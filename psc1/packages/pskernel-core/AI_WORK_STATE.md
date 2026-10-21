@@ -1,3 +1,64 @@
+# Paired performance: collected, with a measured regression
+
+Updated: 2026-10-21 UTC. Branch: `research/psc1-pskernel-paired-perf-20261021`.
+This documentation checkpoint preserves terminal results for experiment source
+`3d93fdeff95b25f619887235b49101e8b725fefa`; it does not introduce a new kernel.
+
+## Exact result
+
+[Run39639125591](https://github.com/dwijayuda/pskernel/actions/runs/39639125591),
+job119357713127, is **PASS for collection and protocol validation**.
+All48 complete-admission observations and16 original-body observations were
+recorded. Both138-assertion replay-control suites passed. The immutable inputs
+are baseline `f9e9b20f92ce2ffa4a666acaf55aa8852949f589` and cache candidate
+`5deaf5880c83a76290520fa1176982dab0bf87a5`. No compiler or canonical-source
+qualification was rerun by this experiment.
+
+Artifact12363874622 is9,392,056bytes, ZIP SHA256
+`2a2a69093e5f7adfca5262a626861406288e26baeb44116db1f5614f1d692d8e`.
+Authenticated bounded readback passed in
+[run39642141114](https://github.com/dwijayuda/pskernel/actions/runs/39642141114),
+job119368141898, source `236f84a9348c277d9bd39f04ca0a2454940bd86e`.
+The complete180,246-byte report SHA256 is
+`ef8bbe8da8ae15994b69381c31c8d3b0f4912ccfa4b59189426885f3ab95e667`;
+the4,247-byte summary SHA256 is
+`9e526bc2a14c1eda42aecc8efdaac86c5506b34177aa9b64750c5948753a17e9`.
+Exact contents and source/artifact identities are retained in
+`evidence/2026-10-21-paired-generated-performance.json`,
+`evidence/2026-10-21-paired-generated-performance.md`, and the matching
+`-receipt.json`.
+
+## Promotion decision and remaining work
+
+**Hold the indexed cache out of integration.** On the same runner with isolated
+ABBA source ordering, DAG metadata admission warm means increased from
+115.411916 to161.457972ms per8-declaration batch (+39.897%) and466.784082
+to594.628287ms per32-declaration batch (+27.388%). Corresponding V1 means were
+134.675035 to131.100849ms and526.718084 to532.440460ms. Whole-process CPU
+increased for these DAG cases; peak RSS was mixed. Other DAG fixtures changed
+by approximately3% or less, while binder32 remains substantially slower than
+V1 on both sources. Two observations per source are descriptive; no statistical
+significance or universal causal claim is made.
+
+The four authenticated bodies produced4 matching acceptances,4 matching kernel
+rejections,4 kernel fuel errors and4 host timeouts across both sources.
+Repeated-subproblem baseline/candidate elapsed ratio was1.013622; stuck-prop
+was0.985144. Church and Prelude are excluded from accepted/rejected latency
+ratios. The experiment is **not a full193-case conformance pass**.
+
+All workers retained4096 kernel fuel and60-second deadlines. The2048MiB V8
+old-space setting is **not a hard RSS cap**; a separate host-only cgroup launcher
+is being prepared and must pass real Linux failure controls before use.
+The next experiment is bounded profiling of the measured metadata regression,
+using these exact generated artifacts and unchanged authentic admission worker.
+The explicit-argument radix worker on a separate research branch is unqualified
+until its own terminal source/canonical/generated gates and paired measurements.
+
+The earlier implementation plan below is historical. Its “NOT RUN” wording
+describes its own commit, not the terminal collection above.
+
+---
+
 # Artifact-only paired performance work state
 
 Date: 2026-10-21 UTC

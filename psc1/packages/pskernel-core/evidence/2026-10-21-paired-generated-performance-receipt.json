@@ -1,0 +1,1008 @@
+{
+  "format": "psc1-paired-generated-performance-receipt-v1",
+  "observed_utc": "2026-10-21T17:23:05Z",
+  "repository": "dwijayuda/pskernel",
+  "source_sha": "3d93fdeff95b25f619887235b49101e8b725fefa",
+  "source_role": "host experiment; does not build or qualify a new kernel",
+  "run_id": 39639125591,
+  "job_id": 119357713127,
+  "terminal_conclusion": "success",
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/39639125591",
+  "artifact": {
+    "id": 12363874622,
+    "bytes": 9392056,
+    "sha256": "2a2a69093e5f7adfca5262a626861406288e26baeb44116db1f5614f1d692d8e"
+  },
+  "authenticated_readback": {
+    "source_sha": "236f84a9348c277d9bd39f04ca0a2454940bd86e",
+    "run_id": 39642141114,
+    "job_id": 119368141898,
+    "terminal_conclusion": "success",
+    "report": {
+      "member": "_temp/psc1-paired-performance/report.json",
+      "bytes": 180246,
+      "sha256": "ef8bbe8da8ae15994b69381c31c8d3b0f4912ccfa4b59189426885f3ab95e667"
+    },
+    "summary": {
+      "member": "_temp/psc1-paired-performance/summary.md",
+      "bytes": 4247,
+      "sha256": "9e526bc2a14c1eda42aecc8efdaac86c5506b34177aa9b64750c5948753a17e9"
+    },
+    "checker_reexecuted": false
+  },
+  "baseline": {
+    "source_sha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+    "producer_run": 39622521184,
+    "manifest_sha256": "af3818a25330989c164d3cc3b5f8d2cf591ff7ba7df04f1a98297cf0b298800d",
+    "kernel_sha256": "a216453f399f38297fd6ce214d5973342c3307834ea9e8312fca1ae16c1c5afa",
+    "files": [
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.js",
+        "bytes": 9891165,
+        "sha256": "a216453f399f38297fd6ce214d5973342c3307834ea9e8312fca1ae16c1c5afa"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.ts",
+        "bytes": 9063093,
+        "sha256": "0fd95c78c93d399cfd7aa8d4ce1d3862d3960fd1aab61002e6ded51968ee9ba5"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+        "bytes": 360525,
+        "sha256": "f17e6becc64c1123f1f9bdce588bdccf0136c88042bc688754d5694cbce6d439"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.js.map",
+        "bytes": 8035493,
+        "sha256": "9fe03502921105b4b4a533f1c91392cd024e3f1a80cc1aa67ea531acaa86696a"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+        "bytes": 12759,
+        "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+        "bytes": 5462,
+        "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/package.json",
+        "bytes": 42,
+        "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/README.md",
+        "bytes": 11813,
+        "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+      }
+    ],
+    "producer_node": "v22.23.3",
+    "producer_typescript": "7.0.2",
+    "route": "authentic checked Lean-source PSC1/TypeScript bundle",
+    "artifact_id": 12358040951,
+    "artifact_zip_sha256": "25abe3ecf39fb76b79d8c41afe56e673309d91c8567de93ae505082d7ccb30a2",
+    "artifact_zip_bytes": 3378995,
+    "producer_run_attempt": 1,
+    "required_jobs": [
+      {
+        "id": 119299431652,
+        "name": "native-dag-integration",
+        "conclusion": "success"
+      },
+      {
+        "id": 119299431901,
+        "name": "generated-dag-integration",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "candidate": {
+    "source_sha": "5deaf5880c83a76290520fa1176982dab0bf87a5",
+    "producer_run": 39631703411,
+    "manifest_sha256": "2fcb8277a9d74c457e61ae3a71275a8514481021f76b13e3fe09cfcf1fb28f01",
+    "kernel_sha256": "fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93",
+    "files": [
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.js",
+        "bytes": 9903773,
+        "sha256": "fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.ts",
+        "bytes": 9080059,
+        "sha256": "48ed79162d03fe9cd326f667269665e701f39913071f54aaa024b786420df8ac"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+        "bytes": 363303,
+        "sha256": "b0028b87baab6f218229ba0b5f24ac7e6d947bf4b4ee8f6b517a44343fb3b8ea"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/kernel.js.map",
+        "bytes": 8048732,
+        "sha256": "518e2aaab9bc82960e150c0527ff590d769e4f289a3e9e762c918a4b01ed22d7"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+        "bytes": 12759,
+        "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+        "bytes": 5462,
+        "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/package.json",
+        "bytes": 42,
+        "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      {
+        "path": "dist/expr-v2/integration/provider/README.md",
+        "bytes": 11813,
+        "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+      }
+    ],
+    "producer_node": "v22.23.3",
+    "producer_typescript": "7.0.2",
+    "route": "authentic checked Lean-source PSC1/TypeScript bundle",
+    "artifact_id": 12364250685,
+    "artifact_zip_sha256": "347d02515c408e825bd13790e265e13663f150e9ab4c64b01107d77b37b0fb01",
+    "artifact_zip_bytes": 3416741,
+    "producer_run_attempt": 1,
+    "required_jobs": [
+      {
+        "id": 119331328218,
+        "name": "native-dag-integration",
+        "conclusion": "success"
+      },
+      {
+        "id": 119331328863,
+        "name": "generated-dag-integration",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "controls": [
+    {
+      "source": "baseline",
+      "valid": true,
+      "expected_assertions": 138,
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.9608505340000022,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "baseline-stdout.txt",
+      "stderr": "baseline-stderr.txt",
+      "time_log": "baseline-time.txt",
+      "process_peak_rss_kib": 222848,
+      "process_cpu_user_seconds": 1.15,
+      "process_cpu_system_seconds": 0.15,
+      "process_major_page_faults": 0
+    },
+    {
+      "source": "candidate",
+      "valid": true,
+      "expected_assertions": 138,
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.8876574159999961,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "candidate-stdout.txt",
+      "stderr": "candidate-stderr.txt",
+      "time_log": "candidate-time.txt",
+      "process_peak_rss_kib": 221380,
+      "process_cpu_user_seconds": 1.21,
+      "process_cpu_system_seconds": 0.12,
+      "process_major_page_faults": 0
+    }
+  ],
+  "collection_complete": true,
+  "collection_protocol_valid": true,
+  "all_admission_samples_valid": true,
+  "admission_sample_count": 48,
+  "authentic_sample_count": 16,
+  "admission_summary": [
+    {
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 39.26903433333338,
+          "candidate": 38.458090333333345
+        },
+        "cold_admission_ms": {
+          "baseline": 55.72781499999999,
+          "candidate": 54.59672250000001
+        },
+        "input_construction_ms": {
+          "baseline": 0.13118900000000622,
+          "candidate": 0.1313145000000162
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 9.76888416666666,
+          "candidate": 9.997329833333328
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 165908,
+          "candidate": 165210
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 35048,
+          "candidate": 35056
+        },
+        "process_elapsed_seconds": {
+          "baseline": 0.6732148710000061,
+          "candidate": 0.6721410709999986
+        },
+        "process_peak_rss_kib": {
+          "baseline": 165972,
+          "candidate": 165210
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 0.855,
+          "candidate": 0.83
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.08499999999999999,
+          "candidate": 0.1
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 1.0210864344269626
+    },
+    {
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 49.966724,
+          "candidate": 50.37285933333334
+        },
+        "cold_admission_ms": {
+          "baseline": 71.73358049999999,
+          "candidate": 72.56212800000002
+        },
+        "input_construction_ms": {
+          "baseline": 11.548909999999992,
+          "candidate": 11.526762500000004
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 15.676224166666675,
+          "candidate": 15.98479633333335
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 187324,
+          "candidate": 184920
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 35160,
+          "candidate": 35128
+        },
+        "process_elapsed_seconds": {
+          "baseline": 0.9918877820000063,
+          "candidate": 0.9988793440000023
+        },
+        "process_peak_rss_kib": {
+          "baseline": 187992,
+          "candidate": 185922
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 1.3450000000000002,
+          "candidate": 1.355
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.105,
+          "candidate": 0.11
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9919374175159323
+    },
+    {
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 125.96866425000002,
+          "candidate": 137.24165500000004
+        },
+        "cold_admission_ms": {
+          "baseline": 165.26458050000002,
+          "candidate": 162.4576835
+        },
+        "input_construction_ms": {
+          "baseline": 0.3357675000000029,
+          "candidate": 0.33339450000001136
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 34.941340500000024,
+          "candidate": 38.191768749999994
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 244588,
+          "candidate": 245948
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 9932,
+          "candidate": 9916
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.6159531810000018,
+          "candidate": 1.715749037000002
+        },
+        "process_peak_rss_kib": {
+          "baseline": 244588,
+          "candidate": 245948
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.245,
+          "candidate": 2.3
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.14500000000000002,
+          "candidate": 0.17
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9178602826525225
+    },
+    {
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 191.5295839999999,
+          "candidate": 194.07085175000003
+        },
+        "cold_admission_ms": {
+          "baseline": 234.78835800000002,
+          "candidate": 237.021857
+        },
+        "input_construction_ms": {
+          "baseline": 49.4667125,
+          "candidate": 51.61304
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 34.90824700000002,
+          "candidate": 33.88835449999988
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 286904,
+          "candidate": 263836
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 14828,
+          "candidate": 16040
+        },
+        "process_elapsed_seconds": {
+          "baseline": 2.6817282724999956,
+          "candidate": 2.6678166855000143
+        },
+        "process_peak_rss_kib": {
+          "baseline": 287160,
+          "candidate": 264284
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 3.91,
+          "candidate": 3.88
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.19,
+          "candidate": 0.185
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9869054640246863
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        16,
+        17,
+        18,
+        19
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 134.67503483333337,
+          "candidate": 131.10084883333337
+        },
+        "cold_admission_ms": {
+          "baseline": 170.9549015,
+          "candidate": 177.27955300000002
+        },
+        "input_construction_ms": {
+          "baseline": 0.37374900000000366,
+          "candidate": 0.3819109999999881
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 20.17087383333334,
+          "candidate": 21.20399500000004
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 267688,
+          "candidate": 250488
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 586404,
+          "candidate": 1110360
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.6758664739999887,
+          "candidate": 1.6680076565000093
+        },
+        "process_peak_rss_kib": {
+          "baseline": 267688,
+          "candidate": 250488
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.44,
+          "candidate": 2.44
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.175,
+          "candidate": 0.16
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 1.0272628745870578
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 115.41191566666669,
+          "candidate": 161.45797183333335
+        },
+        "cold_admission_ms": {
+          "baseline": 146.84057199999998,
+          "candidate": 191.060048
+        },
+        "input_construction_ms": {
+          "baseline": 24.065678500000004,
+          "candidate": 24.30794800000001
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 17.90633116666667,
+          "candidate": 12.54835849999995
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 251664,
+          "candidate": 249078
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 34656,
+          "candidate": 42240
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.8190192035000052,
+          "candidate": 2.1879089994999816
+        },
+        "process_peak_rss_kib": {
+          "baseline": 251856,
+          "candidate": 249206
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.64,
+          "candidate": 3.34
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.16999999999999998,
+          "candidate": 0.16
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.7148108845675445
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        24,
+        25,
+        26,
+        27
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 526.71808425,
+          "candidate": 532.4404602499998
+        },
+        "cold_admission_ms": {
+          "baseline": 613.402569,
+          "candidate": 616.5226210000001
+        },
+        "input_construction_ms": {
+          "baseline": 1.1899839999999955,
+          "candidate": 1.2690759999999983
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 55.72288599999979,
+          "candidate": 63.174031250000326
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 285270,
+          "candidate": 290766
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 17020,
+          "candidate": 19152
+        },
+        "process_elapsed_seconds": {
+          "baseline": 4.991254458,
+          "candidate": 5.084445332000001
+        },
+        "process_peak_rss_kib": {
+          "baseline": 285718,
+          "candidate": 291150
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 7.91,
+          "candidate": 8.045
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.215,
+          "candidate": 0.215
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.989252552299814
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 466.78408175000004,
+          "candidate": 594.6282867499999
+        },
+        "cold_admission_ms": {
+          "baseline": 528.978267,
+          "candidate": 683.3248369999999
+        },
+        "input_construction_ms": {
+          "baseline": 101.84166250000001,
+          "candidate": 99.29482250000001
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 45.64775675000021,
+          "candidate": 48.28511774999993
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 275492,
+          "candidate": 278352
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": -862288,
+          "candidate": 39148
+        },
+        "process_elapsed_seconds": {
+          "baseline": 5.454270754000007,
+          "candidate": 6.938962595499987
+        },
+        "process_peak_rss_kib": {
+          "baseline": 275578,
+          "candidate": 279440
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 9.18,
+          "candidate": 11.585
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.185,
+          "candidate": 0.22
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.7850014742844725
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 50.76947774999999,
+          "candidate": 53.2227795
+        },
+        "cold_admission_ms": {
+          "baseline": 83.66565150000001,
+          "candidate": 82.867536
+        },
+        "input_construction_ms": {
+          "baseline": 0.20674650000000838,
+          "candidate": 0.21928499999999929
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 16.37895800000004,
+          "candidate": 19.153470000000027
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 195506,
+          "candidate": 193740
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 31808,
+          "candidate": 31712
+        },
+        "process_elapsed_seconds": {
+          "baseline": 0.8251209364999852,
+          "candidate": 0.8315699815000102
+        },
+        "process_peak_rss_kib": {
+          "baseline": 195506,
+          "candidate": 193740
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 1.045,
+          "candidate": 1.0750000000000002
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.10500000000000001,
+          "candidate": 0.095
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9539050426706857
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        36,
+        37,
+        38,
+        39
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 123.56982925,
+          "candidate": 121.30144774999997
+        },
+        "cold_admission_ms": {
+          "baseline": 163.974005,
+          "candidate": 162.8056835
+        },
+        "input_construction_ms": {
+          "baseline": 17.295691500000004,
+          "candidate": 17.667443000000006
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 18.441602250000017,
+          "candidate": 19.448915
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 258370,
+          "candidate": 251944
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 36632,
+          "candidate": 36384
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.7680386819999967,
+          "candidate": 1.7254575525000035
+        },
+        "process_peak_rss_kib": {
+          "baseline": 258370,
+          "candidate": 251944
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.5549999999999997,
+          "candidate": 2.455
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.15500000000000003,
+          "candidate": 0.155
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 1.0187003662534608
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 193.97281499999997,
+          "candidate": 195.99647800000002
+        },
+        "cold_admission_ms": {
+          "baseline": 266.408572,
+          "candidate": 258.9190255
+        },
+        "input_construction_ms": {
+          "baseline": 0.577911499999999,
+          "candidate": 0.5667495000000002
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 51.01467000000014,
+          "candidate": 54.87153799999987
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 255106,
+          "candidate": 256796
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 20032,
+          "candidate": 20200
+        },
+        "process_elapsed_seconds": {
+          "baseline": 2.031817140499996,
+          "candidate": 2.0603311699999978
+        },
+        "process_peak_rss_kib": {
+          "baseline": 255106,
+          "candidate": 256796
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.8449999999999998,
+          "candidate": 2.91
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.175,
+          "candidate": 0.16999999999999998
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9896750032416396
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        44,
+        45,
+        46,
+        47
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 490.62007749999975,
+          "candidate": 503.0986255
+        },
+        "cold_admission_ms": {
+          "baseline": 568.6626219999999,
+          "candidate": 573.2469135
+        },
+        "input_construction_ms": {
+          "baseline": 72.2840805,
+          "candidate": 73.5704745
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 62.1465139999998,
+          "candidate": 48.07801299999983
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 271416,
+          "candidate": 272770
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 55716,
+          "candidate": -386708
+        },
+        "process_elapsed_seconds": {
+          "baseline": 5.097476723500009,
+          "candidate": 5.15151826200001
+        },
+        "process_peak_rss_kib": {
+          "baseline": 272864,
+          "candidate": 274022
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 8.105,
+          "candidate": 8.18
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.19,
+          "candidate": 0.20500000000000002
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9751966167913924
+    }
+  ],
+  "authentic_summary": [
+    {
+      "label": "good",
+      "name": "perf/repeated-subproblem.ndjson",
+      "observations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_four_official_matching_kernel_outcomes": true,
+      "classifications": {
+        "baseline": [
+          "matched_acceptance",
+          "matched_acceptance"
+        ],
+        "candidate": [
+          "matched_acceptance",
+          "matched_acceptance"
+        ]
+      },
+      "mean_elapsed_seconds": {
+        "baseline": 1.374139899499994,
+        "candidate": 1.355672956999996
+      },
+      "mean_peak_rss_kib": {
+        "baseline": 282734,
+        "candidate": 280866
+      },
+      "baseline_over_candidate_elapsed_ratio": 1.0136219745364428
+    },
+    {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson",
+      "observations": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "all_four_official_matching_kernel_outcomes": false,
+      "classifications": {
+        "baseline": [
+          "pskernel_resource_exhausted",
+          "pskernel_resource_exhausted"
+        ],
+        "candidate": [
+          "pskernel_resource_exhausted",
+          "pskernel_resource_exhausted"
+        ]
+      },
+      "mean_elapsed_seconds": null,
+      "mean_peak_rss_kib": null,
+      "baseline_over_candidate_elapsed_ratio": null
+    },
+    {
+      "label": "good",
+      "name": "init-prelude.ndjson",
+      "observations": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "all_four_official_matching_kernel_outcomes": false,
+      "classifications": {
+        "baseline": [
+          "pskernel_timeout",
+          "pskernel_timeout"
+        ],
+        "candidate": [
+          "pskernel_timeout",
+          "pskernel_timeout"
+        ]
+      },
+      "mean_elapsed_seconds": null,
+      "mean_peak_rss_kib": null,
+      "baseline_over_candidate_elapsed_ratio": null
+    },
+    {
+      "label": "bad",
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "observations": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "all_four_official_matching_kernel_outcomes": true,
+      "classifications": {
+        "baseline": [
+          "matched_kernel_rejection",
+          "matched_kernel_rejection"
+        ],
+        "candidate": [
+          "matched_kernel_rejection",
+          "matched_kernel_rejection"
+        ]
+      },
+      "mean_elapsed_seconds": {
+        "baseline": 25.90834726999998,
+        "candidate": 26.29905411200002
+      },
+      "mean_peak_rss_kib": {
+        "baseline": 428544,
+        "candidate": 426380
+      },
+      "baseline_over_candidate_elapsed_ratio": 0.9851436922280119
+    }
+  ],
+  "resource_contract": {
+    "kernel_fuel": 4096,
+    "deadline_seconds": 60,
+    "v8_old_space_limit_mib": 2048,
+    "hard_rss_limit_enforced": false,
+    "rss_scope": "measured KiB; V8 old-space limit is not a total-process memory limit"
+  },
+  "decision": "Hold indexed-cache source5de out of integration pending diagnosis of metadata admission regressions; no blanket performance promotion.",
+  "limitations": [
+    "Two samples per source per fixture are descriptive, not a statistical significance claim.",
+    "Comparisons concern exact source revisions; they do not attribute all effects to one function.",
+    "The DAG batch entry is transitional psKernelV1RunDag with acknowledged whole-operation V1 fallbacks.",
+    "Church fuel exhaustion and Prelude host timeouts are incomplete; no accepted/rejected latency ratio is reported for either.",
+    "V8 old-space2048MiB is not a hard RSS cap.",
+    "This experiment does not requalify canonical source, native kernels, global soundness or the full193-case corpus."
+  ]
+}

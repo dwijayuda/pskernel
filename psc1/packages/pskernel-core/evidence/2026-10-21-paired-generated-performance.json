@@ -1,0 +1,4934 @@
+{
+  "format": "psc1-paired-performance-v1",
+  "workflow_source_sha": "3d93fdeff95b25f619887235b49101e8b725fefa",
+  "workflow_run": "https://github.com/dwijayuda/pskernel/actions/runs/39639125591",
+  "started_utc": "2026-10-21T17:00:54Z",
+  "authentication": {
+    "format": "psc1-paired-performance-artifacts-v1",
+    "repository": "dwijayuda/pskernel",
+    "workflow_source_sha": "3d93fdeff95b25f619887235b49101e8b725fefa",
+    "baseline": {
+      "source_sha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+      "producer_run": 39622521184,
+      "manifest_sha256": "af3818a25330989c164d3cc3b5f8d2cf591ff7ba7df04f1a98297cf0b298800d",
+      "kernel_sha256": "a216453f399f38297fd6ce214d5973342c3307834ea9e8312fca1ae16c1c5afa",
+      "files": [
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js",
+          "bytes": 9891165,
+          "sha256": "a216453f399f38297fd6ce214d5973342c3307834ea9e8312fca1ae16c1c5afa"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.ts",
+          "bytes": 9063093,
+          "sha256": "0fd95c78c93d399cfd7aa8d4ce1d3862d3960fd1aab61002e6ded51968ee9ba5"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+          "bytes": 360525,
+          "sha256": "f17e6becc64c1123f1f9bdce588bdccf0136c88042bc688754d5694cbce6d439"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js.map",
+          "bytes": 8035493,
+          "sha256": "9fe03502921105b4b4a533f1c91392cd024e3f1a80cc1aa67ea531acaa86696a"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ],
+      "producer_node": "v22.23.3",
+      "producer_typescript": "7.0.2",
+      "route": "authentic checked Lean-source PSC1/TypeScript bundle",
+      "artifact_id": 12358040951,
+      "artifact_zip_sha256": "25abe3ecf39fb76b79d8c41afe56e673309d91c8567de93ae505082d7ccb30a2",
+      "artifact_zip_bytes": 3378995,
+      "producer_run_attempt": 1,
+      "required_jobs": [
+        {
+          "id": 119299431652,
+          "name": "native-dag-integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 119299431901,
+          "name": "generated-dag-integration",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "candidate": {
+      "source_sha": "5deaf5880c83a76290520fa1176982dab0bf87a5",
+      "producer_run": 39631703411,
+      "manifest_sha256": "2fcb8277a9d74c457e61ae3a71275a8514481021f76b13e3fe09cfcf1fb28f01",
+      "kernel_sha256": "fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93",
+      "files": [
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js",
+          "bytes": 9903773,
+          "sha256": "fad819da8477cf225c608ab928baddb8f91aa3ce7d133edf08942262bcc9ac93"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.ts",
+          "bytes": 9080059,
+          "sha256": "48ed79162d03fe9cd326f667269665e701f39913071f54aaa024b786420df8ac"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+          "bytes": 363303,
+          "sha256": "b0028b87baab6f218229ba0b5f24ac7e6d947bf4b4ee8f6b517a44343fb3b8ea"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/kernel.js.map",
+          "bytes": 8048732,
+          "sha256": "518e2aaab9bc82960e150c0527ff590d769e4f289a3e9e762c918a4b01ed22d7"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+          "bytes": 12759,
+          "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+          "bytes": 5462,
+          "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/package.json",
+          "bytes": 42,
+          "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+        },
+        {
+          "path": "dist/expr-v2/integration/provider/README.md",
+          "bytes": 11813,
+          "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+        }
+      ],
+      "producer_node": "v22.23.3",
+      "producer_typescript": "7.0.2",
+      "route": "authentic checked Lean-source PSC1/TypeScript bundle",
+      "artifact_id": 12364250685,
+      "artifact_zip_sha256": "347d02515c408e825bd13790e265e13663f150e9ab4c64b01107d77b37b0fb01",
+      "artifact_zip_bytes": 3416741,
+      "producer_run_attempt": 1,
+      "required_jobs": [
+        {
+          "id": 119331328218,
+          "name": "native-dag-integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 119331328863,
+          "name": "generated-dag-integration",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "official_reference": {
+      "source_sha": "f9e9b20f92ce2ffa4a666acaf55aa8852949f589",
+      "producer_run": 39622521186,
+      "producer_job": 119299431737,
+      "artifact_id": 12354733263,
+      "artifact_zip_sha256": "14ede6035b1fe3c037deeaccc53439cf9a97d72ac020e20c34729bd5717c7ac3",
+      "report_sha256": "bc2a5d8e47f1b71f4dec3e81fc1ae5c393036c8348bd682bc271fdd76b08e1da",
+      "scope": "authenticated existing official reference; no new oracle execution"
+    },
+    "compiler_reexecuted": false,
+    "canonical_rechecked": false,
+    "new_kernel_qualification_established": false
+  },
+  "source_comparison": {
+    "unchanged_harness_and_policy": {
+      "scripts/pskernel-expr-v2-admission-bench.mjs": "ca69059abd8c24e8dc4e2c058bde540fdf550fdb5d70eccccf39a09aa6fab595",
+      "scripts/pskernel-arena-replay.mjs": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821",
+      "scripts/pskernel-arena-replay-controls.mjs": "28e8ea79d5557a8bb7f5b7d5afa4f69741884c1ee31c3c0a3d7c245de3ca144a",
+      "scripts/pskernel-arena435-oracle.py": "5deb39b9245b05305837cb1a79826c26e7ab05028c7bc489308170eab672f26e",
+      "scripts/pskernel-arena435-compare.py": "490c510b6509bd775dc52539224a573a267f83e9cd0cabe4bec85626baeb9c9a",
+      "lean-toolchain": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ResourcePolicy.lean": "ab987570dc85dbbbb020f5220d74dcaf0cf1e47ba1b0f101f992017141e35242"
+    },
+    "changed_kernel_files": [
+      {
+        "path": "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckState.lean",
+        "baseline_sha256": "d78efa4c2762afa1e87c0acc96a380dee40e73ab44200ba2056cc0ec8dd588ba",
+        "candidate_sha256": "ccae1a86cde9a9f8a16835c2deff193925d5745de101846973c7c8e5a0dce2c8"
+      },
+      {
+        "path": "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/DeltaStep.lean",
+        "baseline_sha256": "c2d83572236be5190413258659be17115526ef86d9f27f8f2c0158ad56ceaebb",
+        "candidate_sha256": "df82bb88e9de072dd38261f1b27c4b2a5c02394fe25de00b5b2f1df53200d18d"
+      },
+      {
+        "path": "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfCache.lean",
+        "baseline_sha256": null,
+        "candidate_sha256": "3f99ab8bd6b0d0bbb07b280922b2e13540462adf7fbbd27a464d82001a7f33f8"
+      },
+      {
+        "path": "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.lean",
+        "baseline_sha256": "26f746cb202d015fb1951ffa3ee3a8eab398e892e33fa2472da6304163e5cb45",
+        "candidate_sha256": "a687becf7a2ccfff6bcfc5580ee134cede141e2b4d89854246c77e5eaae4d675"
+      }
+    ],
+    "attribution": "entire difference between exact source revisions, not a single-function causal estimate"
+  },
+  "harness_sha256": "2d01cbb4bc98e0b82f3b42550908bf78a8df6257eae3b3c7cd1e794a69ff49b9",
+  "node_version": "v22.23.3",
+  "node_executable_sha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+  "host_cpu_models": [
+    "AMD EPYC 9V74 80-Core Processor"
+  ],
+  "host_workers": 1,
+  "source_order_per_group": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "runtime_path_empty": true,
+  "runtime_working_directory_contains_no_Lean_or_repository_sources": true,
+  "kernel_fuel": 4096,
+  "host_deadline_seconds_per_process": 60,
+  "v8_old_space_limit_mib": 2048,
+  "hard_rss_limit_enforced": false,
+  "rss_scope": "measured KiB; V8 old-space limit is not a total-process memory limit",
+  "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
+  "target_lean": {
+    "version": "4.35.0",
+    "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "native_435_reexport": false,
+  "declaration_body_bytes_unchanged": true,
+  "subset_identities": [
+    {
+      "label": "good",
+      "name": "perf/repeated-subproblem.ndjson"
+    },
+    {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson"
+    },
+    {
+      "label": "good",
+      "name": "init-prelude.ndjson"
+    },
+    {
+      "label": "bad",
+      "name": "bugs/proj-of-stuck-prop.ndjson"
+    }
+  ],
+  "corpus_cases_not_measured": 189,
+  "all_193_conformance_established": false,
+  "new_kernel_qualification_established": false,
+  "full_v2_replacement_established": false,
+  "entry_points": {
+    "legacy": "psKernelV1AdmitDeclaration",
+    "dag": "psKernelV1RunDag",
+    "authentic": "psKernelV1RunDag"
+  },
+  "dag_entry_scope": "transitional DAG checker with acknowledged whole-operation V1 fallbacks",
+  "comparison_scope": "whole source revisions; old/new legacy and DAG admission measured separately",
+  "cold_scope": "first valid batch after mandatory negative sentinel; process setup recorded separately",
+  "warm_scope": "five worker warmups; every timed batch still has a fresh semantic session",
+  "controls": [
+    {
+      "source": "baseline",
+      "valid": true,
+      "expected_assertions": 138,
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.9608505340000022,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "baseline-stdout.txt",
+      "stderr": "baseline-stderr.txt",
+      "time_log": "baseline-time.txt",
+      "process_peak_rss_kib": 222848,
+      "process_cpu_user_seconds": 1.15,
+      "process_cpu_system_seconds": 0.15,
+      "process_major_page_faults": 0
+    },
+    {
+      "source": "candidate",
+      "valid": true,
+      "expected_assertions": 138,
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.8876574159999961,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "candidate-stdout.txt",
+      "stderr": "candidate-stderr.txt",
+      "time_log": "candidate-time.txt",
+      "process_peak_rss_kib": 221380,
+      "process_cpu_user_seconds": 1.21,
+      "process_cpu_system_seconds": 0.12,
+      "process_major_page_faults": 0
+    }
+  ],
+  "admission_observations": [
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.6842195910000015,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-000-stdout.txt",
+      "stderr": "admission-000-stderr.txt",
+      "time_log": "admission-000-time.txt",
+      "process_peak_rss_kib": 166316,
+      "process_cpu_user_seconds": 0.86,
+      "process_cpu_system_seconds": 0.09,
+      "process_major_page_faults": 0,
+      "index": 0,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 118.68004300000013,
+        "independent_assertion_ms": 29.83065799999997,
+        "checked_wall_ms": 148.60682200000002,
+        "cold_admission_ms": 56.96303899999998,
+        "cold_assertion_ms": 17.508500999999995,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.12235100000000898,
+        "input_construction_heap_delta_bytes": 16904,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 28260000,
+        "heap_after_gc_bytes": 28295088,
+        "retained_heap_delta_bytes": 35088,
+        "peak_rss_kib": 166188,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.6679154710000006,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-001-stdout.txt",
+      "stderr": "admission-001-stderr.txt",
+      "time_log": "admission-001-time.txt",
+      "process_peak_rss_kib": 164496,
+      "process_cpu_user_seconds": 0.82,
+      "process_cpu_system_seconds": 0.1,
+      "process_major_page_faults": 0,
+      "index": 1,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 113.02913600000011,
+        "independent_assertion_ms": 30.441925999999967,
+        "checked_wall_ms": 143.57117999999997,
+        "cold_admission_ms": 53.25252800000001,
+        "cold_assertion_ms": 17.70266799999999,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.12946200000001795,
+        "input_construction_heap_delta_bytes": 16936,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 28297280,
+        "heap_after_gc_bytes": 28332400,
+        "retained_heap_delta_bytes": 35120,
+        "peak_rss_kib": 164496,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.6763666709999967,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-002-stdout.txt",
+      "stderr": "admission-002-stderr.txt",
+      "time_log": "admission-002-time.txt",
+      "process_peak_rss_kib": 165924,
+      "process_cpu_user_seconds": 0.84,
+      "process_cpu_system_seconds": 0.1,
+      "process_major_page_faults": 0,
+      "index": 2,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 117.71940599999999,
+        "independent_assertion_ms": 29.54205300000001,
+        "checked_wall_ms": 147.354467,
+        "cold_admission_ms": 55.94091700000001,
+        "cold_assertion_ms": 17.50344099999998,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.13316700000001447,
+        "input_construction_heap_delta_bytes": 17224,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 28297408,
+        "heap_after_gc_bytes": 28332400,
+        "retained_heap_delta_bytes": 34992,
+        "peak_rss_kib": 165924,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.6622101510000107,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-003-stdout.txt",
+      "stderr": "admission-003-stderr.txt",
+      "time_log": "admission-003-time.txt",
+      "process_peak_rss_kib": 165628,
+      "process_cpu_user_seconds": 0.85,
+      "process_cpu_system_seconds": 0.08,
+      "process_major_page_faults": 0,
+      "index": 3,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 116.93416300000013,
+        "independent_assertion_ms": 28.782646999999997,
+        "checked_wall_ms": 145.81413399999997,
+        "cold_admission_ms": 54.492591000000004,
+        "cold_assertion_ms": 17.59990400000001,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.14002700000000345,
+        "input_construction_heap_delta_bytes": 16904,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 28260080,
+        "heap_after_gc_bytes": 28295088,
+        "retained_heap_delta_bytes": 35008,
+        "peak_rss_kib": 165628,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.9978205520000074,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-004-stdout.txt",
+      "stderr": "admission-004-stderr.txt",
+      "time_log": "admission-004-time.txt",
+      "process_peak_rss_kib": 185728,
+      "process_cpu_user_seconds": 1.37,
+      "process_cpu_system_seconds": 0.09,
+      "process_major_page_faults": 0,
+      "index": 4,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 149.82205399999998,
+        "independent_assertion_ms": 46.34761000000003,
+        "checked_wall_ms": 196.198397,
+        "cold_admission_ms": 70.340848,
+        "cold_assertion_ms": 18.66225800000001,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 11.91325599999999,
+        "input_construction_heap_delta_bytes": 160976,
+        "input_construction_rss_delta_bytes": 2752512,
+        "heap_before_bytes": 30111720,
+        "heap_after_gc_bytes": 30146992,
+        "retained_heap_delta_bytes": 35272,
+        "peak_rss_kib": 185672,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.9822443649999997,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-005-stdout.txt",
+      "stderr": "admission-005-stderr.txt",
+      "time_log": "admission-005-time.txt",
+      "process_peak_rss_kib": 186076,
+      "process_cpu_user_seconds": 1.34,
+      "process_cpu_system_seconds": 0.1,
+      "process_major_page_faults": 0,
+      "index": 5,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 152.697766,
+        "independent_assertion_ms": 48.082861000000094,
+        "checked_wall_ms": 200.80577500000004,
+        "cold_admission_ms": 71.43275600000001,
+        "cold_assertion_ms": 21.65051699999998,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 11.392483999999996,
+        "input_construction_heap_delta_bytes": 161288,
+        "input_construction_rss_delta_bytes": 2883584,
+        "heap_before_bytes": 30162552,
+        "heap_after_gc_bytes": 30197680,
+        "retained_heap_delta_bytes": 35128,
+        "peak_rss_kib": 185052,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.015514323000005,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-006-stdout.txt",
+      "stderr": "admission-006-stderr.txt",
+      "time_log": "admission-006-time.txt",
+      "process_peak_rss_kib": 185768,
+      "process_cpu_user_seconds": 1.37,
+      "process_cpu_system_seconds": 0.12,
+      "process_major_page_faults": 0,
+      "index": 6,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 149.53939000000003,
+        "independent_assertion_ms": 47.825917000000004,
+        "checked_wall_ms": 197.392065,
+        "cold_admission_ms": 73.69150000000002,
+        "cold_assertion_ms": 24.136200000000002,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 11.661041000000012,
+        "input_construction_heap_delta_bytes": 161304,
+        "input_construction_rss_delta_bytes": 2883584,
+        "heap_before_bytes": 30162552,
+        "heap_after_gc_bytes": 30197680,
+        "retained_heap_delta_bytes": 35128,
+        "peak_rss_kib": 184788,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.9859550120000051,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-007-stdout.txt",
+      "stderr": "admission-007-stderr.txt",
+      "time_log": "admission-007-time.txt",
+      "process_peak_rss_kib": 190256,
+      "process_cpu_user_seconds": 1.32,
+      "process_cpu_system_seconds": 0.12,
+      "process_major_page_faults": 0,
+      "index": 7,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 149.97829000000002,
+        "independent_assertion_ms": 47.70973500000002,
+        "checked_wall_ms": 197.71423200000004,
+        "cold_admission_ms": 73.12631299999998,
+        "cold_assertion_ms": 18.82673699999998,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 11.184563999999995,
+        "input_construction_heap_delta_bytes": 160992,
+        "input_construction_rss_delta_bytes": 3014656,
+        "heap_before_bytes": 30111872,
+        "heap_after_gc_bytes": 30146920,
+        "retained_heap_delta_bytes": 35048,
+        "peak_rss_kib": 188976,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.5863908230000021,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-008-stdout.txt",
+      "stderr": "admission-008-stderr.txt",
+      "time_log": "admission-008-time.txt",
+      "process_peak_rss_kib": 240868,
+      "process_cpu_user_seconds": 2.21,
+      "process_cpu_system_seconds": 0.15,
+      "process_major_page_faults": 0,
+      "index": 8,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 238.39030600000024,
+        "independent_assertion_ms": 66.93122600000015,
+        "checked_wall_ms": 305.33876899999996,
+        "cold_admission_ms": 161.280118,
+        "cold_assertion_ms": 50.818535,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.2868050000000153,
+        "input_construction_heap_delta_bytes": 71656,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 31208992,
+        "heap_after_gc_bytes": 31218840,
+        "retained_heap_delta_bytes": 9848,
+        "peak_rss_kib": 240868,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.6894766699999906,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-009-stdout.txt",
+      "stderr": "admission-009-stderr.txt",
+      "time_log": "admission-009-time.txt",
+      "process_peak_rss_kib": 242532,
+      "process_cpu_user_seconds": 2.3,
+      "process_cpu_system_seconds": 0.17,
+      "process_major_page_faults": 0,
+      "index": 9,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 276.3529370000001,
+        "independent_assertion_ms": 76.21523300000013,
+        "checked_wall_ms": 352.584566,
+        "cold_admission_ms": 158.499034,
+        "cold_assertion_ms": 52.21554600000002,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.2865850000000023,
+        "input_construction_heap_delta_bytes": 71672,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 31246320,
+        "heap_after_gc_bytes": 31256152,
+        "retained_heap_delta_bytes": 9832,
+        "peak_rss_kib": 242532,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.7420214040000133,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-010-stdout.txt",
+      "stderr": "admission-010-stderr.txt",
+      "time_log": "admission-010-time.txt",
+      "process_peak_rss_kib": 249364,
+      "process_cpu_user_seconds": 2.3,
+      "process_cpu_system_seconds": 0.17,
+      "process_major_page_faults": 0,
+      "index": 10,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 272.61368300000004,
+        "independent_assertion_ms": 76.55184199999985,
+        "checked_wall_ms": 349.18355199999996,
+        "cold_admission_ms": 166.416333,
+        "cold_assertion_ms": 55.526836,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.3802040000000204,
+        "input_construction_heap_delta_bytes": 71368,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 31246176,
+        "heap_after_gc_bytes": 31256176,
+        "retained_heap_delta_bytes": 10000,
+        "peak_rss_kib": 249364,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.6455155390000016,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-011-stdout.txt",
+      "stderr": "admission-011-stderr.txt",
+      "time_log": "admission-011-time.txt",
+      "process_peak_rss_kib": 248308,
+      "process_cpu_user_seconds": 2.28,
+      "process_cpu_system_seconds": 0.14,
+      "process_major_page_faults": 0,
+      "index": 11,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 265.48435099999983,
+        "independent_assertion_ms": 72.83413599999994,
+        "checked_wall_ms": 338.33675400000016,
+        "cold_admission_ms": 169.24904300000003,
+        "cold_assertion_ms": 51.984433000000024,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.38472999999999047,
+        "input_construction_heap_delta_bytes": 71352,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 31208848,
+        "heap_after_gc_bytes": 31218864,
+        "retained_heap_delta_bytes": 10016,
+        "peak_rss_kib": 248308,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.5672959919999983,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-012-stdout.txt",
+      "stderr": "admission-012-stderr.txt",
+      "time_log": "admission-012-time.txt",
+      "process_peak_rss_kib": 262972,
+      "process_cpu_user_seconds": 3.77,
+      "process_cpu_system_seconds": 0.16,
+      "process_major_page_faults": 0,
+      "index": 12,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 388.70449299999973,
+        "independent_assertion_ms": 70.33753599999977,
+        "checked_wall_ms": 459.0608080000002,
+        "cold_admission_ms": 232.76314499999998,
+        "cold_assertion_ms": 55.39372800000001,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 49.521906,
+        "input_construction_heap_delta_bytes": 566216,
+        "input_construction_rss_delta_bytes": 19005440,
+        "heap_before_bytes": 33121096,
+        "heap_after_gc_bytes": 33136392,
+        "retained_heap_delta_bytes": 15296,
+        "peak_rss_kib": 262460,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.6176856340000256,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-013-stdout.txt",
+      "stderr": "admission-013-stderr.txt",
+      "time_log": "admission-013-time.txt",
+      "process_peak_rss_kib": 262960,
+      "process_cpu_user_seconds": 3.8,
+      "process_cpu_system_seconds": 0.17,
+      "process_major_page_faults": 0,
+      "index": 13,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 384.4509089999999,
+        "independent_assertion_ms": 67.55419099999995,
+        "checked_wall_ms": 452.02297699999986,
+        "cold_admission_ms": 228.647005,
+        "cold_assertion_ms": 54.08045200000004,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 49.72537700000001,
+        "input_construction_heap_delta_bytes": 566520,
+        "input_construction_rss_delta_bytes": 19529728,
+        "heap_before_bytes": 33171880,
+        "heap_after_gc_bytes": 33187920,
+        "retained_heap_delta_bytes": 16040,
+        "peak_rss_kib": 262320,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.717947737000003,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-014-stdout.txt",
+      "stderr": "admission-014-stderr.txt",
+      "time_log": "admission-014-time.txt",
+      "process_peak_rss_kib": 265608,
+      "process_cpu_user_seconds": 3.96,
+      "process_cpu_system_seconds": 0.2,
+      "process_major_page_faults": 0,
+      "index": 14,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 391.8324980000002,
+        "independent_assertion_ms": 67.99922699999956,
+        "checked_wall_ms": 459.85049200000003,
+        "cold_admission_ms": 245.396709,
+        "cold_assertion_ms": 57.65814500000005,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 53.50070299999999,
+        "input_construction_heap_delta_bytes": 566472,
+        "input_construction_rss_delta_bytes": 18874368,
+        "heap_before_bytes": 33171880,
+        "heap_after_gc_bytes": 33187920,
+        "retained_heap_delta_bytes": 16040,
+        "peak_rss_kib": 265352,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.796160552999993,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-015-stdout.txt",
+      "stderr": "admission-015-stderr.txt",
+      "time_log": "admission-015-time.txt",
+      "process_peak_rss_kib": 311348,
+      "process_cpu_user_seconds": 4.05,
+      "process_cpu_system_seconds": 0.22,
+      "process_major_page_faults": 0,
+      "index": 15,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "chain",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 377.4138429999998,
+        "independent_assertion_ms": 69.2954520000003,
+        "checked_wall_ms": 446.72792200000026,
+        "cold_admission_ms": 236.81357100000002,
+        "cold_assertion_ms": 60.55424499999998,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 49.411519,
+        "input_construction_heap_delta_bytes": 566216,
+        "input_construction_rss_delta_bytes": 18350080,
+        "heap_before_bytes": 34562608,
+        "heap_after_gc_bytes": 34576968,
+        "retained_heap_delta_bytes": 14360,
+        "peak_rss_kib": 311348,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.7378052509999975,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-016-stdout.txt",
+      "stderr": "admission-016-stderr.txt",
+      "time_log": "admission-016-time.txt",
+      "process_peak_rss_kib": 284580,
+      "process_cpu_user_seconds": 2.5,
+      "process_cpu_system_seconds": 0.2,
+      "process_major_page_faults": 0,
+      "index": 16,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 410.881269,
+        "independent_assertion_ms": 54.71152599999982,
+        "checked_wall_ms": 465.7093870000001,
+        "cold_admission_ms": 173.726682,
+        "cold_assertion_ms": 26.686666000000002,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.35763000000000034,
+        "input_construction_heap_delta_bytes": 68080,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 32334816,
+        "heap_after_gc_bytes": 32397360,
+        "retained_heap_delta_bytes": 62544,
+        "peak_rss_kib": 284580,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.7161968520000244,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-017-stdout.txt",
+      "stderr": "admission-017-stderr.txt",
+      "time_log": "admission-017-time.txt",
+      "process_peak_rss_kib": 250692,
+      "process_cpu_user_seconds": 2.53,
+      "process_cpu_system_seconds": 0.15,
+      "process_major_page_faults": 0,
+      "index": 17,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 400.70666800000026,
+        "independent_assertion_ms": 64.7196190000002,
+        "checked_wall_ms": 465.50732800000014,
+        "cold_admission_ms": 176.70729000000003,
+        "cold_assertion_ms": 26.207546000000036,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.38327799999999,
+        "input_construction_heap_delta_bytes": 68416,
+        "input_construction_rss_delta_bytes": 262144,
+        "heap_before_bytes": 30364256,
+        "heap_after_gc_bytes": 31473832,
+        "retained_heap_delta_bytes": 1109576,
+        "peak_rss_kib": 250692,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.6198184609999942,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-018-stdout.txt",
+      "stderr": "admission-018-stderr.txt",
+      "time_log": "admission-018-time.txt",
+      "process_peak_rss_kib": 250284,
+      "process_cpu_user_seconds": 2.35,
+      "process_cpu_system_seconds": 0.17,
+      "process_major_page_faults": 0,
+      "index": 18,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 385.89842499999986,
+        "independent_assertion_ms": 62.50435100000004,
+        "checked_wall_ms": 448.4800210000001,
+        "cold_admission_ms": 177.85181599999999,
+        "cold_assertion_ms": 27.993673,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.3805439999999862,
+        "input_construction_heap_delta_bytes": 68416,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 30363256,
+        "heap_after_gc_bytes": 31474400,
+        "retained_heap_delta_bytes": 1111144,
+        "peak_rss_kib": 250284,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.6139276969999798,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-019-stdout.txt",
+      "stderr": "admission-019-stderr.txt",
+      "time_log": "admission-019-time.txt",
+      "process_peak_rss_kib": 250796,
+      "process_cpu_user_seconds": 2.38,
+      "process_cpu_system_seconds": 0.15,
+      "process_major_page_faults": 0,
+      "index": 19,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 397.16894000000025,
+        "independent_assertion_ms": 66.31371700000022,
+        "checked_wall_ms": 463.563756,
+        "cold_admission_ms": 168.18312100000003,
+        "cold_assertion_ms": 24.802730999999994,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.389868000000007,
+        "input_construction_heap_delta_bytes": 68096,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 30326896,
+        "heap_after_gc_bytes": 31437160,
+        "retained_heap_delta_bytes": 1110264,
+        "peak_rss_kib": 250796,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.7945188079999923,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-020-stdout.txt",
+      "stderr": "admission-020-stderr.txt",
+      "time_log": "admission-020-time.txt",
+      "process_peak_rss_kib": 251964,
+      "process_cpu_user_seconds": 2.62,
+      "process_cpu_system_seconds": 0.16,
+      "process_major_page_faults": 0,
+      "index": 20,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 338.9989350000001,
+        "independent_assertion_ms": 51.89715799999999,
+        "checked_wall_ms": 391.004694,
+        "cold_admission_ms": 146.487325,
+        "cold_assertion_ms": 27.33530499999995,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 23.988264000000015,
+        "input_construction_heap_delta_bytes": 445288,
+        "input_construction_rss_delta_bytes": 8519680,
+        "heap_before_bytes": 31136800,
+        "heap_after_gc_bytes": 31171312,
+        "retained_heap_delta_bytes": 34512,
+        "peak_rss_kib": 251964,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.14514189099998,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-021-stdout.txt",
+      "stderr": "admission-021-stderr.txt",
+      "time_log": "admission-021-time.txt",
+      "process_peak_rss_kib": 250212,
+      "process_cpu_user_seconds": 3.26,
+      "process_cpu_system_seconds": 0.16,
+      "process_major_page_faults": 0,
+      "index": 21,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 477.16189099999997,
+        "independent_assertion_ms": 41.59194499999967,
+        "checked_wall_ms": 518.8415660000001,
+        "cold_admission_ms": 187.58342499999998,
+        "cold_assertion_ms": 23.58334400000001,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 24.26084800000001,
+        "input_construction_heap_delta_bytes": 445272,
+        "input_construction_rss_delta_bytes": 8519680,
+        "heap_before_bytes": 31296728,
+        "heap_after_gc_bytes": 31338768,
+        "retained_heap_delta_bytes": 42040,
+        "peak_rss_kib": 250212,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.230676107999983,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-022-stdout.txt",
+      "stderr": "admission-022-stderr.txt",
+      "time_log": "admission-022-time.txt",
+      "process_peak_rss_kib": 248200,
+      "process_cpu_user_seconds": 3.42,
+      "process_cpu_system_seconds": 0.16,
+      "process_major_page_faults": 0,
+      "index": 22,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 491.58594000000016,
+        "independent_assertion_ms": 33.69820600000003,
+        "checked_wall_ms": 525.3705729999999,
+        "cold_admission_ms": 194.536671,
+        "cold_assertion_ms": 24.58844399999998,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 24.35504800000001,
+        "input_construction_heap_delta_bytes": 445288,
+        "input_construction_rss_delta_bytes": 8388608,
+        "heap_before_bytes": 31297016,
+        "heap_after_gc_bytes": 31339456,
+        "retained_heap_delta_bytes": 42440,
+        "peak_rss_kib": 247944,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.8435195990000182,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-023-stdout.txt",
+      "stderr": "admission-023-stderr.txt",
+      "time_log": "admission-023-time.txt",
+      "process_peak_rss_kib": 251748,
+      "process_cpu_user_seconds": 2.66,
+      "process_cpu_system_seconds": 0.18,
+      "process_major_page_faults": 0,
+      "index": 23,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 8,
+        "calls": 3,
+        "checksum": 24,
+        "checked_declarations": 24,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 353.47255900000005,
+        "independent_assertion_ms": 55.54082900000003,
+        "checked_wall_ms": 409.12511300000006,
+        "cold_admission_ms": 147.19381899999996,
+        "cold_assertion_ms": 28.02337399999999,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 24.143092999999993,
+        "input_construction_heap_delta_bytes": 445016,
+        "input_construction_rss_delta_bytes": 8519680,
+        "heap_before_bytes": 31136512,
+        "heap_after_gc_bytes": 31171312,
+        "retained_heap_delta_bytes": 34800,
+        "peak_rss_kib": 251364,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.019719411000011,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-024-stdout.txt",
+      "stderr": "admission-024-stderr.txt",
+      "time_log": "admission-024-time.txt",
+      "process_peak_rss_kib": 287820,
+      "process_cpu_user_seconds": 7.91,
+      "process_cpu_system_seconds": 0.22,
+      "process_major_page_faults": 0,
+      "index": 24,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 1064.0374110000002,
+        "independent_assertion_ms": 114.11981899999955,
+        "checked_wall_ms": 1178.1754480000004,
+        "cold_admission_ms": 609.365454,
+        "cold_assertion_ms": 56.79905299999996,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 1.319656000000009,
+        "input_construction_heap_delta_bytes": 277696,
+        "input_construction_rss_delta_bytes": 262144,
+        "heap_before_bytes": 32146464,
+        "heap_after_gc_bytes": 32166864,
+        "retained_heap_delta_bytes": 20400,
+        "peak_rss_kib": 287436,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.10312204600001,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-025-stdout.txt",
+      "stderr": "admission-025-stderr.txt",
+      "time_log": "admission-025-time.txt",
+      "process_peak_rss_kib": 287544,
+      "process_cpu_user_seconds": 8.04,
+      "process_cpu_system_seconds": 0.21,
+      "process_major_page_faults": 0,
+      "index": 25,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 1065.3813849999997,
+        "independent_assertion_ms": 127.93921300000056,
+        "checked_wall_ms": 1193.3407069999994,
+        "cold_admission_ms": 619.5496270000001,
+        "cold_assertion_ms": 56.48533800000007,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 1.2702529999999967,
+        "input_construction_heap_delta_bytes": 277712,
+        "input_construction_rss_delta_bytes": 393216,
+        "heap_before_bytes": 32186168,
+        "heap_after_gc_bytes": 32206088,
+        "retained_heap_delta_bytes": 19920,
+        "peak_rss_kib": 287160,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.065768617999993,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-026-stdout.txt",
+      "stderr": "admission-026-stderr.txt",
+      "time_log": "admission-026-time.txt",
+      "process_peak_rss_kib": 294756,
+      "process_cpu_user_seconds": 8.05,
+      "process_cpu_system_seconds": 0.22,
+      "process_major_page_faults": 0,
+      "index": 26,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 1064.3804559999994,
+        "independent_assertion_ms": 124.75691200000074,
+        "checked_wall_ms": 1189.1559470000002,
+        "cold_admission_ms": 613.4956149999999,
+        "cold_assertion_ms": 58.041060000000016,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 1.2678989999999999,
+        "input_construction_heap_delta_bytes": 277712,
+        "input_construction_rss_delta_bytes": 393216,
+        "heap_before_bytes": 32185720,
+        "heap_after_gc_bytes": 32204104,
+        "retained_heap_delta_bytes": 18384,
+        "peak_rss_kib": 294372,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 4.962789504999989,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-027-stdout.txt",
+      "stderr": "admission-027-stderr.txt",
+      "time_log": "admission-027-time.txt",
+      "process_peak_rss_kib": 283616,
+      "process_cpu_user_seconds": 7.91,
+      "process_cpu_system_seconds": 0.21,
+      "process_major_page_faults": 0,
+      "index": 27,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 1042.8349259999995,
+        "independent_assertion_ms": 108.7717249999996,
+        "checked_wall_ms": 1151.625238,
+        "cold_admission_ms": 617.4396839999999,
+        "cold_assertion_ms": 58.41808200000003,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 1.060311999999982,
+        "input_construction_heap_delta_bytes": 277712,
+        "input_construction_rss_delta_bytes": 393216,
+        "heap_before_bytes": 32153368,
+        "heap_after_gc_bytes": 32167008,
+        "retained_heap_delta_bytes": 13640,
+        "peak_rss_kib": 283104,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.441130038000011,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-028-stdout.txt",
+      "stderr": "admission-028-stderr.txt",
+      "time_log": "admission-028-time.txt",
+      "process_peak_rss_kib": 275740,
+      "process_cpu_user_seconds": 9.13,
+      "process_cpu_system_seconds": 0.2,
+      "process_major_page_faults": 0,
+      "index": 28,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 923.1811029999999,
+        "independent_assertion_ms": 94.51482000000033,
+        "checked_wall_ms": 1017.7137110000003,
+        "cold_admission_ms": 525.9189549999999,
+        "cold_assertion_ms": 51.260275999999976,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 99.29199500000001,
+        "input_construction_heap_delta_bytes": 1519784,
+        "input_construction_rss_delta_bytes": 36270080,
+        "heap_before_bytes": 34308776,
+        "heap_after_gc_bytes": 33444328,
+        "retained_heap_delta_bytes": -864448,
+        "peak_rss_kib": 275568,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 6.8820086439999955,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-029-stdout.txt",
+      "stderr": "admission-029-stderr.txt",
+      "time_log": "admission-029-time.txt",
+      "process_peak_rss_kib": 281520,
+      "process_cpu_user_seconds": 11.62,
+      "process_cpu_system_seconds": 0.22,
+      "process_major_page_faults": 0,
+      "index": 29,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 1169.2694809999994,
+        "independent_assertion_ms": 92.19412899999952,
+        "checked_wall_ms": 1261.4811149999996,
+        "cold_admission_ms": 690.450532,
+        "cold_assertion_ms": 53.195550000000026,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 100.737492,
+        "input_construction_heap_delta_bytes": 1520088,
+        "input_construction_rss_delta_bytes": 35872768,
+        "heap_before_bytes": 32548520,
+        "heap_after_gc_bytes": 32587688,
+        "retained_heap_delta_bytes": 39168,
+        "peak_rss_kib": 281008,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 6.995916546999979,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-030-stdout.txt",
+      "stderr": "admission-030-stderr.txt",
+      "time_log": "admission-030-time.txt",
+      "process_peak_rss_kib": 277360,
+      "process_cpu_user_seconds": 11.55,
+      "process_cpu_system_seconds": 0.22,
+      "process_major_page_faults": 0,
+      "index": 30,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 1209.2436660000003,
+        "independent_assertion_ms": 100.94634200000019,
+        "checked_wall_ms": 1310.208826,
+        "cold_admission_ms": 676.1991419999999,
+        "cold_assertion_ms": 51.86437000000001,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 97.85215300000002,
+        "input_construction_heap_delta_bytes": 1528760,
+        "input_construction_rss_delta_bytes": 35459072,
+        "heap_before_bytes": 32545352,
+        "heap_after_gc_bytes": 32584480,
+        "retained_heap_delta_bytes": 39128,
+        "peak_rss_kib": 275696,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.467411470000002,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-031-stdout.txt",
+      "stderr": "admission-031-stderr.txt",
+      "time_log": "admission-031-time.txt",
+      "process_peak_rss_kib": 275416,
+      "process_cpu_user_seconds": 9.23,
+      "process_cpu_system_seconds": 0.17,
+      "process_major_page_faults": 0,
+      "index": 31,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "metadata",
+        "declarations_per_batch": 32,
+        "calls": 2,
+        "checksum": 64,
+        "checked_declarations": 64,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 943.9552240000003,
+        "independent_assertion_ms": 88.07620700000052,
+        "checked_wall_ms": 1032.0508510000004,
+        "cold_admission_ms": 532.037579,
+        "cold_assertion_ms": 56.14488700000004,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 104.39133000000001,
+        "input_construction_heap_delta_bytes": 1519736,
+        "input_construction_rss_delta_bytes": 35319808,
+        "heap_before_bytes": 34305392,
+        "heap_after_gc_bytes": 33445264,
+        "retained_heap_delta_bytes": -860128,
+        "peak_rss_kib": 275416,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.8167219099999841,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-032-stdout.txt",
+      "stderr": "admission-032-stderr.txt",
+      "time_log": "admission-032-time.txt",
+      "process_peak_rss_kib": 195132,
+      "process_cpu_user_seconds": 1.02,
+      "process_cpu_system_seconds": 0.11,
+      "process_major_page_faults": 0,
+      "index": 32,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 101.90275299999996,
+        "independent_assertion_ms": 31.94367900000009,
+        "checked_wall_ms": 133.866712,
+        "cold_admission_ms": 82.148675,
+        "cold_assertion_ms": 22.50617600000001,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.21975600000001805,
+        "input_construction_heap_delta_bytes": 30512,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 30311960,
+        "heap_after_gc_bytes": 30343776,
+        "retained_heap_delta_bytes": 31816,
+        "peak_rss_kib": 195132,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.8305841090000001,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-033-stdout.txt",
+      "stderr": "admission-033-stderr.txt",
+      "time_log": "admission-033-time.txt",
+      "process_peak_rss_kib": 193896,
+      "process_cpu_user_seconds": 1.06,
+      "process_cpu_system_seconds": 0.1,
+      "process_major_page_faults": 0,
+      "index": 33,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 105.34049200000004,
+        "independent_assertion_ms": 32.272828000000004,
+        "checked_wall_ms": 137.63285799999994,
+        "cold_admission_ms": 82.92191500000001,
+        "cold_assertion_ms": 22.19936899999999,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.22045600000001286,
+        "input_construction_heap_delta_bytes": 30816,
+        "input_construction_rss_delta_bytes": 0,
+        "heap_before_bytes": 30349360,
+        "heap_after_gc_bytes": 30381160,
+        "retained_heap_delta_bytes": 31800,
+        "peak_rss_kib": 193896,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.8325558540000202,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-034-stdout.txt",
+      "stderr": "admission-034-stderr.txt",
+      "time_log": "admission-034-time.txt",
+      "process_peak_rss_kib": 193584,
+      "process_cpu_user_seconds": 1.09,
+      "process_cpu_system_seconds": 0.09,
+      "process_major_page_faults": 0,
+      "index": 34,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 107.55062599999997,
+        "independent_assertion_ms": 44.341052000000104,
+        "checked_wall_ms": 151.91065700000001,
+        "cold_admission_ms": 82.81315699999999,
+        "cold_assertion_ms": 22.646540999999985,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.2181139999999857,
+        "input_construction_heap_delta_bytes": 30832,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 30349288,
+        "heap_after_gc_bytes": 30380912,
+        "retained_heap_delta_bytes": 31624,
+        "peak_rss_kib": 193584,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 0.8335199629999863,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-035-stdout.txt",
+      "stderr": "admission-035-stderr.txt",
+      "time_log": "admission-035-time.txt",
+      "process_peak_rss_kib": 195880,
+      "process_cpu_user_seconds": 1.07,
+      "process_cpu_system_seconds": 0.1,
+      "process_major_page_faults": 0,
+      "index": 35,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 101.17515800000001,
+        "independent_assertion_ms": 33.57215300000007,
+        "checked_wall_ms": 134.76513799999998,
+        "cold_admission_ms": 85.18262800000002,
+        "cold_assertion_ms": 22.306668000000002,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.19373699999999872,
+        "input_construction_heap_delta_bytes": 30832,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 30311976,
+        "heap_after_gc_bytes": 30343776,
+        "retained_heap_delta_bytes": 31800,
+        "peak_rss_kib": 195880,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.747106049999985,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-036-stdout.txt",
+      "stderr": "admission-036-stderr.txt",
+      "time_log": "admission-036-time.txt",
+      "process_peak_rss_kib": 257948,
+      "process_cpu_user_seconds": 2.53,
+      "process_cpu_system_seconds": 0.17,
+      "process_major_page_faults": 0,
+      "index": 36,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 235.93627100000003,
+        "independent_assertion_ms": 35.466278999999986,
+        "checked_wall_ms": 271.4202970000001,
+        "cold_admission_ms": 161.525216,
+        "cold_assertion_ms": 22.203615000000013,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 17.613302000000004,
+        "input_construction_heap_delta_bytes": 304888,
+        "input_construction_rss_delta_bytes": 4063232,
+        "heap_before_bytes": 33112240,
+        "heap_after_gc_bytes": 33149336,
+        "retained_heap_delta_bytes": 37096,
+        "peak_rss_kib": 257948,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.7110994989999995,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-037-stdout.txt",
+      "stderr": "admission-037-stderr.txt",
+      "time_log": "admission-037-time.txt",
+      "process_peak_rss_kib": 251108,
+      "process_cpu_user_seconds": 2.42,
+      "process_cpu_system_seconds": 0.16,
+      "process_major_page_faults": 0,
+      "index": 37,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 239.72451499999988,
+        "independent_assertion_ms": 40.72911900000008,
+        "checked_wall_ms": 280.47073,
+        "cold_admission_ms": 162.33747999999997,
+        "cold_assertion_ms": 21.928386999999987,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 17.487897000000004,
+        "input_construction_heap_delta_bytes": 305192,
+        "input_construction_rss_delta_bytes": 3932160,
+        "heap_before_bytes": 32202968,
+        "heap_after_gc_bytes": 32239456,
+        "retained_heap_delta_bytes": 36488,
+        "peak_rss_kib": 251108,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.7398156060000076,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-038-stdout.txt",
+      "stderr": "admission-038-stderr.txt",
+      "time_log": "admission-038-time.txt",
+      "process_peak_rss_kib": 252780,
+      "process_cpu_user_seconds": 2.49,
+      "process_cpu_system_seconds": 0.15,
+      "process_major_page_faults": 0,
+      "index": 38,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 245.48127599999998,
+        "independent_assertion_ms": 37.066540999999916,
+        "checked_wall_ms": 282.5645119999999,
+        "cold_admission_ms": 163.27388699999997,
+        "cold_assertion_ms": 21.543926999999996,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 17.846989000000008,
+        "input_construction_heap_delta_bytes": 305208,
+        "input_construction_rss_delta_bytes": 3932160,
+        "heap_before_bytes": 32203504,
+        "heap_after_gc_bytes": 32239784,
+        "retained_heap_delta_bytes": 36280,
+        "peak_rss_kib": 252780,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 1.7889713140000083,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-039-stdout.txt",
+      "stderr": "admission-039-stderr.txt",
+      "time_log": "admission-039-time.txt",
+      "process_peak_rss_kib": 258792,
+      "process_cpu_user_seconds": 2.58,
+      "process_cpu_system_seconds": 0.14,
+      "process_major_page_faults": 0,
+      "index": 39,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 8,
+        "calls": 2,
+        "checksum": 16,
+        "checked_declarations": 16,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 258.34304599999996,
+        "independent_assertion_ms": 38.30013000000008,
+        "checked_wall_ms": 296.6609819999999,
+        "cold_admission_ms": 166.422794,
+        "cold_assertion_ms": 21.654281000000026,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 16.978081000000003,
+        "input_construction_heap_delta_bytes": 304872,
+        "input_construction_rss_delta_bytes": 4063232,
+        "heap_before_bytes": 33113240,
+        "heap_after_gc_bytes": 33149408,
+        "retained_heap_delta_bytes": 36168,
+        "peak_rss_kib": 258792,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 8,
+          "checked_original_id_entries": 8,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.004951774999995,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-040-stdout.txt",
+      "stderr": "admission-040-stderr.txt",
+      "time_log": "admission-040-time.txt",
+      "process_peak_rss_kib": 250356,
+      "process_cpu_user_seconds": 2.8,
+      "process_cpu_system_seconds": 0.17,
+      "process_major_page_faults": 0,
+      "index": 40,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 191.36624699999993,
+        "independent_assertion_ms": 51.521159000000125,
+        "checked_wall_ms": 242.89824199999998,
+        "cold_admission_ms": 264.864038,
+        "cold_assertion_ms": 44.943872999999996,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.5915770000000009,
+        "input_construction_heap_delta_bytes": 121760,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 32427072,
+        "heap_after_gc_bytes": 32447240,
+        "retained_heap_delta_bytes": 20168,
+        "peak_rss_kib": 250356,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.0542657629999894,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-041-stdout.txt",
+      "stderr": "admission-041-stderr.txt",
+      "time_log": "admission-041-time.txt",
+      "process_peak_rss_kib": 256596,
+      "process_cpu_user_seconds": 2.89,
+      "process_cpu_system_seconds": 0.19,
+      "process_major_page_faults": 0,
+      "index": 41,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 194.1100429999999,
+        "independent_assertion_ms": 54.75980699999991,
+        "checked_wall_ms": 248.87989500000003,
+        "cold_admission_ms": 258.755048,
+        "cold_assertion_ms": 53.184753,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.5428139999999928,
+        "input_construction_heap_delta_bytes": 121760,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 32464672,
+        "heap_after_gc_bytes": 32484744,
+        "retained_heap_delta_bytes": 20072,
+        "peak_rss_kib": 256596,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.066396577000006,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-042-stdout.txt",
+      "stderr": "admission-042-stderr.txt",
+      "time_log": "admission-042-time.txt",
+      "process_peak_rss_kib": 256996,
+      "process_cpu_user_seconds": 2.93,
+      "process_cpu_system_seconds": 0.15,
+      "process_major_page_faults": 0,
+      "index": 42,
+      "source": "candidate",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 197.88291300000014,
+        "independent_assertion_ms": 54.98326899999984,
+        "checked_wall_ms": 252.8766169999999,
+        "cold_admission_ms": 259.083003,
+        "cold_assertion_ms": 42.101201,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.5906850000000077,
+        "input_construction_heap_delta_bytes": 121760,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 33424608,
+        "heap_after_gc_bytes": 33444936,
+        "retained_heap_delta_bytes": 20328,
+        "peak_rss_kib": 256996,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 2.0586825059999967,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-043-stdout.txt",
+      "stderr": "admission-043-stderr.txt",
+      "time_log": "admission-043-time.txt",
+      "process_peak_rss_kib": 259856,
+      "process_cpu_user_seconds": 2.89,
+      "process_cpu_system_seconds": 0.18,
+      "process_major_page_faults": 0,
+      "index": 43,
+      "source": "baseline",
+      "variant": "legacy",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "legacy",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 196.579383,
+        "independent_assertion_ms": 50.50818100000015,
+        "checked_wall_ms": 247.09740899999997,
+        "cold_admission_ms": 267.953106,
+        "cold_assertion_ms": 41.775509,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 0.5642459999999971,
+        "input_construction_heap_delta_bytes": 121744,
+        "input_construction_rss_delta_bytes": 131072,
+        "heap_before_bytes": 33387680,
+        "heap_after_gc_bytes": 33407576,
+        "retained_heap_delta_bytes": 19896,
+        "peak_rss_kib": 259856,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": null,
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.092593831000016,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-044-stdout.txt",
+      "stderr": "admission-044-stderr.txt",
+      "time_log": "admission-044-time.txt",
+      "process_peak_rss_kib": 271988,
+      "process_cpu_user_seconds": 8.05,
+      "process_cpu_system_seconds": 0.19,
+      "process_major_page_faults": 0,
+      "index": 44,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 490.38116599999967,
+        "independent_assertion_ms": 64.62654100000009,
+        "checked_wall_ms": 555.0174109999998,
+        "cold_admission_ms": 566.5513719999999,
+        "cold_assertion_ms": 54.582618000000025,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 72.52672700000002,
+        "input_construction_heap_delta_bytes": 929632,
+        "input_construction_rss_delta_bytes": 26198016,
+        "heap_before_bytes": 32900648,
+        "heap_after_gc_bytes": 32947680,
+        "retained_heap_delta_bytes": 47032,
+        "peak_rss_kib": 271244,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.157430540000007,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-045-stdout.txt",
+      "stderr": "admission-045-stderr.txt",
+      "time_log": "admission-045-time.txt",
+      "process_peak_rss_kib": 273264,
+      "process_cpu_user_seconds": 8.17,
+      "process_cpu_system_seconds": 0.22,
+      "process_major_page_faults": 0,
+      "index": 45,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 504.51732300000003,
+        "independent_assertion_ms": 49.711999000000105,
+        "checked_wall_ms": 554.2408890000002,
+        "cold_admission_ms": 577.016799,
+        "cold_assertion_ms": 53.40194900000006,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 75.392293,
+        "input_construction_heap_delta_bytes": 929984,
+        "input_construction_rss_delta_bytes": 26435584,
+        "heap_before_bytes": 33846888,
+        "heap_after_gc_bytes": 33009064,
+        "retained_heap_delta_bytes": -837824,
+        "peak_rss_kib": 272680,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.145605984000014,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-046-stdout.txt",
+      "stderr": "admission-046-stderr.txt",
+      "time_log": "admission-046-time.txt",
+      "process_peak_rss_kib": 274780,
+      "process_cpu_user_seconds": 8.19,
+      "process_cpu_system_seconds": 0.19,
+      "process_major_page_faults": 0,
+      "index": 46,
+      "source": "candidate",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 501.679928,
+        "independent_assertion_ms": 46.44402699999955,
+        "checked_wall_ms": 548.1355310000004,
+        "cold_admission_ms": 569.477028,
+        "cold_assertion_ms": 56.48513600000001,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 71.74865600000001,
+        "input_construction_heap_delta_bytes": 929952,
+        "input_construction_rss_delta_bytes": 26845184,
+        "heap_before_bytes": 33846888,
+        "heap_after_gc_bytes": 33911296,
+        "retained_heap_delta_bytes": 64408,
+        "peak_rss_kib": 272860,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    },
+    {
+      "returncode": 0,
+      "status": "completed",
+      "elapsed_seconds": 5.102359616000001,
+      "deadline_seconds": 60,
+      "old_space_limit_mib": 2048,
+      "stdout": "admission-047-stdout.txt",
+      "stderr": "admission-047-stderr.txt",
+      "time_log": "admission-047-time.txt",
+      "process_peak_rss_kib": 273740,
+      "process_cpu_user_seconds": 8.16,
+      "process_cpu_system_seconds": 0.19,
+      "process_major_page_faults": 0,
+      "index": 47,
+      "source": "baseline",
+      "variant": "dag",
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "valid": true,
+      "sample": {
+        "variant": "dag",
+        "shape": "binder",
+        "declarations_per_batch": 32,
+        "calls": 1,
+        "checksum": 32,
+        "checked_declarations": 32,
+        "all_correct": true,
+        "negative_type_mismatch": true,
+        "fuel": 4096,
+        "input_pool": 5,
+        "admission_ms": 490.85898899999984,
+        "independent_assertion_ms": 59.666486999999506,
+        "checked_wall_ms": 550.5351209999999,
+        "cold_admission_ms": 570.773872,
+        "cold_assertion_ms": 51.87366900000006,
+        "cold_scope": "first valid fixture batch after the independent negative sentinel; fresh semantic state",
+        "input_construction_ms": 72.04143399999998,
+        "input_construction_heap_delta_bytes": 929904,
+        "input_construction_rss_delta_bytes": 26804224,
+        "heap_before_bytes": 32894176,
+        "heap_after_gc_bytes": 32958576,
+        "retained_heap_delta_bytes": 64400,
+        "peak_rss_kib": 271588,
+        "semantic_cache": "fresh session and checker state for every admitted batch",
+        "lifetime": "input pools retained; admitted environments discarded after exact assertions",
+        "direct_dag_admission_diagnostic": {
+          "scope": "untimed corresponding input-slot-0 batch prefixes; canonical graph and actual dispatcher",
+          "positive_direct_attempts": 32,
+          "checked_original_id_entries": 32,
+          "exact_direct_type_mismatch": true,
+          "dispatcher_environment_parity": true,
+          "timed_path_instrumented": false
+        },
+        "direct_dag_admission_path_measured": false
+      }
+    }
+  ],
+  "authentic_observations": [
+    {
+      "label": "good",
+      "name": "perf/repeated-subproblem.ndjson",
+      "corpus_index": 95,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+        "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.4132306049999954,
+        "log": "case-095.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 0,
+      "source": "baseline",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "verdict": "accepted",
+        "stage": "complete",
+        "coreInvoked": true,
+        "records": 214,
+        "metadataCounts": {
+          "ctorInfo": 5,
+          "recInfo": 3,
+          "inductInfo": 3,
+          "defnInfo": 1,
+          "thmInfo": 1
+        },
+        "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+        "sourceMutualBlockMetadata": [
+          {
+            "kind": "defnInfo",
+            "name": {
+              "tableId": "32",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "perfect"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "thmInfo",
+            "name": {
+              "tableId": "43",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "kernel_repeated_subproblem"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+        "exportedDeclarations": 13,
+        "admissionCommands": 5,
+        "arenaNodes": "162",
+        "fuel": "4096",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": true,
+        "officialReplaySkipsUnsafeOrPartial": false,
+        "elapsed_seconds": 1.3285246559999848,
+        "returncode": 0,
+        "stdout": "case-000-stdout.txt",
+        "stderr": "case-000-stderr.txt",
+        "time_log": "case-000-time.txt",
+        "progress_snapshots": 7,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "metadata-compare",
+          "coreInvoked": true,
+          "records": 214,
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "elapsedMilliseconds": 1237.809509
+        },
+        "peak_rss_kib": 279016,
+        "process_peak_rss_kib": 279016,
+        "process_cpu_user_seconds": 1.8,
+        "process_cpu_system_seconds": 0.18,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_acceptance"
+    },
+    {
+      "label": "good",
+      "name": "perf/repeated-subproblem.ndjson",
+      "corpus_index": 95,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+        "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.4132306049999954,
+        "log": "case-095.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 1,
+      "source": "candidate",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "verdict": "accepted",
+        "stage": "complete",
+        "coreInvoked": true,
+        "records": 214,
+        "metadataCounts": {
+          "ctorInfo": 5,
+          "recInfo": 3,
+          "inductInfo": 3,
+          "defnInfo": 1,
+          "thmInfo": 1
+        },
+        "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+        "sourceMutualBlockMetadata": [
+          {
+            "kind": "defnInfo",
+            "name": {
+              "tableId": "32",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "perfect"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "thmInfo",
+            "name": {
+              "tableId": "43",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "kernel_repeated_subproblem"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+        "exportedDeclarations": 13,
+        "admissionCommands": 5,
+        "arenaNodes": "162",
+        "fuel": "4096",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": true,
+        "officialReplaySkipsUnsafeOrPartial": false,
+        "elapsed_seconds": 1.3370396500000084,
+        "returncode": 0,
+        "stdout": "case-001-stdout.txt",
+        "stderr": "case-001-stderr.txt",
+        "time_log": "case-001-time.txt",
+        "progress_snapshots": 7,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "metadata-compare",
+          "coreInvoked": true,
+          "records": 214,
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "elapsedMilliseconds": 1245.070535
+        },
+        "peak_rss_kib": 276232,
+        "process_peak_rss_kib": 276232,
+        "process_cpu_user_seconds": 1.82,
+        "process_cpu_system_seconds": 0.17,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_acceptance"
+    },
+    {
+      "label": "good",
+      "name": "perf/repeated-subproblem.ndjson",
+      "corpus_index": 95,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+        "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.4132306049999954,
+        "log": "case-095.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 2,
+      "source": "candidate",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "verdict": "accepted",
+        "stage": "complete",
+        "coreInvoked": true,
+        "records": 214,
+        "metadataCounts": {
+          "ctorInfo": 5,
+          "recInfo": 3,
+          "inductInfo": 3,
+          "defnInfo": 1,
+          "thmInfo": 1
+        },
+        "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+        "sourceMutualBlockMetadata": [
+          {
+            "kind": "defnInfo",
+            "name": {
+              "tableId": "32",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "perfect"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "thmInfo",
+            "name": {
+              "tableId": "43",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "kernel_repeated_subproblem"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+        "exportedDeclarations": 13,
+        "admissionCommands": 5,
+        "arenaNodes": "162",
+        "fuel": "4096",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": true,
+        "officialReplaySkipsUnsafeOrPartial": false,
+        "elapsed_seconds": 1.3743062639999835,
+        "returncode": 0,
+        "stdout": "case-002-stdout.txt",
+        "stderr": "case-002-stderr.txt",
+        "time_log": "case-002-time.txt",
+        "progress_snapshots": 7,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "metadata-compare",
+          "coreInvoked": true,
+          "records": 214,
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "elapsedMilliseconds": 1260.376249
+        },
+        "peak_rss_kib": 285500,
+        "process_peak_rss_kib": 285500,
+        "process_cpu_user_seconds": 1.9,
+        "process_cpu_system_seconds": 0.17,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_acceptance"
+    },
+    {
+      "label": "good",
+      "name": "perf/repeated-subproblem.ndjson",
+      "corpus_index": 95,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+        "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.4132306049999954,
+        "log": "case-095.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 3,
+      "source": "baseline",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "verdict": "accepted",
+        "stage": "complete",
+        "coreInvoked": true,
+        "records": 214,
+        "metadataCounts": {
+          "ctorInfo": 5,
+          "recInfo": 3,
+          "inductInfo": 3,
+          "defnInfo": 1,
+          "thmInfo": 1
+        },
+        "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+        "sourceMutualBlockMetadata": [
+          {
+            "kind": "defnInfo",
+            "name": {
+              "tableId": "32",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "perfect"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "thmInfo",
+            "name": {
+              "tableId": "43",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "kernel_repeated_subproblem"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+        "exportedDeclarations": 13,
+        "admissionCommands": 5,
+        "arenaNodes": "162",
+        "fuel": "4096",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": true,
+        "officialReplaySkipsUnsafeOrPartial": false,
+        "elapsed_seconds": 1.4197551430000033,
+        "returncode": 0,
+        "stdout": "case-003-stdout.txt",
+        "stderr": "case-003-stderr.txt",
+        "time_log": "case-003-time.txt",
+        "progress_snapshots": 7,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "metadata-compare",
+          "coreInvoked": true,
+          "records": 214,
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "elapsedMilliseconds": 1306.249757
+        },
+        "peak_rss_kib": 286452,
+        "process_peak_rss_kib": 286452,
+        "process_cpu_user_seconds": 1.95,
+        "process_cpu_system_seconds": 0.18,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_acceptance"
+    },
+    {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson",
+      "corpus_index": 81,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+        "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.43059892300001934,
+        "log": "case-081.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 4,
+      "source": "baseline",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "verdict": "resource_exhausted",
+        "stage": "kernel-admission",
+        "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 227,
+        "exportedDeclarations": 6,
+        "admissionCommands": 4,
+        "arenaNodes": "197",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 19.69695321399999,
+        "returncode": 0,
+        "stdout": "case-004-stdout.txt",
+        "stderr": "case-004-stderr.txt",
+        "time_log": "case-004-time.txt",
+        "progress_snapshots": 5,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "elapsedMilliseconds": 112.949112
+        },
+        "peak_rss_kib": 1116484,
+        "process_peak_rss_kib": 1116484,
+        "process_cpu_user_seconds": 30.37,
+        "process_cpu_system_seconds": 0.89,
+        "process_major_page_faults": 0
+      },
+      "classification": "pskernel_resource_exhausted"
+    },
+    {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson",
+      "corpus_index": 81,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+        "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.43059892300001934,
+        "log": "case-081.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 5,
+      "source": "candidate",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "verdict": "resource_exhausted",
+        "stage": "kernel-admission",
+        "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 227,
+        "exportedDeclarations": 6,
+        "admissionCommands": 4,
+        "arenaNodes": "197",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 19.485481727000035,
+        "returncode": 0,
+        "stdout": "case-005-stdout.txt",
+        "stderr": "case-005-stderr.txt",
+        "time_log": "case-005-time.txt",
+        "progress_snapshots": 5,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "elapsedMilliseconds": 116.235865
+        },
+        "peak_rss_kib": 1119124,
+        "process_peak_rss_kib": 1119124,
+        "process_cpu_user_seconds": 30.08,
+        "process_cpu_system_seconds": 0.86,
+        "process_major_page_faults": 0
+      },
+      "classification": "pskernel_resource_exhausted"
+    },
+    {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson",
+      "corpus_index": 81,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+        "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.43059892300001934,
+        "log": "case-081.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 6,
+      "source": "candidate",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "verdict": "resource_exhausted",
+        "stage": "kernel-admission",
+        "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 227,
+        "exportedDeclarations": 6,
+        "admissionCommands": 4,
+        "arenaNodes": "197",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 19.13978896399999,
+        "returncode": 0,
+        "stdout": "case-006-stdout.txt",
+        "stderr": "case-006-stderr.txt",
+        "time_log": "case-006-time.txt",
+        "progress_snapshots": 5,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "elapsedMilliseconds": 114.684221
+        },
+        "peak_rss_kib": 1108252,
+        "process_peak_rss_kib": 1108252,
+        "process_cpu_user_seconds": 29.64,
+        "process_cpu_system_seconds": 0.86,
+        "process_major_page_faults": 0
+      },
+      "classification": "pskernel_resource_exhausted"
+    },
+    {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson",
+      "corpus_index": 81,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+        "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.43059892300001934,
+        "log": "case-081.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 7,
+      "source": "baseline",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "verdict": "resource_exhausted",
+        "stage": "kernel-admission",
+        "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 227,
+        "exportedDeclarations": 6,
+        "admissionCommands": 4,
+        "arenaNodes": "197",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 18.945515505000003,
+        "returncode": 0,
+        "stdout": "case-007-stdout.txt",
+        "stderr": "case-007-stderr.txt",
+        "time_log": "case-007-time.txt",
+        "progress_snapshots": 5,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "elapsedMilliseconds": 112.04251
+        },
+        "peak_rss_kib": 1208888,
+        "process_peak_rss_kib": 1208888,
+        "process_cpu_user_seconds": 28.98,
+        "process_cpu_system_seconds": 0.94,
+        "process_major_page_faults": 0
+      },
+      "classification": "pskernel_resource_exhausted"
+    },
+    {
+      "label": "good",
+      "name": "init-prelude.ndjson",
+      "corpus_index": 72,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+        "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+        "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.7547596050000038,
+        "log": "case-072.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 8,
+      "source": "baseline",
+      "pskernel": {
+        "elapsed_seconds": 60.13700925500001,
+        "returncode": -9,
+        "stdout": "case-008-stdout.txt",
+        "stderr": "case-008-stderr.txt",
+        "time_log": "case-008-time.txt",
+        "progress_snapshots": 67,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 63723,
+          "exportedDeclarations": 2059,
+          "admissionCommands": 1774,
+          "arenaNodes": "54535",
+          "fuel": "4096",
+          "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "elapsedMilliseconds": 2393.100862
+        },
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "timeout_seconds": 60
+      },
+      "classification": "pskernel_timeout"
+    },
+    {
+      "label": "good",
+      "name": "init-prelude.ndjson",
+      "corpus_index": 72,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+        "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+        "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.7547596050000038,
+        "log": "case-072.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 9,
+      "source": "candidate",
+      "pskernel": {
+        "elapsed_seconds": 60.139375797000014,
+        "returncode": -9,
+        "stdout": "case-009-stdout.txt",
+        "stderr": "case-009-stderr.txt",
+        "time_log": "case-009-time.txt",
+        "progress_snapshots": 67,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 63723,
+          "exportedDeclarations": 2059,
+          "admissionCommands": 1774,
+          "arenaNodes": "54535",
+          "fuel": "4096",
+          "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "elapsedMilliseconds": 2142.130225
+        },
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "timeout_seconds": 60
+      },
+      "classification": "pskernel_timeout"
+    },
+    {
+      "label": "good",
+      "name": "init-prelude.ndjson",
+      "corpus_index": 72,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+        "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+        "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.7547596050000038,
+        "log": "case-072.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 10,
+      "source": "candidate",
+      "pskernel": {
+        "elapsed_seconds": 60.13474956700003,
+        "returncode": -9,
+        "stdout": "case-010-stdout.txt",
+        "stderr": "case-010-stderr.txt",
+        "time_log": "case-010-time.txt",
+        "progress_snapshots": 67,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 63723,
+          "exportedDeclarations": 2059,
+          "admissionCommands": 1774,
+          "arenaNodes": "54535",
+          "fuel": "4096",
+          "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "elapsedMilliseconds": 2300.825926
+        },
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "timeout_seconds": 60
+      },
+      "classification": "pskernel_timeout"
+    },
+    {
+      "label": "good",
+      "name": "init-prelude.ndjson",
+      "corpus_index": 72,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+        "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+        "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.7547596050000038,
+        "log": "case-072.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "index": 11,
+      "source": "baseline",
+      "pskernel": {
+        "elapsed_seconds": 60.149222204999944,
+        "returncode": -9,
+        "stdout": "case-011-stdout.txt",
+        "stderr": "case-011-stderr.txt",
+        "time_log": "case-011-time.txt",
+        "progress_snapshots": 67,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 63723,
+          "exportedDeclarations": 2059,
+          "admissionCommands": 1774,
+          "arenaNodes": "54535",
+          "fuel": "4096",
+          "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "elapsedMilliseconds": 2210.690056
+        },
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "timeout_seconds": 60
+      },
+      "classification": "pskernel_timeout"
+    },
+    {
+      "label": "bad",
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "corpus_index": 13,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+        "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "rejected",
+        "reason": "official_kernel_verdict",
+        "returncode": 1,
+        "elapsed_seconds": 0.45630538700001466,
+        "log": "case-013.txt",
+        "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+      },
+      "index": 12,
+      "source": "baseline",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 5272,
+        "exportedDeclarations": 161,
+        "admissionCommands": 117,
+        "arenaNodes": "4392",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 25.473863273999996,
+        "returncode": 0,
+        "stdout": "case-012-stdout.txt",
+        "stderr": "case-012-stderr.txt",
+        "time_log": "case-012-time.txt",
+        "progress_snapshots": 10,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "fuel": "4096",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "elapsedMilliseconds": 301.23614
+        },
+        "peak_rss_kib": 430424,
+        "process_peak_rss_kib": 430424,
+        "process_cpu_user_seconds": 41.36,
+        "process_cpu_system_seconds": 0.42,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_kernel_rejection"
+    },
+    {
+      "label": "bad",
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "corpus_index": 13,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+        "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "rejected",
+        "reason": "official_kernel_verdict",
+        "returncode": 1,
+        "elapsed_seconds": 0.45630538700001466,
+        "log": "case-013.txt",
+        "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+      },
+      "index": 13,
+      "source": "candidate",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 5272,
+        "exportedDeclarations": 161,
+        "admissionCommands": 117,
+        "arenaNodes": "4392",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 26.095841508000035,
+        "returncode": 0,
+        "stdout": "case-013-stdout.txt",
+        "stderr": "case-013-stderr.txt",
+        "time_log": "case-013-time.txt",
+        "progress_snapshots": 10,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "fuel": "4096",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "elapsedMilliseconds": 303.666346
+        },
+        "peak_rss_kib": 425984,
+        "process_peak_rss_kib": 425984,
+        "process_cpu_user_seconds": 42.12,
+        "process_cpu_system_seconds": 0.44,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_kernel_rejection"
+    },
+    {
+      "label": "bad",
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "corpus_index": 13,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+        "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "rejected",
+        "reason": "official_kernel_verdict",
+        "returncode": 1,
+        "elapsed_seconds": 0.45630538700001466,
+        "log": "case-013.txt",
+        "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+      },
+      "index": 14,
+      "source": "candidate",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 5272,
+        "exportedDeclarations": 161,
+        "admissionCommands": 117,
+        "arenaNodes": "4392",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 26.50226671600001,
+        "returncode": 0,
+        "stdout": "case-014-stdout.txt",
+        "stderr": "case-014-stderr.txt",
+        "time_log": "case-014-time.txt",
+        "progress_snapshots": 10,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "fuel": "4096",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "elapsedMilliseconds": 294.345807
+        },
+        "peak_rss_kib": 426776,
+        "process_peak_rss_kib": 426776,
+        "process_cpu_user_seconds": 43.59,
+        "process_cpu_system_seconds": 0.44,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_kernel_rejection"
+    },
+    {
+      "label": "bad",
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "corpus_index": 13,
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+        "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "rejected",
+        "reason": "official_kernel_verdict",
+        "returncode": 1,
+        "elapsed_seconds": 0.45630538700001466,
+        "log": "case-013.txt",
+        "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+      },
+      "index": 15,
+      "source": "baseline",
+      "pskernel": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 5272,
+        "exportedDeclarations": 161,
+        "admissionCommands": 117,
+        "arenaNodes": "4392",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 26.342831265999962,
+        "returncode": 0,
+        "stdout": "case-015-stdout.txt",
+        "stderr": "case-015-stderr.txt",
+        "time_log": "case-015-time.txt",
+        "progress_snapshots": 10,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "fuel": "4096",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "elapsedMilliseconds": 295.47189
+        },
+        "peak_rss_kib": 426664,
+        "process_peak_rss_kib": 426664,
+        "process_cpu_user_seconds": 42.96,
+        "process_cpu_system_seconds": 0.41,
+        "process_major_page_faults": 0
+      },
+      "classification": "matched_kernel_rejection"
+    }
+  ],
+  "admission_summary": [
+    {
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 39.26903433333338,
+          "candidate": 38.458090333333345
+        },
+        "cold_admission_ms": {
+          "baseline": 55.72781499999999,
+          "candidate": 54.59672250000001
+        },
+        "input_construction_ms": {
+          "baseline": 0.13118900000000622,
+          "candidate": 0.1313145000000162
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 9.76888416666666,
+          "candidate": 9.997329833333328
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 165908.0,
+          "candidate": 165210.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 35048.0,
+          "candidate": 35056.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 0.6732148710000061,
+          "candidate": 0.6721410709999986
+        },
+        "process_peak_rss_kib": {
+          "baseline": 165972.0,
+          "candidate": 165210.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 0.855,
+          "candidate": 0.83
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.08499999999999999,
+          "candidate": 0.1
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 1.0210864344269626
+    },
+    {
+      "shape": "chain",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 49.966724,
+          "candidate": 50.37285933333334
+        },
+        "cold_admission_ms": {
+          "baseline": 71.73358049999999,
+          "candidate": 72.56212800000002
+        },
+        "input_construction_ms": {
+          "baseline": 11.548909999999992,
+          "candidate": 11.526762500000004
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 15.676224166666675,
+          "candidate": 15.98479633333335
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 187324.0,
+          "candidate": 184920.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 35160.0,
+          "candidate": 35128.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 0.9918877820000063,
+          "candidate": 0.9988793440000023
+        },
+        "process_peak_rss_kib": {
+          "baseline": 187992.0,
+          "candidate": 185922.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 1.3450000000000002,
+          "candidate": 1.355
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.105,
+          "candidate": 0.11
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9919374175159323
+    },
+    {
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 125.96866425000002,
+          "candidate": 137.24165500000004
+        },
+        "cold_admission_ms": {
+          "baseline": 165.26458050000002,
+          "candidate": 162.4576835
+        },
+        "input_construction_ms": {
+          "baseline": 0.3357675000000029,
+          "candidate": 0.33339450000001136
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 34.941340500000024,
+          "candidate": 38.191768749999994
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 244588.0,
+          "candidate": 245948.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 9932.0,
+          "candidate": 9916.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.6159531810000018,
+          "candidate": 1.715749037000002
+        },
+        "process_peak_rss_kib": {
+          "baseline": 244588.0,
+          "candidate": 245948.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.245,
+          "candidate": 2.3
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.14500000000000002,
+          "candidate": 0.17
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9178602826525225
+    },
+    {
+      "shape": "chain",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 191.5295839999999,
+          "candidate": 194.07085175000003
+        },
+        "cold_admission_ms": {
+          "baseline": 234.78835800000002,
+          "candidate": 237.021857
+        },
+        "input_construction_ms": {
+          "baseline": 49.4667125,
+          "candidate": 51.61304
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 34.90824700000002,
+          "candidate": 33.88835449999988
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 286904.0,
+          "candidate": 263836.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 14828.0,
+          "candidate": 16040.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 2.6817282724999956,
+          "candidate": 2.6678166855000143
+        },
+        "process_peak_rss_kib": {
+          "baseline": 287160.0,
+          "candidate": 264284.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 3.91,
+          "candidate": 3.88
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.19,
+          "candidate": 0.185
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9869054640246863
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        16,
+        17,
+        18,
+        19
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 134.67503483333337,
+          "candidate": 131.10084883333337
+        },
+        "cold_admission_ms": {
+          "baseline": 170.9549015,
+          "candidate": 177.27955300000002
+        },
+        "input_construction_ms": {
+          "baseline": 0.37374900000000366,
+          "candidate": 0.3819109999999881
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 20.17087383333334,
+          "candidate": 21.20399500000004
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 267688.0,
+          "candidate": 250488.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 586404.0,
+          "candidate": 1110360.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.6758664739999887,
+          "candidate": 1.6680076565000093
+        },
+        "process_peak_rss_kib": {
+          "baseline": 267688.0,
+          "candidate": 250488.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.44,
+          "candidate": 2.44
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.175,
+          "candidate": 0.16
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 1.0272628745870578
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 8,
+      "calls": 3,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 115.41191566666669,
+          "candidate": 161.45797183333335
+        },
+        "cold_admission_ms": {
+          "baseline": 146.84057199999998,
+          "candidate": 191.060048
+        },
+        "input_construction_ms": {
+          "baseline": 24.065678500000004,
+          "candidate": 24.30794800000001
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 17.90633116666667,
+          "candidate": 12.54835849999995
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 251664.0,
+          "candidate": 249078.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 34656.0,
+          "candidate": 42240.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.8190192035000052,
+          "candidate": 2.1879089994999816
+        },
+        "process_peak_rss_kib": {
+          "baseline": 251856.0,
+          "candidate": 249206.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.64,
+          "candidate": 3.34
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.16999999999999998,
+          "candidate": 0.16
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.7148108845675445
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        24,
+        25,
+        26,
+        27
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 526.71808425,
+          "candidate": 532.4404602499998
+        },
+        "cold_admission_ms": {
+          "baseline": 613.402569,
+          "candidate": 616.5226210000001
+        },
+        "input_construction_ms": {
+          "baseline": 1.1899839999999955,
+          "candidate": 1.2690759999999983
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 55.72288599999979,
+          "candidate": 63.174031250000326
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 285270.0,
+          "candidate": 290766.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 17020.0,
+          "candidate": 19152.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 4.991254458,
+          "candidate": 5.084445332000001
+        },
+        "process_peak_rss_kib": {
+          "baseline": 285718.0,
+          "candidate": 291150.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 7.91,
+          "candidate": 8.045
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.215,
+          "candidate": 0.215
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.989252552299814
+    },
+    {
+      "shape": "metadata",
+      "declarations_per_batch": 32,
+      "calls": 2,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 466.78408175000004,
+          "candidate": 594.6282867499999
+        },
+        "cold_admission_ms": {
+          "baseline": 528.978267,
+          "candidate": 683.3248369999999
+        },
+        "input_construction_ms": {
+          "baseline": 101.84166250000001,
+          "candidate": 99.29482250000001
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 45.64775675000021,
+          "candidate": 48.28511774999993
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 275492.0,
+          "candidate": 278352.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": -862288.0,
+          "candidate": 39148.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 5.454270754000007,
+          "candidate": 6.938962595499987
+        },
+        "process_peak_rss_kib": {
+          "baseline": 275578.0,
+          "candidate": 279440.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 9.18,
+          "candidate": 11.585
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.185,
+          "candidate": 0.22
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.7850014742844725
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 50.76947774999999,
+          "candidate": 53.2227795
+        },
+        "cold_admission_ms": {
+          "baseline": 83.66565150000001,
+          "candidate": 82.867536
+        },
+        "input_construction_ms": {
+          "baseline": 0.20674650000000838,
+          "candidate": 0.21928499999999929
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 16.37895800000004,
+          "candidate": 19.153470000000027
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 195506.0,
+          "candidate": 193740.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 31808.0,
+          "candidate": 31712.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 0.8251209364999852,
+          "candidate": 0.8315699815000102
+        },
+        "process_peak_rss_kib": {
+          "baseline": 195506.0,
+          "candidate": 193740.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 1.045,
+          "candidate": 1.0750000000000002
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.10500000000000001,
+          "candidate": 0.095
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9539050426706857
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 8,
+      "calls": 2,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        36,
+        37,
+        38,
+        39
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 123.56982925,
+          "candidate": 121.30144774999997
+        },
+        "cold_admission_ms": {
+          "baseline": 163.974005,
+          "candidate": 162.8056835
+        },
+        "input_construction_ms": {
+          "baseline": 17.295691500000004,
+          "candidate": 17.667443000000006
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 18.441602250000017,
+          "candidate": 19.448915
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 258370.0,
+          "candidate": 251944.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 36632.0,
+          "candidate": 36384.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 1.7680386819999967,
+          "candidate": 1.7254575525000035
+        },
+        "process_peak_rss_kib": {
+          "baseline": 258370.0,
+          "candidate": 251944.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.5549999999999997,
+          "candidate": 2.455
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.15500000000000003,
+          "candidate": 0.155
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 1.0187003662534608
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "variant": "legacy",
+      "complete": true,
+      "observations": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 193.97281499999997,
+          "candidate": 195.99647800000002
+        },
+        "cold_admission_ms": {
+          "baseline": 266.408572,
+          "candidate": 258.9190255
+        },
+        "input_construction_ms": {
+          "baseline": 0.577911499999999,
+          "candidate": 0.5667495000000002
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 51.01467000000014,
+          "candidate": 54.87153799999987
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 255106.0,
+          "candidate": 256796.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 20032.0,
+          "candidate": 20200.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 2.031817140499996,
+          "candidate": 2.0603311699999978
+        },
+        "process_peak_rss_kib": {
+          "baseline": 255106.0,
+          "candidate": 256796.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 2.8449999999999998,
+          "candidate": 2.91
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.175,
+          "candidate": 0.16999999999999998
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9896750032416396
+    },
+    {
+      "shape": "binder",
+      "declarations_per_batch": 32,
+      "calls": 1,
+      "variant": "dag",
+      "complete": true,
+      "observations": [
+        44,
+        45,
+        46,
+        47
+      ],
+      "metric_means": {
+        "warm_admission_ms_per_batch": {
+          "baseline": 490.62007749999975,
+          "candidate": 503.0986255
+        },
+        "cold_admission_ms": {
+          "baseline": 568.6626219999999,
+          "candidate": 573.2469135
+        },
+        "input_construction_ms": {
+          "baseline": 72.2840805,
+          "candidate": 73.5704745
+        },
+        "independent_assertion_ms_per_batch": {
+          "baseline": 62.1465139999998,
+          "candidate": 48.07801299999983
+        },
+        "pre_diagnostic_peak_rss_kib": {
+          "baseline": 271416.0,
+          "candidate": 272770.0
+        },
+        "retained_heap_delta_bytes": {
+          "baseline": 55716.0,
+          "candidate": -386708.0
+        },
+        "process_elapsed_seconds": {
+          "baseline": 5.097476723500009,
+          "candidate": 5.15151826200001
+        },
+        "process_peak_rss_kib": {
+          "baseline": 272864.0,
+          "candidate": 274022.0
+        },
+        "process_cpu_user_seconds": {
+          "baseline": 8.105,
+          "candidate": 8.18
+        },
+        "process_cpu_system_seconds": {
+          "baseline": 0.19,
+          "candidate": 0.20500000000000002
+        }
+      },
+      "baseline_over_candidate_latency_ratio": 0.9751966167913924
+    }
+  ],
+  "authentic_summary": [
+    {
+      "label": "good",
+      "name": "perf/repeated-subproblem.ndjson",
+      "observations": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "all_four_official_matching_kernel_outcomes": true,
+      "classifications": {
+        "baseline": [
+          "matched_acceptance",
+          "matched_acceptance"
+        ],
+        "candidate": [
+          "matched_acceptance",
+          "matched_acceptance"
+        ]
+      },
+      "mean_elapsed_seconds": {
+        "baseline": 1.374139899499994,
+        "candidate": 1.355672956999996
+      },
+      "mean_peak_rss_kib": {
+        "baseline": 282734.0,
+        "candidate": 280866.0
+      },
+      "baseline_over_candidate_elapsed_ratio": 1.0136219745364428
+    },
+    {
+      "label": "good",
+      "name": "perf/church-numerals.ndjson",
+      "observations": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "all_four_official_matching_kernel_outcomes": false,
+      "classifications": {
+        "baseline": [
+          "pskernel_resource_exhausted",
+          "pskernel_resource_exhausted"
+        ],
+        "candidate": [
+          "pskernel_resource_exhausted",
+          "pskernel_resource_exhausted"
+        ]
+      },
+      "mean_elapsed_seconds": null,
+      "mean_peak_rss_kib": null,
+      "baseline_over_candidate_elapsed_ratio": null
+    },
+    {
+      "label": "good",
+      "name": "init-prelude.ndjson",
+      "observations": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "all_four_official_matching_kernel_outcomes": false,
+      "classifications": {
+        "baseline": [
+          "pskernel_timeout",
+          "pskernel_timeout"
+        ],
+        "candidate": [
+          "pskernel_timeout",
+          "pskernel_timeout"
+        ]
+      },
+      "mean_elapsed_seconds": null,
+      "mean_peak_rss_kib": null,
+      "baseline_over_candidate_elapsed_ratio": null
+    },
+    {
+      "label": "bad",
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "observations": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "all_four_official_matching_kernel_outcomes": true,
+      "classifications": {
+        "baseline": [
+          "matched_kernel_rejection",
+          "matched_kernel_rejection"
+        ],
+        "candidate": [
+          "matched_kernel_rejection",
+          "matched_kernel_rejection"
+        ]
+      },
+      "mean_elapsed_seconds": {
+        "baseline": 25.90834726999998,
+        "candidate": 26.29905411200002
+      },
+      "mean_peak_rss_kib": {
+        "baseline": 428544.0,
+        "candidate": 426380.0
+      },
+      "baseline_over_candidate_elapsed_ratio": 0.9851436922280119
+    }
+  ],
+  "collection_complete": true,
+  "all_admission_samples_valid": true,
+  "unexpected_authentic_failures": [],
+  "collection_protocol_valid": true,
+  "finished_utc": "2026-10-21T17:10:07Z"
+}

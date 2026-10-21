@@ -51,6 +51,13 @@ failure after a successful cached inference at fuel1. The existing simple
 matrix now requires its theorem case to select the direct path. These changes
 are pending native/generated/canonical Actions; no theorem pass is claimed yet.
 
+The initial native4a35 job119012235509 in
+[run39535864568](https://github.com/dwijayuda/pskernel/actions/runs/39535864568)
+compiled the production theorem source but rejected a test helper named with
+Lean's reserved keyword theorem. The helper is renamed theoremRequest;
+declaration/error expectations and production code are unchanged. Native
+semantic execution remains pending the corrected fixture.
+
 ### Strict generated admission assertion correction — qualification pending
 
 The5b131 generated job119008044447 in

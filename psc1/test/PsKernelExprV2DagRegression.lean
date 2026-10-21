@@ -3211,30 +3211,30 @@ private def theoremAdmissionParity : IO Unit := do
   for request in seedRequests do
     owner := (← expectPublic (psKernelDagRunCommand owner [] .safe arena built (.admit request))).snd
   let base := fun params type => PsKernelDagConstantBase.mk target params type
-  let theorem := fun params type value =>
+  let theoremRequest := fun params type value =>
     PsKernelDagDeclarationRequest.theoremDecl (base params type) value
   let cases : List (String × PsKernelDagDeclarationRequest × Bool × Option String) := [
-    ("constant-proof", theorem [] p proof, true, none),
-    ("metadata-proof", theorem [] p hiddenProof, true, none),
-    ("identity-proof", theorem [] identityType identityProof, true, none),
-    ("normalized-zero-universe", theorem [u] zeroP zeroProof, true, none),
-    ("nonprop-before-body-mvar", theorem [] s0 mv, true,
+    ("constant-proof", theoremRequest [] p proof, true, none),
+    ("metadata-proof", theoremRequest [] p hiddenProof, true, none),
+    ("identity-proof", theoremRequest [] identityType identityProof, true, none),
+    ("normalized-zero-universe", theoremRequest [u] zeroP zeroProof, true, none),
+    ("nonprop-before-body-mvar", theoremRequest [] s0 mv, true,
       some "theorem type is not a proposition"),
-    ("nonprop-before-body-fvar", theorem [] s1 fv, true,
+    ("nonprop-before-body-fvar", theoremRequest [] s1 fv, true,
       some "theorem type is not a proposition"),
-    ("prop-body-mvar", theorem [] p mv, true, some "declaration has metavariables"),
-    ("prop-body-fvar", theorem [] p fv, true, some "declaration has free variables"),
-    ("prop-body-undefined-universe", theorem [] p undefinedSort, true,
+    ("prop-body-mvar", theoremRequest [] p mv, true, some "declaration has metavariables"),
+    ("prop-body-fvar", theoremRequest [] p fv, true, some "declaration has free variables"),
+    ("prop-body-undefined-universe", theoremRequest [] p undefinedSort, true,
       some "invalid reference to undefined universe level parameter"),
-    ("header-mvar-before-body", theorem [] mv fv, true, some "declaration has metavariables"),
-    ("duplicate-universe-before-header", theorem [u,u] mv proof, true,
+    ("header-mvar-before-body", theoremRequest [] mv fv, true, some "declaration has metavariables"),
+    ("duplicate-universe-before-header", theoremRequest [u,u] mv proof, true,
       some "duplicate universe parameter"),
-    ("unsafe-header", theorem [] unsafeP proof, true, none),
-    ("unsafe-proof", theorem [] p unsafeProof, true, none),
-    ("partial-proof", theorem [] p partialProof, true, none),
-    ("unsupported-proof-comparison", theorem [] p other, false,
+    ("unsafe-header", theoremRequest [] unsafeP proof, true, none),
+    ("unsafe-proof", theoremRequest [] p unsafeProof, true, none),
+    ("partial-proof", theoremRequest [] p partialProof, true, none),
+    ("unsupported-proof-comparison", theoremRequest [] p other, false,
       some "theorem proof type mismatch"),
-    ("unsupported-metadata-comparison", theorem [] hiddenP proof, false, none)]
+    ("unsupported-metadata-comparison", theoremRequest [] hiddenP proof, false, none)]
   let mut comparisons := 0
   for (label, request, directAt64, messageAt64) in cases do
     let declaration ← expect (psKernelDagDecodeDeclaration built request)
@@ -3285,7 +3285,7 @@ private def theoremAdmissionParity : IO Unit := do
              | _, _ => false)
         comparisons := comparisons + 1
   require "theorem-admission-matrix-count" (comparisons == 224)
-  let constantRequest := theorem [] p proof
+  let constantRequest := theoremRequest [] p proof
   let constantDeclaration ← expect (psKernelDagDecodeDeclaration built constantRequest)
   require "theorem-external-index-explicit-fallback"
     (match psKernelDagTryAdmitSimpleWithFuel 64
@@ -3313,7 +3313,7 @@ private def theoremAdmissionParity : IO Unit := do
       name := quickOfficialName target, levelParams := [], type := officialType, value := officialValue }
     let oracle := official.addDeclCore 0 0 declaration none true
     let emptySession ← fresh 64 1
-    let actual := psKernelV1RunDag emptySession [] .safe arena [.admit (theorem [] typeRoot valueRoot)]
+    let actual := psKernelV1RunDag emptySession [] .safe arena [.admit (theoremRequest [] typeRoot valueRoot)]
     require ("official-Lean-theorem-" ++ label)
       ((match oracle with | .ok _ => true | .error _ => false) == expected &&
         (match actual with | .ok _ => true | .error _ => false) == expected)

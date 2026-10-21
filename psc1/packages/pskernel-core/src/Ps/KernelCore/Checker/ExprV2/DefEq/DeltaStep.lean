@@ -99,7 +99,8 @@ def psKernelExprV2DefEqDeltaOnceWith
           | Option.none =>
               Option.some (Except.error "internal lazy-delta request for non-definition")
           | Option.some value =>
-              match coreWhnf context (Prod.fst unfolded).whnf value true with
+              let unfoldedState := Prod.fst unfolded;
+              match coreWhnf context unfoldedState.whnf value true with
               | Option.none => Option.none
               | Option.some reduced =>
                   match reduced with

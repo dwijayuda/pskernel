@@ -9,6 +9,78 @@ Default kernel fuel: **4096**, unchanged. No new runtime axiom or trusted reduct
 
 
 
+## 2026-10-21 — lazy-delta syntax correction and first full allocation corpus result
+
+The ordered lazy-delta source at `a256edb117ace146d1798f3d32cdeb488a45db84`
+is **not qualified**. Integration [39567818080](https://github.com/dwijayuda/pskernel/actions/runs/39567818080)
+is terminal FAIL in both jobs:
+[native 119114273453](https://github.com/dwijayuda/pskernel/actions/runs/39567818080/job/119114273453)
+compiled the portable kernel but could not compile the new test because
+`let by` used Lean's reserved `by` keyword as a local identifier.
+[Generated 119114273662](https://github.com/dwijayuda/pskernel/actions/runs/39567818080/job/119114273662)
+built authentic PSC1, then its parser rejected `(Prod.fst unfolded).whnf`
+at DeltaStep.lean:102. Native correctness
+[119114273797](https://github.com/dwijayuda/pskernel/actions/runs/39567818151/job/119114273797)
+passed; canonical-source checking and the generated research bridge failed at
+the same portable-source parse defect. These are a **fixture syntax defect**
+and a **source-language portability defect**, respectively. The new semantic
+matrix, proof, detached generated and provider gates did not run in those jobs.
+
+This correction renames the fixture local to `decodedRight` and binds the
+projected state to an explicit local before accessing its field. No fuel,
+callback, branch, assertion, expected verdict or environment publication changes.
+The same unsupported syntactic pattern is being removed from the separately
+staged FullShape/FinalRules drafts before their eventual qualification.
+
+The last fully green scoped provider checkpoint remains **e015839** with the
+terminal native, portable, canonical, generated, proof and provider receipts below.
+The containing correction needs its own exact-source test results; no success
+is inferred from the previous native kernel compilation.
+
+### Terminal full Arena result at f483
+
+[39564831733 / generated job 119105347671](https://github.com/dwijayuda/pskernel/actions/runs/39564831733/job/119105347671)
+is terminal **FAIL qualification**, with all **193** records:
+**170 matching outcomes** = 103 acceptances + 59 kernel rejections + one metadata
+rejection + seven transport rejections; **two** separately classified unsafe/partial
+safety agreements; **20 host timeouts**; and **one explicit unsupported case**.
+There are no newly observed false acceptances or false rejections in these records.
+The official-reference job passed.
+
+Compared with the previous 24-timeout result, three bad cases now complete with
+the correct kernel rejection: `bugs/proj-of-stuck-prop.ndjson`,
+`bugs/proj-of-subst-prop.ndjson`, and `bugs/rec-of-subst-prop.ndjson`.
+`bugs/rec-missing-ih.ndjson` now terminates as **unsupported**, with
+`simple inductive admission does not yet support nested recursive occurrences`.
+Official Lean rejects that case; unsupported is neither a rejection nor a parity pass.
+
+Remaining timeout case numbers are 24, 73, 79–88, 91–97 and 99 (one-based corpus
+numbering). The exact named per-case records are in artifact
+[12329788354](https://github.com/dwijayuda/pskernel/actions/runs/39564831733/artifacts/12329788354),
+ZIP SHA-256 `b66dd329573eee116890d0d9bac5e55d55db5ac1ec055be757808716944dc6a1`.
+Default fuel4096, body authentication and60s/2GiB bounds were unchanged.
+The e015 full comparison was still running when this correction was prepared;
+f483's result is not relabeled as an e015 source receipt.
+
+### Parallel diagnostic continuation
+
+The logical-call tracer is committed on isolated branch
+`research/psc1-arena-logical-20261021` at
+`868a1ee518a963ec141bc1129910aaf093261031`, based on qualified runtime e015.
+Only its harness, workflow and state record differ. It retains the original
+unprofiled/V8 diagnostics, then runs a separately instrumented copy with strict
+runtime-identity checks, existing detached positive/adversarial controls and the
+same four authenticated bodies. It is source-reviewed, **not yet executed**.
+This separate branch does not advance or mutate the integration source. Diagnostic
+collection is never a conformance result or a numeric speedup.
+
+Next: re-run the complete corrected lazy-delta checkpoint to terminal status;
+fix any semantic/ABI/proof defect without weakening the 1,800/1,024/128 matrix.
+Use the logical trace to distinguish declaration guards, cache eligibility and
+other free-variable-scan callers before the next P2 source change. Preserve the
+known e015 provider while completing projection/final rules, recursor/iota and
+admission migration. Four public whole-operation fallback sites remain.
+
 ## 2026-10-21 08:12 UTC — exact provider checkpoint green; ordered DAG lazy delta enters qualification
 
 **Last fully qualified native/portable/generated developer checkpoint:**

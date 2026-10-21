@@ -1,5 +1,19 @@
 # PSKernel-Core performance receipts — 2026-10-21
 
+## Subsequent full-corpus receipt: f483 allocation runtime
+
+Full run [39564831733](https://github.com/dwijayuda/pskernel/actions/runs/39564831733/job/119105347671)
+is terminal FAIL qualification: 193 records,170 matching outcomes (103accepted,
+59kernel rejections,1metadata rejection,7transport rejections),2safety-contract
+agreements,20host timeouts,1explicit unsupported nested-recursion case.
+Three previous bad-case timeouts now finish with the correct rejection; the fourth
+now reports unsupported and is not counted as a rejection/parity pass.
+The remaining timeout cases are24,73,79–88,91–97,99. No budget or host limit changed.
+This source-bound result supersedes pending f483 corpus wording in the dated
+entries below; the new Delta successor still needs its own gates.
+Artifact12329788354 ZIP SHA-256
+`b66dd329573eee116890d0d9bac5e55d55db5ac1ec055be757808716944dc6a1`.
+
 ## 2026-10-21 08:12 UTC — qualified allocation change at e015
 
 Source: **`e015839e0cdf29b1e4f2d4a750fed8956c0afe17`**.

@@ -170,9 +170,9 @@ private def compareStep (label : String)
       let decoded ← expect (psKernelExprV2DecodeChecked next.fst.whnf.arena)
       let pairEqual := fun (a b : PsKernelExpr) (x y : Nat) => do
         let ax ← expect (psKernelExprV2DecodedRequire decoded x)
-        let by ← expect (psKernelExprV2DecodedRequire decoded y)
+        let decodedRight ← expect (psKernelExprV2DecodedRequire decoded y)
         require (label ++ "-step-residual-ids")
-          (psKernelExprEqual a ax && psKernelExprEqual b by)
+          (psKernelExprEqual a ax && psKernelExprEqual b decodedRight)
       match old.fst, next.snd with
       | .equal, .equal => pure ()
       | .different a b, .different x y => pairEqual a b x y

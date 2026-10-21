@@ -384,13 +384,54 @@ def psIrSpecDiagnosticInputAndBudget : Bool :=
         (match budget.error with | .fuelExhausted => true | _ => false)
   | _, _ => false
 
+
+def psIrSpecStringIndex : Bool :=
+  let nul := String.singleton (Char.ofNat 0)
+  let first := psStringSetAdd PsStringSet.empty ""
+  let second := psStringSetAdd first.snd nul
+  let third := psStringSetAdd second.snd "λ🙂"
+  let duplicate := psStringSetAdd third.snd nul
+  let many := (List.range 4096).map (fun n => "key" ++ toString n)
+  let large := psStringSetFromList many
+  first.fst && second.fst && third.fst && !duplicate.fst &&
+    psStringSetHash "" == psStringSetHash nul &&
+    !psStringSetContains first.snd nul &&
+    psStringSetContains duplicate.snd "" &&
+    psStringSetContains duplicate.snd nul &&
+    psStringSetContains duplicate.snd "λ🙂" &&
+    !psStringSetContains duplicate.snd "λ🙃" &&
+    many.all (fun key => psStringSetContains large key) &&
+    !psStringSetContains large "key4096"
+
+def psIrSpecStableSchedule : Bool :=
+  let a := PsIrSpecializeRequest.mk .declaration "a" []
+  let b := PsIrSpecializeRequest.mk .structure "b" []
+  let bad := PsIrSpecializeRequest.mk .declaration "bad" [.typeParameter "T"]
+  let scheduled := psIrSpecializeScheduleRequests [a, a, b, a, bad, bad, b] PsStringSet.empty
+  let known := psIrSpecializeScheduleRequests [a, b] (psStringSetFromList ["D:a"])
+  scheduled.requests.map (fun r => r.name) == ["a", "b", "bad", "bad"] &&
+    scheduled.duplicates == 3 && known.requests.map (fun r => r.name) == ["b"]
+
+def psIrSpecScheduledErrorOrder : Bool :=
+  let seen := PsIrSpecializeRequest.mk .declaration "already" []
+  let bad := PsIrSpecializeRequest.mk .declaration "firstMalformed" [.typeParameter "T"]
+  let missing := PsIrSpecializeRequest.mk .declaration "laterUnknown" []
+  let state := PsIrSpecializeState.mk [] [] [] [] [seen, seen, bad, missing] ["D:already"]
+  match psIrSpecializeLoopDetailed psVerifiedIrModuleEmpty 2 state with
+  | .error diagnostic =>
+      diagnostic.phase == "request-key" && diagnostic.owner == "firstMalformed"
+  | _ => false
+
 def main : IO Unit := do
   if psTestGenericSpecialization
       && psIrSpecRejectsForgedValidation
       && psIrSpecAcceptsCheckedClosedInput
       && psIrSpecDiagnosticSeedOwner
       && psIrSpecDiagnosticRequest
-      && psIrSpecDiagnosticInputAndBudget then
+      && psIrSpecDiagnosticInputAndBudget
+      && psIrSpecStringIndex
+      && psIrSpecStableSchedule
+      && psIrSpecScheduledErrorOrder then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"
   else
     throw (IO.userError "PSC1_IR_SPECIALIZE_TESTS: FAIL")

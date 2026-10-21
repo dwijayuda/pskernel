@@ -1,6 +1,7 @@
 import Ps.CompilerIr.Check
 import Ps.Foundation.List
 import Ps.Foundation.Name
+import Ps.Foundation.StringSet
 
 inductive PsIrSpecializeKind where
   | structure
@@ -1542,17 +1543,49 @@ def psIrSpecializeSeedDetailed {alpha : Type}
               Except.ok (Prod.mk (psListAppend head.fst tail.fst)
                 (psListAppend head.snd tail.snd))
 
-def psIrSpecializeLoopDetailed (module : PsVerifiedIrModule) (depth : Nat) :
-    PsIrSpecializeState -> Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+structure PsIrSpecializeSchedule where
+  requests : List PsIrSpecializeRequest
+  scheduled : PsStringSet
+  duplicates : Nat
+
+-- Keep the first occurrence and leave every malformed key in the queue so it
+-- refuses at its original first-error position. No declaration is filtered.
+def psIrSpecializeScheduleWorker (requests : List PsIrSpecializeRequest) :
+    PsStringSet -> List PsIrSpecializeRequest -> Nat -> PsIrSpecializeSchedule :=
+  match requests with
+  | List.nil =>
+      fun (scheduled : PsStringSet) (reversed : List PsIrSpecializeRequest) (duplicates : Nat) =>
+        PsIrSpecializeSchedule.mk (psListReverse reversed) scheduled duplicates
+  | List.cons request rest =>
+      fun (scheduled : PsStringSet) (reversed : List PsIrSpecializeRequest) (duplicates : Nat) =>
+        let smaller : PsStringSet -> List PsIrSpecializeRequest -> Nat -> PsIrSpecializeSchedule :=
+          psIrSpecializeScheduleWorker rest;
+        match psIrSpecializeRequestKey request with
+        | Option.none => smaller scheduled (List.cons request reversed) duplicates
+        | Option.some key =>
+            let added : Prod Bool PsStringSet := psStringSetAdd scheduled key;
+            if added.fst then smaller added.snd (List.cons request reversed) duplicates
+            else smaller scheduled reversed (Nat.succ duplicates)
+
+def psIrSpecializeScheduleRequests (requests : List PsIrSpecializeRequest) (scheduled : PsStringSet) :
+    PsIrSpecializeSchedule :=
+  psIrSpecializeScheduleWorker requests scheduled [] 0
+
+def psIrSpecializeScheduledLoop (module : PsVerifiedIrModule) (depth : Nat) :
+    PsIrSpecializeState -> PsStringSet -> Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
   match depth with
   | Nat.zero =>
-      fun (_state : PsIrSpecializeState) =>
-        Except.error (PsIrSpecializeDiagnostic.mk "request-loop" ""
+      fun (state : PsIrSpecializeState) (_scheduled : PsStringSet) =>
+        Except.error (PsIrSpecializeDiagnostic.mk "request-loop"
+          (String.Internal.append "processed="
+            (String.Internal.append (Nat.repr (psListLength state.seen))
+              (String.Internal.append " pending=" (Nat.repr (psListLength state.pending)))))
           PsIrSpecializeError.fuelExhausted Option.none)
   | Nat.succ fuel =>
-      fun (state : PsIrSpecializeState) =>
-        let smaller : PsIrSpecializeState -> Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
-          psIrSpecializeLoopDetailed module fuel;
+      fun (state : PsIrSpecializeState) (scheduled : PsStringSet) =>
+        let smaller : PsIrSpecializeState -> PsStringSet ->
+            Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+          psIrSpecializeScheduledLoop module fuel;
         match state.pending with
         | List.nil => Except.ok state
         | List.cons request rest =>
@@ -1561,17 +1594,38 @@ def psIrSpecializeLoopDetailed (module : PsVerifiedIrModule) (depth : Nat) :
                 Except.error (PsIrSpecializeDiagnostic.mk "request-key" request.name
                   (PsIrSpecializeError.nonGroundType request.name) Option.none)
             | Option.some key =>
-                let withoutHead : PsIrSpecializeState :=
+                -- Request processing only appends dependencies; it never reads
+                -- the queue. Retain the old tail separately and capture exactly
+                -- the newly produced dependency batch.
+                let isolated : PsIrSpecializeState :=
                   PsIrSpecializeState.mk state.imports state.structures state.inductives
-                    state.declarations rest state.seen;
-                if psIrSpecializeSeenContains state.seen key then smaller withoutHead
-                else
-                  let marked : PsIrSpecializeState := psIrSpecializeMarkSeen withoutHead key;
-                  match psIrSpecializeProcessRequest module marked request with
-                  | Except.error error =>
-                      Except.error (PsIrSpecializeDiagnostic.mk "process-request" request.name
-                        error (Option.some key))
-                  | Except.ok next => smaller next
+                    state.declarations [] state.seen;
+                let marked : PsIrSpecializeState := psIrSpecializeMarkSeen isolated key;
+                match psIrSpecializeProcessRequest module marked request with
+                | Except.error error =>
+                    Except.error (PsIrSpecializeDiagnostic.mk "process-request" request.name
+                      error (Option.some key))
+                | Except.ok next =>
+                    let added : PsIrSpecializeSchedule :=
+                      psIrSpecializeScheduleRequests next.pending scheduled;
+                    let combined : PsIrSpecializeState :=
+                      PsIrSpecializeState.mk next.imports next.structures next.inductives next.declarations
+                        (psListAppend rest added.requests) next.seen;
+                    smaller combined added.scheduled
+
+def psIrSpecializeLoopDetailed (module : PsVerifiedIrModule) (depth : Nat)
+    (state : PsIrSpecializeState) : Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+  match depth with
+  | Nat.zero =>
+      Except.error (PsIrSpecializeDiagnostic.mk "request-loop" ""
+        PsIrSpecializeError.fuelExhausted Option.none)
+  | Nat.succ _ =>
+      let initial : PsIrSpecializeSchedule :=
+        psIrSpecializeScheduleRequests state.pending (psStringSetFromList state.seen);
+      let prepared : PsIrSpecializeState :=
+        PsIrSpecializeState.mk state.imports state.structures state.inductives state.declarations
+          initial.requests state.seen;
+      psIrSpecializeScheduledLoop module depth prepared initial.scheduled
 
 def psIrSpecializeLoop (module : PsVerifiedIrModule) (depth : Nat)
     (state : PsIrSpecializeState) : Except PsIrSpecializeError PsIrSpecializeState :=

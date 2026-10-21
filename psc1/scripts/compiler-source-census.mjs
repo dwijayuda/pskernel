@@ -145,6 +145,7 @@ requireStrictCensus(phases, lanes, options.strictPhase);
 // These normalized compiler modules are maintained regressions, not a waiver for
 // any other refusal. The full inventory above still reports every module.
 for (const [module, stage] of [
+  ['Ps.Foundation.StringSet', 'parse'], ['Ps.Foundation.StringSet', 'elaboration'],
   ['Ps.Syntax.Ast', 'parse'], ['Ps.Syntax.Ast', 'elaboration'],
   ['Ps.Erasure.Definition', 'elaboration'],
   ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration'],

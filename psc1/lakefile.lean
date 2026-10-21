@@ -8,6 +8,7 @@ lean_lib PsFoundation where
   roots := #[
     `Ps.Foundation.List,
     `Ps.Foundation.Name,
+    `Ps.Foundation.StringSet,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic,
     `Ps.Foundation.Text
@@ -389,3 +390,7 @@ lean_exe psc1_js_service_seed where
 lean_exe psc1_js_service_tests where
   srcDir := "test"
   root := `JsServiceTests
+
+lean_exe psc1_specialize_queue_benchmark where
+  srcDir := "scripts"
+  root := `SpecializeQueueBenchmark

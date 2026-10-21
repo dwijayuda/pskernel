@@ -1,9 +1,6 @@
 name: PSC1 retained artifact diagnostics
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/psc1-artifact-diagnostics.yml
   workflow_dispatch:
     inputs:
       run_id:

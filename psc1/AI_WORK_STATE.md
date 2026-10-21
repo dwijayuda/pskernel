@@ -6,7 +6,38 @@ on fix/psc1-closure-normalization-20261021 preserves #171 at
 Execute [the Sol High plan](docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md)
 continuously. The user explicitly requests no small-milestone handoff.
 
-## Exact qualified checkpoint
+## Current continuation — stable specialization scheduling, Linux pending
+
+Parent a37a4ce61139db229f86d50645c65a0597119035 has final successful
+full scoped39537087657, focused39537087675 and all3 exact-closure jobs39537087643.
+Generated diagnostic39537087665 failed at actual native compiler generation:
+request-loop / fuel-exhausted. No G1 was produced. This is separate from source
+acceptance, independent admission and strict original IR, which passed.
+
+The original loop charges every duplicate queued dependency against16384, even
+when its canonical key was already seen. The candidate schedules each valid key
+once, with a portable immutable string trie and full equality in collision buckets.
+First-encounter FIFO order remains, malformed requests remain, every nongeneric
+source declaration remains, and the existing singleton transformation and
+before/after validation remain. The budget is STILL16384; zero-budget refusal
+is unchanged. A dependency batch is captured with an empty queue because request
+processing never reads the pending queue; it only appends dependencies.
+
+Native assertions cover hash collisions, Unicode, persistent snapshots,4096 keys,
+stable ordering, duplicate elimination, seen keys and malformed first-error order.
+The new Linux comparison builds the SAME authored IR fixture against immutable
+a37 and the candidate, checks exact input SHA256 parity, all128 concrete entries
+retained plus one generic instance, unchanged limits, elapsed time and maximum
+RSS. Expected baseline refusal and candidate acceptance are hypotheses until CI.
+The generated compiler diagnostic separately reruns the ACTUAL full source workload.
+
+Next: inspect both-grammar source gates and queue comparison, then the actual G0
+seed/G1 execution. Do not raise limits or claim G1/fixed-point success from the
+synthetic benchmark. Continue the plan, including session publication and G1/G2/G3,
+after actual G1 semantics. Read-only retained-artifact inspection is manual-only;
+its first successful original-artifact inspection remains in history.
+
+## Earlier exact qualified checkpoint
 
 Source head912dcc1c055f78ead505c057b1271b88fd1656e5.
 Tested merge3c0e45261448a8c633fe82d4be79586d1ec1c90d.

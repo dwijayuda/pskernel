@@ -741,12 +741,26 @@
     }
   },
   "currentContinuation": {
-    "headBeforeCandidate": "ee8606baba02d268717cbe845ef772b73c2248b5",
-    "status": "pending-linux",
-    "newCompositionRoot": "Ps.BackendJs.CompilerService",
-    "description": "production scalar provisional facade; shared ownership; native seed once then generated compiler diagnostic with native tools disabled",
-    "generatedExecution": "not-run-until-actual-ci",
-    "fullAtomicServicePublication": "not-implemented-by-this-diagnostic"
+    "headBeforeCandidate": "a37a4ce61139db229f86d50645c65a0597119035",
+    "status": "pending-linux-stable-specialization-scheduling",
+    "sourceAndOriginalIr": {
+      "scoped": 39537087657,
+      "focused": 39537087675,
+      "wholeClosures": 39537087643,
+      "final": "success"
+    },
+    "actualBootstrap": {
+      "run": 39537087665,
+      "final": "failure",
+      "phase": "specialization",
+      "detail": "request-loop fuel-exhausted",
+      "G1": "not-produced"
+    },
+    "queueBudget": 16384,
+    "queueDeduplication": "stable-first-canonical-key-with-full-string-equality",
+    "benchmark": "identical-IR-a37-versus-candidate-pending",
+    "generatedCompilerExecution": "not-run",
+    "fullAtomicServicePublication": "not-implemented"
   },
   "latestCanonicalIrCheckpoint": {
     "head": "ee8606baba02d268717cbe845ef772b73c2248b5",

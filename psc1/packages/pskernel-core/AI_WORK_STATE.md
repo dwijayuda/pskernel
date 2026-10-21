@@ -1,3 +1,49 @@
+# Current isolated experiment — paired explicit radix-worker qualification
+
+Branch: `research/psc1-pskernel-radix-paired-perf-20261021`.
+The containing harness is **NOT RUN** at creation. It changes no kernel source,
+benchmark, artifact authenticator or expected verdict. It is a descendant of the
+existing14ee4a9323e47944e971e1d9c9a191936fb4843e paired harness and changes only
+the workflow's branch/title and pinned candidate identity, plus this work-state.
+
+Candidate: `384f3395036ba7022e6eea9d3ff77f37aacd62ca`.
+Its integration39644630197 is terminal SUCCESS (native119376824639 and
+generated119376824272), correctness39644630244 is now terminal SUCCESS
+(native119376824333 and canonical119376824391), and all six research39644630228
+jobs passed. Those exact-source gates do not qualify this harness's portable
+kernel tree or establish a performance improvement. The artifact-only script
+re-authenticates terminal producer jobs, archive digest, manifest and all runtime
+files before any measurement. Candidate generated artifact12370425630 ZIP
+`a89594570099ad016c2afc682cd5267d211dea89c61e2d571d74d948e92ceedb`;
+kernel9,906,932bytes SHA256
+`cba16c293163e3fd953013b5cecb584213de6b3b9a31df9d711933a26cf38357`.
+
+The unmodified generic drivers compare against exact qualified baseline
+`f9e9b20f92ce2ffa4a666acaf55aa8852949f589`, integration39622521184,
+on one runner with sequential ABBA source order. They retain six complete
+public-admission workloads, four authentic Arena cases, all independent checks,
+fresh detached processes and two138-case transport-control suites.
+The same60-second/2048MiB V8 old-space policy is unchanged. It is NOT an OS RSS
+cap. Actual timeouts, kernel fuel errors and regressions remain visible.
+
+Why this experiment is required: the earlier indexed candidate5de's paired
+metadata8/32 DAG admission regressed39.9%/27.4% against f9. The384 explicit-worker
+source repair has passed correctness but its own generated metadata DAG/V1
+means still show regressions. Actual generated profiles also show curried
+structural-recursion helpers under IndexBucketWorker/IndexSetWorker; explicit
+source arguments alone do not establish that all closure cost was removed.
+Only the controlled same-runner measurements can decide whether promotion is
+appropriate. Keep the indexed cache off integration pending those results.
+No fuel, threshold, collision/equality, cache owner or checker policy changes
+are authorized by a favorable microbenchmark.
+
+The next executable action is this exact workflow push. Preserve its complete
+report, artifact hashes, all48 admission samples,16 authentic observations and
+failed controls/outcomes. Its PASS marker means experiment completion, not full
+Arena conformance, V2 completion or inherited source qualification.
+
+---
+
 # Name worker paired experiment — NOT RUN at creation
 
 Branch: `research/psc1-pskernel-name-paired-perf-20261021`.

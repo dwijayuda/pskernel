@@ -42,8 +42,14 @@ def psKernelStringEqFromWorkerWithFuel
 def psKernelStringEqFromWithFuel
     (fuel : Nat) :
     String -> String -> Nat -> Nat -> Bool :=
-  fun (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) =>
-    psKernelStringEqFromWorkerWithFuel fuel left right leftPos rightPos
+  match fuel with
+  | Nat.zero =>
+      fun (_left : String) (_right : String) (_leftPos : Nat) (_rightPos : Nat) =>
+        false
+  | Nat.succ remaining =>
+      fun (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) =>
+        psKernelStringEqFromWorkerWithFuel (Nat.succ remaining)
+          left right leftPos rightPos
 
 def psKernelStringEq
     (left : String)
@@ -187,7 +193,16 @@ def psKernelNameEqWorker
 def psKernelNameEq
     (left : PsKernelName) :
     PsKernelName -> Bool :=
-  fun (right : PsKernelName) => psKernelNameEqWorker left right
+  match left with
+  | PsKernelName.anonymous =>
+      fun (right : PsKernelName) =>
+        psKernelNameEqWorker PsKernelName.anonymous right
+  | PsKernelName.str parent value =>
+      fun (right : PsKernelName) =>
+        psKernelNameEqWorker (PsKernelName.str parent value) right
+  | PsKernelName.num parent value =>
+      fun (right : PsKernelName) =>
+        psKernelNameEqWorker (PsKernelName.num parent value) right
 
 def psKernelNameAppendAfter
     (name : PsKernelName)

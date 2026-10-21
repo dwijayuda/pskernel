@@ -113,7 +113,10 @@ theorem raw_public_exact
     (fuel : Nat) (left right : String) (leftPos rightPos : Nat) :
     psKernelStringEqFromWithFuel fuel left right leftPos rightPos =
       originalStringEqFromWithFuel fuel left right leftPos rightPos := by
-  exact raw_worker_exact fuel left right leftPos rightPos
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      exact raw_worker_exact (Nat.succ remaining) left right leftPos rightPos
 
 theorem string_public_exact (left right : String) :
     psKernelStringEq left right = originalStringEq left right := by
@@ -131,7 +134,7 @@ theorem name_worker_exact (left right : PsKernelName) :
 
 theorem name_public_exact (left right : PsKernelName) :
     psKernelNameEq left right = originalNameEq left right := by
-  exact name_worker_exact left right
+  cases left <;> exact name_worker_exact _ right
 
 theorem raw_partial_application_exact (fuel : Nat) :
     psKernelStringEqFromWithFuel fuel = originalStringEqFromWithFuel fuel := by

@@ -311,3 +311,8 @@ lean_exe psc1_kernel_expr_v2_owned_state_regression where
 lean_exe psc1_kernel_expr_v2_string_projection_regression where
   srcDir := "test"
   root := `PsKernelExprV2StringProjectionRegression
+
+-- Exact comparison workers, Unicode/raw-position parity, and real checked named declarations.
+lean_exe psc1_kernel_name_worker_regression where
+  root := `PsKernelNameWorkerRegression
+  srcDir := "test"

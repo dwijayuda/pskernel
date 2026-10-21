@@ -5,10 +5,12 @@ on:
   push:
     branches:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
+      - research/psc1-arena-logical-20261021
     paths:
       - psc1/scripts/install-lean435-ci.sh
       - .github/workflows/psc1-pskernel-arena435-profile.yml
       - psc1/scripts/pskernel-arena435-profile.py
+      - psc1/scripts/pskernel-arena435-logical-profile.py
       - psc1/scripts/pskernel-arena435-oracle.py
       - psc1/scripts/pskernel-arena-replay-controls.mjs
       - psc1/scripts/pskernel-arena-replay.mjs
@@ -41,6 +43,7 @@ jobs:
           test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           python3 -m py_compile scripts/pskernel-arena435-profile.py \
+            scripts/pskernel-arena435-logical-profile.py \
             scripts/pskernel-arena435-oracle.py scripts/pskernel-arena435-compare.py
           node --check scripts/pskernel-arena-replay.mjs
           node --check scripts/pskernel-arena-replay-controls.mjs
@@ -117,12 +120,25 @@ jobs:
             --kernel dist/arena435-profile/kernel.js --official-project . \
             --out "$RUNNER_TEMP/arena435-authentic-profiles" \
             | tee "$RUNNER_TEMP/arena435-authentic-profile.log"
+      - name: Trace bounded logical checker stacks in a separate diagnostic copy
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          python3 scripts/pskernel-arena435-logical-profile.py \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --kernel dist/arena435-profile/kernel.js \
+            --baseline-report "$RUNNER_TEMP/arena435-authentic-profiles/report.json" \
+            --out "$RUNNER_TEMP/arena435-logical-profiles" \
+            | tee "$RUNNER_TEMP/arena435-logical-profile.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-arena435-authentic-diagnostics
           path: |
             ${{ runner.temp }}/arena435-authentic-profiles/
+            ${{ runner.temp }}/arena435-logical-profiles/
+            ${{ runner.temp }}/arena435-logical-profile.log
             ${{ runner.temp }}/arena435-authentic-profile.log
             ${{ runner.temp }}/arena435-profile-controls.log
             ${{ runner.temp }}/arena435-profile-artifacts.sha256

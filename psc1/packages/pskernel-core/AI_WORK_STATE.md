@@ -1,3 +1,76 @@
+# Diagnostic branch: authentic Arena logical-call tracing
+
+Date: 2026-10-21 UTC
+Branch: `research/psc1-arena-logical-20261021`
+Runtime source baseline: **`e015839e0cdf29b1e4f2d4a750fed8956c0afe17`**
+Active integration development remains on
+`integration/psc1-pskernel-expr-v2-lean435-20261021`, most recently
+`a256edb117ace146d1798f3d32cdeb488a45db84`.
+
+This diagnostic branch changes only the profile harness/workflow and this state
+record. No compiler, portable kernel, provider or runtime semantic source changes.
+The qualified e015 native, generated and canonical provider jobs are recorded in
+integration39565480601, correctness39565480292 and research39565480417; all terminal
+PASS. The new containing diagnostic source and trace harness are **NOT RUN** until
+their own Actions job completes. Trace collection cannot claim gate B or C.
+Gate A remains the documented e015 scoped V1 developer provider.
+
+## Why this diagnostic exists
+
+The f483 structural-allocation profile39564831855 finished collection successfully:
+stuck-prop completed with the expected rejection under unchanged limits, while
+repeated-subproblem, church-numerals and init-prelude still timed out. Repeated-
+subproblem now identifies psKernelExprHasFVar as a hot function, but the generated
+trampoline hides its logical caller. We need that caller before changing cache
+eligibility, admission validation or transform scanning.
+
+The workflow first runs its existing authentic PSC1/canonical compilation,
+detached controls, official reference, unprofiled cases and V8 profiles unchanged.
+Only afterward it creates a separate instrumented `kernel.logical.mjs`.
+A strict source guard accepts the reviewed TypeScript-erased trampoline, retaining
+all generated function bodies unchanged. The parallel label stack records named
+pending generators, including nested trampoline calls, without reading term payloads
+or modifying semantic decisions. Existing source maps do not describe this copy.
+
+Sampling uses at most 800 samples, 64 named frames and 16,384 inspected frames per
+sample, every 4,096 resumes and at least 100ms apart. Synchronous append preserves
+completed samples after a timeout kill. Frame counts are diagnostic samples, not
+CPU accounting, kernel fuel or performance ratios. Anonymous frames are omitted;
+truncated stacks and missing final records are explicit.
+
+The original authenticated four-case bodies are replayed through the same complete
+RunDag, transport and 4096 fuel. Host limits remain60s/2GiB and PATH is empty.
+The same-source baseline report and exact body/header receipts are required.
+The instrumented copy separately runs the complete existing positive/adversarial
+replay controls before cases. Any rewrite mismatch, malformed trace, protocol
+failure or contradictory completed outcome fails collection; timeouts remain
+timeouts, never rejection or parity passes.
+
+The generated original bundle, separate diagnostic bundle, complete records,
+logical traces, V8 profiles and checksums are attached to the Actions artifact.
+The production artifacts and all qualification results remain uninstrumented.
+
+## Ready-to-execute continuation
+
+Inspect this branch's exact HEAD and terminal
+`.github/workflows/psc1-pskernel-arena435-profile.yml` job/log/artifact.
+If the strict trampoline guard rejects TypeScript formatting, inspect the actual
+emitted prefix in the artifact and fix only the diagnostic recognizer, keeping
+a reviewed exact source identity. Do not relax it to accept arbitrary code.
+If controls fail, classify an instrumentation/harness defect and correct it
+before interpreting samples. If collection passes, correlate named ancestors
+with the untouched source and authenticated per-case progress. Implement any
+semantic optimization on the active integration branch with native, portable,
+canonical/generated, formal-local and original unprofiled corpus qualification.
+
+This is executed through connected GitHub tools and Linux GitHub Actions.
+No local checkout, local CI, force push, main merge or npm publication is used.
+
+## Historical integration state at runtime baseline
+
+The following state file is preserved from e015's tree. Its pending wording
+predates e015's terminal green jobs cited above and does not override this summary.
+
 # PSKernel-Core Expression V2 integration work state
 
 Date: 2026-10-21 (Asia/Jakarta; Actions timestamps use UTC)

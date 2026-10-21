@@ -38,7 +38,8 @@ const jsonRows=jsonContract.cases.flatMap(c=>jsonContract.grammars.flatMap(s=>js
  librarySha256:Object.fromEntries(jsonContract.oracleLibraries.map(key=>[key,digest])),
  refusals:Object.fromEntries(jsonContract.requiredRefusals.map(id=>[id,digest]))
 }))));
-assert.equal(check(jsonContract,jsonRows).obligations,98);
+assert.deepEqual(jsonContract.cases.map(c=>c.id),['pairCase','scalarCase','loneCase','badPairCase','truncatedCase','mixedCase','scalarDecoderCase','separatorCase']);
+assert.equal(check(jsonContract,jsonRows).obligations,jsonContract.cases.length*jsonContract.grammars.length*jsonContract.targets.length);
 assert.throws(()=>check(jsonContract,[{...jsonRows[0],applicationModuleSha256:{}},...jsonRows.slice(1)]));
 assert.throws(()=>check(jsonContract,[{...jsonRows[0],librarySha256:{}},...jsonRows.slice(1)]));
 
@@ -56,3 +57,16 @@ for(const [file,obligations]of [['PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json',70]
  assert.throws(()=>check(contract,[{...generated[0],runtime:'skipped'},...generated.slice(1)]));
  assert.throws(()=>check(contract,[{...generated[0],refusals:{}},...generated.slice(1)]));
 }
+
+const library=JSON.parse(fs.readFileSync('docs/PSC1_LIBRARY_APPLICATION_CASE_CONTRACT.json','utf8'));
+const libraryRows=library.cases.flatMap(c=>library.grammars.flatMap(s=>library.targets.map(t=>({
+ ...rows[0],id:c.id,syntax:s,target:t,applicationBoundaryChecks:library.applicationBoundaryChecks,
+ applicationModuleSha256:Object.fromEntries(library.requiredModules.map(m=>[m+'.'+s,digest])),
+ independentReferenceSha256:digest,referenceComparison:'native-standard-operations',
+ librarySha256:Object.fromEntries(library.oracleLibraries.map(key=>[key,digest])),
+ refusals:Object.fromEntries(library.requiredRefusals.map(id=>[id,digest]))
+}))));
+assert.equal(check(library,libraryRows).obligations,28);
+for(const mutation of [{applicationModuleSha256:{}},{applicationBoundaryChecks:[]},
+ {independentReferenceSha256:null},{referenceComparison:'same-helper'},{refusals:{}}])
+ assert.throws(()=>check(library,[{...libraryRows[0],...mutation},...libraryRows.slice(1)]));

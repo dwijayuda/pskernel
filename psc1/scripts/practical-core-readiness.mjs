@@ -131,6 +131,12 @@ export function deriveReadiness(contract,{commit,suites={},fullQualification=nul
  // matrix contract. No generic Boolean fixture is accepted as application evidence.
  const applications=contract.applications.map(a=>{
   const core=a.coreExecution&&suiteStates[a.coreExecution.suite];
+  if(a.completeExecutionSuite){
+   const suite=suiteStates[a.completeExecutionSuite];
+   assert.equal(a.id,'multi-module-library');
+   if(suite){assert.equal(suite.caseContract.id,'multi-module-library-application-v1');assert.ok(suite.caseContract.requiredModules?.length>=2);assert.equal(suite.caseContract.independentStandardReference,true);}
+   return {id:a.id,status:suite?.qualified&&full?'qualified':suite?.tested?'tested':suite?.implemented?'implemented':'blocked',reason:suite?.qualified&&full?null:'exact-commit complete library application and full qualification pending',coreScope:a.coreExecution.scope};
+  }
   const bound=applicationContract?.applications.includes(a.id)||['cli','json-files'].includes(a.id)&&contract.actualApplications;
   return {id:a.id,status:bound?(actualApplications?(allApplicationTargets&&full?'qualified':'tested'):applicationImplemented?'implemented':'blocked'):'blocked',reason:bound&&actualApplications?null:a.coreExecution?'typed IO and remaining full application criteria pending':'actual application acceptance runner pending',
    coreStatus:core?.qualified&&full?'qualified-subset':core?.tested?'tested':core?.implemented?'implemented':'blocked',

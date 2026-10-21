@@ -28,6 +28,7 @@ export function checkLanguageBackendParity(contract,records,{targets=contract.ta
    assert.deepEqual(Object.keys(row.applicationModuleSha256||{}).sort(),contract.requiredModules.map(m=>m+'.'+row.syntax).sort());
    for(const digest of Object.values(row.applicationModuleSha256))assert.match(digest,/^[a-f0-9]{64}$/);
   }
+  if(contract.applicationBoundaryChecks)assert.deepEqual(row.applicationBoundaryChecks,contract.applicationBoundaryChecks);
   if(contract.independentStandardReference){
    assert.match(row.independentReferenceSha256||'',/^[a-f0-9]{64}$/,'missing independent standard reference');
    assert.equal(row.referenceComparison,'native-standard-operations');

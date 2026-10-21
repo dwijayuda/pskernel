@@ -33,7 +33,7 @@ for(const [data,selected] of [[practicalApplications,targets],[minimumApplicatio
 }
 
 const extraProtocols={};
-for(const [id,file]of [['checked-order','PSC1_ORDER_CASE_CONTRACT.json'],['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
+for(const [id,file]of [['library-application','PSC1_LIBRARY_APPLICATION_CASE_CONTRACT.json'],['checked-order','PSC1_ORDER_CASE_CONTRACT.json'],['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
  ['typed-io-protocol','PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json'],
  ['typed-io-sequencing','PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json']]){
  const contract=read('docs/'+file),receipt=read('dist/scoped-correctness/'+id+'/results.json'),

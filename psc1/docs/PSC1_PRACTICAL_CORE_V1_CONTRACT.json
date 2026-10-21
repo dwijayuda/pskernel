@@ -74,6 +74,12 @@
       "receipt": "dist/scoped-correctness/checked-order/results.json",
       "fixture": "test/OrderFixtures",
       "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "library-application": {
+      "contract": "docs/PSC1_LIBRARY_APPLICATION_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/library-application/results.json",
+      "fixture": "test/LibraryApplication",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
     }
   },
   "families": [
@@ -409,7 +415,12 @@
       "id": "multi-module-library",
       "acceptance": [
         "Resolve multiple authored modules; preserve private imports and entry exports; persistent collection transform; duplicate/missing module refusal."
-      ]
+      ],
+      "coreExecution": {
+        "suite": "library-application",
+        "scope": "Complete finite multi-module library application, persistent collections, private imports and entry exports, duplicate/missing refusals; Bool observation ABI only."
+      },
+      "completeExecutionSuite": "library-application"
     },
     {
       "id": "compiler-like",

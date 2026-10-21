@@ -88,3 +88,10 @@ authored source grammars and twenty-one actual process-level CLI/JSON scenarios 
 target. Its exact-commit matrix, minimum Python and full gates determine the two
 application rows. Library and compiler-like/performance acceptance remain next.
 No milestone here reopens G2/G3 or replaces the finite release contract.
+
+
+PracticalLibrary now supplies an executable two-module persistent collection
+application in both grammars, with native standard reference, import/export
+boundaries and missing/duplicate refusal. Readiness requires the full exact-commit
+two-case/all-target receipt, minimum Python and final qualification. Compiler-like
+application diagnostics and measured 100000-item input remain the next app blocker.

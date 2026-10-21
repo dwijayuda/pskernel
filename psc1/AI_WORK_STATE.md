@@ -129,3 +129,21 @@ resource and rejection policies are retained. Both authored core fixtures and
 actual CLI/file cases require refusal and preservation of the old output.
 The latest source requires fresh Linux qualification; queued earlier runs are
 not success evidence. No local checkout, build or test is used.
+
+## Active library application continuation
+
+Source d03c1d70fad1af0c0bcc2829071d99ed6da68026 run 39639135736 failed static
+qualification because the JSON parity contract test still expected the previous
+98 rows after the strict separator case expanded the matrix to 112. It now
+derives the count from the explicit retained eight-case list and both/seven
+matrix. No negative test is removed. Earlier queued queries were stale; use
+fresh attempts/jobs endpoints and terminal logs before reporting CI state.
+
+The next coherent source commit adds the PracticalLibrary Input/Transform modules
+in both grammars, persistent alias/set/map/fold and optional large-index cases,
+independent native Array reference, missing/duplicate source refusal and entry-only
+exports across the seven consumers. Exact authored module/reference identities
+and boundary checks are mandatory in parity receipts. Focused, full and minimum
+Python runners are registered. This remains implemented, not tested/qualified,
+until a successful exact-commit Linux run. Compiler-like diagnostics and measured
+100000-item corpus remain next. G2/G3 remain deferred.

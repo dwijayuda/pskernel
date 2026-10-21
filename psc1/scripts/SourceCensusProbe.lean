@@ -180,16 +180,14 @@ def psClosurePrepare (assurance : String) (state : PsCompilerPreparationState) :
     match psCompilerPreparationFinishWithOutput state with
     | .error error => throw (psClosureCompilerDetail error)
     | .ok value =>
-        pure { logical := value.prepared, admissions := value.admissions, ordinary := none,
-          sourceCoreDeclarations := source.declarations.length, partialNames := [] }
+        pure (PsClosurePreparedBatch.mk value.prepared value.admissions none source.declarations.length [])
   else if assurance == "ordinary-checked" then
     let ordinary <- psCompilerPrepareOrdinary source
     let admissions <- match psCompilerAdmissionsFromPrepared ordinary.logical with
       | .error error => throw (psClosureCompilerDetail error)
       | .ok value => pure value
-    pure { logical := ordinary.logical, admissions := admissions, ordinary := some ordinary,
-      sourceCoreDeclarations := ordinary.source.declarations.length,
-      partialNames := ordinary.partialNames.map psNameToString }
+    pure (PsClosurePreparedBatch.mk ordinary.logical admissions (some ordinary)
+      ordinary.source.declarations.length (ordinary.partialNames.map psNameToString))
   else throw "PSC1_CLOSURE_UNKNOWN_ASSURANCE"
 
 -- Qualification consumes the exact supplied parser inputs, including retained PS.

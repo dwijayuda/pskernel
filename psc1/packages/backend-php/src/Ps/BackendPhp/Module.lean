@@ -1,5 +1,6 @@
 import Ps.CompilerIr.Validate
 import Ps.BackendPhp.Runtime
+import Ps.BackendCommon.Plan
 
 structure PsPhpPrintedModule where
   source : String
@@ -500,7 +501,7 @@ private def phpPublicScalar : PsVerifiedIrType → Bool
   | _ => false
 
 def psPhpEmitValidatedModule
-    (irModule : PsValidatedIrModule) (publicNames : List String) :
+    (irModule : PsValidatedIrModule) (publicNames : List String) (ioAbi : Bool := false) :
     Except String PsPhpPrintedModule := do
   let _ ← (psStrictValidateModule irModule.raw).mapError (fun _ => "PSC1_PHP_IR_VALIDATION_FAILED")
   let raw := irModule.raw
@@ -526,7 +527,7 @@ def psPhpEmitValidatedModule
     match raw.declarations.find? (fun d => d.name == name) with
     | none => throw ("PSC1_PHP_UNKNOWN_PUBLIC_DECLARATION: " ++ name)
     | some d =>
-        if !phpPublicScalar d.resultType || !d.parameters.all (fun p => phpPublicScalar p.type) then
+        if !phpPublicScalar d.resultType || !d.parameters.all (fun p => phpPublicScalar p.type || (ioAbi && psBackendIoDispatcherType p.type)) then
           throw ("PSC1_PHP_PUBLIC_ABI_UNSUPPORTED: " ++ name)
   let valueNames := (raw.declarations.filter (fun d => d.parameters.isEmpty)).map (fun d => d.name)
   let requested := raw.declarations.flatMap fun declaration =>

@@ -6,6 +6,7 @@ import Ps.Host.ScriptBackend
 def psCliUsage : String :=
   "ProofScript PSC1 checked native compiler (Lean 4.35.0)\n" ++
   "usage:\n" ++
+  "  Add --abi io-dispatcher for the explicit String dispatcher input ABI.\n" ++
   "  Add --assurance ordinary for checked partial execution; --assurance verified is unavailable and rejects.\n" ++
   "  psc1 check <input.lean|input.ps>\n" ++
   "  wasm-component: --export <name> or --exports <comma-separated-names>\n" ++
@@ -126,11 +127,48 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
   | ["wat", binaryPath, "--out", watPath] => psHostWasmBinaryToWat binaryPath watPath
   | _ => throw (IO.userError psCliUsage)
 
+
+private def psCliAbiArgs : List String → Option String → List String →
+    Except String (Bool × List String)
+  | [], abi, reversed => .ok (abi == some "io-dispatcher", reversed.reverse)
+  | "--abi" :: value :: rest, none, reversed =>
+      if value == "scalar" || value == "io-dispatcher" then
+        psCliAbiArgs rest (some value) reversed
+      else .error ("PSC1_ABI_UNKNOWN: " ++ value)
+  | "--abi" :: _, some _, _ => .error "PSC1_ABI_DUPLICATE"
+  | ["--abi"], none, _ => .error "PSC1_ABI_VALUE_REQUIRED"
+  | argument :: rest, abi, reversed => psCliAbiArgs rest abi (argument :: reversed)
+
+private def psCliIoExecution (args : List String) (assurance : PsHostAssurance) : IO Unit := do
+  if assurance == .verified then throw (IO.userError "PSC1_VERIFIED_EXECUTION_UNAVAILABLE")
+  match args with
+  | ["build", inputPath, "--target", target, "--out", outputPath] =>
+      let some kind := psBackendTargetFromName target
+        | throw (IO.userError "PSC1_TARGET_UNKNOWN")
+      if kind == .wasmCore || kind == .wasmComponent then
+        throw (IO.userError "PSC1_IO_DISPATCHER_ABI_TARGET_UNSUPPORTED")
+      let session ← psHostDirectPrepareIoFor inputPath assurance
+      match psHostDirectCheckPublicApi kind session with
+      | .error reason => throw (IO.userError reason)
+      | .ok _ => pure ()
+      match kind with
+      | .js => psHostDirectEmitJavaScript session outputPath
+      | .ts => psHostDirectEmitTypeScript session outputPath
+      | .rust => psHostDirectEmitRust session outputPath
+      | .python => psHostDirectEmitPython session outputPath
+      | .php => psHostDirectEmitPhp session outputPath
+      | _ => throw (IO.userError "PSC1_IO_DISPATCHER_ABI_TARGET_UNSUPPORTED")
+  | _ => throw (IO.userError "PSC1_IO_ABI_REQUIRES_EXPLICIT_BUILD_TARGET")
+
 def main (args : List String) : IO Unit := do
   if Lean.versionString != PsKernelLean.providerVersion || Lean.githash != PsKernelLean.providerCommit then
     throw (IO.userError "PSC1_NATIVE_LEAN_PIN_MISMATCH: compiler runtime does not match the native source pin")
   let (assurance, command) ← match psCliAssuranceArgs args none [] with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
-  if assurance == .checked then psCliCheckedExecution command
+  let (ioAbi, command) ← match psCliAbiArgs command none [] with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  if ioAbi then psCliIoExecution command assurance
+  else if assurance == .checked then psCliCheckedExecution command
   else psCliExecution assurance command

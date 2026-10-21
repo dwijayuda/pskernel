@@ -7,6 +7,23 @@ Base #171 remains1fad9ed53cda9b23ac30be9cea85e7857437564e.
 Preserve history with fresh HEAD reads,expected-HEAD updates and force=false.
 No merge,registry publication or branch-protection change is authorized here.
 
+## Active unqualified typed IO continuation
+
+Source sequencing now uses the checked Io alias of CompilerM with an explicit
+String dispatcher, authored in both grammars. Commit d16e1d1bc3dd17ba09d428bd4844dbc0c46e990c
+passed native, compiler closure and G1 jobs, but run39608411456 failed focused
+erasure before emission. Preserve that failure: parameterized type-valued aliases
+were incorrectly treated as runtime declarations. The next patch classifies the
+whole checked type telescope before erasure; no kernel or IR check is bypassed.
+
+The opt-in --abi io-dispatcher profile accepts only a String-to-String callback
+input with scalar remaining inputs/results on JS/TS/Rust/Python/PHP. Default
+public ABI restrictions remain. Wasm refuses explicitly until marshaling exists.
+A real source application exercises bind, loops, mutation, typed recovery and
+host trap separation. New execution evidence is pending Linux Actions; do not
+promote this work to qualified from source inspection. Standalone adapters and
+Wasm String ABI remain the next implementation tasks.
+
 ## Latest qualified implementation
 
 Implementationf7993e3d51917e2ec18f3c758a61468f06caaeb2 qualifies at tested merge

@@ -178,3 +178,51 @@ def psBackendClosedPlan (source : PsValidatedIrModule)
   match psBackendClosedPlanDetailed source publicNames with
   | Except.error diagnostic => Except.error diagnostic.code
   | Except.ok result => Except.ok result
+
+-- Opt-in IO dispatcher ABI: only String -> String inputs, scalar remaining
+-- inputs/results, and at least one dispatcher. Default target policy is unchanged.
+def psBackendTypeIsString (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.string => true
+      | _ => false
+  | _ => false
+
+def psBackendIoDispatcherType (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.function parameters result =>
+      match parameters with
+      | List.nil => false
+      | List.cons first rest =>
+          match rest with
+          | List.nil => if psBackendTypeIsString first then psBackendTypeIsString result else false
+          | List.cons _ _ => false
+  | _ => false
+
+def psBackendIoScalar (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.primitive primitive => psBackendActivePrimitive primitive
+  | _ => false
+
+def psBackendCheckIoPublicApi
+    (target : PsBackendTarget) (source : PsValidatedIrModule) (publicNames : List String) :
+    Except String Unit := do
+  if psBackendTargetEq target PsBackendTarget.wasmCore ||
+      psBackendTargetEq target PsBackendTarget.wasmComponent then
+    throw "PSC1_IO_DISPATCHER_ABI_TARGET_UNSUPPORTED"
+  if !(psBackendPublicNamesUniqueWorker publicNames []) then
+    throw "PSC1_PUBLIC_DECLARATION_DUPLICATE"
+  let mut hasDispatcher := false
+  for name in publicNames do
+    match psStrictFindDeclaration source.raw.declarations name with
+    | Option.none => throw "PSC1_IO_DISPATCHER_DECLARATION_MISSING"
+    | Option.some declaration =>
+        if !(psListIsEmpty declaration.typeParameters) || !(psBackendIoScalar declaration.resultType) then
+          throw "PSC1_IO_DISPATCHER_SIGNATURE_UNSUPPORTED"
+        for parameter in declaration.parameters do
+          if psBackendIoDispatcherType parameter.type then
+            hasDispatcher := true
+          else if !(psBackendIoScalar parameter.type) then
+            throw "PSC1_IO_DISPATCHER_SIGNATURE_UNSUPPORTED"
+  if hasDispatcher then pure () else throw "PSC1_IO_DISPATCHER_PARAMETER_REQUIRED"

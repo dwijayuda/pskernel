@@ -38,6 +38,7 @@ structure PsHostDirectPrepared where
   authoredTypeNames : List String
   assurance : PsHostAssurance
   partialNames : List PsName
+  ioDispatcherAbi : Bool := false
 
 private def checkedInput (inputPath : String) :
     IO (PsHostCapturedProject × PsCompilerAdmissionReadyModule × String) := do
@@ -154,6 +155,15 @@ def psHostDirectPrepareFor (inputPath : String) (assurance : PsHostAssurance) :
     partialNames := partialNames
   }
 
+def psHostDirectPrepareIoFor
+    (inputPath : String) (assurance : PsHostAssurance) : IO PsHostDirectPrepared := do
+  return { (← psHostDirectPrepareFor inputPath assurance) with ioDispatcherAbi := true }
+
+def psHostDirectCheckPublicApi (target : PsBackendTarget) (session : PsHostDirectPrepared) :
+    Except String Unit :=
+  if session.ioDispatcherAbi then psBackendCheckIoPublicApi target session.validated session.publicNames
+  else psBackendCheckPublicApi target session.validated session.publicNames
+
 def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared :=
   psHostDirectPrepareFor inputPath .checked
 
@@ -195,14 +205,15 @@ def psHostDirectType (value : PsVerifiedIrType) : Except String String :=
     | .error _ => .error "PSC1_PUBLIC_TYPE_UNSUPPORTED"
   | _ => .error "PSC1_PUBLIC_NONSCALAR_SIGNATURE_UNQUALIFIED"
 
-def psHostDirectParameter (value : PsVerifiedIrParameter) : Except String String := do
-  let type ← psHostDirectType value.type
+def psHostDirectParameter (value : PsVerifiedIrParameter) (ioAbi : Bool := false) : Except String String := do
+  let type ← if ioAbi && psBackendIoDispatcherType value.type then pure "(request: string) => string"
+    else psHostDirectType value.type
   return value.name ++ ": " ++ type
 
-def psHostDirectDeclaration (value : PsVerifiedIrDeclaration) : Except String String := do
+def psHostDirectDeclaration (value : PsVerifiedIrDeclaration) (ioAbi : Bool := false) : Except String String := do
   if !value.typeParameters.isEmpty then throw "PSC1_PUBLIC_GENERIC_SIGNATURE_UNQUALIFIED"
   let outputType ← psHostDirectType value.resultType
-  let args ← value.parameters.mapM psHostDirectParameter
+  let args ← value.parameters.mapM (fun parameter => psHostDirectParameter parameter ioAbi)
   if value.parameters.isEmpty then
     return "export declare const " ++ value.name ++ ": " ++ outputType ++ ";"
   else
@@ -213,11 +224,15 @@ def psHostDirectDeclaration (value : PsVerifiedIrDeclaration) : Except String St
 Internal generic dependencies may specialize without exporting unqualified public
 signatures, or imposing that ECMAScript ABI restriction on other targets. -/
 private def ecmaPlan (session : PsHostDirectPrepared) : IO PsValidatedIrModule := do
+  if session.ioDispatcherAbi then
+    match psBackendCheckIoPublicApi .js session.validated session.publicNames with
+    | .error reason => throw (IO.userError reason)
+    | .ok _ => pure ()
   for declaration in session.validated.raw.declarations do
     if session.publicNames.contains declaration.name then
       if !psJsIdentifierSupported declaration.name then
         throw (IO.userError ("PSC1_PUBLIC_IDENTIFIER_UNSUPPORTED: " ++ declaration.name))
-      match psHostDirectDeclaration declaration with
+      match psHostDirectDeclaration declaration session.ioDispatcherAbi with
       | .ok _ => pure ()
       | .error reason => throw (IO.userError (reason ++ ": declaration=" ++ declaration.name))
   match psBackendClosedPlan session.validated session.publicNames with
@@ -250,13 +265,15 @@ def psHostDirectWriteSelectedProvenance
     ",\"sources\":" ++ psJsonArray (session.captured.sources.map (sourceJson session)) ++ "}\n"
   IO.FS.writeFile (stage / "psc1-input.json") metadata
   IO.FS.writeFile (stage / "admissions.json") session.admissions
+  if session.ioDispatcherAbi then
+    IO.FS.writeFile (stage / "public-abi.json") "{\"schema\":\"psc1-public-abi/1\",\"profile\":\"io-dispatcher\",\"dispatcher\":\"String->String\"}\n"
 
 def psHostDirectWriteProvenance (session : PsHostDirectPrepared) (stage : System.FilePath) : IO Unit :=
   psHostDirectWriteSelectedProvenance session stage session.publicNames
 
 private def declarationSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModule) : IO String := do
   let selected := plan.raw.declarations.filter (fun declaration => session.publicNames.contains declaration.name)
-  match selected.mapM psHostDirectDeclaration with
+  match selected.mapM (fun declaration => psHostDirectDeclaration declaration session.ioDispatcherAbi) with
   | .error reason => throw (IO.userError reason)
   | .ok declarations => return "// Public API from the same revalidated specialized IR as the implementation.\n" ++
       String.intercalate "\n" declarations ++ "\n" ++
@@ -400,7 +417,7 @@ private def publicTypeClosure
 
 def psHostDirectEmitRust (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".rs" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .rs")
-  match psBackendCheckPublicApi .rust session.validated session.publicNames with
+  match psHostDirectCheckPublicApi .rust session with
   | .ok _ => pure ()
   | .error reason => throw (IO.userError reason)
   let signatures := session.validated.raw.declarations.filter (fun d => session.publicNames.contains d.name)

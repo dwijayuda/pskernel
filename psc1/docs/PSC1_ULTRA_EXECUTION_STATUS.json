@@ -423,7 +423,7 @@
     "parentScopedRunId": 39508739868,
     "parentNativeRunId": 39508739941,
     "parentTestedMergeCommit": "16581a45341e73b716865ff6c4446f4ca2c07728",
-    "status": "loop-source-focused-accepted-ordinary-and-declaration-context-pending",
+    "status": "semantic-source-scoped-qualified-whole-closure-admission-IR-pending",
     "continuousUserAuthorization": true,
     "smallMilestoneHandoffs": false,
     "pullRequest": 172,
@@ -508,10 +508,7 @@
         }
       }
     },
-    "pendingModules": [
-      "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
-      "psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean"
-    ],
+    "pendingModules": [],
     "latestFocused": {
       "head": "6859fe2d5bfe03ce9fe40a6ed2600837922c63d4",
       "runId": 39518232640,
@@ -548,6 +545,92 @@
       "stage": "native-build",
       "detail": "Term record field separators",
       "correction": "remove misplaced field semicolons; keep all gates"
+    },
+    "semanticSourceCheckpoint": {
+      "head": "50c4fa029677643cc34038513f32a117755116e1",
+      "testedMergeCommit": "43f9becf9d4175aaf4231c8f19a5ca43d9b806a9",
+      "scopedRunId": 39518543422,
+      "nativeRunId": 39518543586,
+      "scopedSteps": 37,
+      "receipt": "PSC1_SEMANTIC_SOURCE_QUALIFICATION_2026-10-21.json",
+      "scopedArtifact": {
+        "id": 12310957077,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMxMDk1NzA3Nw==",
+        "name": "psc1-scoped-correctness-43f9becf9d4175aaf4231c8f19a5ca43d9b806a9",
+        "size_in_bytes": 45208768,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12310957077",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12310957077/zip",
+        "expired": false,
+        "digest": "sha256:ab86b1dcba2da911ac57755b67b5bba292eb5ac250ec8fb1b89bde2b539dd0a0",
+        "created_at": "2026-10-21T00:13:54Z",
+        "updated_at": "2026-10-21T00:13:54Z",
+        "expires_at": "2026-11-04T00:13:48Z",
+        "workflow_run": {
+          "id": 39518543422,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "50c4fa029677643cc34038513f32a117755116e1"
+        }
+      },
+      "nativeArtifact": {
+        "id": 12310695220,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMxMDY5NTIyMA==",
+        "name": "psc1-architecture-native-43f9becf9d4175aaf4231c8f19a5ca43d9b806a9",
+        "size_in_bytes": 236287,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12310695220",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12310695220/zip",
+        "expired": false,
+        "digest": "sha256:3874a8252ef7d9e77abe67d38966cd0b39f3d9c3dde563440f60d5903f0fe98d",
+        "created_at": "2026-10-21T00:02:04Z",
+        "updated_at": "2026-10-21T00:02:04Z",
+        "expires_at": "2026-11-04T00:02:03Z",
+        "workflow_run": {
+          "id": 39518543586,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "50c4fa029677643cc34038513f32a117755116e1"
+        }
+      },
+      "counts": {
+        "semantic": [
+          67,
+          67,
+          67
+        ],
+        "directjs": [
+          79,
+          75,
+          73
+        ],
+        "rust": [
+          83,
+          76,
+          72
+        ]
+      },
+      "strictSemanticAccepted": true
+    },
+    "wholeClosureQualification": {
+      "status": "new-native-probe-driver-workflow-pending",
+      "phase": "semantic-compiler",
+      "workflow": ".github/workflows/psc1-compiler-closure.yml",
+      "separateFreshGrammarStates": true,
+      "exactCanonicalAdmissionBytes": true,
+      "actualCoreOriginCoverage": true,
+      "canonicalAdmissionBytesParity": "pending",
+      "independentAdmission": "pending",
+      "strictIR": "pending",
+      "generatedExecution": "not-run",
+      "fixedPoint": "not-run"
+    },
+    "nextBackendRefusal": {
+      "module": "Ps.CompilerIr.Specialize",
+      "stage": "parse",
+      "line": 51,
+      "column": 15,
+      "detail": "expected ':', got infix product"
     }
   }
 }

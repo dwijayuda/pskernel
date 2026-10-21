@@ -8,6 +8,55 @@ This commit adds host-only diagnostic execution. Its native build, controls and
 original-input execution are **NOT RUN** at creation. No production kernel source,
 fuel, logical dependency or published resource policy changes.
 
+## 2026-10-21 14:51 UTC — authenticated native V1 Church replay completed
+
+Harness source `44ca03e9d88f7971db9cc8c8c45af916e1be4ab6` has terminal
+**PASS diagnostic collection** in
+[run 39620233494 / job 119291437634](https://github.com/dwijayuda/pskernel/actions/runs/39620233494/job/119291437634).
+The independently built kernel source is exactly
+`369bee5801bd5e4476837684fad3f7e1ca8c422c`; this does not qualify the harness
+HEAD as a new production kernel. [The permanent structured receipt](evidence/2026-10-21-44ca03e-native-v1.json)
+records the complete native protocol, toolchain/source/input digests, controls
+and host measurements.
+
+The four original Church requests (one ordinary inductive, two definitions,
+one theorem) contain 197 input DAG nodes. Native V1 admits the first three and
+returns the actual `resourceExhausted / fuel / kernel reduction budget exhausted`
+result at declaration index 3 with fuel **4096**, `accepted: null` and
+`complete: false`. Official Lean accepts this body. The generated result's
+fuel exhaustion is therefore independently reproduced by original native V1
+at this source; it is not an acceptance, rejection or passing Arena comparison.
+Exported metadata comparison was not run, and `arenaMatchClaimed: false` is
+explicit. The authenticated original body SHA256 remains
+`85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47`;
+the historical metadata header adaptation is unchanged.
+
+The detached native process executes with empty PATH, 60-second wall bound and
+an isolated cgroup with `memory.max=2147483648`, swap disabled and no OOM event.
+Measured execution including launch was 0.689668 seconds; native compilation
+was 23.733229 seconds. Sampled process VmHWM is a **lower bound** of 76,443,648
+bytes. Cgroup-charged memory peaked at 15,990,784 bytes; that accounting is not
+process RSS and may differ for shared/file-backed pages. Cgroup cleanup passed.
+All 138 original transport controls and three actual native acceptance, invalid
+definition and zero-fuel controls passed. No exported recursor metadata/body
+was installed, and no official Lean decision was delegated from the replay.
+
+[Artifact 12354467829](https://github.com/dwijayuda/pskernel/actions/runs/39620233494/artifacts/12354467829)
+is 33,615,147 bytes, ZIP SHA256
+`3ec92270d7ad5aeedff681928f63037d337aa5f3f5b39c3eacf9b2a4e5e1358e`.
+The 119,652,432-byte native executable SHA256 is
+`d0d67eeded00ccd2beb3a09f27a503424c652917a51191d5c012342f3facc9a1`.
+The exact generated input and temporary Lake configuration digests are in the
+receipt. This documentation-only successor preserves the tested source identity.
+
+Next: retain the Church failure as an explicit compatibility/resource limit;
+use the authenticated full-operation profiles to address the remaining 17
+host timeouts. The earlier observer trace attributes the selected exhaustion
+to an actual descending application/DefEq path, not an unchanged-root loop.
+No fuel, host limit or outcome classification is changed. Gate B and Gate C
+remain open; the scoped provider qualification belongs to its separate exact
+integration revision.
+
 ## Exact focused resource receipt
 
 [Run 39616011720/job119277124203](https://github.com/dwijayuda/pskernel/actions/runs/39616011720/job/119277124203)

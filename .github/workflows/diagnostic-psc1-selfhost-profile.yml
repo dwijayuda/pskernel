@@ -24,8 +24,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: 39861084058
-          name: psc1-manual-selfhost-7de601f57ccc9e5dca2ab717fc726efab02acd8e-attempt-1
+          run-id: 39864113546
+          name: psc1-manual-selfhost-573bf48533cb196450a8d1df4f454de20c47b08f-attempt-1
           path: retained
       - name: Inspect immutable profile summary and caller costs
         run: |
@@ -36,9 +36,9 @@ jobs:
           import {spawnSync} from 'node:child_process';
           const root='retained/generated-compiler/';
           const receipt=JSON.parse(fs.readFileSync(root+'selfhost-failure-cpu-profile/receipt.json','utf8'));
-          assert.equal(receipt.testedCommit,'7de601f57ccc9e5dca2ab717fc726efab02acd8e');
+          assert.equal(receipt.testedCommit,'573bf48533cb196450a8d1df4f454de20c47b08f');
           assert.equal(receipt.requestId,'G2-self');
-          assert.equal(receipt.requestSha256,'2d2ba2eb8e684cb745bcac2f9f96c07d565afec51b754c19e810917d68c76385');
+          assert.equal(receipt.requestSha256,'e60717a16128dffcafc84499939aa58c5f58f22103be7a3233166cb81ff52f36');
           const source=fs.readFileSync(root+'G1.mjs');
           assert.equal(crypto.createHash('sha256').update(source).digest('hex'),receipt.serviceSha256);
           const text=fs.readFileSync(root+'selfhost-failure-cpu-profile/profile-0.txt','utf8');

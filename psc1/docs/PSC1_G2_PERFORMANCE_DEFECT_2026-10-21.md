@@ -1,18 +1,28 @@
 # Resumed G2 performance defect
 
-Status: open after qualified Practical Core v1 feature freeze.
-Latest actual39861084058/job120111640762 at7de601f5 passes ten G1 cases;
-G2 times out240151ms before admission/publication; G3 not run. Exact replay
-240306ms and artifact12462063500 preserve all source/request/profile bytes.
-Read-only39863014327 splits the same sample into timestamp windows. See
-PSC1_G2_CORE_VISITOR_FAILURE_QUALIFICATION_2026-10-23.json.
+Status: OPEN; manual qualification resumed after frozen Practical Core v1.
+Latest actual manual run 39864113546/job 120121869892 at source 573bf485 passes
+the frozen ten-case G1 corpus; G2 times out at 240197 ms before admission or
+publication. G3 is not run. Exact replay 240346 ms, artifact 12462609800 and
+read-only inspection 39865901653 preserve all source/request/profile identities.
+See PSC1_G2_STABLE_CAPTURE_FAILURE_QUALIFICATION_2026-10-23.json.
 
-All-input native visitor/source equivalence proofs pass atba027ada. They do
-not establish generated fixed-point completion. Stable immutable captures are
-now conservatively optimized, retaining every shadow/effect/fuel refusal;
-new actual baseline/transformed execution and complete/manual CI are required.
-Earlier retries39848619349,39855739415 and39858945154 remain in their dated
-receipts. No heap/stack/deadline/checker/strict-IR/manifest boundary is raised.
+Diagnostic copy only: run 39866505167 enters 29/86 modules by 240 seconds,
+last entering CheckedAdmissions declaration index 59 with observed RSS
+2381944 KiB at that point. Logging affects timing; entries are not completion.
+No diagnostic response is admitted, adopted or published.
+
+Final compiler source 7732e978 narrows capture elision to initialized locals and
+literals, preserving nonlocal read timing. All-input visitor/source proofs,
+old and new runtime/order/divergence/refusal tests, all-seven Practical Core,
+complete closures, G1, minimum-Python/package and aggregate pass in fresh run
+39867567126 (37/37 criteria; all 47 full-job steps). This is normal compiler
+qualification, not G2/G3. G2 has not been executed after that final guard change.
+
+Next: address measured general frontend/elaboration throughput and lifetime;
+verify normal large-source improvement before another expensive manual attempt.
+No heap/stack/deadline/fuel/checker/strict-IR/manifest boundary is raised.
+All earlier retries and their dated receipts remain preserved.
 
 ## Preserved earlier evidence
 

@@ -1,0 +1,1071 @@
+{
+  "schema": "psc1-stable-capture-g2-failure/1",
+  "sourceCommit": "573bf48533cb196450a8d1df4f454de20c47b08f",
+  "runId": 39864113546,
+  "jobId": 120121869892,
+  "status": "failed",
+  "diagnostic": {
+    "status": "failed",
+    "generatedCompilerExecution": "passed-G1-selected-corpus",
+    "selfCompilation": "attempting-G2",
+    "fixedPoint": "not-run",
+    "failure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler:ETIMEDOUT",
+    "service": {
+      "generation": 1,
+      "sha256": "e3fed5ddbc2a728e3ffc75ce02927f5b3a3304da3b5ee2c8439ef2e9772d52ad",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "11ab288081a853452db07b6abe288081c84a6f364adbe92c2b8438ac1a553f9f",
+      "sourceModules": 86,
+      "candidateAdmission": "06ecb00b81ad19d43328fbf73ad82f862facb5a5a326747105932cd4b80342e1",
+      "canonicalOriginalIr": "b297e0f11c1ca2decfca6d43e8e82567ee901130bd98f487b7b18b204883733b",
+      "canonicalSpecializedIr": "5224926d70d146cb03aa63d30dcee4708757992c4b5c05c6f1e1f6e506fdc8a4"
+    },
+    "cases": 10,
+    "completedCorpusGenerations": [
+      1
+    ],
+    "generationAttempts": [
+      {
+        "generation": 2,
+        "producer": "e3fed5ddbc2a728e3ffc75ce02927f5b3a3304da3b5ee2c8439ef2e9772d52ad",
+        "sourceClosureDigest": "11ab288081a853452db07b6abe288081c84a6f364adbe92c2b8438ac1a553f9f",
+        "requestSha256": "e60717a16128dffcafc84499939aa58c5f58f22103be7a3233166cb81ff52f36",
+        "status": "failed-before-publication",
+        "events": [
+          {
+            "role": "generated-compiler",
+            "executable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+            "args": [
+              "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-compiler-runner.mjs",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs",
+              "e3fed5ddbc2a728e3ffc75ce02927f5b3a3304da3b5ee2c8439ef2e9772d52ad",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-mGymLP/request.json",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-mGymLP/candidate.json"
+            ],
+            "status": null,
+            "signal": "SIGTERM",
+            "elapsedMs": 240197,
+            "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT"
+          }
+        ],
+        "failureDirectory": "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/failed-105ea3a6-3636-46a8-bd61-bf7147fbf950"
+      }
+    ]
+  },
+  "profile": {
+    "schema": "psc1-selfhost-failure-cpu-profile/1",
+    "testedCommit": "573bf48533cb196450a8d1df4f454de20c47b08f",
+    "branchHeadCommit": "573bf48533cb196450a8d1df4f454de20c47b08f",
+    "requestId": "G2-self",
+    "serviceSha256": "e3fed5ddbc2a728e3ffc75ce02927f5b3a3304da3b5ee2c8439ef2e9772d52ad",
+    "requestSha256": "e60717a16128dffcafc84499939aa58c5f58f22103be7a3233166cb81ff52f36",
+    "runnerSha256": "bbcda77cb0942484146fc23bd299ac821bfb13e9780cfdace5742d8c6725187e",
+    "nodeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+    "status": null,
+    "signal": "SIGTERM",
+    "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT",
+    "elapsedMs": 240346,
+    "timeoutMs": 240000,
+    "originalFailure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler:ETIMEDOUT",
+    "logs": [
+      {
+        "name": "isolate-0x16920000-4211-v8.log",
+        "bytes": 49211026
+      }
+    ],
+    "nativeCompilerDelegation": false,
+    "admission": "not-run",
+    "publication": "not-run",
+    "G2Qualification": false,
+    "scope": "Exact failed generated G2/G3 request; no native frontend/emitter, response adoption, admission or publication; original qualification remains failed."
+  },
+  "artifact": {
+    "id": 12462609800,
+    "name": "psc1-manual-selfhost-573bf48533cb196450a8d1df4f454de20c47b08f-attempt-1",
+    "size_in_bytes": 11815084,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12462609800",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12462609800/zip",
+    "expired": false,
+    "created_at": "2026-10-22T22:32:26Z",
+    "expires_at": "2027-01-20T22:19:36Z",
+    "updated_at": "2026-10-22T22:32:26Z",
+    "digest": "sha256:7960b253039c3fe80ac52901f6b45fd0dd84b2f24bb09d216b2a7da7170ef1d0",
+    "workflow_run": {
+      "id": 39864113546,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "fix/psc1-closure-normalization-20261021",
+      "head_sha": "573bf48533cb196450a8d1df4f454de20c47b08f"
+    }
+  },
+  "reader": {
+    "commit": "659e518d31cfdba924a06bafb58715933590d024",
+    "runId": 39865901653,
+    "jobId": 120127896016
+  },
+  "workerRuntime": {
+    "schema": "psc1-typed-worker-fusion-runtime/1",
+    "commit": "573bf48533cb196450a8d1df4f454de20c47b08f",
+    "processTimeoutMs": 240000,
+    "divergenceDeadlineMs": 2000,
+    "records": [
+      {
+        "label": "baseline",
+        "elapsedMs": 1772,
+        "moduleSha256": "54f3c960c723ec1416cd00133d8cd18805f6bbe57f16a138b1f1e1447e822017",
+        "early": "0",
+        "full": "0",
+        "escaped": "3",
+        "captured": "0",
+        "stableAlias": "0",
+        "literalAlias": "0",
+        "captureSelf": "0",
+        "captureLambda": "0",
+        "captureMatch": "0",
+        "shadow": "9",
+        "ordered": "3",
+        "arithmetic": "100007",
+        "continuation": "100010",
+        "evaluated": "100007",
+        "marks": [
+          "2",
+          "5"
+        ],
+        "earlyMs": 0.23070599999999786,
+        "maxRssKiB": 122072
+      },
+      {
+        "label": "fused",
+        "elapsedMs": 1022,
+        "moduleSha256": "99f6a71db21b4b48c43c156909f859ee1d82935fde0bb7370252d91526d327f5",
+        "early": "0",
+        "full": "0",
+        "escaped": "3",
+        "captured": "0",
+        "stableAlias": "0",
+        "literalAlias": "0",
+        "captureSelf": "0",
+        "captureLambda": "0",
+        "captureMatch": "0",
+        "shadow": "9",
+        "ordered": "3",
+        "arithmetic": "100007",
+        "continuation": "100010",
+        "evaluated": "100007",
+        "marks": [
+          "2",
+          "5"
+        ],
+        "earlyMs": 0.15177399999999963,
+        "maxRssKiB": 122712
+      }
+    ],
+    "preserved": [
+      "exact observations",
+      "escaping partial functions",
+      "old captured values",
+      "lexical shadowing",
+      "stable variable and literal aliases",
+      "self, lambda and constructor-match shadow capture",
+      "left-to-right exact-once operands",
+      "strict divergent prefix",
+      "total Nat arithmetic prefix and 100000 traversal steps",
+      "unknown curried application order",
+      "evaluated local continuation and 100000 traversal steps"
+    ],
+    "formalPreservation": "not-provided"
+  },
+  "compilerContinuity": {
+    "base": "573bf48533cb196450a8d1df4f454de20c47b08f",
+    "head": "c2041c4af4d9f55364a1626d7309a0320bb5e063",
+    "status": "ahead",
+    "commits": 1,
+    "files": [
+      {
+        "path": "psc1/AI_WORK_STATE.md",
+        "status": "modified",
+        "changes": 4
+      },
+      {
+        "path": "psc1/test/WorkerFusionTests.lean",
+        "status": "modified",
+        "changes": 3
+      }
+    ]
+  },
+  "sampleAttribution": {
+    "ticks": 208130,
+    "gcTicks": 36966,
+    "gcPercent": 17.8,
+    "timeWindows": [
+      {
+        "quarter": 1,
+        "low": 347,
+        "high": 60018327,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "    800    1.5%    5.1%  Builtin: InterpreterEntryTrampoline",
+          "    755    1.5%    4.8%  Builtin: LoadIC_Megamorphic",
+          "    714    1.4%    4.5%  Builtin: GeneratorPrototypeNext",
+          "    700    1.4%    4.5%  Builtin: FindOrderedHashMapEntry",
+          "    607    1.2%    3.9%  Builtin: MapPrototypeSet",
+          "    552    1.1%    3.5%  Builtin: GetProperty",
+          "    479    0.9%    3.1%  Builtin: LoadIC_NoFeedback",
+          "    477    0.9%    3.0%  Builtin: ResumeGeneratorTrampoline",
+          "    474    0.9%    3.0%  Builtin: CompileLazy",
+          "    421    0.8%    2.7%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    414    0.8%    2.6%  JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6426:816",
+          "    347    0.7%    2.2%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    269    0.5%    1.7%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    260    0.5%    1.7%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6439:726",
+          "    250    0.5%    1.6%  Builtin: CallFunction_ReceiverIsAny",
+          "    240    0.5%    1.5%  Builtin: CreateGeneratorObject",
+          "    238    0.5%    1.5%  JS: ~__ps$impl$psJsonStringCharsAccWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6426:56",
+          "    231    0.4%    1.5%  JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6439:7093",
+          "    218    0.4%    1.4%  Builtin: LoadIC",
+          "    213    0.4%    1.4%  Builtin: CreateIterResultObject"
+        ]
+      },
+      {
+        "quarter": 1,
+        "low": 347,
+        "high": 60018327,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  14816   28.6%   94.4%  JavaScript",
+          "    569    1.1%    3.6%  C++",
+          "  10229   19.7%   65.1%  GC",
+          "  36143   69.7%          Shared libraries",
+          "    316    0.6%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 1,
+        "low": 347,
+        "high": 60018327,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  34303   66.2%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  25971   75.7%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   2240    8.6%      JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6426:816",
+          "   1475   65.8%        Builtin: GeneratorPrototypeNext",
+          "   1475  100.0%          JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6426:778",
+          "   1475  100.0%            Builtin: GeneratorPrototypeNext",
+          "    765   34.2%        JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6426:778",
+          "    765  100.0%          Builtin: GeneratorPrototypeNext",
+          "    765  100.0%            JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6426:740",
+          "   2030    7.8%      JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6439:7093",
+          "   1306   64.3%        Builtin: GeneratorPrototypeNext",
+          "   1254   96.0%          JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6439:1308",
+          "   1254  100.0%            Builtin: GeneratorPrototypeNext",
+          "     52    4.0%          JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6439:1308",
+          "     52  100.0%            Builtin: GeneratorPrototypeNext",
+          "    688   33.9%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6439:1308"
+        ]
+      },
+      {
+        "quarter": 2,
+        "low": 60018327,
+        "high": 120036307,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "   1260    2.4%    8.2%  Builtin: LoadIC_Megamorphic",
+          "    831    1.6%    5.4%  Builtin: CompileLazy",
+          "    825    1.6%    5.3%  JS: *psLexListLengthAcc$spec$Char$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6843:45",
+          "    774    1.5%    5.0%  Builtin: GeneratorPrototypeNext",
+          "    699    1.3%    4.5%  Builtin: ResumeGeneratorTrampoline",
+          "    567    1.1%    3.7%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    550    1.1%    3.6%  Builtin: LoadIC",
+          "    327    0.6%    2.1%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    269    0.5%    1.7%  JS: *psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6258:39",
+          "    253    0.5%    1.6%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    233    0.4%    1.5%  Builtin: FindOrderedHashMapEntry",
+          "    232    0.4%    1.5%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+          "    230    0.4%    1.5%  JS: *__ps$impl$psStringEq file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:156:31",
+          "    216    0.4%    1.4%  Builtin: WeakMapLookupHashIndex",
+          "    212    0.4%    1.4%  Builtin: SuspendGeneratorBaseline",
+          "    202    0.4%    1.3%  Builtin: LoadICTrampoline_Megamorphic",
+          "    190    0.4%    1.2%  Builtin: CreateIterResultObject",
+          "    189    0.4%    1.2%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    183    0.4%    1.2%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:205",
+          "    183    0.4%    1.2%  Builtin: CallFunction_ReceiverIsAny"
+        ]
+      },
+      {
+        "quarter": 2,
+        "low": 60018327,
+        "high": 120036307,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  14606   28.0%   94.6%  JavaScript",
+          "    566    1.1%    3.7%  C++",
+          "   8938   17.2%   57.9%  GC",
+          "  36660   70.4%          Shared libraries",
+          "    274    0.5%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 2,
+        "low": 60018327,
+        "high": 120036307,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  35135   67.4%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  27473   78.2%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   1691    6.2%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:205",
+          "   1070   63.3%        Builtin: GeneratorPrototypeNext",
+          "   1070  100.0%          JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:53",
+          "   1070  100.0%            Builtin: GeneratorPrototypeNext",
+          "    621   36.7%        JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:53",
+          "    621  100.0%          Builtin: GeneratorPrototypeNext",
+          "    621  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "   1385    5.0%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    829   59.9%        JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    829  100.0%          Builtin: GeneratorPrototypeNext",
+          "    829  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    556   40.1%        Builtin: GeneratorPrototypeNext",
+          "    556  100.0%          JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    556  100.0%            Builtin: GeneratorPrototypeNext"
+        ]
+      },
+      {
+        "quarter": 3,
+        "low": 120036307,
+        "high": 180054287,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "   1334    2.6%    9.0%  Builtin: LoadIC_Megamorphic",
+          "    833    1.6%    5.6%  Builtin: CompileLazy",
+          "    794    1.5%    5.3%  Builtin: GeneratorPrototypeNext",
+          "    728    1.4%    4.9%  Builtin: ResumeGeneratorTrampoline",
+          "    608    1.2%    4.1%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    387    0.7%    2.6%  Builtin: LoadIC",
+          "    318    0.6%    2.1%  JS: *psLexListLengthAcc$spec$Char$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6843:45",
+          "    317    0.6%    2.1%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    316    0.6%    2.1%  JS: *psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6258:39",
+          "    250    0.5%    1.7%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+          "    248    0.5%    1.7%  Builtin: FindOrderedHashMapEntry",
+          "    248    0.5%    1.7%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    243    0.5%    1.6%  Builtin: WeakMapLookupHashIndex",
+          "    215    0.4%    1.4%  Builtin: LoadICTrampoline_Megamorphic",
+          "    208    0.4%    1.4%  JS: *__ps$impl$psStringEq file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:156:31",
+          "    207    0.4%    1.4%  Builtin: CallFunction_ReceiverIsAny",
+          "    190    0.4%    1.3%  Builtin: CreateIterResultObject",
+          "    189    0.4%    1.3%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:205",
+          "    183    0.4%    1.2%  Builtin: MapPrototypeSet",
+          "    179    0.3%    1.2%  Builtin: RecordWriteSaveFP"
+        ]
+      },
+      {
+        "quarter": 3,
+        "low": 120036307,
+        "high": 180054287,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  14055   26.9%   94.6%  JavaScript",
+          "    531    1.0%    3.6%  C++",
+          "   9090   17.4%   61.2%  GC",
+          "  37315   71.5%          Shared libraries",
+          "    270    0.5%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 3,
+        "low": 120036307,
+        "high": 180054287,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  35911   68.8%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  27950   77.8%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   1989    7.1%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:205",
+          "   1222   61.4%        Builtin: GeneratorPrototypeNext",
+          "   1222  100.0%          JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:53",
+          "   1222  100.0%            Builtin: GeneratorPrototypeNext",
+          "    767   38.6%        JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:53",
+          "    767  100.0%          Builtin: GeneratorPrototypeNext",
+          "    767  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "   1518    5.4%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    897   59.1%        JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    897  100.0%          Builtin: GeneratorPrototypeNext",
+          "    897  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    621   40.9%        Builtin: GeneratorPrototypeNext",
+          "    621  100.0%          JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    621  100.0%            Builtin: GeneratorPrototypeNext"
+        ]
+      },
+      {
+        "quarter": 4,
+        "low": 180054287,
+        "high": 240072267,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "   1330    2.6%    9.0%  Builtin: LoadIC_Megamorphic",
+          "    772    1.5%    5.2%  Builtin: CompileLazy",
+          "    765    1.5%    5.2%  Builtin: GeneratorPrototypeNext",
+          "    680    1.3%    4.6%  Builtin: ResumeGeneratorTrampoline",
+          "    576    1.1%    3.9%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    484    0.9%    3.3%  Builtin: LoadIC",
+          "    305    0.6%    2.1%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    301    0.6%    2.0%  JS: *psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6258:39",
+          "    292    0.6%    2.0%  JS: *psLexListLengthAcc$spec$Char$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6843:45",
+          "    262    0.5%    1.8%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    234    0.4%    1.6%  Builtin: WeakMapLookupHashIndex",
+          "    230    0.4%    1.6%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+          "    226    0.4%    1.5%  Builtin: LoadICTrampoline_Megamorphic",
+          "    214    0.4%    1.4%  JS: *__ps$impl$psStringEq file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:156:31",
+          "    205    0.4%    1.4%  Builtin: FindOrderedHashMapEntry",
+          "    200    0.4%    1.3%  Builtin: CallFunction_ReceiverIsAny",
+          "    189    0.4%    1.3%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:205",
+          "    188    0.4%    1.3%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    185    0.4%    1.2%  Builtin: CreateIterResultObject",
+          "    176    0.3%    1.2%  Builtin: MapPrototypeSet"
+        ]
+      },
+      {
+        "quarter": 4,
+        "low": 180054287,
+        "high": 240072267,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  13952   26.8%   94.0%  JavaScript",
+          "    593    1.1%    4.0%  C++",
+          "   8709   16.7%   58.7%  GC",
+          "  37174   71.5%          Shared libraries",
+          "    290    0.6%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 4,
+        "low": 180054287,
+        "high": 240072267,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  35704   68.6%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  28269   79.2%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   1833    6.5%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:205",
+          "   1105   60.3%        Builtin: GeneratorPrototypeNext",
+          "   1105  100.0%          JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:53",
+          "   1105  100.0%            Builtin: GeneratorPrototypeNext",
+          "    728   39.7%        JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6478:53",
+          "    728  100.0%          Builtin: GeneratorPrototypeNext",
+          "    728  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "   1553    5.5%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    925   59.6%        JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    925  100.0%          Builtin: GeneratorPrototypeNext",
+          "    925  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    628   40.4%        Builtin: GeneratorPrototypeNext",
+          "    628  100.0%          JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    628  100.0%            Builtin: GeneratorPrototypeNext"
+        ]
+      }
+    ],
+    "notes": [
+      "Generated substitution worker contains no administrative capture temporaries in the inspected complete source line.",
+      "Sampled GC share and bounded worker test improve; no overall G2 completion/cost/allocation bound follows."
+    ]
+  },
+  "G3": "not-run",
+  "resourcePolicy": "unchanged",
+  "publication": "not-committed",
+  "progressDiagnostic": {
+    "commit": "9d60de0c89677d4330645f49961ff0bcd1debee8",
+    "runId": 39866505167,
+    "jobId": 120129917036,
+    "artifact": {
+      "id": 12465125123,
+      "name": "psc1-diagnostic-progress-9d60de0c89677d4330645f49961ff0bcd1debee8",
+      "size_in_bytes": 10621,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465125123",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465125123/zip",
+      "expired": false,
+      "created_at": "2026-10-22T22:43:46Z",
+      "expires_at": "2027-01-20T22:39:15Z",
+      "updated_at": "2026-10-22T22:43:46Z",
+      "digest": "sha256:693bf0566bd5d784f391153cca623ac9918f4eaf1615e0c75008af0ca9c3a09d",
+      "workflow_run": {
+        "id": 39866505167,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "diagnostic/psc1-selfhost-progress-20261023",
+        "head_sha": "9d60de0c89677d4330645f49961ff0bcd1debee8"
+      }
+    },
+    "report": {
+      "schema": "psc1-instrumented-progress-diagnostic/1",
+      "qualificationRun": 39864113546,
+      "originalServiceSha256": "e3fed5ddbc2a728e3ffc75ce02927f5b3a3304da3b5ee2c8439ef2e9772d52ad",
+      "requestSha256": "e60717a16128dffcafc84499939aa58c5f58f22103be7a3233166cb81ff52f36",
+      "instrumentedServiceSha256": "3c113654a91743c64cce2bb3c55cb9861afd449704b6a99edfce09f0cf202289",
+      "instrumentedFunctions": [
+        "psJsonParse",
+        "psElabDeclarationBatchWithOrigins",
+        "psCompilerParseSource",
+        "psCompilerPreparationStepParsedWithOrigins",
+        "psCompilerPrepareOrdinary",
+        "psCompilerOrdinaryIr",
+        "psFuseClosedWorkers",
+        "psJsLowerValidatedModuleWithTargetProfile",
+        "psJsPrintDeclarationsWith"
+      ],
+      "elapsedMs": 240177,
+      "timeoutMs": 240000,
+      "status": null,
+      "signal": "SIGTERM",
+      "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT",
+      "enteredSources": [
+        {
+          "name": "Ps.Foundation.Source",
+          "index": 0,
+          "bytes": 148
+        },
+        {
+          "name": "Ps.Syntax.Cursor",
+          "index": 1,
+          "bytes": 2808
+        },
+        {
+          "name": "Ps.Syntax.Token",
+          "index": 2,
+          "bytes": 959
+        },
+        {
+          "name": "Ps.Syntax.Lexer",
+          "index": 3,
+          "bytes": 36817
+        },
+        {
+          "name": "Ps.Foundation.Name",
+          "index": 4,
+          "bytes": 3987
+        },
+        {
+          "name": "Ps.Syntax.Ast",
+          "index": 5,
+          "bytes": 10072
+        },
+        {
+          "name": "Ps.Syntax.ParserState",
+          "index": 6,
+          "bytes": 2955
+        },
+        {
+          "name": "Ps.Syntax.ParseCommon",
+          "index": 7,
+          "bytes": 32182
+        },
+        {
+          "name": "Ps.Syntax.ParseBinding",
+          "index": 8,
+          "bytes": 8309
+        },
+        {
+          "name": "Ps.Syntax.ParseDo",
+          "index": 9,
+          "bytes": 46570
+        },
+        {
+          "name": "Ps.Syntax.ParseData",
+          "index": 10,
+          "bytes": 10172
+        },
+        {
+          "name": "Ps.Syntax.Operators",
+          "index": 11,
+          "bytes": 5448
+        },
+        {
+          "name": "Ps.Syntax.ParseLean",
+          "index": 12,
+          "bytes": 100990
+        },
+        {
+          "name": "Ps.Syntax.ParseProofScript",
+          "index": 13,
+          "bytes": 77810
+        },
+        {
+          "name": "Ps.Syntax.PrintCommon",
+          "index": 14,
+          "bytes": 17164
+        },
+        {
+          "name": "Ps.Syntax.PrintLean",
+          "index": 15,
+          "bytes": 32614
+        },
+        {
+          "name": "Ps.Syntax.PrintProofScript",
+          "index": 16,
+          "bytes": 35158
+        },
+        {
+          "name": "Ps.Syntax.Translate",
+          "index": 17,
+          "bytes": 2074
+        },
+        {
+          "name": "Ps.Foundation.Text",
+          "index": 18,
+          "bytes": 2147
+        },
+        {
+          "name": "Ps.Bridge.Json",
+          "index": 19,
+          "bytes": 37697
+        },
+        {
+          "name": "Ps.Core.Level",
+          "index": 20,
+          "bytes": 286
+        },
+        {
+          "name": "Ps.Core.Expr",
+          "index": 21,
+          "bytes": 753
+        },
+        {
+          "name": "Ps.Core.Declaration",
+          "index": 22,
+          "bytes": 1349
+        },
+        {
+          "name": "Ps.Core.Abstract",
+          "index": 23,
+          "bytes": 2657
+        },
+        {
+          "name": "Ps.Core.Subst",
+          "index": 24,
+          "bytes": 5375
+        },
+        {
+          "name": "Ps.Core.Equality",
+          "index": 25,
+          "bytes": 6529
+        },
+        {
+          "name": "Ps.Foundation.List",
+          "index": 26,
+          "bytes": 2386
+        },
+        {
+          "name": "Ps.Environment.Basic",
+          "index": 27,
+          "bytes": 9104
+        },
+        {
+          "name": "Ps.Bridge.CheckedAdmissions",
+          "index": 28,
+          "bytes": 46303
+        }
+      ],
+      "lastProgress": [
+        {
+          "count": 649,
+          "elapsedMs": 236705,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "30",
+          "rssKiB": 2382152
+        },
+        {
+          "count": 650,
+          "elapsedMs": 236725,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "31",
+          "rssKiB": 2382152
+        },
+        {
+          "count": 651,
+          "elapsedMs": 236743,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "32",
+          "rssKiB": 2382152
+        },
+        {
+          "count": 652,
+          "elapsedMs": 236747,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "33",
+          "rssKiB": 2382152
+        },
+        {
+          "count": 653,
+          "elapsedMs": 237402,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "34",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 654,
+          "elapsedMs": 237440,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "35",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 655,
+          "elapsedMs": 237445,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "36",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 656,
+          "elapsedMs": 237449,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "37",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 657,
+          "elapsedMs": 237452,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "38",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 658,
+          "elapsedMs": 237454,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "39",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 659,
+          "elapsedMs": 237461,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "40",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 660,
+          "elapsedMs": 237464,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "41",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 661,
+          "elapsedMs": 237470,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "42",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 662,
+          "elapsedMs": 237477,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "43",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 663,
+          "elapsedMs": 237545,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "44",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 664,
+          "elapsedMs": 237614,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "45",
+          "rssKiB": 2381688
+        },
+        {
+          "count": 665,
+          "elapsedMs": 237855,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "46",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 666,
+          "elapsedMs": 237864,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "47",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 667,
+          "elapsedMs": 237961,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "48",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 668,
+          "elapsedMs": 238026,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "49",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 669,
+          "elapsedMs": 238077,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "50",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 670,
+          "elapsedMs": 238112,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "51",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 671,
+          "elapsedMs": 238117,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "52",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 672,
+          "elapsedMs": 238121,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "53",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 673,
+          "elapsedMs": 238230,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "54",
+          "rssKiB": 2381816
+        },
+        {
+          "count": 674,
+          "elapsedMs": 239412,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "55",
+          "rssKiB": 2381944
+        },
+        {
+          "count": 675,
+          "elapsedMs": 239440,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "56",
+          "rssKiB": 2381944
+        },
+        {
+          "count": 676,
+          "elapsedMs": 239740,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "57",
+          "rssKiB": 2381944
+        },
+        {
+          "count": 677,
+          "elapsedMs": 239757,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "58",
+          "rssKiB": 2381944
+        },
+        {
+          "count": 678,
+          "elapsedMs": 239783,
+          "phase": "psElabDeclarationBatchWithOrigins",
+          "module": {
+            "name": "Ps.Bridge.CheckedAdmissions",
+            "index": 28,
+            "bytes": 46303
+          },
+          "declaration": "59",
+          "rssKiB": 2381944
+        }
+      ],
+      "nativeCompilerDelegation": false,
+      "admission": "not-run",
+      "publication": "not-run",
+      "qualification": false,
+      "scope": "Instrumented copy only. Function-entry counters do not prove completion; timing includes logging overhead. No response is adopted and original failed qualification stays failed."
+    }
+  }
+}

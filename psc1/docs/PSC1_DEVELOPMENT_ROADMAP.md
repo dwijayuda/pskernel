@@ -6,7 +6,32 @@ criteria, both source grammars, seven targets and four actual application
 categories. Preserve working functionality. Detailed supported semantics remain
 in PSC1_PRACTICAL_CORE_DECISIONS.md; AI_WORK_STATE.md owns continuation status.
 
-## Practical Core v1 contract qualified
+## Latest compiler and resumed manual qualification
+
+Compiler source 7732e9786d09d11c1130da4b315c985e9978f23b, tested merge
+055ba9833567d3cb166341ec1da794eb725b0414, now passes fresh Linux run
+39867567126: every selected job, all 47 full-job steps and 37/37 finite criteria.
+Source equivalence proofs, conservative worker captures (including global-read
+timing), both grammars, all seven targets, G1, complete closures, host boundary,
+minimum Python and installed native package qualification pass.
+PSC1_SELFHOST_RESUMPTION_QUALIFICATION_2026-10-23.json retains exact evidence.
+
+The separate manual workflow has been resumed; it is not returned to a
+feature-freeze deferral. Latest actual source 573bf485 / run 39864113546
+passes ten G1 cases, then G2 times out at 240197 ms before admission/publication;
+G3 is not run. The final local-binding correctness guard changes compiler bytes
+after that failure, so no G2 execution result is claimed for the latest source.
+The retained diagnostic enters 29/86 modules by the original deadline, last in
+CheckedAdmissions declaration index 59, with about 2.27 GiB observed RSS.
+Function-entry samples do not prove completion, scaling or memory bounds.
+
+General frontend/elaboration throughput and lifetime is the immediate blocker.
+Require a measured correction on exact and practical large-source inputs, then
+fresh full and explicit G1/G2/G3 qualification with unchanged resources and all
+identity/refusal checks. Preserve every prior failed/successful artifact and the
+original heap-exhaustion defect. No merge or publication has been authorized.
+
+## Historical Practical Core v1 baseline qualified
 
 Source 9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde passes every selected gate in
 Linux run 39829564386, tested merge 00decc7fb81fc4023f68cdcdbf8cff1fdd028b12.
@@ -42,15 +67,10 @@ reconciliation receipt records the source interval and exact selected evidence.
 
 1. Keep the qualified candidate stable for release review. Merge/publication
    require separate authorization; retain the draft PR and all history.
-2. User resumed the separate manual G1 -> G2 -> G3 qualification on the frozen
-   v1 source on 2026-10-23. The explicit committed request trigger supplements
-   workflow_dispatch without adding G2/G3 to normal development. Execution and
-   results are tracked in AI_WORK_STATE.md. Latest actual run39861084058 passes
-   G1 but G2 times out before admission/publication; G3 has not run. Preserve
-   every source-bound receipt and the open G2 performance defect. Normalize
-   measured eager core visitors (all-input source proofs pass), remove only
-   provably stable administrative captures, and rerun full/manual CI.
-   Do not infer self-host/fixed-point success from the normal G1 correction.
+2. Continue resumed manual self-host qualification through the measured
+   frontend/elaboration performance blocker described above. G2/G3 remain
+   unqualified; preserve the exact ten-case corpus, resource limits, source-bound
+   failures and all independent-checking/strict-IR/negative gates.
 3. For later practical feature or compiler changes, state finite acceptance,
    complete shared semantics and both grammars, validate JS/TS/Rust early, then
    every relevant backend mapping. Requalify changed source before declaring

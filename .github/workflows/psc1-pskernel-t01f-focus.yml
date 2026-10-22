@@ -33,7 +33,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/psc1-t01f"
           lake -f kernel-lakefile.lean env .lake/build/bin/psc1_kernel_expr_v2_string_environment_regression \
-            "$RUNNER_TEMP/psc1-t01f/fixture.json" | tee "$RUNNER_TEMP/psc1-t01f/native.log"
+            "$RUNNER_TEMP/psc1-t01f/fixture.json" 2>&1 | tee "$RUNNER_TEMP/psc1-t01f/native.log"
           grep -Fqx 'PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096' "$RUNNER_TEMP/psc1-t01f/native.log"
           sha256sum "$RUNNER_TEMP/psc1-t01f/fixture.json" | tee "$RUNNER_TEMP/psc1-t01f/fixture.sha256"
       - name: Retain existing minimal String and public DAG controls
@@ -71,7 +71,7 @@ jobs:
           archive = get("/actions/artifacts/" + str(artifact_id) + "/zip")
           assert len(archive) == 3410883 and hashlib.sha256(archive).hexdigest() == zip_digest
           with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
-              names = [name for name in bundle.namelist() if pathlib.PurePosixPath(name).name == "kernel.js"]
+              names = [name for name in bundle.namelist() if name.endswith("/psc1/dist/expr-v2/integration/kernel.js")]
               assert len(names) == 1, names
               kernel = bundle.read(names[0])
           assert len(kernel) == 9952970 and hashlib.sha256(kernel).hexdigest() == kernel_digest
@@ -94,7 +94,7 @@ jobs:
           NODE_BIN="$(command -v node)"
           cd "$RUNNER_TEMP/psc1-t01f"
           PATH="" "$NODE_BIN" --max-old-space-size=2048 --expose-gc smoke.mjs ./kernel.mjs ./fixture.json \
-            | tee generated-diagnostic.log
+            2>&1 | tee generated-diagnostic.log
           grep -Fq 'PSC1_T01F_FULL_STRING_JS: PASS ' generated-diagnostic.log
           test "$(grep -Fc 'PSC1_T01F_JS_CASE_PASS ' generated-diagnostic.log)" -eq 6
       - uses: actions/upload-artifact@v4

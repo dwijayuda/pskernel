@@ -145,7 +145,7 @@ assert.equal(contract.requireReadyOnFullQualification,true,'full qualification m
 
  
 // Published status is a data projection, never independent release evidence.
-const {releaseStatus,checkpointPath}=await import('./practical-core-release-status.mjs');
+const {releaseStatus,checkpointPath,checkedFrozenContract}=await import('./practical-core-release-status.mjs');
 const checkpoint=JSON.parse(fs.readFileSync(new URL('../'+checkpointPath,import.meta.url)));
 const inventory=JSON.parse(fs.readFileSync(new URL('../docs/PSC1_PRACTICAL_CORE_STATUS.json',import.meta.url)));
 assert.deepEqual(inventory,releaseStatus(contract,checkpoint),'stale public release inventory');
@@ -171,3 +171,11 @@ for(const mutate of [
  assert.throws(()=>releaseStatus(contract,changed),'inconsistent public evidence must refuse');
 }
 console.log('PSC1_RELEASE_INVENTORY: PASS stale source, incomplete matrix, failed/skipped/missing/duplicate gates, G1, closure, checker and package identities refuse');
+
+const rewordedContract=clone(contract);
+rewordedContract.families[0].acceptance[0].meaning='A broader unqualified acceptance claim';
+assert.throws(()=>releaseStatus(rewordedContract,checkpoint),/contract differs/);
+const contractBytes=fs.readFileSync(new URL('../docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json',import.meta.url));
+assert.deepEqual(checkedFrozenContract(contractBytes),contract);
+assert.throws(()=>checkedFrozenContract(Buffer.concat([contractBytes,Buffer.from('\n')])),/contract bytes differ/);
+console.log('PSC1_RELEASE_CONTRACT_IDENTITY: PASS edited meaning or bytes cannot reuse the old finite checkpoint');

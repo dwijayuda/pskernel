@@ -3,6 +3,7 @@
   "name": "PSC1 Practical Core v1",
   "authority": "Data-only projection of the finite contract and immutable Linux CI checkpoint; no admission, publication or changed-source authority.",
   "contract": "docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json",
+  "contractBlobSha": "1e49d4399d67b87097894047dd7924db04ffed99",
   "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json",
   "sourceCommit": "9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde",
   "testedMergeCommit": "00decc7fb81fc4023f68cdcdbf8cff1fdd028b12",

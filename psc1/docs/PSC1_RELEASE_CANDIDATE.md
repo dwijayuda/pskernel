@@ -100,7 +100,9 @@ node scripts/practical-core-release-status.mjs --write
 ```
 
 The generator's checkpointPath must explicitly name the reviewed immutable
-checkpoint. Static tests reject inconsistent source/merge/checker/package
+checkpoint. Its contractBlobSha pins exact contract bytes from that source;
+changed acceptance text cannot inherit the old checkpoint at the same count.
+Update that identity only with genuinely qualified replacement evidence. Static tests reject inconsistent source/merge/checker/package
 identities, incomplete/failed/skipped/duplicate required gates, missing G1 or
 compiler closure evidence, and stale inventory bytes. These are consistency checks
 on recorded evidence, not independent proof admission or live GitHub authentication.

@@ -269,3 +269,14 @@ active term-assignment and independent level-assignment cases are mandatory.
 No unification/admission rule, fuel number, deadline, heap/stack setting, source
 refusal or manifest condition changes. Actual G2/G3 and fresh complete CI remain
 required before qualification; the original G2 defect stays open.
+
+## Lexer accumulator source-census refusal (2026-10-23)
+
+Run39858476122/job120102709250 at5fe1ff5f refuses Lexer source declaration6,
+psLexListLengthAcc, as structuralRecursionArity in both source lanes before
+generation. Native compilation passed; no G1/G2/G3 attempt is inferred.
+Retain artifact12460467320 and the dated lexer-census failure receipt.
+Normalize the recursive reference through an explicit local Nat -> Nat worker,
+then apply its accumulator. This uses the existing supported form and keeps
+the original arity validator unchanged. Native equivalence proofs and fresh
+whole-closure/self-host/full CI remain required.

@@ -36,7 +36,9 @@ def psLexListLengthAcc {α : Type} (xs : List α) : Nat -> Nat :=
   match xs with
   | List.nil => fun (acc : Nat) => acc
   | List.cons _ rest =>
-      fun (acc : Nat) => psLexListLengthAcc rest (Nat.succ acc)
+      fun (acc : Nat) =>
+        let smaller : Nat -> Nat := psLexListLengthAcc rest;
+        smaller (Nat.succ acc)
 
 def psLexListLength {α : Type} (xs : List α) : Nat :=
   psLexListLengthAcc xs 0

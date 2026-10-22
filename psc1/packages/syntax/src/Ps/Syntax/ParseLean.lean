@@ -229,9 +229,9 @@ def psLeanNomatchConsumedStop
   | List.nil =>
       fun (_next : Option PsToken) (latest : PsSourcePos) => latest
   | List.cons token rest =>
-      let smaller : Option PsToken -> PsSourcePos -> PsSourcePos :=
-        psLeanNomatchConsumedStop rest;
       fun (next : Option PsToken) (latest : PsSourcePos) =>
+        let smaller : Option PsToken -> PsSourcePos -> PsSourcePos :=
+          psLeanNomatchConsumedStop rest;
         let finished : Bool :=
           if psTokenKindEq token.kind PsTokenKind.endOfInput then true
           else
@@ -300,17 +300,20 @@ def psParseLeanApplicationPrimary
       parseNomatchScrutinee parseParenthesized cursor with
   | Except.error error => Except.error error
   | Except.ok parsed =>
-      let inner : PsSourceSpan := psSyntaxTermSpan parsed.value;
-      let start : PsSourcePos :=
-        match psTokenCursorPeek cursor with
-        | Option.none => inner.start
-        | Option.some token => token.span.start;
-      let stop : PsSourcePos := psLeanNomatchConsumedStop cursor.remaining
-        (psTokenCursorPeek parsed.cursor) inner.stop;
-      let surfaceSpan : PsSourceSpan := { start := start, stop := stop };
-      psParseDataOptionalIndexTailWithFuel parseParenthesized
-        (Nat.succ (psParseListLength parsed.cursor.remaining))
-        parsed.value surfaceSpan parsed.cursor
+      -- Surface-span recovery and suffix fuel are needed only for an index tail.
+      if psTokenCursorAtText parsed.cursor "[" then
+        let inner : PsSourceSpan := psSyntaxTermSpan parsed.value;
+        let start : PsSourcePos :=
+          match psTokenCursorPeek cursor with
+          | Option.none => inner.start
+          | Option.some token => token.span.start;
+        let stop : PsSourcePos := psLeanNomatchConsumedStop cursor.remaining
+          (psTokenCursorPeek parsed.cursor) inner.stop;
+        let surfaceSpan : PsSourceSpan := { start := start, stop := stop };
+        psParseDataOptionalIndexTailWithFuel parseParenthesized
+          (Nat.succ (psParseListLength parsed.cursor.remaining))
+          parsed.value surfaceSpan parsed.cursor
+      else Except.ok parsed
 
 def psLeanCanStartSimpleArgument
     (current : PsSyntaxTerm)

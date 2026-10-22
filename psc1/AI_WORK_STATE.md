@@ -154,9 +154,33 @@ Normal development still runs only G1. Exact-source Lean caches reduce seed
 rebuild work. A failed G2/G3 process retains an exact-request V8 sample without
 changing its failed gate or publishing a sampled response.
 
-Request psc1-v1-frozen-selfhost-2026-10-23-01 is pending actual Linux execution.
-Preserve all previous G1 receipts and the original G2 performance defect.
-Record terminal generation/CI/artifact evidence; do not infer G2/G3 from G1.
+Request psc1-v1-frozen-selfhost-2026-10-23-01 completed in run39848619349/
+job120068493837 at de564ab6. G1's ten cases pass with the preserved service
+685d0a38...; G2-self times out240267ms/SIGTERM before admission/publication.
+G3 is not run. Exact-request profiling repeats the timeout at240430ms and retains
+203478 samples /42605184 raw-log bytes in artifact12456933484 (90 days).
+The dated G2_RESUMPTION_FAILURE_QUALIFICATION receipt keeps all identities.
+
+A read-only diagnostic branch diagnostic/psc1-selfhost-profile-20261023 at
+baa848fa3f76ffd528829ee823785757bea7041e inspects that immutable artifact in
+run39850725240/job120075835424 without replay or compiler changes. Its inclusive
+caller breakdown attributes leading paths to psParseListLength<PsToken> and
+psLeanNomatchConsumedStop; GC is22.4% of samples. This is sampled attribution,
+not a proof of total cost or allocation.
+
+Root source correction: ordinary primary expressions no longer calculate
+optional-index suffix fuel/surface spans unless a next bracket exists. Actual
+index tails retain the original adjacency, fuel, parse/error and span policy.
+The consumed-stop helper binds next/latest before constructing its recursive
+worker, avoiding eager traversal of the unused suffix. A generated G1 case
+covers a grouped optional index followed by256 private declarations; all old
+cases remain. Native both-grammar cases retain nested-grouped adjacency/refusal.
+
+These changed compiler bytes are not yet qualified. Preserve the original
+finite-v1 receipt at9ee6c5ff as historical evidence, and require fresh complete
+Practical Core plus actual G1/G2/G3 results before declaring the new candidate
+finished. No resource limits or native-delegation boundaries change.
+A new explicit qualification request follows this source-fix commit.
 
 ## Remaining release work and deferred scope
 

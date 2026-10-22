@@ -1,7 +1,15 @@
 # Deferred G2 performance defect
 
-Status: open, deferred self-host qualification; normal compilation relevance
-may raise its priority. No G2/G3 or fixed-point success is claimed.
+Status: open, explicitly resumed after frozen Practical Core v1 qualification.
+Current run39848619349/job120068493837 atde564ab6 passes G1's ten cases, then
+G2-self times out240267ms before admission/publication; G3 is not run.
+Exact request/service hashes, 90-day artifact12456933484, CPU profile and
+read-only caller analysis are in
+PSC1_G2_RESUMPTION_FAILURE_QUALIFICATION_2026-10-23.json.
+The measured parser source correction is pending new full/self-host CI.
+No G2/G3 or fixed-point success is claimed.
+
+## Preserved earlier evidence
 
 Original actual G2 attempt at 3b189f589b0a4ad06eb1bcc666014220e72268df:
 run39545154962/job119041551702 aborted before publication (SIGABRT131880ms).

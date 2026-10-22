@@ -374,6 +374,10 @@ def main : IO Unit := do
       "def result : Option Nat := #[][0]?\n" optionNat noneNat
     checkExecuted "parenthesized array keeps suffix adjacency" kind
       "def result : Option Nat := (#[11,22])[1]?\n" optionNat someTwentyTwo
+    checkExecuted "nested parenthesized array keeps consumed surface span" kind
+      "def result : Option Nat := ((#[11,22]))[1]?\n" optionNat someTwentyTwo
+    rejectedParse "index receiver bracket must remain adjacent" kind
+      "def result : Option Nat := (#[11,22]) [1]?\n"
     rejectedParse "plain indexing is not optional indexing" kind
       "def result : Nat := #[1][0]\n"
     rejectedParse "panic indexing remains unselected" kind

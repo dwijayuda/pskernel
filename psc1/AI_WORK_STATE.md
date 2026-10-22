@@ -337,3 +337,20 @@ local continuation still obtains a checked companion and exact 100000-step
 baseline/fused runtime comparison. The earlier curried 100000 observation also
 remains, now expressly testing the conservative unfused path. Pending Linux CI;
 no weakened workloads, correctness boundaries, or qualified-source claims.
+
+
+## Rust host planning integration
+
+Inspection of DirectBackend exposed the missing execution path: Rust called
+psRustEmitSelectedValidatedModule directly with original validated IR; unlike
+ECMAScript/Wasm/script targets, it never ran worker fusion. Therefore the prior
+generated Rust output could not establish that fusion rejected the helper.
+
+The Rust host now runs psFuseClosedWorkers before public-type closure, emission,
+and runtime planning, all from the same revalidated plan. It deliberately keeps
+Rust's existing generic support: the shared monomorphizing closed plan is not
+imposed on Rust. Original/transformed strict checks, public ownership/signature
+checks, unsupported refusals and staged publication remain. Actual unchanged
+streaming source cases will validate bounded native execution in Linux CI.
+The conservative curried-call correction and known source-lambda expansion
+remain; no earlier descendant is claimed qualified.

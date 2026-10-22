@@ -463,20 +463,25 @@ def psHostDirectEmitRust (session : PsHostDirectPrepared) (outputPath : String) 
   match psHostDirectCheckPublicApi .rust session with
   | .ok _ => pure ()
   | .error reason => throw (IO.userError reason)
-  let signatures := session.validated.raw.declarations.filter (fun d => session.publicNames.contains d.name)
-  let seeds := session.authoredTypeNames ++ signatures.flatMap (fun d =>
-    namedTypes d.resultType ++ d.parameters.flatMap (fun p => namedTypes p.type))
-  let types ← match publicTypeClosure session.validated.raw 4096 seeds [] with
+  -- Rust retains its supported generic declarations. It still needs the shared
+  -- strictly rechecked worker fusion before closure/tail lowering.
+  let plan ← match psFuseClosedWorkers session.validated with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
-  let emitted ← match psRustEmitSelectedValidatedModule session.validated session.publicNames types with
+  let signatures := plan.raw.declarations.filter (fun d => session.publicNames.contains d.name)
+  let seeds := session.authoredTypeNames ++ signatures.flatMap (fun d =>
+    namedTypes d.resultType ++ d.parameters.flatMap (fun p => namedTypes p.type))
+  let types ← match publicTypeClosure plan.raw 4096 seeds [] with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  let emitted ← match psRustEmitSelectedValidatedModule plan session.publicNames types with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
   let name := psHostArtifactFileName outputPath "module.rs"
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteProvenance session stage
     IO.FS.writeFile (stage / name) emitted
-    let runtime := psRustPlanRuntime session.validated.raw
+    let runtime := psRustPlanRuntime plan.raw
     psHostWriteArtifactTargetPlans stage [
       psHostArtifactTargetPlanJson "rust" name "psc1-rust-runtime/1"
         runtime.source runtime.requirements []]

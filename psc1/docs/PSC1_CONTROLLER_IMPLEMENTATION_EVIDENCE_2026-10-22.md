@@ -43,3 +43,11 @@ admits only a single checked application layer and adds a real deadline test
 where that callback must diverge before a later argument throws. Known source
 base lambda values are instead expanded before total helper capture, under the
 existing official-conversion theorem. All original strict computations stay.
+
+
+Rust path inspection corrects the earlier missing-worker interpretation:
+DirectBackend emitted the original validated module without invoking fusion.
+The Rust host now applies the strictly rechecked fusion pass before deriving
+public type closure, generated code and runtime plan. Rust's supported generic
+declarations are preserved; no monomorphizing plan is forced on that target.
+Source execution and the full release gates remain the authority for success.

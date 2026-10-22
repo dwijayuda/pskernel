@@ -13,7 +13,9 @@ artifact bounded profile completed; a fused data-result hash candidate now
 passed native preflight at exact c64425881ca637021c56bf4c985e2d1bd6afa593;
 its generated producer and retained controls passed in run39867316634;
 its unchanged mixed replay timed out in job120141720969 after402 completed
-calls. A primitive-only byte-step candidate now requires its own preflight. Read the newest
+calls. The primitive-only byte-step candidate passed native preflight at exact
+16aac21740fa7870e502fdf712eff76e5c33e1a2; its generated gate/runtime remain
+pending in run39873570107. The earlier e23 native elaboration failure is retained. Read the newest
 [continuation](../../AI_CONTINUATION_PROMPT.md) and package AI_WORK_STATE.md.
 Do not inherit834's subset passes or discard its failed mixed timeout.
 

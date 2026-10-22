@@ -1,44 +1,50 @@
-## Pure-step proof elaboration fix; e23 failure retained, all new gates pending
+## Exact16aac pure byte-step native PASS; generated pure-leaf gate pending
 
-Exact `e23bc44c641117370fee44c0c288b8b41362fbf8` failed native proof
-elaboration in [run39873131163](https://github.com/dwijayuda/pskernel/actions/runs/39873131163),
-job120152146037. Generated producer120152910177 and runtime120152909766
-were correctly SKIPPED. There is no new generated artifact or qualification.
-The scan_eq_before simp proof did not unfold psKernelCacheMix under the
-recursive state argument after the primitive-only step refactor. Lean reported
-automatic sorryAx dependencies for the FAILED proof elaboration; no sorry
-source or unchecked assumption was introduced. The job exited1 before the
-native hash matrix/full String fixture execution. Raw error/artifact details:
-`evidence/2026-10-23-t01f-leaf-native-rejected.json`.
+Executable `16aac21740fa7870e502fdf712eff76e5c33e1a2` passed its native
+job120153577616 in
+[run39873570107](https://github.com/dwijayuda/pskernel/actions/runs/39873570107).
+Allfive exact equations,2730 frozen matrix cases,three long cases,294
+admissions/377 metadata,all6 authentic String cases and singleton sequences,
+retained native/official/DAG/session controls passed. All79 proof reports are
+recorded; the newfive use only propext,Classical.choice,Quot.sound. No sorryAx
+or compiler-trust axiom appears in these successful proof reports.
+Artifact12467875493 and exact source/tree/proofs:
+`evidence/2026-10-23-t01f-pure-byte-step-native.json`.
 
-This commit adds only explicit psKernelCacheMix unfolding to that existing
-simpa set. The five theorem statements,proof assumptions,2730-case matrices,
-8190 staged calls,13665 assertions,three long cases,authentic String closure,
-all assertions and resource limits remain unchanged. Native must actually
-elaborate and pass with no sorryAx; no result is inherited from e23 or c644.
-Fetch this corrected source's existing native-first hash preflight and do not
-duplicate it. The small generated pure-leaf gate must pass before full compile.
+Generated producer120154391391 is ALREADY RUNNING at16aac. Fetch its current
+run; do not duplicate it. Require complete authentic source check,TS7.0.2,
+the unchanged2730/8190/13665 generated matrix and three long cases,then the
+small pure-byte-step gate before full compilation. That gate refuses any
+generator/run/invoke/wrap machinery in the nonrecursive byte transition.
+It also rejects function-valued iterator results and staged full-hash entry.
+If this code-shape hypothesis fails,stop at the gate; do not suppress it.
+All generated controls/full mixed qualification remain pending.
+This containing documentation child inherits no executable qualification.
 
-The production primitive-only byte-step candidate is otherwise unchanged:
-nonrecursive step contains exact arithmetic; immutable data iterator calls it;
-fullHash calls saturated Scan; exported worker retains every partial stage.
-The generated probe refuses generator/run/invoke/wrap machinery in the byte
-step. If the lowering hypothesis fails,stop there; do not suppress the gate.
+The source primitive-only step uses exactly the old arithmetic; immutable
+data iteration calls it; fullHash bypasses public staging internally while
+the exported worker preserves every partial stage. The five theorem
+statements and assumptions are unchanged. Explicit psKernelCacheMix unfolding
+repaired only the proof tactic. Previouse23 native elaboration FAILED and
+generated jobs were skipped; that rejection remains recorded separately.
+Native equivalence does not prove TS/JS preservation,global soundness,or
+complete generated String correctness.
 
-Preceding c644 mixed run39867316634 timed out at25minutes after402/403 traced
-calls,interrupted V1RunDag validity-left. All294/377 and singleton passed,
-but no complete case/negative/shard receipt. Its full trace/native/producer/
-control/artifact records remain in
+C644 preceding mixed preflight timed out at25minutes after402/403 traced
+calls,V1RunDag validity-left interrupted; singleton/294/377 passed but no
+complete case or selected negatives/shard receipt. Its entire trace and all
+artifact bindings remain in
 `evidence/2026-10-23-t01f-fused-data-result-mixed-terminal.json`.
-All previous failed/incomplete sources and timing/RSS observations remain
-visible; no controlled speedup or current-source full qualification is claimed.
+Retain all old timing/RSS regressions and incomplete sources. No controlled
+speedup or broader performance qualification has been established.
 
-Final workflow drafts remain INACTIVE. Preserve fuel4096,2048MiB,emptyPATH
-and all job caps. T01F/currentA/B/C/D OPEN; historical scopedA=9c87,
-historical full193C=FAIL. Integration stays123c411; do not startT05.
-Only complete mixed PASS permits final activation,then all final-source gates,
-measurements and193-case/profile obligations remain required. Disable narrow
-focused/hash/profile pushes on activation. No DirectJS/global proof claim.
+Final workflows remain INACTIVE; drafts/README retain exact destinations and
+digests. Preservefuel4096,2048MiB,emptyPATH,all assertions and job caps.
+T01F/currentA/B/C/D OPEN; historical scopedA=9c87,historical full193C=FAIL.
+Integration stays123c411; do not startT05. Only complete mixed PASS permits
+final activation at one coherent source,with focused/hash/profile automatic
+pushes disabled and every final route/native/official/proof/provider/research/
+measurement/ABBA/unchanged193 Arena/profile gate re-executed at that source.
 
 ## Exact 5abf mixed preflight TIMEOUT; current-artifact bounded profile next
 

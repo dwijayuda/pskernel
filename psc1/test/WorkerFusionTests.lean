@@ -175,7 +175,8 @@ def main : IO Unit := do
   let invalid := PsVerifiedIrModule.mk [] [] [] [
     .mk "bad" [] [] natT (.literal (.bool true))]
   let imported := PsVerifiedIrModule.mk
-    [.mk "mark" "./probe.mjs" "mark" (.function [natT] natT)] [] [] module.declarations
+    [.mk "mark" "./probe.mjs" "mark" (.function [natT] natT)]
+    module.structures module.inductives module.declarations
   require "unqualified external imports still refuse"
     (match psFuseClosedWorkers (.mk imported) with | .error _ => true | _ => false)
   require "forged validated wrapper refuses"

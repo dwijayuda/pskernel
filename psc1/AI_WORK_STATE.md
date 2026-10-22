@@ -365,3 +365,7 @@ captures. All older escape, exact-once order, continuation, strict divergence,
 bounded optimization with execution evidence required, not a preservation proof.
 Request fresh complete companion CI and manual G1/G2/G3; keep G2 open and all
 resource/checker/manifest policies unchanged.
+
+The external-import refusal fixture also carries the new CaptureBox datatype
+inventory, keeping its source well-typed so the existing import refusal test
+cannot pass merely because an unrelated datatype declaration is absent.

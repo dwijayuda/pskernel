@@ -1,0 +1,51 @@
+{
+  "schema": "psc1-t01f-leaf-native-elaboration-rejected-v1",
+  "sourceSha": "e23bc44c641117370fee44c0c288b8b41362fbf8",
+  "sourceTree": "575ed6cfc9a000659ee46e1a4c119a8b613729de",
+  "runId": 39873131163,
+  "nativeJobId": 120152146037,
+  "conclusion": "failure",
+  "scope": "Native proof elaboration failed before the hash matrix/full String execution; generated jobs skipped",
+  "error": [
+    "test/PsKernelScalarHashWorkerRegression.lean:81:10: error: Type mismatch: After simplification, term",
+    "  ih (String.Pos.Raw.next value { byteIdx := position }).byteIdx",
+    "    (psKernelCacheMix hash (String.Internal.get value { byteIdx := position }).toNat)",
+    " has type",
+    "  @Eq Nat",
+    "    (psKernelCacheStringHashStateWithFuel remaining value",
+    "        ((String.Pos.Raw.next value { byteIdx := position }).byteIdx,",
+    "          psKernelCacheMix hash (String.Internal.get value { byteIdx := position }).toNat)).snd",
+    "    (stringHashWorkerBefore remaining value (String.Pos.Raw.next value { byteIdx := position }).byteIdx",
+    "      (psKernelCacheMix hash (String.Internal.get value { byteIdx := position }).toNat))",
+    "but is expected to have type",
+    "  @Eq Nat",
+    "    (psKernelCacheStringHashStateWithFuel remaining value",
+    "        ((String.Pos.Raw.next value { byteIdx := position }).byteIdx,",
+    "          (hash * 31 + (String.Internal.get value { byteIdx := position }).toNat).mod psKernelCacheHashModulus)).snd",
+    "    (stringHashWorkerBefore remaining value (String.Pos.Raw.next value { byteIdx := position }).byteIdx",
+    "      (psKernelCacheMix hash (String.Internal.get value { byteIdx := position }).toNat))",
+    "'PsKernelScalarHashWorkerRegression.state_step_commutes' depends on axioms: [propext, Classical.choice, Quot.sound]",
+    "'PsKernelScalarHashWorkerRegression.state_fixed' depends on axioms: [propext, Classical.choice, Quot.sound]",
+    "'PsKernelScalarHashWorkerRegression.scan_eq_before' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]",
+    "'PsKernelScalarHashWorkerRegression.worker_eq_before' depends on axioms: [propext,",
+    " sorryAx,"
+  ],
+  "automaticElaborationPlaceholdersReported": true,
+  "sourceIntroducedSorry": false,
+  "qualification": false,
+  "generatedProducer": {
+    "jobId": 120152910177,
+    "conclusion": "skipped"
+  },
+  "generatedRuntime": {
+    "jobId": 120152909766,
+    "conclusion": "skipped"
+  },
+  "nativeArtifact": {
+    "id": 12466539623,
+    "bytes": 564,
+    "zipSha256": "8087eab82ba636e958d9a4e891efd7703e41aaf8a1f4d2ddcdfa4d12c02c4a74"
+  },
+  "fix": "Add explicit psKernelCacheMix unfolding to scan_eq_before's existing simpa set; theorem statements and assumptions unchanged",
+  "T01F": "OPEN"
+}

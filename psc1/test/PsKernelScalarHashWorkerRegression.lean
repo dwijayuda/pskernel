@@ -79,7 +79,7 @@ theorem scan_eq_before (fuel : Nat) (value : String) (position hash : Nat) :
       cases finished : String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) with
       | false =>
           simpa [psKernelCacheStringHashScan, psKernelCacheStringHashStep,
-            stringHashWorkerBefore, finished] using
+            psKernelCacheMix, stringHashWorkerBefore, finished] using
               ih (String.Pos.Raw.byteIdx
                 (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
                 (psKernelCacheMix hash

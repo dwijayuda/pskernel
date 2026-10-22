@@ -1,46 +1,44 @@
-## Pure byte-step candidate; exact c644 mixed TIMEOUT retained
+## Pure-step proof elaboration fix; e23 failure retained, all new gates pending
 
-The preceding executable `c64425881ca637021c56bf4c985e2d1bd6afa593`
-has terminal [run39867316634](https://github.com/dwijayuda/pskernel/actions/runs/39867316634):
-native120132664257 PASS; producer120133415127 PASS; controls120141720995 PASS;
-mixed120141720969 CANCELLED at the unchanged25-minute job cap. It completed
-294 admissions/377 metadata and the mixed singleton,then402 of403 traced
-calls. Call403,V1RunDag at validity-left,was interrupted. No complete case/
-shard receipt,assertion failure,heap failure,or completed peakRSS was observed.
-All402 completed trace records and exact native/producer/control/artifact
-identities are saved in
+Exact `e23bc44c641117370fee44c0c288b8b41362fbf8` failed native proof
+elaboration in [run39873131163](https://github.com/dwijayuda/pskernel/actions/runs/39873131163),
+job120152146037. Generated producer120152910177 and runtime120152909766
+were correctly SKIPPED. There is no new generated artifact or qualification.
+The scan_eq_before simp proof did not unfold psKernelCacheMix under the
+recursive state argument after the primitive-only step refactor. Lean reported
+automatic sorryAx dependencies for the FAILED proof elaboration; no sorry
+source or unchecked assumption was introduced. The job exited1 before the
+native hash matrix/full String fixture execution. Raw error/artifact details:
+`evidence/2026-10-23-t01f-leaf-native-rejected.json`.
+
+This commit adds only explicit psKernelCacheMix unfolding to that existing
+simpa set. The five theorem statements,proof assumptions,2730-case matrices,
+8190 staged calls,13665 assertions,three long cases,authentic String closure,
+all assertions and resource limits remain unchanged. Native must actually
+elaborate and pass with no sorryAx; no result is inherited from e23 or c644.
+Fetch this corrected source's existing native-first hash preflight and do not
+duplicate it. The small generated pure-leaf gate must pass before full compile.
+
+The production primitive-only byte-step candidate is otherwise unchanged:
+nonrecursive step contains exact arithmetic; immutable data iterator calls it;
+fullHash calls saturated Scan; exported worker retains every partial stage.
+The generated probe refuses generator/run/invoke/wrap machinery in the byte
+step. If the lowering hypothesis fails,stop there; do not suppress the gate.
+
+Preceding c644 mixed run39867316634 timed out at25minutes after402/403 traced
+calls,interrupted V1RunDag validity-left. All294/377 and singleton passed,
+but no complete case/negative/shard receipt. Its full trace/native/producer/
+control/artifact records remain in
 `evidence/2026-10-23-t01f-fused-data-result-mixed-terminal.json`.
+All previous failed/incomplete sources and timing/RSS observations remain
+visible; no controlled speedup or current-source full qualification is claimed.
 
-C644 UTF8-literal-left V1WHNF recorded52338.398165ms; repeated large V1DefEq
-calls there58471–60927ms. All44 completed V1DefEq calls total826264.118534ms.
-Progress moved from377 completed calls at5abf to402,but different runners and
-capped incomplete traces do not establish controlled speedup or qualification.
-Keep the DAG RSS increase(582428KiB vs5abf565200KiB),old cold/warm/heap/Name
-regressions,and all failed/incomplete attempts visible.
-
-This commit tests a narrower pure-data byte-step lowering. The nonrecursive
-exported step now contains the exact primitive arithmetic directly; the data
-iterator calls that step,which should emit a normal function instead of one
-byte-step generator per iteration. Full hash still calls saturated Scan,and
-the public curried worker retains every partial stage. The existing five
-equations,2730 native/generated cases,8190 staged calls,13665 generated
-assertions,three long cases,and all authentic String assertions are UNCHANGED.
-The new small codegen gate refuses any generator/run/invoke/wrap machinery
-inside the step and any staged full-hash entry,before full compilation.
-If the pure-leaf hypothesis fails,stop at that gate; do not suppress it.
-
-This candidate is UNQUALIFIED. Fetch this exact source's existing native-first
-hash preflight,never duplicate it. Preserve fuel4096,2048MiB,emptyPATH,
-native25-minute/producer25-minute/controls10-minute/mixed25-minute caps.
-Only actual complete mixed PASS permits activating the saved final workflows.
-All final native/official/canonical/proof/provider24/API8,research,measurements,
-both six-sample aggregates,32-worker384-call ABBA,and unchanged193 Arena/
-profile gates must still run at the final source. Disable focused/hash/profile
-automatic diagnostics on activation. Draft locations/digests remain in README.
-
-T01F/currentA/B/C/D OPEN; historical scopedA=9c87,historical full193C=FAIL.
-Do not startT05 or move integration123c411. Do not claim DirectJS support,
-global soundness/refinement/backend preservation,or inherited qualification.
+Final workflow drafts remain INACTIVE. Preserve fuel4096,2048MiB,emptyPATH
+and all job caps. T01F/currentA/B/C/D OPEN; historical scopedA=9c87,
+historical full193C=FAIL. Integration stays123c411; do not startT05.
+Only complete mixed PASS permits final activation,then all final-source gates,
+measurements and193-case/profile obligations remain required. Disable narrow
+focused/hash/profile pushes on activation. No DirectJS/global proof claim.
 
 ## Exact 5abf mixed preflight TIMEOUT; current-artifact bounded profile next
 

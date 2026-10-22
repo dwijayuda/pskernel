@@ -280,3 +280,15 @@ Normalize the recursive reference through an explicit local Nat -> Nat worker,
 then apply its accumulator. This uses the existing supported form and keeps
 the original arity validator unchanged. Native equivalence proofs and fresh
 whole-closure/self-host/full CI remain required.
+
+
+## Lexer source identities: proof elaboration correction (2026-10-23)
+
+Manual run39858945154 at4cc36fc8 passes the complete source census and has
+reached generated execution. Companion native job120104888892 refuses the
+new lexLengthAcc_correct proof at321:4: recursive simp unfolding exceeds the
+unchanged proof recursion limit. Replace that simp unfolding with one explicit
+cons reduction, induction-hypothesis rewrite and arithmetic simplification.
+Compiler bytes, statements and resource policies stay identical. The original
+manual run continues to retain its exact source-bound result; fresh companion
+CI must validate this proof correction and all selected release gates.

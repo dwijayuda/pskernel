@@ -318,7 +318,9 @@ private theorem lexLengthAcc_correct {α : Type} (xs : List α) (acc : Nat) :
   induction xs generalizing acc with
   | nil => rfl
   | cons head rest ih =>
-    simpa [psLexListLengthAcc, Nat.succ_add, Nat.add_succ] using ih (Nat.succ acc)
+    change psLexListLengthAcc rest (Nat.succ acc) = acc + (List.cons head rest).length
+    rw [ih]
+    simp [Nat.succ_add, Nat.add_succ]
 
 private theorem lexLength_correct {α : Type} (xs : List α) :
     psLexListLength xs = xs.length := by

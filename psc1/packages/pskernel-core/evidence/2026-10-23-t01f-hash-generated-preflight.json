@@ -1,0 +1,148 @@
+{
+  "schema": "psc1-t01f-hash-generated-narrow-preflight-v1",
+  "observedAt": "2026-10-22T21:30:43.607Z",
+  "sourceSha": "834d267acc246b5bf6ed2d29b19d04d8b87526c4",
+  "sourceTree": "091d29521c54a9765a1cb9c6485e5fd3fe3de645",
+  "runId": 39853314171,
+  "runAttempt": 1,
+  "node": "v22.23.3",
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "typescript": "7.0.2",
+  "native": {
+    "jobId": 120084924212,
+    "conclusion": "success",
+    "receipt": "2026-10-23-t01f-hash-native.json"
+  },
+  "producer": {
+    "jobId": 120086000612,
+    "conclusion": "success",
+    "sourceCheck": "success",
+    "freshCompilation": "success",
+    "fixtureProduction": "success",
+    "kernel": {
+      "bytes": 9954719,
+      "sha256": "d0d43eb8db19f77a3ba370645924f761762086bc160e7526740b9d1633926ffb"
+    },
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "runner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    },
+    "artifact": {
+      "id": 12460485134,
+      "name": "psc1-t01f-hash-generated-producer",
+      "size_in_bytes": 1095153,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12460485134",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12460485134/zip",
+      "expired": false,
+      "created_at": "2026-10-22T21:21:50Z",
+      "expires_at": "2027-01-20T20:57:51Z",
+      "updated_at": "2026-10-22T21:21:50Z",
+      "digest": "sha256:5b7e485d731ebd95df5b3082c7c28487556151c745835ae1bb02f6156611fe69",
+      "workflow_run": {
+        "id": 39853314171,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "834d267acc246b5bf6ed2d29b19d04d8b87526c4"
+      }
+    }
+  },
+  "controls": {
+    "jobId": 120096453339,
+    "conclusion": "success",
+    "hashCases": 2730,
+    "hashStrings": 12,
+    "partialApplicationStages": 8190,
+    "hashAssertions": 13662,
+    "dag": {
+      "seconds": 146.99,
+      "peakRssKiB": 584684
+    },
+    "prefixSession": {
+      "seconds": 36.4,
+      "peakRssKiB": 612100,
+      "positive": 6,
+      "negative": 7,
+      "assertions": 605
+    },
+    "artifact": {
+      "id": 12460036217,
+      "name": "psc1-t01f-hash-runtime-controls",
+      "size_in_bytes": 663690,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12460036217",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12460036217/zip",
+      "expired": false,
+      "created_at": "2026-10-22T21:25:28Z",
+      "expires_at": "2027-01-20T20:57:51Z",
+      "updated_at": "2026-10-22T21:25:28Z",
+      "digest": "sha256:820e627904e51cba6e6e6e8e2dc7a6009037a734c08fbf2810820dce0f8bc2cf",
+      "workflow_run": {
+        "id": 39853314171,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "834d267acc246b5bf6ed2d29b19d04d8b87526c4"
+      }
+    }
+  },
+  "crossRunObservations": {
+    "comparableControlledExperiment": false,
+    "baseline": {
+      "generatedSource": "19fb4b0b8f52808d6a31705185018d6e60836d8e",
+      "harnessSource": "9248c474d705ffaa4a1aba8a0aa7a4ce54e4a303",
+      "runId": 39848120108,
+      "dag": {
+        "seconds": 115.11,
+        "peakRssKiB": 628496
+      },
+      "prefixSession": {
+        "seconds": 28.17,
+        "peakRssKiB": 422628
+      }
+    },
+    "candidateOverPrevious": {
+      "dagSeconds": 1.2769524802362957,
+      "dagPeakRss": 0.9302907257961864,
+      "prefixSeconds": 1.2921547745828894,
+      "prefixPeakRss": 1.4483186158986154
+    },
+    "disposition": "Retain all observations including higher time and prefix RSS. Different runner executions do not establish causal regression or improvement; unchanged controlled owner ABBA and final source measurements remain required. D stays open."
+  },
+  "codegen": {
+    "sourceSha": "834d267acc246b5bf6ed2d29b19d04d8b87526c4",
+    "kernelSha256": "d0d43eb8db19f77a3ba370645924f761762086bc160e7526740b9d1633926ffb",
+    "generatedHelper": "psKernelCacheStringHashScan_$psc0SH_0",
+    "helperExplicitArgs": [
+      "fuel",
+      "value"
+    ],
+    "remainingStagedArgs": [
+      "position",
+      "hash"
+    ],
+    "verifiedBy": "Static read of ZIP SHA2565b7e485d731ebd95df5b3082c7c28487556151c745835ae1bb02f6156611fe69, exact primary kernel digest checked",
+    "inference": "Source saturation preserves ABI/output but current portable lowering still emits two staged closures in its recursive helper. Do not claim all generated per-character closure overhead is removed; complete mixed execution and comparable performance remain required."
+  },
+  "mixed": {
+    "jobId": 120096453413,
+    "statusAtWrite": "in_progress",
+    "sourceQualified": false,
+    "completeCaseReceiptObserved": false,
+    "jobMinutes": 25,
+    "sampleIndex": 5,
+    "sample": "Aé€😀"
+  },
+  "T01F": "NOT COMPLETE",
+  "A": "Historical9c scoped PASS; current final-source qualification pending",
+  "B": "OPEN",
+  "C": "No current Arena; historical193 remains failed",
+  "D": "OPEN; no performance qualification"
+}

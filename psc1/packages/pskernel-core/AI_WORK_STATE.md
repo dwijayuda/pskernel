@@ -1,3 +1,41 @@
+## Exact834 generated producer and retained controls PASS; mixed pending
+
+At exact `834d267acc246b5bf6ed2d29b19d04d8b87526c4`,
+run39853314171 producer120086000612 PASS: complete authentic source check,
+fresh TypeScript7.0.2/Node22 compilation and genuine fixture production.
+Kernel9954719bytes, SHA256`d0d43eb8db19f77a3ba370645924f761762086bc160e7526740b9d1633926ffb`;
+artifact12460485134. Controls120096453339 PASS:2730 scalar-hash cases,
+8190 public partial stages,13662 assertions, retained DAG/minimal String,
+605 prefix assertions and prior-session controls. Native120084924212 also PASS.
+
+Mixed120096453413 is ALREADY RUNNING at834 under the unchanged25-minute
+runtime job cap. Fetch its terminal state; do not duplicate it. No complete
+mixed sample, full matrix, both-route or final-source qualification exists yet.
+See `evidence/2026-10-23-t01f-hash-generated-preflight.json` for exact producer,
+artifact and observed-control bindings.
+
+Static inspection of the authenticated compiled kernel shows the portable
+lowering still emits `psKernelCacheStringHashScan_$psc0SH_0` with explicit
+fuel/value and TWO staged position/hash closures. The source worker does not
+remove all generated per-character closure overhead. Native equivalence and
+finite generated ABI/output controls pass; a speedup is not established.
+
+Retain cross-run observations: DAG146.99s/584684KiB and prefix/session
+36.40s/612100KiB, versus previous19fb115.11s/628496KiB and28.17s/422628KiB.
+These different runner executions are not a controlled causal comparison.
+The larger time and prefix peak-RSS observations must remain visible until
+comparable measurements resolve them. D remains open; no general improvement
+or release-performance qualification is claimed.
+
+The containing checkpoint changes documentation/drafts only. Its HEAD is
+separate from tested executable834. Integration remains123c411; fully qualified
+scoped A remains9c87. Final drafts remain inactive, and T05 remains blocked.
+If834 mixed passes, execute the reconciled exact-source full suite; if it
+fails or times out, use its trace and the verified remaining staged-helper
+lowering to choose a concrete next fix. Preserve all limits and assertions.
+
+---
+
 ## Exact834 native PASS; existing generated preflight pending
 
 Executable candidate: `834d267acc246b5bf6ed2d29b19d04d8b87526c4`.

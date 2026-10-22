@@ -243,3 +243,28 @@ The complete 64-condition/64-equality size and kernel probes, original source
 corpus, all resource ceilings, independent admission and strict IR remain.
 Latest remote HEAD was refreshed after resume: f1a3384b; PR remains draft/open,
 base 1fad9ed5, with no concurrent branch update or qualification promotion.
+
+## Linear sharing validated; finite Nat helper lifting
+
+Source 2919c7b9 / run 39758498052 passes native and its four official-admission/
+strict-IR size probes: 64 conjunctions use 1452 nodes / 65911 bytes; nested
+equalities use 3331 nodes / 150395 bytes in each grammar. Dependent let result
+closure and all negative/fuel probes pass. The eighteen-case semantic wrapper
+drops from 3145709 to 430 nodes and admissions from 138242867 to 374615 bytes.
+Measured capture/preparation/admission/erasure drops from 39238 to 360 ms for the
+profiled JS bundle, with every correctness check retained. JS/TS complete the
+first grammar. Rust now conclusively overflows on streamingControllerCase true,
+after all earlier collection/range/controller paths pass; huge immediate return
+passes. Fixed 100000 actions and the debug Rust consumer are retained.
+
+Reuse the existing checked loop-lifting architecture for finite Nat controllers.
+Concrete private helpers stay total Nat.rec definitions. Normalize only
+administrative beta work, keep strict nonvalue lets and original captures, and
+eta-expand the already evaluated continuation base. Existing closed worker fusion
+can expose direct tail recurrence to the native backends. Every new helper also
+emits an erased predicate-equivalence theorem comparing it with the original
+checked deferred fold; official Lean admission is mandatory. No function ABI,
+runtime schema, resource ceiling, partial profile or ordinary witness rule is
+relaxed. Public and private source origins remain tied to the original declaration.
+This Nat lifting is implemented eligibility, not qualification; List/Array
+continue through the existing checked deferred iterator pending broader evidence.

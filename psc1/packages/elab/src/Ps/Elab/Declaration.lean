@@ -2,6 +2,7 @@ import Ps.Core.Declaration
 import Ps.Core.Equality
 import Ps.Elab.Recursion
 import Ps.Elab.DoLoopLift
+import Ps.Elab.DoForLift
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -100,13 +101,15 @@ def psElabBatchOriginAt
     (Prod.fst sourceOrigin) (Prod.snd sourceOrigin) members normalization
 
 def psElabStableMemberRole (declaration : PsDeclaration) : PsElabOriginRole :=
-  match declaration with
-  | PsDeclaration.inductiveDecl info =>
-      if info.isStructure then PsElabOriginRole.structureType
-      else PsElabOriginRole.inductiveType
-  | PsDeclaration.constructorDecl _ => PsElabOriginRole.constructor
-  | PsDeclaration.recursorDecl _ => PsElabOriginRole.recursor
-  | _ => PsElabOriginRole.sourceDeclaration
+  if psElabDoForIsLiftedName (psDeclarationName declaration) then PsElabOriginRole.normalizedWorker
+  else
+    match declaration with
+    | PsDeclaration.inductiveDecl info =>
+        if info.isStructure then PsElabOriginRole.structureType
+        else PsElabOriginRole.inductiveType
+    | PsDeclaration.constructorDecl _ => PsElabOriginRole.constructor
+    | PsDeclaration.recursorDecl _ => PsElabOriginRole.recursor
+    | _ => PsElabOriginRole.sourceDeclaration
 
 def psElabStableMemberOriginsFold (declarations : List PsDeclaration) :
     Nat -> List PsElabMemberOrigin :=
@@ -1541,6 +1544,12 @@ def psElabNormalizedDefinition
   | Except.error failure => Except.error failure.error
   | Except.ok result => Except.ok (psElabNormalizedDefinitionBatch result)
 
+def psElabDoForBatch (environment : PsEnvironment) (declarations : List PsDeclaration) :
+    Except PsElabError PsElabDeclarationBatchResult :=
+  match psElabDoForLiftDeclarations environment declarations with
+  | Except.error error => Except.error error
+  | Except.ok lifted => Except.ok (PsElabDeclarationBatchResult.mk lifted)
+
 def psElabDeclarationBatchStable
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
@@ -1571,8 +1580,8 @@ def psElabDeclarationBatchStable
               match psElabDoLoopLiftDeclaration environment name levels type value with
               | Except.error error => Except.error error
               | Except.ok declarations =>
-                  Except.ok (PsElabDeclarationBatchResult.mk declarations)
-          | _ => Except.ok (PsElabDeclarationBatchResult.mk [result.declaration])
+                  psElabDoForBatch environment declarations
+          | _ => psElabDoForBatch environment [result.declaration]
 
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same

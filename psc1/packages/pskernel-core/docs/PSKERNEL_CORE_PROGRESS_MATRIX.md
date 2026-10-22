@@ -1,3 +1,37 @@
+## Exact 5abf mixed preflight TIMEOUT; current-artifact bounded profile next
+
+Executable `5abf40506564cad00ff518600ae5992dc826510e` has terminal
+[run 39860528417](https://github.com/dwijayuda/pskernel/actions/runs/39860528417):
+native 120109760162 PASS; producer 120110557932 PASS; controls 120118769801
+PASS; mixed 120118769683 CANCELLED at the unchanged 25-minute job cap.
+The mixed singleton passed, all 294 requests/377 metadata checks completed,
+and 377 of 378 traced calls completed. Call 378, V1 DefEq at
+`utf8-ofList-left`, was interrupted. No complete case/shard receipt, assertion
+failure, heap failure, or completed peak-RSS measurement was observed.
+All completed trace records and exact source/artifact bindings are retained in
+`evidence/2026-10-23-t01f-data-result-mixed-terminal.json`.
+
+Current UTF8-literal-left V1 WHNF recorded 66895.09929 ms; repeated large
+V1 DefEq calls there recorded 75875–77903 ms. Different hosted runners and
+incomplete capped traces do not establish a controlled causal speedup.
+The exact local equations, matrix and code-shape improvements remain scoped
+evidence; the full mixed sample remains unfinished. Keep all prior 19fb/834
+timeouts and DAG/prefix RSS/timing observations visible. Do not raise caps,
+remove assertions, replace authentic declarations, or claim T01F completion.
+
+The updated narrow `psc1-pskernel-t01f-v1-profile.yml` reuses only the exact
+authenticated 5abf producer artifact 12461534544. It performs the unchanged
+full 294-request/377-metadata prefix, then the measured UTF8-literal V1 WHNF
+under the existing 180-second diagnostic deadline, 10-minute job cap,
+fuel4096, empty PATH and 2048MiB old-space. It records separate generated/
+harness source SHAs and never emits a full String acceptance receipt.
+Fetch its already-triggered current run before launching anything else.
+
+Final sharding workflows remain INACTIVE. T01F, current-source A, B, C and D
+remain open; historical scoped A is 9c87; historical full193 C remains FAIL.
+Do not start T05. Integration stays 123c411. Read the terminal profile before
+selecting another narrow source change; rerun appropriate source-bound gates.
+
 ## Exact 5abf generated producer and retained controls PASS; mixed replay pending
 
 Executable source: `5abf40506564cad00ff518600ae5992dc826510e`.

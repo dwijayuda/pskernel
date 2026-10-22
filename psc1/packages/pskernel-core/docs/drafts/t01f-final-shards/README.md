@@ -8,7 +8,8 @@ partial-application stages and three long ASCII/Unicode cases on both routes.
 
 Exact 5abf40506564cad00ff518600ae5992dc826510e passed its own native preflight
 in run39860528417. Its authentic generated producer and retained controls passed; the unchanged
-mixed sample is still pending in job120118769683. Read the newest
+mixed sample timed out at its 25-minute cap in job120118769683. The current-
+artifact bounded profile is the next diagnostic. Read the newest
 [continuation](../../AI_CONTINUATION_PROMPT.md) and package AI_WORK_STATE.md.
 Do not inherit834's subset passes or discard its failed mixed timeout.
 
@@ -28,8 +29,8 @@ The helper and paired-owner fragment are unchanged from handoff34f06a19.
 
 ## Activation prerequisites
 
-Finish the current complete unchanged mixed-sample preflight under its25-minute
-runtime job cap. Fix actual proof/source/codegen/runtime failures first.
+Complete the unchanged mixed-sample preflight under its25-minute runtime cap;
+5abf's attempt timed out and is not a completed qualification. Fix actual proof/source/codegen/runtime failures first.
 Then activate at one coherent exact source, disable narrow diagnostic push
 triggers to avoid duplicates, and add only the work-branch trigger to:
 

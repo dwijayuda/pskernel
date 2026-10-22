@@ -1,5 +1,26 @@
 # PSKernel-Core completion plan — Lean 4.35.0
 
+## Current work-branch T01F checkpoint — unqualified handoff
+
+The active work branch is `work/psc1-pskernel-t01f-string-20261022`.
+The genuine actual-Init String fixture now independently admits294 requests
+into377 declarations and checks all six samples. Exact
+`a36839347269d05f5a79d6103a7a4b0ddab1bdb1` passed its native singleton
+preflight ([39829443557](https://github.com/dwijayuda/pskernel/actions/runs/39829443557)).
+Production lookup-worker source `19fb4b0b8f52808d6a31705185018d6e60836d8e`
+passed native preflight; its fresh generated run39827244691 was cancelled at the
+unchanged25-minute cap after complete empty/ASCII cases. Later cases and
+retained generated controls did not complete. No full T01F qualification exists.
+
+This handoff adds an unexecuted strict selector and artifact-reuse diagnostic;
+complete generated/canonical shard workflows remain saved drafts. Review
+[the continuation](AI_CONTINUATION_PROMPT.md), [draft instructions](drafts/t01f-final-shards/README.md)
+and [source-bound checkpoint](../evidence/2026-10-22-t01f-handoff-checkpoint.json).
+Complete T01F before T05 or other inductive-admission migration. Historical9c
+remains the last complete scoped qualification; B/C/D remain open. No new Arena
+or controlled performance qualification is claimed. The containing handoff
+commit has no CI and inherits no parent qualification.
+
 Execution receipt: **2026-10-22 16:52:53 WIB (2026-10-22 09:52:53 UTC)**. T03b preexisting-session ownership is
 implemented and scoped A-qualified at exact
 `9c87f631758862285273ddb0ea0a3987c671022e`: own integration39694087886,
@@ -86,7 +107,7 @@ Owners: `Checker/ExprV2/Projection.lean`, `WhnfOwned.lean`, `Whnf.lean`, `String
 
 Acceptance for the focused slice: native and both generated routes exercise direct success without outer fallback in the documented minimal fixture environment; valid empty/nonempty/Unicode String cases agree with the applicable V1/official controls; invalid field/family/ill-typed controls fail correctly; zero/near-bound fuel, depth, callback errors and state-marker probes preserve exact results. Existing String/recursor, private-ID and universe-negative suites remain unchanged. Record before/after public-operation timing; do not describe a coverage addition as a whole-kernel speedup.
 
-**T01F — full String environment follow-up:** the focused fixture does not install the complete actual `String.ofList` implementation and dependencies. Test genuine `String.ofList` expansion with an independently checked complete declaration environment, including actual constructor/list/character reduction and public checking. Preserve this as open until native and both generated routes execute it correctly. Minimal fixture success must not be presented as complete full-environment String qualification. T03a ownership can proceed after the focused slice; T01F is required before B/C completion.
+**T01F — full String environment follow-up:** the separate minimal fixture remains retained. The work-branch authentic fixture now reads the actual pinned declaration closure and independently admits294 requests into377 declarations, including genuine constructor/list/character reduction, projections and separate/reused public checking. Native singleton preflight at a368 passed. Fresh generated preflight at19fb timed out before completing the matrix; final generated/canonical qualification remains open. Finish the saved bounded shard qualification on both authentic routes and retain all negatives. Minimal or native-only success must not be presented as complete full-environment String qualification. T01F is required before T05 and B/C completion.
 
 Dependency: T00. If the containing implementation already completed T01, retain its receipt and update the matrix rather than reimplementing it; after the qualified T03b slice, execute T01F as the next bounded task. The additional cheapRec/public-WHNF cache-isolation defect discovered during implementation must retain its reproducer and dedicated negative mode-crossing controls; follow the containing audit/work-state for its exact source receipt.
 

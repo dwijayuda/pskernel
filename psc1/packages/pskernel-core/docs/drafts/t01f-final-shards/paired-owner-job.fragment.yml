@@ -1,0 +1,260 @@
+  # Optional same-run regression job. Add under jobs: in the final-source
+  # psc1-pskernel-expr-v2-integration.yml; no compiler or kernel rebuild occurs.
+  paired-initial-owner:
+    needs: [native-dag-integration, generated-dag-integration]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate exact historical and current generated provider bundles
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, hashlib, io, json, os, pathlib, re, stat, urllib.request, zipfile
+          REPO = "dwijayuda/pskernel"
+          API = "https://api.github.com/repos/" + REPO
+          WORKFLOW = ".github/workflows/psc1-pskernel-expr-v2-integration.yml"
+          LEAN = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          DRIVER_SOURCE = "4ebfd97b4588f8651e8b7a81bc00b2a05cfe1e3c"
+          DRIVER_PATH = "psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs"
+          DRIVER_SHA256 = "7c8a82758b90958d973623d26e4c4dfbd900126cd737c190adffb76cb1563221"
+          BASELINE_SOURCE = "9c87f631758862285273ddb0ea0a3987c671022e"
+          BASELINE_RUN, BASELINE_ARTIFACT = 39694087886, 12391568345
+          BASELINE_BYTES = 3410883
+          BASELINE_ZIP_SHA256 = "6c63a2fa2981610f14e91e3aeb37ae6f00e5fdc1107a4c942841d25208af3ff7"
+          BASELINE_KERNEL_SHA256 = "f1ac31f1527103877268b5dea86075795401fc7679357878064f9194e0e9fd32"
+          PREFIX = "dist/expr-v2/integration/provider/"
+          FILES = {"kernel.js", "kernel.ts", "kernel.d.ts", "kernel.js.map",
+                   "scripts/pskernel-canonical-provider.mjs",
+                   "npm-runtime/canonical-admissions-wire.mjs", "package.json", "README.md"}
+          LIMIT = 256 * 1024 * 1024
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-t01f-owner-pair"
+          out.mkdir()
+          candidate_source = os.environ["GITHUB_SHA"]
+          candidate_run = int(os.environ["GITHUB_RUN_ID"])
+          assert re.fullmatch(r"[0-9a-f]{40}", candidate_source)
+          assert candidate_source != BASELINE_SOURCE
+          assert os.environ["GITHUB_REPOSITORY"] == REPO
+          def sha(data):
+              return hashlib.sha256(data).hexdigest()
+          def get(route):
+              request = urllib.request.Request(API + route, headers={
+                  "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"})
+              # Authenticate the API request; do not forward the token to signed blob redirects.
+              request.add_unredirected_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  data = response.read(LIMIT + 1)
+              assert len(data) <= LIMIT
+              return data
+          def api(route):
+              value = json.loads(get(route))
+              assert isinstance(value, dict)
+              return value
+          def one(values, predicate):
+              matches = [value for value in values if predicate(value)]
+              assert len(matches) == 1, matches
+              return matches[0]
+          def suffix(names, value):
+              return one(names, lambda name: name == value or name.endswith("/" + value))
+          def restore(label, source, run_id, fixed_artifact=None):
+              run = api("/actions/runs/" + str(run_id))
+              assert run["id"] == run_id and run["head_sha"] == source and run["path"] == WORKFLOW
+              assert run["repository"]["full_name"] == run["head_repository"]["full_name"] == REPO
+              if label == "baseline":
+                  assert run["status"] == "completed" and run["conclusion"] == "success"
+              else:
+                  # This job keeps its own enclosing workflow running. Both producer jobs,
+                  # rather than the enclosing run, must already have terminal success.
+                  assert run_id == candidate_run and source == candidate_source
+                  assert run["status"] == "in_progress" or (
+                      run["status"] == "completed" and run["conclusion"] == "success")
+              response = api("/actions/runs/" + str(run_id) + "/jobs?per_page=100")
+              jobs = response["jobs"]
+              assert response["total_count"] == len(jobs)
+              producers = []
+              for name in ("native-dag-integration", "generated-dag-integration"):
+                  job = one(jobs, lambda value: value["name"] == name)
+                  assert job["status"] == "completed" and job["conclusion"] == "success"
+                  producers.append({"id": job["id"], "name": name, "conclusion": job["conclusion"]})
+              response = api("/actions/runs/" + str(run_id) + "/artifacts?per_page=100")
+              assert response["total_count"] == len(response["artifacts"])
+              metadata = one(response["artifacts"], lambda value:
+                  value["name"] == "psc1-v2-dag-generated-js" and
+                  (fixed_artifact is None or value["id"] == fixed_artifact))
+              assert not metadata["expired"]
+              assert metadata["workflow_run"]["id"] == run_id
+              assert metadata["workflow_run"]["head_sha"] == source
+              assert re.fullmatch(r"sha256:[0-9a-f]{64}", metadata["digest"])
+              raw = get("/actions/artifacts/" + str(metadata["id"]) + "/zip")
+              assert len(raw) == metadata["size_in_bytes"] and sha(raw) == metadata["digest"][7:]
+              if label == "baseline":
+                  assert len(raw) == BASELINE_BYTES and sha(raw) == BASELINE_ZIP_SHA256
+              (out / (label + ".zip")).write_bytes(raw)
+              with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
+                  members = {}
+                  for member in bundle.infolist():
+                      name = member.filename
+                      assert not name.startswith("/") and "\\" not in name
+                      assert ".." not in pathlib.PurePosixPath(name).parts
+                      if member.is_dir():
+                          continue
+                      assert name not in members and 0 <= member.file_size <= LIMIT
+                      assert ((member.external_attr >> 16) & 0o170000) in (0, stat.S_IFREG)
+                      members[name] = member
+                  manifest_name = suffix(members, PREFIX + "artifacts.json")
+                  manifest_raw = bundle.read(manifest_name)
+                  manifest = json.loads(manifest_raw)
+                  assert manifest["schema"] == "pskernel-core-artifacts-v1"
+                  assert manifest["repository"] == REPO and manifest["sourceSha"] == source
+                  assert manifest["workflowRun"] == "https://github.com/" + REPO + "/actions/runs/" + str(run_id)
+                  assert manifest["runAttempt"] == str(run["run_attempt"])
+                  assert manifest["kind"] == "lean-generated-js"
+                  assert manifest["leanToolchain"] == "leanprover/lean4:v4.35.0"
+                  assert manifest["leanCommit"] == LEAN and manifest["typescript"] == "7.0.2"
+                  assert manifest["checkerFuelDefault"] == 4096
+                  assert re.fullmatch(r"v22\.[0-9]+\.[0-9]+", manifest["node"])
+                  records = manifest["files"]
+                  assert len(records) == len(FILES)
+                  assert {record["path"] for record in records} == {PREFIX + name for name in FILES}
+                  bundle_root = manifest_name[:-len("artifacts.json")]
+                  restored = {}
+                  for record in records:
+                      relative = record["path"][len(PREFIX):]
+                      member = bundle_root + relative
+                      assert member in members
+                      data = bundle.read(member)
+                      assert data and len(data) == record["bytes"] and sha(data) == record["sha256"]
+                      restored[relative] = data
+                  assert json.loads(restored["package.json"]) == {"private": True, "type": "module"}
+                  source_map = json.loads(restored["kernel.js.map"])
+                  assert source_map["version"] == 3 and source_map["sources"] and source_map["mappings"]
+                  for index, name in enumerate(source_map["sources"]):
+                      contents = source_map.get("sourcesContent", [])
+                      if index < len(contents) and isinstance(contents[index], str):
+                          continue
+                      assert isinstance(name, str) and not name.startswith("/")
+                      assert ".." not in pathlib.PurePosixPath(name).parts
+                      assert source_map.get("sourceRoot", "") in ("", ".") and name in restored
+                  primary = bundle.read(suffix(members, "psc1/dist/expr-v2/integration/kernel.js"))
+                  assert primary == restored["kernel.js"]
+                  if label == "baseline":
+                      assert sha(primary) == BASELINE_KERNEL_SHA256
+                  session_log = bundle.read(suffix(members, "psc1-generated-prefix-js.log")).decode("utf-8")
+                  assert "PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2" in session_log.splitlines()
+              runtime = out / label
+              runtime.mkdir()
+              for relative, data in restored.items():
+                  target = runtime / relative
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+              (runtime / "artifacts.json").write_bytes(manifest_raw)
+              return {"sourceSha": source, "producerRun": run_id, "producerRunAttempt": run["run_attempt"],
+                      "producerJobs": producers, "artifactId": metadata["id"],
+                      "artifactBytes": len(raw), "artifactSha256": sha(raw),
+                      "kernelSha256": sha(restored["kernel.js"]), "manifestSha256": sha(manifest_raw),
+                      "files": records, "producerNode": manifest["node"], "producerTypescript": manifest["typescript"],
+                      "runtime": str(runtime), "role": "authentic Lean-source PSC1/TypeScript provider bundle"}
+          baseline = restore("baseline", BASELINE_SOURCE, BASELINE_RUN, BASELINE_ARTIFACT)
+          candidate = restore("candidate", candidate_source, candidate_run)
+          driver_record = api("/contents/" + DRIVER_PATH + "?ref=" + DRIVER_SOURCE)
+          assert driver_record["type"] == "file" and driver_record["encoding"] == "base64"
+          assert driver_record["sha"] == "9fcf6d6b5ea969fdad79f5f9f2b1f2459cbe2080"
+          driver = base64.b64decode(driver_record["content"])
+          assert sha(driver) == DRIVER_SHA256
+          (out / "driver.mjs").write_bytes(driver)
+          receipt = {"schema": "psc1-t01f-owner-pair-authentication-v1", "repository": REPO,
+                     "workflowSource": candidate_source, "workflowRun": candidate_run,
+                     "driverSource": DRIVER_SOURCE, "driverPath": DRIVER_PATH, "driverSha256": DRIVER_SHA256,
+                     "baseline": baseline, "candidate": candidate, "compilerReexecuted": False,
+                     "scope": "Narrow paired owner regression; full qualification remains tied to terminal producer workflows."}
+          (out / "authentication.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_T01F_OWNER_PAIR_AUTHENTICATED " + json.dumps(receipt, sort_keys=True))
+          PY
+      - name: Execute the unchanged 32-worker complete-call ABBA driver
+        timeout-minutes: 35
+        run: |
+          set -euo pipefail
+          PSC1_PAIR_NODE="$(command -v node)"
+          PSC1_PAIR_DIR="$RUNNER_TEMP/psc1-t01f-owner-pair"
+          "$PSC1_PAIR_NODE" --version
+          "$PSC1_PAIR_NODE" --check "$PSC1_PAIR_DIR/driver.mjs"
+          "$PSC1_PAIR_NODE" --check "$PSC1_PAIR_DIR/candidate/kernel.js"
+          "$PSC1_PAIR_NODE" --check "$PSC1_PAIR_DIR/baseline/kernel.js"
+          cd "$RUNNER_TEMP"
+          env PATH="" "$PSC1_PAIR_NODE" "$PSC1_PAIR_DIR/driver.mjs" \
+            "$PSC1_PAIR_DIR/candidate/kernel.js" "$PSC1_PAIR_DIR/baseline/kernel.js" \
+            "$PSC1_PAIR_DIR/measurements" "$GITHUB_SHA" \
+            "9c87f631758862285273ddb0ea0a3987c671022e" \
+            2>&1 | tee "$PSC1_PAIR_DIR/collection.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_BENCH: PASS workers=32 calls=384 sizes=32,128 queries=4' \
+            "$PSC1_PAIR_DIR/collection.log"
+      - name: Bind all measurements to exact artifact bytes and unchanged resource policy
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-t01f-owner-pair"
+          auth = json.loads((root / "authentication.json").read_text())
+          report_path = root / "measurements/initial-owner-complete-batch.json"
+          report = json.loads(report_path.read_text())
+          sha = lambda data: hashlib.sha256(data).hexdigest()
+          assert auth["candidate"]["sourceSha"] == report["candidateSha"] == os.environ["GITHUB_SHA"]
+          assert auth["baseline"]["sourceSha"] == report["baselineSha"] == "9c87f631758862285273ddb0ea0a3987c671022e"
+          assert report["schema"] == "psc1-initial-owner-complete-batch-v1"
+          assert report["limits"] == {"kernelFuel": 4096, "hostPerWorkerSeconds": 60,
+                                      "v8OldSpaceMiB": 2048, "hardRssLimitClaim": False}
+          assert report["callsPerWorker"] == {"cold": 1, "warmup": 2, "warm": 9}
+          assert report["expectedWorkers"] == report["completedWorkers"] == 32
+          assert report["validatedCalls"] == 384 and report["failures"] == []
+          expected = {(size, query, position, label)
+                      for size in (32, 128)
+                      for query in ("trivial-sort", "owned-constant", "unknown-constant", "ill-typed-definition")
+                      for position, label in enumerate(("baseline", "candidate", "candidate", "baseline"))}
+          assert len(report["workers"]) == 32
+          assert {(row["owners"], row["query"], row["position"], row["label"])
+                  for row in report["workers"]} == expected
+          for label in ("baseline", "candidate"):
+              assert report["expectedDigests"][label] == auth[label]["kernelSha256"]
+              assert sha((root / label / "kernel.js").read_bytes()) == auth[label]["kernelSha256"]
+          assert report["driverSha256"] == auth["driverSha256"] == sha((root / "driver.mjs").read_bytes())
+          for row in report["workers"]:
+              assert row["sourceSha"] == auth[row["label"]]["sourceSha"]
+              assert row["kernelSha256"] == auth[row["label"]]["kernelSha256"]
+              assert row["validated"] == 12 and row["kernelFuel"] == "4096"
+              assert len(row["warmup"]) == 2 and len(row["warm"]) == 9
+              assert row["hostWallDeadlineSeconds"] == 60 and row["v8OldSpaceMiB"] == 2048
+              assert row["hardRssLimitClaim"] is False and row["node"].startswith("v22.")
+          receipt = {"schema": "psc1-t01f-owner-pair-receipt-v1",
+                     "candidateSource": report["candidateSha"], "baselineSource": report["baselineSha"],
+                     "workflowRun": int(os.environ["GITHUB_RUN_ID"]), "driverSource": auth["driverSource"],
+                     "driverSha256": report["driverSha256"], "reportSha256": sha(report_path.read_bytes()),
+                     "authenticationSha256": sha((root / "authentication.json").read_bytes()),
+                     "workers": 32, "validatedCalls": 384, "allSourceAndArtifactBindingsMatched": True,
+                     "performanceThresholdClaim": False, "hardRssLimitClaim": False,
+                     "wholeKernelSpeedupClaim": False, "kernelCompiledHere": False}
+          (root / "measurements/authenticated-comparison.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_T01F_OWNER_PAIR_RECEIPT " + json.dumps(receipt, sort_keys=True))
+          print("PSC1_T01F_OWNER_PAIR_SUMMARY " + json.dumps(
+              {key: value for key, value in report.items() if key != "workers"}, sort_keys=True))
+          PY
+      - name: Present complete and incomplete measurements
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/psc1-t01f-owner-pair/measurements/initial-owner-complete-batch.md"; then
+            cat "$RUNNER_TEMP/psc1-t01f-owner-pair/measurements/initial-owner-complete-batch.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-owner-pair-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/psc1-t01f-owner-pair/
+

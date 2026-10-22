@@ -1,5 +1,26 @@
 # PSKernel-Core progress matrix
 
+## Current work-branch T01F checkpoint — unqualified handoff
+
+The active work branch is `work/psc1-pskernel-t01f-string-20261022`.
+The genuine actual-Init String fixture now independently admits294 requests
+into377 declarations and checks all six samples. Exact
+`a36839347269d05f5a79d6103a7a4b0ddab1bdb1` passed its native singleton
+preflight ([39829443557](https://github.com/dwijayuda/pskernel/actions/runs/39829443557)).
+Production lookup-worker source `19fb4b0b8f52808d6a31705185018d6e60836d8e`
+passed native preflight; its fresh generated run39827244691 was cancelled at the
+unchanged25-minute cap after complete empty/ASCII cases. Later cases and
+retained generated controls did not complete. No full T01F qualification exists.
+
+This handoff adds an unexecuted strict selector and artifact-reuse diagnostic;
+complete generated/canonical shard workflows remain saved drafts. Review
+[the continuation](AI_CONTINUATION_PROMPT.md), [draft instructions](drafts/t01f-final-shards/README.md)
+and [source-bound checkpoint](../evidence/2026-10-22-t01f-handoff-checkpoint.json).
+Complete T01F before T05 or other inductive-admission migration. Historical9c
+remains the last complete scoped qualification; B/C/D remain open. No new Arena
+or controlled performance qualification is claimed. The containing handoff
+commit has no CI and inherits no parent qualification.
+
 Execution update: **2026-10-22 16:52:53 WIB (2026-10-22 09:52:53 UTC)**. T03b preexisting-session ownership is
 implemented at exact `9c87f631758862285273ddb0ea0a3987c671022e`. Its own native/official, both authentic generated, canonical, local proof, provider and six research gates PASS. The full193 comparison is FAIL; complete benchmark collection passes with documented time and incremental-retained-heap regressions. D remains OPEN and the source is not performance-qualified.
 Its terminal source-bound receipt is separate from any later documentation-only
@@ -28,7 +49,7 @@ Implementation and qualification are independent columns. `Open` does not negate
 | Complete seven-field checker owner | Implemented, including admission/public-WHNF boundary | Exact9c87f631 native and both generated routes PASS | T00 | Original full carrier42/56/540/38/44 and admission8/12/336/public-WHNF168 plus local proofs, both generated routes | P0 retained |
 | K and Nat/String/structure recursor-major normalization | Implemented and retained | Exact9c87f631 native and both generated routes PASS | T00 | Retained major126/504/360/432, K108/432/648/96, private-ID/universe negatives and genuine official checked declarations | P0 retained |
 | T01 String-literal projection WHNF | Bounded minimal-environment slice implemented | Exact9c87f631 native and both generated routes PASS, including1296projection/16decline/32error observations | T00 | Direct-path String projection positives/negatives, callback ownership and exact resource results; V1/official controls | P0 retained |
-| T01F Full actual String environment | Complete actual String.ofList declaration environment not exercised by focused fixture | Open; next executable task | T01, T03a owning references | Genuine complete-environment native/official/generated String.ofList expansion and projection; do not infer from minimal fixture | Next P1 |
+| T01F Full actual String environment | Actual294-request/377-declaration fixture and six semantic/singleton groups implemented; lookup worker locally proved; unexecuted sharding follow-up saved | Native a368 run39829443557 PASS;19fb generated run39827244691 CANCELLED before full matrix; both final generated routes and final-suite qualification pending | T01, T03a owning references; finish before T05 | Genuine complete-environment native/official/generated String.ofList expansion, projections and separate/reused public calls; all negatives and both six-shard aggregates | Immediate P1 |
 | T02a Explicit-argument cache search worker | Implemented; first-match semantics retained | Exact9c87f631 native and both generated routes, frozen-worker equations/axioms PASS; no speedup qualification | T00 | First-match/no-hit/collision/duplicate lookup, proof audit and public operation parity | P0 retained |
 | T02b Scoped exact ID/pair cache index | Open | Not run | T02a, measured probe attribution | Collision and unique lookup matrices, owner/mode/scope controls, ABBA binder/chain/collision timings and memory | P1 |
 | T02c Checked app/lam/forall inference reuse | Open architectural gap; do not toggle eligibility alone | Not run | T02b, explicit scope/owner/mode invariant | Checked versus infer-only separation, context changes, scope exit, stale-owner negatives and same-run repeated-subterm cost | P1 |

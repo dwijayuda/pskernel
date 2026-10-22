@@ -1,0 +1,211 @@
+{
+  "kind": "unfinished-t01f-handoff",
+  "qualification": "NOT_QUALIFIED",
+  "handoff_ci": "not launched; commit uses [skip ci]",
+  "repository": "dwijayuda/pskernel",
+  "work_branch": "work/psc1-pskernel-t01f-string-20261022",
+  "integration_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "last_observed_integration_head": "123c41197950b6761be965fd21c57142ee2b0d1c",
+  "handoff_parent_sha": "a36839347269d05f5a79d6103a7a4b0ddab1bdb1",
+  "production_source_sha": "19fb4b0b8f52808d6a31705185018d6e60836d8e",
+  "last_complete_scoped_qualified_executable": "9c87f631758862285273ddb0ea0a3987c671022e",
+  "note": "The containing handoff commit must be resolved independently. No evidence is inherited by that commit. Saved workflow/helper drafts are unexecuted.",
+  "lean": {
+    "version": "v4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "limits": {
+    "fuel": 4096,
+    "node_old_space_mib": 2048,
+    "arena_seconds_per_case": 60,
+    "arena_workers": 2,
+    "string_shard_job_minutes": 25,
+    "string_shard_max_parallel_per_route": 2
+  },
+  "current_fixture": {
+    "raw_requests": 294,
+    "independently_admitted_declarations": 377,
+    "source_axioms_admitted": 0,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "bytes": 2791525,
+    "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+  },
+  "native_singleton": {
+    "source": "a36839347269d05f5a79d6103a7a4b0ddab1bdb1",
+    "run_id": 39829443557,
+    "job_id": 120001370021,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39829443557",
+    "conclusion": "success",
+    "scope": "native preflight only",
+    "cases": 6,
+    "singleton_sequences": 6,
+    "proof_reports": 74,
+    "axiom_free_reports": 19,
+    "remaining_reported_axiom_union": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "whole_job_seconds": 134,
+    "string_execution_seconds": 8,
+    "artifact": {
+      "id": 12448311510,
+      "name": "psc1-t01f-native-preflight",
+      "bytes": 105212,
+      "zip_sha256": "d09fbdcba16b890d562fc4f425d2a97fa2259a17b027068cebfd9051843263aa"
+    }
+  },
+  "generated_preflight": {
+    "source": "19fb4b0b8f52808d6a31705185018d6e60836d8e",
+    "tree": "f229557fc2f6d3b782a319710462dd29bb0c080a",
+    "run_id": 39827244691,
+    "native_job_id": 119993677370,
+    "native_conclusion": "success",
+    "generated_job_id": 119993676851,
+    "generated_conclusion": "cancelled",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39827244691",
+    "job_minutes": 25,
+    "source_check": "success",
+    "fresh_compilation": "success",
+    "fixture_production": "success",
+    "setup_build_seconds": 839,
+    "detached_runtime_seconds": 676,
+    "complete_cases": [
+      "",
+      "a"
+    ],
+    "interrupted": {
+      "sample": "é",
+      "trace_id": 595,
+      "stage": "string-right",
+      "api": "psKernelV1Whnf"
+    },
+    "remaining_cases_not_reached": [
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "retained_generated_controls": "skipped",
+    "assertion_failure_observed": false,
+    "heap_exhaustion_observed": false,
+    "full_matrix_pass": false,
+    "completed_peak_rss": null,
+    "artifact": {
+      "id": 12447224834,
+      "name": "psc1-t01f-generated-preflight",
+      "bytes": 1110713,
+      "zip_sha256": "f899a7704c804d9c48ac54ee2cdd608f69497397b4f1378145e235b65126522b",
+      "primary_suffix": "psc1/dist/expr-v2/integration/kernel.js",
+      "kernel_bytes": 9953467,
+      "kernel_sha256": "cd6d03fe2da5b7e76bf40a7e3dba9e8315e2fb1a269f20f3108e29f77c49e5f5",
+      "producer_workflow_git_blob": "6c35ee482ec86aa4eaa4aafecd8025bc79a38b82",
+      "old_runner_sha256": "fafce130684bc8fc8e2ea53f4632a257152caf4d86b66cd558d8663bc143f737",
+      "old_native_producer_sha256": "de62e00a433d3a98eee1e85905ed8fc217f0dc9d3669257934d7d6fefa4992fc"
+    }
+  },
+  "diagnostic_performance": {
+    "qualified": false,
+    "completed_trace_calls": 594,
+    "first_owner_seconds": 4.95,
+    "first_12_empty_public_seconds": 69.173,
+    "ascii": {
+      "v1_defeq_calls": 53,
+      "v1_defeq_seconds": 144.798,
+      "v1_whnf_calls": 8,
+      "v1_whnf_seconds": 37.68,
+      "public_calls": 29,
+      "public_seconds": 185.276
+    },
+    "historical_comparison_caveat": "Historical9c was profiled on Node22.23.3; 19fb was unprofiled on Node22.23.4. No controlled speedup claim."
+  },
+  "historical_arena": {
+    "source": "9c87f631758862285273ddb0ea0a3987c671022e",
+    "run_id": 39694087862,
+    "conclusion": "failure",
+    "total": 193,
+    "matching": 173,
+    "matching_breakdown": {
+      "accepted": 105,
+      "kernel_rejections": 60,
+      "metadata_rejections": 1,
+      "transport_rejections": 7
+    },
+    "separate_safety_contract_agreements": 2,
+    "timeouts": 17,
+    "church_resource_exhaustion": 1,
+    "unsupported": 0,
+    "official": {
+      "accepted": 122,
+      "rejected": 71,
+      "timeouts": 0
+    },
+    "body_hashes": "Preserve all original/adapted pairs from evidence/2026-10-22-t03b-arena-complete.json; no new-source Arena run yet."
+  },
+  "historical_performance": {
+    "qualified": false,
+    "owned_cold_regression_percent": [
+      68.95,
+      69.34
+    ],
+    "owned_incremental_retained_heap_regression_percent": [
+      50.97,
+      56.52
+    ],
+    "unknown_incremental_retained_heap_regression_percent": [
+      17.08,
+      18.05
+    ],
+    "warm_groups_over_10_percent_regression": 5,
+    "name_memory_regressions": "open",
+    "church_resource_exhaustion": "open",
+    "prelude_timeout": "open"
+  },
+  "milestone_state": {
+    "A": "9c scoped PASS only; current T01F final-source qualification pending",
+    "B": "open; T01F before T05/T06/T07 and remaining metadata/ingress work",
+    "C": "open; historical193 comparison fails; no new result",
+    "D": "open; complete current comparable measurements and broad proof obligations pending"
+  },
+  "unexecuted_installed_files": [
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-focus.yml",
+      "sha256": "b56fc74d659bf6fcdcd878db89db6d1de404e2309f8844a2c8a7744cfbbd3ef1",
+      "bytes": 23450
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+      "bytes": 27140
+    }
+  ],
+  "saved_unexecuted_drafts": [
+    {
+      "path": "psc1/packages/pskernel-core/docs/drafts/t01f-final-shards/psc1-pskernel-expr-v2-integration.yml",
+      "bytes": 91967,
+      "sha256": "74b974f6f3b0ad398a97ba3e72a935cc37c3e5616b33b94745f727ee988daea5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/docs/drafts/t01f-final-shards/psc1-pskernel-core-correctness.yml",
+      "bytes": 43193,
+      "sha256": "b9c124bc49625d675a2a8f3a385577b633cd63181c54af4fd4af2d1f27767114"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/docs/drafts/t01f-final-shards/pskernel-t01f-shards.mjs",
+      "bytes": 15142,
+      "sha256": "1b8a302fcf22a573ee3b005578dd4930e6e773a9b803ec19c32f7f45bd3161d8"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/docs/drafts/t01f-final-shards/paired-owner-job.fragment.yml",
+      "bytes": 16984,
+      "sha256": "34cacbc1b11b907b94771460086b004a9cdee60231fdfb436b9107129c2f0fb8"
+    }
+  ],
+  "next_task": "Review and run authenticated19fb mixed-index5 and retained-control preflight with the new harness, then finish both complete generated routes and the final exact-source acceptance suite; T05 only after T01F gates pass."
+}

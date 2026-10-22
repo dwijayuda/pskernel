@@ -1,0 +1,1389 @@
+name: PSC1 Expression V2 production integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - integration/psc1-pskernel-expr-v2-lean435-20261021
+      - work/psc1-pskernel-t03b-session-20261022
+      - work/psc1-pskernel-t01f-string-20261022
+      - research/psc1-pskernel-v2-staged-20261021
+      - research/psc1-pskernel-v2-carrier-20261021
+    paths:
+      - psc1/scripts/install-lean435-ci.sh
+      - psc1/lean-toolchain
+      - psc1/packages/pskernel-core/AI_WORK_STATE.md
+      - psc1/packages/pskernel-core/src/**
+      - psc1/test/PsKernelInvalidRecursorOccurrenceRegression.lean
+      - psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs
+      - psc1/packages/pskernel-core/KERNEL_DIAGNOSTICS.json
+      - psc1/test/PsKernelExprV2DagRegression.lean
+      - psc1/test/PsKernelExprV2InferOnlyRegression.lean
+      - psc1/test/PsKernelExprV2ProofIrrelevanceRegression.lean
+      - psc1/test/PsKernelExprV2LazyNatRegression.lean
+      - psc1/test/PsKernelExprV2LazyDeltaRegression.lean
+      - psc1/test/PsKernelExprV2FullShapeRegression.lean
+      - psc1/test/PsKernelExprV2FinalRulesRegression.lean
+      - psc1/test/PsKernelExprV2AdmissionGuardRegression.lean
+      - psc1/test/PsKernelExprV2AdmissionGuardProofs.lean
+      - psc1/test/PsKernelExprV2QuotRegression.lean
+      - psc1/test/PsKernelExprV2RecursorRegression.lean
+      - psc1/test/PsKernelExprV2StringEnvironmentRegression.lean
+      - psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs
+      - psc1/scripts/pskernel-t01f-shards.mjs
+      - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
+      - psc1/test/PsKernelExprV2SessionProofs.lean
+      - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+      - psc1/test/PsKernelExprV2QuotOwnerRegression.lean
+      - psc1/test/PsKernelExprV2QuotOwnerProofs.lean
+      - psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs
+      - psc1/test/PsKernelNameWorkerRegression.lean
+      - psc1/test/PsKernelNameWorkerProofs.lean
+      - psc1/scripts/pskernel-name-worker-smoke.mjs
+      - psc1/test/PsKernelExprV2RecursorProofs.lean
+      - psc1/test/PsKernelExprV2WhnfABIProofs.lean
+      - psc1/test/PsKernelExprV2DagPerformance.lean
+      - psc1/test/PsKernelExprV2TransformRegression.lean
+      - psc1/test/PsKernelExprV2MetadataProofs.lean
+      - psc1/test/PsKernelCacheScopeProofs.lean
+      - psc1/test/PsKernelNatFuelProofs.lean
+      - psc1/test/PsKernelExprEqualityProofs.lean
+      - psc1/test/PsKernelKnotFuelProofs.lean
+      - psc1/scripts/pskernel-nat-runtime-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-dag-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-infer-only-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-lazy-nat-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-lazy-delta-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-full-shape-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-final-rules-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-admission-guard-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-quot-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-recursor-smoke.mjs
+      - psc1/test/PsKernelExprV2RecursorKRegression.lean
+      - psc1/test/PsKernelExprV2RecursorMajorProofs.lean
+      - psc1/test/PsKernelExprV2RecursorKProofs.lean
+      - psc1/scripts/pskernel-expr-v2-recursor-k-smoke.mjs
+      - psc1/test/PsKernelExprV2OwnedStateRegression.lean
+      - psc1/test/PsKernelExprV2OwnedStateProofs.lean
+      - psc1/scripts/pskernel-expr-v2-owned-state-smoke.mjs
+      - psc1/scripts/pskernel-expr-v2-dag-bench.mjs
+      - psc1/scripts/pskernel-expr-v2-admission-bench.mjs
+      - psc1/scripts/pskernel-generated-profile.mjs
+      - psc1/scripts/pskernel-whole-js-bench.mjs
+      - psc1/scripts/pskernel-js-memory-probe.mjs
+      - psc1/host/kernel-provider/**
+      - psc1/test/PsKernelProviderOfficial.lean
+      - psc1/scripts/pskernel-canonical-provider.mjs
+      - psc1/scripts/pskernel-provider-smoke.mjs
+      - psc1/scripts/pskernel-artifact-manifest.mjs
+      - psc1/npm-runtime/canonical-admissions-wire.mjs
+      - psc1/kernel-lakefile.lean
+      - .github/workflows/psc1-pskernel-expr-v2-integration.yml
+
+permissions:
+  contents: read
+
+jobs:
+  native-dag-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          bash psc1/scripts/install-lean435-ci.sh
+      - name: Compile complete checker with checked DAG input
+        id: kernel_build
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          node --check scripts/pskernel-expr-v2-recursor-smoke.mjs
+          node --check scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
+          node --check scripts/pskernel-expr-v2-quot-owner-smoke.mjs
+          node --check scripts/pskernel-name-worker-smoke.mjs
+          node --check scripts/pskernel-expr-v2-recursor-k-smoke.mjs
+          node --check scripts/pskernel-expr-v2-owned-state-smoke.mjs
+          # Run the new authentic mode-crossing sentinel against exact parent semantics.
+          # Only these two production files are replaced; new regression assertions stay intact.
+          PSC1_CORE_V1=packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean
+          PSC1_CORE_V2=packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfOwned.lean
+          restore_kernel_sources() {
+            git restore --source="$GITHUB_SHA" -- "$PSC1_CORE_V1" "$PSC1_CORE_V2"
+          }
+          git fetch --no-tags --depth=1 origin 3aa077cb64ff06f76727decd01c43ad6c33f351d
+          trap restore_kernel_sources EXIT
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_CORE_V1" > "$PSC1_CORE_V1"
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_CORE_V2" > "$PSC1_CORE_V2"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_recursor_regression
+          set +e
+          .lake/build/bin/psc1_kernel_expr_v2_recursor_regression > "$RUNNER_TEMP/psc1-cache-mode-parent.log" 2>&1
+          PSC1_BASELINE_STATUS=$?
+          set -e
+          test "$PSC1_BASELINE_STATUS" -ne 0
+          grep -Fq 'PSC1_V2_RECURSOR_FAIL cache-mode-beta-cheapRec-cannot-publish' "$RUNNER_TEMP/psc1-cache-mode-parent.log"
+          restore_kernel_sources
+          trap - EXIT
+          echo 'PSC1_CACHE_MODE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d'
+          # Reproduce the invalid-recursive-occurrence boundary on exact parent semantics.
+          # The existing target refreshes imported kernel oleans; the new test stays unchanged.
+          PSC1_OCC_CTOR=packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean
+          PSC1_OCC_OUTCOME=packages/pskernel-core/src/Ps/KernelCore/API/Outcome.lean
+          restore_occurrence_sources() {
+            git restore --source="$GITHUB_SHA" -- "$PSC1_OCC_CTOR" "$PSC1_OCC_OUTCOME"
+          }
+          trap restore_occurrence_sources EXIT
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_OCC_CTOR" > "$PSC1_OCC_CTOR"
+          git show 3aa077cb64ff06f76727decd01c43ad6c33f351d:psc1/"$PSC1_OCC_OUTCOME" > "$PSC1_OCC_OUTCOME"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_recursor_regression
+          set +e
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelInvalidRecursorOccurrenceRegression.lean > "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log" 2>&1
+          PSC1_OCC_BASELINE_STATUS=$?
+          set -e
+          cat "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"
+          test "$PSC1_OCC_BASELINE_STATUS" -ne 0
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls' "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"
+          grep -Fq 'PSC1_INVALID_RECURSOR_OCCURRENCE_FAIL public-invalid-exact-diagnostic' "$RUNNER_TEMP/psc1-invalid-occurrence-parent.log"
+          restore_occurrence_sources
+          trap - EXIT
+          echo 'PSC1_INVALID_OCCURRENCE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d'
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression psc1_kernel_expr_v2_regression psc1_kernel_expr_v2_dag_performance psc1_kernel_expr_v2_transform_regression psc1_kernel_expr_v2_infer_only_regression psc1_kernel_provider psc1_kernel_expr_v2_proof_irrelevance_regression psc1_kernel_expr_v2_lazy_nat_regression psc1_kernel_expr_v2_lazy_delta_regression psc1_kernel_expr_v2_full_shape_regression psc1_kernel_expr_v2_final_rules_regression psc1_kernel_expr_v2_admission_guard_regression psc1_kernel_expr_v2_quot_regression psc1_kernel_expr_v2_recursor_regression psc1_kernel_expr_v2_recursor_k_regression psc1_kernel_expr_v2_owned_state_regression psc1_kernel_name_worker_regression psc1_kernel_expr_v2_quot_owner_regression psc1_kernel_expr_v2_string_environment_regression
+      - name: Check invalid recursor-headed occurrence against official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelInvalidRecursorOccurrenceRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-invalid-occurrence-native.log"
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls' "$RUNNER_TEMP/psc1-invalid-occurrence-native.log"
+          grep -Fqx 'PSC1_INVALID_RECURSOR_OCCURRENCE: PASS invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls' "$RUNNER_TEMP/psc1-invalid-occurrence-native.log"
+      - name: Run native DAG semantics, adversarial, fuel and official comparison
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e' \
+            -o "$RUNNER_TEMP/psc1-dag-native.memory" \
+            .lake/build/bin/psc1_kernel_expr_v2_dag_regression \
+            | tee "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_REGRESSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_LEAN: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_BETA: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_WHNF_STATE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_PUBLIC_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_QUICK_DEFEQ: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_QUICK_DEFEQ: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_NAT_PROJECTION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_OFFICIAL_NAT: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_PROJECTION_UNSELECTED_FIELD: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_NESTED_OUTCOMES: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_BINDER: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_BINDER: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_CHECK_APP: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_CHECK_APP: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_DELTA: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_CONSTANT_INDEX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_MUTUAL_INDEX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_CHECK_PROJECTION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_CHECK_PROJECTION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_CHECK_LET: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_CHECK_LET: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_LET_CACHE_SCOPE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_LET_LOCAL_WHNF: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_STATEFUL_DEFEQ: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_APP_CONVERSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_APP_CONVERSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_APP_CONVERSION_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_APP_EAGER_CONTEXT: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_SIMPLE_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_ADMISSION_SHARED_STATE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_ADMISSION_POLICY_SAFETY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_SIMPLE_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_THEOREM_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_THEOREM_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_THEOREM_ISPROP_STATE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_UNSAFE_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_UNSAFE_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_UNSAFE_FRESH_BODY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_MUTUAL_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_BINDER_SPINE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_BINDER_SPINE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_BINDER_SPINE_BUDGET: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_BINDER_SPINE_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_DEFEQ_PREFIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_DEFEQ_PREFIX: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_CHEAP_CORE_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_DEFEQ_REFLECTION: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS' "$RUNNER_TEMP/psc1-dag-native.log"
+          .lake/build/bin/psc1_kernel_expr_v2_regression \
+            | tee "$RUNNER_TEMP/psc1-v2-existing-native.log"
+      - name: Check inference-only semantics and checked-cache separation
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_infer_only_regression \
+            | tee "$RUNNER_TEMP/psc1-infer-only-native.log"
+          grep -q 'PSC1_V2_DAG_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-native.log"
+      - name: Check DAG proof irrelevance against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_proof_irrelevance_regression \
+            | tee "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
+          grep -q 'PSC1_V2_DAG_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
+          grep -Fq 'PSC1_V2_DAG_PROOF_IRRELEVANCE_TERMINAL: PASS comparisons=180 official=2' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_PROOF_IRRELEVANCE: PASS cases=8 invalid=1' "$RUNNER_TEMP/psc1-proof-irrelevance-native.log"
+      - name: Check ordered DAG Nat DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_lazy_nat_regression \
+            | tee "$RUNNER_TEMP/psc1-lazy-nat-native.log"
+          grep -q 'PSC1_V2_DAG_LAZY_NAT: PASS comparisons=1350 stage=192' "$RUNNER_TEMP/psc1-lazy-nat-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_LAZY_NAT: PASS cases=14 invalid=1' "$RUNNER_TEMP/psc1-lazy-nat-native.log"
+      - name: Check ordered DAG lazy delta DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_lazy_delta_regression \
+            | tee "$RUNNER_TEMP/psc1-lazy-delta-native.log"
+          grep -q 'PSC1_V2_DAG_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_LAZY_DELTA: PASS cases=18 invalid=4' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
+          grep -Fq 'PSC1_V2_PAIR_SCAN: PASS cases=9 equation=all-inputs' "$RUNNER_TEMP/psc1-lazy-delta-native.log"
+      - name: Check ordered DAG full-shape and residual DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_full_shape_regression \
+            | tee "$RUNNER_TEMP/psc1-full-shape-native.log"
+          grep -q 'PSC1_V2_DAG_FULL_SHAPE: PASS stageComparisons=342 ownerComparisons=108' "$RUNNER_TEMP/psc1-full-shape-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_FULL_SHAPE: PASS cases=6 invalid=1' "$RUNNER_TEMP/psc1-full-shape-native.log"
+      - name: Check ordered DAG terminal DefEq against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_final_rules_regression \
+            | tee "$RUNNER_TEMP/psc1-final-rules-native.log"
+          grep -q 'PSC1_V2_DAG_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32' "$RUNNER_TEMP/psc1-final-rules-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_FINAL_RULES: PASS cases=21 invalid=5 strings=8 resource=1' "$RUNNER_TEMP/psc1-final-rules-native.log"
+          grep -Fq 'PSC1_V2_STRING_PROJECTION: PASS differential=1296 owners=16 failures=32 officialValid=8 officialInvalid=16' "$RUNNER_TEMP/psc1-final-rules-native.log"
+      - name: Check DAG admission guards against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_admission_guard_regression \
+            | tee "$RUNNER_TEMP/psc1-admission-guard-native.log"
+          grep -q 'PSC1_V2_ADMISSION_GUARD_STATIC: PASS comparisons=420' "$RUNNER_TEMP/psc1-admission-guard-native.log"
+          grep -q 'PSC1_V2_ADMISSION_GUARD_HOSTILE: PASS sharedDepth=128 cases=12' "$RUNNER_TEMP/psc1-admission-guard-native.log"
+          grep -q 'PSC1_V2_ADMISSION_GUARD_PUBLIC: PASS comparisons=672' "$RUNNER_TEMP/psc1-admission-guard-native.log"
+          grep -q 'PSC1_V2_ADMISSION_GUARD_OFFICIAL: PASS cases=8 doCheck=true' "$RUNNER_TEMP/psc1-admission-guard-native.log"
+          grep -q 'PSC1_V2_ADMISSION_GUARD: PASS' "$RUNNER_TEMP/psc1-admission-guard-native.log"
+      - name: Check DAG Quot reduction against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_quot_regression \
+            | tee "$RUNNER_TEMP/psc1-quot-native.log"
+          grep -q 'PSC1_V2_DAG_QUOT: PASS public=240 core=480 owners=720 reducer=60' "$RUNNER_TEMP/psc1-quot-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_QUOT: PASS valid=10 invalid=5' "$RUNNER_TEMP/psc1-quot-native.log"
+      - name: Check generated recursor ownership and DAG non-K iota against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_recursor_regression \
+            | tee "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -q 'PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_CACHE_MODE: PASS wrappers=2 cheapModes=4 warmCold=8' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES: PASS cases=2' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -q 'PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX: PASS public=126 core=504 owners=360 reducer=432' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STATE: PASS sequence=4 propagated=40' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY: PASS comparisons=70 fields=20' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STRING: PASS callbacks=24 propagated=48 official=6' "$RUNNER_TEMP/psc1-recursor-native.log"
+          grep -Fqx 'PSC1_V2_DAG_OFFICIAL_RECURSOR_MAJOR: PASS valid=6 admitted=2 rejected=2' "$RUNNER_TEMP/psc1-recursor-native.log"
+      - name: Check authoritative new-prefix mutual and nested owners
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2GeneratedPrefixRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7' "$RUNNER_TEMP/psc1-generated-prefix-native.log"
+      - name: Check actual String declarations and export source-bound T01F inputs
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_T01F_DIR="$RUNNER_TEMP/psc1-t01f-native"
+          mkdir -p "$PSC1_T01F_DIR"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
+          lean --version > "$PSC1_T01F_DIR/lean-version.txt"
+          lean --githash > "$PSC1_T01F_DIR/lean-githash.txt"
+          lake -f kernel-lakefile.lean env .lake/build/bin/psc1_kernel_expr_v2_string_environment_regression \
+            "$PSC1_T01F_DIR/fixture.json" 2>&1 | tee "$PSC1_T01F_DIR/native.log"
+          grep -Fqx 'PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096' "$PSC1_T01F_DIR/native.log"
+          test "$(grep -c '^PSC1_T01F_CASE_PASS ' "$PSC1_T01F_DIR/native.log")" -eq 6
+          test "$(grep -c '^PSC1_T01F_SINGLETON_PASS ' "$PSC1_T01F_DIR/native.log")" -eq 6
+          grep -Fq 'PSC1_T01F_FIXTURE_WRITTEN ' "$PSC1_T01F_DIR/native.log"
+          test -s "$PSC1_T01F_DIR/fixture.json"
+          sha256sum "$PSC1_T01F_DIR/fixture.json" | tee "$PSC1_T01F_DIR/fixture.sha256"
+          node --input-type=module - "$PSC1_T01F_DIR" ".lake/build/bin/psc1_kernel_expr_v2_string_environment_regression" "native" <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const [dir,kernel,route]=process.argv.slice(2);
+          const digest=path=>{const bytes=readFileSync(path);return {bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};};
+          const fixture=JSON.parse(readFileSync(dir+'/fixture.json','utf8'));
+          const leanCommit=readFileSync(dir+'/lean-githash.txt','utf8').trim();
+          if(leanCommit!=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc' || fixture.leanCommit!==leanCommit ||
+              fixture.leanVersion!=='4.35.0' || fixture.format!=='psc1-authentic-string435-v1')
+            throw Error('PSC1_T01F_SOURCE_PROVENANCE_MISMATCH');
+          if(!/^[0-9a-f]{40}$/.test(process.env.GITHUB_SHA??''))throw Error('PSC1_T01F_MISSING_SOURCE_SHA');
+          const report={schema:'psc1-t01f-source-provenance-v1',sourceSha:process.env.GITHUB_SHA,
+            runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,job:process.env.GITHUB_JOB,route,
+            leanVersion:readFileSync(dir+'/lean-version.txt','utf8').trim(),leanCommit,node:process.version,
+            requests:fixture.declarations.length,metadata:fixture.metadata.length,samples:fixture.samples,
+            kernelFuel:4096,nodeOldSpaceLimitMiB:route==='native'?null:2048,
+            authority:'Raw declaration requests only; generated consumers independently admit from empty.',
+            fixture:digest(dir+'/fixture.json'),kernel:digest(kernel),
+            fixtureProducer:digest('test/PsKernelExprV2StringEnvironmentRegression.lean'),generatedRunner:digest('scripts/pskernel-expr-v2-string-environment-smoke.mjs')};
+          writeFileSync(dir+'/provenance.json',JSON.stringify(report,null,2)+'\n');
+          console.log('PSC1_T01F_SOURCE_PROVENANCE '+JSON.stringify(report));
+          NODE
+      - name: Check DAG K conversion against V1 and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_recursor_k_regression \
+            | tee "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_K_MATRIX_PASS public=108 core=432 reducer=648' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_K_FIXED_OWNER_PASS cases=96' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_K_OWNER_PASS carrier=16 propagated=16 metadata=16' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_K_ORDER_PASS guards=5' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_K_DIRECT_ADMISSION_PASS cases=2' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_K_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_K_OFFICIAL_PASS valid=6 invalid=3 declarations=2' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+          grep -Fqx 'PSC1_V2_RECURSOR_K_PASS' "$RUNNER_TEMP/psc1-recursor-k-native.log"
+      - name: Check exact name and string comparison workers
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_name_worker_regression \
+            | tee "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_NAMES_PASS pairs=400 deep=4 maxDepth=1024' "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_CHECKING_PASS declarations=10 checked=10 normalized=10 negatives=4 officialPositive=10 officialNegative=4' "$RUNNER_TEMP/psc1-name-worker-native.log"
+          grep -Fqx 'PSC1_NAME_WORKER_PASS' "$RUNNER_TEMP/psc1-name-worker-native.log"
+      - name: Check checked Quot declaration owner installation
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_quot_owner_regression \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-native.log"
+          grep -Fqx 'PSC1_V2_QUOT_OWNER_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 officialPositive=10 officialNegative=7' "$RUNNER_TEMP/psc1-quot-owner-native.log"
+      - name: Check complete DAG checker state and callback ownership
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_owned_state_regression \
+            | tee "$RUNNER_TEMP/psc1-owned-state-native.log"
+          grep -Fqx 'PSC1_V2_OWNED_STATE_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44' "$RUNNER_TEMP/psc1-owned-state-native.log"
+          grep -Fqx 'PSC1_V2_ADMISSION_OWNED_STATE_PASS carrier=8 propagated=12 differential=336 publicWhnf=168' "$RUNNER_TEMP/psc1-owned-state-native.log"
+      - name: Check DAG transformation semantics and sharing
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_transform_regression \
+            | tee "$RUNNER_TEMP/psc1-transform-native.log"
+          grep -q 'PSKERNEL_V2_TRANSFORM_REGRESSION_PASSED' "$RUNNER_TEMP/psc1-transform-native.log"
+      - name: Check local metadata and cache-scope theorems
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2MetadataProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-metadata-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelCacheScopeProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-scope-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelNatFuelProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-nat-fuel-proofs.log"
+          grep -q 'PSKERNEL_LARGE_NAT_NATIVE: PASS' "$RUNNER_TEMP/psc1-nat-fuel-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprEqualityProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
+          grep -q 'PSKERNEL_EXPR_EQUALITY_NATIVE: PASS comparisons=800 hostile=21 sharedDepth=64' "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelKnotFuelProofs.lean)" -eq 16
+          lake -f kernel-lakefile.lean env lean test/PsKernelKnotFuelProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
+          grep -q 'PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15' "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
+          grep -Fq 'PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical' "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2AdmissionGuardProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-admission-guard-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-recursor-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 14
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-session-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2RecursorMajorProofs.lean)" -eq 10
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorMajorProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-recursor-major-proofs.log"
+          test "$(grep -c '^#print axioms PsKernelExprV2RecursorKProofs\.' test/PsKernelExprV2RecursorKProofs.lean)" -eq 6
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2RecursorKProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-recursor-k-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelNameWorkerProofs.lean)" -eq 8
+          lake -f kernel-lakefile.lean env lean test/PsKernelNameWorkerProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-name-worker-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2QuotOwnerProofs.lean)" -eq 21
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2QuotOwnerProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-proofs.log"
+          test "$(grep -c '^#print axioms PsKernelExprV2WhnfABIProofs\.' test/PsKernelExprV2WhnfABIProofs.lean)" -eq 2
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2WhnfABIProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-whnf-abi-proofs.log"
+          test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 21
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean \
+            | tee "$RUNNER_TEMP/psc1-owned-state-proofs.log"
+          if grep -E 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' \
+              "$RUNNER_TEMP/psc1-metadata-proofs.log" "$RUNNER_TEMP/psc1-scope-proofs.log" \
+              "$RUNNER_TEMP/psc1-nat-fuel-proofs.log" "$RUNNER_TEMP/psc1-expr-equality-proofs.log" \
+              "$RUNNER_TEMP/psc1-admission-guard-proofs.log" \
+              "$RUNNER_TEMP/psc1-recursor-proofs.log" \
+              "$RUNNER_TEMP/psc1-session-proofs.log" \
+              "$RUNNER_TEMP/psc1-recursor-major-proofs.log" \
+              "$RUNNER_TEMP/psc1-recursor-k-proofs.log" \
+              "$RUNNER_TEMP/psc1-name-worker-proofs.log" \
+              "$RUNNER_TEMP/psc1-quot-owner-proofs.log" \
+              "$RUNNER_TEMP/psc1-whnf-abi-proofs.log" \
+              "$RUNNER_TEMP/psc1-owned-state-proofs.log" \
+              "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"; then
+            echo 'PSKERNEL_PROOF_UNAPPROVED_TRUST_DEPENDENCY'
+            exit 1
+          fi
+          echo 'PSKERNEL_LOCAL_METADATA_AND_SCOPE_PROOFS: PASS'
+      - name: Compare exact provider fixtures with official Lean 4.35
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelProviderOfficial.lean \
+            | tee "$RUNNER_TEMP/psc1-provider-official.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER_OFFICIAL: PASS cases=5 batchDeclarations=4 doCheck=true' "$RUNNER_TEMP/psc1-provider-official.log"
+      - name: Exercise the native checked batch provider in a detached process
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-provider-smoke.mjs native .lake/build/bin/psc1_kernel_provider \
+            | tee "$RUNNER_TEMP/psc1-native-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=native cases=24 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-native-provider.log"
+          mkdir -p dist/expr-v2
+          tar -czf dist/expr-v2/native-provider-linux.tar.gz -C .lake/build/bin psc1_kernel_provider
+          node scripts/pskernel-artifact-manifest.mjs \
+            dist/expr-v2/native-artifacts.json native \
+            .lake/build/bin/psc1_kernel_provider host/kernel-provider/KernelProviderMain.lean \
+            dist/expr-v2/native-provider-linux.tar.gz
+      - name: Measure complete native checks against original and official Lean
+        if: ${{ !cancelled() && steps.kernel_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e' \
+            -o "$RUNNER_TEMP/psc1-dag-native-bench.memory" \
+            .lake/build/bin/psc1_kernel_expr_v2_dag_performance \
+            | tee "$RUNNER_TEMP/psc1-dag-native-bench.log"
+          grep -q 'PSC1_V2_DAG_NATIVE_BENCH: PASS' "$RUNNER_TEMP/psc1-dag-native-bench.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-dag-native
+          path: |
+            ${{ runner.temp }}/psc1-t01f-native/
+            ${{ runner.temp }}/psc1-native-provider.log
+            ${{ runner.temp }}/psc1-provider-official.log
+            ${{ runner.temp }}/psc1-proof-irrelevance-native.log
+            ${{ runner.temp }}/psc1-lazy-nat-native.log
+            ${{ runner.temp }}/psc1-lazy-delta-native.log
+            ${{ runner.temp }}/psc1-full-shape-native.log
+            ${{ runner.temp }}/psc1-final-rules-native.log
+            ${{ runner.temp }}/psc1-admission-guard-native.log
+            ${{ runner.temp }}/psc1-quot-native.log
+            ${{ runner.temp }}/psc1-recursor-native.log
+            ${{ runner.temp }}/psc1-generated-prefix-native.log
+            ${{ runner.temp }}/psc1-quot-owner-native.log
+            ${{ runner.temp }}/psc1-name-worker-native.log
+            ${{ runner.temp }}/psc1-recursor-k-native.log
+            ${{ runner.temp }}/psc1-owned-state-native.log
+            psc1/dist/expr-v2/native-artifacts.json
+            psc1/dist/expr-v2/native-provider-linux.tar.gz
+            psc1/host/kernel-provider/KernelProviderMain.lean
+            ${{ runner.temp }}/psc1-cache-mode-parent.log
+            ${{ runner.temp }}/psc1-invalid-occurrence-parent.log
+            ${{ runner.temp }}/psc1-invalid-occurrence-native.log
+            ${{ runner.temp }}/psc1-dag-native.log
+            ${{ runner.temp }}/psc1-dag-native.memory
+            ${{ runner.temp }}/psc1-v2-existing-native.log
+            ${{ runner.temp }}/psc1-transform-native.log
+            ${{ runner.temp }}/psc1-infer-only-native.log
+            ${{ runner.temp }}/psc1-metadata-proofs.log
+            ${{ runner.temp }}/psc1-scope-proofs.log
+            ${{ runner.temp }}/psc1-nat-fuel-proofs.log
+            ${{ runner.temp }}/psc1-expr-equality-proofs.log
+            ${{ runner.temp }}/psc1-knot-fuel-proofs.log
+            ${{ runner.temp }}/psc1-recursor-proofs.log
+            ${{ runner.temp }}/psc1-session-proofs.log
+            ${{ runner.temp }}/psc1-recursor-major-proofs.log
+            ${{ runner.temp }}/psc1-recursor-k-proofs.log
+            ${{ runner.temp }}/psc1-quot-owner-proofs.log
+            ${{ runner.temp }}/psc1-whnf-abi-proofs.log
+            ${{ runner.temp }}/psc1-name-worker-proofs.log
+            ${{ runner.temp }}/psc1-owned-state-proofs.log
+            ${{ runner.temp }}/psc1-admission-guard-proofs.log
+            ${{ runner.temp }}/psc1-dag-native-bench.log
+            ${{ runner.temp }}/psc1-dag-native-bench.memory
+          retention-days: 30
+
+  generated-dag-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          bash psc1/scripts/install-lean435-ci.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build authentic PSC1 and check complete kernel source
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          lake build psc1
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+      - name: Install pinned TypeScript
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-dag-ts"
+          echo '{"name":"psc1-dag-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-dag-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-dag-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/psc1-dag-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Compile the complete independent kernel to JavaScript
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            --out dist/expr-v2/integration/kernel.js
+          test -s dist/expr-v2/integration/kernel.js
+          test -s dist/expr-v2/integration/kernel.ts
+          test -s dist/expr-v2/integration/kernel.d.ts
+          test -s dist/expr-v2/integration/kernel.js.map
+          node --check dist/expr-v2/integration/kernel.js
+      - name: Produce authentic T01F inputs for generated independent replay
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_T01F_DIR="$RUNNER_TEMP/psc1-t01f-generated"
+          mkdir -p "$PSC1_T01F_DIR"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_string_environment_regression
+          lean --version > "$PSC1_T01F_DIR/lean-version.txt"
+          lean --githash > "$PSC1_T01F_DIR/lean-githash.txt"
+          lake -f kernel-lakefile.lean env .lake/build/bin/psc1_kernel_expr_v2_string_environment_regression \
+            "$PSC1_T01F_DIR/fixture.json" 2>&1 | tee "$PSC1_T01F_DIR/native.log"
+          grep -Fqx 'PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096' "$PSC1_T01F_DIR/native.log"
+          test "$(grep -c '^PSC1_T01F_CASE_PASS ' "$PSC1_T01F_DIR/native.log")" -eq 6
+          test "$(grep -c '^PSC1_T01F_SINGLETON_PASS ' "$PSC1_T01F_DIR/native.log")" -eq 6
+          grep -Fq 'PSC1_T01F_FIXTURE_WRITTEN ' "$PSC1_T01F_DIR/native.log"
+          test -s "$PSC1_T01F_DIR/fixture.json"
+          sha256sum "$PSC1_T01F_DIR/fixture.json" | tee "$PSC1_T01F_DIR/fixture.sha256"
+          node --input-type=module - "$PSC1_T01F_DIR" "dist/expr-v2/integration/kernel.js" "generated" <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const [dir,kernel,route]=process.argv.slice(2);
+          const digest=path=>{const bytes=readFileSync(path);return {bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};};
+          const fixture=JSON.parse(readFileSync(dir+'/fixture.json','utf8'));
+          const leanCommit=readFileSync(dir+'/lean-githash.txt','utf8').trim();
+          if(leanCommit!=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc' || fixture.leanCommit!==leanCommit ||
+              fixture.leanVersion!=='4.35.0' || fixture.format!=='psc1-authentic-string435-v1')
+            throw Error('PSC1_T01F_SOURCE_PROVENANCE_MISMATCH');
+          if(!/^[0-9a-f]{40}$/.test(process.env.GITHUB_SHA??''))throw Error('PSC1_T01F_MISSING_SOURCE_SHA');
+          const report={schema:'psc1-t01f-source-provenance-v1',sourceSha:process.env.GITHUB_SHA,
+            runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,job:process.env.GITHUB_JOB,route,
+            leanVersion:readFileSync(dir+'/lean-version.txt','utf8').trim(),leanCommit,node:process.version,
+            requests:fixture.declarations.length,metadata:fixture.metadata.length,samples:fixture.samples,
+            kernelFuel:4096,nodeOldSpaceLimitMiB:route==='native'?null:2048,
+            authority:'Raw declaration requests only; generated consumers independently admit from empty.',
+            fixture:digest(dir+'/fixture.json'),kernel:digest(kernel),
+            fixtureProducer:digest('test/PsKernelExprV2StringEnvironmentRegression.lean'),generatedRunner:digest('scripts/pskernel-expr-v2-string-environment-smoke.mjs')};
+          writeFileSync(dir+'/provenance.json',JSON.stringify(report,null,2)+'\n');
+          console.log('PSC1_T01F_SOURCE_PROVENANCE '+JSON.stringify(report));
+          NODE
+      - name: Run real generated checker without external Lean on PATH
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          mkdir -p "$PSC1_DAG_RUN_DIR"
+          cp dist/expr-v2/integration/kernel.js "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-dag-smoke.mjs "$PSC1_DAG_RUN_DIR/smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" --expose-gc smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-dag-generated-js.log" \
+            | sed -u '/^PSC1_DAG_PASS /d'
+          grep -q 'PSC1_V2_DAG_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -Fqx 'PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ZETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_BETA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_WHNF_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_NAT_PROJECTION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_NESTED_OUTCOMES: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_BINDER: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CHECK_APP: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_DELTA: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CONSTANT_INDEX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CHECK_LET: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_LET_CACHE_SCOPE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_LET_LOCAL_WHNF: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_STATEFUL_DEFEQ: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_APP_CONVERSION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_APP_CONVERSION_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_APP_EAGER_CONTEXT: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_SIMPLE_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_THEOREM_ADMISSION_MATRIX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_UNSAFE_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_UNSAFE_FRESH_BODY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_MUTUAL_ADMISSION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_BINDER_SPINE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_DEFEQ_PREFIX: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CHEAP_CORE_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+          grep -q 'PSC1_V2_TRANSFORM_JS: PASS' "$RUNNER_TEMP/psc1-dag-generated-js.log"
+      - name: Check generated invalid recursor-headed occurrence in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          node --check scripts/pskernel-invalid-recursor-occurrence-smoke.mjs
+          cp scripts/pskernel-invalid-recursor-occurrence-smoke.mjs "$PSC1_DAG_RUN_DIR/invalid-occurrence-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" invalid-occurrence-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-invalid-occurrence-generated.log"
+          grep -Eq '^PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS [0-9]+ invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls$' "$RUNNER_TEMP/psc1-invalid-occurrence-generated.log"
+      - name: Run generated inference modes with separate checked authorization
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-infer-only-smoke.mjs "$PSC1_DAG_RUN_DIR/infer-only-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" infer-only-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-infer-only-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_INFER_ONLY: PASS' "$RUNNER_TEMP/psc1-infer-only-generated.log"
+      - name: Check generated DAG proof irrelevance in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-proof-irrelevance-smoke.mjs "$PSC1_DAG_RUN_DIR/proof-irrelevance-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" proof-irrelevance-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-proof-irrelevance-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_PROOF_IRRELEVANCE: PASS comparisons=1350' "$RUNNER_TEMP/psc1-proof-irrelevance-generated.log"
+          grep -Fq 'PSC1_V2_DAG_JS_PROOF_IRRELEVANCE_TERMINAL: PASS comparisons=180' "$RUNNER_TEMP/psc1-proof-irrelevance-generated.log"
+      - name: Check generated ordered DAG Nat DefEq in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-lazy-nat-smoke.mjs "$PSC1_DAG_RUN_DIR/lazy-nat-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" lazy-nat-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-lazy-nat-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_LAZY_NAT: PASS comparisons=1350 stage=192' "$RUNNER_TEMP/psc1-lazy-nat-generated.log"
+      - name: Check generated ordered DAG lazy delta DefEq in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-lazy-delta-smoke.mjs "$PSC1_DAG_RUN_DIR/lazy-delta-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" lazy-delta-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-lazy-delta-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128' "$RUNNER_TEMP/psc1-lazy-delta-generated.log"
+          grep -Fq 'PSC1_V2_PAIR_SCAN_JS: PASS' "$RUNNER_TEMP/psc1-lazy-delta-generated.log"
+      - name: Check generated ordered DAG full-shape and residual DefEq in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-full-shape-smoke.mjs "$PSC1_DAG_RUN_DIR/full-shape-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" full-shape-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-full-shape-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_FULL_SHAPE: PASS stageComparisons=342 ownerComparisons=108' "$RUNNER_TEMP/psc1-full-shape-generated.log"
+      - name: Check generated ordered DAG terminal DefEq in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-final-rules-smoke.mjs "$PSC1_DAG_RUN_DIR/final-rules-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" final-rules-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-final-rules-generated.log"
+          grep -q 'PSC1_V2_DAG_JS_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32' "$RUNNER_TEMP/psc1-final-rules-generated.log"
+          grep -Fq 'PSC1_V2_STRING_PROJECTION_JS: PASS differential=1296 owners=16 failures=32' "$RUNNER_TEMP/psc1-final-rules-generated.log"
+      - name: Check generated DAG admission guards in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-admission-guard-smoke.mjs "$PSC1_DAG_RUN_DIR/admission-guard-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" admission-guard-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-admission-guard-generated.log"
+          grep -q 'PSC1_V2_ADMISSION_GUARD_JS: PASS staticComparisons=420 publicComparisons=672 sharedDepth=128 hostile=12' "$RUNNER_TEMP/psc1-admission-guard-generated.log"
+      - name: Check generated DAG Quot reduction in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-quot-smoke.mjs "$PSC1_DAG_RUN_DIR/quot-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" quot-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-quot-generated.log"
+          grep -q 'PSC1_V2_DAG_QUOT: PASS public=240 core=480 owners=720 reducer=60' "$RUNNER_TEMP/psc1-quot-generated.log"
+      - name: Check generated DAG recursors and private owner IDs in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-expr-v2-recursor-smoke.mjs "$PSC1_DAG_RUN_DIR/recursor-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" recursor-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -q 'PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_CACHE_MODE_JS: PASS wrappers=2 cheapModes=4 warmCold=8' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fq 'PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX_JS: PASS public=126 core=504 owners=360 reducer=432' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_ADMISSION_JS: PASS valid=6 admitted=2 rejected=2' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STATE_JS: PASS sequence=4 propagated=40' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY_JS: PASS comparisons=70 fields=20' "$RUNNER_TEMP/psc1-recursor-generated.log"
+          grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STRING_JS: PASS callbacks=24 propagated=48' "$RUNNER_TEMP/psc1-recursor-generated.log"
+      - name: Check generated mutual and nested prefix owners in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-generated-prefix-smoke.mjs "$PSC1_DAG_RUN_DIR/generated-prefix-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" generated-prefix-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-generated-prefix-js.log"
+          grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
+          grep -Fqx 'PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
+          grep -Eq '^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-generated-prefix-js.log"
+      - name: Check generated DAG K conversion in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-recursor-k-smoke.mjs "$PSC1_DAG_RUN_DIR/recursor-k-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" recursor-k-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+          grep -Fqx 'PSC1_V2_K_GENERATED_DIRECT_ADMISSION_PASS cases=2' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+          grep -Fqx 'PSC1_V2_K_GENERATED_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+          grep -Fqx 'PSC1_V2_K_GENERATED_MATRIX_PASS public=108 core=432 reducer=648' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+          grep -Fqx 'PSC1_V2_K_GENERATED_FIXED_OWNER_PASS cases=96' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+          grep -Fqx 'PSC1_V2_K_GENERATED_OWNER_PASS carrier=16 propagated=16 metadata=16' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+          grep -Fqx 'PSC1_V2_K_GENERATED_ORDER_PASS guards=5' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+          grep -Eq '^PSC1_V2_RECURSOR_K_GENERATED_PASS assertions=[0-9]+$' "$RUNNER_TEMP/psc1-recursor-k-generated.log"
+      - name: Check generated name and string workers in detached Node
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-name-worker-smoke.mjs "$PSC1_DAG_RUN_DIR/name-worker-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" name-worker-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_NAMES_PASS pairs=400 deep=4 maxDepth=1024' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_ABI_PASS rawPartials=4 namePartials=1 executions=7' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Fqx 'PSC1_NAME_WORKER_CHECKING_PASS declarations=10 checked=10 normalized=10 negatives=4 official=native-gate' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+          grep -Eq '^PSC1_NAME_WORKER_PASS assertions=[1-9][0-9]*$' "$RUNNER_TEMP/psc1-name-worker-generated.log"
+      - name: Check generated Quot owners and actual admissions in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-quot-owner-smoke.mjs "$PSC1_DAG_RUN_DIR/quot-owner-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" quot-owner-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-quot-owner-generated.log"
+          grep -Eq '^PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-quot-owner-generated.log"
+      - name: Check complete generated DAG checker state in detached Node
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-expr-v2-owned-state-smoke.mjs "$PSC1_DAG_RUN_DIR/owned-state-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" owned-state-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-owned-state-generated.log"
+          grep -Eq '^PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions=[0-9]+$' "$RUNNER_TEMP/psc1-owned-state-generated.log"
+          grep -Fqx 'PSC1_V2_ADMISSION_OWNED_STATE_JS_PASS carrier=8 propagated=12 differential=336 publicWhnf=168' "$RUNNER_TEMP/psc1-owned-state-generated.log"
+      - name: Exercise the generated checked batch provider in detached Node
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-provider-smoke.mjs js dist/expr-v2/integration/kernel.js \
+            | tee "$RUNNER_TEMP/psc1-generated-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
+          grep -q 'PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached' "$RUNNER_TEMP/psc1-generated-provider.log"
+      - name: Check large numerals without fuel-proportional closure allocation
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          cp scripts/pskernel-nat-runtime-smoke.mjs "$PSC1_DAG_RUN_DIR/nat-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" nat-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-nat-generated.log"
+          grep -q 'PSC1_NAT_LARGE_RUNTIME: PASS' "$RUNNER_TEMP/psc1-nat-generated.log"
+      - name: Measure complete generated checks in isolated A-B-B-A workers
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node --expose-gc scripts/pskernel-expr-v2-dag-bench.mjs \
+            dist/expr-v2/integration/kernel.js \
+            | tee "$RUNNER_TEMP/psc1-dag-generated-bench.log"
+          grep -q 'PSC1_V2_DAG_BENCH: PASS' "$RUNNER_TEMP/psc1-dag-generated-bench.log"
+      - name: Measure complete declaration admission in separate A-B-B-A workers
+        timeout-minutes: 12
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node --check scripts/pskernel-expr-v2-admission-bench.mjs
+          node --expose-gc scripts/pskernel-expr-v2-admission-bench.mjs \
+            dist/expr-v2/integration/kernel.js \
+            | tee "$RUNNER_TEMP/psc1-admission-generated-bench.log"
+          grep -q 'PSC1_DAG_ADMISSION_BENCH: PASS' "$RUNNER_TEMP/psc1-admission-generated-bench.log"
+          test "$(grep -c '^PSC1_ADMISSION_SAMPLE ' "$RUNNER_TEMP/psc1-admission-generated-bench.log")" -eq 24
+      - name: Recheck full executable workloads with strict value assertions
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-whole-js-bench.mjs \
+            dist/expr-v2/integration/kernel.js optimized \
+            | tee "$RUNNER_TEMP/psc1-whole-strict.log"
+          grep -q 'PSC1_JS_WHOLE_SUMMARY' "$RUNNER_TEMP/psc1-whole-strict.log"
+          node --expose-gc scripts/pskernel-js-memory-probe.mjs \
+            dist/expr-v2/integration/kernel.js optimized warm_infer \
+            | tee "$RUNNER_TEMP/psc1-memory-strict.log"
+          grep -q 'PSC1_JS_WHOLE_SUMMARY' "$RUNNER_TEMP/psc1-memory-strict.log"
+      - name: Profile actual checked workloads in separate diagnostic workers
+        timeout-minutes: 12
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_PROFILE_NODE="$(command -v node)"
+          node --check scripts/pskernel-generated-profile.mjs
+          for specification in "fn-unique 128 whnf" "fn-collision 128 whnf" "zeta 24 check"; do
+            read -r shape depth operation <<< "$specification"
+            for variant in legacy dag; do
+              timeout --signal=KILL 180s env PATH="" "$PSC1_PROFILE_NODE" --expose-gc \
+                scripts/pskernel-expr-v2-dag-bench.mjs \
+                dist/expr-v2/integration/kernel.js profile \
+                "$variant" "$shape" "$depth" 1 "$operation" \
+                "$RUNNER_TEMP/psc1-dag-profiles" \
+                | tee -a "$RUNNER_TEMP/psc1-dag-profile.log"
+            done
+          done
+          test "$(grep -c '^PSC1_V2_DAG_PROFILE: PASS$' "$RUNNER_TEMP/psc1-dag-profile.log")" -eq 6
+      - name: Package the checked generated provider and source-bound digests
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          PSC1_PROVIDER_DIST=dist/expr-v2/integration/provider
+          mkdir -p "$PSC1_PROVIDER_DIST/scripts" "$PSC1_PROVIDER_DIST/npm-runtime"
+          cp dist/expr-v2/integration/kernel.js dist/expr-v2/integration/kernel.ts dist/expr-v2/integration/kernel.d.ts \
+            dist/expr-v2/integration/kernel.js.map "$PSC1_PROVIDER_DIST/"
+          cp scripts/pskernel-canonical-provider.mjs "$PSC1_PROVIDER_DIST/scripts/"
+          cp packages/pskernel-core/PROVIDER.md "$PSC1_PROVIDER_DIST/README.md"
+          cp npm-runtime/canonical-admissions-wire.mjs "$PSC1_PROVIDER_DIST/npm-runtime/"
+          node -e "require('node:fs').writeFileSync(process.argv[1],JSON.stringify({private:true,type:'module'},null,2)+'\\n')" \
+            "$PSC1_PROVIDER_DIST/package.json"
+          node scripts/pskernel-artifact-manifest.mjs "$PSC1_PROVIDER_DIST/artifacts.json" \
+            lean-generated-js "$PSC1_PROVIDER_DIST/kernel.js" "$PSC1_PROVIDER_DIST/kernel.ts" "$PSC1_PROVIDER_DIST/kernel.d.ts" \
+            "$PSC1_PROVIDER_DIST/kernel.js.map" "$PSC1_PROVIDER_DIST/scripts/pskernel-canonical-provider.mjs" \
+            "$PSC1_PROVIDER_DIST/npm-runtime/canonical-admissions-wire.mjs" "$PSC1_PROVIDER_DIST/package.json" "$PSC1_PROVIDER_DIST/README.md"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-v2-dag-generated-js
+          path: |
+            ${{ runner.temp }}/psc1-t01f-generated/
+            ${{ runner.temp }}/psc1-generated-provider.log
+            ${{ runner.temp }}/psc1-proof-irrelevance-generated.log
+            ${{ runner.temp }}/psc1-lazy-nat-generated.log
+            ${{ runner.temp }}/psc1-lazy-delta-generated.log
+            ${{ runner.temp }}/psc1-invalid-occurrence-generated.log
+            ${{ runner.temp }}/psc1-full-shape-generated.log
+            ${{ runner.temp }}/psc1-final-rules-generated.log
+            ${{ runner.temp }}/psc1-admission-guard-generated.log
+            ${{ runner.temp }}/psc1-quot-generated.log
+            ${{ runner.temp }}/psc1-recursor-generated.log
+            ${{ runner.temp }}/psc1-generated-prefix-js.log
+            ${{ runner.temp }}/psc1-quot-owner-generated.log
+            ${{ runner.temp }}/psc1-name-worker-generated.log
+            ${{ runner.temp }}/psc1-recursor-k-generated.log
+            ${{ runner.temp }}/psc1-owned-state-generated.log
+            psc1/dist/expr-v2/integration/provider/
+            ${{ runner.temp }}/psc1-dag-generated-js.log
+            ${{ runner.temp }}/psc1-nat-generated.log
+            ${{ runner.temp }}/psc1-infer-only-generated.log
+            ${{ runner.temp }}/psc1-dag-generated-bench.log
+            ${{ runner.temp }}/psc1-admission-generated-bench.log
+            ${{ runner.temp }}/psc1-whole-strict.log
+            ${{ runner.temp }}/psc1-memory-strict.log
+            ${{ runner.temp }}/psc1-dag-profile.log
+            ${{ runner.temp }}/psc1-dag-profiles/
+            psc1/dist/expr-v2/integration/kernel.js
+            psc1/dist/expr-v2/integration/kernel.ts
+            psc1/dist/expr-v2/integration/kernel.d.ts
+            psc1/dist/expr-v2/integration/kernel.js.map
+          retention-days: 30
+
+
+  # Reuse the exact generated provider for an authenticated paired regression.
+  paired-initial-owner:
+    needs: [native-dag-integration, generated-dag-integration]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate exact historical and current generated provider bundles
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, hashlib, io, json, os, pathlib, re, stat, urllib.request, zipfile
+          REPO = "dwijayuda/pskernel"
+          API = "https://api.github.com/repos/" + REPO
+          WORKFLOW = ".github/workflows/psc1-pskernel-expr-v2-integration.yml"
+          LEAN = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          DRIVER_SOURCE = "4ebfd97b4588f8651e8b7a81bc00b2a05cfe1e3c"
+          DRIVER_PATH = "psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs"
+          DRIVER_SHA256 = "7c8a82758b90958d973623d26e4c4dfbd900126cd737c190adffb76cb1563221"
+          BASELINE_SOURCE = "9c87f631758862285273ddb0ea0a3987c671022e"
+          BASELINE_RUN, BASELINE_ARTIFACT = 39694087886, 12391568345
+          BASELINE_BYTES = 3410883
+          BASELINE_ZIP_SHA256 = "6c63a2fa2981610f14e91e3aeb37ae6f00e5fdc1107a4c942841d25208af3ff7"
+          BASELINE_KERNEL_SHA256 = "f1ac31f1527103877268b5dea86075795401fc7679357878064f9194e0e9fd32"
+          PREFIX = "dist/expr-v2/integration/provider/"
+          FILES = {"kernel.js", "kernel.ts", "kernel.d.ts", "kernel.js.map",
+                   "scripts/pskernel-canonical-provider.mjs",
+                   "npm-runtime/canonical-admissions-wire.mjs", "package.json", "README.md"}
+          LIMIT = 256 * 1024 * 1024
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-t01f-owner-pair"
+          out.mkdir()
+          candidate_source = os.environ["GITHUB_SHA"]
+          candidate_run = int(os.environ["GITHUB_RUN_ID"])
+          assert re.fullmatch(r"[0-9a-f]{40}", candidate_source)
+          assert candidate_source != BASELINE_SOURCE
+          assert os.environ["GITHUB_REPOSITORY"] == REPO
+          def sha(data):
+              return hashlib.sha256(data).hexdigest()
+          def get(route):
+              request = urllib.request.Request(API + route, headers={
+                  "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"})
+              # Authenticate the API request; do not forward the token to signed blob redirects.
+              request.add_unredirected_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  data = response.read(LIMIT + 1)
+              assert len(data) <= LIMIT
+              return data
+          def api(route):
+              value = json.loads(get(route))
+              assert isinstance(value, dict)
+              return value
+          def one(values, predicate):
+              matches = [value for value in values if predicate(value)]
+              assert len(matches) == 1, matches
+              return matches[0]
+          def suffix(names, value):
+              return one(names, lambda name: name == value or name.endswith("/" + value))
+          def restore(label, source, run_id, fixed_artifact=None):
+              run = api("/actions/runs/" + str(run_id))
+              assert run["id"] == run_id and run["head_sha"] == source and run["path"] == WORKFLOW
+              assert run["repository"]["full_name"] == run["head_repository"]["full_name"] == REPO
+              if label == "baseline":
+                  assert run["status"] == "completed" and run["conclusion"] == "success"
+              else:
+                  # This job keeps its own enclosing workflow running. Both producer jobs,
+                  # rather than the enclosing run, must already have terminal success.
+                  assert run_id == candidate_run and source == candidate_source
+                  assert run["status"] == "in_progress" or (
+                      run["status"] == "completed" and run["conclusion"] == "success")
+              response = api("/actions/runs/" + str(run_id) + "/jobs?per_page=100")
+              jobs = response["jobs"]
+              assert response["total_count"] == len(jobs)
+              producers = []
+              for name in ("native-dag-integration", "generated-dag-integration"):
+                  job = one(jobs, lambda value: value["name"] == name)
+                  assert job["status"] == "completed" and job["conclusion"] == "success"
+                  producers.append({"id": job["id"], "name": name, "conclusion": job["conclusion"]})
+              response = api("/actions/runs/" + str(run_id) + "/artifacts?per_page=100")
+              assert response["total_count"] == len(response["artifacts"])
+              metadata = one(response["artifacts"], lambda value:
+                  value["name"] == "psc1-v2-dag-generated-js" and
+                  (fixed_artifact is None or value["id"] == fixed_artifact))
+              assert not metadata["expired"]
+              assert metadata["workflow_run"]["id"] == run_id
+              assert metadata["workflow_run"]["head_sha"] == source
+              assert re.fullmatch(r"sha256:[0-9a-f]{64}", metadata["digest"])
+              raw = get("/actions/artifacts/" + str(metadata["id"]) + "/zip")
+              assert len(raw) == metadata["size_in_bytes"] and sha(raw) == metadata["digest"][7:]
+              if label == "baseline":
+                  assert len(raw) == BASELINE_BYTES and sha(raw) == BASELINE_ZIP_SHA256
+              (out / (label + ".zip")).write_bytes(raw)
+              with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
+                  members = {}
+                  for member in bundle.infolist():
+                      name = member.filename
+                      assert not name.startswith("/") and "\\" not in name
+                      assert ".." not in pathlib.PurePosixPath(name).parts
+                      if member.is_dir():
+                          continue
+                      assert name not in members and 0 <= member.file_size <= LIMIT
+                      assert ((member.external_attr >> 16) & 0o170000) in (0, stat.S_IFREG)
+                      members[name] = member
+                  manifest_name = suffix(members, PREFIX + "artifacts.json")
+                  manifest_raw = bundle.read(manifest_name)
+                  manifest = json.loads(manifest_raw)
+                  assert manifest["schema"] == "pskernel-core-artifacts-v1"
+                  assert manifest["repository"] == REPO and manifest["sourceSha"] == source
+                  assert manifest["workflowRun"] == "https://github.com/" + REPO + "/actions/runs/" + str(run_id)
+                  assert manifest["runAttempt"] == str(run["run_attempt"])
+                  assert manifest["kind"] == "lean-generated-js"
+                  assert manifest["leanToolchain"] == "leanprover/lean4:v4.35.0"
+                  assert manifest["leanCommit"] == LEAN and manifest["typescript"] == "7.0.2"
+                  assert manifest["checkerFuelDefault"] == 4096
+                  assert re.fullmatch(r"v22\.[0-9]+\.[0-9]+", manifest["node"])
+                  records = manifest["files"]
+                  assert len(records) == len(FILES)
+                  assert {record["path"] for record in records} == {PREFIX + name for name in FILES}
+                  bundle_root = manifest_name[:-len("artifacts.json")]
+                  restored = {}
+                  for record in records:
+                      relative = record["path"][len(PREFIX):]
+                      member = bundle_root + relative
+                      assert member in members
+                      data = bundle.read(member)
+                      assert data and len(data) == record["bytes"] and sha(data) == record["sha256"]
+                      restored[relative] = data
+                  assert json.loads(restored["package.json"]) == {"private": True, "type": "module"}
+                  source_map = json.loads(restored["kernel.js.map"])
+                  assert source_map["version"] == 3 and source_map["sources"] and source_map["mappings"]
+                  for index, name in enumerate(source_map["sources"]):
+                      contents = source_map.get("sourcesContent", [])
+                      if index < len(contents) and isinstance(contents[index], str):
+                          continue
+                      assert isinstance(name, str) and not name.startswith("/")
+                      assert ".." not in pathlib.PurePosixPath(name).parts
+                      assert source_map.get("sourceRoot", "") in ("", ".") and name in restored
+                  primary = bundle.read(suffix(members, "psc1/dist/expr-v2/integration/kernel.js"))
+                  assert primary == restored["kernel.js"]
+                  if label == "baseline":
+                      assert sha(primary) == BASELINE_KERNEL_SHA256
+                  session_log = bundle.read(suffix(members, "psc1-generated-prefix-js.log")).decode("utf-8")
+                  assert "PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2" in session_log.splitlines()
+              runtime = out / label
+              runtime.mkdir()
+              for relative, data in restored.items():
+                  target = runtime / relative
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+              (runtime / "artifacts.json").write_bytes(manifest_raw)
+              return {"sourceSha": source, "producerRun": run_id, "producerRunAttempt": run["run_attempt"],
+                      "producerJobs": producers, "artifactId": metadata["id"],
+                      "artifactBytes": len(raw), "artifactSha256": sha(raw),
+                      "kernelSha256": sha(restored["kernel.js"]), "manifestSha256": sha(manifest_raw),
+                      "files": records, "producerNode": manifest["node"], "producerTypescript": manifest["typescript"],
+                      "runtime": str(runtime), "role": "authentic Lean-source PSC1/TypeScript provider bundle"}
+          baseline = restore("baseline", BASELINE_SOURCE, BASELINE_RUN, BASELINE_ARTIFACT)
+          candidate = restore("candidate", candidate_source, candidate_run)
+          driver_record = api("/contents/" + DRIVER_PATH + "?ref=" + DRIVER_SOURCE)
+          assert driver_record["type"] == "file" and driver_record["encoding"] == "base64"
+          assert driver_record["sha"] == "9fcf6d6b5ea969fdad79f5f9f2b1f2459cbe2080"
+          driver = base64.b64decode(driver_record["content"])
+          assert sha(driver) == DRIVER_SHA256
+          (out / "driver.mjs").write_bytes(driver)
+          receipt = {"schema": "psc1-t01f-owner-pair-authentication-v1", "repository": REPO,
+                     "workflowSource": candidate_source, "workflowRun": candidate_run,
+                     "driverSource": DRIVER_SOURCE, "driverPath": DRIVER_PATH, "driverSha256": DRIVER_SHA256,
+                     "baseline": baseline, "candidate": candidate, "compilerReexecuted": False,
+                     "scope": "Narrow paired owner regression; full qualification remains tied to terminal producer workflows."}
+          (out / "authentication.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_T01F_OWNER_PAIR_AUTHENTICATED " + json.dumps(receipt, sort_keys=True))
+          PY
+      - name: Execute the unchanged 32-worker complete-call ABBA driver
+        timeout-minutes: 35
+        run: |
+          set -euo pipefail
+          PSC1_PAIR_NODE="$(command -v node)"
+          PSC1_PAIR_DIR="$RUNNER_TEMP/psc1-t01f-owner-pair"
+          "$PSC1_PAIR_NODE" --version
+          "$PSC1_PAIR_NODE" --check "$PSC1_PAIR_DIR/driver.mjs"
+          "$PSC1_PAIR_NODE" --check "$PSC1_PAIR_DIR/candidate/kernel.js"
+          "$PSC1_PAIR_NODE" --check "$PSC1_PAIR_DIR/baseline/kernel.js"
+          cd "$RUNNER_TEMP"
+          env PATH="" "$PSC1_PAIR_NODE" "$PSC1_PAIR_DIR/driver.mjs" \
+            "$PSC1_PAIR_DIR/candidate/kernel.js" "$PSC1_PAIR_DIR/baseline/kernel.js" \
+            "$PSC1_PAIR_DIR/measurements" "$GITHUB_SHA" \
+            "9c87f631758862285273ddb0ea0a3987c671022e" \
+            2>&1 | tee "$PSC1_PAIR_DIR/collection.log"
+          grep -Fqx 'PSC1_V2_INITIAL_OWNER_BENCH: PASS workers=32 calls=384 sizes=32,128 queries=4' \
+            "$PSC1_PAIR_DIR/collection.log"
+      - name: Bind all measurements to exact artifact bytes and unchanged resource policy
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-t01f-owner-pair"
+          auth = json.loads((root / "authentication.json").read_text())
+          report_path = root / "measurements/initial-owner-complete-batch.json"
+          report = json.loads(report_path.read_text())
+          sha = lambda data: hashlib.sha256(data).hexdigest()
+          assert auth["candidate"]["sourceSha"] == report["candidateSha"] == os.environ["GITHUB_SHA"]
+          assert auth["baseline"]["sourceSha"] == report["baselineSha"] == "9c87f631758862285273ddb0ea0a3987c671022e"
+          assert report["schema"] == "psc1-initial-owner-complete-batch-v1"
+          assert report["limits"] == {"kernelFuel": 4096, "hostPerWorkerSeconds": 60,
+                                      "v8OldSpaceMiB": 2048, "hardRssLimitClaim": False}
+          assert report["callsPerWorker"] == {"cold": 1, "warmup": 2, "warm": 9}
+          assert report["expectedWorkers"] == report["completedWorkers"] == 32
+          assert report["validatedCalls"] == 384 and report["failures"] == []
+          expected = {(size, query, position, label)
+                      for size in (32, 128)
+                      for query in ("trivial-sort", "owned-constant", "unknown-constant", "ill-typed-definition")
+                      for position, label in enumerate(("baseline", "candidate", "candidate", "baseline"))}
+          assert len(report["workers"]) == 32
+          assert {(row["owners"], row["query"], row["position"], row["label"])
+                  for row in report["workers"]} == expected
+          for label in ("baseline", "candidate"):
+              assert report["expectedDigests"][label] == auth[label]["kernelSha256"]
+              assert sha((root / label / "kernel.js").read_bytes()) == auth[label]["kernelSha256"]
+          assert report["driverSha256"] == auth["driverSha256"] == sha((root / "driver.mjs").read_bytes())
+          for row in report["workers"]:
+              assert row["sourceSha"] == auth[row["label"]]["sourceSha"]
+              assert row["kernelSha256"] == auth[row["label"]]["kernelSha256"]
+              assert row["validated"] == 12 and row["kernelFuel"] == "4096"
+              assert len(row["warmup"]) == 2 and len(row["warm"]) == 9
+              assert row["hostWallDeadlineSeconds"] == 60 and row["v8OldSpaceMiB"] == 2048
+              assert row["hardRssLimitClaim"] is False and row["node"].startswith("v22.")
+          receipt = {"schema": "psc1-t01f-owner-pair-receipt-v1",
+                     "candidateSource": report["candidateSha"], "baselineSource": report["baselineSha"],
+                     "workflowRun": int(os.environ["GITHUB_RUN_ID"]), "driverSource": auth["driverSource"],
+                     "driverSha256": report["driverSha256"], "reportSha256": sha(report_path.read_bytes()),
+                     "authenticationSha256": sha((root / "authentication.json").read_bytes()),
+                     "workers": 32, "validatedCalls": 384, "allSourceAndArtifactBindingsMatched": True,
+                     "performanceThresholdClaim": False, "hardRssLimitClaim": False,
+                     "wholeKernelSpeedupClaim": False, "kernelCompiledHere": False}
+          (root / "measurements/authenticated-comparison.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_T01F_OWNER_PAIR_RECEIPT " + json.dumps(receipt, sort_keys=True))
+          print("PSC1_T01F_OWNER_PAIR_SUMMARY " + json.dumps(
+              {key: value for key, value in report.items() if key != "workers"}, sort_keys=True))
+          PY
+      - name: Present complete and incomplete measurements
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/psc1-t01f-owner-pair/measurements/initial-owner-complete-batch.md"; then
+            cat "$RUNNER_TEMP/psc1-t01f-owner-pair/measurements/initial-owner-complete-batch.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-owner-pair-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/psc1-t01f-owner-pair/
+
+  # Reuse this run's checked producer. Each fresh process readmits the complete
+  # authentic closure and executes one unchanged sample, including its negatives.
+  t01f-generated-shards:
+    needs: [generated-dag-integration]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        sample: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-v2-dag-generated-js
+          path: ${{ runner.temp }}/psc1-t01f-generated-producer
+      - name: Authenticate inputs and execute the complete selected String sample
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/pskernel-t01f-shards.mjs
+          node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
+          node scripts/pskernel-t01f-shards.mjs run generated \
+            "$RUNNER_TEMP/psc1-t01f-generated-producer" \
+            "$RUNNER_TEMP/psc1-t01f-generated-${{ matrix.sample }}" "${{ matrix.sample }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-generated-shard-${{ matrix.sample }}-attempt-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/psc1-t01f-generated-${{ matrix.sample }}/receipt.json
+            ${{ runner.temp }}/psc1-t01f-generated-${{ matrix.sample }}/inputs.json
+            ${{ runner.temp }}/psc1-t01f-generated-${{ matrix.sample }}/generated.log
+            ${{ runner.temp }}/psc1-t01f-generated-${{ matrix.sample }}/generated.memory
+          if-no-files-found: error
+          retention-days: 30
+
+  t01f-generated-complete:
+    if: ${{ always() }}
+    needs: [generated-dag-integration, t01f-generated-shards]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Require every producer and shard job to succeed
+        env:
+          PSC1_T01F_PRODUCER_RESULT: ${{ needs.generated-dag-integration.result }}
+          PSC1_T01F_SHARDS_RESULT: ${{ needs.t01f-generated-shards.result }}
+        run: |
+          set -euo pipefail
+          test "$PSC1_T01F_PRODUCER_RESULT" = success
+          test "$PSC1_T01F_SHARDS_RESULT" = success
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-v2-dag-generated-js
+          path: ${{ runner.temp }}/psc1-t01f-generated-producer
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psc1-t01f-generated-shard-*-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/psc1-t01f-generated-receipts
+          merge-multiple: false
+      - name: Reauthenticate and require all six complete String samples
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-t01f-shards.mjs aggregate generated \
+            "$RUNNER_TEMP/psc1-t01f-generated-producer" \
+            "$RUNNER_TEMP/psc1-t01f-generated-receipts" \
+            "$RUNNER_TEMP/psc1-t01f-generated-complete"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-generated-complete-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/psc1-t01f-generated-complete/
+          if-no-files-found: error
+          retention-days: 30
+

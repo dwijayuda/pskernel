@@ -4,8 +4,14 @@ import path from "node:path";
 import {performance} from "node:perf_hooks";
 import {createHash} from "node:crypto";
 
-const [filename,fixturePath]=process.argv.slice(2);
-if(!filename||!fixturePath)throw Error("usage: t01f-string-smoke <generated-kernel.js> <authentic-fixture.json>");
+const args=process.argv.slice(2);
+const [filename,fixturePath,sampleIndexArgument]=args;
+if(args.length<2||args.length>3||!filename||!fixturePath||
+ (sampleIndexArgument!==undefined&&!["0","1","2","3","4","5"].includes(sampleIndexArgument)))
+ throw Error("usage: t01f-string-smoke <generated-kernel.js> <authentic-fixture.json> [sample-index:0..5]");
+const sampleIndex=sampleIndexArgument===undefined?null:Number(sampleIndexArgument);
+const harnessStarted=performance.now();
+const harnessSha256=createHash("sha256").update(readFileSync(new URL(import.meta.url))).digest("hex");
 const kernelSha256=createHash("sha256").update(readFileSync(filename)).digest("hex");
 const k=await import(pathToFileURL(path.resolve(filename)).href);
 const fixtureBytes=readFileSync(fixturePath);
@@ -149,6 +155,7 @@ must(fixture.roots.every(root=>typeof root==="string")&&
  new Set(fixture.roots).size===fixture.roots.length,"unique-request-roots");
 for(const root of ["String.ofList","Char.ofNat","UInt8.ofNat"])must(fixture.roots.includes(root),"genuine-root-"+root);
 must(same(fixture.samples,["","a","é","€","😀","Aé€😀"]),"complete-utf8-sample-matrix");
+const selectedSamples=sampleIndex===null?fixture.samples:[fixture.samples[sampleIndex]];
 const resources=get("psKernelResourcePolicyDefault");
 must(resources.fuel===4096n&&resources.maxRecDepth===0n&&resources.maxNatSize===134217728n&&
  resources.maxDeclarations===0n&&resources.cancelled===false,"unchanged-resources");
@@ -267,7 +274,8 @@ for(const raw of metadata){
 }
 must(new Set(metadataNames).size===metadataNames.length&&
  BigInt(metadata.length)===get("psKernelEnvironmentSize")(session.environment),"complete-authentic-metadata-coverage");
-console.log("PSC1_T01F_METADATA_COMPLETE "+JSON.stringify({declarations:metadata.length,milliseconds:performance.now()-metadataStart}));
+const metadataMs=performance.now()-metadataStart;
+console.log("PSC1_T01F_METADATA_COMPLETE "+JSON.stringify({declarations:metadata.length,milliseconds:metadataMs}));
 const stringConstructor=find("String.ofByteArray");
 must(stringConstructor&&same(stringConstructor,ci.ctorInfo(stringConstructor.value))&&
  stringConstructor.value.numFields===2n,"actual-String-bytearray-proof-constructor");
@@ -281,7 +289,7 @@ const requireStringConstructor=(term,label)=>{
 const decode=(arena,root)=>accepted(get("psKernelExprV2DecodedRequire")(
  accepted(get("psKernelExprV2DecodeChecked")(arena),"decode"),root),"root");
 const measurements=[];
-for(const value of sequence(fixture.samples).map(text)){
+for(const value of sequence(selectedSamples).map(text)){
  traceSample=value;traceStage="input-and-owners";
  if(traceEnabled)console.log("PSC1_T01F_SAMPLE_BEGIN "+JSON.stringify(value));
  const started=performance.now();
@@ -406,8 +414,15 @@ for(const value of sequence(fixture.samples).map(text)){
  console.log("PSC1_T01F_JS_CASE_PASS "+JSON.stringify(value));
 }
 must(get("psKernelEnvironmentSize")(empty.environment)===0n,"empty-session-immutable");
-console.log("PSC1_T01F_FULL_STRING_JS: PASS "+JSON.stringify({kernelSha256,fixtureSha256,requests:requests.length,metadata:metadata.length,
- declarations:get("psKernelEnvironmentSize")(session.environment).toString(),samples:fixture.samples.length,
- assertions,constructionMs,admissionMs,diagnosticTracing:traceEnabled,measurements}));
+must(measurements.length===selectedSamples.length&&
+ (sampleIndex===null?measurements.length===6:measurements.length===1),"complete-selected-sample-matrix");
+const result={kernelSha256,fixtureSha256,harnessSha256,requests:requests.length,metadata:metadata.length,
+ declarations:get("psKernelEnvironmentSize")(session.environment).toString(),samples:selectedSamples.length,
+ availableSamples:fixture.samples.length,executedSamples:measurements.length,fuel:Number(resources.fuel),independentAdmission:true,
+ assertions,constructionMs,admissionMs,metadataMs,totalMs:performance.now()-harnessStarted,
+ diagnosticTracing:traceEnabled,measurements};
+if(sampleIndex===null)console.log("PSC1_T01F_FULL_STRING_JS: PASS "+JSON.stringify(result));
+else console.log("PSC1_T01F_STRING_SHARD_JS: PASS "+JSON.stringify({
+ ...result,sampleIndex,sample:fixture.samples[sampleIndex]}));
 
 

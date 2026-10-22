@@ -1,3 +1,99 @@
+## Unfinished T01F handoff — no CI on this checkpoint
+
+This work-branch checkpoint preserves the current implementation and prepared
+qualification work for GPT-6.1 Sol with High reasoning. The user requested a
+continuation prompt; no further CI was launched. The containing commit uses
+`[skip ci]` and is **unqualified**. Resolve its exact SHA independently.
+
+Integration remains `123c41197950b6761be965fd21c57142ee2b0d1c`.
+The latest native-tested harness is parent
+`a36839347269d05f5a79d6103a7a4b0ddab1bdb1`; production Lean remains
+`19fb4b0b8f52808d6a31705185018d6e60836d8e`. Historical complete scoped
+checking qualification remains `9c87f631758862285273ddb0ea0a3987c671022e`.
+Do not inherit any of these results for the containing commit.
+
+The strict generated selector and authenticated19fb artifact-reuse focused
+workflow are installed but unexecuted. Final sharded workflow replacements,
+helper and paired-owner fragment are preserved as unexecuted drafts under
+`docs/drafts/t01f-final-shards/`; they are not active workflows. Finish review
+and mixed-sample/retained-control preflight before activating the final suite.
+All assertions, negatives and resource limits remain required.
+
+Read `docs/AI_CONTINUATION_PROMPT.md` and
+`evidence/2026-10-22-t01f-handoff-checkpoint.json` for source/run/digest details.
+T01F is not complete; both generated routes, canonical final qualification,
+complete performance and the unchanged193 Arena at a final coherent source
+remain pending. A/B/C/D remain separate. Older entries below are historical;
+in particular, any statement that run39827244691 is still running is superseded
+by its recorded terminal cancellation.
+
+---
+
+## T01F generated matrix isolation — focused mixed-sample preflight
+
+The exact19fb generated preflight in run39827244691/job119993676851 built and
+source-checked the fresh candidate, then reached its unchanged25-minute
+whole-job limit. Setup/build consumed839 seconds and detached execution676
+seconds. Empty and ASCII cases completed, including their negatives. The
+third sample was interrupted in V1 WHNF; the remaining samples and retained
+generated DAG/prefix stages did not complete. No assertion failure or heap
+exhaustion was observed. This is an incomplete preflight, never a T01F PASS.
+
+Source `19fb4b0b8f52808d6a31705185018d6e60836d8e` produced artifact12447224834
+(`psc1-t01f-generated-preflight`,1110713 bytes), ZIP SHA-256
+`f899a7704c804d9c48ac54ee2cdd608f69497397b4f1378145e235b65126522b`.
+Its9953467-byte kernel has SHA-256
+`cd6d03fe2da5b7e76bf40a7e3dba9e8315e2fb1a269f20f3108e29f77c49e5f5`.
+The authenticated raw fixture remains
+`563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d`.
+Compiled source and fixture production steps succeeded even though the whole
+producer run was cancelled. Reuse must validate those individual steps and
+retain the cancellation/skipped-gate facts; never assert producer-run success.
+
+The trace completed594 API calls. First owner derivation was4.950 seconds;
+the first12 empty-sample public calls totaled69.173 seconds
+(5.293–6.105 each). Historical profiled9c execution measured7.784 and101.039
+seconds respectively, but the Node patch and profiler settings differ, so this
+is diagnostic evidence rather than controlled performance acceptance.
+The ASCII sample's53 V1 DefEq calls took144.798 seconds and8 V1 WHNF calls took
+37.680 seconds. Its29 public calls took185.276 seconds. No completed peak-RSS
+result survived cancellation.
+
+Exact `a36839347269d05f5a79d6103a7a4b0ddab1bdb1` passed native singleton
+preflight run39829443557/job120001370021: all six cases and singleton sequences,
+294 requests/377 metadata records,74 proof reports and retained controls.
+Fixture execution took8 seconds. This is that source's native result only.
+
+This revision adds strict optional sample selection to the generated test
+runner. Default invocation still runs all six original samples and every
+assertion. An explicit index0–5 executes exactly that sample after full
+independent declaration admission and all applicable negatives, produces a
+distinct shard PASS receipt, and retains singleton session-reuse checks.
+The fixture contents are never edited to select cases.
+
+The focused workflow reuses authenticated19fb compiled bytes to test the
+heaviest mixed sample and retained controls without another compilation. Its
+harness source is this revision; its generated kernel source remains19fb.
+Neither identity inherits final qualification. The mixed sample has its own
+25-minute job limit; retained controls have a separate10-minute job. Both use
+fuel4096,2048MiB old-space and empty runtime PATH.
+
+Final qualification will compile each authentic route once at one new exact
+source, run all six complete cases in separate runtime-only jobs, and require
+an aggregate receipt proving all six distinct indices on each route with
+matching source/run/attempt, kernel/fixture/producer/runner digests. This
+allocates more total CI time to the complete new matrix while preserving
+25 minutes per case job, all assertions and negatives. Compilation, existing
+controls and performance measurements are not repeated per case. Matrix
+max-parallel is two per route. The unchanged193-case Arena remains60 seconds
+per case,2048MiB Node old-space,two workers and identical body hashes.
+
+T01F remains incomplete until both complete generated routes and all final
+native/official/canonical/proof/provider/research gates have their own terminal
+source-bound evidence. No inductive-admission migration has begun. A/B/C/D
+remain separate; the performance worker requires the unchanged comparable
+paired benchmark before any speedup claim.
+
 ## T01F singleton public-call coverage — native-only follow-up
 
 Updated: 2026-10-22 UTC. This revision adds a singleton check → WHNF → DefEq
@@ -3097,3 +3193,4 @@ Candidate034 runs already exist: integration39637759611 (generated119352848385/n
 Separate Church diagnostic branch sourcef2e6c44a506a53dc294ae6569f8371e81ed6bdd5/run39638208348 is queued. It pins historical kernel369bee. d373 compilation failed on reserved prefix; b71 compiled and reproduced original resource exhaustion, then launcher argument allowlists refused stage modes. Both host-only issues are repaired; no first-failing-stage attribution has yet been observed. Inspect the new artifact rather than infer a stage.
 
 Next regular Pro task: finish existing034 qualification, fix only evidenced failures, require unchanged case16 actual rejectedInvalid with official rejection and safe/unsafe/erased/nested controls. Scoped A gates and remaining C failures are distinct. Then implement T03a exactly as the plan's authoritative new-environment-prefix recipe specifies; no broad re-audit. T01F full actual String environment stays open. Pair timing remains inconclusive; no overall speedup/global soundness claim. The four final docs under docs/ are authoritative, including ready-to-copy AI_CONTINUATION_PROMPT.md. Preserve4096, resources, negative tests, history, defaultV1 and independent checker boundaries. No local builds, main merge or npm publication were performed.
+

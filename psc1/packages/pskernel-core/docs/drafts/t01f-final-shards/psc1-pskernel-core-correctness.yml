@@ -523,7 +523,8 @@ jobs:
           cd "$PSC1_PS_RUN_DIR"
           env PATH="" "$PSC1_NODE_BIN" --max-old-space-size=2048 scalar-hash-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
-          grep -Fqx 'PSC1_SCALAR_HASH_WORKER_JS: PASS {"cases":2730,"strings":12,"stages":8190,"assertions":13662,"modulus":"65521","algorithmChanged":false}' "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_WORKER_JS: PASS {"cases":2730,"strings":12,"stages":8190,"assertions":13665,"modulus":"65521","algorithmChanged":false}' "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_LONG_JS: PASS cases=3' "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
           env PATH="" "$PSC1_NODE_BIN" name-worker-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-name-worker-canonical.log"
           grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-canonical.log"

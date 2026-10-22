@@ -1,3 +1,31 @@
+## Exact5abf data-result native preflight PASS; generated pending
+
+Executable candidate: `5abf40506564cad00ff518600ae5992dc826510e`.
+Own [run39860528417](https://github.com/dwijayuda/pskernel/actions/runs/39860528417)
+native120109760162 PASS: all5 hash equations,2730 raw/fuel/accumulator cases,
+3 long ASCII/Unicode cases,294 requests/377 authentic metadata, all6 String
+cases and singleton sequences, retained native/official/DAG/session controls.
+There are79 local proof reports total; the new5 report only
+propext,Classical.choice,Quot.sound. No sorryAx.
+Artifact12462220608 and all proof rows are bound in
+`evidence/2026-10-23-t01f-data-result-native.json`.
+
+Generated producer120110557932 is ALREADY RUNNING at5abf. Its next new gate
+compiles only the ScalarHash import closure, runs the unchanged2730-case/
+8190-stage matrix plus long cases, and refuses staged function-result wrappers
+inside the data iterator. Only after that gate passes does full authentic
+kernel compilation proceed. Fetch the existing run, never duplicate it.
+
+Saved final workflow drafts are reconciled to5 equations and long controls on
+both generated routes, with updated README digests and raw-log upload paths.
+They remain inactive. The containing documentation HEAD is separate from
+5abf's native source; no generated or final-source qualification is inherited.
+Historical834's mixed timeout and911's zero-job workflow rejection remain
+explicitly recorded. Integration stays123c411; scoped A remains9c87.
+T01F must finish before T05. B/C/D remain open.
+
+---
+
 ## Workflow transport correction after911 — no candidate tests ran
 
 Source911510a6d618612a4aaeb363ee517af9cdf2ba54

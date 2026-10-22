@@ -1,61 +1,69 @@
-## Reconciled scalar-hash candidate drafts — still inactive
+# T01F final qualification drafts — inactive
 
-The two workflow drafts now also retain the new scalar-hash native proof/matrix
-and detached generated controls on both authentic routes. Their updated digests
-are below. Native preflight passed at exact834d267a; its fresh generated preflight
-is still pending. Do not install these drafts until the complete unchanged mixed
-sample passes within its cap. The helper and paired-owner fragment are unchanged.
-This reconciliation is documentation preparation, not qualification evidence.
+These are saved preparations, not installed workflows or qualification evidence.
+Current drafts retain all prior native/source/canonical/generated/proof/provider/
+performance gates and add complete same-run String shards. They also require
+five local scalar-hash equations,2730 raw/fuel/accumulator cases,8190 generated
+partial-application stages and three long ASCII/Unicode cases on both routes.
 
----
-
-# Saved T01F final qualification drafts
-
-These files were preserved when the user requested a GPT-6.1 Sol / High
-continuation prompt. They are **unexecuted drafts**, not active workflows or
-qualification evidence. The handoff commit uses `[skip ci]`. Production Lean
-remains19fb; the last tested native singleton harness is a368. Read
-[the continuation](../../AI_CONTINUATION_PROMPT.md) and
-[checkpoint receipt](../../../evidence/2026-10-22-t01f-handoff-checkpoint.json).
+Exact5abf40506564cad00ff518600ae5992dc826510e passed its own native preflight
+in run39860528417. Its generated preflight is pending. Read the newest
+[continuation](../../AI_CONTINUATION_PROMPT.md) and package AI_WORK_STATE.md.
+Do not inherit834's subset passes or discard its failed mixed timeout.
 
 ## Intended destinations
 
-| Saved file | Intended repository destination |
+| Saved file | Repository destination |
 | --- | --- |
 | psc1-pskernel-expr-v2-integration.yml | .github/workflows/psc1-pskernel-expr-v2-integration.yml |
 | psc1-pskernel-core-correctness.yml | .github/workflows/psc1-pskernel-core-correctness.yml |
 | pskernel-t01f-shards.mjs | psc1/scripts/pskernel-t01f-shards.mjs |
-| paired-owner-job.fragment.yml | Review reference; already included in the integration draft |
+| paired-owner-job.fragment.yml | Review reference; included in the integration draft |
 
-Do not install blindly. Fetch live branches and reconcile concurrent edits.
-These full workflow drafts are the newest sharded versions; do not overwrite
-them with older monolithic preparations. The drafts retain the previous
-source/native/generated/provider/proof/performance structure by intent, but
-static review is not execution evidence. Finish helper copy/spawn/log and
-source/run/attempt/provider provenance review before activation.
+Fetch live files and reconcile concurrent changes before installation. Both full
+workflow drafts retain old steps; the native build target list adds the authentic
+String exporter. Hash proof/native/generated controls and raw logs are retained.
+The helper and paired-owner fragment are unchanged from handoff34f06a19.
 
-The strict sample selector is already installed in the existing generated
-String runner, and the focused artifact-reuse workflow is already installed
-at `.github/workflows/psc1-pskernel-t01f-focus.yml`. Both are unexecuted at this
-handoff. First run its authenticated19fb mixed-index5 and retained-controls
-preflight. Then activate a reconciled helper/final workflows at one exact
-coherent source and execute both complete six-case aggregates plus all old
-gates, research, full performance and unchanged193-case Arena. Disable the
-focused push trigger for that full-suite push to avoid duplicate work.
+## Activation prerequisites
 
-Three other existing research/Arena/profile workflows still need live review
-and only the necessary work-branch trigger addition; their prepared edits
-were not preserved before a tool-session reset. Do not alter their job bodies,
-Arena limits or body-hash policy. Their exact paths are in the continuation.
+Finish the current complete unchanged mixed-sample preflight under its25-minute
+runtime job cap. Fix actual proof/source/codegen/runtime failures first.
+Then activate at one coherent exact source, disable narrow diagnostic push
+triggers to avoid duplicates, and add only the work-branch trigger to:
 
-## Static file digests
+- .github/workflows/psc1-pskernel-expr-v2.yml
+- .github/workflows/psc1-pskernel-arena435.yml
+- .github/workflows/psc1-pskernel-arena435-profile.yml
 
-- psc1-pskernel-expr-v2-integration.yml: 93186 bytes; SHA256 de04901180705d017390d756c7f492f327cfce83a0a6b970b7e9293dfcbd94ed
-- psc1-pskernel-core-correctness.yml: 43841 bytes; SHA256 6e25c5bcd23c7d68436923a09669ee523cad15d7f908fbddd72a97cdb4309c46
-- pskernel-t01f-shards.mjs: 15142 bytes; SHA256 1b8a302fcf22a573ee3b005578dd4930e6e773a9b803ec19c32f7f45bd3161d8
-- paired-owner-job.fragment.yml: 16984 bytes; SHA256 34cacbc1b11b907b94771460086b004a9cdee60231fdfb436b9107129c2f0fb8
+Preserve those job bodies,193-case body hashes,60 seconds/case,2 workers,
+fuel4096 and2048MiB old-space. Execute all native/official/canonical/proof/
+provider24/API8/research/measurement gates and both complete route aggregates.
+A full193 diagnostic failure stays distinct from scoped A/T01F qualification.
 
-See [INTEGRATION_NOTES.md](INTEGRATION_NOTES.md) for the intended shard contract.
-Its original preparation note refers to scratch-only work at drafting time;
-this handoff now persists those same bytes in the repository. Neither that
-persistence nor prior static syntax review is a CI PASS.
+## Shard contract
+
+Each route compiles once. Its runtime-only matrix executes exactly indices0–5,
+fail-fast false,max-parallel2,25minutes/job. Every fresh process independently
+admits all294 requests, compares all377 metadata records and executes its entire
+selected case, singleton sequence and negatives with empty PATH and unchanged
+fuel/heap policy. A shard cannot claim a full-matrix PASS.
+
+The aggregate requires producer and all shards to succeed, authenticates exact
+source/run/attempt/route/kernel/fixture/harness/provider bytes, and rejects
+missing,failed,skipped,duplicate,stale or mixed-source receipts. It rechecks all
+raw log/memory digests and complete case markers. Require
+PSC1_T01F_FULL_STRING_SHARDED_JS: PASS on BOTH authentic routes at the same source.
+No benchmark collection or hash authenticity establishes logical authority or
+global soundness. The generated kernel must perform its own checks.
+
+## Current exact digests
+
+- psc1-pskernel-expr-v2-integration.yml: 93401 bytes; SHA256 5c67395b97c16d6810678289d9ed0fdb8bdba4448ae1d9e20a96c3175050790c
+- psc1-pskernel-core-correctness.yml: 43948 bytes; SHA256 793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff
+- pskernel-t01f-shards.mjs:15142 bytes; SHA256 1b8a302fcf22a573ee3b005578dd4930e6e773a9b803ec19c32f7f45bd3161d8
+- paired-owner-job.fragment.yml:16984 bytes; SHA256 34cacbc1b11b907b94771460086b004a9cdee60231fdfb436b9107129c2f0fb8
+
+See [INTEGRATION_NOTES.md](INTEGRATION_NOTES.md) for additional contract details.
+Its original scratch-preparation wording is historical; these bytes are durable
+repository drafts and remain unexecuted until activation and source-bound CI.

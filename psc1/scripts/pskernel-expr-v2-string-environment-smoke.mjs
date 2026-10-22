@@ -246,6 +246,12 @@ const stringConstructor=find("String.ofByteArray");
 must(stringConstructor&&same(stringConstructor,ci.ctorInfo(stringConstructor.value))&&
  stringConstructor.value.numFields===2n,"actual-String-bytearray-proof-constructor");
 const exact=(a,b)=>get("psKernelExprEqual")(a)(b);
+const requireStringConstructor=(term,label)=>{
+ let head=term;
+ while(head&&typeof head==="object"&&Object.hasOwn(head,"fn")&&
+   same(head,E.app(head.fn,head.arg)))head=head.fn;
+ must(exact(head,cn("String.ofByteArray")),label+"-actual-String-constructor");
+};
 const decode=(arena,root)=>accepted(get("psKernelExprV2DecodedRequire")(
  accepted(get("psKernelExprV2DecodeChecked")(arena),"decode"),root),"root");
 const measurements=[];
@@ -270,6 +276,7 @@ for(const value of sequence(fixture.samples).map(text)){
    const caseLabel=label+"-"+side;
    const legacy=accepted(get("psKernelV1CheckExpression")(session,nil,safe,term),caseLabel+"-v1-check");
    const legacyNormalized=accepted(get("psKernelV1Whnf")(session,nil,safe,term),caseLabel+"-v1-whnf");
+   if(label==="string"&&side==="right")requireStringConstructor(legacyNormalized,caseLabel+"-v1");
    must(exact(legacy.expression,term),caseLabel+"-v1-input-preserved");
    const checked=attempt(get("psKernelExprV2TryCheckWithDeclarationsFuel")(
     4096n,context,owners.arena,owners.declarations,root),caseLabel+"-check");
@@ -278,6 +285,7 @@ for(const value of sequence(fixture.samples).map(text)){
    const normalized=attempt(get("psKernelExprV2TryWhnfOwnedWithDeclarationsFuel")(
     4096n,context,owners.arena,owners.declarations,root),caseLabel+"-whnf");
    const actualWhnf=decode(normalized.fst,normalized.snd);
+   if(label==="string"&&side==="right")requireStringConstructor(actualWhnf,caseLabel+"-direct");
    must(eqExpr(actualWhnf,legacyNormalized),caseLabel+"-whnf-output-matches-v1");
    must(accepted(get("psKernelV1IsDefEq")(session,nil,safe,term,actualWhnf),caseLabel+"-whnf-parity"),caseLabel+"-whnf-equal");
    const commands=list([C.check(root),C.whnf(root),C.isDefEq(root,other)]);
@@ -290,6 +298,7 @@ for(const value of sequence(fixture.samples).map(text)){
      same(replies[1],Reply.normalized(replies[1].value))&&
      same(replies[2],Reply.equal(true)),caseLabel+"-public-reply-kinds");
     const checkedReply=replies[0].value,whnfReply=replies[1].value;
+    if(label==="string"&&side==="right")requireStringConstructor(whnfReply,caseLabel+"-public");
     must(exact(checkedReply.expression,term),caseLabel+"-public-check-input-preserved");
     must(accepted(get("psKernelV1IsDefEq")(session,nil,safe,checkedReply.type,legacy.type),
      caseLabel+"-public-check-type"),caseLabel+"-public-check-type-equal");
@@ -315,6 +324,15 @@ for(const value of sequence(fixture.samples).map(text)){
    must(rejected(get("psKernelV1RunDag")(session,nil,safe,imported.fst.arena,list([command]))),badLabel+"-public-invalid-rejection");
   }
  }
+ const different=E.lit(Lit.str(value+"x"));
+ must(!accepted(get("psKernelV1IsDefEq")(session,nil,safe,literal,different),"distinct-v1"),"distinct-strings-v1");
+ let unequalSource={arena:get("psKernelExprV2PagedEmpty"),built:get("psKernelExprV2DecodedEmpty"),declarations:nil};
+ const unequalLeft=accepted(get("psKernelDagGeneratedImport")(literal,unequalSource),"distinct-left");
+ const unequalRight=accepted(get("psKernelDagGeneratedImport")(different,unequalLeft.fst),"distinct-right");
+ const unequal=accepted(get("psKernelV1RunDag")(session,nil,safe,unequalRight.fst.arena,
+  list([C.isDefEq(unequalLeft.snd,unequalRight.snd)])),"distinct-public");
+ must(same(array(unequal.replies),[get("PsKernelDagReply").equal(false)]),"distinct-strings-public");
+ must(unequal.session.environment===session.environment,"distinct-query-environment-unmodified");
  measurements.push({sample:value,utf8Bytes:Buffer.byteLength(value),owners:array(owners.declarations).length,
   ownerAndConstructionMs:ownerMs,totalMs:performance.now()-started,
   arenaNodes:arena.size.toString(),ownedArenaNodes:owners.arena.size.toString(),memory:process.memoryUsage()});

@@ -420,11 +420,16 @@ private def checkCase (source : Lean.Environment) (session : PsKernelKernelSessi
     (.proj (name `ByteArray) 0 (.proj (name `String) 0 literal))
   let expectedBytes := byteList text.toUTF8.data.toList
   let proof := PsKernelExpr.proj (name `String) 1 literal
+  let expandedBytes := PsKernelExpr.proj (name `Array) 0
+    (.proj (name `ByteArray) 0 (.proj (name `String) 0 expanded))
+  let expandedProof := PsKernelExpr.proj (name `String) 1 expanded
   let mut arena := psKernelExprV2PagedEmpty
   let mut pairs : List (String × PsKernelExpr × PsKernelExpr × Nat × Nat) := []
   for (label, left, right) in
       [("string",literal,expanded), ("ofList",expanded,literal),
-       ("utf8",bytes,expectedBytes), ("validity",proof,proof)] do
+       ("utf8",bytes,expectedBytes), ("validity",proof,proof),
+       ("utf8-ofList",expandedBytes,expectedBytes),
+       ("validity-ofList",expandedProof,proof)] do
     IO.println ("PSC1_T01F_QUERY_BEGIN " ++ label ++ " " ++ reprStr text)
     let (next,leftId) ← plain "import-left" (psKernelExprV2PagedImportIntoChecked arena left)
     let (next,rightId) ← plain "import-right" (psKernelExprV2PagedImportIntoChecked next right)

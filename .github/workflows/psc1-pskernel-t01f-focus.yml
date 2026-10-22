@@ -1,4 +1,4 @@
-name: PSC1 T01F authentic String focused qualification
+name: PSC1 T01F authentic String native preflight
 on:
   workflow_dispatch:
   push:
@@ -9,7 +9,6 @@ on:
       - '.github/workflows/psc1-pskernel-t01f-focus.yml'
 permissions:
   contents: read
-  actions: read
 jobs:
   native-string:
     runs-on: ubuntu-latest
@@ -26,6 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
           lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_string_environment_regression psc1_kernel_expr_v2_dag_regression
       - name: Independently admit actual String declarations and export untrusted inputs
         working-directory: psc1
@@ -44,67 +44,12 @@ jobs:
             | tee "$RUNNER_TEMP/psc1-t01f/retained.log" \
             | sed '/^PSC1_DAG_PASS /d'
           grep -Fq 'PSC1_V2_DAG_REGRESSION: PASS' "$RUNNER_TEMP/psc1-t01f/retained.log"
-      - name: Fetch exact historical generated bundle for harness diagnostic only
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import hashlib, io, json, os, pathlib, urllib.request, zipfile
-          base = "https://api.github.com/repos/dwijayuda/pskernel"
-          source = "9c87f631758862285273ddb0ea0a3987c671022e"
-          run_id, artifact_id = 39694087886, 12391568345
-          zip_digest = "6c63a2fa2981610f14e91e3aeb37ae6f00e5fdc1107a4c942841d25208af3ff7"
-          kernel_digest = "f1ac31f1527103877268b5dea86075795401fc7679357878064f9194e0e9fd32"
-          def get(route):
-              request = urllib.request.Request(base + route, headers={
-                  "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"})
-              request.add_unredirected_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
-              with urllib.request.urlopen(request, timeout=60) as response:
-                  return response.read()
-          run = json.loads(get("/actions/runs/" + str(run_id)))
-          assert run["head_sha"] == source and run["status"] == "completed" and run["conclusion"] == "success"
-          artifact = json.loads(get("/actions/artifacts/" + str(artifact_id)))
-          assert artifact["name"] == "psc1-v2-dag-generated-js" and not artifact["expired"]
-          assert artifact["workflow_run"]["id"] == run_id and artifact["workflow_run"]["head_sha"] == source
-          assert artifact["digest"] == "sha256:" + zip_digest and artifact["size_in_bytes"] == 3410883
-          archive = get("/actions/artifacts/" + str(artifact_id) + "/zip")
-          assert len(archive) == 3410883 and hashlib.sha256(archive).hexdigest() == zip_digest
-          with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
-              names = [name for name in bundle.namelist() if name.endswith("/psc1/dist/expr-v2/integration/kernel.js")]
-              assert len(names) == 1, names
-              kernel = bundle.read(names[0])
-          assert len(kernel) == 9952970 and hashlib.sha256(kernel).hexdigest() == kernel_digest
-          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-t01f"
-          (out / "kernel.mjs").write_bytes(kernel)
-          provenance = {
-              "role": "harness diagnostic only; not qualification of this revision",
-              "harnessSource": os.environ["GITHUB_SHA"], "generatedSource": source,
-              "producerRun": run_id, "artifactId": artifact_id,
-              "artifactSha256": zip_digest, "kernelSha256": kernel_digest,
-              "fixtureSha256": hashlib.sha256((out / "fixture.json").read_bytes()).hexdigest()}
-          (out / "diagnostic-provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
-          print("PSC1_T01F_HARNESS_DIAGNOSTIC " + json.dumps(provenance))
-          PY
-      - name: Exercise authentic generated admission and detached public String operations
-        working-directory: psc1
-        run: |
-          set -euo pipefail
-          cp scripts/pskernel-expr-v2-string-environment-smoke.mjs "$RUNNER_TEMP/psc1-t01f/smoke.mjs"
-          NODE_BIN="$(command -v node)"
-          cd "$RUNNER_TEMP/psc1-t01f"
-          PATH="" "$NODE_BIN" --max-old-space-size=2048 --expose-gc smoke.mjs ./kernel.mjs ./fixture.json \
-            2>&1 | tee generated-diagnostic.log
-          grep -Fq 'PSC1_T01F_FULL_STRING_JS: PASS ' generated-diagnostic.log
-          test "$(grep -Fc 'PSC1_T01F_JS_CASE_PASS ' generated-diagnostic.log)" -eq 6
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-t01f-focused-preflight
+          name: psc1-t01f-native-preflight
           path: |
             ${{ runner.temp }}/psc1-t01f/fixture.json
             ${{ runner.temp }}/psc1-t01f/fixture.sha256
-            ${{ runner.temp }}/psc1-t01f/diagnostic-provenance.json
             ${{ runner.temp }}/psc1-t01f/native.log
             ${{ runner.temp }}/psc1-t01f/retained.log
-            ${{ runner.temp }}/psc1-t01f/generated-diagnostic.log

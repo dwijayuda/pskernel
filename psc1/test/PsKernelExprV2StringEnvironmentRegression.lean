@@ -215,14 +215,19 @@ private def install (state : IO.Ref Imported) (n : Lean.Name)
   IO.println ("PSC1_T01F_ADMIT_BEGIN " ++ toString current.requests ++ " " ++ toString n)
   let result ← expectPublic ("T01F admission " ++ toString n)
     (psKernelV1AdmitDeclaration current.session request)
-  state.set { current with session := result.session, requests := current.requests + 1,
-    roots := current.roots ++ [n], inputs := current.inputs ++ [request] }
+  state.set { current with
+    session := result.session
+    requests := current.requests + 1
+    roots := current.roots ++ [n]
+    inputs := current.inputs ++ [request] }
   IO.println ("PSC1_T01F_ADMIT_PASS " ++ toString n)
 
 /- Recursion is test-host traversal, not a new admission implementation.
    Explicit visiting guards reject non-inductive dependency cycles. -/
 private partial def admitName (source : Lean.Environment) (state : IO.Ref Imported)
     (visiting : List Lean.Name) (n : Lean.Name) : IO Unit := do
+  require ("no-proof-shortcut-" ++ toString n)
+    (![(`sorryAx : Lean.Name), `ofReduceBool, `Lean.ofReduceBool, `Lean.trustCompiler].contains n)
   let current ← state.get
   if psKernelEnvironmentContains current.session.environment (name n) then
     verifyHeader source current n
@@ -289,6 +294,8 @@ private partial def admitName (source : Lean.Environment) (state : IO.Ref Import
         admitName source state (n :: visiting) dependency
       let request ← match original with
         | .axiomInfo value => do
+            require ("genuine-standard-axiom-" ++ toString n)
+              ([(`propext : Lean.Name), `Quot.sound, `Classical.choice].contains n)
             IO.println ("PSC1_T01F_SOURCE_AXIOM " ++ toString n)
             pure (.axiomDecl { base := base original, isUnsafe := value.isUnsafe })
         | .defnInfo value => pure (.definitionDecl {
@@ -472,6 +479,12 @@ private def checkCase (source : Lean.Environment) (session : PsKernelKernelSessi
       require "public-invalid-rejects"
         (match psKernelV1RunDag session [] .safe badArena [command] with
          | .error (.rejectedInvalid _) => true | _ => false)
+    let (againArena,againId) ← plain "after-rejection-input"
+      (psKernelExprV2PagedImportIntoChecked psKernelExprV2PagedEmpty literal)
+    let afterRejection ← expectPublic "fresh-valid-call-after-rejection"
+      (psKernelV1RunDag session [] .safe againArena [.check againId])
+    require "after-rejection-exact-session-environment"
+      (sameEnvironment session.environment afterRejection.session.environment)
   let different := PsKernelExpr.lit (.str (text ++ "x"))
   officialEqual source "distinct-strings" (officialExpr literal) (officialExpr different) false
   require "v1-distinct-strings"
@@ -516,7 +529,7 @@ private def jsonExpr : PsKernelExpr → Lean.Json
   | .app f a => .arr #[.str "app", jsonExpr f, jsonExpr a]
   | .lam n d b bi => .arr #[.str "lam", jsonName n, jsonExpr d, jsonExpr b, jsonBinder bi]
   | .forallE n d b bi => .arr #[.str "forallE", jsonName n, jsonExpr d, jsonExpr b, jsonBinder bi]
-  | .letE n t v b nd => .arr #[.str "letE", jsonName n, jsonExpr t, jsonExpr v, jsonExpr b, toJson nd]
+  | .letE n t v b nd => .arr #[.str "letE", jsonName n, jsonExpr t, jsonExpr v, jsonExpr b, Lean.toJson nd]
   | .lit (.nat n) => .arr #[.str "nat", .str (toString n)]
   | .lit (.str s) => .arr #[.str "str", .str s]
   | .mdata metadata b => .arr #[.str "mdata", .str (toString metadata), jsonExpr b]
@@ -544,19 +557,19 @@ private def jsonInductive (value : PsKernelSimpleMutualTypeDecl) : Lean.Json :=
 
 private def jsonGroup (value : PsKernelSimpleMutualInductiveDecl) : Lean.Json :=
   .arr #[.arr (value.levelParams.map jsonName).toArray, .str (toString value.numParams),
-    .arr (value.types.map jsonInductive).toArray, toJson value.isUnsafe]
+    .arr (value.types.map jsonInductive).toArray, Lean.toJson value.isUnsafe]
 
 private def jsonRequest : PsKernelDeclarationRequest → Lean.Json
-  | .axiomDecl value => .arr #[.str "axiomDecl", jsonBase value.base, toJson value.isUnsafe]
+  | .axiomDecl value => .arr #[.str "axiomDecl", jsonBase value.base, Lean.toJson value.isUnsafe]
   | .definitionDecl value => .arr #[.str "definitionDecl", jsonDefinition value]
   | .theoremDecl value => .arr #[.str "theoremDecl", jsonBase value.base, jsonExpr value.value]
-  | .opaqueDecl value => .arr #[.str "opaqueDecl", jsonBase value.base, jsonExpr value.value, toJson value.isUnsafe]
+  | .opaqueDecl value => .arr #[.str "opaqueDecl", jsonBase value.base, jsonExpr value.value, Lean.toJson value.isUnsafe]
   | .mutualDefinitions values => .arr #[.str "mutualDefinitions", .arr (values.map jsonDefinition).toArray]
   | .quot => .arr #[.str "quot"]
   | .ordinaryInductive value => .arr #[.str "ordinaryInductive", .arr #[
       .arr (value.levelParams.map jsonName).toArray, .str (toString value.numParams),
       jsonInductive { name := value.name, type := value.type, ctors := value.ctors },
-      toJson value.isUnsafe]]
+      Lean.toJson value.isUnsafe]]
   | .mutualInductive value => .arr #[.str "mutualInductive", jsonGroup value]
   | .nestedInductive value => .arr #[.str "nestedInductive", jsonGroup value]
   | .unsupported feature => .arr #[.str "unsupported", .str feature]
@@ -571,21 +584,21 @@ private def jsonRule (value : PsKernelRecursorRule) : Lean.Json :=
 
 private def jsonInfo (value : PsKernelConstantInfo) : Lean.Json :=
   match value with
-  | .axiomInfo value => .arr #[.str "axiomInfo", jsonBase value.base, toJson value.isUnsafe]
+  | .axiomInfo value => .arr #[.str "axiomInfo", jsonBase value.base, Lean.toJson value.isUnsafe]
   | .defnInfo value => .arr #[.str "defnInfo", jsonDefinition value]
   | .thmInfo value => .arr #[.str "thmInfo", jsonBase value.base, jsonExpr value.value]
-  | .opaqueInfo value => .arr #[.str "opaqueInfo", jsonBase value.base, jsonExpr value.value, toJson value.isUnsafe]
+  | .opaqueInfo value => .arr #[.str "opaqueInfo", jsonBase value.base, jsonExpr value.value, Lean.toJson value.isUnsafe]
   | .inductInfo value => .arr #[.str "inductInfo", jsonBase value.base,
       .str (toString value.numParams), .str (toString value.numIndices),
       .arr (value.all.map jsonName).toArray, .arr (value.ctors.map jsonName).toArray,
-      .str (toString value.numNested), toJson value.isRec, toJson value.isReflexive, toJson value.isUnsafe]
+      .str (toString value.numNested), Lean.toJson value.isRec, Lean.toJson value.isReflexive, Lean.toJson value.isUnsafe]
   | .ctorInfo value => .arr #[.str "ctorInfo", jsonBase value.base, jsonName value.induct,
       .str (toString value.cidx), .str (toString value.numParams), .str (toString value.numFields),
-      toJson value.isUnsafe]
+      Lean.toJson value.isUnsafe]
   | .recInfo value => .arr #[.str "recInfo", jsonBase value.base, .arr (value.all.map jsonName).toArray,
       .str (toString value.numParams), .str (toString value.numIndices),
       .str (toString value.numMotives), .str (toString value.numMinors),
-      .arr (value.rules.map jsonRule).toArray, toJson value.k, toJson value.isUnsafe]
+      .arr (value.rules.map jsonRule).toArray, Lean.toJson value.k, Lean.toJson value.isUnsafe]
   | .quotInfo value => .arr #[.str "quotInfo", jsonBase value.base, jsonQuot value.kind]
 
 private def writeFixture (path : String) (source : Lean.Environment) (state : Imported) : IO Unit := do

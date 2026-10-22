@@ -1,5 +1,18 @@
 # Normal generated-compiler performance regression
 
+
+Resolved at source 9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde in Linux run
+39829564386 (tested merge 00decc7fb81fc4023f68cdcdbf8cff1fdd028b12).
+The first normal G1 case completes in 2254 ms and all ten cases pass, compared
+with the prior unchanged 240-second timeout. All required gates and all 37
+finite Practical Core criteria pass. The seven printer visitors now create
+recursive helpers after binding traversal inputs. Fuel, heap/stack/deadline
+policies, driver behavior, strict IR and existing regression tests stay intact.
+Exact resolution evidence is PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json.
+The original G2 performance defect and manual qualification remain separate.
+
+The failed observations below are preserved as history.
+
 Source 56663b26b51cb65e0c34c44d2d63fdb927fd36f2, tested merge
 d6d3b2e8446f72208f3c1c062721a30a3c0d23fa, Linux run 39817072167.
 The complete finite matrix passes all 37 criteria, all targets, minimum Python,

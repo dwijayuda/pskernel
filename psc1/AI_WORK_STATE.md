@@ -1,133 +1,119 @@
 # PSC1 active work state
 
-Updated 2026-10-23 (Asia/Jakarta). Continue draft PR #172 on
-fix/psc1-closure-normalization-20261021. Connected GitHub and Linux Actions only:
-no local checkout/files/build/tests. Fetch remote HEAD before each expected-HEAD,
-non-force update. Preserve history. No merge or registry publication authorized.
+Updated 2026-10-23 (Asia/Jakarta). Draft PR #172:
+https://github.com/dwijayuda/pskernel/pull/172
+Branch: fix/psc1-closure-normalization-20261021.
+Use connected GitHub and Linux Actions only; no local checkout/files/build/tests.
+Fetch latest remote HEAD before expected-HEAD, non-force updates. Preserve history.
+Merge and registry publication require separate authorization.
 
-## Latest finite matrix checkpoint; aggregate is blocked
+## Current qualified compiler source
 
-Source 56663b26b51cb65e0c34c44d2d63fdb927fd36f2, tested merge
-d6d3b2e8446f72208f3c1c062721a30a3c0d23fa, run 39817072167:
-https://github.com/dwijayuda/pskernel/actions/runs/39817072167
+Source 9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde, tested merge
+00decc7fb81fc4023f68cdcdbf8cff1fdd028b12, base
+1fad9ed53cda9b23ac30be9cea85e7857437564e, run 39829564386:
+https://github.com/dwijayuda/pskernel/actions/runs/39829564386
 
-Static, native, all three focused lanes, all three compiler closures, host
-session boundary and complete Linux full matrix pass. Every full step passes:
-seven targets, both grammars, minimum Python, capability/negative/strictness
-boundaries, installed packages and exact evidence consolidation. The finite
-readiness report is 37 qualified / 0 blocked, releaseReady=true. This data status
-does not override the failing G1 requirement or aggregate gate.
+Every selected gate passes: static, native, all three focused lanes, complete
+semantic/JS/Rust compiler closures, G1, host-session boundary, full Linux matrix
+and aggregate. Benchmark is dependency-skipped. All 47 full-job steps succeed.
+Full job 120010034085; aggregate 120026838629; G1 120007421327.
 
-Exact receipt: docs/PSC1_PRACTICAL_CORE_MATRIX_QUALIFICATION_2026-10-23.json.
-It retains all jobs/steps, artifacts/digests/expiry, per-process application
-observations, original/transformed IR identities, native conversion and the G1
-failure. All fourteen families /37 criteria /four applications remain frozen.
+The frozen Practical Core v1 contract is complete in this finite Linux scope:
+14 families, 37 qualified criteria, 0 blocked, both grammars, all seven targets
+and four actual application categories. Data releaseReady=true.
+The authoritative receipt is
+docs/PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json.
+It preserves exact jobs/steps, observations, source/IR/admission identities,
+artifact digests/expiry and the complete G1/closure evidence. No claim extends
+to unrestricted Lean, arbitrary public ABIs or formal backend preservation.
 
-The current G1 job 119963998304 times out on G1-lean-modules after 240261 ms at
-the original 240-second limit; no corpus case completes and nothing publishes.
-The older qualified G1 completed that same case in 2154 ms. This is a real
-normal-compilation performance regression, not deferred G2 qualification.
-The aggregate correctly fails. See PSC1_NORMAL_G1_PERFORMANCE_DEFECT_2026-10-23.md.
+Both/seven execution includes 252 inference/control obligations (36 minimum
+Python), 56 collection obligations (8 minimum), 98 order obligations (14 minimum),
+168 compiler-like and 294 CLI/JSON actual process cases plus their 24/42
+minimum-Python cases, and 28 library obligations plus 4 minimum. All seven actual
+IO adapters, native exact-once argument checks, ordinary pairing, privacy,
+publication preservation, while refusals and genuine external deadlines pass.
+All prior cases, workload sizes and resource ceilings remain.
 
-The last source passing every gate remains65fa8766759ae9a87e7322033e94ba5b2447e86d,
-run 39683701190, with 25 qualified /12 blocked criteria at that historical source.
-Its qualified G1, successful source/tests/artifacts and receipt
-PSC1_BOUNDED_CORE_QUALIFICATION_2026-10-22.json remain preserved.
+The manual Practical Core wrapper invokes the same native/closure/G1/full
+workflows executed here. Normal full qualification enforces the same readiness
+assertion because requireReadyOnFullQualification=true. Qualification rests on
+these completed checks; no manual workflow event or duplicate replay is claimed.
 
-## Current implementation follow-up (unqualified descendant)
+## Resolved normal compiler regression
 
-The expanded corpus fixed real shared defects:
-- Total List/Nat continuations defer tails; Array-to-List is linear.
-- Finite Nat controllers lift to total private Nat.rec helpers. Erased official
-  conversion theorems reject well-typed changed behavior. Known local lambda
-  values expand safely; other strict computations retain original lets.
-- Rust now runs strictly rechecked worker fusion before emission and runtime
-  planning while retaining generic support. Both/seven 100000-step streaming
-  and immediate-return-from10^18 cases pass.
-- JS dynamic callbacks use the shared driver; true tail calls replace frames.
-  Unknown curried intermediate application order stays conservative and is
-  guarded by actual divergence-before-later-trap tests.
-- Checked condition/operand sharing, local-let inference and reflexivity keep
-  the 18-condition wrapper at 430 nodes rather than 3145709. Native64-expression,
-  dependent-let, negative and fuel guards pass under official admission/IR.
+The first small G1 case formerly timed out at 240 seconds in sources 56663b26
+and bb59d544. Actual CPU sampling identified recursive printer workers built
+before their expression lambda: three branches per fuel level at budget 4096.
+WeakMap registration dominated the sample. This was eager setup over fuel,
+rather than work over the visited expression graph.
 
-The immediate follow-up leaves call-free JS inner closures plain rather than
-allocating a generator driver for them. Existing calls retain the driver.
-An escaping-closure capture/identity regression runs in both JS/TS with every
-existing continuation test and resource bound. This small correction is pending
-its own Linux evidence; do not assume it resolves the whole G1 slowdown.
+All seven affected JS printer visitors now bind their remaining inputs before
+constructing recursive helpers. Traversal algorithms, driver behavior, fuel,
+heap/stack settings, deadlines and strict-IR restrictions stay unchanged.
+G1 now completes that first case in 2254 ms (prior qualified baseline 2154 ms).
+All ten selected G1 cases pass; five positive cases take 1.699-5.560 seconds.
+The same single native seed is used, with no later native frontend/emitter
+delegation and with separate independent official checking.
 
-A failure-only normal-G1 V8 sampler replays one exact failed immutable service
-and request with the same 240-second deadline. It does not delegate to a native
-compiler/checker, admit a candidate, publish, or turn the original failure green.
-Raw samples identify hot functions if another shared correction is needed.
-G2/G3 profiling and fixed-point workflows stay separate, manual and deferred.
+Current G1 service:
+685d0a3816d5087ac8dee33b6db1be7c59d1369995519bee2d9b7fdfb3c61c3b
+Source closure:
+d453ba84f3c6f8631754826a75e36c082c64ed14da0118e8ef9b65ba1f8db0cf
+86 modules; complete closure lanes have 70 semantic / 86 JS / 89 Rust modules.
+G1 artifact 12449875258, ZIP digest
+b49c9a3334a87d45396cd5df8ebf1ab86a7d7b2b1e50264788c5b54486df897b,
+expires 2027-01-20T18:14:13Z.
 
-## Current acceptance evidence and CI
+PSC1_NORMAL_G1_PERFORMANCE_DEFECT_2026-10-23.md records resolution.
+PSC1_NORMAL_G1_FAILURE_2026-10-23.json preserves the exact failed request,
+profile and successful full companion matrix. Earlier qualified G1 and failed
+attempts remain in Git and their original artifacts/receipts. The original
+G2 heap/timeout defect is separate and is not marked resolved.
 
-Full matrix:252 inference/control obligations (36 minimum Python), 56 collection
-obligations (8 minimum), 98 order obligations (14 minimum), all seven IO adapters,
-168 compiler-like and294 CLI/JSON process cases plus their 24/42 minimum-Python
-counterparts, and28 library obligations plus 4 minimum. Original negative cases,
-native exact-once argument tests, sixteen while refusals, genuine external
-deadlines, privacy/publication preservation and opaque witness pairing remain.
+## Preserved implementation and CI mechanisms
 
-Focused core/applications now run in parallel matrix lanes with the same 15-minute
-limits, pinned setup and shared exact-source cache. Source 56663b26 measured
-core 5m43s and applications 9m14s, versus a serial attempt cancelled at 15 minutes
-during cleanup after all tests passed. Each original command/target remains.
-Artifacts carry lane/attempt identities. Full qualification retains every test.
+Total deferred List/Nat folds and linear Array-to-List conversion stream
+iteration. Total private Nat.rec controller helpers carry erased official
+conversion theorems; well-typed changed behavior is refused. Rust uses strictly
+rechecked worker fusion while retaining generics. Unknown curried callback
+order remains conservative and has actual divergence-before-later-trap tests.
+The 100000-step traversal and immediate return from a 10^18 bound pass.
 
-## Dependency-ordered remaining work
+JS/TS retain driven dynamic/non-tail calls and replacement of true tail frames.
+The million-mutual-call and lexical capture/order/trap/divergence corpus passes
+under its original 262144-KiB bound. Call-free closures stay ordinary functions.
+Checked condition/operand sharing and local-let inference retain the 430-node
+wrapper, native 64-expression bounds, dependent-let and negative/fuel guards.
 
-1. Restore normal generated compiler/G1 performance at unchanged workloads,
-   deadlines, heap/stack settings, security and authority boundaries. Measure
-   the real100000-statement application too. If needed use retained CPU samples.
-2. Requalify the final changed source: all finite criteria, all three closures,
-   G1, host boundary, seven/minimum-runtime/package matrix and aggregate gate.
-3. Run manual Practical Core release qualification before declaring a stable
-   feature freeze. Do not merge/publish without qualification and authorization.
-4. Resume expensive G1->G2->G3 only on finalized feature-frozen compiler source.
-   Keep original G2 heap/timeout defects tracked; do not prioritize G2 alone.
-   Official Lean 4.35.0 admission remains; Expression V2 research is independent.
+Focused core and measured applications run in parallel 15-minute lanes with
+the same targets, commands, child budgets and exact-source cache. Artifacts
+carry lane/attempt identities. The selected integration tier precedes the full
+tier; an integration failure cannot be reported as final qualification.
+Failed/cancelled debt is retained. Documentation/qualification receipts select
+only static checks after the successful compiler baseline.
 
-The single roadmap is PSC1_DEVELOPMENT_ROADMAP.md; finite authority is
-PSC1_PRACTICAL_CORE_V1_CONTRACT.json. Earlier detailed work state is archived in
-PSC1_IMPLEMENTATION_HISTORY_2026-10-23.md and the 22nd's history file.
+## Remaining release work and deferred scope
 
+There are no blocked finite Practical Core v1 acceptance items at the qualified
+source above. Keep the candidate source stable for release review. A later
+compiler/language change needs fresh relevant evidence and complete qualification
+before it is called finished; do not inherit these results onto changed code.
 
-## Profiled cause and demand-driven worker normalization
+G2/G3 and fixed-point qualification stay in the separate manual/release workflow
+on finalized feature-frozen compiler source. Keep
+docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md and its original evidence tracked.
+No G2/G3 result follows from the G1 fix. Incomplete PSKernel-Core Expression V2
+research remains independent; official Lean 4.35.0 admission at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc remains the production boundary.
 
-Source bb59d544 / tested merge bb9e63d2 / run 39823355653 passes native,
-source census, all focused lanes and all three compiler closures. The closure
-capture regression passes in JS/TS; their million-mutual-call RSS remains
-58408/58140 KiB under the unchanged 262144-KiB bound. Actual five-target
-applications pass 120 compiler and 210 CLI/file cases. The small plain-closure
-change does not materially improve the 20-21-second JS compiler workload.
+Unrestricted metaprogramming, arbitrary effects, unsupported compound public
+ABIs, non-Linux distribution and formal compiler-preservation certificates stay
+outside the frozen v1 claim. Preserve explicit unsupported-ABI refusals and all
+security, semantics, resource and regression boundaries.
 
-G1 again fails before completing its first case. Its exact failed request was
-CPU-sampled without native delegation, admission or publication. The sample has
-220620 ticks: WeakCollectionSet is 38.9% of total / 83.9% of non-library ticks;
-WeakMapLookupHashIndex adds 4.0% / 8.6%. The observed source worker is
-psJsPrintExprWithPositionAndFuel_$psc0SH_0. Exact hashes, sample metadata and raw
-profile text are in PSC1_NORMAL_G1_FAILURE_2026-10-23.json; the 50, 337, 174-byte
-V8 log is retained in artifact 12446328228 (ZIP digest
-188868f897fb728089f775dc80a252d25dfb8535966870535326de5b48779866).
-
-The expression printer constructs three recursive partial workers before
-returning its expression lambda. Generated strict evaluation therefore builds
-a branching worker tree over fuel (4096 by default), before visiting input.
-The correction moves setup beneath the remaining input binders in all seven
-affected JS printer visitors. Traversal bodies, fuel limits, driver semantics,
-strict-IR checks and all existing tests stay. Native execution had not exposed the source-level eager setup; actual generated G1 is the acceptance.
-
-The development full tier now waits for selected G1 and compiler closures.
-Release-only selections with skipped integration are explicitly supported.
-The aggregate still requires every selected dependency; full testing is not
-removed. This prevents expensive full replay while a required integration
-gate is already failing. The new source normalization is awaiting Linux CI.
-
-The complete bb59d544 full job 119985758171 now passes every step and again
-reports 37 qualified / 0 blocked, data releaseReady=true. All-three closures and
-host boundary also pass; the aggregate fails solely for the normal G1 timeout.
-This full matrix and CPU failure are both preserved in the new failure receipt.
+PSC1_DEVELOPMENT_ROADMAP.md is the single roadmap.
+PSC1_PRACTICAL_CORE_V1_CONTRACT.json is the single machine release contract.
+Detailed historical work state is in PSC1_IMPLEMENTATION_HISTORY_2026-10-23.md
+and the 22nd's history file.

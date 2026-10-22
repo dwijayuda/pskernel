@@ -14,6 +14,8 @@ permissions:
   contents: read
   actions: read
 
+# Push activation: run the reviewed mixed-sample and retained-control diagnostics
+# after the saved handoff; no final-source qualification is claimed by this run.
 # This workflow reuses the compiled bytes from 19fb4b0. That producer's full
 # generated acceptance job was cancelled. Its successful compiler, source-check,
 # and fixture steps are authenticated separately below. These diagnostics neither

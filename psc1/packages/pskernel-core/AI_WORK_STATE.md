@@ -1,3 +1,21 @@
+## T01F resumed — authenticated generated preflight pending
+
+Live integration `123c41197950b6761be965fd21c57142ee2b0d1c` and work handoff
+`34f06a19a9829c52f85457658cc9a3ba28ea01ed` were rechecked before this update.
+No newer T01F run or concurrent branch update was present. This checkpoint
+activates the reviewed artifact-reuse workflow by a path-filtered push; its
+mixed-index5 and retained-control results are pending. Production remains
+`19fb4b0b8f52808d6a31705185018d6e60836d8e`; the current harness is separate.
+The diagnostic authenticates the cancelled producer's successful build steps,
+exact ZIP/kernel/fixture/source digests and immutable current harness bytes.
+It preserves all selected-case assertions, singleton sequences, negatives,
+empty runtime PATH, fuel4096 and 2048MiB old-space. A shard success is not
+full-matrix or final-source qualification. Final-suite drafts stay inactive
+until the focused diagnostics finish. No integration update is authorized by
+this diagnostic result alone. A/B/C/D remain as recorded below.
+
+---
+
 ## Unfinished T01F handoff — no CI on this checkpoint
 
 This work-branch checkpoint preserves the current implementation and prepared

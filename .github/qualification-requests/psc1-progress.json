@@ -1,0 +1,10 @@
+{
+  "schema": "psc1-progress-diagnostic-request/1",
+  "qualificationRun": 39864113546,
+  "sourceCommit": "573bf48533cb196450a8d1df4f454de20c47b08f",
+  "instrumentedCopy": true,
+  "qualification": false,
+  "admission": "not-run",
+  "publication": "not-run",
+  "timeoutMs": 240000
+}

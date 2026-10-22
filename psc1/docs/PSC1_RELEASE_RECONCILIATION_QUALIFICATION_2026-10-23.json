@@ -234,5 +234,119 @@
     "mergeOrPublication": "separate authorization required; PR stays draft",
     "G2G3": "separate deferred manual qualification; original defect remains tracked"
   },
-  "mergeOrPublishPerformed": false
+  "mergeOrPublishPerformed": false,
+  "contractIdentityFollowUp": {
+    "sourceCommit": "00b0b5e0a6e5330514d5aaedda48c047a49fa307",
+    "testedMergeCommit": "9c7712ee54dc4bb90a97edd7d9cdf31880227519",
+    "runId": 39847474123,
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39847474123",
+    "conclusion": "success",
+    "contractBlobSha": "1e49d4399d67b87097894047dd7924db04ffed99",
+    "checks": [
+      "same-count changed acceptance meaning refuses",
+      "changed exact contract bytes refuse",
+      "public inventory matches pinned contract and completed checkpoint"
+    ],
+    "jobs": [
+      {
+        "id": 120064452180,
+        "name": "static",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Select dependencies from exact new commit interval",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check static contracts and source syntax",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain selection and evidence-derived readiness",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120064951341,
+        "name": "benchmark",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 120064951749,
+        "name": "gate",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Require every selected dependency",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120064952277,
+        "name": "focused",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 120064952518,
+        "name": "native",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 120064952644,
+        "name": "closures",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 120064953729,
+        "name": "g1",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 120064953923,
+        "name": "full",
+        "conclusion": "skipped",
+        "steps": []
+      }
+    ],
+    "compilerRuntimeDependencyOrContractChanged": false
+  }
 }

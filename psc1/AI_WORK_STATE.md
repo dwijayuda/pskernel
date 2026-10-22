@@ -114,8 +114,25 @@ static readiness tests compare the inventory and reject inconsistent source,
 matrix, gate, G1/closure/checker/package evidence. Exact inventory/test paths
 select static checks; contract, readiness gate, compiler, host, workflow and
 unknown machine policies retain their existing test tiers. No correctness or
-final qualification assertion is removed. Linux static validation is pending
-for this reconciliation commit; record its terminal result after completion.
+final qualification assertion is removed. Linux reconciliation run 39846954055 passes at
+0b4d4b3f9ae98f37341f06df062ec23303b54094 (merge
+15e55bb274b3b64e17d3e7247979ef2a30c1b980). Static job 120062643558
+and aggregate 120062995270 succeed; heavy jobs are correctly skipped.
+
+The follow-up pins exact qualified contract Git blob
+1e49d4399d67b87097894047dd7924db04ffed99. Editing acceptance meaning or
+bytes at the same criterion count cannot inherit old evidence. Linux run
+39847474123 passes at source 00b0b5e0a6e5330514d5aaedda48c047a49fa307,
+tested merge 9c7712ee54dc4bb90a97edd7d9cdf31880227519. Static 120064452180
+and aggregate 120064951749 pass, including the new byte/meaning refusals.
+Its baseline is successful run 39847269726 / source 3579d6bd; all heavy
+jobs remain correctly unselected.
+
+GitHub compare against qualified compiler source 9ee6c5ff confirms changes
+only in documentation, data inventory, pure static tests and scheduling helpers.
+The unchanged compiler qualification remains at its exact original source.
+Complete run/step/diff evidence is in
+docs/PSC1_RELEASE_RECONCILIATION_QUALIFICATION_2026-10-23.json.
 
 ## Remaining release work and deferred scope
 

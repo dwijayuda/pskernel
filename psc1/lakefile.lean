@@ -103,7 +103,7 @@ lean_lib PsErasure where
 
 lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
-  roots := #[`Ps.Compiler, `Ps.Compiler.Api, `Ps.Compiler.Ordinary, `Ps.Compiler.Sh1]
+  roots := #[`Ps.Compiler, `Ps.Compiler.Api, `Ps.Compiler.Ordinary, `Ps.Compiler.Sh1, `Ps.Compiler.Service]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
@@ -114,7 +114,8 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Checked,
     `Ps.BackendTs.Sh1Target,
     `Ps.BackendTs.Sh1,
-    `Ps.BackendTs.Compiler
+    `Ps.BackendTs.Compiler,
+    `Ps.BackendTs.CompilerService
   ]
 
 -- Target libraries remain outside the portable bootstrap import closure.
@@ -142,7 +143,8 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Tail,
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.RuntimePlan,
-    `Ps.BackendRust.Module
+    `Ps.BackendRust.Module,
+    `Ps.BackendRust.CompilerService
   ]
 
 lean_lib PsBackendWasm where
@@ -424,3 +426,7 @@ lean_exe psc1_ts_continuation_tests where
 lean_exe psc1_php_utf8_tests where
   srcDir := "test"
   root := `PhpUtf8Tests
+
+lean_exe psc1_target_service_seed where
+  srcDir := "scripts"
+  root := `TargetServiceSeed

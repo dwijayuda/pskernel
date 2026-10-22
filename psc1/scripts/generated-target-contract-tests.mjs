@@ -1,0 +1,33 @@
+// Constructed data exercises host boundaries only; never grants qualification.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {sha,verifyArtifact} from '../host-tools/generated-target-tools.mjs';
+import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
+import {corpus,refusals,expectedObservations,rustObservations} from './generated-target-corpus.mjs';
+assert.equal(corpus.length,5);assert.equal(refusals.length,5);
+assert.deepEqual([...corpus,...refusals].map(c=>c.id).sort(),['lean-modules','ps-integer-unicode','ps-list-literal','lean-handler-pattern','lean-ordinary-loop','malformed-list','wrong-body','missing-import','checked-partial','verified'].sort());
+assert.deepEqual(Object.keys(expectedObservations).sort(),corpus.map(c=>c.id).sort());
+assert.deepEqual(Object.keys(rustObservations).sort(),corpus.map(c=>c.id).sort());
+const sources=[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}];
+for(const target of ['ts','rust']){
+ const session=createCompilerHostSession({requestId:'negative',target,sources,canonicalAdmissions:'[]',checkerExecutable:'/must-not-execute'});
+ assert.throws(()=>session.admit(JSON.stringify({protocol:'psc1-compiler-host/1',op:'admit',requestId:'negative',
+  target:target==='ts'?'rust':'ts',sourceClosureDigest:compilerSourceClosureDigest(sources),admissions:'[]'})),/REQUEST_MISMATCH/);
+}
+const dir=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-target-boundary-'));
+try{
+ const source=path.join(dir,'module.js'),manifestFile=path.join(dir,'artifact.json');
+ fs.writeFileSync(source,'export {};\n');
+ const m={schema:'psc1-generated-target-artifact/1',target:'ts',executable:'module.js',
+  files:[{path:'module.js',bytes:11,sha256:sha(fs.readFileSync(source))}]};
+ fs.writeFileSync(manifestFile,JSON.stringify(m));const hash=sha(fs.readFileSync(manifestFile));
+ assert.equal(verifyArtifact(manifestFile,hash).target,'ts');
+ fs.writeFileSync(source,'export {x};\n');assert.throws(()=>verifyArtifact(manifestFile,hash));
+ fs.writeFileSync(source,'export {};\n');fs.renameSync(source,path.join(dir,'real.js'));fs.symlinkSync('real.js',source);
+ assert.throws(()=>verifyArtifact(manifestFile,hash));
+ fs.unlinkSync(source);fs.renameSync(path.join(dir,'real.js'),source);
+ fs.appendFileSync(manifestFile,' ');assert.throws(()=>verifyArtifact(manifestFile,hash),/MANIFEST_CHANGED/);
+}finally{fs.rmSync(dir,{recursive:true,force:true});}
+console.log('PSC1_GENERATED_TARGET_CONTRACT: corpus frozen; wrong target, changed artifact and symlink refused');

@@ -1,5 +1,23 @@
 # PSC1 active work state
 
+## Active Rust and TypeScript priority pivot (2026-10-23)
+
+Rust and TypeScript now lead actual self-hosting qualification. DirectJS stays
+working as a reference/regression; further DirectJS-specific G2 tuning is not
+prioritized. Existing successful and failed evidence below remains historical.
+The compiler source/front end/elaborator/checked IR/admission are shared through
+Ps.Compiler.Service; target facades use existing production emitters. New manual
+Linux matrix qualification seeds once per target, then requires actual target
+execution, all ten frozen cases and independent G1/G2/G3 source/graph/IR fixed
+points without native compiler delegation. No current Rust/TS generation is
+claimed qualified before CI. Resources, official Lean, all-seven Practical Core
+coverage and publication restrictions remain unchanged. Architecture and exact
+execution procedure: docs/PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md (roadmap-relative:
+PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md). Next: execute the new manual matrix,
+fix target/source blockers as classes, capture exact tool/runtime evidence and
+complete fresh normal qualification after compiler changes.
+
+
 Updated 2026-10-23 (Asia/Jakarta). Draft PR #172:
 https://github.com/dwijayuda/pskernel/pull/172
 Branch: fix/psc1-closure-normalization-20261021.

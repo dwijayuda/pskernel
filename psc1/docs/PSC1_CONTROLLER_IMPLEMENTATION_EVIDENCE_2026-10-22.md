@@ -26,3 +26,12 @@ requiring official conversion equality with the original checked fold. Existing
 worker fusion and backend tail lowering then apply to those concrete bodies.
 No new logical axiom or partial helper is introduced. The whole source matrix,
 all targets, negative boundaries and full release contract still must pass.
+
+
+- 749f72bc / 39763819545: native tests and source census pass. Rust diagnostic
+  prints the admitted concrete helper and owner; no worker companion exists,
+  and the true path still overflows at 100000 iterations.
+- Current descendant extends fusion to already evaluated local callable leaves
+  using the checked curried result type. The paired baseline/fused IR fixture
+  requires a four-argument companion and 100000-step exact observation.
+  Linux validation remains pending; the emitted Rust must demonstrate the fix.

@@ -15,12 +15,13 @@ const early=m.entry(1000000000n,0n);
 const earlyMs=performance.now()-start;
 const full=m.entry(30000n,30000n);
 const arithmetic=m.arithmeticEntry(100000n,7n);
+const continuation=m.continuationEntry(100000n,7n,3n);
 const escaped=m.escaped(7n,10n);
 const captured=m.capture(5n);
 const shadow=m.shadow(2n);
 const ordered=m.orderedWitness();
 console.log(JSON.stringify({early:String(early),full:String(full),escaped:String(escaped),
- captured:String(captured),shadow:String(shadow),ordered:String(ordered),arithmetic:String(arithmetic),marks:probe.seen,
+ captured:String(captured),shadow:String(shadow),ordered:String(ordered),arithmetic:String(arithmetic),continuation:String(continuation),marks:probe.seen,
  earlyMs,maxRssKiB:process.resourceUsage().maxRSS}));\n`);
 const records=[];
 let expected=null;
@@ -33,7 +34,7 @@ for(const label of ['baseline','fused']) {
   const result=JSON.parse(run.stdout.trim());
   assert.ok(result.earlyMs<2000,'first return must avoid traversing billion-fuel range');
   const observation={...result};delete observation.earlyMs;delete observation.maxRssKiB;
-  assert.deepEqual(observation,{early:'0',full:'0',escaped:'3',captured:'0',shadow:'9',ordered:'3',arithmetic:'100007',marks:['2','5']});
+  assert.deepEqual(observation,{early:'0',full:'0',escaped:'3',captured:'0',shadow:'9',ordered:'3',arithmetic:'100007',continuation:'100010',marks:['2','5']});
   if(expected)assert.deepEqual(observation,expected);else expected=observation;
   records.push({label,elapsedMs:Math.round(performance.now()-start),moduleSha256:sha(fs.readFileSync(module)),...result});
 }
@@ -47,7 +48,7 @@ for(const label of ['baseline','fused']) {
 const result={schema:'psc1-typed-worker-fusion-runtime/1',commit:process.env.GITHUB_SHA,
   processTimeoutMs:240000,divergenceDeadlineMs:2000,records,
   preserved:['exact observations','escaping partial functions','old captured values','lexical shadowing',
-    'left-to-right exact-once operands','strict divergent prefix','total Nat arithmetic prefix and 100000 traversal steps'],
+    'left-to-right exact-once operands','strict divergent prefix','total Nat arithmetic prefix and 100000 traversal steps','eta-contracted curried continuation and 100000 traversal steps'],
   formalPreservation:'not-provided'};
 fs.writeFileSync(path.join(root,'results.json'),JSON.stringify(result,null,2)+'\n');
 console.log('PSC1_TYPED_WORKER_FUSION_RUNTIME: '+JSON.stringify(result));

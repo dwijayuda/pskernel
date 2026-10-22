@@ -301,3 +301,21 @@ Rust still overflows at complete streaming traversal after original/proof
 admission and earlier cases pass. Retain the generated source for the concrete
 controller and its companions on this failure, so the next change targets the
 actual unfused/native-call shape rather than guessed stack or resource settings.
+
+
+## Evaluated continuation fusion (current descendant)
+
+Source 749f72bc / Linux run 39763819545 passes native tests and the complete
+source census. Its focused Rust streaming true case still overflows the stack;
+the emitted helper has no worker companion and returns curried closures.
+
+Fusion now handles an already evaluated local callable in a returned branch,
+using the checked function type to apply each curried layer in source order.
+Only local values qualify; computed calls and unknown globals remain excluded.
+The sink carries the expected result type through administrative lets/branches,
+while lambda binders advance to their declared result type.
+A strict-IR regression covers an eta-contracted curried base continuation,
+requires its four-parameter companion, and compares baseline/fused execution
+for 100000 steps (100010 exact result). All old divergence/order/capture tests
+and resource limits remain. This change is pending its own Linux CI; it is not
+a new qualification claim.

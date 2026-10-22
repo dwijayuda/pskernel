@@ -27,9 +27,25 @@ def arithmeticWorker : PsVerifiedIrDeclaration :=
       (.letE "remaining" natT (sub (v "fuel") (add (n 0) (n 1)))
         (lam "state" (app (call "arithmeticScan" [v "remaining"]) (add (v "state") (n 1))))))
 
+-- Erasure can eta-contract the base branch to its evaluated continuation.
+-- Cover both curried layers so a flat overapplication cannot pass this test.
+def continuationT : PsVerifiedIrType := .function [natT] fnT
+def continuationWorker : PsVerifiedIrDeclaration :=
+  .mk "continuationScan" [] [.mk "done" continuationT, param "fuel"] continuationT
+    (.ifE (eq (v "fuel") (n 0)) (v "done")
+      (.letE "remaining" natT (sub (v "fuel") (n 1))
+        (.lambda [param "state"] fnT
+          (lam "sentinel" (app (app (call "continuationScan" [v "done",v "remaining"])
+            (add (v "state") (n 1))) (v "sentinel"))))))
+
 def module : PsVerifiedIrModule := .mk [] [] [] [
     worker,
     arithmeticWorker,
+    continuationWorker,
+    .mk "continuationEntry" [] [param "fuel",param "state",param "sentinel"] natT
+      (app (app (call "continuationScan" [
+        .lambda [param "x"] fnT (lam "y" (add (v "x") (v "y"))), v "fuel"])
+        (v "state")) (v "sentinel")),
     .mk "arithmeticEntry" [] [param "fuel",param "state"] natT
       (app (call "arithmeticScan" [v "fuel"]) (v "state")),
     .mk "scan$worker" [] [] natT (n 13),
@@ -102,6 +118,8 @@ def main : IO Unit := do
     (fused.raw.declarations.any (fun value => value.name == "scan$worker_" && value.parameters.length == 2))
   require "total Nat arithmetic prefix obtains a checked companion"
     (fused.raw.declarations.any (fun value => value.name == "arithmeticScan$worker" && value.parameters.length == 2))
+  require "eta-contracted curried continuation obtains a checked companion"
+    (fused.raw.declarations.any (fun value => value.name == "continuationScan$worker" && value.parameters.length == 4))
   require "escaped call-only function stays available"
     (fused.raw.declarations.any (fun value => value.name == "hold"))
   let invalid := PsVerifiedIrModule.mk [] [] [] [
@@ -118,8 +136,8 @@ def main : IO Unit := do
     | .ok value => pure value
   require "effectful/divergent prefix is never delayed"
     (!strictFused.raw.declarations.any (fun value => value.name == "unsafe$worker"))
-  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow","arithmeticEntry"]
-  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry"]
+  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow","arithmeticEntry","continuationEntry"]
+  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry","continuationEntry"]
   emit strictInput "dist/worker-fusion/strict-baseline.mjs" ["strict"]
   emit strictFused "dist/worker-fusion/strict-fused.mjs" ["strict"]
   IO.FS.writeFile "dist/worker-fusion/probe.mjs"

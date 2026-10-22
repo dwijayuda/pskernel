@@ -161,9 +161,27 @@ def bindParameters (parameters : List PsVerifiedIrParameter) (arguments : List P
           | Option.some nested =>
               Option.some (PsVerifiedIrExpr.letE parameter.name parameter.type argument nested)
 
+-- A local callable is already evaluated. Apply its checked curried signature
+-- in order; never treat a computed call or an unknown global as a value here.
+def applyLocal (fuel : Nat) (type : PsVerifiedIrType)
+    (value : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) : Option PsVerifiedIrExpr :=
+  match fuel with
+  | Nat.zero => Option.none
+  | Nat.succ remaining =>
+      if psListIsEmpty arguments then Option.some value
+      else
+        match type with
+        | PsVerifiedIrType.function parameters result =>
+            let count : Nat := psListLength parameters;
+            if Nat.beq count 0 || Nat.blt (psListLength arguments) count then Option.none
+            else applyLocal remaining result
+              (PsVerifiedIrExpr.call value [] (psListTake count arguments)) (drop count arguments)
+        | _ => Option.none
+
 -- Beta application is represented by typed lets rather than textual substitution.
 -- Original lambda shadowing/capture scopes therefore remain exactly nested.
-def sink (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) :
+def sink (fuel : Nat) (locals : List String) (type : PsVerifiedIrType)
+    (expression : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) :
     Option PsVerifiedIrExpr :=
   match fuel with
   | Nat.zero => if psListIsEmpty arguments then Option.some expression else Option.none
@@ -171,25 +189,25 @@ def sink (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) (ar
       if psListIsEmpty arguments then Option.some expression
       else
         match expression with
-        | PsVerifiedIrExpr.lambda parameters _ body =>
+        | PsVerifiedIrExpr.lambda parameters result body =>
             let count : Nat := psListLength parameters;
             if Nat.blt (psListLength arguments) count || Nat.beq count 0 then Option.none
             else
-              match sink remaining (psListAppend (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) locals) body (drop count arguments) with
+              match sink remaining (psListAppend (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) locals) result body (drop count arguments) with
               | Option.none => Option.none
               | Option.some nested => bindParameters parameters (psListTake count arguments) nested
-        | PsVerifiedIrExpr.letE name type value body =>
+        | PsVerifiedIrExpr.letE name valueType value body =>
             if administrative 64 locals value then
-              match sink remaining (List.cons name locals) body arguments with
+              match sink remaining (List.cons name locals) type body arguments with
               | Option.none => Option.none
-              | Option.some nested => Option.some (PsVerifiedIrExpr.letE name type value nested)
+              | Option.some nested => Option.some (PsVerifiedIrExpr.letE name valueType value nested)
             else Option.none
         | PsVerifiedIrExpr.ifE condition yes no =>
             if administrative 64 locals condition then
-              match sink remaining locals yes arguments with
+              match sink remaining locals type yes arguments with
               | Option.none => Option.none
               | Option.some left =>
-                  match sink remaining locals no arguments with
+                  match sink remaining locals type no arguments with
                   | Option.none => Option.none
                   | Option.some right => Option.some (PsVerifiedIrExpr.ifE condition left right)
             else Option.none
@@ -199,7 +217,7 @@ def sink (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) (ar
                   Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) ->
                   Option (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) :=
                 fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
-                  match sink remaining (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name) alternative.snd.fst) locals) alternative.snd.snd arguments with
+                  match sink remaining (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name) alternative.snd.fst) locals) type alternative.snd.snd arguments with
                   | Option.none => Option.none
                   | Option.some body =>
                       Option.some (Prod.mk alternative.fst (Prod.mk alternative.snd.fst body));
@@ -211,6 +229,8 @@ def sink (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) (ar
               | Option.none => Option.none
               | Option.some values => Option.some (PsVerifiedIrExpr.matchE owner types major values)
             else Option.none
+        | PsVerifiedIrExpr.var name =>
+            if seen locals name then applyLocal 64 type expression arguments else Option.none
         | _ => Option.none
 
 structure Spec where
@@ -240,7 +260,7 @@ def addSpec (plan : Plan) (declaration : PsVerifiedIrDeclaration) : Except Strin
               | Except.ok extra =>
                   let arguments : List PsVerifiedIrExpr := psListMap
                     (fun (parameter : PsVerifiedIrParameter) => PsVerifiedIrExpr.var parameter.name) extra.parameters;
-                  match sink 4096 (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.body arguments with
+                  match sink 4096 (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.resultType declaration.body arguments with
                   | Option.none => Except.ok plan
                   | Option.some body =>
                       let parameters : List PsVerifiedIrParameter :=

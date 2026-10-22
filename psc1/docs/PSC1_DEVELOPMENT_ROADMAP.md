@@ -57,7 +57,11 @@ unsupported ABI/publication preservation and negative tests.
 Four CI tiers remain: static contracts/syntax, native and focused consumers,
 integration complete-source closures plus G1/host boundary, and full all-seven/
 minimum-runtime/package qualification. Focused inference/control now precedes
-measured applications, so source/type failures fail before expensive replay.
+measured applications. Core regressions and the unchanged five-target measured
+application scripts now run in separate focused matrix lanes, each retaining its
+original 15-minute ceiling and exact-source cache; the full contract is unchanged.
+This removes the measured eight-minute application segment from the serial
+core lane. Artifacts include lane/attempt identities to preserve retry evidence.
 The separate focused PHP lane retains the original five-target application lane.
 All process/job ceilings remain; the compiler application is 100000 statements,
 500000 bytes, at most 120 seconds / 1048576 KiB per actual checked child.

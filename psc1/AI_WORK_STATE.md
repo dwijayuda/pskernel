@@ -364,3 +364,33 @@ then diagnoses unsupported nested constructor pattern syntax in the new local
 lambda lookup, DoForLift 58:25. Normalize it to two flat checked matches rather
 than expanding the source language or dropping the census. Rust-host integration
 is a later descendant and remains pending its own Linux execution.
+
+
+## Complete focused execution and CI lane sizing
+
+Source 0a24357d, tested merge f0771c0e, run 39813833670 attempt 1:
+native/census and PHP pass; the main focused log completes all commands without
+a test failure. Both grammars' full eighteen-case JS/TS/Rust corpus passes
+(108 obligations), fixing the original Rust 100000-step stack overflow.
+Five-target compiler applications pass 120 cases and CLI/file applications
+210 cases. The unchanged 100000-statement compiler workload stays within
+120 seconds / 1048576 KiB for every child: measured core Wasm at most 76.09 s,
+Rust 42.33 s, JS RSS at most 725876 KiB, TS 229352 KiB.
+Protocol, sequencing, actual IO and dispatcher consumers all pass.
+
+The focused job is cancelled at its existing 15-minute limit during artifact
+cleanup; aggregate gate correctly refuses cancelled dependencies and full/G1/
+closures are skipped. It is scoped execution evidence, not full qualification.
+A failed-only attempt 2 was requested after terminal state, retaining successful
+native/PHP/static evidence; it was still queued when the lane-sizing correction
+was prepared.
+
+The same focused reusable job now has core/application matrix lanes, each with
+the original 15-minute ceiling and pinned build/runtime setup. Every original
+command remains: only the two five-target measured application scripts move
+to the application lane, saving about eight minutes from the serial core lane.
+Both lanes restore the same exact-source build cache and run independent fresh
+admission/IR/runtime checks. Matrix fail-fast=false retains independent failure
+evidence. Artifact names include lane and run attempt; PHP names include attempt.
+No test, target, resource budget, negative control or required final gate is
+removed or weakened. The new workflow and final full qualification are pending.

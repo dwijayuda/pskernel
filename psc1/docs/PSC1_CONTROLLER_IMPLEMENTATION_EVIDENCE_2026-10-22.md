@@ -51,3 +51,15 @@ The Rust host now applies the strictly rechecked fusion pass before deriving
 public type closure, generated code and runtime plan. Rust's supported generic
 declarations are preserved; no monomorphizing plan is forced on that target.
 Source execution and the full release gates remain the authority for success.
+
+
+Source 0a24357d / tested merge f0771c0e / run 39813833670:
+native equivalence and source census pass; all six JS/TS/Rust source pairs pass
+all eighteen control cases (108 obligations), including complete 100000-step
+streaming and immediate 10^18-bound return. The original Rust stack failure is
+resolved in scoped Linux execution. All focused scripts finish, including 120
+five-target compiler-application cases and 210 actual CLI/file cases. The job
+hits its unchanged 15-minute ceiling during cleanup, so the aggregate correctly
+rejects cancellation and later full gates skip. The application segment consumed
+about eight minutes; splitting those same commands into a separate focused lane
+addresses CI sizing without changing any child workload or acceptance limit.

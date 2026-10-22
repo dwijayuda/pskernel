@@ -1,21 +1,11 @@
 name: PSC1 T01F authenticated generated artifact diagnostic
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - work/psc1-pskernel-t01f-string-20261022
-    paths:
-      - '.github/workflows/psc1-pskernel-t01f-focus.yml'
-      - 'psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs'
-      - 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs'
-      - 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs'
-      - '**/AI_WORK_STATE.md'
+# Full-suite qualification owns push execution; keep this diagnostic manual.
 permissions:
   contents: read
   actions: read
 
-# Push activation: run the reviewed mixed-sample and retained-control diagnostics
-# after the saved handoff; no final-source qualification is claimed by this run.
 # This workflow reuses the compiled bytes from 19fb4b0. That producer's full
 # generated acceptance job was cancelled. Its successful compiler, source-check,
 # and fixture steps are authenticated separately below. These diagnostics neither

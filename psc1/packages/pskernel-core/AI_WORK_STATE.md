@@ -1,3 +1,43 @@
+## T01F mixed diagnostic timed out — V1 conversion/reduction bottleneck
+
+Observed 2026-10-23 WIB. Exact harness `9248c474d705ffaa4a1aba8a0aa7a4ce54e4a303`
+reused authenticated generated source `19fb4b0b8f52808d6a31705185018d6e60836d8e`
+in [run39848120108](https://github.com/dwijayuda/pskernel/actions/runs/39848120108).
+Retained controls job120066753317 PASS: DAG115.11s/628496KiB, prefix/session
+28.17s/422628KiB,605 prefix assertions and all prior-session owner markers.
+Mixed job120066753711 CANCELLED at the unchanged25-minute whole-job cap.
+All294 requests and377 metadata comparisons completed. The mixed singleton
+sequence passed, but the complete case and later UTF8/validity/negative groups
+did not finish. No assertion failure or heap exhaustion was observed; there
+is no completed mixed peak-RSS result or qualification receipt.
+
+The347 completed trace calls record913.757s in21 V1 DefEq calls and212.937s
+in3 V1 WHNF calls. UTF8 literal DefEq took220.158s; its WHNF127.355s.
+The interrupted call348 is V1 DefEq in utf8-literal-left. These are diagnostic
+outer-API times, not a controlled speedup or internal hotspot attribution.
+Both successful/unfinished artifacts and every completed trace record are
+retained in `evidence/2026-10-23-t01f-focused-diagnostic.json`.
+
+The full final-suite drafts were reviewed (old steps preserved, exact source/
+run/attempt/provider identities, six unique receipts, clean runtime exit and
+raw logs/memory revalidation), but remain INACTIVE because the focused mixed
+case cannot finish within its cap. The old focused push trigger is disabled
+to avoid an accidental duplicate25-minute run. A separate bounded180-second
+V8 profile targets the measured V1 UTF8 literal WHNF after unchanged complete
+fixture admission, corrupt-definition control and metadata comparison.
+It derives a diagnostic driver only; the full acceptance runner is unchanged.
+The new profile workflow is `.github/workflows/psc1-pskernel-t01f-v1-profile.yml`.
+Its containing source and terminal result must be fetched; no profile success
+or source qualification is claimed in this update.
+
+Production remains19fb. Integration remains123c411; native singleton evidence
+remainsa368 and complete scoped A remains9c87. B/C/D remain open. Do not activate
+the final suite or start T05 until a genuine hotspot fix lets the complete
+unchanged mixed preflight pass under the existing cap. Do not raise limits,
+suppress V1 parity or replace real declarations.
+
+---
+
 ## T01F resumed — authenticated generated preflight pending
 
 Live integration `123c41197950b6761be965fd21c57142ee2b0d1c` and work handoff

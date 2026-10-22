@@ -1,0 +1,304 @@
+name: PSC1 T01F measured V1 UTF8 WHNF diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - work/psc1-pskernel-t01f-string-20261022
+    paths:
+      - '.github/workflows/psc1-pskernel-t01f-v1-profile.yml'
+permissions:
+  contents: read
+  actions: read
+# A bounded profile of the measured slow V1 call. This cannot qualify T01F.
+jobs:
+  generated-reuse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PSC1_T01F_REUSE_MODE: v1-whnf-profile
+      PSC1_T01F_JOB_MINUTES: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate producer steps, artifact bytes, and current harness sources
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PSC1_T01F_REUSE_DIR="$RUNNER_TEMP/psc1-t01f-reuse-$PSC1_T01F_REUSE_MODE"
+          export PSC1_T01F_NODE="$(command -v node)"
+          mkdir -p "$PSC1_T01F_REUSE_DIR"
+          printf 'PSC1_T01F_REUSE_DIR=%s\nPSC1_T01F_NODE=%s\n' \
+            "$PSC1_T01F_REUSE_DIR" "$PSC1_T01F_NODE" >> "$GITHUB_ENV"
+          python3 - <<'PY'
+          import base64, hashlib, io, json, os, pathlib, re, subprocess, urllib.parse, urllib.request, zipfile
+
+          repo = 'dwijayuda/pskernel'
+          source = '19fb4b0b8f52808d6a31705185018d6e60836d8e'
+          source_tree = 'f229557fc2f6d3b782a319710462dd29bb0c080a'
+          producer_run = 39827244691
+          producer_job = 119993676851
+          artifact_id = 12447224834
+          artifact_size = 1110713
+          artifact_digest = 'f899a7704c804d9c48ac54ee2cdd608f69497397b4f1378145e235b65126522b'
+          lean_commit = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          samples = ['', 'a', 'é', '€', '😀', 'Aé€😀']
+          expected = {
+              'kernel': {'bytes': 9953467, 'sha256': 'cd6d03fe2da5b7e76bf40a7e3dba9e8315e2fb1a269f20f3108e29f77c49e5f5'},
+              'fixture': {'bytes': 2791525, 'sha256': '563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d'},
+              'fixtureProducer': {'bytes': 37036, 'sha256': 'de62e00a433d3a98eee1e85905ed8fc217f0dc9d3669257934d7d6fefa4992fc'},
+              'generatedRunner': {'bytes': 23847, 'sha256': 'fafce130684bc8fc8e2ea53f4632a257152caf4d86b66cd558d8663bc143f737'},
+          }
+          root = pathlib.Path(os.environ['PSC1_T01F_REUSE_DIR'])
+          detached = root / 'detached'
+          detached.mkdir()
+          harness_sha = os.environ['GITHUB_SHA']
+          api = 'https://api.github.com/repos/' + repo
+
+          def require(condition, label):
+              if not condition:
+                  raise RuntimeError('PSC1_T01F_REUSE_AUTH_FAILURE: ' + label)
+
+          def digest(data):
+              return {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+
+          def get(path, binary=False):
+              request = urllib.request.Request(api + path, headers={
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'User-Agent': 'psc1-t01f-authenticated-artifact-diagnostic',
+              })
+              # Never forward the GitHub token to the artifact's signed blob URL.
+              request.add_unredirected_header('Authorization', 'Bearer ' + os.environ['GH_TOKEN'])
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  data = response.read()
+              return data if binary else json.loads(data)
+
+          def source_file(path, ref):
+              record = get('/contents/' + urllib.parse.quote(path, safe='/') + '?ref=' + ref)
+              require(record['type'] == 'file' and record['encoding'] == 'base64', 'source file encoding ' + path)
+              data = base64.b64decode(record['content'])
+              git_blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+              require(record['sha'] == git_blob and record['size'] == len(data), 'source blob integrity ' + path)
+              return data, record['sha']
+
+          require(os.environ['GITHUB_REPOSITORY'] == repo, 'repository')
+          require(re.fullmatch('[0-9a-f]{40}', harness_sha) is not None, 'current harness SHA')
+          require(subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == harness_sha,
+                  'checkout is current immutable harness source')
+          node_version = subprocess.check_output([os.environ['PSC1_T01F_NODE'], '--version'], text=True).strip()
+          require(node_version.startswith('v22.'), 'Node 22')
+          mode = os.environ['PSC1_T01F_REUSE_MODE']
+          require(mode == 'v1-whnf-profile', 'diagnostic mode')
+
+          run = get('/actions/runs/' + str(producer_run))
+          require(run['id'] == producer_run and run['run_attempt'] == 1 and run['head_sha'] == source,
+                  'producer run source and attempt')
+          require(run['repository']['full_name'] == repo and run['head_repository']['full_name'] == repo,
+                  'producer repository')
+          require(run['head_commit']['tree_id'] == source_tree, 'producer immutable source tree')
+          require(run['path'] == '.github/workflows/psc1-pskernel-t01f-focus.yml', 'producer workflow')
+          require(run['status'] == 'completed' and run['conclusion'] == 'cancelled',
+                  'preserve actual cancelled producer outcome')
+          job = get('/actions/jobs/' + str(producer_job))
+          require(job['id'] == producer_job and job['run_id'] == producer_run and job['head_sha'] == source,
+                  'producer job source')
+          require(job['name'] == 'generated-string' and job['status'] == 'completed' and job['conclusion'] == 'cancelled',
+                  'preserve actual cancelled generated job outcome')
+          expected_steps = {
+              'Run actions/checkout@v4': 'success',
+              'Install pinned Lean': 'success',
+              'Run actions/setup-node@v4': 'success',
+              'Build authentic PSC1 and check complete kernel source': 'success',
+              'Install pinned TypeScript': 'success',
+              'Compile the complete independent kernel to JavaScript': 'success',
+              'Produce authentic T01F inputs for generated independent replay': 'success',
+              'Independently admit and check full String environment in detached generated Node': 'cancelled',
+              'Run real generated checker without external Lean on PATH': 'skipped',
+              'Check generated mutual and nested prefix owners in detached Node': 'skipped',
+              'Run actions/upload-artifact@v4': 'success',
+          }
+          step_evidence = []
+          for name, conclusion in expected_steps.items():
+              matching = [step for step in job['steps'] if step['name'] == name]
+              require(len(matching) == 1 and matching[0]['status'] == 'completed' and
+                      matching[0]['conclusion'] == conclusion, 'producer step ' + name)
+              step_evidence.append(matching[0])
+
+          artifact = get('/actions/artifacts/' + str(artifact_id))
+          require(artifact['id'] == artifact_id and artifact['name'] == 'psc1-t01f-generated-preflight' and
+                  artifact['size_in_bytes'] == artifact_size and not artifact['expired'], 'artifact metadata')
+          require(artifact['digest'] == 'sha256:' + artifact_digest and
+                  artifact['workflow_run']['id'] == producer_run and artifact['workflow_run']['head_sha'] == source,
+                  'artifact source and digest')
+          archive_bytes = get('/actions/artifacts/' + str(artifact_id) + '/zip', binary=True)
+          require(digest(archive_bytes) == {'bytes': artifact_size, 'sha256': artifact_digest}, 'downloaded ZIP bytes')
+          (root / 'producer-artifact.zip').write_bytes(archive_bytes)
+          archive = zipfile.ZipFile(io.BytesIO(archive_bytes))
+          entries = []
+
+          def extract(suffix, target):
+              matches = [entry for entry in archive.infolist() if not entry.is_dir() and
+                         (entry.filename == suffix or entry.filename.endswith('/' + suffix))]
+              require(len(matches) == 1, 'unique primary archive path ' + suffix)
+              entry = matches[0]
+              data = archive.read(entry)
+              target.write_bytes(data)
+              entries.append({'archivePath': entry.filename, 'outputPath': str(target.relative_to(root)), **digest(data)})
+              return data
+
+          kernel = extract('psc1/dist/expr-v2/integration/kernel.js', detached / 'kernel.mjs')
+          fixture_bytes = extract('psc1-t01f-generated/fixture.json', detached / 'fixture.json')
+          provenance_bytes = extract('psc1-t01f-generated/provenance.json', root / 'producer-provenance.json')
+          native_log = extract('psc1-t01f-generated/native.log', root / 'producer-native.log').decode('utf-8')
+          require(digest(kernel) == expected['kernel'] and digest(fixture_bytes) == expected['fixture'],
+                  'primary kernel and raw fixture bytes')
+          provenance = json.loads(provenance_bytes)
+          require(provenance['schema'] == 'psc1-t01f-source-provenance-v1' and provenance['sourceSha'] == source and
+                  provenance['runId'] == str(producer_run) and provenance['runAttempt'] == '1' and
+                  provenance['job'] == 'generated-string' and provenance['route'] == 'generated', 'original provenance identity')
+          require(provenance['leanCommit'] == lean_commit and 'version 4.35.0,' in provenance['leanVersion'] and
+                  provenance['node'] == 'v22.23.4' and provenance['kernelFuel'] == 4096 and
+                  provenance['nodeOldSpaceLimitMiB'] == 2048, 'original toolchain and resource policy')
+          require(provenance['requests'] == 294 and provenance['metadata'] == 377 and provenance['samples'] == samples,
+                  'original input manifest')
+          for name, value in expected.items():
+              require(provenance[name] == value, 'original provenance digest ' + name)
+          fixture = json.loads(fixture_bytes)
+          require(fixture['format'] == 'psc1-authentic-string435-v1' and fixture['leanVersion'] == '4.35.0' and
+                  fixture['leanCommit'] == lean_commit, 'raw fixture format and pinned Lean')
+          require(len(fixture['declarations']) == 294 and len(fixture['metadata']) == 377 and fixture['samples'] == samples,
+                  'complete original declaration input set')
+          native_lines = native_log.splitlines()
+          require(native_lines.count('PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096') == 1,
+                  'successful original native oracle')
+          require(sum(line.startswith('PSC1_T01F_CASE_PASS ') for line in native_lines) == 6,
+                  'six original native cases')
+
+          original_sources = {}
+          for name, path in (
+              ('fixtureProducer', 'psc1/test/PsKernelExprV2StringEnvironmentRegression.lean'),
+              ('generatedRunner', 'psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs'),
+              ('selfHost', 'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean'),
+              ('leanToolchain', 'psc1/lean-toolchain'),
+              ('workflow', '.github/workflows/psc1-pskernel-t01f-focus.yml'),
+          ):
+              data, blob_sha = source_file(path, source)
+              if name in expected:
+                  require(digest(data) == expected[name], 'original source input ' + name)
+              if name == 'leanToolchain':
+                  require(data.decode().strip() == 'leanprover/lean4:v4.35.0', 'source Lean toolchain pin')
+              if name == 'workflow':
+                  require(blob_sha == '6c35ee482ec86aa4eaa4aafecd8025bc79a38b82', 'reviewed original compiler workflow')
+                  require('typescript@7.0.2' in data.decode() and
+                          'lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean' in data.decode(),
+                          'original TypeScript pin and complete SelfHost source-check command')
+              (root / ('producer-' + name + pathlib.Path(path).suffix)).write_bytes(data)
+              original_sources[name] = {'path': path, 'sourceSha': source, 'gitBlobSha': blob_sha, **digest(data)}
+
+          current_sources = {}
+          for name, path, output in (
+              ('string', 'psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs', 'string-smoke.mjs'),
+              ('dag', 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs', 'dag-smoke.mjs'),
+              ('prefix', 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs', 'prefix-smoke.mjs'),
+          ):
+              data, blob_sha = source_file(path, harness_sha)
+              require(pathlib.Path(path).read_bytes() == data, 'current immutable checkout script ' + name)
+              (detached / output).write_bytes(data)
+              current_sources[name] = {'path': path, 'detachedPath': output, 'sourceSha': harness_sha,
+                                       'gitBlobSha': blob_sha, **digest(data)}
+          require(current_sources['string']['sha256'] == 'd3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2',
+                  'reviewed strict selector harness bytes')
+
+          report = {
+              'schema': 'psc1-t01f-authenticated-reuse-diagnostic-v1',
+              'authority': 'Diagnostic only. The 19fb producer full generated acceptance was cancelled; no final-source qualification or provider promotion.',
+              'inputAuthority': 'Raw requests only. This generated process must independently admit all 294 requests from empty before querying.',
+              'repository': repo, 'harnessSourceSha': harness_sha, 'generatedSourceSha': source,
+              'generatedSourceTree': source_tree, 'runId': os.environ['GITHUB_RUN_ID'],
+              'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'], 'mode': mode,
+              'jobMinutes': int(os.environ['PSC1_T01F_JOB_MINUTES']), 'node': node_version,
+              'producerTypeScript': '7.0.2', 'producerLeanCommit': lean_commit,
+              'fuel': 4096, 'nodeOldSpaceLimitMiB': 2048, 'emptyPATH': True, 'exposeGC': True,
+              'requestedSampleIndex': 5,
+              'requestedSample': samples[5],
+              'producer': {'runId': producer_run, 'runAttempt': 1, 'jobId': producer_job,
+                           'runConclusion': run['conclusion'], 'jobConclusion': job['conclusion'],
+                           'verifiedSteps': step_evidence},
+              'artifact': {'id': artifact_id, 'name': artifact['name'], 'bytes': artifact_size, 'sha256': artifact_digest},
+              'kernel': digest(kernel), 'fixture': digest(fixture_bytes),
+              'originalSources': original_sources, 'currentScripts': current_sources, 'extractedEntries': entries,
+          }
+          (root / 'reuse-provenance.json').write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
+          print('PSC1_T01F_REUSE_PROVENANCE ' + json.dumps(report, ensure_ascii=False))
+          PY
+          "$PSC1_T01F_NODE" --check "$PSC1_T01F_REUSE_DIR/detached/kernel.mjs"
+          "$PSC1_T01F_NODE" --check "$PSC1_T01F_REUSE_DIR/detached/string-smoke.mjs"
+          "$PSC1_T01F_NODE" --check "$PSC1_T01F_REUSE_DIR/detached/dag-smoke.mjs"
+          "$PSC1_T01F_NODE" --check "$PSC1_T01F_REUSE_DIR/detached/prefix-smoke.mjs"
+
+      - name: Derive isolated operation after full unchanged admission and metadata checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ['PSC1_T01F_REUSE_DIR'])
+          source = (root / 'detached/string-smoke.mjs').read_text()
+          anchor = 'const measurements=[];\nfor(const value of sequence(selectedSamples).map(text)){'
+          if source.count(anchor) != 1: raise RuntimeError('Unique reviewed complete-fixture prefix required')
+          prefix = source[:source.index(anchor)]
+          tail = "\ntraceSample=fixture.samples[5];traceStage=\"profile:utf8-literal-left\";\nconst diagnosticLiteral=E.lit(Lit.str(traceSample));\nconst diagnosticInput=E.proj(qname(\"Array\"),0n,\n E.proj(qname(\"ByteArray\"),0n,E.proj(qname(\"String\"),0n,diagnosticLiteral)));\nconst diagnosticStart=performance.now();\nconst diagnosticNormalized=accepted(get(\"psKernelV1Whnf\")(session,nil,safe,diagnosticInput),\"profile-utf8-literal-whnf\");\nlet diagnosticHead=diagnosticNormalized;\nwhile(diagnosticHead&&typeof diagnosticHead===\"object\"&&Object.hasOwn(diagnosticHead,\"fn\")&&\n same(diagnosticHead,E.app(diagnosticHead.fn,diagnosticHead.arg)))diagnosticHead=diagnosticHead.fn;\nmust(eqExpr(diagnosticHead,cn(\"List.cons\",[zero])),\"diagnostic-nonempty-byte-list-head\");\nmust(get(\"psKernelEnvironmentSize\")(empty.environment)===0n,\"diagnostic-empty-session-isolation\");\nconsole.log(\"PSC1_T01F_V1_WHNF_DIAGNOSTIC_COMPLETE \"+JSON.stringify({\n diagnosticOnly:true,qualification:false,sample:traceSample,requests:requests.length,metadata:metadata.length,\n milliseconds:performance.now()-diagnosticStart,kernelSha256,fixtureSha256,harnessSha256,\n memory:process.memoryUsage()}));\n"
+          derived = (prefix + tail).encode()
+          (root / 'detached/v1-whnf-profile.mjs').write_bytes(derived)
+          report = {'schema':'psc1-t01f-derived-operation-diagnostic-v1', 'diagnosticOnly':True, 'qualification':False,
+                    'generatedSourceSha':'19fb4b0b8f52808d6a31705185018d6e60836d8e', 'harnessSourceSha':os.environ['GITHUB_SHA'],
+                    'fullRunnerSha256':hashlib.sha256(source.encode()).hexdigest(),
+                    'derivedDriverSha256':hashlib.sha256(derived).hexdigest(),
+                    'prefixBytes':len(prefix.encode()), 'operation':'psKernelV1Whnf(Array0(ByteArray0(String0(literal))))',
+                    'sample':'Aé€😀', 'fullIndependentAdmission':294, 'metadataComparison':377,
+                    'fuel':4096, 'oldSpaceMiB':2048, 'operationDiagnosticSeconds':180, 'emptyPATH':True}
+          (root / 'diagnostic-driver-provenance.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+          print('PSC1_T01F_V1_PROFILE_DRIVER ' + json.dumps(report,ensure_ascii=False))
+          PY
+          "$PSC1_T01F_NODE" --check "$PSC1_T01F_REUSE_DIR/detached/v1-whnf-profile.mjs"
+      - name: Profile measured UTF8 literal WHNF under fixed diagnostic deadline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PSC1_T01F_REUSE_DIR/detached"
+          set +e
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' \
+            -o "$PSC1_T01F_REUSE_DIR/profile.memory" \
+            timeout --signal=TERM --kill-after=5s 180s \
+            env PATH="" PSC1_T01F_TRACE=1 NODE_OPTIONS="" "$PSC1_T01F_NODE" --max-old-space-size=2048 --expose-gc \
+              --prof --logfile=v1-whnf.log v1-whnf-profile.mjs kernel.mjs fixture.json 5 \
+              2>&1 | tee "$PSC1_T01F_REUSE_DIR/profile.log"
+          status=${PIPESTATUS[0]}
+          printf '%s\n' "$status" > "$PSC1_T01F_REUSE_DIR/diagnostic-exit-status.txt"
+          cat "$PSC1_T01F_REUSE_DIR/profile.memory"
+          exit "$status"
+      - name: Process sampled V8 profile and retain incomplete outcomes
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$PSC1_T01F_REUSE_DIR/detached"
+          shopt -s nullglob
+          logs=(isolate-*-v1-whnf.log)
+          test "${#logs[@]}" -eq 1
+          "$PSC1_T01F_NODE" --prof-process "${logs[0]}" > "$PSC1_T01F_REUSE_DIR/profile.txt" 2> "$PSC1_T01F_REUSE_DIR/profile-process.stderr"
+          sed -n '1,260p' "$PSC1_T01F_REUSE_DIR/profile.txt"
+          tail -n 20 "$PSC1_T01F_REUSE_DIR/profile.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-measured-v1-whnf-diagnostic
+          path: ${{ runner.temp }}/psc1-t01f-reuse-v1-whnf-profile/
+          if-no-files-found: error

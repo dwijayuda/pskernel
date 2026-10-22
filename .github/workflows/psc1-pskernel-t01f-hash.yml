@@ -1,4 +1,4 @@
-name: PSC1 T01F data-result hash iteration preflight
+name: PSC1 T01F fused data-result hash iteration preflight
 on:
   workflow_dispatch:
   push:
@@ -124,6 +124,16 @@ jobs:
               body = text[start:] if end < 0 else text[start:end]
               if '__ps$wrap' in body:
                   raise RuntimeError('Iterator still constructs staged function results: ' + name)
+              for dispatch in ('__ps$invoke(psKernelCacheStringHashStep,', '__ps$invoke(psKernelCacheMix,'):
+                  if dispatch in body:
+                      raise RuntimeError('Unfused per-byte hash dispatch: ' + dispatch)
+          marker = 'function* __ps$impl$psKernelCacheStringHash('
+          start = text.index(marker)
+          end = text.find('\nexport ', start + len(marker))
+          entry = text[start:] if end < 0 else text[start:end]
+          if 'psKernelCacheStringHashWorker' in entry or '__ps$wrap' in entry:
+              raise RuntimeError('Full hash still dispatches through the staged public worker')
+          print('PSC1_HASH_FUSED_CODEGEN: PASS stagedFullEntry=false byteStepDispatch=false byteMixDispatch=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
           PY
       - name: Compile the complete independent kernel to JavaScript

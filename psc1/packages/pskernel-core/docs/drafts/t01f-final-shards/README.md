@@ -6,10 +6,11 @@ performance gates and add complete same-run String shards. They also require
 five local scalar-hash equations,2730 raw/fuel/accumulator cases,8190 generated
 partial-application stages and three long ASCII/Unicode cases on both routes.
 
-Exact 5abf40506564cad00ff518600ae5992dc826510e passed its own native preflight
+Historical candidate 5abf40506564cad00ff518600ae5992dc826510e passed its own native preflight
 in run39860528417. Its authentic generated producer and retained controls passed; the unchanged
 mixed sample timed out at its 25-minute cap in job120118769683. The current-
-artifact bounded profile is the next diagnostic. Read the newest
+artifact bounded profile completed; a fused data-result hash candidate now
+requires its own native/generated preflight. Read the newest
 [continuation](../../AI_CONTINUATION_PROMPT.md) and package AI_WORK_STATE.md.
 Do not inherit834's subset passes or discard its failed mixed timeout.
 

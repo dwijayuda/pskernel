@@ -37,8 +37,20 @@ def psKernelCacheStringHashStateWithFuel
   match fuel with
   | Nat.zero => initial
   | Nat.succ remaining =>
-      psKernelCacheStringHashStep value
-        (psKernelCacheStringHashStateWithFuel remaining value initial)
+      /- This is definitionally the exported step, fused to avoid per-byte
+      generated dispatch. The recursion still returns only immutable data. -/
+      let state := psKernelCacheStringHashStateWithFuel remaining value initial;
+      let position := Prod.fst state;
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+        state
+      else
+        let char := String.Internal.get value (String.Pos.Raw.mk position);
+        let next := String.Pos.Raw.byteIdx
+          (String.Pos.Raw.next value (String.Pos.Raw.mk position));
+        Prod.mk next
+          (Nat.mod
+            (Nat.add (Nat.mul (Prod.snd state) 31) (Char.toNat char))
+            psKernelCacheHashModulus)
 
 def psKernelCacheStringHashScan
     (fuel : Nat)
@@ -62,7 +74,7 @@ def psKernelCacheStringHashWorker
 def psKernelCacheStringHash
     (value : String) :
     Nat :=
-  psKernelCacheStringHashWorker
+  psKernelCacheStringHashScan
     (Nat.succ
       (String.utf8ByteSize value))
     value

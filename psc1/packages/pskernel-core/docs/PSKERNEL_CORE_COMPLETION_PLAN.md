@@ -1,3 +1,38 @@
+## Fused data-result hash candidate: exact profile saved; native-first gates pending
+
+The preceding 5abf mixed preflight timed out at the unchanged 25-minute cap.
+Its exact-artifact diagnostic completed in
+[run 39866518232](https://github.com/dwijayuda/pskernel/actions/runs/39866518232),
+job120129961504 PASS: all294 requests/377 metadata, target WHNF91536.663875ms,
+whole152.76s, peakRSS560584KiB. Artifact12463918754, raw sampled profile and
+source/driver bindings are recorded in
+`evidence/2026-10-23-t01f-data-result-v1-whnf-profile.json`.
+130522 sampled ticks include admission plus the target operation;19260 GC
+ticks (14.8% total). This is not a phase-exclusive or controlled comparison.
+
+This commit changes only production ScalarHash.lean plus its narrow workflow.
+It fuses the definitionally equal byte-step/mix body into the existing
+immutable data iterator, avoiding two generated per-byte dispatches. The
+ordinary full hash calls saturated Scan directly. The exported public worker
+retains every partial-application stage. Hash recurrence/modulus/raw UTF8/
+fuel-bounded outputs and immutable ownership are unchanged.
+The existing five exact equations,2730-case native/generated matrices,
+8190 partial stages,13665 generated assertions and three long cases are
+UNCHANGED; passing the previous source does not qualify this candidate.
+
+Fetch this source's existing native-first hash preflight. Require its own
+five native equations, frozen matrices, authentic294/377 and allsix native
+String/singletons, then authentic source-check/TS7.0.2 compilation. The small
+generated probe now rejects per-byte Step/Mix dispatch and a staged full-hash
+entry in addition to rejecting function-result wrappers. Only after all
+those gates pass does full compilation and unchanged controls/mixed replay
+proceed. Preserve25-minute runtime caps,2048MiB,emptyPATH andfuel4096.
+
+Final workflows remain INACTIVE. All current-source qualification is pending.
+T01F/A/B/C/D remain open (historical A scoped9c87; historical full193 C FAIL).
+Do not startT05 or merge into integration. Keep both failed mixed attempts,
+all elapsed/RSS regressions and exact source/artifact identities visible.
+
 ## Exact 5abf mixed preflight TIMEOUT; current-artifact bounded profile next
 
 Executable `5abf40506564cad00ff518600ae5992dc826510e` has terminal

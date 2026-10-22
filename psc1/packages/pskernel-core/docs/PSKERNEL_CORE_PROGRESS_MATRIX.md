@@ -1,3 +1,42 @@
+## Data-result hash iteration candidate — after834 mixed timeout
+
+Exact834 run39853314171 ended with mixed120096453413 CANCELLED at25minutes,
+interrupting public RunDag call343 in utf8-literal-left. The342 completed calls
+include914.757s in18 V1 DefEq and239.661s in3 V1 WHNF calls. The mixed singleton
+sequence passed; the complete sample and later controls did not finish. No
+assertion failure or heap exhaustion was observed. Native, complete authentic
+source checking/compilation and retained generated controls passed at834 only.
+Full trace/artifact facts are preserved in
+`evidence/2026-10-23-t01f-hash-terminal.json`. It is NOT T01F-qualified.
+
+The containing candidate replaces the String hash scan with an immutable
+cursor/hash transition and a fuel iterator returning DATA (Prod Nat Nat).
+The recursive call keeps value/initial state fixed, then applies the transition
+to the returned state. A finished cursor is a fixed point. This performs up to
+fuel transitions, including unchanged fixed-state transitions after end, while
+preserving the exact bounded-prefix hash output and curried public API.
+It targets the two remaining staged recursive-helper closures verified in834.
+No cache index/equality/ownership, kernel4096 policy or acceptance assertion changes.
+
+Two iterator lemmas plus the three frozen original-worker equations must pass
+before generated work. Native/generated2730-case raw/fuel/accumulator matrices
+and8190 staged ABI controls remain; three additional long ASCII/Unicode cases
+exercise the data iterator's stack/allocation path. None is qualified yet.
+
+The narrow workflow now first compiles the ScalarHash import closure, runs the
+generated matrix and checks that data-result iterator implementations contain
+no staged function-result wrappers. Only then does it compile the complete
+authentic kernel and execute the complete unchanged mixed sample (25minutes)
+and retained controls (10minutes). Inspect the exact containing source/run;
+do not duplicate CI or inherit834's passes. If proofs or code generation fail,
+fix that evidenced gate before another full build.
+
+Final drafts remain inactive. Reconcile the new five-equation count and long
+hash controls into both final routes before eventual activation. No T05 before
+full T01F acceptance; A remains historical9c scoped only, B/C/D remain open.
+
+---
+
 ## Exact834 generated producer and retained controls PASS; mixed pending
 
 At exact `834d267acc246b5bf6ed2d29b19d04d8b87526c4`,

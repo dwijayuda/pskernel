@@ -45,16 +45,51 @@ def stringHashWorkerBefore
               (Char.toNat char))
 
 
+theorem state_step_commutes (fuel : Nat) (value : String) (state : Prod Nat Nat) :
+    psKernelCacheStringHashStateWithFuel fuel value
+        (psKernelCacheStringHashStep value state) =
+      psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStateWithFuel fuel value state) := by
+  induction fuel with
+  | zero => rfl
+  | succ remaining ih =>
+      exact congrArg (psKernelCacheStringHashStep value) ih
+
+theorem state_fixed (fuel : Nat) (value : String) (state : Prod Nat Nat)
+    (fixed : psKernelCacheStringHashStep value state = state) :
+    psKernelCacheStringHashStateWithFuel fuel value state = state := by
+  induction fuel with
+  | zero => rfl
+  | succ remaining ih =>
+      change psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStateWithFuel remaining value state) = state
+      rw [ih]
+      exact fixed
+
 theorem scan_eq_before (fuel : Nat) (value : String) (position hash : Nat) :
     psKernelCacheStringHashScan fuel value position hash =
       stringHashWorkerBefore fuel value position hash := by
   induction fuel generalizing position hash with
   | zero => rfl
   | succ remaining ih =>
-      simp only [psKernelCacheStringHashScan, stringHashWorkerBefore]
-      split
-      · rfl
-      · exact ih _ _
+      change (psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStateWithFuel remaining value (Prod.mk position hash))).snd =
+          stringHashWorkerBefore (Nat.succ remaining) value position hash
+      rw [← state_step_commutes remaining value (Prod.mk position hash)]
+      cases finished : String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) with
+      | false =>
+          simpa [psKernelCacheStringHashScan, psKernelCacheStringHashStep,
+            stringHashWorkerBefore, finished] using
+              ih (String.Pos.Raw.byteIdx
+                (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+                (psKernelCacheMix hash
+                  (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+      | true =>
+          have fixed : psKernelCacheStringHashStep value (Prod.mk position hash) =
+              Prod.mk position hash := by
+            simp [psKernelCacheStringHashStep, finished]
+          rw [fixed, state_fixed remaining value (Prod.mk position hash) fixed]
+          simp [stringHashWorkerBefore, finished]
 
 theorem worker_eq_before (fuel : Nat) :
     psKernelCacheStringHashWorker fuel = stringHashWorkerBefore fuel := by
@@ -72,6 +107,8 @@ theorem hash_eq_before (value : String) :
 
 end PsKernelScalarHashWorkerRegression
 
+#print axioms PsKernelScalarHashWorkerRegression.state_step_commutes
+#print axioms PsKernelScalarHashWorkerRegression.state_fixed
 #print axioms PsKernelScalarHashWorkerRegression.scan_eq_before
 #print axioms PsKernelScalarHashWorkerRegression.worker_eq_before
 #print axioms PsKernelScalarHashWorkerRegression.hash_eq_before
@@ -96,4 +133,14 @@ def main : IO Unit := do
         PsKernelScalarHashWorkerRegression.stringHashWorkerBefore
           (String.utf8ByteSize value + 1) value 0 0 do
       throw (IO.userError "scalar hash public digest changed")
+  let longWords := [
+    String.ofList (List.replicate 4096 'A'),
+    String.ofList (List.replicate 1024 '😀'),
+    String.join (List.replicate 256 "Aé€😀")]
+  for value in longWords do
+    unless psKernelCacheStringHash value ==
+        PsKernelScalarHashWorkerRegression.stringHashWorkerBefore
+          (String.utf8ByteSize value + 1) value 0 0 do
+      throw (IO.userError "long scalar hash digest changed")
+  IO.println "PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3"
   IO.println ("PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=" ++ toString count ++ " strings=12")

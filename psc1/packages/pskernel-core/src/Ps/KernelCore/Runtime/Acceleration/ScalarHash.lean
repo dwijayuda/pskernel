@@ -16,24 +16,37 @@ def psKernelCacheMix
       right)
     psKernelCacheHashModulus
 
-/- Explicit-argument scan for the measured generated hash hotspot.
-The public staged worker below retains its original curried ABI. -/
+/- Data-result iteration keeps the recursor motive out of function space.
+The cursor/hash transition is immutable and preserves a finished cursor. -/
+def psKernelCacheStringHashStep
+    (value : String)
+    (state : Prod Nat Nat) : Prod Nat Nat :=
+  let position := Prod.fst state;
+  if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+    state
+  else
+    let char := String.Internal.get value (String.Pos.Raw.mk position);
+    let next := String.Pos.Raw.byteIdx
+      (String.Pos.Raw.next value (String.Pos.Raw.mk position));
+    Prod.mk next (psKernelCacheMix (Prod.snd state) (Char.toNat char))
+
+def psKernelCacheStringHashStateWithFuel
+    (fuel : Nat)
+    (value : String)
+    (initial : Prod Nat Nat) : Prod Nat Nat :=
+  match fuel with
+  | Nat.zero => initial
+  | Nat.succ remaining =>
+      psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStateWithFuel remaining value initial)
+
 def psKernelCacheStringHashScan
     (fuel : Nat)
     (value : String)
     (position : Nat)
     (hash : Nat) : Nat :=
-  match fuel with
-  | Nat.zero => hash
-  | Nat.succ remaining =>
-      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
-        hash
-      else
-        let char := String.Internal.get value (String.Pos.Raw.mk position);
-        let next := String.Pos.Raw.byteIdx
-          (String.Pos.Raw.next value (String.Pos.Raw.mk position));
-        psKernelCacheStringHashScan remaining value next
-          (psKernelCacheMix hash (Char.toNat char))
+  Prod.snd
+    (psKernelCacheStringHashStateWithFuel fuel value (Prod.mk position hash))
 
 /- Preserve every public partial-application stage and exact hash value. -/
 def psKernelCacheStringHashWorker

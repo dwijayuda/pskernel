@@ -41,4 +41,8 @@ for(const value of words){
    }
  must(full(value)===reference(v,v.size+1n,0n,0n),"unchanged-public-digest");
 }
+for(const value of ["A".repeat(4096),"😀".repeat(1024),"Aé€😀".repeat(256)]){
+ const v=view(value);must(full(value)===reference(v,v.size+1n,0n,0n),"long-public-digest");
+}
+console.log("PSC1_SCALAR_HASH_LONG_JS: PASS cases=3");
 console.log("PSC1_SCALAR_HASH_WORKER_JS: PASS "+JSON.stringify({cases,strings:words.length,stages,assertions,modulus:"65521",algorithmChanged:false}));

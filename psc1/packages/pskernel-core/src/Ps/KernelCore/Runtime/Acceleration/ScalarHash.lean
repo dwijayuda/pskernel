@@ -16,45 +16,35 @@ def psKernelCacheMix
       right)
     psKernelCacheHashModulus
 
+/- Explicit-argument scan for the measured generated hash hotspot.
+The public staged worker below retains its original curried ABI. -/
+def psKernelCacheStringHashScan
+    (fuel : Nat)
+    (value : String)
+    (position : Nat)
+    (hash : Nat) : Nat :=
+  match fuel with
+  | Nat.zero => hash
+  | Nat.succ remaining =>
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+        hash
+      else
+        let char := String.Internal.get value (String.Pos.Raw.mk position);
+        let next := String.Pos.Raw.byteIdx
+          (String.Pos.Raw.next value (String.Pos.Raw.mk position));
+        psKernelCacheStringHashScan remaining value next
+          (psKernelCacheMix hash (Char.toNat char))
+
+/- Preserve every public partial-application stage and exact hash value. -/
 def psKernelCacheStringHashWorker
     (fuel : Nat) :
     String -> Nat -> Nat -> Nat :=
   match fuel with
   | Nat.zero =>
-      fun
-        (_value : String)
-        (_position : Nat)
-        (hash : Nat) =>
-        hash
+      fun (_value : String) (_position : Nat) (hash : Nat) => hash
   | Nat.succ remaining =>
-      let smaller :
-          String -> Nat -> Nat -> Nat :=
-        psKernelCacheStringHashWorker remaining;
-      fun
-        (value : String)
-        (position : Nat)
-        (hash : Nat) =>
-        if
-            String.Pos.Raw.atEnd
-              value
-              (String.Pos.Raw.mk position) then
-          hash
-        else
-          let char :=
-            String.Internal.get
-              value
-              (String.Pos.Raw.mk position);
-          let next :=
-            String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next
-                value
-                (String.Pos.Raw.mk position));
-          smaller
-            value
-            next
-            (psKernelCacheMix
-              hash
-              (Char.toNat char))
+      fun (value : String) (position : Nat) (hash : Nat) =>
+        psKernelCacheStringHashScan (Nat.succ remaining) value position hash
 
 def psKernelCacheStringHash
     (value : String) :

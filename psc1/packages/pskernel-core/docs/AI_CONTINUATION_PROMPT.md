@@ -1,3 +1,43 @@
+## T01F scalar hash scan candidate — qualification pending
+
+Bounded V1 profile at `7e29c6c795e64a488a51edcc940c6916d4a1bafd`
+[run39852099370](https://github.com/dwijayuda/pskernel/actions/runs/39852099370)
+ended with timeout124 after180.03s/566044KiB. The complete294-request admission
+and377-record comparison finished, then the isolated UTF8 literal WHNF remained
+active at the deadline. Profile processing and artifact upload passed. The
+153613-tick sample spans admission and partial WHNF; it is not a completed
+operation benchmark. Exact generated lines8012–8024 map the prominent scalar
+hash worker closures and repeated staged dispatch. GC accounts for15.6% of
+total sample ticks. Full authenticated artifact12458271030 and its digest are
+recorded in `evidence/2026-10-23-t01f-v1-whnf-profile.json`.
+
+This containing candidate adds an explicit-argument String hash scan while
+retaining the original curried worker API, fuel countdown, Raw.atEnd/get/next,
+character codes, mix recurrence, initial accumulator and exact hash outputs.
+It changes no index representation, equality authorization or cache ownership.
+The native frozen-source proof/regression file compares all inputs by three
+local equations plus2730 finite raw-position/fuel/accumulator cases. Its
+generated counterpart also checks all three public partial-application stages
+against an independently built UTF8 boundary map. These tests/proofs have not
+yet passed at this entry; no equivalence or speedup result is claimed.
+
+The narrow preflight workflow is `.github/workflows/psc1-pskernel-t01f-hash.yml`.
+It runs native proofs and all existing native String/DAG/session controls first,
+then freshly checks and compiles the complete authentic kernel. Separate
+runtime-only jobs run the retained controls/new hash matrix (10minutes) and the
+complete unchanged mixed String sample (25minutes). It authenticates the same
+source/run/attempt kernel, fixture and harness bytes. All original negative
+controls and fuel4096/2048MiB/emptyPATH remain. Inspect existing runs for the
+exact containing SHA before retrying; do not duplicate builds.
+
+The final six-case workflows remain saved drafts. If this preflight passes,
+reconcile the new hash proof/native/generated controls into BOTH final routes,
+then activate and execute one coherent final qualification. T01F remains open;
+do not start T05. Integration remains123c411 and historical complete scoped A
+remains9c87. B/C/D and the historical193 failures remain open.
+
+---
+
 ## T01F mixed diagnostic timed out — V1 conversion/reduction bottleneck
 
 Observed 2026-10-23 WIB. Exact harness `9248c474d705ffaa4a1aba8a0aa7a4ce54e4a303`

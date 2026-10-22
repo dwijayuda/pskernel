@@ -1,0 +1,37 @@
+{
+  "schema": "psc1-t01f-v1-whnf-profile-v1",
+  "sourceSha": "7e29c6c795e64a488a51edcc940c6916d4a1bafd",
+  "generatedSourceSha": "19fb4b0b8f52808d6a31705185018d6e60836d8e",
+  "runId": 39852099370,
+  "jobId": 120080694992,
+  "conclusion": "failure",
+  "diagnosticExit": 124,
+  "wallSeconds": 180.03,
+  "peakRssKiB": 566044,
+  "qualification": false,
+  "completedRequests": 294,
+  "completedMetadata": 377,
+  "admissionMs": 59864.642726,
+  "metadataMs": 1836.43976,
+  "interruptedApi": "psKernelV1Whnf",
+  "interruptedStage": "profile:utf8-literal-left",
+  "artifact": {
+    "id": 12458271030,
+    "bytes": 6725004,
+    "zipSha256": "12d3697f029de4b672a17fe628b1771df3dfd6a4828dd1a6963c1da387aecd11"
+  },
+  "profile": {
+    "ticks": 153613,
+    "unaccountedTicks": 418,
+    "gcTicks": 23942,
+    "gcTotalPercent": 15.6,
+    "mappedGeneratedLines": {
+      "worker": 8012,
+      "recursivePrepass": 8015,
+      "threeStagedClosures": 8016,
+      "recurDispatch": 8020
+    },
+    "inference": "The bottom-up sample and exact generated code map identify scalar hash worker closure construction/staged dispatch as a candidate hotspot. Sampling spans admission plus partial WHNF, not a complete or phase-exclusive operation. No speedup established."
+  },
+  "next": "Prove exact frozen worker equivalence and measure explicit-argument scan; keep hash outputs, resource policies and full qualification runner unchanged."
+}

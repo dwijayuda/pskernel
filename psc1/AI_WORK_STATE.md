@@ -250,3 +250,22 @@ Native count/source proofs and all focused tests pass for235d8c6d. Actual G2/G3
 remain unrun for that attempt. Keep the corpus-refusal receipt and the earlier
 G2 timeout/profile. Request qualification again with the original exact corpus,
 unchanged process/resource limits and fresh complete companion CI.
+
+## Actual G2 retry after corpus repair (2026-10-23)
+
+Run39855739415/job120093348319 atbc19587d passes the exact frozen ten-case G1
+corpus. G1 service7ff9024a... /86 modules is retained. G2-self then times out
+240272ms before admission/publication; G3 is not run. The exact replay times out
+240440ms,203883 samples,46935721 raw-log bytes, artifact12459313965.
+Read-only profile inspection run39857658719/job120099956772 preserves caller
+attribution. See PSC1_G2_CURSOR_COUNT_FAILURE_QUALIFICATION_2026-10-23.json.
+
+Earlier token/span leading paths are absent from the new leading excerpt.
+Lexer list length, empty-assignment meta-expression scans and level-expression
+rebuilding now take notable caller samples. Implement an accumulator lexer
+length and exact-result empty-context fast paths. Retain the original scan/walk
+as nonempty fallbacks. Native all-input equivalence lemmas plus unresolved-meta,
+active term-assignment and independent level-assignment cases are mandatory.
+No unification/admission rule, fuel number, deadline, heap/stack setting, source
+refusal or manifest condition changes. Actual G2/G3 and fresh complete CI remain
+required before qualification; the original G2 defect stays open.

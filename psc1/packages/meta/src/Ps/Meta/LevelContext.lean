@@ -207,7 +207,7 @@ def psLevelInstantiateList
         (psLevelInstantiate context level)
         (psLevelInstantiateList context rest)
 
-def psLevelInstantiateExpr
+def psLevelInstantiateExprWalk
     (context : PsLevelMetaContext)
     (expr : PsExpr) : PsExpr :=
   match expr with
@@ -216,29 +216,35 @@ def psLevelInstantiateExpr
       PsExpr.constE name (psLevelInstantiateList context levels)
   | .app fn arg =>
       PsExpr.app
-        (psLevelInstantiateExpr context fn)
-        (psLevelInstantiateExpr context arg)
+        (psLevelInstantiateExprWalk context fn)
+        (psLevelInstantiateExprWalk context arg)
   | .lam name type body binder =>
       PsExpr.lam
         name
-        (psLevelInstantiateExpr context type)
-        (psLevelInstantiateExpr context body)
+        (psLevelInstantiateExprWalk context type)
+        (psLevelInstantiateExprWalk context body)
         binder
   | .forallE name type body binder =>
       PsExpr.forallE
         name
-        (psLevelInstantiateExpr context type)
-        (psLevelInstantiateExpr context body)
+        (psLevelInstantiateExprWalk context type)
+        (psLevelInstantiateExprWalk context body)
         binder
   | .letE name type value body =>
       PsExpr.letE
         name
-        (psLevelInstantiateExpr context type)
-        (psLevelInstantiateExpr context value)
-        (psLevelInstantiateExpr context body)
+        (psLevelInstantiateExprWalk context type)
+        (psLevelInstantiateExprWalk context value)
+        (psLevelInstantiateExprWalk context body)
   | .proj typeName index value =>
-      PsExpr.proj typeName index (psLevelInstantiateExpr context value)
+      PsExpr.proj typeName index (psLevelInstantiateExprWalk context value)
   | _ => expr
+
+-- Empty level substitution leaves the entire immutable expression exactly unchanged.
+def psLevelInstantiateExpr (context : PsLevelMetaContext) (expr : PsExpr) : PsExpr :=
+  match context.assignments with
+  | List.nil => expr
+  | List.cons _ _ => psLevelInstantiateExprWalk context expr
 
 def psLevelHasMVar
     (level : PsLevel) : Bool :=

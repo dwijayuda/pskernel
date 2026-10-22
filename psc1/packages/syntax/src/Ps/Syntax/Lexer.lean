@@ -32,11 +32,14 @@ def psLexAdvanceTwo
   psLexAdvanceChar (psLexAdvanceChar position first) second
 
 
-def psLexListLength {α : Type} (xs : List α) : Nat :=
+def psLexListLengthAcc {α : Type} (xs : List α) : Nat -> Nat :=
   match xs with
-  | List.nil => 0
-  | List.cons _ tail =>
-      Nat.add 1 (psLexListLength tail)
+  | List.nil => fun (acc : Nat) => acc
+  | List.cons _ rest =>
+      fun (acc : Nat) => psLexListLengthAcc rest (Nat.succ acc)
+
+def psLexListLength {α : Type} (xs : List α) : Nat :=
+  psLexListLengthAcc xs 0
 
 def psLexCharEq (left : Char) (right : Char) : Bool :=
   Nat.beq (Char.toNat left) (Char.toNat right)

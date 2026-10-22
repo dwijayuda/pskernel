@@ -196,24 +196,30 @@ def psMetaInstantiateStep
         (psMetaInstantiateStep context value)
   | _ => expr
 
-def psMetaExprHasAssignedVar (context : PsMetaContext) (expr : PsExpr) : Bool :=
+def psMetaExprHasAssignedVarScan (context : PsMetaContext) (expr : PsExpr) : Bool :=
   match expr with
   | PsExpr.mvar id =>
       match psMetaFindAssignment context id with
       | Option.none => false
       | Option.some _ => true
   | PsExpr.app fn arg =>
-      if psMetaExprHasAssignedVar context fn then true else psMetaExprHasAssignedVar context arg
+      if psMetaExprHasAssignedVarScan context fn then true else psMetaExprHasAssignedVarScan context arg
   | PsExpr.lam _ type body _ =>
-      if psMetaExprHasAssignedVar context type then true else psMetaExprHasAssignedVar context body
+      if psMetaExprHasAssignedVarScan context type then true else psMetaExprHasAssignedVarScan context body
   | PsExpr.forallE _ type body _ =>
-      if psMetaExprHasAssignedVar context type then true else psMetaExprHasAssignedVar context body
+      if psMetaExprHasAssignedVarScan context type then true else psMetaExprHasAssignedVarScan context body
   | PsExpr.letE _ type value body =>
-      if psMetaExprHasAssignedVar context type then true
-      else if psMetaExprHasAssignedVar context value then true
-      else psMetaExprHasAssignedVar context body
-  | PsExpr.proj _ _ value => psMetaExprHasAssignedVar context value
+      if psMetaExprHasAssignedVarScan context type then true
+      else if psMetaExprHasAssignedVarScan context value then true
+      else psMetaExprHasAssignedVarScan context body
+  | PsExpr.proj _ _ value => psMetaExprHasAssignedVarScan context value
   | _ => false
+
+-- No expression node can refer to an assigned metavariable in an assignment-free context.
+def psMetaExprHasAssignedVar (context : PsMetaContext) (expr : PsExpr) : Bool :=
+  match context.assignments with
+  | List.nil => false
+  | List.cons _ _ => psMetaExprHasAssignedVarScan context expr
 
 def psMetaInstantiateRounds
     (context : PsMetaContext)

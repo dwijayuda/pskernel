@@ -312,7 +312,72 @@ private theorem cursorAdvance_count (cursor : PsTokenCursor) (read : PsTokenRead
       simp at coherent
       simp [coherent]
 
+-- These all-input source equalities justify the exact-result fast paths.
+private theorem lexLengthAcc_correct {α : Type} (xs : List α) (acc : Nat) :
+    psLexListLengthAcc xs acc = acc + xs.length := by
+  induction xs generalizing acc with
+  | nil => rfl
+  | cons head rest ih =>
+    simpa [psLexListLengthAcc, Nat.succ_add, Nat.add_succ] using ih (Nat.succ acc)
+
+private theorem lexLength_correct {α : Type} (xs : List α) :
+    psLexListLength xs = xs.length := by
+  simpa [psLexListLength] using lexLengthAcc_correct xs 0
+
+private theorem assignedScan_empty (context : PsMetaContext)
+    (empty : context.assignments = []) (expr : PsExpr) :
+    psMetaExprHasAssignedVarScan context expr = false := by
+  induction expr <;> simp_all [psMetaExprHasAssignedVarScan,
+    psMetaFindAssignment, psMetaFindAssignmentInList]
+
+private theorem assignedGuard_exact (context : PsMetaContext) (expr : PsExpr) :
+    psMetaExprHasAssignedVar context expr = psMetaExprHasAssignedVarScan context expr := by
+  cases empty : context.assignments with
+  | nil => simp [psMetaExprHasAssignedVar, empty, assignedScan_empty context empty expr]
+  | cons head rest => simp [psMetaExprHasAssignedVar, empty]
+
+private theorem levelSubstitution_empty (context : PsLevelMetaContext)
+    (empty : context.assignments = []) (level : PsLevel) :
+    psLevelInstantiate context level = level := by
+  cases level <;> simp [psLevelInstantiate, psLevelAssignmentCount, empty,
+    psLevelInstantiateWithFuel, psLevelFindAssignment, psLevelFindAssignmentInList]
+
+private theorem levelListSubstitution_empty (context : PsLevelMetaContext)
+    (empty : context.assignments = []) (levels : List PsLevel) :
+    psLevelInstantiateList context levels = levels := by
+  induction levels with
+  | nil => rfl
+  | cons level rest ih =>
+    simp [psLevelInstantiateList, levelSubstitution_empty context empty, ih]
+
+private theorem levelExprWalk_empty (context : PsLevelMetaContext)
+    (empty : context.assignments = []) (expr : PsExpr) :
+    psLevelInstantiateExprWalk context expr = expr := by
+  induction expr <;> simp_all [psLevelInstantiateExprWalk,
+    levelSubstitution_empty context empty, levelListSubstitution_empty context empty]
+
+private theorem levelExprGuard_exact (context : PsLevelMetaContext) (expr : PsExpr) :
+    psLevelInstantiateExpr context expr = psLevelInstantiateExprWalk context expr := by
+  cases empty : context.assignments with
+  | nil => simp [psLevelInstantiateExpr, empty, levelExprWalk_empty context empty expr]
+  | cons head rest => simp [psLevelInstantiateExpr, empty]
+
 def main : IO Unit := do
+  if psMetaExprHasAssignedVar psMetaEmpty (.mvar 99) then
+    fail "empty assignments" "unassigned metavariable counted as assigned"
+  if !psExprHasUnresolvedMeta (psMetaInstantiate psMetaEmpty (.mvar 99)) then
+    fail "empty assignments" "unresolved metavariable was hidden"
+  let assigned : PsMetaContext :=
+    { psMetaEmpty with assignments := [{ id := 9, value := .lit (.natural 42) }] }
+  if !psMetaExprHasAssignedVar assigned (.mvar 9) then
+    fail "nonempty assignments" "assigned metavariable missed"
+  let levelAssigned : PsLevelMetaContext :=
+    { psLevelMetaEmpty with assignments := [{ id := 0, value := .succ .zero }] }
+  let mixed : PsMetaContext := { psMetaEmpty with levels := levelAssigned }
+  match psMetaInstantiate mixed (.sortE (.mvar 0)) with
+  | .sortE (.succ .zero) => pure ()
+  | _ => fail "independent level assignments" "empty term context skipped level substitution"
+  IO.println "PSC1_DATA_PASS: empty shortcuts preserve unresolved and active term/level substitutions"
   for source in ["", "Alpha.beta.gamma", "α.β.γ rest", "name := 7",
       "namespace Long\ndef x : Nat := 1\nend Long\n"] do
     let tokens ← match psLex source with

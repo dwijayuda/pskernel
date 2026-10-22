@@ -1,7 +1,8 @@
 {
   "schema": "psc1-readonly-profile-request/1",
-  "runId": 39858945154,
-  "testedCommit": "4cc36fc8aa3ee707a669973b5c65b8474bf5be69",
-  "requestSha256": "27ef703343ca90dc29ba97cdbfb5848d8a405d7b97fb83259dc723b9793ce8a2",
-  "readOnly": true
+  "runId": 39861084058,
+  "testedCommit": "7de601f57ccc9e5dca2ab717fc726efab02acd8e",
+  "requestSha256": "2d2ba2eb8e684cb745bcac2f9f96c07d565afec51b754c19e810917d68c76385",
+  "readOnly": true,
+  "timeWindows": 4
 }

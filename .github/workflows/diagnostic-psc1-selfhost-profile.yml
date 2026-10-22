@@ -24,8 +24,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: 39858945154
-          name: psc1-manual-selfhost-4cc36fc8aa3ee707a669973b5c65b8474bf5be69-attempt-1
+          run-id: 39861084058
+          name: psc1-manual-selfhost-7de601f57ccc9e5dca2ab717fc726efab02acd8e-attempt-1
           path: retained
       - name: Inspect immutable profile summary and caller costs
         run: |
@@ -33,11 +33,12 @@ jobs:
           import assert from 'node:assert/strict';
           import fs from 'node:fs';
           import crypto from 'node:crypto';
+          import {spawnSync} from 'node:child_process';
           const root='retained/generated-compiler/';
           const receipt=JSON.parse(fs.readFileSync(root+'selfhost-failure-cpu-profile/receipt.json','utf8'));
-          assert.equal(receipt.testedCommit,'4cc36fc8aa3ee707a669973b5c65b8474bf5be69');
+          assert.equal(receipt.testedCommit,'7de601f57ccc9e5dca2ab717fc726efab02acd8e');
           assert.equal(receipt.requestId,'G2-self');
-          assert.equal(receipt.requestSha256,'27ef703343ca90dc29ba97cdbfb5848d8a405d7b97fb83259dc723b9793ce8a2');
+          assert.equal(receipt.requestSha256,'2d2ba2eb8e684cb745bcac2f9f96c07d565afec51b754c19e810917d68c76385');
           const source=fs.readFileSync(root+'G1.mjs');
           assert.equal(crypto.createHash('sha256').update(source).digest('hex'),receipt.serviceSha256);
           const text=fs.readFileSync(root+'selfhost-failure-cpu-profile/profile-0.txt','utf8');
@@ -48,5 +49,34 @@ jobs:
           const lines=source.toString('utf8').split('\n');
           const selected=[...new Set([...text.slice(text.indexOf('[Bottom up')).split('\n').slice(0,280).join('\n').matchAll(/G1\.mjs:(\d+):/g)].map(m=>Number(m[1])))].slice(0,16);
           for(const n of selected)console.log('PSC1_RETAINED_GENERATED_LINE: '+n+' '+lines[n-1].slice(0,9000));
+
+          const rawLog=root+'selfhost-failure-cpu-profile/'+receipt.logs[0].name;
+          assert.equal(fs.statSync(rawLog).size,receipt.logs[0].bytes);
+          const rawLines=fs.readFileSync(rawLog,'utf8').split('\n');
+          const ticks=rawLines.filter(line=>line.startsWith('tick,'));
+          const timestamps=ticks.map(line=>Number(line.split(',')[2]));
+          assert.ok(timestamps.length&&timestamps.every(Number.isFinite));
+          const first=Math.min(...timestamps.slice(0,100));
+          const last=Math.max(...timestamps.slice(-100));
+          console.log('PSC1_RETAINED_TICK_CLOCK: '+JSON.stringify({first,last,ticks:ticks.length,firstTick:ticks[0],lastTick:ticks.at(-1)}));
+          for(let quarter=0;quarter<4;quarter++){
+            const low=first+(last-first)*quarter/4,high=first+(last-first)*(quarter+1)/4;
+            const selected=rawLines.filter(line=>{
+              if(!line.startsWith('tick,'))return true;
+              const timestamp=Number(line.split(',')[2]);
+              return timestamp>=low&&(quarter===3?timestamp<=high:timestamp<high);
+            });
+            const filtered='profile-window-'+quarter+'.log';
+            fs.writeFileSync(filtered,selected.join('\n'));
+            const processed=spawnSync(process.execPath,['--prof-process',filtered],
+              {encoding:'utf8',timeout:45000,maxBuffer:20*1024*1024});
+            assert.equal(processed.status,0,processed.stderr);
+            const windowText=processed.stdout;
+            for(const label of ['[JavaScript]','[Summary]','[Bottom up']){
+              const offset=windowText.indexOf(label);assert.ok(offset>=0,label);
+              console.log('PSC1_RETAINED_TIME_WINDOW: '+JSON.stringify({quarter:quarter+1,low,high,section:label})+'\n'+windowText.slice(offset).split('\n').slice(0,label==='[Summary]'?7:label==='[JavaScript]'?24:95).join('\n'));
+            }
+          }
+
           console.log('PSC1_RETAINED_PROFILE_RECEIPT: '+JSON.stringify(receipt));
           JS

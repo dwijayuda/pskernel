@@ -1,3 +1,54 @@
+## T01F authentic String — measured ownership bottleneck and candidate worker
+
+Updated: 2026-10-22 UTC. Work branch:
+`work/psc1-pskernel-t01f-string-20261022`.
+Integration remains `123c41197950b6761be965fd21c57142ee2b0d1c`;
+the historical scoped-qualified executable remains
+`9c87f631758862285273ddb0ea0a3987c671022e`.
+**This containing implementation candidate is not qualified.**
+
+The actual Lean4.35 closure now independently admits294 requests into377
+declarations from an empty session, compares every metadata record and checks
+six empty/ASCII/UTF8 samples. Native source90917599acbc8fce257361f36a032dd86defa9da
+passed run39823486422/job119980543904, including official, V1, direct DAG and
+separate/reused public queries and malformed definition/expression controls.
+The earlier minimal String receipt remains separate.
+
+Historical generated replay at harness0b05e5beb04e30323bb790f7b0038e81ebb90f96
+(run39821217936/job119972688309) was cancelled at the25-minute job limit:
+empty, ASCII and two-byte cases including their per-sample negatives passed;
+the remaining samples and whole-matrix PASS did not complete. No assertion
+failure was logged. This used the authenticated9c87 bundle and does not qualify
+0b05 or any newer source.
+
+Bounded diagnostic675adacb6820aea2e5c4003a9948958877aae34f,
+run39825997073/job119989324609, propagated timeout124 at180seconds.
+All294 genuine admissions plus the corrupt-definition rejection completed;
+metadata377 took1.345seconds. Completed trace calls include owner derivation
+7.784seconds,12 public calls totalling101.039seconds (8.004–8.869each),
+and14 full checked decodes totalling10.468seconds. The profile shows generated
+declaration-lookup closures, name comparisons and generator/WeakMap overhead.
+PeakRSS747448KiB. Artifact12446507718, ZIP SHA256
+44f2b9ee71ac29e231f0322905f11f83ff9709c73b60f210c95903ab759e552f.
+These are diagnostic measurements, not performance acceptance or qualification.
+
+The candidate introduces an explicit-argument DeclarationRefFind worker while
+retaining the curried exported ABI, immutable list, exact NameEq and first-match
+result. The previous scan already deferred tail traversal; this change targets
+per-visited-entry generated closure overhead, not eager import or a new index.
+A copied exact pre-change specification and local equivalence theorems are
+added to PsKernelCacheScopeProofs. No fuel, cache authorization, owner identity,
+declaration admission, field semantics or fallback policy changes.
+
+Run the focused native and fresh-source generated preflight first. The complete
+unchanged authentic String matrix must pass. Both final-source generated routes,
+all prior native/official/proof/provider controls, complete measurements and
+unchanged full193 Arena remain pending. A speedup is not established until
+comparable measurements complete. Full-kernel DirectJS remains unsupported;
+A/B/C/D are not advanced by this candidate.
+
+---
+
 ## T01F authentic String implementation — focused Linux preflight
 
 Updated: 2026-10-22. Integration base is exact

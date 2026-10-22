@@ -1,12 +1,6 @@
 name: PSC1 T01F generated operation diagnostic
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - work/psc1-pskernel-t01f-string-20261022
-    paths:
-      - '.github/workflows/psc1-pskernel-t01f-profile.yml'
-      - 'psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs'
 permissions:
   contents: read
   actions: read

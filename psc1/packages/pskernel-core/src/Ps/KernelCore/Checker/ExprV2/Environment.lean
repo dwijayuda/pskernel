@@ -45,20 +45,28 @@ structure PsKernelExprV2DeclarationRef where
   deltaValue : Option Nat
   kind : PsKernelExprV2DeclarationRefKind
 
+/- Keep the immutable declaration list and its exact first-match semantics.
+   The internal scan receives the queried name explicitly, avoiding a new
+   curried argument closure for each visited owner in generated code. -/
+def psKernelExprV2DeclarationRefFindWorker
+    (declarations : List PsKernelExprV2DeclarationRef)
+    (name : PsKernelName) : Option PsKernelExprV2DeclarationRef :=
+  match declarations with
+  | List.nil => Option.none
+  | List.cons first rest =>
+      if psKernelNameEq first.name name then Option.some first
+      else psKernelExprV2DeclarationRefFindWorker rest name
+
+/- Retain the original curried public ABI, including partial applications. -/
 def psKernelExprV2DeclarationRefFind
     (declarations : List PsKernelExprV2DeclarationRef) :
     PsKernelName -> Option PsKernelExprV2DeclarationRef :=
   match declarations with
   | List.nil =>
       fun (_name : PsKernelName) => Option.none
-  | List.cons first rest =>
-      let smaller :=
-        fun (nextName : PsKernelName) =>
-          let recur := psKernelExprV2DeclarationRefFind rest;
-          recur nextName;
+  | List.cons _ _ =>
       fun (name : PsKernelName) =>
-        if psKernelNameEq first.name name then Option.some first
-        else smaller name
+        psKernelExprV2DeclarationRefFindWorker declarations name
 
 def psKernelExprV2QuotKindEq
     (left right : PsKernelQuotKind) : Bool :=

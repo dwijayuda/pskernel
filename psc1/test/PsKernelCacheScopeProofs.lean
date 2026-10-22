@@ -705,3 +705,54 @@ end PsKernelCacheScopeProofs
 #print axioms PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches
 #print axioms PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks
 #print axioms PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks
+
+namespace PsKernelCacheScopeProofs
+
+/- Exact pre-change recursive lookup specification. No owner representation,
+   equality test, candidate order or result fields are changed by the worker. -/
+def psKernelExprV2DeclarationRefFindBefore
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    PsKernelName -> Option PsKernelExprV2DeclarationRef :=
+  match declarations with
+  | List.nil =>
+      fun (_name : PsKernelName) => Option.none
+  | List.cons first rest =>
+      let smaller :=
+        fun (nextName : PsKernelName) =>
+          let recur := psKernelExprV2DeclarationRefFindBefore rest;
+          recur nextName;
+      fun (name : PsKernelName) =>
+        if psKernelNameEq first.name name then Option.some first
+        else smaller name
+
+
+theorem psKernelExprV2DeclarationRefFindWorker_eq_before
+    (declarations : List PsKernelExprV2DeclarationRef) (name : PsKernelName) :
+    psKernelExprV2DeclarationRefFindWorker declarations name =
+      psKernelExprV2DeclarationRefFindBefore declarations name := by
+  induction declarations with
+  | nil => rfl
+  | cons first rest ih =>
+      cases matched : psKernelNameEq first.name name with
+      | false =>
+          simpa [psKernelExprV2DeclarationRefFindWorker,
+            psKernelExprV2DeclarationRefFindBefore, matched] using ih
+      | true =>
+          simp [psKernelExprV2DeclarationRefFindWorker,
+            psKernelExprV2DeclarationRefFindBefore, matched]
+
+theorem psKernelExprV2DeclarationRefFind_eq_before
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    psKernelExprV2DeclarationRefFind declarations =
+      psKernelExprV2DeclarationRefFindBefore declarations := by
+  funext name
+  cases declarations with
+  | nil => rfl
+  | cons first rest =>
+      exact psKernelExprV2DeclarationRefFindWorker_eq_before
+        (List.cons first rest) name
+
+end PsKernelCacheScopeProofs
+
+#print axioms PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before
+#print axioms PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before

@@ -95,20 +95,119 @@ private structure Imported where
   session : PsKernelKernelSession
   requests : Nat := 0
   roots : List Lean.Name := []
+  inputs : List PsKernelDeclarationRequest := []
 
 private def info (source : Lean.Environment) (n : Lean.Name) : IO Lean.ConstantInfo := do
   match source.find? n with
   | some value => pure value
   | none => throw (IO.userError ("T01F source declaration missing: " ++ toString n))
 
+
+/- The source metadata below is an untrusted comparison target only. No caller
+   invokes a low-level environment insertion with it. -/
+private def referenceQuot : Lean.QuotKind → PsKernelQuotKind
+  | .type => .typeQ | .ctor => .ctorQ | .lift => .liftQ | .ind => .indQ
+
+private def referenceInfo (original : Lean.ConstantInfo) : PsKernelConstantInfo :=
+  match original with
+  | .axiomInfo value => .axiomInfo { base := base original, isUnsafe := value.isUnsafe }
+  | .defnInfo value => .defnInfo {
+      base := base original, value := expr value.value,
+      hints := hints value.hints, safety := safety value.safety }
+  | .thmInfo value => .thmInfo { base := base original, value := expr value.value }
+  | .opaqueInfo value => .opaqueInfo {
+      base := base original, value := expr value.value, isUnsafe := value.isUnsafe }
+  | .inductInfo value => .inductInfo {
+      base := base original, numParams := value.numParams, numIndices := value.numIndices,
+      all := value.all.map name, ctors := value.ctors.map name, numNested := value.numNested,
+      isRec := value.isRec, isReflexive := value.isReflexive, isUnsafe := value.isUnsafe }
+  | .ctorInfo value => .ctorInfo {
+      base := base original, induct := name value.induct, cidx := value.cidx,
+      numParams := value.numParams, numFields := value.numFields, isUnsafe := value.isUnsafe }
+  | .recInfo value => .recInfo {
+      base := base original, all := value.all.map name,
+      numParams := value.numParams, numIndices := value.numIndices,
+      numMotives := value.numMotives, numMinors := value.numMinors,
+      rules := value.rules.map (fun rule =>
+        { ctor := name rule.ctor, nFields := rule.nfields, rhs := expr rule.rhs }),
+      k := value.k, isUnsafe := value.isUnsafe }
+  | .quotInfo value => .quotInfo { base := base original, kind := referenceQuot value.kind }
+
+private def sameHints : PsKernelReducibilityHints → PsKernelReducibilityHints → Bool
+  | .abbrevHint, .abbrevHint | .opaqueHint, .opaqueHint => true
+  | .regular a, .regular b => a == b
+  | _, _ => false
+
+private def sameSafety : PsKernelDefinitionSafety → PsKernelDefinitionSafety → Bool
+  | .safe, .safe | .unsafeDef, .unsafeDef | .partialDef, .partialDef => true
+  | _, _ => false
+
+private def sameQuot : PsKernelQuotKind → PsKernelQuotKind → Bool
+  | .typeQ, .typeQ | .ctorQ, .ctorQ | .liftQ, .liftQ | .indQ, .indQ => true
+  | _, _ => false
+
+private def sameRules (eqExpr : PsKernelExpr → PsKernelExpr → Bool) :
+    List PsKernelRecursorRule → List PsKernelRecursorRule → Bool
+  | [], [] => true
+  | a :: restA, b :: restB =>
+      psKernelNameEq a.ctor b.ctor && a.nFields == b.nFields &&
+      eqExpr a.rhs b.rhs && sameRules eqExpr restA restB
+  | _, _ => false
+
+private def sameInfo (eqExpr : PsKernelExpr → PsKernelExpr → Bool)
+    (left right : PsKernelConstantInfo) : Bool :=
+  let a := psKernelConstantInfoBase left
+  let b := psKernelConstantInfoBase right
+  psKernelNameEq a.name b.name && psKernelNameListsEq a.levelParams b.levelParams &&
+  eqExpr a.type b.type &&
+  match left, right with
+  | .axiomInfo a, .axiomInfo b => a.isUnsafe == b.isUnsafe
+  | .defnInfo a, .defnInfo b =>
+      eqExpr a.value b.value && sameHints a.hints b.hints && sameSafety a.safety b.safety
+  | .thmInfo a, .thmInfo b => eqExpr a.value b.value
+  | .opaqueInfo a, .opaqueInfo b => eqExpr a.value b.value && a.isUnsafe == b.isUnsafe
+  | .inductInfo a, .inductInfo b =>
+      a.numParams == b.numParams && a.numIndices == b.numIndices &&
+      psKernelNameListsEq a.all b.all && psKernelNameListsEq a.ctors b.ctors &&
+      a.numNested == b.numNested && a.isRec == b.isRec &&
+      a.isReflexive == b.isReflexive && a.isUnsafe == b.isUnsafe
+  | .ctorInfo a, .ctorInfo b =>
+      psKernelNameEq a.induct b.induct && a.cidx == b.cidx &&
+      a.numParams == b.numParams && a.numFields == b.numFields && a.isUnsafe == b.isUnsafe
+  | .recInfo a, .recInfo b =>
+      psKernelNameListsEq a.all b.all && a.numParams == b.numParams &&
+      a.numIndices == b.numIndices && a.numMotives == b.numMotives &&
+      a.numMinors == b.numMinors && sameRules eqExpr a.rules b.rules &&
+      a.k == b.k && a.isUnsafe == b.isUnsafe
+  | .quotInfo a, .quotInfo b => sameQuot a.kind b.kind
+  | _, _ => false
+
+private def sameConstants : List PsKernelConstantInfo → List PsKernelConstantInfo → Bool
+  | [], [] => true
+  | a :: restA, b :: restB =>
+      sameInfo psKernelExprEqual a b && sameConstants restA restB
+  | _, _ => false
+
+private def sameIndex : PsKernelEnvironmentIndex → PsKernelEnvironmentIndex → Bool
+  | .empty, .empty => true
+  | .small a, .small b | .bucket a, .bucket b => sameConstants a b
+  | .branch a b, .branch c d => sameIndex a c && sameIndex b d
+  | _, _ => false
+
+private def sameEnvironment (a b : PsKernelEnvironment) : Bool :=
+  sameConstants a.constants b.constants && sameIndex a.index b.index &&
+  a.quotInitialized == b.quotInitialized &&
+  a.runtime.nativeEvaluator.isNone && b.runtime.nativeEvaluator.isNone
+
 private def verifyHeader (source : Lean.Environment) (state : Imported) (n : Lean.Name) : IO Unit := do
   let original ← info source n
   let some checked := psKernelEnvironmentFind state.session.environment (name n)
     | throw (IO.userError ("T01F checked declaration missing: " ++ toString n))
-  require ("authentic-header-" ++ toString n)
-    (psKernelExprEqual (psKernelConstantInfoType checked) (expr original.type))
-  require ("authentic-levels-" ++ toString n)
-    (psKernelNameListsEq (psKernelConstantInfoLevelParams checked) (original.levelParams.map name))
+  -- Match the established Arena kernel-expression comparator: binder display
+  -- names are not semantic metadata. Exact session immutability below uses
+  -- the stronger psKernelExprEqual comparator, including those names.
+  require ("authentic-metadata-" ++ toString n)
+    (sameInfo psKernelExprEq (referenceInfo original) checked)
 
 private def install (state : IO.Ref Imported) (n : Lean.Name)
     (request : PsKernelDeclarationRequest) : IO Unit := do
@@ -117,7 +216,7 @@ private def install (state : IO.Ref Imported) (n : Lean.Name)
   let result ← expectPublic ("T01F admission " ++ toString n)
     (psKernelV1AdmitDeclaration current.session request)
   state.set { current with session := result.session, requests := current.requests + 1,
-    roots := current.roots ++ [n] }
+    roots := current.roots ++ [n], inputs := current.inputs ++ [request] }
   IO.println ("PSC1_T01F_ADMIT_PASS " ++ toString n)
 
 /- Recursion is test-host traversal, not a new admission implementation.
@@ -254,6 +353,32 @@ private def byteList (bytes : List UInt8) : PsKernelExpr :=
       [byte, .app (.const (name `UInt8.ofNat) []) (.lit (.nat value.toNat)), tail])
     (.app (.const (name `List.nil) [zero]) byte)
 
+private def officialChecked (source : Lean.Environment) (label : String)
+    (term : PsKernelExpr) : IO Lean.Expr := do
+  match Lean.Kernel.check source {} (officialExpr term) with
+  | .ok type => pure type
+  | .error _ => throw (IO.userError ("T01F official check failed: " ++ label))
+
+private def officialWhnf (source : Lean.Environment) (label : String)
+    (term : PsKernelExpr) : IO Lean.Expr := do
+  match Lean.Kernel.whnf source {} (officialExpr term) with
+  | .ok value => pure value
+  | .error _ => throw (IO.userError ("T01F official WHNF failed: " ++ label))
+
+private def officialEqual (source : Lean.Environment) (label : String)
+    (left right : Lean.Expr) (expected : Bool := true) : IO Unit := do
+  require ("official-defeq-" ++ label)
+    (match Lean.Kernel.isDefEq source {} left right with
+     | .ok actual => actual == expected | _ => false)
+
+private def ensureConstructor (source : Lean.Environment) (label : String)
+    (normalized : PsKernelExpr) : IO Unit := do
+  let head := (officialExpr normalized).getAppFn
+  require ("actual-String-constructor-" ++ label)
+    (match head with | .const n _ => n == `String.ofByteArray | _ => false)
+  let _ ← officialChecked source ("constructor-" ++ label) normalized
+  pure ()
+
 private def checkCase (source : Lean.Environment) (session : PsKernelKernelSession)
     (text : String) : IO Unit := do
   let literal := PsKernelExpr.lit (.str text)
@@ -265,32 +390,50 @@ private def checkCase (source : Lean.Environment) (session : PsKernelKernelSessi
   let mut arena := psKernelExprV2PagedEmpty
   let mut pairs : List (String × PsKernelExpr × PsKernelExpr × Nat × Nat) := []
   for (label, left, right) in
-      [("string",literal,expanded), ("utf8",bytes,expectedBytes), ("validity",proof,proof)] do
+      [("string",literal,expanded), ("ofList",expanded,literal),
+       ("utf8",bytes,expectedBytes), ("validity",proof,proof)] do
     IO.println ("PSC1_T01F_QUERY_BEGIN " ++ label ++ " " ++ reprStr text)
     let (next,leftId) ← plain "import-left" (psKernelExprV2PagedImportIntoChecked arena left)
     let (next,rightId) ← plain "import-right" (psKernelExprV2PagedImportIntoChecked next right)
     arena := next
     pairs := pairs ++ [(label,left,right,leftId,rightId)]
-    require ("official-check-" ++ label)
-      (match Lean.Kernel.check source {} (officialExpr left) with | .ok _ => true | _ => false)
-    require ("official-defeq-" ++ label)
-      (match Lean.Kernel.isDefEq source {} (officialExpr left) (officialExpr right) with
-       | .ok true => true | _ => false)
-    let _ ← expectPublic ("v1-check-" ++ label) (psKernelV1CheckExpression session [] .safe left)
+    let officialType ← officialChecked source label left
+    let _ ← officialChecked source (label ++ "-right") right
+    let independent ← expectPublic ("v1-check-" ++ label)
+      (psKernelV1CheckExpression session [] .safe left)
+    officialEqual source (label ++ "-type") officialType (officialExpr independent.type)
+    officialEqual source label (officialExpr left) (officialExpr right)
     require ("v1-defeq-" ++ label)
       (← expectPublic ("v1-defeq-" ++ label) (psKernelV1IsDefEq session [] .safe left right))
   let built ← plain "input-decode" (psKernelExprV2DecodeChecked arena)
   let owners ← plain "session-owners" (psKernelDagGeneratedFromSession session arena built)
   let context := (psKernelKernelSessionChecker session [] .safe).context
   for (label,left,_,leftId,rightId) in pairs do
-    let _ ← direct ("direct-check-" ++ label)
+    let officialType ← officialChecked source label left
+    let officialNormal ← officialWhnf source label left
+    let legacyChecked ← expectPublic ("v1-type-" ++ label)
+      (psKernelV1CheckExpression session [] .safe left)
+    let legacyWhnf ← expectPublic ("v1-whnf-" ++ label)
+      (psKernelV1Whnf session [] .safe left)
+    officialEqual source (label ++ "-v1-whnf") officialNormal (officialExpr legacyWhnf)
+    let checked ← direct ("direct-check-" ++ label)
       (psKernelExprV2TryCheckWithDeclarationsFuel 4096 context owners.arena owners.declarations leftId)
+    let checkedType ← decode checked.fst checked.snd
+    officialEqual source (label ++ "-direct-type") officialType (officialExpr checkedType)
+    require (label ++ "-direct-v1-type")
+      (← expectPublic (label ++ "-direct-v1-type")
+        (psKernelV1IsDefEq session [] .safe checkedType legacyChecked.type))
     let normalized ← direct ("direct-whnf-" ++ label)
       (psKernelExprV2TryWhnfOwnedWithDeclarationsFuel 4096 context owners.arena owners.declarations leftId)
     let normalizedValue ← decode normalized.fst normalized.snd
-    require ("official-direct-whnf-" ++ label)
-      (match Lean.Kernel.isDefEq source {} (officialExpr left) (officialExpr normalizedValue) with
-       | .ok true => true | _ => false)
+    let _ ← officialChecked source (label ++ "-direct-normalized") normalizedValue
+    officialEqual source (label ++ "-direct-whnf") officialNormal (officialExpr normalizedValue)
+    require (label ++ "-direct-v1-whnf")
+      (← expectPublic (label ++ "-direct-v1-whnf")
+        (psKernelV1IsDefEq session [] .safe normalizedValue legacyWhnf))
+    if label == "ofList" then
+      ensureConstructor source "direct-ofList" normalizedValue
+      ensureConstructor source "v1-ofList" legacyWhnf
     require ("direct-defeq-" ++ label)
       (← direct ("direct-defeq-" ++ label)
         (psKernelExprV2TryDefEqWithDeclarationsFuel 4096 context owners.arena owners.declarations leftId rightId))
@@ -299,8 +442,23 @@ private def checkCase (source : Lean.Environment) (session : PsKernelKernelSessi
     let second ← expectPublic ("public-reuse-" ++ label)
       (psKernelV1RunDag first.session [] .safe arena [.check leftId,.whnf leftId,.isDefEq leftId rightId])
     for result in [first,second] do
-      require ("public-replies-" ++ label)
-        (match result.replies with | [.checked _,.normalized _,.equal true] => true | _ => false)
+      require (label ++ "-exact-session-environment")
+        (sameEnvironment session.environment result.session.environment)
+      match result.replies with
+      | [.checked checked, .normalized normalized, .equal true] =>
+          require (label ++ "-checked-original-expression")
+            (psKernelExprEqual checked.expression left)
+          officialEqual source (label ++ "-public-type") officialType (officialExpr checked.type)
+          require (label ++ "-public-v1-type")
+            (← expectPublic (label ++ "-public-v1-type")
+              (psKernelV1IsDefEq session [] .safe checked.type legacyChecked.type))
+          let _ ← officialChecked source (label ++ "-public-normalized") normalized
+          officialEqual source (label ++ "-public-whnf") officialNormal (officialExpr normalized)
+          require (label ++ "-public-v1-whnf")
+            (← expectPublic (label ++ "-public-v1-whnf")
+              (psKernelV1IsDefEq session [] .safe normalized legacyWhnf))
+          if label == "ofList" then ensureConstructor source "public-ofList" normalized
+      | _ => throw (IO.userError ("T01F public reply shape: " ++ label))
   for bad in [PsKernelExpr.proj (name `String) 2 literal,
       PsKernelExpr.app (.const (name `String.ofList) []) (.lit (.nat 0))] do
     require "official-invalid-rejects"
@@ -308,9 +466,146 @@ private def checkCase (source : Lean.Environment) (session : PsKernelKernelSessi
     require "independent-invalid-rejects"
       (match psKernelV1CheckExpression session [] .safe bad with
        | .error (.rejectedInvalid _) => true | _ => false)
+    let (badArena,badId) ← plain "invalid-input"
+      (psKernelExprV2PagedImportIntoChecked psKernelExprV2PagedEmpty bad)
+    for command in [.check badId,.whnf badId,.isDefEq badId badId] do
+      require "public-invalid-rejects"
+        (match psKernelV1RunDag session [] .safe badArena [command] with
+         | .error (.rejectedInvalid _) => true | _ => false)
+  let different := PsKernelExpr.lit (.str (text ++ "x"))
+  officialEqual source "distinct-strings" (officialExpr literal) (officialExpr different) false
+  require "v1-distinct-strings"
+    (!(← expectPublic "v1-distinct-strings" (psKernelV1IsDefEq session [] .safe literal different)))
+  let (unequalArena,leftId) ← plain "unequal-left"
+    (psKernelExprV2PagedImportIntoChecked psKernelExprV2PagedEmpty literal)
+  let (unequalArena,rightId) ← plain "unequal-right"
+    (psKernelExprV2PagedImportIntoChecked unequalArena different)
+  let unequal ← expectPublic "public-distinct-strings"
+    (psKernelV1RunDag session [] .safe unequalArena [.isDefEq leftId rightId])
+  require "public-distinct-strings"
+    (match unequal.replies with | [.equal false] => true | _ => false)
+  require "unequal-exact-session-environment"
+    (sameEnvironment session.environment unequal.session.environment)
   IO.println ("PSC1_T01F_CASE_PASS " ++ reprStr text)
 
-def regression : IO Unit := do
+private def jsonName : PsKernelName → Lean.Json
+  | .anonymous => .arr #[.str "anonymous"]
+  | .str parent value => .arr #[.str "str", jsonName parent, .str value]
+  | .num parent value => .arr #[.str "num", jsonName parent, .str (toString value)]
+
+private def jsonLevel : PsKernelLevel → Lean.Json
+  | .zero => .arr #[.str "zero"]
+  | .succ value => .arr #[.str "succ", jsonLevel value]
+  | .max a b => .arr #[.str "max", jsonLevel a, jsonLevel b]
+  | .imax a b => .arr #[.str "imax", jsonLevel a, jsonLevel b]
+  | .param n => .arr #[.str "param", jsonName n]
+  | .mvar n => .arr #[.str "mvar", jsonName n]
+
+private def jsonBinder : PsKernelBinderInfo → Lean.Json
+  | .default => .str "default"
+  | .implicit => .str "implicit"
+  | .strictImplicit => .str "strictImplicit"
+  | .instImplicit => .str "instImplicit"
+
+private def jsonExpr : PsKernelExpr → Lean.Json
+  | .bvar n => .arr #[.str "bvar", .str (toString n)]
+  | .fvar n => .arr #[.str "fvar", jsonName n]
+  | .mvar n => .arr #[.str "mvar", jsonName n]
+  | .sort u => .arr #[.str "sort", jsonLevel u]
+  | .const n us => .arr #[.str "const", jsonName n, .arr (us.map jsonLevel).toArray]
+  | .app f a => .arr #[.str "app", jsonExpr f, jsonExpr a]
+  | .lam n d b bi => .arr #[.str "lam", jsonName n, jsonExpr d, jsonExpr b, jsonBinder bi]
+  | .forallE n d b bi => .arr #[.str "forallE", jsonName n, jsonExpr d, jsonExpr b, jsonBinder bi]
+  | .letE n t v b nd => .arr #[.str "letE", jsonName n, jsonExpr t, jsonExpr v, jsonExpr b, toJson nd]
+  | .lit (.nat n) => .arr #[.str "nat", .str (toString n)]
+  | .lit (.str s) => .arr #[.str "str", .str s]
+  | .mdata metadata b => .arr #[.str "mdata", .str (toString metadata), jsonExpr b]
+  | .proj n i b => .arr #[.str "proj", jsonName n, .str (toString i), jsonExpr b]
+
+private def jsonBase (value : PsKernelConstantBase) : Lean.Json :=
+  .arr #[jsonName value.name, .arr (value.levelParams.map jsonName).toArray, jsonExpr value.type]
+
+private def jsonSafety : PsKernelDefinitionSafety → Lean.Json
+  | .safe => .str "safe" | .unsafeDef => .str "unsafeDef" | .partialDef => .str "partialDef"
+
+private def jsonHints : PsKernelReducibilityHints → Lean.Json
+  | .opaqueHint => .arr #[.str "opaqueHint"]
+  | .abbrevHint => .arr #[.str "abbrevHint"]
+  | .regular height => .arr #[.str "regular", .str (toString height)]
+
+private def jsonDefinition (value : PsKernelDefinitionInfo) : Lean.Json :=
+  .arr #[jsonBase value.base, jsonExpr value.value, jsonHints value.hints, jsonSafety value.safety]
+
+private def jsonCtor (value : PsKernelSimpleConstructorDecl) : Lean.Json :=
+  .arr #[jsonName value.name, jsonExpr value.type]
+
+private def jsonInductive (value : PsKernelSimpleMutualTypeDecl) : Lean.Json :=
+  .arr #[jsonName value.name, jsonExpr value.type, .arr (value.ctors.map jsonCtor).toArray]
+
+private def jsonGroup (value : PsKernelSimpleMutualInductiveDecl) : Lean.Json :=
+  .arr #[.arr (value.levelParams.map jsonName).toArray, .str (toString value.numParams),
+    .arr (value.types.map jsonInductive).toArray, toJson value.isUnsafe]
+
+private def jsonRequest : PsKernelDeclarationRequest → Lean.Json
+  | .axiomDecl value => .arr #[.str "axiomDecl", jsonBase value.base, toJson value.isUnsafe]
+  | .definitionDecl value => .arr #[.str "definitionDecl", jsonDefinition value]
+  | .theoremDecl value => .arr #[.str "theoremDecl", jsonBase value.base, jsonExpr value.value]
+  | .opaqueDecl value => .arr #[.str "opaqueDecl", jsonBase value.base, jsonExpr value.value, toJson value.isUnsafe]
+  | .mutualDefinitions values => .arr #[.str "mutualDefinitions", .arr (values.map jsonDefinition).toArray]
+  | .quot => .arr #[.str "quot"]
+  | .ordinaryInductive value => .arr #[.str "ordinaryInductive", .arr #[
+      .arr (value.levelParams.map jsonName).toArray, .str (toString value.numParams),
+      jsonInductive { name := value.name, type := value.type, ctors := value.ctors },
+      toJson value.isUnsafe]]
+  | .mutualInductive value => .arr #[.str "mutualInductive", jsonGroup value]
+  | .nestedInductive value => .arr #[.str "nestedInductive", jsonGroup value]
+  | .unsupported feature => .arr #[.str "unsupported", .str feature]
+
+
+private def jsonQuot : PsKernelQuotKind → Lean.Json
+  | .typeQ => .str "typeQ" | .ctorQ => .str "ctorQ"
+  | .liftQ => .str "liftQ" | .indQ => .str "indQ"
+
+private def jsonRule (value : PsKernelRecursorRule) : Lean.Json :=
+  .arr #[jsonName value.ctor, .str (toString value.nFields), jsonExpr value.rhs]
+
+private def jsonInfo (value : PsKernelConstantInfo) : Lean.Json :=
+  match value with
+  | .axiomInfo value => .arr #[.str "axiomInfo", jsonBase value.base, toJson value.isUnsafe]
+  | .defnInfo value => .arr #[.str "defnInfo", jsonDefinition value]
+  | .thmInfo value => .arr #[.str "thmInfo", jsonBase value.base, jsonExpr value.value]
+  | .opaqueInfo value => .arr #[.str "opaqueInfo", jsonBase value.base, jsonExpr value.value, toJson value.isUnsafe]
+  | .inductInfo value => .arr #[.str "inductInfo", jsonBase value.base,
+      .str (toString value.numParams), .str (toString value.numIndices),
+      .arr (value.all.map jsonName).toArray, .arr (value.ctors.map jsonName).toArray,
+      .str (toString value.numNested), toJson value.isRec, toJson value.isReflexive, toJson value.isUnsafe]
+  | .ctorInfo value => .arr #[.str "ctorInfo", jsonBase value.base, jsonName value.induct,
+      .str (toString value.cidx), .str (toString value.numParams), .str (toString value.numFields),
+      toJson value.isUnsafe]
+  | .recInfo value => .arr #[.str "recInfo", jsonBase value.base, .arr (value.all.map jsonName).toArray,
+      .str (toString value.numParams), .str (toString value.numIndices),
+      .str (toString value.numMotives), .str (toString value.numMinors),
+      .arr (value.rules.map jsonRule).toArray, toJson value.k, toJson value.isUnsafe]
+  | .quotInfo value => .arr #[.str "quotInfo", jsonBase value.base, jsonQuot value.kind]
+
+private def writeFixture (path : String) (source : Lean.Environment) (state : Imported) : IO Unit := do
+  let metadata ← state.session.environment.constants.mapM (fun checked => do
+    let original ← info source (officialName (psKernelConstantInfoName checked))
+    pure (jsonInfo (referenceInfo original)))
+  let output := Lean.Json.mkObj [
+    ("format", .str "psc1-authentic-string435-v1"),
+    ("leanVersion", .str "4.35.0"),
+    ("leanCommit", .str "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"),
+    ("authority", .str "Untrusted authentic declaration inputs; every consumer must independently admit from empty."),
+    ("declarations", .arr (state.inputs.map jsonRequest).toArray),
+    ("roots", .arr (state.roots.map (fun n => .str (toString n))).toArray),
+    ("metadata", .arr metadata.toArray),
+    ("metadataRole", .str "Official source records, compared only after independent admission; never installed."),
+    ("samples", .arr #[.str "", .str "a", .str "é", .str "€", .str "😀", .str "Aé€😀"])]
+  IO.FS.writeFile path (output.compress ++ "\n")
+  IO.println ("PSC1_T01F_FIXTURE_WRITTEN " ++ path ++ " requests=" ++ toString state.requests)
+
+def regression (output : Option String := none) : IO Unit := do
   let source ← Lean.importModules #[{ module := `Init }] {}
   let empty ← expectPublic "empty-session"
     (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
@@ -319,6 +614,13 @@ def regression : IO Unit := do
   for root in [`String.ofList,`Char.ofNat,`UInt8.ofNat] do
     admitName source state [] root
   let imported ← state.get
+  for checked in imported.session.environment.constants do
+    verifyHeader source imported (officialName (psKernelConstantInfoName checked))
+  IO.println ("PSC1_T01F_METADATA_PASS declarations=" ++
+    toString (psKernelEnvironmentSize imported.session.environment))
+  match output with
+  | some path => writeFixture path source imported
+  | none => pure ()
   IO.println ("PSC1_T01F_CLOSURE_PASS requests=" ++ toString imported.requests ++
     " declarations=" ++ toString (psKernelEnvironmentSize imported.session.environment))
   for text in ["", "a", "é", "€", "😀", "Aé€😀"] do
@@ -328,5 +630,7 @@ def regression : IO Unit := do
 
 end PsKernelExprV2StringEnvironmentRegression
 
-def main : IO Unit := PsKernelExprV2StringEnvironmentRegression.regression
+def main (args : List String) : IO Unit :=
+  PsKernelExprV2StringEnvironmentRegression.regression args.head?
+
 

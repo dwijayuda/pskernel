@@ -1,0 +1,238 @@
+{
+  "schema": "psc1-release-reconciliation-qualification/1",
+  "status": "passed-static-release-inventory-and-documentation",
+  "sourceCommit": "0b4d4b3f9ae98f37341f06df062ec23303b54094",
+  "testedMergeCommit": "15e55bb274b3b64e17d3e7247979ef2a30c1b980",
+  "parentCommit": "fc60604a6b9759da75f3f507b2b7a4868d57ef99",
+  "runId": 39846954055,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39846954055",
+  "conclusion": "success",
+  "compilerQualification": {
+    "sourceCommit": "9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde",
+    "runId": 39829564386,
+    "receipt": "docs/PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json",
+    "finiteCriteriaQualified": 37,
+    "finiteCriteriaBlocked": 0,
+    "changedCompilerRuntimeDependencyOrContractBytes": false,
+    "evidenceBoundary": "No new full compiler qualification is claimed. GitHub compare confirms only documentation, inventory, pure inventory regressions and scheduling helpers differ."
+  },
+  "selection": {
+    "baselineCommit": "fc60604a6b9759da75f3f507b2b7a4868d57ef99",
+    "baselineRunId": 39837904301,
+    "static": true,
+    "focused": false,
+    "integration": false,
+    "release": false,
+    "benchmark": false
+  },
+  "jobs": [
+    {
+      "id": 120062643558,
+      "name": "static",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Select dependencies from exact new commit interval",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check static contracts and source syntax",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain selection and evidence-derived readiness",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 120062993815,
+      "name": "native",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 120062994917,
+      "name": "benchmark",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 120062995119,
+      "name": "focused",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 120062995170,
+      "name": "closures",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 120062995270,
+      "name": "gate",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require every selected dependency",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 120062995699,
+      "name": "g1",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 120062997289,
+      "name": "full",
+      "conclusion": "skipped"
+    }
+  ],
+  "changesSinceQualifiedCompiler": [
+    {
+      "path": "psc1/AI_WORK_STATE.md",
+      "blobSha": "5b3127028064591b72d776164c62b60ed6653bf2",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/README.md",
+      "blobSha": "a7b187c67d294ba93299af7e02dbe6536040e26a",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_BACKEND_CONFORMANCE.md",
+      "blobSha": "d13114cd2f2fabfcd0e665555da8efbb14a5dd36",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_DEVELOPMENT_ROADMAP.md",
+      "blobSha": "b856b774480d2f83612909148074887ec1cd88ec",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_IMPLEMENTATION_HISTORY_2026-10-23.md",
+      "blobSha": "4af97025ced0180cdf1702f5924fcac3ae4af3c0",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_NORMAL_G1_PERFORMANCE_DEFECT_2026-10-23.md",
+      "blobSha": "eef2647b0cc21d30a83db845899b60b89b5a7176",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_NPM_ECOSYSTEM.md",
+      "blobSha": "717ea7c3cbfac030567b450a1998c7ca007cfcc5",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_PRACTICAL_APPLICATIONS_V1.md",
+      "blobSha": "5eb93fead756e98cff13612a5b527e73f9ba01bb",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_PRACTICAL_CORE_DECISIONS.md",
+      "blobSha": "990e97a7aa3264d0858ee651cd74b7d0ec885441",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_PRACTICAL_CORE_STATUS.json",
+      "blobSha": "c05db9dae85e9a5758b8957dad75894d0da1af25",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json",
+      "blobSha": "f71a8c76ae022f44d9f9363eab4090523b88f5f9",
+      "status": "added"
+    },
+    {
+      "path": "psc1/docs/PSC1_RELEASE_CANDIDATE.md",
+      "blobSha": "77675a10eb4a03fbfe9e6e8b36dfab15e987760b",
+      "status": "added"
+    },
+    {
+      "path": "psc1/docs/PSC1_TYPED_IO_V1.md",
+      "blobSha": "391a22163f2364ef2936b6879673dbce18b81392",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/PSC1_WASM_STRING_ABI_V1.md",
+      "blobSha": "464e8556e6f0e24bf37f67bd3dcb821155d853c7",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/docs/history/PSC1_PRACTICAL_CORE_STATUS_BEFORE_V1_2026-10-23.json",
+      "blobSha": "47348f103f2550bdc3bf7b4133e46663102f021c",
+      "status": "added"
+    },
+    {
+      "path": "psc1/scripts/development-selection-tests.mjs",
+      "blobSha": "72cafb4702f43624bd8cf7f8f6b69a4534860358",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/scripts/practical-core-readiness-tests.mjs",
+      "blobSha": "2b738f713c78d527ac94e16b8637fae9e8f070f2",
+      "status": "modified"
+    },
+    {
+      "path": "psc1/scripts/practical-core-release-status.mjs",
+      "blobSha": "ef4a96a8a1b77ca479417363d1afe0ae61ce1926",
+      "status": "added"
+    },
+    {
+      "path": "psc1/scripts/select-development-tests.mjs",
+      "blobSha": "1b03f4d5d6eb2860b4b06784db1b53230105b3c2",
+      "status": "modified"
+    }
+  ],
+  "resolved": [
+    "README and backend/IO/application documentation no longer describe completed finite v1 work as missing.",
+    "Machine-readable status is derived from the frozen release contract and immutable completed CI receipt.",
+    "Static evidence-consistency regressions reject stale identities, missing/failing/skipped required execution, duplicate jobs, missing G1/closure/checker/package evidence.",
+    "Release guide records exact unpublished package digest, qualified platform and artifact expiry; original history/status remain preserved."
+  ],
+  "artifact": {
+    "id": 12451785253,
+    "expired": false,
+    "expiresAt": "2026-11-05T19:03:04Z",
+    "sha256": "9a72ab29e62693915432efc326597809fea500047d34693d6b55fda8ffbc4b76",
+    "tarballSha256": "c70a7e8965f4ddef4c48f14f9e645da3dc0389e23a841f372c2ff80f670f1956"
+  },
+  "remaining": {
+    "finiteV1AcceptanceBlockers": [],
+    "mergeOrPublication": "separate authorization required; PR stays draft",
+    "G2G3": "separate deferred manual qualification; original defect remains tracked"
+  },
+  "mergeOrPublishPerformed": false
+}

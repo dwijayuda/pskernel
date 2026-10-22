@@ -205,3 +205,26 @@ PSC1_DEVELOPMENT_ROADMAP.md is the single roadmap.
 PSC1_PRACTICAL_CORE_V1_CONTRACT.json is the single machine release contract.
 Detailed historical work state is in PSC1_IMPLEMENTATION_HISTORY_2026-10-23.md
 and the 22nd's history file.
+
+## Cursor-count correction and harness repair (2026-10-23)
+
+Run39851140073/job120077318443 atb8bbabd9 compiled the corrected86-module
+service and executed the new grouped-index/private-suffix case, but the harness
+omitted that case from its observation maps. Target assertions passed, then
+JSON.stringify(undefined) caused the controller to fail before recording G1 or
+attempting G2. This is a harness error, not a G2 result. The dated harness-failure
+receipt preserves it. Add both maps and an exact corpus/map-key invariant.
+
+The case also exposed costly repeated suffix-length setup outside the optional
+index path. PsTokenCursor now owns an exact remainingCount initialized once and
+decremented on advancement. Both grammars, common/data/binding/do parsers use it
+for the very same previous list-length-derived fuel. Qualified-name traversal
+keeps the cursor instead of discarding/recounting its tail. Raw-list entrypoints,
+zero-fuel refusal, spans, source ownership and parsing errors stay explicit.
+
+Native DataTests adds all-input source identities for old/new counts and coherent
+advancement, plus actual token/Unicode/EOF/name traversal checks. The 256-declaration
+generated regression and every earlier source/refusal case remain. No heap,
+stack, process deadline, fuel number or independent-checking boundary is raised.
+These changes still require fresh native, both-grammar compiler closure, G1/G2/G3
+and complete Practical Core CI; do not report the changed candidate qualified.

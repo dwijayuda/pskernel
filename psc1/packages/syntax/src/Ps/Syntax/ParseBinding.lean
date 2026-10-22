@@ -118,7 +118,7 @@ structure PsParsedBindingPattern where
 def psParseBindingPatternHeader (parseTerm : PsBindingTermParser)
     (cursor : PsTokenCursor) : Except PsParseError PsParsedBindingPattern :=
   match psParseBindingPatternWithFuel
-      (Nat.succ (psParseListLength cursor.remaining)) cursor with
+      (Nat.succ (psTokenCursorLength cursor)) cursor with
   | Except.error error => Except.error error
   | Except.ok pattern =>
       if psTokenCursorAtText pattern.cursor ":" then

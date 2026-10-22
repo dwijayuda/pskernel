@@ -242,6 +242,7 @@ try {
       consumer: "if (m.answer(5n) !== 5n) throw Error('ordinary loop');" }
   ];
   const observedExpressions = {
+    'lean-parser-index-suffix':'({answer:String(m.answer),exports:Object.keys(m)})',
     'lean-modules':'({answer:String(m.answer),exports:Object.keys(m)})',
     'ps-integer-unicode':'({huge:String(m.huge),text:m.text})',
     'ps-list-literal':'({empty:String(m.answer(false)),first:String(m.answer(true))})',
@@ -249,12 +250,15 @@ try {
     'lean-ordinary-loop':'({zero:String(m.answer(0n)),five:String(m.answer(5n))})'
   };
   const expectedObservations = {
+    'lean-parser-index-suffix':{answer:'42',exports:['answer']},
     'lean-modules':{answer:'42',exports:['answer']},
     'ps-integer-unicode':{huge:'-9007199254740993123456789',text:'λ🙂'},
     'ps-list-literal':{empty:'0',first:'7'},
     'lean-handler-pattern':{normal:'3',caught:'8'},
     'lean-ordinary-loop':{zero:'0',five:'5'}
   };
+  assert.deepEqual(Object.keys(observedExpressions).sort(),corpus.map(item=>item.id).sort(),'every corpus case requires an observation expression');
+  assert.deepEqual(Object.keys(expectedObservations).sort(),corpus.map(item=>item.id).sort(),'every corpus case requires expected observations');
   function exercise(servicePath, serviceIdentity, label) {
     const observations=[];
   for (const item of corpus) {

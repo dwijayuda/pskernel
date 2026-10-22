@@ -116,113 +116,80 @@ def psSyntaxCompilerBind
     (List.cons action (List.cons lambda List.nil))
     span
 
-def psParseSyntaxNameTailWithFuel
+-- The owned cursor keeps the exact count while a qualified name consumes tokens.
+def psParseSyntaxNameCursorTailWithFuel
     (fuel : Nat) :
-    List String ->
-    PsSourcePos ->
-    PsSourcePos ->
-    List PsToken ->
+    List String -> PsSourcePos -> PsSourcePos -> PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxName) :=
   match fuel with
-  | 0 =>
-      fun
-          (_segmentsRev : List String)
-          (_start : PsSourcePos)
-          (_stop : PsSourcePos)
-          (_tokens : List PsToken) =>
+  | Nat.zero =>
+      fun (_segmentsRev : List String) (_start : PsSourcePos)
+          (_stop : PsSourcePos) (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
-  | remainingFuel + 1 =>
-      fun
-          (segmentsRev : List String)
-          (start : PsSourcePos)
-          (stop : PsSourcePos)
-          (tokens : List PsToken) =>
-        let smaller :
-            List String ->
-            PsSourcePos ->
-            PsSourcePos ->
-            List PsToken ->
+  | Nat.succ remaining =>
+      fun (segmentsRev : List String) (start : PsSourcePos)
+          (stop : PsSourcePos) (cursor : PsTokenCursor) =>
+        let smaller : List String -> PsSourcePos -> PsSourcePos -> PsTokenCursor ->
             Except PsParseError (PsParseResult PsSyntaxName) :=
-          psParseSyntaxNameTailWithFuel remainingFuel;
-        match tokens with
-        | List.nil =>
-            Except.ok {
-              value := {
-                segments := psParseListReverse segmentsRev
-                span := { start := start, stop := stop }
-              }
-              cursor := { remaining := List.nil }
-            }
-        | List.cons dot rest =>
-            if psStringEq dot.text "." then
-              match rest with
-              | List.nil =>
-                  Except.error
-                    (PsParseError.unexpectedEnd "identifier")
-              | List.cons next after =>
-                  if
-                      psTokenKindEq
-                        next.kind
-                        PsTokenKind.identifier then
-                    smaller
-                      (List.cons next.text segmentsRev)
-                      start
-                      next.span.stop
-                      after
+          psParseSyntaxNameCursorTailWithFuel remaining;
+        if psTokenCursorAtText cursor "." then
+          match psTokenCursorAdvance cursor with
+          | Option.none => Except.error (PsParseError.unexpectedEnd "identifier")
+          | Option.some dot =>
+              match psTokenCursorAdvance dot.cursor with
+              | Option.none => Except.error (PsParseError.unexpectedEnd "identifier")
+              | Option.some next =>
+                  if psTokenKindEq next.token.kind PsTokenKind.identifier then
+                    smaller (List.cons next.token.text segmentsRev) start
+                      next.token.span.stop next.cursor
                   else
-                    Except.error
-                      (PsParseError.expectedKind
-                        PsTokenKind.identifier
-                        next.kind
-                        next.span)
-            else
-              Except.ok {
-                value := {
-                  segments := psParseListReverse segmentsRev
-                  span := { start := start, stop := stop }
-                }
-                cursor := {
-                  remaining := List.cons dot rest
-                }
-              }
+                    Except.error (PsParseError.expectedKind PsTokenKind.identifier
+                      next.token.kind next.token.span)
+        else
+          Except.ok {
+            value := {
+              segments := psParseListReverse segmentsRev
+              span := { start := start, stop := stop }
+            }
+            cursor := cursor
+          }
 
-def psParseSyntaxNameTail
-    (segmentsRev : List String)
-    (start : PsSourcePos)
-    (stop : PsSourcePos)
+-- Retain the raw-list entrypoints and their original zero/positive fuel behavior.
+def psParseSyntaxNameTailWithFuel
+    (fuel : Nat) (segmentsRev : List String) (start stop : PsSourcePos)
     (tokens : List PsToken) :
     Except PsParseError (PsParseResult PsSyntaxName) :=
-  psParseSyntaxNameTailWithFuel
-    (Nat.add (psParseListLength tokens) 1)
-    segmentsRev
-    start
-    stop
-    tokens
+  if Nat.beq fuel 0 then Except.error PsParseError.fuelExhausted
+  else psParseSyntaxNameCursorTailWithFuel fuel segmentsRev start stop
+    (psTokenCursorFromTokens tokens)
+
+def psParseSyntaxNameTail
+    (segmentsRev : List String) (start stop : PsSourcePos)
+    (tokens : List PsToken) :
+    Except PsParseError (PsParseResult PsSyntaxName) :=
+  let cursor := psTokenCursorFromTokens tokens;
+  psParseSyntaxNameCursorTailWithFuel
+    (Nat.add (psTokenCursorLength cursor) 1) segmentsRev start stop cursor
 
 def psParseSyntaxName
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxName) :=
-  match cursor.remaining with
-  | [] => Except.error (PsParseError.unexpectedEnd "identifier")
-  | token :: rest =>
-      if psTokenKindEq token.kind PsTokenKind.identifier then
-        if psStringEq token.text "_root_" then
-          Except.error
-            (PsParseError.expectedText
-              "_root_ escapes are allowed only in references"
-              token.text token.span)
+  match psTokenCursorAdvance cursor with
+  | Option.none => Except.error (PsParseError.unexpectedEnd "identifier")
+  | Option.some first =>
+      if psTokenKindEq first.token.kind PsTokenKind.identifier then
+        if psStringEq first.token.text "_root_" then
+          Except.error (PsParseError.expectedText
+            "_root_ escapes are allowed only in references"
+            first.token.text first.token.span)
         else
-          psParseSyntaxNameTail
-            (List.cons token.text List.nil)
-            token.span.start
-            token.span.stop
-            rest
+          psParseSyntaxNameCursorTailWithFuel
+            (Nat.add (psTokenCursorLength first.cursor) 1)
+            (List.cons first.token.text List.nil)
+            first.token.span.start first.token.span.stop first.cursor
       else
-        Except.error
-          (PsParseError.expectedKind
-            PsTokenKind.identifier
-            token.kind
-            token.span)
+        Except.error (PsParseError.expectedKind PsTokenKind.identifier
+          first.token.kind first.token.span)
 
 -- Root escapes are permitted only where a name denotes a reference.
 -- Declarations, namespace commands, imports and ordinary binder/field names
@@ -353,7 +320,7 @@ def psParseRecordLiteral
       match
           psParseRecordFieldsWithFuel
             parseTerm
-            (psParseListLength opening.cursor.remaining)
+            (psTokenCursorLength opening.cursor)
             opening.cursor
             List.nil with
       | Except.error error => Except.error error
@@ -639,7 +606,7 @@ def psParseConstructorPatternTail
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
   match psParsePatternBindersWithFuel
-      (psParseListLength cursor.remaining)
+      (psTokenCursorLength cursor)
       cursor
       List.nil with
   | Except.error error => Except.error error

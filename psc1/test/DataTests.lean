@@ -280,7 +280,63 @@ private def testConstructorNotationHygiene : IO Unit := do
   roundTrip "array constructor hygiene Lean to PS" .lean .proofScript leanArray
   roundTrip "array constructor hygiene PS to Lean" .proofScript .lean psArray
 
+-- All-input source identities: cached counts are the exact old fuel values.
+private theorem tokenCount_eq_length (tokens : List PsToken) :
+    psTokenListLength tokens = tokens.length := by
+  induction tokens with
+  | nil => rfl
+  | cons token rest ih => simp [psTokenListLength, ih]
+
+private theorem oldTokenCount_eq_length (tokens : List PsToken) :
+    psParseListLength tokens = tokens.length := by
+  induction tokens with
+  | nil => rfl
+  | cons token rest ih => simp [psParseListLength, ih, Nat.add_comm]
+
+private theorem cursorInitialFuel_preserved (tokens : List PsToken) :
+    psTokenCursorLength (psTokenCursorFromTokens tokens) = psParseListLength tokens := by
+  simp [psTokenCursorLength, psTokenCursorFromTokens, tokenCount_eq_length,
+    oldTokenCount_eq_length]
+
+private theorem cursorAdvance_count (cursor : PsTokenCursor) (read : PsTokenRead)
+    (coherent : cursor.remainingCount = cursor.remaining.length)
+    (advanced : psTokenCursorAdvance cursor = some read) :
+    read.cursor.remainingCount = read.cursor.remaining.length := by
+  cases cursor with
+  | mk tokens count =>
+    cases tokens with
+    | nil => simp [psTokenCursorAdvance] at advanced
+    | cons token rest =>
+      simp [psTokenCursorAdvance] at advanced
+      cases advanced
+      simp at coherent
+      simp [coherent]
+
 def main : IO Unit := do
+  for source in ["", "Alpha.beta.gamma", "α.β.γ rest", "name := 7",
+      "namespace Long\ndef x : Nat := 1\nend Long\n"] do
+    let tokens ← match psLex source with
+      | .ok tokens => pure tokens
+      | .error _ => fail "cursor count" "lexer"
+    let mut cursor := psTokenCursorFromTokens tokens
+    for _ in [:tokens.length + 1] do
+      if psTokenCursorLength cursor != cursor.remaining.length then
+        fail "cursor count" "advance changed exact remaining-token count"
+      match psTokenCursorAdvance cursor with
+      | .none => pure ()
+      | .some read => cursor := read.cursor
+    IO.println "PSC1_DATA_PASS: canonical cursor count agrees at every token and EOF"
+    let initial := psTokenCursorFromTokens tokens
+    match psParseSyntaxName initial with
+    | .error _ => pure ()
+    | .ok result =>
+      if psTokenCursorLength result.cursor != result.cursor.remaining.length then
+        fail "name cursor count" "qualified-name traversal lost count"
+      IO.println "PSC1_DATA_PASS: qualified-name cursor retains exact count"
+    let start : PsSourcePos := { byteOffset := 0, line := 1, column := 1 }
+    match psParseSyntaxNameTailWithFuel 0 [] start start tokens with
+    | .error .fuelExhausted => pure ()
+    | _ => fail "name cursor count" "zero fuel must refuse"
   same "Lean right-associated tuple with contextual Int" .lean
     "def result : Prod Int (Prod Bool Nat) := (1, true, 2)\n"
     "def result : Prod Int (Prod Bool Nat) := Prod.mk 1 (Prod.mk true 2)\n"

@@ -538,7 +538,7 @@ def psParseDoConditional
   | Option.none => Except.error (PsParseError.unexpectedEnd "if")
   | Option.some first =>
       psParseDoConditionalWithFuel parseTerm parseBody
-        (Nat.succ (psParseListLength cursor.remaining))
+        (Nat.succ (psTokenCursorLength cursor))
         first.span.start.column native cursor
 
 
@@ -628,11 +628,11 @@ def psParseDoFor
               let sourceName := PsSyntaxName.mk [name.token.text] name.token.span;
               let delimiter := if native then "do" else "{";
               match psParseDoTakeHeader delimiter
-                  (Nat.succ (psParseListLength separator.cursor.remaining))
+                  (Nat.succ (psTokenCursorLength separator.cursor))
                   0 separator.cursor [] with
               | Except.error error => Except.error error
               | Except.ok header =>
-                  let headerCursor := PsTokenCursor.mk header.value;
+                  let headerCursor := psTokenCursorFromTokens header.value;
                   let iterable :
                       Except PsParseError (Prod PsSyntaxTerm (Option PsSyntaxTerm)) :=
                     if psParseDoIsRange headerCursor then
@@ -773,8 +773,8 @@ def psParseDoBody
                 psParseDoWhile parseTerm smaller allowSemicolon cursor
               else
                 let chunk := psParseDoTakeStatement
-                  (Nat.succ (psParseListLength cursor.remaining)) first.span.start 0 0 0 cursor [];
-                match psParseDoStatement parseTerm (PsTokenCursor.mk chunk.value) with
+                  (Nat.succ (psTokenCursorLength cursor)) first.span.start 0 0 0 cursor [];
+                match psParseDoStatement parseTerm (psTokenCursorFromTokens chunk.value) with
                 | Except.error error => Except.error error
                 | Except.ok head => Except.ok (PsParseResult.mk head chunk.cursor);
             match parsedHead with
@@ -843,7 +843,7 @@ def psParseDo
     | Option.none => Except.error (PsParseError.unexpectedEnd "do statement")
     | Option.some first =>
         match psParseDoBody parseTerm allowSemicolon
-            (Nat.succ (psParseListLength bodyCursor.remaining))
+            (Nat.succ (psTokenCursorLength bodyCursor))
             braced first.span.start.column bodyCursor with
         | Except.error error => Except.error error
         | Except.ok body =>

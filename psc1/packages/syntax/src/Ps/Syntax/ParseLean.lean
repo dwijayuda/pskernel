@@ -12,7 +12,7 @@ def psLeanTermStop
 
 def psLeanTokenCursor
     (remaining : List PsToken) : PsTokenCursor :=
-  { remaining := remaining }
+  psTokenCursorFromTokens remaining
 
 def psLeanBoolNot (value : Bool) : Bool :=
   if value then false else true
@@ -311,7 +311,7 @@ def psParseLeanApplicationPrimary
           (psTokenCursorPeek parsed.cursor) inner.stop;
         let surfaceSpan : PsSourceSpan := { start := start, stop := stop };
         psParseDataOptionalIndexTailWithFuel parseParenthesized
-          (Nat.succ (psParseListLength parsed.cursor.remaining))
+          (Nat.succ (psTokenCursorLength parsed.cursor))
           parsed.value surfaceSpan parsed.cursor
       else Except.ok parsed
 
@@ -454,7 +454,7 @@ def psParseLeanSimpleApplication
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseLeanSimpleApplicationWithFuel
-    (Nat.add (psParseListLength cursor.remaining) 1)
+    (Nat.add (psTokenCursorLength cursor) 1)
     cursor
 
 def psParseLeanProductWithNomatchWithFuel
@@ -488,7 +488,7 @@ def psParseLeanProduct
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseLeanProductWithFuel
-    (Nat.add (psParseListLength cursor.remaining) 1)
+    (Nat.add (psTokenCursorLength cursor) 1)
     cursor
 
 def psParseLeanBinderTypeWithFuel
@@ -581,7 +581,7 @@ def psParseLeanBinderType
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseLeanBinderTypeWithFuel
-    (Nat.add (psParseListLength cursor.remaining) 1)
+    (Nat.add (psTokenCursorLength cursor) 1)
     cursor
 
 def psParseLeanBinderNamesWithFuel
@@ -675,7 +675,7 @@ def psParseLeanBinderGroup
   | Except.ok opening =>
       match
           psParseLeanBinderNamesWithFuel
-            (psParseListLength opening.cursor.remaining)
+            (psTokenCursorLength opening.cursor)
             opening.cursor
             List.nil with
       | Except.error error => Except.error error
@@ -1330,7 +1330,7 @@ def psParseLeanTermWithFuel
                 | Except.ok afterWith =>
                     match psParseLeanMatchAlternativesWithFuel
                         (smaller)
-                        (psParseListLength afterWith.cursor.remaining)
+                        (psTokenCursorLength afterWith.cursor)
                         afterWith.cursor
                         [] with
                     | Except.error error => Except.error error
@@ -1497,7 +1497,7 @@ def psParseLeanTermWithFuel
         | Option.none => Except.error (PsParseError.unexpectedEnd "lambda binder")
         | Option.some keyword =>
             match psParseLambdaBindersWithFuel psParseLeanBinderGroup
-                (psParseListLength keyword.cursor.remaining)
+                (psTokenCursorLength keyword.cursor)
                 keyword.cursor
                 [] with
             | Except.error error => Except.error error
@@ -1571,7 +1571,7 @@ def psParseLeanTermWithFuel
 def psParseLeanTerm
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  psParseLeanTermWithFuel (Nat.add (psParseListLength cursor.remaining) 1) cursor
+  psParseLeanTermWithFuel (Nat.add (psTokenCursorLength cursor) 1) cursor
 
 def psParseLeanInductiveConstructorsWithFuel
     (fuel : Nat) :
@@ -1610,7 +1610,7 @@ def psParseLeanInductiveConstructorsWithFuel
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel
-                      (psParseListLength name.cursor.remaining)
+                      (psTokenCursorLength name.cursor)
                       name.cursor
                       [] with
                   | Except.error error => Except.error error
@@ -1805,7 +1805,7 @@ def psParseLeanStructureDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              (psParseListLength name.cursor.remaining)
+              (psTokenCursorLength name.cursor)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1815,7 +1815,7 @@ def psParseLeanStructureDeclaration
               | Except.ok afterWhere =>
                   match
                       psParseLeanStructureFieldsWithFuel
-                        (psParseListLength afterWhere.cursor.remaining)
+                        (psTokenCursorLength afterWhere.cursor)
                         afterWhere.cursor
                         [] with
                   | Except.error error => Except.error error
@@ -1849,7 +1849,7 @@ def psParseLeanInductiveDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
-              (psParseListLength name.cursor.remaining)
+              (psTokenCursorLength name.cursor)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1866,7 +1866,7 @@ def psParseLeanInductiveDeclaration
                 | Except.error error => Except.error error
                 | Except.ok afterWhere =>
                     match psParseLeanInductiveConstructorsWithFuel
-                        (psParseListLength afterWhere.cursor.remaining)
+                        (psTokenCursorLength afterWhere.cursor)
                         afterWhere.cursor
                         [] with
                     | Except.error error => Except.error error
@@ -1989,7 +1989,7 @@ def psParseLeanEquationClausesWithFuel
           | Option.some bar =>
               match
                   psParseLeanEquationPatternsWithFuel
-                    (psParseListLength bar.cursor.remaining)
+                    (psTokenCursorLength bar.cursor)
                     bar.cursor
                     [] with
               | Except.error error => Except.error error
@@ -2499,7 +2499,7 @@ def psParseLeanDeclaration
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel
-                      (psParseListLength name.cursor.remaining)
+                      (psTokenCursorLength name.cursor)
                       name.cursor
                       [] with
                   | Except.error error => Except.error error
@@ -2537,7 +2537,7 @@ def psParseLeanDeclaration
                                 match
                                     psParseLeanEquationClausesWithFuel
                                       psParseLeanTerm
-                                      (psParseListLength type.cursor.remaining)
+                                      (psTokenCursorLength type.cursor)
                                       type.cursor
                                       [] with
                                 | Except.error error =>
@@ -2673,12 +2673,12 @@ def psParseLeanTokens
     (tokens : List PsToken) :
     Except PsParseError PsSyntaxModule :=
   let cursor := psTokenCursorFromTokens tokens;
-  match psParseLeanImportsWithFuel (psParseListLength tokens) cursor [] with
+  match psParseLeanImportsWithFuel (psTokenCursorLength cursor) cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match psParseScopedDeclarationsWithFuel
           psParseLeanDeclaration (fun (start : PsSourcePos) (cursor : PsTokenCursor) => Except.ok cursor)
-          (psParseListLength tokens) imports.cursor [] [] with
+          (psTokenCursorLength cursor) imports.cursor [] [] with
       | Except.error error => Except.error error
       | Except.ok declarations =>
           Except.ok {

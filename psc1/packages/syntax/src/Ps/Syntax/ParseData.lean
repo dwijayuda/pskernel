@@ -69,7 +69,7 @@ def psSyntaxDataListValue (elements : List PsSyntaxTerm)
 def psParseDataListAfterOpening (parseTerm : PsDataTermParser)
     (opening : PsTokenRead) : Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match psParseDataElementsWithFuel parseTerm "]"
-      (Nat.succ (psParseListLength opening.cursor.remaining))
+      (Nat.succ (psTokenCursorLength opening.cursor))
       opening.token.span.start opening.cursor [] false with
   | Except.error error => Except.error error
   | Except.ok parsed =>
@@ -101,7 +101,7 @@ def psParseDataParen (parseTerm : PsDataTermParser)
   | Except.error error => Except.error error
   | Except.ok opening =>
       match psParseDataElementsWithFuel parseTerm ")"
-          (Nat.succ (psParseListLength opening.cursor.remaining))
+          (Nat.succ (psTokenCursorLength opening.cursor))
           opening.token.span.start opening.cursor [] false with
       | Except.error error => Except.error error
       | Except.ok parsed =>
@@ -149,7 +149,7 @@ def psParseDataArray (parseTerm : PsDataTermParser)
             Except.error (PsParseError.expectedText "adjacent #[" "[" opening.token.span)
           else
             match psParseDataElementsWithFuel parseTerm "]"
-                (Nat.succ (psParseListLength opening.cursor.remaining))
+                (Nat.succ (psTokenCursorLength opening.cursor))
                 hashToken.token.span.start opening.cursor [] false with
             | Except.error error => Except.error error
             | Except.ok parsed =>

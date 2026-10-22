@@ -276,7 +276,7 @@ def psParseProofScriptRecordLiteral
   | Except.ok opening =>
       match psParseProofScriptRecordFieldsWithFuel
           parseTerm
-          (Nat.succ (psParseListLength opening.cursor.remaining))
+          (Nat.succ (psTokenCursorLength opening.cursor))
           opening.cursor
           [] with
       | Except.error error => Except.error error
@@ -533,7 +533,7 @@ def psParseProofScriptSimpleApplication
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseProofScriptSimpleApplicationWithFuel
-    (Nat.add (psParseListLength cursor.remaining) 1)
+    (Nat.add (psTokenCursorLength cursor) 1)
     cursor
 
 def psParseProofScriptArrowTail
@@ -680,7 +680,7 @@ def psParseProofScriptBinderType
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psParseProofScriptBinderTypeWithFuel
-    (Nat.add (psParseListLength cursor.remaining) 1)
+    (Nat.add (psTokenCursorLength cursor) 1)
     cursor
 
 def psParseProofScriptBinder
@@ -1014,7 +1014,7 @@ def psParseProofScriptTermWithFuel
                     | Except.ok afterOpen =>
                         match psParseProofScriptMatchAlternativesWithFuel
                             (smaller)
-                            (psParseListLength afterOpen.cursor.remaining)
+                            (psTokenCursorLength afterOpen.cursor)
                             afterOpen.cursor
                             [] with
                         | Except.error error => Except.error error
@@ -1177,7 +1177,7 @@ def psParseProofScriptTermWithFuel
         | Option.some keyword =>
             match psParseLambdaBindersWithFuel
                 (psParseSingleLambdaBinder psParseProofScriptBinder)
-                (psParseListLength keyword.cursor.remaining)
+                (psTokenCursorLength keyword.cursor)
                 keyword.cursor
                 [] with
             | Except.error error => Except.error error
@@ -1245,7 +1245,7 @@ def psParseProofScriptTermWithFuel
 def psParseProofScriptTerm
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  psParseProofScriptTermWithFuel (Nat.add (psParseListLength cursor.remaining) 1) cursor
+  psParseProofScriptTermWithFuel (Nat.add (psTokenCursorLength cursor) 1) cursor
 
 
 
@@ -1409,7 +1409,7 @@ def psParseProofScriptStructureDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseProofScriptDeclarationBindersWithFuel
-              (psParseListLength name.cursor.remaining)
+              (psTokenCursorLength name.cursor)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1422,7 +1422,7 @@ def psParseProofScriptStructureDeclaration
                   | Except.ok afterOpen =>
                       match
                           psParseProofScriptStructureFieldsWithFuel
-                            (psParseListLength afterOpen.cursor.remaining)
+                            (psTokenCursorLength afterOpen.cursor)
                             afterOpen.cursor
                             [] with
                       | Except.error error => Except.error error
@@ -1456,7 +1456,7 @@ def psParseProofScriptInductiveDeclaration
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseProofScriptDeclarationBindersWithFuel
-              (psParseListLength name.cursor.remaining)
+              (psTokenCursorLength name.cursor)
               name.cursor
               [] with
           | Except.error error => Except.error error
@@ -1476,7 +1476,7 @@ def psParseProofScriptInductiveDeclaration
                     | Except.error error => Except.error error
                     | Except.ok afterOpen =>
                         match psParseProofScriptInductiveConstructorsWithFuel
-                            (psParseListLength afterOpen.cursor.remaining)
+                            (psTokenCursorLength afterOpen.cursor)
                             afterOpen.cursor
                             [] with
                         | Except.error error => Except.error error
@@ -1595,7 +1595,7 @@ def psParseProofScriptDeclaration
                       Except.ok { value := [], cursor := name.cursor }
                     else
                       psParseProofScriptDeclarationBindersWithFuel
-                        (Nat.succ (psParseListLength name.cursor.remaining))
+                        (Nat.succ (psTokenCursorLength name.cursor))
                         name.cursor [];
                   match bindersResult with
                   | Except.error error => Except.error error
@@ -1741,12 +1741,12 @@ def psParseProofScriptTokens
     (tokens : List PsToken) :
     Except PsParseError PsSyntaxModule :=
   let cursor := psTokenCursorFromTokens tokens;
-  match psParseProofScriptImportsWithFuel (psParseListLength tokens) cursor [] with
+  match psParseProofScriptImportsWithFuel (psTokenCursorLength cursor) cursor [] with
   | Except.error error => Except.error error
   | Except.ok imports =>
       match psParseScopedDeclarationsWithFuel
           psParseProofScriptDeclaration psParseProofScriptCommandSeparator
-          (psParseListLength tokens) imports.cursor [] [] with
+          (psTokenCursorLength cursor) imports.cursor [] [] with
       | Except.error error => Except.error error
       | Except.ok declarations =>
           Except.ok {

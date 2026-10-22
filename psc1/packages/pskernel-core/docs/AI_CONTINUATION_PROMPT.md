@@ -1,37 +1,41 @@
-## Fused data-result hash candidate: exact profile saved; native-first gates pending
+## Exact c644 fused hash native PASS; authentic generated gates pending
 
-The preceding 5abf mixed preflight timed out at the unchanged 25-minute cap.
-Its exact-artifact diagnostic completed in
-[run 39866518232](https://github.com/dwijayuda/pskernel/actions/runs/39866518232),
-job120129961504 PASS: all294 requests/377 metadata, target WHNF91536.663875ms,
-whole152.76s, peakRSS560584KiB. Artifact12463918754, raw sampled profile and
-source/driver bindings are recorded in
+Executable source: `c64425881ca637021c56bf4c985e2d1bd6afa593`.
+[Run39867316634](https://github.com/dwijayuda/pskernel/actions/runs/39867316634)
+native120132664257 PASS: five exact hash equations,2730 frozen matrix cases,
+three long cases,all294 requests/377 metadata,six native String cases and six
+threaded singleton sequences,retained native/official/DAG/session controls.
+All79 proof reports are retained; the new five use only propext,
+Classical.choice,Quot.sound,no sorryAx or compiler-trust axiom.
+Artifact12464961155 and exact source/tree/proof rows:
+`evidence/2026-10-23-t01f-fused-data-result-native.json`.
+
+Generated producer120133415127 is ALREADY RUNNING at c644. Fetch that existing
+run; do not duplicate it. Require its authentic source check,TS7.0.2,small
+generated2730/8190/13665 matrix plus three long cases,and the strengthened
+no-staged-result/no-Step-or-Mix-dispatch/no-staged-full-entry code-shape gate
+before full compilation. Unchanged controls and mixed runtime still require
+their own successful jobs. This documentation child inherits no qualification.
+
+The fused production change preserves the exported public staged worker,
+exact recurrence/modulus/raw UTF8/fuel-bounded outputs and immutable ownership.
+The byte-step/mix body is definitionally equal to the exported step; the
+ordinary full hash calls saturated Scan directly. Native proofs passed,but
+generated performance and complete String qualification remain pending.
+These local equations do not prove global backend preservation or soundness.
+
+Previous5abf mixed timed out at25minutes (377 completed trace calls);
+its exact-artifact bounded WHNF profile completed91536.663875ms,
+whole152.76s,peakRSS560584KiB. Keep all prior timing/RSS observations visible.
+The profile spans admission plus the operation,not a phase-exclusive or
+controlled benchmark. Its raw records and next-change rationale are saved in
 `evidence/2026-10-23-t01f-data-result-v1-whnf-profile.json`.
-130522 sampled ticks include admission plus the target operation;19260 GC
-ticks (14.8% total). This is not a phase-exclusive or controlled comparison.
 
-This commit changes only production ScalarHash.lean plus its narrow workflow.
-It fuses the definitionally equal byte-step/mix body into the existing
-immutable data iterator, avoiding two generated per-byte dispatches. The
-ordinary full hash calls saturated Scan directly. The exported public worker
-retains every partial-application stage. Hash recurrence/modulus/raw UTF8/
-fuel-bounded outputs and immutable ownership are unchanged.
-The existing five exact equations,2730-case native/generated matrices,
-8190 partial stages,13665 generated assertions and three long cases are
-UNCHANGED; passing the previous source does not qualify this candidate.
-
-Fetch this source's existing native-first hash preflight. Require its own
-five native equations, frozen matrices, authentic294/377 and allsix native
-String/singletons, then authentic source-check/TS7.0.2 compilation. The small
-generated probe now rejects per-byte Step/Mix dispatch and a staged full-hash
-entry in addition to rejecting function-result wrappers. Only after all
-those gates pass does full compilation and unchanged controls/mixed replay
-proceed. Preserve25-minute runtime caps,2048MiB,emptyPATH andfuel4096.
-
-Final workflows remain INACTIVE. All current-source qualification is pending.
-T01F/A/B/C/D remain open (historical A scoped9c87; historical full193 C FAIL).
-Do not startT05 or merge into integration. Keep both failed mixed attempts,
-all elapsed/RSS regressions and exact source/artifact identities visible.
+Final sharding workflows remain INACTIVE. T01F/currentA/B/C/D remain open;
+historical scoped A=9c87,historical full193 C=FAIL. Do not startT05 or move
+integration123c411. After complete mixed PASS,activate both final routes
+and all retained gates at one source,disable narrow automatic diagnostics,
+and execute all current-source qualifications and complete measurements.
 
 ## Exact 5abf mixed preflight TIMEOUT; current-artifact bounded profile next
 

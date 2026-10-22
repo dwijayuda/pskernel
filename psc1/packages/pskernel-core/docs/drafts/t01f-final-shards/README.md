@@ -10,7 +10,8 @@ Historical candidate 5abf40506564cad00ff518600ae5992dc826510e passed its own nat
 in run39860528417. Its authentic generated producer and retained controls passed; the unchanged
 mixed sample timed out at its 25-minute cap in job120118769683. The current-
 artifact bounded profile completed; a fused data-result hash candidate now
-requires its own native/generated preflight. Read the newest
+passed native preflight at exact c64425881ca637021c56bf4c985e2d1bd6afa593;
+its generated producer/control/mixed gates are pending in run39867316634. Read the newest
 [continuation](../../AI_CONTINUATION_PROMPT.md) and package AI_WORK_STATE.md.
 Do not inherit834's subset passes or discard its failed mixed timeout.
 

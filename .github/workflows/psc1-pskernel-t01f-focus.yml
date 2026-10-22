@@ -1,12 +1,6 @@
 name: PSC1 T01F authentic String native preflight
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - work/psc1-pskernel-t01f-string-20261022
-    paths:
-      - 'psc1/**'
-      - '.github/workflows/psc1-pskernel-t01f-focus.yml'
 permissions:
   contents: read
 jobs:
@@ -25,7 +19,6 @@ jobs:
         run: |
           set -euo pipefail
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
-          node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
           lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_string_environment_regression psc1_kernel_expr_v2_dag_regression
       - name: Independently admit actual String declarations and export untrusted inputs
         working-directory: psc1

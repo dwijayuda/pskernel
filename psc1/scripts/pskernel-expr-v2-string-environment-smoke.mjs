@@ -11,7 +11,27 @@ const k=await import(pathToFileURL(path.resolve(filename)).href);
 const fixtureBytes=readFileSync(fixturePath);
 const fixture=JSON.parse(fixtureBytes.toString("utf8"));
 const fixtureSha256=createHash("sha256").update(fixtureBytes).digest("hex");
-const get=name=>{if(!(name in k))throw Error("PSC1_T01F_MISSING_EXPORT "+name);return k[name];};
+const traceEnabled=process.env.PSC1_T01F_TRACE==="1";
+const tracedAPIs=new Set(["psKernelV1AdmitDeclaration","psKernelDagGeneratedFromSession",
+ "psKernelExprV2DecodeChecked","psKernelV1CheckExpression","psKernelV1Whnf","psKernelV1IsDefEq",
+ "psKernelExprV2TryDefEqWithDeclarationsFuel","psKernelExprV2TryCheckWithDeclarationsFuel",
+ "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel","psKernelV1RunDag"]);
+let traceSequence=0,traceStage="initial",traceSample=null;
+const tracedExports=new Map();
+const get=name=>{
+ if(!(name in k))throw Error("PSC1_T01F_MISSING_EXPORT "+name);
+ if(!traceEnabled||!tracedAPIs.has(name))return k[name];
+ if(!tracedExports.has(name))tracedExports.set(name,(...args)=>{
+  const id=++traceSequence,stage=traceStage,sample=traceSample;
+  console.log("PSC1_T01F_TRACE_BEGIN "+JSON.stringify({id,stage,sample,api:name}));
+  const start=performance.now();
+  const result=k[name](...args);
+  const milliseconds=performance.now()-start;
+  console.log("PSC1_T01F_TRACE_END "+JSON.stringify({id,stage,sample,api:name,milliseconds}));
+  return result;
+ });
+ return tracedExports.get(name);
+};
 const unit=value=>typeof value==="function"?value():value;
 let assertions=0;
 const must=(ok,label)=>{if(ok!==true)throw Error("PSC1_T01F_FAIL "+label);assertions++;};
@@ -151,6 +171,7 @@ const constructionMs=performance.now()-constructionStart;
 const admitStart=performance.now();
 let corruptedDefinitionControls=0;
 for(let index=0;index<requests.length;index++){
+ traceStage="admission:"+fixture.roots[index];
  console.log("PSC1_T01F_JS_ADMIT_BEGIN "+index+" "+fixture.roots[index]);
  if(fixture.declarations[index][0]==="definitionDecl"&&
     same(requests[index].value.base.name,qname("String.ofList"))){
@@ -166,6 +187,7 @@ for(let index=0;index<requests.length;index++){
  session=accepted(get("psKernelV1AdmitDeclaration")(session,requests[index]),"admission-"+fixture.roots[index]).session;
 }
 const admissionMs=performance.now()-admitStart;
+console.log("PSC1_T01F_ADMISSION_COMPLETE "+JSON.stringify({requests:requests.length,admissionMs}));
 must(corruptedDefinitionControls===1,"exactly-one-authentic-corrupted-definition-control");
 const chars=value=>{
  const char=cn("Char");
@@ -184,6 +206,9 @@ const names=raw=>list(sequence(raw).map(name));
 // The original official metadata is an expected value only. It never enters
 // an admission request, checked environment, declaration index or owner table.
 const metadata=sequence(fixture.metadata),metadataNames=[];
+traceStage="metadata";
+const metadataStart=performance.now();
+if(traceEnabled)console.log("PSC1_T01F_METADATA_BEGIN "+metadata.length);
 for(const raw of metadata){
  sequence(raw);const tag=text(raw[0]);
  const expectedBase=base(tag==="defnInfo"?record(raw[1],4,"metadata-definition")[0]:raw[1]);
@@ -242,6 +267,7 @@ for(const raw of metadata){
 }
 must(new Set(metadataNames).size===metadataNames.length&&
  BigInt(metadata.length)===get("psKernelEnvironmentSize")(session.environment),"complete-authentic-metadata-coverage");
+console.log("PSC1_T01F_METADATA_COMPLETE "+JSON.stringify({declarations:metadata.length,milliseconds:performance.now()-metadataStart}));
 const stringConstructor=find("String.ofByteArray");
 must(stringConstructor&&same(stringConstructor,ci.ctorInfo(stringConstructor.value))&&
  stringConstructor.value.numFields===2n,"actual-String-bytearray-proof-constructor");
@@ -256,6 +282,8 @@ const decode=(arena,root)=>accepted(get("psKernelExprV2DecodedRequire")(
  accepted(get("psKernelExprV2DecodeChecked")(arena),"decode"),root),"root");
 const measurements=[];
 for(const value of sequence(fixture.samples).map(text)){
+ traceSample=value;traceStage="input-and-owners";
+ if(traceEnabled)console.log("PSC1_T01F_SAMPLE_BEGIN "+JSON.stringify(value));
  const started=performance.now();
  const literal=E.lit(Lit.str(value)),expanded=app(cn("String.ofList"),[chars(value)]);
  const data=term=>E.proj(qname("Array"),0n,E.proj(qname("ByteArray"),0n,E.proj(qname("String"),0n,term)));
@@ -270,10 +298,12 @@ for(const value of sequence(fixture.samples).map(text)){
  const ownerMs=performance.now()-started;
  const context=get("psKernelKernelSessionChecker")(session,nil,safe).context;
  for(const {label,left,right,a,b} of roots){
+  traceStage=label+":defeq";
   must(accepted(get("psKernelV1IsDefEq")(session,nil,safe,left,right),label+"-v1-defeq"),label+"-v1-equal");
   must(attempt(get("psKernelExprV2TryDefEqWithDeclarationsFuel")(4096n,context,owners.arena,owners.declarations,a,b),label+"-defeq"),label+"-equal");
   for(const [side,term,root,other] of [["left",left,a,b],["right",right,b,a]]){
    const caseLabel=label+"-"+side;
+   traceStage=caseLabel;
    const legacy=accepted(get("psKernelV1CheckExpression")(session,nil,safe,term),caseLabel+"-v1-check");
    const legacyNormalized=accepted(get("psKernelV1Whnf")(session,nil,safe,term),caseLabel+"-v1-whnf");
    if(label==="string"&&side==="right")requireStringConstructor(legacyNormalized,caseLabel+"-v1");
@@ -317,6 +347,7 @@ for(const value of sequence(fixture.samples).map(text)){
   ["ofList-universe",app(cn("String.ofList",[zero]),[chars(value)])]
  ];
  for(const [badLabel,bad] of badCases){
+  traceStage="negative:"+badLabel;
   must(rejected(get("psKernelV1CheckExpression")(session,nil,safe,bad)),badLabel+"-invalid-rejection");
   const malformed={arena:get("psKernelExprV2PagedEmpty"),built:get("psKernelExprV2DecodedEmpty"),declarations:nil};
   const imported=accepted(get("psKernelDagGeneratedImport")(bad,malformed),"bad-input");
@@ -324,6 +355,7 @@ for(const value of sequence(fixture.samples).map(text)){
    must(rejected(get("psKernelV1RunDag")(session,nil,safe,imported.fst.arena,list([command]))),badLabel+"-public-invalid-rejection");
   }
  }
+ traceStage="distinct-strings";
  const different=E.lit(Lit.str(value+"x"));
  must(!accepted(get("psKernelV1IsDefEq")(session,nil,safe,literal,different),"distinct-v1"),"distinct-strings-v1");
  let unequalSource={arena:get("psKernelExprV2PagedEmpty"),built:get("psKernelExprV2DecodedEmpty"),declarations:nil};
@@ -341,5 +373,5 @@ for(const value of sequence(fixture.samples).map(text)){
 must(get("psKernelEnvironmentSize")(empty.environment)===0n,"empty-session-immutable");
 console.log("PSC1_T01F_FULL_STRING_JS: PASS "+JSON.stringify({kernelSha256,fixtureSha256,requests:requests.length,metadata:metadata.length,
  declarations:get("psKernelEnvironmentSize")(session.environment).toString(),samples:fixture.samples.length,
- assertions,constructionMs,admissionMs,measurements}));
+ assertions,constructionMs,admissionMs,diagnosticTracing:traceEnabled,measurements}));
 

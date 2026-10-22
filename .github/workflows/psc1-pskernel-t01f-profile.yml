@@ -1,0 +1,111 @@
+name: PSC1 T01F generated operation diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - work/psc1-pskernel-t01f-string-20261022
+    paths:
+      - '.github/workflows/psc1-pskernel-t01f-profile.yml'
+      - 'psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  trace-historical-generated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate historical generated code and current untrusted declaration inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, io, json, os, pathlib, urllib.request, zipfile
+          base = "https://api.github.com/repos/dwijayuda/pskernel"
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "psc1-t01f-profile"
+          out.mkdir()
+          def get(route):
+              request = urllib.request.Request(base + route, headers={
+                  "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"})
+              request.add_unredirected_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  return response.read()
+          def artifact(source, run_id, artifact_id, artifact_name, size, digest, suffix, output, file_digest):
+              run = json.loads(get("/actions/runs/" + str(run_id)))
+              assert run["head_sha"] == source and run["status"] == "completed" and run["conclusion"] == "success"
+              info = json.loads(get("/actions/artifacts/" + str(artifact_id)))
+              assert info["name"] == artifact_name and not info["expired"]
+              assert info["workflow_run"]["id"] == run_id and info["workflow_run"]["head_sha"] == source
+              assert info["digest"] == "sha256:" + digest and info["size_in_bytes"] == size
+              archive = get("/actions/artifacts/" + str(artifact_id) + "/zip")
+              assert len(archive) == size and hashlib.sha256(archive).hexdigest() == digest
+              with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
+                  names = [name for name in bundle.namelist() if name == suffix or name.endswith("/" + suffix)]
+                  assert len(names) == 1, names
+                  contents = bundle.read(names[0])
+              assert hashlib.sha256(contents).hexdigest() == file_digest
+              (out / output).write_bytes(contents)
+              return {"source":source,"runId":run_id,"artifactId":artifact_id,"artifactSha256":digest,
+                      "entry":names[0],"fileSha256":file_digest,"bytes":len(contents)}
+          generated = artifact(
+              "9c87f631758862285273ddb0ea0a3987c671022e",39694087886,12391568345,
+              "psc1-v2-dag-generated-js",3410883,
+              "6c63a2fa2981610f14e91e3aeb37ae6f00e5fdc1107a4c942841d25208af3ff7",
+              "psc1/dist/expr-v2/integration/kernel.js","kernel.mjs",
+              "f1ac31f1527103877268b5dea86075795401fc7679357878064f9194e0e9fd32")
+          fixture = artifact(
+              "90917599acbc8fce257361f36a032dd86defa9da",39823486422,12446150730,
+              "psc1-t01f-native-preflight",105178,
+              "44ce52a353e76aa2c6e686d6710688b80789668b53372a7880fb6d0b7c3d941b",
+              "fixture.json","fixture.json",
+              "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d")
+          provenance = {"role":"bounded diagnostic only; no qualification or performance acceptance",
+                        "harnessSource":os.environ["GITHUB_SHA"],"generated":generated,"fixture":fixture,
+                        "fuel":4096,"nodeOldSpaceMiB":2048,"diagnosticDeadlineSeconds":180}
+          (out / "provenance.json").write_text(json.dumps(provenance,indent=2)+"\n")
+          print("PSC1_T01F_TRACE_PROVENANCE "+json.dumps(provenance))
+          PY
+      - name: Trace complete unchanged matrix until bounded diagnostic deadline
+        run: |
+          set -euo pipefail
+          cp psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs "$RUNNER_TEMP/psc1-t01f-profile/smoke.mjs"
+          NODE_BIN="$(command -v node)"
+          cd "$RUNNER_TEMP/psc1-t01f-profile"
+          "$NODE_BIN" --check smoke.mjs
+          "$NODE_BIN" --version
+          set +e
+          /usr/bin/time -f 'PSC1_T01F_TRACE_RESOURCE wallSeconds=%e maxRssKiB=%M exit=%x' \
+            timeout --signal=TERM --kill-after=5s 180s \
+            env PATH="" PSC1_T01F_TRACE=1 "$NODE_BIN" --max-old-space-size=2048 --expose-gc \
+              --prof --logfile=profile.log smoke.mjs ./kernel.mjs ./fixture.json \
+              2>&1 | tee trace.log
+          status=${PIPESTATUS[0]}
+          printf '%s\n' "$status" > diagnostic-exit-status.txt
+          exit "$status"
+      - name: Process sampled V8 profile
+        if: always()
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/psc1-t01f-profile"
+          shopt -s nullglob
+          logs=(isolate-*-profile.log)
+          test "${#logs[@]}" -eq 1
+          node --prof-process "${logs[0]}" > profile.txt 2> profile-process.stderr
+          sed -n '1,240p' profile.txt
+          tail -n 40 trace.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-bounded-operation-profile
+          path: |
+            ${{ runner.temp }}/psc1-t01f-profile/provenance.json
+            ${{ runner.temp }}/psc1-t01f-profile/trace.log
+            ${{ runner.temp }}/psc1-t01f-profile/diagnostic-exit-status.txt
+            ${{ runner.temp }}/psc1-t01f-profile/isolate-*-profile.log
+            ${{ runner.temp }}/psc1-t01f-profile/profile.txt
+            ${{ runner.temp }}/psc1-t01f-profile/profile-process.stderr

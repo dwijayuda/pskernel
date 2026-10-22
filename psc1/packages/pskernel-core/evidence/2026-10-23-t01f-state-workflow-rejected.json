@@ -1,0 +1,10 @@
+{
+  "sourceSha": "911510a6d618612a4aaeb363ee517af9cdf2ba54",
+  "runId": 39860291713,
+  "conclusion": "failure",
+  "jobs": 0,
+  "phase": "workflow parse before runner",
+  "qualified": false,
+  "cause": "Authoring String.replace expanded a replacement token inside embedded Python marker",
+  "correction": "Insert workflow fragment through callback, preserving literal marker and boundaries; kernel/test sources unchanged."
+}

@@ -1,3 +1,16 @@
+## Workflow transport correction after911 — no candidate tests ran
+
+Source911510a6d618612a4aaeb363ee517af9cdf2ba54
+run39860291713 was rejected as an invalid workflow before any runner/job.
+The embedded Python marker contained a JavaScript string-replacement token;
+the authoring replacement incorrectly expanded workflow suffix text.
+This checkpoint corrects the workflow text using literal/callback insertion.
+Production code, proofs, matrices, acceptance assertions and limits are unchanged.
+No native or generated qualification is inherited by this new candidate.
+Run the native-first corrected workflow and inspect its own exact source.
+
+---
+
 ## Data-result hash iteration candidate — after834 mixed timeout
 
 Exact834 run39853314171 ended with mixed120096453413 CANCELLED at25minutes,

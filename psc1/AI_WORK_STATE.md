@@ -94,6 +94,29 @@ tier; an integration failure cannot be reported as final qualification.
 Failed/cancelled debt is retained. Documentation/qualification receipts select
 only static checks after the successful compiler baseline.
 
+## Release-facing reconciliation (2026-10-23)
+
+Verified latest remote HEAD fc60604a6b9759da75f3f507b2b7a4868d57ef99:
+the compiler qualification run 39829564386 and final documentation run
+39837904301 both succeed. The latter selects qualified source 9ee6c5ff as its
+baseline and skips heavy tests. No compiler/runtime/dependency bytes change here.
+
+Release audit found stale README/conformance/IO/application claims and the old
+status JSON, which still called typed IO missing and pointed to PR #169.
+Reconcile current documentation with the exact finite v1 checkpoint; preserve
+all historical sections and archive the old status under docs/history/.
+docs/PSC1_RELEASE_CANDIDATE.md gives the exact tested package/hash, platform,
+artifact expiry, supported ABI choices and remaining authorization boundary.
+
+scripts/practical-core-release-status.mjs derives the current data-only status
+from the single frozen contract and completed immutable receipt. Always-run
+static readiness tests compare the inventory and reject inconsistent source,
+matrix, gate, G1/closure/checker/package evidence. Exact inventory/test paths
+select static checks; contract, readiness gate, compiler, host, workflow and
+unknown machine policies retain their existing test tiers. No correctness or
+final qualification assertion is removed. Linux static validation is pending
+for this reconciliation commit; record its terminal result after completion.
+
 ## Remaining release work and deferred scope
 
 There are no blocked finite Practical Core v1 acceptance items at the qualified

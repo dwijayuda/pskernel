@@ -90,9 +90,12 @@ all seven target mappings in both grammars. Each native provider passes 20 actua
 Linux policy cases. The new matrix also checks source recovery, foreign trap
 escape, admitted source/IR identities and ABI refusal preservation.
 
-The typed-io family's three finite criteria are scoped-qualified. Complete
-application acceptance and other Practical Core criteria remain blocked;
-releaseReady=false. Pure protocol observations alone never qualify host adapters.
+The typed-io family's three finite criteria and all other frozen v1 criteria
+are qualified at compiler source 9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde in
+[Linux run 39829564386](https://github.com/dwijayuda/pskernel/actions/runs/39829564386).
+The exact complete receipt is PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json;
+its data inventory reports 37 qualified / 0 blocked, releaseReady=true.
+Pure protocol observations alone never qualify host adapters.
 
 
 ## Checked sequencing and standalone profiles
@@ -132,7 +135,7 @@ non-string paths as pathDenied and non-string text as protocolError; shared
 policy tests exercise these malformed field classes.
 
 
-## Exact current evidence
+## Preserved first seven-adapter checkpoint
 
 Implementation 74179eb664e132502a24ce60b52a3dbd52b1d0cc, tested merge
 2a6dbec7b7f3d02c6dc6399360422da350e646e7:
@@ -144,4 +147,5 @@ Wasm IO supports payload limits up to 2 MiB and a fixed 16 MiB arena; larger
 configuration refuses before loading. See PSC1_WASM_STRING_ABI_V1.md.
 The unpublished npm qualification package exports proofscript/io/node and
 proofscript/io/wasm-core and ships the standalone Python/PHP/locked-Rust resources.
-No registry publication or release-readiness claim is made.
+This older checkpoint does not itself establish complete release readiness.
+The current finite v1 result is linked above. No registry publication has occurred.

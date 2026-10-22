@@ -52,3 +52,18 @@ for(const file of ['psc1/scripts/select-development-tests.mjs','psc1/scripts/dev
  assert.equal(select([file,'psc1/host-tools/artifacts.mjs']).release,true);
  assert.equal(select([file,'psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean']).integration,true);
 }
+
+
+// Only this exact data projection and its always-run pure tests are static-only.
+// Contract, readiness gate, source, host, workflow or arbitrary status changes keep their tiers.
+for(const file of ['psc1/docs/PSC1_PRACTICAL_CORE_STATUS.json',
+ 'psc1/docs/history/PSC1_PRACTICAL_CORE_STATUS_BEFORE_V1_2026-10-23.json',
+ 'psc1/scripts/practical-core-release-status.mjs','psc1/scripts/practical-core-readiness-tests.mjs']){
+ const result=select([file]);assert.equal(result.focused,false);assert.equal(result.release,false);
+ for(const dependency of ['psc1/scripts/practical-core-readiness.mjs',
+  'psc1/docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json','.github/workflows/psc1-development.yml',
+  'psc1/packages/elab/src/Ps/Elab/Do.lean','psc1/host-tools/typed-io.mjs']){
+  const combined=select([file,dependency]),expected=select([dependency]);
+  for(const tier of ['focused','integration','release','benchmark'])assert.equal(combined[tier],expected[tier]);
+ }
+}

@@ -1,7 +1,10 @@
 # Explicit Wasm String ABI v1
 
-Status: scoped-qualified at 74179eb664e132502a24ce60b52a3dbd52b1d0cc in Linux
-run 39627387430. Default ABIs remain unchanged.
+Current finite v1 candidate: 9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde,
+[Linux run 39829564386](https://github.com/dwijayuda/pskernel/actions/runs/39829564386),
+PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json.
+The first scoped qualification at 74179eb664e132502a24ce60b52a3dbd52b1d0cc,
+run 39627387430, remains preserved below. Default ABIs remain unchanged.
 
 --abi wasm-string permits public Bool/String arguments/results after source
 admission and strict original/transformed IR validation. --abi io-dispatcher

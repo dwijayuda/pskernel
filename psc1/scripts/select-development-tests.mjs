@@ -15,6 +15,14 @@ export function selectPsc1Tests(paths,{full=false,uncertain=false}={}){
    all('build-or-ci-policy:'+file);continue;
   }
   if(!file.startsWith('psc1/'))continue; // PSKernel research is a separate workstream.
+  // These derived inventories and their pure validators run in every static tier.
+  // They do not alter compiler semantics, admission, release assertions or runtime policy.
+  if(['psc1/docs/PSC1_PRACTICAL_CORE_STATUS.json',
+      'psc1/docs/history/PSC1_PRACTICAL_CORE_STATUS_BEFORE_V1_2026-10-23.json',
+      'psc1/scripts/practical-core-release-status.mjs',
+      'psc1/scripts/practical-core-readiness-tests.mjs'].includes(file)){
+   reasons.push('static-release-inventory:'+file);continue;
+  }
   if(/\.(md|txt)$/.test(file))continue;
   if(file.startsWith('psc1/docs/')){
    if(/^psc1\/docs\/PSC1_[A-Z0-9_]*(QUALIFICATION|FAILURE|RUNTIME|FIRST_ATTEMPT)_[0-9-]+\.json$/.test(file))continue;

@@ -42,5 +42,8 @@ Provide a host config JSON granting readUtf8, writeUtf8 and writeLine explicitly
 Node usage: `node scripts/practical-application-node.mjs js MODULE CONFIG transform INPUT OUTPUT`.
 The compiler never grants host access from source text or a manifest.
 
-Library, compiler-like and 100000-item measured workload acceptance remain
-separate finite release blockers. G2/G3 remain deferred until stable feature freeze.
+The separate library, compiler-like and 100000-item measured workload acceptance
+also passes in the complete finite v1 candidate at
+9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde, [Linux run 39829564386](https://github.com/dwijayuda/pskernel/actions/runs/39829564386).
+The exact receipt is PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json.
+G2/G3 remain separate manual qualification on finalized source.

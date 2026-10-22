@@ -142,3 +142,32 @@ assert.deepEqual(meta('for-loops','ranges').requiredSourceEvaluationOnce,['evalu
 assert.deepEqual(meta('arrays-indexing','operations').requiredSourceEvaluationOnce,['evaluationArray','evaluationIndex']);
 
 assert.equal(contract.requireReadyOnFullQualification,true,'full qualification must enforce the completed finite contract');
+
+ 
+// Published status is a data projection, never independent release evidence.
+const {releaseStatus,checkpointPath}=await import('./practical-core-release-status.mjs');
+const checkpoint=JSON.parse(fs.readFileSync(new URL('../'+checkpointPath,import.meta.url)));
+const inventory=JSON.parse(fs.readFileSync(new URL('../docs/PSC1_PRACTICAL_CORE_STATUS.json',import.meta.url)));
+assert.deepEqual(inventory,releaseStatus(contract,checkpoint),'stale public release inventory');
+for(const mutate of [
+ r=>r.sourceCommit='b'.repeat(40),
+ r=>r.testedMergeCommit='b'.repeat(40),
+ r=>r.finiteScope.targets.pop(),
+ r=>r.finiteScope.criteria--,
+ r=>r.readiness.counts.qualified--,
+ r=>r.allSelectedJobsPassed=false,
+ r=>r.jobs=r.jobs.filter(j=>j.name!=='g1 / generated-js'),
+ r=>r.jobs.find(j=>j.name==='full / linux-scoped').conclusion='failure',
+ r=>r.jobs.find(j=>j.name==='full / linux-scoped').steps[0].conclusion='skipped',
+ r=>r.jobs.push(clone(r.jobs[0])),
+ r=>r.jobs.find(j=>j.name==='g1 / generated-js').steps=r.jobs.find(j=>j.name==='g1 / generated-js').steps.filter(s=>s.name!=='Seed once and execute actual generated compiler semantics'),
+ r=>r.g1.generatedCompilerExecution='pending',
+ r=>r.closures[0].canonicalIrBytesParity='refused',
+ r=>r.qualification.logicalChecker.commit='b'.repeat(40),
+ r=>r.qualification.npm.branchHeadCommit='b'.repeat(40),
+ r=>r.qualification.npm.publicationStatus='published'
+]){
+ const changed=clone(checkpoint);mutate(changed);
+ assert.throws(()=>releaseStatus(contract,changed),'inconsistent public evidence must refuse');
+}
+console.log('PSC1_RELEASE_INVENTORY: PASS stale source, incomplete matrix, failed/skipped/missing/duplicate gates, G1, closure, checker and package identities refuse');

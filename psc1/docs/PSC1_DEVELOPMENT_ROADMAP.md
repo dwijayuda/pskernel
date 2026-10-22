@@ -30,6 +30,12 @@ requireReadyOnFullQualification=true. Its completed evidence satisfies the
 executable finite contract; a manual event is not claimed and an identical
 expensive replay is not scheduled merely to change the triggering event.
 
+Current release-facing documents and the derived status inventory are reconciled
+with this checkpoint. The prior status is archived; a static regression checks
+the contract/receipt/status identities and rejects incomplete required gates.
+PSC1_RELEASE_CANDIDATE.md records exact package provenance, artifact expiry and
+ABI selection. This documentation/test continuation changes no compiler bytes.
+
 ## Dependency-ordered continuation
 
 1. Keep the qualified candidate stable for release review. Merge/publication

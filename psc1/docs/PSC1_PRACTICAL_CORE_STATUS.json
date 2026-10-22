@@ -1,685 +1,406 @@
 {
-  "schema": "psc1-practical-core-status/1",
-  "name": "PSC1 Practical Core — v7.2 subset",
-  "baselineCommit": "a2778be648850a1f6a2381e28babcd4a6e783e31",
-  "reference": {
-    "path": "psc1/PSC1_LANGUAGE_REFERENCE_v7.2.md",
-    "upstreamCommit": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
-    "upstreamBlob": "694115223777599ba28ee175e14bb642b7b6aa4b"
-  },
+  "schema": "psc1-practical-core-status/2",
+  "name": "PSC1 Practical Core v1",
+  "authority": "Data-only projection of the finite contract and immutable Linux CI checkpoint; no admission, publication or changed-source authority.",
+  "contract": "docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json",
+  "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json",
+  "sourceCommit": "9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde",
+  "testedMergeCommit": "00decc7fb81fc4023f68cdcdbf8cff1fdd028b12",
+  "baseCommit": "1fad9ed53cda9b23ac30be9cea85e7857437564e",
+  "runId": 39829564386,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39829564386",
+  "scope": "frozen-finite-v1-linux",
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
   "semanticLean": {
     "version": "4.35.0",
     "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
   },
-  "implementationLean": {
-    "version": "4.35.0",
-    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-    "status": "isolated-native-migration-qualified"
+  "counts": {
+    "implemented": 0,
+    "tested": 0,
+    "qualified": 37,
+    "blocked": 0
   },
-  "baselineEvidence": {
-    "implementationCommit": "f933691a1d6fa578c59623636afbb02119909837",
-    "runId": 39332460452,
-    "repairPrRunId": 39333660822
-  },
-  "currentMilestones": [
-    {
-      "id": "lean-4.35-native-migration",
-      "status": "qualified",
-      "commit": "1bd0854f735cf8d0c8f3d07f705195c131acbd61",
-      "runId": 39344155280
-    },
-    {
-      "id": "practical-core-slice-1",
-      "status": "qualified-subset",
-      "qualification": "focused Linux compile, independent admission, typed IR and actual target execution passed",
-      "commit": "4be91b111c1773f02a009fb2f643b18912cee920",
-      "runId": 39348537989,
-      "receipt": "docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json"
-    },
-    {
-      "id": "practical-core-control-data-ordinary-while",
-      "status": "qualified-subset",
-      "qualification": "focused Linux compile, independent admission, strict IR and selected execution in both grammars on seven targets passed",
-      "commit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-      "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-      "runId": 39407097682,
-      "receipt": "docs/PSC1_PRACTICAL_CORE_CONTROL_DATA_QUALIFICATION_2026-10-20.json"
-    },
-    {
-      "id": "practical-core-immutable-patterns-semantic-namespaces",
-      "status": "qualified-subset",
-      "qualification": "Both-grammar native admission and strict IR, selected seven-target execution, strict tuple-RHS deadlines, namespace ownership/refusals, minimum Python and installed package checks passed",
-      "commit": "7e1158875cdf236a677448598bd5f677c11d4daf",
-      "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
-      "runId": 39467579973,
-      "receipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json"
-    },
-    {
-      "id": "typed-error-handlers",
-      "status": "qualified-selected-subset",
-      "branch": "research/psc1-ultra-qualified-20261021",
-      "baselineCommit": "da880d864ca5f9e35729255fd7e4f8a17953cd39",
-      "integratedCommit": "a830668d2c23886843e616951836d8d990aa2ff5",
-      "scope": "Selected single typed handlers, distinct control packets, nested scope/state, lexical captures, finite-loop pattern fallthrough and ordinary while; 28 target/source bundles and 70 refusals; minimum Python4 bundles/10 refusals. CompilerM remains native/private-JS evidence; no complete-family or formal preservation claim.",
-      "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
-      "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
-      "runId": 39495181966,
-      "receipt": "docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json"
-    },
-    {
-      "id": "compiler-m-owned-callbacks-seven-target-case-contract",
-      "status": "qualified-selected-subset",
-      "implementationCommit": "8ac752a7f3acfe696ee3e8cb1fe67398de040704",
-      "testedMergeCommit": "574d481a3c0f0f1259d73f929a04d9dc2217fad0",
-      "runId": 39557245201,
-      "receipt": "docs/PSC1_COMPILERM_QUALIFICATION_2026-10-21.json",
-      "scope": "7 independently authored cases, both grammars, seven targets, minimum Python, returned owned callback data and explicit multi-export Bool components; full families incomplete"
-    },
-    {
-      "id": "canonical-stdlib-collections-both-grammar-list-literals",
-      "status": "qualified-selected-subset",
-      "implementationCommit": "dd2328a53e5e9a5384e474410f5123810330130c",
-      "testedMergeCommit": "86f2c1aea281ba7303a5158a19df85b58c375d58",
-      "runId": 39561579871,
-      "receipt": "docs/PSC1_COLLECTIONS_QUALIFICATION_2026-10-21.json",
-      "scope": "Canonical List/Except imports, correct length/reverse, direct checked optional lookup and PS list literals;42 collection obligations plus retained98 CompilerM, minimum Python and ten G1 cases"
-    }
-  ],
-  "stages": [
-    "specified",
-    "parsed",
-    "elaborated",
-    "independently-checked",
-    "executed-on-target"
-  ],
+  "releaseReady": true,
   "features": [
     {
       "id": "operators",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
-        "psc1/packages/environment/src/Ps/Environment/Prelude.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/Operators.lean",
-        "psc1/packages/elab/src/Ps/Elab/Operators.lean",
-        "psc1/test/OperatorTests.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/PrintCommon.lean"
-      ],
-      "notes": "Existing Nat arithmetic, selected Int arithmetic, Bool operations and Nat/Bool equality remain qualified in the retained profile. New control lowering reuses existing Bool decision evidence. Prop-valued Nat/Int ordering is still missing; Int division/modulo remains outside the active profile.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "psc1_operator_tests and practical-forms-backend-tests.mjs",
-          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+          "id": "numeric",
+          "meaning": "Exact Nat arithmetic, saturation and zero divisors; Int add/sub/mul; mixed numeric refusal.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_operator_tests, runtime-conformance-tests.mjs and operator translation roundtrips",
-          "scope": "Retained selected arithmetic/Bool predicates execute in both grammars on all seven targets; operator grouping roundtrips preserve the selected syntax. No new Prop-ordering family claim."
+          "id": "order",
+          "meaning": "Nat/Int proposition-valued order with independently admitted decisions; false/true and equal boundaries.",
+          "status": "qualified"
+        },
+        {
+          "id": "short-circuit",
+          "meaning": "Fixed precedence/associativity; Bool short circuit skips divergence/error; typed equality rejects mismatches.",
+          "status": "qualified"
         }
       ]
     },
     {
       "id": "local-inference",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/elab/src/Ps/Elab/Term.lean",
-        "psc1/test/BootstrapTests.lean",
-        "psc1/packages/elab/src/Ps/Elab/Data.lean",
-        "psc1/test/DataTests.lean"
-      ],
-      "notes": "Typed/inferred local lets, contextual literals and selected tuple/array/control interactions are exercised. Unresolved metavariables fail closed. This does not claim general Lean inference.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
-          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+          "id": "contexts",
+          "meaning": "Expected types resolve numeric/empty-array/tuple/lambda contexts in both syntaxes.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "contextual_inference_tests, psc1_data_tests and runtime-conformance-tests.mjs",
-          "scope": "Selected contextual data/control inference participates in native tests and both-grammar seven-target predicates. General Lean inference remains unclaimed."
+          "id": "rollback",
+          "meaning": "Failed speculative alternatives restore meta state; ambiguous and unresolved terms refuse.",
+          "status": "qualified"
         }
       ]
     },
     {
-      "id": "do",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
-        "psc1/packages/elab/src/Ps/Elab/Do.lean",
-        "psc1/test/DoTests.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
-        "psc1/packages/elab/src/Ps/Elab/Data.lean",
-        "psc1/test/DataTests.lean",
-        "psc1/test/CompilerMFixtures.lean",
-        "psc1/test/CompilerMFixtures.ps",
-        "psc1/docs/PSC1_COMPILERM_CASE_CONTRACT.json"
-      ],
-      "notes": "Type0 Id, Except and actual checked CompilerM share lexical mutation, branch continuations, early return, finite loops and contextual pure. CompilerM now has a finite seven-case authored both-grammar/seven-target contract with native Lean observations, admission, strict IR and actual individual target execution (including returned callback storage); this does not complete the full family. Source while is restricted to selected ordinary Id/Except cases; general effects/handlers remain missing. Immutable product/Unit/wildcard let patterns now share the same controller; mutable and monadic patterns remain refused.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "id": "typed-do",
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "psc1_do_tests and practical-forms-backend-tests.mjs",
-          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+          "id": "state",
+          "meaning": "Reader/state/modify and old-value capture match the checked CompilerM library.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_do_tests, runtime-conformance-tests.mjs and native/private-JS CompilerM fixtures",
-          "scope": "Selected Id/Except control executes in both grammars on all seven targets; actual checked CompilerM control/state is separately independently admitted, IR checked and compared through private JavaScript execution."
+          "id": "patterns",
+          "meaning": "Unit/nested-product bindings compose with bind, once-only evaluation and scopes.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
-          "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
-          "runId": 39467579973,
-          "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
-          "scope": "Selected immutable pattern bindings preserve outer RHS scope, closure captures, mutation continuations and early return; native finite-loop interactions and both-grammar seven-target do-pattern predicates pass."
-        },
-        {
-          "implementationCommit": "8ac752a7f3acfe696ee3e8cb1fe67398de040704",
-          "testedMergeCommit": "574d481a3c0f0f1259d73f929a04d9dc2217fad0",
-          "runId": 39557245201,
-          "suite": "compiler-m-conformance-tests.mjs and finite parity validator",
-          "scope": "98 case/grammar/target obligations plus14 minimum Python; exact receipt above"
+          "id": "ownership",
+          "meaning": "Nested do/lambda owns return; wrong state/error/result types refuse.",
+          "status": "qualified"
         }
       ]
     },
     {
-      "id": "for",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoFor.lean",
-        "psc1/packages/environment/src/Ps/Environment/Control.lean",
-        "psc1/test/DoTests.lean"
-      ],
-      "notes": "List, Array and finite unit-step Nat ranges capture collection/endpoints once and preserve selected left-to-right bodies, mutation, early return and effect sequencing. Includes literal/empty Lists and equal/reversed/zero-start ranges. O(n) continuation construction; arbitrary iterator instances and broad resource qualification remain outside the profile.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "id": "for-loops",
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_do_tests and runtime-conformance-tests.mjs",
-          "scope": "Selected List/Array/unit-step Nat ranges execute in both grammars on all seven targets; CompilerM finite-loop state cases use native/private-JS evidence. No broad large-collection resource claim."
+          "id": "collections",
+          "meaning": "List/Array traversal order, once-only source, empty collections and state/error propagation.",
+          "status": "qualified"
+        },
+        {
+          "id": "ranges",
+          "meaning": "Lower-inclusive upper-exclusive Nat range; endpoint order/once-only evaluation; reversed range is empty.",
+          "status": "qualified"
+        },
+        {
+          "id": "streaming",
+          "meaning": "First action occurs without materializing all continuations; retained 100000-step bounded-memory application measurement.",
+          "status": "qualified"
         }
       ]
     },
     {
-      "id": "while",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoWhile.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean",
-        "psc1/test/WhileTests.lean",
-        "psc1/scripts/ordinary-while-conformance-tests.mjs"
-      ],
-      "notes": "Explicit partial source owners and ordinary assurance only. Selected Type0 Id/Except loops require a known datatype or selected primitive data result head and fully saturated direct tail recurrence after checked per-site closure conversion. No procedural loop in a while body's control spine, CompilerM while, unknown/function head of the complete computation type, or general dependent local-let capture. Includes sequential loops, while within a finite for, early return, typed error propagation and external-timeout divergence; no generated execution fuel.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "id": "while-loops",
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_while_tests and ordinary-while-conformance-tests.mjs",
-          "scope": "Selected explicit ordinary Id/Except loops: 14 finite target/source bundles, 14 external divergence deadlines and 16 refusals; 100000-iteration cases. Complete families remain false."
+          "id": "controller",
+          "meaning": "Reevaluation, sequential/nested loops, mutation, return and typed catch use the current state.",
+          "status": "qualified"
+        },
+        {
+          "id": "divergence",
+          "meaning": "Ordinary divergent loop is externally timed out; no injected runtime fuel; checked total owner refuses unproved loop.",
+          "status": "qualified"
         }
       ]
     },
     {
       "id": "mutation",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
-        "psc1/packages/elab/src/Ps/Elab/Do.lean",
-        "psc1/test/DoTests.lean",
-        "psc1/test/WhileTests.lean"
-      ],
-      "notes": "Lexical fixed-type let-mut and assignment become checked immutable Core lets; branches and selected loops carry current values. Immutable shadowing by a new mutable local is allowed, while rebinding/shadowing an existing mutable name inside its controller is refused. Earlier closures retain captured values. General handler/effect interactions remain incomplete.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_do_tests, psc1_while_tests and both runtime matrices",
-          "scope": "Selected lexical fixed-type assignment, branch/loop joins and value capture execute in both-grammar target predicates; additional CompilerM state cases use native/private-JS evidence."
+          "id": "capture",
+          "meaning": "Owned returned callbacks preserve old values through product/Array/Option storage.",
+          "status": "qualified"
+        },
+        {
+          "id": "joins",
+          "meaning": "Fixed types across branch/loop joins; shadowing/escaping-name/type-change policy enforced.",
+          "status": "qualified"
+        },
+        {
+          "id": "rollback",
+          "meaning": "Handler restores lexical and effect state and continues outside the handler.",
+          "status": "qualified"
         }
       ]
     },
     {
-      "id": "return",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseDo.lean",
-        "psc1/packages/elab/src/Ps/Elab/Do.lean",
-        "psc1/test/DoTests.lean",
-        "psc1/test/WhileTests.lean"
-      ],
-      "notes": "Terminal and nested branch/selected loop early return use one procedural controller. A direct nested do shares it; a parenthesized do term or lambda creates a separate computation. Handler interactions and unsupported loop/effect shapes remain incomplete.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "id": "early-return",
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "psc1_do_tests and practical-forms-backend-tests.mjs",
-          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+          "id": "loop",
+          "meaning": "CompilerM finite range return skips continuation and preserves specified state.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_do_tests, psc1_while_tests and both runtime matrices",
-          "scope": "Selected branch/finite/ordinary-while early returns execute in both-grammar target predicates; independent nested-do/controller boundaries are pinned in native tests."
+          "id": "handler",
+          "meaning": "Source return bypasses catch and skips remaining continuation.",
+          "status": "qualified"
+        },
+        {
+          "id": "owners",
+          "meaning": "Returns in nested branches/loops exit only their owner; grouped do/lambda has independent owner.",
+          "status": "qualified"
         }
       ]
     },
     {
-      "id": "partial-def",
-      "priority": "P0",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/core/src/Ps/Core/Declaration.lean",
-        "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
-        "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
-        "psc1/packages/compiler/src/Ps/Compiler/Ordinary.lean",
-        "psc1/test/OrdinaryExecutionTests.lean",
-        "psc1/scripts/practical-ordinary-tests.mjs",
-        "psc1/packages/elab/src/Ps/Elab/DoLoopLift.lean",
-        "psc1/test/WhileTests.lean",
-        "psc1/scripts/ordinary-while-conformance-tests.mjs"
-      ],
-      "notes": "Explicit ordinary execution retains independently admitted constructive opaque witnesses and exact checked bodies with immutable graph pairing. Generated private while helpers use the unchanged ordinary path; their generic elaboration markers are absent from runtime graphs. Default checked and explicit verified requests refuse and preserve prior published artifacts. Broader function/control qualification remains incomplete.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "id": "partial-definitions",
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "psc1_ordinary_tests and practical-ordinary-tests.mjs",
-          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+          "id": "pairing",
+          "meaning": "Ordinary constructive opaque witness exactly paired with checked executable graph; forged companion/axiom/uninhabited results refuse.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_ordinary_tests, practical-ordinary-tests.mjs and ordinary-while-conformance-tests.mjs",
-          "scope": "Preserved independently admitted opaque-witness/exact-body pairing plus selected private ordinary while helpers; default/verified refusals preserve prior artifacts. No behavioral certificate."
+          "id": "recursion",
+          "meaning": "Direct, non-tail and higher-order recursion execute under unchanged limits; verified mode refuses without certificate.",
+          "status": "qualified"
         }
       ]
     },
     {
-      "id": "tuples",
-      "priority": "P1",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/environment/src/Ps/Environment/SelfHostProd.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseData.lean",
-        "psc1/test/DataTests.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseBinding.lean",
-        "psc1/packages/elab/src/Ps/Elab/Data.lean",
-        "psc1/packages/elab/src/Ps/Elab/Do.lean",
-        "psc1/scripts/ordinary-while-conformance-tests.mjs"
-      ],
-      "notes": "Unit/grouping and right-associated tuple expressions plus immutable nested product/Unit/wildcard binding patterns in ordinary let and selected do let. A single strict Core let retains RHS evaluation even for all-wildcard patterns; typed projections, original RHS scope, immutable shadowing and closure capture are checked. Duplicate named leaves, mutable and monadic patterns, arbitrary/dependent constructor patterns remain outside the selected profile. No new public aggregate ABI or full-family completion claim.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "id": "tuples-patterns",
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
-          "scope": "existing named Prod/Array operations with contextual Int elements, JS/TS/Rust, both source forms"
+          "id": "products",
+          "meaning": "Unit/grouping/right-associated products and nested named/wildcard patterns; RHS once in original scope.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
-          "scope": "Unit/grouping/right-associated product expressions, contextual elements and internal aggregate use; both grammars and seven-target Bool predicates. No destructuring or new public aggregate ABI."
-        },
-        {
-          "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
-          "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
-          "runId": 39467579973,
-          "suite": "psc1_data_tests, runtime-conformance-tests.mjs and ordinary-while-conformance-tests.mjs",
-          "scope": "Immutable nested product and wildcard patterns execute in handwritten source cases across both grammars and all seven targets. Unit binding patterns are covered by native admission and private-JS cases. Native graph, notation-hygiene and translation cases preserve checked Core. All-wildcard RHS strictness reaches 14 external target/source deadlines plus two minimum-Python repetitions. Mutable and monadic patterns remain refused."
+          "id": "identity",
+          "meaning": "Duplicate binders refuse; closures preserve original binding identity; strictness observes divergent RHS.",
+          "status": "qualified"
         }
       ]
     },
     {
-      "id": "arrays",
-      "priority": "P1",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/environment/src/Ps/Environment/Prelude.lean",
-        "psc1/packages/erasure/src/Ps/Erasure/Expr.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseData.lean",
-        "psc1/packages/elab/src/Ps/Elab/Data.lean",
-        "psc1/test/DataTests.lean"
-      ],
-      "notes": "Array literals, contextual empty arrays and adjacent optional xs[i]? implement the selected minimum through existing checked Array machinery. Optional lookup binds receiver then Nat index once and returns none on empty/OOB/huge indices without a default element. The implementation scans the array. Plain/proof access remains refused pending genuine validity evidence; panic access is excluded by this selection. These refusals are not additional minimum-completion obligations. Full-family completion beyond the demonstrated selected cases is not claimed.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "id": "arrays-indexing",
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
-          "scope": "existing named Prod/Array operations with contextual Int elements, JS/TS/Rust, both source forms"
+          "id": "lookup",
+          "meaning": "Persistent alias unchanged after set; optional empty/huge/OOB Nat lookup requires no element inhabitant.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_data_tests and runtime-conformance-tests.mjs",
-          "scope": "Array literals, contextual empties and optional Nat indexing, including empty/OOB/huge-index cases, execute through internal operations in both grammars on seven targets. Plain/proof/panic forms remain refused."
+          "id": "operations",
+          "meaning": "Empty/literal/push/set/map/fold and receiver/index order evaluated once; wrong index/element types refuse.",
+          "status": "qualified"
+        },
+        {
+          "id": "lists",
+          "meaning": "Canonical List literals, length/append/reverse and empty case agree with Lean standard operations.",
+          "status": "qualified"
         }
       ]
     },
     {
       "id": "typed-errors",
-      "priority": "P1",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/stdlib/ProofScript/Data/Result.lean",
-        "psc1/stdlib/ProofScript/Compiler/Effect.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoBase.lean",
-        "psc1/test/DoTests.lean",
-        "psc1/test/WhileTests.lean",
-        "psc1/packages/elab/src/Ps/Elab/DoTry.lean",
-        "psc1/test/TypedErrorTests.lean",
-        "psc1/test/TypedErrorFixtures.lean",
-        "psc1/test/TypedErrorOracle.lean",
-        "psc1/scripts/typed-error-conformance-tests.mjs"
-      ],
-      "notes": "Selected contextual throw and single try/catch in Except and checked CompilerM now compose with early returns, lexical rollback, pattern bindings, finite loops and selected ordinary while. Except cases execute both grammars/all seven; CompilerM retains native/private-JS state checks. Finally, multiple/pattern handlers and general MonadExcept remain deferred; full family remains incomplete.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "psc1_do_tests, psc1_while_tests and the selected Except runtime predicates",
-          "scope": "Selected Except propagation, including ordinary while, executes on seven targets in both grammars. CompilerM control/state propagation uses native/private-JS comparisons; throw/try/catch remains missing."
+          "id": "except",
+          "meaning": "Canonical Except propagates typed errors and successful values.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
-          "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
-          "runId": 39495181966,
-          "suite": "psc1_typed_error_tests, typed-error-conformance-tests.mjs, pinned native Lean oracle",
-          "scope": "Selected single typed handlers, distinct control packets, nested scope/state, lexical captures, finite-loop pattern fallthrough and ordinary while; 28 target/source bundles and 70 refusals; minimum Python4 bundles/10 refusals. CompilerM remains native/private-JS evidence; no complete-family or formal preservation claim."
+          "id": "recovery",
+          "meaning": "Checked CompilerM recovery restores state.",
+          "status": "qualified"
+        },
+        {
+          "id": "failure",
+          "meaning": "Throw skips continuation; host/compiler failures never become source values.",
+          "status": "qualified"
+        },
+        {
+          "id": "scope",
+          "meaning": "Rethrow/nested binder/continuation scope and return bypass; malformed/mistyped handlers refuse.",
+          "status": "qualified"
         }
       ]
     },
     {
       "id": "call-inference",
-      "priority": "P1",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/elab/src/Ps/Elab/Term.lean",
-        "psc1/packages/meta/src/Ps/Meta/Unify.lean",
-        "psc1/test/DataTests.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
-        "psc1/test/DoTests.lean"
-      ],
-      "notes": "Retained transactional expected-result constraints precede nondependent explicit arguments; selected contextual data/control interactions are exercised. Dependent and intervening-implicit telescopes retain sequential checking; general Lean inference is not claimed.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-          "runId": 39348537989,
-          "suite": "contextual_inference_tests and practical-forms-backend-tests.mjs",
-          "scope": "only the selected cases in the slice-1 receipt; full family remains incomplete"
+          "id": "telescopes",
+          "meaning": "Sequential dependent/intervening implicit telescopes; transactional nondependent expected-result constraints.",
+          "status": "qualified"
         },
         {
-          "implementationCommit": "8d6f80ea5813edd0644440971095abffd9dddacd",
-          "testedMergeCommit": "164fb133a8da410140cc3a84dcd51382c4a230a6",
-          "runId": 39407097682,
-          "suite": "contextual_inference_tests, grouped-arrow roundtrips and private Rust closure consumers",
-          "scope": "Retained contextual constraints, grouped/dependent-arrow roundtrips and both private Rust higher-order reuse consumers; the public nested-function signature still refuses. General dependent inference is not claimed."
+          "id": "refusals",
+          "meaning": "Ambiguity, arity and unresolved metas refuse; adjacent comma/native calls and explicit f(()) retained.",
+          "status": "qualified"
         }
       ]
     },
     {
       "id": "namespaces",
-      "priority": "P1",
-      "status": "qualified-subset",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/packages/environment/src/Ps/Environment/Resolve.lean",
-        "psc1/packages/elab/src/Ps/Elab/Context.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
-        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean",
-        "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
-        "psc1/packages/elab/src/Ps/Elab/Term.lean",
-        "psc1/packages/elab/src/Ps/Elab/Recursion.lean",
-        "psc1/host/src/Ps/Host/DirectBackend.lean",
-        "psc1/test/NamespaceTests.lean",
-        "psc1/scripts/scoped-backend-tests.mjs"
-      ],
-      "notes": "Nested, reopened and dotted namespace/end scopes retain per-declaration semantic metadata and fully qualified identity. Exact local lookup precedes current/enclosing/root global search, including relative qualified names; dotted declarations establish their parent body/type namespace. End commands match the innermost opened name, duplicate full identities and unresolved names reject, and qualified global projections are checked. Structural recursion, contextual pure, private while-helper ownership, translation and entry-module import/export privacy are exercised. Imports remain module headers. Reference-only _root_.Name spelling selects exact root globals and preserves generated notation identity through translation; authored relative names remain namespace-sensitive. Open/section/export aliases, unnamed ends and root-escaped namespace/declaration commands remain outside this increment; no full-family completion claim.",
-      "targets": {
-        "js": "selected-cases-executed",
-        "ts": "selected-cases-executed",
-        "rust": "selected-cases-executed",
-        "wasm-core": "selected-cases-executed",
-        "wasm-component": "selected-cases-executed",
-        "python": "selected-cases-executed",
-        "php": "selected-cases-executed"
-      },
-      "evidence": [
+      "status": "qualified-finite-v1",
+      "acceptance": [
         {
-          "implementationCommit": "7e1158875cdf236a677448598bd5f677c11d4daf",
-          "testedMergeCommit": "45169fa903b6bd68c3d9cc46348f8c4487d382c3",
-          "runId": 39467579973,
-          "suite": "psc1_namespace_tests, runtime-conformance-tests.mjs and scoped-backend-tests.mjs",
-          "scope": "60 native categorical outcomes plus both-grammar seven-target imported namespace predicates. Native/private-JS cases cover identity, lexical resolution, constructors, projections and recursion; host tests separately check scoped entry exports/source origins, imported privacy, 12 refusals and ten prior-output preservation cases."
+          "id": "identity",
+          "meaning": "Nested/reopened/dotted declarations, current/enclosing/root lookup and local precedence preserve full identity.",
+          "status": "qualified"
+        },
+        {
+          "id": "ownership",
+          "meaning": "Translation hygiene, duplicate/refusal tests; imports stay private and only entry declarations export.",
+          "status": "qualified"
         }
       ]
     },
     {
       "id": "typed-io",
-      "priority": "P1",
-      "status": "missing",
-      "specified": true,
-      "complete": false,
-      "sourceEvidence": [
-        "psc1/host/src/Ps/Host/DirectBackend.lean",
-        "psc1/packages/compiler-ir/src/Ps/CompilerIr/Model.lean"
-      ],
-      "notes": "No admitted source IO profile. Completion requires typed console line input/output and bounded UTF-8 file read/write with path roots, EOF/newline, size/error semantics, target adapters and refusal before publication. Stdout alone is not completion.",
-      "targets": {
-        "js": "not-implemented",
-        "ts": "not-implemented",
-        "rust": "not-implemented",
-        "wasm-core": "not-implemented",
-        "wasm-component": "not-implemented",
-        "python": "not-implemented",
-        "php": "not-implemented"
-      },
-      "evidence": []
+      "status": "qualified-finite-v1",
+      "acceptance": [
+        {
+          "id": "console",
+          "meaning": "Explicit typed capability: UTF-8 line read/write, EOF and newline; denied capability refuses before publication.",
+          "status": "qualified"
+        },
+        {
+          "id": "files",
+          "meaning": "Root-confined bounded UTF-8 file read/write, exact size/encoding/path policy and typed failures.",
+          "status": "qualified"
+        },
+        {
+          "id": "adapters",
+          "meaning": "All seven target adapters preserve portable semantics; unsupported ABI/configuration refuses before publication.",
+          "status": "qualified"
+        }
+      ]
     }
   ],
-  "assurance": {
-    "currentArtifact": "psc1-checked-direct/1",
-    "endToEndVerifiedMode": "explicit --assurance verified rejects; no ordinary fallback",
-    "partialExecution": "Unchanged constructive opaque-witness/exact-body pairing; source while helpers are privately specialized before ordinary preparation. Selected Id/Except ordinary execution passed; default checked and explicit verified partial requests refuse.",
-    "effects": "Selected Type0 Id/Except/checked CompilerM control, finite loops and typed single catch; selected Id/Except ordinary while. CompilerM execution scope remains native/private-JS. No admitted general source IO profile.",
-    "directAdmissionProvider": "independent official Lean",
-    "ownedKernel": "source integrated; separately native-tested"
-  },
-  "componentPublicScalars": [
-    "Bool"
+  "applications": [
+    {
+      "id": "cli",
+      "status": "qualified"
+    },
+    {
+      "id": "json-files",
+      "status": "qualified"
+    },
+    {
+      "id": "multi-module-library",
+      "status": "qualified"
+    },
+    {
+      "id": "compiler-like",
+      "status": "qualified"
+    }
   ],
-  "fullSelfHostTests": false,
-  "deferred": "All unimplemented v7.2 features outside the fourteen approved families; public unsafe, partial_fixpoint, break/continue/finally, macros, broad automation, networking/FFI, optional scalar families, full standard and full self-host qualification.",
-  "qualificationReceipt": "docs/PSC1_PRACTICAL_CORE_PATTERNS_NAMESPACES_QUALIFICATION_2026-10-20.json",
-  "continuation": {
-    "pr": 169,
-    "basePr": 168,
-    "baseCommit": "7e25943b991446ee2ab5a32b445238ef5af47cb5",
-    "branch": "research/psc1-ultra-qualified-20261021",
-    "status": "qualified-architecture-foundation-and-selected-cases",
-    "receipt": "docs/PSC1_ULTRA_FOUNDATION_QUALIFICATION_2026-10-21.json",
-    "documentation": "docs/PSC1_SOL_HIGH_CONTINUATION_PROMPT.md",
-    "implementationCommit": "5496943a30423269654fffcd7579b3c5dd16b4f9",
-    "testedMergeCommit": "a4e3b9bd626c36437557b58f5e7dfb3c477fcf39",
-    "runId": 39495181966
+  "queue": [
+    {
+      "id": "collection-reference",
+      "status": "qualified",
+      "dependsOn": []
+    },
+    {
+      "id": "json-application",
+      "status": "qualified",
+      "dependsOn": [
+        "collection-reference"
+      ]
+    },
+    {
+      "id": "inference-control",
+      "status": "qualified",
+      "dependsOn": [
+        "collection-reference"
+      ]
+    },
+    {
+      "id": "typed-io",
+      "status": "qualified",
+      "dependsOn": [
+        "inference-control",
+        "json-application"
+      ]
+    },
+    {
+      "id": "checked-order",
+      "status": "qualified",
+      "dependsOn": [
+        "inference-control"
+      ]
+    },
+    {
+      "id": "application-performance",
+      "status": "qualified",
+      "dependsOn": [
+        "checked-order",
+        "typed-io"
+      ]
+    },
+    {
+      "id": "feature-freeze",
+      "status": "qualified",
+      "dependsOn": [
+        "application-performance"
+      ]
+    }
+  ],
+  "G1": {
+    "status": "qualified-selected-corpus",
+    "cases": 10
   },
-  "developmentPriority": {
-    "updated": "2026-10-21",
-    "roadmap": "docs/PSC1_DEVELOPMENT_ROADMAP.md",
-    "primary": "complete Practical Core, both authored grammars and seven backend mappings",
-    "G1": "retained functionality regressions",
-    "G2G3": "deferred until feature freeze; separate manual qualification",
-    "performanceDefect": "docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md"
-  }
+  "G2G3": {
+    "status": "deferred-manual-qualification",
+    "defect": "docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md"
+  },
+  "publication": {
+    "status": "unpublished",
+    "authorizationRequired": true
+  },
+  "deferred": [
+    "G2/G3/fixed-point until feature freeze",
+    "arbitrary user Monad/iterator instances",
+    "heap references/concurrency",
+    "user tactics/macros/metaprogramming",
+    "general dependent patterns/indexed inductive source",
+    "floating/fixed-width scalars",
+    "Int division/modulo",
+    "implicit empty f() Unit completion",
+    "nonportable ABI extensions"
+  ],
+  "exclusions": [
+    "Finite Practical Core v1 Linux qualification is not unrestricted Lean/language conformance.",
+    "No formal backend-preservation theorem or behavioral certificate is claimed.",
+    "G2/G3 self-compilation and fixed-point qualification remain separate manual work on finalized source; no result is inferred from G1 or this fix.",
+    "No manual workflow event, merge, registry publication or release upload is claimed."
+  ]
 }

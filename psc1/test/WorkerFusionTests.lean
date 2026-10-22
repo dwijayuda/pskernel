@@ -104,6 +104,18 @@ def strictModule : PsVerifiedIrModule := .mk [] [] [] [
     (.letE "ignored" fnT (call "unsafe" [n 0]) (n 1))
 ]
 
+-- A forward global is well-typed IR but a read before module initialization
+-- throws. Capture creation must retain that read even when the alias is unused.
+def globalTimingModule : PsVerifiedIrModule := .mk [] [] [] [
+  worker,
+  .mk "spin" [] [param "n"] natT (call "spin" [v "n"]),
+  .mk "observeGlobal" [] [param "unused"] natT
+    (.letE "saved" fnT (call "scan" [v "lateGlobal"])
+      (.letE "diverges" natT (call "spin" [n 0]) (n 1))),
+  .mk "trigger" [] [] natT (call "observeGlobal" [n 0]),
+  .mk "lateGlobal" [] [] natT (n 5)
+]
+
 def require (label : String) (condition : Bool) : IO Unit := do
   unless condition do throw (IO.userError ("PSC1_WORKER_FUSION_FAIL: " ++ label))
   IO.println ("PSC1_WORKER_FUSION_PASS: " ++ label)
@@ -168,7 +180,7 @@ def main : IO Unit := do
          | _ => false
      | none => false)
   require "exhausted binder scan cannot certify stability"
-    (!Ps.Internal.WorkerFusion.stableCapture "saved" (n 0) (.call (v "scan") [] []) &&
+    (!Ps.Internal.WorkerFusion.stableCapture [] "saved" (n 0) (.call (v "scan") [] []) &&
       Ps.Internal.WorkerFusion.bindsName 0 "fuel" (n 0))
   require "escaped call-only function stays available"
     (fused.raw.declarations.any (fun value => value.name == "hold"))
@@ -191,6 +203,19 @@ def main : IO Unit := do
   emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry","continuationEntry","evaluatedEntry","stableAlias","literalAlias","captureSelf","captureLambda","captureMatch"]
   emit strictInput "dist/worker-fusion/strict-baseline.mjs" ["strict","curriedProbe"]
   emit strictFused "dist/worker-fusion/strict-fused.mjs" ["strict","curriedProbe"]
+  let globalInput <- validate globalTimingModule
+  let globalFused <- match psFuseClosedWorkers globalInput with
+    | .error error => throw (IO.userError error)
+    | .ok value => pure value
+  require "nonlocal variable capture remains before later divergence"
+    (match globalFused.raw.declarations.find? (fun declaration => declaration.name == "observeGlobal") with
+     | some declaration =>
+         match declaration.body with
+         | .letE _ _ (.var "lateGlobal") _ => true
+         | _ => false
+     | none => false)
+  emit globalInput "dist/worker-fusion/global-baseline.mjs" ["observeGlobal"]
+  emit globalFused "dist/worker-fusion/global-fused.mjs" ["observeGlobal"]
   IO.FS.writeFile "dist/worker-fusion/probe.mjs"
     "export const seen=[];export function mark(n){seen.push(String(n));return n;}\n"
   IO.println "PSC1_WORKER_FUSION_FIXTURES: typed source and transformed modules emitted"

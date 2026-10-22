@@ -407,14 +407,15 @@ def bindsName (fuel : Nat) (name : String) (expression : PsVerifiedIrExpr) : Boo
               psListAny (fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name name)
                 alternative.snd.fst || visit alternative.snd.snd) alternatives
 
-def stableCapture (binder : String) (body value : PsVerifiedIrExpr) : Bool :=
+def stableCapture (locals : List String) (binder : String) (body value : PsVerifiedIrExpr) : Bool :=
   match value with
   | PsVerifiedIrExpr.literal _ => true
-  | PsVerifiedIrExpr.var name => !psStringEq name binder && !bindsName 4096 name body
+  | PsVerifiedIrExpr.var name =>
+      seen locals name && !psStringEq name binder && !bindsName 4096 name body
   | _ => false
 
 def captureArguments (parameters : List PsVerifiedIrParameter) (arguments : List PsVerifiedIrExpr)
-    (binder : String) (body : PsVerifiedIrExpr)
+    (locals : List String) (binder : String) (body : PsVerifiedIrExpr)
     (depth index : Nat) (used : PsStringSet) : Except String Captures :=
   match arguments with
   | List.nil => Except.ok (Captures.mk used [] [])
@@ -422,8 +423,8 @@ def captureArguments (parameters : List PsVerifiedIrParameter) (arguments : List
       match parameters with
       | List.nil => Except.error "PSC1_WORKER_FUSION_CAPTURE_ARITY"
       | List.cons parameter others =>
-          if stableCapture binder body value then
-            match captureArguments others rest binder body depth (Nat.succ index) used with
+          if stableCapture locals binder body value then
+            match captureArguments others rest locals binder body depth (Nat.succ index) used with
             | Except.error error => Except.error error
             | Except.ok tail =>
                 Except.ok (Captures.mk tail.used tail.bindings (List.cons value tail.arguments))
@@ -433,7 +434,7 @@ def captureArguments (parameters : List PsVerifiedIrParameter) (arguments : List
             match fresh 4096 used base with
             | Except.error error => Except.error error
             | Except.ok name =>
-                match captureArguments others rest binder body depth (Nat.succ index) (psStringSetInsert used name) with
+                match captureArguments others rest locals binder body depth (Nat.succ index) (psStringSetInsert used name) with
                 | Except.error error => Except.error error
                 | Except.ok tail =>
                     Except.ok (Captures.mk tail.used
@@ -512,7 +513,7 @@ def rewrite (plan : Plan) (fuel : Nat) (locals : List String) (aliases : List Al
               if Nat.ble (psListLength selected.spec.original.parameters) count &&
                   Nat.blt count (psListLength selected.spec.parameters) &&
                   !(psListAny (fun (argument : PsVerifiedIrExpr) => !valueOperand argument) selected.arguments) then
-                match captureArguments selected.spec.parameters selected.arguments name body remaining 0
+                match captureArguments selected.spec.parameters selected.arguments locals name body remaining 0
                     (aliasNames aliases plan.used) with
                 | Except.error error => Except.error error
                 | Except.ok captures =>

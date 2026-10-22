@@ -55,9 +55,19 @@ for(const label of ['baseline','fused']) {
     strict],{encoding:'utf8',timeout:2000,maxBuffer:32*1024*1024});
   assert.equal(run.error?.code,'ETIMEDOUT','intermediate curried call must diverge before later argument');
 }
+for(const label of ['baseline','fused']) {
+  const global=path.join(root,'global-'+label+'.mjs');
+  const run=spawnSync(process.execPath,['--input-type=module','-e',
+    'import {pathToFileURL} from "node:url";await import(pathToFileURL(process.argv[1]).href);',
+    global],{encoding:'utf8',timeout:2000,maxBuffer:32*1024*1024});
+  assert.equal(run.error,undefined,'global capture must trap before later divergence');
+  assert.notEqual(run.status,0);
+  assert.match(run.stderr,/ReferenceError/);
+  assert.match(run.stderr,/lateGlobal/);
+}
 const result={schema:'psc1-typed-worker-fusion-runtime/1',commit:process.env.GITHUB_SHA,
   processTimeoutMs:240000,divergenceDeadlineMs:2000,records,
-  preserved:['exact observations','escaping partial functions','old captured values','lexical shadowing','stable variable and literal aliases','self, lambda and constructor-match shadow capture',
+  preserved:['exact observations','escaping partial functions','old captured values','lexical shadowing','stable variable and literal aliases','self, lambda and constructor-match shadow capture','forward-global read traps before later divergence',
     'left-to-right exact-once operands','strict divergent prefix','total Nat arithmetic prefix and 100000 traversal steps','unknown curried application order','evaluated local continuation and 100000 traversal steps'],
   formalPreservation:'not-provided'};
 fs.writeFileSync(path.join(root,'results.json'),JSON.stringify(result,null,2)+'\n');

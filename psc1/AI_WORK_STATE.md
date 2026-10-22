@@ -369,3 +369,20 @@ resource/checker/manifest policies unchanged.
 The external-import refusal fixture also carries the new CaptureBox datatype
 inventory, keeping its source well-typed so the existing import refusal test
 cannot pass merely because an unrelated datatype declaration is absent.
+
+
+## Capture read-timing review correction (2026-10-23)
+
+Review of the new guard identified a distinct validated-IR boundary: a variable
+can denote a forward module constant whose read throws before initialization.
+An unshadowed name alone does not authorize delaying that read past divergence.
+Restrict capture elision to literals and variables already in the initialized
+local-binding environment. Keep globals and every existing shadow/exhaustion
+case captured. Add well-typed forward-global IR: its original/fused imports must
+both raise ReferenceError for lateGlobal before a following divergent call.
+
+All prior source equalities, runtime/negative workloads and strict rechecks stay.
+The preceding candidate's native/focused/closures/G1/host gates passed; its full
+matrix was underway, not final qualification. This correction requires fresh
+complete CI. The manual573bf485 G2 failure/trace remains source-bound historical
+evidence; do not claim a G2 execution result for this corrected candidate.

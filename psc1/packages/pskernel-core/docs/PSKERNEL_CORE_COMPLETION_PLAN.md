@@ -1,137 +1,30 @@
-## T03b qualification execution — focused gates passed; full exact-source gates pending
-
-Updated: 2026-10-21 23:10:21 UTC.
-The demand-scoped implementation passed focused Linux qualification at exact
-`6fd9ac6f57e34947e0b11f0176f357146798a9e1`, run39691206177/job119537547857.
-Native public DAG controls, T03a24/7/6/3 plus official5/6/7, separate-session
-8-kind/7-direct/5-private-ID/2-fork controls and official4-declaration/7-direct
-checks all passed. All21 recursor equations,21 Quot-owner equations and13 session
-equations elaborated without sorryAx or compiler-trust proof shortcuts.
-
-Failed preflights remain in history: exact0b413781f68bfce7d451255e94e84e4415fec1bb,
-run39690178207/job119534142609, exposed official fixture record layout;
-exact6c1059657945c7516480c60c16e5d889642735f5,
-run39690574716/job119535462633, exposed mutable input shadowing and the old late
-publication theorem's missing demand-completion state. Both were test/proof
-corrections; production is unchanged from0b413. The late-command theorem now
-quantifies the actual completed state, and a new equation proves atomic failure
-at the added post-command import boundary. No failing gate was suppressed.
-
-Existing parent0420aa896b04197aebd14444c1d2c4a36a41df9e is independently
-scoped-A qualified: integration39664059278, correctness39664059196 and all6
-research39664059121 jobs passed. Its full193 Arena39664059161 is FAIL:
-173 matches,2 safety-contract agreements,17 timeouts,1 resource exhaustion,
-0 unsupported. Profiles39664059168 passed collection only. Both generated routes
-retain T03a controls,1360 Quot-owner assertions,Name50237 assertions and24+8
-provider checks. Parent PASS does not qualify this containing source.
-
-The containing commit enables full isolated-branch qualification on
-`work/psc1-pskernel-t03b-session-20261022`: native/official, authentic generated,
-canonical reconstruction/checking, all6 research jobs, providers, complete
-benchmarks, one unchanged193-case comparison and diagnostic profiles. Inspect
-these existing exact-source runs before launching anything else. This containing
-source is **NOT YET A-qualified**. The final paired experiment must reuse the
-unchanged32-worker/384-call/32-and128-owner driver fromf84f344, comparing against
-the authenticated immediate-parent0420 artifact12378492499. The eager7e and
-indexed-cache performance holds remain.
-
-A is exact-source scoped and pending here; B still includes T03b qualification,
-T01F, V1 inductive admission, recursive metadata import, eager decoding and four
-whole-operation fallbacks. C remains open for timeouts, Church exhaustion and
-explicit safety-contract reconciliation. D remains open pending complete
-same-run observations; no general speedup is claimed. Fuel4096 and all host
-limits, independent checking, both detached generated routes, original external
-IDs, exact immutable environment identity and atomic publication remain fixed.
-The next executable action is to finish these gates and the unchanged paired
-measurement, then integrate only the qualified result with a separate
-documentation receipt.
-
-Earlier updates below retain their named historical sources.
-
----
-
-## T03b demand-scoped session ownership — isolated implementation, pending qualification
-
-Updated: 2026-10-21 19:59:42 UTC. Integration parent is exact
-`0420aa896b04197aebd14444c1d2c4a36a41df9e`; the isolated branch is
-`work/psc1-pskernel-t03b-session-20261022`. This containing source is
-**NOT YET A-qualified**. No parent PASS is inherited. Existing exact0420 runs
-39664059278/39664059196/39664059121/39664059161/39664059168 are being inspected,
-not duplicated. Exactdeb18 combined qualification is terminal and separately
-recorded in [its receipt](../evidence/2026-10-21-deb-terminal-qualification.json).
-
-T03b now derives private owners from the actual admitted session before use.
-Canonical input nodes seed indexed name lookup; newly imported checked types,
-transparent bodies and recursor rules extend the same demand closure. Literal
-translation and Nat Boolean results contribute their implicit helper names.
-Actual inductive families/constructors and recursor rule constructors contribute
-metadata dependencies. No unrelated declaration is eagerly imported, and there
-is no environment-size prepass. A structural authority-list cursor bounds one
-new owner per step without traversing the old tail or eagerly building closures.
-The checked environment index supplies every declaration; the cursor head is
-never metadata authority. The public entry accepts no owner table or receipt.
-
-The original decoded input remains the external ID namespace. The append-only
-arena, synchronized decoded table and private owners are staged together.
-Post-command demand completion scans only newly appended metadata, using the
-actual checked next session. All publication remains atomic. Immutable
-environment identity accompanies owner indexes; operation caches remain fresh.
-The T03a final-prefix recipe, all existing Quot ownership behavior and the old
-helper ABIs remain. Low-level forged sessions keep the documented trusted
-integration boundary; this adapter adds no admission mechanism.
-
-Native/official and both authentic generated gates retain all previous controls
-and add prior-session constant/recursor direct check, WHNF and DefEq, all8
-declaration kinds,5 private-ID negatives,2 isolated session forks, missing/wrong
-owners, late command/import errors, and demand-only import checks. Twelve local
-equations address exact lookup, bounded import, error propagation and original
-input identity; these are not global soundness/refinement/backend proofs.
-
-The eager7e candidate remains held. Promotion requires the unchanged32-worker,
-384-call,32/128-owner complete-call ABBA experiment against a source-bound
-baseline, with construction/admission/module/cache measurements retained.
-Only one final unchanged193-case comparison is planned per coherent candidate.
-Fuel4096,60seconds/case,2048MiB Node old-space and2workers are unchanged.
-No general speedup is claimed. A qualification is pending for this source;
-B remains open (T03b qualification,T01F,V1 inductive admission,recursive metadata
-import,eager decode,four whole-operation fallbacks), C remains open for
-timeouts/Church/safety reconciliation, and D remains open.
-
-Earlier execution updates below are historical and retain their exact sources.
-
----
-
-## Current execution update — 2026-10-21 19:41:30 UTC
-
-The current integration source adds checked Quot owner installation from exact
-`df4d1751f4166ed8c9a28ac151d1ab77c94cbfe7`, whose native/generated integration,
-canonical correctness and all6 research jobs passed. Containing-commit CI is
-**NOT RUN at creation**; fetch its exact terminal jobs. Exact deb18b9 qualification
-is also complete. Both sources' full193 Arena remain FAIL:173 matches
-(105 admitted,60 kernel rejections,1 metadata rejection,7 transport rejections),
-2 safety-contract differences,17 host timeouts and1 fixed-fuel exhaustion.
-
-Eager initial-owner7e is semantically qualified but **held out of integration**:
-the authenticated32-worker/384-call experiment measured up to61.06× warm
-slowdown at128 prior owners. See [the measured hold](INITIAL_OWNER_PERFORMANCE_HOLD.md)
-and the latest [work state](../AI_WORK_STATE.md) for exact receipts and the
-replacement task. Avoid whole-environment import for each query. Indexed cache384
-also remains held; the optional backend saturation experiment has no performance
-qualification. Direct DAG Quot admission remains in development.
-
-A is qualified only at its named exact source revisions; B/C/D remain open.
-Retain V1 default/reference, unchanged4096fuel and all trust/ordering guards.
-The following earlier plan and receipts remain historical context, superseded by
-this update where their pending status or next-step recommendations differ.
-
----
-
 # PSKernel-Core completion plan — Lean 4.35.0
 
-Execution receipt: **2026-10-21T18:48:58Z**. T03a and the retained bounded corrections are qualified for scoped A at exact `7b14affc854e7bc99e4778ac155ae805dd273226`: integration39645765038, correctness39645764867 and all six research39645765012 jobs PASS. Original034 qualification is terminal and remains failed because of native fixture elaboration; its corrected334 successor is preserved separately. See [T03a source-bound receipt](../evidence/2026-10-22-t03a-terminal-qualification.json), the current matrix and newest work state. A later documentation-only HEAD does not change this exact qualified source. Full Arena C remains FAIL: 173 matches / 2 safety agreements / 17 timeouts / 1 resource exhaustion / 0 unsupported, and performance/release D remains open. The immediate next task is completing the existing exact `deb18b9c87a5d21a406c6e5b852afb4d44785fe5` combined-source qualification; the next implementation task is **T03b preexisting-session ownership**.
+Execution receipt: **2026-10-22 16:52:53 WIB (2026-10-22 09:52:53 UTC)**. T03b preexisting-session ownership is
+implemented and scoped A-qualified at exact
+`9c87f631758862285273ddb0ea0a3987c671022e`: own integration39694087886,
+correctness39694087885 and all six research39694087856 jobs PASS.
+Read the [T03b qualification and measurement](T03B_SESSION_OWNERSHIP_QUALIFICATION.md),
+[exact terminal receipt](../evidence/2026-10-22-t03b-terminal-qualification.json)
+and [pre-T03b parent0420 receipt](../evidence/2026-10-22-0420-terminal-qualification.json).
+The full193 Arena result is 173 matches / 2 separate safety-contract agreements / 17 timeouts / 1 Church resource exhaustion / 0 unsupported; C and D remain open.
+A later documentation-only integration HEAD remains distinct from the exact
+qualified executable source. Parent0420, combineddeb18 and T03a7b14 each passed
+their own scoped gates; none was inherited. Original034 and failed T03b
+preflight/461/0f7 attempts remain separately recorded in the work-state history
+and source-bound receipts. The next bounded executable task is
+**T01F full actual String.ofList environment coverage**.
 
 
-Concurrent source note: live integration also contains the name/string workers from341 in exact `deb18b9c87a5d21a406c6e5b852afb4d44785fe5`. Its own native and six research jobs passed; generated integration, canonical, independent Arena and profiles were active at2026-10-21T18:48:12Z. Keep it unqualified until its own required gates finish. Preserve its existing source/paired evidence and the latest work-state history; do not duplicate those runs.
+Concurrent source note: the qualified parent0420 includes checked Quot-kind
+ownership and Name/string workers; both remain unchanged in the T03b production
+delta. Retain the original f9e9-to341 Name paired evidence, including peak-RSS
+regressions, as measurements of those exact sources. The eager initial-owner7e
+and indexed-cache384 candidates remain held under their own decisions. The
+T03b causal paired experiment authenticates0420 and9c generated bundles using
+the unchanged f84 driver; its result is run39757971693/job119754708372, 32 workers/384 validated calls PASS collection; correctness-only promotion under the documented performance tradeoff, D OPEN. Complete native,
+construction/admission/cache and all generated ABBA observations are retained
+in the linked measurement receipts. No general speedup is claimed.
 
 Repository: `dwijayuda/pskernel`  
 Integration branch: `integration/psc1-pskernel-expr-v2-lean435-20261021`  
@@ -147,10 +40,10 @@ Produce an independently executing native and generated-JavaScript kernel, prese
 
 | Milestone | Definition of done | Current boundary |
 | --- | --- | --- |
-| A — working independent kernel | The same exact source passes native checked semantics, complete portable `.lean` source checking, independently reconstructed/rechecked canonical `.ps`, both detached generated routes, positive/negative provider controls and artifact packaging | Exact `7b14affc854e7bc99e4778ac155ae805dd273226`: integration39645765038(native119380795456/generated119380794907), correctness39645764867(native119380794896/canonical119380794398), all six research39645765012 jobs PASS. Full Arena and complete V2 remain separate |
-| B — complete Expression V2 | Every operation promoted by KernelContract-v1 executes through canonical IDs and checked owning metadata, with no four public whole-operation V1 restarts; no eager whole-arena decode or recursive generated-metadata import in the promoted checking path | Open. V1 remains separately selectable and remains the default provider until explicit promotion qualification |
-| C — Lean 4.35 compatibility | The unchanged authentic 193-record gate passes, with official controls, zero timeout/resource/unsupported/mismatch escapes, and explicit resolution of the two safety-contract disagreements | Open. Diagnostic success and intended safety restrictions are not exact semantic parity |
-| D — performance and release qualification | Frozen baseline/candidate measurements are reproducible, the major recorded regressions are resolved, all final-source release checks pass, and deployable artifacts/provenance are complete | Open. No npm publication or main merge is authorized by this plan |
+| A — working independent kernel | The same exact source passes native checked semantics, complete portable `.lean` source checking, independently reconstructed/rechecked canonical `.ps`, both detached generated routes, positive/negative provider controls and artifact packaging | Exact `9c87f631758862285273ddb0ea0a3987c671022e`: own integration39694087886(native119547118983/generated119547118855), correctness39694087885(native119547118951/canonical119547118636) and all six research39694087856 jobs PASS. Pre-T03b0420, deb18 and T03a7b14 remain separate source-bound results. Full Arena and complete V2 remain separate |
+| B — complete Expression V2 | Every operation promoted by KernelContract-v1 executes through canonical IDs and checked owning metadata, with no four public whole-operation V1 restarts; no eager whole-arena decode or recursive generated-metadata import in the promoted checking path | Open. T03b is implemented and scoped qualified. T01F is the next bounded task; DAG-native inductive admission, recursive metadata import, eager input decoding and four whole-operation fallbacks remain open. V1 remains separately selectable and remains the default provider until explicit promotion qualification |
+| C — Lean 4.35 compatibility | The unchanged authentic 193-record gate passes, with official controls, zero timeout/resource/unsupported/mismatch escapes, and explicit resolution of the two safety-contract disagreements | FAIL/open. Exact9c full193: 173 matches / 2 separate safety-contract agreements / 17 timeouts / 1 Church resource exhaustion / 0 unsupported. All cases and original/adapted body hashes are retained. Safety-contract agreements, timeouts and resource exhaustion remain distinct from exact matches; diagnostic collection does not qualify a case |
+| D — performance and release qualification | Frozen baseline/candidate measurements are reproducible, the major recorded regressions are resolved, all final-source release checks pass, and deployable artifacts/provenance are complete | Open. Exact0420-to9c paired ownership result: run39757971693/job119754708372, 32 workers/384 validated calls PASS collection; correctness-only promotion under the documented performance tradeoff, D OPEN. Full native and generated construction/admission/cache measurements are retained. The unchanged T09 thresholds and eager7e/indexed-cache384 holds remain; no general speedup or whole-kernel release completion is claimed. No npm publication or main merge is authorized by this plan |
 
 Keep A usable while B–D progress. PSC1 compiler development must not wait for unfinished independent kernel research. Full-kernel DirectJS remains an explicitly unsupported compiler capability and is not silently substituted for the qualified TS pipeline.
 
@@ -171,7 +64,15 @@ All paths below are relative to `psc1/`; kernel source abbreviations start at `p
 
 ### T00 — bind the current checkpoint and retain A
 
-The containing four corrections—focused String projection, explicit-argument pair search, cheapRec cache-publication isolation and safe invalid recursor-headed occurrence—and T03a final-prefix ownership passed their own scoped A gates at exact `7b14affc854e7bc99e4778ac155ae805dd273226`. Preserve their terminal receipt and failures in history. T01F full String environment remains open. Finish the existing combined-source gates before T03b; the T03a recipe below remains the authoritative specification for its implemented bridge.
+Retain the qualified integration parent0420, bounded String/cache/occurrence
+corrections, T03a final-prefix ownership, checked Quot ownership and Name workers
+with their original source-bound receipts. Current T03b executable9c87 is
+scoped A-qualified by its own terminal gates listed above; both genuine
+generated routes pass the new separate-session controls and the retained
+provider/negative suites. The unchanged paired ownership experiment and complete
+same-run measurements are recorded separately from functional qualification.
+Execute T01F next. The T03a recipe below remains the authoritative specification
+for its implemented bridge.
 
 Fetch branch HEAD and all required workflow jobs before any write. Inspect the exact commit and artifact manifests. Record implementation SHA, terminal job IDs, protocol/source-closure results and open Arena classification counts. If HEAD changed concurrently, inspect the change and rebase the intended edit with a non-force expected-SHA update; never overwrite another chat's work.
 
@@ -187,7 +88,7 @@ Acceptance for the focused slice: native and both generated routes exercise dire
 
 **T01F — full String environment follow-up:** the focused fixture does not install the complete actual `String.ofList` implementation and dependencies. Test genuine `String.ofList` expansion with an independently checked complete declaration environment, including actual constructor/list/character reduction and public checking. Preserve this as open until native and both generated routes execute it correctly. Minimal fixture success must not be presented as complete full-environment String qualification. T03a ownership can proceed after the focused slice; T01F is required before B/C completion.
 
-Dependency: T00. If the containing implementation already completed T01, inspect its receipt, update the matrix and begin T02 rather than reimplementing it. The additional cheapRec/public-WHNF cache-isolation defect discovered during implementation must retain its reproducer and dedicated negative mode-crossing controls; follow the containing audit/work-state for its exact source receipt.
+Dependency: T00. If the containing implementation already completed T01, retain its receipt and update the matrix rather than reimplementing it; after the qualified T03b slice, execute T01F as the next bounded task. The additional cheapRec/public-WHNF cache-isolation defect discovered during implementation must retain its reproducer and dedicated negative mode-crossing controls; follow the containing audit/work-state for its exact source receipt.
 
 ### T02 — remove avoidable cache traversal and establish scoped lookup costs
 
@@ -212,6 +113,20 @@ Owners: `API/DagGenerated.lean`, `DagDeclaration.lean`, `Dag.lean`, `Checker/Exp
 **T03a — mutual/nested family ownership:** extend the existing post-success bridge from ordinary inductives to actual mutually generated and nested-restored recursors and auxiliaries. Enumerate names from checked admission results/environment ownership; confirm family, constructor, parameters, universes, rule arities and type/body IDs. Do not infer an authoritative recursor by a caller-provided name suffix. Use one private staged owner and publish it only when every required reference imports successfully. Implemented and scoped-qualified at `7b14affc854e7bc99e4778ac155ae805dd273226` using the final-environment new-prefix recipe below. Native and both generated routes retain 24new declarations,7recursors,6direct cases and3private-ID controls; native official controls cover5families/6positive/7negative, and all21recursor proof equations are audited. T03b remains separate.
 
 **T03b — preexisting-session ownership:** for a preexisting checked session, establish batch-owned references from the session's admitted declarations before use; never accept an input-supplied reference table. Choose a single owner boundary and keep immutable environment identity attached to indexes/caches. This is an adapter for checked state, not a second admission mechanism. Keep unsupported low-level forged-session behavior within the documented trusted integration boundary rather than pretending record constructors are sealed.
+
+Current implementation/status: implemented and scoped qualified at exact
+`9c87f631758862285273ddb0ea0a3987c671022e`. One private appended owner boundary
+derives exact admitted metadata on demand; the original input-ID namespace,
+immutable environment identity, complete state and atomic publication remain.
+Native and both generated routes pass8-kind/7-direct/5-private-ID/2-fork controls;
+native official checking covers4 declarations and7 direct cases. Fourteen local
+session equations cover selection, bounded import, errors, namespace/atomicity
+and append order. The actual portable worker matches the structural bound first
+and uses explicit structural append; unrelated old declarations are not eagerly
+imported. The authenticated0420-to9c paired experiment is run39757971693/job119754708372, 32 workers/384 validated calls PASS collection; correctness-only promotion under the documented performance tradeoff, D OPEN.
+This checked-state adapter does not replace V1 inductive admission, recursive
+metadata import, eager input decoding or the four whole-operation fallbacks.
+The next bounded executable task is T01F.
 
 Acceptance: ordinary/mutual/nested generated owners exercised directly at nonzero IDs, across two batches and after an unrelated appended declaration; authentic recursor positive/negative and K/major cases; absent/mismatched owner and malformed-universe sentinels; full state retention and atomic rollback on a late import failure. Native official Lean controls for every new declaration family, plus both authentic generated routes. No silent fallback may satisfy a direct-path assertion.
 

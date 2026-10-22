@@ -1,3 +1,110 @@
+## T03b terminal qualification — exact executable source and integration handoff
+
+Updated: 2026-10-22 16:52:53 WIB (2026-10-22 09:52:53 UTC).
+Exact qualified executable source:
+`9c87f631758862285273ddb0ea0a3987c671022e` (tree
+`5dd7e9879f28d0adb8794c8b60469eecaaa7f866`).
+This containing receipt commit changes documentation/data only and is distinct
+from that source. Its integration promotion preserves all six isolated T03b
+commits atop the independently qualified parent
+`0420aa896b04197aebd14444c1d2c4a36a41df9e`. No force update, main merge or npm
+publication is part of this work.
+
+**A PASS, scoped to9c87. B OPEN. C FAIL/open. D OPEN.**
+Own terminal integration39694087886 (native119547118983/generated119547118855),
+correctness39694087885 (native119547118951/canonical119547118636) and all six
+research39694087856 jobs PASS. Both authentic generated routes compile and run
+the actual changed kernel, retain detached provider24/API8 checks, and pass
+the new session8-kind/7-direct/5-private-ID/2-fork controls. Native official
+checks cover4 independently admitted declarations and7 direct cases.
+All14 session,21 recursor,21 Quot-owner and8 Name equations pass their actual
+axiom audit; no global soundness/refinement/backend proof is inferred.
+
+The single final unchanged193 comparison at this source is run39694087862,
+independent job119547747908: 173 matches / 2 separate safety-contract agreements / 17 timeouts / 1 Church resource exhaustion / 0 unsupported. All193 complete case records and
+original/adapted body hashes are saved. Official job119547118244 independently
+reports122 accepted/71 rejected with controls passing. Actual zero-based
+case16 rec-missing-ih (printedcase17) is independently rejected; it is not
+unsupported. Authentic profile39694087923/job119547118869 is collection-only:
+repeated-subproblem accepted, Church resource_exhausted, Prelude timeout and stuck projection rejected in both unprofiled/profiled runs; all four kernel_qualified=false. Successful collection does not qualify failed kernel cases.
+
+The unchanged0420-to9c ownership experiment is run39757971693/job119754708372, harness4ebfd97b4588f8651e8b7a81bc00b2a05cfe1e3c, artifact12415998934.
+The paired run completed all32 workers/384 independently validated calls. Five pooled warm-median groups exceed10%; owned-constant cold grows68.95%/69.34% (about2.33–2.38ms extra). Peak RSS and total retained heap stay below15% growth, but incremental retained heap grows50.97%/56.52% for owned constants and17.08%/18.05% for unknown constants. A separate complete-record review supports the bounded correctness migration with this explicit tradeoff. It is NOT performance-qualified; D stays OPEN, and no general speedup is claimed. Costs remain optimization work and are not proved unavoidable.
+All32 workers/384 calls and raw worker records remain; each complete public
+call is independently checked after its timer against the exact genuine V1
+outcome. Both source-bound generated bundles, driver identity and native
+producer archives are authenticated. Full same-run128 whole-checker and24
+admission ABBA records, all337 native records and outer memory measurements
+are published for each source. Construction, first-batch admission/setup,
+module loading, cache context, CPU, retained heap and RSS are separate fields.
+No general speedup or hard RSS cap is claimed.
+
+Implementation boundary: derive fresh private appended owners from actual
+already admitted session metadata; no caller owner table or receipt is trusted.
+Canonical input and newly appended types/bodies/family/rule metadata seed exact
+immutable environment-index lookup. The admitted list is only a structural
+bound, consumed once per unique new owner. Empty demand inspects one outer
+constructor without a tail walk, environment-length prepass or eager closure.
+Original external IDs remain unchanged; appended owner IDs remain private.
+Post-command demand completion uses the actual next checked environment and
+preserves complete state and atomic failure. This adapts checked session state,
+not a second admission mechanism. Low-level forged internal sessions/owners
+remain within the documented trusted integration boundary.
+
+Retain T03a's authoritative final-environment prefix recipe, exact old-name
+cutoff, actual final recursor types/rules and nested restoration, current-command
+input-ref reuse and old helper ABI. Retain native and both generated24/7/6/3,
+official5/6/7, all state/universe/checked-infer-only/private-ID controls, the
+parameterized checked Quot-kind bridge and Name production. Session regression
+controls include late import/command failure, missing/wrong/stale ownership,
+two session forks,32 unrelated old declarations skipped and a closed-sort
+zero-import case.
+
+Source-bound history remains separate:
+- combineddeb18 passed its own scoped gates; full193173/2/17/1/0 FAIL;
+- parent0420 passed its own scoped gates; full193173/2/17/1/0 FAIL;
+- T03a7b14 passed its own scoped gates; full193173/2/17/1/0 FAIL;
+- original034 remains NOT A-qualified due to native fixture elaboration;
+  actual rec-missing-ih was independently rejected, not unsupported;
+- T03b0b413/6c105 failed native fixture/proof attempts;6fd9 native preflight
+  passed;461 failed generic append elaboration and0f7 failed structural
+  self-recursion recognition. Both full failed sources stopped before the
+  independent193 replay. Their receipts are preserved and no assertion,
+  compiler rule or resource limit was weakened.
+
+The eager7e importer and indexed-cache384 remain held. Name's original paired
+experiment remains f9e9b20f92ce2ffa4a666acaf55aa8852949f589→
+34126793178021a9cd1bdb37aa6fe17c0fab41c6, harness14ee4a9323e47944e971e1d9c9a191936fb4843e,
+run39645953379/job119381453525. Preserve its chain8 DAG RSS192432→195732KiB
+and stuck-projection421436→449388KiB regressions, mixed retained heap and
+Church/Prelude failures. Those historical measurements are not T03b results.
+
+Read [T03b qualification](docs/T03B_SESSION_OWNERSHIP_QUALIFICATION.md),
+[exact terminal receipt](evidence/2026-10-22-t03b-terminal-qualification.json),
+[parent0420 receipt](evidence/2026-10-22-0420-terminal-qualification.json),
+[current matrix](docs/PSKERNEL_CORE_PROGRESS_MATRIX.md) and
+[completion plan](docs/PSKERNEL_CORE_COMPLETION_PLAN.md).
+
+B still requires full actual String.ofList (T01F), V1 inductive admission,
+recursive metadata import, eager decoding and four whole-operation fallbacks.
+C retains original timeouts/Church exhaustion and explicit safety-contract
+reconciliation. D retains broader whole-kernel performance and release gates;
+global proof obligations remain open. Fuel4096,60seconds/case,2048MiB Node
+old-space,2workers, Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+TypeScript7.0.2/Node22 and both authentic generated routes remain fixed.
+Full-kernel DirectJS is UNSUPPORTED.
+
+**One next executable task: T01F full actual String.ofList environment coverage**,
+with independent admission and genuine reduction/projection/public checking,
+then its own exact-source native/official/generated/proof/provider/benchmark
+qualification and one unchanged193 comparison. Do not start a broad audit or
+combine it with ordinary/mutual/nested admission migration.
+
+Everything below is dated source-bound history. Old pending states or next-step
+directions do not override this current handoff.
+
+---
+
 ## T03b structural-recursion correction — new exact-source qualification required
 
 Updated: 2026-10-21 23:32:00 UTC.

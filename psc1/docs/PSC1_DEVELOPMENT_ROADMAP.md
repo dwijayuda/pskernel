@@ -42,8 +42,10 @@ reconciliation receipt records the source interval and exact selected evidence.
 
 1. Keep the qualified candidate stable for release review. Merge/publication
    require separate authorization; retain the draft PR and all history.
-2. On finalized feature-frozen source, run the separate manual G1 -> G2 -> G3
-   qualification. Preserve the original G2 heap/timeout defect and evidence.
+2. User resumed the separate manual G1 -> G2 -> G3 qualification on the frozen
+   v1 source on 2026-10-23. The explicit committed request trigger supplements
+   workflow_dispatch without adding G2/G3 to normal development. Execution and
+   results are tracked in AI_WORK_STATE.md. Preserve the original G2 heap/timeout defect and evidence.
    Do not infer self-host/fixed-point success from the normal G1 correction.
 3. For later practical feature or compiler changes, state finite acceptance,
    complete shared semantics and both grammars, validate JS/TS/Rust early, then

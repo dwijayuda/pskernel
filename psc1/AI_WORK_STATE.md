@@ -134,6 +134,30 @@ The unchanged compiler qualification remains at its exact original source.
 Complete run/step/diff evidence is in
 docs/PSC1_RELEASE_RECONCILIATION_QUALIFICATION_2026-10-23.json.
 
+## Resumed manual G1 -> G2 -> G3 qualification (2026-10-23)
+
+User explicitly resumed self-host qualification after frozen Practical Core v1
+passed. Starting HEAD 5d6c161cbc4a1857d288d219e4a650e2403040ab; compiler/stdlib/runtime bytes
+remain identical to qualified source 9ee6c5ff. Run the existing --self-host
+controller: exactly one native seed, separate official checker, exact source,
+admissions/IR/output identities, ten actual positive/negative corpus cases at
+each completed generation, and generation refusal tests. No heap/stack/deadline
+or soundness/strict-IR boundary is raised.
+
+The connector has no workflow_dispatch action, and this branch-only workflow is
+not exposed in GitHub's workflow UI. The separate manual workflow now also
+accepts a deliberately committed .github/qualification-requests/psc1-selfhost.json.
+Only that path on this branch triggers it; the Linux preflight checks the exact
+request parent/event commit and refuses compiler changes hidden in the request.
+This is a push-explicit-request event, not a claimed workflow_dispatch event.
+Normal development still runs only G1. Exact-source Lean caches reduce seed
+rebuild work. A failed G2/G3 process retains an exact-request V8 sample without
+changing its failed gate or publishing a sampled response.
+
+Request psc1-v1-frozen-selfhost-2026-10-23-01 is pending actual Linux execution.
+Preserve all previous G1 receipts and the original G2 performance defect.
+Record terminal generation/CI/artifact evidence; do not infer G2/G3 from G1.
+
 ## Remaining release work and deferred scope
 
 There are no blocked finite Practical Core v1 acceptance items at the qualified
@@ -141,8 +165,8 @@ source above. Keep the candidate source stable for release review. A later
 compiler/language change needs fresh relevant evidence and complete qualification
 before it is called finished; do not inherit these results onto changed code.
 
-G2/G3 and fixed-point qualification stay in the separate manual/release workflow
-on finalized feature-frozen compiler source. Keep
+G2/G3 and fixed-point qualification are now explicitly resumed in the separate
+manual/release workflow on the frozen v1 compiler source; result pending. Keep
 docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md and its original evidence tracked.
 No G2/G3 result follows from the G1 fix. Incomplete PSKernel-Core Expression V2
 research remains independent; official Lean 4.35.0 admission at

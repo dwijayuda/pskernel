@@ -1,0 +1,40 @@
+{
+  "schema": "psc1-generation-corpus-extension-refusal/1",
+  "sourceCommit": "235d8c6d0b05aa6ff6c101c87e7306f252b7ad3f",
+  "runId": 39853512845,
+  "jobId": 120085616777,
+  "status": "failed-before-G2",
+  "diagnostic": {
+    "status": "failed",
+    "generatedCompilerExecution": "passed-G1-selected-corpus",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "failure": "PSC1_GENERATION_CORPUS_CHANGED",
+    "service": {
+      "generation": 1,
+      "sha256": "7ff9024aab675521f4b54954ec9b5afa5acfc37fe87ddebb096d9d15c8a595cb",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "d4670716e028ce27e42c32ef9b0f782781897c8c30e2a4456859e0fb3c6bdd85",
+      "sourceModules": 86,
+      "candidateAdmission": "3c47b47b1fb6233812c6bbaa200c62701c3f8bb2f2cbfab0e51670894a5d43d0",
+      "canonicalOriginalIr": "bec72d8b122778cfc58733b60ec9f531545749fcb703038abf5148e2090d65b0",
+      "canonicalSpecializedIr": "7a1e99b45dd88023c2739dcaa81f77b2155c1314cdc0d4fa640f2e447ec10f3d"
+    },
+    "cases": 11,
+    "completedCorpusGenerations": [
+      1
+    ]
+  },
+  "scaleProbeObservation": {
+    "generation": "G1",
+    "id": "lean-parser-index-suffix",
+    "elapsedMs": 210139,
+    "maxRssKiB": 696784,
+    "sourceSha256": "782138e17a95817ec49022c9f3abb978391a0791adb59ee213cfb703038c1c9b",
+    "publicationGeneration": "c7e7e759b8c00fb7709e2b43f4900e43a8fc0febbbee860a90ea249e0a3d673a"
+  },
+  "reason": "The generation manifest correctly requires the frozen ten-case identity corpus and refused the added eleventh observation.",
+  "correction": "Restore the exact original ten-case generation corpus. Preserve the 256-declaration case as an independent opt-in performance probe, without weakening the manifest or reducing the workload.",
+  "G2": "not-run",
+  "G3": "not-run"
+}

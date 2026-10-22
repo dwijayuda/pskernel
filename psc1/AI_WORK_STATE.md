@@ -228,3 +228,25 @@ generated regression and every earlier source/refusal case remain. No heap,
 stack, process deadline, fuel number or independent-checking boundary is raised.
 These changes still require fresh native, both-grammar compiler closure, G1/G2/G3
 and complete Practical Core CI; do not report the changed candidate qualified.
+
+## Frozen-corpus refusal and separate scale probe (2026-10-23)
+
+Run39853512845/job120085616777 at235d8c6d passed eleven case executions, then
+the unchanged generation manifest correctly refused PSC1_GENERATION_CORPUS_CHANGED
+before G2. Its v2 schema requires the original exact ten-case corpus.
+Restore that exact generation corpus; retain the map-key invariant. No manifest
+criterion, identity comparison, negative test or refusal is relaxed.
+
+Keep the complete256-declaration source in test/applications/ParserScale/Program.lean
+and its independent opt-in runner scripts/generated-parser-scale-tests.mjs.
+The manual workflow's parser_scale input/request flag explicitly selects it;
+normal G1 and fixed-point identity comparisons retain the frozen corpus.
+This experimental probe was never qualified as part of the generation manifest.
+Its observed compile took210139ms with696784KiB peak RSS and correct answer42 /
+private exports. That is an OPEN frontend performance defect, not a speed fix.
+Do not claim cursor metadata resolved overall compilation cost without evidence.
+
+Native count/source proofs and all focused tests pass for235d8c6d. Actual G2/G3
+remain unrun for that attempt. Keep the corpus-refusal receipt and the earlier
+G2 timeout/profile. Request qualification again with the original exact corpus,
+unchanged process/resource limits and fresh complete companion CI.

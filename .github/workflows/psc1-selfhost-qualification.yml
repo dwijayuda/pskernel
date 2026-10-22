@@ -2,6 +2,11 @@ name: PSC1 manual release self-host qualification
 
 on:
   workflow_dispatch:
+    inputs:
+      parser_scale:
+        description: Also execute the separate 256-declaration frontend performance probe
+        type: boolean
+        default: false
   # Explicit committed request: ordinary source/docs pushes never start G2/G3.
   push:
     branches:
@@ -34,6 +39,7 @@ jobs:
         with:
           node-version: '22.23.3'
       - name: Verify explicit branch qualification request
+        id: qualification_request
         if: github.event_name == 'push'
         run: |
           node --input-type=module <<'JS'
@@ -60,6 +66,7 @@ jobs:
             'psc1/AI_WORK_STATE.md','psc1/docs/PSC1_DEVELOPMENT_ROADMAP.md'];
           assert.ok(paths.every(p=>allowed.includes(p)),'request must not silently change compiler bytes');
           assert.equal(request.resourcePolicy,'unchanged');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'parser_scale='+(request.parserScale===true)+'\n');
           fs.mkdirSync('dist/generated-compiler',{recursive:true});
           fs.writeFileSync('dist/generated-compiler/qualification-request.json',JSON.stringify({
             ...request,event:'push-explicit-request',testedCommit:process.env.GITHUB_SHA,paths},null,2)+'\n');
@@ -139,6 +146,9 @@ jobs:
       - name: Sample a failed generated process without changing qualification
         if: ${{ failure() && steps.generated_execution.outcome == 'failure' }}
         run: node scripts/profile-generated-selfhost-failure.mjs
+      - name: Execute separately requested frontend scale probe
+        if: ${{ !cancelled() && (inputs.parser_scale || steps.qualification_request.outputs.parser_scale == 'true') }}
+        run: node scripts/generated-parser-scale-tests.mjs
       - name: Retain candidate graphs, executable identities and process evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -146,6 +156,7 @@ jobs:
           name: psc1-manual-selfhost-${{ github.sha }}-attempt-${{ github.run_attempt }}
           path: |
             psc1/dist/generated-compiler/
+            psc1/dist/generated-parser-scale/
             psc1/dist/generated-service-native/
             psc1/dist/worker-fusion/
             psc1/dist/scoped-correctness/compiler-source-census/

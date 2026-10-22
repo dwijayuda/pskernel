@@ -217,13 +217,6 @@ try {
     /PSC1_NATIVE_COMPILER_DELEGATION_FORBIDDEN/);
   report.nativeDelegationBoundary = 'seed-once; native tools disabled; frontend role refused';
   const corpus = [
-    { id: 'lean-parser-index-suffix', grammar: 'lean', assurance: 'checked', entry: 'Entry',
-      sources: [{ module: 'Entry', text:
-        'def answer : Nat := match ((#[40,42]))[1]? with | Option.none => 0 | Option.some value => value\n' +
-        'namespace Ps.Internal.ParserTail\n' +
-        Array.from({length:256},(_,i)=>'def item'+i+' : Nat := '+i+'\n').join('') +
-        'end Ps.Internal.ParserTail\n' }],
-      consumer: "if (m.answer !== 42n || Object.keys(m).join(',') !== 'answer') throw Error('parser index/span and long suffix ownership');" },
     { id: 'lean-modules', grammar: 'lean', assurance: 'checked', entry: 'Entry',
       sources: [{ module: 'Lib', text: 'namespace Lib\ndef base : Nat := 40\nend Lib\n' },
         { module: 'Entry', text: 'import Lib\ndef Ps.Internal.Corpus.hidden : Nat := Lib.base\ndef answer : Nat := Ps.Internal.Corpus.hidden + 2\n' }],
@@ -242,7 +235,6 @@ try {
       consumer: "if (m.answer(5n) !== 5n) throw Error('ordinary loop');" }
   ];
   const observedExpressions = {
-    'lean-parser-index-suffix':'({answer:String(m.answer),exports:Object.keys(m)})',
     'lean-modules':'({answer:String(m.answer),exports:Object.keys(m)})',
     'ps-integer-unicode':'({huge:String(m.huge),text:m.text})',
     'ps-list-literal':'({empty:String(m.answer(false)),first:String(m.answer(true))})',
@@ -250,7 +242,6 @@ try {
     'lean-ordinary-loop':'({zero:String(m.answer(0n)),five:String(m.answer(5n))})'
   };
   const expectedObservations = {
-    'lean-parser-index-suffix':{answer:'42',exports:['answer']},
     'lean-modules':{answer:'42',exports:['answer']},
     'ps-integer-unicode':{huge:'-9007199254740993123456789',text:'λ🙂'},
     'ps-list-literal':{empty:'0',first:'7'},

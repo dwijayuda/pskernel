@@ -1,8 +1,7 @@
 {
   "schema": "psc1-retained-selfhost-profile-request/1",
-  "sourceRun": 39848619349,
-  "artifact": 12456933484,
-  "artifactZipSha256": "9de69b371111897f03f59022293871b0d6b63af181ac374bbe1aeb6109c8b7c9",
+  "sourceRun": 39855739415,
+  "artifact": 12459313965,
   "readOnly": true,
   "replay": false
 }

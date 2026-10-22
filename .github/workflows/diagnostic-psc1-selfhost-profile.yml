@@ -1,0 +1,51 @@
+name: PSC1 retained self-host profile evidence
+
+on:
+  push:
+    branches:
+      - diagnostic/psc1-selfhost-profile-20261023
+    paths:
+      - .github/qualification-requests/psc1-profile.json
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Read only the exact retained qualification artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 39848619349
+          name: psc1-manual-selfhost-de564ab6f4aa6d52d61f888646d3030530ab71ac-attempt-1
+          path: retained
+      - name: Inspect immutable profile summary and caller costs
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const root='retained/generated-compiler/';
+          const receipt=JSON.parse(fs.readFileSync(root+'selfhost-failure-cpu-profile/receipt.json','utf8'));
+          assert.equal(receipt.testedCommit,'de564ab6f4aa6d52d61f888646d3030530ab71ac');
+          assert.equal(receipt.requestId,'G2-self');
+          assert.equal(receipt.requestSha256,'657b05fbce172bb668996ebd402680b2008566050f694351d4f8bd26f379e34b');
+          const source=fs.readFileSync(root+'G1.mjs');
+          assert.equal(crypto.createHash('sha256').update(source).digest('hex'),receipt.serviceSha256);
+          const text=fs.readFileSync(root+'selfhost-failure-cpu-profile/profile-0.txt','utf8');
+          for(const label of ['[Summary]','[Bottom up']){
+            const start=text.indexOf(label);assert.ok(start>=0,label);
+            console.log('PSC1_RETAINED_PROFILE_SECTION: '+text.slice(start).split('\n').slice(0,label==='[Summary]'?35:280).join('\n'));
+          }
+          const lines=source.toString('utf8').split('\n');
+          for(const n of [484,5316,6394,6407])console.log('PSC1_RETAINED_GENERATED_LINE: '+n+' '+lines[n-1].slice(0,14000));
+          console.log('PSC1_RETAINED_PROFILE_RECEIPT: '+JSON.stringify(receipt));
+          JS

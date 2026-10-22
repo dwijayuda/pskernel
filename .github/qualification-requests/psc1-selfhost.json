@@ -1,16 +1,17 @@
 {
   "schema": "psc1-manual-selfhost-request/1",
-  "id": "psc1-v1-source-worker-selfhost-2026-10-23-06",
+  "id": "psc1-v1-frozen-selfhost-2026-10-23-07",
   "action": "qualify-G1-G2-G3",
   "branch": "fix/psc1-closure-normalization-20261021",
-  "parentCommit": "f7e4f49600131e3c422e74efce97dbf56d3c99d8",
+  "parentCommit": "b6ebff79b10e85fd5165225d9d96c2b23f350681",
   "qualifiedCompilerSource": "9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde",
   "practicalCoreQualificationRun": 39829564386,
   "contractGitBlob": "1e49d4399d67b87097894047dd7924db04ffed99",
   "authorization": "User explicitly requested resuming manual G1 -> G2 -> G3 after Practical Core v1 qualification.",
   "resourcePolicy": "unchanged",
   "mergeOrPublish": false,
-  "candidateCompilerSource": "f7e4f49600131e3c422e74efce97dbf56d3c99d8",
+  "candidateCompilerSource": "b6ebff79b10e85fd5165225d9d96c2b23f350681",
   "qualificationBoundary": "Historical Practical Core baseline is preserved; changed parser candidate requires fresh full CI, running separately. No result is inherited onto changed compiler bytes.",
-  "parserScale": false
+  "parserScale": false,
+  "note": "Manual qualification of source-normalized total core visitors. Historical v1 baseline is not inherited; require fresh complete companion CI, exact ten-case G1/G2/G3 manifests, unchanged resources and independent checker."
 }

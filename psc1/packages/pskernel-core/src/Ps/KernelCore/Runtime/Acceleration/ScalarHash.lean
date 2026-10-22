@@ -28,7 +28,10 @@ def psKernelCacheStringHashStep
     let char := String.Internal.get value (String.Pos.Raw.mk position);
     let next := String.Pos.Raw.byteIdx
       (String.Pos.Raw.next value (String.Pos.Raw.mk position));
-    Prod.mk next (psKernelCacheMix (Prod.snd state) (Char.toNat char))
+    Prod.mk next
+      (Nat.mod
+        (Nat.add (Nat.mul (Prod.snd state) 31) (Char.toNat char))
+        psKernelCacheHashModulus)
 
 def psKernelCacheStringHashStateWithFuel
     (fuel : Nat)
@@ -37,20 +40,10 @@ def psKernelCacheStringHashStateWithFuel
   match fuel with
   | Nat.zero => initial
   | Nat.succ remaining =>
-      /- This is definitionally the exported step, fused to avoid per-byte
-      generated dispatch. The recursion still returns only immutable data. -/
-      let state := psKernelCacheStringHashStateWithFuel remaining value initial;
-      let position := Prod.fst state;
-      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
-        state
-      else
-        let char := String.Internal.get value (String.Pos.Raw.mk position);
-        let next := String.Pos.Raw.byteIdx
-          (String.Pos.Raw.next value (String.Pos.Raw.mk position));
-        Prod.mk next
-          (Nat.mod
-            (Nat.add (Nat.mul (Prod.snd state) 31) (Char.toNat char))
-            psKernelCacheHashModulus)
+      /- Keep the byte transition a nonrecursive primitive-only data function,
+      so generated iteration does not allocate a byte-step generator. -/
+      psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStateWithFuel remaining value initial)
 
 def psKernelCacheStringHashScan
     (fuel : Nat)

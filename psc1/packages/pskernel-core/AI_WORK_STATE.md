@@ -1,45 +1,46 @@
-## Exact c644 generated producer/control PASS; mixed replay pending
+## Pure byte-step candidate; exact c644 mixed TIMEOUT retained
 
-Executable: `c64425881ca637021c56bf4c985e2d1bd6afa593`.
-[Run39867316634](https://github.com/dwijayuda/pskernel/actions/runs/39867316634):
-native120132664257 PASS; generated producer120133415127 PASS; generated
-controls120141720995 PASS. Mixed120141720969 is ALREADY RUNNING under its
-unchanged25-minute cap. Fetch that existing run,never duplicate it.
-This documentation child inherits no executable qualification.
+The preceding executable `c64425881ca637021c56bf4c985e2d1bd6afa593`
+has terminal [run39867316634](https://github.com/dwijayuda/pskernel/actions/runs/39867316634):
+native120132664257 PASS; producer120133415127 PASS; controls120141720995 PASS;
+mixed120141720969 CANCELLED at the unchanged25-minute job cap. It completed
+294 admissions/377 metadata and the mixed singleton,then402 of403 traced
+calls. Call403,V1RunDag at validity-left,was interrupted. No complete case/
+shard receipt,assertion failure,heap failure,or completed peakRSS was observed.
+All402 completed trace records and exact native/producer/control/artifact
+identities are saved in
+`evidence/2026-10-23-t01f-fused-data-result-mixed-terminal.json`.
 
-Native: allfive exact equations,2730 matrix cases,three long cases,294/377,
-six authentic String cases/singleton sequences,retained controls. All79 proof
-rows are in `evidence/2026-10-23-t01f-fused-data-result-native.json`;
-the newfive use only propext,Classical.choice,Quot.sound,no sorryAx/trust axiom.
-Both generated small probe and full-kernel controls passed2730 cases,
-8190 partial stages,13665 assertions and three long cases.
-Complete-kernel static reading confirms one immutable data iterator with no
-staged result wrappers,no byte Step/Mix dispatch,and no staged full-hash entry.
+C644 UTF8-literal-left V1WHNF recorded52338.398165ms; repeated large V1DefEq
+calls there58471–60927ms. All44 completed V1DefEq calls total826264.118534ms.
+Progress moved from377 completed calls at5abf to402,but different runners and
+capped incomplete traces do not establish controlled speedup or qualification.
+Keep the DAG RSS increase(582428KiB vs5abf565200KiB),old cold/warm/heap/Name
+regressions,and all failed/incomplete attempts visible.
 
-Complete kernel9955448 bytes,SHA256
-`89f52d0606284bf9d9a8416db15fcd0d757835ce48e1e4478a89aba97bed1c49`.
-Producer artifact12465008609,ZIP SHA256
-`39fb5a2853b85a55a7b3d7bfb336fee5e9b8739be0babc145c843902ac422862`.
-Generated DAG136.95s/582428KiB peakRSS; prefix/session30.84s/400216KiB,
-605 assertions. Keep the larger DAG RSS versus5abf(565200KiB) and all old
-timings visible. Different hosted runners do not establish causal speedup.
-Complete source/artifact/probe/raw code-shape/measurement bindings:
-`evidence/2026-10-23-t01f-fused-data-result-generated-preflight.json`.
+This commit tests a narrower pure-data byte-step lowering. The nonrecursive
+exported step now contains the exact primitive arithmetic directly; the data
+iterator calls that step,which should emit a normal function instead of one
+byte-step generator per iteration. Full hash still calls saturated Scan,and
+the public curried worker retains every partial stage. The existing five
+equations,2730 native/generated cases,8190 staged calls,13665 generated
+assertions,three long cases,and all authentic String assertions are UNCHANGED.
+The new small codegen gate refuses any generator/run/invoke/wrap machinery
+inside the step and any staged full-hash entry,before full compilation.
+If the pure-leaf hypothesis fails,stop at that gate; do not suppress it.
 
-The public staged worker and exact hash algorithm/UTF8/fuel-bounded values
-remain unchanged; fullHash bypasses staging internally,and data iteration
-fuses the definitionally equal step/mix. Native equivalence does not prove
-global backend preservation,soundness,or final String correctness.
-Previous5abf mixed timed out; its bounded profile completed but did not qualify
-T01F. Preserve all historical failed/incomplete runs and measured regressions.
+This candidate is UNQUALIFIED. Fetch this exact source's existing native-first
+hash preflight,never duplicate it. Preserve fuel4096,2048MiB,emptyPATH,
+native25-minute/producer25-minute/controls10-minute/mixed25-minute caps.
+Only actual complete mixed PASS permits activating the saved final workflows.
+All final native/official/canonical/proof/provider24/API8,research,measurements,
+both six-sample aggregates,32-worker384-call ABBA,and unchanged193 Arena/
+profile gates must still run at the final source. Disable focused/hash/profile
+automatic diagnostics on activation. Draft locations/digests remain in README.
 
-Final workflows remain INACTIVE. T01F/currentA/B/C/D OPEN; historical scoped
-A=9c87,historical full193 C=FAIL. Do not startT05 or move integration123c411.
-After an actual complete mixed PASS,activate both final routes/all retained
-gates at one coherent source,disable focused/hash/profile automatic pushes,
-and run every required native/official/canonical/proof/provider24/API8,
-six-shard aggregate,research,complete measurement,unchanged32-worker384-call
-ABBA,and unchanged193 Arena/profile gate. New source must requalify itself.
+T01F/currentA/B/C/D OPEN; historical scopedA=9c87,historical full193C=FAIL.
+Do not startT05 or move integration123c411. Do not claim DirectJS support,
+global soundness/refinement/backend preservation,or inherited qualification.
 
 ## Exact 5abf mixed preflight TIMEOUT; current-artifact bounded profile next
 

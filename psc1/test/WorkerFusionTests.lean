@@ -38,10 +38,20 @@ def continuationWorker : PsVerifiedIrDeclaration :=
           (lam "sentinel" (app (app (call "continuationScan" [v "done",v "remaining"])
             (add (v "state") (n 1))) (v "sentinel"))))))
 
+def evaluatedWorker : PsVerifiedIrDeclaration :=
+  .mk "evaluatedScan" [] [.mk "done" fnT, param "fuel"] fnT
+    (.ifE (eq (v "fuel") (n 0)) (v "done")
+      (.letE "remaining" natT (sub (v "fuel") (n 1))
+        (lam "state" (app (call "evaluatedScan" [v "done",v "remaining"])
+          (add (v "state") (n 1))))))
+
 def module : PsVerifiedIrModule := .mk [] [] [] [
     worker,
     arithmeticWorker,
     continuationWorker,
+    evaluatedWorker,
+    .mk "evaluatedEntry" [] [param "fuel",param "state"] natT
+      (app (call "evaluatedScan" [lam "x" (v "x"),v "fuel"]) (v "state")),
     .mk "continuationEntry" [] [param "fuel",param "state",param "sentinel"] natT
       (app (app (call "continuationScan" [
         .lambda [param "x"] fnT (lam "y" (add (v "x") (v "y"))), v "fuel"])
@@ -66,6 +76,10 @@ def module : PsVerifiedIrModule := .mk [] [] [] [
   ]
 
 def strictModule : PsVerifiedIrModule := .mk [] [] [] [
+  continuationWorker,
+  .mk "curriedProbe" [] [.mk "first" continuationT,.mk "later" fnT] natT
+    (app (app (call "continuationScan" [v "first",n 0]) (n 0)) (call "later" [n 0])),
+
   .mk "spin" [] [param "n"] natT (call "spin" [v "n"]),
   .mk "unsafe" [] [param "n"] fnT
     (.letE "computed" natT (call "spin" [v "n"]) (lam "x" (v "computed"))),
@@ -118,8 +132,10 @@ def main : IO Unit := do
     (fused.raw.declarations.any (fun value => value.name == "scan$worker_" && value.parameters.length == 2))
   require "total Nat arithmetic prefix obtains a checked companion"
     (fused.raw.declarations.any (fun value => value.name == "arithmeticScan$worker" && value.parameters.length == 2))
-  require "eta-contracted curried continuation obtains a checked companion"
-    (fused.raw.declarations.any (fun value => value.name == "continuationScan$worker" && value.parameters.length == 4))
+  require "unknown curried continuation retains intermediate application order"
+    (!fused.raw.declarations.any (fun value => value.name == "continuationScan$worker"))
+  require "evaluated single-layer continuation obtains a checked companion"
+    (fused.raw.declarations.any (fun value => value.name == "evaluatedScan$worker" && value.parameters.length == 3))
   require "escaped call-only function stays available"
     (fused.raw.declarations.any (fun value => value.name == "hold"))
   let invalid := PsVerifiedIrModule.mk [] [] [] [
@@ -136,10 +152,10 @@ def main : IO Unit := do
     | .ok value => pure value
   require "effectful/divergent prefix is never delayed"
     (!strictFused.raw.declarations.any (fun value => value.name == "unsafe$worker"))
-  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow","arithmeticEntry","continuationEntry"]
-  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry","continuationEntry"]
-  emit strictInput "dist/worker-fusion/strict-baseline.mjs" ["strict"]
-  emit strictFused "dist/worker-fusion/strict-fused.mjs" ["strict"]
+  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow","arithmeticEntry","continuationEntry","evaluatedEntry"]
+  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry","continuationEntry","evaluatedEntry"]
+  emit strictInput "dist/worker-fusion/strict-baseline.mjs" ["strict","curriedProbe"]
+  emit strictFused "dist/worker-fusion/strict-fused.mjs" ["strict","curriedProbe"]
   IO.FS.writeFile "dist/worker-fusion/probe.mjs"
     "export const seen=[];export function mark(n){seen.push(String(n));return n;}\n"
   IO.println "PSC1_WORKER_FUSION_FIXTURES: typed source and transformed modules emitted"

@@ -35,3 +35,11 @@ all targets, negative boundaries and full release contract still must pass.
   using the checked curried result type. The paired baseline/fused IR fixture
   requires a four-argument companion and 100000-step exact observation.
   Linux validation remains pending; the emitted Rust must demonstrate the fix.
+
+
+The initial general curried-local fallback in 3da91ece is superseded: it could
+move intermediate callback divergence after a later argument. The replacement
+admits only a single checked application layer and adds a real deadline test
+where that callback must diverge before a later argument throws. Known source
+base lambda values are instead expanded before total helper capture, under the
+existing official-conversion theorem. All original strict computations stay.

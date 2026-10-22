@@ -319,3 +319,21 @@ requires its four-parameter companion, and compares baseline/fused execution
 for 100000 steps (100010 exact result). All old divergence/order/capture tests
 and resource limits remain. This change is pending its own Linux CI; it is not
 a new qualification claim.
+
+
+## Curried-call strictness correction
+
+The initial 3da91ece extension is superseded before qualification: applying
+unknown curried function parameters only after all later arguments could move
+an intermediate divergent call. The fallback now permits exactly one checked
+application layer. Unknown curried leaves refuse fusion, with a native no-worker
+assertion and actual two-second baseline/fused divergence-before-later-trap test.
+
+The source Nat lift expands only known evaluated local lambda values (including
+bounded value aliases) at its base. Other calls/computations remain in original
+strict lets. Free captures retain original binding identity; the total helper
+and its erased official-conversion theorem remain mandatory. A single-layer
+local continuation still obtains a checked companion and exact 100000-step
+baseline/fused runtime comparison. The earlier curried 100000 observation also
+remains, now expressly testing the conservative unfused path. Pending Linux CI;
+no weakened workloads, correctness boundaries, or qualified-source claims.

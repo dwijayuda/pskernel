@@ -161,22 +161,17 @@ def bindParameters (parameters : List PsVerifiedIrParameter) (arguments : List P
           | Option.some nested =>
               Option.some (PsVerifiedIrExpr.letE parameter.name parameter.type argument nested)
 
--- A local callable is already evaluated. Apply its checked curried signature
--- in order; never treat a computed call or an unknown global as a value here.
-def applyLocal (fuel : Nat) (type : PsVerifiedIrType)
+-- A local callable is already evaluated. Only one checked application layer
+-- can move here: an intermediate curried call might diverge before later args.
+def applyLocal (type : PsVerifiedIrType)
     (value : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) : Option PsVerifiedIrExpr :=
-  match fuel with
-  | Nat.zero => Option.none
-  | Nat.succ remaining =>
-      if psListIsEmpty arguments then Option.some value
-      else
-        match type with
-        | PsVerifiedIrType.function parameters result =>
-            let count : Nat := psListLength parameters;
-            if Nat.beq count 0 || Nat.blt (psListLength arguments) count then Option.none
-            else applyLocal remaining result
-              (PsVerifiedIrExpr.call value [] (psListTake count arguments)) (drop count arguments)
-        | _ => Option.none
+  match type with
+  | PsVerifiedIrType.function parameters _ =>
+      if Nat.beq (psListLength parameters) (psListLength arguments) &&
+          !(psListIsEmpty parameters) then
+        Option.some (PsVerifiedIrExpr.call value [] arguments)
+      else Option.none
+  | _ => Option.none
 
 -- Beta application is represented by typed lets rather than textual substitution.
 -- Original lambda shadowing/capture scopes therefore remain exactly nested.
@@ -230,7 +225,7 @@ def sink (fuel : Nat) (locals : List String) (type : PsVerifiedIrType)
               | Option.some values => Option.some (PsVerifiedIrExpr.matchE owner types major values)
             else Option.none
         | PsVerifiedIrExpr.var name =>
-            if seen locals name then applyLocal 64 type expression arguments else Option.none
+            if seen locals name then applyLocal type expression arguments else Option.none
         | _ => Option.none
 
 structure Spec where

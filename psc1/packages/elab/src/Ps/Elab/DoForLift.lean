@@ -46,10 +46,32 @@ def psElabDoForLiftMinor (step index rest : PsExpr) (placeholder : PsName) :
       | _ => Except.error PsElabError.unsupportedTerm
   | _ => Except.error PsElabError.unsupportedTerm
 
+-- Expanding a known local lambda duplicates only an evaluated closure value.
+-- Calls and other strict computations stay in their original source lets.
+def psElabDoForBaseLambda (fuel : Nat) (locals : PsLocalContext) (term : PsExpr) : PsExpr :=
+  match fuel with
+  | Nat.zero => term
+  | Nat.succ remaining =>
+      match term with
+      | PsExpr.fvar id =>
+          match psLocalFindById locals id with
+          | Option.some (PsLocalDecl.letDecl _ _ _ value) =>
+              match value with
+              | PsExpr.lam _ _ _ _ => value
+              | PsExpr.fvar _ =>
+                  let expanded : PsExpr := psElabDoForBaseLambda remaining locals value;
+                  match expanded with
+                  | PsExpr.lam _ _ _ _ => expanded
+                  | _ => term
+              | _ => term
+          | _ => term
+      | _ => term
+
 def psElabDoForSpecialize
     (owner : PsName) (ownerType : PsExpr) (locals : PsLocalContext)
     (work : PsElabDoLoopLiftState) (resultType base step count : PsExpr) :
     Except PsElabError PsElabDoLoopLiftResult :=
+  let base : PsExpr := psElabDoForBaseLambda 64 locals base;
   let name := psElabDoForLiftName owner work.nextIndex;
   let placeholder := PsName.str name "_psc1Induction";
   let capturesRev := psElabDoLoopCaptures [resultType, base, step] locals.declarations;

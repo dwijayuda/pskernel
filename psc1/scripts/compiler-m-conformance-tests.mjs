@@ -325,7 +325,15 @@ try {
     for(const c of contract.cases) records.push({...identity,id:c.id,flags:[false,true],
      expected:{false:oracle[c.id+'False'],true:oracle[c.id+'True']}});
     console.log(marker+'_TARGET_PASS: '+label);
-   }catch(error){failures.push({label,error:error.stack||String(error)});console.error(marker+'_TARGET_FAIL: '+label+'\n'+error.stack);}
+   }catch(error){
+    if(inferenceControl&&target==='rust'&&fs.existsSync(output)){
+     const chunks=read(output).split(/(?=^(?:pub\\s+)?fn\\s)/m);
+     const functions=chunks.filter(s=>s.slice(0,s.indexOf('{')+1).includes('streamingControllerCase')).map(s=>({
+      header:s.slice(0,s.indexOf('{')),chars:s.length,tailLoop:s.includes('__ps_internal_tail_state'),source:s.slice(0,18000)}));
+     console.error(marker+'_RUST_CONTROLLER: '+JSON.stringify({syntax,functions}));
+    }
+    failures.push({label,error:error.stack||String(error)});console.error(marker+'_TARGET_FAIL: '+label+'\\n'+error.stack);
+   }
    finally{
     if(fs.existsSync(output+'.bundle.json'))fs.cpSync(path.dirname(fs.realpathSync(output+'.bundle.json')),path.join(evidence,'bundles',label),{recursive:true});
    }

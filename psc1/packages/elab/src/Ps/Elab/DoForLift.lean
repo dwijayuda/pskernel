@@ -258,7 +258,7 @@ def psElabDoForLiftDeclaration
               match psElabDoForLiftExprWorker 4096 owner type psLocalEmpty work value with
               | Except.error error => Except.error error
               | Except.ok lifted =>
-                  let result := match declaration with
+                  let result : PsDeclaration := match declaration with
                     | PsDeclaration.definitionDecl name levels type _ =>
                         PsDeclaration.definitionDecl name levels type lifted.term
                     | PsDeclaration.partialDecl name levels type _ =>

@@ -292,3 +292,12 @@ Calls, projection/indexing, effects and divergence remain excluded. Retain the
 old negative prefix tests and add actual baseline/fused 100000-step arithmetic
 observations, checked companion creation and exact final values. This uses no
 larger Rust stack, release-only optimization, heap allowance or workload reduction.
+
+At 13402f7 / run 39762613631, the finite helper equivalence theorems pass official
+admission, and both grammars reject the well-typed zero-iteration mutation.
+The source census refuses psElabDoForLiftDeclaration with matchExpectedType;
+supply the missing explicit PsDeclaration annotation on that local match.
+Rust still overflows at complete streaming traversal after original/proof
+admission and earlier cases pass. Retain the generated source for the concrete
+controller and its companions on this failure, so the next change targets the
+actual unfused/native-call shape rather than guessed stack or resource settings.

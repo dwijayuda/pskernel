@@ -1,3 +1,25 @@
+## T01F singleton public-call coverage — native-only follow-up
+
+Updated: 2026-10-22 UTC. This revision adds a singleton check → WHNF → DefEq
+sequence for each of the six authentic String.ofList samples, threading the
+returned session and checking its exact environment, resource policy and
+provider. Every previous matrix/negative control remains. The actual constructor,
+checked type, WHNF and DefEq results are compared with V1 and the official
+native oracle as applicable. The final gates require six singleton PASS markers
+in native and each generated route.
+
+Production code is unchanged from worker candidate
+`19fb4b0b8f52808d6a31705185018d6e60836d8e`.
+Its native job119993677370 in run39827244691 passed, including both new
+lookup-equivalence theorems (only standard Lean axioms), T03a/T03b and
+all294 requests/377 declarations/six original sample groups. Its fresh generated
+job119993676851 is still running at this revision's preparation. Do not duplicate
+that build. This follow-up runs native only; no generated qualification is
+inherited, and the final coherent source still requires both generated routes
+with all singleton controls and the complete acceptance suite.
+
+---
+
 ## T01F authentic String — measured ownership bottleneck and candidate worker
 
 Updated: 2026-10-22 UTC. Work branch:

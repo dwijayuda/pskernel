@@ -199,6 +199,18 @@ private def sameEnvironment (a b : PsKernelEnvironment) : Bool :=
   a.quotInitialized == b.quotInitialized &&
   a.runtime.nativeEvaluator.isNone && b.runtime.nativeEvaluator.isNone
 
+private def sameSession (a b : PsKernelKernelSession) : Bool :=
+  sameEnvironment a.environment b.environment &&
+  a.resources.fuel == b.resources.fuel &&
+  a.resources.maxRecDepth == b.resources.maxRecDepth &&
+  a.resources.maxNatSize == b.resources.maxNatSize &&
+  a.resources.cancelled == b.resources.cancelled &&
+  a.resources.maxDeclarations == b.resources.maxDeclarations &&
+  psKernelStringEq a.provider.target.contract b.provider.target.contract &&
+  psKernelStringEq a.provider.target.leanVersion b.provider.target.leanVersion &&
+  psKernelStringEq a.provider.target.leanCommit b.provider.target.leanCommit &&
+  a.provider.nativeEvaluator.isNone && b.provider.nativeEvaluator.isNone
+
 private def verifyHeader (source : Lean.Environment) (state : Imported) (n : Lean.Name) : IO Unit := do
   let original ← info source n
   let some checked := psKernelEnvironmentFind state.session.environment (name n)
@@ -497,6 +509,36 @@ private def checkCase (source : Lean.Environment) (session : PsKernelKernelSessi
               (psKernelV1IsDefEq session [] .safe normalized legacyWhnf))
           if label == "ofList" then ensureConstructor source "public-ofList" normalized
       | _ => throw (IO.userError ("T01F public reply shape: " ++ label))
+    if label == "ofList" then
+      let singleCheck ← expectPublic "singleton-ofList-check"
+        (psKernelV1RunDag session [] .safe arena [.check leftId])
+      require "singleton-ofList-check-session" (sameSession session singleCheck.session)
+      match singleCheck.replies with
+      | [.checked checked] =>
+          require "singleton-ofList-checked-expression" (psKernelExprEqual checked.expression left)
+          officialEqual source "singleton-ofList-checked-type" officialType (officialExpr checked.type)
+          require "singleton-ofList-checked-v1-type"
+            (← expectPublic "singleton-ofList-checked-v1-type"
+              (psKernelV1IsDefEq session [] .safe checked.type legacyChecked.type))
+      | _ => throw (IO.userError "T01F singleton check reply shape")
+      let singleWhnf ← expectPublic "singleton-ofList-whnf"
+        (psKernelV1RunDag singleCheck.session [] .safe arena [.whnf leftId])
+      require "singleton-ofList-whnf-session" (sameSession session singleWhnf.session)
+      match singleWhnf.replies with
+      | [.normalized normalized] =>
+          ensureConstructor source "singleton-ofList" normalized
+          officialEqual source "singleton-ofList-whnf" officialNormal (officialExpr normalized)
+          require "singleton-ofList-whnf-v1-output" (psKernelExprEq normalized legacyWhnf)
+          require "singleton-ofList-whnf-v1-parity"
+            (← expectPublic "singleton-ofList-whnf-v1-parity"
+              (psKernelV1IsDefEq session [] .safe left normalized))
+      | _ => throw (IO.userError "T01F singleton WHNF reply shape")
+      let singleEq ← expectPublic "singleton-ofList-defeq"
+        (psKernelV1RunDag singleWhnf.session [] .safe arena [.isDefEq leftId rightId])
+      require "singleton-ofList-defeq-session" (sameSession session singleEq.session)
+      require "singleton-ofList-defeq"
+        (match singleEq.replies with | [.equal true] => true | _ => false)
+      IO.println ("PSC1_T01F_SINGLETON_PASS " ++ reprStr text)
   for bad in [PsKernelExpr.proj (name `String) 2 literal,
       PsKernelExpr.app (.const (name `String.ofList) []) (.lit (.nat 0)),
       psKernelApplyArgs (.const (name `String.ofByteArray) [])
@@ -680,5 +722,6 @@ end PsKernelExprV2StringEnvironmentRegression
 
 def main (args : List String) : IO Unit :=
   PsKernelExprV2StringEnvironmentRegression.regression args.head?
+
 
 

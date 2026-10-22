@@ -338,6 +338,41 @@ for(const value of sequence(fixture.samples).map(text)){
     must(result.session.environment===session.environment&&result.session.resources===session.resources&&
      result.session.provider===session.provider,caseLabel+"-query-session-unmodified");
    }
+   if(label==="string"&&side==="right"){
+    const Reply=get("PsKernelDagReply");
+    const unchanged=(result,label)=>must(
+     result.session.environment===session.environment&&result.session.resources===session.resources&&
+     result.session.provider===session.provider,label+"-session-unmodified");
+    traceStage="ofList-singleton:check";
+    const singleCheck=accepted(get("psKernelV1RunDag")(session,nil,safe,arena,
+     list([C.check(root)])),"singleton-ofList-check");
+    unchanged(singleCheck,"singleton-ofList-check");
+    const checkedReplies=array(singleCheck.replies);
+    must(checkedReplies.length===1&&checkedReplies[0]&&
+     same(checkedReplies[0],Reply.checked(checkedReplies[0].value)),"singleton-ofList-check-reply-kind");
+    const checkedReply=checkedReplies[0].value;
+    must(exact(checkedReply.expression,term),"singleton-ofList-checked-expression");
+    must(accepted(get("psKernelV1IsDefEq")(session,nil,safe,checkedReply.type,legacy.type),
+     "singleton-ofList-checked-type"),"singleton-ofList-checked-type-equal");
+    traceStage="ofList-singleton:whnf";
+    const singleWhnf=accepted(get("psKernelV1RunDag")(singleCheck.session,nil,safe,arena,
+     list([C.whnf(root)])),"singleton-ofList-whnf");
+    unchanged(singleWhnf,"singleton-ofList-whnf");
+    const whnfReplies=array(singleWhnf.replies);
+    must(whnfReplies.length===1&&whnfReplies[0]&&
+     same(whnfReplies[0],Reply.normalized(whnfReplies[0].value)),"singleton-ofList-whnf-reply-kind");
+    const whnfReply=whnfReplies[0].value;
+    requireStringConstructor(whnfReply,"singleton-ofList");
+    must(eqExpr(whnfReply,legacyNormalized),"singleton-ofList-whnf-output-matches-v1");
+    must(accepted(get("psKernelV1IsDefEq")(session,nil,safe,term,whnfReply),
+     "singleton-ofList-whnf-parity"),"singleton-ofList-whnf-equal");
+    traceStage="ofList-singleton:defeq";
+    const singleEq=accepted(get("psKernelV1RunDag")(singleWhnf.session,nil,safe,arena,
+     list([C.isDefEq(root,other)])),"singleton-ofList-defeq");
+    unchanged(singleEq,"singleton-ofList-defeq");
+    must(same(array(singleEq.replies),[Reply.equal(true)]),"singleton-ofList-defeq-reply");
+    console.log("PSC1_T01F_JS_SINGLETON_PASS "+JSON.stringify(value));
+   }
   }
  }
  const badCases=[
@@ -374,4 +409,5 @@ must(get("psKernelEnvironmentSize")(empty.environment)===0n,"empty-session-immut
 console.log("PSC1_T01F_FULL_STRING_JS: PASS "+JSON.stringify({kernelSha256,fixtureSha256,requests:requests.length,metadata:metadata.length,
  declarations:get("psKernelEnvironmentSize")(session.environment).toString(),samples:fixture.samples.length,
  assertions,constructionMs,admissionMs,diagnosticTracing:traceEnabled,measurements}));
+
 

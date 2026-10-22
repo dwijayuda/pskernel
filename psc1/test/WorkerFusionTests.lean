@@ -45,7 +45,24 @@ def evaluatedWorker : PsVerifiedIrDeclaration :=
         (lam "state" (app (call "evaluatedScan" [v "done",v "remaining"])
           (add (v "state") (n 1))))))
 
-def module : PsVerifiedIrModule := .mk [] [] [] [
+def captureBox : PsVerifiedIrInductive :=
+  .mk "CaptureBox" [] [.mk "box" [.mk "value" natT]]
+
+def module : PsVerifiedIrModule := .mk [] [] [captureBox] [
+    .mk "stableAlias" [] [param "fuel",param "state"] natT
+      (.letE "saved" fnT (call "scan" [v "fuel"]) (app (v "saved") (v "state"))),
+    .mk "literalAlias" [] [param "state"] natT
+      (.letE "saved" fnT (call "scan" [n 5]) (app (v "saved") (v "state"))),
+    .mk "captureSelf" [] [param "fuel"] natT
+      (.letE "fuel" fnT (call "scan" [v "fuel"]) (app (v "fuel") (n 2))),
+    .mk "captureLambda" [] [param "fuel"] natT
+      (.letE "saved" fnT (call "scan" [v "fuel"])
+        (app (lam "fuel" (app (v "saved") (n 2))) (n 0))),
+    .mk "captureMatch" [] [param "fuel"] natT
+      (.letE "saved" fnT (call "scan" [v "fuel"])
+        (.matchE "CaptureBox" [] (.constructor "CaptureBox" "box" [] [("value",n 0)])
+          [("box", [.mk "value" "fuel" natT], app (v "saved") (n 2))])),
+
     worker,
     arithmeticWorker,
     continuationWorker,
@@ -136,6 +153,23 @@ def main : IO Unit := do
     (!fused.raw.declarations.any (fun value => value.name == "continuationScan$worker"))
   require "evaluated single-layer continuation obtains a checked companion"
     (fused.raw.declarations.any (fun value => value.name == "evaluatedScan$worker" && value.parameters.length == 3))
+  require "stable variable alias needs no administrative capture"
+    (match fused.raw.declarations.find? (fun declaration => declaration.name == "stableAlias") with
+     | some declaration =>
+         match declaration.body with
+         | .call (.var name) [] [.var "fuel", .var "state"] => name == "scan$worker_"
+         | _ => false
+     | none => false)
+  require "literal alias needs no administrative capture"
+    (match fused.raw.declarations.find? (fun declaration => declaration.name == "literalAlias") with
+     | some declaration =>
+         match declaration.body with
+         | .call (.var name) [] [.literal (.natural 5), .var "state"] => name == "scan$worker_"
+         | _ => false
+     | none => false)
+  require "exhausted binder scan cannot certify stability"
+    (!Ps.Internal.WorkerFusion.stableCapture "saved" (n 0) (.call (v "scan") [] []) &&
+      Ps.Internal.WorkerFusion.bindsName 0 "fuel" (n 0))
   require "escaped call-only function stays available"
     (fused.raw.declarations.any (fun value => value.name == "hold"))
   let invalid := PsVerifiedIrModule.mk [] [] [] [
@@ -152,8 +186,8 @@ def main : IO Unit := do
     | .ok value => pure value
   require "effectful/divergent prefix is never delayed"
     (!strictFused.raw.declarations.any (fun value => value.name == "unsafe$worker"))
-  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow","arithmeticEntry","continuationEntry","evaluatedEntry"]
-  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry","continuationEntry","evaluatedEntry"]
+  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow","arithmeticEntry","continuationEntry","evaluatedEntry","stableAlias","literalAlias","captureSelf","captureLambda","captureMatch"]
+  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry","continuationEntry","evaluatedEntry","stableAlias","literalAlias","captureSelf","captureLambda","captureMatch"]
   emit strictInput "dist/worker-fusion/strict-baseline.mjs" ["strict","curriedProbe"]
   emit strictFused "dist/worker-fusion/strict-fused.mjs" ["strict","curriedProbe"]
   IO.FS.writeFile "dist/worker-fusion/probe.mjs"

@@ -1,18 +1,18 @@
 # Resumed G2 performance defect
 
 Status: open after qualified Practical Core v1 feature freeze.
-Latest completed manual run39858945154/job120104321493 at4cc36fc8 passes the
-exact ten-case G1 corpus; G2 times out240171ms before admission/publication,
-G3 not run. Exact replay240221ms and artifact12460934656 preserve the request,
-service and V8 sample. The dated G2_LEXER_META_FAILURE_QUALIFICATION receipt
-records identities and read-only profile inspection39860611583.
+Latest actual39861084058/job120111640762 at7de601f5 passes ten G1 cases;
+G2 times out240151ms before admission/publication; G3 not run. Exact replay
+240306ms and artifact12462063500 preserve all source/request/profile bytes.
+Read-only39863014327 splits the same sample into timestamp windows. See
+PSC1_G2_CORE_VISITOR_FAILURE_QUALIFICATION_2026-10-23.json.
 
-Earlier actual retries39848619349 and39855739415 also timed out on G2;
-retain their dated receipts. Lexer/cursor/meta source fixes have native/census
-or G1 evidence as recorded in AI_WORK_STATE.md, not G2/G3 qualification.
-Next candidate normalizes the same eager helper-construction class in seven
-core visitors, with all-input native reference equalities and fresh complete CI.
-No heap/stack/deadline or checker/strict-IR/manifest condition is raised.
+All-input native visitor/source equivalence proofs pass atba027ada. They do
+not establish generated fixed-point completion. Stable immutable captures are
+now conservatively optimized, retaining every shadow/effect/fuel refusal;
+new actual baseline/transformed execution and complete/manual CI are required.
+Earlier retries39848619349,39855739415 and39858945154 remain in their dated
+receipts. No heap/stack/deadline/checker/strict-IR/manifest boundary is raised.
 
 ## Preserved earlier evidence
 

@@ -332,3 +332,36 @@ matches after simplification (717/722/727/732). Add explicit cases on that
 right input in the proof scripts. All-input statements and original reference
 definitions stay intact; compiler source/resource/checker bytes do not change.
 Manual39861084058 continues on the identical compiler candidate.
+
+
+## Core-visitor G2 result and stable capture optimization (2026-10-23)
+
+Manual39861084058/job120111640762 at7de601f5 passes all ten G1 cases with
+serviced23b9965... /86 modules, then G2 times out240151ms before admission or
+publication; G3 not run. Exact replay240306ms retains51673311 raw profile
+bytes in artifact12462063500 (b9f12e6b...). Read-only39863014327/job120118179696
+splits its206145 ticks into four timestamp windows without replaying the
+compiler. First minute primarily decodes JSON; later windows contain ongoing
+lexing/elaboration, substitution and meta/name scans. GC is46290 samples.
+All exact identities/windows are in the dated G2_CORE_VISITOR failure receipt.
+
+Native39861839336/job120117453281 atba027ada passes all seven total visitor
+reference equalities, earlier count/lexer/empty-substitution proofs and existing
+regressions. Focused core/PHP also pass; complete candidate qualification has
+not finished and is not inherited by the next changed compiler.
+
+Worker fusion now avoids administrative capture lets only for immutable
+literals or variables proven unshadowed throughout the original alias body.
+The overapproximating bounded binder scan covers let initializers/bodies,
+lambda parameters, constructor-match bindings and every expression child;
+exhaustion retains capture. The alias's own binder also protects old values.
+Unknown/effectful/non-value operands and all prior administrative-prefix
+refusals remain. Original declarations and strict input/output IR rechecks stay.
+
+New native shape checks and actual baseline/transformed JS execution cover
+stable variable/literal aliases plus self, lambda and constructor-match shadow
+captures. All older escape, exact-once order, continuation, strict divergence,
+100000-step and billion-bound immediate-return obligations remain. This is a
+bounded optimization with execution evidence required, not a preservation proof.
+Request fresh complete companion CI and manual G1/G2/G3; keep G2 open and all
+resource/checker/manifest policies unchanged.

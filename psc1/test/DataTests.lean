@@ -320,7 +320,8 @@ private theorem lexLengthAcc_correct {α : Type} (xs : List α) (acc : Nat) :
   | cons head rest ih =>
     change psLexListLengthAcc rest (Nat.succ acc) = acc + (List.cons head rest).length
     rw [ih]
-    simp [Nat.succ_add, Nat.add_succ]
+    change Nat.succ acc + rest.length = acc + Nat.succ rest.length
+    exact (Nat.succ_add acc rest.length).trans (Nat.add_succ acc rest.length).symm
 
 private theorem lexLength_correct {α : Type} (xs : List α) :
     psLexListLength xs = xs.length := by

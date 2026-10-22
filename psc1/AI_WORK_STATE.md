@@ -292,3 +292,8 @@ cons reduction, induction-hypothesis rewrite and arithmetic simplification.
 Compiler bytes, statements and resource policies stay identical. The original
 manual run continues to retain its exact source-bound result; fresh companion
 CI must validate this proof correction and all selected release gates.
+
+The follow-up companion39859589200/job120107100265 isolates the remaining
+proof error to the arithmetic simp step at323:4. Replace it with the explicit
+Nat.succ_add / symmetric Nat.add_succ equality chain. No proof/runtime limit
+is raised and the all-input statement is retained.

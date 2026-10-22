@@ -780,6 +780,46 @@ def psJsPrintMatchAlternativesWith
                   printedAlternative
                   printedRest)
 
+def psJsPrintEvery {alpha : Type} (predicate : alpha -> Bool) (values : List alpha) : Bool :=
+  match values with
+  | List.nil => true
+  | List.cons value rest =>
+      if predicate value then psJsPrintEvery predicate rest else false
+
+def psJsCallsUseOnlySelfWithFuel (selfName : String) (fuel : Nat) :
+    PsJsIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_expression : PsJsIrExpr) => false
+  | Nat.succ remaining =>
+      let smaller : PsJsIrExpr -> Bool :=
+        psJsCallsUseOnlySelfWithFuel selfName remaining;
+      fun (expression : PsJsIrExpr) =>
+        match expression with
+        | .literal _ => true
+        | .var _ => true
+        | .unary _ value => smaller value
+        | .projection value _ => smaller value
+        | .binary _ left right => smaller left && smaller right
+        | .letE _ value body => smaller value && smaller body
+        | .runtime _ arguments => psJsPrintEvery smaller arguments
+        | .lambda _ body => smaller body
+        | .call fn arguments =>
+            match fn with
+            | .var name => psStringEq name selfName && psJsPrintEvery smaller arguments
+            | _ => false
+        | .ifE condition left right => smaller condition && smaller left && smaller right
+        | .record fields => psJsPrintEvery (fun (field : Prod String PsJsIrExpr) => smaller field.snd) fields
+        | .constructor _ fields => psJsPrintEvery (fun (field : Prod String PsJsIrExpr) => smaller field.snd) fields
+        | .matchE scrutinee alternatives =>
+            smaller scrutinee && psJsPrintEvery
+              (fun (alternative : Prod String (Prod (List PsJsIrMatchBinding) PsJsIrExpr)) =>
+                smaller alternative.snd.snd) alternatives
+
+-- An empty sentinel cannot be an authored JsIR declaration name. With it the
+-- same structural visitor recognizes expressions containing no calls at all.
+def psJsNeedsCallDriver (expression : PsJsIrExpr) : Bool :=
+  if psJsCallsUseOnlySelfWithFuel "" 4096 expression then false else true
+
 def psJsPrintExprWithPositionAndFuel
     (stackTarget : Option String) (tailPosition : Bool)
     (fuel : Nat) :
@@ -829,10 +869,16 @@ def psJsPrintExprWithPositionAndFuel
             | Except.ok printedArguments =>
                 psJsPrintRuntime operation printedArguments
         | PsJsIrExpr.lambda parameters body =>
-            match lambdaBody body with
+            -- A call-free closure cannot suspend. Keep its existing lexical
+            -- captures and ordinary expression evaluation without a driver.
+            let driven : Bool := stackContext && psJsNeedsCallDriver body;
+            let printBody : PsJsIrExpr -> Except PsJsEmitError String :=
+              if driven then lambdaBody
+              else psJsPrintExprWithPositionAndFuel Option.none true remaining;
+            match printBody body with
             | Except.error error => Except.error error
             | Except.ok printedBody =>
-                if stackContext then
+                if driven then
                   Except.ok
                     (psJsJoin
                       ""
@@ -1544,46 +1590,6 @@ def psJsTailEmitWithFuel
                     "return "
                     printed
                     ";")
-
-def psJsPrintEvery {alpha : Type} (predicate : alpha -> Bool) (values : List alpha) : Bool :=
-  match values with
-  | List.nil => true
-  | List.cons value rest =>
-      if predicate value then psJsPrintEvery predicate rest else false
-
-def psJsCallsUseOnlySelfWithFuel (selfName : String) (fuel : Nat) :
-    PsJsIrExpr -> Bool :=
-  match fuel with
-  | Nat.zero => fun (_expression : PsJsIrExpr) => false
-  | Nat.succ remaining =>
-      let smaller : PsJsIrExpr -> Bool :=
-        psJsCallsUseOnlySelfWithFuel selfName remaining;
-      fun (expression : PsJsIrExpr) =>
-        match expression with
-        | .literal _ => true
-        | .var _ => true
-        | .unary _ value => smaller value
-        | .projection value _ => smaller value
-        | .binary _ left right => smaller left && smaller right
-        | .letE _ value body => smaller value && smaller body
-        | .runtime _ arguments => psJsPrintEvery smaller arguments
-        | .lambda _ body => smaller body
-        | .call fn arguments =>
-            match fn with
-            | .var name => psStringEq name selfName && psJsPrintEvery smaller arguments
-            | _ => false
-        | .ifE condition left right => smaller condition && smaller left && smaller right
-        | .record fields => psJsPrintEvery (fun (field : Prod String PsJsIrExpr) => smaller field.snd) fields
-        | .constructor _ fields => psJsPrintEvery (fun (field : Prod String PsJsIrExpr) => smaller field.snd) fields
-        | .matchE scrutinee alternatives =>
-            smaller scrutinee && psJsPrintEvery
-              (fun (alternative : Prod String (Prod (List PsJsIrMatchBinding) PsJsIrExpr)) =>
-                smaller alternative.snd.snd) alternatives
-
--- An empty sentinel cannot be an authored JsIR declaration name. With it the
--- same structural visitor recognizes expressions containing no calls at all.
-def psJsNeedsCallDriver (expression : PsJsIrExpr) : Bool :=
-  if psJsCallsUseOnlySelfWithFuel "" 4096 expression then false else true
 
 def psJsPrintTailLoopWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) : Option String :=

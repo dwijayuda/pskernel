@@ -28,6 +28,12 @@ assert.equal(m.letValue(7n),8n);assert.equal(m.letTail(7n),1n);
 assert.equal(m.condition(0n),7n);assert.equal(m.condition(1n),9n);
 const captured=m.make(3n);assert.equal(captured(3n),1n);assert.equal(captured(4n),0n);
 assert.equal(m.capture(5n),7n);
+const firstPlain=m.plainCapture(0n),secondPlain=m.plainCapture(1n);
+assert.notEqual(firstPlain,secondPlain);
+assert.equal(firstPlain(0n),1n);assert.equal(firstPlain(4n),5n);
+assert.equal(secondPlain(0n),0n);assert.equal(secondPlain(4n),4n);
+assert.equal(firstPlain(4n),5n);
+
 const marks=[];
 const ordered=m.ordered(n=>{marks.push("callee");assert.equal(n,0n);return(a,b)=>{marks.push("call");return a+b;};},
  n=>{marks.push("left");assert.equal(n,1n);return n;},n=>{marks.push("right");assert.equal(n,2n);return n;});
@@ -38,7 +44,7 @@ const maxRssKiB=process.resourceUsage().maxRSS;
 console.log(JSON.stringify({passed:true,mutualTailCalls:1000001,nonTailDepth:5000,maxRssKiB,
  checks:["mutual tail results","non-tail arithmetic continuation","local value continuation","local tail result",
  "condition continuation","escaping lambda owner","old captured value","callee and operands exact-once left-to-right",
- "tail foreign trap escapes","non-tail foreign trap escapes"]}));
+ "tail foreign trap escapes","non-tail foreign trap escapes","escaping call-free closures retain independent lexical captures"]}));
 `);
 const observed=JSON.parse(run(process.execPath,[consumer,module]));
 assert.equal(observed.passed,true);assert.ok(observed.maxRssKiB>0&&observed.maxRssKiB<=262144,'bounded tail-driver process RSS');

@@ -40,6 +40,11 @@ def raw : PsVerifiedIrModule := .mk [] [] [] [
   .mk "capture" [] [p "n"] natT
     (.letE "saved" fnT (.lambda [p "x"] natT (add (v "n") (v "x")))
       (.letE "n" natT (n 99) (.call (v "saved") [] [n 2]))),
+  .mk "plainCapture" [] [p "n"] fnT
+    (.letE "seed" natT (call "even" [v "n"])
+      (.lambda [p "x"] natT
+        (.letE "n" natT (n 99)
+          (.ifE (eq (v "x") (n 0)) (v "seed") (add (v "seed") (v "x")))))),
   .mk "ordered" [] [.mk "provider" providerT,.mk "left" fnT,.mk "right" fnT] natT
     (.call (call "provider" [n 0]) [] [call "left" [n 1],call "right" [n 2]]),
   .mk "trapTail" [] [.mk "fn" fnT] natT (call "fn" [n 0]),

@@ -1,93 +1,71 @@
 # PSC1 development roadmap
 
-Updated 2026-10-22. The single finite release authority is
-[PSC1_PRACTICAL_CORE_V1_CONTRACT.json](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):
-fourteen families, 37 acceptance criteria, both source grammars, seven targets
-and four actual applications. Scope is frozen; retain all already working
-features. Detailed supported semantics remain in PSC1_PRACTICAL_CORE_DECISIONS.md.
-AI_WORK_STATE.md owns current continuation status. Historical diagnoses and
-superseded work-state text are in PSC1_IMPLEMENTATION_HISTORY_2026-10-22.md.
+Updated2026-10-23. PSC1_PRACTICAL_CORE_V1_CONTRACT.json is the single machine
+release authority: fourteen families,37 finite criteria, both source grammars,
+seven targets and four actual application categories. Scope is frozen. Keep
+working functionality; supported semantics remain in PSC1_PRACTICAL_CORE_DECISIONS.md.
+AI_WORK_STATE.md owns current exact continuation state.
 
-## Current qualified checkpoint
+## Finite matrix complete; normal compiler performance blocks release
 
-Source 65fa8766759ae9a87e7322033e94ba5b2447e86d passes complete Linux run
-39683701190 at tested merge 49b4a1e8bc659c71840c9d523cdf9b68265235b2.
-Static/native/focused, all complete closures, G1, host boundary, full matrix,
-minimum Python, package and aggregate gate pass. Machine readiness is
-25 qualified / 12 blocked, releaseReady=false. All four finite application
-categories have scoped execution. Exact receipts:
-PSC1_BOUNDED_CORE_QUALIFICATION_2026-10-22.json.
-Earlier application, order/library and typed-IO qualification receipts remain
-historical facts, not current-HEAD evidence.
+Source56663b26, tested merge d6d3b2e8, Linux run39817072167 passes the complete
+all-seven/minimum-Python/package matrix with37 qualified criteria and data
+releaseReady=true. Native and all three complete compiler closures pass in both
+grammars. Exact receipts: PSC1_PRACTICAL_CORE_MATRIX_QUALIFICATION_2026-10-23.json.
 
-## Active dependency-coherent queue
+G1 fails its first small normal case at the original240-second limit; the
+qualified source65fa8766 completed that case in2154 ms. Aggregate qualification
+correctly fails. No feature freeze or release qualification follows merely
+from the finite matrix. Preserve the prior successful G1 and all evidence.
+See PSC1_NORMAL_G1_PERFORMANCE_DEFECT_2026-10-23.md.
 
-The remaining-core continuation binds the last twelve existing criteria to
-complete executable acceptance and mandatory companion evidence. It is
-implemented, UNQUALIFIED until its own Linux gates. Eligibility is not status.
-See PSC1_REMAINING_CORE_ACCEPTANCE_2026-10-22.md.
+## Dependency-ordered queue
 
-1. Complete collection/range/streaming acceptance and diagnose any first-action,
-   continuation retention, traversal or runtime defect in the shared mechanism.
-2. Complete ordinary pairing/recursion, product identity/strictness, Array
-   operations/evaluation and namespace identity/privacy acceptance. Reuse exact
-   existing native and backend evidence; do not infer success from filenames.
-3. Require all 37 criteria and four applications at the same final source.
-   Normal full qualification enforces releaseReady once all criteria are bound;
-   the manual release wrapper retains --require-ready. Do not merge/publish
-   without required qualification and authorization.
-4. Resume expensive manual G1 -> G2 -> G3 only after stable feature freeze.
-   Keep normal compiler/kernel functionality and qualified G1 regressions active.
+1. Correct the shared JS runtime/compiler performance regression exposed by
+   normal G1 and practical application compilation. Keep workloads, deadlines,
+   memory policies, logical admission and all negative controls unchanged.
+   The first follow-up avoids generators for call-free inner closures and adds
+   escaping capture/identity execution. On failure, sample the exact failed
+   normal request without admitting/publishing a diagnostic replay.
+2. Requalify final source across all37 criteria, both grammars, every backend,
+   minimum runtimes, packages, all three closures, G1 and the aggregate gate.
+3. Run manual Practical Core release qualification and establish stable feature
+   freeze. Merge/publication require qualification and authorization.
+4. Only then resume full G1->G2->G3 using finalized source. Preserve the original
+   G2 heap/timeout defect; normal compiler performance fixes are useful without
+   becoming self-host qualification work.
 
-The selected ordinary while profile remains as documented: Id/Except, mutation,
-return, sequential controllers and selected nesting such as while inside for.
-Its wider body/result and CompilerM restrictions remain explicit refusals;
-broaden them only when actual supported source/application needs require it.
-No acceptance meaning, security boundary or resource policy is weakened.
+## Completed mechanisms and test policy
 
-## Implementation and CI rules
+Collections/ranges stream; exact captured evaluation, mutation/errors and early
+return retain their source semantics. Total Nat controller helpers carry erased
+official-conversion theorems. Rust shares strictly validated worker fusion while
+retaining generics; unknown curried callback order remains conservative.
+Ordinary recursion/products/Array/namespaces have all frozen finite acceptance.
+The selected ordinary while profile and all sixteen wider-profile refusals stay.
 
-Start each task with exact finite acceptance. Complete shared semantics and both
-grammars; exercise JS/TS/Rust early, then every relevant mapping before qualifying
-a feature. Real CLI, JSON/files, multi-module-library and compiler-like processes
-remain acceptance workloads. Keep independent official Lean reference checking,
-strict original/transformed/target IR, ordinary witness pairing, source failures,
-unsupported ABI/publication preservation and negative tests.
+Four tiers remain: static contracts, native/focused, complete compiler closures
+plus G1/host boundary, and full all-seven/minimum-runtime/package qualification.
+Focused core and unchanged five-target applications run in separate matrix lanes,
+each with its original15-minute limit and exact-source cache. Measured56663b26
+core5m43s /applications9m14s replaces the serial cleanup timeout. Every command,
+target and fixed child resource ceiling remains; artifacts include lane/attempt.
+Dependency selection retains failed/cancelled debt; unknown policy changes run
+full tests. Documentation/qualification receipts do not rerun compiler work.
 
-Four CI tiers remain: static contracts/syntax, native and focused consumers,
-integration complete-source closures plus G1/host boundary, and full all-seven/
-minimum-runtime/package qualification. Focused inference/control now precedes
-measured applications. Core regressions and the unchanged five-target measured
-application scripts now run in separate focused matrix lanes, each retaining its
-original 15-minute ceiling and exact-source cache; the full contract is unchanged.
-This removes the measured eight-minute application segment from the serial
-core lane. Artifacts include lane/attempt identities to preserve retry evidence.
-The separate focused PHP lane retains the original five-target application lane.
-All process/job ceilings remain; the compiler application is 100000 statements,
-500000 bytes, at most 120 seconds / 1048576 KiB per actual checked child.
+Keep independent official Lean4.35.0 admission at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict input/transformed/target IR,
+ordinary witness/body pairing, real applications, actual IO capability policy,
+negative/publication-preservation tests and fixed resource bounds.
+No native frontend/emitter delegation after the single G1 seed is introduced.
 
-Dependency selection compares the last successful gate with the current exact
-interval. Failed/cancelled work retains testing debt. Unknown diffs or changed
-base/authority/build/workflows conservatively require full tests. Documentation
-does not restart compiler jobs. Pinned-tool and exact-source Lake caches never
-replace fresh admission/IR/runtime/publication evidence. Concurrency cancels
-obsolete PR work; manual qualification is retained. Benchmark work runs when
-its dependency changes, not repeatedly on unrelated language changes.
+## Separate research and deferred scope
 
-## Preserved workstreams and deferred scope
-
-Practical Core language work, compiler/backend engineering and PSKernel-Core
-Expression V2 research progress independently. Keep official Lean 4.35.0
-admission at eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Incomplete owned-kernel
-research must not replace that boundary or block ordinary compiler development.
-
-Qualified G1 source, tests, receipts/artifacts and successful CI remain preserved.
-Normal integration uses one native seed and its ten-case/85-module corpus with
-no later native frontend/emitter delegation. G2/G3 and fixed-point/profile
-workflows remain separate manual qualification. The original G2 JS heap and
-post-fusion timeout defect remains tracked; fix shared causes exposed by normal
-compilation without treating a performance correction as self-host qualification.
+Practical language development, backend/compiler engineering and PSKernel-Core
+Expression V2 research remain independent. Incomplete owned-kernel research does
+not replace official admission or block practical compiler progress. Expensive
+G2/G3/fixed-point workflows remain manual until stable feature freeze.
 
 Unrestricted Lean/metaprogramming, arbitrary effects, unsupported public compound
 ABIs, non-Linux distribution and formal backend-preservation certificates remain
-outside the finite v1 claim. Explicit unsupported refusals remain part of correctness.
+outside finite v1. Explicit unsupported-ABI refusals remain correctness features.

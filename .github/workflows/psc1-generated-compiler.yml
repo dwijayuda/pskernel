@@ -68,6 +68,7 @@ jobs:
           node scripts/compiler-source-census.mjs --strict-phase directjs-compiler
           node scripts/compiler-closure-qualification.mjs --phase directjs-compiler --assurance ordinary-checked
       - name: Seed once and execute actual generated compiler semantics
+        id: generated_execution
         run: |
           set -euo pipefail
           node scripts/generated-compiler-diagnostic.mjs --g1-only
@@ -96,6 +97,9 @@ jobs:
           }
           scan(root);
           JS
+      - name: Sample a failed normal generated process without changing its gate
+        if: ${{ failure() && steps.generated_execution.outcome == 'failure' }}
+        run: node scripts/profile-g1-failure.mjs
       - name: Retain candidate graphs, executable identities and process evidence
         if: always()
         uses: actions/upload-artifact@v4

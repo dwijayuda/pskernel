@@ -305,6 +305,32 @@ private partial def admitName (source : Lean.Environment) (state : IO.Ref Import
         | .opaqueInfo value => pure (.opaqueDecl {
             base := base original, value := expr value.value, isUnsafe := value.isUnsafe })
         | _ => throw (IO.userError ("T01F unhandled declaration: " ++ toString n))
+      if n == `String.ofList then
+        let before ← state.get
+        require "invalid-definition-name-not-yet-admitted"
+          (!(psKernelEnvironmentContains before.session.environment (name n)))
+        match original, request with
+        | .defnInfo actual, .definitionDecl actualRequest =>
+            let malformed := PsKernelDeclarationRequest.definitionDecl
+              { actualRequest with value := .lit (.nat 0) }
+            require "independent-invalid-definition-rejects"
+              (match psKernelV1AdmitDeclaration before.session malformed with
+               | .error (.rejectedInvalid _) => true | _ => false)
+            let badName : Lean.Name := `PSKernelT01FMalformedStringOfList
+            require "official-invalid-definition-name-fresh" (!(source.contains badName))
+            let badDefinition : Lean.DefinitionVal := {
+              actual with
+              name := badName
+              value := .lit (.natVal 0)
+              all := [badName]
+            }
+            require "official-invalid-definition-rejects"
+              (match source.addDeclCore 0 0 (.defnDecl badDefinition) none true with
+               | .error _ => true | _ => false)
+            require "invalid-definition-failure-no-publication"
+              (!(psKernelEnvironmentContains (← state.get).session.environment (name n)))
+            IO.println "PSC1_T01F_INVALID_DEFINITION_PASS"
+        | _, _ => throw (IO.userError "T01F expected actual String.ofList definition")
       install state n request
   verifyHeader source (← state.get) n
 
@@ -467,7 +493,10 @@ private def checkCase (source : Lean.Environment) (session : PsKernelKernelSessi
           if label == "ofList" then ensureConstructor source "public-ofList" normalized
       | _ => throw (IO.userError ("T01F public reply shape: " ++ label))
   for bad in [PsKernelExpr.proj (name `String) 2 literal,
-      PsKernelExpr.app (.const (name `String.ofList) []) (.lit (.nat 0))] do
+      PsKernelExpr.app (.const (name `String.ofList) []) (.lit (.nat 0)),
+      psKernelApplyArgs (.const (name `String.ofByteArray) [])
+        [.proj (name `String) 0 literal, .lit (.nat 0)],
+      PsKernelExpr.app (.const (name `String.ofList) [.zero]) (charList text.toList)] do
     require "official-invalid-rejects"
       (match Lean.Kernel.check source {} (officialExpr bad) with | .error _ => true | _ => false)
     require "independent-invalid-rejects"
@@ -619,6 +648,7 @@ private def writeFixture (path : String) (source : Lean.Environment) (state : Im
   IO.println ("PSC1_T01F_FIXTURE_WRITTEN " ++ path ++ " requests=" ++ toString state.requests)
 
 def regression (output : Option String := none) : IO Unit := do
+  Lean.initSearchPath (← Lean.findSysroot)
   let source ← Lean.importModules #[{ module := `Init }] {}
   let empty ← expectPublic "empty-session"
     (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)

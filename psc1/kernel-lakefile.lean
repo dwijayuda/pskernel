@@ -316,3 +316,9 @@ lean_exe psc1_kernel_name_worker_regression where
 lean_exe psc1_kernel_expr_v2_quot_owner_regression where
   root := `PsKernelExprV2QuotOwnerRegression
   srcDir := "test"
+
+-- Actual pinned String/Char/List declarations, independently admitted native and generated.
+lean_exe psc1_kernel_expr_v2_string_environment_regression where
+  root := `PsKernelExprV2StringEnvironmentRegression
+  srcDir := "test"
+

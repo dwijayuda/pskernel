@@ -1,0 +1,143 @@
+{
+  "schema": "psc1-t01f-fused-data-result-generated-preflight-v1",
+  "sourceSha": "c64425881ca637021c56bf4c985e2d1bd6afa593",
+  "sourceTree": "b1f12306e1c975876dc65590cb68d31f1facf910",
+  "runId": 39867316634,
+  "runAttempt": 1,
+  "producer": {
+    "jobId": 120133415127,
+    "conclusion": "success",
+    "provenance": {
+      "schema": "psc1-t01f-source-provenance-v1",
+      "sourceSha": "c64425881ca637021c56bf4c985e2d1bd6afa593",
+      "runId": "39867316634",
+      "runAttempt": "1",
+      "job": "generated-string",
+      "route": "generated",
+      "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "node": "v22.23.3",
+      "requests": 294,
+      "metadata": 377,
+      "samples": [
+        "",
+        "a",
+        "é",
+        "€",
+        "😀",
+        "Aé€😀"
+      ],
+      "kernelFuel": 4096,
+      "nodeOldSpaceLimitMiB": 2048,
+      "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+      "fixture": {
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      "kernel": {
+        "bytes": 9955448,
+        "sha256": "89f52d0606284bf9d9a8416db15fcd0d757835ce48e1e4478a89aba97bed1c49"
+      },
+      "fixtureProducer": {
+        "bytes": 39734,
+        "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+      },
+      "generatedRunner": {
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      }
+    },
+    "artifact": {
+      "id": 12465008609,
+      "name": "psc1-t01f-hash-generated-producer",
+      "size_in_bytes": 1132798,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465008609",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465008609/zip",
+      "expired": false,
+      "created_at": "2026-10-22T23:10:04Z",
+      "expires_at": "2027-01-20T22:46:11Z",
+      "updated_at": "2026-10-22T23:10:04Z",
+      "digest": "sha256:39fb5a2853b85a55a7b3d7bfb336fee5e9b8739be0babc145c843902ac422862",
+      "workflow_run": {
+        "id": 39867316634,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "c64425881ca637021c56bf4c985e2d1bd6afa593"
+      }
+    }
+  },
+  "smallProbe": {
+    "cases": 2730,
+    "stages": 8190,
+    "assertions": 13665,
+    "longCases": 3,
+    "iteratorHelpers": 1,
+    "iteratorStagedResultWrappers": 0,
+    "byteStepDispatch": false,
+    "byteMixDispatch": false,
+    "stagedFullEntry": false
+  },
+  "authenticatedFullKernelStaticRead": {
+    "zipBytes": 1132798,
+    "zipSha256": "39fb5a2853b85a55a7b3d7bfb336fee5e9b8739be0babc145c843902ac422862",
+    "kernelBytes": 9955448,
+    "kernelSha256": "89f52d0606284bf9d9a8416db15fcd0d757835ce48e1e4478a89aba97bed1c49",
+    "iteratorHelpers": 1,
+    "iteratorStagedWrappers": 0,
+    "byteStepDispatch": false,
+    "byteMixDispatch": false,
+    "stagedFullEntry": false,
+    "iteratorBody": "function* __ps$impl$psKernelCacheStringHashStateWithFuel(fuel, value, initial) { return (((fuel) === (0n)) ? initial : (yield* (function* () { {\n    const remaining = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n);\n    {\n        const state = (yield* __ps$invoke(psKernelCacheStringHashStateWithFuel, remaining, value, initial));\n        {\n            const position = state.fst;\n            return (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, position) ? state : (yield* (function* () { {\n                const char = __ps$stringGet(value, position);\n                {\n                    const next = __ps$stringNext(value, position);\n                    return ({ [__ps$brand$0]: true, fst: next, snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((state.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(char)), psKernelCacheHashModulus) });\n                }\n            } })()));\n        }\n    }\n} })())); }\n__ps$implementations.set(psKernelCacheStringHashStateWithFuel, __ps$impl$psKernelCacheStringHashStateWithFuel);",
+    "fullEntryBody": "function* __ps$impl$psKernelCacheStringHash(value) { return (yield* __ps$invoke(psKernelCacheStringHashScan, (__ps$utf8(value).size + 1n), value, 0n, 0n)); }\n__ps$implementations.set(psKernelCacheStringHash, __ps$impl$psKernelCacheStringHash);"
+  },
+  "runtime": {
+    "controls": {
+      "jobId": 120141720995,
+      "conclusion": "success",
+      "hash": {
+        "cases": 2730,
+        "stages": 8190,
+        "assertions": 13665,
+        "longCases": 3
+      },
+      "dag": {
+        "wallSeconds": 136.95,
+        "peakRssKiB": 582428
+      },
+      "prefixAndSession": {
+        "wallSeconds": 30.84,
+        "peakRssKiB": 400216,
+        "assertions": 605
+      },
+      "artifact": {
+        "id": 12465404617,
+        "name": "psc1-t01f-hash-runtime-controls",
+        "size_in_bytes": 663844,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465404617",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465404617/zip",
+        "expired": false,
+        "created_at": "2026-10-22T23:13:23Z",
+        "expires_at": "2027-01-20T22:46:11Z",
+        "updated_at": "2026-10-22T23:13:23Z",
+        "digest": "sha256:1c9282233f642866ac411cb6e8a791fb03dc5a156fc544751a05a4554579c20d",
+        "workflow_run": {
+          "id": 39867316634,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+          "head_sha": "c64425881ca637021c56bf4c985e2d1bd6afa593"
+        }
+      },
+      "comparison": "Different hosted runners; preserve larger DAG RSS and all timings, without causal speedup or performance qualification claims."
+    },
+    "mixed": {
+      "jobId": 120141720969,
+      "status": "in_progress",
+      "jobMinutes": 25
+    }
+  },
+  "T01F": "OPEN",
+  "qualificationInherited": false,
+  "capturedAt": "2026-10-22T23:14:36.361Z"
+}

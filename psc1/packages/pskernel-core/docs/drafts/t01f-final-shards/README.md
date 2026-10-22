@@ -11,7 +11,8 @@ in run39860528417. Its authentic generated producer and retained controls passed
 mixed sample timed out at its 25-minute cap in job120118769683. The current-
 artifact bounded profile completed; a fused data-result hash candidate now
 passed native preflight at exact c64425881ca637021c56bf4c985e2d1bd6afa593;
-its generated producer/control/mixed gates are pending in run39867316634. Read the newest
+its generated producer and retained controls passed in run39867316634;
+its unchanged mixed replay is pending in job120141720969. Read the newest
 [continuation](../../AI_CONTINUATION_PROMPT.md) and package AI_WORK_STATE.md.
 Do not inherit834's subset passes or discard its failed mixed timeout.
 

@@ -1,3 +1,14 @@
+## Reconciled scalar-hash candidate drafts — still inactive
+
+The two workflow drafts now also retain the new scalar-hash native proof/matrix
+and detached generated controls on both authentic routes. Their updated digests
+are below. Native preflight passed at exact834d267a; its fresh generated preflight
+is still pending. Do not install these drafts until the complete unchanged mixed
+sample passes within its cap. The helper and paired-owner fragment are unchanged.
+This reconciliation is documentation preparation, not qualification evidence.
+
+---
+
 # Saved T01F final qualification drafts
 
 These files were preserved when the user requested a GPT-6.1 Sol / High
@@ -39,8 +50,8 @@ Arena limits or body-hash policy. Their exact paths are in the continuation.
 
 ## Static file digests
 
-- psc1-pskernel-expr-v2-integration.yml: 91967 bytes; SHA256 74b974f6f3b0ad398a97ba3e72a935cc37c3e5616b33b94745f727ee988daea5
-- psc1-pskernel-core-correctness.yml: 43193 bytes; SHA256 b9c124bc49625d675a2a8f3a385577b633cd63181c54af4fd4af2d1f27767114
+- psc1-pskernel-expr-v2-integration.yml: 93186 bytes; SHA256 de04901180705d017390d756c7f492f327cfce83a0a6b970b7e9293dfcbd94ed
+- psc1-pskernel-core-correctness.yml: 43841 bytes; SHA256 6e25c5bcd23c7d68436923a09669ee523cad15d7f908fbddd72a97cdb4309c46
 - pskernel-t01f-shards.mjs: 15142 bytes; SHA256 1b8a302fcf22a573ee3b005578dd4930e6e773a9b803ec19c32f7f45bd3161d8
 - paired-owner-job.fragment.yml: 16984 bytes; SHA256 34cacbc1b11b907b94771460086b004a9cdee60231fdfb436b9107129c2f0fb8
 

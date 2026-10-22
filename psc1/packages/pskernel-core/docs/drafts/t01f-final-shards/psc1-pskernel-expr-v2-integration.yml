@@ -31,6 +31,8 @@ on:
       - psc1/test/PsKernelExprV2StringEnvironmentRegression.lean
       - psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs
       - psc1/scripts/pskernel-t01f-shards.mjs
+      - psc1/test/PsKernelScalarHashWorkerRegression.lean
+      - psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
       - psc1/test/PsKernelExprV2SessionProofs.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
@@ -474,6 +476,11 @@ jobs:
           test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 21
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean \
             | tee "$RUNNER_TEMP/psc1-owned-state-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 3
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelScalarHashWorkerRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-scalar-hash-native.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$RUNNER_TEMP/psc1-scalar-hash-native.log"
+          if grep -E 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-scalar-hash-native.log"; then exit 1; fi
           if grep -E 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' \
               "$RUNNER_TEMP/psc1-metadata-proofs.log" "$RUNNER_TEMP/psc1-scope-proofs.log" \
               "$RUNNER_TEMP/psc1-nat-fuel-proofs.log" "$RUNNER_TEMP/psc1-expr-equality-proofs.log" \
@@ -543,6 +550,7 @@ jobs:
             ${{ runner.temp }}/psc1-generated-prefix-native.log
             ${{ runner.temp }}/psc1-quot-owner-native.log
             ${{ runner.temp }}/psc1-name-worker-native.log
+            ${{ runner.temp }}/psc1-scalar-hash-native.log
             ${{ runner.temp }}/psc1-recursor-k-native.log
             ${{ runner.temp }}/psc1-owned-state-native.log
             psc1/dist/expr-v2/native-artifacts.json
@@ -874,7 +882,11 @@ jobs:
           PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
           test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
           cp scripts/pskernel-name-worker-smoke.mjs "$PSC1_DAG_RUN_DIR/name-worker-smoke.mjs"
+          cp scripts/pskernel-scalar-hash-worker-smoke.mjs "$PSC1_DAG_RUN_DIR/scalar-hash-smoke.mjs"
           cd "$PSC1_DAG_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" --max-old-space-size=2048 scalar-hash-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-scalar-hash-generated.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_WORKER_JS: PASS {"cases":2730,"strings":12,"stages":8190,"assertions":13662,"modulus":"65521","algorithmChanged":false}' "$RUNNER_TEMP/psc1-scalar-hash-generated.log"
           env PATH="" "$PSC1_NODE_BIN" name-worker-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-name-worker-generated.log"
           grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-generated.log"
@@ -1013,6 +1025,7 @@ jobs:
             ${{ runner.temp }}/psc1-generated-prefix-js.log
             ${{ runner.temp }}/psc1-quot-owner-generated.log
             ${{ runner.temp }}/psc1-name-worker-generated.log
+            ${{ runner.temp }}/psc1-scalar-hash-generated.log
             ${{ runner.temp }}/psc1-recursor-k-generated.log
             ${{ runner.temp }}/psc1-owned-state-generated.log
             psc1/dist/expr-v2/integration/provider/

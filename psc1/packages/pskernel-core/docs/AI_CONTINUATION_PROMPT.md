@@ -1,3 +1,37 @@
+## Exact834 native PASS; existing generated preflight pending
+
+Executable candidate: `834d267acc246b5bf6ed2d29b19d04d8b87526c4`.
+Its [run39853314171](https://github.com/dwijayuda/pskernel/actions/runs/39853314171)
+native job120084924212 PASS: three new hash equations,2730 finite cases,
+all294 authentic requests/377 metadata records, all6 String cases and singleton
+sequences, retained DAG/T03a/T03b/official controls and existing proof audits.
+The new local equations report only propext,Classical.choice,Quot.sound;
+no sorryAx. See `evidence/2026-10-23-t01f-hash-native.json`.
+This is native narrow qualification at834 only.
+
+Generated producer120086000612 is already running at834. At this update it is
+building/checking the complete authentic source, before pinned TypeScript7.0.2
+compilation. Wait for that existing run; never launch a duplicate. Its dependent
+runtime jobs retain the full mixed sample and all negatives under25minutes,
+and hash/DAG/prefix/session controls under10minutes. No generated result or
+speedup has been established yet.
+
+The saved final workflow drafts now include the new hash native proof/matrix,
+both detached generated hash suites and uploaded raw hash logs. README digests
+match the reconciled bytes. These drafts are still INACTIVE. The helper and
+paired-owner fragment remain unchanged. This containing documentation checkpoint
+does not acquire834's native result or qualify a new executable source.
+
+If834 preflight passes completely, activate the reconciled drafts and the three
+research/Arena work-branch triggers, disable narrow automatic diagnostics, and
+execute final native, both six-sample route aggregates, canonical, proofs,
+provider24/API8, research, full measurements/unchanged owner ABBA and193-case
+Arena at one coherent final source. Keep historical C failures separate from
+scoped A/T01F coverage. Integration remains123c411; fully qualified scoped A
+remains9c87. No T05 yet.
+
+---
+
 ## T01F scalar hash scan candidate — qualification pending
 
 Bounded V1 profile at `7e29c6c795e64a488a51edcc940c6916d4a1bafd`

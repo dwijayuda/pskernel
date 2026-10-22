@@ -45,6 +45,8 @@ on:
       - psc1/test/PsKernelExprV2StringEnvironmentRegression.lean
       - psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs
       - psc1/scripts/pskernel-t01f-shards.mjs
+      - psc1/test/PsKernelScalarHashWorkerRegression.lean
+      - psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
       - psc1/test/PsKernelExprV2SessionProofs.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
@@ -517,7 +519,11 @@ jobs:
           PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
           test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
           cp scripts/pskernel-name-worker-smoke.mjs "$PSC1_PS_RUN_DIR/name-worker-smoke.mjs"
+          cp scripts/pskernel-scalar-hash-worker-smoke.mjs "$PSC1_PS_RUN_DIR/scalar-hash-smoke.mjs"
           cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" --max-old-space-size=2048 scalar-hash-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_WORKER_JS: PASS {"cases":2730,"strings":12,"stages":8190,"assertions":13662,"modulus":"65521","algorithmChanged":false}' "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
           env PATH="" "$PSC1_NODE_BIN" name-worker-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-name-worker-canonical.log"
           grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-canonical.log"
@@ -619,6 +625,7 @@ jobs:
             ${{ runner.temp }}/psc1-generated-prefix-canonical.log
             ${{ runner.temp }}/psc1-quot-owner-canonical.log
             ${{ runner.temp }}/psc1-name-worker-canonical.log
+            ${{ runner.temp }}/psc1-scalar-hash-canonical.log
             ${{ runner.temp }}/psc1-recursor-k-canonical.log
             ${{ runner.temp }}/psc1-owned-state-canonical.log
             psc1/dist/pskernel-selfhost/provider/

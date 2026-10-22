@@ -665,6 +665,51 @@ private def testDeferredDefinitions (natType : PsExpr) : IO Unit := do
     checkReduced "deferred Nat iteration independent kernel conversion" prepared natType
       (PsExpr.lit (PsLiteral.natural expected))
 
+-- Corrupt only the well-typed operational body. The retained theorem must
+-- make independent admission refuse, rather than relying on malformed types.
+private def omitFiniteIterations (term : PsExpr) : Option PsExpr :=
+  match term with
+  | .lam name type body binder =>
+      match omitFiniteIterations body with
+      | none => none
+      | some changed => some (.lam name type changed binder)
+  | _ =>
+      let view := psExprAppView term
+      match view.head, view.args with
+      | .constE name _, [_motive, base, _minor, _major] =>
+          if psNameEq name psNatRecName then some base else none
+      | _, _ => none
+
+private def checkFiniteEquivalence (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
+  let some helper := prepared.declarations.find? (fun declaration =>
+    match declaration with
+    | .definitionDecl name _ _ _ => psElabDoForIsLiftedName name
+    | _ => false)
+    | throw (IO.userError "finite Nat helper missing")
+  let helperName := psDeclarationName helper
+  require "finite helper has an erased equivalence theorem"
+    (prepared.declarations.any (fun declaration =>
+      match declaration with
+      | .theoremDecl name _ _ _ => psNameEq name (PsName.str helperName "_psc1ForEquivalence")
+      | _ => false))
+  let .definitionDecl name levels type value := helper
+    | throw (IO.userError "finite helper is not total")
+  let some changed := omitFiniteIterations value
+    | throw (IO.userError "finite helper has no checked Nat recursor")
+  let environment ← match psAddDeclarationList psSelfHostProdPreludeEnvironment prepared.declarations with
+    | .error _ => throw (IO.userError "finite helper native environment refused")
+    | .ok value => pure value
+  match psElabDoLoopCheck environment psLocalEmpty changed type with
+  | .error _ => throw (IO.userError "corrupted finite helper is not well-typed")
+  | .ok _ => pure ()
+  let declarations := prepared.declarations.map (fun declaration =>
+    if psNameEq (psDeclarationName declaration) name then
+      PsDeclaration.definitionDecl name levels type changed else declaration)
+  match ← psHostLeanCheckPrepared (.mk declarations) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "kernel accepted changed loop behavior against its equivalence theorem")
+  IO.println "PSC1_FINITE_HELPER_EQUIVALENCE: PASS total helper, erased theorem, well-typed changed behavior refused"
+
 private def testEvaluationOnce (natType : PsExpr) : IO Unit := do
   let lean :=
     "def evaluationItems (flag : Bool) : List Nat := [if flag then 1 else 2]\n" ++
@@ -706,6 +751,7 @@ private def testEvaluationOnce (natType : PsExpr) : IO Unit := do
         (evaluationCallCount (psRootName name) body == 1)
     psPracticalCheckExecuted "source iterator/range/Array calls and observed values"
       prepared natType (PsExpr.lit (PsLiteral.natural 205))
+    checkFiniteEquivalence prepared
 
 def main : IO Unit := do
   let natType := PsExpr.constE psNatName []

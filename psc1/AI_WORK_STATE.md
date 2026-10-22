@@ -268,3 +268,12 @@ runtime schema, resource ceiling, partial profile or ordinary witness rule is
 relaxed. Public and private source origins remain tied to the original declaration.
 This Nat lifting is implemented eligibility, not qualification; List/Array
 continue through the existing checked deferred iterator pending broader evidence.
+
+The first finite-lift run 39760971285 stops during native compilation because
+this repository requires every Lean module to be listed explicitly in lakefile.
+Register Ps.Elab.DoForLift as a PsElab root. Keep its eta traversal at the existing
+4096 structural budget rather than introduce a narrower 64-argument restriction.
+The native execution probe now retains each helper's theorem, changes only the
+helper's well-typed behavior to omit iterations, and requires official admission
+to refuse the corrupted graph in both source grammars. The original admitted
+source execution runs first, preventing a false negative from an invalid probe.

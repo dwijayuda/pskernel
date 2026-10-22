@@ -87,7 +87,7 @@ def psElabDoForSpecialize
   let withCount := psLocalPushBinding locals countName natType PsBinderInfo.explicit;
   let withIndex := psLocalPushBinding withCount.context (psRootName "_psc1ForIndex") natType PsBinderInfo.explicit;
   let withRest := psLocalPushBinding withIndex.context (psRootName "_psc1ForRest") resultType PsBinderInfo.explicit;
-  match psElabDoForLiftEta 64 work.environment withRest.context resultType base with
+  match psElabDoForLiftEta 4096 work.environment withRest.context resultType base with
   | Except.error error => Except.error error
   | Except.ok etaBase =>
       let deferred := PsExpr.lam (psRootName "_unit") (PsExpr.constE psUnitName [])

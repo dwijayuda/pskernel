@@ -232,6 +232,7 @@ lean_lib PsElab where
     `Ps.Elab.Data,
     `Ps.Elab.DoLoop,
     `Ps.Elab.DoLoopLift,
+    `Ps.Elab.DoForLift,
     `Ps.Elab.DoBase,
     `Ps.Elab.DoFor,
     `Ps.Elab.DoWhile,

@@ -1,0 +1,50 @@
+name: PSC1 T01F authentic String focused qualification
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - work/psc1-pskernel-t01f-string-20261022
+    paths:
+      - 'psc1/**'
+      - '.github/workflows/psc1-pskernel-t01f-focus.yml'
+permissions:
+  contents: read
+jobs:
+  native-string:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Build retained independent checker
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_dag_regression
+      - name: Independently admit actual String environment and check direct public operations
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2StringEnvironmentRegression.lean \
+            | tee "$RUNNER_TEMP/psc1-t01f-native.log"
+          grep -Fqx 'PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096' "$RUNNER_TEMP/psc1-t01f-native.log"
+      - name: Retain existing minimal String and public DAG controls
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_kernel_expr_v2_dag_regression \
+            | tee "$RUNNER_TEMP/psc1-t01f-retained.log" \
+            | sed '/^PSC1_DAG_PASS /d'
+          grep -Fq 'PSC1_V2_DAG_REGRESSION: PASS' "$RUNNER_TEMP/psc1-t01f-retained.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-native-preflight
+          path: |
+            ${{ runner.temp }}/psc1-t01f-native.log
+            ${{ runner.temp }}/psc1-t01f-retained.log

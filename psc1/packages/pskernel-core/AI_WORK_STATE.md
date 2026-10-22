@@ -1,3 +1,33 @@
+## T01F authentic String implementation — focused Linux preflight
+
+Updated: 2026-10-22. Integration base is exact
+`123c41197950b6761be965fd21c57142ee2b0d1c`; the last scoped-qualified
+executable remains `9c87f631758862285273ddb0ea0a3987c671022e`.
+Work branch: `work/psc1-pskernel-t01f-string-20261022`.
+This containing candidate is **NOT QUALIFIED**; no previous PASS is inherited.
+
+The new host-only fixture reads actual Lean 4.35 Init declaration payloads from
+String.ofList, Char.ofNat and UInt8.ofNat, traverses their dependency closure,
+and independently admits every request from an empty default PSKernel session.
+It never installs official constructor/recursor metadata or trusts a receipt.
+Each admission is logged so a genuine first failure identifies the next source
+fix. The actual representation is String.ofByteArray with ByteArray data and
+its UTF8 validity proof. String field1 is valid; field2 is invalid.
+
+Focused checks cover V1, direct DAG attempts that cannot silently fall back,
+and separate/reused public check/WHNF/DefEq calls for empty, ASCII, 2/3/4-byte
+and mixed Unicode strings, actual byte-list projection, validity-proof projection
+and ill-typed/invalid-field negatives. The previous bounded minimal fixture is
+retained separately. This first preflight makes no production semantic change.
+
+Run the narrow Linux workflow first and fix observed genuine failures. Complete
+the authentic generated input export/replay, metadata comparison, local proof
+controls and full exact-source gates before marking T01F complete. Full193 and
+all prior performance regressions remain open; no parent counts qualify this
+candidate. Fuel4096 and every existing host/negative/ownership limit remain.
+
+---
+
 ## T03b terminal qualification — exact executable source and integration handoff
 
 Updated: 2026-10-22 16:52:53 WIB (2026-10-22 09:52:53 UTC).

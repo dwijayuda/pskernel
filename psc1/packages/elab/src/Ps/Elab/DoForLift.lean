@@ -55,16 +55,19 @@ def psElabDoForBaseLambda (fuel : Nat) (locals : PsLocalContext) (term : PsExpr)
       match term with
       | PsExpr.fvar id =>
           match psLocalFindById locals id with
-          | Option.some (PsLocalDecl.letDecl _ _ _ value) =>
-              match value with
-              | PsExpr.lam _ _ _ _ => value
-              | PsExpr.fvar _ =>
-                  let expanded : PsExpr := psElabDoForBaseLambda remaining locals value;
-                  match expanded with
-                  | PsExpr.lam _ _ _ _ => expanded
+          | Option.some declaration =>
+              match declaration with
+              | PsLocalDecl.letDecl _ _ _ value =>
+                  match value with
+                  | PsExpr.lam _ _ _ _ => value
+                  | PsExpr.fvar _ =>
+                      let expanded : PsExpr := psElabDoForBaseLambda remaining locals value;
+                      match expanded with
+                      | PsExpr.lam _ _ _ _ => expanded
+                      | _ => term
                   | _ => term
               | _ => term
-          | _ => term
+          | Option.none => term
       | _ => term
 
 def psElabDoForSpecialize

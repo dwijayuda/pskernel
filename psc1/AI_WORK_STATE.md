@@ -354,3 +354,13 @@ checks, unsupported refusals and staged publication remain. Actual unchanged
 streaming source cases will validate bounded native execution in Linux CI.
 The conservative curried-call correction and known source-lambda expansion
 remain; no earlier descendant is claimed qualified.
+
+
+Linux b7825916 / run 39813012567 validates the new strict worker fixtures:
+all native fusion guards pass, both 100000-step paired observations agree, and
+both genuine divergence deadlines pass (baseline 1114 ms, fused 700 ms for the
+observation group; no formal preservation claim). The complete source census
+then diagnoses unsupported nested constructor pattern syntax in the new local
+lambda lookup, DoForLift 58:25. Normalize it to two flat checked matches rather
+than expanding the source language or dropping the census. Rust-host integration
+is a later descendant and remains pending its own Linux execution.

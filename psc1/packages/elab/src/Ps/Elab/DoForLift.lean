@@ -83,7 +83,7 @@ def psElabDoForSpecialize
     else term;
   let helperType := closeSourceType closedType;
   let sourceArguments := if captureSource then [PsExpr.constE owner []] else [];
-  let prefix := psListAppend sourceArguments captureArguments;
+  let argumentPrefix := psListAppend sourceArguments captureArguments;
   let withCount := psLocalPushBinding locals countName natType PsBinderInfo.explicit;
   let withIndex := psLocalPushBinding withCount.context (psRootName "_psc1ForIndex") natType PsBinderInfo.explicit;
   let withRest := psLocalPushBinding withIndex.context (psRootName "_psc1ForRest") resultType PsBinderInfo.explicit;
@@ -107,7 +107,7 @@ def psElabDoForSpecialize
             [motive, etaBase, minor, PsExpr.fvar countId];
           let helperValue := closeSourceValue (psElabDoLoopCloseValue bindersRev value);
           let declaration := PsDeclaration.definitionDecl name [] helperType helperValue;
-          match psEnvironmentAddOwnedBootstrapDeclaration work.environment declaration with
+          match psEnvironmentAdd work.environment declaration with
           | Option.none => Except.error (PsElabError.duplicateDeclaration name)
           | Option.some environment =>
               match psElabDoLoopCheck environment psLocalEmpty helperValue helperType with
@@ -116,7 +116,7 @@ def psElabDoForSpecialize
                   let original := psExprApplyMany (PsExpr.constE psControlLazyNatFoldName [])
                     [resultType, base, step, PsExpr.fvar countId];
                   let replacement := psExprApplyMany (PsExpr.constE name [])
-                    (psListAppend prefix [PsExpr.fvar countId]);
+                    (psListAppend argumentPrefix [PsExpr.fvar countId]);
                   let predicateType := PsExpr.forallE (psRootName "_value") resultType
                     (PsExpr.sortE PsLevel.zero) PsBinderInfo.explicit;
                   let proofBinders := psListAppend
@@ -128,7 +128,7 @@ def psElabDoForSpecialize
                     (PsExpr.app (PsExpr.fvar predicateId) replacement));
                   let proofValue := closeSourceValue (psElabDoLoopCloseValue proofBinders (PsExpr.fvar witnessId));
                   let proof := PsDeclaration.theoremDecl (PsName.str name "_psc1ForEquivalence") [] proofType proofValue;
-                  let call := psExprApplyMany (PsExpr.constE name []) (psListAppend prefix [count]);
+                  let call := psExprApplyMany (PsExpr.constE name []) (psListAppend argumentPrefix [count]);
                   match psElabDoLoopCheck environment locals call resultType with
                   | Except.error error => Except.error error
                   | Except.ok _ =>
@@ -274,7 +274,7 @@ def psElabDoForLiftInsert
   match declarations with
   | List.nil => Except.ok environment
   | List.cons declaration rest =>
-      match psEnvironmentAddOwnedBootstrapDeclaration environment declaration with
+      match psEnvironmentAdd environment declaration with
       | Option.none => Except.error (PsElabError.duplicateDeclaration (psDeclarationName declaration))
       | Option.some next => psElabDoForLiftInsert rest next
 

@@ -128,7 +128,8 @@ def newParameters (types : List PsVerifiedIrType) (index : Nat) (used : PsString
               Except.ok (NewParameters.mk tail.used (List.cons (PsVerifiedIrParameter.mk name type) tail.parameters))
 
 -- Only total administrative work can move across a later argument evaluation.
--- In particular, calls, projections and indexing never qualify here.
+-- Exact Nat addition/subtraction/equality are total on already computed inputs.
+-- Calls, projections and indexing never qualify here.
 def administrative (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) : Bool :=
   match fuel with
   | Nat.zero => false
@@ -140,6 +141,7 @@ def administrative (fuel : Nat) (locals : List String) (expression : PsVerifiedI
           let allowed : Bool :=
             match operation with
             | PsVerifiedIrIntrinsic.natEq => true
+            | PsVerifiedIrIntrinsic.natAdd => true
             | PsVerifiedIrIntrinsic.natSub => true
             | _ => false;
           allowed && psListIsEmpty types &&

@@ -277,3 +277,18 @@ The native execution probe now retains each helper's theorem, changes only the
 helper's well-typed behavior to omit iterations, and requires official admission
 to refuse the corrupted graph in both source grammars. The original admitted
 source execution runs first, preventing a false negative from an invalid probe.
+
+Finite-lift run 39761792719 identifies native compilation errors before execution:
+rename Lean's reserved prefix identifier, and use the lower-level environment
+insert available to this module (the owned-bootstrap wrapper lives in Declaration
+and cannot be imported cyclically). This pass receives nondata definitions,
+partial definitions and theorems; bootstrap inductive batches retain their
+existing owned insertion path.
+
+Concrete range minors compute upper - (index + 1) before the returned state
+lambda. Permit total exact Nat addition alongside existing Nat subtraction and
+equality in worker-fusion administrative prefixes, with computed scalar operands.
+Calls, projection/indexing, effects and divergence remain excluded. Retain the
+old negative prefix tests and add actual baseline/fused 100000-step arithmetic
+observations, checked companion creation and exact final values. This uses no
+larger Rust stack, release-only optimization, heap allowance or workload reduction.

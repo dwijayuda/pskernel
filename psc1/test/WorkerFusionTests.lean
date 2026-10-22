@@ -21,8 +21,17 @@ def worker : PsVerifiedIrDeclaration :=
         (lam "state" (.letE "smaller" fnT (call "scan" [v "remaining"])
           (.ifE (eq (v "state") (n 0)) (v "state") (app (v "smaller") (sub (v "state") (n 1))))))))
 
+def arithmeticWorker : PsVerifiedIrDeclaration :=
+  .mk "arithmeticScan" [] [param "fuel"] fnT
+    (.ifE (eq (v "fuel") (n 0)) (lam "state" (v "state"))
+      (.letE "remaining" natT (sub (v "fuel") (add (n 0) (n 1)))
+        (lam "state" (app (call "arithmeticScan" [v "remaining"]) (add (v "state") (n 1))))))
+
 def module : PsVerifiedIrModule := .mk [] [] [] [
     worker,
+    arithmeticWorker,
+    .mk "arithmeticEntry" [] [param "fuel",param "state"] natT
+      (app (call "arithmeticScan" [v "fuel"]) (v "state")),
     .mk "scan$worker" [] [] natT (n 13),
     .mk "entry" [] [param "fuel",param "state"] natT
       (app (call "scan" [v "fuel"]) (v "state")),
@@ -91,6 +100,8 @@ def main : IO Unit := do
     (fun original => fused.raw.declarations.any (fun value => value.name == original.name)))
   require "fresh companion avoids existing global"
     (fused.raw.declarations.any (fun value => value.name == "scan$worker_" && value.parameters.length == 2))
+  require "total Nat arithmetic prefix obtains a checked companion"
+    (fused.raw.declarations.any (fun value => value.name == "arithmeticScan$worker" && value.parameters.length == 2))
   require "escaped call-only function stays available"
     (fused.raw.declarations.any (fun value => value.name == "hold"))
   let invalid := PsVerifiedIrModule.mk [] [] [] [
@@ -107,8 +118,8 @@ def main : IO Unit := do
     | .ok value => pure value
   require "effectful/divergent prefix is never delayed"
     (!strictFused.raw.declarations.any (fun value => value.name == "unsafe$worker"))
-  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow"]
-  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered"]
+  emit input "dist/worker-fusion/baseline.mjs" ["entry","escaped","capture","shadow","arithmeticEntry"]
+  emit fused "dist/worker-fusion/fused.mjs" ["entry","escaped","capture","shadow","ordered","arithmeticEntry"]
   emit strictInput "dist/worker-fusion/strict-baseline.mjs" ["strict"]
   emit strictFused "dist/worker-fusion/strict-fused.mjs" ["strict"]
   IO.FS.writeFile "dist/worker-fusion/probe.mjs"

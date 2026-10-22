@@ -98,8 +98,12 @@ jobs:
     uses: ./.github/workflows/psc1-generated-compiler.yml
 
   full:
-    needs: [static, native, focused]
-    if: needs.static.outputs.release == 'true'
+    needs: [static, native, focused, closures, g1]
+    if: >-
+      ${{ !cancelled() && needs.static.outputs.release == 'true' &&
+          needs.native.result == 'success' && needs.focused.result == 'success' &&
+          (needs.static.outputs.integration != 'true' ||
+            (needs.closures.result == 'success' && needs.g1.result == 'success')) }}
     uses: ./.github/workflows/psc1-scoped-correctness.yml
 
   benchmark:

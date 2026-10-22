@@ -519,6 +519,8 @@ def psJsPrintRuntime
                       | List.cons _ _ =>
                           Except.error PsJsEmitError.malformedIr
 
+-- Construct curried recursive helpers only after binding their traversal inputs.
+-- Eager setup before that lambda can branch over fuel rather than visited nodes.
 def psJsExprUsesNameWithFuel
     (fuel : Nat) :
     PsJsIrExpr -> String -> Bool :=
@@ -526,9 +528,9 @@ def psJsExprUsesNameWithFuel
   | Nat.zero =>
       fun (_expr : PsJsIrExpr) (_name : String) => true
   | Nat.succ remaining =>
-      let smaller : PsJsIrExpr -> String -> Bool :=
-        psJsExprUsesNameWithFuel remaining;
       fun (expr : PsJsIrExpr) (name : String) =>
+        let smaller : PsJsIrExpr -> String -> Bool :=
+          psJsExprUsesNameWithFuel remaining;
         let uses : PsJsIrExpr -> Bool :=
           fun (value : PsJsIrExpr) =>
             smaller value name;
@@ -608,9 +610,9 @@ def psJsFreshMatchTempWorker
   | Nat.zero =>
       fun (_index : Nat) => "__ps$match$overflow"
   | Nat.succ remaining =>
-      let smaller : Nat -> String :=
-        psJsFreshMatchTempWorker expr remaining;
       fun (index : Nat) =>
+        let smaller : Nat -> String :=
+          psJsFreshMatchTempWorker expr remaining;
         let candidate : String :=
           String.Internal.append
             "__ps$match$"
@@ -635,9 +637,9 @@ def psJsFreshTailMatchTempWorker
           "__ps$tail$match$"
           (psNatToString index)
   | Nat.succ remaining =>
-      let smaller : Nat -> String :=
-        psJsFreshTailMatchTempWorker expr remaining;
       fun (index : Nat) =>
+        let smaller : Nat -> String :=
+          psJsFreshTailMatchTempWorker expr remaining;
         let candidate : String :=
           psJsConcat2
             "__ps$tail$match$"
@@ -791,9 +793,9 @@ def psJsCallsUseOnlySelfWithFuel (selfName : String) (fuel : Nat) :
   match fuel with
   | Nat.zero => fun (_expression : PsJsIrExpr) => false
   | Nat.succ remaining =>
-      let smaller : PsJsIrExpr -> Bool :=
-        psJsCallsUseOnlySelfWithFuel selfName remaining;
       fun (expression : PsJsIrExpr) =>
+        let smaller : PsJsIrExpr -> Bool :=
+          psJsCallsUseOnlySelfWithFuel selfName remaining;
         match expression with
         | .literal _ => true
         | .var _ => true
@@ -820,6 +822,8 @@ def psJsCallsUseOnlySelfWithFuel (selfName : String) (fuel : Nat) :
 def psJsNeedsCallDriver (expression : PsJsIrExpr) : Bool :=
   if psJsCallsUseOnlySelfWithFuel "" 4096 expression then false else true
 
+-- These three recursive modes must be created inside the expression handler.
+-- Before that binder, generated code eagerly builds an exponential worker tree.
 def psJsPrintExprWithPositionAndFuel
     (stackTarget : Option String) (tailPosition : Bool)
     (fuel : Nat) :
@@ -829,14 +833,14 @@ def psJsPrintExprWithPositionAndFuel
       fun (_expr : PsJsIrExpr) =>
         Except.error PsJsEmitError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          PsJsIrExpr -> Except PsJsEmitError String :=
-        psJsPrintExprWithPositionAndFuel stackTarget false remaining;
-      let inTail : PsJsIrExpr -> Except PsJsEmitError String :=
-        psJsPrintExprWithPositionAndFuel stackTarget tailPosition remaining;
-      let lambdaBody : PsJsIrExpr -> Except PsJsEmitError String :=
-        psJsPrintExprWithPositionAndFuel stackTarget true remaining;
       fun (expr : PsJsIrExpr) =>
+        let smaller :
+            PsJsIrExpr -> Except PsJsEmitError String :=
+          psJsPrintExprWithPositionAndFuel stackTarget false remaining;
+        let inTail : PsJsIrExpr -> Except PsJsEmitError String :=
+          psJsPrintExprWithPositionAndFuel stackTarget tailPosition remaining;
+        let lambdaBody : PsJsIrExpr -> Except PsJsEmitError String :=
+          psJsPrintExprWithPositionAndFuel stackTarget true remaining;
         let stackContext : Bool :=
           match stackTarget with
           | Option.none => false
@@ -1196,11 +1200,11 @@ def psJsAdvanceGeneratedTextWorker
         if String.Internal.atEnd text (String.Pos.Raw.mk offset) then Except.ok position
         else Except.error PsJsEmitError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          String -> Nat -> PsJsGeneratedPosition ->
-          Except PsJsEmitError PsJsGeneratedPosition :=
-        psJsAdvanceGeneratedTextWorker remaining;
       fun (text : String) (offset : Nat) (position : PsJsGeneratedPosition) =>
+        let smaller :
+            String -> Nat -> PsJsGeneratedPosition ->
+            Except PsJsEmitError PsJsGeneratedPosition :=
+          psJsAdvanceGeneratedTextWorker remaining;
         if String.Internal.atEnd text (String.Pos.Raw.mk offset) then Except.ok position
         else
           let char : Char := String.Internal.get text (String.Pos.Raw.mk offset);
@@ -1437,13 +1441,13 @@ def psJsTailEmitWithFuel
       fun (_matchDepth : Nat) (_expr : PsJsIrExpr) =>
         Option.none
   | Nat.succ remaining =>
-      let smaller :
-          Nat -> PsJsIrExpr -> Option String :=
-        psJsTailEmitWithFuel
-          declaration
-          available
-          remaining;
       fun (matchDepth : Nat) (expr : PsJsIrExpr) =>
+        let smaller :
+            Nat -> PsJsIrExpr -> Option String :=
+          psJsTailEmitWithFuel
+            declaration
+            available
+            remaining;
         let sameDepth : PsJsIrExpr -> Option String :=
           smaller matchDepth;
         let nested : PsJsIrExpr -> Option String :=

@@ -324,3 +324,11 @@ Do not infer G2/G3 or fresh Practical Core qualification. The original G2 defect
 remains open; changed compiler bytes require fresh complete companion CI and
 actual generated qualification. All child deadlines/heap/stack/fuel/strict-IR,
 independent official checking, exact ten-case manifests and refusals remain.
+
+
+Native39861089884/job120112479254 compiles the three substitution visitor
+reference equalities, but four equality-visitor proofs leave unreduced right
+matches after simplification (717/722/727/732). Add explicit cases on that
+right input in the proof scripts. All-input statements and original reference
+definitions stay intact; compiler source/resource/checker bytes do not change.
+Manual39861084058 continues on the identical compiler candidate.

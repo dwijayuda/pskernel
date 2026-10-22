@@ -715,22 +715,22 @@ end PsVisitorNormalizationLegacy
 -- Moving pure helper construction under its final binder preserves every input.
 private theorem nameVisitor_exact (left : PsName) :
     psNameEq left = PsVisitorNormalizationLegacy.psNameEq left := by
-  induction left <;> funext right
+  induction left <;> funext right <;> cases right
     <;> simp only [psNameEq, PsVisitorNormalizationLegacy.psNameEq, *]
 
 private theorem levelVisitor_exact (left : PsLevel) :
     psLevelStructuralEq left = PsVisitorNormalizationLegacy.psLevelStructuralEq left := by
-  induction left <;> funext right
+  induction left <;> funext right <;> cases right
     <;> simp only [psLevelStructuralEq, PsVisitorNormalizationLegacy.psLevelStructuralEq, nameVisitor_exact, *]
 
 private theorem levelListVisitor_exact (left : List PsLevel) :
     psLevelListEq left = PsVisitorNormalizationLegacy.psLevelListEq left := by
-  induction left <;> funext right
+  induction left <;> funext right <;> cases right
     <;> simp only [psLevelListEq, PsVisitorNormalizationLegacy.psLevelListEq, levelVisitor_exact, *]
 
 private theorem exprEqualityVisitor_exact (left : PsExpr) :
     psExprAlphaEq left = PsVisitorNormalizationLegacy.psExprAlphaEq left := by
-  induction left <;> funext right
+  induction left <;> funext right <;> cases right
     <;> simp only [psExprAlphaEq, PsVisitorNormalizationLegacy.psExprAlphaEq, nameVisitor_exact, levelVisitor_exact, levelListVisitor_exact, *]
 
 private theorem liftVisitor_exact (amount : Nat) (expr : PsExpr) :

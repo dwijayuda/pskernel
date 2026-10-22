@@ -1,13 +1,18 @@
-# Deferred G2 performance defect
+# Resumed G2 performance defect
 
-Status: open, explicitly resumed after frozen Practical Core v1 qualification.
-Current run39848619349/job120068493837 atde564ab6 passes G1's ten cases, then
-G2-self times out240267ms before admission/publication; G3 is not run.
-Exact request/service hashes, 90-day artifact12456933484, CPU profile and
-read-only caller analysis are in
-PSC1_G2_RESUMPTION_FAILURE_QUALIFICATION_2026-10-23.json.
-The measured parser source correction is pending new full/self-host CI.
-No G2/G3 or fixed-point success is claimed.
+Status: open after qualified Practical Core v1 feature freeze.
+Latest completed manual run39858945154/job120104321493 at4cc36fc8 passes the
+exact ten-case G1 corpus; G2 times out240171ms before admission/publication,
+G3 not run. Exact replay240221ms and artifact12460934656 preserve the request,
+service and V8 sample. The dated G2_LEXER_META_FAILURE_QUALIFICATION receipt
+records identities and read-only profile inspection39860611583.
+
+Earlier actual retries39848619349 and39855739415 also timed out on G2;
+retain their dated receipts. Lexer/cursor/meta source fixes have native/census
+or G1 evidence as recorded in AI_WORK_STATE.md, not G2/G3 qualification.
+Next candidate normalizes the same eager helper-construction class in seven
+core visitors, with all-input native reference equalities and fresh complete CI.
+No heap/stack/deadline or checker/strict-IR/manifest condition is raised.
 
 ## Preserved earlier evidence
 

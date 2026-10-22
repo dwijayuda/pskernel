@@ -280,6 +280,474 @@ private def testConstructorNotationHygiene : IO Unit := do
   roundTrip "array constructor hygiene Lean to PS" .lean .proofScript leanArray
   roundTrip "array constructor hygiene PS to Lean" .proofScript .lean psArray
 
+-- Original total visitors retained only as native proof references.
+namespace PsVisitorNormalizationLegacy
+
+def psNameEq (left : PsName) : PsName -> Bool :=
+  match left with
+  | PsName.anonymous =>
+      fun (right : PsName) =>
+        match right with
+        | PsName.anonymous => true
+        | _ => false
+  | PsName.str leftPrefix leftValue =>
+      let smaller : PsName -> Bool := psNameEq leftPrefix;
+      fun (right : PsName) =>
+        match right with
+        | PsName.str rightPrefix rightValue =>
+            if smaller rightPrefix then
+              psStringEq leftValue rightValue
+            else
+              false
+        | _ => false
+  | PsName.num leftPrefix leftValue =>
+      let smaller : PsName -> Bool := psNameEq leftPrefix;
+      fun (right : PsName) =>
+        match right with
+        | PsName.num rightPrefix rightValue =>
+            if smaller rightPrefix then
+              Nat.beq leftValue rightValue
+            else
+              false
+        | _ => false
+
+def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
+  match left with
+  | .zero =>
+      fun (right : PsLevel) =>
+        match right with
+        | .zero => true
+        | _ => false
+  | .succ leftValue =>
+      let smaller : PsLevel -> Bool :=
+        psLevelStructuralEq leftValue;
+      fun (right : PsLevel) =>
+        match right with
+        | .succ rightValue =>
+            smaller rightValue
+        | _ => false
+  | .max leftA leftB =>
+      let leftEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftA;
+      let rightEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftB;
+      fun (right : PsLevel) =>
+        match right with
+        | .max rightA rightB =>
+            if leftEq rightA then
+              rightEq rightB
+            else
+              false
+        | _ => false
+  | .imax leftA leftB =>
+      let leftEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftA;
+      let rightEq : PsLevel -> Bool :=
+        psLevelStructuralEq leftB;
+      fun (right : PsLevel) =>
+        match right with
+        | .imax rightA rightB =>
+            if leftEq rightA then
+              rightEq rightB
+            else
+              false
+        | _ => false
+  | .param leftName =>
+      fun (right : PsLevel) =>
+        match right with
+        | .param rightName => psNameEq leftName rightName
+        | _ => false
+  | .mvar leftId =>
+      fun (right : PsLevel) =>
+        match right with
+        | .mvar rightId => Nat.beq leftId rightId
+        | _ => false
+
+def psLevelListEq
+    (left : List PsLevel) : List PsLevel -> Bool :=
+  match left with
+  | [] =>
+      fun (right : List PsLevel) =>
+        match right with
+        | [] => true
+        | _ => false
+  | leftValue :: leftRest =>
+      let smaller : List PsLevel -> Bool :=
+        psLevelListEq leftRest;
+      fun (right : List PsLevel) =>
+        match right with
+        | rightValue :: rightRest =>
+            if psLevelStructuralEq leftValue rightValue then
+              smaller rightRest
+            else
+              false
+        | _ => false
+
+def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
+  match left with
+  | .bvar leftIndex =>
+      fun (right : PsExpr) =>
+        match right with
+        | .bvar rightIndex => Nat.beq leftIndex rightIndex
+        | _ => false
+  | .fvar leftId =>
+      fun (right : PsExpr) =>
+        match right with
+        | .fvar rightId => Nat.beq leftId rightId
+        | _ => false
+  | .mvar leftId =>
+      fun (right : PsExpr) =>
+        match right with
+        | .mvar rightId => Nat.beq leftId rightId
+        | _ => false
+  | .sortE leftLevel =>
+      fun (right : PsExpr) =>
+        match right with
+        | .sortE rightLevel =>
+            psLevelStructuralEq leftLevel rightLevel
+        | _ => false
+  | .constE leftName leftLevels =>
+      fun (right : PsExpr) =>
+        match right with
+        | .constE rightName rightLevels =>
+            if psNameEq leftName rightName then
+              psLevelListEq leftLevels rightLevels
+            else
+              false
+        | _ => false
+  | .app leftFn leftArg =>
+      let fnEq : PsExpr -> Bool :=
+        psExprAlphaEq leftFn;
+      let argEq : PsExpr -> Bool :=
+        psExprAlphaEq leftArg;
+      fun (right : PsExpr) =>
+        match right with
+        | .app rightFn rightArg =>
+            if fnEq rightFn then
+              argEq rightArg
+            else
+              false
+        | _ => false
+  | .lam _ leftType leftBody leftBinder =>
+      let typeEq : PsExpr -> Bool :=
+        psExprAlphaEq leftType;
+      let bodyEq : PsExpr -> Bool :=
+        psExprAlphaEq leftBody;
+      fun (right : PsExpr) =>
+        match right with
+        | .lam _ rightType rightBody rightBinder =>
+            if psBinderInfoEq leftBinder rightBinder then
+              if typeEq rightType then
+                bodyEq rightBody
+              else
+                false
+            else
+              false
+        | _ => false
+  | .forallE _ leftType leftBody leftBinder =>
+      let typeEq : PsExpr -> Bool :=
+        psExprAlphaEq leftType;
+      let bodyEq : PsExpr -> Bool :=
+        psExprAlphaEq leftBody;
+      fun (right : PsExpr) =>
+        match right with
+        | .forallE _ rightType rightBody rightBinder =>
+            if psBinderInfoEq leftBinder rightBinder then
+              if typeEq rightType then
+                bodyEq rightBody
+              else
+                false
+            else
+              false
+        | _ => false
+  | .letE _ leftType leftValue leftBody =>
+      let typeEq : PsExpr -> Bool :=
+        psExprAlphaEq leftType;
+      let valueEq : PsExpr -> Bool :=
+        psExprAlphaEq leftValue;
+      let bodyEq : PsExpr -> Bool :=
+        psExprAlphaEq leftBody;
+      fun (right : PsExpr) =>
+        match right with
+        | .letE _ rightType rightValue rightBody =>
+            if typeEq rightType then
+              if valueEq rightValue then
+                bodyEq rightBody
+              else
+                false
+            else
+              false
+        | _ => false
+  | .lit leftValue =>
+      fun (right : PsExpr) =>
+        match right with
+        | .lit rightValue => psLiteralEq leftValue rightValue
+        | _ => false
+  | .proj leftType leftIndex leftValue =>
+      let valueEq : PsExpr -> Bool :=
+        psExprAlphaEq leftValue;
+      fun (right : PsExpr) =>
+        match right with
+        | .proj rightType rightIndex rightValue =>
+            if psNameEq leftType rightType then
+              if Nat.beq leftIndex rightIndex then
+                valueEq rightValue
+              else
+                false
+            else
+              false
+        | _ => false
+
+def psExprLiftBVarsWorker
+    (amount : Nat)
+    (expr : PsExpr) : Nat -> PsExpr :=
+  match expr with
+  | .bvar index =>
+      fun (cutoff : Nat) =>
+        if Nat.ble cutoff index then
+          PsExpr.bvar (Nat.add index amount)
+        else
+          PsExpr.bvar index
+  | .fvar id =>
+      fun (cutoff : Nat) => PsExpr.fvar id
+  | .mvar id =>
+      fun (cutoff : Nat) => PsExpr.mvar id
+  | .sortE level =>
+      fun (cutoff : Nat) => PsExpr.sortE level
+  | .constE name levels =>
+      fun (cutoff : Nat) => PsExpr.constE name levels
+  | .app fn arg =>
+      let liftedFn : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount fn;
+      let liftedArg : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount arg;
+      fun (cutoff : Nat) =>
+        PsExpr.app
+          (liftedFn cutoff)
+          (liftedArg cutoff)
+  | .lam name type body binder =>
+      let liftedType : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount type;
+      let liftedBody : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount body;
+      fun (cutoff : Nat) =>
+        PsExpr.lam
+          name
+          (liftedType cutoff)
+          (liftedBody (Nat.succ cutoff))
+          binder
+  | .forallE name type body binder =>
+      let liftedType : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount type;
+      let liftedBody : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount body;
+      fun (cutoff : Nat) =>
+        PsExpr.forallE
+          name
+          (liftedType cutoff)
+          (liftedBody (Nat.succ cutoff))
+          binder
+  | .letE name type value body =>
+      let liftedType : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount type;
+      let liftedValue : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount value;
+      let liftedBody : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount body;
+      fun (cutoff : Nat) =>
+        PsExpr.letE
+          name
+          (liftedType cutoff)
+          (liftedValue cutoff)
+          (liftedBody (Nat.succ cutoff))
+  | .lit value =>
+      fun (cutoff : Nat) => PsExpr.lit value
+  | .proj typeName index value =>
+      let liftedValue : Nat -> PsExpr :=
+        psExprLiftBVarsWorker amount value;
+      fun (cutoff : Nat) =>
+        PsExpr.proj typeName index (liftedValue cutoff)
+
+def psExprInstantiateAtWorker
+    (replacement : PsExpr)
+    (expr : PsExpr) : Nat -> PsExpr :=
+  match expr with
+  | .bvar index =>
+      fun (depth : Nat) =>
+        if Nat.beq index depth then
+          psExprLiftBVars depth 0 replacement
+        else if Nat.blt depth index then
+          PsExpr.bvar (Nat.sub index 1)
+        else
+          PsExpr.bvar index
+  | .fvar id =>
+      fun (depth : Nat) => PsExpr.fvar id
+  | .mvar id =>
+      fun (depth : Nat) => PsExpr.mvar id
+  | .sortE level =>
+      fun (depth : Nat) => PsExpr.sortE level
+  | .constE name levels =>
+      fun (depth : Nat) => PsExpr.constE name levels
+  | .app fn arg =>
+      let instantiatedFn : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement fn;
+      let instantiatedArg : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement arg;
+      fun (depth : Nat) =>
+        PsExpr.app
+          (instantiatedFn depth)
+          (instantiatedArg depth)
+  | .lam name type body binder =>
+      let instantiatedType : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement type;
+      let instantiatedBody : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement body;
+      fun (depth : Nat) =>
+        PsExpr.lam
+          name
+          (instantiatedType depth)
+          (instantiatedBody (Nat.succ depth))
+          binder
+  | .forallE name type body binder =>
+      let instantiatedType : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement type;
+      let instantiatedBody : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement body;
+      fun (depth : Nat) =>
+        PsExpr.forallE
+          name
+          (instantiatedType depth)
+          (instantiatedBody (Nat.succ depth))
+          binder
+  | .letE name type value body =>
+      let instantiatedType : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement type;
+      let instantiatedValue : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement value;
+      let instantiatedBody : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement body;
+      fun (depth : Nat) =>
+        PsExpr.letE
+          name
+          (instantiatedType depth)
+          (instantiatedValue depth)
+          (instantiatedBody (Nat.succ depth))
+  | .lit value =>
+      fun (depth : Nat) => PsExpr.lit value
+  | .proj typeName index value =>
+      let instantiatedValue : Nat -> PsExpr :=
+        psExprInstantiateAtWorker replacement value;
+      fun (depth : Nat) =>
+        PsExpr.proj typeName index (instantiatedValue depth)
+
+def psExprAbstractFVarAtWorker
+    (target : Nat)
+    (expr : PsExpr) : Nat -> PsExpr :=
+  match expr with
+  | .bvar index =>
+      fun (depth : Nat) => PsExpr.bvar index
+  | .fvar id =>
+      fun (depth : Nat) =>
+        if Nat.beq id target then
+          PsExpr.bvar depth
+        else
+          PsExpr.fvar id
+  | .mvar id =>
+      fun (depth : Nat) => PsExpr.mvar id
+  | .sortE level =>
+      fun (depth : Nat) => PsExpr.sortE level
+  | .constE name levels =>
+      fun (depth : Nat) => PsExpr.constE name levels
+  | .app fn arg =>
+      let abstractFn : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target fn;
+      let abstractArg : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target arg;
+      fun (depth : Nat) =>
+        PsExpr.app
+          (abstractFn depth)
+          (abstractArg depth)
+  | .lam name type body binder =>
+      let abstractType : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target type;
+      let abstractBody : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target body;
+      fun (depth : Nat) =>
+        PsExpr.lam
+          name
+          (abstractType depth)
+          (abstractBody (Nat.succ depth))
+          binder
+  | .forallE name type body binder =>
+      let abstractType : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target type;
+      let abstractBody : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target body;
+      fun (depth : Nat) =>
+        PsExpr.forallE
+          name
+          (abstractType depth)
+          (abstractBody (Nat.succ depth))
+          binder
+  | .letE name type value body =>
+      let abstractType : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target type;
+      let abstractValue : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target value;
+      let abstractBody : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target body;
+      fun (depth : Nat) =>
+        PsExpr.letE
+          name
+          (abstractType depth)
+          (abstractValue depth)
+          (abstractBody (Nat.succ depth))
+  | .lit value =>
+      fun (depth : Nat) => PsExpr.lit value
+  | .proj typeName index value =>
+      let abstractValue : Nat -> PsExpr :=
+        psExprAbstractFVarAtWorker target value;
+      fun (depth : Nat) =>
+        PsExpr.proj typeName index (abstractValue depth)
+
+end PsVisitorNormalizationLegacy
+
+-- Moving pure helper construction under its final binder preserves every input.
+private theorem nameVisitor_exact (left : PsName) :
+    psNameEq left = PsVisitorNormalizationLegacy.psNameEq left := by
+  induction left <;> funext right
+    <;> simp only [psNameEq, PsVisitorNormalizationLegacy.psNameEq, *]
+
+private theorem levelVisitor_exact (left : PsLevel) :
+    psLevelStructuralEq left = PsVisitorNormalizationLegacy.psLevelStructuralEq left := by
+  induction left <;> funext right
+    <;> simp only [psLevelStructuralEq, PsVisitorNormalizationLegacy.psLevelStructuralEq, nameVisitor_exact, *]
+
+private theorem levelListVisitor_exact (left : List PsLevel) :
+    psLevelListEq left = PsVisitorNormalizationLegacy.psLevelListEq left := by
+  induction left <;> funext right
+    <;> simp only [psLevelListEq, PsVisitorNormalizationLegacy.psLevelListEq, levelVisitor_exact, *]
+
+private theorem exprEqualityVisitor_exact (left : PsExpr) :
+    psExprAlphaEq left = PsVisitorNormalizationLegacy.psExprAlphaEq left := by
+  induction left <;> funext right
+    <;> simp only [psExprAlphaEq, PsVisitorNormalizationLegacy.psExprAlphaEq, nameVisitor_exact, levelVisitor_exact, levelListVisitor_exact, *]
+
+private theorem liftVisitor_exact (amount : Nat) (expr : PsExpr) :
+    psExprLiftBVarsWorker amount expr = PsVisitorNormalizationLegacy.psExprLiftBVarsWorker amount expr := by
+  induction expr <;> funext cutoff
+    <;> simp only [psExprLiftBVarsWorker, PsVisitorNormalizationLegacy.psExprLiftBVarsWorker, *]
+
+private theorem instantiateVisitor_exact (replacement : PsExpr) (expr : PsExpr) :
+    psExprInstantiateAtWorker replacement expr = PsVisitorNormalizationLegacy.psExprInstantiateAtWorker replacement expr := by
+  induction expr <;> funext depth
+    <;> simp only [psExprInstantiateAtWorker, PsVisitorNormalizationLegacy.psExprInstantiateAtWorker, *]
+
+private theorem abstractVisitor_exact (target : Nat) (expr : PsExpr) :
+    psExprAbstractFVarAtWorker target expr = PsVisitorNormalizationLegacy.psExprAbstractFVarAtWorker target expr := by
+  induction expr <;> funext depth
+    <;> simp only [psExprAbstractFVarAtWorker, PsVisitorNormalizationLegacy.psExprAbstractFVarAtWorker, *]
+
 -- All-input source identities: cached counts are the exact old fuel values.
 private theorem tokenCount_eq_length (tokens : List PsToken) :
     psTokenListLength tokens = tokens.length := by

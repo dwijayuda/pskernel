@@ -45,7 +45,10 @@ reconciliation receipt records the source interval and exact selected evidence.
 2. User resumed the separate manual G1 -> G2 -> G3 qualification on the frozen
    v1 source on 2026-10-23. The explicit committed request trigger supplements
    workflow_dispatch without adding G2/G3 to normal development. Execution and
-   results are tracked in AI_WORK_STATE.md. Preserve the original G2 heap/timeout defect and evidence.
+   results are tracked in AI_WORK_STATE.md. Latest actual run39858945154 passes
+   G1 but G2 times out before admission/publication; G3 has not run. Preserve
+   every source-bound receipt and the open G2 performance defect. Normalize
+   measured eager core visitors, prove source equivalence and rerun full CI.
    Do not infer self-host/fixed-point success from the normal G1 correction.
 3. For later practical feature or compiler changes, state finite acceptance,
    complete shared semantics and both grammars, validate JS/TS/Rust early, then

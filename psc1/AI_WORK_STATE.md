@@ -297,3 +297,30 @@ The follow-up companion39859589200/job120107100265 isolates the remaining
 proof error to the arithmetic simp step at323:4. Replace it with the explicit
 Nat.succ_add / symmetric Nat.add_succ equality chain. No proof/runtime limit
 is raised and the all-input statement is retained.
+
+
+## Exact-result guards and core visitor normalization (2026-10-23)
+
+Native job120109306294 in39860171095 atde1737eb passes all count/lexer,
+empty term/level guards, unresolved/active assignment and existing regressions.
+Manual39858945154/job120104321493 at4cc36fc8 passes both-grammar whole-source
+census and all ten frozen G1 cases. G1 service719b9697... /86 modules;
+G2-self still times out240171ms before admission/publication, G3 not run.
+Exact replay240221ms; artifact12460934656 /14735f63... retains53226594 raw
+profile bytes. Read-only39860611583 inspects the exact artifact; receipt
+PSC1_G2_LEXER_META_FAILURE_QUALIFICATION_2026-10-23.json retains all identities.
+
+The leading excerpt no longer contains lexer length or empty-level rebuilding.
+Core substitution, alpha/name/level equality still construct recursive function
+trees before their final input binder. Normalize26 cases across seven total
+visitors in Core.Subst, Core.Abstract, Core.Equality and Foundation.Name by
+moving the unchanged named helpers under that binder. Existing constructor,
+comparison/short-circuit order and de Bruijn depth arithmetic stay identical.
+DataTests retains original visitor definitions only in a native reference
+namespace and requires all-input function equalities by structural induction.
+These are source equivalence proofs, not a backend preservation certificate.
+
+Do not infer G2/G3 or fresh Practical Core qualification. The original G2 defect
+remains open; changed compiler bytes require fresh complete companion CI and
+actual generated qualification. All child deadlines/heap/stack/fuel/strict-IR,
+independent official checking, exact ten-case manifests and refusals remain.

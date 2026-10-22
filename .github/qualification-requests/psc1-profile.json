@@ -1,7 +1,7 @@
 {
-  "schema": "psc1-retained-selfhost-profile-request/1",
-  "sourceRun": 39855739415,
-  "artifact": 12459313965,
-  "readOnly": true,
-  "replay": false
+  "schema": "psc1-readonly-profile-request/1",
+  "runId": 39858945154,
+  "testedCommit": "4cc36fc8aa3ee707a669973b5c65b8474bf5be69",
+  "requestSha256": "27ef703343ca90dc29ba97cdbfb5848d8a405d7b97fb83259dc723b9793ce8a2",
+  "readOnly": true
 }

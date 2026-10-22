@@ -327,7 +327,7 @@ try {
     console.log(marker+'_TARGET_PASS: '+label);
    }catch(error){
     if(inferenceControl&&target==='rust'&&fs.existsSync(output)){
-     const chunks=read(output).split(/(?=^(?:pub\\s+)?fn\\s)/m);
+     const chunks=read(output).split(/(?=^(?:pub )?fn )/m);
      const functions=chunks.filter(s=>s.slice(0,s.indexOf('{')+1).includes('streamingControllerCase')).map(s=>({
       header:s.slice(0,s.indexOf('{')),chars:s.length,tailLoop:s.includes('__ps_internal_tail_state'),source:s.slice(0,18000)}));
      console.error(marker+'_RUST_CONTROLLER: '+JSON.stringify({syntax,functions}));

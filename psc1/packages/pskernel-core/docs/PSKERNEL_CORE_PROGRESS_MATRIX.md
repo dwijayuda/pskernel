@@ -1,3 +1,38 @@
+## Exact 5abf generated producer and retained controls PASS; mixed replay pending
+
+Executable source: `5abf40506564cad00ff518600ae5992dc826510e`.
+[Run 39860528417](https://github.com/dwijayuda/pskernel/actions/runs/39860528417):
+native `120109760162` PASS; authentic generated producer `120110557932` PASS;
+generated retained controls `120118769801` PASS. Mixed String runtime
+`120118769683` is ALREADY RUNNING with its unchanged 25-minute cap. Fetch that
+existing job; do not duplicate it or infer its result from these subset passes.
+
+The native five exact hash equations, 2730 cases and three long cases passed.
+The generated small closure and complete kernel controls each passed the
+2730-case, 8190-stage, 13665-assertion matrix and three long cases. Static reading
+of the authenticated complete kernel found one data iterator helper and zero
+staged function-result wrappers in that helper. This is code-shape evidence,
+not a global backend-preservation theorem or a demonstrated speedup.
+
+Complete kernel: 9954933 bytes; SHA256
+`4252fe0c1100a0bda8aa9e488195902af560c27e92b3e93ad77ac9550b4bc5fe`.
+Producer artifact `12461534544`: ZIP SHA256
+`deffed2af9d212e3bd77a5c444c1d50f3cddfa148646a0526c40c5f4ba8186a7`.
+Generated DAG: 153.98 s / 565200 KiB peak RSS; prefix/session: 37.90 s /
+507868 KiB peak RSS, 605 assertions. Different hosted runners prevent a causal
+speedup claim; keep historical slower runs and RSS observations visible.
+Exact provenance and artifact identities:
+`evidence/2026-10-23-t01f-data-result-generated-preflight.json`.
+
+The containing documentation checkpoint runs no CI and inherits no qualification.
+Final sharding workflows remain inactive. T01F, current-source A, B, C and D
+remain open; historical scoped A is 9c87 and historical full193 C remains FAIL.
+Do not start T05. Integration remains 123c411. After a complete mixed PASS,
+activate the reconciled final workflows at one coherent source, disable narrow
+push diagnostics, and run all final native/official/proof/provider24/API8,
+both six-sample route aggregates, research, full measurements, unchanged
+32-worker/384-call ABBA and unchanged 193-case Arena/profile gates.
+
 ## Exact5abf data-result native preflight PASS; generated pending
 
 Executable candidate: `5abf40506564cad00ff518600ae5992dc826510e`.

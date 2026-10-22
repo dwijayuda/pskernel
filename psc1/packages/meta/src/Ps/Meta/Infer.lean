@@ -501,7 +501,7 @@ def psInferTypeWithFuelWorker
                                     (PsExpr.sortE
                                       (psInferNormalizeClosedLevel
                                         (PsLevel.imax domainLevel bodyLevel)))
-              | .letE _ type value body =>
+              | .letE name type value body =>
                   match smaller environment metaContext localContext type with
                   | Except.error error => Except.error error
                   | Except.ok typeType =>
@@ -517,11 +517,15 @@ def psInferTypeWithFuelWorker
                                   localContext
                                   type
                                   valueType then
-                                smaller
-                                  environment
-                                  metaContext
-                                  localContext
-                                  (psExprInstantiate1 body value)
+                                -- Infer under one checked local binding. Substituting
+                                -- the value into the entire body destroys Core sharing.
+                                let pushed := psLocalPushLet localContext name type value;
+                                let openedBody := psExprInstantiate1 body (PsExpr.fvar pushed.id);
+                                match smaller environment metaContext pushed.context openedBody with
+                                | Except.error error => Except.error error
+                                | Except.ok bodyType =>
+                                    Except.ok (psExprInstantiate1
+                                      (psExprAbstractFVar pushed.id bodyType) value)
                               else
                                 Except.error PsInferError.letTypeMismatch
               | .proj typeName index target =>

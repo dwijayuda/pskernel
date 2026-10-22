@@ -215,8 +215,8 @@ was not applied. Source readiness remains unqualified until its own exact CI.
 
 ## Preserve sharing during unification
 
-At e076fe0 / run 39695880402, native size/control tests and PHP applications pass
-their execution steps, but inference/control capture reaches its unchanged
+At e076fe0 / run 39695880402, PHP applications pass. Native enters the new
+operator size probe without completing; inference/control capture reaches its unchanged
 120-second deadline before erasure. The shared syntax tree alone is insufficient:
 the unifier weak-head reduces both sides before its reflexivity check, expanding
 local let values even when their indexed propositions are already identical.
@@ -225,3 +225,21 @@ normalization, assignment rules and failure path for unequal terms. Fuel zero
 still refuses. Identical expressions in the same meta/local context are
 definitionally equal without unfolding. Independent kernel admission, strict IR,
 ordinary body replay and all old soundness/negative regressions remain required.
+
+## Let inference preserves the admitted graph
+
+Correction to interim commentary: native never completed the new 64-condition
+probe at e076fe0 or f1a3384b; it was killed at the original job ceiling.
+Reflexivity alone was insufficient. The ordinary inference algorithm substituted
+a let value into the complete body before checking it, duplicating the shared
+condition into proposition and decision again. Infer the checked body under
+psLocalPushLet, then close/substitute only its inferred result type. Check the
+declared type and value first exactly as before. Read-only conversion, like
+unification, checks alpha reflexivity before reducing unequal expressions.
+
+Native probes require dependent result closure, a local Type alias, rejection
+of an unused ill-typed value and a loose binder, and unchanged zero-fuel refusal.
+The complete 64-condition/64-equality size and kernel probes, original source
+corpus, all resource ceilings, independent admission and strict IR remain.
+Latest remote HEAD was refreshed after resume: f1a3384b; PR remains draft/open,
+base 1fad9ed5, with no concurrent branch update or qualification promotion.

@@ -59,7 +59,42 @@ private def requireTransactionalPreview : IO Unit := do
       IO.println "PSC1_CONTEXTUAL_INFERENCE_PASS: failed preview rolls back before a different successful constraint"
   | _ => throw (IO.userError "PSC1_CONTEXTUAL_INFERENCE_FAIL: rollback blocked subsequent constraint")
 
+private def requireLetInference : IO Unit := do
+  let natType := PsExpr.constE psNatName []
+  let typeType := PsExpr.sortE (.succ .zero)
+  let environment := psSelfHostProdPreludeEnvironment
+  let aliases := PsExpr.letE (psRootName "A") typeType natType
+    (.letE (psRootName "value") (.bvar 0) (.lit (.natural 7)) (.bvar 0))
+  match psInferType environment psMetaEmpty psLocalEmpty aliases with
+  | .ok type =>
+      if !psExprAlphaEq type natType then
+        throw (IO.userError "checked let alias lost its closed result type")
+  | .error _ => throw (IO.userError "checked dependent let alias refused")
+  let familyType := PsExpr.forallE (psRootName "index") natType typeType .explicit
+  let family := psLocalPushBinding psLocalEmpty (psRootName "P") familyType .explicit
+  let indexed := PsExpr.app (.fvar family.id) (.lit (.natural 7))
+  let dependent := PsExpr.letE (psRootName "index") natType (.lit (.natural 7))
+    (.lam (psRootName "value") (.app (.fvar family.id) (.bvar 0)) (.bvar 0) .explicit)
+  let expected := PsExpr.forallE (psRootName "value") indexed
+    (psExprLiftBVars 1 0 indexed) .explicit
+  match psInferType environment psMetaEmpty family.context dependent with
+  | .ok type =>
+      if !psExprAlphaEq type expected then
+        throw (IO.userError "let result type leaked an internal local or lost dependency")
+  | .error _ => throw (IO.userError "checked let dependency refused")
+  for invalid in [
+      PsExpr.letE (psRootName "unused") natType (.constE psBoolFalseName []) (.lit (.natural 1)),
+      PsExpr.letE (psRootName "value") natType (.lit (.natural 1)) (.bvar 1)] do
+    match psInferType environment psMetaEmpty psLocalEmpty invalid with
+    | .error _ => pure ()
+    | .ok _ => throw (IO.userError "malformed let accepted")
+  match psInferTypeWithFuel environment psMetaEmpty psLocalEmpty 0 aliases with
+  | .error .fuelExhausted => pure ()
+  | _ => throw (IO.userError "let inference bypassed zero fuel")
+  IO.println "PSC1_LET_INFERENCE: PASS dependent result closure, checked aliases, unused ill-typed value, loose binder and zero fuel"
+
 def main : IO Unit := do
+  requireLetInference
   requireTransactionalPreview
   requireAcceptedPair "contextual and nested generic Int calls"
     "def contextualId {A : Type} (value : A) : A := value\ndef result : Int := contextualId (contextualId 7)\n"

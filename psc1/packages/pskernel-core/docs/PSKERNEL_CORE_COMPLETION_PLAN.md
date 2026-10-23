@@ -1,3 +1,57 @@
+## Exact9d3fb native AND bounded generated gate PASS; full producer pending
+
+ExecutableANDharness9d3fb530e67863017c50470dbd5d06aa388d6184,
+tree238f75eb53995732ed2991f18bc98e17cce3f863.
+Existing run https://github.com/dwijayuda/pskernel/actions/runs/39896509889.
+Native120228107597 PASS82proofreports,including EIGHT hash lemmas; five
+original statements/frozen19fb worker unchanged. Permitted axiom union only
+propext/Classical.choice/Quot.sound. Native2730cases,long3,294requests/
+377metadata,all6authenticStringcases/singletons andretainedcontrols PASS.
+Artifact12476714215 ZIP105566bytes SHA256
+cd0787823347649411458a2a4a166bd2a8cd3c52b5b64159ec199f5b9de39544.
+All82proofrows/authenticatedartifactfiles:
+evidence/2026-10-23-t01f-primitive-pair-counter-native.json.
+
+Generated120228660726 bounded SMALL gate PASS at this exact source:
+realPSC1->TS7.0.2,2730cases8190stages13665assertions,long3.
+Strict pair-counter code shape passed: onePairhelper/oneStatehelper,
+zero stagedresults/Step/Mixdispatch; one recursivePairinvoke/one structural
+block/two primitive transitions; StateonePairinvoke/oneblock/oneoddtransition.
+This is not a generator-free loop or demonstrated performance improvement.
+Actual printed bodies/artifact should be collected when producer terminates;
+step success is observed now,not a fabricated full-kernel receipt.
+
+Producer120228660726 is ALREADY checking COMPLETE authentic SelfHost source
+after that gate,then fullkernelcompilation and rawfixture/provenance.
+Retained controls10m and complete unchanged mixed25m are pending dependencies.
+Fetch existing run; neverduplicate. Fuel4096,heap2048MiB,emptyPATH and all
+1400selectedsample assertions/singleton/negatives/session/owner checks remain.
+No complete mixed/fullT01F/currentA qualification exists yet.
+
+The containing checkpoint reconciles paused fullintegration and saved draft
+nativehashproofcount to8; all prior proof trust/resource gates stay intact.
+Saved integrationdraft93833bytes SHA256
+544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02;
+paused active93785bytes SHA256
+55828fcae22f61a3df74fe8493bcc0b933166db0c5fa88df8924fc399aa87b5f.
+Saved README updated; all5fullworkbranchpushes STILL PAUSED,profilemanual.
+Documentation child has separate source identity and inherits no qualification.
+
+One next task: finish existing9d3fb complete producer then unchanged mixed/
+controls. If mixedPASS,fetch fresh pausedfiles,restore all5workbranchtriggers,
+keep eightproofguard/canonical9file/ownerlifecycle fix,disable narrowhashpush,
+and qualify ONE NEW coherent source through BOTH6shard strictaggregates plus
+allnative/official/proofs/provider24CLI+8API/research/measurements/unchanged
+owner32workers384calls/full193/profile. If genuinefailure/cap,preserve
+actualtrace/artifact and fix evidencedbottleneck; neverweakenlimits/assertions.
+Prior61deda/fe4aa mixedtimeouts and27c85codegenrejection stay preserved below.
+CurrentA/T01F/B/D OPEN,C FAIL,historicalscopedA9c87 qualified,noT05 yet.
+Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged,no main/npm.
+ActionsLinux only for builds/tests/kernel execution;fresh expected_sha,
+nonforce updates,preserve concurrenthistory.
+
+---
+
 ## Current: primitive pair counter after27c85 code-shape rejection
 
 Source27c85aef9a5fd11f4074976b60c7ec482a83260f/run39895889666:

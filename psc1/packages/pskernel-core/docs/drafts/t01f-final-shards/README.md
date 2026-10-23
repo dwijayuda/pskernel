@@ -1,3 +1,12 @@
+# Current: full pushes paused; eight hash proof reports reconciled
+
+The exact9d3fb native and bounded generated gates passed,while complete producer
+and mixed preflight are still pending. Do not activate before full mixed PASS.
+The saved integration draft and paused active workflow now require all eight
+hash proof reports. Older activation wording below is historical; current
+AI_WORK_STATE.md and continuation are authoritative. No source inherits prior
+qualification. Canonical nine-file manifest/owner live-job guard stay intact.
+
 # Current owner lifecycle correction
 
 Queued matrix jobs keep an active run queued. The final owner gate now accepts
@@ -24,7 +33,7 @@ the authoritative current status is AI_WORK_STATE.md and the continuation.
 These are saved preparations, not installed workflows or qualification evidence.
 Current drafts retain all prior native/source/canonical/generated/proof/provider/
 performance gates and add complete same-run String shards. They also require
-five local scalar-hash equations,2730 raw/fuel/accumulator cases,8190 generated
+eight local scalar-hash equations (five original statements plus three iterator lemmas),2730 raw/fuel/accumulator cases,8190 generated
 partial-application stages and three long ASCII/Unicode cases on both routes.
 
 Historical candidate 5abf40506564cad00ff518600ae5992dc826510e passed its own native preflight
@@ -88,7 +97,7 @@ global soundness. The generated kernel must perform its own checks.
 
 ## Current exact digests
 
-- psc1-pskernel-expr-v2-integration.yml: 93833 bytes; SHA256 8a8a0fd21cf381543d342509e862b5888a2da0a0e573efb662a24a8302483099
+- psc1-pskernel-expr-v2-integration.yml: 93833 bytes; SHA256 544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02
 - psc1-pskernel-core-correctness.yml: 43948 bytes; SHA256 793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff
 - pskernel-t01f-shards.mjs:15203 bytes; SHA256 daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287
 - paired-owner-job.fragment.yml:17261 bytes; SHA256 bc99a5c9029d0dd30eacf60a975d9a0230f3739b999112dc5f3e259ca2941fcd

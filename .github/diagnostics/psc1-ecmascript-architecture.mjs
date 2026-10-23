@@ -54,4 +54,4 @@ for(const file of profileFiles.filter(f=>f.endsWith('.log.txt'))){
 assert.ok(cpu.length>0,'full retained processed CPU report must be present');
 const receipt={schema:request.schema,testedCommit:process.env.GITHUB_SHA,compilerExecution:false,nativeDelegation:false,qualification:false,comparisonLimits:'Different target closures and source snapshots; shape comparison is not a matched performance benchmark.',results,cpu};
 fs.mkdirSync('dist/ecmascript-architecture',{recursive:true});fs.writeFileSync('dist/ecmascript-architecture/receipt.json',JSON.stringify(receipt,null,2)+'\n');
-console.log('PSC1_RETAINED_ECMASCRIPT_ARCHITECTURE: '+JSON.stringify(receipt));
+console.log('PSC1_RETAINED_ECMASCRIPT_ARCHITECTURE: '+JSON.stringify({...receipt,results:results.map(({selected,...row})=>({...row,selected:selected.map(({snippet,...fn})=>fn)}))}));

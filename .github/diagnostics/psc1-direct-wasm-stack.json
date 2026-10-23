@@ -2,19 +2,18 @@
   "schema": "psc1-retained-wasm-stack-diagnosis/1",
   "attempts": [
     {
-      "runId": 40031965458,
-      "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
-      "sourceCommit": "ef06b357723b2265759dccb955c1575a1bbb78bf",
-      "artifactId": 12535892025,
-      "artifactDigest": "sha256:a2593af908c9ec59985a6c8f19349b2e73d458f88aaea4baab551b4d766fcccd"
+      "runId": 40035031327,
+      "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
+      "sourceCommit": "699f84948ff70273e5ab9a7c5c0273316df23e66",
+      "artifactId": 12537505726,
+      "artifactDigest": "sha256:8c95c7ab2104f8200af7c258e7a01b985cbc040073b8bb68d7542ec874910c9c"
     }
   ],
-  "serviceSha256": "1b7cc49ab3f1b22e8f6c800305c2a8ea05ed87ea3bdf983905bcb20fb6301ba5",
-  "requestSha256": "4529904f51dd278f15740190b11edc907d383efd1851a7959895400ac2beef20",
-  "closure": "0313a6571d90c544bc6b88ed9a4809ca0d74733ed86e24ac57ec7766a0295a29",
+  "serviceSha256": "38cf11fd0fdf7a48d7a3dc9a926b5970e2ddf14e3ad852a5fa6fe682680724cb",
+  "requestSha256": "154f995001505a8f1415f1b407616fec2ba349e344b775bb17b97c5bea710ff6",
+  "closure": "85c03806bb5c045a8d5c48a73ddd1fbe7f5be568ea3c92a599d7b19ac0e5f317",
   "resolveOnly": [
-    6,
-    2286
+    11
   ],
-  "purpose": "Resolve exact terminal G2 repeated frames after foundation fix; read-only, no repeated compiler execution."
+  "purpose": "Resolve exact terminal repeated runtime frame after main lower-expression prefix fix; read-only no compiler execution."
 }

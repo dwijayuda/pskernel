@@ -1,10 +1,25 @@
 # PSC1 development roadmap
 
-Updated 2026-10-23 UTC. [AI_WORK_STATE](../AI_WORK_STATE.md) owns continuation.
+Updated 2026-10-24 Asia/Jakarta. [AI_WORK_STATE](../AI_WORK_STATE.md) owns continuation.
 Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 criteria.
 [Compact evidence](PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json) binds the
 full [canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json),
 including17 completed actual attempts, preserved failures and immutable artifacts.
+
+## Current remaining queue — DirectJS and DirectWasm
+
+| Order | Work | Acceptance / current evidence |
+| --- | --- | --- |
+|1|Finish measured DirectJS cache-key and Wasm ordinary-stack defect-class fixes.|e274/40023689471 passes51 all-input prefix proofs, ordinary accumulator/wrapper equivalence, negatives, deep/native/reference/runtime/owned-Wasm tests and both87/98-module grammars. DirectJS53c9b895 lazy-token emitter gate40025082793 pending; actual retained G2 profile40024746671 pending.|
+|2|Execute genuine independent DirectJS and DirectWasm G1→G2→G3.|Previous0c/40020523049: both completeG1; JS G2 deadline1800162ms/1862136KiB, Wasm G2 stack123237ms/536280KiB. Neither has G3/fixedpoint. Actual new Wasm request8b01ac30/run40024688133 on proved e274 source is running. Exact source/admission/original+transformed IR/observations/source-byte (owned Wasm binary) fixed points required.|
+|3|Qualify latest source across all seven backends, both grammars and real applications.|Preserved PR174 afed7c4b full40015619975 passes37/37, identical-tree merge; later source still needs full CI. Preserve independent Lean4.35 and strict IR/negative/refusal gates.|
+|4|Separate performance and reproducibility qualification.|Keep original240s profile and independent clean-build repeatability distinct from1800s correctness. No heap/stack/fuel/checking relaxation; no merge or publication.|
+
+Authoritative continuation: [AI_WORK_STATE](../AI_WORK_STATE.md).
+Machine-readable immutable attempt identities, focused gates and current runs:
+[Direct target evidence](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json).
+Preserve qualified Rust83e18fe1 and TS84e1e16f. Earlier sections below retain
+historical attempts; this queue supersedes their older pending descriptions.
 
 Corrected TS source748fd5fd/request079b26b9/run39993829327 independently qualifies
 genuine G1/G2/G3 and exact source/admissions/IR/ten-case fixed points under1800s.
@@ -32,12 +47,7 @@ replaces original240s performance. Prior exact240s TS39988689772 fails G2;
 current corrected G2 also exceeds240s. Same-run executable equality is narrower
 than independent clean-build repeatability.
 
-| Order | Remaining work | Finite acceptance |
-| --- | --- | --- |
-|1|Preserve this qualified draft173 checkpoint for review; next implementation work is measured current-source240s performance and independent clean-build reproducibility. No source CI or self-host rerun is needed for this documentation-only checkpoint.|Preserve existing37 criteria, all seven target mappings, applications, official independent Lean, strict IR and negative boundaries|
-|2|Measured current compiler performance|Original240s qualification, source identities and unchanged fuel/heap/stack/stream/wire; no unchanged duplicate timeout run or speculative redesign|
-|3|Independent reproducibility|Separate clean environments reproduce exact admitted compiler sources and comparable generated executable identities|
-|4|Distribution/release|Existing native/standalone package and application gates; no merge/npm publication without authorization|
+> The previous TS-only queue is superseded by the current DirectJS/DirectWasm queue above.
 
 Use shared source/frontend/elaboration/checked IR for all backends. Preserve generic
 fallbacks and explicit unsupported-ABI refusals. Keep DirectJS regression coverage,

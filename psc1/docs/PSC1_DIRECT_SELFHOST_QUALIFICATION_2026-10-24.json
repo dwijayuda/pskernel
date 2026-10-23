@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 20:42:02 UTC",
+  "recordedAtUtc": "2026-10-23 21:13:00 UTC",
   "localDate": "2026-10-24",
-  "status": "genuine-generation-qualification-running",
+  "status": "blocker-fixes-under-test",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -79,6 +79,26 @@
         "sourceBytes": 6513509,
         "gcSamplePercent": 19.6,
         "compilerExecution": false
+      },
+      "currentCpuDiagnosis": {
+        "runId": 40024746671,
+        "source": {
+          "schema": "psc1-direct-generated-profile-request/1",
+          "runId": 40020523049,
+          "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
+          "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+          "artifactId": 12531877337,
+          "artifactDigest": "sha256:695440e0d7c763d6e0356e8448a5c1d93d8c4ce21a6070e13a735d3ca11a30c6",
+          "target": "js",
+          "requestId": "G2-self",
+          "sourceClosureDigest": "0d7371b426f06361a39bf68e3c16baac0766d635aac5d01a4435d0747f3ca114",
+          "serviceSha256": "df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84",
+          "requestSha256": "3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7",
+          "purpose": "Measure actual generated statement-loop compiler on its exact retained G2 request; diagnostic only, no qualification or policy change.",
+          "attempt": 3
+        },
+        "qualification": false,
+        "status": "in_progress"
       }
     },
     "wasm": {
@@ -122,6 +142,141 @@
     }
   },
   "focusedGate": {
+    "commit": "e2743316170f800b8ad84533c1da1834773acccd",
+    "runId": 40023689471,
+    "status": "passed",
+    "prefixEqualities": 51,
+    "ordinaryAccumulatorInvariant": true,
+    "ordinaryWorkerEquality": true,
+    "ordinarySmokeDeclarations": 10000,
+    "jsRuntimeComparisons": 7540,
+    "jsNativeReferenceComparisons": 780,
+    "bothCompleteSourceGrammars": true,
+    "sourceModules": {
+      "js": 87,
+      "wasm": 98
+    },
+    "ownedWasmEngine": true
+  },
+  "currentAttempt": {
+    "target": "wasm-core",
+    "sourceCommit": "e2743316170f800b8ad84533c1da1834773acccd",
+    "requestCommit": "8b01ac30d9e5e03ed394746148bb20a7cebddb2b",
+    "runId": 40024688133,
+    "status": "in_progress",
+    "fixedPoint": "not-yet-established"
+  },
+  "integrationCheckpoint": {
+    "pullRequest": 174,
+    "commit": "afed7c4b2681533b525d7434856a97a78fd3d745",
+    "fullRunId": 40015619975,
+    "status": "passed",
+    "criteriaQualified": 37,
+    "criteriaBlocked": 0,
+    "sevenBackends": true,
+    "mergeCommit": "3ee84d55184e1f458e2f49fbd599ebf0f157e1c4",
+    "identicalTree": "9be586614ad592940b6f142109d7a8ca61c2cbf7",
+    "artifact": {
+      "id": 12529619543,
+      "digest": "sha256:0317731c7fdbcb9b426d555e4f194a99dc5271694ca2ef9360dcaecb0ba20091"
+    },
+    "scope": "afed integration tree only; later source needs current-source full CI"
+  },
+  "publication": "not-run",
+  "merges": "not-run",
+  "independentCleanBuildReproducibility": "not-qualified",
+  "completedAttempt": {
+    "runId": 40020523049,
+    "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+    "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
+    "branch": "work/psc1-direct-selfhost-blockers-20261024",
+    "targets": [
+      "js",
+      "wasm-core"
+    ],
+    "jobs": {
+      "js": 120643819553,
+      "wasm": 120643819569
+    },
+    "observedWorkflowStatus": "completed",
+    "terminalResult": "failure",
+    "fixedPoints": "not-run",
+    "js": {
+      "target": "js",
+      "profile": {
+        "name": "correctness-1800s",
+        "g1TimeoutMs": 240000,
+        "corpusTimeoutMs": 240000,
+        "toolTimeoutMs": 240000,
+        "selfCompileTimeoutMs": 1800000,
+        "correctnessAndPerformanceSeparate": true
+      },
+      "correctnessQualification": "not-qualified",
+      "performanceQualification": "not-qualified",
+      "status": "failed",
+      "sourceModules": 87,
+      "sourceClosureDigest": "0d7371b426f06361a39bf68e3c16baac0766d635aac5d01a4435d0747f3ca114",
+      "generations": [
+        1
+      ],
+      "fixedPoint": "not-run",
+      "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84\",\"requestSha256\":\"3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1862136,\"peakTreeRssKiB\":1862136,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800162,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+      "attempts": [
+        {
+          "generation": 2,
+          "producer": "df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84",
+          "startedAt": "2026-10-23T20:38:41.388Z",
+          "status": "failed",
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84\",\"requestSha256\":\"3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1862136,\"peakTreeRssKiB\":1862136,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800162,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+          "completedAt": "2026-10-23T21:08:42.116Z"
+        }
+      ]
+    },
+    "wasm-core": {
+      "target": "wasm-core",
+      "profile": {
+        "name": "correctness-1800s",
+        "g1TimeoutMs": 240000,
+        "corpusTimeoutMs": 240000,
+        "toolTimeoutMs": 240000,
+        "selfCompileTimeoutMs": 1800000,
+        "correctnessAndPerformanceSeparate": true
+      },
+      "correctnessQualification": "not-qualified",
+      "performanceQualification": "not-qualified",
+      "status": "failed",
+      "sourceModules": 98,
+      "sourceClosureDigest": "cf1fbeba006442a10b687b56cd4be48c73d56a7574758126e337806b0e7568c3",
+      "generations": [
+        1
+      ],
+      "fixedPoint": "not-run",
+      "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5\",\"requestSha256\":\"ba9cf85f7f5fa252e18d4b9053a4b6eed2686fbb50314b6c7d1a8ebdda753fe1\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":536280,\"peakTreeRssKiB\":535672,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":123237,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/0061d16a:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae38\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n\nNode.js v22.23.3\n",
+      "attempts": [
+        {
+          "generation": 2,
+          "producer": "8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5",
+          "startedAt": "2026-10-23T20:39:08.055Z",
+          "status": "failed",
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5\",\"requestSha256\":\"ba9cf85f7f5fa252e18d4b9053a4b6eed2686fbb50314b6c7d1a8ebdda753fe1\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":536280,\"peakTreeRssKiB\":535672,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":123237,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/0061d16a:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae38\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n\nNode.js v22.23.3\n",
+          "completedAt": "2026-10-23T20:41:12.108Z"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": 12531877337,
+        "digest": "sha256:695440e0d7c763d6e0356e8448a5c1d93d8c4ce21a6070e13a735d3ca11a30c6",
+        "name": "psc1-direct-selfhost-correctness-1800s-js-0c0b0be64a362e0a16e3c19c8cd057e25e934b6b"
+      },
+      {
+        "id": 12530402614,
+        "digest": "sha256:0b48449adc24ae9430654698650769418116e1aeea3a649a08e361c11cf48d0e",
+        "name": "psc1-direct-selfhost-correctness-1800s-wasm-core-0c0b0be64a362e0a16e3c19c8cd057e25e934b6b"
+      }
+    ]
+  },
+  "previousFocusedGate": {
     "commit": "82b270632beb1df34b65605877eeec3bf940f232",
     "runId": 40020188747,
     "status": "passed",
@@ -156,30 +311,10 @@
       "allAccepted": true
     }
   },
-  "currentAttempt": {
-    "runId": 40020523049,
-    "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
-    "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
-    "branch": "work/psc1-direct-selfhost-blockers-20261024",
-    "targets": [
-      "js",
-      "wasm-core"
-    ],
-    "jobs": {
-      "js": 120643819553,
-      "wasm": 120643819569
-    },
-    "observedWorkflowStatus": "in_progress",
-    "terminalResult": "not-yet-established",
-    "fixedPoints": "not-yet-established"
-  },
-  "integrationCheckpoint": {
-    "pullRequest": 174,
-    "commit": "afed7c4b2681533b525d7434856a97a78fd3d745",
-    "fullRunId": 40015619975,
-    "observedStatus": "full-gate-in-progress"
-  },
-  "publication": "not-run",
-  "merges": "not-run",
-  "independentCleanBuildReproducibility": "not-qualified"
+  "pendingFocusedGate": {
+    "commit": "53c9b895386b8e2f5747a0a03f0c9397561ad3bf",
+    "runId": 40025082793,
+    "status": "in_progress",
+    "mechanism": "alias-aware invariant pure-loop lazy UTF8 tokens"
+  }
 }

@@ -53,28 +53,40 @@ def stringHashStateBefore (fuel : Nat) (value : String)
   | Nat.succ remaining =>
       psKernelCacheStringHashStep value (stringHashStateBefore remaining value initial)
 
+theorem pairs_eq_before (pairs : Nat) (value : String) (initial : Prod Nat Nat) :
+    psKernelCacheStringHashPairsWithFuel pairs value initial =
+      stringHashStateBefore (pairs * 2) value initial := by
+  induction pairs with
+  | zero => rfl
+  | succ remaining ih =>
+      have count : (Nat.succ remaining) * 2 =
+          Nat.succ (Nat.succ (remaining * 2)) := by omega
+      rw [count]
+      change psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStep value
+          (psKernelCacheStringHashPairsWithFuel remaining value initial)) =
+        psKernelCacheStringHashStep value
+          (psKernelCacheStringHashStep value
+            (stringHashStateBefore (remaining * 2) value initial))
+      rw [ih]
+
 theorem state_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
     psKernelCacheStringHashStateWithFuel fuel value initial =
       stringHashStateBefore fuel value initial := by
-  refine Nat.strongRecOn
-    (motive := fun count =>
-      psKernelCacheStringHashStateWithFuel count value initial =
-        stringHashStateBefore count value initial)
-    fuel ?_
-  intro count ih
-  cases count with
-  | zero => rfl
-  | succ count =>
-      cases count with
-      | zero => rfl
-      | succ remaining =>
-          change psKernelCacheStringHashStep value
-            (psKernelCacheStringHashStep value
-              (psKernelCacheStringHashStateWithFuel remaining value initial)) =
-            psKernelCacheStringHashStep value
-              (psKernelCacheStringHashStep value
-                (stringHashStateBefore remaining value initial))
-          rw [ih remaining (by omega)]
+  change (if Nat.beq (fuel % 2) 0 then
+      psKernelCacheStringHashPairsWithFuel (fuel / 2) value initial
+    else psKernelCacheStringHashStep value
+      (psKernelCacheStringHashPairsWithFuel (fuel / 2) value initial)) =
+        stringHashStateBefore fuel value initial
+  simp only [pairs_eq_before]
+  by_cases even : fuel % 2 = 0
+  · have count : (fuel / 2) * 2 = fuel := by omega
+    simpa [even] using
+      congrArg (fun count => stringHashStateBefore count value initial) count
+  · have odd : fuel % 2 = 1 := by omega
+    have count : Nat.succ ((fuel / 2) * 2) = fuel := by omega
+    simpa [odd, stringHashStateBefore] using
+      congrArg (fun count => stringHashStateBefore count value initial) count
 
 theorem state_succ (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
     psKernelCacheStringHashStateWithFuel (Nat.succ fuel) value initial =
@@ -152,6 +164,7 @@ theorem hash_eq_before (value : String) :
 
 end PsKernelScalarHashWorkerRegression
 
+#print axioms PsKernelScalarHashWorkerRegression.pairs_eq_before
 #print axioms PsKernelScalarHashWorkerRegression.state_eq_before
 #print axioms PsKernelScalarHashWorkerRegression.state_succ
 #print axioms PsKernelScalarHashWorkerRegression.state_step_commutes

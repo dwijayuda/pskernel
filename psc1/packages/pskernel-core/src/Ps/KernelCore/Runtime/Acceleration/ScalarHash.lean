@@ -33,56 +33,61 @@ def psKernelCacheStringHashStep
         (Nat.add (Nat.mul (Prod.snd state) 31) (Char.toNat char))
         psKernelCacheHashModulus)
 
+/- Count pairs directly so portable structural recursion decreases by one. -/
+def psKernelCacheStringHashPairsWithFuel
+    (pairs : Nat)
+    (value : String)
+    (initial : Prod Nat Nat) : Prod Nat Nat :=
+  match pairs with
+  | Nat.zero => initial
+  | Nat.succ remaining =>
+      let state := psKernelCacheStringHashPairsWithFuel remaining value initial;
+      let intermediate :=
+        let position := Prod.fst state;
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+          state
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+              psKernelCacheHashModulus);
+      let position := Prod.fst intermediate;
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+        intermediate
+      else
+        Prod.mk
+          (String.Pos.Raw.byteIdx
+            (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+          (Nat.mod
+            (Nat.add
+              (Nat.mul (Prod.snd intermediate) 31)
+              (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+            psKernelCacheHashModulus)
+
 def psKernelCacheStringHashStateWithFuel
     (fuel : Nat)
     (value : String)
     (initial : Prod Nat Nat) : Prod Nat Nat :=
-  match fuel with
-  | Nat.zero => initial
-  | Nat.succ fuelPred =>
-      match fuelPred with
-      | Nat.zero =>
-          let position := Prod.fst initial;
-          if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
-            initial
-          else
-            Prod.mk
-              (String.Pos.Raw.byteIdx
-                (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
-              (Nat.mod
-                (Nat.add
-                  (Nat.mul (Prod.snd initial) 31)
-                  (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
-                psKernelCacheHashModulus)
-      | Nat.succ remaining =>
-          /- Two immutable transitions share one recursive scheduler descent.
-          Keep the data motive and every exact bounded-prefix result. -/
-          let state := psKernelCacheStringHashStateWithFuel remaining value initial;
-          let intermediate :=
-            let position := Prod.fst state;
-            if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
-              state
-            else
-              Prod.mk
-                (String.Pos.Raw.byteIdx
-                  (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
-                (Nat.mod
-                  (Nat.add
-                    (Nat.mul (Prod.snd state) 31)
-                    (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
-                  psKernelCacheHashModulus);
-          let position := Prod.fst intermediate;
-          if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
-            intermediate
-          else
-            Prod.mk
-              (String.Pos.Raw.byteIdx
-                (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
-              (Nat.mod
-                (Nat.add
-                  (Nat.mul (Prod.snd intermediate) 31)
-                  (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
-                psKernelCacheHashModulus)
+  let paired := psKernelCacheStringHashPairsWithFuel (Nat.div fuel 2) value initial;
+  if Nat.beq (Nat.mod fuel 2) 0 then
+    paired
+  else
+    let position := Prod.fst paired;
+    if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+      paired
+    else
+      Prod.mk
+        (String.Pos.Raw.byteIdx
+          (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+        (Nat.mod
+          (Nat.add
+            (Nat.mul (Prod.snd paired) 31)
+            (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+          psKernelCacheHashModulus)
 
 def psKernelCacheStringHashScan
     (fuel : Nat)

@@ -1,3 +1,49 @@
+## Current pair-counter candidate after portable nested-recursion rejection
+
+Source2b32b76d3dfaf2134aa1f8496a0745a03a8c9a82/run39895167983:
+native120223802748 PASS81proofs (seven hash),2730cases,long3,294requests/
+377metadata/all6Stringcases; onlypermittedpropext/Classical.choice/Quot.sound.
+Nativeartifact12476382023 ZIP105561bytes SHA256
+3de6a2cf12a3a26444ec46a700ad707bf1fe932f81ae13ceb21091e89816ad8e.
+But SMALL generatedsource120224384754 failed structuralRecursionNotDecreasing.
+Nested simple patterns parsed; PSC1 did not recognize the twice-nested predecessor.
+No generatedmatrix/code-shape/fullsource/fullbuild/runtime executed.
+All81proofrows/artifacthashes/failure:
+evidence/2026-10-23-t01f-two-transition-portable-recursion-rejected.json.
+The b4d6 proof elaboration and63ce parser failures remain retained separately.
+
+This DISTINCT candidate uses a direct one-decreasing PAIR counter.
+Pairs(p+1) performs two immutable primitive transitions after Pairs(p).
+Public State(fuel) computes Pairs(fuel/2) then one extra transition iff fuel%2=1.
+All exact bounded output/frozen19fb worker/publiccurriedABI/hash31mod65521/
+rawUTF8/owner/session/cache/index/resource policies remain unchanged.
+No compiler/backend/checker changes. New pairs_eq_before proves paircounter
+equals the frozen one-step DATA recurrence at2*p; quotient/remainder arithmetic
+then proves State(fuel) equals that recurrence atfuel. Seven existing theorem
+statements remain; eight total hash proof reports are required. This source
+has NOT passed them yet; native-first,2730cases,long3 and generated8190stage/
+13665assertion controls rerun before expensive work.
+
+Distinct bounded shape gate requires exactly one PAIR iterator helper and
+one publicState helper,zero staged result wrappers/Step/Mix dispatch in both,
+one recursive scheduler invoke/one structural anonymous block in pair iterator,
+TWO inlined get/next transitions there and ONE odd transition in State with
+exactly one dispatch to the pair counter. Print bodies; failbeforecomplete
+SelfHostchecking/fullbuild on actual mismatch. No pureloop/speedup claim.
+
+One next task: native proof success at this exact source,then actual bounded
+PSC1 value/shape success,then complete unchanged mixed25m and controls10m.
+Full5workbranchpushes remain paused,profilemanual-only; no duplicated runs.
+If mixedPASS,reconcile fullnative proofcount8/drafts then activateONEnewsource
+with both6shardaggregates and allnative/official/proofs/provider24CLI+8API/
+research/measurements/owner32workers384calls/full193/profile gates.
+T01F/currentA/B/D OPEN,C FAIL,historicalscopedA9c87 qualified; noT05.
+Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged,no main/npm.
+ActionsLinux only for builds/tests/kernel execution,fresh expected_sha,
+nonforce updates,preserve concurrent history.
+
+---
+
 ## Portable syntax correction after63ce native PASS / small PSC1 parse FAIL
 
 Source63ce4521744f5f01f570b45b63f8c72f44691761/run39894656919:

@@ -1,4 +1,4 @@
-name: PSC1 T01F two-transition data-result preflight
+name: PSC1 T01F pair-counter data-result preflight
 on:
   workflow_dispatch:
   push:
@@ -113,29 +113,35 @@ jobs:
           python3 - <<'PY'
           import pathlib, re
           text = pathlib.Path('dist/expr-v2/scalar-hash/kernel.js').read_text()
-          names = re.findall(r'^export function (psKernelCacheStringHashStateWithFuel[A-Za-z0-9_$]*)\(', text, re.M)
-          bodies = []
-          for name in names:
+          def implementations(prefix):
+              return re.findall(r'^export function (' + prefix + r'[A-Za-z0-9_$]*)\(', text, re.M)
+          def body_of(name):
               marker = 'function* __ps$impl$' + name + '('
               if marker not in text: marker = 'export function ' + name + '('
               start = text.index(marker)
               end = text.find('\nexport ', start + len(marker))
-              body = text[start:] if end < 0 else text[start:end]
-              bodies.append(body)
-              print('PSC1_HASH_ITERATOR_BODY ' + name + ' ' + repr(body))
-          if names != ['psKernelCacheStringHashStateWithFuel']:
-              raise RuntimeError('Iterator was recurried into staged helpers: ' + repr(names))
-          body = bodies[0]
-          for machinery in ('__ps$wrap', 'psKernelCacheStringHashStep', 'psKernelCacheMix'):
-              if machinery in body:
-                  raise RuntimeError('Fused data iterator still has staged results or byte dispatch: ' + machinery)
-          if body.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashStateWithFuel,' not in body:
-              raise RuntimeError('Expected only one recursive scheduler call in the data iterator')
-          blocks = len(re.findall(r'function\s*\*\s*\(', body))
-          if blocks not in (1, 2):
-              raise RuntimeError('Expected at most two structural blocks for a two-transition descent')
-          if body.count('__ps$stringNext(') != 3 or body.count('__ps$stringGet(') != 3:
-              raise RuntimeError('Expected one base transition and two transitions after recursive descent')
+              return text[start:] if end < 0 else text[start:end]
+          names = implementations('psKernelCacheStringHashPairsWithFuel')
+          state_names = implementations('psKernelCacheStringHashStateWithFuel')
+          if names != ['psKernelCacheStringHashPairsWithFuel'] or state_names != ['psKernelCacheStringHashStateWithFuel']:
+              raise RuntimeError('Pair iterator or public state was recurried into staged helpers: ' + repr((names,state_names)))
+          body = body_of(names[0])
+          state_body = body_of(state_names[0])
+          print('PSC1_HASH_PAIR_ITERATOR_BODY ' + repr(body))
+          print('PSC1_HASH_PAIR_STATE_BODY ' + repr(state_body))
+          for candidate in (body,state_body):
+              for machinery in ('__ps$wrap','psKernelCacheStringHashStep','psKernelCacheMix'):
+                  if machinery in candidate:
+                      raise RuntimeError('Unexpected staged result or byte-step/mix dispatch: ' + machinery)
+          if body.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in body:
+              raise RuntimeError('Expected one recursive scheduler call in pair iterator')
+          blocks = len(re.findall(r'function\s*\*\s*\(',body))
+          if blocks != 1 or body.count('__ps$stringNext(') != 2 or body.count('__ps$stringGet(') != 2:
+              raise RuntimeError('Expected one structural block with two inlined primitive transitions')
+          if state_body.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in state_body:
+              raise RuntimeError('Expected exactly one public-state dispatch to pair counter')
+          if state_body.count('__ps$stringNext(') != 1 or state_body.count('__ps$stringGet(') != 1:
+              raise RuntimeError('Expected one public-state odd remainder transition')
           marker = 'export function psKernelCacheStringHashStep('
           start = text.index(marker)
           end = text.find('\nexport ', start + len(marker))
@@ -151,7 +157,7 @@ jobs:
               raise RuntimeError('Full hash still dispatches through the staged public worker')
           print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
-          print('PSC1_HASH_TWO_TRANSITION_CODEGEN: PASS resultStaging=0 byteStepDispatch=false recursiveDispatches=1 transitionsPerDescent=2 structuralGeneratorBlocks=' + str(blocks))
+          print('PSC1_HASH_PAIR_COUNTER_CODEGEN: PASS resultStaging=0 byteStepDispatch=false recursiveDispatches=1 transitionsPerDescent=2 structuralGeneratorBlocks=1')
           PY
       - name: Check complete authentic kernel source after the bounded gate
         working-directory: psc1

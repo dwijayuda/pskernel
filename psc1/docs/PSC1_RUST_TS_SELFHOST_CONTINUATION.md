@@ -15,8 +15,11 @@ updates, preserve history. No merge/npm publication.
    5d819f69ba1ccda0689e7d354fdcab9295807c0d. Actual source parent
    453659433789ae3c6322f61b956e784891776c71, correctness request
    66f1e752cfbdc491d9b2974c849825e8a4193227, run39973570792/job120482257189
-   is IN PROGRESS at checkpoint write. Read terminal status/receipt before any
-   expensive action; do not repeat unchanged. G2/G3/fixed point remain unqualified.
+   is TERMINAL FAILED: G1 independently admitted/built and10 cases pass;
+   G2 timeout1800231ms/3064892KiB, no candidate/G3/fixed point. Audit39978659027
+   verifies all source/request/manifest and actual encoder/erasure/token/cache
+   mechanisms. Artifact12512171887 digestfd7e28e0e06134029accdd8774a33dc1cd314de67ddad10bf2394b269623ef77,
+   expiry2027-01-21T14:53:58Z. Do not repeat unchanged or re-audit this artifact.
 
 3. Focused39972917410/job120480001006 SUCCESS proves two applied IR encoder
    workers equal exact retained originals for all fuel/types/expressions, plus
@@ -63,20 +66,36 @@ updates, preserve history. No merge/npm publication.
   240s and independent clean-build repeatability remain unqualified. Do not edit
    this branch or discard its artifact12482993158/receipts.
 
-8. After current run ends, audit its immutable terminal artifact once using
-   .github/diagnostics/psc1-selfhost-receipts.mjs/workflow on
-   diagnostic/psc1-selfhost-profile-20261023. Bind source/request/run/job,
-   artifactID/digest/expiry, all source/tool/request/manifest identities and
-   original/transformed IR/generation/corpus/fixedpoint assertions.
-   Include encoder source/saturated IR data result and actual recursive call
-   shapes; local callback lambdas are valid, unlike eager fuel-prefix construction.
-   Auditing does not supply missing compiler execution or admission.
-   Canonical receipt records all completed attempts; derive compact projection
-   from its exact Git blob. Frozen profile-declaration snapshot stays historical.
+8. Current continuation is ONE progressive diagnostic39978891505/job120500641283,
+   commitbac05317679a9e756d093d76dfc7a1d3465fc53a on
+   diagnostic/psc1-selfhost-profile-20261023. It replays current G2 request
+   e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998 against
+   unchanged G1 manifest294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec,
+   sourceedaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d,
+   closure816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82.
+   Fetch its current run and artifact list. It publishes phase240/600/1200/1750
+   artifacts from the same bounded request; do not launch a duplicate.
+   Phase240 artifact12512911643, digest411a6ef3d22907b28b0f6784c94709b0756922f97329a4758400374217905715,
+   read39979697224, shows erasure/environment/generator work, native Node46.1%
+   and WeakCollectionSet228/27522 (0.8%); this is early, not the late diagnosis.
+   For each new available phase artifact, update ONLY
+   .github/diagnostics/psc1-profile-read.json on the diagnostic branch, schema
+   psc1-profile-read-request/1, freshid, phase, runId39978891505,
+   sourceCommitbac05317679a9e756d093d76dfc7a1d3465fc53a,
+   artifactId/artifactDigest/artifactExpiresAt from actual API metadata.
+   Existing workflow verifies artifact provenance, request/manifest/source hashes,
+   source files and phase liveness, then prints PSC1_PROGRESSIVE_PROFILE_READ.
+   No compiler re-execution, admission or adoption. Read terminal logs if a phase
+   fails; retain original raw profile. The exact source census39977097772 finds
+  132 syntactic candidates including false positives, not132 defects. Shape
+   inspection39975765156 matches admitted G1 and witnesses delayed saturated
+   encoder callbacks. No zero-lambda rule for legitimate callbacks.
+   Canonical records14 completed attempts. Derive compact evidence from its
+   exact Git blob. Frozen initial profile declaration stays historical.
 
 9. If correctness passes, run the unchanged performance240s profile separately,
    and then coherent integration/full seven-backend/application qualification.
-   If it fails, diagnose the actual new failed phase, fix the measured class with
+   The current source fails, so diagnose the remaining progressive phases, fix the measured class with
    all-input/regression evidence, source-gate it, then issue one fresh request.
    Do not optimize generic generators from synthetic results: native-invoke and
    manual-iterator corpus experiments were marginal/unadopted; self-tail loops

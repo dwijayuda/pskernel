@@ -1,8 +1,8 @@
 {
   "schema": "psc1-selfhost-profile-results-projection/1",
-  "recordedAt": "2026-10-23 14:56:20 UTC",
+  "recordedAt": "2026-10-23 15:38:08 UTC",
   "projectionOf": "PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json",
-  "sourceReceiptGitBlob": "7a2cae16a8e73eba25353684708b40363690f516",
+  "sourceReceiptGitBlob": "d9117983f1bef5c291dc77565826538ea3de029f",
   "authority": "read-only projection of actual canonical CI receipts; not a new release contract",
   "normalQualification": {
     "sourceCommit": "5ce2fc74b9f01682832ddc10ec9ef27f26458564",
@@ -861,6 +861,69 @@
       },
       "reportSha256": "68b60ca9a37e773e813a0ca041f5992edfc015dfffbaf199b12ecabbc9ea850d",
       "auditRunId": 39969728664
+    },
+    {
+      "id": "ts-ir-encoder-workers-correctness-1800s",
+      "target": "ts",
+      "profile": "correctness-1800s",
+      "sourceCommit": "453659433789ae3c6322f61b956e784891776c71",
+      "requestCommit": "66f1e752cfbdc491d9b2974c849825e8a4193227",
+      "runId": 39973570792,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39973570792",
+      "status": "failed",
+      "g1Qualified": true,
+      "correctnessQualified": false,
+      "performance240Qualified": false,
+      "fixedPoint": "not-run",
+      "inputModules": 85,
+      "sourceClosureDigest": "816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82",
+        "sourceSha256": "edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d",
+        "admissionsSha256": "102d5e61f1d8f5b61ceb5245a91c5cf3023915eb9df6a5c2735422216ddc1d81",
+        "originalIrSha256": "515abb80c69f019ea69d92757bbc307e7e814bb84a014d37b0c929923ad083d8",
+        "specializedIrSha256": "bbfc14b292e1a9b4da7ea86798245499d71299cdb59dd6734a56d6adeb0cff8a",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+          "sourceSha256": "edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d",
+          "executableSha256": "91c9568698e9804805538b6db6041b24607593ba103c1ef8667fc5536cc372ee",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+          "requestSha256": "e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 3064892,
+          "peakTreeRssKiB": 3064892,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 1800231,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        }
+      ],
+      "artifact": {
+        "id": 12512171887,
+        "digest": "sha256:fd7e28e0e06134029accdd8774a33dc1cd314de67ddad10bf2394b269623ef77",
+        "expiresAt": "2027-01-21T14:53:58Z"
+      },
+      "reportSha256": "ae47df7c7ca489d89b291dfb3c9c90850207f61b1f6504b59d624da8f1762825",
+      "auditRunId": 39978659027
     }
   ],
   "currentDiagnosis": {
@@ -905,15 +968,85 @@
       "dominant": "WeakCollectionSet26481/27754 ticks;type encoder23006/expr encoder3397 beneathWeakMapSet",
       "qualification": false
     },
-    "next": "fully applied IR encoder workers; focused source/proof gate before actual new G2 request"
+    "next": "Read progressive CPU phases from39978891505 (one pinned exact G2); diagnose the measured remaining class before another source edit or generation attempt; G2/G3/fixedpoint still unqualified.",
+    "encoderTrial": {
+      "runId": 39973570792,
+      "status": "failed",
+      "G2elapsedMs": 1800231,
+      "G2peakRssKiB": 3064892,
+      "generations": [
+        1
+      ],
+      "fixedPoint": "not-run"
+    },
+    "progressive": {
+      "runId": 39978891505,
+      "jobId": 120500641283,
+      "commit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
+      "status": "in_progress; phase240 immutable receipt verified; later phases pending",
+      "phases": [
+        240,
+        600,
+        1200,
+        1750
+      ],
+      "requestSha256": "e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998",
+      "manifestSha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+      "qualification": false,
+      "admission": "not-run",
+      "adoption": "not-run",
+      "available": [
+        {
+          "phase": 240,
+          "artifactId": 12512911643,
+          "artifactDigest": "sha256:411a6ef3d22907b28b0f6784c94709b0756922f97329a4758400374217905715",
+          "artifactExpiresAt": "2027-01-21T15:30:43Z",
+          "readRunId": 39979697224,
+          "readCommit": "fcdca79fef427358e2dfe322e856d594a77a0417",
+          "receiptSha256": "80ebfdc7927dc31b671332976ce2b90a659edb9a9d5ed6477f31e4adcefe944e",
+          "totalTicks": 220142,
+          "selectedTicks": 27522,
+          "summary": "phase240: erasure/environment/generators; nativeNode46.1%;WeakCollectionSet228/27522; early window only"
+        }
+      ]
+    }
   },
   "preferredContinuation": {
     "branch": "perf/psc1-erasure-applied-workers-20261023",
     "sourceCommit": "453659433789ae3c6322f61b956e784891776c71",
     "testedRequest": "66f1e752cfbdc491d9b2974c849825e8a4193227",
-    "scope": "continue measured encoder-worker source and actual run; preserve prior source/evidence and qualified Rust; no unchanged duplicate",
-    "runId": 39973570792,
-    "jobId": 120482257189
+    "scope": "current encoder workers are proved and reach admitted G1; completed trial still G2-timeout; read progressive phase receipts to locate remaining cost, preserve original240s and qualified Rust",
+    "diagnostic": {
+      "runId": 39978891505,
+      "jobId": 120500641283,
+      "commit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
+      "status": "in_progress; phase240 immutable receipt verified; later phases pending",
+      "phases": [
+        240,
+        600,
+        1200,
+        1750
+      ],
+      "requestSha256": "e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998",
+      "manifestSha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+      "qualification": false,
+      "admission": "not-run",
+      "adoption": "not-run",
+      "available": [
+        {
+          "phase": 240,
+          "artifactId": 12512911643,
+          "artifactDigest": "sha256:411a6ef3d22907b28b0f6784c94709b0756922f97329a4758400374217905715",
+          "artifactExpiresAt": "2027-01-21T15:30:43Z",
+          "readRunId": 39979697224,
+          "readCommit": "fcdca79fef427358e2dfe322e856d594a77a0417",
+          "receiptSha256": "80ebfdc7927dc31b671332976ce2b90a659edb9a9d5ed6477f31e4adcefe944e",
+          "totalTicks": 220142,
+          "selectedTicks": 27522,
+          "summary": "phase240: erasure/environment/generators; nativeNode46.1%;WeakCollectionSet228/27522; early window only"
+        }
+      ]
+    }
   },
   "mapExperiment": {
     "selectedForPromotion": false,
@@ -972,17 +1105,15 @@
     "encoder": {
       "branch": "perf/psc1-erasure-applied-workers-20261023",
       "codeCommit": "c3fe670ffbd8a56be552910bbb3a0a20170b2b11",
+      "proofCommit": "5d819f69ba1ccda0689e7d354fdcab9295807c0d",
       "focusedRunId": 39972917410,
       "focusedJobId": 120480001006,
-      "status": "all-input-proved; focused source/native/runtime/negative gates passed; actual correctness1800s executing",
+      "status": "all-input-proved, focused native/source/runtime gates pass; independently admitted G1/ten cases pass; G2 still times out1800s",
       "workers": [
         "psIrEncodeTypeWithFuelWorker",
         "psIrEncodeExprWithFuelWorker"
       ],
       "mechanism": "fully applied fuel/value data workers; recursive references delayed in lambda until actual recursive use; public wrappers/default4096/tagged tuples unchanged",
-      "measurement": "26481/27754 final-window ticks in WeakCollectionSet;23006 type encoder and3397 expr encoder under WeakMapSet",
-      "qualification": "not-yet-attempted-on-new-source",
-      "proofCommit": "5d819f69ba1ccda0689e7d354fdcab9295807c0d",
       "proofBoundary": "two workers and wrappers/helpers equal retained originals for every fuel and type/expression, standard propext/Quot.sound only",
       "failedProofScript": {
         "commit": "c3fe670ffbd8a56be552910bbb3a0a20170b2b11",
@@ -994,8 +1125,88 @@
         "requestCommit": "66f1e752cfbdc491d9b2974c849825e8a4193227",
         "runId": 39973570792,
         "jobId": 120482257189,
-        "status": "in_progress",
-        "profile": "correctness-1800s"
+        "status": "failed",
+        "profile": "correctness-1800s",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "elapsedMs": 1800231,
+        "maxRssKiB": 3064892,
+        "artifactId": 12512171887,
+        "artifactDigest": "sha256:fd7e28e0e06134029accdd8774a33dc1cd314de67ddad10bf2394b269623ef77",
+        "auditRunId": 39978659027
+      },
+      "shapeRunId": 39975765156,
+      "shapeWitness": [
+        {
+          "name": "psIrEncodeTypeWithFuelWorker_$psc0SH_0$worker",
+          "parameters": 2,
+          "resultType": [
+            "named",
+            "Except$spec$N$PsIrEncodeError$String",
+            []
+          ],
+          "recursiveCalls": [
+            {
+              "name": "psIrEncodeTypeWithFuelWorker_$psc0SH_0$worker",
+              "arguments": 2,
+              "lambdaDepth": 1
+            }
+          ]
+        },
+        {
+          "name": "psIrEncodeExprWithFuelWorker_$psc0SH_0$worker",
+          "parameters": 2,
+          "resultType": [
+            "named",
+            "Except$spec$N$PsIrEncodeError$String",
+            []
+          ],
+          "recursiveCalls": [
+            {
+              "name": "psIrEncodeExprWithFuelWorker_$psc0SH_0$worker",
+              "arguments": 2,
+              "lambdaDepth": 1
+            }
+          ]
+        }
+      ],
+      "sourceClassCensus": {
+        "runId": 39977097772,
+        "count": 132,
+        "scope": "132 syntactic candidates, including false positives; not132 defects or reachability/performance evidence; no blanket normalization"
+      },
+      "progressiveDiagnosis": {
+        "runId": 39978891505,
+        "jobId": 120500641283,
+        "commit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
+        "status": "in_progress; phase240 immutable receipt verified; later phases pending",
+        "phases": [
+          240,
+          600,
+          1200,
+          1750
+        ],
+        "requestSha256": "e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998",
+        "manifestSha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+        "qualification": false,
+        "admission": "not-run",
+        "adoption": "not-run",
+        "available": [
+          {
+            "phase": 240,
+            "artifactId": 12512911643,
+            "artifactDigest": "sha256:411a6ef3d22907b28b0f6784c94709b0756922f97329a4758400374217905715",
+            "artifactExpiresAt": "2027-01-21T15:30:43Z",
+            "readRunId": 39979697224,
+            "readCommit": "fcdca79fef427358e2dfe322e856d594a77a0417",
+            "receiptSha256": "80ebfdc7927dc31b671332976ce2b90a659edb9a9d5ed6477f31e4adcefe944e",
+            "totalTicks": 220142,
+            "selectedTicks": 27522,
+            "summary": "phase240: erasure/environment/generators; nativeNode46.1%;WeakCollectionSet228/27522; early window only"
+          }
+        ]
       }
     }
   }

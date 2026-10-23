@@ -16,7 +16,9 @@ Rust5e0b548e/request7d8865a0/run39908529181 qualifies genuine G1/G2/G3 and
 fixed point under1800s. Qualified branch remains untouched at83e18fe1.
 G2/G3 692788/660042ms;240s and independent clean-build repeatability incomplete.
 
-TypeScript remains G1-only at every completed attempt. Erasure run39964278626
+TypeScript remains G1-only at every completed attempt. Encoder run39973570792
+passes G1/ten cases, then G2 timeout1800231ms/3064892KiB; no G3/fixed point.
+Audit39978659027 verifies the actual fully applied encoder paths. Erasure run39964278626
 times out1800138ms/3002380KiB; sibling39965349252 times out240170ms/2277344KiB.
 Both G1/ten cases pass; no admitted G2/G3/fixed point. Audit39969728664 verifies
 exact sources/requests/manifests and source/saturated worker shapes.
@@ -25,15 +27,18 @@ exact sources/requests/manifests and source/saturated worker shapes.
 
 | Order | Work | Current evidence | Acceptance |
 | --- | --- | --- | --- |
-|1|Complete current TS correctness trial|Encoder source45365943/request66f1e752/run39973570792 is executing; focused39972917410 passes all-input proofs, prior gates and both85-module audits|Actual generated G2/G3 independently admitted/built/executed; exact source/closure/canonical admission/original/transformed IR/ten-case fixed points under1800s|
+|1|Diagnose remaining TS cost and complete correctness|Encoder source45365943/request66f1e752/run39973570792 is terminal G2-timeout; all-input proofs/source and G1 gates pass. Progressive39978891505 publishes240/600/1200/1750s receipts from one pinned replay; phase240 verified by39979697224|Actual generated G2/G3 independently admitted/built/executed; exact source/closure/canonical admission/original/transformed IR/ten-case fixed points under1800s|
 |2|Original performance qualification|240s remains separate and unqualified|Genuine performance-240s G1/G2/G3 with identical checking/fuel/memory/stack/negative criteria|
 |3|Integrate coherent validated source|Current source remains isolated; preserve untouched Rust reference|Fresh HEAD/non-force updates, preserve backend-neutral semantics and generic/public ABI fallbacks, fresh full seven-backend/application CI|
 |4|Reproducibility/distribution readiness|Same-run Rust executable equality and deterministic TS G1 records are narrower evidence|Independent clean builds and readable generated artifacts; no inference from same-run equality|
 |5|Distribution|Packages/artifacts remain unpublished|Required final qualification plus explicit merge/publication authorization|
 
-Read the active run terminal result first; do not repeat unchanged1800s work.
-Audit each new terminal artifact once. If blocked, profile the newly executing
-failed phase before choosing another optimization.
+Read available progressive receipts before choosing another optimization; do
+not repeat unchanged1800s work or re-audit existing receipts. Phase240 shows
+erasure/environment/generator work and WeakCollectionSet228/27522 (0.8%);
+it is not a late-window diagnosis. Source census132 is syntactic and includes
+false positives, not132 performance defects. Preserve exact source/manifest
+and request identity checks, and publish each phase immutably.
 
 ## Measured implementation
 

@@ -12,5 +12,6 @@
       "artifactDigest": "sha256:3fdbf9984ea5f0937212359d239de50cc973670dca7daf9bf2ba7445539df218",
       "artifactExpiresAt": "2027-01-21T06:45:17Z"
     }
-  ]
+  ],
+  "auditRevision": 2
 }

@@ -81,17 +81,11 @@ for(const expected of request.attempts) {
  for(const graph of ['originalIr','specializedIr'])
   selectedIr[graph]=bootstrapCandidate[graph][4].filter(d=>typeof d[0]==='string'&&
    ['psJsonCharNeedsEscape','psBridgeFindConstructor','psBridgeFindRegularHeightInBucket','psBridgeHeightBucket'].some(n=>d[0].includes(n)));
- const sourceLines=fs.readFileSync(path.join(directory,'G1-service',expected.target==='ts'?'module.js':'module.rs'),'utf8').split('\\n');
+ const sourceLines=fs.readFileSync(path.join(directory,'G1-service',expected.target==='ts'?'module.js':'module.rs'),'utf8').split('\n');
  const selectedSource=sourceLines.map((line,i)=>({line:i+1,text:line})).filter(r=>
   ['psJsonCharNeedsEscape','psBridgeFindConstructor','psBridgeFindRegularHeightInBucket','psBridgeHeightBucket'].some(n=>
-   r.text.includes('const __ps$impl,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
-  report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
- rows.push(row);
- console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));
-}
-fs.mkdirSync('receipt-audit',{recursive:true});
-fs.writeFileSync('receipt-audit/qualification-receipts.json',JSON.stringify({schema:'psc1-selfhost-receipt-audit/1',auditedAt:new Date().toISOString(),attempts:rows},null,2)+'\n');
-+n+' ')||r.text.includes('function '+n+'(')||r.text.includes('function* '+n+'('))).slice(0,24);
+   r.text.includes('const __ps$impl$'+n+' ')||r.text.includes('function '+n+'(')||r.text.includes('function* '+n+'(')))
+  .slice(0,24).map(r=>({...r,text:r.text.slice(0,4000)}));
  const row={...expected,candidates,selectedIr,selectedSource,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);

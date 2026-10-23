@@ -1,8 +1,8 @@
 {
   "schema": "psc1-selfhost-profile-results-projection/1",
-  "recordedAt": "2026-10-23T08:42:03Z",
+  "recordedAt": "2026-10-23T14:19:00.422Z",
   "projectionOf": "PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json",
-  "sourceReceiptGitBlob": "0d1d31c7c2793f372af6cf22b348473653755b7e",
+  "sourceReceiptGitBlob": "611a3f505cf0f3700d191681547a336f87d7266a",
   "authority": "read-only projection of actual canonical CI receipts; not a new release contract",
   "normalQualification": {
     "sourceCommit": "5ce2fc74b9f01682832ddc10ec9ef27f26458564",
@@ -483,18 +483,366 @@
         "expiresAt": "2027-01-21T07:52:25Z"
       },
       "reportSha256": "7710638dc52a74bd3ef728eff63409c899b9fdb16b345427ca635cfa641f3c11"
+    },
+    {
+      "id": "ts-utf8-token-performance-240s",
+      "target": "ts",
+      "profile": "performance-240s",
+      "sourceCommit": "27f2a2164560089d530d6b6b9d8cdbc4754d162a",
+      "requestCommit": "e6df0e0dd54bfe1f243489f62c7ee8f80efb15af",
+      "runId": 39952866650,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39952866650",
+      "status": "failed",
+      "g1Qualified": true,
+      "correctnessQualified": false,
+      "performance240Qualified": false,
+      "fixedPoint": "not-run",
+      "inputModules": 85,
+      "sourceClosureDigest": "b5e496cc6734849116a7dd113257853d755271b20a44f419750993cd99069217",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "b5e496cc6734849116a7dd113257853d755271b20a44f419750993cd99069217",
+        "sourceSha256": "214d0b284315f9b1bf2f9084ef22c95345393f7f2118859d6f6d599e976c5954",
+        "admissionsSha256": "b1b588fee18dc63c427ecbda63ac14786d1026b20bafd4a21ed6729939e6ca6b",
+        "originalIrSha256": "e5a4491f25cfc58dca89d7f701accf616b7b0226e1790fa26a4d41919f4a9959",
+        "specializedIrSha256": "feecc51b1d36dfff7962d715acb6deab66582c55fbf5970fca3f905f3c5f0134",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "3d491fac102424409c9359f702b1b61354bc3acd9aacbe00668200e941c4ca65",
+          "sourceSha256": "214d0b284315f9b1bf2f9084ef22c95345393f7f2118859d6f6d599e976c5954",
+          "executableSha256": "d779120443694d6698bcd01bf754b50b2a97974eb335a83b5fbec7a86c646dcb",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "3d491fac102424409c9359f702b1b61354bc3acd9aacbe00668200e941c4ca65",
+          "requestSha256": "50cedd8dd842d2d64723696097fff3c200b560ff1996cba7f929d1ddc227cf08",
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxRssKiB": 2281004,
+          "peakTreeRssKiB": 2281004,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 240202,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        }
+      ],
+      "artifact": {
+        "id": 12501172293,
+        "digest": "sha256:2c7e1ad82f93b3d54b56b48213e77b5bf1d26ed5f24eeec257b50126702d2e9e",
+        "expiresAt": "2027-01-21T12:22:51Z"
+      },
+      "reportSha256": "32ddec5824dddba2f7612b895e3e2648842b95053e7680cef0348be9aa83fcd2",
+      "auditRunId": 39953924361
+    },
+    {
+      "id": "ts-utf8-token-correctness-1800s",
+      "target": "ts",
+      "profile": "correctness-1800s",
+      "sourceCommit": "d520a49e400be14edd26c098054722cd82b7bca8",
+      "requestCommit": "27f2a2164560089d530d6b6b9d8cdbc4754d162a",
+      "runId": 39952593596,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39952593596",
+      "status": "failed",
+      "g1Qualified": true,
+      "correctnessQualified": false,
+      "performance240Qualified": false,
+      "fixedPoint": "not-run",
+      "inputModules": 85,
+      "sourceClosureDigest": "b5e496cc6734849116a7dd113257853d755271b20a44f419750993cd99069217",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "b5e496cc6734849116a7dd113257853d755271b20a44f419750993cd99069217",
+        "sourceSha256": "214d0b284315f9b1bf2f9084ef22c95345393f7f2118859d6f6d599e976c5954",
+        "admissionsSha256": "b1b588fee18dc63c427ecbda63ac14786d1026b20bafd4a21ed6729939e6ca6b",
+        "originalIrSha256": "e5a4491f25cfc58dca89d7f701accf616b7b0226e1790fa26a4d41919f4a9959",
+        "specializedIrSha256": "feecc51b1d36dfff7962d715acb6deab66582c55fbf5970fca3f905f3c5f0134",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "aa75e8769ff47babfc831aae5f4e2e93d5d1fedc51c37a4459f698fc0c605e01",
+          "sourceSha256": "214d0b284315f9b1bf2f9084ef22c95345393f7f2118859d6f6d599e976c5954",
+          "executableSha256": "d779120443694d6698bcd01bf754b50b2a97974eb335a83b5fbec7a86c646dcb",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "aa75e8769ff47babfc831aae5f4e2e93d5d1fedc51c37a4459f698fc0c605e01",
+          "requestSha256": "50cedd8dd842d2d64723696097fff3c200b560ff1996cba7f929d1ddc227cf08",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 3050788,
+          "peakTreeRssKiB": 3050788,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 1800195,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        }
+      ],
+      "artifact": {
+        "id": 12502712284,
+        "digest": "sha256:a6cfd7aae9431831e65c131e70c0998f7b4912c4ac7681d983a63e5ae4f5cf4f",
+        "expiresAt": "2027-01-21T12:20:36Z"
+      },
+      "reportSha256": "dd8897fa3c3a61b4369dd6e0199fd5ad5b65eb9b7530cc6093986e5c66ed6dea",
+      "auditRunId": 39957038006
+    },
+    {
+      "id": "ts-cursor-cache-performance-240s",
+      "target": "ts",
+      "profile": "performance-240s",
+      "sourceCommit": "3dd9152a675468980c1d603aa707287ff1c9b4ac",
+      "requestCommit": "55fcd9d9683f44c5de14412e38d32c641b81ef34",
+      "runId": 39960115125,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39960115125",
+      "status": "failed",
+      "g1Qualified": true,
+      "correctnessQualified": false,
+      "performance240Qualified": false,
+      "fixedPoint": "not-run",
+      "inputModules": 85,
+      "sourceClosureDigest": "af5d13a6b2ee4b73d29fc7d4e148d66f57ab9dd69e1b036cd182dfc7e4a35720",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "af5d13a6b2ee4b73d29fc7d4e148d66f57ab9dd69e1b036cd182dfc7e4a35720",
+        "sourceSha256": "a44844f594537de03410436bf8fe226f49596604b289c9d0c9ad45bf27aa9107",
+        "admissionsSha256": "27d2767abb30bc365fc083112cee385421a0ac32dab812d4ee2565fc54c85979",
+        "originalIrSha256": "98c154564d0d8d9e4efdc761a0f08a2472e8c932602de7e1945ea2e7f7223e6b",
+        "specializedIrSha256": "4eecf3018ec2df03a634ece5677d6a6ead00bd4546bc6afa61cf120e59d940a5",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "b5d653394c3bb7f271a5f8d5bfcfb7af14192707d7e46bc2689a3a0f547c41bb",
+          "sourceSha256": "a44844f594537de03410436bf8fe226f49596604b289c9d0c9ad45bf27aa9107",
+          "executableSha256": "e7e1f3c9ae847eaac6a3f35a09cefcdf16eefe3192cdd0daa6cafad518dd54a7",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "b5d653394c3bb7f271a5f8d5bfcfb7af14192707d7e46bc2689a3a0f547c41bb",
+          "requestSha256": "762cc2ea0cc27203c3fb12ad197a79f0e1a028b59699f172db01ffb2328d07c1",
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxRssKiB": 2370648,
+          "peakTreeRssKiB": 2370648,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 240168,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        }
+      ],
+      "artifact": {
+        "id": 12504238250,
+        "digest": "sha256:bea376424749990d60324d833ab0a06b3b4899a7128170292d1b1799f4259f81",
+        "expiresAt": "2027-01-21T13:18:31Z"
+      },
+      "reportSha256": "4253e7385b8eeb7b6b9defb66bce25aa1130d9755218102c9125c6783c92872a",
+      "auditRunId": 39961219637
+    },
+    {
+      "id": "ts-cursor-cache-correctness-1800s",
+      "target": "ts",
+      "profile": "correctness-1800s",
+      "sourceCommit": "edc3e17ba2195649428f9ce020789404a9406beb",
+      "requestCommit": "3dd9152a675468980c1d603aa707287ff1c9b4ac",
+      "runId": 39959835622,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39959835622",
+      "status": "failed",
+      "g1Qualified": true,
+      "correctnessQualified": false,
+      "performance240Qualified": false,
+      "fixedPoint": "not-run",
+      "inputModules": 85,
+      "sourceClosureDigest": "af5d13a6b2ee4b73d29fc7d4e148d66f57ab9dd69e1b036cd182dfc7e4a35720",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "af5d13a6b2ee4b73d29fc7d4e148d66f57ab9dd69e1b036cd182dfc7e4a35720",
+        "sourceSha256": "a44844f594537de03410436bf8fe226f49596604b289c9d0c9ad45bf27aa9107",
+        "admissionsSha256": "27d2767abb30bc365fc083112cee385421a0ac32dab812d4ee2565fc54c85979",
+        "originalIrSha256": "98c154564d0d8d9e4efdc761a0f08a2472e8c932602de7e1945ea2e7f7223e6b",
+        "specializedIrSha256": "4eecf3018ec2df03a634ece5677d6a6ead00bd4546bc6afa61cf120e59d940a5",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "386cce2cbd07f97a5b654ecf7c55ad42f06662ee82efedc399444692c5112d77",
+          "sourceSha256": "a44844f594537de03410436bf8fe226f49596604b289c9d0c9ad45bf27aa9107",
+          "executableSha256": "e7e1f3c9ae847eaac6a3f35a09cefcdf16eefe3192cdd0daa6cafad518dd54a7",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "386cce2cbd07f97a5b654ecf7c55ad42f06662ee82efedc399444692c5112d77",
+          "requestSha256": "762cc2ea0cc27203c3fb12ad197a79f0e1a028b59699f172db01ffb2328d07c1",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 2989224,
+          "peakTreeRssKiB": 2989224,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 1800199,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        }
+      ],
+      "artifact": {
+        "id": 12506755130,
+        "digest": "sha256:eed47fbb3aaced564ec05fde862a1e820146d4a3dd9e24c50b0fd9044d62b96c",
+        "expiresAt": "2027-01-21T13:16:28Z"
+      },
+      "reportSha256": "047f919d93c7d096d8c7ec748e0b6da65db295c24a89570b888346d9681dfbb5",
+      "auditRunId": 39964784124
+    },
+    {
+      "id": "ts-erasure-workers-performance-240s",
+      "target": "ts",
+      "profile": "performance-240s",
+      "sourceCommit": "09f41833d1c2d5c62de8bc55a25e58076055cc06",
+      "requestCommit": "9a0a9e6f5b6b8c6546c1833b243115f97888c561",
+      "runId": 39965349252,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39965349252",
+      "status": "failed",
+      "g1Qualified": true,
+      "correctnessQualified": false,
+      "performance240Qualified": false,
+      "fixedPoint": "not-run",
+      "inputModules": 85,
+      "sourceClosureDigest": "9db57f58b183ff8267116b762a8f6a35b1d375301883abc6881987a53bca1abc",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "9db57f58b183ff8267116b762a8f6a35b1d375301883abc6881987a53bca1abc",
+        "sourceSha256": "6e187da6190f21c88792a7fb92b63fd7e64632be1045b40fc95c33434bb20549",
+        "admissionsSha256": "80c48b7dd5dda42373bbbae311a116ebd64012c241e5971c9b378dc55299bb8c",
+        "originalIrSha256": "ea030c504d424054ac160f99f919e96e3314a475b2fcee285df48452087f49e9",
+        "specializedIrSha256": "ffb1f7d1bf6b478ff7e75e26d68a0e7cda912a1ca6fffdc5563c528d25e25c28",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "f594ea3fee41844add79b774b63df7dd80b8eead15fe265e830768173aa1329d",
+          "sourceSha256": "6e187da6190f21c88792a7fb92b63fd7e64632be1045b40fc95c33434bb20549",
+          "executableSha256": "3524d055b91e58db5b07cf9a6434a02c0c41886a613fe1e37c5b1dc0e7f823a8",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "f594ea3fee41844add79b774b63df7dd80b8eead15fe265e830768173aa1329d",
+          "requestSha256": "ae97450bad8f2130d344b0ee98a63766e82849d2b7f897a2b700e7630bdeeb1e",
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxRssKiB": 2277344,
+          "peakTreeRssKiB": 2277344,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 240170,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        }
+      ],
+      "artifact": {
+        "id": 12506727938,
+        "digest": "sha256:d1090e31f9c534f40c2821d3581c90b250be7fabe8cda99cdd956cae7d3071bf",
+        "expiresAt": "2027-01-21T13:56:11Z"
+      },
+      "reportSha256": "001daa85ed87ef79c8aab22c6e639706f812e09a1104be2a39cd18804126823e",
+      "auditRunId": 39966960519
     }
   ],
   "currentDiagnosis": {
-    "runId": 39918874112,
-    "scope": "last30s of bounded220s replay; not end of1800s request; no response/adoption/admission/qualification",
-    "finding": "Builtin StringEqual 17099/27684 ticks (61.8%); 17090 attributed under psStringEqFromWithFuel$worker; shared Node17.9%"
+    "source": "actual current cursor and applied-erasure compiler workloads",
+    "windows": "last30s of bounded220s, not final1800s; changed source can reach different phases",
+    "profiles": [
+      {
+        "runId": 39961304634,
+        "selectedTicks": 26866,
+        "StringEqualTicks": 8,
+        "WeakCollectionSetTicks": 8025,
+        "mainInsertionFrame": "psErasureTypeValuedWithFuel"
+      },
+      {
+        "runId": 39966590664,
+        "selectedTicks": 27480,
+        "StringEqualTicks": 22,
+        "WeakCollectionSetTicks": 114,
+        "remaining": "generator/helper work in this bounded window"
+      }
+    ],
+    "lateProfile": {
+      "sourceCommit": "d5ca074954b30fd51a0e696734128b0e03a023e8",
+      "requestSha256": "ae97450bad8f2130d344b0ee98a63766e82849d2b7f897a2b700e7630bdeeb1e",
+      "status": "in_progress",
+      "maxRequestMs": 1750000,
+      "timeoutPolicy": "g2g3-correctness-1800s",
+      "scope": "one pinned actual G2 diagnostic replay within existing1800s profile; no adoption/admission/qualification",
+      "runId": 39967678751
+    },
+    "scope": "diagnostics never supply missing execution/admission/qualification"
   },
   "preferredContinuation": {
-    "sourceCommit": "0938c895a9ff007a36df72dc49c836dc7443cef3",
-    "testedRequest": "10ac556f28782c4efeaa72c168f3969aba68ccca",
-    "workflowAndDocumentationBase": "a10c0162805d0e3e39375d1be55ae38d77ff67d9",
-    "scope": "G1-qualified all-input lookup/predicate source without unproven-benefit Map experiment; fork a new branch, never force-reset existing history"
+    "branch": "perf/psc1-erasure-applied-workers-20261023",
+    "codeCommit": "f9675e05b063df1fb949f97188724d11134b7b26",
+    "sourceCommit": "ba0d5f2916074b6331441b050a38fd0f12347604",
+    "testedRequest": "d2bc51fcce626297db491890551d2902c710a844",
+    "runId": 39964278626,
+    "status": "in_progress",
+    "sourceIntegrated": false,
+    "nativeProofRunId": 39963603961,
+    "allInputWorkerEqualities": 8,
+    "currentPerformanceRunId": 39965349252,
+    "currentPerformance": "G2 timeout240170ms; no240s badge",
+    "instruction": "Continue current branch, read existing long and late diagnostic terminal results; no obsolete refork or unchanged duplicate run"
   },
   "mapExperiment": {
     "selectedForPromotion": false,
@@ -526,5 +874,29 @@
     "formalBackendPreservation": "not-provided",
     "merge": "not-authorized-not-run",
     "packagePublication": "not-authorized-not-run"
+  },
+  "runtimeMechanisms": {
+    "tokens": {
+      "focusedRun": 39952202237,
+      "comparisons": 16000,
+      "maxViews": 2
+    },
+    "cursor": {
+      "focusedRun": 39959279408,
+      "equalityComparisons": 16000,
+      "extractionComparisons": 95576,
+      "maxViews": 2,
+      "coldSizeAdmitsView": false
+    },
+    "erasure": {
+      "focusedRun": 39963603961,
+      "equalities": 8,
+      "publicTypes": "unchanged",
+      "defaultFuel4096": "unchanged",
+      "sourceAndSaturatedWorkers": "data results, zero body lambdas",
+      "partialVariants": "retained"
+    },
+    "independentKernelAndStrictIrAndNegativesAndPolicies": "unchanged",
+    "sourcePromotion": "not integrated; full seven-backend/application qualification required"
   }
 }

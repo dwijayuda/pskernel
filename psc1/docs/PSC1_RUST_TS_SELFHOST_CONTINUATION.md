@@ -1,131 +1,108 @@
-# Executable PSC1 continuation after longer-profile qualification
+# Executable continuation: current PSC1 TypeScript self-hosting
 
-Continue PR172 autonomously through implementation and Linux qualification.
-Use connected GitHub tools and Linux Actions only: no local checkout/files/builds/
-tests. Fetch fresh HEAD before expected-HEAD non-force updates; preserve history.
-No merge or npm publication is authorized.
+Continue PR172 autonomously using connected GitHub and Linux Actions only.
+No local checkout/files/builds/tests. Fresh HEAD, expected-HEAD non-force updates,
+preserved history. No merge or npm publication.
 
-1. Fetch PR172 and active fix/psc1-closure-normalization-20261021 HEAD.
-   Read applicable AGENTS instructions, AI_WORK_STATE, roadmap, profile contract
-   and PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json first. It is a compact
-   projection tied to the exact Git blob of the exhaustive canonical receipt.
-   Code5ce2fc74b9f01682832ddc10ec9ef27f26458564 / merge
-   a61eecf46ded19eedcdefcb320aa33118cd8f2ad passes normal39909569028:
-   all selected jobs,47 full steps,37/37 finite criteria. Preserve14 families,
-   both grammars, seven targets, four applications, strict IR/official/negative
-   checks and unpublished native package. Full artifact12483409585 expires
-   2026-11-06T06:45:00Z.
-2. Preserve the qualified isolated Rust reference:
-   branch fix/psc1-rust-owned-string-moves-20261023, source
+1. Read main fix/psc1-closure-normalization-20261021 HEAD, AI_WORK_STATE, roadmap,
+   profile contract and compact PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json.
+   Its sourceReceiptGitBlob binds the complete canonical receipt. Main code5ce2fc74
+   / mergea61eecf4 / normal39909569028 qualifies37/37 criteria and all seven targets.
+   Do not infer new source qualification from this older integrated baseline.
+2. Current implementation branch is perf/psc1-erasure-applied-workers-20261023.
+   Code/proof sourcef9675e05b063df1fb949f97188724d11134b7b26, long source parent
+   ba0d5f2916074b6331441b050a38fd0f12347604, request
+   d2bc51fcce626297db491890551d2902c710a844, run39964278626/job120449945559.
+   Fetch its terminal state before doing anything expensive; at receipt write it
+   was running actual generated requests. Do not start an unchanged duplicate.
+   Short request9a0a9e6f5b6b8c6546c1833b243115f97888c561 (parent09f41833d1c2d5c62de8bc55a25e58076055cc06)
+   / run39965349252/job120453647159 passes G1/ten cases, G2 timeout240170ms,
+   RSS2277344KiB. No G3/fixed point or240s badge.
+3. Preserve Rust branch fix/psc1-rust-owned-string-moves-20261023 untouched
+   at83e18fe183498f7d8b0fc3e3faa5bdacc41cb23d. Qualified source
    5e0b548e6cb3606ee0d3c129e0a829d830e407e4, request
-   7d8865a08427a28432e427592dfc4263718c9a2f,
-   run39908529181/job120265913272. Actual G1/G2/G3, official admission and exact
-   source/closure/admission/original/transformed IR/ten-case fixed points pass.
-   G2/G3 are692788/660042ms, RSS668192/668184KiB. Same-run executable SHA256
-   d55a8435a157f021e5a7c073037303429b9787729c963af3842a04b9fb009017
-   matches all3 generations.240s and independent clean builds remain unqualified.
-3. All TypeScript generation trials are terminal, G1-only:
-   shared codec run39908439190 G2 timeout1800240ms/2995304KiB;
-   direct predicate39913434540 timeout1800199ms/2878304KiB;
-   applied lookups39914906360 timeout1800149ms/1630836KiB;
-   bounded-map39920694158 timeout1800169ms/1787220KiB.
-   None produces an admitted G2 candidate; no G3/fixed point.
-   Original performance-240s runs remain separately failed; do not weaken them.
-4. Preferred next engineering base is the applied-lookup source without the
-   unproven-benefit Map: source0938c895a9ff007a36df72dc49c836dc7443cef3,
-   tested request10ac556f28782c4efeaa72c168f3969aba68ccca,
-   run39914906360/job120286173371. Workflow/documentation descendant
-   a10c0162805d0e3e39375d1be55ae38d77ff67d9 has identical compiler code and the
-   correct separate240s proof lane. Create a fresh experiment branch from that
-   immutable base, update workflow branch guards and copy current continuation
-   docs. Never force-reset the later experimental branch.
-   Input closure8a875f219d60c3cb7b266569b5533dd96c4e891adbac7fbb02b1215f6fbdbccf;
-   G1 manifest e3e93fc46e47ad6036769b6d98655e1a426cb3917bd6417a58254b65d0f9e29f;
-   request cffb8230e123e8e9411de5e02133b0b8191dd2c8110f2e2c6a3c0c7651836c2f.
-   Artifact12485169920/digest2dd1dc8d8614ec346f53da1d693ef0ddb86410861c3e8f822ea527bf3af5acdf
-   expires2027-01-21T06:59:33Z.
-5. Preserve the proven changes: all-Char escape-predicate equality with1114112
-   native cases; all-list/name/fuel/index/hash constructor/height lookup equality;
-   first duplicate and100001-entry miss; existing all-input cursor/lexer/codec
-   proofs and source audits. Audited specialized IR confirms constructor/height
-   list workers and wrappers now take2 parameters and return data/scalars with
-   no body lambdas; the predicate emits a plain function. Existing closed worker
-   fusion did not remove the old eager let-before-lambda lookup bodies.
-   Do not repeat ineffective wrapper rewrites or remove generic guards blindly.
-6. Inspect saved current profile39918874112/job120298957773 at diagnostic source
-   a5011506a4d1bad2700802f9ef611616fc439ca9. It is last30s of a220s replay, not
-   the last30s of1800s. StringEqual17099/27684 ticks(61.8%),17090 under
-   psStringEqFromWithFuel; shared Node17.9%. Profile artifact12485957720 digest
-   152b1f627bdc7338a7500ec331f4289f53cca7bb9e15f4c9aadb9f2624449c84,
-   expiry2027-01-21T07:36:19Z. Use bottom-up data and generated-code/inlining
-   context; determine actual caller and compared-string lengths/equality cases.
-   Source character comparison uses Nat.beq(Char.toNat...), while runtime cache
-   text comparisons can inline into the same worker. Establish the causal path
-   on actual generated compiler work before changing code or retrying1800s.
-7. Preserve the bounded-map experiment separately:
-   sourceaae4aac442154bb0c95fedb35f19fdb1552cc271/request
-   9f39ab515a3a0c88979ac7f8902aea731975bbcc/run39920694158/job120304921482.
-   It keeps2 views/exact eviction and passes1458 strict old/current runtime
-   comparisons, Unicode/surrogates/invalid offsets/equal separate strings.
-   Synthetic prefix was10.215ms old/10.496ms indexed (no advantage asserted);
-   real G2 still times out. It is not selected for promotion.
-   Artifact12488294175 digest515d90795f00cc2c3c22af72d65e272ec0bc24d42e632bbb051ac3e4253ea8da
-   expires2027-01-21T07:52:25Z. Do not remove history or claim a speedup.
-8. Make a small dependency-coherent correction addressing measured cost. Keep
-   all input/output/error/evaluation/Unicode/raw-offset/fuel semantics and
-   negative/unsupported ABI refusals. Any primitive String equality replacement
-   needs official all-input equivalence and supported source builtin mapping;
-   do not use native_decide/new axioms/sorry to bypass opaque String APIs.
-   Any loop/view reuse must avoid eager work on exhausted fuel, alias/shadow/
-   capture issues and retaining extra views across calls. Do not expand the
-   existing cache, heap/stack/fuel/stream/wire limits.
-9. Run through Actions only. Profiles from psc1/:
-   ```sh
-   node scripts/generated-target-qualification.mjs ts --self-host correctness-1800s
-   node scripts/generated-target-qualification.mjs rust --self-host correctness-1800s
-   node scripts/generated-target-qualification.mjs ts --self-host performance-240s
-   node scripts/generated-target-qualification.mjs rust --self-host performance-240s
-   ```
-   performance keeps15-minute jobs/240000ms every request/build.
-   Longer profile changes only G2-self/G3-self to1800000ms, job120min/step110min.
-   G1/corpus/builds240000ms; checker120000ms; cleanup5s; streams32MiB/wire128MiB.
-   Use source-first then request-only commits. Long request path
-   .github/qualification-requests/psc1-rust-ts-selfhost-correctness.json:
-   schema psc1-rust-ts-selfhost-request/2; action qualify-independent-G1-G2-G3;
-   exact branch/targets; profile correctness-1800s; g2g3TimeoutMs1800000;
-   g1TimeoutMs240000; resourcePolicy
-   only-G2-G3-wall-clock-extended;all-other-policies-unchanged.
-   Fresh id/parentCommit; next commit changes only the request file.
-   Parent/event.before/parentCommit must agree, event.after equals request commit.
-   Retain existing performance schema/1/resourcePolicy unchanged request lanes.
-10. Native seed once, then remove native compiler executables. Actual emitted
-    compilers must produce G2/G3, independently admit/build/execute all ten cases
-    per generation and exact fixed points. Official Lean4.35.0 commit
-    eb6cafb7290e8bd5f2937522d8d804f58f02bafc, original/post-plan strict IR,
-    source/tool/artifact identities and every negative remain.
-    Long correctness cannot grant240s. Record time/RSS/failures and artifacts.
-11. Audit each new terminal artifact once with the existing diagnostic branch
-    .github/diagnostics/psc1-selfhost-receipts.mjs/workflow, pinning source parent,
-    request, run, artifact ID/digest/expiry. Audits39910276762/39912095877/
-    39917944529/39918849858/39925093205 already cover all current attempts.
-    They verify data and never supply missing admission/qualification.
-12. After TS correctness optimize both toward240s. Rust exact late stack39906025465
-    reaches strict IR nominal-arity lookup. Any index must prove first-binding/
-    duplicate/structure-before-inductive/Array/miss equivalence and retain all
-    report/resource counters and size preflight. Keep checked scalar closed
-    planning/generic fallback, Rust ownership/private safe Drop, TS checked
-    generator results, all input grammar/proof tests and all7 backend mappings.
-13. Integrate only coherent validated files onto latest main, preserving existing
-    TS annotations and concurrent history; do not copy a stale entire tree.
-    Fresh full seven-backend/application qualification is mandatory for new
-    integrated compiler source. Same-run Rust executable equality is not separate
-    clean-build reproducibility. DirectJS G1 and its G2 heap evidence stay;
-    ExpressionV2 research remains independent and never replaces official Lean.
-14. Update AI_WORK_STATE/roadmap, exhaustive canonical receipt and its compact
-    derived projection together from actual CI data. Freeze passive history.
-    Avoid unchanged full CI, repeated audits and unmeasured cache/architecture
-    experiments. No merge or package publication.
-
-Continue actual implementation from this verified checkpoint. Neither target is
-240s-qualified and TypeScript is not self-host-qualified. Do not claim project
-completion or promote a candidate without the required fresh evidence.
+   7d8865a08427a28432e427592dfc4263718c9a2f, run39908529181/job120265913272
+   genuinely qualifies G1/G2/G3 and exact fixed point under1800s. G2/G3
+   692788/660042ms, RSS668192/668184KiB, executable
+   d55a8435a157f021e5a7c073037303429b9787729c963af3842a04b9fb009017.
+   Original240s and independent clean-build qualification remain incomplete.
+4. Keep the proved source normalization: eight applied workers in
+   Ps.Erasure.Basic/Definition/Expr, original public types, default4096 and whnf.
+   Native39963603961 checks all-input equalities against retained old definitions,
+   zero/forall fuel, first duplicates and100001-entry hit/miss. It also runs all
+   prior proof/negative/runtime gates and both85-module source audits.
+   Auditor39966960519 confirms source/saturated workers are data-returning with
+   zero body lambdas. Separate function-valued generated variants are legitimate
+   partial applications; inspect actual call paths rather than banning them.
+5. Preserve TS token/cursor changes in BackendTs.Module/Expr: lazy two-view symbol
+   identities, guarded invariant aliases, cold size counting without admission,
+   existing valid-boundary slice extraction and exact legacy invalid/cold fallback.
+   Native39959279408 checks16000 equality/95576 extraction cases, max2 views,
+   independent UTF8 size and extraction-only module runtime. Never replace source
+   String equality with native equality without official all-input equivalence.
+   No cache, heap/stack, fuel, stream or wire bound was expanded.
+6. Prior trials are terminal and retained:
+   tokens source d520a49e/request27f2a216/run39952593596: G2 timeout1800195ms,
+   RSS3050788KiB; shorte6df0e0d/run39952866650 timeout240202ms/RSS2281004.
+   Cursor sourceedc3e17b/request3dd9152a/run39959835622 timeout1800199ms,
+   RSS2989224; short55fcd9d9/run39960115125 timeout240168ms/RSS2370648.
+   Both G1/ten cases pass; no admitted G2/G3/fixed point. Do not refork olda10c0162.
+   Map sourceaae4aac4 remains an unselected historical experiment.
+7. Saved profiles are last30s of220s, not the final1800s request:
+   39918874112 StringEqual17099/27684;39961304634 StringEqual8/26866 and
+   WeakCollectionSet8025/26866, mainly psErasureTypeValuedWithFuel;39966590664
+   StringEqual22/27480 and weak-set114/27480 after proved normalization.
+   Different sources may reach different phases; no whole-compiler speedup follows.
+   One up-to1750s pinned actual G2 diagnostic replay is requested at diagnostic
+   sourced5ca074954b30fd51a0e696734128b0e03a023e8 on
+   diagnostic/psc1-selfhost-profile-20261023, to measure the late window. Read that
+   run before proposing another optimization. It uses exact request
+   ae97450bad8f2130d344b0ee98a63766e82849d2b7f897a2b700e7630bdeeb1e and the
+   existing correctness policy. Diagnostic copies/results are never adopted.
+8. For each new terminal qualification artifact, audit once using the existing
+   .github/diagnostics/psc1-selfhost-receipts.mjs/workflow on the diagnostic branch.
+   Bind source parent, request SHA, run/job, artifact ID/digest/expiry. Preserve
+   inventory/request/manifest and all source/admission/original/target IR/corpus
+   assertions. Flags inspectUtf8TokenWorker, inspectCursorCacheHelpers and
+   inspectErasureWorkers record actual mechanism. Audits never supply missing
+   compiler execution/admission. Already completed audits39953924361/39957038006/
+   39961219637/39964784124 cover the token/cursor trials. Erasure inspection
+   initially over-selected function-valued auxiliary variants (39966561743),
+   repaired39966960519; no verification/controller requirement changed.
+9. If current long run passes, record actual G2/G3 time/RSS and exact fixed points,
+   then optimize toward original240s. If it fails, use the late-window evidence
+   and actual IR/caller paths to fix the remaining class before another request.
+   Small native-invoke and iterator prototypes remain unadopted;20 real corpus
+   replays gave13704/13788ms and13016/13508ms, not demonstrated G2 gains.
+10. Source-first then request-only commits are required. Long request path
+    .github/qualification-requests/psc1-rust-ts-selfhost-correctness.json:
+    schema psc1-rust-ts-selfhost-request/2; action qualify-independent-G1-G2-G3;
+    exact current branch/targets; profile correctness-1800s; g2g3TimeoutMs1800000;
+    g1TimeoutMs240000; resourcePolicy
+    only-G2-G3-wall-clock-extended;all-other-policies-unchanged;
+    fresh id and parentCommit equal source HEAD. Request commit changes only that
+    file; event.before/parent/source and event.after/request SHA must match.
+    Short schema/1 path .github/qualification-requests/psc1-ts-generator-types.json
+    keeps resourcePolicy unchanged and original240s. Branch guards must match.
+11. Existing Linux commands from psc1/:
+    lake build psc1_erasure_worker_normalization_tests psc1_ts_utf8_view_tests
+    .lake/build/bin/psc1_erasure_worker_normalization_tests
+    .lake/build/bin/psc1_ts_utf8_view_tests
+    node scripts/ts-utf8-view-runtime-tests.mjs
+    node scripts/generated-target-source-audit.mjs ts
+    node scripts/generated-target-qualification.mjs ts --self-host correctness-1800s
+    node scripts/generated-target-qualification.mjs ts --self-host performance-240s
+    Use the existing workflows so all common proof/checker/negative gates run too.
+    G1/corpus/build240000ms, checker120000ms; only actual G2/G3 correct1800000ms;
+    long job120min/step110min, short15min, cleanup5s, streams32MiB/wire128MiB.
+    Preserve official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+    strict original/transformed IR, semantic fuel, heap/stack, identities and ABI
+    refusals. One native seed then native compiler executables removed, independent
+    checker retained; no native/handwritten semantic substitute.
+12. Promote coherent verified source only onto fresh main, preserving TS typed/
+    generic guards and Rust ownership/private safe Drop, then require fresh full
+    seven-backend/application qualification. Current isolated G1 or fixed point
+    is not that integration gate. Update AI_WORK_STATE, roadmap and canonical
+    receipt together; derive the compact projection from its exact Git blob.
+    Frozen release contract and passive historical evidence remain unchanged.
+    DirectJS G1/heap defect and independent ExpressionV2 research stay separate.

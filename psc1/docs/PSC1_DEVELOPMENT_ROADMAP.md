@@ -1,66 +1,70 @@
 # PSC1 development roadmap
 
-Updated2026-10-23. The frozen [Practical Core v1 contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json)
-owns14 families,37 finite criteria, both grammars, seven targets and four
-application categories. [AI_WORK_STATE.md](../AI_WORK_STATE.md) owns continuation.
-[Compact results](PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json) derive from
-[the canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
+Updated2026-10-23. [AI_WORK_STATE](../AI_WORK_STATE.md) owns continuation.
+The frozen [Practical Core v1 contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json)
+owns14 families/37 finite criteria. [Current compact evidence](PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json)
+derives from the [canonical CI receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
 
-## Verified state
+## Qualified state
 
-Integrated5ce2fc74 / mergea61eecf4 / run39909569028 passes all selected jobs,
-47 full steps and37/37 criteria; benchmark dependency-skipped. Both grammars,
-all7 backends, practical applications, official admission, strict IR, negatives,
-minimum Python and unpublished native package remain qualified.
+Main code5ce2fc74 / mergea61eecf4 / normal39909569028 passes all selected jobs,
+47 full steps,37/37 criteria, both grammars, seven backends, four application
+categories, official checking, strict IR, negative and installed native package
+tests. Main Lean source is unchanged from78fe34b8. Later source remains isolated.
 
-Isolated Rust source5e0b548e/request7d8865a0/run39908529181 genuinely passes
-G1/G2/G3 and exact fixed point under correctness-1800s. G2/G3 take692788/660042ms,
-maxRSS668192/668184KiB; all three executable hashes match within this pipeline.
-The original240s profile remains failed and independent clean repeats unqualified.
+Rust source5e0b548e/request7d8865a0/run39908529181 qualifies G1/G2/G3 and exact
+fixed point under1800s:692788/660042ms, RSS668192/668184KiB. Same-run executable
+hashes match;240s and independent clean-build repeatability remain unqualified.
+The qualified branch stays untouched at83e18fe1.
 
-Every TS trial passes G1 and ten cases, then times out at1800s. Shared codec,
-direct predicate, applied lookup and two-view Map results are separately recorded.
-G3/fixed point are not run. The Map passes1458 runtime comparisons and preserves
-two views/order but establishes no synthetic or completed-compiler advantage;
-it is not selected for promotion. Preserve it as an experiment.
+TypeScript remains G1-only at every completed trial. Token and cursor changes
+pass runtime/negative/source gates and reach actual G1, then exceed both240s and
+1800s. Current applied-erasure worker long run39964278626 is active; its separate
+240s run39965349252 times out240170ms after G1/ten cases. No G3/fixed-point claim.
 
 ## Dependency-ordered queue
 
-| Order | Work | Evidence | Acceptance |
+| Order | Work | Actual evidence | Acceptance |
 | --- | --- | --- | --- |
-| 1 | Diagnose remaining TS string-comparison cost on preferred applied-lookup baseline | Source0938c895/request10ac556f; proof/native/audit/G1 pass, G2 timeout1800149ms. Saved current profile39918874112 has StringEqual61.8% under psStringEqFromWithFuel | Same-input generated-code/caller/argument-size evidence, then an all-input-equivalent targeted change and actual G2/G3/fixed point under1800s |
-| 2 | Optimize toward the unchanged240s target | Rust correctness qualified at about11min/request; TS still blocked | Actual performance-240s G1/G2/G3 with original identity, checking and negative requirements |
-| 3 | Promote coherent validated sources | Main integrates host profiles only; later compiler/backend changes stay isolated | Fresh HEAD/non-force updates, preserve TS annotations/all targets, fresh full seven-backend/application qualification |
-| 4 | Separate clean-build reproducibility | Rust executable bytes match G1/G2/G3 in one pipeline | Independent clean builds and readable code/TS declarations/maps |
-| 5 | Final distribution | Native package and artifacts remain unpublished | Required final qualification and explicit merge/publication authorization |
+|1|Complete current TS correctness and diagnose late cost|Branch perf/psc1-erasure-applied-workers-20261023; sourceba0d5f29/requestd2bc51fc/run39964278626; native proof run39963603961 passes8 all-input equalities, both85-module source audits and existing gates|Actual emitted G2/G3 independently admitted, built/executed, exact source/closure/admission/original/target IR/ten-case fixed points under1800s|
+|2|Reach the original performance target|Independent240s tests remain failed for both targets|Actual performance-240s G1/G2/G3 with unchanged source/checking/negative/resource requirements|
+|3|Integrate coherent verified source|Current compiler/backend changes remain isolated|Fresh HEAD/non-force updates, preserve Rust ownership/Drop and TS typed/generic guards, fresh full seven-backend/application qualification|
+|4|Clean-build reproducibility and distribution readiness|Rust same-run executable equality; deterministic TS G1 source/executable records|Independent clean builds, readable generated code/declarations/maps, no inference from same-run equality|
+|5|Final distribution|Native packages/artifacts remain unpublished|Required final qualification plus explicit merge/publication authorization|
 
-For TS continue from workflow/docs descendanta10c0162, with compiler code identical
-to tested0938c895. Create a fresh experiment branch; do not reset later history.
-Do not promote unproven-benefit cache changes or retry unchanged full workloads.
+Do not refork the obsolete applied-lookup/Map checkpoint or repeat unchanged
+1800s attempts. Read the active run's terminal state first. A pinned1750s actual
+G2 diagnostic replay is requested to locate the near-deadline bottleneck; its
+output is unadopted and does not supply missing admission or qualification.
 
-## Mechanisms and limits
+## Implemented mechanisms and evidence boundaries
 
-All-input proofs preserve codec schemas, the direct escape predicate and fully
-applied constructor/height lookup workers. Actual specialized IR confirms the
-latter no longer return functions. Source-wrapper fixes that do not change the
-actual helper remain insufficient; inspect IR/calls, not source appearance alone.
-General lambda floating must preserve effect/trap/evaluation/fuel behavior;
-do not simply remove worker guards or replace String equality without proof.
+Lazy symbol tokens avoid repeated string-key comparisons while retaining only
+the two existing UTF8 views. Cold size requests count bytes without admitting
+position arrays. Cached valid-boundary extraction uses slicing; cold/invalid
+offsets preserve the original scan. Native run39959279408 passes16000 equality
+and95576 extraction comparisons, independent size and extract-only runtime checks.
 
-Rust late stack39906025465 reaches strict IR checking and nominal-arity lookup.
-Any derived index must prove lookup equality for first binding, duplicates,
-Array and structure/inductive priority and preserve report/resource behavior.
-Keep existing checked closed planning and generic fallback.
+Current erasure source adds fully applied workers for eight classification and
+lookup functions, preserving public types and default fuel. Official Lean proofs
+against retained originals cover all inputs; first duplicate, exhaustion and
+100001-entry hit/miss cases pass. Actual source and saturated IR workers return
+data with zero body lambdas; function-valued partial-application variants remain.
 
-performance-240s retains15-minute jobs/240000ms requests and builds.
-correctness-1800s is separate manual/release:120-minute jobs/110-minute step;
-only G2-self/G3-self get1800000ms. G1/corpus/builds stay240000ms and independent
-checker120000ms. Cleanup5s, streams32MiB, wire128MiB; fuel/heap/stack, strict IR,
-negatives, source identities and unsupported ABI refusals stay unchanged.
+Profiles are bounded windows, not completed-compiler timings. Old StringEqual
+61.8% no longer dominates. Cursor profile39961304634 exposes eager erasure weak
+map insertion; applied-worker profile39966590664 shows that spike removed in
+its220s window. Do not sum nested percentages or infer total speed from these
+changed-source samples. Native-invoke/iterator experiments remain unadopted.
 
-Use the same compiler/frontend/elaborator/IR/verifier and all7 existing emitters.
-Official Lean4.35.0 remains authoritative; no handwritten compiler or native
-semantic delegation after the one seed. Preserve qualified G1, DirectJS reference
-and its G2 defect. ExpressionV2 research proceeds independently.
-Avoid speculative redesign, unchanged full CI and duplicate audits. Passive
-history stays frozen; compact evidence is derived, not a new acceptance contract.
+Keep source/frontend/elaborator/checked IR/verifier and all7 emitters. No handwritten
+compiler or native semantic substitute. Preserve all-input lexer/cursor/codec/
+predicate/lookup proofs, scalar closed planning with generic/public ABI fallback,
+Rust ownership/private safe Drop and TS result annotations/structured generators.
+
+Performance default240s/15-minute jobs; correctness only G2/G3 extends to1800s,
+120-minute jobs/110-minute execution step. G1/corpus/builds240s, checker120s,
+cleanup5s, streams32MiB/wire128MiB, semantic fuel/heap/stack and strict validation
+remain. Official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc remains the
+admission authority. DirectJS G1/heap evidence is preserved; ExpressionV2 research
+is independent. Frozen contract and passive historical evidence stay unchanged.

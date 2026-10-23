@@ -1,7 +1,7 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
   "branch": "work/psc1-direct-selfhost-blockers-20261024",
-  "parentCommit": "e2743316170f800b8ad84533c1da1834773acccd",
+  "parentCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
@@ -10,5 +10,5 @@
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "e2743316 preflight 40023689471 PASS: ordinary-expansion all-input ordered accumulator equivalence, 51 delayed prefix guards/proofs, unchanged strict IR and independent Lean admission. Retest actual Wasm G2 stack blocker diagnosed by 40021807647."
+  "reason": "Both declaration-spine fixes now proved: 40026533023 passes all native proofs and runtime checks and complete98-module Wasm Lean/PS census. Source includes exact rightmost-error collector/ordered normalization and lookup equality. JS source-only worker normalization does not change the Wasm closure. Retest real G1/G2/G3 without stack/fuel/checker changes."
 }

@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+const expected=JSON.parse(fs.readFileSync('.github/diagnostics/psc1-profile-read.json','utf8'));
+const files=[];function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){assert.ok(!e.isSymbolicLink());const p=path.join(d,e.name);if(e.isDirectory())walk(p);else if(e.isFile())files.push(p);}}walk('input');
+const selected=files.filter(p=>path.basename(p)==='receipt.json');assert.equal(selected.length,1);
+const bytes=fs.readFileSync(selected[0]),row=JSON.parse(bytes);
+assert.equal(row.schema,'psc1-progressive-profile/1');assert.equal(row.phase,expected.phase);
+assert.equal(row.requestSha256,'e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998');
+assert.equal(row.manifestSha256,'294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec');
+assert.equal(row.sourceClosureDigest,'816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82');
+assert.equal(row.sourceSha256,'edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d');
+assert.equal(row.sourceFilesVerified,true);assert.equal(row.qualification,false);assert.equal(row.admission,'not-run');assert.equal(row.adoption,'not-run');
+console.log('PSC1_PROGRESSIVE_PROFILE_READ: '+JSON.stringify({...expected,receiptSha256:crypto.createHash('sha256').update(bytes).digest('hex'),receipt:row}));

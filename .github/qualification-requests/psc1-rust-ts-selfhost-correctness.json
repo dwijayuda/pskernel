@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/2",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "ts-applied-bridge-lookup-workers-1800s-20261023",
+  "id": "ts-two-view-index-1800s-20261023",
   "branch": "perf/psc1-bridge-lookup-workers-20261023",
-  "parentCommit": "0938c895a9ff007a36df72dc49c836dc7443cef3",
+  "parentCommit": "aae4aac442154bb0c95fedb35f19fdb1552cc271",
   "targets": [
     "ts"
   ],

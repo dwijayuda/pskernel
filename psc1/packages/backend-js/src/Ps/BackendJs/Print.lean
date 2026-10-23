@@ -1811,7 +1811,10 @@ def psJsViewInspect (self source : String) (index fuel : Nat) :
             | _ => false;
           let uses :=
             match arguments with
-            | List.cons (PsJsIrExpr.var name) _ => indexed && known name
+            | List.cons first _ =>
+                match first with
+                | PsJsIrExpr.var name => indexed && known name
+                | _ => false
             | _ => false;
           psJsViewAny (List.cons (Option.some uses) (psListMap recur arguments))
       | PsJsIrExpr.lambda _ _ => Option.none
@@ -1820,8 +1823,11 @@ def psJsViewInspect (self source : String) (index fuel : Nat) :
           | PsJsIrExpr.var called =>
               if psStringEq called self then
                 match psJsTailDrop index arguments with
-                | List.cons (PsJsIrExpr.var name) _ =>
-                    if known name then psJsViewAny (psListMap recur arguments) else Option.none
+                | List.cons first _ =>
+                    match first with
+                    | PsJsIrExpr.var name =>
+                        if known name then psJsViewAny (psListMap recur arguments) else Option.none
+                    | _ => Option.none
                 | _ => Option.none
               else Option.none
           | _ => Option.none
@@ -1860,32 +1866,35 @@ def psJsViewIntrinsic (views : List (String × String)) (operation : PsJsIrRunti
     (arguments : List PsJsIrExpr) : PsJsIrExpr :=
   let ordinary := PsJsIrExpr.runtime operation arguments;
   match arguments with
-  | List.cons (PsJsIrExpr.var name) rest =>
-      match psJsViewLookup views name with
-      | Option.none => ordinary
-      | Option.some getter =>
-          let view := PsJsIrExpr.call (PsJsIrExpr.var getter) [];
-          match operation with
-          | PsJsIrRuntimeOp.stringUtf8ByteSize =>
-              if psListIsEmpty rest then PsJsIrExpr.projection view "size" else ordinary
-          | _ =>
-              match rest with
-              | List.cons position tail =>
-                  if psListIsEmpty tail then
-                    let p := PsJsIrExpr.var psJsViewPositionName;
-                    let value :=
-                      match operation with
-                      | PsJsIrRuntimeOp.stringGet => Option.some (PsJsIrExpr.call (PsJsIrExpr.var "__ps$stringGetView") [view,p])
-                      | PsJsIrRuntimeOp.stringNext => Option.some (PsJsIrExpr.call (PsJsIrExpr.var "__ps$stringNextView") [view,p])
-                      | PsJsIrRuntimeOp.stringAtEnd => Option.some (PsJsIrExpr.binary PsJsIrBinaryOp.bigintLe (PsJsIrExpr.projection view "size") p)
-                      | _ => Option.none;
-                    match value with
-                    | Option.none => ordinary
-                    | Option.some body =>
-                        -- Preserve position evaluation before the lazy cache lookup.
-                        PsJsIrExpr.call (PsJsIrExpr.lambda [psJsViewPositionName] body) [position]
-                  else ordinary
-              | _ => ordinary
+  | List.cons first rest =>
+      match first with
+      | PsJsIrExpr.var name =>
+          match psJsViewLookup views name with
+          | Option.none => ordinary
+          | Option.some getter =>
+              let view := PsJsIrExpr.call (PsJsIrExpr.var getter) [];
+              match operation with
+              | PsJsIrRuntimeOp.stringUtf8ByteSize =>
+                  if psListIsEmpty rest then PsJsIrExpr.projection view "size" else ordinary
+              | _ =>
+                  match rest with
+                  | List.cons position tail =>
+                      if psListIsEmpty tail then
+                        let p := PsJsIrExpr.var psJsViewPositionName;
+                        let value :=
+                          match operation with
+                          | PsJsIrRuntimeOp.stringGet => Option.some (PsJsIrExpr.call (PsJsIrExpr.var "__ps$stringGetView") [view,p])
+                          | PsJsIrRuntimeOp.stringNext => Option.some (PsJsIrExpr.call (PsJsIrExpr.var "__ps$stringNextView") [view,p])
+                          | PsJsIrRuntimeOp.stringAtEnd => Option.some (PsJsIrExpr.binary PsJsIrBinaryOp.bigintLe (PsJsIrExpr.projection view "size") p)
+                          | _ => Option.none;
+                        match value with
+                        | Option.none => ordinary
+                        | Option.some body =>
+                            -- Preserve position evaluation before the lazy cache lookup.
+                            PsJsIrExpr.call (PsJsIrExpr.lambda [psJsViewPositionName] body) [position]
+                      else ordinary
+                  | _ => ordinary
+      | _ => ordinary
   | _ => ordinary
 
 def psJsViewMapOne {alpha beta : Type} (convert : alpha -> beta) (value : Option alpha) : Option beta :=

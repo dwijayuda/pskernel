@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 21:43:00 UTC",
+  "recordedAtUtc": "2026-10-23 21:54:00 UTC",
   "localDate": "2026-10-24",
-  "status": "erasure-spine-proofs-source-runtime-passed-next-wasm-request",
+  "status": "actual-direct-generations-and-parent-full-ci-running",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -1361,7 +1361,46 @@
     "pullRequest": 175,
     "head": "85433830522dc0cc52541b985510122b67dea364",
     "runId": 40027662328,
-    "status": "in_progress"
+    "status": "full-linux-in-progress",
+    "jobId": 120672846738,
+    "completed": [
+      "static",
+      "native",
+      "focused-core",
+      "focused-applications",
+      "php-application",
+      "selected-closures",
+      "G1"
+    ]
   },
-  "nextWasmSourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0"
+  "nextWasmSourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
+  "activeAttempts": [
+    {
+      "target": "js",
+      "sourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
+      "requestParent": "949d687b8977bb1fec3697293818f6d9d07f92a4",
+      "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
+      "runId": 40027650302,
+      "status": "in_progress",
+      "fixedPoint": "not-yet-established"
+    },
+    {
+      "target": "wasm-core",
+      "sourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
+      "requestParent": "4f88fac688408adb7a4c059539746719c39c0170",
+      "requestCommit": "bef0e260a062f89981af514480d9bd7414047d97",
+      "runId": 40028857732,
+      "jobId": 120671963814,
+      "status": "in_progress",
+      "fixedPoint": "not-yet-established"
+    }
+  ],
+  "diagnosticSpineInventory": {
+    "runId": 40029584741,
+    "compilerExecution": false,
+    "qualification": false,
+    "candidates": 300,
+    "scope": "heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof",
+    "note": "Heuristic review queue, not300 proven defects or additional release blockers; optimize only relevant measured paths."
+  }
 }

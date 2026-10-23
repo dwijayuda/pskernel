@@ -38,8 +38,14 @@ policies are unchanged. Do not substitute sample lookup parity for full equality
 PR175 full CI40027662328 and genuine JS qualification40027650302/request
 85433830522dc0cc52541b985510122b67dea364 continue on the immutable parent branch
 work/psc1-direct-selfhost-blockers-20261024. Do not cancel/restart them for
-focused child iterations. Next issue a request-only Wasm run on this proved child source;
-its manifest binds the exact parent/request commit and selected target. Once fixes are stable, preserve terminal parent evidence before a
+focused child iterations. Actual child Wasm requestbef0e260a062f89981af514480d9bd7414047d97,
+parent4f88fac688408adb7a4c059539746719c39c0170, source52cff171,
+run40028857732/job120671963814 is executing genuine generations. The parent
+JS request85433830 remains active at40027650302/job120667923890; parent full
+40027662328 has passed static/native/core/application/all selected closures/G1
+and is in full Linux job120672846738. These are active states, not terminal
+G2/G3 or37/37 claims. Re-query each run before continuation; do not duplicate
+executing qualifications. Once fixes are stable, preserve terminal parent evidence before a
 fresh expected-HEAD non-force fast-forward of the review branch if appropriate.
 No PR merge/publication. New common source requires its own source identities;
 do not inherit the parent's self-hosting/full-suite claims for changed code.

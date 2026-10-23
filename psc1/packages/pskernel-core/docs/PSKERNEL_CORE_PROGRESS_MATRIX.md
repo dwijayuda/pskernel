@@ -1,3 +1,48 @@
+## Exact final source2c9bf2d2 — FIVE full runs active, qualification PENDING
+
+Qualification executableANDharness2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298;
+treeea5d79f5927f61a98ad704b09b1ab495ea3701a3.
+Do NOT use this containing documentation child's HEAD as qualified source.
+Existing exact-source runs already started; NEVERduplicate:
+
+- Integration39900914731: generated120242036204/native120242036517.
+- Correctness39900914918: canonical120242036927/native120242037072.
+- Research39900914848: sixjobs120242037047,120242037305,120242037319,
+  120242037323,120242037378,120242037576.
+- Full193Arena39900914747: official120242036227; independentjob follows.
+- Authenticprofile39900914830:120242037123.
+
+Allinitialjobs currentlyRUNNING,not qualified. Gen/canonical producers must
+freshlycompile at2c9bf2d2 before their runtime-only sixshards/strictaggregates.
+Require BOTH PSC1_T01F_FULL_STRING_SHARDED_JS: PASS atthis exactsource,
+allretainednative/official/proofs/eighthashreports/eachroute24CLI+8API/
+research/fullmeasurements/unchangedowner32workers384callsABBA/full193/profile.
+All5workbranchfulltriggers active; narrowhash/focus/profile/owner diagnostic
+pushes manual-only. Canonical9filemanifest and ownerlivejobsource/run/attempt
+guard retained,alllimits/assertions unchanged. No partialrerun may inherit
+producer or shard receipts from anotherattempt/source/run.
+
+Prerequisite9d3fb/run39896509889 is ALL4 narrowjobsSUCCESS,including
+complete unchangedmixed1400assertions/440calls/1423.67s/1064712KiB. That is
+source-specific evidence,not a pass inherited by2c9bf2d2 or this docs child.
+Current status snapshot:
+evidence/2026-10-23-t01f-pair-counter-final-qualification-active.json.
+Exactprerequisite/traces/artifactshashes:
+evidence/2026-10-23-t01f-primitive-pair-counter-mixed-terminal.json.
+Earlierfe4aa BOTH mixedtimeouts,61deda timeout,27c85 codegenfailure and
+higher9dDAG/prefix timings/prefixRSS remainvisible. No generalcausalspeedup/
+hardRSSclaim/globalbackendpreservation or soundness claim. DOPEN.
+
+One next task: follow THESE FIVE existing runs toterminal,collect allsource-
+bound receipts and bothsix-shardaggregates. CurrentA/T01F/B/DOPEN,CpriorFAIL;
+historicalscopedA9c87 qualified. KeepC/D separatefromscopedA acceptance.
+NoT05untilfullT01F. No integrationwriteyet; fresh targetintegrationhead
+123c41197950b6761be965fd21c57142ee2b0d1c observedunchanged.
+ActionsLinux ONLY for builds/tests/kernelexecution,fresh expected_sha,
+nonforce updates,preserve concurrenthistory,no main/npm.
+
+---
+
 ## Final qualification reactivated after exact9d3fb mixed PASS
 
 Narrow prerequisite executableANDharness9d3fb530e67863017c50470dbd5d06aa388d6184

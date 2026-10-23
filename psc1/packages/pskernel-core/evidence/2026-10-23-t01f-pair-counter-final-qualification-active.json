@@ -1,0 +1,165 @@
+{
+  "schema": "psc1-t01f-pair-counter-final-qualification-active-v1",
+  "observedAt": "2026-10-23T04:34:31.492Z",
+  "qualificationSource": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+  "qualificationTree": "ea5d79f5927f61a98ad704b09b1ab495ea3701a3",
+  "workBranch": "work/psc1-pskernel-t01f-string-20261022",
+  "integrationBranch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "integrationHead": "123c41197950b6761be965fd21c57142ee2b0d1c",
+  "prerequisite": {
+    "source": "9d3fb530e67863017c50470dbd5d06aa388d6184",
+    "runId": 39896509889,
+    "conclusion": "success",
+    "mixedAssertions": 1400,
+    "completedTraceCalls": 440,
+    "wallSeconds": 1423.67,
+    "peakRssKiB": 1064712,
+    "scope": "Narrow prerequisite only, not inherited qualification at new source."
+  },
+  "runs": [
+    {
+      "id": 39900914747,
+      "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+      "path": ".github/workflows/psc1-pskernel-arena435.yml",
+      "headSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 120242036227,
+          "name": "official-arena-reference",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39900914848,
+      "name": "PSC1 PSKernel-Core Expression V2 research",
+      "path": ".github/workflows/psc1-pskernel-expr-v2.yml",
+      "headSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 120242037047,
+          "name": "generated-js-full-checker-bridge",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120242037305,
+          "name": "full-checker-bridge",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120242037319,
+          "name": "portable-ps-closure",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120242037323,
+          "name": "portable-v2-check",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120242037378,
+          "name": "expr-v2-differential",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120242037576,
+          "name": "whnf-subset-regression",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39900914830,
+      "name": "PSC1 authentic Arena timeout diagnostics",
+      "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+      "headSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 120242037123,
+          "name": "authentic-timeout-diagnostics",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39900914731,
+      "name": "PSC1 Expression V2 production integration",
+      "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      "headSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 120242036204,
+          "name": "generated-dag-integration",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120242036517,
+          "name": "native-dag-integration",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39900914918,
+      "name": "PSC1 PSKernel-Core correctness",
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "headSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 120242036927,
+          "name": "psc1-portability",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120242037072,
+          "name": "native-kernel",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    }
+  ],
+  "required": {
+    "bothSixShardAggregates": true,
+    "allRetainedNativeOfficialProofProviderResearchMeasurements": true,
+    "hashProofReports": 8,
+    "providerCliCasesPerRoute": 24,
+    "providerApiCasesPerRoute": 8,
+    "ownerWorkers": 32,
+    "ownerValidatedCalls": 384,
+    "fullArenaCases": 193,
+    "unchangedLimits": true,
+    "sourceAndAttemptStrict": true
+  },
+  "readiness": {
+    "T01F": "OPEN",
+    "A": "OPEN at current source; historical scoped9c87 qualified",
+    "B": "OPEN",
+    "C": "prior full193 FAIL; current source pending",
+    "D": "OPEN",
+    "T05": "blocked until fullT01F acceptance",
+    "performanceQualified": false
+  },
+  "next": "Follow these exact existing five runs to terminal; no duplicate builds or partial-attempt receipt inheritance. Require both six-shard strictaggregates, preserve full193 failures/performance observations, then decide correctness-only integration using fresh expectedSHA/nonforce."
+}

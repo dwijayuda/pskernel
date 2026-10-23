@@ -87,7 +87,7 @@ if(request.resolveOnly){
   runtimeFunctions:runtime.length,sourceFunctions:names.length,compilerExecution:false,qualification:false,resolved,recursiveListSpines,
   inventoryScope:'heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof'};
  fs.writeFileSync(path.join(out,'resolved.json'),JSON.stringify(receipt,null,2)+'\n');
- const inventorySummary={schema:receipt.schema,testedCommit:receipt.testedCommit,
+ const inventorySummary={localsInventory,schema:receipt.schema,testedCommit:receipt.testedCommit,
   source:receipt.source,sourceSha256:receipt.sourceSha256,binarySha256:receipt.binarySha256,
   exportAnchorsVerified:true,compilerExecution:false,qualification:false,
   resolved:resolved.map(({index,name})=>({index,name})),totalCandidates:recursiveListSpines.length,

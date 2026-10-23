@@ -2,16 +2,16 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "ts-cursor-cache-performance-240s",
+      "id": "ts-cursor-cache-correctness-1800s",
       "target": "ts",
-      "profile": "performance-240s",
-      "sourceCommit": "3dd9152a675468980c1d603aa707287ff1c9b4ac",
-      "requestCommit": "55fcd9d9683f44c5de14412e38d32c641b81ef34",
-      "runId": 39960115125,
-      "jobId": 120435706739,
-      "artifactId": 12504238250,
-      "artifactDigest": "sha256:bea376424749990d60324d833ab0a06b3b4899a7128170292d1b1799f4259f81",
-      "artifactExpiresAt": "2027-01-21T13:18:31Z",
+      "profile": "correctness-1800s",
+      "sourceCommit": "edc3e17ba2195649428f9ce020789404a9406beb",
+      "requestCommit": "3dd9152a675468980c1d603aa707287ff1c9b4ac",
+      "runId": 39959835622,
+      "jobId": 120434766232,
+      "artifactId": 12506755130,
+      "artifactDigest": "sha256:eed47fbb3aaced564ec05fde862a1e820146d4a3dd9e24c50b0fd9044d62b96c",
+      "artifactExpiresAt": "2027-01-21T13:16:28Z",
       "inspectUtf8TokenWorker": true,
       "inspectCursorCacheHelpers": true
     }

@@ -125,7 +125,20 @@ for(const expected of request.attempts) {
   }
  }
 
- const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,cursorCacheHelpers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
+
+ const erasureWorkers={};
+ if(expected.inspectErasureWorkers){
+  const names=["psErasureIndexFindInBucketWorker","psErasureLookupRuntimeExpressionWorker","psErasureLookupNatWorker","psErasureNatInListWorker","psErasureTypeValuedWithFuelWorker","psErasureStringInListWorker","psErasureLookupTypeSubstitutionWorker","psErasureFindStringIndexWorker"];
+  const countLambdas=value=>Array.isArray(value)?(value[0]==='lambda'?1:0)+value.reduce((n,x)=>n+countLambdas(x),0):0;
+  for(const graph of ['originalIr','specializedIr']){
+   const selected=bootstrapCandidate[graph][4].filter(d=>names.some(name=>d[0]===name||d[0].startsWith(name+'$')||d[0].startsWith(name+'_')));
+   for(const name of names)if(graph==='originalIr')assert.ok(selected.some(d=>d[0]===name),'missing source worker '+name);
+   erasureWorkers[graph]=selected.map(d=>({name:d[0],typeParameters:d[1].length,parameters:d[2].length,resultType:d[3],bodyLambdas:countLambdas(d[4]),body:d[4]}));
+   for(const worker of erasureWorkers[graph]){assert.notEqual(worker.resultType[0],'function');assert.equal(worker.bodyLambdas,0);}
+  }
+ }
+
+ const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,cursorCacheHelpers,erasureWorkers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);
  console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));

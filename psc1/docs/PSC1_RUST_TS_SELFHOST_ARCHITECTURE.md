@@ -76,6 +76,12 @@ Its all-Char proof/native comparisons/regressions/audits pass; actual generation
 are pending in run39913434540. Cache/index hypotheses remain hypotheses; neither
 the two-entry UTF8 cache nor raw-position semantics have been changed.
 
+Combined TS trial39914906360 then normalizes constructor/height lookups into
+fully applied workers, avoiding eager suffix-closure construction. Existing
+function types remain. Universal list/name/fuel/index/hash equalities, first
+duplicate and100001-entry miss checks pass; actual generations remain pending.
+No index/cache/resource policy changed. Predicate-only trial remains separate.
+
 Rust late stack39906025465 reaches strict IR checking and nominal-arity lookup.
 A derived bounded index may reduce repeated searches if exact lookup and
 resource/report behavior are proved. A single stack is not total CPU attribution.

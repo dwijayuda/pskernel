@@ -92,6 +92,20 @@ comparisons, quote regressions and both source audits. Actual target generations
 are still running; no new generation qualification is claimed yet.
 Do not infer G1/G2/G3 success for this new source from the earlier source.
 
+
+The combined lookup trial is now the latest isolated TS candidate:
+branch `perf/psc1-bridge-lookup-workers-20261023`, source
+`0938c895a9ff007a36df72dc49c836dc7443cef3`, request
+`10ac556f28782c4efeaa72c168f3969aba68ccca`,
+[run 39914906360](https://github.com/dwijayuda/pskernel/actions/runs/39914906360).
+Constructor/height lookups now receive all arguments before list/fuel recursion;
+the old public function types remain. Official equalities cover every declaration
+list/name, height-entry list/name, and fuel/index/hash. Native first-duplicate and
+100001-entry miss tests, prior proofs/regressions and audits pass. Actual generated
+qualification is running. This trial inherits the predicate correction and leaves
+the predicate-only trial running independently. Neither new source is yet declared
+G1/G2/G3 qualified. It changes no index, cache capacity or semantic fuel.
+
 Preserve the qualified Rust reference while finishing that TS trial, then
 optimize measured costs toward 240 seconds. Earlier exact Rust late stack
 39906025465 reaches strict transformed IR checking and nominal-arity lookup;

@@ -7586,7 +7586,7 @@
     "previousQualifiedHead": "ea10eff9b3de063941c6029bb6c821f9cc10cc3f"
   },
   "remaining": [
-    "Finish current TypeScript direct escape-predicate all-input proof, quote/native regressions, both grammar audits, then actual generated G1/G2/G3 under correctness-1800s; current source pending, previous source timed out at 1800240 ms.",
+    "Finish actual TypeScript G2/G3 for combined applied-lookup source0938c895/request10ac556f/run39914906360; all-input lookup proofs and native regressions/audits pass. Preserve separate predicate-only run39913434540 for comparison.",
     "Optimize measured shared/target runtime costs toward original performance-240s. Preserve the already qualified Rust source and exact source/admission/IR/executable identities. Never claim long-profile success as performance qualification.",
     "Inspect measured Rust strict IR nominal-arity lookup and current TypeScript generator/codec/constructor-lookup costs. Any index must preserve first binding, duplicates, Array override, report/resource semantics and all safety bounds.",
     "Promote dependency-coherent shared/backend changes onto latest main without overwriting integrated TypeScript annotations or other target changes, then fresh full seven-backend/application qualification.",
@@ -22029,7 +22029,7 @@
       "documentationOnly": true
     }
   },
-  "recordedAt": "2026-10-23 06:49:14 UTC",
+  "recordedAt": "2026-10-23 07:04:02 UTC",
   "currentCheckpoint": {
     "qualifiedIntegratedSource": "5ce2fc74b9f01682832ddc10ec9ef27f26458564",
     "testedMerge": "a61eecf46ded19eedcdefcb320aa33118cd8f2ad",
@@ -22056,9 +22056,35 @@
       "currentRequest": "ecd53ad3f7ea96e07b53c7ece405b0f97c67dbf1",
       "currentRunId": 39913434540,
       "currentStatus": "native-proof-regressions-and-audits-passed;actual-generations-running",
-      "integrated": false
+      "integrated": false,
+      "latestCandidate": {
+        "branch": "perf/psc1-bridge-lookup-workers-20261023",
+        "sourceCommit": "0938c895a9ff007a36df72dc49c836dc7443cef3",
+        "requestCommit": "10ac556f28782c4efeaa72c168f3969aba68ccca",
+        "runId": 39914906360,
+        "jobId": 120286173371,
+        "status": "all-input-native-proof-regressions-and-source-audits-passed;actual-target-generations-running",
+        "inheritedPredicateSource": "083f900a60f6df3ad32f2d4e1c4afac2c53cf12a",
+        "mechanism": "fully applied constructor/height list/fuel workers avoid eager suffix closures; existing public function types retained",
+        "universalEqualities": [
+          "all declaration lists and names",
+          "all height-entry lists and names including first duplicate",
+          "all fuel/index/hash values"
+        ],
+        "stress": "100001-entry miss and first duplicate/native fuel-index-hash comparisons passed",
+        "proofRoot": "psc1_bridge_lookup_normalization_tests",
+        "proofFile": "psc1/test/BridgeLookupNormalizationTests.lean",
+        "qualification": "pending-no-new-G1-G2-G3-claim",
+        "cachePolicy": "unchanged",
+        "fuelPolicy": "unchanged",
+        "comparison": {
+          "predicateOnlyRun": 39913434540,
+          "status": "still-running",
+          "purpose": "retain independent predicate-only versus combined lookup trial evidence"
+        }
+      }
     },
-    "nextDependency": "Finish current all-Char proof and TypeScript actual G2/G3 trial; keep Rust qualified source immutable as reference; optimize toward separate 240s target; promote coherent sources only after fresh full seven-backend qualification"
+    "nextDependency": "Complete predicate-only and combined applied-lookup TypeScript generation trials; retain Rust qualified source; then original performance-240s target and coherent full integration."
   },
   "previousSelfHostProfileCheckpoint": {
     "qualifiedIntegratedSource": "78fe34b8d08d3f01dcc06ca9592668c958526849",
@@ -28161,7 +28187,13 @@
     "streamLimitBytes": 33554432,
     "wireLimitBytes": 134217728,
     "semanticFuel": "unchanged",
-    "memoryAndStackPolicies": "unchanged"
+    "memoryAndStackPolicies": "unchanged",
+    "mostRecentDocumentationGate": {
+      "head": "19530a8b2c539ea99696055a652a8a32d8b52f49",
+      "runId": 39914178783,
+      "status": "success",
+      "sourceUnchanged": true
+    }
   },
   "currentTypeScriptSharedCodecRuntimeDiagnosis": {
     "commit": "06cf502ed986ec8be7cf5c820d04962ebf0083c8",
@@ -28207,6 +28239,32 @@
       "runId": 39913434540,
       "status": "native-all-Char-proof-and-1114112-tests-passed;actual-generations-running",
       "mechanism": "replace lazy Boolean disjunction in escape predicate with explicit branches; all-Char equality gate and 1114112 native cases"
+    }
+  },
+  "bridgeLookupNormalization": {
+    "branch": "perf/psc1-bridge-lookup-workers-20261023",
+    "sourceCommit": "0938c895a9ff007a36df72dc49c836dc7443cef3",
+    "requestCommit": "10ac556f28782c4efeaa72c168f3969aba68ccca",
+    "runId": 39914906360,
+    "jobId": 120286173371,
+    "status": "all-input-native-proof-regressions-and-source-audits-passed;actual-target-generations-running",
+    "inheritedPredicateSource": "083f900a60f6df3ad32f2d4e1c4afac2c53cf12a",
+    "mechanism": "fully applied constructor/height list/fuel workers avoid eager suffix closures; existing public function types retained",
+    "universalEqualities": [
+      "all declaration lists and names",
+      "all height-entry lists and names including first duplicate",
+      "all fuel/index/hash values"
+    ],
+    "stress": "100001-entry miss and first duplicate/native fuel-index-hash comparisons passed",
+    "proofRoot": "psc1_bridge_lookup_normalization_tests",
+    "proofFile": "psc1/test/BridgeLookupNormalizationTests.lean",
+    "qualification": "pending-no-new-G1-G2-G3-claim",
+    "cachePolicy": "unchanged",
+    "fuelPolicy": "unchanged",
+    "comparison": {
+      "predicateOnlyRun": 39913434540,
+      "status": "still-running",
+      "purpose": "retain independent predicate-only versus combined lookup trial evidence"
     }
   }
 }

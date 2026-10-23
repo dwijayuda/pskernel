@@ -24,7 +24,17 @@ updates. No merge or npm publication is authorized.
    d55a8435a157f021e5a7c073037303429b9787729c963af3842a04b9fb009017.
    Same-run executable equality is observed; independent clean-build repeatability
    and the240s performance target remain unqualified.
-3. Re-query the latest TypeScript trial before changing or rerunning anything:
+3. Re-query both current TypeScript trials before changing or rerunning anything.
+   Latest combined branch perf/psc1-bridge-lookup-workers-20261023 has source
+   0938c895a9ff007a36df72dc49c836dc7443cef3, request
+   10ac556f28782c4efeaa72c168f3969aba68ccca, run39914906360/job120286173371.
+   It inherits the predicate correction and uses fully applied constructor/height
+   lookup workers, retaining old function types. All-input list/name/fuel/index/
+   hash equality proofs, first-duplicate/100001-entry native checks, prior
+   regressions and source audits pass; actual generations are running.
+   Keep psc1_bridge_lookup_normalization_tests and its retained reference workers.
+   Do not infer generation success or alter cache/fuel/index policies.
+   The separate predicate-only comparison remains:
    branch fix/psc1-ts-generator-result-types-20261023, source
    083f900a60f6df3ad32f2d4e1c4afac2c53cf12a, request
    ecd53ad3f7ea96e07b53c7ece405b0f97c67dbf1,

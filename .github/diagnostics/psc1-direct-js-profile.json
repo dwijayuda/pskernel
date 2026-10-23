@@ -1,15 +1,15 @@
 {
   "schema": "psc1-direct-generated-profile-request/1",
-  "runId": 40027650302,
-  "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
-  "sourceCommit": "949d687b8977bb1fec3697293818f6d9d07f92a4",
-  "artifactId": 12535705338,
-  "artifactDigest": "sha256:d4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e",
+  "runId": 40033515365,
+  "requestCommit": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
+  "sourceCommit": "844f8c3b765b6cc1378f164ac4cfcc39b02364a6",
+  "artifactId": 12536664869,
+  "artifactDigest": "sha256:58565e59a32ab927c35c54d108858b571fb3d30d4cbc46229b4a4b00e8d639e7",
   "target": "js",
   "requestId": "G2-self",
-  "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31",
-  "serviceSha256": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
-  "requestSha256": "b76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d",
-  "purpose": "Profile exact retained lazy-view G1 compiler on its real failed G2 request; verify actual emitted optimization shape; no qualification/resource changes.",
-  "attempt": 4
+  "sourceClosureDigest": "04fe35964af8c177b7d7672ed3bd2ea00c70b1491a58ce64667630c028862faf",
+  "serviceSha256": "1fdc5fc3efa4613480e3f89d73a30cf48596e68c4b528c0285a0f8019150718a",
+  "requestSha256": "1eb8e38276972ca64018c75007ecd87f594ae55ae61812f3ad960e2249bdaa97",
+  "purpose": "Measure actual current direct-driver G1 compiler on exact failed G2 request; existing performance240s diagnostic only; no compiler rebuild or policy change.",
+  "attempt": 5
 }

@@ -36,10 +36,10 @@ const source=fs.readFileSync(path.join(root,'G1-service/module.js'),'utf8');asse
 const sourceShape={bytes:Buffer.byteLength(source),generators:(source.match(/function\*/g)||[]).length,
  generatorLetWrappers:(source.match(/yield\* \(function\*/g)||[]).length,
  lazyViewGetters:source.split('})(__ps$utf8Known(').length-1,
- invokeSites:source.split('yield* __ps$invoke(').length-1,tailInvokeSites:source.split('yield* __ps$tailInvoke(').length-1};
+ invokeSites:source.split('yield* __ps$invoke(').length-1,tailInvokeSites:source.split('yield* __ps$tailInvoke(').length-1,directDriverSites:source.split('(yield { fn:').length-1};
 console.log('PSC1_ACTUAL_JS_EMISSION_SHAPE: '+JSON.stringify(sourceShape));
 const selected=source.split('\n').map((text,index)=>({text,line:index+1})).filter(r=>/^function(?:\*)? (?:__ps\$impl\$)?psStringEqFromWithFuel/.test(r.text));
-console.log('PSC1_ACTUAL_STRING_EQUAL_WORKER: '+JSON.stringify(selected.map(r=>({...r,text:r.text.slice(0,14000)}))));
+console.log('PSC1_ACTUAL_STRING_EQUAL_WORKER: '+JSON.stringify(selected.map(r=>({...r,text:r.text.slice(0,5000)}))));
 fs.writeFileSync(path.join(out,'emission-shape.json'),JSON.stringify({sourceShape,selected},null,2)+'\n');
 const request=path.join(root,'G2-self.request.json');assert.equal(sha(fs.readFileSync(request)),expected.requestSha256);
 assert.equal(JSON.parse(fs.readFileSync(request))[1],'G2-self');assert.equal(fs.existsSync('.lake/build/bin/psc1_target_service_seed'),false);
@@ -54,7 +54,11 @@ const processed=[];
 for(const file of logs){
  const r=boundedRun(process.execPath,['--prof-process',path.join(out,file)],{timeoutMs:120000,logDirectory:path.join(out,'processed-'+processed.length)});
  fs.writeFileSync(path.join(out,file+'.txt'),r.stdout);processed.push({file,status:r.status,error:r.error});
- console.log('PSC1_DIRECT_JS_CPU_PROFILE:\n'+r.stdout.split('\n').slice(0,180).join('\n'));
+ const lines=r.stdout.split(String.fromCharCode(10));const summary={};
+ for(const [section,count] of [['JavaScript',30],['Summary',15],['Bottom up (heavy) profile',40]]){
+  const at=lines.findIndex(l=>l.includes('['+section+']'));assert.ok(at>=0,section);summary[section]=lines.slice(at,at+count);
+ }
+ console.log('PSC1_DIRECT_JS_CPU_SECTIONS: '+JSON.stringify(summary));
 }
 const receipt={schema:'psc1-direct-generated-cpu-diagnosis/1',testedCommit:process.env.GITHUB_SHA,
  source:expected,retainedG1:{sourceSha256:m.sourceSha256,artifactSha256:expected.serviceSha256,

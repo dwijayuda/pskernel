@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/2",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "ts-correctness-1800s-20261023",
+  "id": "ts-direct-json-escape-predicate-1800s-20261023",
   "branch": "fix/psc1-ts-generator-result-types-20261023",
-  "parentCommit": "29e871eae0df41a2f782a501fc4110b928fafa2e",
+  "parentCommit": "083f900a60f6df3ad32f2d4e1c4afac2c53cf12a",
   "targets": [
     "ts"
   ],

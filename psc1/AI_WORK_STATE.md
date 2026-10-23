@@ -142,3 +142,10 @@ another request. After correctness, qualify240s separately and promote coherent
 validated source with fresh full seven-backend/application CI. No merge/npm
 publication. DirectJS G1 and its tracked G2 heap defect stay; ExpressionV2 research
 remains independent and never replaces official checking.
+
+
+## Late-window encoder bottleneck follow-up (2026-10-23)
+
+Actual erasure G2 run39964278626 is terminal: timeout1800138ms, peak3002380KiB; G1/ten cases pass, noG2/G3/fixedpoint. Read-only audit39969728664 verifies its source/request/manifest and actual worker shapes. Diagnostic39967678751 replays the exact G2 request1750s and samples the final30s: WeakCollectionSet26481/27754 ticks (95.4%), primarily psIrEncodeTypeWithFuel23006 and psIrEncodeExprWithFuel3397 beneath WeakMapSet. StringEqual absent from the reported late hot frames. This is diagnostic, not qualification.
+
+Continue on this branch: fully applied type/expression encoder workers remove the remaining eager fuel-prefix closure construction. Original public signatures, default4096, tagged transport bytes, fuel exhaustion/error order and official strict IR/admission remain unchanged. Retained exact originals and all-input Lean equalities plus focused source audits must pass before new actual G2/G3 requests. Qualified Rust branch stays83e18fe1; do not change it. Canonical/compact receipt will incorporate the terminal result and new candidate once validation completes.

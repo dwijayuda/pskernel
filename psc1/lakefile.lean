@@ -466,3 +466,8 @@ lean_exe psc1_ts_utf8_view_tests where
 lean_exe psc1_erasure_worker_normalization_tests where
   srcDir := "test"
   root := `ErasureWorkerNormalizationTests
+
+
+lean_exe psc1_ir_encoder_worker_normalization_tests where
+  srcDir := "test"
+  root := `IrEncoderWorkerNormalizationTests

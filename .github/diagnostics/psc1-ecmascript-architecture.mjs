@@ -1,5 +1,5 @@
 // Inspect only immutable, independently admitted generated compiler artifacts.
-import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';
+import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';import {execFileSync} from 'node:child_process';
 import {sha,verifyArtifact} from '../../psc1/host-tools/generated-target-tools.mjs';
 import {compilerSourceClosureDigest} from '../../psc1/host-tools/compiler-host-protocol.mjs';
 const request=JSON.parse(fs.readFileSync('../.github/diagnostics/psc1-ecmascript-architecture.json'));
@@ -55,13 +55,16 @@ assert.ok(cpu.length>0,'full retained processed CPU report must be present');
 const sourceRoot=path.resolve('../input/source/psc1'),priorCwd=process.cwd();
 const sourceReader=await import(pathToFileURL(path.join(sourceRoot,'host-tools/compiler-source-inputs.mjs')));
 const sourceCheckpoint=request.sourceCheckpoint,sourceRows=new Map();
+assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:sourceRoot,encoding:'utf8'}).trim(),sourceCheckpoint.commit);
+assert.equal(execFileSync('git',['rev-parse','HEAD^{tree}'],{cwd:sourceRoot,encoding:'utf8'}).trim(),sourceCheckpoint.tree);
 process.chdir(sourceRoot);
 try{for(const entry of sourceCheckpoint.entries)for(const row of sourceReader.readOwnedCompilerSources(entry))sourceRows.set(row.module,row);}finally{process.chdir(priorCwd);}
 const prefixCandidates=[];
 for(const row of sourceRows.values()){
  for(const block of row.text.split(/(?=^def )/m)){
   const match=/^def\s+([A-Za-z0-9_]+)/.exec(block);if(!match)continue;
-  const name=match[1],unsafe=new RegExp('let\\\\s+\\\\w+(?:(?!:=)[\\\\s\\\\S])*:=\\\\s*'+name+'\\\\b[^;]*;\\\\s*fun\\\\b');
+  const name=match[1];
+  const unsafe=new RegExp('let\\s+\\w+(?:(?!:=)[\\s\\S])*:=\\s*'+name+'\\b[^;]*;\\s*fun\\b');
   if(unsafe.test(block))prefixCandidates.push({module:row.module,name,definitionSha256:sha(block)});
  }
 }

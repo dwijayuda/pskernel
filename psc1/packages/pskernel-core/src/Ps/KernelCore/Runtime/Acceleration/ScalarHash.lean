@@ -67,7 +67,113 @@ def psKernelCacheStringHashPairsWithFuel
               (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst intermediate)))))
             psKernelCacheHashModulus)
 
-def psKernelCacheStringHashStateWithFuel
+/- Eight immutable transitions share one structural scheduler descent.
+The remainder uses the unchanged pair counter, so every fuel is exact. -/
+def psKernelCacheStringHashOctetsWithFuel
+    (octets : Nat)
+    (value : String)
+    (initial : Prod Nat Nat) : Prod Nat Nat :=
+  match octets with
+  | Nat.zero => initial
+  | Nat.succ remaining =>
+      let state0 := psKernelCacheStringHashOctetsWithFuel remaining value initial;
+      let state1 :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state0)) then
+          state0
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state0))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state0) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state0)))))
+              psKernelCacheHashModulus);
+      let state2 :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state1)) then
+          state1
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state1))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state1) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state1)))))
+              psKernelCacheHashModulus);
+      let state3 :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state2)) then
+          state2
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state2))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state2) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state2)))))
+              psKernelCacheHashModulus);
+      let state4 :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state3)) then
+          state3
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state3))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state3) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state3)))))
+              psKernelCacheHashModulus);
+      let state5 :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state4)) then
+          state4
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state4))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state4) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state4)))))
+              psKernelCacheHashModulus);
+      let state6 :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state5)) then
+          state5
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state5))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state5) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state5)))))
+              psKernelCacheHashModulus);
+      let state7 :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state6)) then
+          state6
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state6))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state6) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state6)))))
+              psKernelCacheHashModulus);
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state7)) then
+          state7
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state7))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state7) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state7)))))
+              psKernelCacheHashModulus)
+
+def psKernelCacheStringHashRemainderWithFuel
     (fuel : Nat)
     (value : String)
     (initial : Prod Nat Nat) : Prod Nat Nat :=
@@ -86,6 +192,13 @@ def psKernelCacheStringHashStateWithFuel
             (Nat.mul (Prod.snd paired) 31)
             (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst paired)))))
           psKernelCacheHashModulus)
+
+def psKernelCacheStringHashStateWithFuel
+    (fuel : Nat)
+    (value : String)
+    (initial : Prod Nat Nat) : Prod Nat Nat :=
+  let complete := psKernelCacheStringHashOctetsWithFuel (Nat.div fuel 8) value initial;
+  psKernelCacheStringHashRemainderWithFuel (Nat.mod fuel 8) value complete
 
 def psKernelCacheStringHashScan
     (fuel : Nat)

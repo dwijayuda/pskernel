@@ -476,7 +476,7 @@ jobs:
           test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 21
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean \
             | tee "$RUNNER_TEMP/psc1-owned-state-proofs.log"
-          test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 8
+          test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 11
           lake -f kernel-lakefile.lean env lean --run test/PsKernelScalarHashWorkerRegression.lean \
             | tee "$RUNNER_TEMP/psc1-scalar-hash-native.log"
           grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$RUNNER_TEMP/psc1-scalar-hash-native.log"

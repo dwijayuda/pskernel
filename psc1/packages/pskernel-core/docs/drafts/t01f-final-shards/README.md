@@ -1,3 +1,56 @@
+## Final pair-counter qualification FAILED; eight-transition candidate in narrow preflight
+
+Exact final source 2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298 failed BOTH
+strict route qualifications. In generated run39900914731 and canonical
+run39900914918, samples0–4 PASS1400assertions each. Mixed5 jobs120251078421
+and120253647380 cancelled at the unchanged25minute job cap; both independently
+admitted294requests, compared377metadata and passed the mixed singleton.
+Neither emitted a complete mixed-case marker or receipt. Memory files are
+empty: terminal peakRSS/complete wall time are UNKNOWN. Tracing was disabled;
+the interrupted API is UNKNOWN. Aggregates120264468016 and120266204053 FAIL
+because shard result was cancelled; no full sharded qualification marker.
+
+Failure evidence and authenticated artifact contents:
+docs/evidence/2026-10-23-t01f-pair-counter-final-shards-terminal.json.
+Generated failed ZIP12481850927 SHA256
+1d5ec9a42ff9fad8a2809ad67db439b4038acf80d7f37527d1224eeb2f1e9253.
+Canonical failed ZIP12482340395 SHA256
+579e3449a12ddabb6449a737d0a1ea88b5c07f362c9b0663c8b402846dd792d1.
+Canonical emoji4 passed755.71s/787700KiB,1400assertions; receiptSHA
+8c1299fc76a0e021dc9fb9ceaf174b5c5225b1afca75e55851910ec7d4170240.
+All prior native222proofs/providers24CLI+8API/owner32workers384calls/research
+passes remain source-specific2c9 evidence, not T01F acceptance. C remains FAIL
+173semanticmatches+2separateSafetyAgreements+17timeouts+1resourceExhausted;
+B/D OPEN. Historical scopedA9c87 remains qualified. No T05 or integration yet.
+
+THIS containing source is an UNQUALIFIED optimization candidate: add a data-result
+octet counter with eight inlined immutable Raw.atEnd/get/next transitions and
+one structural recursive descent. State divides fuel by8, then executes the
+exact remainder through the unchanged pair counter and odd primitive transition.
+The frozen19fb worker, modulus65521/mix31/hash semantics/public partial stages,
+all existing five equivalence statements, native2730cases/long3 and JS
+2730cases8190stages13665assertions/long3 remain unchanged. Three additional
+lemmas (octets, iteration composition, remainder) yield eleven hash proof reports.
+No generator-free loop, global backend theorem or general speedup claim.
+This hypothesis follows earlier phase-exclusive hash21.84% CPU evidence.
+
+All FIVE full work-branch push triggers PAUSED; only narrow hash push ACTIVE.
+Require narrow native proofs and unchanged controls, authentic realPSC1/TS7.0.2
+bounded and complete code generation, then full mixed1400assertions/294/377/
+440calls under unchanged25min/fuel4096/2048MiB/emptyPATH. Bounded code guard
+requires exactly one structural block per helper, eight primitive transitions
+per octet descent, no staged results/Step/Mix dispatch, exact remainder routing.
+Full integration and saved draft hash report count reconciled to11.
+One next task: fetch this candidate's ONE narrow run and follow to terminal.
+If complete mixed passes, restore FIVE full triggers, make narrow manual-only,
+then qualify ONE coherent new source with BOTH strict six-shard aggregates
+and all retained gates before T01F acceptance/T05. Do not rerun old final source.
+ActionsLinux ONLY for builds/tests/kernel execution, fresh expected_sha/nonforce,
+preserve concurrent history. Integration last123c41197950b6761be965fd21c57142ee2b0d1c;
+no main merge, force push or npm publication.
+
+---
+
 # Current: reactivated after exact9d3fb complete mixed PASS
 
 The containing activation restores all five full work-branch pushes after run

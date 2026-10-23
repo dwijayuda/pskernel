@@ -1,52 +1,55 @@
-## Fused scalar-hash entries candidate; exact octet profile shows staging costs
+## Primitive short-pair preflight: mixed runtime pending
 
-Exact6bed4d6c octet narrow mixed FAILED25mincap at421completed/422begun
-publiccalls; fullfailureevidence in octet-mixed-terminal.json. NoT01Facceptance.
-Exactgenerated6bed/profileharness99af98944f9669d63a0a33f79a98600ad9c88219
-diagnostic39958132429/job120429021696 PASSED COLLECTION ONLY. After unchanged
-294independentrequests/377metadata,realUTF8 DefEq assertedtrue in93493.655482ms;
-phase-exclusiveCPU78999samples. Whole155.73s/631636KiBpeakRSS.
-Artifact12502819580 ZIP5318634bytes SHA256
-6bef9211a17a3bbace05016d910072ac9c58de40d8aa3a3f2aa8219ed6652544.
-All24artifactfilehashes/provenance/phaseframes/fullCPUfamilycounts:
-docs/evidence/2026-10-23-t01f-octet-defeq-phase-profile.json.
+Execution and harness source: `b0d560cfbbfd976a9d8338dbd2bd26a4d5614418`.
+Follow the single [narrow run](https://github.com/dwijayuda/pskernel/actions/runs/39972883672).
 
-Measuredselfsamples:pairiterator7745(9.80%),State3559(4.51%),remainder3210
-(4.06%),octet615(0.78%),curriedlevel-listworker6729(8.52%). AllStringhashfamilies
-15812(20.02%);GC11661(14.76%),scheduler9165(11.60%). These are observations,
-not a generalcausalspeedup claim. The profile motivates eliminating entry and
-function-space dispatch; octet grouping alone was insufficient.
+Native job 120479881827 passed 85 proof reports, including 11 hash reports,
+with only the permitted standard axioms. The bounded compiler gate passed
+the frozen 2,730 cases, 8,190 partial stages, 13,665 assertions and three long
+cases, plus the separate 19-case/38-assertion boundary matrix.
 
-THIS containing executableANDharness is a NEW UNQUALIFIED implementation:
-restore original2c9 pair-basedgeneralState/Scan/Worker and alloriginalEIGHT
-hashproofs unchanged; REMOVE failed octet/remainder helpers and theirTHREE
-implementation-specificlemmas. The public zero-cursor StringHash entry directly
-inlines pair+odd handling,removingScan/State dispatch while preservingexact
-hashes/modulus65521/mix31/Rawcursorsemantics/publicpartialstages.
-Original hash_eq_before proof still checks equality to frozen19fb worker.
-Specialize publicLevelListHash arities0,1,2 with identical mixing (emptyexact575),
-retaining unchangedpubliccurriedWorker as fallback forlength>=3. ONE added
-forall-list kernel theorem proves entry=unchangedWorker(values)(18) bycases/rfl.
-Totalhashreports9 (original8+new1),nativepreflight expected83(60scope+14session+9).
-Count reduction retires obsolete octet-only lemmas WITH their deleted helper;
-no original proof/test/assertion weakened. Fullintegration and saved draft
-hash-countguards reconciled9. Frozen2730native/8190JSstages/13665assertions/
-long3,fullfixture/harness/294/377/1400mixed/440calls ALL unchanged.
+Complete producer 120481013892 passed authentic PSC1 source checking and
+the full TypeScript 7.0.2 build. All 15 artifact files and six complete emitted
+helper bodies were independently verified. The new short helper contains
+eight primitive transitions and no generators, scheduler calls, staged
+machinery, or Step/Mix dispatch. The full entry selects exactly one of the
+short helper and unchanged pair fallback through the exact four-pair bound.
 
-Only narrowhash work-branch pushACTIVE; V1profilebackmanual-only; allFIVE full
-workbranchpushes remainPAUSED. New bounded guard requires onepair dispatch/
-oneblock/oneoddprimitive in FULLHash, noScan/State/Worker/Step/Mixdispatch or
-stagedresult; commonlevel-listbranches literal575/oneandtwoLevelHashcalls,
-exactlyonegenericWorkerfallback,no stagedresult. Require nativeproofs first.
-ONE next task: fetch this NEW candidate's one narrowrun; follow native then
-bounded+completecodegen,retainedcontrols and complete mixed toterminal.
-If failure, preserve exact evidence and fix actual cause; do not weakenlimits.
-If allPASS, restorefullfive and qualify ONE coherent newsource through BOTH
-strictsixshardaggregates/allretainedgates beforeT01F/T05.
-T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integrationyet.
-Fresh integrationlast123c41197950b6761be965fd21c57142ee2b0d1c; ActionsLinuxONLY
-execution,expected_sha/nonforce,preservehistory,4096/2048MiB/emptyPATH/25min,
-no main/npm. This candidate inherits no prior-source qualification.
+Generated controls 120488960287 passed, including 605 prefix assertions
+and the retained private-ID/session checks. DAG measured 107.96 seconds and
+694,292 KiB peak RSS; prefix measured 23.63 seconds and 483,284 KiB.
+Both observed peak RSS values exceed the prior 0fe control run; preserve those
+memory regressions. Cross-run timings do not establish a general speedup.
+
+Mixed job 120488960255 started at 15:07:20 UTC on 2026-10-23 and remains
+running. Its unchanged 25-minute job cap is approximately 15:32:20 UTC.
+The complete 1,400-assertion receipt, 440 completed trace calls, whole runtime
+and peak RSS remain unknown. Do not duplicate this run or combine sources.
+
+Evidence is in:
+
+- ../../evidence/2026-10-23-t01f-primitive-short-pairs-native-gates.json
+- ../../evidence/2026-10-23-t01f-primitive-short-pairs-generated-preflight.json
+
+The saved integration draft requires 11 hash proof reports and the additional
+19-case boundary matrix. All five full work-branch pushes remain paused;
+narrow hash alone is active and T01F diagnostics are manual-only.
+
+Only after complete narrow PASS, authenticate its receipt and artifact, fetch
+fresh full workflows, restore all five full triggers and make narrow hash
+manual-only. Require exactly 1,400 assertions per shard and 8,400 executed
+assertions per route, including repeated admission prefixes. Qualify one new
+coherent source through both strict six-shard aggregates and every retained
+native, official, provider 24 CLI + 8 API, research, frozen 32-worker/384-call
+owner, full 193-case Arena and profile gate. Each route compiles once; each
+shard independently admits all 294 requests and compares 377 metadata entries.
+Require both PSC1_T01F_FULL_STRING_SHARDED_JS: PASS markers at that exact source.
+
+T01F/current A/B/D remain OPEN; C remains FAIL. Historical scoped A9c87 stays
+qualified. No T05 or integration yet. Keep fuel 4096, 2048 MiB old space,
+empty PATH and the 25-minute cap. Actions Linux execution only; fresh expected
+SHA and non-force updates; preserve history; no main merge or npm publication.
+Default provider is V1; full-kernel DirectJS remains UNSUPPORTED.
 
 ---
 

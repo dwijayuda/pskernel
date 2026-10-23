@@ -285,7 +285,7 @@ def psJsRuntimeUnary
           ""
           ["((__ps_s) => BigInt(Array.from(__ps_s).length))(", value, ")"])
   | PsJsIrRuntimeOp.stringUtf8ByteSize =>
-      Except.ok (psJsJoin "" ["__ps$utf8(", value, ").size"])
+      Except.ok (psJsJoin "" ["__ps$stringUtf8Size(", value, ")"])
   | PsJsIrRuntimeOp.arrayEmptyWithCapacity =>
       Except.ok
         (psJsJoin
@@ -339,16 +339,13 @@ def psJsRuntimeBinary
           ])
   | PsJsIrRuntimeOp.stringNext =>
       Except.ok (psJsJoin ""
-        ["((__ps_s, __ps_p) => __ps_p + (__ps$utf8(__ps_s).entries.get(__ps_p)?.[1] ?? 1n))(",
-         left, ", ", right, ")"])
+        ["__ps$stringNext(", left, ", ", right, ")"])
   | PsJsIrRuntimeOp.stringGet =>
       Except.ok (psJsJoin ""
-        ["((__ps_s, __ps_p) => __ps$utf8(__ps_s).entries.get(__ps_p)?.[0] ?? \"A\")(",
-         left, ", ", right, ")"])
+        ["__ps$stringGet(", left, ", ", right, ")"])
   | PsJsIrRuntimeOp.stringAtEnd =>
       Except.ok (psJsJoin ""
-        ["((__ps_s, __ps_p) => __ps_p >= __ps$utf8(__ps_s).size)(",
-         left, ", ", right, ")"])
+        ["((__ps_s, __ps_p) => __ps_p >= __ps$stringUtf8Size(__ps_s))(", left, ", ", right, ")"])
   | PsJsIrRuntimeOp.arrayPush =>
       Except.ok
         (psJsJoin
@@ -385,26 +382,7 @@ def psJsRuntimeTernary
     Except PsJsEmitError String :=
   match operation with
   | PsJsIrRuntimeOp.stringExtract =>
-      Except.ok
-        (psJsJoin
-          ""
-          [
-            "((__ps_s, __ps_b, __ps_e) => { if (__ps_b >= __ps_e) return \"\"; ",
-            "let __ps_i = 0n; let __ps_started = false; let __ps_out = \"\"; ",
-            "for (const __ps_c of __ps_s) { ",
-            "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ",
-            "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : __ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ",
-            "if (!__ps_started) { if (__ps_i === __ps_b) __ps_started = true; ",
-            "else { __ps_i += __ps_w; continue; } } ",
-            "if (__ps_i === __ps_e) return __ps_out; ",
-            "__ps_out += __ps_c; __ps_i += __ps_w; } return __ps_out; })(",
-            first,
-            ", ",
-            second,
-            ", ",
-            third,
-            ")"
-          ])
+      Except.ok (psJsJoin "" ["__ps$stringExtract(", first, ", ", second, ", ", third, ")"])
   | PsJsIrRuntimeOp.arrayGetD =>
       Except.ok
         (psJsJoin
@@ -521,86 +499,49 @@ def psJsPrintRuntime
 
 -- Construct curried recursive helpers only after binding their traversal inputs.
 -- Eager setup before that lambda can branch over fuel rather than visited nodes.
-def psJsExprUsesNameWithFuel
-    (fuel : Nat) :
-    PsJsIrExpr -> String -> Bool :=
+def psJsExprUsesNameWithFuelWorker (fuel : Nat) (expr : PsJsIrExpr) (name : String) : Bool :=
   match fuel with
-  | Nat.zero =>
-      fun (_expr : PsJsIrExpr) (_name : String) => true
+  | Nat.zero => true
   | Nat.succ remaining =>
-      fun (expr : PsJsIrExpr) (name : String) =>
-        let smaller : PsJsIrExpr -> String -> Bool :=
-          psJsExprUsesNameWithFuel remaining;
-        let uses : PsJsIrExpr -> Bool :=
-          fun (value : PsJsIrExpr) =>
-            smaller value name;
-        let nameUses : String -> Bool :=
-          fun (value : String) =>
-            psStringEq value name;
-        let fieldUses :
-            (String × PsJsIrExpr) -> Bool :=
-          fun (field : String × PsJsIrExpr) =>
-            uses (Prod.snd field);
-        let bindingUses :
-            PsJsIrMatchBinding -> Bool :=
-          fun (binding : PsJsIrMatchBinding) =>
-            psStringEq binding.name name;
-        let alternativeUses :
-            (String ×
-              List PsJsIrMatchBinding ×
-              PsJsIrExpr) -> Bool :=
-          fun
-            (alternative :
-              String ×
-                List PsJsIrMatchBinding ×
-                PsJsIrExpr) =>
-            let detail := Prod.snd alternative;
-            if psListAny bindingUses (Prod.fst detail) then
-              true
-            else
-              uses (Prod.snd detail);
-        match expr with
-        | PsJsIrExpr.literal _ => false
-        | PsJsIrExpr.var value =>
-            psStringEq value name
-        | PsJsIrExpr.unary _ value =>
-            uses value
-        | PsJsIrExpr.binary _ left right =>
-            if uses left then true else uses right
-        | PsJsIrExpr.runtime _ arguments =>
-            psListAny uses arguments
-        | PsJsIrExpr.lambda parameters body =>
-            if psListAny nameUses parameters then
-              true
-            else
-              uses body
-        | PsJsIrExpr.call fn arguments =>
-            if uses fn then true else psListAny uses arguments
-        | PsJsIrExpr.letE localName value body =>
-            if psStringEq localName name then
-              true
-            else if uses value then
-              true
-            else
-              uses body
-        | PsJsIrExpr.ifE condition thenBranch elseBranch =>
-            if uses condition then
-              true
-            else if uses thenBranch then
-              true
-            else
-              uses elseBranch
-        | PsJsIrExpr.record fields =>
-            psListAny fieldUses fields
-        | PsJsIrExpr.projection target _ =>
-            uses target
-        | PsJsIrExpr.constructor _ fields =>
-            psListAny fieldUses fields
-        | PsJsIrExpr.matchE scrutinee alternatives =>
-            if uses scrutinee then
-              true
-            else
-              psListAny alternativeUses alternatives
+      match expr with
+      | .literal _ => false
+      | .var value => psStringEq value name
+      | .unary _ value => psJsExprUsesNameWithFuelWorker remaining value name
+      | .binary _ left right =>
+          if psJsExprUsesNameWithFuelWorker remaining left name then true
+          else psJsExprUsesNameWithFuelWorker remaining right name
+      | .runtime _ arguments =>
+          psListAny (fun (value : PsJsIrExpr) => psJsExprUsesNameWithFuelWorker remaining value name) arguments
+      | .lambda parameters body =>
+          if psListAny (fun (parameter : String) => psStringEq parameter name) parameters then true
+          else psJsExprUsesNameWithFuelWorker remaining body name
+      | .call fn arguments =>
+          if psJsExprUsesNameWithFuelWorker remaining fn name then true
+          else psListAny (fun (value : PsJsIrExpr) => psJsExprUsesNameWithFuelWorker remaining value name) arguments
+      | .letE localName value body =>
+          if psStringEq localName name then true
+          else if psJsExprUsesNameWithFuelWorker remaining value name then true
+          else psJsExprUsesNameWithFuelWorker remaining body name
+      | .ifE condition left right =>
+          if psJsExprUsesNameWithFuelWorker remaining condition name then true
+          else if psJsExprUsesNameWithFuelWorker remaining left name then true
+          else psJsExprUsesNameWithFuelWorker remaining right name
+      | .record fields =>
+          psListAny (fun (field : String × PsJsIrExpr) =>
+            psJsExprUsesNameWithFuelWorker remaining field.snd name) fields
+      | .projection target _ => psJsExprUsesNameWithFuelWorker remaining target name
+      | .constructor _ fields =>
+          psListAny (fun (field : String × PsJsIrExpr) =>
+            psJsExprUsesNameWithFuelWorker remaining field.snd name) fields
+      | .matchE scrutinee alternatives =>
+          if psJsExprUsesNameWithFuelWorker remaining scrutinee name then true
+          else psListAny (fun (alternative : String × List PsJsIrMatchBinding × PsJsIrExpr) =>
+            if psListAny (fun (binding : PsJsIrMatchBinding) => psStringEq binding.name name)
+                alternative.snd.fst then true
+            else psJsExprUsesNameWithFuelWorker remaining alternative.snd.snd name) alternatives
+
+def psJsExprUsesNameWithFuel (fuel : Nat) : PsJsIrExpr -> String -> Bool :=
+  fun (expr : PsJsIrExpr) (name : String) => psJsExprUsesNameWithFuelWorker fuel expr name
 
 def psJsFreshMatchTempWorker
     (expr : PsJsIrExpr)
@@ -1300,7 +1241,7 @@ def psJsPrintDeclarations
 
 
 def psJsStringRuntimeSupport : String :=
-  "let __ps$utf8Cache;\nfunction __ps$utf8(source) { if (__ps$utf8Cache?.source === source) return __ps$utf8Cache; const entries = new Map(); let size = 0n; for (const char of source) { const cp = char.codePointAt(0) ?? 0; const width = BigInt(cp <= 0x7f ? 1 : cp <= 0x7ff ? 2 : cp <= 0xffff ? 3 : 4); entries.set(size, [char, width]); size += width; } return (__ps$utf8Cache = { source, entries, size }); }\n"
+  "let __ps$lastUtf8;\nlet __ps$previousUtf8;\nfunction __ps$utf8Width(code) { return code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4; }\nfunction __ps$utf8(text) {\n  if (__ps$lastUtf8?.text === text) return __ps$lastUtf8;\n  if (__ps$previousUtf8?.text === text) return __ps$previousUtf8;\n  let size = 0;\n  for (const char of text) size += __ps$utf8Width(char.codePointAt(0) ?? 0);\n  const positions = new Uint32Array(size + 1);\n  let byte = 0, index = 0;\n  for (const char of text) {\n    positions[byte] = index + 1;\n    const __ps_w = __ps$utf8Width(char.codePointAt(0) ?? 0);\n    byte += __ps_w; index += char.length;\n  }\n  positions[size] = text.length + 1;\n  __ps$previousUtf8 = __ps$lastUtf8;\n  return __ps$lastUtf8 = { token: Symbol(), text, size: BigInt(size), positions };\n}\nfunction __ps$stringGet(text, position) {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNext(text, position) {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(text.codePointAt(index - 1) ?? 0));\n}\nfunction __ps$utf8Known(text, token) {\n  if (token !== undefined) {\n    if (__ps$lastUtf8?.token === token) return __ps$lastUtf8;\n    if (__ps$previousUtf8?.token === token) return __ps$previousUtf8;\n  }\n  return __ps$utf8(text);\n}\nfunction __ps$stringGetView(view, position) {\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(view.text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNextView(view, position) {\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(view.text.codePointAt(index - 1) ?? 0));\n}\n\nfunction __ps$stringUtf8Size(text) {\n  if (__ps$lastUtf8?.text === text) return __ps$lastUtf8.size;\n  if (__ps$previousUtf8?.text === text) return __ps$previousUtf8.size;\n  let size = 0;\n  for (const char of text) size += __ps$utf8Width(char.codePointAt(0) ?? 0);\n  return BigInt(size);\n}\nfunction __ps$stringExtract(text, start, stop) {\n  if (start >= stop) return \"\";\n  const view = __ps$lastUtf8?.text === text ? __ps$lastUtf8 :\n    __ps$previousUtf8?.text === text ? __ps$previousUtf8 : undefined;\n  if (view !== undefined && start >= 0n && stop <= view.size) {\n    const first = view.positions[Number(start)], last = view.positions[Number(stop)];\n    if (first > 0 && last > 0) return text.slice(first - 1, last - 1);\n  }\n  // Exact retained scan for cold views and invalid/interior/out-of-range offsets.\n  let position = 0n, started = false, output = \"\";\n  for (const char of text) {\n    const code = char.codePointAt(0) ?? 0;\n    const width = BigInt(code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4);\n    if (!started) {\n      if (position === start) started = true;\n      else { position += width; continue; }\n    }\n    if (position === stop) return output;\n    output += char; position += width;\n  }\n  return output;\n}\n"
 
 def psJsStackRuntimeSupport : String :=
   psJsJoin
@@ -1721,6 +1662,7 @@ partial def psJsNeedsUtf8Runtime (expression : PsJsIrExpr) : Bool :=
         | PsJsIrRuntimeOp.stringNext => true
         | PsJsIrRuntimeOp.stringGet => true
         | PsJsIrRuntimeOp.stringAtEnd => true
+        | PsJsIrRuntimeOp.stringExtract => true
         | _ => false;
       needsOperation || psListAny psJsNeedsUtf8Runtime arguments
   | PsJsIrExpr.lambda _ body => psJsNeedsUtf8Runtime body

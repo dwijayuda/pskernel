@@ -39,6 +39,15 @@ def psWasmServiceIntFunctions : List PsWasmFunction :=
 def psWasmServiceHasType (name : String) (module : PsWasmModule) : Bool :=
   psListAny (fun (type : PsWasmStructType) => psStringEq type.name name) module.structures
 
+def psWasmServiceSelectExports (publicNames : List String)
+    (exports : List (Prod String String)) : List (Prod String String) :=
+  match exports with
+  | List.nil => []
+  | List.cons entry rest =>
+      if psBackendNameSeen entry.fst publicNames then
+        List.cons entry (psWasmServiceSelectExports publicNames rest)
+      else psWasmServiceSelectExports publicNames rest
+
 def psWasmServiceTransport (module : PsWasmModule) (publicNames : List String) : PsWasmModule :=
   let nat := psWasmServiceHasType psWasmNatName module;
   let functions := psListAppend
@@ -57,8 +66,7 @@ def psWasmServiceTransport (module : PsWasmModule) (publicNames : List String) :
       Prod.mk "__psc1_service_nat_of_u32" psWasmNatOfU32Fn,
       Prod.mk "__psc1_service_nat_bit0" psWasmNatMkBit0Fn,
       Prod.mk "__psc1_service_nat_bit1" psWasmNatBit1Fn] else [];
-  let exports := psListFilter
-    (fun (entry : Prod String String) => psBackendNameSeen entry.fst publicNames) module.exports;
+  let exports := psWasmServiceSelectExports publicNames module.exports;
   { structures := module.structures, arrays := module.arrays, functionTypes := module.functionTypes,
     functions := psListAppend module.functions functions, functionRefs := module.functionRefs,
     exports := psListAppend exports (psListAppend helperExports (psListAppend natExports intExports)),

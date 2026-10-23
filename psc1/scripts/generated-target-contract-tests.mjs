@@ -11,7 +11,7 @@ assert.deepEqual([...corpus,...refusals].map(c=>c.id).sort(),['lean-modules','ps
 assert.deepEqual(Object.keys(expectedObservations).sort(),corpus.map(c=>c.id).sort());
 assert.deepEqual(Object.keys(rustObservations).sort(),corpus.map(c=>c.id).sort());
 const sources=[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}];
-for(const target of ['ts','rust']){
+for(const target of ['ts','rust','js','wasm-core']){
  const session=createCompilerHostSession({requestId:'negative',target,sources,canonicalAdmissions:'[]',checkerExecutable:'/must-not-execute'});
  assert.throws(()=>session.admit(JSON.stringify({protocol:'psc1-compiler-host/1',op:'admit',requestId:'negative',
   target:target==='ts'?'rust':'ts',sourceClosureDigest:compilerSourceClosureDigest(sources),admissions:'[]'})),/REQUEST_MISMATCH/);

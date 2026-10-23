@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.Recursor.Reduction
-import Ps.KernelCore.Runtime.Acceleration.CachePolicy
+import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
 /-
 Lean 4.34 binder/application comparison support.
@@ -22,20 +22,19 @@ def psKernelDefEqFinish
     (value : Bool) :
     Prod Bool PsKernelCheckerState :=
   if value then
-    if
-        psKernelSemanticPairCacheEligible
+    match
+        psKernelSemanticExprPairSetInsert
+          state.success
           left
-          right then
-      Prod.mk
-        true
-        (psKernelCheckerStateWithSuccess
-          state
-          (psKernelExprPairSetInsert
-            state.success
-            left
-            right))
-    else
-      Prod.mk true state
+          right with
+    | Option.none =>
+        Prod.mk true state
+    | Option.some nextCache =>
+        Prod.mk
+          true
+          (psKernelCheckerStateWithSuccess
+            state
+            nextCache)
   else
     Prod.mk false state
 

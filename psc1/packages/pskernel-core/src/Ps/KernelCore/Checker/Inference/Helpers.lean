@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.Projection
-import Ps.KernelCore.Runtime.Acceleration.CachePolicy
+import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
 /-
 Inference helper layer.
@@ -28,30 +28,28 @@ def psKernelCacheInferResult
     (expr : PsKernelExpr)
     (result : PsKernelExpr) :
     PsKernelCheckerState :=
-  if
-      psKernelInferCacheEligible
-        inferOnly
-        expr then
+  let cache :=
     if inferOnly then
-      let cache :=
-        psKernelExprMapInsert
-          state.inferOnly
-          expr
-          result;
-      psKernelCheckerStateWithInferOnly
-        state
-        cache
+      state.inferOnly
     else
-      let cache :=
-        psKernelExprMapInsert
-          state.checkedInfer
-          expr
-          result;
-      psKernelCheckerStateWithCheckedInfer
-        state
+      state.checkedInfer;
+  match
+      psKernelInferCacheMapInsert
         cache
-  else
-    state
+        inferOnly
+        expr
+        result with
+  | Option.none =>
+      state
+  | Option.some nextCache =>
+      if inferOnly then
+        psKernelCheckerStateWithInferOnly
+          state
+          nextCache
+      else
+        psKernelCheckerStateWithCheckedInfer
+          state
+          nextCache
 
 def psKernelEnsureSortWith
     (whnf :

@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Inference.Helpers
 import Ps.KernelCore.Checker.Inference.Constant
+import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
 /-
 Syntax-directed core inference.
@@ -78,15 +79,10 @@ def psKernelInferCoreWithFuel
           else
             state.checkedInfer;
         let cached :=
-          if
-              psKernelInferCacheEligible
-                inferOnly
-                expr then
-            psKernelExprMapGet
-              cache
-              expr
-          else
-            Option.none;
+          psKernelInferCacheMapGet
+            cache
+            inferOnly
+            expr;
         match cached with
         | Option.some cached =>
             match

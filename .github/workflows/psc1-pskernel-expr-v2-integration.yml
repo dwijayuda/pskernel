@@ -31,6 +31,8 @@ on:
       - psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs
       - psc1/scripts/pskernel-t01f-shards.mjs
       - psc1/test/PsKernelScalarHashWorkerRegression.lean
+      - psc1/test/PsKernelClosedCacheAnalysisRegression.lean
+      - psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs
       - psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs
       - psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
@@ -476,6 +478,27 @@ jobs:
           test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 21
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean \
             | tee "$RUNNER_TEMP/psc1-owned-state-proofs.log"
+          test "$(grep -c '^#print axioms ' test/PsKernelClosedCacheAnalysisRegression.lean)" -eq 7
+          lake -f kernel-lakefile.lean env lean test/PsKernelClosedCacheAnalysisRegression.lean \
+            2>&1 | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-proofs.log"
+          python3 - <<'PY'
+          import os, pathlib, re
+          log = (pathlib.Path(os.environ['RUNNER_TEMP']) / 'psc1-closed-cache-analysis-proofs.log').read_text()
+          reports = re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log)
+          expected = {'PsKernelClosedCacheAnalysisRegression.' + name for name in
+                      ('analysis_eq', 'semantic_map_get_eq', 'semantic_map_insert_eq',
+                       'semantic_pair_contains_eq', 'semantic_pair_insert_eq',
+                       'infer_map_get_eq', 'infer_map_insert_eq')}
+          if len(reports) != 7 or {name for name, _ in reports} != expected:
+              raise RuntimeError('Missing one of the seven exact closed-cache equivalence reports')
+          if any(bad in log for bad in ('sorryAx', 'Lean.ofReduceBool', 'Lean.trustCompiler')):
+              raise RuntimeError('Forbidden closed-cache equivalence proof dependency')
+          for name, axioms in reports:
+              used = {axiom.strip() for axiom in axioms.split(',') if axiom.strip()}
+              if not used <= {'propext', 'Classical.choice', 'Quot.sound'}:
+                  raise RuntimeError('Unexpected axiom in ' + name + ': ' + repr(used))
+          print('PSC1_CLOSED_CACHE_ANALYSIS_PROOFS: PASS theorems=7 allowedStandardAxiomsOnly=true')
+          PY
           test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 11
           lake -f kernel-lakefile.lean env lean --run test/PsKernelScalarHashWorkerRegression.lean \
             | tee "$RUNNER_TEMP/psc1-scalar-hash-native.log"
@@ -494,6 +517,7 @@ jobs:
               "$RUNNER_TEMP/psc1-quot-owner-proofs.log" \
               "$RUNNER_TEMP/psc1-whnf-abi-proofs.log" \
               "$RUNNER_TEMP/psc1-owned-state-proofs.log" \
+              "$RUNNER_TEMP/psc1-closed-cache-analysis-proofs.log" \
               "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"; then
             echo 'PSKERNEL_PROOF_UNAPPROVED_TRUST_DEPENDENCY'
             exit 1
@@ -552,6 +576,7 @@ jobs:
             ${{ runner.temp }}/psc1-quot-owner-native.log
             ${{ runner.temp }}/psc1-name-worker-native.log
             ${{ runner.temp }}/psc1-scalar-hash-native.log
+            ${{ runner.temp }}/psc1-closed-cache-analysis-proofs.log
             ${{ runner.temp }}/psc1-recursor-k-native.log
             ${{ runner.temp }}/psc1-owned-state-native.log
             psc1/dist/expr-v2/native-artifacts.json
@@ -885,6 +910,7 @@ jobs:
           cp scripts/pskernel-name-worker-smoke.mjs "$PSC1_DAG_RUN_DIR/name-worker-smoke.mjs"
           cp scripts/pskernel-scalar-hash-worker-smoke.mjs "$PSC1_DAG_RUN_DIR/scalar-hash-smoke.mjs"
           cp scripts/pskernel-scalar-hash-short-entry-smoke.mjs "$PSC1_DAG_RUN_DIR/scalar-hash-short-entry-smoke.mjs"
+          cp scripts/pskernel-closed-cache-analysis-smoke.mjs "$PSC1_DAG_RUN_DIR/closed-cache-analysis-smoke.mjs"
           cd "$PSC1_DAG_RUN_DIR"
           env PATH="" "$PSC1_NODE_BIN" --max-old-space-size=2048 scalar-hash-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-scalar-hash-generated.log"
@@ -893,6 +919,9 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" --max-old-space-size=2048 scalar-hash-short-entry-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-scalar-hash-short-entry-generated.log"
           grep -Fqx 'PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {"cases":19,"assertions":38,"shortMaxPairs":4,"genericFallback":true}' "$RUNNER_TEMP/psc1-scalar-hash-short-entry-generated.log"
+          env PATH="" "$PSC1_NODE_BIN" --max-old-space-size=2048 closed-cache-analysis-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-generated.log"
+          grep -Fqx 'PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {"expressions":20,"states":2,"mapQueries":40,"pairQueries":800,"inferQueries":80,"assertions":1884,"smallAndIndexed":true,"openEntriesSeeded":true}' "$RUNNER_TEMP/psc1-closed-cache-analysis-generated.log"
           env PATH="" "$PSC1_NODE_BIN" name-worker-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-name-worker-generated.log"
           grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-generated.log"
@@ -1033,6 +1062,7 @@ jobs:
             ${{ runner.temp }}/psc1-name-worker-generated.log
             ${{ runner.temp }}/psc1-scalar-hash-generated.log
             ${{ runner.temp }}/psc1-scalar-hash-short-entry-generated.log
+            ${{ runner.temp }}/psc1-closed-cache-analysis-generated.log
             ${{ runner.temp }}/psc1-recursor-k-generated.log
             ${{ runner.temp }}/psc1-owned-state-generated.log
             psc1/dist/expr-v2/integration/provider/
@@ -1411,4 +1441,5 @@ jobs:
           path: ${{ runner.temp }}/psc1-t01f-generated-complete/
           if-no-files-found: error
           retention-days: 30
+
 

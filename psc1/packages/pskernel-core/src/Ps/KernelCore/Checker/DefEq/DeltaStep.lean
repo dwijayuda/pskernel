@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.DefEq.Support
-import Ps.KernelCore.Runtime.Acceleration.CachePolicy
+import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
 /-
 Lean 4.34 single-step lazy-delta selection and unfolding.
@@ -446,23 +446,12 @@ def psKernelDefEqLazyStepBoth
           (Prod Bool PsKernelCheckerState) :=
       if sameShortcut then
         if
-            psKernelSemanticPairCacheEligible
+            psKernelSemanticExprPairSetContains
+              state.failure
               left
               right then
-          if
-              psKernelExprPairSetContains
-                state.failure
-                left
-                right then
-            Except.ok
-              (Prod.mk false state)
-          else
-            psKernelDefEqArgs
-              defeq
-              context
-              state
-              left
-              right
+          Except.ok
+            (Prod.mk false state)
         else
           psKernelDefEqArgs
             defeq
@@ -491,18 +480,17 @@ def psKernelDefEqLazyStepBoth
             Prod.snd compared;
           let afterFailure :=
             if sameShortcut then
-              if
-                  psKernelSemanticPairCacheEligible
-                    left
-                    right then
-                psKernelCheckerStateWithFailure
-                  comparedState
-                  (psKernelExprPairSetInsert
+              match
+                  psKernelSemanticExprPairSetInsert
                     comparedState.failure
                     left
-                    right)
-              else
-                comparedState
+                    right with
+              | Option.none =>
+                  comparedState
+              | Option.some nextCache =>
+                  psKernelCheckerStateWithFailure
+                    comparedState
+                    nextCache
             else
               comparedState;
           match
@@ -594,4 +582,3 @@ def psKernelDefEqLazyStep
             right
             leftDef
             rightDef
-

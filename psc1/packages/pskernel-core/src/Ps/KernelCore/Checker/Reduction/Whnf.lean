@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.WhnfCore
-import Ps.KernelCore.Runtime.Acceleration.CachePolicy
+import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
 /-
 Public weak-head normalization pipeline.
@@ -146,12 +146,9 @@ def psKernelWhnfWithFuel
                     Except.ok (Prod.mk expr state)
                 | Option.some _ =>
                     match
-                        if psKernelSemanticCacheEligible expr then
-                          psKernelExprMapGet
-                            state.whnf
-                            expr
-                        else
-                          Option.none with
+                        psKernelSemanticExprMapGet
+                          state.whnf
+                          expr with
                     | Option.some cached =>
                         Except.ok
                           (Prod.mk cached state)
@@ -191,12 +188,9 @@ def psKernelWhnfWithFuel
                               core
         | _ =>
             match
-                if psKernelSemanticCacheEligible expr then
-                  psKernelExprMapGet
-                    state.whnf
-                    expr
-                else
-                  Option.none with
+                psKernelSemanticExprMapGet
+                  state.whnf
+                  expr with
             | Option.some cached =>
                 Except.ok
                   (Prod.mk cached state)

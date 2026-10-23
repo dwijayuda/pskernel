@@ -1,5 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.KernelReductions
-import Ps.KernelCore.Runtime.Acceleration.CachePolicy
+import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
 /-
 Core weak-head reduction.
@@ -83,21 +83,22 @@ def psKernelWhnfCoreFinish
   if cheapProj then
     Except.ok
       (Prod.mk result state)
-  else if psKernelSemanticCacheEligible original then
-    let nextCache :=
-      psKernelExprMapInsert
-        state.whnfCore
-        original
-        result;
-    Except.ok
-      (Prod.mk
-        result
-        (psKernelCheckerStateWithWhnfCore
-          state
-          nextCache))
   else
-    Except.ok
-      (Prod.mk result state)
+    match
+        psKernelSemanticExprMapInsert
+          state.whnfCore
+          original
+          result with
+    | Option.none =>
+        Except.ok
+          (Prod.mk result state)
+    | Option.some nextCache =>
+        Except.ok
+          (Prod.mk
+            result
+            (psKernelCheckerStateWithWhnfCore
+              state
+              nextCache))
 
 def psKernelWhnfFinish
     (original : PsKernelExpr)
@@ -105,21 +106,21 @@ def psKernelWhnfFinish
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  if psKernelSemanticCacheEligible original then
-    let nextCache :=
-      psKernelExprMapInsert
+  match
+      psKernelSemanticExprMapInsert
         state.whnf
         original
-        result;
-    Except.ok
-      (Prod.mk
-        result
-        (psKernelCheckerStateWithWhnf
-          state
-          nextCache))
-  else
-    Except.ok
-      (Prod.mk result state)
+        result with
+  | Option.none =>
+      Except.ok
+        (Prod.mk result state)
+  | Option.some nextCache =>
+      Except.ok
+        (Prod.mk
+          result
+          (psKernelCheckerStateWithWhnf
+            state
+            nextCache))
 
 def psKernelWhnfCoreWithFuel
     (fuel : Nat) :
@@ -249,12 +250,9 @@ def psKernelWhnfCoreWithFuel
                           cheapProj
             | _ =>
                 match
-                    if psKernelSemanticCacheEligible expr then
-                      psKernelExprMapGet
-                        state.whnfCore
-                        expr
-                    else
-                      Option.none with
+                    psKernelSemanticExprMapGet
+                      state.whnfCore
+                      expr with
                 | Option.some cached =>
                     Except.ok
                       (Prod.mk cached state)
@@ -468,4 +466,3 @@ def psKernelWhnfCoreWithFuel
                     | _ =>
                         Except.ok
                           (Prod.mk expr state)
-

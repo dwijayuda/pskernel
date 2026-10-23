@@ -1,3 +1,42 @@
+## 2026-10-24 shared closed-cache analysis candidate — qualification pending
+
+This containing implementation recreates the saved T01F handoff: one explicit
+data-result eligibility/hash worker, four semantic cache helpers and two
+inference helpers; seven universal equivalence statements; a generated
+20-expression/two-representation matrix requiring exactly1,884 assertions; and
+the seven specified V1 checker call-site files. This is a NEW candidate, not
+a previously tested transient draft. Native proof elaboration, generated shape,
+complete producer, controls and mixed runtime are not yet qualified.
+
+Old Cache.lean, CachePolicy.lean, Core/Expr.lean, ScalarHash.lean and all eleven
+scalar-hash proofs remain unchanged. The worker preserves eligibility scan
+order and exact closed hashes; semantic comparisons remain authoritative.
+None on ineligible insertion retains the original checker state. Small-cache
+promotion, scopes, owners, fuel, depth, errors and publication order remain.
+Knot's unconditional pair lookup and LazyDelta remain unchanged.
+
+The active narrow workflow requires92native proof reports (85retained+7new),
+the frozen scalar matrix and short-entry controls, exact1,884new assertions,
+and strict complete-worker generated-body inspection before the authentic
+full PSC1/TypeScript7.0.2 producer and unchanged mixed job. The mixed receipt
+now requires exactly1,400 assertions. BOTH paused final routes include the new
+detached matrix, and the saved integration draft is synchronized.
+
+Follow this candidate's ONE native-first narrow run to terminal; do not launch
+duplicates. All FIVE full work-branch triggers stay PAUSED; diagnostics remain
+manual-only. Only a complete narrow PASS permits one exact new final source
+through BOTH strict six-shard routes (1,400/sample;8,400executed/route, repeated
+prefixes explicit) plus all retained gates. No source/attempt pass mixing.
+
+T01F/current A/B/D remain OPEN; C remains FAIL. No T05 or integration yet.
+Latest fetched integration123c41197950b6761be965fd21c57142ee2b0d1c; parent work
+c775391e13506208a9c7372bd212102b7e9a49e5. The b0 mixed timeout and phase profile
+remain source-bound historical evidence. Actions Linux ONLY; pinned Lean
+eb6cafb7/TS7.0.2/Node22, fuel4096/oldspace2048MiB/emptyPATH/25min unchanged.
+No main merge, force push or npm publication; fresh expected-SHA updates.
+
+---
+
 ## 2026-10-24 handoff: b0 mixed FAILED; cache-analysis implementation NOT committed
 
 The user requested continuation in a new regular chat. This containing commit

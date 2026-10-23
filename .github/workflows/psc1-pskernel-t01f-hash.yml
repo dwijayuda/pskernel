@@ -1,4 +1,4 @@
-name: PSC1 T01F primitive short-pair leaf preflight
+name: PSC1 T01F closed-cache analysis preflight
 on:
   workflow_dispatch:
   push:
@@ -7,6 +7,8 @@ on:
     paths:
       - psc1/packages/pskernel-core/src/**
       - psc1/test/PsKernelScalarHashWorkerRegression.lean
+      - psc1/test/PsKernelClosedCacheAnalysisRegression.lean
+      - psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs
       - .github/workflows/psc1-pskernel-t01f-hash.yml
 permissions:
   contents: read
@@ -29,8 +31,13 @@ jobs:
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
           lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_string_environment_regression psc1_kernel_expr_v2_dag_regression
-          lake -f kernel-lakefile.lean env lean test/PsKernelCacheScopeProofs.lean
-          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean
+          mkdir -p "$RUNNER_TEMP/psc1-t01f"
+          test "$(grep -c '^#print axioms ' test/PsKernelCacheScopeProofs.lean)" -eq 60
+          test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 14
+          lake -f kernel-lakefile.lean env lean test/PsKernelCacheScopeProofs.lean \
+            2>&1 | tee "$RUNNER_TEMP/psc1-t01f/cache-scope-proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean \
+            2>&1 | tee "$RUNNER_TEMP/psc1-t01f/session-proofs.log"
           lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2GeneratedPrefixRegression.lean
       - name: Prove exact scalar hash equivalence and run frozen native matrix
         working-directory: psc1
@@ -44,6 +51,38 @@ jobs:
           grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           grep -Fqx 'PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           if grep -Eq 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"; then exit 1; fi
+      - name: Prove all seven closed-cache equivalences before generated execution
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^#print axioms ' test/PsKernelClosedCacheAnalysisRegression.lean)" -eq 7
+          lake -f kernel-lakefile.lean env lean test/PsKernelClosedCacheAnalysisRegression.lean \
+            2>&1 | tee "$RUNNER_TEMP/psc1-t01f/closed-cache-analysis-proofs.log"
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-t01f/closed-cache-analysis-proofs.log"; then exit 1; fi
+          python3 - <<'PY'
+          import os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'psc1-t01f'
+          expected = {'cache-scope-proofs.log': 60, 'session-proofs.log': 14,
+                      'scalar-hash-native.log': 11, 'closed-cache-analysis-proofs.log': 7}
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          total = 0
+          for filename, count in expected.items():
+              log = (root / filename).read_text()
+              reports = re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log)
+              if len(reports) != count:
+                  raise RuntimeError('Unexpected proof report count for ' + filename + ': ' + str(len(reports)))
+              if any(bad in log for bad in ('sorryAx', 'Lean.ofReduceBool', 'Lean.trustCompiler')):
+                  raise RuntimeError('Forbidden proof dependency in ' + filename)
+              for name, axioms in reports:
+                  used = {axiom.strip() for axiom in axioms.split(',') if axiom.strip()}
+                  if not used <= allowed:
+                      raise RuntimeError('Unexpected axioms for ' + name + ': ' + repr(used - allowed))
+              total += len(reports)
+          if total != 92:
+              raise RuntimeError('Expected exactly 92 native proof reports')
+          print('PSC1_CLOSED_CACHE_ANALYSIS_NATIVE: PASS newProofs=7 totalProofs=92 allowedStandardAxiomsOnly=true')
+          PY
       - name: Independently admit actual String declarations and export untrusted inputs
         working-directory: psc1
         run: |
@@ -72,6 +111,9 @@ jobs:
             ${{ runner.temp }}/psc1-t01f/native.log
             ${{ runner.temp }}/psc1-t01f/retained.log
             ${{ runner.temp }}/psc1-t01f/scalar-hash-native.log
+            ${{ runner.temp }}/psc1-t01f/cache-scope-proofs.log
+            ${{ runner.temp }}/psc1-t01f/session-proofs.log
+            ${{ runner.temp }}/psc1-t01f/closed-cache-analysis-proofs.log
 
   generated-string:
     needs: [native-string]
@@ -100,12 +142,12 @@ jobs:
           echo '{"name":"psc1-dag-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-dag-ts/package.json"
           npm install --prefix "$RUNNER_TEMP/psc1-dag-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/psc1-dag-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
-      - name: Require data-result scalar hash code generation before full kernel build
+      - name: Require scalar hash and closed-cache code generation before full kernel build
         working-directory: psc1
         shell: bash
         run: |
           set -euo pipefail
-          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean \
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean \
             --out dist/expr-v2/scalar-hash/kernel.js
           cp dist/expr-v2/scalar-hash/kernel.js "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs"
           node scripts/pskernel-scalar-hash-worker-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
@@ -113,7 +155,10 @@ jobs:
           node scripts/pskernel-scalar-hash-short-entry-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
             | tee -a "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
           grep -Fqx 'PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {"cases":19,"assertions":38,"shortMaxPairs":4,"genericFallback":true}' "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
-          python3 - <<'PY'
+          env PATH="" "$(command -v node)" --max-old-space-size=2048 scripts/pskernel-closed-cache-analysis-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
+            | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-probe.log"
+          grep -Fqx 'PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {"expressions":20,"states":2,"mapQueries":40,"pairQueries":800,"inferQueries":80,"assertions":1884,"smallAndIndexed":true,"openEntriesSeeded":true}' "$RUNNER_TEMP/psc1-closed-cache-analysis-probe.log"
+          python3 - <<'PY' | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-codegen.log"
           import pathlib, re
           text = pathlib.Path('dist/expr-v2/scalar-hash/kernel.js').read_text()
           def implementations(prefix):
@@ -124,6 +169,17 @@ jobs:
               start = text.index(marker)
               end = text.find('\nexport ', start + len(marker))
               return text[start:] if end < 0 else text[start:end]
+          analysis_name = 'psKernelExprClosedCacheAnalysis'
+          if implementations(analysis_name) != [analysis_name]:
+              raise RuntimeError('Closed-cache analysis must have exactly one non-recurried export')
+          analysis_body = body_of(analysis_name)
+          print('PSC1_CLOSED_CACHE_ANALYSIS_BODY ' + repr(analysis_body))
+          for forbidden in ('_$psc0SH', '__ps$wrap', 'psKernelExprHash', 'psKernelExprHasFVar'):
+              if forbidden in analysis_body:
+                  raise RuntimeError('Unexpected closed-cache analysis staging or old traversal: ' + forbidden)
+          if analysis_body.count('__ps$invoke(' + analysis_name + ',') != 11:
+              raise RuntimeError('Closed-cache analysis must retain exactly eleven structural self-dispatch sites')
+          print('PSC1_CLOSED_CACHE_ANALYSIS_CODEGEN: PASS dataResult=true recursiveSites=11 oldHashCalls=0 oldHasFVarCalls=0 recurry=false')
           expected = {
               'psKernelCacheStringHashPairsWithFuel': (2, ['psKernelCacheStringHashPairsWithFuel']),
               'psKernelCacheStringHashStateWithFuel': (1, ['psKernelCacheStringHashPairsWithFuel']),
@@ -274,6 +330,8 @@ jobs:
             psc1/dist/expr-v2/integration/kernel.js.map
             psc1/dist/expr-v2/scalar-hash/
             ${{ runner.temp }}/psc1-scalar-hash-probe.log
+            ${{ runner.temp }}/psc1-closed-cache-analysis-probe.log
+            ${{ runner.temp }}/psc1-closed-cache-analysis-codegen.log
           if-no-files-found: error
 
   generated-hash-runtime:
@@ -335,6 +393,7 @@ jobs:
           kernel = suffix('psc1/dist/expr-v2/integration/kernel.js')
           fixture = suffix('psc1-t01f-generated/fixture.json')
           runner = pathlib.Path('psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs')
+          cache_analysis_runner = pathlib.Path('psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs')
           fixture_producer = pathlib.Path('psc1/test/PsKernelExprV2StringEnvironmentRegression.lean')
           for field,path in {'kernel':kernel,'fixture':fixture,'generatedRunner':runner,'fixtureProducer':fixture_producer}.items():
               require(provenance[field]==digest(path),'digest '+field)
@@ -348,12 +407,14 @@ jobs:
           for path,name in [(kernel,'kernel.mjs'),(fixture,'fixture.json'),(runner,'string-smoke.mjs'),
                             (pathlib.Path('psc1/scripts/pskernel-expr-v2-dag-smoke.mjs'),'dag-smoke.mjs'),
                             (pathlib.Path('psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs'),'prefix-smoke.mjs'),
-                            (pathlib.Path('psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs'),'scalar-hash-smoke.mjs')]:
+                            (pathlib.Path('psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs'),'scalar-hash-smoke.mjs'),
+                            (cache_analysis_runner,'closed-cache-analysis-smoke.mjs')]:
               shutil.copyfile(path,detached/name)
               require(digest(path)==digest(detached/name),'detached copy '+name)
           report={'schema':'psc1-t01f-same-run-hash-preflight-v1','harnessSourceSha':source,'generatedSourceSha':source,
                   'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
-                  'kernel':digest(kernel),'fixture':digest(fixture),'currentScripts':{'string':digest(runner)},
+                  'kernel':digest(kernel),'fixture':digest(fixture),
+                  'currentScripts':{'string':digest(runner),'closedCacheAnalysis':digest(cache_analysis_runner)},
                   'artifact':{'name':'psc1-t01f-hash-generated-producer','runId':os.environ['GITHUB_RUN_ID']},
                   'node':os.environ['PSC1_T01F_NODE_VERSION'],'mode':os.environ['PSC1_T01F_REUSE_MODE']}
           (root/'reuse-provenance.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
@@ -369,6 +430,9 @@ jobs:
             | tee "$PSC1_T01F_REUSE_DIR/scalar-hash.log"
           grep -Fq 'PSC1_SCALAR_HASH_WORKER_JS: PASS ' "$PSC1_T01F_REUSE_DIR/scalar-hash.log"
           grep -Fqx 'PSC1_SCALAR_HASH_LONG_JS: PASS cases=3' "$PSC1_T01F_REUSE_DIR/scalar-hash.log"
+          env PATH="" "$PSC1_T01F_NODE" --max-old-space-size=2048 closed-cache-analysis-smoke.mjs kernel.mjs \
+            | tee "$PSC1_T01F_REUSE_DIR/closed-cache-analysis.log"
+          grep -Fqx 'PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {"expressions":20,"states":2,"mapQueries":40,"pairQueries":800,"inferQueries":80,"assertions":1884,"smallAndIndexed":true,"openEntriesSeeded":true}' "$PSC1_T01F_REUSE_DIR/closed-cache-analysis.log"
           /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' \
             -o "$PSC1_T01F_REUSE_DIR/dag.memory" \
             env PATH="" "$PSC1_T01F_NODE" --max-old-space-size=2048 --expose-gc \
@@ -441,8 +505,8 @@ jobs:
           measurements = receipt.get('measurements')
           if not isinstance(measurements, list) or len(measurements) != 1 or measurements[0].get('sample') != 'Aé€😀':
               raise RuntimeError('Expected one complete mixed-sample measurement')
-          if type(receipt.get('assertions')) is not int or receipt['assertions'] <= 0:
-              raise RuntimeError('Missing assertion count')
+          if type(receipt.get('assertions')) is not int or receipt['assertions'] != 1400:
+              raise RuntimeError('Expected exactly 1400 executed mixed-sample assertions, including repeated prefixes')
           for name in ('constructionMs', 'admissionMs', 'metadataMs', 'totalMs'):
               value = receipt.get(name)
               if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
@@ -462,3 +526,4 @@ jobs:
           name: psc1-t01f-hash-runtime-${{ matrix.mode }}
           path: ${{ runner.temp }}/psc1-t01f-hash-${{ matrix.mode }}/
           if-no-files-found: error
+

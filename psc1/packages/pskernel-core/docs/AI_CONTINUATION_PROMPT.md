@@ -1,3 +1,48 @@
+## Current:61deda whole mixed TIMEOUT; exact-artifact phase profile next
+
+Executable/harness61deda52ef95b5e932e179663e60ba59fa9777df,
+run https://github.com/dwijayuda/pskernel/actions/runs/39888872678:
+native120203522175 PASS,complete authentic generated producer120204250635 PASS,
+retained detached controls120209378192 PASS; whole mixed120209378115 CANCELLED
+at unchanged25minute cap. 417trace begins/416ends; interrupted call417 is
+psKernelV1RunDag at validity-right. All294admissions/377metadata and mixed
+String.ofList singleton passed; no complete mixed case/shard receipt.
+Completed V1DefEq776258.693ms,publicRunDag365100.787ms,V1WHNF180695.556ms.
+Top completed UTF8-literal/UTF8-ofList DefEq calls77695.176/79278.336ms.
+No assertion/heap failure observed; mixed.memory empty,completedpeakRSS UNKNOWN.
+Artifact12475851172 ZIP536116bytes SHA256
+9ff1dad78994822a2267da13c81c1689bc8d27d582db7355db7436c9e7a6ede5.
+Exact all417begins/416ends,source/harness/kernel/fixture bindings and hashes:
+evidence/2026-10-23-t01f-primitive-fusion-mixed-terminal.json.
+Bounded primitive-fusion shape and finite/exact results remain valid at61deda;
+the complete mixed execution did NOT pass. Do not infer performance success.
+
+This diagnostic source updates ONLY the bounded V1 profiling workflow plus
+evidence/docs. It reuses authenticated exact61deda producer artifact12474053112
+(run39888872678/job120204250635/tree79711d9d637ebea88f5f09f06bdd54c1d48c3e08),
+kernel e58459e63fd78a34c867b7ccbc913d2f8b38c9881067fcb45cf526ce7e7e1780.
+The driver preserves complete independent294request admission and377metadata
+checks then isolates V1DefEq of Array0(ByteArray0(String0(mixedliteral))) against
+the genuine UInt8 byte list. A separate Inspector CPU profile starts AFTER
+admission/metadata/term construction and ends immediately after that operation;
+whole-process V8 sampling is retained as incomplete-outcome fallback.
+Fixed180second diagnostic deadline/10minutejob,fuel4096,heap2048MiB,emptyPATH.
+The derived driver is diagnosticOnly/qualificationfalse and cannot emit any
+full String acceptance receipt. Generated and harness sources are separate.
+Read the containing source's existing profile run and actual profile before
+selecting another optimization; never launch a duplicate or weaken acceptance.
+
+All5full work-branch pushes remain PAUSED; prepared activation is NOT applied.
+Bothfe4aa final-route mixed timeouts/aggregate failures are durably retained.
+Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged. T01F/currentA/B/D
+OPEN,C FAIL,historicalscopedA9c87 qualified; noT05 until fullT01F. No main/npm.
+One next task: inspect this exact-artifact bounded DefEq phase profile, then fix
+its concrete source bottleneck and rerun native-first preflight. Full final
+qualification requires both6-shard routes,allretained gates,owner32/384 and193/
+profile at ONE coherent final source. Prior passes cannot qualify a new source.
+
+---
+
 ## Current checkpoint: primitive fusion built; whole mixed preflight pending
 
 Executable and harness `61deda52ef95b5e932e179663e60ba59fa9777df`,

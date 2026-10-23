@@ -1,6 +1,11 @@
-name: PSC1 T01F data-result measured V1 UTF8 WHNF diagnostic
+name: PSC1 T01F primitive-fusion V1 UTF8 DefEq diagnostic
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - work/psc1-pskernel-t01f-string-20261022
+    paths:
+      - '.github/workflows/psc1-pskernel-t01f-v1-profile.yml'
 permissions:
   contents: read
   actions: read
@@ -10,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PSC1_T01F_REUSE_MODE: v1-whnf-profile
+      PSC1_T01F_REUSE_MODE: v1-defeq-profile
       PSC1_T01F_JOB_MINUTES: 10
     steps:
       - uses: actions/checkout@v4
@@ -35,17 +40,17 @@ jobs:
           import base64, hashlib, io, json, os, pathlib, re, subprocess, urllib.parse, urllib.request, zipfile
 
           repo = 'dwijayuda/pskernel'
-          source = '5abf40506564cad00ff518600ae5992dc826510e'
-          source_tree = '3fada3d01b4555f50d197421b5c1fadc4c671757'
-          producer_run = 39860528417
-          producer_job = 120110557932
-          artifact_id = 12461534544
-          artifact_size = 1132630
-          artifact_digest = 'deffed2af9d212e3bd77a5c444c1d50f3cddfa148646a0526c40c5f4ba8186a7'
+          source = '61deda52ef95b5e932e179663e60ba59fa9777df'
+          source_tree = '79711d9d637ebea88f5f09f06bdd54c1d48c3e08'
+          producer_run = 39888872678
+          producer_job = 120204250635
+          artifact_id = 12474053112
+          artifact_size = 1132696
+          artifact_digest = '36b1e3befc0a8fac6ef36a72d048988c06107f053015c08a0b89de3941d46869'
           lean_commit = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
           samples = ['', 'a', 'é', '€', '😀', 'Aé€😀']
           expected = {
-              'kernel': {'bytes': 9954933, 'sha256': '4252fe0c1100a0bda8aa9e488195902af560c27e92b3e93ad77ac9550b4bc5fe'},
+              'kernel': {'bytes': 9955170, 'sha256': 'e58459e63fd78a34c867b7ccbc913d2f8b38c9881067fcb45cf526ce7e7e1780'},
               'fixture': {'bytes': 2791525, 'sha256': '563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d'},
               'fixtureProducer': {'bytes': 39734, 'sha256': '63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663'},
               'generatedRunner': {'bytes': 27140, 'sha256': 'd3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2'},
@@ -90,7 +95,7 @@ jobs:
           node_version = subprocess.check_output([os.environ['PSC1_T01F_NODE'], '--version'], text=True).strip()
           require(node_version.startswith('v22.'), 'Node 22')
           mode = os.environ['PSC1_T01F_REUSE_MODE']
-          require(mode == 'v1-whnf-profile', 'diagnostic mode')
+          require(mode == 'v1-defeq-profile', 'diagnostic mode')
 
           run = get('/actions/runs/' + str(producer_run))
           require(run['id'] == producer_run and run['run_attempt'] == 1 and run['head_sha'] == source,
@@ -110,7 +115,8 @@ jobs:
               'Run actions/checkout@v4': 'success',
               'Install pinned Lean': 'success',
               'Run actions/setup-node@v4': 'success',
-              'Build authentic PSC1 and check complete kernel source': 'success',
+              'Build authentic PSC1 for the bounded code-generation gate': 'success',
+              'Check complete authentic kernel source after the bounded gate': 'success',
               'Install pinned TypeScript': 'success',
               'Compile the complete independent kernel to JavaScript': 'success',
               'Produce authentic T01F inputs for generated independent replay': 'success',
@@ -188,7 +194,7 @@ jobs:
               if name == 'leanToolchain':
                   require(data.decode().strip() == 'leanprover/lean4:v4.35.0', 'source Lean toolchain pin')
               if name == 'workflow':
-                  require(blob_sha == 'f9be2c9a3616ec508e1ddec815c65d3ee035fea7', 'reviewed original compiler workflow')
+                  require(blob_sha == 'bccfa8dca153bb4885899a3e4e79c1420e936e68', 'reviewed original compiler workflow')
                   require('typescript@7.0.2' in data.decode() and
                           'lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean' in data.decode(),
                           'original TypeScript pin and complete SelfHost source-check command')
@@ -211,7 +217,7 @@ jobs:
 
           report = {
               'schema': 'psc1-t01f-authenticated-reuse-diagnostic-v1',
-              'authority': 'Diagnostic only. The 19fb producer full generated acceptance was cancelled; no final-source qualification or provider promotion.',
+              'authority': 'Diagnostic only. The61deda producer full generated acceptance was cancelled; no final-source qualification or provider promotion.',
               'inputAuthority': 'Raw requests only. This generated process must independently admit all 294 requests from empty before querying.',
               'repository': repo, 'harnessSourceSha': harness_sha, 'generatedSourceSha': source,
               'generatedSourceTree': source_tree, 'runId': os.environ['GITHUB_RUN_ID'],
@@ -247,21 +253,22 @@ jobs:
           anchor = 'const measurements=[];\nfor(const value of sequence(selectedSamples).map(text)){'
           if source.count(anchor) != 1: raise RuntimeError('Unique reviewed complete-fixture prefix required')
           prefix = source[:source.index(anchor)]
-          tail = "\ntraceSample=fixture.samples[5];traceStage=\"profile:utf8-literal-left\";\nconst diagnosticLiteral=E.lit(Lit.str(traceSample));\nconst diagnosticInput=E.proj(qname(\"Array\"),0n,\n E.proj(qname(\"ByteArray\"),0n,E.proj(qname(\"String\"),0n,diagnosticLiteral)));\nconst diagnosticStart=performance.now();\nconst diagnosticNormalized=accepted(get(\"psKernelV1Whnf\")(session,nil,safe,diagnosticInput),\"profile-utf8-literal-whnf\");\nlet diagnosticHead=diagnosticNormalized;\nwhile(diagnosticHead&&typeof diagnosticHead===\"object\"&&Object.hasOwn(diagnosticHead,\"fn\")&&\n same(diagnosticHead,E.app(diagnosticHead.fn,diagnosticHead.arg)))diagnosticHead=diagnosticHead.fn;\nmust(eqExpr(diagnosticHead,cn(\"List.cons\",[zero])),\"diagnostic-nonempty-byte-list-head\");\nmust(get(\"psKernelEnvironmentSize\")(empty.environment)===0n,\"diagnostic-empty-session-isolation\");\nconsole.log(\"PSC1_T01F_V1_WHNF_DIAGNOSTIC_COMPLETE \"+JSON.stringify({\n diagnosticOnly:true,qualification:false,sample:traceSample,requests:requests.length,metadata:metadata.length,\n milliseconds:performance.now()-diagnosticStart,kernelSha256,fixtureSha256,harnessSha256,\n memory:process.memoryUsage()}));\n"
+          tail = "\ntraceSample=fixture.samples[5];traceStage=\"profile:utf8-literal:defeq\";\nconst diagnosticLiteral=E.lit(Lit.str(traceSample));\nconst diagnosticInput=E.proj(qname(\"Array\"),0n,\n E.proj(qname(\"ByteArray\"),0n,E.proj(qname(\"String\"),0n,diagnosticLiteral)));\nconst diagnosticExpected=bytes(traceSample);\nconst {Session:InspectorSession}=await import(\"node:inspector\");\nconst {writeFileSync}=await import(\"node:fs\");\nconst cpu=new InspectorSession();cpu.connect();\nconst post=(method,params={})=>new Promise((resolve,reject)=>cpu.post(method,params,(error,result)=>error?reject(error):resolve(result)));\nawait post(\"Profiler.enable\");\nawait post(\"Profiler.setSamplingInterval\",{interval:1000});\nawait post(\"Profiler.start\");\nconst diagnosticStart=performance.now();\nconst diagnosticEqual=accepted(get(\"psKernelV1IsDefEq\")(session,nil,safe,diagnosticInput,diagnosticExpected),\"profile-utf8-literal-defeq\");\nconst diagnosticMs=performance.now()-diagnosticStart;\nconst {profile}=await post(\"Profiler.stop\");\nwriteFileSync(\"../operation.cpuprofile\",JSON.stringify(profile));\ncpu.disconnect();\nmust(diagnosticEqual,\"diagnostic-genuine-byte-list-equal\");\nmust(get(\"psKernelEnvironmentSize\")(empty.environment)===0n,\"diagnostic-empty-session-isolation\");\nconsole.log(\"PSC1_T01F_V1_DEFEQ_DIAGNOSTIC_COMPLETE \"+JSON.stringify({\n diagnosticOnly:true,qualification:false,phaseExclusiveProfile:true,sample:traceSample,requests:requests.length,metadata:metadata.length,\n milliseconds:diagnosticMs,kernelSha256,fixtureSha256,harnessSha256,\n profileSamples:profile.samples.length,memory:process.memoryUsage()}));\n"
           derived = (prefix + tail).encode()
-          (root / 'detached/v1-whnf-profile.mjs').write_bytes(derived)
+          (root / 'detached/v1-defeq-profile.mjs').write_bytes(derived)
           report = {'schema':'psc1-t01f-derived-operation-diagnostic-v1', 'diagnosticOnly':True, 'qualification':False,
-                    'generatedSourceSha':'5abf40506564cad00ff518600ae5992dc826510e', 'harnessSourceSha':os.environ['GITHUB_SHA'],
+                    'generatedSourceSha':'61deda52ef95b5e932e179663e60ba59fa9777df', 'harnessSourceSha':os.environ['GITHUB_SHA'],
                     'fullRunnerSha256':hashlib.sha256(source.encode()).hexdigest(),
                     'derivedDriverSha256':hashlib.sha256(derived).hexdigest(),
-                    'prefixBytes':len(prefix.encode()), 'operation':'psKernelV1Whnf(Array0(ByteArray0(String0(literal))))',
+                    'phaseExclusiveProfile':True, 'samplingIntervalMicroseconds':1000,
+                    'prefixBytes':len(prefix.encode()), 'operation':'psKernelV1IsDefEq(Array0(ByteArray0(String0(literal))),genuine-UInt8-byte-list)',
                     'sample':'Aé€😀', 'fullIndependentAdmission':294, 'metadataComparison':377,
                     'fuel':4096, 'oldSpaceMiB':2048, 'operationDiagnosticSeconds':180, 'emptyPATH':True}
           (root / 'diagnostic-driver-provenance.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
           print('PSC1_T01F_V1_PROFILE_DRIVER ' + json.dumps(report,ensure_ascii=False))
           PY
-          "$PSC1_T01F_NODE" --check "$PSC1_T01F_REUSE_DIR/detached/v1-whnf-profile.mjs"
-      - name: Profile measured UTF8 literal WHNF under fixed diagnostic deadline
+          "$PSC1_T01F_NODE" --check "$PSC1_T01F_REUSE_DIR/detached/v1-defeq-profile.mjs"
+      - name: Profile measured UTF8 literal DefEq under fixed diagnostic deadline
         shell: bash
         run: |
           set -euo pipefail
@@ -271,7 +278,7 @@ jobs:
             -o "$PSC1_T01F_REUSE_DIR/profile.memory" \
             timeout --signal=TERM --kill-after=5s 180s \
             env PATH="" PSC1_T01F_TRACE=1 NODE_OPTIONS="" "$PSC1_T01F_NODE" --max-old-space-size=2048 --expose-gc \
-              --prof --logfile=v1-whnf.log v1-whnf-profile.mjs kernel.mjs fixture.json 5 \
+              --prof --logfile=v1-defeq.log v1-defeq-profile.mjs kernel.mjs fixture.json 5 \
               2>&1 | tee "$PSC1_T01F_REUSE_DIR/profile.log"
           status=${PIPESTATUS[0]}
           printf '%s\n' "$status" > "$PSC1_T01F_REUSE_DIR/diagnostic-exit-status.txt"
@@ -284,14 +291,32 @@ jobs:
           set -euo pipefail
           cd "$PSC1_T01F_REUSE_DIR/detached"
           shopt -s nullglob
-          logs=(isolate-*-v1-whnf.log)
+          logs=(isolate-*-v1-defeq.log)
           test "${#logs[@]}" -eq 1
           "$PSC1_T01F_NODE" --prof-process "${logs[0]}" > "$PSC1_T01F_REUSE_DIR/profile.txt" 2> "$PSC1_T01F_REUSE_DIR/profile-process.stderr"
           sed -n '1,260p' "$PSC1_T01F_REUSE_DIR/profile.txt"
+          python3 - <<'PY'
+          import collections, json, os, pathlib
+          root = pathlib.Path(os.environ['PSC1_T01F_REUSE_DIR'])
+          path = root / 'operation.cpuprofile'
+          report = {'diagnosticOnly':True,'qualification':False,'phaseExclusive':True,'profilePresent':path.exists()}
+          if path.exists():
+              profile=json.loads(path.read_text())
+              nodes={node['id']:node for node in profile['nodes']}
+              counts=collections.Counter(profile['samples'])
+              kernel=(root/'detached/kernel.mjs').read_text().splitlines()
+              rows=[]
+              for node_id,count in counts.most_common(70):
+                  frame=nodes[node_id]['callFrame'];line=frame['lineNumber']
+                  rows.append({'samples':count,'frame':frame,'generatedLine':kernel[line] if frame['url'].endswith('/kernel.mjs') and 0<=line<len(kernel) else None})
+              report.update({'samples':len(profile['samples']),'startTime':profile['startTime'],'endTime':profile['endTime'],'topSelf':rows})
+          (root/'phase-profile-summary.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('PSC1_T01F_V1_DEFEQ_PHASE_PROFILE '+json.dumps(report))
+          PY
           tail -n 20 "$PSC1_T01F_REUSE_DIR/profile.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-t01f-measured-v1-whnf-diagnostic
-          path: ${{ runner.temp }}/psc1-t01f-reuse-v1-whnf-profile/
+          name: psc1-t01f-measured-v1-defeq-diagnostic
+          path: ${{ runner.temp }}/psc1-t01f-reuse-v1-defeq-profile/
           if-no-files-found: error

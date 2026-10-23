@@ -450,3 +450,7 @@ lean_exe psc1_lexer_normalization_tests where
 lean_exe psc1_codec_static_schema_tests where
   root := `CodecStaticSchemaTests
   srcDir := "test"
+
+lean_exe psc1_json_escape_predicate_tests where
+  srcDir := "test"
+  root := `JsonEscapePredicateTests

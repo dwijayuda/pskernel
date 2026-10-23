@@ -173,7 +173,9 @@ def psJsonEscapeChars (chars : List Char) : String :=
 
 def psJsonCharNeedsEscape (char : Char) : Bool :=
   let code : Nat := Char.toNat char;
-  Nat.blt code 32 || Nat.beq code 34 || Nat.beq code 92
+  if Nat.blt code 32 then true
+  else if Nat.beq code 34 then true
+  else Nat.beq code 92
 
 -- Copy unchanged UTF-8 spans in one chunk. Positions come only from the owned
 -- string cursor. The input-derived byte bound is the same as StringToChars;

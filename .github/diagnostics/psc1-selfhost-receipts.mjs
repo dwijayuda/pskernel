@@ -114,7 +114,7 @@ for(const expected of request.attempts) {
    const helpers={};
    for(const name of ['__ps$stringUtf8Size','__ps$stringExtract']){
     const start=text.indexOf('function '+name+'(');assert.ok(start>=0);
-    const next=text.indexOf('\nfunction',start+10),body=text.slice(start,next<0?text.length:next);
+    let depth=0,end=-1;for(let i=text.indexOf('{',start);i<text.length;i++){if(text[i]==='{')depth++;else if(text[i]==='}'&&--depth===0){end=i+1;break;}}assert.ok(end>start);const body=text.slice(start,end);
     assert.equal(/__ps\$(?:last|previous)Utf8\s*=/.test(body),false);
     assert.equal(body.includes('new Uint32Array'),false);
     if(name==='__ps$stringUtf8Size')assert.equal(body.includes('__ps$utf8('),false);

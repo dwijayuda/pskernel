@@ -1,3 +1,4 @@
+import SharedLookupPrefixTests
 import FoundationListTests
 import ErasureSpineTests
 import CheckedSpineTests
@@ -351,6 +352,7 @@ private def fixtureModule : PsVerifiedIrModule :=
   ]
 
 def main : IO Unit := do
+  runSharedLookupPrefixTests
   runFoundationListTests
   runErasureSpineTests
   runCheckedSpineTests

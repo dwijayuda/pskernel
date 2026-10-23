@@ -519,3 +519,7 @@ lean_lib PsFoundationListReference where
 lean_lib PsWasmLowerExprPrefixReference where
   srcDir := "test"
   roots := #[`WasmLowerExprPrefixReference, `WasmLowerExprPrefixTests]
+
+lean_lib PsSharedLookupPrefixReference where
+  srcDir := "test"
+  roots := #[`SharedLookupPrefixReference, `SharedLookupPrefixTests]

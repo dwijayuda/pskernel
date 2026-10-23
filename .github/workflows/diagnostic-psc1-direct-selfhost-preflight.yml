@@ -9,6 +9,7 @@ on:
       - psc1/packages/bridge/**
       - psc1/packages/erasure/**
       - psc1/packages/foundation/**
+      - psc1/packages/environment/**
       - psc1/scripts/TargetServiceSeed.lean
       - psc1/scripts/generated-target-source-audit.mjs
       - psc1/host-tools/generated-target-profiles.mjs
@@ -20,6 +21,8 @@ on:
       - psc1/test/CheckedSpine*.lean
       - psc1/test/ErasureSpine*.lean
       - psc1/test/FoundationList*.lean
+      - psc1/test/SharedLookupPrefix*.lean
+      - psc1/scripts/check-shared-lookup-prefixes.mjs
       - psc1/scripts/check-erasure-declaration-spines.mjs
       - psc1/test/JsStatement*.lean
       - psc1/scripts/js-statement-tests.mjs
@@ -80,6 +83,7 @@ jobs:
           node --check scripts/generated-target-qualification.mjs
           node --check scripts/js-statement-tests.mjs
           node scripts/check-wasm-applied-prefixes.mjs
+          node scripts/check-shared-lookup-prefixes.mjs
           node scripts/check-erasure-declaration-spines.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs

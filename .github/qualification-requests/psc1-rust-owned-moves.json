@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "rust-private-linear-drop-20261023",
+  "id": "rust-shared-cursor-accumulator-20261023",
   "branch": "fix/psc1-rust-owned-string-moves-20261023",
-  "parentCommit": "981f9dff23ea8c04da730eeefc9fb42c4a2012f6",
+  "parentCommit": "623384b5212576229a6caae474edcdb4e71e9c76",
   "targets": [
     "rust"
   ],

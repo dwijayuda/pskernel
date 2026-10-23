@@ -100,9 +100,10 @@ jobs:
           node --check host-tools/generated-wasm-transport.mjs
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
+          node --check scripts/js-statement-tests.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests
+          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -114,6 +115,8 @@ jobs:
           .lake/build/bin/psc1_js_service_tests
           .lake/build/bin/psc1_direct_selfhost_preflight_tests
           node scripts/direct-selfhost-preflight-tests.mjs
+          .lake/build/bin/psc1_js_statement_tests
+          node scripts/js-statement-tests.mjs
       - name: Census complete owned backend source in both grammars
         run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
       - name: Execute genuine generated compiler generations and exact fixed point
@@ -125,5 +128,6 @@ jobs:
           name: psc1-direct-selfhost-correctness-1800s-${{ matrix.target }}-${{ github.sha }}
           path: |
             psc1/dist/direct-selfhost-preflight/
+            psc1/dist/js-statement-tests/
             psc1/dist/generated-${{ matrix.target }}-compiler/
           retention-days: 90

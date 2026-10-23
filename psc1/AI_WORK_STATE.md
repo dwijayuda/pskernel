@@ -243,3 +243,28 @@ binary encoding of float constants remains refused. Boundary tests exercise
 valid maximum patterns, overflowing patterns and preserved scalar-capability
 refusals. This is representation normalization, not qualification of floats.
 Next: focused proof/runtime/source gates, then actual Wasm generations.
+
+## DirectJS measured generator allocation class
+
+Actual retained G2 CPU profile40017280827 completed240111ms/1336356KiB
+diagnostic sampling, using exact G1 sourcef6ea612d97032bf94e348820b9233be21b61a71d61d0326dcf5cfe43aca430ae/
+artifact7cc7bc0b157d0b7ef400a9b1f8541a7b2d7875472d9ad9e0a007e07e609e1529.
+Largest identified JS samples include megamorphic property loads, lazy compilation,
+generator next/resume/create, __ps$run/invoke and compiler worker closures.
+The old DirectJS fast loop admits only self calls; helpers force the generic
+expression printer, which allocates generator IIFEs for each let/match context.
+Implement a generic statement printer in generator context: reuse the existing
+driver for ordinary/non-tail calls; inline saturated self tails into a loop with
+immutable per-iteration parameter snapshots. Preserve evaluation order, lexical
+shadowing, alias capture/escape refusals, fresh-name checks,4096 fuel and the
+unchanged pure printer/fallback. No source-name-specific recognition or runtime
+String equality replacement. New strict-IR native fixtures compare retained
+production emission and actual Node behavior, including deep tail/non-tail/mutual
+calls, changing value/function captures, shadowing, alias/freshness/fuel negatives.
+Focused gate pending; no new generation qualification claim.
+
+Wasm c8ccd777 focused gate40017933708 PASSED both complete source grammars,
+carrier/reference tests and bounded raw metadata refusal tests.
+Actual next Wasm request0300717161765ff939a2500d293ca1d985dd6513 uses that
+unchanged98-module Wasm closure. Its independent qualification is in progress;
+subsequent JS-only code does not alter that source closure.

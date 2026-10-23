@@ -1536,6 +1536,210 @@ def psJsTailEmitWithFuel
                     printed
                     ";")
 
+-- Generator statements reuse the existing driver for every non-tail call.
+-- Tail iterations snapshot every parameter immutably, preserving escaped closures.
+def psJsGeneratorTailValue (name : String) (tail : Bool) (fuel : Nat)
+    (expr : PsJsIrExpr) : Option String :=
+  match psJsPrintExprWithPositionAndFuel (Option.some name) tail fuel expr with
+  | Except.error _ => Option.none
+  | Except.ok printed => Option.some printed
+
+def psJsGeneratorTailArguments (name : String) (fuel : Nat)
+    (arguments : List PsJsIrExpr) : Option (List String) :=
+  match arguments with
+  | List.nil => Option.some []
+  | List.cons value rest =>
+      match psJsGeneratorTailValue name false fuel value with
+      | Option.none => Option.none
+      | Option.some printed =>
+          match psJsGeneratorTailArguments name fuel rest with
+          | Option.none => Option.none
+          | Option.some others => Option.some (List.cons printed others)
+
+def psJsGeneratorTailEmitWithFuel
+    (declaration : PsJsIrDeclaration)
+    (available : String -> Bool)
+    (fuel : Nat) :
+    Nat -> PsJsIrExpr -> Option String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_matchDepth : Nat) (_expr : PsJsIrExpr) =>
+        Option.none
+  | Nat.succ remaining =>
+      fun (matchDepth : Nat) (expr : PsJsIrExpr) =>
+        let smaller :
+            Nat -> PsJsIrExpr -> Option String :=
+          psJsGeneratorTailEmitWithFuel
+            declaration
+            available
+            remaining;
+        let sameDepth : PsJsIrExpr -> Option String :=
+          smaller matchDepth;
+        let nested : PsJsIrExpr -> Option String :=
+          smaller (Nat.succ matchDepth);
+        match expr with
+        | PsJsIrExpr.call fn arguments =>
+            match fn with
+            | PsJsIrExpr.var name =>
+                if psStringEq name declaration.name then
+                  if Nat.beq remaining 0 then Option.none else
+                  if
+                      Nat.beq
+                        (psListLength declaration.parameters)
+                        (psListLength arguments) then
+                    match
+                        psJsGeneratorTailArguments declaration.name remaining arguments with
+                    | Option.none => Option.none
+                    | Option.some printedArguments =>
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "__ps$tail$state = [",
+                              psJsJoin ", " printedArguments,
+                              "]; continue;"
+                            ])
+                  else
+                    Option.none
+                else
+                  match
+                      psJsGeneratorTailValue declaration.name true fuel expr with
+                  | Option.none => Option.none
+                  | Option.some printed =>
+                      Option.some
+                        (psJsConcat3
+                          "return "
+                          printed
+                          ";")
+            | _ =>
+                match
+                    psJsGeneratorTailValue declaration.name true fuel expr with
+                | Option.none => Option.none
+                | Option.some printed =>
+                    Option.some
+                      (psJsConcat3
+                        "return "
+                        printed
+                        ";")
+        | PsJsIrExpr.letE name value body =>
+            if psStringEq name declaration.name then
+              Option.none
+            else
+              match
+                  psJsGeneratorTailValue declaration.name false remaining value with
+              | Option.none => Option.none
+              | Option.some printedValue =>
+                  match sameDepth body with
+                  | Option.none => Option.none
+                  | Option.some printedBody =>
+                      let temp := String.Internal.append "__ps$tail$value$" (psNatToString remaining);
+                      if available temp then
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "{ const ", temp, " = ", printedValue,
+                              "; { const ", name, " = ", temp, "; ", printedBody, " } }"
+                            ])
+                      else Option.none
+        | PsJsIrExpr.ifE condition thenBranch elseBranch =>
+            match
+                psJsGeneratorTailValue declaration.name false remaining condition with
+            | Option.none => Option.none
+            | Option.some printedCondition =>
+                match sameDepth thenBranch with
+                | Option.none => Option.none
+                | Option.some printedThen =>
+                    match sameDepth elseBranch with
+                    | Option.none => Option.none
+                    | Option.some printedElse =>
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "if (",
+                              printedCondition,
+                              ") { ",
+                              printedThen,
+                              " } else { ",
+                              printedElse,
+                              " }"
+                            ])
+        | PsJsIrExpr.matchE scrutinee alternatives =>
+            match
+                psJsGeneratorTailValue declaration.name false remaining scrutinee with
+            | Option.none => Option.none
+            | Option.some printedScrutinee =>
+                let temp : String :=
+                  psJsFreshTailMatchTemp
+                    expr
+                    matchDepth;
+                if available temp then
+                  match
+                      psJsTailPrintAlternativesWith
+                        nested
+                        declaration.name
+                        temp
+                        alternatives with
+                  | Option.none => Option.none
+                  | Option.some printedAlternatives =>
+                      Option.some
+                        (psJsJoin
+                          ""
+                          [
+                            "const ",
+                            temp,
+                            " = ",
+                            printedScrutinee,
+                            "; switch (",
+                            temp,
+                            "[\"$ps$tag\"]) { ",
+                            psJsJoin " " printedAlternatives,
+                            " } throw new Error(\"invalid ProofScript constructor tag\");"
+                          ])
+                else Option.none
+        | _ =>
+            match
+                psJsGeneratorTailValue declaration.name true fuel expr with
+            | Option.none => Option.none
+            | Option.some printed =>
+                Option.some
+                  (psJsConcat3
+                    "return "
+                    printed
+                    ";")
+
+
+def psJsPrintGeneratorTailLoopWithVisibility (isPublic : Bool)
+    (declaration : PsJsIrDeclaration) : Option String :=
+  match declaration.parameters with
+  | List.nil => Option.none
+  | List.cons _ _ =>
+      if psJsNeedsCallDriver declaration.body then
+        let names := psJsTailParameterNames declaration.parameters;
+        let uses : PsJsIrExpr -> String -> Bool := psJsExprUsesNameWithFuel 4096;
+        let available : String -> Bool := fun (name : String) =>
+          if psStringEq name declaration.name then false
+          else if psJsTailContains names name then false
+          else if uses declaration.body name then false else true;
+        if available "__ps$tail$state" then
+          match psJsTailRewriteWithFuel declaration uses available 4096 names [] declaration.body with
+          | Option.none => Option.none
+          | Option.some rewritten =>
+              match psJsGeneratorTailEmitWithFuel declaration available 4096 0 rewritten with
+              | Option.none => Option.none
+              | Option.some body =>
+                  let parameters := psJsJoin ", " names;
+                  let implementation := psJsImplementationName declaration.name;
+                  Option.some (psJsJoin "" [
+                    (if isPublic then "export function " else "function "), declaration.name,
+                    "(", parameters, ") { return __ps$run(", implementation, "(", parameters, ")); }\n",
+                    "function* ", implementation, "(", parameters, ") { let __ps$tail$state = [",
+                    parameters, "]; while (true) { const [", parameters, "] = __ps$tail$state; ",
+                    body, " } }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");\n"])
+        else Option.none
+      else Option.none
+
 def psJsPrintTailLoopWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) : Option String :=
   match declaration.parameters with
@@ -1577,62 +1781,65 @@ def psJsPrintDeclarationStackSafeWithVisibility (isPublic : Bool)
   | Option.some printed =>
       Except.ok printed
   | Option.none =>
-      if psJsNeedsCallDriver declaration.body then
-        match
-            psJsPrintExprStackSafe
-              declaration.name
-              declaration.body with
-        | Except.error error => Except.error error
-        | Except.ok body =>
-            match declaration.parameters with
-            | List.nil =>
-                Except.ok
-                  (psJsJoin
-                    ""
-                    [
-                      (if isPublic then "export const " else "const "),
-                      declaration.name,
-                      " = __ps$run((function*() { return ",
-                      body,
-                      "; })());\n"
-                    ])
-            | List.cons _ _ =>
-                let parameters :=
-                  psListMap
-                    psJsParameterName
-                    declaration.parameters;
-                let joinedParameters : String :=
-                  psJsJoin ", " parameters;
-                let implementation : String :=
-                  psJsImplementationName declaration.name;
-                Except.ok
-                  (psJsJoin
-                    ""
-                    [
-                      (if isPublic then "export function " else "function "),
-                      declaration.name,
-                      "(",
-                      joinedParameters,
-                      ") { return __ps$run(",
-                      implementation,
-                      "(",
-                      joinedParameters,
-                      ")); }\n",
-                      "function* ",
-                      implementation,
-                      "(",
-                      joinedParameters,
-                      ") { return ",
-                      body,
-                      "; }\n",
-                      "__ps$implementations.set(",
-                      declaration.name,
-                      ", ",
-                      implementation,
-                      ");\n"
-                    ])
-      else
-        psJsPrintDeclarationWithVisibility isPublic declaration
+      match psJsPrintGeneratorTailLoopWithVisibility isPublic declaration with
+      | Option.some printed => Except.ok printed
+      | Option.none =>
+          if psJsNeedsCallDriver declaration.body then
+            match
+                psJsPrintExprStackSafe
+                  declaration.name
+                  declaration.body with
+            | Except.error error => Except.error error
+            | Except.ok body =>
+                match declaration.parameters with
+                | List.nil =>
+                    Except.ok
+                      (psJsJoin
+                        ""
+                        [
+                          (if isPublic then "export const " else "const "),
+                          declaration.name,
+                          " = __ps$run((function*() { return ",
+                          body,
+                          "; })());\n"
+                        ])
+                | List.cons _ _ =>
+                    let parameters :=
+                      psListMap
+                        psJsParameterName
+                        declaration.parameters;
+                    let joinedParameters : String :=
+                      psJsJoin ", " parameters;
+                    let implementation : String :=
+                      psJsImplementationName declaration.name;
+                    Except.ok
+                      (psJsJoin
+                        ""
+                        [
+                          (if isPublic then "export function " else "function "),
+                          declaration.name,
+                          "(",
+                          joinedParameters,
+                          ") { return __ps$run(",
+                          implementation,
+                          "(",
+                          joinedParameters,
+                          ")); }\n",
+                          "function* ",
+                          implementation,
+                          "(",
+                          joinedParameters,
+                          ") { return ",
+                          body,
+                          "; }\n",
+                          "__ps$implementations.set(",
+                          declaration.name,
+                          ", ",
+                          implementation,
+                          ");\n"
+                        ])
+          else
+            psJsPrintDeclarationWithVisibility isPublic declaration
 
 def psJsPrintDeclarationStackSafe (declaration : PsJsIrDeclaration) : Except PsJsEmitError String :=
   psJsPrintDeclarationStackSafeWithVisibility true declaration

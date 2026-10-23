@@ -10,6 +10,8 @@ on:
       - psc1/host-tools/generated-target-profiles.mjs
       - psc1/test/DirectSelfHostPreflightTests.lean
       - psc1/test/WasmBinary*.lean
+      - psc1/test/JsStatement*.lean
+      - psc1/scripts/js-statement-tests.mjs
       - psc1/scripts/direct-selfhost-preflight-tests.mjs
       - psc1/lakefile.lean
       - .github/workflows/diagnostic-psc1-direct-selfhost-preflight.yml
@@ -64,9 +66,10 @@ jobs:
           node --check host-tools/generated-wasm-transport.mjs
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
+          node --check scripts/js-statement-tests.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests
+          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -78,6 +81,8 @@ jobs:
           .lake/build/bin/psc1_js_service_tests
           .lake/build/bin/psc1_direct_selfhost_preflight_tests
           node scripts/direct-selfhost-preflight-tests.mjs
+          .lake/build/bin/psc1_js_statement_tests
+          node scripts/js-statement-tests.mjs
       - name: Census both complete owned backend closures in both grammars
         run: |
           set +e
@@ -92,6 +97,7 @@ jobs:
           name: psc1-direct-source-both-${{ github.sha }}
           path: |
             psc1/dist/direct-selfhost-preflight/
+            psc1/dist/js-statement-tests/
             psc1/dist/generated-js-compiler/source-audit/
             psc1/dist/generated-wasm-core-compiler/source-audit/
           retention-days: 90

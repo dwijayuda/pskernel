@@ -487,3 +487,11 @@ lean_lib PsWasmBinaryCarrierReference where
 lean_exe psc1_direct_selfhost_preflight_tests where
   srcDir := "test"
   root := `DirectSelfHostPreflightTests
+
+lean_lib PsJsStatementReference where
+  srcDir := "test"
+  roots := #[`JsStatementReference]
+
+lean_exe psc1_js_statement_tests where
+  srcDir := "test"
+  root := `JsStatementTests

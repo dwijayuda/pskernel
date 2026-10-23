@@ -16,42 +16,34 @@ The preserved review branch is work/psc1-direct-selfhost-blockers-20261024,
 draft PR175, based on draft PR174/integrationafed7c4b. Do not cancel existing
 qualifications or infer success from elapsed job time.
 
-Snapshot as of2026-10-23 22:44UTC (re-query before acting):
-- Childc115c65732ea1bf78aba263658e9ab804e116822 fixes the main Wasm
-  lower-expression prefix. Focused40034701526/job120691199253 PASSED:
-  52 all-input prefix equalities;464 owned Wasm definitions scanned with no
-  unsafe prefix; actual retained original rejected; million-fuel early result
-  and exact zero-fuel refusal; both87/98-module .lean/.ps and all earlier tests.
-- Last Wasm487e7100/run40031965458 completed independently admittedG1/ten
-  cases, then G2 stack666386ms/1026060KiB. Exact retained map40033860834
-  identifies repeated2286 as psWasmLowerExprWorker. Its335-character type
-  exceeded the old guard180-character bound; the recursive binding still
-  preceded all four inputs. c115c657 fixes placement, no resource/fuel change.
-- JS request8d7a5dc5488e872c0f81b5f848fd6b44d3654456, parent844f8c3b,
-  run40033515365/job120687475727 is executing actual generations on verified
-  direct-dispatch source82994f85. Later Wasm-only edits leave its closure
-  unchanged. Do not duplicate/cancel that request.
-- Prior JS85433830/run40027650302 completedG1 but G2 hit1800227ms/3132516KiB.
-  Retained profile40031550466 confirms6 lazy getters and StringEqual0.1%
-  sampled ticks; direct dispatch removes helper generators and duplicate
-  lookups, with64 order/trap cases and40→20 instrumented lookups.
-- Review branch/draft175 was non-force fast-forwarded to8d7a5dc5 after the
-  prior full gate completed. New full40033570924 is active; focused40033565233
-  passed. Request workflow40033565129 correctly skipped multi-commit ref
-  integration. Keep review stable until that full run ends.
-- Preserved parent85433830/full40027662328 PASSED37/37,all seven/both
-  grammars/apps/packages,tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
-  Changed compiler source requires its own full qualification.
-- Actual Wasm requeste5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24,
-  parent699f84948ff70273e5ab9a7c5c0273316df23e66, run40035031327,
-  job120692435799 is executing generations. Request and all source/runtime
-  gates passed. Do not duplicate this or JS40033515365.
-- Read-only40035257537 compares retained JS and qualified TS compiler artifacts:
-  TS has more generator/IIFE sites despite qualifying. Counts are not a speed
-  benchmark; preserve representation pending measured evidence.
+Snapshot as of2026-10-23 23:00UTC (re-query before acting):
+- Latest child146270cf6b7a037ccd83b08296f6c35f725ee988 defers three shared
+  environment/constructor/recursor lookup prefixes; focused40036978899 pending
+  all-input retained equalities and100000-element order/miss/kind/payload tests.
+- c115c657/focused40034701526 PASSED52 all-input Wasm prefix equalities,
+  464-definition guard, actual retained-original negative, million-fuel/zero-
+  fuel and all prior runtime/source/refusal gates.
+- ActualJS8d7a5dc5/run40033515365 completed independently checkedG1/ten cases;
+  G2 deadline1800214ms/3179196KiB, noG3/fixedpoint.
+- ActualWasme5b9cd76/run40035031327 completed independently checkedG1/ten
+  cases; G2 stack720754ms/1009612KiB, repeated runtime11Nat division.
+  That10-frame trace does not prove a Nat operand defect: a deeper caller may
+  already consume the stack. Full retained replay40036672078 is active with
+ 16384 reported frames, unchanged execution stack and existing1800s profile.
+- LatestJS retained CPU profile40037023905 is active under original240s,
+  diagnostic only. Earlier profile full summary40036067959 shows21.5%GC ticks
+  and lookup closure registration;104-module source scan40036411081 confirms
+  the eager-prefix shape in those measured workers. Other candidates are an
+  audit queue, not proved defects.
+- Read-only40036922902 reports owned binary local counts/frame-size proxies;
+  largest487, main curried lower-expression function1. These are not actual
+  JIT stack-byte measurements. Use full runtime caller evidence for the fix.
+- Review8d7a5dc5/draft175 full40033570924 is active; keep it stable until
+  terminal, then expected-HEAD non-force integrate the final verified child.
+  Parent854/full40027662328 passes37/37 only for exacttree1382a67a.
 - Neither direct target has a terminal qualifiedG2/G3 fixed point yet.
 
-1. Re-query the actual JS run, latest child Wasm request/run and review full CI. If still active, continue waiting without
+1. Re-query the focused lookup gate, retained JS profile/full Wasm trace and review full CI. If still active, continue waiting without
    dispatching duplicates. If completed, inspect the actual job log and immutable
    artifact metadata; record exact source closure, request/service/source/binary
    identities, G2/G3 elapsed times, Linux wait4 RSS and sampled process-tree RSS,

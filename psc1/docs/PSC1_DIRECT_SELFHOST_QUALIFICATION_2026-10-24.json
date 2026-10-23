@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 22:44:00 UTC",
+  "recordedAtUtc": "2026-10-23 23:00:00 UTC",
   "localDate": "2026-10-24",
-  "status": "both-direct-generation-chains-running-after-proved-mechanism-fixes",
+  "status": "both-direct-G1-passed-G2-blocked-shared-lookup-prefix-fix-under-validation",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -275,16 +275,7 @@
       "refused": []
     }
   },
-  "currentAttempt": {
-    "target": "wasm-core",
-    "sourceCommit": "c115c65732ea1bf78aba263658e9ab804e116822",
-    "requestParent": "699f84948ff70273e5ab9a7c5c0273316df23e66",
-    "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
-    "runId": 40035031327,
-    "jobId": 120692435799,
-    "status": "in_progress",
-    "fixedPoint": "not-yet-established"
-  },
+  "currentAttempt": null,
   "integrationCheckpoint": {
     "pullRequest": 174,
     "commit": "afed7c4b2681533b525d7434856a97a78fd3d745",
@@ -736,6 +727,92 @@
         {
           "id": 12535892025,
           "digest": "sha256:a2593af908c9ec59985a6c8f19349b2e73d458f88aaea4baab551b4d766fcccd"
+        }
+      ]
+    },
+    {
+      "runId": 40035031327,
+      "target": "wasm-core",
+      "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
+      "status": "failed",
+      "report": {
+        "target": "wasm-core",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 98,
+        "sourceClosureDigest": "85c03806bb5c045a8d5c48a73ddd1fbe7f5be568ea3c92a599d7b19ac0e5f317",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"38cf11fd0fdf7a48d7a3dc9a926b5970e2ddf14e3ad852a5fa6fe682680724cb\",\"requestSha256\":\"154f995001505a8f1415f1b407616fec2ba349e344b775bb17b97c5bea710ff6\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1009612,\"peakTreeRssKiB\":1009612,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":720754,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/00637aea:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e0d9\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n\nNode.js v22.23.3\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "38cf11fd0fdf7a48d7a3dc9a926b5970e2ddf14e3ad852a5fa6fe682680724cb",
+            "startedAt": "2026-10-23T22:42:02.198Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"38cf11fd0fdf7a48d7a3dc9a926b5970e2ddf14e3ad852a5fa6fe682680724cb\",\"requestSha256\":\"154f995001505a8f1415f1b407616fec2ba349e344b775bb17b97c5bea710ff6\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1009612,\"peakTreeRssKiB\":1009612,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":720754,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/00637aea:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e0d9\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n    at wasm://wasm/00637aea:wasm-function[11]:0x2e113\n\nNode.js v22.23.3\n",
+            "completedAt": "2026-10-23T22:54:03.528Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12537505726,
+          "digest": "sha256:8c95c7ab2104f8200af7c258e7a01b985cbc040073b8bb68d7542ec874910c9c"
+        }
+      ]
+    },
+    {
+      "runId": 40033515365,
+      "target": "js",
+      "requestCommit": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
+      "status": "failed",
+      "report": {
+        "target": "js",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "04fe35964af8c177b7d7672ed3bd2ea00c70b1491a58ce64667630c028862faf",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"1fdc5fc3efa4613480e3f89d73a30cf48596e68c4b528c0285a0f8019150718a\",\"requestSha256\":\"1eb8e38276972ca64018c75007ecd87f594ae55ae61812f3ad960e2249bdaa97\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":3179196,\"peakTreeRssKiB\":3179196,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800214,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "1fdc5fc3efa4613480e3f89d73a30cf48596e68c4b528c0285a0f8019150718a",
+            "startedAt": "2026-10-23T22:27:26.033Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"1fdc5fc3efa4613480e3f89d73a30cf48596e68c4b528c0285a0f8019150718a\",\"requestSha256\":\"1eb8e38276972ca64018c75007ecd87f594ae55ae61812f3ad960e2249bdaa97\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":3179196,\"peakTreeRssKiB\":3179196,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800214,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+            "completedAt": "2026-10-23T22:57:26.741Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12536664869,
+          "digest": "sha256:58565e59a32ab927c35c54d108858b571fb3d30d4cbc46229b4a4b00e8d639e7"
         }
       ]
     }
@@ -1627,28 +1704,7 @@
     "scope": "current review branch; c115c657 later Wasm fix requires subsequent full CI"
   },
   "nextWasmSourceCommit": "c115c65732ea1bf78aba263658e9ab804e116822",
-  "activeAttempts": [
-    {
-      "target": "js",
-      "sourceCommit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
-      "requestParent": "844f8c3b765b6cc1378f164ac4cfcc39b02364a6",
-      "requestCommit": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
-      "runId": 40033515365,
-      "jobId": 120687475727,
-      "status": "in_progress",
-      "fixedPoint": "not-yet-established"
-    },
-    {
-      "target": "wasm-core",
-      "sourceCommit": "c115c65732ea1bf78aba263658e9ab804e116822",
-      "requestParent": "699f84948ff70273e5ab9a7c5c0273316df23e66",
-      "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
-      "runId": 40035031327,
-      "jobId": 120692435799,
-      "status": "in_progress",
-      "fixedPoint": "not-yet-established"
-    }
-  ],
+  "activeAttempts": [],
   "diagnosticSpineInventory": {
     "runId": 40029584741,
     "compilerExecution": false,
@@ -1764,7 +1820,12 @@
     },
     "scope": "85433830 tree only; subsequent child source needs full CI"
   },
-  "pendingFocusedGate": null,
+  "pendingFocusedGate": {
+    "commit": "146270cf6b7a037ccd83b08296f6c35f725ee988",
+    "runId": 40036978899,
+    "status": "in_progress",
+    "change": "Three shared environment/constructor/recursor lookup prefixes; all-input retained proofs;100000-element early/miss/kind/duplicate payload tests."
+  },
   "ecmascriptArchitectureComparison": {
     "runId": 40035257537,
     "jobId": 120693033144,
@@ -2074,6 +2135,1014 @@
           ]
         }
       ]
+    }
+  },
+  "activeDiagnostics": [
+    {
+      "target": "wasm-core",
+      "runId": 40036672078,
+      "commit": "356b569f28f0a4a25df295329b0864b09add6ef9",
+      "kind": "exact retained G2 full reported trace",
+      "profile": "correctness-1800s",
+      "executionStackSizeChanged": false,
+      "qualification": false,
+      "status": "in_progress"
+    },
+    {
+      "target": "js",
+      "runId": 40037023905,
+      "commit": "d62c4d28051d16e49e45cd83543217a4b02308eb",
+      "kind": "exact latest retained G2 CPU profile",
+      "profile": "performance-240s",
+      "qualification": false,
+      "status": "in_progress"
+    }
+  ],
+  "sharedPrefixInventory": {
+    "runId": 40036411081,
+    "status": "passed",
+    "receipt": {
+      "sourceCheckpoint": {
+        "commit": "88e45f044da1f75d3a1d8cef89636ea368312dd9",
+        "tree": "86aabcca08717acad6d576044416c0a9562138e6",
+        "entries": [
+          "Ps.BackendJs.CompilerService",
+          "Ps.BackendWasm.CompilerService"
+        ]
+      },
+      "modules": 104,
+      "candidates": [
+        {
+          "module": "Ps.Syntax.Ast",
+          "name": "psSyntaxAppendNames",
+          "definitionSha256": "5fd85d8ca72aaac393c68eff0b7544598d5125c83d42178a0f7dc66d6a135767"
+        },
+        {
+          "module": "Ps.Syntax.Ast",
+          "name": "psSyntaxDeclarationQualifyWorker",
+          "definitionSha256": "7b9b08dad1da53252d069ad2e43a7c1937913fe766b9bd8ddf8dcb5f22b10848"
+        },
+        {
+          "module": "Ps.Syntax.ParseCommon",
+          "name": "psParseListReverseAcc",
+          "definitionSha256": "915c940210a0303478a94aed75ff4b186978eaffb6daeb054e7802a2a4482238"
+        },
+        {
+          "module": "Ps.Syntax.ParseCommon",
+          "name": "psParseListAppend",
+          "definitionSha256": "8fe37a7eefc69f6d61ab71f525c0637b9793be93fc903090a4f23d07d1003575"
+        },
+        {
+          "module": "Ps.Syntax.ParseCommon",
+          "name": "psParseNamespaceEq",
+          "definitionSha256": "eec56e626e84085d22d4453d5c6c55ccf79aa502bb3f60f857ee4614a981bd73"
+        },
+        {
+          "module": "Ps.Syntax.ParseLean",
+          "name": "psLeanPrependBinderGroupReverse",
+          "definitionSha256": "fa438ba19d7c9513a8c97735c95dd70641e9ca7e562d72e1fa15af9e4a57a439"
+        },
+        {
+          "module": "Ps.Syntax.ParseLean",
+          "name": "psLeanStringListEq",
+          "definitionSha256": "282787e79c272965091fd5af119d4ab6a0829dd5cfbfdb490863636a61b386a3"
+        },
+        {
+          "module": "Ps.Syntax.ParseLean",
+          "name": "psLeanEquationHeadPatternsAcc",
+          "definitionSha256": "70f178fc504bef7dcb38976058a75cf1c69eb262f3ebca269a74fe7720550484"
+        },
+        {
+          "module": "Ps.Syntax.ParseLean",
+          "name": "psLeanEquationClausesForBranchAcc",
+          "definitionSha256": "baa472ae855c7e4f8babe4bea1e86f583fd541be1825936c5dae28d81b7f1c11"
+        },
+        {
+          "module": "Ps.Syntax.ParseLean",
+          "name": "psLeanLowerEquationClauses",
+          "definitionSha256": "30c1afb356c26597a49b05a4b763fc8634cf3b294afe685b0a7f294e4672a797"
+        },
+        {
+          "module": "Ps.Syntax.PrintLean",
+          "name": "psPrintLeanAppendStrings",
+          "definitionSha256": "5694aa6961dc35fcb719b05e52f411cb61f2e3fb851f6e717d46536f3a9ea3f3"
+        },
+        {
+          "module": "Ps.Syntax.PrintProofScript",
+          "name": "psPrintProofScriptAppendStrings",
+          "definitionSha256": "8b6d31bb231b56660fe4c6a0e4e0dd0997d3c118f0b6693000784b317ad4cde7"
+        },
+        {
+          "module": "Ps.Environment.Basic",
+          "name": "psEnvironmentFindInListWorker",
+          "definitionSha256": "9adcdcf790de8fb2f33cd09f3077a95afa2bdbe17a2af302227a082d9135fb3d"
+        },
+        {
+          "module": "Ps.Environment.Basic",
+          "name": "psEnvironmentRemoveNameWorker",
+          "definitionSha256": "94736384f47c5a4e9a23dd6661df5a2a9d43829076e31284e9e1dedea30a1a53"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psEncodeCheckedAdmissionsLoop",
+          "definitionSha256": "4095716a5590e7f3b1db891ade06d9c2c6ef4cdc9038f17ff886a1ba1800a9ee"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedAdmissionReverseStringsAcc",
+          "definitionSha256": "1092f376d9aeb52caee5d8e076d7e45d2fcf4cbb93d34f4897c947923b68777a"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedNestedBind",
+          "definitionSha256": "60b286f2b689d7f93cb20e845bcc1361327f50abc928932fe8ed8f930f2be6f7"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedNestedAddTypes",
+          "definitionSha256": "1e746b7cb96ce98e18c46b90fc04cfc45e21ca7c6b70906d48c468a068eaed24"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedNestedRoots",
+          "definitionSha256": "a620452804c2df0895628e3acefa2d08259d5699db4acde299b7612ad7b60b75"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedNestedApply",
+          "definitionSha256": "0ca73fc30d478c809bf22efcfe684bee0227dfe49ff1c70cf91e15dd5aafc815"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedNestedHypotheses",
+          "definitionSha256": "54bf22c67feee2861d711fe3e6dc83917945e19567596854717ceef9215be504"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedNestedMinors",
+          "definitionSha256": "63e64e991fe0992068da177f8a2f7e7e346edaffb4894f00ce6ef21aaa43e531"
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "name": "psCheckedNestedFields",
+          "definitionSha256": "286152cc4278f9a08da8f26bd297a376b3ffafbe08f1979b037ce407f66efd75"
+        },
+        {
+          "module": "Ps.Environment.Control",
+          "name": "psControlAddLoopDeclarations",
+          "definitionSha256": "655282d0afc31da16b34cc8ee42ef74f01ec04e8141547d0fb67cd2d42f74df2"
+        },
+        {
+          "module": "Ps.Environment.Order",
+          "name": "psOrderAddDeclarations",
+          "definitionSha256": "53b573c7ce05951bdbc85e652a1b98a8b569b648f371aefbaaf74060c106c1a6"
+        },
+        {
+          "module": "Ps.Core.LevelSubst",
+          "name": "psFindLevelArgumentWorker",
+          "definitionSha256": "961c3af24b7d7951b59be9e15449e6617664747852321544b31c5f58878a4f42"
+        },
+        {
+          "module": "Ps.Meta.Infer",
+          "name": "psInferAppViewAcc",
+          "definitionSha256": "9fea0bb05b600857b2d9b2b9e57a4524c654a25ddfc18b37cb56e0e31a9e576d"
+        },
+        {
+          "module": "Ps.Meta.Infer",
+          "name": "psInferApplyStructureParametersWorker",
+          "definitionSha256": "839a54a52b1b107dd22b888f073926ba7d447213e91a02e86da48a9c12d31d90"
+        },
+        {
+          "module": "Ps.Meta.Unify",
+          "name": "psUnifyLevelLists",
+          "definitionSha256": "978ea026b0c05925846e7583eb62d0d5741c172e24b064c1b47a3474f4851d5c"
+        },
+        {
+          "module": "Ps.Meta.SynthInstance",
+          "name": "psPreparedInstanceArgumentListReverseAux",
+          "definitionSha256": "25e51f33754edc22492b60a9a59055573ccc6601545b66a3f83c4c4fe46cf982"
+        },
+        {
+          "module": "Ps.Meta.SynthInstance",
+          "name": "psSolvePreparedInstanceArgumentsWorker",
+          "definitionSha256": "3082f4339c0e4d6b11bcfc18d3c0a256332ecf329cacf3336160781c7fa4e7eb"
+        },
+        {
+          "module": "Ps.Meta.SynthInstance",
+          "name": "psTryInstanceCandidatesWorker",
+          "definitionSha256": "abf83c26f33de23524371505cc8125d0a97f1ade256e6ac22b026930051ad5fd"
+        },
+        {
+          "module": "Ps.Elab.Literal",
+          "name": "psParseNaturalChars",
+          "definitionSha256": "837e4d6dc8edc05f8271d8c0d28ec22161aa127b66fd1ad995f9e6af9ff375d1"
+        },
+        {
+          "module": "Ps.Elab.Basic",
+          "name": "psSyntaxNameAppendSegments",
+          "definitionSha256": "1ea855b151bbd8e0b4ee4556dd3edc335d70511e44a8d80abe0ee81011fe433a"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabStructuralParameterAt",
+          "definitionSha256": "0a5f7afd38855960d98e1201f16df426ae7bee62b89563e4d5b3b58c5f839edc"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabProjectionApplyParameters",
+          "definitionSha256": "2ddd2f1bee15e728dbf8419c20301295bb4d230db55d91577591eb8941ec2816"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabProjectionChainWorker",
+          "definitionSha256": "0a52c89d2c3c18060172b3b987d5763464cfd83550ed069ecbd34b46b53945d9"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabLocalProjectionBaseWorker",
+          "definitionSha256": "c3232465c3757bfd368e6aef2d9a99e9cdfaca7dee8f4c80827e584ea426b221"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabGlobalProjectionBaseWorker",
+          "definitionSha256": "6762888f6b8d61a1549294f1809f4a4501fde3d80c5e838790b105e8ac7aeca7"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabTypedBindersAcc",
+          "definitionSha256": "bc968116e5b8dfadf93fa53f9df1002ac82e6afc3c010c8b01f4876a9934c561"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabTypedBinderListReverseAux",
+          "definitionSha256": "ca71644730ccf89a05de54e59d0e6b3998e7f6f6728370e5c83cf86430aa9d43"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psCloseElabTypedBinders",
+          "definitionSha256": "fc2e36c760c9c09c2b8491979b65ab05a41544f76a7ddbaaa22ea67d8ba0053c"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabLambdaExpectedBody",
+          "definitionSha256": "e05bbbf6f00ba0d097a6f850727427cd33084d02a2817ccdcdef994a833c18b5"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabLambdaBindersAcc",
+          "definitionSha256": "23f9a76ffa2c002b7c8e1f7b0d4d2453ea1c94e096751450fe3756e2befba6de"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psCloseElabForallBinders",
+          "definitionSha256": "2ee59f303404fd7361e8c6006a01d221a885eddfaa20d327299d56417e1a31cd"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabFillWildcardAlternatives",
+          "definitionSha256": "e792a43a5192793234671f3964dc62a5b7937e3e3238a023c491a9c8cfa172d2"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabMatchAlternativeListReverseAux",
+          "definitionSha256": "1da1424e3b813234b35695f83fbe06fd5d1e8f4e8fc93041e24c9f28ad84f0c9"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabPrepareMatchAlternativesWorker",
+          "definitionSha256": "218a12951c89b4d954b7bbd6338efc530932043f637d054add822af494e66352"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabMatchApplyParametersWorker",
+          "definitionSha256": "1e36fa4a053d1edf7f2d6915f91cd0d8131bfbe4e65ad1bba80a6dd9ad545fa8"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabMatchFieldsWorker",
+          "definitionSha256": "87c1c4da7f73b8c35cc3468db4c019e8f6f1ebbb00c561d4813f8de718668957"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabPushRecursiveHypothesesWorker",
+          "definitionSha256": "49a8bf04428928fe8321fb132e13477725450a4e0d35d084371382cbadfa1d93"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psCloseElabMatchFieldsWorker",
+          "definitionSha256": "f354329c92586108d9b1701691489b2c062dd05c7a982680edc694c3b51a834b"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabMatchFieldListReverseWorker",
+          "definitionSha256": "382a4e72d7562a37bfba37d3cd2dd3daef0624ce6c4972d3cab193b845855c82"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabMatchMinorsWorker",
+          "definitionSha256": "e5b94a0cc0b3015f6f12b8d3f324985b7bc2d8646d7421bccf4f80e2631f0c6f"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabExprListAppendWorker",
+          "definitionSha256": "97dbb5016426bb5633ec781309c87a8bbc8ee1dd4b25ec8b46ffd7820d9f2026"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabApplicationUsesBinderWorker",
+          "definitionSha256": "cc43e507dfad9bf43fd7f08c645ad27c577204a705dd68753ce7c2b91584cdea"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabSolvePendingInstancesWorker",
+          "definitionSha256": "301b849c33f78bb02a7d7cadc571af8db6b233688f4a1084385d0dc9ef6eec3c"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psSyntaxRecordFieldsMatchWorker",
+          "definitionSha256": "d758031c052a6308eedd41316da49ae9a3f993e8eb3b899f6b4740079ae159cc"
+        },
+        {
+          "module": "Ps.Elab.Term",
+          "name": "psElabValidateStructuralCallWorker",
+          "definitionSha256": "567f820befb747396b2a6ef3975757211f16a69ec293ace6da1fe0453f599521"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionContains",
+          "definitionSha256": "d5c1a24a9b52d80c38bbbc87567c914334e64575252af08491eb0c743ab962f3"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionPushNames",
+          "definitionSha256": "2c28cadd164f47539f74a37d8b4b877419deec6df88d60de8bafdcd7009406ff"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionBindingPatternWorker",
+          "definitionSha256": "61118dff7457fee7aa49df2a82a6983b53a36405810311e02f0d842253708994"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionChangedArguments",
+          "definitionSha256": "b75960bd61bf43b949ceeff81d63b849ce851e600bb4ad86e3beea6932819ac3"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionSelectArguments",
+          "definitionSha256": "e6a1dbd173ed3d1972be7b130aaf92ad7281fe3ecde92829ec19c9a521670905"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionWalkTerms",
+          "definitionSha256": "43aa3eaf223c257e18dbc0822d34177b283ab0fcda445e93eea57477d9342787"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionWalkFields",
+          "definitionSha256": "809b9730176a345acdc3df6b92e6becfcc33bbfc84e93db3b69bafe92c70d6f5"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionWalkBinders",
+          "definitionSha256": "f4f5fb19ea561e64c3b7178ba1b196fbdd9fc8aa2c3793b3ee22329a986884db"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionWalkAlternatives",
+          "definitionSha256": "39075260f813bdd8a51cc4da54b8cdbb44ab6252babfde07fcb04e6b581bc555"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionSelectedBinders",
+          "definitionSha256": "db5aefec6fddee65cec97d7165c4657c9901465bfcea0ca9c9ca81c6a343b022"
+        },
+        {
+          "module": "Ps.Elab.Recursion",
+          "name": "psElabRecursionRenameParameters",
+          "definitionSha256": "0e2756341b7f2012b8e83e41456be2de33b103c0d0dbd47a754864e0e8e17c00"
+        },
+        {
+          "module": "Ps.Elab.DoLoopLift",
+          "name": "psElabDoLoopCapturesWorker",
+          "definitionSha256": "2c26fbd32044743319195057b889ee4b428d91b31118b5bb3ddc06438bf073d3"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabStableMemberOriginsFold",
+          "definitionSha256": "49a0e2f5cce134f110f77987d02ef497a6ec8230e1278436086dd8785347e91b"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabWhileMemberOriginsFold",
+          "definitionSha256": "997cee7f9a376f4c0cd4813fb4ff612c6f78274129a5bdf28b4a6813046cadb0"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabFindNatIndexWorker",
+          "definitionSha256": "1dc476d283df470ff15ea89cb95e5b8cf95b2df2560f9fa11f212955fc19f3e6"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psCloseElabImplicitBindersWorker",
+          "definitionSha256": "d994d99c222cf199e64a9ab0e7f96208fa8993661c74859241ef1ac689c76bab"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psExprListAlphaEqWorker",
+          "definitionSha256": "05fcda96ff38dbc7b71e263c78c38b9f14adafa2189f660a57e3ca5834fab89b"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabReverseNatListAcc",
+          "definitionSha256": "827e7e5f6fa366b9d12cf553e846af146b1aa09b7ca71fbd2db2eed92b3d3ea1"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabRecursiveFieldIndicesWorker",
+          "definitionSha256": "7beb2576d921896351393cad8b520ee9e57b2371285b94666e024f2ec857ff53"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabReverseDeclarationsAcc",
+          "definitionSha256": "94b034db00247daa17df08ce775388f4ac0f247924fc90c71c5b8f8775f2c6cf"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabInductiveConstructorsWorker",
+          "definitionSha256": "c61c59bde7fa64705c72106751eb80d28f8448e7c051a947f293e3d1957a2761"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psAddDeclarationListWorker",
+          "definitionSha256": "9a29803401bbe2db2c96e97f5e54ea1d459821d8813be3183fecf842d4fd0ee8"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabExprAt",
+          "definitionSha256": "4bbbd4bde00f2aeee1842663636f713229a3141fdb74d5e542c2b42e86f42344"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabAppendExprs",
+          "definitionSha256": "bf8fec7e5822934aafec534d32369b39fab6f71ad01da3e737f7e7e033336e33"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabAppendDeclarations",
+          "definitionSha256": "b32a97cdc82aa54d74143a637e3bcac3816f2a7fb578cf58cea76e52a6d73561"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psBuildRecursorMinorBindersWorker",
+          "definitionSha256": "4313ff3c02d15eceb16aba35ce206231855788e502975a50c9eb3b8df47efb63"
+        },
+        {
+          "module": "Ps.Elab.Declaration",
+          "name": "psElabDeclarationsWithOriginsFold",
+          "definitionSha256": "6584f90666837232fe9a92c23256e69f0ca3fcc31cab6d74f986d4312ef1265a"
+        },
+        {
+          "module": "Ps.Erasure.Basic",
+          "name": "psErasureAppViewAcc",
+          "definitionSha256": "0800d7ec47b318358d654cd25897d0521b7c01523ab2baa94a94a71e53f84f17"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psErasureAppendRuntimeArgument",
+          "definitionSha256": "0d9735abbe5f7523acc96c5183987d506acf84e2af03834f61c356b31e36fb66"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psEraseApplicationArgumentsWorker",
+          "definitionSha256": "66a47a9e725bfae4b8c07fc822f75774d8533194f316d2ecb70bc9563dcedaa5"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psErasureCaptureApplicationArguments",
+          "definitionSha256": "aa94fb8a9ae7368dda3ce90b9349b435b7cd5225f1efb9f219b924ff0e7009e4"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psErasureWrapApplicationCaptures",
+          "definitionSha256": "acce28f3c4548e6561035a7ec59f87a17243f526cada96bca4cd8682141e5da0"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psEraseRuntimeStructureFields",
+          "definitionSha256": "5473e50874a63727b12673096ecac8c99203f4194b503653549c93b2a851fe11"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psEraseRuntimeConstructorFields",
+          "definitionSha256": "b784982b9f7b35d3f98b6891103641f603a8954145a3b15034bff4e31ab1eb55"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psOpenMatchMinorFields",
+          "definitionSha256": "c02d7a3328819bf586c7e4a575ef6e5b243640fa02f73ee8372484d181690727"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psErasureRecursiveCallArguments",
+          "definitionSha256": "32cf1b6cb46b7fe0323f4da474c256df7d119dc1d2ba39e23df39c2ce6938860"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psOpenMatchMinorHypotheses",
+          "definitionSha256": "e2a5bd7c6a60af694964b7bd3cbac38def1e064ccbb6b38c028a433354055879"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psEraseMatchAlternativesWorker",
+          "definitionSha256": "860410fe41bf3556499ea06aba04eee95c506c5cc14c00a9f9cd2d9f494fc548"
+        },
+        {
+          "module": "Ps.Erasure.Expr",
+          "name": "psErasureEtaParameters",
+          "definitionSha256": "3edee3097b4e02e059bc999e2085dc5d6ca668f09e4c7c3506810c956533d7d1"
+        },
+        {
+          "module": "Ps.Erasure.Inductive",
+          "name": "psApplyConstructorParameters",
+          "definitionSha256": "6971ef0f2d1fcd21d16e156425c0af69fabed100020e767fa06c61b22c6a3ebf"
+        },
+        {
+          "module": "Ps.Erasure.Inductive",
+          "name": "psFindConstructorDeclaration",
+          "definitionSha256": "4c1d1da42426cdd0ceb2ec4648c6246989ab719dfdf96718d9f504155df01e83"
+        },
+        {
+          "module": "Ps.Erasure.Inductive",
+          "name": "psFindRecursorDeclaration",
+          "definitionSha256": "c8d7fcf3261b59aaab91b3a49b83a159878eb41f45b6c8d8ea4324fd138c3caa"
+        },
+        {
+          "module": "Ps.Erasure.Inductive",
+          "name": "psPrepareRuntimeConstructors",
+          "definitionSha256": "9e07dc8e337e3c71c1b9118cd6b8bf373469aa9be2631302f86aa91671b8a607"
+        },
+        {
+          "module": "Ps.Erasure.Definition",
+          "name": "psErasureReverseDeclarationNamesAcc",
+          "definitionSha256": "055a9620b440c4334d2d911b106697756f550e8d4d549ff0594ffdf8dc77da12"
+        },
+        {
+          "module": "Ps.Erasure.Definition",
+          "name": "psErasureReverseTypeParametersAcc",
+          "definitionSha256": "cec04114afb6d9b753c905b452c8095ee05437f6e450e3e755a3131b46d341aa"
+        },
+        {
+          "module": "Ps.Erasure.Definition",
+          "name": "psErasureReverseParametersAcc",
+          "definitionSha256": "2fd97c8eac870225b2ca2fcebaac86a85082638e373a202da4e0050fdb8fb930"
+        },
+        {
+          "module": "Ps.Erasure.Definition",
+          "name": "psErasureReverseIrDeclarationsAcc",
+          "definitionSha256": "7b961d7c01ea6e26ad1d7e509f1ff24f6e46c0c104ef8a43275a20dee71ecf79"
+        },
+        {
+          "module": "Ps.Erasure.Definition",
+          "name": "psErasureAppendDeclarations",
+          "definitionSha256": "510f5c8193adb3d95f5a02e240d1fcc78f09a1c05afae493821a0c7715bd39b6"
+        },
+        {
+          "module": "Ps.Erasure.Definition",
+          "name": "psErasureRuntimePreludeClosure",
+          "definitionSha256": "00d64e033d3d43e3aa61417638a58c822fe5324f386d0d9ea874ccc0f1dac53a"
+        },
+        {
+          "module": "Ps.Compiler.Ordinary",
+          "name": "psOrdinaryConstructorFieldsWorker",
+          "definitionSha256": "4ac847c6935d7c240e43327d829046fef3f1264d7ef2a073b9fbbd3aebef64d1"
+        },
+        {
+          "module": "Ps.Compiler.Ordinary",
+          "name": "psOrdinaryConstructorAlternativesWorker",
+          "definitionSha256": "aa6753b9296b9a4ac44441b4d611659230e4ccf4a4ac2964401413ef75aa612a"
+        },
+        {
+          "module": "Ps.Compiler.Ordinary",
+          "name": "psOrdinaryWitnessBudgetWorker",
+          "definitionSha256": "329fe8a02649a116c5db098168a1e0cf8b5736beb1c7f207059e68592b5a8344"
+        },
+        {
+          "module": "Ps.CompilerIr.Specialize",
+          "name": "psIrSpecializeTypeKeyWithFuel",
+          "definitionSha256": "c05f6e89a7f14528f4f9e6412cb6adac30bafd76caf1d0047093ed3a4f6c4648"
+        },
+        {
+          "module": "Ps.BackendCommon.Plan",
+          "name": "psBackendPublicNamesUniqueWorker",
+          "definitionSha256": "4c07db5b84f1b4f705fca4ebea53a892077fe5c2268722a20162764552615e77"
+        },
+        {
+          "module": "Ps.Compiler.Service",
+          "name": "atWorker",
+          "definitionSha256": "11b449232979937e642208a281ce67d8792ddf75823df1fb882edc78783a95df"
+        },
+        {
+          "module": "Ps.Compiler.Service",
+          "name": "captureWorker",
+          "definitionSha256": "6548fd2030c14eef781182f272521fb52c1e8b9d47f70c76ee40c68d426979c5"
+        },
+        {
+          "module": "Ps.Compiler.Service",
+          "name": "exactClosureWorker",
+          "definitionSha256": "3b2ad240958e4b03716304c83899b626b5c494d252575b09d74341ed1992886d"
+        },
+        {
+          "module": "Ps.BackendJs.Lower",
+          "name": "psVerifiedIrIntDecimalMagnitudeWithFuel",
+          "definitionSha256": "9c33f57fce48a2714299b218809fd438871f5adf49679a6456c4264621902ee3"
+        },
+        {
+          "module": "Ps.BackendJs.Lower",
+          "name": "psJsTypeSupportedWithPolicyAndFuel",
+          "definitionSha256": "d62e2c77cfcf7b54fe32dd57c061f5171a40c7be8114366846d397f1cbbf6f6c"
+        },
+        {
+          "module": "Ps.BackendJs.Lower",
+          "name": "psJsLowerExprWithPolicyAndFuel",
+          "definitionSha256": "fc984aa6f3a2e7bb2490c2f23d1647a4925879cec63b0a43832bb31a531ab0c9"
+        },
+        {
+          "module": "Ps.BackendJs.Validate",
+          "name": "psJsValidationAppendNames",
+          "definitionSha256": "13cc3bd64ba3318f51065b44283da0e661c0f61d7017e092e45a6a7112662d3c"
+        },
+        {
+          "module": "Ps.BackendJs.Validate",
+          "name": "psJsValidationAddBindings",
+          "definitionSha256": "7bcf558573a92f45384ce6820d76c67275013414bbdcdd8be4661cd8802e39e5"
+        },
+        {
+          "module": "Ps.BackendJs.Validate",
+          "name": "psJsValidateExprWithFuel",
+          "definitionSha256": "8c73b44d89634d3fd0a248addc98b5286be3342b986549ba97d773a7788c1e50"
+        },
+        {
+          "module": "Ps.BackendJs.TailAlias",
+          "name": "psJsTailDrop",
+          "definitionSha256": "2b68a31b6f2b28194055f5b25fcf915c9d0741bd06dc1e3dbdc8b2eaf94a1a21"
+        },
+        {
+          "module": "Ps.BackendJs.TailAlias",
+          "name": "psJsTailEtaSuffix",
+          "definitionSha256": "18f7a8fd76b6a69a6c3e0189bd54cf531f0b825684f2aa560bd99b045cb6fb14"
+        },
+        {
+          "module": "Ps.BackendJs.TailAlias",
+          "name": "psJsTailCaptureBindings",
+          "definitionSha256": "c1cc0d65c07e4853230f36d27f81d82f35462fb0e9b9aaa710e8741eb4cee555"
+        },
+        {
+          "module": "Ps.BackendJs.TailAlias",
+          "name": "psJsTailRewriteWithFuel",
+          "definitionSha256": "c30a85f8c8f360fc57cdb17f27d1da74fcbf593fbac018db3eecc66f7fc628cd"
+        },
+        {
+          "module": "Ps.BackendJs.Print",
+          "name": "psJsPrintDeclarationsObservedWith",
+          "definitionSha256": "2a46cda0438daacf369354b41694b1981d3300c3ad60fd8f9002b3bdc6586689"
+        }
+      ],
+      "scope": "Source-shape candidates in real owned JS/Wasm union, not proven reachable defects or a performance qualification."
+    }
+  },
+  "fullRetainedCpuSummary": {
+    "runId": 40036067959,
+    "status": "passed",
+    "compilerExecution": false,
+    "summary": [
+      {
+        "file": "isolate-0x17f61000-2309-v8.log.txt",
+        "sha256": "a9a87d71728ba417a333217cba6ecafeae1260ff013893990227baf1756495fc",
+        "sections": {
+          "Summary": [
+            " [Summary]:",
+            "   ticks  total  nonlib   name",
+            "  133139   60.3%   95.6%  JavaScript",
+            "   3056    1.4%    2.2%  C++",
+            "  47368   21.5%   34.0%  GC",
+            "  81389   36.9%          Shared libraries",
+            "   3030    1.4%          Unaccounted",
+            "",
+            " [C++ entry points]:",
+            "   ticks    cpp   total   name",
+            "    378   36.9%    0.2%  __libc_malloc@@GLIBC_2.2.5",
+            "    146   14.3%    0.1%  __pthread_mutex_lock@GLIBC_2.2.5",
+            "     76    7.4%    0.0%  __pthread_mutex_unlock@GLIBC_2.2.5",
+            "     69    6.7%    0.0%  __write@@GLIBC_2.2.5",
+            "     67    6.5%    0.0%  operator new(unsigned long)@@GLIBCXX_3.4"
+          ],
+          "Bottom up (heavy) profile": [
+            " [Bottom up (heavy) profile]:",
+            "  Note: percentage shows a share of a particular caller in the total",
+            "  amount of its parent calls.",
+            "  Callers occupying less than 1.0% are not shown.",
+            "",
+            "   ticks parent  name",
+            "  71204   32.3%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+            "  33773   47.4%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+            "   4737   14.0%      JS: *__ps$impl$psMetaInstantiate file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:2185:38",
+            "   4737  100.0%        Builtin: GeneratorPrototypeNext",
+            "   4737  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "   4737  100.0%            JS: ~psCompilerJsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:5609:45",
+            "   3530   10.5%      JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "   3529  100.0%        JS: ~psCompilerJsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:5609:45",
+            "   3529  100.0%          JS: ~executeService file:///home/runner/work/pskernel/pskernel/psc1/host-tools/generated-target-tools.mjs:145:37",
+            "   3529  100.0%            Builtin: AsyncFunctionAwaitResolveClosure",
+            "   2923    8.7%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:1416:607",
+            "   2026   69.3%        Builtin: GeneratorPrototypeNext",
+            "   2026  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "   2026  100.0%            JS: ~psCompilerJsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:5609:45",
+            "    897   30.7%        JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "    897  100.0%          JS: ~psCompilerJsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:5609:45",
+            "    897  100.0%            JS: ~executeService file:///home/runner/work/pskernel/pskernel/psc1/host-tools/generated-target-tools.mjs:145:37",
+            "   2559    7.6%      Builtin: WeakMapPrototypeSet",
+            "   1383   54.0%        JS: *__ps$impl$psEnvironmentFindInListWorker file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:1416:50",
+            "   1383  100.0%          Builtin: GeneratorPrototypeNext",
+            "   1383  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "    399   15.6%        JS: *__ps$wrap file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:82:19",
+            "     97   24.3%          JS: *__ps$impl$psErasePrimitiveApplication file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3729:48",
+            "     97  100.0%            Builtin: GeneratorPrototypeNext",
+            "     83   20.8%          JS: *__ps$impl$psEraseRuntimeConstructorApplication file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3762:57",
+            "     83  100.0%            Builtin: GeneratorPrototypeNext",
+            "     38    9.5%          JS: *__ps$impl$psSyntaxNameAppendSegments file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:2417:47",
+            "     38  100.0%            Builtin: GeneratorPrototypeNext",
+            "     32    8.0%          JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:7076:11948",
+            "     32  100.0%            Builtin: GeneratorPrototypeNext",
+            "     29    7.3%          JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3893:1889",
+            "     29  100.0%            Builtin: GeneratorPrototypeNext",
+            "     28    7.0%          JS: ~__ps$impl$psErasureBindingReserved file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3593:45",
+            "     28  100.0%            Builtin: GeneratorPrototypeNext",
+            "     24    6.0%          JS: *__ps$impl$psEraseRuntimeConstructorFields file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3759:52",
+            "     24  100.0%            Builtin: GeneratorPrototypeNext",
+            "     10    2.5%          JS: *__ps$impl$psElabApplicationUsesBinderWorker file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:2975:54",
+            "     10  100.0%            Builtin: GeneratorPrototypeNext",
+            "      7    1.8%          JS: ^__ps$impl$Ps_Internal_CompilerService_originJson file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:4898:59",
+            "      7  100.0%            Builtin: GeneratorPrototypeNext",
+            "      5    1.3%          JS: ^__ps$impl$psParseLeanBinderTypeWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:6706:57",
+            "      5  100.0%            Builtin: GeneratorPrototypeNext",
+            "      5    1.3%          JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:2257:689",
+            "      5  100.0%            Builtin: GeneratorPrototypeNext",
+            "      4    1.0%          JS: ^__ps$impl$psLeanPrependBinderGroupReverse file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:634:52",
+            "      4  100.0%            Builtin: GeneratorPrototypeNext",
+            "      4    1.0%          JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:6721:23434",
+            "      4  100.0%            Builtin: GeneratorPrototypeNext",
+            "      4    1.0%          JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3078:491",
+            "      4  100.0%            Builtin: GeneratorPrototypeNext",
+            "    222    8.7%        JS: *__ps$impl$psFindConstructorDeclaration file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3887:49",
+            "    222  100.0%          Builtin: GeneratorPrototypeNext",
+            "    222  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "    144    5.6%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:7076:2328",
+            "    144  100.0%          Builtin: GeneratorPrototypeNext",
+            "    144  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "     72    2.8%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3629:525",
+            "     72  100.0%          Builtin: GeneratorPrototypeNext",
+            "     72  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "     52    2.0%        JS: *__ps$impl$psErasureAppViewAcc file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3611:40",
+            "     52  100.0%          Builtin: GeneratorPrototypeNext",
+            "     52  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "     47    1.8%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3078:491",
+            "     47  100.0%          Builtin: GeneratorPrototypeNext",
+            "     47  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "     43    1.7%        JS: *__ps$impl$psElabSolvePendingInstancesWorker file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:2993:54",
+            "     43  100.0%          Builtin: GeneratorPrototypeNext",
+            "     43  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "     40    1.6%        JS: *__ps$impl$psParseListReverseAcc$spec$String file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:6276:54",
+            "     40  100.0%          Builtin: GeneratorPrototypeNext",
+            "     40  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "   1648    4.9%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3887:607",
+            "    973   59.0%        Builtin: GeneratorPrototypeNext",
+            "    973  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "    973  100.0%            JS: ~psCompilerJsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:5609:45",
+            "    675   41.0%        JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:81:18",
+            "    675  100.0%          JS: ~psCompilerJsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:5609:45",
+            "    675  100.0%            JS: ~executeService file:///home/runner/work/pskernel/pskernel/psc1/host-tools/generated-target-tools.mjs:145:37",
+            "   1404    4.2%      JS: ~__ps$impl$psErasureBindingReserved file:///home/runner/work/pskernel/pskernel/input/direct-js/psc1-direct-selfhost-correctness-1800s-js-85433830522dc0cc52541b985510122b67dea364/generated-js-compiler/G1-service/module.js:3593:45"
+          ]
+        }
+      }
+    ]
+  },
+  "wasmLocalsInventory": {
+    "runId": 40036922902,
+    "status": "passed",
+    "receipt": {
+      "localsInventory": {
+        "scope": "Decoded owned binary local counts/code bytes are frame-size proxies, not a JIT stack-byte measurement.",
+        "largest": [
+          {
+            "index": 3135,
+            "locals": 487,
+            "bodyBytes": 12149,
+            "name": "psParseDoAppend$worker"
+          },
+          {
+            "index": 3745,
+            "locals": 486,
+            "bodyBytes": 12123,
+            "name": "generated-closure:3745"
+          },
+          {
+            "index": 3228,
+            "locals": 342,
+            "bodyBytes": 8328,
+            "name": "psUnifyWithFuelWorker$worker"
+          },
+          {
+            "index": 4268,
+            "locals": 336,
+            "bodyBytes": 8255,
+            "name": "generated-closure:4268"
+          },
+          {
+            "index": 3207,
+            "locals": 321,
+            "bodyBytes": 7174,
+            "name": "psExprAlphaEq$worker"
+          },
+          {
+            "index": 1392,
+            "locals": 305,
+            "bodyBytes": 7273,
+            "name": "psElabRecursionStateIsRuntime"
+          },
+          {
+            "index": 189,
+            "locals": 288,
+            "bodyBytes": 8055,
+            "name": "psParseDoFallthrough"
+          },
+          {
+            "index": 3966,
+            "locals": 286,
+            "bodyBytes": 7960,
+            "name": "generated-closure:3966"
+          },
+          {
+            "index": 3178,
+            "locals": 285,
+            "bodyBytes": 7954,
+            "name": "psPrintDoBody$worker"
+          },
+          {
+            "index": 3293,
+            "locals": 283,
+            "bodyBytes": 6834,
+            "name": "psEraseOpenDefinitionWithFuel$worker"
+          },
+          {
+            "index": 5205,
+            "locals": 277,
+            "bodyBytes": 6788,
+            "name": "generated-closure:5205"
+          },
+          {
+            "index": 3255,
+            "locals": 275,
+            "bodyBytes": 7507,
+            "name": "psElabRecursionWalkWithFuel$worker"
+          },
+          {
+            "index": 4870,
+            "locals": 274,
+            "bodyBytes": 7494,
+            "name": "generated-closure:4870"
+          },
+          {
+            "index": 4701,
+            "locals": 251,
+            "bodyBytes": 8190,
+            "name": "generated-closure:4701"
+          },
+          {
+            "index": 6561,
+            "locals": 251,
+            "bodyBytes": 8190,
+            "name": "generated-closure:6561"
+          },
+          {
+            "index": 1598,
+            "locals": 237,
+            "bodyBytes": 5839,
+            "name": "psEraseCondition"
+          },
+          {
+            "index": 3221,
+            "locals": 210,
+            "bodyBytes": 5657,
+            "name": "psLevelUnifyWithFuelWorker$worker"
+          },
+          {
+            "index": 1154,
+            "locals": 208,
+            "bodyBytes": 4477,
+            "name": "psElabDoBuiltinArgument"
+          },
+          {
+            "index": 3316,
+            "locals": 206,
+            "bodyBytes": 6410,
+            "name": "psIrSpecializeRewriteExprWithFuel$worker"
+          },
+          {
+            "index": 4203,
+            "locals": 206,
+            "bodyBytes": 5614,
+            "name": "generated-closure:4203"
+          },
+          {
+            "index": 5349,
+            "locals": 206,
+            "bodyBytes": 6396,
+            "name": "generated-closure:5349"
+          },
+          {
+            "index": 1455,
+            "locals": 202,
+            "bodyBytes": 4392,
+            "name": "psElabStructuralRecursionFromSource"
+          },
+          {
+            "index": 3243,
+            "locals": 199,
+            "bodyBytes": 5040,
+            "name": "psElabDoBodyWithExitWorker$worker"
+          },
+          {
+            "index": 3284,
+            "locals": 199,
+            "bodyBytes": 5181,
+            "name": "psEraseRuntimeExprWithFuelWorker$worker"
+          },
+          {
+            "index": 5137,
+            "locals": 197,
+            "bodyBytes": 5151,
+            "name": "generated-closure:5137"
+          }
+        ],
+        "selected": [
+          {
+            "index": 11,
+            "locals": 5,
+            "bodyBytes": 136,
+            "name": "__ps_wasm_nat_divmod"
+          },
+          {
+            "index": 2286,
+            "locals": 1,
+            "bodyBytes": 56,
+            "name": "psWasmLowerExprWorker"
+          }
+        ]
+      },
+      "schema": "psc1-retained-wasm-function-map/1",
+      "testedCommit": "c82ebf5fb83c4e2b2dc3b5cd6e48f70916f9b150",
+      "source": {
+        "schema": "psc1-retained-wasm-stack-diagnosis/1",
+        "attempts": [
+          {
+            "runId": 40035031327,
+            "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
+            "sourceCommit": "699f84948ff70273e5ab9a7c5c0273316df23e66",
+            "artifactId": 12537505726,
+            "artifactDigest": "sha256:8c95c7ab2104f8200af7c258e7a01b985cbc040073b8bb68d7542ec874910c9c"
+          }
+        ],
+        "serviceSha256": "38cf11fd0fdf7a48d7a3dc9a926b5970e2ddf14e3ad852a5fa6fe682680724cb",
+        "requestSha256": "154f995001505a8f1415f1b407616fec2ba349e344b775bb17b97c5bea710ff6",
+        "closure": "85c03806bb5c045a8d5c48a73ddd1fbe7f5be568ea3c92a599d7b19ac0e5f317",
+        "purpose": "Read-only exact owned code-section local inventory to distinguish giant function frames from Nat operand depth; not a performance or stack-size proof.",
+        "resolveOnly": [
+          11,
+          2286
+        ],
+        "attempt": 2
+      },
+      "sourceSha256": "8ad03f84ff1beae83c8b896b66a712bf3bf70768c6302af26eecf24978b34341",
+      "binarySha256": "96f44823fec24fb5483f51111ed9fd151cc40b9af435ba12119d363b47843bf9",
+      "exportAnchorsVerified": true,
+      "compilerExecution": false,
+      "qualification": false,
+      "resolved": [
+        {
+          "index": 11,
+          "name": "__ps_wasm_nat_divmod"
+        },
+        {
+          "index": 2286,
+          "name": "psWasmLowerExprWorker"
+        }
+      ],
+      "totalCandidates": 0,
+      "inventoryScope": "heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof",
+      "declarationSpines": [],
+      "otherFirst60": []
     }
   }
 }

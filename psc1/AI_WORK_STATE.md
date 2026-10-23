@@ -1,132 +1,171 @@
 # PSC1 active work state
 
-Updated 2026-10-23. Draft [PR #172](https://github.com/dwijayuda/pskernel/pull/172),
+Updated 2026-10-23. Draft [PR #172](https://github.com/dwijayuda/pskernel/pull/172);
 active branch `fix/psc1-closure-normalization-20261021`.
 Use connected GitHub tools and Linux Actions only. Fetch latest remote HEAD
-before non-force, expected-HEAD commits. Preserve history. No merge or npm
+before non-force expected-HEAD updates. Preserve history; no merge or npm
 publication is authorized.
 
-## Verified production-source checkpoint
+## Verified integrated checkpoint
 
-Qualified source `d0bef34de7d5d3c495f2a4a73af7eccd892d0d74`;
-tested merge `6cc6c55b4785eebf70f27331610f9e949a3a84e5`.
-[Linux run 39887884270](https://github.com/dwijayuda/pskernel/actions/runs/39887884270)
-completed successfully: every selected job, all 47 full-job steps and all
-37 finite Practical Core criteria. The benchmark lane was dependency-skipped.
-Both grammars, all seven targets, applications, independent official Lean
-admission, strict IR, negative tests, host boundaries, compiler closures,
-minimum Python and installed native package qualification pass.
+Branch HEAD `78fe34b8d08d3f01dcc06ca9592668c958526849`, tested merge
+`9fc3bade30bb0dc2ab4535e17319af52bee62250`, passes
+[Linux run 39894605462](https://github.com/dwijayuda/pskernel/actions/runs/39894605462):
+every selected job, all 47 full-job steps, and all 37 finite Practical Core
+criteria. Benchmark is dependency-skipped. Both grammars, all seven targets,
+applications, official admission, strict IR, negatives, host boundaries,
+compiler closures, minimum Python and installed native package remain qualified.
+This repeats the source qualification at d0bef34d / run 39887884270; that complete
+receipt and all previous successful/failed evidence remain preserved.
 
-The frozen release authority remains
-[PSC1_PRACTICAL_CORE_V1_CONTRACT.json](docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json):
+The frozen authority is [PSC1_PRACTICAL_CORE_V1_CONTRACT.json](docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json):
 14 families, 37 finite criteria, both grammars, seven targets, four application
 categories. This is scoped qualification, not unrestricted language completeness
-or a formal backend preservation theorem. The native package is unpublished;
-its tarball SHA256 is
-`037aeb87220f38d9d70ed01a8a6540ae58f751c2f8eaa168b30875ed8e052962`.
+or a formal backend preservation theorem. The native package is unpublished:
+tarball SHA256 `30d5333a7311335809eb28be4b130acf0e73b2a1bdd408915a7d4b20ec3bef7b`.
+Full artifact 12477371933 expires 2026-11-06T03:56:45Z; digest and all exact
+identities/steps are in [the machine receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
 
-Exact source/tool/package identities, jobs/steps, artifacts and expiry are in
-[the current machine receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
-The normal full artifact 12474609129 expires 2026-11-06T02:47:32Z.
-Previous state, roadmap, receipt and every commit remain preserved.
+## One compiler; independently executing targets
 
-## One compiler and genuine generation evidence
+Rust native execution and readable npm-compatible TypeScript lead self-hosting.
+`Ps.Compiler.Service` shares the existing source/frontend/elaborator, original
+checked IR, target planning, admissions and origins. Thin target facades invoke
+existing emitters. There is no handwritten target compiler. A single native seed
+is followed by actual emitted compilers; native compiler executables are removed
+before generated work. A separate host admits exact canonical graphs with official
+Lean 4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 
-Rust native execution and TypeScript readable npm-compatible distribution lead
-self-hosting. `Ps.Compiler.Service` shares the existing source/frontend/elaborator,
-original checked IR, target planning, admissions and origin identities.
-Thin target facades call existing production emitters; there is no handwritten
-target compiler. A single native seed is followed by actual emitted compilers;
-native compiler executables are removed before generated work. The host separately
-admits exact canonical graphs with official Lean 4.35.0 commit
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Both targets genuinely pass the same five positive/five refusal G1 cases across
+both grammars. Integrated TypeScript result annotations resolve the strict checker
+contextual-inference stall. All 489 PSC1 Lean blobs match its actual G1-tested
+a0a0a92f source; the source-tree witness is retained. DirectJS G1 remains the
+qualified reference/regression; its original
+[G2 heap defect](docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md) remains open,
+without prioritizing DirectJS-specific G2 work.
 
-| Target / source | Actual completed qualification | Remaining boundary |
-| --- | --- | --- |
-| Rust baseline ea10eff9 / 39880803794 | G1 executable and all ten frozen cases | G2 timeout at 240031 ms |
-| Integrated TypeScript annotation source / 39887064597 | Strict compilation, executing G1 and all ten cases | G2 timeout at 240091 ms |
-| Isolated Rust ownership + private Drop / 39890802847 | Both grammar audits, G1 and all ten cases; 500000-node/drop-order stress tests | Later G2 stack failure at 186541 ms |
-| Isolated TypeScript structured generator / 39889151346 | Both grammar audits, G1 and all ten cases; two all-input legacy equalities | G2 timeout at 240086 ms |
+Neither target has qualified G2/G3, a fixed point or repeated clean target binary
+builds. A diagnostic job passing is not a generation pass.
 
-Neither target has completed G2/G3 or fixed-point qualification. No final binary
-reproducibility claim is made. Integrated TS G1-tested source and qualified main
-have identical blobs for all 489 PSC1 Lean files (recorded tree witness); its host
-receipt-bookkeeping update does not change the compiler closure.
+## Measured isolated engineering
 
-DirectJS G1 remains qualified as the normal reference/regression. Its diagnosed
-G2 JavaScript heap defect remains tracked in
-[the retained defect](docs/PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md).
-DirectJS-specific G2 optimization is not prioritized.
+Rust ownership changes avoid measured full String copies using scope-aware
+last-use and unique tail transfers. Changing arguments evaluate before moves;
+capture/duplicate/shadow/error/fuel guards remain. Retained-old/current runtime
+comparisons cover Unicode and 100000 steps. Safe iterative Drop applies only to
+private regular last-field linear inductives with an empty sentinel. Shared
+tails and original destruction order are compared; 500000-node destruction passes.
+Public enum pattern ABI is unchanged; no unsafe code, leak or stack increase.
 
-## Measured corrections and current isolated work
+The shared cursor accumulator/reverse correction has an official all-input
+fuel/source/raw-offset equality proof, 306 evaluated cases and a 100000-character
+case. The explicit lexer-length wrapper also has all-type/list/count equality.
+Both branches pass both complete source grammar audits and actual G1 cases.
 
-TypeScript's strict checker stalled on contextual return/yield/conditional
-inference. Explicit nested generator result annotations use checked IR types,
-preserve all-input legacy rendering, and retain 264 old/current print/runtime
-selection comparisons. That correction is integrated and normally qualified.
-The isolated structured-generator follow-up reduces suspension overhead,
-preserves ordinary typed/fuel preflight and legacy pure output by induction,
-and refuses alias escape or unsafe shadowing. A 220-second exact replay's final
-30-second profile shows active frontend instantiation/inference and string/name/
-environment lookup, alongside generator dispatch. It is not a finished G2.
+Exact diagnosis [39896155384](https://github.com/dwijayuda/pskernel/actions/runs/39896155384)
+at `f3e9caea62882242a1040ebca51f1ec7f1f9381f` finds the broader class:
+14 recursive polymorphic curried helpers survive unchanged in original and
+transformed IR. The explicit source length wrapper does not change its synthesized
+recursive helper. Closed worker fusion deliberately skips generic declarations.
+Do not repeatedly rewrite individual wrappers or simply remove that guard:
+generic companion signatures, instantiated capture types and call spines need
+coherent treatment.
 
-Rust exact replay exposed full String copying in request decoding. Borrowed
-ordered intrinsic wrappers, last-use String aliases and tail transfers address
-that class; changing arguments evaluate before unique owned locals move.
-Capture analysis, duplicate/shadow guards and retained-old/current execution
-tests preserve scope and evaluation order. The subsequent crash was recursive
-`Rc::drop_slow`. Safe iterative destruction applies only to private, regular,
-last-field linear recursion with an empty sentinel; public enum representation
-is unchanged. Shared tails and original field-drop order are tested. No unsafe
-code or stack increase is introduced.
-
-[Exact later crash diagnosis 39891954467](https://github.com/dwijayuda/pskernel/actions/runs/39891954467)
-identifies native recursion in `psLexStringToListFromWithFuel`.
-The shared cursor accumulator/reverse correction keeps every original fuel,
-source and raw-offset result. Its all-input equality proof and 100000-character
-native stress case precede both grammar audits and actual generations.
-
-Latest isolated shared-cursor qualifications are terminal. Both prove the all-input
-equality, execute 306 offset/fuel cases and 100000 characters, pass both full
-grammar audits and all ten actual G1 cases. Rust G2 still fails with stack
-overflow at 14116 ms; TS G2 times out at 240086 ms. No G2 candidate is admitted,
-G3/fixed point are not run. The next exact Rust crash replay is dispatched at
-`f07845ad5cd300d1e5c61fa71949741263286cdf`; inspect its terminal stack before
-choosing another source/backend correction.
-
-Exact tested requests:
+The next experiment reuses existing strictly checked closed specialization and
+worker fusion for nongeneric primitive-only public interfaces, including the
+compiler's String -> String interface. Other APIs retain the generic route;
+planning refusal falls back to that existing route. Original/post-plan public
+API and strict IR checks remain. Native eligibility/specialization/generic-ABI
+regressions pass. Both targets use identical shared service/cursor/lexer source.
 
 - Rust branch `fix/psc1-rust-owned-string-moves-20261023`: source
-  `623384b5212576229a6caae474edcdb4e71e9c76`, request
-  `62c8937e72ece94e774bcee33f691edd1c293260`,
-  [run 39893147337](https://github.com/dwijayuda/pskernel/actions/runs/39893147337).
-- TS branch `fix/psc1-ts-generator-result-types-20261023`: source
-  `ee45ca9035698ca12f0c6814c91b615db01242ff`, request
-  `541419592bc2a90ea2b79737ba7e64ba365c4108`,
-  [run 39893184640](https://github.com/dwijayuda/pskernel/actions/runs/39893184640).
+  `734f01ea364c543547eb3755697a651329502a07`, request
+  `b7e33cddd169bc5ccc937d6ada0c41a8718cffbb`,
+  [run 39898205150](https://github.com/dwijayuda/pskernel/actions/runs/39898205150),
+  job 120233440695. The actual compiler has 2691 declarations, zero open generics;
+  G1 build and all ten cases pass. G2 fails with stack overflow at 36175 ms.
+  Experimental Rust optimization level 0 is recorded, while integrated main
+  remains level 1. Its small requests were slower than earlier candidates with different plans;
+  the later same-input level-1 comparison below is the controlled profile evidence. Artifact 12478265373, digest
+  `1f385e61b5e139f34d925a659f2cad41a3ac076e7b775d70f9c4ce4606a8b40a`,
+  expires 2027-01-21T04:02:46Z.
+- TypeScript branch `fix/psc1-ts-generator-result-types-20261023`: source
+  `eeba9fadcee74bdcd6f98a74db71d81eea03fa56`, request
+  `b279eea5d899a7d039f2a7c1cb099e8dbaf52206`,
+  [run 39898459655](https://github.com/dwijayuda/pskernel/actions/runs/39898459655),
+  job 120234241165. Strict build, all ten G1 cases and zero open generics in 2604 declarations pass; G2 times out at 240162 ms. G3/fixed point are not run. Artifact 12478440283 expires 2027-01-21T04:05:37Z; exact digest is in the machine receipt.
 
-Both apply identical shared Cursor.lean/proof bytes. The cursor correction and
-later backend prototypes are **not integrated or normally qualified** on PR #172.
-Do not promote merely because native proofs or G1 pass; use actual workload
-evidence and fresh normal seven-backend qualification after integration.
+Exact closed Rust replay [39898770508](https://github.com/dwijayuda/pskernel/actions/runs/39898770508), job 120235233000, identifies repeated
+psLexAllWorker$worker frames at 37068 ms. It independently confirms that
+closed specialization/fusion removed the generic-helper barrier.
 
-## Execution boundaries and next work
+The follow-up changes both grammar token-stream workers to accumulate/reverse
+while preserving original bounds, errors, spans, token order and exported
+wrappers. All-input inputBound/fuel/cursor/accumulator equality proofs against
+retained original workers and 320 finite comparisons plus 100001 tokens per
+grammar pass before expensive generations. Native tests, old proofs, DirectJS
+G1 regressions and both complete grammar audits also pass.
 
-Follow the [dependency-ordered roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) and
-[executable continuation prompt](docs/PSC1_RUST_TS_SELFHOST_CONTINUATION.md).
-First diagnose the next post-cursor Rust stack path and the measured remaining TS
-full-workload cost, then finish independent G2/G3 and exact source/admission/original-IR/
-transformed-IR/corpus fixed points for each target. Then qualify reproducible
-target build products and readable distribution. Source/IR fixed points and
-native executable bit equality are distinct evidence.
+Current source requests are Rust source 64e497ff407f802445d234726fa4ca2ccb4068a0,
+request e91e39e44774747650e7a80e12e01887c2b34b42,
+run 39899597934/job 120237851825; TypeScript source
+39cc17b3d0bae945df932da9ffccacacfb45d1ca, request
+da837f82f580e9f49be9bacb4961d57c9e93021d,
+run 39899843170/job 120238644855. Both are terminal failures after all ten G1 cases: Rust level 0 G2 times out
+at 240041 ms; TypeScript G2 at 240106 ms. No G2 candidate is admitted; G3 and
+fixed point are not run.
 
-Preserve strict checking, unsupported ABI refusals, all negatives, source/tool
-identities and existing fuel/heap/stack policies. Manual jobs retain 15 minutes;
-child process groups are killed at 240000 ms with 32 MiB per stream. The
-245000 ms supervisor guard is cleanup only. Incremental failed attempts now
-record terminal failure rather than remaining running. All historical G1,
-failed self-host and performance evidence remains.
+The same Rust compiler-input closure was then built at established level 1:
+source e9a457c25f2005cabae4ce1d844259b7779ede3f, request
+709562694133433234bf222a1d012a53766607c2,
+[run 39900513422](https://github.com/dwijayuda/pskernel/actions/runs/39900513422),
+job 120240781146. All native proofs/regressions, audits and ten G1 cases pass;
+G2 times out at 240038 ms. Artifact 12478079568 expires 2027-01-21T04:28:33Z.
+The five positive G1 requests total 5853 ms at level 0 and 2303 ms at level 1;
+all ten total 6849/3220 ms. Inputs match exactly, runs use separate hosted
+machines and wall times include runner startup. Both full G2 observations are
+hard-deadline censored; no full-compiler throughput ranking is established.
 
-Expensive generations remain manual/release work, separate from normal
-development. PSKernel-Core Expression V2 research remains independent;
-official Lean admission continues to authorize checked compilation.
+Current exact TS late profile:
+[39900956833](https://github.com/dwijayuda/pskernel/actions/runs/39900956833),
+job 120242169870, diagnostic source
+67041d9b7d32183c514a032e957ab172b6697925. A 220-second bounded replay analyzes
+the final 30 seconds (26766 selected ticks). Hot work includes canonical codec/
+JSON encoding, psJsonEscapeStringWithFuel, text-builder/concat/quote operations
+and generator dispatch. Shared Node samples are 61.7%; flat counts alone cannot
+attribute inclusive phase cost. No candidate response, adoption or admission.
+This supersedes the old generic frontend-only profile for choosing TS work.
+
+The isolated TypeScript structured-generator emitter preserves ordinary typed/fuel
+preflight and legacy pure output by induction; 264 legacy/current comparisons
+remain. It refuses unsafe alias/shadow cases. The exact late profile
+39890014989 reaches instantiation, meta/inference, string/name/environment
+lookup and generator dispatch. Earlier generic G2 timed out at 240113 ms;
+JSON-only early profiles do not explain the whole workload.
+
+These later backend/shared changes remain **isolated, not integrated or normally
+qualified on PR #172**. G1/native proofs alone do not justify promotion.
+
+## Ordered execution and boundaries
+
+Use [the roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) and
+[executable continuation](docs/PSC1_RUST_TS_SELFHOST_CONTINUATION.md).
+Fix the actual next closed-workload blocker, then independently admit/build/execute
+G2/G3 and exact closure/source/canonical-admission/original-IR/transformed-IR/ten-case
+fixed points for each target. Compare actual compiler workloads, not synthetic
+tests alone. Then establish repeated clean target build-product identities,
+readable code and distribution. Source/IR identity is distinct from native binary
+bit equality. Promote coherent validated changes with fresh full seven-backend,
+application and regression qualification on the integrated source.
+
+No strictness, unsupported ABI refusals, negatives, semantic/resource policies or
+official checking are relaxed. Manual jobs retain 15 minutes, 240000 ms process-tree
+deadlines, 32 MiB per stream and 128 MiB request/response limits; 245000 ms is
+supervisor cleanup only. Failures retain terminal incremental receipts/artifacts.
+Expensive generations stay in manual/release workflows. PSKernel Expression V2
+research remains independent and does not replace official Lean admission.
+
+Freeze the passive historical/defect JSON snapshots created at 78fe34b8; changing
+them conservatively selects policy/full CI. Subsequent evidence updates belong
+in the existing recognized machine receipt and these active Markdown documents,
+without weakening dependency selection or repeating full CI for unchanged source.

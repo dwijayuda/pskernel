@@ -11,11 +11,14 @@ frontend preparation, elaboration, original strict IR validation, admissions,
 source origin identities and provisional response. Thin target modules provide
 only existing production emission. There is no handwritten target compiler.
 
-Rust and TypeScript keep the generic IR supported by their existing production
-emitters, with strictly rechecked shared worker fusion and selected public API
-checks. DirectJS retains its existing closed specialization/fusion plan. This
-uses existing generic emission; it adds no handwritten compiler or language
-semantics. Every final original/transformed IR graph is still strictly checked.
+Integrated Rust and TypeScript use their existing generic emitters with rechecked
+shared worker fusion. The isolated scalar-interface experiment first reuses the
+existing checked closed specialization/fusion plan for nongeneric primitive-only
+public signatures, including the compiler's String -> String interface. Other
+interfaces, or planning refusal, retain the existing generic route. Original and
+post-plan public API checks and strict IR remain. DirectJS retains its closed
+plan. These are existing compiler mechanisms, with no handwritten target compiler
+or new language semantics. Later isolated changes need fresh integrated qualification.
 
 Both expose String -> String candidates; these cannot authorize admission.
 The host separately admits the exact canonical graph with official Lean 4.35.0
@@ -43,8 +46,14 @@ symlinks and mismatched host target identities have negative tests.
 Measured wall time and peak RSS use actual generated requests; Rust uses the
 child's /usr/bin/time RSS rather than Node's parent RSS. Target compilation time,
 tool failures and generated source size are separate from service execution.
-Rust release optimization level 1 is an explicit reproducible build profile;
-type/borrow checking, locked dependencies and all runtime qualification remain.
+Integrated Rust release optimization level 1 is an explicit build profile.
+The isolated closed-plan experiment records level 0 to separate build optimization
+cost from actual compiler execution. Same-closure/request comparisons total 5853 ms (level 0) versus 2303 ms
+(level 1) for the five positive G1 workloads, across separate hosted runs and
+including startup. Neither full G2 completes, so these measurements establish
+no full-workload performance ranking.
+Compare both profiles on the same real workload before promotion. Type/borrow
+checking, locked dependencies and all runtime qualification remain.
 The source, toolchain and profile are recorded. Level 3 build performance and
 whole-file formatting are measured defects, not grounds for larger limits.
 The exact reviewed Cargo lock is committed (SHA256
@@ -72,5 +81,34 @@ Source/graph/IR fixed points and native build-product bit equality are distinct.
 The current controller asserts source, admission, IR and observation identities;
 record repeated clean Rust executable and TS emitted-product identities before
 claiming binary reproducibility. No G2/G3 or final reproducibility claim currently
-passes. Later backend and shared cursor candidates remain isolated until reviewed
-and normally qualified on the integrated source.
+passes. Later backend/shared cursor/lexer/scalar-plan candidates remain isolated
+until reviewed and normally qualified on the integrated source.
+
+## Exact current lowering findings
+
+Inventory/replay 39896155384 finds fourteen recursive polymorphic curried helpers
+unchanged in the generic plan. Source wrapper arity does not change synthesized
+recursive helper arity. Closed worker fusion deliberately excludes generic
+declarations. Removing that guard alone would leave uninstantiated type variables
+in companion/capture/call types. Reuse existing closed specialization for scalar
+interfaces before adding coherent generic instantiation machinery.
+
+Actual closed compiler inventories are Rust 2691 and TypeScript 2604 declarations,
+zero open generics. Both emitted compilers build and pass all ten G1 cases.
+Rust G2 then stacks at 36175 ms; TypeScript G2 times out at 240162 ms. Exact
+closed Rust replay 39898770508 identifies repeated psLexAllWorker$worker frames,
+separate from the formerly generic length helper. Both grammar token-list workers
+are now being normalized with accumulators, original inputBound/fuel/error/order
+semantics and all-input equality gates. All-input worker equalities, 320 finite comparisons and 100001-token cases per
+grammar pass on both targets. Latest G1 remains qualified; normalized Rust
+level 1 G2 times out at 240038 ms, TS at 240106 ms. G3/fixed points remain unrun.
+Current TS late profile 39900956833 shows codec/JSON/text-builder operations and
+generator dispatch, with substantial shared Node samples; inspect inclusive
+cost before selecting another optimization.
+
+Rust iterative destruction is private linear-only and preserves public pattern
+ABI and observed field order; it does not claim general nonlinear stack-safe
+memory management. Structured TypeScript generators preserve legacy rendering
+and ordinary fuel/error preflight. Neither engineering mechanism substitutes for
+full independently admitted compiler generations. Keep exact source/tool/profile/
+request/graph identities, failed evidence and the frozen seven-backend contract.

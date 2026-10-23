@@ -1,7 +1,7 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
   "branch": "work/psc1-direct-selfhost-spines2-20261024",
-  "parentCommit": "4f88fac688408adb7a4c059539746719c39c0170",
+  "parentCommit": "ef06b357723b2265759dccb955c1575a1bbb78bf",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
@@ -10,5 +10,5 @@
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "52cff171/Linux40028430603 passed generic reverse-fold equality and all three complete erasure index APIs, all prior ordinary/checked/prefix proofs,10000 declarations,10584 lazy-view comparisons and full87/98-module Lean/PS censuses. Actual previous G2 function1538 resolved to psErasureDeclarationEntryIndex. Execute genuine independent G1/G2/G3; original fuel/hash/heap/stack/checking policies unchanged."
+  "reason": "472f8def/full focused40031387906 PASSED six retained foundation API equalities,100000-element tests, all earlier erasure/checked/ordinary/prefix proofs and87/98-module Lean/PS gates. Actual previous G2 failed829660ms at psListLength$spec$PsWasmStructType, verified by retained map40030902621. Execute genuine G1/G2/G3 with fully applied list accumulators; all verification/fuel/heap/stack policies unchanged."
 }

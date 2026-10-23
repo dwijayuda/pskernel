@@ -2,21 +2,22 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "ts-ir-encoder-workers-correctness-1800s",
+      "id": "ts-text-lookup-visitor-correctness-1800s",
       "target": "ts",
       "profile": "correctness-1800s",
-      "sourceCommit": "453659433789ae3c6322f61b956e784891776c71",
-      "requestCommit": "66f1e752cfbdc491d9b2974c849825e8a4193227",
-      "runId": 39973570792,
-      "jobId": 120482257189,
-      "artifactId": 12512171887,
-      "artifactDigest": "sha256:fd7e28e0e06134029accdd8774a33dc1cd314de67ddad10bf2394b269623ef77",
-      "artifactExpiresAt": "2027-01-21T14:53:58Z",
+      "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
+      "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+      "runId": 39984419742,
+      "jobId": 120519775807,
+      "artifactId": 12516855369,
+      "artifactDigest": "sha256:e92065e83fe52d701f4342d7c63f3a85895ccad9094034f8bc552fbb21a39423",
+      "artifactExpiresAt": "2027-01-21T16:09:31Z",
       "inspectUtf8TokenWorker": true,
       "inspectCursorCacheHelpers": true,
       "inspectErasureWorkers": true,
       "inspectEncoderWorkers": true,
-      "expectedG1SourceSha256": "edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d"
+      "inspectTextLookupWorkers": true,
+      "expectedG1SourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452"
     }
   ]
 }

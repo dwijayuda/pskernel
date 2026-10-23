@@ -434,3 +434,7 @@ lean_exe psc1_target_service_seed where
 lean_exe psc1_ts_service_normalization_tests where
   srcDir := "test"
   root := `TsServiceNormalizationTests
+
+lean_exe psc1_cursor_normalization_tests where
+  srcDir := "test"
+  root := `CursorNormalizationTests

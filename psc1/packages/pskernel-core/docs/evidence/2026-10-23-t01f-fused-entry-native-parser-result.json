@@ -1,0 +1,1312 @@
+{
+  "schema": "psc1-t01f-fused-entry-native-and-parser-result-v1",
+  "sourceSha": "9c3c0b546e388e3cca44aa3855587efff7c34bd2",
+  "treeSha": "9d0e353d8ea12b55e3a50bdc4d5f391471730c31",
+  "runId": 39960385954,
+  "nativeJobId": 120436606817,
+  "nativeStatus": "PASS",
+  "proofs": [
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_restores_all_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_parent",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_fvar_ineligible",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_extensional",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_preserves",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_extensional",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.append_demands_preserves_order",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.pairs_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_succ",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_step_commutes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_fixed",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.scan_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.worker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.hash_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "markers": [
+    "PSC1_PINNED_LEAN_INSTALLED leanprover/lean4:v4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3",
+    "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7",
+    "PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2",
+    "PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7",
+    "PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3",
+    "PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12",
+    "PSC1_T01F_ADMIT_BEGIN 0 List",
+    "PSC1_T01F_ADMIT_PASS List",
+    "PSC1_T01F_ADMIT_BEGIN 1 Nat",
+    "PSC1_T01F_ADMIT_PASS Nat",
+    "PSC1_T01F_ADMIT_BEGIN 2 LT",
+    "PSC1_T01F_ADMIT_PASS LT",
+    "PSC1_T01F_ADMIT_BEGIN 3 LT.lt",
+    "PSC1_T01F_ADMIT_PASS LT.lt",
+    "PSC1_T01F_ADMIT_BEGIN 4 Nat.le",
+    "PSC1_T01F_ADMIT_PASS Nat.le",
+    "PSC1_T01F_ADMIT_BEGIN 5 Nat.lt",
+    "PSC1_T01F_ADMIT_PASS Nat.lt",
+    "PSC1_T01F_ADMIT_BEGIN 6 instLTNat",
+    "PSC1_T01F_ADMIT_PASS instLTNat",
+    "PSC1_T01F_ADMIT_BEGIN 7 Fin",
+    "PSC1_T01F_ADMIT_PASS Fin",
+    "PSC1_T01F_ADMIT_BEGIN 8 outParam",
+    "PSC1_T01F_ADMIT_PASS outParam",
+    "PSC1_T01F_ADMIT_BEGIN 9 HPow",
+    "PSC1_T01F_ADMIT_PASS HPow",
+    "PSC1_T01F_ADMIT_BEGIN 10 HPow.hPow",
+    "PSC1_T01F_ADMIT_PASS HPow.hPow",
+    "PSC1_T01F_ADMIT_BEGIN 11 Pow",
+    "PSC1_T01F_ADMIT_PASS Pow",
+    "PSC1_T01F_ADMIT_BEGIN 12 Pow.pow",
+    "PSC1_T01F_ADMIT_PASS Pow.pow",
+    "PSC1_T01F_ADMIT_BEGIN 13 instHPow",
+    "PSC1_T01F_ADMIT_PASS instHPow",
+    "PSC1_T01F_ADMIT_BEGIN 14 NatPow",
+    "PSC1_T01F_ADMIT_PASS NatPow",
+    "PSC1_T01F_ADMIT_BEGIN 15 NatPow.pow",
+    "PSC1_T01F_ADMIT_PASS NatPow.pow",
+    "PSC1_T01F_ADMIT_BEGIN 16 instPowNat",
+    "PSC1_T01F_ADMIT_PASS instPowNat",
+    "PSC1_T01F_ADMIT_BEGIN 17 PUnit",
+    "PSC1_T01F_ADMIT_PASS PUnit",
+    "PSC1_T01F_ADMIT_BEGIN 18 PProd",
+    "PSC1_T01F_ADMIT_PASS PProd",
+    "PSC1_T01F_ADMIT_BEGIN 19 Nat.below",
+    "PSC1_T01F_ADMIT_PASS Nat.below",
+    "PSC1_T01F_ADMIT_BEGIN 20 Nat.brecOn.go",
+    "PSC1_T01F_ADMIT_PASS Nat.brecOn.go",
+    "PSC1_T01F_ADMIT_BEGIN 21 Nat.brecOn",
+    "PSC1_T01F_ADMIT_PASS Nat.brecOn",
+    "PSC1_T01F_ADMIT_BEGIN 22 Unit",
+    "PSC1_T01F_ADMIT_PASS Unit",
+    "PSC1_T01F_ADMIT_BEGIN 23 OfNat",
+    "PSC1_T01F_ADMIT_PASS OfNat",
+    "PSC1_T01F_ADMIT_BEGIN 24 OfNat.ofNat",
+    "PSC1_T01F_ADMIT_PASS OfNat.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 25 instOfNatNat",
+    "PSC1_T01F_ADMIT_PASS instOfNatNat",
+    "PSC1_T01F_ADMIT_BEGIN 26 Nat.casesOn",
+    "PSC1_T01F_ADMIT_PASS Nat.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 27 Unit.unit",
+    "PSC1_T01F_ADMIT_PASS Unit.unit",
+    "PSC1_T01F_ADMIT_BEGIN 28 Nat.pow.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.pow.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 29 Nat.mul.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.mul.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 30 Nat.add.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.add.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 31 Nat.add._f",
+    "PSC1_T01F_ADMIT_PASS Nat.add._f",
+    "PSC1_T01F_ADMIT_BEGIN 32 Nat.add",
+    "PSC1_T01F_ADMIT_PASS Nat.add",
+    "PSC1_T01F_ADMIT_BEGIN 33 Nat.mul._f",
+    "PSC1_T01F_ADMIT_PASS Nat.mul._f",
+    "PSC1_T01F_ADMIT_BEGIN 34 Nat.mul",
+    "PSC1_T01F_ADMIT_PASS Nat.mul",
+    "PSC1_T01F_ADMIT_BEGIN 35 Nat.pow._f",
+    "PSC1_T01F_ADMIT_PASS Nat.pow._f",
+    "PSC1_T01F_ADMIT_BEGIN 36 Nat.pow",
+    "PSC1_T01F_ADMIT_PASS Nat.pow",
+    "PSC1_T01F_ADMIT_BEGIN 37 instNatPowNat",
+    "PSC1_T01F_ADMIT_PASS instNatPowNat",
+    "PSC1_T01F_ADMIT_BEGIN 38 BitVec",
+    "PSC1_T01F_ADMIT_PASS BitVec",
+    "PSC1_T01F_ADMIT_BEGIN 39 UInt32",
+    "PSC1_T01F_ADMIT_PASS UInt32",
+    "PSC1_T01F_ADMIT_BEGIN 40 Or",
+    "PSC1_T01F_ADMIT_PASS Or",
+    "PSC1_T01F_ADMIT_BEGIN 41 And",
+    "PSC1_T01F_ADMIT_PASS And",
+    "PSC1_T01F_ADMIT_BEGIN 42 Nat.isValidChar",
+    "PSC1_T01F_ADMIT_PASS Nat.isValidChar",
+    "PSC1_T01F_ADMIT_BEGIN 43 Fin.val",
+    "PSC1_T01F_ADMIT_PASS Fin.val",
+    "PSC1_T01F_ADMIT_BEGIN 44 BitVec.toFin",
+    "PSC1_T01F_ADMIT_PASS BitVec.toFin",
+    "PSC1_T01F_ADMIT_BEGIN 45 BitVec.toNat",
+    "PSC1_T01F_ADMIT_PASS BitVec.toNat",
+    "PSC1_T01F_ADMIT_BEGIN 46 UInt32.toBitVec",
+    "PSC1_T01F_ADMIT_PASS UInt32.toBitVec",
+    "PSC1_T01F_ADMIT_BEGIN 47 UInt32.toNat",
+    "PSC1_T01F_ADMIT_PASS UInt32.toNat",
+    "PSC1_T01F_ADMIT_BEGIN 48 UInt32.isValidChar",
+    "PSC1_T01F_ADMIT_PASS UInt32.isValidChar",
+    "PSC1_T01F_ADMIT_BEGIN 49 Char",
+    "PSC1_T01F_ADMIT_PASS Char",
+    "PSC1_T01F_ADMIT_BEGIN 50 Array",
+    "PSC1_T01F_ADMIT_PASS Array",
+    "PSC1_T01F_ADMIT_BEGIN 51 UInt8",
+    "PSC1_T01F_ADMIT_PASS UInt8",
+    "PSC1_T01F_ADMIT_BEGIN 52 ByteArray",
+    "PSC1_T01F_ADMIT_PASS ByteArray",
+    "PSC1_T01F_ADMIT_BEGIN 53 Eq",
+    "PSC1_T01F_ADMIT_PASS Eq",
+    "PSC1_T01F_ADMIT_BEGIN 54 List.below",
+    "PSC1_T01F_ADMIT_PASS List.below",
+    "PSC1_T01F_ADMIT_BEGIN 55 List.brecOn.go",
+    "PSC1_T01F_ADMIT_PASS List.brecOn.go",
+    "PSC1_T01F_ADMIT_BEGIN 56 List.brecOn",
+    "PSC1_T01F_ADMIT_PASS List.brecOn",
+    "PSC1_T01F_ADMIT_BEGIN 57 List.casesOn",
+    "PSC1_T01F_ADMIT_PASS List.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 58 List.toByteArray.match_1",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 59 ByteArray.casesOn",
+    "PSC1_T01F_ADMIT_PASS ByteArray.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 60 ByteArray.push.match_1",
+    "PSC1_T01F_ADMIT_PASS ByteArray.push.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 61 List.concat.match_1",
+    "PSC1_T01F_ADMIT_PASS List.concat.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 62 List.concat._f",
+    "PSC1_T01F_ADMIT_PASS List.concat._f",
+    "PSC1_T01F_ADMIT_BEGIN 63 List.concat",
+    "PSC1_T01F_ADMIT_PASS List.concat",
+    "PSC1_T01F_ADMIT_BEGIN 64 Array.toList",
+    "PSC1_T01F_ADMIT_PASS Array.toList",
+    "PSC1_T01F_ADMIT_BEGIN 65 Array.push",
+    "PSC1_T01F_ADMIT_PASS Array.push",
+    "PSC1_T01F_ADMIT_BEGIN 66 ByteArray.push",
+    "PSC1_T01F_ADMIT_PASS ByteArray.push",
+    "PSC1_T01F_ADMIT_BEGIN 67 List.toByteArray.loop._f",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray.loop._f",
+    "PSC1_T01F_ADMIT_BEGIN 68 List.toByteArray.loop",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray.loop",
+    "PSC1_T01F_ADMIT_BEGIN 69 Array.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_PASS Array.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_BEGIN 70 Array.empty",
+    "PSC1_T01F_ADMIT_PASS Array.empty",
+    "PSC1_T01F_ADMIT_BEGIN 71 ByteArray.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_PASS ByteArray.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_BEGIN 72 ByteArray.empty",
+    "PSC1_T01F_ADMIT_PASS ByteArray.empty",
+    "PSC1_T01F_ADMIT_BEGIN 73 List.toByteArray",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray",
+    "PSC1_T01F_ADMIT_BEGIN 74 List.flatten.match_1",
+    "PSC1_T01F_ADMIT_PASS List.flatten.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 75 List.append.match_1",
+    "PSC1_T01F_ADMIT_PASS List.append.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 76 List.append._f",
+    "PSC1_T01F_ADMIT_PASS List.append._f",
+    "PSC1_T01F_ADMIT_BEGIN 77 List.append",
+    "PSC1_T01F_ADMIT_PASS List.append",
+    "PSC1_T01F_ADMIT_BEGIN 78 List.flatten._f",
+    "PSC1_T01F_ADMIT_PASS List.flatten._f",
+    "PSC1_T01F_ADMIT_BEGIN 79 List.flatten",
+    "PSC1_T01F_ADMIT_PASS List.flatten",
+    "PSC1_T01F_ADMIT_BEGIN 80 instDecidableEqList.match_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableEqList.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 81 List.map._f",
+    "PSC1_T01F_ADMIT_PASS List.map._f",
+    "PSC1_T01F_ADMIT_BEGIN 82 List.map",
+    "PSC1_T01F_ADMIT_PASS List.map",
+    "PSC1_T01F_ADMIT_BEGIN 83 List.flatMap",
+    "PSC1_T01F_ADMIT_PASS List.flatMap",
+    "PSC1_T01F_ADMIT_BEGIN 84 Char.val",
+    "PSC1_T01F_ADMIT_PASS Char.val",
+    "PSC1_T01F_ADMIT_BEGIN 85 Bool",
+    "PSC1_T01F_ADMIT_PASS Bool",
+    "PSC1_T01F_ADMIT_BEGIN 86 Bool.casesOn",
+    "PSC1_T01F_ADMIT_PASS Bool.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 87 Bool.Reflects.match_1",
+    "PSC1_T01F_ADMIT_PASS Bool.Reflects.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 88 False",
+    "PSC1_T01F_ADMIT_PASS False",
+    "PSC1_T01F_ADMIT_BEGIN 89 Not",
+    "PSC1_T01F_ADMIT_PASS Not",
+    "PSC1_T01F_ADMIT_BEGIN 90 Bool.Reflects",
+    "PSC1_T01F_ADMIT_PASS Bool.Reflects",
+    "PSC1_T01F_ADMIT_BEGIN 91 Decidable",
+    "PSC1_T01F_ADMIT_PASS Decidable",
+    "PSC1_T01F_ADMIT_BEGIN 92 Decidable.decide",
+    "PSC1_T01F_ADMIT_PASS Decidable.decide",
+    "PSC1_T01F_ADMIT_BEGIN 93 Decidable.reflects_decide",
+    "PSC1_T01F_ADMIT_PASS Decidable.reflects_decide",
+    "PSC1_T01F_ADMIT_BEGIN 94 dite",
+    "PSC1_T01F_ADMIT_PASS dite",
+    "PSC1_T01F_ADMIT_BEGIN 95 ite",
+    "PSC1_T01F_ADMIT_PASS ite",
+    "PSC1_T01F_ADMIT_BEGIN 96 LE",
+    "PSC1_T01F_ADMIT_PASS LE",
+    "PSC1_T01F_ADMIT_BEGIN 97 LE.le",
+    "PSC1_T01F_ADMIT_PASS LE.le",
+    "PSC1_T01F_ADMIT_BEGIN 98 instLENat",
+    "PSC1_T01F_ADMIT_PASS instLENat",
+    "PSC1_T01F_ADMIT_BEGIN 99 Nat.ble.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.ble.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 100 Nat.ble._f",
+    "PSC1_T01F_ADMIT_PASS Nat.ble._f",
+    "PSC1_T01F_ADMIT_BEGIN 101 Nat.ble",
+    "PSC1_T01F_ADMIT_PASS Nat.ble",
+    "PSC1_T01F_ADMIT_BEGIN 102 Nat.decEq.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.decEq.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 103 False.elim",
+    "PSC1_T01F_ADMIT_PASS False.elim",
+    "PSC1_T01F_ADMIT_BEGIN 104 Eq.casesOn",
+    "PSC1_T01F_ADMIT_PASS Eq.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 105 HEq",
+    "PSC1_T01F_ADMIT_PASS HEq",
+    "PSC1_T01F_ADMIT_BEGIN 106 True",
+    "PSC1_T01F_ADMIT_PASS True",
+    "PSC1_T01F_ADMIT_BEGIN 107 Nat.beq.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.beq.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 108 Nat.beq._f",
+    "PSC1_T01F_ADMIT_PASS Nat.beq._f",
+    "PSC1_T01F_ADMIT_BEGIN 109 Nat.beq",
+    "PSC1_T01F_ADMIT_PASS Nat.beq",
+    "PSC1_T01F_ADMIT_BEGIN 110 _private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 111 _private.Init.Prelude.0.noConfusion_of_Nat.aux._f",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.noConfusion_of_Nat.aux._f",
+    "PSC1_T01F_ADMIT_BEGIN 112 _private.Init.Prelude.0.noConfusion_of_Nat.aux",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.noConfusion_of_Nat.aux",
+    "PSC1_T01F_ADMIT_BEGIN 113 rfl",
+    "PSC1_T01F_ADMIT_PASS rfl",
+    "PSC1_T01F_ADMIT_BEGIN 114 congrArg",
+    "PSC1_T01F_ADMIT_PASS congrArg",
+    "PSC1_T01F_ADMIT_BEGIN 115 noConfusion_of_Nat",
+    "PSC1_T01F_ADMIT_PASS noConfusion_of_Nat",
+    "PSC1_T01F_ADMIT_BEGIN 116 Bool.ctorIdx",
+    "PSC1_T01F_ADMIT_PASS Bool.ctorIdx",
+    "PSC1_T01F_ADMIT_BEGIN 117 _private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 118 _private.Init.Prelude.0.Nat.zero_le.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.zero_le.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 119 Nat.zero_le._f",
+    "PSC1_T01F_ADMIT_PASS Nat.zero_le._f",
+    "PSC1_T01F_ADMIT_BEGIN 120 Nat.zero_le",
+    "PSC1_T01F_ADMIT_PASS Nat.zero_le",
+    "PSC1_T01F_ADMIT_BEGIN 121 Nat.le.below",
+    "PSC1_T01F_ADMIT_PASS Nat.le.below",
+    "PSC1_T01F_ADMIT_BEGIN 122 Nat.le.brecOn",
+    "PSC1_T01F_ADMIT_PASS Nat.le.brecOn",
+    "PSC1_T01F_ADMIT_BEGIN 123 Nat.le.below.casesOn",
+    "PSC1_T01F_ADMIT_PASS Nat.le.below.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 124 Eq.ndrec",
+    "PSC1_T01F_ADMIT_PASS Eq.ndrec",
+    "PSC1_T01F_ADMIT_BEGIN 125 Eq.symm",
+    "PSC1_T01F_ADMIT_PASS Eq.symm",
+    "PSC1_T01F_ADMIT_BEGIN 126 cast",
+    "PSC1_T01F_ADMIT_PASS cast",
+    "PSC1_T01F_ADMIT_BEGIN 127 eq_of_heq",
+    "PSC1_T01F_ADMIT_PASS eq_of_heq",
+    "PSC1_T01F_ADMIT_BEGIN 128 _private.Init.Prelude.0.Nat.succ_le_succ.match_1_7",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.succ_le_succ.match_1_7",
+    "PSC1_T01F_ADMIT_BEGIN 129 HAdd",
+    "PSC1_T01F_ADMIT_PASS HAdd",
+    "PSC1_T01F_ADMIT_BEGIN 130 HAdd.hAdd",
+    "PSC1_T01F_ADMIT_PASS HAdd.hAdd",
+    "PSC1_T01F_ADMIT_BEGIN 131 Add",
+    "PSC1_T01F_ADMIT_PASS Add",
+    "PSC1_T01F_ADMIT_BEGIN 132 Add.add",
+    "PSC1_T01F_ADMIT_PASS Add.add",
+    "PSC1_T01F_ADMIT_BEGIN 133 instHAdd",
+    "PSC1_T01F_ADMIT_PASS instHAdd",
+    "PSC1_T01F_ADMIT_BEGIN 134 instAddNat",
+    "PSC1_T01F_ADMIT_PASS instAddNat",
+    "PSC1_T01F_ADMIT_BEGIN 135 Nat.succ_le_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.succ_le_succ",
+    "PSC1_T01F_ADMIT_BEGIN 136 Nat.le_of_ble_eq_true._f",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_ble_eq_true._f",
+    "PSC1_T01F_ADMIT_BEGIN 137 Nat.le_of_ble_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_ble_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 138 absurd",
+    "PSC1_T01F_ADMIT_PASS absurd",
+    "PSC1_T01F_ADMIT_BEGIN 139 _private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7",
+    "PSC1_T01F_ADMIT_BEGIN 140 _private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 141 Nat.ble_self_eq_true._f",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_self_eq_true._f",
+    "PSC1_T01F_ADMIT_BEGIN 142 Nat.ble_self_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_self_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 143 _private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 144 Nat.ble_succ_eq_true._f",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_succ_eq_true._f",
+    "PSC1_T01F_ADMIT_BEGIN 145 Nat.ble_succ_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_succ_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 146 Nat.ble_eq_true_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_eq_true_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 147 Nat.not_le_of_not_ble_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.not_le_of_not_ble_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 148 Bool.noConfusionType",
+    "PSC1_T01F_ADMIT_PASS Bool.noConfusionType",
+    "PSC1_T01F_ADMIT_BEGIN 149 Bool.noConfusion",
+    "PSC1_T01F_ADMIT_PASS Bool.noConfusion",
+    "PSC1_T01F_ADMIT_BEGIN 150 Nat.decLe._proof_1",
+    "PSC1_T01F_ADMIT_PASS Nat.decLe._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 151 Nat.decLe",
+    "PSC1_T01F_ADMIT_PASS Nat.decLe",
+    "PSC1_T01F_ADMIT_BEGIN 152 HMod",
+    "PSC1_T01F_ADMIT_PASS HMod",
+    "PSC1_T01F_ADMIT_BEGIN 153 HMod.hMod",
+    "PSC1_T01F_ADMIT_PASS HMod.hMod",
+    "PSC1_T01F_ADMIT_BEGIN 154 Mod",
+    "PSC1_T01F_ADMIT_PASS Mod",
+    "PSC1_T01F_ADMIT_BEGIN 155 Mod.mod",
+    "PSC1_T01F_ADMIT_PASS Mod.mod",
+    "PSC1_T01F_ADMIT_BEGIN 156 instHMod",
+    "PSC1_T01F_ADMIT_PASS instHMod",
+    "PSC1_T01F_ADMIT_BEGIN 157 namedPattern",
+    "PSC1_T01F_ADMIT_PASS namedPattern",
+    "PSC1_T01F_ADMIT_BEGIN 158 Nat.mod.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.mod.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 159 Nat.decLt",
+    "PSC1_T01F_ADMIT_PASS Nat.decLt",
+    "PSC1_T01F_ADMIT_BEGIN 160 Nat.le.casesOn",
+    "PSC1_T01F_ADMIT_PASS Nat.le.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 161 Nat.ctorIdx",
+    "PSC1_T01F_ADMIT_PASS Nat.ctorIdx",
+    "PSC1_T01F_ADMIT_BEGIN 162 Nat.div.go.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.div.go.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 163 HSub",
+    "PSC1_T01F_ADMIT_PASS HSub",
+    "PSC1_T01F_ADMIT_BEGIN 164 HSub.hSub",
+    "PSC1_T01F_ADMIT_PASS HSub.hSub",
+    "PSC1_T01F_ADMIT_BEGIN 165 Sub",
+    "PSC1_T01F_ADMIT_PASS Sub",
+    "PSC1_T01F_ADMIT_BEGIN 166 Sub.sub",
+    "PSC1_T01F_ADMIT_PASS Sub.sub",
+    "PSC1_T01F_ADMIT_BEGIN 167 instHSub",
+    "PSC1_T01F_ADMIT_PASS instHSub",
+    "PSC1_T01F_ADMIT_BEGIN 168 Nat.pred",
+    "PSC1_T01F_ADMIT_PASS Nat.pred",
+    "PSC1_T01F_ADMIT_BEGIN 169 Nat.sub._f",
+    "PSC1_T01F_ADMIT_PASS Nat.sub._f",
+    "PSC1_T01F_ADMIT_BEGIN 170 Nat.sub",
+    "PSC1_T01F_ADMIT_PASS Nat.sub",
+    "PSC1_T01F_ADMIT_BEGIN 171 instSubNat",
+    "PSC1_T01F_ADMIT_PASS instSubNat",
+    "PSC1_T01F_ADMIT_BEGIN 172 _private.Init.Prelude.0.Nat.le_trans.match_1_10",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.le_trans.match_1_10",
+    "PSC1_T01F_ADMIT_BEGIN 173 Nat.le_trans",
+    "PSC1_T01F_ADMIT_PASS Nat.le_trans",
+    "PSC1_T01F_ADMIT_BEGIN 174 Nat.lt_of_lt_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_of_lt_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 175 And.casesOn",
+    "PSC1_T01F_ADMIT_PASS And.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 176 _private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 177 _private.Init.Prelude.0.Nat.sub_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.sub_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 178 _private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 179 Nat.noConfusionType",
+    "PSC1_T01F_ADMIT_PASS Nat.noConfusionType",
+    "PSC1_T01F_ADMIT_BEGIN 180 Nat.noConfusion",
+    "PSC1_T01F_ADMIT_PASS Nat.noConfusion",
+    "PSC1_T01F_ADMIT_BEGIN 181 Nat.not_succ_le_zero",
+    "PSC1_T01F_ADMIT_PASS Nat.not_succ_le_zero",
+    "PSC1_T01F_ADMIT_BEGIN 182 _private.Init.Prelude.0.Nat.pred_le_pred.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.pred_le_pred.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 183 Nat.le_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.le_succ",
+    "PSC1_T01F_ADMIT_BEGIN 184 Nat.pred_le_pred",
+    "PSC1_T01F_ADMIT_PASS Nat.pred_le_pred",
+    "PSC1_T01F_ADMIT_BEGIN 185 Nat.le_of_succ_le_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_succ_le_succ",
+    "PSC1_T01F_ADMIT_BEGIN 186 Nat.not_succ_le_self._f",
+    "PSC1_T01F_ADMIT_PASS Nat.not_succ_le_self._f",
+    "PSC1_T01F_ADMIT_BEGIN 187 Nat.not_succ_le_self",
+    "PSC1_T01F_ADMIT_PASS Nat.not_succ_le_self",
+    "PSC1_T01F_ADMIT_BEGIN 188 Nat.lt_irrefl",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_irrefl",
+    "PSC1_T01F_ADMIT_BEGIN 189 Nat.lt_succ_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_succ_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 190 Nat.le_refl",
+    "PSC1_T01F_ADMIT_PASS Nat.le_refl",
+    "PSC1_T01F_ADMIT_BEGIN 191 _private.Init.Prelude.0.Nat.pred_le.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.pred_le.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 192 Nat.pred_le",
+    "PSC1_T01F_ADMIT_PASS Nat.pred_le",
+    "PSC1_T01F_ADMIT_BEGIN 193 Nat.sub_le",
+    "PSC1_T01F_ADMIT_PASS Nat.sub_le",
+    "PSC1_T01F_ADMIT_BEGIN 194 Nat.succ_sub_succ_eq_sub",
+    "PSC1_T01F_ADMIT_PASS Nat.succ_sub_succ_eq_sub",
+    "PSC1_T01F_ADMIT_BEGIN 195 Nat.sub_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.sub_lt",
+    "PSC1_T01F_ADMIT_BEGIN 196 Nat.div_rec_lemma",
+    "PSC1_T01F_ADMIT_PASS Nat.div_rec_lemma",
+    "PSC1_T01F_ADMIT_BEGIN 197 Nat.le_of_lt_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_lt_succ",
+    "PSC1_T01F_ADMIT_BEGIN 198 Nat.div_rec_fuel_lemma",
+    "PSC1_T01F_ADMIT_PASS Nat.div_rec_fuel_lemma",
+    "PSC1_T01F_ADMIT_BEGIN 199 Nat.modCore.go._f",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore.go._f",
+    "PSC1_T01F_ADMIT_BEGIN 200 Nat.modCore.go",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore.go",
+    "PSC1_T01F_ADMIT_BEGIN 201 Nat.lt_add_one",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_add_one",
+    "PSC1_T01F_ADMIT_BEGIN 202 Nat.lt_succ_self",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_succ_self",
+    "PSC1_T01F_ADMIT_BEGIN 203 Nat.modCore",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore",
+    "PSC1_T01F_ADMIT_BEGIN 204 Nat.mod",
+    "PSC1_T01F_ADMIT_PASS Nat.mod",
+    "PSC1_T01F_ADMIT_BEGIN 205 Nat.instMod",
+    "PSC1_T01F_ADMIT_PASS Nat.instMod",
+    "PSC1_T01F_ADMIT_BEGIN 206 _private.Init.Prelude.0.Nat.mod_lt.match_1_3",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.mod_lt.match_1_3",
+    "PSC1_T01F_ADMIT_BEGIN 207 Nat.zero_lt_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.zero_lt_succ",
+    "PSC1_T01F_ADMIT_BEGIN 208 Decidable.casesOn",
+    "PSC1_T01F_ADMIT_PASS Decidable.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 209 _private.Init.Prelude.0.Nat.mod_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.mod_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 210 _private.Init.Prelude.0.Nat.modCore_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.modCore_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 211 Nat.not_lt_zero",
+    "PSC1_T01F_ADMIT_PASS Nat.not_lt_zero",
+    "PSC1_T01F_ADMIT_BEGIN 212 _private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 213 Decidable.isTrue",
+    "PSC1_T01F_ADMIT_PASS Decidable.isTrue",
+    "PSC1_T01F_ADMIT_BEGIN 214 Or.casesOn",
+    "PSC1_T01F_ADMIT_PASS Or.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 215 _private.Init.Prelude.0.Or.elim.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Or.elim.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 216 Or.elim",
+    "PSC1_T01F_ADMIT_PASS Or.elim",
+    "PSC1_T01F_ADMIT_BEGIN 217 id",
+    "PSC1_T01F_ADMIT_PASS id",
+    "PSC1_T01F_ADMIT_BEGIN 218 Or.resolve_right",
+    "PSC1_T01F_ADMIT_PASS Or.resolve_right",
+    "PSC1_T01F_ADMIT_BEGIN 219 GE.ge",
+    "PSC1_T01F_ADMIT_PASS GE.ge",
+    "PSC1_T01F_ADMIT_BEGIN 220 _private.Init.Prelude.0.Nat.lt_or_ge.match_1_5",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.lt_or_ge.match_1_5",
+    "PSC1_T01F_ADMIT_BEGIN 221 _private.Init.Prelude.0.Nat.lt_or_ge.match_1_3",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.lt_or_ge.match_1_3",
+    "PSC1_T01F_ADMIT_BEGIN 222 Nat.le_succ_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.le_succ_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 223 _private.Init.Prelude.0.Nat.lt_or_ge.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.lt_or_ge.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 224 _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3",
+    "PSC1_T01F_ADMIT_BEGIN 225 _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 226 Nat.eq_or_lt_of_le._f",
+    "PSC1_T01F_ADMIT_PASS Nat.eq_or_lt_of_le._f",
+    "PSC1_T01F_ADMIT_BEGIN 227 Nat.eq_or_lt_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.eq_or_lt_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 228 Nat.lt_or_ge._f",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_or_ge._f",
+    "PSC1_T01F_ADMIT_BEGIN 229 Nat.lt_or_ge",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_or_ge",
+    "PSC1_T01F_ADMIT_BEGIN 230 Nat.lt_of_not_le",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_of_not_le",
+    "PSC1_T01F_ADMIT_BEGIN 231 Decidable.isFalse",
+    "PSC1_T01F_ADMIT_PASS Decidable.isFalse",
+    "PSC1_T01F_ADMIT_BEGIN 232 Nat.modCoreGo_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.modCoreGo_lt",
+    "PSC1_T01F_ADMIT_BEGIN 233 Nat.modCore_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore_lt",
+    "PSC1_T01F_ADMIT_BEGIN 234 Nat.mod_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.mod_lt",
+    "PSC1_T01F_ADMIT_BEGIN 235 Fin.Internal.ofNat",
+    "PSC1_T01F_ADMIT_PASS Fin.Internal.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 236 _private.Init.Prelude.0.Nat.pow_pos.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.pow_pos.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 237 HMul",
+    "PSC1_T01F_ADMIT_PASS HMul",
+    "PSC1_T01F_ADMIT_BEGIN 238 HMul.hMul",
+    "PSC1_T01F_ADMIT_PASS HMul.hMul",
+    "PSC1_T01F_ADMIT_BEGIN 239 Mul",
+    "PSC1_T01F_ADMIT_PASS Mul",
+    "PSC1_T01F_ADMIT_BEGIN 240 Mul.mul",
+    "PSC1_T01F_ADMIT_PASS Mul.mul",
+    "PSC1_T01F_ADMIT_BEGIN 241 instHMul",
+    "PSC1_T01F_ADMIT_PASS instHMul",
+    "PSC1_T01F_ADMIT_BEGIN 242 instMulNat",
+    "PSC1_T01F_ADMIT_PASS instMulNat",
+    "PSC1_T01F_ADMIT_BEGIN 243 _private.Init.Prelude.0.Nat.mul_pos.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.mul_pos.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 244 _private.Init.Prelude.0.Nat.add_pos_right.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.add_pos_right.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 245 Nat.add_pos_right",
+    "PSC1_T01F_ADMIT_PASS Nat.add_pos_right",
+    "PSC1_T01F_ADMIT_BEGIN 246 Nat.mul_pos",
+    "PSC1_T01F_ADMIT_PASS Nat.mul_pos",
+    "PSC1_T01F_ADMIT_BEGIN 247 Nat.pow_pos._f",
+    "PSC1_T01F_ADMIT_PASS Nat.pow_pos._f",
+    "PSC1_T01F_ADMIT_BEGIN 248 Nat.pow_pos",
+    "PSC1_T01F_ADMIT_PASS Nat.pow_pos",
+    "PSC1_T01F_ADMIT_BEGIN 249 BitVec.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_PASS BitVec.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 250 BitVec.ofNat",
+    "PSC1_T01F_ADMIT_PASS BitVec.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 251 UInt8.ofNat",
+    "PSC1_T01F_ADMIT_PASS UInt8.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 252 HDiv",
+    "PSC1_T01F_ADMIT_PASS HDiv",
+    "PSC1_T01F_ADMIT_BEGIN 253 HDiv.hDiv",
+    "PSC1_T01F_ADMIT_PASS HDiv.hDiv",
+    "PSC1_T01F_ADMIT_BEGIN 254 Div",
+    "PSC1_T01F_ADMIT_PASS Div",
+    "PSC1_T01F_ADMIT_BEGIN 255 Div.div",
+    "PSC1_T01F_ADMIT_PASS Div.div",
+    "PSC1_T01F_ADMIT_BEGIN 256 instHDiv",
+    "PSC1_T01F_ADMIT_PASS instHDiv",
+    "PSC1_T01F_ADMIT_BEGIN 257 Nat.div.go._f",
+    "PSC1_T01F_ADMIT_PASS Nat.div.go._f",
+    "PSC1_T01F_ADMIT_BEGIN 258 Nat.div.go",
+    "PSC1_T01F_ADMIT_PASS Nat.div.go",
+    "PSC1_T01F_ADMIT_BEGIN 259 Nat.div",
+    "PSC1_T01F_ADMIT_PASS Nat.div",
+    "PSC1_T01F_ADMIT_BEGIN 260 Nat.instDiv",
+    "PSC1_T01F_ADMIT_PASS Nat.instDiv",
+    "PSC1_T01F_ADMIT_BEGIN 261 String.utf8EncodeChar",
+    "PSC1_T01F_ADMIT_PASS String.utf8EncodeChar",
+    "PSC1_T01F_ADMIT_BEGIN 262 List.utf8Encode",
+    "PSC1_T01F_ADMIT_PASS List.utf8Encode",
+    "PSC1_T01F_ADMIT_BEGIN 263 ByteArray.IsValidUTF8",
+    "PSC1_T01F_ADMIT_PASS ByteArray.IsValidUTF8",
+    "PSC1_T01F_ADMIT_BEGIN 264 String",
+    "PSC1_T01F_ADMIT_PASS String",
+    "PSC1_T01F_ADMIT_BEGIN 265 String.ofList._proof_1",
+    "PSC1_T01F_ADMIT_PASS String.ofList._proof_1",
+    "PSC1_T01F_INVALID_DEFINITION_PASS",
+    "PSC1_T01F_ADMIT_BEGIN 266 String.ofList",
+    "PSC1_T01F_ADMIT_PASS String.ofList",
+    "PSC1_T01F_ADMIT_BEGIN 267 Bool.or",
+    "PSC1_T01F_ADMIT_PASS Bool.or",
+    "PSC1_T01F_ADMIT_BEGIN 268 instDecidableOr.match_3",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr.match_3",
+    "PSC1_T01F_ADMIT_BEGIN 269 instDecidableOr.match_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 270 instDecidableOr._proof_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 271 instDecidableOr",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr",
+    "PSC1_T01F_ADMIT_BEGIN 272 Bool.and",
+    "PSC1_T01F_ADMIT_PASS Bool.and",
+    "PSC1_T01F_ADMIT_BEGIN 273 instDecidableAnd.match_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableAnd.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 274 And.right",
+    "PSC1_T01F_ADMIT_PASS And.right",
+    "PSC1_T01F_ADMIT_BEGIN 275 And.left",
+    "PSC1_T01F_ADMIT_PASS And.left",
+    "PSC1_T01F_ADMIT_BEGIN 276 instDecidableAnd._proof_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableAnd._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 277 instDecidableAnd",
+    "PSC1_T01F_ADMIT_PASS instDecidableAnd",
+    "PSC1_T01F_ADMIT_BEGIN 278 BitVec.ofNatLT",
+    "PSC1_T01F_ADMIT_PASS BitVec.ofNatLT",
+    "PSC1_T01F_ADMIT_BEGIN 279 UInt32.size",
+    "PSC1_T01F_ADMIT_PASS UInt32.size",
+    "PSC1_T01F_ADMIT_BEGIN 280 _private.Init.Prelude.0.isValidChar_UInt32.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.isValidChar_UInt32.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 281 Nat.lt_trans",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_trans",
+    "PSC1_T01F_ADMIT_BEGIN 282 _private.Init.Prelude.0.of_decide_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.of_decide_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 283 _private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 284 Bool.ne_true_of_eq_false",
+    "PSC1_T01F_ADMIT_PASS Bool.ne_true_of_eq_false",
+    "PSC1_T01F_ADMIT_BEGIN 285 _private.Init.Prelude.0.decide_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.decide_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 286 decide_eq_false",
+    "PSC1_T01F_ADMIT_PASS decide_eq_false",
+    "PSC1_T01F_ADMIT_BEGIN 287 of_decide_eq_true",
+    "PSC1_T01F_ADMIT_PASS of_decide_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 288 _private.Init.Prelude.0.isValidChar_UInt32",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.isValidChar_UInt32",
+    "PSC1_T01F_ADMIT_BEGIN 289 Char.ofNatAux._private_1",
+    "PSC1_T01F_ADMIT_PASS Char.ofNatAux._private_1",
+    "PSC1_T01F_ADMIT_BEGIN 290 Char.ofNatAux",
+    "PSC1_T01F_ADMIT_PASS Char.ofNatAux",
+    "PSC1_T01F_ADMIT_BEGIN 291 Char.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_PASS Char.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 292 Char.ofNat._proof_2",
+    "PSC1_T01F_ADMIT_PASS Char.ofNat._proof_2",
+    "PSC1_T01F_ADMIT_BEGIN 293 Char.ofNat",
+    "PSC1_T01F_ADMIT_PASS Char.ofNat",
+    "PSC1_T01F_METADATA_PASS declarations=377",
+    "PSC1_T01F_FIXTURE_WRITTEN /home/runner/work/_temp/psc1-t01f/fixture.json requests=294",
+    "PSC1_T01F_CLOSURE_PASS requests=294 declarations=377",
+    "PSC1_T01F_QUERY_BEGIN string \"\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"\"",
+    "PSC1_T01F_SINGLETON_PASS \"\"",
+    "PSC1_T01F_CASE_PASS \"\"",
+    "PSC1_T01F_QUERY_BEGIN string \"a\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"a\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"a\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"a\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"a\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"a\"",
+    "PSC1_T01F_SINGLETON_PASS \"a\"",
+    "PSC1_T01F_CASE_PASS \"a\"",
+    "PSC1_T01F_QUERY_BEGIN string \"é\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"é\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"é\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"é\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"é\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"é\"",
+    "PSC1_T01F_SINGLETON_PASS \"é\"",
+    "PSC1_T01F_CASE_PASS \"é\"",
+    "PSC1_T01F_QUERY_BEGIN string \"€\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"€\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"€\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"€\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"€\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"€\"",
+    "PSC1_T01F_SINGLETON_PASS \"€\"",
+    "PSC1_T01F_CASE_PASS \"€\"",
+    "PSC1_T01F_QUERY_BEGIN string \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"😀\"",
+    "PSC1_T01F_SINGLETON_PASS \"😀\"",
+    "PSC1_T01F_CASE_PASS \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN string \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"Aé€😀\"",
+    "PSC1_T01F_SINGLETON_PASS \"Aé€😀\"",
+    "PSC1_T01F_CASE_PASS \"Aé€😀\"",
+    "PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096",
+    "PSC1_V2_DAG_NATIVE_NESTED_OUTCOMES: PASS",
+    "PSC1_V2_DAG_NATIVE_INFERENCE: PASS",
+    "PSC1_V2_DAG_NATIVE_WHNF_IDENTITY: PASS",
+    "PSC1_V2_DAG_NATIVE_ZETA: PASS",
+    "PSC1_V2_DAG_NATIVE_BETA: PASS",
+    "PSC1_V2_DAG_NATIVE_WHNF_STATE: PASS",
+    "PSC1_V2_DAG_NATIVE_PUBLIC_CACHE: PASS",
+    "PSC1_V2_DAG_NATIVE_PROJECTION_UNSELECTED_FIELD: PASS",
+    "PSC1_V2_DAG_NATIVE_OFFICIAL_NAT: PASS",
+    "PSC1_V2_DAG_NATIVE_NAT_PROJECTION: PASS",
+    "PSC1_V2_DAG_STRUCTURAL_SHORTCUT: PASS",
+    "PSC1_V2_DAG_OFFICIAL_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS",
+    "PSC1_V2_DAG_NATIVE_CONSTANT_INDEX: PASS",
+    "PSC1_V2_DAG_NATIVE_DELTA: PASS",
+    "PSC1_V2_DAG_NATIVE_MUTUAL_INDEX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_BINDER: PASS",
+    "PSC1_V2_DAG_BINDER: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_APP: PASS",
+    "PSC1_V2_DAG_CHECK_APP: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_CHECK_LET: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_LET: PASS",
+    "PSC1_V2_DAG_LET_CACHE_SCOPE: PASS",
+    "PSC1_V2_DAG_LET_LOCAL_WHNF: PASS",
+    "PSC1_V2_DAG_STATEFUL_DEFEQ: PASS",
+    "PSC1_V2_DAG_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_APP_CONVERSION_CACHE: PASS",
+    "PSC1_V2_DAG_APP_EAGER_CONTEXT: PASS",
+    "PSC1_V2_DAG_OFFICIAL_SIMPLE_ADMISSION: PASS",
+    "PSC1_V2_DAG_SIMPLE_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_ADMISSION_SHARED_STATE: PASS",
+    "PSC1_V2_DAG_UNSAFE_FRESH_BODY: PASS",
+    "PSC1_V2_DAG_ADMISSION_POLICY_SAFETY: PASS",
+    "PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS",
+    "PSC1_V2_DAG_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS",
+    "PSC1_V2_DAG_THEOREM_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_THEOREM_ADMISSION: PASS",
+    "PSC1_V2_DAG_THEOREM_ISPROP_STATE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_OFFICIAL_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_BUDGET: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_CACHE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS",
+    "PSC1_V2_DAG_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_CHEAP_CORE_POLICY: PASS",
+    "PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS",
+    "PSC1_V2_DAG_DEFEQ_REFLECTION: PASS",
+    "PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS",
+    "PSC1_V2_DAG_OFFICIAL_LEAN: PASS",
+    "PSC1_V2_DAG_REGRESSION: PASS"
+  ],
+  "nativeArtifact": {
+    "artifactId": 12503823535,
+    "zipBytes": 105588,
+    "zipSha256": "699fb36de783dc25255e1fc7863925bf90cabdb853942f34f1daefb6cb28680e",
+    "files": [
+      {
+        "path": "fixture.json",
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      {
+        "path": "native.log",
+        "bytes": 25850,
+        "sha256": "dfe01cd71b5f54fc9c0d0b87d51d3efee10cdc4394688072583f6d825f40572c"
+      },
+      {
+        "path": "fixture.sha256",
+        "bytes": 113,
+        "sha256": "f48476f51e7a14d206ab922d3cabc568498a350c4af5b81cb66873c5c143e9e6"
+      },
+      {
+        "path": "retained.log",
+        "bytes": 2197,
+        "sha256": "dd8027463b01693baa8afb677bd585c757df0b69b775c7b1aa035ea6d58c8d35"
+      },
+      {
+        "path": "scalar-hash-native.log",
+        "bytes": 1116,
+        "sha256": "f1798656df66cc0f711823fc5aa2c50b423ad3258ce135707275a1f80b3165fc"
+      }
+    ]
+  },
+  "producerJobId": 120437719668,
+  "producerStatus": "FAIL_BOUNDED_PARSE",
+  "producerLog": "﻿2026-10-23T13:22:59.5372612Z Current runner version: '2.338.0'\n2026-10-23T13:22:59.5408916Z ##[group]Runner Image Provisioner\n2026-10-23T13:22:59.5409454Z Hosted Compute Agent\n2026-10-23T13:22:59.5409883Z Version: 20261012.601\n2026-10-23T13:22:59.5410297Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d\n2026-10-23T13:22:59.5410995Z Build Date: 2026-10-12T17:48:21Z\n2026-10-23T13:22:59.5411416Z Worker ID: {2124c38f-794f-48d0-b4b2-542e5b08971e}\n2026-10-23T13:22:59.5411831Z Region: centralus\n2026-10-23T13:22:59.5412255Z Cloud: Azure\n2026-10-23T13:22:59.5412578Z ##[endgroup]\n2026-10-23T13:22:59.5413870Z ##[group]Operating System\n2026-10-23T13:22:59.5414253Z Ubuntu\n2026-10-23T13:22:59.5414567Z 24.04.5\n2026-10-23T13:22:59.5414943Z LTS\n2026-10-23T13:22:59.5415260Z ##[endgroup]\n2026-10-23T13:22:59.5415577Z ##[group]Runner Image\n2026-10-23T13:22:59.5415968Z Image: ubuntu-24.04\n2026-10-23T13:22:59.5416334Z Version: 20261012.334.1\n2026-10-23T13:22:59.5417119Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md\n2026-10-23T13:22:59.5417977Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334\n2026-10-23T13:22:59.5418578Z ##[endgroup]\n2026-10-23T13:22:59.5419284Z ##[group]GITHUB_TOKEN Permissions\n2026-10-23T13:22:59.5420707Z Actions: read\n2026-10-23T13:22:59.5421053Z Contents: read\n2026-10-23T13:22:59.5421435Z Metadata: read\n2026-10-23T13:22:59.5421766Z ##[endgroup]\n2026-10-23T13:22:59.5423370Z Secret source: Actions\n2026-10-23T13:22:59.5424059Z Cache mode: write\n2026-10-23T13:22:59.5424679Z Prepare workflow directory\n2026-10-23T13:22:59.5655487Z Prepare all required actions\n2026-10-23T13:22:59.5686164Z Getting action download info\n2026-10-23T13:22:59.8141249Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)\n2026-10-23T13:23:00.0011781Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)\n2026-10-23T13:23:00.1753803Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)\n2026-10-23T13:23:00.3835759Z Complete job name: generated-string\n2026-10-23T13:23:00.4302089Z ##[group]Run actions/checkout@v4\n2026-10-23T13:23:00.4302514Z with:\n2026-10-23T13:23:00.4302757Z   repository: dwijayuda/pskernel\n2026-10-23T13:23:00.4305056Z   token: ***\n2026-10-23T13:23:00.4305290Z   ssh-strict: true\n2026-10-23T13:23:00.4305530Z   ssh-user: git\n2026-10-23T13:23:00.4305771Z   persist-credentials: true\n2026-10-23T13:23:00.4306034Z   clean: true\n2026-10-23T13:23:00.4306277Z   sparse-checkout-cone-mode: true\n2026-10-23T13:23:00.4306593Z   fetch-depth: 1\n2026-10-23T13:23:00.4306831Z   fetch-tags: false\n2026-10-23T13:23:00.4307070Z   show-progress: true\n2026-10-23T13:23:00.4307314Z   lfs: false\n2026-10-23T13:23:00.4307566Z   submodules: false\n2026-10-23T13:23:00.4307808Z   set-safe-directory: true\n2026-10-23T13:23:00.4308086Z   allow-unsafe-pr-checkout: false\n2026-10-23T13:23:00.4308557Z ##[endgroup]\n2026-10-23T13:23:00.4977216Z Syncing repository: dwijayuda/pskernel\n2026-10-23T13:23:00.4978767Z ##[group]Getting Git version info\n2026-10-23T13:23:00.4979410Z Working directory is '/home/runner/work/pskernel/pskernel'\n2026-10-23T13:23:00.4980292Z [command]/usr/bin/git version\n2026-10-23T13:23:00.5040172Z git version 2.55.0\n2026-10-23T13:23:00.5054762Z ##[endgroup]\n2026-10-23T13:23:00.5064442Z Temporarily overriding HOME='/home/runner/work/_temp/016d380d-27fc-4d19-8e16-045b2e0aaf3d' before making global git config changes\n2026-10-23T13:23:00.5065718Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-23T13:23:00.5068206Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel\n2026-10-23T13:23:00.5113720Z Deleting the contents of '/home/runner/work/pskernel/pskernel'\n2026-10-23T13:23:00.5117091Z ##[group]Initializing the repository\n2026-10-23T13:23:00.5119868Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel\n2026-10-23T13:23:00.5234807Z hint: Using 'master' as the name for the initial branch. This default branch name\n2026-10-23T13:23:00.5242066Z hint: will change to \"main\" in Git 3.0. To configure the initial branch name\n2026-10-23T13:23:00.5254057Z hint: to use in all of your new repositories, which will suppress this warning,\n2026-10-23T13:23:00.5257044Z hint: call:\n2026-10-23T13:23:00.5257384Z hint:\n2026-10-23T13:23:00.5257764Z hint: \tgit config --global init.defaultBranch <name>\n2026-10-23T13:23:00.5258103Z hint:\n2026-10-23T13:23:00.5258413Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\n2026-10-23T13:23:00.5258906Z hint: 'development'. The just-created branch can be renamed via this command:\n2026-10-23T13:23:00.5259465Z hint:\n2026-10-23T13:23:00.5259811Z hint: \tgit branch -m <name>\n2026-10-23T13:23:00.5260159Z hint:\n2026-10-23T13:23:00.5260496Z hint: Disable this message with \"git config set advice.defaultBranchName false\"\n2026-10-23T13:23:00.5261022Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/.git/\n2026-10-23T13:23:00.5262310Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel\n2026-10-23T13:23:00.5283553Z ##[endgroup]\n2026-10-23T13:23:00.5286818Z ##[group]Disabling automatic garbage collection\n2026-10-23T13:23:00.5287411Z [command]/usr/bin/git config --local gc.auto 0\n2026-10-23T13:23:00.5317480Z ##[endgroup]\n2026-10-23T13:23:00.5317896Z ##[group]Setting up auth\n2026-10-23T13:23:00.5323379Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-23T13:23:00.5352543Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-23T13:23:00.5646084Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-23T13:23:00.5675543Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-23T13:23:00.5862112Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-23T13:23:00.5891666Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-23T13:23:00.6087341Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***\n2026-10-23T13:23:00.6125709Z ##[endgroup]\n2026-10-23T13:23:00.6126555Z ##[group]Fetching the repository\n2026-10-23T13:23:00.6133270Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +9c3c0b546e388e3cca44aa3855587efff7c34bd2:refs/remotes/origin/work/psc1-pskernel-t01f-string-20261022\n2026-10-23T13:23:09.4672501Z From https://github.com/dwijayuda/pskernel\n2026-10-23T13:23:09.4673731Z  * [new ref]           9c3c0b546e388e3cca44aa3855587efff7c34bd2 -> origin/work/psc1-pskernel-t01f-string-20261022\n2026-10-23T13:23:09.4675476Z ##[endgroup]\n2026-10-23T13:23:09.4675957Z ##[group]Determining the checkout info\n2026-10-23T13:23:09.4704825Z ##[endgroup]\n2026-10-23T13:23:09.4705872Z [command]/usr/bin/git sparse-checkout disable\n2026-10-23T13:23:09.4729592Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig\n2026-10-23T13:23:09.4784138Z ##[group]Checking out the ref\n2026-10-23T13:23:09.4787562Z [command]/usr/bin/git checkout --progress --force -B work/psc1-pskernel-t01f-string-20261022 refs/remotes/origin/work/psc1-pskernel-t01f-string-20261022\n2026-10-23T13:23:10.9715171Z Updating files:   7% (1649/22758)\n2026-10-23T13:23:10.9810512Z Updating files:   8% (1821/22758)\n2026-10-23T13:23:11.0001400Z Updating files:   9% (2049/22758)\n2026-10-23T13:23:11.0313996Z Updating files:  10% (2276/22758)\n2026-10-23T13:23:11.0516238Z Updating files:  11% (2504/22758)\n2026-10-23T13:23:11.0675447Z Updating files:  12% (2731/22758)\n2026-10-23T13:23:11.0918349Z Updating files:  13% (2959/22758)\n2026-10-23T13:23:11.5900362Z Updating files:  14% (3187/22758)\n2026-10-23T13:23:12.3533313Z Updating files:  14% (3362/22758)\n2026-10-23T13:23:12.3603548Z Updating files:  15% (3414/22758)\n2026-10-23T13:23:12.3741630Z Updating files:  16% (3642/22758)\n2026-10-23T13:23:12.3935668Z Updating files:  17% (3869/22758)\n2026-10-23T13:23:12.4101169Z Updating files:  18% (4097/22758)\n2026-10-23T13:23:12.4264819Z Updating files:  19% (4325/22758)\n2026-10-23T13:23:12.4406555Z Updating files:  20% (4552/22758)\n2026-10-23T13:23:12.6773800Z Updating files:  21% (4780/22758)\n2026-10-23T13:23:13.7031032Z Updating files:  21% (4808/22758)\n2026-10-23T13:23:13.7109555Z Updating files:  21% (4812/22758)\n2026-10-23T13:23:13.7196835Z Updating files:  22% (5007/22758)\n2026-10-23T13:23:13.7286441Z Updating files:  23% (5235/22758)\n2026-10-23T13:23:13.7421318Z Updating files:  24% (5462/22758)\n2026-10-23T13:23:13.7519529Z Updating files:  25% (5690/22758)\n2026-10-23T13:23:13.7712372Z Updating files:  26% (5918/22758)\n2026-10-23T13:23:13.7882938Z Updating files:  27% (6145/22758)\n2026-10-23T13:23:13.8056855Z Updating files:  28% (6373/22758)\n2026-10-23T13:23:13.8207974Z Updating files:  29% (6600/22758)\n2026-10-23T13:23:14.5705692Z Updating files:  30% (6828/22758)\n2026-10-23T13:23:15.0674853Z Updating files:  30% (6880/22758)\n2026-10-23T13:23:15.0756702Z Updating files:  31% (7055/22758)\n2026-10-23T13:23:15.0841805Z Updating files:  32% (7283/22758)\n2026-10-23T13:23:15.0937178Z Updating files:  33% (7511/22758)\n2026-10-23T13:23:15.1029356Z Updating files:  34% (7738/22758)\n2026-10-23T13:23:15.1642310Z Updating files:  35% (7966/22758)\n2026-10-23T13:23:15.1791473Z Updating files:  36% (8193/22758)\n2026-10-23T13:23:15.1911732Z Updating files:  37% (8421/22758)\n2026-10-23T13:23:15.2044878Z Updating files:  38% (8649/22758)\n2026-10-23T13:23:15.2173955Z Updating files:  39% (8876/22758)\n2026-10-23T13:23:15.2292723Z Updating files:  40% (9104/22758)\n2026-10-23T13:23:15.2429205Z Updating files:  41% (9331/22758)\n2026-10-23T13:23:15.2554330Z Updating files:  42% (9559/22758)\n2026-10-23T13:23:15.2660096Z Updating files:  43% (9786/22758)\n2026-10-23T13:23:15.2784935Z Updating files:  44% (10014/22758)\n2026-10-23T13:23:15.2972855Z Updating files:  45% (10242/22758)\n2026-10-23T13:23:15.3078449Z Updating files:  46% (10469/22758)\n2026-10-23T13:23:15.3179739Z Updating files:  47% (10697/22758)\n2026-10-23T13:23:15.3276156Z Updating files:  48% (10924/22758)\n2026-10-23T13:23:15.3368279Z Updating files:  49% (11152/22758)\n2026-10-23T13:23:15.4263364Z Updating files:  50% (11379/22758)\n2026-10-23T13:23:15.4652254Z Updating files:  51% (11607/22758)\n2026-10-23T13:23:15.4946741Z Updating files:  52% (11835/22758)\n2026-10-23T13:23:15.5299478Z Updating files:  52% (11938/22758)\n2026-10-23T13:23:15.6522813Z Updating files:  53% (12062/22758)\n2026-10-23T13:23:15.9177611Z Updating files:  54% (12290/22758)\n2026-10-23T13:23:16.1903535Z Updating files:  55% (12517/22758)\n2026-10-23T13:23:16.4016853Z Updating files:  56% (12745/22758)\n2026-10-23T13:23:16.4955760Z Updating files:  57% (12973/22758)\n2026-10-23T13:23:16.5987531Z Updating files:  57% (13086/22758)\n2026-10-23T13:23:16.8360786Z Updating files:  58% (13200/22758)\n2026-10-23T13:23:16.9624545Z Updating files:  59% (13428/22758)\n2026-10-23T13:23:17.0401820Z Updating files:  60% (13655/22758)\n2026-10-23T13:23:17.0737385Z Updating files:  61% (13883/22758)\n2026-10-23T13:23:17.0797208Z Updating files:  62% (14110/22758)\n2026-10-23T13:23:17.0855777Z Updating files:  63% (14338/22758)\n2026-10-23T13:23:17.0916425Z Updating files:  64% (14566/22758)\n2026-10-23T13:23:17.0981495Z Updating files:  65% (14793/22758)\n2026-10-23T13:23:17.1053474Z Updating files:  66% (15021/22758)\n2026-10-23T13:23:17.1130078Z Updating files:  67% (15248/22758)\n2026-10-23T13:23:17.1207426Z Updating files:  68% (15476/22758)\n2026-10-23T13:23:17.1291435Z Updating files:  69% (15704/22758)\n2026-10-23T13:23:17.1366262Z Updating files:  70% (15931/22758)\n2026-10-23T13:23:17.1438725Z Updating files:  71% (16159/22758)\n2026-10-23T13:23:17.1511172Z Updating files:  72% (16386/22758)\n2026-10-23T13:23:17.1586176Z Updating files:  73% (16614/22758)\n2026-10-23T13:23:17.1660128Z Updating files:  74% (16841/22758)\n2026-10-23T13:23:17.1733494Z Updating files:  75% (17069/22758)\n2026-10-23T13:23:17.1804293Z Updating files:  76% (17297/22758)\n2026-10-23T13:23:17.1893369Z Updating files:  77% (17524/22758)\n2026-10-23T13:23:17.1964513Z Updating files:  78% (17752/22758)\n2026-10-23T13:23:17.2035159Z Updating files:  79% (17979/22758)\n2026-10-23T13:23:17.2111738Z Updating files:  80% (18207/22758)\n2026-10-23T13:23:17.2186304Z Updating files:  81% (18434/22758)\n2026-10-23T13:23:17.2278180Z Updating files:  82% (18662/22758)\n2026-10-23T13:23:17.2341090Z Updating files:  83% (18890/22758)\n2026-10-23T13:23:17.2404824Z Updating files:  84% (19117/22758)\n2026-10-23T13:23:17.2471567Z Updating files:  85% (19345/22758)\n2026-10-23T13:23:17.2535881Z Updating files:  86% (19572/22758)\n2026-10-23T13:23:17.2601431Z Updating files:  87% (19800/22758)\n2026-10-23T13:23:17.2649532Z Updating files:  88% (20028/22758)\n2026-10-23T13:23:17.2698827Z Updating files:  89% (20255/22758)\n2026-10-23T13:23:17.2759173Z Updating files:  90% (20483/22758)\n2026-10-23T13:23:17.3004855Z Updating files:  91% (20710/22758)\n2026-10-23T13:23:17.3087906Z Updating files:  92% (20938/22758)\n2026-10-23T13:23:17.3154843Z Updating files:  93% (21165/22758)\n2026-10-23T13:23:17.3256173Z Updating files:  94% (21393/22758)\n2026-10-23T13:23:17.4595780Z Updating files:  95% (21621/22758)\n2026-10-23T13:23:17.4946854Z Updating files:  96% (21848/22758)\n2026-10-23T13:23:17.5305459Z Updating files:  96% (21959/22758)\n2026-10-23T13:23:17.5451148Z Updating files:  97% (22076/22758)\n2026-10-23T13:23:17.5979499Z Updating files:  98% (22303/22758)\n2026-10-23T13:23:17.6330820Z Updating files:  99% (22531/22758)\n2026-10-23T13:23:17.6331425Z Updating files: 100% (22758/22758)\n2026-10-23T13:23:17.6331860Z Updating files: 100% (22758/22758), done.\n2026-10-23T13:23:17.8420023Z Switched to a new branch 'work/psc1-pskernel-t01f-string-20261022'\n2026-10-23T13:23:17.8422465Z branch 'work/psc1-pskernel-t01f-string-20261022' set up to track 'origin/work/psc1-pskernel-t01f-string-20261022'.\n2026-10-23T13:23:17.8530665Z ##[endgroup]\n2026-10-23T13:23:17.8569541Z [command]/usr/bin/git log -1 --format=%H\n2026-10-23T13:23:17.8593291Z 9c3c0b546e388e3cca44aa3855587efff7c34bd2\n2026-10-23T13:23:17.9729779Z ##[group]Run set -euo pipefail\n2026-10-23T13:23:17.9730012Z \u001b[36;1mset -euo pipefail\u001b[0m\n2026-10-23T13:23:17.9730197Z \u001b[36;1mbash psc1/scripts/install-lean435-ci.sh\u001b[0m\n2026-10-23T13:23:18.0044962Z shell: /usr/bin/bash -e {0}\n2026-10-23T13:23:18.0045128Z ##[endgroup]\n2026-10-23T13:23:18.1617668Z info: downloading installer\n2026-10-23T13:23:19.4071935Z info: downloading https://releases.lean-lang.org/lean4/v4.35.0/lean-4.35.0-linux.tar.zst\n2026-10-23T13:23:26.6747014Z info: installing /home/runner/.elan/toolchains/leanprover--lean4---v4.35.0\n2026-10-23T13:23:36.4832481Z \n2026-10-23T13:23:36.5140660Z leanprover/lean4:v4.35.0 installed - Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)\n2026-10-23T13:23:36.5143398Z \n2026-10-23T13:23:36.5523729Z PSC1_PINNED_LEAN_INSTALLED leanprover/lean4:v4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc\n2026-10-23T13:23:36.6653825Z ##[group]Run actions/setup-node@v4\n2026-10-23T13:23:36.6653992Z with:\n2026-10-23T13:23:36.6654112Z   node-version: 22\n2026-10-23T13:23:36.6654243Z   always-auth: false\n2026-10-23T13:23:36.6654366Z   check-latest: false\n2026-10-23T13:23:36.6655559Z   token: ***\n2026-10-23T13:23:36.6655679Z ##[endgroup]\n2026-10-23T13:23:36.7669263Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64\n2026-10-23T13:23:36.7671893Z (node:2129) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n2026-10-23T13:23:36.7672498Z (Use `node --trace-deprecation ...` to show where the warning was created)\n2026-10-23T13:23:36.7674011Z ##[group]Environment details\n2026-10-23T13:23:37.2313024Z node: v22.23.3\n2026-10-23T13:23:37.2313874Z npm: 10.9.9\n2026-10-23T13:23:37.2314044Z yarn: 1.22.22\n2026-10-23T13:23:37.2314688Z ##[endgroup]\n2026-10-23T13:23:37.3905613Z ##[group]Run set -euo pipefail\n2026-10-23T13:23:37.3905892Z \u001b[36;1mset -euo pipefail\u001b[0m\n2026-10-23T13:23:37.3906090Z \u001b[36;1mtest \"$(cat lean-toolchain)\" = \"leanprover/lean4:v4.35.0\"\u001b[0m\n2026-10-23T13:23:37.3906355Z \u001b[36;1mtest \"$(lean --githash)\" = \"eb6cafb7290e8bd5f2937522d8d804f58f02bafc\"\u001b[0m\n2026-10-23T13:23:37.3906570Z \u001b[36;1mlake build psc1\u001b[0m\n2026-10-23T13:23:37.3976956Z shell: /usr/bin/bash -e {0}\n2026-10-23T13:23:37.3977120Z ##[endgroup]\n2026-10-23T13:23:38.7797623Z ✔ [1/25] Built Ps.Foundation.Source (307ms)\n2026-10-23T13:23:38.7873599Z ✔ [2/25] Built Ps.Foundation.List (377ms)\n2026-10-23T13:23:38.8774748Z ✔ [3/25] Built Ps.Foundation.Name (473ms)\n2026-10-23T13:23:39.2760389Z ⚠ [4/25] Built Ps.Syntax.Cursor (382ms)\n2026-10-23T13:23:39.2804667Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.\n2026-10-23T13:23:39.2837353Z \n2026-10-23T13:23:39.2838587Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:39.2839297Z   [apply] _head\n2026-10-23T13:23:39.2839599Z \n2026-10-23T13:23:39.2843538Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:39.2844452Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.\n2026-10-23T13:23:39.2846414Z \n2026-10-23T13:23:39.2847114Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:39.2849603Z   [apply] _tail\n2026-10-23T13:23:39.2853533Z \n2026-10-23T13:23:39.2854177Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:39.2854895Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.\n2026-10-23T13:23:39.2855265Z \n2026-10-23T13:23:39.2855769Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:39.2856263Z   [apply] _rest\n2026-10-23T13:23:39.2856376Z \n2026-10-23T13:23:39.2856638Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:39.2857291Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.\n2026-10-23T13:23:39.2857632Z \n2026-10-23T13:23:39.2858099Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:39.2858595Z   [apply] _first\n2026-10-23T13:23:39.2858706Z \n2026-10-23T13:23:39.2858975Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:39.2859603Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.\n2026-10-23T13:23:39.2859958Z \n2026-10-23T13:23:39.2860435Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:39.2860957Z   [apply] _tail\n2026-10-23T13:23:39.2861062Z \n2026-10-23T13:23:39.2861318Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:39.2861981Z ✔ [5/25] Built Ps.Syntax.Token (419ms)\n2026-10-23T13:23:39.4746743Z ✔ [6/25] Built Ps.Syntax.Ast (711ms)\n2026-10-23T13:23:39.4748114Z ✔ [7/25] Built Ps.Bridge.Json (1.0s)\n2026-10-23T13:23:39.5764542Z ✔ [8/29] Built Ps.Core.Level (337ms)\n2026-10-23T13:23:39.6752366Z ⚠ [9/29] Built Ps.Syntax.ParserState (358ms)\n2026-10-23T13:23:39.6753686Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.\n2026-10-23T13:23:39.6754399Z \n2026-10-23T13:23:39.6759768Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:39.6771450Z   [apply] _rest\n2026-10-23T13:23:39.6771750Z \n2026-10-23T13:23:39.6772401Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:39.8854644Z ✔ [10/29] Built Ps.Syntax.PrintCommon (480ms)\n2026-10-23T13:23:39.9856223Z ✔ [11/29] Built Ps.Core.Expr (458ms)\n2026-10-23T13:23:40.0848869Z ✔ [12/29] Built Ps.Core.Builtin (441ms)\n2026-10-23T13:23:40.1850590Z ⚠ [13/31] Built Ps.Syntax.Lexer (744ms)\n2026-10-23T13:23:40.1851647Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:40.1873567Z \n2026-10-23T13:23:40.1910078Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:40.1933742Z   [apply] _depth\n2026-10-23T13:23:40.1963411Z \n2026-10-23T13:23:40.1993859Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:40.1994841Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.\n2026-10-23T13:23:40.2023400Z \n2026-10-23T13:23:40.2054076Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:40.2054816Z   [apply] _remaining\n2026-10-23T13:23:40.2083589Z \n2026-10-23T13:23:40.2106866Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:40.2110564Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.\n2026-10-23T13:23:40.2129936Z \n2026-10-23T13:23:40.2130650Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:40.2131313Z   [apply] _remaining\n2026-10-23T13:23:40.2131589Z \n2026-10-23T13:23:40.2131992Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:40.2132789Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.\n2026-10-23T13:23:40.2133449Z \n2026-10-23T13:23:40.2134068Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:40.2157288Z   [apply] _charsRev\n2026-10-23T13:23:40.2158401Z \n2026-10-23T13:23:40.2163941Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:40.5867529Z ✔ [14/31] Built Ps.Syntax.ParseCommon (691ms)\n2026-10-23T13:23:40.5894492Z ✔ [15/31] Built Ps.Syntax.PrintLean (532ms)\n2026-10-23T13:23:40.6846957Z ✔ [16/31] Built Ps.Syntax.PrintProofScript (622ms)\n2026-10-23T13:23:40.6874769Z ✔ [17/31] Built Ps.Core.Equality (488ms)\n2026-10-23T13:23:40.9905521Z ⚠ [18/32] Built Ps.Core.Abstract (326ms)\n2026-10-23T13:23:40.9944918Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:40.9945749Z \n2026-10-23T13:23:40.9974361Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:40.9983949Z   [apply] _depth\n2026-10-23T13:23:40.9984408Z \n2026-10-23T13:23:40.9991711Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:40.9992933Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:40.9993580Z \n2026-10-23T13:23:40.9994205Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:40.9994920Z   [apply] _depth\n2026-10-23T13:23:40.9995239Z \n2026-10-23T13:23:40.9995651Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:40.9997189Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:40.9997686Z \n2026-10-23T13:23:40.9998303Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:40.9998920Z   [apply] _depth\n2026-10-23T13:23:40.9999140Z \n2026-10-23T13:23:40.9999517Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0000272Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:41.0000731Z \n2026-10-23T13:23:41.0001330Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0001961Z   [apply] _depth\n2026-10-23T13:23:41.0002185Z \n2026-10-23T13:23:41.0002569Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0003455Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:41.0003947Z \n2026-10-23T13:23:41.0004557Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0005187Z   [apply] _depth\n2026-10-23T13:23:41.0005414Z \n2026-10-23T13:23:41.0005794Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0006704Z ⚠ [19/32] Built Ps.Core.Subst (375ms)\n2026-10-23T13:23:41.0007372Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:23:41.0007831Z \n2026-10-23T13:23:41.0008444Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0009097Z   [apply] _cutoff\n2026-10-23T13:23:41.0009334Z \n2026-10-23T13:23:41.0009730Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0010660Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:23:41.0011214Z \n2026-10-23T13:23:41.0011804Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0012390Z   [apply] _cutoff\n2026-10-23T13:23:41.0012600Z \n2026-10-23T13:23:41.0012954Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0013749Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:23:41.0014189Z \n2026-10-23T13:23:41.0014759Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0015382Z   [apply] _cutoff\n2026-10-23T13:23:41.0015792Z \n2026-10-23T13:23:41.0016204Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0017066Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:23:41.0017516Z \n2026-10-23T13:23:41.0018098Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0018717Z   [apply] _cutoff\n2026-10-23T13:23:41.0018933Z \n2026-10-23T13:23:41.0019312Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0020044Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:23:41.0020476Z \n2026-10-23T13:23:41.0021102Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0021959Z   [apply] _cutoff\n2026-10-23T13:23:41.0022181Z \n2026-10-23T13:23:41.0022669Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0023583Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:41.0024048Z \n2026-10-23T13:23:41.0024642Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0025266Z   [apply] _depth\n2026-10-23T13:23:41.0025484Z \n2026-10-23T13:23:41.0025858Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0026562Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:41.0026974Z \n2026-10-23T13:23:41.0027696Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0028332Z   [apply] _depth\n2026-10-23T13:23:41.0028551Z \n2026-10-23T13:23:41.0028918Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0029624Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:41.0030054Z \n2026-10-23T13:23:41.0030629Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0031220Z   [apply] _depth\n2026-10-23T13:23:41.0031432Z \n2026-10-23T13:23:41.0031803Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0032521Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:41.0032953Z \n2026-10-23T13:23:41.0033677Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0034279Z   [apply] _depth\n2026-10-23T13:23:41.0034492Z \n2026-10-23T13:23:41.0034853Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0035565Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:23:41.0036003Z \n2026-10-23T13:23:41.0036577Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.0037172Z   [apply] _depth\n2026-10-23T13:23:41.0037381Z \n2026-10-23T13:23:41.0037747Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.0038506Z ✔ [20/32] Built Ps.Environment.LocalContext (297ms)\n2026-10-23T13:23:41.1914861Z ✔ [21/36] Built Ps.Core.Declaration (541ms)\n2026-10-23T13:23:41.3914882Z ⚠ [22/36] Built Ps.Core.LevelSubst (361ms)\n2026-10-23T13:23:41.3934221Z warning: packages/core/src/Ps/Core/LevelSubst.lean:8:11: Variable name `arguments` is not explicitly referenced.\n2026-10-23T13:23:41.3993414Z \n2026-10-23T13:23:41.4024146Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.4063532Z   [apply] _arguments\n2026-10-23T13:23:41.4093395Z \n2026-10-23T13:23:41.4164357Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.4184399Z warning: packages/core/src/Ps/Core/LevelSubst.lean:9:13: Variable name `target` is not explicitly referenced.\n2026-10-23T13:23:41.4184954Z \n2026-10-23T13:23:41.4185573Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.4186196Z   [apply] _target\n2026-10-23T13:23:41.4186424Z \n2026-10-23T13:23:41.4186804Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:41.8911733Z ✔ [23/37] Built Ps.Environment.Basic (666ms)\n2026-10-23T13:23:41.8989024Z ⚠ [24/37] Built Ps.Meta.LevelContext (521ms)\n2026-10-23T13:23:41.9064382Z warning: packages/meta/src/Ps/Meta/LevelContext.lean:59:4: Variable name `assignment` is not explicitly referenced.\n2026-10-23T13:23:41.9093545Z \n2026-10-23T13:23:41.9094327Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:41.9123852Z   [apply] _assignment\n2026-10-23T13:23:41.9153329Z \n2026-10-23T13:23:41.9174091Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:42.1934659Z ✔ [25/37] Built Ps.Syntax.ParseProofScript (1.2s)\n2026-10-23T13:23:42.2975252Z ✔ [26/39] Built Ps.Environment.Resolve (381ms)\n2026-10-23T13:23:42.5012339Z ✔ [27/39] Built Ps.Syntax.ParseLean (1.6s)\n2026-10-23T13:23:42.6044909Z ✔ [28/44] Built Ps.Environment.Instances (362ms)\n2026-10-23T13:23:42.7037239Z ✔ [29/44] Built Ps.Environment.Prelude (575ms)\n2026-10-23T13:23:42.9034597Z ✔ [30/44] Built Ps.Syntax.Translate (326ms)\n2026-10-23T13:23:43.0054765Z ✔ [31/48] Built Ps.Bridge.CheckedAdmissions (1.1s)\n2026-10-23T13:23:43.1064444Z ✔ [32/52] Built Ps.Meta.Context (589ms)\n2026-10-23T13:23:43.3065018Z ✔ [33/52] Built Ps.Environment.SelfHostPrelude (404ms)\n2026-10-23T13:23:43.3065507Z ⚠ [34/52] Built Ps.Elab.Literal (524ms)\n2026-10-23T13:23:43.3066078Z warning: packages/elab/src/Ps/Elab/Literal.lean:166:11: Variable name `chars` is not explicitly referenced.\n2026-10-23T13:23:43.3066443Z \n2026-10-23T13:23:43.3066960Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:43.3067489Z   [apply] _chars\n2026-10-23T13:23:43.3067608Z \n2026-10-23T13:23:43.3067891Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:43.3068556Z warning: packages/elab/src/Ps/Elab/Literal.lean:167:13: Variable name `charsRev` is not explicitly referenced.\n2026-10-23T13:23:43.3068966Z \n2026-10-23T13:23:43.3069454Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:43.3069966Z   [apply] _charsRev\n2026-10-23T13:23:43.3070081Z \n2026-10-23T13:23:43.3070350Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:43.5064624Z ✔ [35/75] Built Ps.Elab.Context (359ms)\n2026-10-23T13:23:43.7050144Z ✔ [36/84] Built Ps.Environment.SelfHostProd (336ms)\n2026-10-23T13:23:43.7074406Z ✔ [37/84] Built Ps.Meta.Reduce (436ms)\n2026-10-23T13:23:43.8051820Z ✔ [38/85] Built Ps.Foundation.Text (342ms)\n2026-10-23T13:23:44.0084859Z ✔ [39/87] Built Ps.CompilerIr.Model (990ms)\n2026-10-23T13:23:44.0085401Z ✔ [40/87] Built Ps.BackendRust.Runtime (324ms)\n2026-10-23T13:23:44.1077920Z ✔ [41/87] Built Ps.BackendRust.Identifier (395ms)\n2026-10-23T13:23:44.4094499Z ✔ [42/87] Built Ps.Meta.Infer (594ms)\n2026-10-23T13:23:44.4112468Z ⚠ [43/87] Built Ps.Meta.Unify (415ms)\n2026-10-23T13:23:44.4134216Z warning: packages/meta/src/Ps/Meta/Unify.lean:90:11: Variable name `environment` is not explicitly referenced.\n2026-10-23T13:23:44.4176768Z \n2026-10-23T13:23:44.4230261Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:44.4243747Z   [apply] _environment\n2026-10-23T13:23:44.4262864Z \n2026-10-23T13:23:44.4282149Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:44.4283443Z warning: packages/meta/src/Ps/Meta/Unify.lean:91:11: Variable name `localContext` is not explicitly referenced.\n2026-10-23T13:23:44.4283946Z \n2026-10-23T13:23:44.4284527Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:44.4285141Z   [apply] _localContext\n2026-10-23T13:23:44.4285754Z \n2026-10-23T13:23:44.4286259Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:44.4286955Z warning: packages/meta/src/Ps/Meta/Unify.lean:93:11: Variable name `left` is not explicitly referenced.\n2026-10-23T13:23:44.4287378Z \n2026-10-23T13:23:44.4287954Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:44.4288549Z   [apply] _left\n2026-10-23T13:23:44.4288766Z \n2026-10-23T13:23:44.4289122Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:44.4289822Z warning: packages/meta/src/Ps/Meta/Unify.lean:94:11: Variable name `right` is not explicitly referenced.\n2026-10-23T13:23:44.4290253Z \n2026-10-23T13:23:44.4290830Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:44.4291473Z   [apply] _right\n2026-10-23T13:23:44.4291700Z \n2026-10-23T13:23:44.4292079Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:44.4292836Z warning: packages/meta/src/Ps/Meta/Unify.lean:178:17: Variable name `leftName` is not explicitly referenced.\n2026-10-23T13:23:44.4293458Z \n2026-10-23T13:23:44.4294073Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:44.4294749Z   [apply] _leftName\n2026-10-23T13:23:44.4294991Z \n2026-10-23T13:23:44.4295395Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:44.4296166Z warning: packages/meta/src/Ps/Meta/Unify.lean:207:21: Variable name `leftName` is not explicitly referenced.\n2026-10-23T13:23:44.4296642Z \n2026-10-23T13:23:44.4297246Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:44.4297884Z   [apply] _leftName\n2026-10-23T13:23:44.4298128Z \n2026-10-23T13:23:44.4298515Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:44.7144921Z ✔ [44/87] Built Ps.CompilerIr.Construct (306ms)\n2026-10-23T13:23:44.8143818Z ✔ [45/87] Built Ps.BackendJs.Model (750ms)\n2026-10-23T13:23:44.8144523Z ✔ [46/87] Built Ps.BackendWasm.Model (805ms)\n2026-10-23T13:23:45.2106361Z ✔ [47/88] Built Ps.BackendWasm.IntUtil (345ms)\n2026-10-23T13:23:45.3110385Z ✔ [48/88] Built Ps.BackendTs.Type (462ms)\n2026-10-23T13:23:45.5122195Z ✔ [49/88] Built Ps.CompilerIr.CheckTypes (731ms)\n2026-10-23T13:23:45.5123844Z ✔ [50/88] Built Ps.CompilerIr.Specialize (1.2s)\n2026-10-23T13:23:45.7132696Z ✔ [51/88] Built Ps.Meta.SynthInstance (419ms)\n2026-10-23T13:23:45.7154207Z ✔ [52/88] Built Ps.BackendRust.Type (503ms)\n2026-10-23T13:23:46.1134122Z ✔ [53/91] Built Ps.BackendJs.TailAlias (574ms)\n2026-10-23T13:23:46.1164370Z ✔ [54/91] Built Ps.BackendWasm.TailCalls (358ms)\n2026-10-23T13:23:46.2164160Z ✔ [55/91] Built Ps.Erasure.Basic (792ms)\n2026-10-23T13:23:46.5184828Z ✔ [56/91] Built Ps.BackendWasm.Binary (855ms)\n2026-10-23T13:23:46.7234915Z ✔ [57/91] Built Ps.CompilerIr.CheckSize (623ms)\n2026-10-23T13:23:46.9214733Z ⚠ [58/91] Built Ps.BackendTs.Expr (829ms)\n2026-10-23T13:23:46.9240730Z warning: packages/backend-ts/src/Ps/BackendTs/Expr.lean:631:32: Variable name `fieldName` is not explicitly referenced.\n2026-10-23T13:23:46.9270888Z \n2026-10-23T13:23:46.9271885Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:46.9272764Z   [apply] _fieldName\n2026-10-23T13:23:46.9273027Z \n2026-10-23T13:23:46.9273603Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:47.0236273Z ✔ [59/93] Built Ps.BackendRust.ValueRefs (454ms)\n2026-10-23T13:23:47.2240821Z ✔ [60/93] Built Ps.BackendJs.Lower (1.0s)\n2026-10-23T13:23:47.3266519Z ✔ [61/93] Built Ps.BackendWasm.Type (423ms)\n2026-10-23T13:23:47.5278197Z ✔ [62/93] Built Ps.Erasure.Inductive (490ms)\n2026-10-23T13:23:48.4333275Z ⚠ [63/94] Built Ps.Elab.Term (1.7s)\n2026-10-23T13:23:48.4354414Z warning: packages/elab/src/Ps/Elab/Term.lean:2890:11: Variable name `context` is not explicitly referenced.\n2026-10-23T13:23:48.4383920Z \n2026-10-23T13:23:48.4394276Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:48.4395040Z   [apply] _context\n2026-10-23T13:23:48.4395308Z \n2026-10-23T13:23:48.4419842Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:48.4420829Z warning: packages/elab/src/Ps/Elab/Term.lean:2891:13: Variable name `recursion` is not explicitly referenced.\n2026-10-23T13:23:48.4421373Z \n2026-10-23T13:23:48.4422001Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:48.4422859Z   [apply] _recursion\n2026-10-23T13:23:48.4423355Z \n2026-10-23T13:23:48.4423755Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:48.4424651Z warning: packages/elab/src/Ps/Elab/Term.lean:2892:15: Variable name `index` is not explicitly referenced.\n2026-10-23T13:23:48.4425165Z \n2026-10-23T13:23:48.4425794Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:48.4426412Z   [apply] _index\n2026-10-23T13:23:48.4426657Z \n2026-10-23T13:23:48.4427050Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:48.4427843Z ✔ [64/94] Built Ps.BackendTs.Module (983ms)\n2026-10-23T13:23:48.4428337Z ⚠ [65/94] Built Ps.CompilerIr.Check (1.1s)\n2026-10-23T13:23:48.4429085Z warning: packages/compiler-ir/src/Ps/CompilerIr/Check.lean:690:27: Variable name `scope` is not explicitly referenced.\n2026-10-23T13:23:48.4429633Z \n2026-10-23T13:23:48.4430254Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:48.4430894Z   [apply] _scope\n2026-10-23T13:23:48.4431145Z \n2026-10-23T13:23:48.4431553Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:48.7335835Z ✔ [67/196] Built Ps.BackendWasm.LowerFloat (295ms)\n2026-10-23T13:23:48.8375177Z ⚠ [68/196] Built Ps.BackendRust.Captures (377ms)\n2026-10-23T13:23:48.8406299Z warning: packages/backend-rust/src/Ps/BackendRust/Captures.lean:38:15: Variable name `captures` is not explicitly referenced.\n2026-10-23T13:23:48.8406724Z \n2026-10-23T13:23:48.8407229Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:48.8407812Z   [apply] _captures\n2026-10-23T13:23:48.8407931Z \n2026-10-23T13:23:48.8408246Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:49.0341417Z ⚠ [69/196] Built Ps.Erasure.Expr (1.8s)\n2026-10-23T13:23:49.0374275Z warning: packages/erasure/src/Ps/Erasure/Expr.lean:1083:21: Variable name `name` is not explicitly referenced.\n2026-10-23T13:23:49.0403544Z \n2026-10-23T13:23:49.0435356Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:23:49.0463762Z   [apply] _name\n2026-10-23T13:23:49.0463934Z \n2026-10-23T13:23:49.0464260Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:23:49.1365060Z ✔ [70/196] Built Ps.Erasure.Structure (371ms)\n2026-10-23T13:23:49.1398700Z ✔ [71/196] Built Ps.BackendWasm.RuntimeNat (664ms)\n2026-10-23T13:23:49.2338636Z ✔ [72/196] Built Ps.BackendWasm.LowerInt (495ms)\n2026-10-23T13:23:49.4341936Z ✔ [73/196] Built Ps.CompilerIr.Validate (343ms)\n2026-10-23T13:23:49.4374289Z ✔ [74/196] Built Ps.Foundation.Source:c.o (58ms)\n2026-10-23T13:23:49.5344347Z ✔ [75/196] Built Ps.Syntax.Cursor:c.o (128ms)\n2026-10-23T13:23:49.7354639Z ✔ [76/196] Built Ps.Host.TypeScriptCompiler (586ms)\n2026-10-23T13:23:49.7374183Z ✔ [77/196] Built Ps.Syntax.Token:c.o (159ms)\n2026-10-23T13:23:49.8341927Z ✔ [78/196] Built Ps.Elab.Recursion (778ms)\n2026-10-23T13:23:49.9344726Z ✔ [79/196] Built Ps.Syntax.Ast:c.o (167ms)\n2026-10-23T13:23:50.0364637Z ✔ [80/196] Built Ps.Foundation.Name:c.o (139ms)\n2026-10-23T13:23:50.0394091Z ✔ [81/196] Built Ps.Syntax.ParserState:c.o (144ms)\n2026-10-23T13:23:50.2344588Z ✔ [82/196] Built Ps.BackendTs.Sh1Target (960ms)\n2026-10-23T13:23:50.3414887Z ✔ [83/196] Built Ps.Syntax.Lexer:c.o (639ms)\n2026-10-23T13:23:50.4406212Z ✔ [84/196] Built Ps.Syntax.ParseCommon:c.o (407ms)\n2026-10-23T13:23:50.5414647Z ✔ [85/196] Built Ps.Syntax.PrintCommon:c.o (125ms)\n2026-10-23T13:23:50.8413467Z ✔ [86/196] Built Ps.Syntax.PrintLean:c.o (456ms)\n2026-10-23T13:23:50.9434970Z ✔ [87/196] Built Ps.Syntax.Translate:c.o (110ms)\n2026-10-23T13:23:51.0434783Z ✔ [88/196] Built Ps.Syntax.PrintProofScript:c.o (486ms)\n2026-10-23T13:23:51.0454124Z ✔ [89/196] Built Ps.Core.Level:c.o (79ms)\n2026-10-23T13:23:51.2454919Z ✔ [90/196] Built Ps.Core.Expr:c.o (134ms)\n2026-10-23T13:23:51.2484127Z ✔ [91/196] Built Ps.Core.Declaration:c.o (83ms)\n2026-10-23T13:23:51.3449169Z ✔ [92/196] Built Ps.Core.Abstract:c.o (95ms)\n2026-10-23T13:23:51.5452808Z ✔ [93/196] Built Ps.Syntax.ParseProofScript:c.o (1.4s)\n2026-10-23T13:23:51.5473969Z ✔ [94/196] Built Ps.Core.Subst:c.o (123ms)\n2026-10-23T13:23:51.6476063Z ✔ [95/196] Built Ps.Syntax.ParseLean:c.o (1.6s)\n2026-10-23T13:23:51.6483856Z ✔ [96/196] Built Ps.Core.Equality:c.o (106ms)\n2026-10-23T13:23:51.7478983Z ✔ [97/196] Built Ps.Bridge.Json:c.o (761ms)\n2026-10-23T13:23:51.7504134Z ✔ [98/196] Built Ps.Foundation.List:c.o (138ms)\n2026-10-23T13:23:51.8477540Z ✔ [99/196] Built Ps.Environment.Basic:c.o (218ms)\n2026-10-23T13:23:51.8503984Z ✔ [100/196] Built Ps.Core.Builtin:c.o (155ms)\n2026-10-23T13:23:51.9484680Z ✔ [101/196] Built Ps.Environment.SelfHostProd:c.o (129ms)\n2026-10-23T13:23:52.1514631Z ✔ [102/196] Built Ps.Environment.Prelude:c.o (420ms)\n2026-10-23T13:23:52.1543965Z ✔ [103/196] Built Ps.Environment.SelfHostPrelude:c.o (288ms)\n2026-10-23T13:23:52.1573851Z ✔ [104/196] Built Ps.Environment.LocalContext:c.o (141ms)\n2026-10-23T13:23:52.1604018Z ✔ [105/196] Built Ps.Environment.Resolve:c.o (82ms)\n2026-10-23T13:23:52.2525153Z ✔ [106/196] Built Ps.Core.LevelSubst:c.o (122ms)\n2026-10-23T13:23:52.3544929Z ✔ [107/196] Built Ps.Meta.LevelContext:c.o (245ms)\n2026-10-23T13:23:52.4564826Z ✔ [108/196] Built Ps.Meta.Context:c.o (237ms)\n2026-10-23T13:23:52.4594171Z ✔ [109/196] Built Ps.Meta.Reduce:c.o (208ms)\n2026-10-23T13:23:52.5564666Z ✔ [110/196] Built Ps.Bridge.CheckedAdmissions:c.o (946ms)\n2026-10-23T13:23:52.5624281Z ✔ [111/196] Built Ps.Environment.Instances:c.o (102ms)\n2026-10-23T13:23:52.6544869Z ✔ [112/196] Built Ps.Meta.SynthInstance:c.o (168ms)\n2026-10-23T13:23:52.6555553Z ✔ [113/196] Built Ps.Elab.Context:c.o (107ms)\n2026-10-23T13:23:52.7574600Z ✔ [114/196] Built Ps.Meta.Infer:c.o (367ms)\n2026-10-23T13:23:52.7583790Z ✔ [115/196] Built Ps.Meta.Unify:c.o (280ms)\n2026-10-23T13:23:52.9584596Z ✔ [116/196] Built Ps.Elab.Literal:c.o (232ms)\n2026-10-23T13:23:53.2574574Z ✔ [117/196] Built Ps.Erasure.Basic:c.o (512ms)\n2026-10-23T13:23:53.3564668Z ✔ [118/196] Built Ps.Erasure.Inductive:c.o (403ms)\n2026-10-23T13:23:53.4614929Z ✔ [119/196] Built Ps.CompilerIr.Model:c.o (766ms)\n2026-10-23T13:23:53.4644111Z ✔ [120/196] Built Ps.BackendTs.Type:c.o (145ms)\n2026-10-23T13:23:53.9584634Z ✔ [121/196] Built Ps.BackendTs.Expr:c.o (600ms)\n2026-10-23T13:23:54.0583712Z ✔ [122/196] Built Ps.CompilerIr.CheckTypes:c.o (532ms)\n2026-10-23T13:23:54.2584982Z ✔ [123/196] Built Ps.Elab.Term:c.o (1.6s)\n2026-10-23T13:23:54.3581993Z ✔ [124/196] Built Ps.BackendTs.Module:c.o (906ms)\n2026-10-23T13:23:54.3634176Z ✔ [125/196] Built Ps.CompilerIr.CheckSize:c.o (458ms)\n2026-10-23T13:23:54.3664719Z ✔ [126/196] Built Ps.CompilerIr.Construct:c.o (84ms)\n2026-10-23T13:23:54.9634767Z ✔ [127/196] Built Ps.CompilerIr.Check:c.o (980ms)\n2026-10-23T13:23:54.9644666Z ✔ [128/196] Built Ps.BackendJs.Model:c.o (549ms)\n2026-10-23T13:23:55.0644767Z ✔ [129/196] Built Ps.Foundation.Text:c.o (103ms)\n2026-10-23T13:23:55.1644593Z ✔ [130/196] Built Ps.BackendJs.Lower:c.o (797ms)\n2026-10-23T13:23:55.2644857Z ✔ [131/196] Built Ps.BackendJs.TailAlias:c.o (366ms)\n2026-10-23T13:23:55.2664008Z ✔ [132/196] Built Ps.BackendRust.Identifier:c.o (151ms)\n2026-10-23T13:23:55.3644780Z ✔ [133/196] Built Ps.BackendRust.Runtime:c.o (75ms)\n2026-10-23T13:23:55.4695435Z ✔ [134/196] Built Ps.BackendRust.Type:c.o (246ms)\n2026-10-23T13:23:55.4696471Z ✔ [135/196] Built Ps.BackendRust.ValueRefs:c.o (258ms)\n2026-10-23T13:23:55.5716254Z ✔ [136/196] Built Ps.BackendWasm.Model:c.o (220ms)\n2026-10-23T13:23:55.5726246Z ✔ [137/196] Built Ps.BackendWasm.IntUtil:c.o (150ms)\n2026-10-23T13:23:55.6791396Z ✔ [138/196] Built Ps.CompilerIr.Specialize:c.o (1.3s)\n2026-10-23T13:23:55.6814237Z ✔ [139/196] Built Ps.BackendWasm.TailCalls:c.o (154ms)\n2026-10-23T13:23:55.6843961Z ✔ [140/196] Built Ps.BackendWasm.LowerFloat:c.o (76ms)\n2026-10-23T13:23:55.7804703Z ✔ [141/196] Built Ps.BackendWasm.Type:c.o (167ms)\n2026-10-23T13:23:55.8804906Z ✔ [142/196] Built Ps.BackendRust.Captures:c.o (192ms)\n2026-10-23T13:23:55.9804947Z ✔ [143/196] Built Ps.BackendWasm.RuntimeNat:c.o (284ms)\n2026-10-23T13:23:56.0915925Z ✔ [144/196] Built Ps.Erasure.Structure:c.o (183ms)\n2026-10-23T13:23:56.0919054Z ✔ [145/196] Built Ps.BackendWasm.LowerInt:c.o (99ms)\n2026-10-23T13:23:56.1804846Z ✔ [146/196] Built Ps.CompilerIr.Validate:c.o (115ms)\n2026-10-23T13:23:56.1824119Z ✔ [147/196] Built Ps.BackendWasm.Binary:c.o (699ms)\n2026-10-23T13:23:56.5835182Z ✔ [148/196] Built Ps.Host.TypeScriptCompiler:c.o (414ms)\n2026-10-23T13:23:56.9834657Z ✔ [149/196] Built Ps.Elab.Recursion:c.o (782ms)\n2026-10-23T13:23:57.0844908Z ✔ [150/196] Built Ps.BackendTs.Sh1Target:c.o (838ms)\n2026-10-23T13:23:57.1824771Z ✔ [151/196] Built Ps.BackendRust.Expr (610ms)\n2026-10-23T13:23:57.4874693Z ✔ [152/196] Built Ps.BackendWasm.RuntimeInt (414ms)\n2026-10-23T13:23:57.4875312Z ✔ [153/196] Built Ps.BackendWasm.RuntimeString (555ms)\n2026-10-23T13:23:57.5855009Z ✔ [154/196] Built Ps.Erasure.StructureRecursor (426ms)\n2026-10-23T13:23:57.9864564Z ✔ [155/196] Built Ps.BackendJs.Validate (529ms)\n2026-10-23T13:23:58.1874771Z ✔ [156/196] Built Ps.BackendWasm.RuntimeInt:c.o (239ms)\n2026-10-23T13:23:58.2864553Z ✔ [157/196] Built Ps.BackendRust.Expr:c.o (700ms)\n2026-10-23T13:23:58.3858925Z ✔ [158/196] Built Ps.Elab.Declaration (910ms)\n2026-10-23T13:23:58.4874619Z ✔ [159/196] Built Ps.Erasure.Expr:c.o (2.7s)\n2026-10-23T13:23:58.4904288Z ✔ [160/196] Built Ps.Erasure.StructureRecursor:c.o (231ms)\n2026-10-23T13:23:58.7867421Z ✔ [161/196] Built Ps.BackendWasm.RuntimeIntRepr (312ms)\n2026-10-23T13:23:58.7903968Z ✔ [162/196] Built Ps.BackendJs.Validate:c.o (368ms)\n2026-10-23T13:23:58.8906976Z ✔ [163/196] Built Ps.BackendRust.TailAlias (432ms)\n2026-10-23T13:23:59.0944997Z ✔ [164/196] Built Ps.BackendWasm.RuntimeString:c.o (861ms)\n2026-10-23T13:23:59.2944916Z ✔ [165/196] Built Ps.BackendWasm.RuntimeIntRepr:c.o (167ms)\n2026-10-23T13:23:59.3958736Z ✔ [166/196] Built Ps.Erasure.Definition (530ms)\n2026-10-23T13:23:59.5974611Z ✔ [167/196] Built Ps.BackendRust.TailAlias:c.o (274ms)\n2026-10-23T13:23:59.7954708Z ✔ [168/196] Built Ps.Elab.Declaration:c.o (985ms)\n2026-10-23T13:23:59.8964981Z ✔ [169/196] Built Ps.Host.ProjectCompiler (654ms)\n2026-10-23T13:23:59.8973753Z ✔ [170/196] Built Ps.BackendJs.Print (1.0s)\n2026-10-23T13:24:00.1984800Z ✔ [171/196] Built Ps.Erasure.Definition:c.o (401ms)\n2026-10-23T13:24:00.2977858Z ✔ [172/196] Built Ps.BackendRust.Tail (404ms)\n2026-10-23T13:24:00.6982266Z ✔ [173/196] Built Ps.Compiler.Api (523ms)\n2026-10-23T13:24:00.6994233Z ✔ [174/196] Built Ps.Host.ProjectCompiler:c.o (391ms)\n2026-10-23T13:24:00.8054849Z ✔ [175/196] Built Ps.BackendJs.Print:c.o (935ms)\n2026-10-23T13:24:00.9045504Z ✔ [176/196] Built Ps.BackendRust.Tail:c.o (238ms)\n2026-10-23T13:24:01.0055075Z ✔ [177/196] Built Ps.Compiler.Api:c.o (267ms)\n2026-10-23T13:24:01.4065437Z ✔ [178/196] Built Ps.BackendTs.Checked (461ms)\n2026-10-23T13:24:01.5076344Z ✔ [179/196] Built Ps.BackendTs.Checked:c.o (144ms)\n2026-10-23T13:24:01.6084719Z ✔ [180/196] Built Ps.BackendRust.Module (781ms)\n2026-10-23T13:24:01.8081623Z ✔ [181/196] Built Ps.Compiler.Sh1 (892ms)\n2026-10-23T13:24:01.9085029Z ✔ [182/196] Built Ps.BackendWasm.Lower (2.3s)\n2026-10-23T13:24:02.1104823Z ✔ [183/196] Built Ps.BackendTs.Sh1 (335ms)\n2026-10-23T13:24:02.2084698Z ✔ [184/196] Built Ps.BackendTs.Sh1:c.o (114ms)\n2026-10-23T13:24:02.3082834Z ✔ [185/196] Built Ps.BackendRust.Module:c.o (725ms)\n2026-10-23T13:24:02.4084519Z ✔ [186/196] Built Ps.Compiler.Sh1:c.o (625ms)\n2026-10-23T13:24:02.5104796Z ✔ [187/196] Built Ps.BackendTs.Compiler (272ms)\n2026-10-23T13:24:02.6086866Z ✔ [188/196] Built Ps.BackendTs.Compiler:c.o (91ms)\n2026-10-23T13:24:02.7127448Z ✔ [189/196] Built Ps.Host.CompilerDriver (240ms)\n2026-10-23T13:24:02.9128447Z ✔ [190/196] Built Ps.Host.CompilerDriver:c.o (161ms)\n2026-10-23T13:24:03.0143720Z ✔ [191/196] Built Ps.Host.DirectBackend (297ms)\n2026-10-23T13:24:03.2146876Z ✔ [192/196] Built Ps.Host.DirectBackend:c.o (149ms)\n2026-10-23T13:24:03.3148213Z ✔ [193/196] Built Main (272ms)\n2026-10-23T13:24:03.4148881Z ✔ [194/196] Built Main:c.o (107ms)\n2026-10-23T13:24:04.4157732Z ✔ [195/196] Built Ps.BackendWasm.Lower:c.o (2.5s)\n2026-10-23T13:24:04.5158598Z ✔ [196/196] Built psc1:exe (154ms)\n2026-10-23T13:24:04.5369701Z Build completed successfully (196 jobs).\n2026-10-23T13:24:04.5790419Z ##[group]Run set -euo pipefail\n2026-10-23T13:24:04.5790620Z \u001b[36;1mset -euo pipefail\u001b[0m\n2026-10-23T13:24:04.5790777Z \u001b[36;1mmkdir -p \"$RUNNER_TEMP/psc1-dag-ts\"\u001b[0m\n2026-10-23T13:24:04.5791072Z \u001b[36;1mecho '{\"name\":\"psc1-dag-ts\",\"private\":true,\"version\":\"0.0.0\"}' > \"$RUNNER_TEMP/psc1-dag-ts/package.json\"\u001b[0m\n2026-10-23T13:24:04.5791489Z \u001b[36;1mnpm install --prefix \"$RUNNER_TEMP/psc1-dag-ts\" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2\u001b[0m\n2026-10-23T13:24:04.5791894Z \u001b[36;1mecho \"PSC0_TSC=$RUNNER_TEMP/psc1-dag-ts/node_modules/typescript/bin/tsc\" >> \"$GITHUB_ENV\"\u001b[0m\n2026-10-23T13:24:04.5844697Z shell: /usr/bin/bash -e {0}\n2026-10-23T13:24:04.5844848Z ##[endgroup]\n2026-10-23T13:24:06.1616122Z \n2026-10-23T13:24:06.1616654Z added 2 packages in 2s\n2026-10-23T13:24:06.2321928Z ##[group]Run set -euo pipefail\n2026-10-23T13:24:06.2322162Z \u001b[36;1mset -euo pipefail\u001b[0m\n2026-10-23T13:24:06.2322433Z \u001b[36;1mlake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean \\\u001b[0m\n2026-10-23T13:24:06.2322757Z \u001b[36;1m  --out dist/expr-v2/scalar-hash/kernel.js\u001b[0m\n2026-10-23T13:24:06.2323022Z \u001b[36;1mcp dist/expr-v2/scalar-hash/kernel.js \"$RUNNER_TEMP/psc1-scalar-hash-probe.mjs\"\u001b[0m\n2026-10-23T13:24:06.2323573Z \u001b[36;1mnode scripts/pskernel-scalar-hash-worker-smoke.mjs \"$RUNNER_TEMP/psc1-scalar-hash-probe.mjs\" \\\u001b[0m\n2026-10-23T13:24:06.2323880Z \u001b[36;1m  | tee \"$RUNNER_TEMP/psc1-scalar-hash-probe.log\"\u001b[0m\n2026-10-23T13:24:06.2324064Z \u001b[36;1mpython3 - <<'PY'\u001b[0m\n2026-10-23T13:24:06.2324215Z \u001b[36;1mimport pathlib, re\u001b[0m\n2026-10-23T13:24:06.2324421Z \u001b[36;1mtext = pathlib.Path('dist/expr-v2/scalar-hash/kernel.js').read_text()\u001b[0m\n2026-10-23T13:24:06.2324641Z \u001b[36;1mdef implementations(prefix):\u001b[0m\n2026-10-23T13:24:06.2324897Z \u001b[36;1m    return re.findall(r'^export function (' + prefix + r'[A-Za-z0-9_$]*)\\(', text, re.M)\u001b[0m\n2026-10-23T13:24:06.2325132Z \u001b[36;1mdef body_of(name):\u001b[0m\n2026-10-23T13:24:06.2325293Z \u001b[36;1m    marker = 'function* __ps$impl$' + name + '('\u001b[0m\n2026-10-23T13:24:06.2325516Z \u001b[36;1m    if marker not in text: marker = 'export function ' + name + '('\u001b[0m\n2026-10-23T13:24:06.2325722Z \u001b[36;1m    start = text.index(marker)\u001b[0m\n2026-10-23T13:24:06.2325908Z \u001b[36;1m    end = text.find('\\nexport ', start + len(marker))\u001b[0m\n2026-10-23T13:24:06.2326122Z \u001b[36;1m    return text[start:] if end < 0 else text[start:end]\u001b[0m\n2026-10-23T13:24:06.2326307Z \u001b[36;1mexpected = {\u001b[0m\n2026-10-23T13:24:06.2326550Z \u001b[36;1m    'psKernelCacheStringHashPairsWithFuel': (2, ['psKernelCacheStringHashPairsWithFuel']),\u001b[0m\n2026-10-23T13:24:06.2327057Z \u001b[36;1m    'psKernelCacheStringHashStateWithFuel': (1, ['psKernelCacheStringHashPairsWithFuel']),\u001b[0m\n2026-10-23T13:24:06.2327308Z \u001b[36;1m}\u001b[0m\n2026-10-23T13:24:06.2327417Z \u001b[36;1mnames = []\u001b[0m\n2026-10-23T13:24:06.2327578Z \u001b[36;1mfor name, (transitions, calls) in expected.items():\u001b[0m\n2026-10-23T13:24:06.2327773Z \u001b[36;1m    found = implementations(name)\u001b[0m\n2026-10-23T13:24:06.2327935Z \u001b[36;1m    if found != [name]:\u001b[0m\n2026-10-23T13:24:06.2328152Z \u001b[36;1m        raise RuntimeError('Data-result iterator was recurried: ' + repr(found))\u001b[0m\n2026-10-23T13:24:06.2328380Z \u001b[36;1m    names.extend(found)\u001b[0m\n2026-10-23T13:24:06.2328523Z \u001b[36;1m    body = body_of(name)\u001b[0m\n2026-10-23T13:24:06.2328709Z \u001b[36;1m    print('PSC1_HASH_ITERATOR_BODY ' + name + ' ' + repr(body))\u001b[0m\n2026-10-23T13:24:06.2328994Z \u001b[36;1m    for machinery in ('__ps$wrap', 'psKernelCacheStringHashStep', 'psKernelCacheMix'):\u001b[0m\n2026-10-23T13:24:06.2329234Z \u001b[36;1m        if machinery in body:\u001b[0m\n2026-10-23T13:24:06.2329470Z \u001b[36;1m            raise RuntimeError('Unexpected staging or transition dispatch: ' + machinery)\u001b[0m\n2026-10-23T13:24:06.2329856Z \u001b[36;1m    if body.count('__ps$invoke(') != len(calls):\u001b[0m\n2026-10-23T13:24:06.2330177Z \u001b[36;1m        raise RuntimeError('Unexpected scheduler calls in ' + name)\u001b[0m\n2026-10-23T13:24:06.2330382Z \u001b[36;1m    for call in calls:\u001b[0m\n2026-10-23T13:24:06.2330550Z \u001b[36;1m        if body.count('__ps$invoke(' + call + ',') != 1:\u001b[0m\n2026-10-23T13:24:06.2330785Z \u001b[36;1m            raise RuntimeError('Expected exactly one dispatch to ' + call)\u001b[0m\n2026-10-23T13:24:06.2331028Z \u001b[36;1m    if len(re.findall(r'function\\s*\\*\\s*\\(', body)) != 1:\u001b[0m\n2026-10-23T13:24:06.2331358Z \u001b[36;1m        raise RuntimeError('Expected exactly one structural generator block in ' + name)\u001b[0m\n2026-10-23T13:24:06.2331738Z \u001b[36;1m    if body.count('__ps$stringNext(') != transitions or body.count('__ps$stringGet(') != transitions:\u001b[0m\n2026-10-23T13:24:06.2332067Z \u001b[36;1m        raise RuntimeError('Unexpected primitive transition count in ' + name)\u001b[0m\n2026-10-23T13:24:06.2332311Z \u001b[36;1mentry = body_of('psKernelCacheStringHash')\u001b[0m\n2026-10-23T13:24:06.2332514Z \u001b[36;1mprint('PSC1_HASH_FUSED_ENTRY_BODY ' + repr(entry))\u001b[0m\n2026-10-23T13:24:06.2332920Z \u001b[36;1mforbidden = ('__ps$wrap','psKernelCacheStringHashWorker','psKernelCacheStringHashScan',\u001b[0m\n2026-10-23T13:24:06.2333438Z \u001b[36;1m             'psKernelCacheStringHashStateWithFuel','psKernelCacheStringHashRemainderWithFuel',\u001b[0m\n2026-10-23T13:24:06.2333829Z \u001b[36;1m             'psKernelCacheStringHashOctetsWithFuel','psKernelCacheStringHashStep','psKernelCacheMix')\u001b[0m\n2026-10-23T13:24:06.2334129Z \u001b[36;1mif any(name in entry for name in forbidden):\u001b[0m\n2026-10-23T13:24:06.2334382Z \u001b[36;1m    raise RuntimeError('Full entry retains a staged/state/scan transition dispatch')\u001b[0m\n2026-10-23T13:24:06.2334735Z \u001b[36;1mif entry.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in entry:\u001b[0m\n2026-10-23T13:24:06.2335083Z \u001b[36;1m    raise RuntimeError('Full entry must dispatch only once to the pair iterator')\u001b[0m\n2026-10-23T13:24:06.2335347Z \u001b[36;1mif len(re.findall(r'function\\s*\\*\\s*\\(',entry)) != 1:\u001b[0m\n2026-10-23T13:24:06.2335601Z \u001b[36;1m    raise RuntimeError('Fused entry still allocates an extra generator block')\u001b[0m\n2026-10-23T13:24:06.2335895Z \u001b[36;1mif entry.count('__ps$stringNext(') != 1 or entry.count('__ps$stringGet(') != 1:\u001b[0m\n2026-10-23T13:24:06.2336203Z \u001b[36;1m    raise RuntimeError('Fused entry must contain exactly one odd remainder transition')\u001b[0m\n2026-10-23T13:24:06.2336470Z \u001b[36;1mlevel = body_of('psKernelCacheLevelListHash')\u001b[0m\n2026-10-23T13:24:06.2336685Z \u001b[36;1mprint('PSC1_HASH_LEVEL_LIST_ENTRY_BODY ' + repr(level))\u001b[0m\n2026-10-23T13:24:06.2336924Z \u001b[36;1mif '__ps$wrap' in level or 'case \"nil\": return 575n;' not in level:\u001b[0m\n2026-10-23T13:24:06.2337241Z \u001b[36;1m    raise RuntimeError('Empty universe arguments must return exact constant575 without a staged result')\u001b[0m\n2026-10-23T13:24:06.2337669Z \u001b[36;1mif level.count('__ps$invoke(psKernelCacheLevelListHashWorker,') != 1:\u001b[0m\n2026-10-23T13:24:06.2337950Z \u001b[36;1m    raise RuntimeError('Keep exactly one generic staged-worker fallback')\u001b[0m\n2026-10-23T13:24:06.2338215Z \u001b[36;1mif level.count('__ps$invoke(psKernelCacheLevelHash,') != 3:\u001b[0m\n2026-10-23T13:24:06.2338488Z \u001b[36;1m    raise RuntimeError('Expected specialized one-level and two-level branches')\u001b[0m\n2026-10-23T13:24:06.2338761Z \u001b[36;1mmarker = 'export function psKernelCacheStringHashStep('\u001b[0m\n2026-10-23T13:24:06.2338960Z \u001b[36;1mstart = text.index(marker)\u001b[0m\n2026-10-23T13:24:06.2339159Z \u001b[36;1mend = text.find('\\nexport ', start + len(marker))\u001b[0m\n2026-10-23T13:24:06.2339376Z \u001b[36;1mstep = text[start:] if end < 0 else text[start:end]\u001b[0m\n2026-10-23T13:24:06.2339619Z \u001b[36;1mfor machinery in ('function*', '__ps$run', '__ps$invoke', '__ps$wrap'):\u001b[0m\n2026-10-23T13:24:06.2339837Z \u001b[36;1m    if machinery in step:\u001b[0m\n2026-10-23T13:24:06.2340071Z \u001b[36;1m        raise RuntimeError('Byte transition is not a pure generated leaf: ' + machinery)\u001b[0m\n2026-10-23T13:24:06.2340354Z \u001b[36;1mmarker = 'function* __ps$impl$psKernelCacheStringHash('\u001b[0m\n2026-10-23T13:24:06.2340551Z \u001b[36;1mstart = text.index(marker)\u001b[0m\n2026-10-23T13:24:06.2340729Z \u001b[36;1mend = text.find('\\nexport ', start + len(marker))\u001b[0m\n2026-10-23T13:24:06.2340943Z \u001b[36;1mentry = text[start:] if end < 0 else text[start:end]\u001b[0m\n2026-10-23T13:24:06.2341196Z \u001b[36;1mif 'psKernelCacheStringHashWorker' in entry or '__ps$wrap' in entry:\u001b[0m\n2026-10-23T13:24:06.2341497Z \u001b[36;1m    raise RuntimeError('Full hash still dispatches through the staged public worker')\u001b[0m\n2026-10-23T13:24:06.2341902Z \u001b[36;1mprint('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')\u001b[0m\n2026-10-23T13:24:06.2342285Z \u001b[36;1mprint('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))\u001b[0m\n2026-10-23T13:24:06.2342731Z \u001b[36;1mprint('PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairDispatches=1 primitiveRemainder=1 structuralGeneratorBlocks=1')\u001b[0m\n2026-10-23T13:24:06.2343351Z \u001b[36;1mprint('PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false')\u001b[0m\n2026-10-23T13:24:06.2343746Z \u001b[36;1mPY\u001b[0m\n2026-10-23T13:24:06.2397894Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}\n2026-10-23T13:24:06.2398087Z env:\n2026-10-23T13:24:06.2398276Z   PSC0_TSC: /home/runner/work/_temp/psc1-dag-ts/node_modules/typescript/bin/tsc\n2026-10-23T13:24:06.2398493Z ##[endgroup]\n2026-10-23T13:24:06.6325852Z ⚠ [3/196] Replayed Ps.Syntax.Cursor\n2026-10-23T13:24:06.6326701Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.\n2026-10-23T13:24:06.6327328Z \n2026-10-23T13:24:06.6327877Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6328416Z   [apply] _head\n2026-10-23T13:24:06.6328530Z \n2026-10-23T13:24:06.6328801Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6329459Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.\n2026-10-23T13:24:06.6329807Z \n2026-10-23T13:24:06.6330279Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6330769Z   [apply] _tail\n2026-10-23T13:24:06.6330876Z \n2026-10-23T13:24:06.6331126Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6331724Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.\n2026-10-23T13:24:06.6332045Z \n2026-10-23T13:24:06.6332494Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6333406Z   [apply] _rest\n2026-10-23T13:24:06.6333509Z \n2026-10-23T13:24:06.6333760Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6334364Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.\n2026-10-23T13:24:06.6334692Z \n2026-10-23T13:24:06.6335135Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6335601Z   [apply] _first\n2026-10-23T13:24:06.6335702Z \n2026-10-23T13:24:06.6335947Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6336537Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.\n2026-10-23T13:24:06.6336862Z \n2026-10-23T13:24:06.6337307Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6337778Z   [apply] _tail\n2026-10-23T13:24:06.6337881Z \n2026-10-23T13:24:06.6338124Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6338594Z ⚠ [5/196] Replayed Ps.Syntax.Lexer\n2026-10-23T13:24:06.6339088Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6339417Z \n2026-10-23T13:24:06.6339864Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6340329Z   [apply] _depth\n2026-10-23T13:24:06.6340431Z \n2026-10-23T13:24:06.6340680Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6341281Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.\n2026-10-23T13:24:06.6341611Z \n2026-10-23T13:24:06.6342059Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6342527Z   [apply] _remaining\n2026-10-23T13:24:06.6342642Z \n2026-10-23T13:24:06.6343028Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6343821Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.\n2026-10-23T13:24:06.6344157Z \n2026-10-23T13:24:06.6344606Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6345073Z   [apply] _remaining\n2026-10-23T13:24:06.6345183Z \n2026-10-23T13:24:06.6345429Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6346029Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.\n2026-10-23T13:24:06.6346368Z \n2026-10-23T13:24:06.6346810Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6347278Z   [apply] _charsRev\n2026-10-23T13:24:06.6347385Z \n2026-10-23T13:24:06.6347636Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6348062Z ⚠ [8/196] Replayed Ps.Syntax.ParserState\n2026-10-23T13:24:06.6348592Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.\n2026-10-23T13:24:06.6348939Z \n2026-10-23T13:24:06.6349386Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6349849Z   [apply] _rest\n2026-10-23T13:24:06.6349947Z \n2026-10-23T13:24:06.6350196Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6350592Z ⚠ [20/196] Replayed Ps.Core.Abstract\n2026-10-23T13:24:06.6351196Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6351516Z \n2026-10-23T13:24:06.6351969Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6352435Z   [apply] _depth\n2026-10-23T13:24:06.6352535Z \n2026-10-23T13:24:06.6352783Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6353486Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6353807Z \n2026-10-23T13:24:06.6354251Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6354712Z   [apply] _depth\n2026-10-23T13:24:06.6354813Z \n2026-10-23T13:24:06.6355057Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6355651Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6355971Z \n2026-10-23T13:24:06.6356417Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6356884Z   [apply] _depth\n2026-10-23T13:24:06.6356986Z \n2026-10-23T13:24:06.6357232Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6357819Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6358135Z \n2026-10-23T13:24:06.6358578Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6359046Z   [apply] _depth\n2026-10-23T13:24:06.6359146Z \n2026-10-23T13:24:06.6359396Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6359982Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6360303Z \n2026-10-23T13:24:06.6360854Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6361318Z   [apply] _depth\n2026-10-23T13:24:06.6361422Z \n2026-10-23T13:24:06.6361670Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6362067Z ⚠ [21/196] Replayed Ps.Core.Subst\n2026-10-23T13:24:06.6362542Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:24:06.6362855Z \n2026-10-23T13:24:06.6363415Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6363889Z   [apply] _cutoff\n2026-10-23T13:24:06.6363994Z \n2026-10-23T13:24:06.6364241Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6364828Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:24:06.6365139Z \n2026-10-23T13:24:06.6365583Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6366045Z   [apply] _cutoff\n2026-10-23T13:24:06.6366150Z \n2026-10-23T13:24:06.6366395Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6366971Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:24:06.6367279Z \n2026-10-23T13:24:06.6367726Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6368302Z   [apply] _cutoff\n2026-10-23T13:24:06.6368406Z \n2026-10-23T13:24:06.6368652Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6369232Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:24:06.6369542Z \n2026-10-23T13:24:06.6369989Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6370450Z   [apply] _cutoff\n2026-10-23T13:24:06.6370556Z \n2026-10-23T13:24:06.6370798Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6371397Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.\n2026-10-23T13:24:06.6371703Z \n2026-10-23T13:24:06.6372155Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6372627Z   [apply] _cutoff\n2026-10-23T13:24:06.6372729Z \n2026-10-23T13:24:06.6372969Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6373642Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6373947Z \n2026-10-23T13:24:06.6374393Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6374854Z   [apply] _depth\n2026-10-23T13:24:06.6374958Z \n2026-10-23T13:24:06.6375202Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6375773Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6376082Z \n2026-10-23T13:24:06.6376528Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6376995Z   [apply] _depth\n2026-10-23T13:24:06.6377099Z \n2026-10-23T13:24:06.6377339Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6378015Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6378324Z \n2026-10-23T13:24:06.6378773Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6379235Z   [apply] _depth\n2026-10-23T13:24:06.6379340Z \n2026-10-23T13:24:06.6379580Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6380164Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6380490Z \n2026-10-23T13:24:06.6380947Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6381388Z   [apply] _depth\n2026-10-23T13:24:06.6381483Z \n2026-10-23T13:24:06.6381716Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6382281Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.\n2026-10-23T13:24:06.6382596Z \n2026-10-23T13:24:06.6383050Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6383786Z   [apply] _depth\n2026-10-23T13:24:06.6383940Z \n2026-10-23T13:24:06.6384326Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6385054Z ⚠ [32/196] Replayed Ps.Core.LevelSubst\n2026-10-23T13:24:06.6385896Z warning: packages/core/src/Ps/Core/LevelSubst.lean:8:11: Variable name `arguments` is not explicitly referenced.\n2026-10-23T13:24:06.6386497Z \n2026-10-23T13:24:06.6386791Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6387180Z   [apply] _arguments\n2026-10-23T13:24:06.6387258Z \n2026-10-23T13:24:06.6387426Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6387813Z warning: packages/core/src/Ps/Core/LevelSubst.lean:9:13: Variable name `target` is not explicitly referenced.\n2026-10-23T13:24:06.6388030Z \n2026-10-23T13:24:06.6388313Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6388618Z   [apply] _target\n2026-10-23T13:24:06.6388690Z \n2026-10-23T13:24:06.6388843Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6389125Z ⚠ [33/196] Replayed Ps.Meta.LevelContext\n2026-10-23T13:24:06.6389476Z warning: packages/meta/src/Ps/Meta/LevelContext.lean:59:4: Variable name `assignment` is not explicitly referenced.\n2026-10-23T13:24:06.6389709Z \n2026-10-23T13:24:06.6389998Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6390307Z   [apply] _assignment\n2026-10-23T13:24:06.6390386Z \n2026-10-23T13:24:06.6390543Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6390804Z ⚠ [38/196] Replayed Ps.Meta.Unify\n2026-10-23T13:24:06.6391122Z warning: packages/meta/src/Ps/Meta/Unify.lean:90:11: Variable name `environment` is not explicitly referenced.\n2026-10-23T13:24:06.6391337Z \n2026-10-23T13:24:06.6391617Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6391925Z   [apply] _environment\n2026-10-23T13:24:06.6392006Z \n2026-10-23T13:24:06.6392168Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6392552Z warning: packages/meta/src/Ps/Meta/Unify.lean:91:11: Variable name `localContext` is not explicitly referenced.\n2026-10-23T13:24:06.6392765Z \n2026-10-23T13:24:06.6393275Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6393613Z   [apply] _localContext\n2026-10-23T13:24:06.6393695Z \n2026-10-23T13:24:06.6393853Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6394225Z warning: packages/meta/src/Ps/Meta/Unify.lean:93:11: Variable name `left` is not explicitly referenced.\n2026-10-23T13:24:06.6394430Z \n2026-10-23T13:24:06.6394715Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6395020Z   [apply] _left\n2026-10-23T13:24:06.6395094Z \n2026-10-23T13:24:06.6395249Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6395623Z warning: packages/meta/src/Ps/Meta/Unify.lean:94:11: Variable name `right` is not explicitly referenced.\n2026-10-23T13:24:06.6395826Z \n2026-10-23T13:24:06.6396118Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6396424Z   [apply] _right\n2026-10-23T13:24:06.6396496Z \n2026-10-23T13:24:06.6396652Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6397035Z warning: packages/meta/src/Ps/Meta/Unify.lean:178:17: Variable name `leftName` is not explicitly referenced.\n2026-10-23T13:24:06.6397244Z \n2026-10-23T13:24:06.6397529Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6397837Z   [apply] _leftName\n2026-10-23T13:24:06.6397995Z \n2026-10-23T13:24:06.6398151Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6398533Z warning: packages/meta/src/Ps/Meta/Unify.lean:207:21: Variable name `leftName` is not explicitly referenced.\n2026-10-23T13:24:06.6398750Z \n2026-10-23T13:24:06.6399032Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6399339Z   [apply] _leftName\n2026-10-23T13:24:06.6399411Z \n2026-10-23T13:24:06.6399590Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6399855Z ⚠ [41/196] Replayed Ps.Elab.Literal\n2026-10-23T13:24:06.6400179Z warning: packages/elab/src/Ps/Elab/Literal.lean:166:11: Variable name `chars` is not explicitly referenced.\n2026-10-23T13:24:06.6400421Z \n2026-10-23T13:24:06.6400878Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6401368Z   [apply] _chars\n2026-10-23T13:24:06.6401471Z \n2026-10-23T13:24:06.6401720Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6402343Z warning: packages/elab/src/Ps/Elab/Literal.lean:167:13: Variable name `charsRev` is not explicitly referenced.\n2026-10-23T13:24:06.6402682Z \n2026-10-23T13:24:06.6403236Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6403709Z   [apply] _charsRev\n2026-10-23T13:24:06.6403819Z \n2026-10-23T13:24:06.6404068Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6404474Z ⚠ [42/196] Replayed Ps.Elab.Term\n2026-10-23T13:24:06.6404965Z warning: packages/elab/src/Ps/Elab/Term.lean:2890:11: Variable name `context` is not explicitly referenced.\n2026-10-23T13:24:06.6405290Z \n2026-10-23T13:24:06.6405759Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6406246Z   [apply] _context\n2026-10-23T13:24:06.6406354Z \n2026-10-23T13:24:06.6406704Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6407309Z warning: packages/elab/src/Ps/Elab/Term.lean:2891:13: Variable name `recursion` is not explicitly referenced.\n2026-10-23T13:24:06.6407646Z \n2026-10-23T13:24:06.6408107Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6408588Z   [apply] _recursion\n2026-10-23T13:24:06.6408702Z \n2026-10-23T13:24:06.6408953Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6409553Z warning: packages/elab/src/Ps/Elab/Term.lean:2892:15: Variable name `index` is not explicitly referenced.\n2026-10-23T13:24:06.6409879Z \n2026-10-23T13:24:06.6410341Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6410823Z   [apply] _index\n2026-10-23T13:24:06.6410927Z \n2026-10-23T13:24:06.6411186Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6411597Z ⚠ [47/196] Replayed Ps.Erasure.Expr\n2026-10-23T13:24:06.6412115Z warning: packages/erasure/src/Ps/Erasure/Expr.lean:1083:21: Variable name `name` is not explicitly referenced.\n2026-10-23T13:24:06.6412460Z \n2026-10-23T13:24:06.6412918Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6413487Z   [apply] _name\n2026-10-23T13:24:06.6413593Z \n2026-10-23T13:24:06.6413843Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6414256Z ⚠ [54/196] Replayed Ps.BackendTs.Expr\n2026-10-23T13:24:06.6414915Z warning: packages/backend-ts/src/Ps/BackendTs/Expr.lean:631:32: Variable name `fieldName` is not explicitly referenced.\n2026-10-23T13:24:06.6415291Z \n2026-10-23T13:24:06.6415756Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6416234Z   [apply] _fieldName\n2026-10-23T13:24:06.6416349Z \n2026-10-23T13:24:06.6416601Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6417020Z ⚠ [58/196] Replayed Ps.CompilerIr.Check\n2026-10-23T13:24:06.6417585Z warning: packages/compiler-ir/src/Ps/CompilerIr/Check.lean:690:27: Variable name `scope` is not explicitly referenced.\n2026-10-23T13:24:06.6417950Z \n2026-10-23T13:24:06.6418418Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6418888Z   [apply] _scope\n2026-10-23T13:24:06.6419003Z \n2026-10-23T13:24:06.6419254Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6419683Z ⚠ [79/196] Replayed Ps.BackendRust.Captures\n2026-10-23T13:24:06.6420285Z warning: packages/backend-rust/src/Ps/BackendRust/Captures.lean:38:15: Variable name `captures` is not explicitly referenced.\n2026-10-23T13:24:06.6420671Z \n2026-10-23T13:24:06.6421134Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n2026-10-23T13:24:06.6421608Z   [apply] _captures\n2026-10-23T13:24:06.6421721Z \n2026-10-23T13:24:06.6421968Z Note: This linter can be disabled with `set_option linter.unusedVariables false`\n2026-10-23T13:24:06.6472900Z uncaught exception: PSC1_PROJECT_PARSE_FAILED: packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean: 116:36: expected ')', got 'then'\n2026-10-23T13:24:06.6829950Z ##[error]Process completed with exit code 1.\n2026-10-23T13:24:06.7318986Z ##[group]Run actions/upload-artifact@v4\n2026-10-23T13:24:06.7319154Z with:\n2026-10-23T13:24:06.7319298Z   name: psc1-t01f-hash-generated-producer\n2026-10-23T13:24:06.7319945Z   path: /home/runner/work/_temp/psc1-t01f-generated/\npsc1/dist/expr-v2/integration/kernel.js\npsc1/dist/expr-v2/integration/kernel.ts\npsc1/dist/expr-v2/integration/kernel.d.ts\npsc1/dist/expr-v2/integration/kernel.js.map\npsc1/dist/expr-v2/scalar-hash/\n/home/runner/work/_temp/psc1-scalar-hash-probe.log\n\n2026-10-23T13:24:06.7320559Z   if-no-files-found: error\n2026-10-23T13:24:06.7320697Z   compression-level: 6\n2026-10-23T13:24:06.7320821Z   overwrite: false\n2026-10-23T13:24:06.7320947Z   include-hidden-files: false\n2026-10-23T13:24:06.7321081Z env:\n2026-10-23T13:24:06.7321265Z   PSC0_TSC: /home/runner/work/_temp/psc1-dag-ts/node_modules/typescript/bin/tsc\n2026-10-23T13:24:06.7321483Z ##[endgroup]\n2026-10-23T13:24:06.8348610Z (node:3307) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n2026-10-23T13:24:06.8349904Z (Use `node --trace-deprecation ...` to show where the warning was created)\n2026-10-23T13:24:06.8396147Z Multiple search paths detected. Calculating the least common ancestor of all paths\n2026-10-23T13:24:06.8398277Z The least common ancestor is /home/runner/work. This will be the root directory of the artifact\n2026-10-23T13:24:06.8414382Z ##[error]No files were found with the provided path: /home/runner/work/_temp/psc1-t01f-generated/\npsc1/dist/expr-v2/integration/kernel.js\npsc1/dist/expr-v2/integration/kernel.ts\npsc1/dist/expr-v2/integration/kernel.d.ts\npsc1/dist/expr-v2/integration/kernel.js.map\npsc1/dist/expr-v2/scalar-hash/\n/home/runner/work/_temp/psc1-scalar-hash-probe.log. No artifacts will be uploaded.\n2026-10-23T13:24:06.9211865Z Post job cleanup.\n2026-10-23T13:24:06.9732378Z [command]/usr/bin/git version\n2026-10-23T13:24:06.9762800Z git version 2.55.0\n2026-10-23T13:24:06.9784945Z Temporarily overriding HOME='/home/runner/work/_temp/0e96dcc3-b101-4195-a0e0-ac30edfebb4c' before making global git config changes\n2026-10-23T13:24:06.9785954Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-23T13:24:06.9787979Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel\n2026-10-23T13:24:07.0010488Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-23T13:24:07.0045359Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-23T13:24:07.0260370Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-23T13:24:07.0284201Z http.https://github.com/.extraheader\n2026-10-23T13:24:07.0298721Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader\n2026-10-23T13:24:07.0996830Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-23T13:24:07.1212438Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-23T13:24:07.1243965Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-23T13:24:07.1560294Z Cleaning up orphan processes\n2026-10-23T13:24:07.1754200Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/\n",
+  "actualError": "PSC1_PROJECT_PARSE_FAILED ScalarHash.lean116:36 expected ')' got 'then' from parenthesized if inside Prod.snd",
+  "completeBuildNotStarted": true,
+  "generatedRuntimeSkipped": true,
+  "noJsAssertionsRun": true,
+  "fix": "Same expression in portable top-level let final := if ...; Prod.snd final. No semantic/proof/test/resource changes."
+}

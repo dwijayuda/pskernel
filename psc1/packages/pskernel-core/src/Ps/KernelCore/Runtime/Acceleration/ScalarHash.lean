@@ -112,8 +112,8 @@ def psKernelCacheStringHash
   /- Fuse the public zero-cursor entry; preserve the staged general worker. -/
   let fuel := Nat.succ (String.utf8ByteSize value);
   let paired := psKernelCacheStringHashPairsWithFuel (Nat.div fuel 2) value (Prod.mk 0 0);
-  Prod.snd
-    (if Nat.beq (Nat.mod fuel 2) 0 then
+  let final :=
+    if Nat.beq (Nat.mod fuel 2) 0 then
       paired
     else
       if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst paired)) then
@@ -126,7 +126,8 @@ def psKernelCacheStringHash
             (Nat.add
               (Nat.mul (Prod.snd paired) 31)
               (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst paired)))))
-            psKernelCacheHashModulus))
+            psKernelCacheHashModulus);
+  Prod.snd final
 
 def psKernelCacheNameHash
     (name : PsKernelName) :

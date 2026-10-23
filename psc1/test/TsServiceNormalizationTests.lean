@@ -245,6 +245,44 @@ def psTsSelectedRuntimeSource (module : PsVerifiedIrModule) : String :=
     (if needs.contains "generator-stack" then [psTsStackRuntimeSupport] else []) ++
     (if needs.contains "utf8-byte-index" then [psTsUtf8RuntimeSupport] else []))
 
+def psTsEmitInductiveWithVisibility (isPublic : Bool)
+    (tags : List (String × String))
+    (inductiveInfo : PsVerifiedIrInductive) :
+    Except PsTsEmitError (List String) :=
+  match psTsLookup tags inductiveInfo.name with
+  | Option.none =>
+      Except.error (PsTsEmitError.unknownInductive inductiveInfo.name)
+  | Option.some tag =>
+      match psListMapExcept (psTsEmitConstructorVariant tag) inductiveInfo.constructors with
+      | Except.error error => Except.error error
+      | Except.ok variants =>
+          match psListMapExcept (psTsEmitConstructorValue tag inductiveInfo) inductiveInfo.constructors with
+          | Except.error error => Except.error error
+          | Except.ok constructorValues =>
+              let generic :=
+                psTsGenericNames inductiveInfo.typeParameters;
+              let declarationPrefix :=
+                psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic];
+              -- A leading union separator on a single variant creates a
+              -- one-member TSUnionType which formatters collapse to its member.
+              -- Emit the canonical type shape before the exact AST guard.
+              let typeLine :=
+                match variants with
+                | List.nil => psTsJoin "" [declarationPrefix, " = never;"]
+                | List.cons first rest =>
+                    match rest with
+                    | List.nil => psTsJoin "" [declarationPrefix, " = ", first, ";"]
+                    | List.cons _ _ =>
+                        psTsJoin "" [declarationPrefix, " =\n  | ", psTsJoin "\n  | " variants, ";"];
+              let tagLine := psTsJoin "" ["const ", tag, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", inductiveInfo.name, ".tag"]), ");"];
+              let exportLine := psTsJoin "" [(if isPublic then "export const " else "const "), inductiveInfo.name, " = {"];
+              Except.ok (psTsAppendLines [tagLine, typeLine, exportLine] (psTsAppendLines constructorValues ["} as const;"]))
+
+example (isPublic : Bool) (tags : List (String × String)) (info : PsVerifiedIrInductive) :
+    psTsEmitInductiveWithVisibility isPublic tags info =
+      _root_.psTsEmitInductiveWithVisibility isPublic tags info := by
+  rfl
+
 end PsTsModuleReference
 
 def main : IO Unit := do

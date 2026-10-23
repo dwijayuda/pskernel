@@ -34,7 +34,14 @@ artifact 12468503739 (sha256 549e18247437786702b88164be9bede201491f3a580529d18e6
 TS audit identifies one shorthand constructor at Module:731:20; normalized.
 Rust now uses the existing rustfmt target formatting before cargo, without
 suppressing warnings or changing the 32 MiB/240000 ms resource bounds.
-Next: execute the new manual matrix,
+Read-only diagnostic 39877244232 (af235af31b98d626e28d37a7796cfb7705d04bd9)
+confirms 1935 warnings and no Rust errors in the bounded prior log. The exact
+recorded Cargo lock is now committed (sha256 4d375c97eebc30fce378df900dd76bdd2cb9d82ce7619f50fb7ab3161f8e576d),
+including num-bigint 0.4.6 / num-traits 0.2.19 and checksummed transitives.
+TS audit 39877162580 accepts parsing, then identifies an untyped local match
+in psTsEmitInductiveWithVisibility at 162:1. An explicit String annotation and
+a native definitional-equality proof preserve its exact result. No Rust or TS
+G1/G2/G3 execution is qualified yet. Next: execute the new manual matrix,
 fix target/source blockers as classes, capture exact tool/runtime evidence and
 complete fresh normal qualification after compiler changes.
 

@@ -180,7 +180,7 @@ def psTsEmitInductiveWithVisibility (isPublic : Bool)
               -- A leading union separator on a single variant creates a
               -- one-member TSUnionType which formatters collapse to its member.
               -- Emit the canonical type shape before the exact AST guard.
-              let typeLine :=
+              let typeLine : String :=
                 match variants with
                 | List.nil => psTsJoin "" [declarationPrefix, " = never;"]
                 | List.cons first rest =>

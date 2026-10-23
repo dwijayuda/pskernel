@@ -1461,6 +1461,12 @@ private def get {alpha : Type} (value : Except PsRustEmitError alpha) : IO alpha
   | .ok result => pure result
   | .error error => throw (IO.userError (psRustEmitFailureReason error))
 
+
+private def dropInfo (name : String) : PsVerifiedIrInductive :=
+  .mk name [.mk "A"] [
+    .mk "End" [],
+    .mk "Link" [.mk "payload" (.typeParameter "A"), .mk "rest" (.named name [.typeParameter "A"])]]
+
 def main : IO Unit := do
   let text : PsVerifiedIrParameter := .mk "text" strT
   require "initialized local String qualifies"
@@ -1513,12 +1519,30 @@ def main : IO Unit := do
   let labels := ["scan","order","duplicate","shadow","reserved","renamed","retained"]
   let declarations := forward :: (labels.flatMap fun label =>
     [fixture label ("baseline_" ++ label),fixture label ("moved_" ++ label)])
-  let raw : PsVerifiedIrModule := .mk [] [] [] declarations
+  let raw : PsVerifiedIrModule := .mk [] [] [dropInfo "BaselineChain",dropInfo "DropChain"] declarations
   let validated ← match psStrictValidateModule raw with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_RUST_INVARIANT_IR_INVALID")
   let forwardSource ← get (psRustEmitDeclarationWithVisibility true declarations [] forward)
-  let mut printed : List String := [forwardSource]
+  let baselineSource ← get (psRustEmitInductiveWithVisibility true (dropInfo "BaselineChain"))
+  let privateSource ← get (psRustEmitInductiveWithVisibility false (dropInfo "DropChain"))
+  require "public enum ABI receives no Drop implementation"
+    (!((baselineSource.splitOn " Drop for ").length > 1))
+  require "private regular final-field recursion receives iterative Drop"
+    (((privateSource.splitOn " Drop for ").length > 1))
+  let reversed : PsVerifiedIrInductive := .mk "Reversed" [.mk "A"] [
+    .mk "End" [], .mk "Link" [.mk "rest" (.named "Reversed" [.typeParameter "A"]), .mk "payload" (.typeParameter "A")]]
+  let nonlinear : PsVerifiedIrInductive := .mk "Nonlinear" [] [
+    .mk "End" [], .mk "Fork" [.mk "left" (.named "Nonlinear" []),.mk "right" (.named "Nonlinear" [])]]
+  let noEmpty : PsVerifiedIrInductive := .mk "NoEmpty" [] [
+    .mk "Link" [.mk "rest" (.named "NoEmpty" [])]]
+  require "recursive field before payload retains original drop"
+    (psRustPrivateLinearDrop reversed == "")
+  require "nonlinear recursion retains original drop"
+    (psRustPrivateLinearDrop nonlinear == "")
+  require "no empty sentinel retains original drop"
+    (psRustPrivateLinearDrop noEmpty == "")
+  let mut printed : List String := [forwardSource,baselineSource,privateSource]
   for label in labels do
     for baseline in [true,false] do
       let name := (if baseline then "baseline_" else "moved_") ++ label

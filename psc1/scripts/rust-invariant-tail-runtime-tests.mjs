@@ -3,6 +3,40 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import path fro
 import {buildTarget,observeArtifact,sha} from '../host-tools/generated-target-tools.mjs';
 const root=path.resolve('dist/rust-invariant-tail'),source=fs.readFileSync(path.join(root,'module.rs'),'utf8');
 const consumer=`
+
+#[derive(Clone)]
+struct Probe { id: usize, log: std::rc::Rc<std::cell::RefCell<Vec<usize>>> }
+impl Drop for Probe { fn drop(&mut self) { self.log.borrow_mut().push(self.id); } }
+fn baseline_drop_order(keep_shared: bool) -> Vec<usize> {
+ let log=std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+ let mut node=BaselineChain::<Probe>::End {};
+ for id in (1..64).rev() { node=BaselineChain::Link {
+  payload:std::rc::Rc::new(Probe{id,log:log.clone()}),rest:std::rc::Rc::new(node)}; }
+ let shared=std::rc::Rc::new(node);
+ let root=BaselineChain::Link {payload:std::rc::Rc::new(Probe{id:0,log:log.clone()}),rest:shared.clone()};
+ if keep_shared { drop(root);assert_eq!(*log.borrow(),vec![0]);drop(shared); }
+ else { drop(shared);drop(root); }
+ let observed=log.borrow().clone();observed
+}
+fn iterative_drop_order(keep_shared: bool) -> Vec<usize> {
+ let log=std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+ let mut node=DropChain::<Probe>::End {};
+ for id in (1..64).rev() { node=DropChain::Link {
+  payload:std::rc::Rc::new(Probe{id,log:log.clone()}),rest:std::rc::Rc::new(node)}; }
+ let shared=std::rc::Rc::new(node);
+ let root=DropChain::Link {payload:std::rc::Rc::new(Probe{id:0,log:log.clone()}),rest:shared.clone()};
+ if keep_shared { drop(root);assert_eq!(*log.borrow(),vec![0]);drop(shared); }
+ else { drop(shared);drop(root); }
+ let observed=log.borrow().clone();observed
+}
+for shared in [false,true] {
+ let baseline=baseline_drop_order(shared);let iterative=iterative_drop_order(shared);
+ assert_eq!(baseline,(0..64).collect::<Vec<usize>>());assert_eq!(baseline,iterative);
+}
+let mut deep=DropChain::<char>::End {};
+for _ in 0..500000 {deep=DropChain::Link{payload:std::rc::Rc::new('λ'),rest:std::rc::Rc::new(deep)};}
+drop(deep);
+
 let text = "λ🙂".repeat(10000);
 let start = std::time::Instant::now();
 let baseline = baseline_scan(text.clone(), PsNat::from(100000u32));
@@ -33,6 +67,7 @@ const result=observeArtifact(artifact);assert.equal(result.observation.guards,'p
 const report={schema:'psc1-rust-invariant-tail-runtime/1',commit:process.env.GITHUB_SHA,
  irSha256:sha(fs.readFileSync(path.join(root,'original-ir.json'))),sourceSha256:sha(source),
  artifactSha256:artifact.sha256,processDeadlineMs:240000,...result.observation,event:result.event,
+ privateDropRegression:{deepNodes:500000,sharedTailModes:2,dropOrderLength:64},
  scope:'exact old/current generated Rust; real G2 qualification remains separate'};
 fs.writeFileSync(path.join(root,'runtime.json'),JSON.stringify(report,null,2)+'\n');
 console.log('PSC1_RUST_INVARIANT_RUNTIME: '+JSON.stringify(report));

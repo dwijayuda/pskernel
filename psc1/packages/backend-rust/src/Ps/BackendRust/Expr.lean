@@ -961,7 +961,7 @@ def psRustEmitMatchBindingsPatternWorker
         let current : String :=
           psRustConcat3
             (psRustIdentifier binding.field)
-            ": "
+            ": ref "
             (psRustMatchBindingTemp index);
         match rest with
         | List.nil =>
@@ -990,7 +990,7 @@ def psRustEmitMatchBindingLetsWorker
         psRustConcat4
           "let "
           (psRustIdentifier binding.name)
-          " = (*"
+          " = (**"
           (psRustConcat4
             (psRustMatchBindingTemp index)
             ").clone(); "

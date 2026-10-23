@@ -128,6 +128,92 @@ def psRustEmitConstructorList
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
+
+structure PsRustLinearDropCase where
+  constructorName : String
+  field : String
+
+-- Direct regular recursion must be the final field. Other shapes retain
+-- ordinary destruction. This permits preserving the original field drop order.
+def psRustLinearDropField (info : PsVerifiedIrInductive)
+    (fields : List PsVerifiedIrConstructorField) : Option (Option String) :=
+  match fields with
+  | List.nil => Option.some Option.none
+  | List.cons field rest =>
+      match field.type with
+      | PsVerifiedIrType.named name arguments =>
+          if psStringEq name info.name then
+            if psRustTailSameTypes info.typeParameters arguments && psListIsEmpty rest then
+              Option.some (Option.some field.name)
+            else Option.none
+          else psRustLinearDropField info rest
+      | _ => psRustLinearDropField info rest
+
+def psRustLinearDropCases (info : PsVerifiedIrInductive)
+    (constructors : List PsVerifiedIrConstructor) : Option (List PsRustLinearDropCase) :=
+  match constructors with
+  | List.nil => Option.some List.nil
+  | List.cons constructorInfo rest =>
+      match psRustLinearDropField info constructorInfo.fields with
+      | Option.none => Option.none
+      | Option.some field =>
+          match psRustLinearDropCases info rest with
+          | Option.none => Option.none
+          | Option.some others =>
+              match field with
+              | Option.none => Option.some others
+              | Option.some name =>
+                  Option.some (List.cons (PsRustLinearDropCase.mk constructorInfo.name name) others)
+
+def psRustLinearDropEmpty (constructors : List PsVerifiedIrConstructor) : Option String :=
+  match constructors with
+  | List.nil => Option.none
+  | List.cons constructorInfo rest =>
+      if psListIsEmpty constructorInfo.fields then Option.some constructorInfo.name
+      else psRustLinearDropEmpty rest
+
+def psRustLinearDropCheck (caseInfo : PsRustLinearDropCase) : String :=
+  psRustJoin "" ["Self::", psRustIdentifier caseInfo.constructorName, " { ",
+    psRustIdentifier caseInfo.field,
+    ": __ps_internal_drop_tail, .. } => std::rc::Rc::strong_count(__ps_internal_drop_tail) == 1"]
+
+def psRustLinearDropTake (caseInfo : PsRustLinearDropCase) : String :=
+  psRustJoin "" ["Self::", psRustIdentifier caseInfo.constructorName, " { ",
+    psRustIdentifier caseInfo.field,
+    ": __ps_internal_drop_tail, .. } => Some(std::mem::replace(__ps_internal_drop_tail, std::rc::Rc::clone(&__ps_internal_drop_empty)))"]
+
+-- Private representation only: public enum field types and Rust pattern ABI
+-- stay unchanged. Moving the whole node to an empty variant is safe Rust.
+-- Drop each node before its final recursive field, exactly as derived drop.
+def psRustPrivateLinearDrop (info : PsVerifiedIrInductive) : String :=
+  if psStringEq info.name "Array" then ""
+  else
+    match psRustLinearDropEmpty info.constructors with
+    | Option.none => ""
+    | Option.some empty =>
+        match psRustLinearDropCases info info.constructors with
+        | Option.none => ""
+        | Option.some cases =>
+            if psListIsEmpty cases then ""
+            else
+              let typeArgument : PsVerifiedIrTypeParameter -> PsVerifiedIrType :=
+                fun (parameter : PsVerifiedIrTypeParameter) => PsVerifiedIrType.typeParameter parameter.name;
+              match psRustEmitType (PsVerifiedIrType.named info.name (psListMap typeArgument info.typeParameters)) with
+              | Except.error _ => ""
+              | Except.ok selfType =>
+                  let emptyValue := psRustJoin "" ["Self::", psRustIdentifier empty, " {}"];
+                  psRustJoin "" ["\nimpl", psRustGenericNames info.typeParameters, " Drop for ", selfType,
+                    " { fn drop(&mut self) { let __ps_internal_drop_unique = match self { ",
+                    psRustJoin ", " (psListMap psRustLinearDropCheck cases),
+                    ", _ => false }; if !__ps_internal_drop_unique { return; } ",
+                    "let __ps_internal_drop_empty = std::rc::Rc::new(", emptyValue, "); ",
+                    "let mut __ps_internal_drop_node = std::mem::replace(self, ", emptyValue, "); loop { ",
+                    "let __ps_internal_drop_next = match &mut __ps_internal_drop_node { ",
+                    psRustJoin ", " (psListMap psRustLinearDropTake cases),
+                    ", _ => None }; std::mem::drop(__ps_internal_drop_node); ",
+                    "match __ps_internal_drop_next { Some(__ps_internal_drop_tail) => match std::rc::Rc::try_unwrap(__ps_internal_drop_tail) { ",
+                    "Ok(__ps_internal_drop_value) => { __ps_internal_drop_node = __ps_internal_drop_value; }, Err(_) => break }, None => break } } } }"]
+
 def psRustEmitInductiveWithVisibility (isPublic : Bool)
     (inductiveInfo : PsVerifiedIrInductive) :
     Except PsRustEmitError String :=
@@ -146,7 +232,7 @@ def psRustEmitInductiveWithVisibility (isPublic : Bool)
             " { "
             (psRustJoin ", " printedConstructors)
             " }"
-            ""))
+            (if isPublic then "" else psRustPrivateLinearDrop inductiveInfo)))
 
 def psRustEmitInductive (value : PsVerifiedIrInductive) : Except PsRustEmitError String :=
   psRustEmitInductiveWithVisibility true value

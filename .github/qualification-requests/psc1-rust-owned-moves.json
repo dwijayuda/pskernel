@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "rust-owned-moves-20261023-02",
+  "id": "rust-owned-moves-20261023-03",
   "branch": "fix/psc1-rust-owned-string-moves-20261023",
-  "parentCommit": "b03eeeb03a652e8bcbec5214bfa8b4f34c99b523",
+  "parentCommit": "19d2b71687bc5fb3d3109521ef10dfa47ae7ebe1",
   "targets": [
     "rust"
   ],

@@ -184,14 +184,15 @@ theorem entry_pairs_eq (pairs : Nat) (value : String) (initial : Prod Nat Nat) :
   cases comparison : Nat.ble pairs 4 with
   | false => rfl
   | true =>
-      have bounded : pairs <= 4 := by omega
+      have bounded : pairs <= 4 := Nat.le_of_ble_eq_true comparison
       exact short_pairs_eq pairs value initial bounded
 
 theorem hash_eq_before (value : String) :
     psKernelCacheStringHash value =
       stringHashWorkerBefore (Nat.succ (String.utf8ByteSize value)) value 0 0 := by
   unfold psKernelCacheStringHash
-  rw [entry_pairs_eq]
+  dsimp only
+  simp only [entry_pairs_eq]
   exact congrArg (fun worker => worker value 0 0)
     (worker_eq_before (Nat.succ (String.utf8ByteSize value)))
 

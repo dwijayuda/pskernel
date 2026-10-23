@@ -1,0 +1,805 @@
+{
+  "schema": "psc1-t01f-short-pair-native-elaboration-failure-v1",
+  "sourceSha": "e996075be53951613d3548d6f5591d4a53af9e00",
+  "treeSha": "c233d4bb59f66f404c54fc6a34b59d92d126f859",
+  "runId": "39970749692",
+  "runAttempt": "1",
+  "nativeJobId": 120472453623,
+  "status": "FAIL",
+  "jobs": [
+    {
+      "id": 120472453623,
+      "run_id": 39970749692,
+      "workflow_name": "PSC1 T01F pure short-pair hash entry preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39970749692",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcDLfB9w",
+      "head_sha": "e996075be53951613d3548d6f5591d4a53af9e00",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120472453623",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39970749692/job/120472453623",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-10-23T14:34:13Z",
+      "started_at": "2026-10-23T14:34:16Z",
+      "completed_at": "2026-10-23T14:36:20Z",
+      "name": "native-string",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T14:34:17Z",
+          "completed_at": "2026-10-23T14:34:17Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T14:34:17Z",
+          "completed_at": "2026-10-23T14:34:38Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T14:34:38Z",
+          "completed_at": "2026-10-23T14:34:39Z"
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T14:34:39Z",
+          "completed_at": "2026-10-23T14:34:51Z"
+        },
+        {
+          "name": "Build authentic fixture exporter and retained checker",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T14:34:51Z",
+          "completed_at": "2026-10-23T14:36:15Z"
+        },
+        {
+          "name": "Prove exact scalar hash equivalence and run frozen native matrix",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-10-23T14:36:15Z",
+          "completed_at": "2026-10-23T14:36:17Z"
+        },
+        {
+          "name": "Independently admit actual String declarations and export untrusted inputs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-23T14:36:17Z",
+          "completed_at": "2026-10-23T14:36:17Z"
+        },
+        {
+          "name": "Retain existing minimal String and public DAG controls",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-23T14:36:17Z",
+          "completed_at": "2026-10-23T14:36:17Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T14:36:17Z",
+          "completed_at": "2026-10-23T14:36:18Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-23T14:36:18Z",
+          "completed_at": "2026-10-23T14:36:18Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-23T14:36:18Z",
+          "completed_at": "2026-10-23T14:36:18Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-23T14:36:18Z",
+          "completed_at": "2026-10-23T14:36:18Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120472453623",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027892,
+      "runner_name": "GitHub Actions 1000027892",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120473517398,
+      "run_id": 39970749692,
+      "workflow_name": "PSC1 T01F pure short-pair hash entry preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39970749692",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcDMf9Vg",
+      "head_sha": "e996075be53951613d3548d6f5591d4a53af9e00",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120473517398",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39970749692/job/120473517398",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-10-23T14:36:20Z",
+      "started_at": "2026-10-23T14:36:20Z",
+      "completed_at": "2026-10-23T14:36:20Z",
+      "name": "generated-hash-runtime",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120473517398",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    },
+    {
+      "id": 120473517799,
+      "run_id": 39970749692,
+      "workflow_name": "PSC1 T01F pure short-pair hash entry preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39970749692",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcDMf-5w",
+      "head_sha": "e996075be53951613d3548d6f5591d4a53af9e00",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120473517799",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39970749692/job/120473517799",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-10-23T14:36:20Z",
+      "started_at": "2026-10-23T14:36:20Z",
+      "completed_at": "2026-10-23T14:36:20Z",
+      "name": "generated-string",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120473517799",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    }
+  ],
+  "proofs": [
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_restores_all_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_parent",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_fvar_ineligible",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_extensional",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_preserves",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_extensional",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.append_demands_preserves_order",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.short_pairs_eq",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.entry_pairs_eq",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.pairs_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_succ",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_step_commutes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_fixed",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.scan_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.worker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.hash_eq_before",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "proofCount": 85,
+  "forbiddenReports": [
+    {
+      "name": "PsKernelScalarHashWorkerRegression.entry_pairs_eq",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.hash_eq_before",
+      "axioms": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "artifactInspection": {
+    "artifactId": 12508558972,
+    "zipBytes": 850,
+    "zipSha256": "48628a8ab7fed1cdd793d6d1f3042ed5fe47a4b3a4229da98e7a0155b574def7",
+    "files": [
+      {
+        "path": "scalar-hash-native.log",
+        "bytes": 3180,
+        "sha256": "3edcde441fe998af102f89c146b24f5e6362ea459ffddf2eb20c1f8e31b22bc3"
+      }
+    ]
+  },
+  "nativeFailureSection": "test/PsKernelScalarHashWorkerRegression.lean:187:38: error: omega could not prove the goal:\na possible counterexample may satisfy the constraints\n  a ≥ 5\nwhere\n a := ↑pairs\ntest/PsKernelScalarHashWorkerRegression.lean:194:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  if Nat.ble ?pairs 4 = true then psKernelCacheStringHashShortPairs ?pairs ?value ?initial\n  else psKernelCacheStringHashPairsWithFuel ?pairs ?value ?initial\nin the target expression\n  (have fuel := value.utf8ByteSize.succ;\n    have pairs := fuel.div 2;\n    have paired :=\n      if pairs.ble 4 = true then psKernelCacheStringHashShortPairs pairs value (0, 0)\n      else psKernelCacheStringHashPairsWithFuel pairs value (0, 0);\n    have final :=\n      if (fuel.mod 2).beq 0 = true then paired\n      else\n        if String.Pos.Raw.atEnd value { byteIdx := paired.fst } = true then paired\n        else\n          ((String.Pos.Raw.next value { byteIdx := paired.fst }).byteIdx,\n            ((paired.snd.mul 31).add (String.Internal.get value { byteIdx := paired.fst }).toNat).mod\n              psKernelCacheHashModulus);\n    final.snd) =\n    stringHashWorkerBefore value.utf8ByteSize.succ value 0 0\n\nvalue : String\n⊢ (have fuel := value.utf8ByteSize.succ;\n    have pairs := fuel.div 2;\n    have paired :=\n      if pairs.ble 4 = true then psKernelCacheStringHashShortPairs pairs value (0, 0)\n      else psKernelCacheStringHashPairsWithFuel pairs value (0, 0);\n    have final :=\n      if (fuel.mod 2).beq 0 = true then paired\n      else\n        if String.Pos.Raw.atEnd value { byteIdx := paired.fst } = true then paired\n        else\n          ((String.Pos.Raw.next value { byteIdx := paired.fst }).byteIdx,\n            ((paired.snd.mul 31).add (String.Internal.get value { byteIdx := paired.fst }).toNat).mod\n              psKernelCacheHashModulus);\n    final.snd) =\n    stringHashWorkerBefore value.utf8ByteSize.succ value 0 0\n'PsKernelScalarHashWorkerRegression.short_pairs_eq' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.entry_pairs_eq' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelScalarHashWorkerRegression.pairs_eq_before' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.state_eq_before' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.state_succ' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.state_step_commutes' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.state_fixed' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.scan_eq_before' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.worker_eq_before' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelScalarHashWorkerRegression.hash_eq_before' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n##[error]Process completed with exit code 1.\n",
+  "fix": {
+    "productionUnchanged": true,
+    "theoremStatementsUnchanged": true,
+    "boundedProof": "Use exact pinned Lean Nat.le_of_ble_eq_true comparison rather than expecting omega to interpret Nat.ble.",
+    "entryRewrite": "Reduce only local lets with dsimp only, then simp only [entry_pairs_eq] through every duplicated occurrence before the original exact worker proof.",
+    "primaryLemmaSource": "https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Nat/Basic.lean",
+    "primaryLemmaLine": 123
+  },
+  "acceptance": "short_pairs_eq itself elaborated with only standard axioms; entry_pairs_eq and hash_eq_before have sorryAx after failure and are NOT accepted. No generated build or runtime ran. The next candidate must freshly pass all gates."
+}

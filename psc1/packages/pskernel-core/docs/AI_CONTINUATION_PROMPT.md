@@ -1,4 +1,19 @@
-## Pure short-pair candidate: native and generated acceptance PENDING
+## Short-pair native proof elaboration corrected; fresh gates PENDING
+
+Candidate e996075be53951613d3548d6f5591d4a53af9e00/run39970749692 FAILED
+native job120472453623. The bounded short_pairs_eq theorem elaborated with
+standard axioms, but entry_pairs_eq could not derive the Nat bound from its
+Boolean comparison; hash_eq_before could not rewrite beneath local lets.
+Those two failed reports include sorryAx and are NOT accepted. Generated jobs
+were skipped; no code-generation or runtime acceptance is claimed.
+
+This containing candidate changes ONLY the proof steps: use the exact pinned
+Lean Nat.le_of_ble_eq_true comparison lemma, reduce local lets explicitly,
+then simplify all occurrences of entry_pairs_eq before the original worker
+equality proof. Production, theorem statements, all tests, limits and codegen
+guards remain unchanged. Follow its ONE fresh native-first narrow run.
+Failure evidence/all85 actual reports/one artifact file hash:
+docs/evidence/2026-10-23-t01f-short-pair-native-elaboration-failure.json.
 
 The prior executable0fe60cc69e8d7544acb09025944cbfd3d955f992 FAILED the complete
 mixed runtime at the unchanged25-minute cap. Run39961234382/job120449895373:

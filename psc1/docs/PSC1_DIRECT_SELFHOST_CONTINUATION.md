@@ -16,32 +16,37 @@ The preserved review branch is work/psc1-direct-selfhost-blockers-20261024,
 draft PR175, based on draft PR174/integrationafed7c4b. Do not cancel existing
 qualifications or infer success from elapsed job time.
 
-Snapshot as of2026-10-23 22:24UTC (re-query before acting):
-- Child production foundation9530b5ee, proof/test472f8def, dispatch3b5a9b9a,
-  instrumented comparison82994f858088a2a14e35eaf9ed17b9156ee91cdb.
-  Full focused40032762325/job120684793164 PASSED every earlier proof/runtime/
-  refusal/census gate plus64 call-order/trap cases; registered lookups40→20.
-  Six foundation APIs have retained all-input equalities and100000-element tests.
-- Wasm request487e710069dca55d018f406e32e9f7c4b92f0adf,
-  parentef06b357723b2265759dccb955c1575a1bbb78bf, run40031965458,
-  job120682317187 executes that foundation fix. Later JS-only changes leave
-  its98-module closure unchanged.
-- Prior JS85433830/run40027650302 completedG1 but G2 hit1800227ms/3132516KiB;
-  noG3/fixedpoint. Actual retained profile40031550466 confirms lazy getters and
-  StringEqual0.1% sampled ticks; direct driver dispatch is the next actual experiment.
-- Prior Wasmbef0e260/run40028857732 completedG1 but G2 stack829660ms/1023424KiB
-  mapped to psListLength$spec$PsWasmStructType by read-only40030902621.
-- Parent full40027662328 PASSED, final gate120680396390/Linux120672846738:
-  37/37,0 blocked,releaseReady=true,all seven,both grammars,apps and packages.
-  Merge34d29e215ea568466dcbc96b14b5e10b2dddb438 and head85433830 have identical
-  tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
-- The next single-commit request selectsJS on the latest verified child.
-  Normal full CI will qualify the review-branch fast-forward separately.
-  Multi-commit ref integrations skip the request job; actual single-commit
-  requests retain every exact path/parent/branch/profile guard.
+Snapshot as of2026-10-23 22:39UTC (re-query before acting):
+- Childc115c65732ea1bf78aba263658e9ab804e116822 fixes the main Wasm
+  lower-expression prefix. Focused40034701526/job120691199253 PASSED:
+  52 all-input prefix equalities;464 owned Wasm definitions scanned with no
+  unsafe prefix; actual retained original rejected; million-fuel early result
+  and exact zero-fuel refusal; both87/98-module .lean/.ps and all earlier tests.
+- Last Wasm487e7100/run40031965458 completed independently admittedG1/ten
+  cases, then G2 stack666386ms/1026060KiB. Exact retained map40033860834
+  identifies repeated2286 as psWasmLowerExprWorker. Its335-character type
+  exceeded the old guard180-character bound; the recursive binding still
+  preceded all four inputs. c115c657 fixes placement, no resource/fuel change.
+- JS request8d7a5dc5488e872c0f81b5f848fd6b44d3654456, parent844f8c3b,
+  run40033515365/job120687475727 is executing actual generations on verified
+  direct-dispatch source82994f85. Later Wasm-only edits leave its closure
+  unchanged. Do not duplicate/cancel that request.
+- Prior JS85433830/run40027650302 completedG1 but G2 hit1800227ms/3132516KiB.
+  Retained profile40031550466 confirms6 lazy getters and StringEqual0.1%
+  sampled ticks; direct dispatch removes helper generators and duplicate
+  lookups, with64 order/trap cases and40→20 instrumented lookups.
+- Review branch/draft175 was non-force fast-forwarded to8d7a5dc5 after the
+  prior full gate completed. New full40033570924 is active; focused40033565233
+  passed. Request workflow40033565129 correctly skipped multi-commit ref
+  integration. Keep review stable until that full run ends.
+- Preserved parent85433830/full40027662328 PASSED37/37,all seven/both
+  grammars/apps/packages,tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
+  Changed compiler source requires its own full qualification.
+- Next request selects onlyWasm on the latest child after this passing gate.
+  Check the remote manifest/run first: it may already have been dispatched.
 - Neither direct target has a terminal qualifiedG2/G3 fixed point yet.
 
-1. Re-query those three runs. If still active, continue waiting without
+1. Re-query the actual JS run, latest child Wasm request/run and review full CI. If still active, continue waiting without
    dispatching duplicates. If completed, inspect the actual job log and immutable
    artifact metadata; record exact source closure, request/service/source/binary
    identities, G2/G3 elapsed times, Linux wait4 RSS and sampled process-tree RSS,
@@ -59,7 +64,7 @@ Snapshot as of2026-10-23 22:24UTC (re-query before acting):
    criteria, rather than raising stack/fuel/heap/deadline limits.
 
 3. Preserve all current proofs and regressions. In particular:
-   - Wasm delayed-prefix guard plus51 all-input equalities.
+   - Wasm owned-closure prefix guard plus52 all-input equalities, including the main lower-expression worker.
    - Ordinary accumulator/public API equality and exact canonical ordering.
    - Checked collector/lookup/normalization equality and rightmost-error priority.
    - Erasure generic right-fold and three complete index API equalities,

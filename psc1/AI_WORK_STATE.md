@@ -1,6 +1,6 @@
 # PSC1 AI work state
 
-Updated2026-10-24 Asia/Jakarta (2026-10-23 22:38UTC).
+Updated2026-10-24 Asia/Jakarta (2026-10-23 22:39UTC).
 Use connected GitHub tools and Linux Actions only; fresh expected-HEAD,
 non-force updates. No PR merge or npm release authorized.
 Practical Core v1 remains14 families/37 finite criteria.
@@ -14,9 +14,11 @@ owns immutable attempts/measurements. The complete prior work-state history is
 Childc115c65732ea1bf78aba263658e9ab804e116822 moves the main Wasm
 lower-expression worker recursive prefix under all four dynamic inputs. Retained
 all-input equality, million-fuel early result, exact zero-fuel refusal and an
-owned Wasm closure scan are under validation in40034701526/job120691199253.
-The guard must reject the exact original long-annotation definition too.
-No generated-execution improvement is claimed before the next qualification.
+owned Wasm closure scan PASSED40034701526/job120691199253. All52 worker
+equalities passed,464 owned Wasm definitions scanned with no unsafe prefix,
+and the exact retained original was rejected. Both87/98-module .lean/.ps
+censuses and all prior proof/runtime/refusal gates passed. Next is actual Wasm
+execution; source tests alone do not qualifyG2/G3.
 
 ## Verified implementation checkpoint
 

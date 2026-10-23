@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 22:38:00 UTC",
+  "recordedAtUtc": "2026-10-23 22:39:00 UTC",
   "localDate": "2026-10-24",
-  "status": "wasm-lower-expression-prefix-fix-under-focused-validation-js-generations-running",
+  "status": "wasm-lower-expression-prefix-proof-runtime-census-passed-ready-generated-execution",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -253,29 +253,18 @@
     }
   },
   "focusedGate": {
-    "commit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
-    "productionDispatchCommit": "3b5a9b9ad16ad3d400f28c50377962609092ee76",
-    "runId": 40032762325,
-    "jobId": 120684793164,
+    "commit": "c115c65732ea1bf78aba263658e9ab804e116822",
+    "runId": 40034701526,
+    "jobId": 120691199253,
     "status": "passed",
-    "foundationApiEqualities": 6,
-    "foundationSmokeSize": 100000,
-    "erasureApiEqualities": 3,
-    "genericErasureFoldEquality": true,
-    "checkedSpineEqualities": 3,
-    "ordinaryWorkerEquality": true,
-    "prefixEqualities": 51,
-    "containsSorry": false,
-    "dispatchComparisons": 64,
-    "registeredCallLookups": {
-      "retained": 40,
-      "current": 20
-    },
-    "delegatedSites": {
-      "retained": 35,
-      "current": 0
-    },
-    "allPriorRuntimeAndRefusalGates": "passed",
+    "newAllInputLowerExprEquality": true,
+    "prefixEqualities": 52,
+    "ownedWasmDefinitionsScanned": 464,
+    "unsafePrefixes": [],
+    "retainedOriginalRejected": true,
+    "nativeEarlyResultFuel": 1000000,
+    "exactZeroFuelRefusal": true,
+    "allPriorProofRuntimeRefusalGates": "passed",
     "sourceCensus": {
       "js": 87,
       "wasm": 98,
@@ -407,38 +396,37 @@
     ]
   },
   "previousFocusedGate": {
-    "commit": "82b270632beb1df34b65605877eeec3bf940f232",
-    "runId": 40020188747,
+    "commit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
+    "productionDispatchCommit": "3b5a9b9ad16ad3d400f28c50377962609092ee76",
+    "runId": 40032762325,
+    "jobId": 120684793164,
     "status": "passed",
-    "nativeLean": {
-      "recursiveWorkerEqualities": 48,
-      "byteModulusAndRangeProofs": 2,
-      "allInputJsNameVisitorEquality": true,
-      "containsSorry": false
+    "foundationApiEqualities": 6,
+    "foundationSmokeSize": 100000,
+    "erasureApiEqualities": 3,
+    "genericErasureFoldEquality": true,
+    "checkedSpineEqualities": 3,
+    "ordinaryWorkerEquality": true,
+    "prefixEqualities": 51,
+    "containsSorry": false,
+    "dispatchComparisons": 64,
+    "registeredCallLookups": {
+      "retained": 40,
+      "current": 20
     },
-    "actualRuntime": {
-      "jsRetainedRuntimeComparisons": 7540,
-      "jsNativeAndRetainedEmitterComparisons": 780,
-      "nativeReferenceRows": 65,
-      "deepTailCalls": 100000,
-      "deepNonTailCalls": 30000,
-      "valueAndFunctionCaptures": true,
-      "aliasFreshnessFuelRefusals": true,
-      "all96WasmOpcodeComparisons": true,
-      "actualOwnedWasmEngine": true,
-      "arbitraryNatIntGcRoundTrips": true,
-      "importRefusals": true
+    "delegatedSites": {
+      "retained": 35,
+      "current": 0
     },
+    "allPriorRuntimeAndRefusalGates": "passed",
     "sourceCensus": {
-      "lean": {
-        "js": 87,
-        "wasm": 98
-      },
-      "ps": {
-        "js": 87,
-        "wasm": 98
-      },
-      "allAccepted": true
+      "js": 87,
+      "wasm": 98,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "refused": []
     }
   },
   "completedAttempts": [
@@ -1018,6 +1006,29 @@
         "refused": []
       },
       "allPriorRuntimeAndRefusalGates": "passed"
+    },
+    {
+      "commit": "c115c65732ea1bf78aba263658e9ab804e116822",
+      "runId": 40034701526,
+      "jobId": 120691199253,
+      "status": "passed",
+      "newAllInputLowerExprEquality": true,
+      "prefixEqualities": 52,
+      "ownedWasmDefinitionsScanned": 464,
+      "unsafePrefixes": [],
+      "retainedOriginalRejected": true,
+      "nativeEarlyResultFuel": 1000000,
+      "exactZeroFuelRefusal": true,
+      "allPriorProofRuntimeRefusalGates": "passed",
+      "sourceCensus": {
+        "js": 87,
+        "wasm": 98,
+        "grammars": [
+          "lean",
+          "ps"
+        ],
+        "refused": []
+      }
     }
   ],
   "nextRequestedTarget": "wasm-core",
@@ -1743,11 +1754,5 @@
     },
     "scope": "85433830 tree only; subsequent child source needs full CI"
   },
-  "pendingFocusedGate": {
-    "commit": "c115c65732ea1bf78aba263658e9ab804e116822",
-    "runId": 40034701526,
-    "jobId": 120691199253,
-    "status": "in_progress",
-    "change": "Delay main Wasm lower-expression worker recursive prefix under all four inputs; retained all-input Lean equality; owned closure source guard rejects original 335-character type annotation."
-  }
+  "pendingFocusedGate": null
 }

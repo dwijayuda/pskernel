@@ -1,6 +1,6 @@
 {
   "schema": "psc1-t01f-final-qualification-active-v1",
-  "recordedAt": "2026-10-23T00:40:05.945Z",
+  "recordedAt": "2026-10-23T00:46:13.433Z",
   "executableSource": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
   "harnessSource": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
   "sourceTree": "a8db2401141bc73a00dfb169c9b3f45b6f499dae",
@@ -17,37 +17,43 @@
           "id": 120172865111,
           "name": "generated-js-full-checker-bridge",
           "status": "in_progress",
-          "conclusion": null
+          "conclusion": null,
+          "currentStep": "Build complete real PSC1 compiler and check combined research entry"
         },
         {
           "id": 120172865303,
           "name": "portable-ps-closure",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
         },
         {
           "id": 120172865308,
           "name": "portable-v2-check",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
         },
         {
           "id": 120172865309,
           "name": "whnf-subset-regression",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
         },
         {
           "id": 120172865389,
           "name": "full-checker-bridge",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
         },
         {
           "id": 120172865432,
           "name": "expr-v2-differential",
-          "status": "queued",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
         }
       ]
     },
@@ -60,14 +66,16 @@
         {
           "id": 120172865344,
           "name": "native-dag-integration",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
         },
         {
           "id": 120172865519,
           "name": "generated-dag-integration",
           "status": "in_progress",
-          "conclusion": null
+          "conclusion": null,
+          "currentStep": "Build authentic PSC1 and check complete kernel source"
         }
       ]
     },
@@ -81,7 +89,8 @@
           "id": 120172865376,
           "name": "authentic-timeout-diagnostics",
           "status": "in_progress",
-          "conclusion": null
+          "conclusion": null,
+          "currentStep": "Build authentic compiler and complete canonical source closure"
         }
       ]
     },
@@ -94,8 +103,16 @@
         {
           "id": 120172865174,
           "name": "official-arena-reference",
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
+        },
+        {
+          "id": 120173469604,
+          "name": "generated-arena-comparison",
           "status": "in_progress",
-          "conclusion": null
+          "conclusion": null,
+          "currentStep": "Reconstruct and check the complete canonical kernel closure"
         }
       ]
     },
@@ -109,17 +126,57 @@
           "id": 120172865185,
           "name": "psc1-portability",
           "status": "in_progress",
-          "conclusion": null
+          "conclusion": null,
+          "currentStep": "Check complete kernel source closure using PSC1"
         },
         {
           "id": 120172865463,
           "name": "native-kernel",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success",
+          "currentStep": null
         }
       ]
     }
   ],
+  "scopedNativeEvidence": "evidence/2026-10-23-t01f-final-source-native.json",
+  "officialArena": {
+    "total": 193,
+    "accepted": 122,
+    "rejected": 71,
+    "complete": true,
+    "conclusion": "success",
+    "independentKernelQualified": false,
+    "jobId": 120172865174,
+    "artifact": {
+      "id": 12469568855,
+      "name": "psc1-arena435-official-reference",
+      "size_in_bytes": 114866,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12469568855",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12469568855/zip",
+      "expired": false,
+      "created_at": "2026-10-23T00:41:14Z",
+      "expires_at": "2026-11-22T00:41:13Z",
+      "updated_at": "2026-10-23T00:41:14Z",
+      "digest": "sha256:4bebb5ac8cc78398ac93f4b03421dd472709442957973817235f21ce016fc5d7",
+      "workflow_run": {
+        "id": 39879401452,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849"
+      }
+    }
+  },
+  "preflight": {
+    "source": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
+    "runId": 39873570107,
+    "conclusion": "success",
+    "mixedAssertions": 1400,
+    "wallSeconds": 1455.04,
+    "peakRssKiB": 1165840,
+    "fullBothRouteMatrixQualified": false
+  },
   "firstActivation": {
     "source": "fad56ef8e983c78cb0c6209975d6e1a9f2300fdb",
     "state": "unqualified_static_canonical_manifest_defect",
@@ -151,24 +208,11 @@
       }
     ]
   },
-  "preflight": {
-    "source": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
-    "runId": 39873570107,
-    "conclusion": "success",
-    "fullBothRouteMatrixQualified": false
+  "boundaries": {
+    "A": "Historical scoped9c87 PASS; current-source final A/T01F OPEN.",
+    "B": "OPEN: V1 admission/recursive metadata/eager decode/four whole-operation fallbacks.",
+    "C": "Historical full193 FAIL:173 semantic matches,2 separate safety agreements,17timeouts,1Church resource exhaustion,0unsupported. Current independent result pending.",
+    "D": "OPEN: controlled performance and broad soundness/refinement/backend preservation; retain regressions."
   },
-  "limits": {
-    "fuel": 4096,
-    "nodeOldSpaceMiB": 2048,
-    "emptyRuntimePATH": true,
-    "shardsPerRoute": 6,
-    "shardMinutes": 25,
-    "shardMaxParallel": 2,
-    "ownerWorkers": 32,
-    "validatedOwnerCalls": 384,
-    "arenaCases": 193,
-    "arenaSecondsPerCase": 60,
-    "arenaWorkers": 2
-  },
-  "integrationAuthorizedOnlyAfterRequiredQualification": true
+  "nextTask": "Follow these existing exact-source runs to terminal results; require both six-shard aggregates and all retained gates before T01F acceptance or any integration. No T05 before T01F."
 }

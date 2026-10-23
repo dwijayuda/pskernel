@@ -1,0 +1,3515 @@
+{
+  "schema": "psc1-t01f-final-source-native-qualification-v1",
+  "recordedAt": "2026-10-23T00:46:13.431Z",
+  "sourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+  "harnessSourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+  "sourceTree": "a8db2401141bc73a00dfb169c9b3f45b6f499dae",
+  "runId": 39879401423,
+  "runAttempt": 1,
+  "jobId": 120172865344,
+  "conclusion": "success",
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/39879401423/job/120172865344",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-node@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install pinned Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compile complete checker with checked DAG input",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check invalid recursor-headed occurrence against official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run native DAG semantics, adversarial, fuel and official comparison",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check inference-only semantics and checked-cache separation",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check DAG proof irrelevance against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check ordered DAG Nat DefEq against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check ordered DAG lazy delta DefEq against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check ordered DAG full-shape and residual DefEq against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check ordered DAG terminal DefEq against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check DAG admission guards against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check DAG Quot reduction against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check generated recursor ownership and DAG non-K iota against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check authoritative new-prefix mutual and nested owners",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check actual String declarations and export source-bound T01F inputs",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check DAG K conversion against V1 and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check exact name and string comparison workers",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check checked Quot declaration owner installation",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check complete DAG checker state and callback ownership",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check DAG transformation semantics and sharing",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check local metadata and cache-scope theorems",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compare exact provider fixtures with official Lean 4.35",
+      "conclusion": "success"
+    },
+    {
+      "name": "Exercise the native checked batch provider in a detached process",
+      "conclusion": "success"
+    },
+    {
+      "name": "Measure complete native checks against original and official Lean",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-node@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "proofs": [
+    {
+      "name": "PsKernelExprV2MetadataProofs.app_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.lam_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.forall_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.let_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.mdata_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.proj_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_restores_all_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_parent",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_fvar_ineligible",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_extensional",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_preserves",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_extensional",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNatFuelProofs.NatGcdWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNatFuelProofs.NatHeapWordCountWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNatFuelProofs.NatPowWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNatFuelProofs.NatBitwiseWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNatFuelProofs.NatShiftRightWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprEqualityProofs.exprEq_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprEqualityProofs.exprEqual_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprEqualityProofs.exprEq_pointwise_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprEqualityProofs.exprEqual_pointwise_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.ReduceRecursorBoundedWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.IsDefEqWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.WhnfWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.WhnfCoreWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.WhnfCoreWithFuel_full_mode_preserves_historical",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.InferCoreWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.InferAppOnlyLoopWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.DefEqLazyReductionWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.DefEqLazyProjReductionWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.DefEqArgsWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.DefEqLambdaSpineWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.DefEqForallSpineWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.DefEqCompareExprListsWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.WhnfCountLambdasWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelKnotFuelProofs.StringConstructorDataWithFuel_delayed_recursion_preserves",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.id_member_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.bucket_set_same",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.inserted_id_is_found",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.hit_requires_exact_id",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.empty_owner_has_no_hits",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.first_undef_kept",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.first_undef_from_next",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.expression_mvar_implies_full_mvar",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.sort_universe_mvar_precedes_param",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.constant_universe_mvar_precedes_param",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.free_variable_precedes_undefined_param",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.finish_matches_reference",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.scan_zero_precedes_memo",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.validated_root_expression_mvar",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.canonical_guard_matches_reference_conditionally",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.checked_boundary_preserves_validation_error",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.header_existing_name_precedes_arena",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2AdmissionGuardProofs.header_duplicate_params_precedes_arena",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_type_reuses_current_command_ref",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_prefix_empty",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_prefix_stops_at_old_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_prefix_first_import_error",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_prefix_threads_complete_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_import_error_prevents_batch_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_late_command_error_prevents_batch_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.check_uses_input_namespace",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.whnf_uses_input_namespace",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.defeq_left_uses_input_namespace_first",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.admission_uses_input_namespace",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_finish_synchronizes_append",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.generated_finish_refuses_wrong_root",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.no_owner_from_empty_batch",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.insufficient_fields_precede_owner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.wrong_universe_arity_precedes_owner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.missing_owner_never_claims_reduction",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.K_refuses_before_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.constructor_skips_major_callback",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.nonconstructor_callback_error_precedes_normalization",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorProofs.recursor_zero_before_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.append_demands_preserves_order",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.major_family_zero_precedes_root",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.structure_fields_zero_preserves_arena",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.no_type_owner_in_empty_index",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.constructor_shortcut_precedes_owner_and_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.missing_family_owner_declines",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.non_structure_major_is_supported_unchanged",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.structure_inference_decline_preserved",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.structure_inference_error_precedes_type_whnf",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.string_uses_public_callback_after_exact_construction",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorMajorProofs.is_prop_retains_complete_last_callback_state",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorKProofs.inferNone",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorKProofs.inferError",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorKProofs.whnfNone",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorKProofs.whnfError",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorKProofs.candidateDecisionRetainsFullState",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2RecursorKProofs.candidateFalseRetainsFullState",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.raw_worker_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.raw_public_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.string_public_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.name_worker_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.name_public_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.raw_partial_application_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.name_partial_application_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelNameWorkerProofs.raw_zero_fuel_exact",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.kind_reflexive",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.quotient_kind_matches_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.quotient_kind_refuses_axiom",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.find_missing",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.find_wrong_kind",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.plan_uninitialized",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.plan_missing_first",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.plan_incomplete_last",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.plan_complete",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.owner_missing",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.owner_delta_refused",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.owner_type_error_refused",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.owner_type_exact_comparison",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.install_missing_plan",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.install_existing_plan",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.install_incomplete_owners",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.quotient_info_imports_only_header",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.quotient_command_uses_checked_plan",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.quotient_previous_command_uses_checked_plan",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.private_check_reference_stays_invalid",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2QuotOwnerProofs.private_whnf_reference_stays_invalid",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2WhnfABIProofs.core_wrapper_keeps_exact_operation",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2WhnfABIProofs.public_wrapper_keeps_exact_operation",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.lift_success_preserves_six_outer_fields",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.optional_lift_success_preserves_six_outer_fields",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.lower_lift_identity",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.optional_lower_lift_identity",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.lift_decline_and_error_preserved",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.owned_core_zero_precedes_callbacks_and_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.owned_public_zero_precedes_callbacks_and_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.owned_recursor_zero_precedes_callbacks_and_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.owned_inference_zero_precedes_callbacks_and_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.owned_defeq_zero_precedes_syntax_and_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_sort_keeps_complete_returned_owner",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_sort_decline_precedes_lookup",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_sort_error_precedes_lookup",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_prop_keeps_both_callback_owners",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_prop_inference_decline_precedes_whnf",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_prop_inference_error_precedes_whnf",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_prop_whnf_decline_keeps_order",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_prop_whnf_error_keeps_order",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.full_state_whnf_zero_precedes_syntax_and_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_sort_zero_precedes_syntactic_sort",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2OwnedStateProofs.admission_prop_zero_preserves_inference_failure",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_step_commutes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_fixed",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.scan_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.worker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.hash_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "proofReports": 219,
+  "axiomFreeReports": 27,
+  "allowedAxiomUnion": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "provenance": {
+    "schema": "psc1-t01f-source-provenance-v1",
+    "sourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+    "runId": "39879401423",
+    "runAttempt": "1",
+    "job": "native-dag-integration",
+    "route": "native",
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "v22.23.3",
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": null,
+    "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "kernel": {
+      "bytes": 120691144,
+      "sha256": "645ad3ce6c30e92500f880050ae187af004364172abcde1402f634dc31360593"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "generatedRunner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    }
+  },
+  "markers": [
+    "PSC1_CACHE_MODE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d",
+    "PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls",
+    "PSC1_INVALID_OCCURRENCE_PARENT_REPRODUCED: PASS source=3aa077cb64ff06f76727decd01c43ad6c33f351d",
+    "PSC1_INVALID_RECURSOR_OCCURRENCE_ORACLE: PASS stuck/reducible/nonrecursive/erased/unsafe controls",
+    "PSC1_INVALID_RECURSOR_OCCURRENCE: PASS invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls",
+    "PSC1_V2_DAG_NATIVE_NESTED_OUTCOMES: PASS",
+    "PSC1_V2_DAG_NATIVE_INFERENCE: PASS",
+    "PSC1_V2_DAG_NATIVE_WHNF_IDENTITY: PASS",
+    "PSC1_V2_DAG_NATIVE_ZETA: PASS",
+    "PSC1_V2_DAG_NATIVE_BETA: PASS",
+    "PSC1_V2_DAG_NATIVE_WHNF_STATE: PASS",
+    "PSC1_V2_DAG_NATIVE_PUBLIC_CACHE: PASS",
+    "PSC1_V2_DAG_NATIVE_PROJECTION_UNSELECTED_FIELD: PASS",
+    "PSC1_V2_DAG_NATIVE_OFFICIAL_NAT: PASS",
+    "PSC1_V2_DAG_NATIVE_NAT_PROJECTION: PASS",
+    "PSC1_V2_DAG_STRUCTURAL_SHORTCUT: PASS",
+    "PSC1_V2_DAG_OFFICIAL_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS",
+    "PSC1_V2_DAG_NATIVE_CONSTANT_INDEX: PASS",
+    "PSC1_V2_DAG_NATIVE_DELTA: PASS",
+    "PSC1_V2_DAG_NATIVE_MUTUAL_INDEX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_BINDER: PASS",
+    "PSC1_V2_DAG_BINDER: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_APP: PASS",
+    "PSC1_V2_DAG_CHECK_APP: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_CHECK_LET: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_LET: PASS",
+    "PSC1_V2_DAG_LET_CACHE_SCOPE: PASS",
+    "PSC1_V2_DAG_LET_LOCAL_WHNF: PASS",
+    "PSC1_V2_DAG_STATEFUL_DEFEQ: PASS",
+    "PSC1_V2_DAG_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_APP_CONVERSION_CACHE: PASS",
+    "PSC1_V2_DAG_APP_EAGER_CONTEXT: PASS",
+    "PSC1_V2_DAG_OFFICIAL_SIMPLE_ADMISSION: PASS",
+    "PSC1_V2_DAG_SIMPLE_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_ADMISSION_SHARED_STATE: PASS",
+    "PSC1_V2_DAG_UNSAFE_FRESH_BODY: PASS",
+    "PSC1_V2_DAG_ADMISSION_POLICY_SAFETY: PASS",
+    "PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS",
+    "PSC1_V2_DAG_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS",
+    "PSC1_V2_DAG_THEOREM_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_THEOREM_ADMISSION: PASS",
+    "PSC1_V2_DAG_THEOREM_ISPROP_STATE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_OFFICIAL_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_BUDGET: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_CACHE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS",
+    "PSC1_V2_DAG_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_CHEAP_CORE_POLICY: PASS",
+    "PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS",
+    "PSC1_V2_DAG_DEFEQ_REFLECTION: PASS",
+    "PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS",
+    "PSC1_V2_DAG_OFFICIAL_LEAN: PASS",
+    "PSC1_V2_DAG_REGRESSION: PASS",
+    "PSC1_EXPR_V2_PASS constructor-bvar",
+    "PSC1_EXPR_V2_PASS import-bvar-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-bvar-roundtrip",
+    "PSC1_EXPR_V2_PASS import-bvar-hash",
+    "PSC1_EXPR_V2_PASS import-bvar-loose",
+    "PSC1_EXPR_V2_PASS import-bvar-depth",
+    "PSC1_EXPR_V2_PASS import-bvar-fvar",
+    "PSC1_EXPR_V2_PASS import-bvar-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-fvar",
+    "PSC1_EXPR_V2_PASS import-fvar-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-fvar-roundtrip",
+    "PSC1_EXPR_V2_PASS import-fvar-hash",
+    "PSC1_EXPR_V2_PASS import-fvar-loose",
+    "PSC1_EXPR_V2_PASS import-fvar-depth",
+    "PSC1_EXPR_V2_PASS import-fvar-fvar",
+    "PSC1_EXPR_V2_PASS import-fvar-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-mvar",
+    "PSC1_EXPR_V2_PASS import-mvar-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-mvar-roundtrip",
+    "PSC1_EXPR_V2_PASS import-mvar-hash",
+    "PSC1_EXPR_V2_PASS import-mvar-loose",
+    "PSC1_EXPR_V2_PASS import-mvar-depth",
+    "PSC1_EXPR_V2_PASS import-mvar-fvar",
+    "PSC1_EXPR_V2_PASS import-mvar-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-sort",
+    "PSC1_EXPR_V2_PASS import-sort-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-sort-roundtrip",
+    "PSC1_EXPR_V2_PASS import-sort-hash",
+    "PSC1_EXPR_V2_PASS import-sort-loose",
+    "PSC1_EXPR_V2_PASS import-sort-depth",
+    "PSC1_EXPR_V2_PASS import-sort-fvar",
+    "PSC1_EXPR_V2_PASS import-sort-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-const",
+    "PSC1_EXPR_V2_PASS import-const-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-const-roundtrip",
+    "PSC1_EXPR_V2_PASS import-const-hash",
+    "PSC1_EXPR_V2_PASS import-const-loose",
+    "PSC1_EXPR_V2_PASS import-const-depth",
+    "PSC1_EXPR_V2_PASS import-const-fvar",
+    "PSC1_EXPR_V2_PASS import-const-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-nat-lit",
+    "PSC1_EXPR_V2_PASS import-nat-lit-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-nat-lit-roundtrip",
+    "PSC1_EXPR_V2_PASS import-nat-lit-hash",
+    "PSC1_EXPR_V2_PASS import-nat-lit-loose",
+    "PSC1_EXPR_V2_PASS import-nat-lit-depth",
+    "PSC1_EXPR_V2_PASS import-nat-lit-fvar",
+    "PSC1_EXPR_V2_PASS import-nat-lit-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-string-lit",
+    "PSC1_EXPR_V2_PASS import-string-lit-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-string-lit-roundtrip",
+    "PSC1_EXPR_V2_PASS import-string-lit-hash",
+    "PSC1_EXPR_V2_PASS import-string-lit-loose",
+    "PSC1_EXPR_V2_PASS import-string-lit-depth",
+    "PSC1_EXPR_V2_PASS import-string-lit-fvar",
+    "PSC1_EXPR_V2_PASS import-string-lit-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-app",
+    "PSC1_EXPR_V2_PASS import-app-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-app-roundtrip",
+    "PSC1_EXPR_V2_PASS import-app-hash",
+    "PSC1_EXPR_V2_PASS import-app-loose",
+    "PSC1_EXPR_V2_PASS import-app-depth",
+    "PSC1_EXPR_V2_PASS import-app-fvar",
+    "PSC1_EXPR_V2_PASS import-app-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-lambda",
+    "PSC1_EXPR_V2_PASS import-lambda-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-lambda-roundtrip",
+    "PSC1_EXPR_V2_PASS import-lambda-hash",
+    "PSC1_EXPR_V2_PASS import-lambda-loose",
+    "PSC1_EXPR_V2_PASS import-lambda-depth",
+    "PSC1_EXPR_V2_PASS import-lambda-fvar",
+    "PSC1_EXPR_V2_PASS import-lambda-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-forall",
+    "PSC1_EXPR_V2_PASS import-forall-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-forall-roundtrip",
+    "PSC1_EXPR_V2_PASS import-forall-hash",
+    "PSC1_EXPR_V2_PASS import-forall-loose",
+    "PSC1_EXPR_V2_PASS import-forall-depth",
+    "PSC1_EXPR_V2_PASS import-forall-fvar",
+    "PSC1_EXPR_V2_PASS import-forall-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-let",
+    "PSC1_EXPR_V2_PASS import-let-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-let-roundtrip",
+    "PSC1_EXPR_V2_PASS import-let-hash",
+    "PSC1_EXPR_V2_PASS import-let-loose",
+    "PSC1_EXPR_V2_PASS import-let-depth",
+    "PSC1_EXPR_V2_PASS import-let-fvar",
+    "PSC1_EXPR_V2_PASS import-let-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-metadata",
+    "PSC1_EXPR_V2_PASS import-metadata-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-metadata-roundtrip",
+    "PSC1_EXPR_V2_PASS import-metadata-hash",
+    "PSC1_EXPR_V2_PASS import-metadata-loose",
+    "PSC1_EXPR_V2_PASS import-metadata-depth",
+    "PSC1_EXPR_V2_PASS import-metadata-fvar",
+    "PSC1_EXPR_V2_PASS import-metadata-self-equality",
+    "PSC1_EXPR_V2_PASS constructor-projection",
+    "PSC1_EXPR_V2_PASS import-projection-linear-node-count",
+    "PSC1_EXPR_V2_PASS import-projection-roundtrip",
+    "PSC1_EXPR_V2_PASS import-projection-hash",
+    "PSC1_EXPR_V2_PASS import-projection-loose",
+    "PSC1_EXPR_V2_PASS import-projection-depth",
+    "PSC1_EXPR_V2_PASS import-projection-fvar",
+    "PSC1_EXPR_V2_PASS import-projection-self-equality",
+    "PSC1_EXPR_V2_PASS ignored-binder-name-and-info",
+    "PSC1_EXPR_V2_PASS different-constructor-not-equal",
+    "PSC1_EXPR_V2_PASS structural-equality-distinct-ids",
+    "PSC1_EXPR_V2_PASS explicit-subtree-sharing",
+    "PSC1_EXPR_V2_PASS valid-duplicate-sharing-equality",
+    "PSC1_EXPR_V2_PASS legacy-hash-collision-present",
+    "PSC1_EXPR_V2_PASS collision-not-deemed-equal",
+    "PSC1_EXPR_V2_PASS invalid-child-rejected",
+    "PSC1_EXPR_V2_PASS forged-closedness-rejected",
+    "PSC1_EXPR_V2_PASS linear-forged-closedness-rejected",
+    "PSC1_EXPR_V2_PASS forward-references-rejected",
+    "PSC1_EXPR_V2_PASS linear-forward-references-rejected",
+    "PSC1_EXPR_V2_PASS invalid-root-rejected",
+    "PSC1_EXPR_V2_PASS dag-node-count-1",
+    "PSC1_EXPR_V2_PASS dag-hash-1",
+    "PSC1_EXPR_V2_PASS dag-flags-1",
+    "PSC1_EXPR_V2_PASS dag-identity-1",
+    "PSC1_EXPR_V2_PASS dag-node-count-8",
+    "PSC1_EXPR_V2_PASS dag-hash-8",
+    "PSC1_EXPR_V2_PASS dag-flags-8",
+    "PSC1_EXPR_V2_PASS dag-identity-8",
+    "PSC1_EXPR_V2_PASS dag-node-count-32",
+    "PSC1_EXPR_V2_PASS dag-hash-32",
+    "PSC1_EXPR_V2_PASS dag-flags-32",
+    "PSC1_EXPR_V2_PASS dag-identity-32",
+    "PSC1_EXPR_V2_PASS dag-node-count-128",
+    "PSC1_EXPR_V2_PASS dag-hash-128",
+    "PSC1_EXPR_V2_PASS dag-flags-128",
+    "PSC1_EXPR_V2_PASS dag-identity-128",
+    "PSC1_EXPR_V2_PASS spine-32-full-validation-linear-node-count",
+    "PSC1_EXPR_V2_PASS spine-32-full-validation-roundtrip",
+    "PSC1_EXPR_V2_PASS spine-32-full-validation-hash",
+    "PSC1_EXPR_V2_PASS spine-32-full-validation-loose",
+    "PSC1_EXPR_V2_PASS spine-32-full-validation-depth",
+    "PSC1_EXPR_V2_PASS spine-32-full-validation-fvar",
+    "PSC1_EXPR_V2_PASS spine-32-full-validation-self-equality",
+    "PSC1_EXPR_V2_PASS exponential-sharing-node-count",
+    "PSC1_EXPR_V2_PASS exponential-sharing-replay-count",
+    "PSC1_EXPR_V2_PASS exponential-sharing-depth",
+    "PSC1_EXPR_V2_PASS exponential-sharing-identity",
+    "PSC1_EXPR_V2_PASS indexed-count-parity",
+    "PSC1_EXPR_V2_PASS indexed-no-out-of-range-alias",
+    "PSC1_EXPR_V2_PASS indexed-persistent-old-root",
+    "PSC1_EXPR_V2_PASS indexed-new-root-has-entry",
+    "PSC1_EXPR_V2_INDEXED: PASS nodes=384",
+    "PSC1_EXPR_V2_PASS all-smart-builder-count-parity",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-proj",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-proj",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-mdata",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-mdata",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-let",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-let",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-forall",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-forall",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-lambda",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-lambda",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-app",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-app",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-lit",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-lit",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-const",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-const",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-sort",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-sort",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-mvar",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-mvar",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-fvar",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-fvar",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-bvar2",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-bvar2",
+    "PSC1_EXPR_V2_PASS indexed-smart-id-bvar",
+    "PSC1_EXPR_V2_PASS indexed-smart-metadata-bvar",
+    "PSC1_EXPR_V2_PASS indexed-smart-invalid-child",
+    "PSC1_EXPR_V2_PASS indexed-smart-large-sharing-depth",
+    "PSC1_EXPR_V2_PASS indexed-smart-large-sharing-nodes",
+    "PSC1_EXPR_V2_INDEXED_BUILDERS: PASS",
+    "PSC1_EXPR_V2_PASS all-smart-builder-count-parity",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-proj",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-proj",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-mdata",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-mdata",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-let",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-let",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-forall",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-forall",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-lambda",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-lambda",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-app",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-app",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-lit",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-lit",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-const",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-const",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-sort",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-sort",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-mvar",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-mvar",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-fvar",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-fvar",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-bvar2",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-bvar2",
+    "PSC1_EXPR_V2_PASS chunked-smart-id-bvar",
+    "PSC1_EXPR_V2_PASS chunked-smart-metadata-bvar",
+    "PSC1_EXPR_V2_PASS chunked-smart-invalid-child",
+    "PSC1_EXPR_V2_PASS chunked-smart-large-sharing-depth",
+    "PSC1_EXPR_V2_PASS chunked-smart-large-sharing-nodes",
+    "PSC1_EXPR_V2_CHUNKED_BUILDERS: PASS",
+    "PSC1_EXPR_V2_PASS chunked-size-0",
+    "PSC1_EXPR_V2_PASS portable-replay-node-count-0",
+    "PSC1_EXPR_V2_PASS portable-replay-chunk-limit-0",
+    "PSC1_EXPR_V2_PASS chunked-replay-validated-0",
+    "PSC1_EXPR_V2_PASS chunked-no-out-of-bounds-0",
+    "PSC1_EXPR_V2_PASS chunked-persistent-old-snapshot-0",
+    "PSC1_EXPR_V2_PASS chunked-extended-0",
+    "PSC1_EXPR_V2_PASS chunked-size-1",
+    "PSC1_EXPR_V2_PASS portable-replay-node-count-1",
+    "PSC1_EXPR_V2_PASS portable-replay-chunk-limit-1",
+    "PSC1_EXPR_V2_PASS chunked-replay-validated-1",
+    "PSC1_EXPR_V2_PASS chunked-no-out-of-bounds-1",
+    "PSC1_EXPR_V2_PASS chunked-persistent-old-snapshot-1",
+    "PSC1_EXPR_V2_PASS chunked-extended-1",
+    "PSC1_EXPR_V2_PASS chunked-size-8",
+    "PSC1_EXPR_V2_PASS portable-replay-node-count-8",
+    "PSC1_EXPR_V2_PASS portable-replay-chunk-limit-8",
+    "PSC1_EXPR_V2_PASS chunked-replay-validated-8",
+    "PSC1_EXPR_V2_PASS chunked-no-out-of-bounds-8",
+    "PSC1_EXPR_V2_PASS chunked-persistent-old-snapshot-8",
+    "PSC1_EXPR_V2_PASS chunked-extended-8",
+    "PSC1_EXPR_V2_PASS chunked-size-32",
+    "PSC1_EXPR_V2_PASS portable-replay-node-count-32",
+    "PSC1_EXPR_V2_PASS portable-replay-chunk-limit-32",
+    "PSC1_EXPR_V2_PASS chunked-replay-validated-32",
+    "PSC1_EXPR_V2_PASS chunked-no-out-of-bounds-32",
+    "PSC1_EXPR_V2_PASS chunked-persistent-old-snapshot-32",
+    "PSC1_EXPR_V2_PASS chunked-extended-32",
+    "PSC1_EXPR_V2_PASS chunked-size-64",
+    "PSC1_EXPR_V2_PASS portable-replay-node-count-64",
+    "PSC1_EXPR_V2_PASS portable-replay-chunk-limit-64",
+    "PSC1_EXPR_V2_PASS chunked-replay-validated-64",
+    "PSC1_EXPR_V2_PASS chunked-no-out-of-bounds-64",
+    "PSC1_EXPR_V2_PASS chunked-persistent-old-snapshot-64",
+    "PSC1_EXPR_V2_PASS chunked-extended-64",
+    "PSC1_EXPR_V2_PASS chunked-forged-fvar-rejected",
+    "PSC1_EXPR_V2_PASS portable-forged-fvar-rejected",
+    "PSC1_EXPR_V2_PASS chunked-forward-reference-rejected",
+    "PSC1_EXPR_V2_PASS portable-forward-reference-rejected",
+    "PSC1_EXPR_V2_PASS portable-zero-chunk-limit-rejected",
+    "PSC1_EXPR_V2_CHUNKED: PASS nodes=512 limits=5",
+    "PSC1_EXPR_V2_PASS all-smart-builder-count-parity",
+    "PSC1_EXPR_V2_PASS paged-smart-id-proj",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-proj",
+    "PSC1_EXPR_V2_PASS paged-smart-id-mdata",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-mdata",
+    "PSC1_EXPR_V2_PASS paged-smart-id-let",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-let",
+    "PSC1_EXPR_V2_PASS paged-smart-id-forall",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-forall",
+    "PSC1_EXPR_V2_PASS paged-smart-id-lambda",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-lambda",
+    "PSC1_EXPR_V2_PASS paged-smart-id-app",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-app",
+    "PSC1_EXPR_V2_PASS paged-smart-id-lit",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-lit",
+    "PSC1_EXPR_V2_PASS paged-smart-id-const",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-const",
+    "PSC1_EXPR_V2_PASS paged-smart-id-sort",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-sort",
+    "PSC1_EXPR_V2_PASS paged-smart-id-mvar",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-mvar",
+    "PSC1_EXPR_V2_PASS paged-smart-id-fvar",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-fvar",
+    "PSC1_EXPR_V2_PASS paged-smart-id-bvar2",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-bvar2",
+    "PSC1_EXPR_V2_PASS paged-smart-id-bvar",
+    "PSC1_EXPR_V2_PASS paged-smart-metadata-bvar",
+    "PSC1_EXPR_V2_PASS paged-smart-invalid-child",
+    "PSC1_EXPR_V2_PASS paged-smart-large-sharing-depth",
+    "PSC1_EXPR_V2_PASS paged-smart-large-sharing-nodes",
+    "PSC1_EXPR_V2_PAGED_BUILDERS: PASS",
+    "PSC1_EXPR_V2_PASS paged-size-0",
+    "PSC1_EXPR_V2_PASS paged-validation-0",
+    "PSC1_EXPR_V2_PASS paged-out-of-range-0",
+    "PSC1_EXPR_V2_PASS paged-old-snapshot-0",
+    "PSC1_EXPR_V2_PASS paged-new-snapshot-0",
+    "PSC1_EXPR_V2_PASS paged-size-1",
+    "PSC1_EXPR_V2_PASS paged-validation-1",
+    "PSC1_EXPR_V2_PASS paged-out-of-range-1",
+    "PSC1_EXPR_V2_PASS paged-old-snapshot-1",
+    "PSC1_EXPR_V2_PASS paged-new-snapshot-1",
+    "PSC1_EXPR_V2_PASS paged-size-8",
+    "PSC1_EXPR_V2_PASS paged-validation-8",
+    "PSC1_EXPR_V2_PASS paged-out-of-range-8",
+    "PSC1_EXPR_V2_PASS paged-old-snapshot-8",
+    "PSC1_EXPR_V2_PASS paged-new-snapshot-8",
+    "PSC1_EXPR_V2_PASS paged-size-32",
+    "PSC1_EXPR_V2_PASS paged-validation-32",
+    "PSC1_EXPR_V2_PASS paged-out-of-range-32",
+    "PSC1_EXPR_V2_PASS paged-old-snapshot-32",
+    "PSC1_EXPR_V2_PASS paged-new-snapshot-32",
+    "PSC1_EXPR_V2_PASS paged-size-64",
+    "PSC1_EXPR_V2_PASS paged-validation-64",
+    "PSC1_EXPR_V2_PASS paged-out-of-range-64",
+    "PSC1_EXPR_V2_PASS paged-old-snapshot-64",
+    "PSC1_EXPR_V2_PASS paged-new-snapshot-64",
+    "PSC1_EXPR_V2_PASS paged-forged-metadata-rejected",
+    "PSC1_EXPR_V2_PASS paged-valid-size-not-trust-bypass",
+    "PSC1_EXPR_V2_PASS paged-forward-reference-rejected",
+    "PSC1_EXPR_V2_PASS paged-zero-capacity-rejected",
+    "PSC1_EXPR_V2_PASS paged-incomplete-completed-page-rejected",
+    "PSC1_EXPR_V2_PASS paged-mismatched-size-rejected",
+    "PSC1_EXPR_V2_PAGED: PASS nodes=512 capacities=5",
+    "PSC1_EXPR_V2_PASS paged-shared-spine-root-metadata",
+    "PSC1_EXPR_V2_PASS paged-shared-spine-exact-depth",
+    "PSC1_EXPR_V2_PASS paged-shared-spine-index-range",
+    "PSC1_EXPR_V2_PASS paged-shared-spine-page-count",
+    "PSC1_EXPR_V2_PASS paged-shared-spine-old-leaf-access",
+    "PSC1_EXPR_V2_PAGED_SPINE: PASS nodes=1025",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar0",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar0",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar0",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar0",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar0-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar0-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-bvar2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-bvar2-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-bvar2-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-sort",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-sort",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-sort",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-sort",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-sort-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-sort-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-app",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-app",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-app",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-app",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-app-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-app-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-lambda",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-lambda",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-lambda",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-lambda",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-lambda-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-lambda-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-forall",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-forall",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-forall",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-forall",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-forall-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-forall-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-let",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-let",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-let",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-let",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-let-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-let-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-metadata",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-metadata",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-metadata",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-metadata",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-metadata-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-metadata-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-0-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-projection",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-0-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-0-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-1-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-projection",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-1-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-1-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-2-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-projection",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-2-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-2-2",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-3-0",
+    "PSC1_EXPR_V2_PASS paged-lift-preserves-zero-projection",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-3-1",
+    "PSC1_EXPR_V2_PASS paged-lift-legacy-projection-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-chunked-projection-3-2",
+    "PSC1_EXPR_V2_PASS paged-lift-invalid-root",
+    "PSC1_EXPR_V2_PASS paged-lift-forged-metadata-rejected",
+    "PSC1_EXPR_V2_PAGED_LIFT: PASS cases=108",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar0-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar0-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar0-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar0-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar0-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar0-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar0-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar0-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar1-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar1-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar1-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar1-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar1-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar1-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar1-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar1-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar2-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar2-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar2-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar2-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar2-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar2-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-bvar2-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-bvar2-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-sort-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-sort-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-sort-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-sort-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-sort-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-sort-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-sort-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-sort-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-fvar-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-fvar-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-fvar-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-fvar-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-fvar-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-fvar-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-fvar-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-fvar-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-app-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-app-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-app-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-app-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-app-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-app-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-app-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-app-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-lambda-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-lambda-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-lambda-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-lambda-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-lambda-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-lambda-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-lambda-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-lambda-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-forall-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-forall-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-forall-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-forall-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-forall-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-forall-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-forall-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-forall-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-let-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-let-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-let-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-let-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-let-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-let-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-let-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-let-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-mdata-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-mdata-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-mdata-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-mdata-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-mdata-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-mdata-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-mdata-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-mdata-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-projection-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-projection-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-projection-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-projection-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-projection-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-projection-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-projection-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-projection-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-shared-app-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-shared-app-sort",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-shared-app-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-shared-app-bvar2",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-shared-app-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-shared-app-open-app",
+    "PSC1_EXPR_V2_PASS paged-inst-legacy-shared-app-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-chunked-shared-app-fvar",
+    "PSC1_EXPR_V2_PASS paged-inst-invalid-root",
+    "PSC1_EXPR_V2_PASS paged-inst-invalid-replacement",
+    "PSC1_EXPR_V2_PASS paged-inst-forged-loose-range",
+    "PSC1_EXPR_V2_PAGED_INSTANTIATE: PASS cases=48",
+    "PSC1_EXPR_V2_PASS paged-head-beta-zeta-mdata-equal",
+    "PSC1_EXPR_V2_PASS paged-head-step-budget-enforced",
+    "PSC1_EXPR_V2_PASS paged-head-invalid-root",
+    "PSC1_EXPR_V2_PASS paged-head-forged-metadata-rejected",
+    "PSC1_EXPR_V2_PASS paged-head-depth-1-identical-result",
+    "PSC1_EXPR_V2_PASS paged-head-depth-1-insufficient-budget",
+    "PSC1_EXPR_V2_PASS paged-head-depth-8-identical-result",
+    "PSC1_EXPR_V2_PASS paged-head-depth-8-insufficient-budget",
+    "PSC1_EXPR_V2_PASS paged-head-depth-24-identical-result",
+    "PSC1_EXPR_V2_PASS paged-head-depth-24-insufficient-budget",
+    "PSC1_EXPR_V2_PASS paged-head-depth-48-identical-result",
+    "PSC1_EXPR_V2_PASS paged-head-depth-48-insufficient-budget",
+    "PSC1_EXPR_V2_PAGED_HEAD: PASS depths=1,8,24,48",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-zero",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-zero",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-zero",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-zero",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-zero-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-zero-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-zero-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-two",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-two",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-two",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-bvar-two",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-bvar-two-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-bvar-two-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-bvar-two-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-sort",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-sort",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-sort",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-sort",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-sort-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-sort-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-sort-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-app",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-app",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-app",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-app",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-app-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-app-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-app-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-lambda",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-lambda",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-lambda",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-lambda",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-lambda-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-lambda-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-lambda-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-forall",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-forall",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-forall",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-forall",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-forall-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-forall-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-forall-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-let",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-let",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-let",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-let",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-let-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-let-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-let-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-metadata",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-metadata",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-metadata",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-metadata",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-metadata-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-metadata-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-metadata-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff0-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-projection",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff0-amount1",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff0-amount2",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff1-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-projection",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff1-amount1",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff1-amount2",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff2-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-projection",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff2-amount1",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff2-amount2",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff3-amount0",
+    "PSC1_EXPR_V2_PASS lift-zero-allocation-projection",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff3-amount1",
+    "PSC1_EXPR_V2_PASS lift-projection-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-lift-projection-cutoff3-amount2",
+    "PSC1_EXPR_V2_PASS portable-vs-native-lift-projection-cutoff3-amount2",
+    "PSC1_EXPR_V2_LIFT_DIFFERENTIAL: PASS",
+    "PSC1_EXPR_V2_PASS lift-input-shared-node-count",
+    "PSC1_EXPR_V2_PASS lift-shared-result-depth",
+    "PSC1_EXPR_V2_PASS lift-sharing-bounded-node-growth",
+    "PSC1_EXPR_V2_PASS lift-zero-preserves-identity",
+    "PSC1_EXPR_V2_PASS lift-rejects-unvalidated-metadata",
+    "PSC1_EXPR_V2_PASS portable-lift-rejects-unvalidated-metadata",
+    "PSC1_EXPR_V2_PASS portable-shared-lift-depth",
+    "PSC1_EXPR_V2_PASS portable-shared-lift-bounded-growth",
+    "PSC1_EXPR_V2_LIFT_SHARING: PASS input_nodes=21 output_nodes=42",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-zero-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-zero-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-zero-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-zero-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-one-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-one-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-one-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-one-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-two-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-two-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-two-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-bvar-two-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-sort-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-sort-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-sort-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-sort-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-fvar-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-fvar-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-fvar-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-fvar-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-app-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-app-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-app-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-app-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-lambda-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-lambda-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-lambda-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-lambda-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-forall-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-forall-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-forall-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-forall-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-let-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-let-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-let-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-let-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-mdata-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-mdata-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-mdata-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-mdata-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-projection-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-projection-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-projection-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-projection-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-shared-app-closed-sort",
+    "PSC1_EXPR_V2_PASS instantiate-shared-app-open-bvar2",
+    "PSC1_EXPR_V2_PASS instantiate-shared-app-open-app",
+    "PSC1_EXPR_V2_PASS instantiate-shared-app-free-var",
+    "PSC1_EXPR_V2_PASS instantiate-invalid-root",
+    "PSC1_EXPR_V2_PASS instantiate-invalid-replacement",
+    "PSC1_EXPR_V2_PASS instantiate-rejects-forged-range",
+    "PSC1_EXPR_V2_INSTANTIATE_DIFFERENTIAL: PASS cases=48",
+    "PSC1_EXPR_V2_PASS instantiate-shared-input-nodes",
+    "PSC1_EXPR_V2_PASS instantiate-shared-depth",
+    "PSC1_EXPR_V2_PASS instantiate-shared-bound-variable-removed",
+    "PSC1_EXPR_V2_PASS instantiate-shared-bounded-node-growth",
+    "PSC1_EXPR_V2_PASS instantiate-shared-subtree-reused",
+    "PSC1_EXPR_V2_INSTANTIATE_SHARING: PASS input_nodes=22 output_nodes=42",
+    "PSC1_EXPR_V2_PASS head-step-beta-identity",
+    "PSC1_EXPR_V2_PASS head-step-zeta-identity",
+    "PSC1_EXPR_V2_PASS head-step-metadata-one-step",
+    "PSC1_EXPR_V2_PASS head-step-neutral-app",
+    "PSC1_EXPR_V2_PASS head-step-beta-outer-decrement",
+    "PSC1_EXPR_V2_PASS head-step-zeta-outer-decrement",
+    "PSC1_EXPR_V2_PASS head-step-sort",
+    "PSC1_EXPR_V2_PASS head-step-neutral-identity",
+    "PSC1_EXPR_V2_PASS head-step-invalid-root",
+    "PSC1_EXPR_V2_HEAD_REDUCTION: PASS cases=7",
+    "PSC1_EXPR_V2_PASS head-machine-matches-slow-root",
+    "PSC1_EXPR_V2_PASS head-sequence-composed-normal-form",
+    "PSC1_EXPR_V2_PASS head-sequence-rejects-insufficient-fuel",
+    "PSC1_EXPR_V2_PASS head-machine-rejects-insufficient-fuel",
+    "PSC1_EXPR_V2_PASS head-sequence-neutral-fuel-one",
+    "PSC1_EXPR_V2_PASS head-sequence-zero-fuel-rejected",
+    "PSC1_EXPR_V2_PASS head-machine-invalid-root",
+    "PSC1_EXPR_V2_HEAD_SEQUENCE: PASS",
+    "PSC1_EXPR_V2_PASS head-machine-depth-1-root-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-1-arena-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-1-fail-closed-fuel",
+    "PSC1_EXPR_V2_PASS head-machine-depth-1-forged-rejected",
+    "PSC1_EXPR_V2_PASS head-machine-depth-8-root-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-8-arena-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-8-fail-closed-fuel",
+    "PSC1_EXPR_V2_PASS head-machine-depth-8-forged-rejected",
+    "PSC1_EXPR_V2_PASS head-machine-depth-24-root-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-24-arena-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-24-fail-closed-fuel",
+    "PSC1_EXPR_V2_PASS head-machine-depth-24-forged-rejected",
+    "PSC1_EXPR_V2_PASS head-machine-depth-48-root-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-48-arena-parity",
+    "PSC1_EXPR_V2_PASS head-machine-depth-48-fail-closed-fuel",
+    "PSC1_EXPR_V2_PASS head-machine-depth-48-forged-rejected",
+    "PSC1_EXPR_V2_HEAD_MACHINE: PASS",
+    "PSC1_EXPR_V2_PASS pair-eq-same-id",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-same-id",
+    "PSC1_EXPR_V2_PASS pair-eq-two-bvars",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-bvars",
+    "PSC1_EXPR_V2_PASS pair-eq-real-hash-collision",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-real-hash-collision",
+    "PSC1_EXPR_V2_PASS pair-eq-two-sorts",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-sorts",
+    "PSC1_EXPR_V2_PASS pair-eq-sort-vs-const",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-sort-vs-const",
+    "PSC1_EXPR_V2_PASS pair-eq-fvar-vs-mvar",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-fvar-vs-mvar",
+    "PSC1_EXPR_V2_PASS pair-eq-const-vs-literal",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-const-vs-literal",
+    "PSC1_EXPR_V2_PASS pair-eq-two-apps",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-apps",
+    "PSC1_EXPR_V2_PASS pair-eq-two-lambdas-ignore-name-and-info",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-lambdas-ignore-name-and-info",
+    "PSC1_EXPR_V2_PASS pair-eq-two-foralls-ignore-name-and-info",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-foralls-ignore-name-and-info",
+    "PSC1_EXPR_V2_PASS pair-eq-lambda-vs-forall",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-lambda-vs-forall",
+    "PSC1_EXPR_V2_PASS pair-eq-two-lets",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-lets",
+    "PSC1_EXPR_V2_PASS pair-eq-let-nondep-different",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-let-nondep-different",
+    "PSC1_EXPR_V2_PASS pair-eq-two-metadata",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-metadata",
+    "PSC1_EXPR_V2_PASS pair-eq-two-projections",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-two-projections",
+    "PSC1_EXPR_V2_PASS pair-eq-projection-vs-metadata",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-projection-vs-metadata",
+    "PSC1_EXPR_V2_PASS pair-eq-invalid-left",
+    "PSC1_EXPR_V2_PASS pair-eq-invalid-right",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-invalid-left",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-invalid-right",
+    "PSC1_EXPR_V2_PASS pair-eq-forged-metadata-rejected",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-forged-metadata-rejected",
+    "PSC1_EXPR_V2_PAGED_PAIR_EQUALITY: PASS cases=16",
+    "PSC1_EXPR_V2_PAIR_EQUALITY: PASS cases=16",
+    "PSC1_EXPR_V2_PASS pair-shared-compact-node-count",
+    "PSC1_EXPR_V2_PASS paged-pair-eq-deep-sharing",
+    "PSC1_EXPR_V2_PASS pair-shared-distinct-ids-structurally-equal",
+    "PSC1_EXPR_V2_PASS pair-shared-shapes-distinct",
+    "PSC1_EXPR_V2_PAIR_SHARING: PASS nodes=49 depth=24",
+    "PSC1_EXPR_V2_PASS pair-batch-ordered-results",
+    "PSC1_EXPR_V2_PASS paged-pair-batch-ordered-results",
+    "PSC1_EXPR_V2_PASS pair-batch-empty-input",
+    "PSC1_EXPR_V2_PASS pair-batch-rejects-invalid-node",
+    "PSC1_EXPR_V2_PASS paged-pair-batch-rejects-invalid-node",
+    "PSC1_EXPR_V2_PASS pair-batch-forged-metadata-rejected",
+    "PSC1_EXPR_V2_PASS paged-pair-batch-forged-metadata-rejected",
+    "PSC1_EXPR_V2_PAGED_PAIR_BATCH: PASS cases=5",
+    "PSC1_EXPR_V2_PASS pair-batch-scoped-to-distinct-arena",
+    "PSC1_EXPR_V2_PAIR_BATCH: PASS cases=5",
+    "PSC1_EXPR_V2_PASS paged-pair-batch-reuses-shared-comparisons",
+    "PSC1_EXPR_V2_PASS pair-batch-reuses-shared-comparisons",
+    "PSC1_EXPR_V2_PAIR_BATCH_SHARING: PASS nodes=41 comparisons=16",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-bvar",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-bvar",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-bvar",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-bvar",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-fvar",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-fvar",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-fvar",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-fvar",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-mvar",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-mvar",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-mvar",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-mvar",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-sort",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-sort",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-sort",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-sort",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-const",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-const",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-const",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-const",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-nat-literal",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-nat-literal",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-nat-literal",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-nat-literal",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-string-literal",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-string-literal",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-string-literal",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-string-literal",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-app",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-app",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-app",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-app",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-lambda",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-lambda",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-lambda",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-lambda",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-forall",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-forall",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-forall",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-forall",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-let",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-let",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-let",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-let",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-mdata",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-mdata",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-mdata",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-mdata",
+    "PSC1_EXPR_V2_PASS legacy-import-roundtrip-projection",
+    "PSC1_EXPR_V2_PASS paged-import-roundtrip-projection",
+    "PSC1_EXPR_V2_PASS paged-import-cross-copy-projection",
+    "PSC1_EXPR_V2_PASS legacy-import-cross-copy-projection",
+    "PSC1_EXPR_V2_PASS legacy-import-checked-beta-reduction",
+    "PSC1_EXPR_V2_PASS paged-import-checked-beta",
+    "PSC1_EXPR_V2_PASS legacy-import-refuses-forged-source",
+    "PSC1_EXPR_V2_PASS paged-import-refuses-forged-source",
+    "PSC1_EXPR_V2_PAGED_LEGACY_IMPORT: PASS cases=13",
+    "PSC1_EXPR_V2_LEGACY_IMPORT: PASS cases=13",
+    "PSC1_EXPR_V2_REGRESSION: PASS",
+    "PSC1_V2_DAG_INFER_ONLY: PASS",
+    "PSC1_V2_DAG_OFFICIAL_INFER_ONLY: PASS",
+    "PSC1_V2_DAG_PROOF_IRRELEVANCE_TERMINAL: PASS comparisons=180 official=2",
+    "PSC1_V2_DAG_PROOF_IRRELEVANCE: PASS comparisons=1350",
+    "PSC1_V2_DAG_OFFICIAL_PROOF_IRRELEVANCE: PASS cases=8 invalid=1",
+    "PSC1_V2_DAG_LAZY_NAT: PASS comparisons=1350 stage=192",
+    "PSC1_V2_DAG_OFFICIAL_LAZY_NAT: PASS cases=14 invalid=1",
+    "PSC1_V2_PAIR_SCAN: PASS cases=9 equation=all-inputs",
+    "PSC1_V2_DAG_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128",
+    "PSC1_V2_DAG_OFFICIAL_LAZY_DELTA: PASS cases=18 invalid=4",
+    "PSC1_V2_DAG_FULL_SHAPE: PASS stageComparisons=342 ownerComparisons=108",
+    "PSC1_V2_DAG_OFFICIAL_FULL_SHAPE: PASS cases=6 invalid=1",
+    "PSC1_V2_STRING_PROJECTION: PASS differential=1296 owners=16 failures=32 officialValid=8 officialInvalid=16",
+    "PSC1_V2_DAG_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32",
+    "PSC1_V2_DAG_OFFICIAL_FINAL_RULES: PASS cases=21 invalid=5 strings=8 resource=1",
+    "PSC1_V2_ADMISSION_GUARD_STATIC: PASS comparisons=420",
+    "PSC1_V2_ADMISSION_GUARD_HOSTILE: PASS sharedDepth=128 cases=12",
+    "PSC1_V2_ADMISSION_GUARD_PUBLIC: PASS comparisons=672",
+    "PSC1_V2_ADMISSION_GUARD_OFFICIAL: PASS cases=8 doCheck=true",
+    "PSC1_V2_ADMISSION_GUARD: PASS",
+    "PSC1_V2_DAG_QUOT: PASS public=240 core=480 owners=720 reducer=60",
+    "PSC1_V2_DAG_OFFICIAL_QUOT: PASS valid=10 invalid=5",
+    "PSC1_V2_DAG_RECURSOR_CACHE_MODE: PASS wrappers=2 cheapModes=4 warmCold=8",
+    "PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX: PASS public=126 core=504 owners=360 reducer=432",
+    "PSC1_V2_DAG_RECURSOR_MAJOR_STATE: PASS sequence=4 propagated=40",
+    "PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY: PASS comparisons=70 fields=20",
+    "PSC1_V2_DAG_RECURSOR_MAJOR_STRING: PASS callbacks=24 propagated=48 official=6",
+    "PSC1_V2_DAG_OFFICIAL_RECURSOR_MAJOR: PASS valid=6 admitted=2 rejected=2",
+    "PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES: PASS cases=2",
+    "PSC1_V2_DAG_RECURSOR: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9",
+    "PSC1_V2_DAG_OFFICIAL_RECURSOR: PASS valid=12 invalid=4 addDecl=3",
+    "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3",
+    "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7",
+    "PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2",
+    "PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7",
+    "PSC1_T01F_INVALID_DEFINITION_PASS",
+    "PSC1_T01F_METADATA_PASS declarations=377",
+    "PSC1_T01F_CLOSURE_PASS requests=294 declarations=377",
+    "PSC1_T01F_SINGLETON_PASS \"\"",
+    "PSC1_T01F_CASE_PASS \"\"",
+    "PSC1_T01F_SINGLETON_PASS \"a\"",
+    "PSC1_T01F_CASE_PASS \"a\"",
+    "PSC1_T01F_SINGLETON_PASS \"é\"",
+    "PSC1_T01F_CASE_PASS \"é\"",
+    "PSC1_T01F_SINGLETON_PASS \"€\"",
+    "PSC1_T01F_CASE_PASS \"€\"",
+    "PSC1_T01F_SINGLETON_PASS \"😀\"",
+    "PSC1_T01F_CASE_PASS \"😀\"",
+    "PSC1_T01F_SINGLETON_PASS \"Aé€😀\"",
+    "PSC1_T01F_CASE_PASS \"Aé€😀\"",
+    "PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096",
+    "PSC1_V2_K_DIRECT_ADMISSION_PASS cases=2",
+    "PSC1_V2_K_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6",
+    "PSC1_V2_K_OFFICIAL_PASS valid=6 invalid=3 declarations=2",
+    "PSC1_V2_K_MATRIX_PASS public=108 core=432 reducer=648",
+    "PSC1_V2_K_FIXED_OWNER_PASS cases=96",
+    "PSC1_V2_K_OWNER_PASS carrier=16 propagated=16 metadata=16",
+    "PSC1_V2_K_ORDER_PASS guards=5",
+    "PSC1_V2_RECURSOR_K_PASS",
+    "PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24",
+    "PSC1_NAME_WORKER_NAMES_PASS pairs=400 deep=4 maxDepth=1024",
+    "PSC1_NAME_WORKER_CHECKING_PASS declarations=10 checked=10 normalized=10 negatives=4 officialPositive=10 officialNegative=4",
+    "PSC1_NAME_WORKER_PASS",
+    "PSC1_V2_QUOT_OWNER_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 officialPositive=10 officialNegative=7",
+    "PSC1_V2_ADMISSION_OWNED_STATE_PASS carrier=8 propagated=12 differential=336 publicWhnf=168",
+    "PSC1_V2_OWNED_STATE_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44",
+    "PSKERNEL_V2_TRANSFORM_SHARING_AND_BUDGETS_PASSED",
+    "PSKERNEL_V2_TRANSFORM_NEGATIVES_PASSED",
+    "PSKERNEL_V2_TRANSFORM_REGRESSION_PASSED",
+    "PSKERNEL_LARGE_NAT_NATIVE: PASS",
+    "PSKERNEL_EXPR_EQUALITY_NATIVE: PASS comparisons=800 hostile=21 sharedDepth=64",
+    "PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15",
+    "PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical",
+    "PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3",
+    "PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12",
+    "PSKERNEL_LOCAL_METADATA_AND_SCOPE_PROOFS: PASS",
+    "PSC1_CANONICAL_PROVIDER_OFFICIAL: PASS cases=5 batchDeclarations=4 doCheck=true",
+    "PSC1_CANONICAL_PROVIDER: PASS mode=native cases=24 PATH=empty cwd=detached",
+    "PSC1_V2_DAG_NATIVE_BENCH: PASS"
+  ],
+  "measurementRows": [
+    "PSC1_DAG_NATIVE_CONSTRUCTION shape=metadata depth=32 pool=5 combined_inputs_ms=0",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=metadata depth=32 calls=1200 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=metadata depth=32 calls=1200 ms=28 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=metadata depth=32 calls=1200 ms=15 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=metadata depth=32 calls=1200 ms=15 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=metadata depth=32 calls=1200 ms=28 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=metadata depth=32 calls=1200 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_CONSTRUCTION shape=metadata depth=96 pool=5 combined_inputs_ms=0",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=metadata depth=96 calls=600 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=metadata depth=96 calls=600 ms=84 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=metadata depth=96 calls=600 ms=20 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=metadata depth=96 calls=600 ms=20 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=metadata depth=96 calls=600 ms=85 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=metadata depth=96 calls=600 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_CONSTRUCTION shape=metadata depth=192 pool=5 combined_inputs_ms=0",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=metadata depth=192 calls=300 ms=3 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=metadata depth=192 calls=300 ms=142 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=metadata depth=192 calls=300 ms=19 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=metadata depth=192 calls=300 ms=19 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=metadata depth=192 calls=300 ms=143 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=metadata depth=192 calls=300 ms=3 all_correct=true",
+    "PSC1_DAG_NATIVE_CONSTRUCTION shape=zeta depth=32 pool=5 combined_inputs_ms=0",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=zeta depth=32 calls=100 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=zeta depth=32 calls=100 ms=6 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=zeta depth=32 calls=100 ms=7 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=zeta depth=32 calls=100 ms=8 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=zeta depth=32 calls=100 ms=7 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=zeta depth=32 calls=100 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_CONSTRUCTION shape=zeta depth=96 pool=5 combined_inputs_ms=0",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=zeta depth=96 calls=50 ms=3 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=zeta depth=96 calls=50 ms=19 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=zeta depth=96 calls=50 ms=11 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=zeta depth=96 calls=50 ms=11 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=zeta depth=96 calls=50 ms=18 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=zeta depth=96 calls=50 ms=3 all_correct=true",
+    "PSC1_DAG_NATIVE_CONSTRUCTION shape=zeta depth=192 pool=5 combined_inputs_ms=1",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=zeta depth=192 calls=20 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=zeta depth=192 calls=20 ms=27 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=zeta depth=192 calls=20 ms=9 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=dag shape=zeta depth=192 calls=20 ms=8 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=legacy shape=zeta depth=192 calls=20 ms=28 all_correct=true",
+    "PSC1_DAG_NATIVE_SAMPLE variant=lean shape=zeta depth=192 calls=20 ms=2 all_correct=true",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=metadata depth=96 calls=300 ms=1 warm_ns=1372141 cold_ns=8119 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=metadata depth=96 calls=300 ms=42 warm_ns=42543496 cold_ns=148600 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=metadata depth=96 calls=300 ms=11 warm_ns=11789288 cold_ns=77762 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=metadata depth=96 calls=300 ms=11 warm_ns=11857246 cold_ns=39786 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=metadata depth=96 calls=300 ms=42 warm_ns=42172962 cold_ns=149066 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=metadata depth=96 calls=300 ms=1 warm_ns=1340980 cold_ns=18490 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=zeta depth=32 calls=100 ms=2 warm_ns=2315275 cold_ns=36270 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=zeta depth=32 calls=100 ms=10 warm_ns=10128978 cold_ns=126029 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=zeta depth=32 calls=100 ms=8 warm_ns=8945687 cold_ns=126110 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=zeta depth=32 calls=100 ms=8 warm_ns=8947510 cold_ns=89246 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=zeta depth=32 calls=100 ms=10 warm_ns=10177155 cold_ns=113735 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=zeta depth=32 calls=100 ms=2 warm_ns=2290369 cold_ns=41690 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=zeta depth=96 calls=50 ms=3 warm_ns=3444566 cold_ns=71674 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=zeta depth=96 calls=50 ms=35 warm_ns=35272588 cold_ns=733830 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=zeta depth=96 calls=50 ms=12 warm_ns=12963709 cold_ns=309670 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=zeta depth=96 calls=50 ms=12 warm_ns=12895408 cold_ns=264773 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=zeta depth=96 calls=50 ms=35 warm_ns=35197327 cold_ns=740454 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=zeta depth=96 calls=50 ms=3 warm_ns=3350664 cold_ns=115353 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=zeta depth=192 calls=20 ms=2 warm_ns=2773896 cold_ns=198399 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=zeta depth=192 calls=20 ms=52 warm_ns=52466752 cold_ns=2666623 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=zeta depth=192 calls=20 ms=10 warm_ns=10174532 cold_ns=576861 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=zeta depth=192 calls=20 ms=10 warm_ns=10150198 cold_ns=505973 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=zeta depth=192 calls=20 ms=52 warm_ns=52299028 cold_ns=2649682 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=zeta depth=192 calls=20 ms=2 warm_ns=2700194 cold_ns=185696 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-shared depth=8 pool=5 input_ns=5737 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-shared depth=8 calls=100 ms=0 warm_ns=579461 cold_ns=33399 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-shared depth=8 peak_rss_kib=68304 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-shared depth=8 pool=5 input_ns=5489 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-shared depth=8 calls=100 ms=2 warm_ns=2165403 cold_ns=49901 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-shared depth=8 peak_rss_kib=68324 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-shared depth=8 pool=5 input_ns=20400 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-shared depth=8 calls=100 ms=2 warm_ns=2947326 cold_ns=73592 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-shared depth=8 peak_rss_kib=68168 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-shared depth=8 pool=5 input_ns=18907 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-shared depth=8 calls=100 ms=2 warm_ns=2719320 cold_ns=71178 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-shared depth=8 peak_rss_kib=68320 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-shared depth=8 pool=5 input_ns=6283 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-shared depth=8 calls=100 ms=2 warm_ns=2181900 cold_ns=49799 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-shared depth=8 peak_rss_kib=68560 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-shared depth=8 pool=5 input_ns=6534 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-shared depth=8 calls=100 ms=0 warm_ns=542930 cold_ns=29448 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-shared depth=8 peak_rss_kib=68752 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-shared depth=32 pool=5 input_ns=6905 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-shared depth=32 calls=40 ms=0 warm_ns=555614 cold_ns=40235 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-shared depth=32 peak_rss_kib=68936 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-shared depth=32 pool=5 input_ns=6021 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-shared depth=32 calls=40 ms=4 warm_ns=4915065 cold_ns=150802 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-shared depth=32 peak_rss_kib=68680 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-shared depth=32 pool=5 input_ns=33228 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-shared depth=32 calls=40 ms=3 warm_ns=3070388 cold_ns=118830 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-shared depth=32 peak_rss_kib=68540 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-shared depth=32 pool=5 input_ns=32630 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-shared depth=32 calls=40 ms=2 warm_ns=2882288 cold_ns=149596 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-shared depth=32 peak_rss_kib=68672 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-shared depth=32 pool=5 input_ns=5755 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-shared depth=32 calls=40 ms=4 warm_ns=4893107 cold_ns=149964 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-shared depth=32 peak_rss_kib=68760 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-shared depth=32 pool=5 input_ns=8691 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-shared depth=32 calls=40 ms=0 warm_ns=560970 cold_ns=41749 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-shared depth=32 peak_rss_kib=68540 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-shared depth=128 pool=5 input_ns=26058 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-shared depth=128 calls=10 ms=0 warm_ns=511756 cold_ns=90977 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-shared depth=128 peak_rss_kib=68492 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-shared depth=128 pool=5 input_ns=9816 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-shared depth=128 calls=10 ms=14 warm_ns=14204607 cold_ns=1451196 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-shared depth=128 peak_rss_kib=68516 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-shared depth=128 pool=5 input_ns=81806 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-shared depth=128 calls=10 ms=2 warm_ns=2426213 cold_ns=303079 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-shared depth=128 peak_rss_kib=68976 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-shared depth=128 pool=5 input_ns=80651 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-shared depth=128 calls=10 ms=2 warm_ns=2463259 cold_ns=305644 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-shared depth=128 peak_rss_kib=68540 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-shared depth=128 pool=5 input_ns=11016 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-shared depth=128 calls=10 ms=14 warm_ns=14163487 cold_ns=1455335 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-shared depth=128 peak_rss_kib=68740 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-shared depth=128 pool=5 input_ns=13889 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-shared depth=128 calls=10 ms=0 warm_ns=479862 cold_ns=122836 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-shared depth=128 peak_rss_kib=68244 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-alpha depth=8 pool=5 input_ns=11155 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-alpha depth=8 calls=100 ms=0 warm_ns=605825 cold_ns=31512 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-alpha depth=8 peak_rss_kib=68316 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-alpha depth=8 pool=5 input_ns=9759 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-alpha depth=8 calls=100 ms=2 warm_ns=2197772 cold_ns=50323 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-alpha depth=8 peak_rss_kib=68600 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-alpha depth=8 pool=5 input_ns=36887 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-alpha depth=8 calls=100 ms=4 warm_ns=4239127 cold_ns=110993 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-alpha depth=8 peak_rss_kib=68708 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-alpha depth=8 pool=5 input_ns=34909 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-alpha depth=8 calls=100 ms=4 warm_ns=4092518 cold_ns=86093 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-alpha depth=8 peak_rss_kib=68316 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-alpha depth=8 pool=5 input_ns=8212 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-alpha depth=8 calls=100 ms=2 warm_ns=2201537 cold_ns=48869 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-alpha depth=8 peak_rss_kib=68188 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-alpha depth=8 pool=5 input_ns=11866 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-alpha depth=8 calls=100 ms=0 warm_ns=599216 cold_ns=32084 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-alpha depth=8 peak_rss_kib=68600 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-alpha depth=32 pool=5 input_ns=57664 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-alpha depth=32 calls=40 ms=0 warm_ns=623652 cold_ns=46597 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-alpha depth=32 peak_rss_kib=68540 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-alpha depth=32 pool=5 input_ns=15468 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-alpha depth=32 calls=40 ms=4 warm_ns=4896218 cold_ns=150491 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-alpha depth=32 peak_rss_kib=68512 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-alpha depth=32 pool=5 input_ns=112903 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-alpha depth=32 calls=40 ms=5 warm_ns=5313403 cold_ns=207764 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-alpha depth=32 peak_rss_kib=68280 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-alpha depth=32 pool=5 input_ns=100611 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-alpha depth=32 calls=40 ms=5 warm_ns=5108281 cold_ns=181952 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-alpha depth=32 peak_rss_kib=68816 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-alpha depth=32 pool=5 input_ns=14982 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-alpha depth=32 calls=40 ms=4 warm_ns=4915263 cold_ns=178074 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-alpha depth=32 peak_rss_kib=68588 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-alpha depth=32 pool=5 input_ns=27737 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-alpha depth=32 calls=40 ms=0 warm_ns=655012 cold_ns=46379 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-alpha depth=32 peak_rss_kib=68276 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-alpha depth=128 pool=5 input_ns=119049 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-alpha depth=128 calls=10 ms=0 warm_ns=566144 cold_ns=96103 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-alpha depth=128 peak_rss_kib=68712 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-alpha depth=128 pool=5 input_ns=51991 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-alpha depth=128 calls=10 ms=14 warm_ns=14185395 cold_ns=1444959 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-alpha depth=128 peak_rss_kib=68208 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-alpha depth=128 pool=5 input_ns=368477 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-alpha depth=128 calls=10 ms=4 warm_ns=4769608 cold_ns=543305 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-alpha depth=128 peak_rss_kib=68932 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-alpha depth=128 pool=5 input_ns=344031 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-alpha depth=128 calls=10 ms=4 warm_ns=4779916 cold_ns=565734 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-alpha depth=128 peak_rss_kib=68656 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-alpha depth=128 pool=5 input_ns=50957 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-alpha depth=128 calls=10 ms=14 warm_ns=14211608 cold_ns=1458066 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-alpha depth=128 peak_rss_kib=68996 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-alpha depth=128 pool=5 input_ns=99651 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-alpha depth=128 calls=10 ms=0 warm_ns=608947 cold_ns=97870 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-alpha depth=128 peak_rss_kib=68592 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-unique depth=8 pool=5 input_ns=13512 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-unique depth=8 calls=100 ms=1 warm_ns=1915059 cold_ns=49644 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-unique depth=8 peak_rss_kib=69008 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-unique depth=8 pool=5 input_ns=8608 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-unique depth=8 calls=100 ms=4 warm_ns=4772956 cold_ns=83577 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-unique depth=8 peak_rss_kib=68996 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-unique depth=8 pool=5 input_ns=37063 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-unique depth=8 calls=100 ms=8 warm_ns=8102460 cold_ns=128601 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-unique depth=8 peak_rss_kib=68840 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-unique depth=8 pool=5 input_ns=38318 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-unique depth=8 calls=100 ms=8 warm_ns=8073242 cold_ns=132932 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-unique depth=8 peak_rss_kib=68780 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-unique depth=8 pool=5 input_ns=8404 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-unique depth=8 calls=100 ms=4 warm_ns=4619027 cold_ns=80538 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-unique depth=8 peak_rss_kib=68748 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-unique depth=8 pool=5 input_ns=12715 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-unique depth=8 calls=100 ms=1 warm_ns=1835503 cold_ns=48735 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-unique depth=8 peak_rss_kib=69012 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-unique depth=32 pool=5 input_ns=55614 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-unique depth=32 calls=40 ms=6 warm_ns=6086893 cold_ns=194669 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-unique depth=32 peak_rss_kib=68848 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-unique depth=32 pool=5 input_ns=16510 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-unique depth=32 calls=40 ms=11 warm_ns=11077895 cold_ns=312667 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-unique depth=32 peak_rss_kib=68500 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-unique depth=32 pool=5 input_ns=102175 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-unique depth=32 calls=40 ms=12 warm_ns=12853331 cold_ns=382308 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-unique depth=32 peak_rss_kib=68536 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-unique depth=32 pool=5 input_ns=101653 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-unique depth=32 calls=40 ms=12 warm_ns=12761467 cold_ns=393129 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-unique depth=32 peak_rss_kib=68688 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-unique depth=32 pool=5 input_ns=17159 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-unique depth=32 calls=40 ms=11 warm_ns=11201278 cold_ns=311714 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-unique depth=32 peak_rss_kib=68960 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-unique depth=32 pool=5 input_ns=26807 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-unique depth=32 calls=40 ms=6 warm_ns=6098070 cold_ns=186753 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-unique depth=32 peak_rss_kib=68712 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-unique depth=128 pool=5 input_ns=107234 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-unique depth=128 calls=10 ms=19 warm_ns=19658813 cold_ns=2277871 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-unique depth=128 peak_rss_kib=68452 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-unique depth=128 pool=5 input_ns=82457 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-unique depth=128 calls=10 ms=27 warm_ns=27324201 cold_ns=2953974 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-unique depth=128 peak_rss_kib=68676 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-unique depth=128 pool=5 input_ns=677538 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-unique depth=128 calls=10 ms=15 warm_ns=15001210 cold_ns=3718939 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-unique depth=128 peak_rss_kib=68392 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-unique depth=128 pool=5 input_ns=379388 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-unique depth=128 calls=10 ms=14 warm_ns=14848835 cold_ns=1644448 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-unique depth=128 peak_rss_kib=68452 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-unique depth=128 pool=5 input_ns=51170 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-unique depth=128 calls=10 ms=27 warm_ns=27397614 cold_ns=2817771 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-unique depth=128 peak_rss_kib=68548 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-unique depth=128 pool=5 input_ns=90118 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-unique depth=128 calls=10 ms=19 warm_ns=19565741 cold_ns=2121351 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-unique depth=128 peak_rss_kib=68868 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-collision depth=8 pool=5 input_ns=12396 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-collision depth=8 calls=100 ms=1 warm_ns=1808045 cold_ns=47993 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-collision depth=8 peak_rss_kib=68708 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-collision depth=8 pool=5 input_ns=8179 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-collision depth=8 calls=100 ms=4 warm_ns=4896177 cold_ns=82547 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-collision depth=8 peak_rss_kib=68656 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-collision depth=8 pool=5 input_ns=38753 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-collision depth=8 calls=100 ms=10 warm_ns=10269193 cold_ns=182912 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-collision depth=8 peak_rss_kib=68420 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-collision depth=8 pool=5 input_ns=37639 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-collision depth=8 calls=100 ms=10 warm_ns=10235859 cold_ns=155736 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-collision depth=8 peak_rss_kib=68952 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-collision depth=8 pool=5 input_ns=7795 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-collision depth=8 calls=100 ms=4 warm_ns=4897316 cold_ns=82829 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-collision depth=8 peak_rss_kib=68588 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-collision depth=8 pool=5 input_ns=13228 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-collision depth=8 calls=100 ms=1 warm_ns=1883575 cold_ns=47767 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-collision depth=8 peak_rss_kib=68248 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-collision depth=32 pool=5 input_ns=27533 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-collision depth=32 calls=40 ms=6 warm_ns=6293508 cold_ns=187134 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-collision depth=32 peak_rss_kib=68540 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-collision depth=32 pool=5 input_ns=15854 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-collision depth=32 calls=40 ms=13 warm_ns=13442705 cold_ns=373735 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-collision depth=32 peak_rss_kib=68748 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-collision depth=32 pool=5 input_ns=110733 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-collision depth=32 calls=40 ms=26 warm_ns=26752022 cold_ns=726463 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-collision depth=32 peak_rss_kib=68188 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-collision depth=32 pool=5 input_ns=103501 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-collision depth=32 calls=40 ms=26 warm_ns=26677765 cold_ns=767580 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-collision depth=32 peak_rss_kib=68708 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-collision depth=32 pool=5 input_ns=16110 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-collision depth=32 calls=40 ms=13 warm_ns=13530247 cold_ns=394508 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-collision depth=32 peak_rss_kib=68696 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-collision depth=32 pool=5 input_ns=26887 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-collision depth=32 calls=40 ms=6 warm_ns=6067510 cold_ns=186515 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-collision depth=32 peak_rss_kib=68672 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-collision depth=128 pool=5 input_ns=91554 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-collision depth=128 calls=10 ms=19 warm_ns=19728094 cold_ns=2044657 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-collision depth=128 peak_rss_kib=68332 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-collision depth=128 pool=5 input_ns=50428 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-collision depth=128 calls=10 ms=39 warm_ns=39525456 cold_ns=4034787 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-collision depth=128 peak_rss_kib=68336 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-collision depth=128 pool=5 input_ns=334260 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-collision depth=128 calls=10 ms=70 warm_ns=70204366 cold_ns=7205888 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-collision depth=128 peak_rss_kib=68316 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=fn-collision depth=128 pool=5 input_ns=336284 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=dag shape=fn-collision depth=128 calls=10 ms=69 warm_ns=69433449 cold_ns=7418198 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=fn-collision depth=128 peak_rss_kib=68552 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=fn-collision depth=128 pool=5 input_ns=50565 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=legacy shape=fn-collision depth=128 calls=10 ms=39 warm_ns=39592894 cold_ns=4051096 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=fn-collision depth=128 peak_rss_kib=69008 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=fn-collision depth=128 pool=5 input_ns=114455 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_WHNF_SAMPLE variant=lean shape=fn-collision depth=128 calls=10 ms=19 warm_ns=19502719 cold_ns=2052452 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=fn-collision depth=128 peak_rss_kib=68172 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=metadata-pair depth=32 pool=5 input_ns=13424 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=lean shape=metadata-pair depth=32 calls=100 warm_ns=1086872 cold_ns=29091 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=metadata-pair depth=32 peak_rss_kib=68680 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=metadata-pair depth=32 pool=5 input_ns=4872 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=legacy shape=metadata-pair depth=32 calls=100 warm_ns=8487114 cold_ns=107983 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=metadata-pair depth=32 peak_rss_kib=68304 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=metadata-pair depth=32 pool=5 input_ns=33377 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=dag shape=metadata-pair depth=32 calls=100 warm_ns=4237934 cold_ns=66900 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=metadata-pair depth=32 peak_rss_kib=68200 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=metadata-pair depth=32 pool=5 input_ns=33933 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=dag shape=metadata-pair depth=32 calls=100 warm_ns=4206071 cold_ns=69036 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=metadata-pair depth=32 peak_rss_kib=68544 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=metadata-pair depth=32 pool=5 input_ns=5482 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=legacy shape=metadata-pair depth=32 calls=100 warm_ns=8658773 cold_ns=111052 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=metadata-pair depth=32 peak_rss_kib=68596 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=metadata-pair depth=32 pool=5 input_ns=14711 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=lean shape=metadata-pair depth=32 calls=100 warm_ns=1099896 cold_ns=26935 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=metadata-pair depth=32 peak_rss_kib=69012 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=metadata-pair depth=96 pool=5 input_ns=33036 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=lean shape=metadata-pair depth=96 calls=40 warm_ns=3001099 cold_ns=94394 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=metadata-pair depth=96 peak_rss_kib=68568 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=metadata-pair depth=96 pool=5 input_ns=10431 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=legacy shape=metadata-pair depth=96 calls=40 warm_ns=20085672 cold_ns=563729 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=metadata-pair depth=96 peak_rss_kib=68340 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=metadata-pair depth=96 pool=5 input_ns=84418 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=dag shape=metadata-pair depth=96 calls=40 warm_ns=5241900 cold_ns=164724 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=metadata-pair depth=96 peak_rss_kib=68188 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=metadata-pair depth=96 pool=5 input_ns=84077 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=dag shape=metadata-pair depth=96 calls=40 warm_ns=5240451 cold_ns=163703 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=metadata-pair depth=96 peak_rss_kib=68168 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=metadata-pair depth=96 pool=5 input_ns=9579 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=legacy shape=metadata-pair depth=96 calls=40 warm_ns=20239712 cold_ns=555784 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=metadata-pair depth=96 peak_rss_kib=68540 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=metadata-pair depth=96 pool=5 input_ns=32447 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=lean shape=metadata-pair depth=96 calls=40 warm_ns=2874152 cold_ns=93738 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=metadata-pair depth=96 peak_rss_kib=68292 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=metadata-pair depth=192 pool=5 input_ns=62494 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=lean shape=metadata-pair depth=192 calls=20 warm_ns=5257850 cold_ns=285615 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=metadata-pair depth=192 peak_rss_kib=68984 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=metadata-pair depth=192 pool=5 input_ns=16745 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=legacy shape=metadata-pair depth=192 calls=20 warm_ns=34667428 cold_ns=1842056 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=metadata-pair depth=192 peak_rss_kib=68532 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=metadata-pair depth=192 pool=5 input_ns=166452 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=dag shape=metadata-pair depth=192 calls=20 warm_ns=5308896 cold_ns=321079 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=metadata-pair depth=192 peak_rss_kib=68288 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=dag shape=metadata-pair depth=192 pool=5 input_ns=157079 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=dag shape=metadata-pair depth=192 calls=20 warm_ns=5506680 cold_ns=336184 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=dag shape=metadata-pair depth=192 peak_rss_kib=68360 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=legacy shape=metadata-pair depth=192 pool=5 input_ns=22633 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=legacy shape=metadata-pair depth=192 calls=20 warm_ns=34837357 cold_ns=1823502 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=legacy shape=metadata-pair depth=192 peak_rss_kib=68820 scope=isolated_worker",
+    "PSC1_DAG_NATIVE_CONSTRUCTION variant=lean shape=metadata-pair depth=192 pool=5 input_ns=62262 representation=measured_variant_only",
+    "PSC1_DAG_NATIVE_DEFEQ_SAMPLE variant=lean shape=metadata-pair depth=192 calls=20 warm_ns=5359474 cold_ns=311046 input_pool=5 fuel=4096 fuel_scope=pskernel_only official_budget=kernel_internal all_correct=true semantic_cache=fresh_per_public_operation",
+    "PSC1_DAG_NATIVE_PROCESS_MEMORY variant=lean shape=metadata-pair depth=192 peak_rss_kib=68596 scope=isolated_worker"
+  ],
+  "artifacts": [
+    {
+      "id": 12469314736,
+      "name": "psc1-v2-dag-native",
+      "size_in_bytes": 33280573,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12469314736",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12469314736/zip",
+      "expired": false,
+      "created_at": "2026-10-23T00:43:27Z",
+      "expires_at": "2026-11-22T00:43:24Z",
+      "updated_at": "2026-10-23T00:43:27Z",
+      "digest": "sha256:e5372beada059940fd3674c6a449565719d05def6bb0f76eb02db66ddd0812b2",
+      "workflow_run": {
+        "id": 39879401423,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849"
+      }
+    }
+  ],
+  "limits": "Native subset only. Both generated routes, String aggregates, owner ABBA, generated measurements and full independent Arena remain pending."
+}

@@ -1,3 +1,70 @@
+## Progress checkpoint: ae916be4 native integration PASS; generated qualification pending
+
+Executable/harness `ae916be40ec30a8a0caf5dd683eb7d1d54966849`;
+tree `a8db2401141bc73a00dfb169c9b3f45b6f499dae`. This documentation-only child inherits no
+executable qualification. Live integration remains123c41197950b6761be965fd21c57142ee2b0d1c.
+Current exact jobs:
+- PSC1 PSKernel-Core Expression V2 research: https://github.com/dwijayuda/pskernel/actions/runs/39879401425
+  generated-js-full-checker-bridge=in_progress (job120172865111); portable-ps-closure=success (job120172865303); portable-v2-check=success (job120172865308); whnf-subset-regression=success (job120172865309); full-checker-bridge=success (job120172865389); expr-v2-differential=success (job120172865432)
+- PSC1 Expression V2 production integration: https://github.com/dwijayuda/pskernel/actions/runs/39879401423
+  native-dag-integration=success (job120172865344); generated-dag-integration=in_progress (job120172865519)
+- PSC1 authentic Arena timeout diagnostics: https://github.com/dwijayuda/pskernel/actions/runs/39879401524
+  authentic-timeout-diagnostics=in_progress (job120172865376)
+- PSC1 Lean Arena 4.35 full corpus qualification: https://github.com/dwijayuda/pskernel/actions/runs/39879401452
+  official-arena-reference=success (job120172865174); generated-arena-comparison=in_progress (job120173469604)
+- PSC1 PSKernel-Core correctness: https://github.com/dwijayuda/pskernel/actions/runs/39879401429
+  psc1-portability=in_progress (job120172865185); native-kernel=success (job120172865463)
+
+Native integration120172865344 PASSED all retained steps:219 proof reports,
+27 axiom-free; remaining axiom union only propext,Classical.choice,Quot.sound.
+Allfive scalar hash equations,2730 native cases,3 long cases,genuine String
+294/377/all6cases+singletons,official provider comparisons,24 detached native
+provider cases and complete native measurement rows passed. Exact proofs,
+native executable/fixture/harness digests,steps,measurements and artifact12469314736:
+evidence/2026-10-23-t01f-final-source-native.json.
+Native-kernel120172865463 also PASS; five of six research jobs PASS.
+Official Arena120172865174 PASS:193cases,122accepted,71rejected,complete.
+The independent comparison is pending; official results do not qualify it.
+
+Both authentic generated producers are running; their six-sample runtime-only
+matrices/aggregates,generated provider24CLI+8API/measurements and unchanged
+32worker384call ABBA remain pending. Profile and full193 independent Arena
+are pending. No current-source full A/T01F acceptance or integration yet.
+T05 remains blocked. All historical timeouts/regressions and B/C/D gaps remain.
+Complete preflight16aac mixed PASS was1455.04s/1165840KiB,1400assertions;
+it qualifies only that narrow source/sample, not current final matrices.
+Active inventory: evidence/2026-10-23-t01f-final-qualification-active.json.
+
+### Ready-to-copy continuation
+
+Continue PSC1 PSKernel-Core T01F in dwijayuda/pskernel. Fetch fresh work branch
+work/psc1-pskernel-t01f-string-20261022 and integration branch
+integration/psc1-pskernel-expr-v2-lean435-20261021 before mutation.
+Read this newest checkpoint and saved active/native evidence. Qualified-candidate
+executable AND harness source is ae916be40ec30a8a0caf5dd683eb7d1d54966849;
+the live work HEAD may be a [skip ci] documentation child. Reuse the five
+already-triggered exact-source runs above, not the earlier fad56 activation.
+Do not launch duplicate builds or transfer a parent's qualification.
+Follow both authentic route producers,all6 whole-case shards+strict aggregates,
+all retained native/official/proof/provider24CLI+8API/research/measurement gates,
+unchanged32worker384call owner ABBA and all193 Arena/profile to terminal.
+Keep scoped A,T01F,B,C,D distinct; corpus collection success is not corpus PASS.
+Preserve fuel4096,2048MiB,empty runtimePATH,25minutes/shard,maxparallel2,
+allpositive/negative assertions,exact ownership/sessions/private IDs,
+Arena60seconds/case2workers and full original/adapted case hashes.
+Actions Linux only for builds/tests/kernel execution. No local execution.
+Fix genuine failures narrowly and retain every rejected source/receipt;
+any source change requires fresh full source-bound qualification.
+Only integrate after required scoped qualification using fresh expected_sha,
+force:false,preserving concurrent changes. No main merge or npm publish.
+One next task is finish/evaluate the existing final T01F suite. T05 follows
+full T01F acceptance,then T06/T07,T04a;T04b separate. Save exact durable
+continuation and truthful pending/failure/performance boundaries if unfinished.
+
+Older chronological entries below remain historical.
+
+---
+
 ## Live final qualification: ae916be4 — running, not qualified
 
 Executable AND harness: `ae916be40ec30a8a0caf5dd683eb7d1d54966849`.

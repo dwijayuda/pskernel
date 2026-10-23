@@ -1,0 +1,9 @@
+{
+  "schema": "psc1-direct-wasm-ir-diagnosis-request/1",
+  "runId": 40015615536,
+  "requestCommit": "afed7c4b2681533b525d7434856a97a78fd3d745",
+  "sourceCommit": "88f5b3aa7c51ad805bcfe463bce91a4d86a4fd69",
+  "artifactId": 12527599858,
+  "artifactDigest": "sha256:8cdc274e24aab903f545af4e109785bf3cd0bcd812e6a88504f50d315569d199",
+  "closure": "07f9b73f16fbd46fc27e7d1de96e733b775f3067f8c064fb59491cde640d6574"
+}

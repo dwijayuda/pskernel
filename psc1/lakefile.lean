@@ -487,3 +487,7 @@ lean_lib PsWasmBinaryCarrierReference where
 lean_exe psc1_direct_selfhost_preflight_tests where
   srcDir := "test"
   root := `DirectSelfHostPreflightTests
+
+lean_exe psc1_direct_wasm_ir_probe where
+  srcDir := "scripts"
+  root := `DirectWasmIrProbe

@@ -1,0 +1,33 @@
+{
+  "schema": "psc1-knot-proof-bridge-independent-review-v1",
+  "baseSource": "ce5747574230e009705372f36da80978060a78ad",
+  "target": "psc1/test/PsKernelKnotFuelProofs.lean",
+  "originalDigest": {
+    "bytes": 130714,
+    "sha256": "44c0bfde20f2a3d3b3d049cbf8503e9a28d02d1f5807cd6c619a6f2a5a6a37ce"
+  },
+  "reviewedDigest": {
+    "bytes": 131180,
+    "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b"
+  },
+  "frozenWorkerRegion": {
+    "byteIdentical": true,
+    "bytes": 102676,
+    "sha256": "fed4e88f30f4fada6790788dadde701d0f9cb841c92468acaf16d3c150ed2662"
+  },
+  "all16TheoremStatementsByteIdentical": true,
+  "all16PrintedAxiomNamesUnchanged": true,
+  "onlyProofBodiesChanged": [
+    "WhnfWithFuel_delayed_recursion_preserves",
+    "WhnfCoreWithFuel_delayed_recursion_preserves",
+    "WhnfCoreWithFuel_full_mode_preserves_historical",
+    "InferCoreWithFuel_delayed_recursion_preserves"
+  ],
+  "addedImport": "PsKernelClosedCacheAnalysisRegression",
+  "universalRewriteLemmas": [
+    "PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq",
+    "PsKernelClosedCacheAnalysisRegression.infer_map_get_eq"
+  ],
+  "review": "Three WHNF proof bodies rewrite the fused semantic lookup using its universal map-get equality; one inference proof rewrites the fused inference lookup using its universal mode-sensitive equality. All arguments, resources, states, historical/corrected references, and theorem assumptions are unchanged. No frozen implementation worker changes, additional axioms, or executable changes. Native module import/build wiring is pending a separate review.",
+  "leanCompilation": "Not executed locally; GitHub Actions Linux remains required."
+}

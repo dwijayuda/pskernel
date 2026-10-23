@@ -1,0 +1,123 @@
+{
+  "sourceSha": "ce5747574230e009705372f36da80978060a78ad",
+  "method": "Static exact-source targeted reference search in the eight post-Knot proof files, plus all eighteen PSKernel workflows. This is not proof elaboration.",
+  "remainingProofFiles": [
+    {
+      "path": "psc1/test/PsKernelExprV2AdmissionGuardProofs.lean",
+      "gitBlobSha": "de597c70416cc91b3606d72edfbf01e24529588a",
+      "targetedChangedFunctionReferences": []
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2RecursorProofs.lean",
+      "gitBlobSha": "d50d3e781ae27fca7d54b278cee9a0698c7cf8bf",
+      "targetedChangedFunctionReferences": []
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2RecursorMajorProofs.lean",
+      "gitBlobSha": "de27dbe6ed55f180947a7e0dc423082a7f2cb2cb",
+      "targetedChangedFunctionReferences": []
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2RecursorKProofs.lean",
+      "gitBlobSha": "25022eb665c4ec4a26b2d0b63706e2c3b2f23b51",
+      "targetedChangedFunctionReferences": []
+    },
+    {
+      "path": "psc1/test/PsKernelNameWorkerProofs.lean",
+      "gitBlobSha": "43d280f3d4da3b21f4c67e53da08dbb036b5a30f",
+      "targetedChangedFunctionReferences": []
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2QuotOwnerProofs.lean",
+      "gitBlobSha": "47f7c6d019e798d54797bcc6a87036d9fd485d79",
+      "targetedChangedFunctionReferences": []
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2WhnfABIProofs.lean",
+      "gitBlobSha": "8363d4794a6c56a46bd790294cc8b8d8709fe139",
+      "targetedChangedFunctionReferences": []
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2OwnedStateProofs.lean",
+      "gitBlobSha": "084b4a646af750d56d9259ad8eafbfc0a2c83658",
+      "targetedChangedFunctionReferences": []
+    }
+  ],
+  "sessionProofs": "Already covered by the passed a069 narrow scope; must still execute on next source.",
+  "workflowInvocationInventory": [
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-controlled-js-memory.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-hotpath-benchmark.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-js-ablation.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-matched-official.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-focus.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-owner-preflight.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-profile.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-v1-profile.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t03a-focus.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t03b-focus.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-whole-benchmark.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-whole-js-benchmark.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      "directKnotInvocations": 1
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "directKnotInvocations": 0
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+      "directKnotInvocations": 0
+    }
+  ],
+  "embeddedPythonBlocksParsedWithoutExecution": 12,
+  "result": "Only the current integration workflow directly invoked Knot proofs; the repaired narrow workflow adds the second invocation. No changed V1 function/cache API references found in the eight reviewed remaining proof files. Native elaboration remains required."
+}

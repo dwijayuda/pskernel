@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Knot
+import PsKernelClosedCacheAnalysisRegression
 
 /-!
 Extensional equivalence of delayed recursive aliases for every fuel, callback,
@@ -12,6 +13,8 @@ cheapRec=false. Other historical comparisons remain unchanged.
 Both sides use the same imported helper definitions. These local replacement
 theorems assert neither global kernel soundness nor a runtime allocation bound.
 The frozen workers remain outside the portable source closure.
+Shared cache lookups are rewritten only in the proofs below with the imported
+universal closed-cache equivalences; the frozen worker bodies stay unchanged.
 -/
 namespace PsKernelKnotFuelProofs
 
@@ -2472,7 +2475,8 @@ theorem WhnfWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext reduceRecursor context state expr
-      simp only [psKernelWhnfWithFuel, beforeWhnfWithFuel, ih] <;> rfl
+      simp only [psKernelWhnfWithFuel, beforeWhnfWithFuel, ih,
+        PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq] <;> rfl
 
 #print axioms WhnfWithFuel_delayed_recursion_preserves
 
@@ -2484,7 +2488,8 @@ theorem WhnfCoreWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext publicWhnf reduceRecursor context state expr cheapRec cheapProj
-      simp only [psKernelWhnfCoreWithFuel, cacheCorrectedEagerWhnfCoreWithFuel, ih] <;> rfl
+      simp only [psKernelWhnfCoreWithFuel, cacheCorrectedEagerWhnfCoreWithFuel, ih,
+        PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq] <;> rfl
 
 #print axioms WhnfCoreWithFuel_delayed_recursion_preserves
 
@@ -2507,7 +2512,8 @@ theorem WhnfCoreWithFuel_full_mode_preserves_historical (fuel : Nat) :
   | succ fuel ih =>
       intro publicWhnf reduceRecursor context state expr cheapProj
       simp only [psKernelWhnfCoreWithFuel, beforeWhnfCoreWithFuel,
-        psKernelWhnfCoreCacheDisabled, ih] <;> rfl
+        psKernelWhnfCoreCacheDisabled, ih,
+        PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq] <;> rfl
 
 #print axioms WhnfCoreWithFuel_full_mode_preserves_historical
 
@@ -2517,7 +2523,8 @@ theorem InferCoreWithFuel_delayed_recursion_preserves (fuel : Nat) :
   | zero => rfl
   | succ fuel ih =>
       funext whnf defeq context state expr inferOnly
-      simp only [psKernelInferCoreWithFuel, beforeInferCoreWithFuel, ih] <;> rfl
+      simp only [psKernelInferCoreWithFuel, beforeInferCoreWithFuel, ih,
+        PsKernelClosedCacheAnalysisRegression.infer_map_get_eq] <;> rfl
 
 #print axioms InferCoreWithFuel_delayed_recursion_preserves
 

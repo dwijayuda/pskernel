@@ -1,0 +1,59 @@
+{
+  "schema": "psc1-knot-workflow-independent-review-v1",
+  "baseSource": "ce5747574230e009705372f36da80978060a78ad",
+  "stagedFiles": [
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      "bytes": 97038,
+      "sha256": "3c40f738013c7622544c0f6e205461297594289a92993469ff55ebdab7345035"
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "bytes": 45286,
+      "sha256": "17a3b8c0b21020659d77ca76018fdf2448fba984214740f3de2f815ca43f0d58"
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2.yml",
+      "bytes": 21240,
+      "sha256": "b4df3e32ee0e65068bcbad9c65f19619884b45044063898d04c393d61db22da3"
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435.yml",
+      "bytes": 10362,
+      "sha256": "0df1368d000956ef184dd71675bf805fa0bda714bdf40796eff45c088135281d"
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+      "bytes": 6814,
+      "sha256": "02869622c2105db0c2f9cb022c1f7c7c111ec3db5080baa4a5c92f6fe0e19540"
+    },
+    {
+      "path": "psc1/kernel-lakefile.lean",
+      "bytes": 13757,
+      "sha256": "a757b196a2bdf9920333cc6e3642d664886f12463c94c7565d53da5a385d6a6d"
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+      "bytes": 37998,
+      "sha256": "77dcbadfc50b69fcbbf20a2a7015727b62cdd154ce860deb09a1a42592cdce7f"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/docs/drafts/t01f-final-shards/psc1-pskernel-expr-v2-integration.yml",
+      "bytes": 97086,
+      "sha256": "0328921094ce5c2e5cf06e5b765813a7e1093ff74e71dc2c7759939b1dbe943b"
+    }
+  ],
+  "verification": {
+    "fiveFullWorkTriggersPaused": true,
+    "oneNarrowWorkTrigger": true,
+    "allNarrowGeneratedProducerRuntimeBodiesUnchanged": true,
+    "allIntegrationGeneratedAndShardedBodiesUnchanged": true,
+    "canonicalWorkflowOnlyBranchPause": true,
+    "nativeOnlyProofLibraryOutsideProductionRoots": true,
+    "proofModuleBuiltBeforeKnotImportBothWorkflows": true,
+    "narrowChecks108ReportsIncludingExact16KnotNames": true,
+    "frozenKnotStatementsAndBodiesReviewedSeparately": true,
+    "savedIntegrationDraftSynchronized": true
+  },
+  "limits": "Static workflow/library review only. New Lean elaboration and CI qualification remain pending. This review adds no execution, changes no pins/resources, and does not qualify the source."
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "psc1-knot-proof-bridge-static-preservation-v1",
+  "baseSource": "ce5747574230e009705372f36da80978060a78ad",
+  "target": "psc1/test/PsKernelKnotFuelProofs.lean",
+  "frozenWorkerRegion": {
+    "bytes": 102675,
+    "sha256": "845de9b2edab7651ed552d9f2e4024c7e041e69547c5188fd60b911833c9e915",
+    "byteIdentical": true
+  },
+  "existingTheoremStatements": 16,
+  "allStatementsByteIdentical": true,
+  "allPrintedAxiomNamesIdentical": true,
+  "nativeOnlyImport": "PsKernelClosedCacheAnalysisRegression",
+  "proofChanges": [
+    "WhnfWithFuel_delayed_recursion_preserves",
+    "WhnfCoreWithFuel_delayed_recursion_preserves",
+    "WhnfCoreWithFuel_full_mode_preserves_historical",
+    "InferCoreWithFuel_delayed_recursion_preserves"
+  ],
+  "rewrites": [
+    "PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq",
+    "PsKernelClosedCacheAnalysisRegression.infer_map_get_eq"
+  ],
+  "newFile": {
+    "bytes": 131180,
+    "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b"
+  },
+  "leanCompilation": "Not executed locally; awaits GitHub Actions Linux."
+}

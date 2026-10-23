@@ -1,3 +1,58 @@
+## 2026-10-24 final native Knot proof failure; universal-lemma bridge in narrow preflight
+
+Final source `ce5747574230e009705372f36da80978060a78ad`, integration
+[run 40032581038](https://github.com/dwijayuda/pskernel/actions/runs/40032581038),
+attempt 1, FAILED its native job `120684188035`. Four existing proofs in
+`test/PsKernelKnotFuelProofs.lean` no longer closed by definitional equality:
+`WhnfWithFuel_delayed_recursion_preserves`,
+`WhnfCoreWithFuel_delayed_recursion_preserves`,
+`WhnfCoreWithFuel_full_mode_preserves_historical`, and
+`InferCoreWithFuel_delayed_recursion_preserves`.
+The log reports 12 standard-only Knot proofs and four failed proofs with
+`sorryAx`; the gate rejected them. The later seven new cache-analysis and
+eleven scalar-hash proof invocations were NOT reached in this final job.
+Do not inherit their a069 narrow PASS as a final-source native PASS.
+
+All 39 native artifact files were independently inspected. Artifact
+`12536115592`: 33,288,730 bytes, SHA-256
+`8e8a530cb2c26eed28dcf55cd32f9be69104d2fc00721fc80d87375b751e49b5`.
+Full failing goals, proof reports, source/run/attempt and upload bindings:
+`docs/evidence/2026-10-24-t01f-final-knot-proof-failure.json`.
+The same job's native String 294-admission / 377-metadata / six-sample controls
+passed, but this does not qualify the failed job. Canonical native job
+`120684187642` in run `40032580944` passed its separate 62 cases.
+Other ce574 jobs/results remain bound to that source and attempt; no final
+acceptance or integration follows from them.
+
+The containing correction changes only four proof scripts, adding rewrites
+by the already proved `semantic_map_get_eq` or `infer_map_get_eq`.
+All 16 original theorem statements, printed axiom names, and the entire
+102,675-byte frozen reference-worker region remain byte-for-byte unchanged.
+The native-only proof module is built explicitly before the Knot test imports
+it; it does not enter the portable kernel closure. Production Lean, seven
+new universal statements, eleven scalar-hash proofs, fixtures, generated
+matrices, String harness and resource limits are unchanged.
+Independent static preservation review:
+`docs/evidence/2026-10-24-t01f-knot-bridge-independent-review.json`.
+This is a proposed proof repair, not a claimed Lean PASS.
+
+All five full work-branch push triggers are PAUSED again. One native-first
+narrow push is active and now checks the 16 retained Knot reports as well as
+the original 92 reports: exactly 108 total, with forbidden axioms rejected.
+Only after this prerequisite succeeds may its bounded 1,884 matrix, strict
+body checks, complete producer, controls and exact 1,400-assertion mixed
+runtime proceed. Follow that one new coherent candidate; do not rerun the
+failed ce574 attempt or mix its receipts with a successor.
+
+Retain the stricter final six-shard gate: 1,400 assertions per sample and
+8,400 executed assertions per route, explicitly including repeated prefixes.
+After a complete corrected narrow pass, activate one new exact final source
+for both routes and all retained gates. T01F/current A/B/D remain OPEN; C FAIL.
+No T05 or integration advancement is claimed. Integration remains last observed
+at `123c41197950b6761be965fd21c57142ee2b0d1c`; fresh-read both refs before writes.
+
+---
+
 ## 2026-10-24 complete closed-cache narrow PASS; exact final qualification activated
 
 Exact source `a069080c35df3d5a19b06e133f9fa33ffabbb35b` completed

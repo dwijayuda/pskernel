@@ -177,6 +177,11 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Research.ExprV2PagedWhnfSubset
   ]
 
+-- Native proof-only module ownership; this test root is outside portable PsKernelCore.
+lean_lib PsKernelClosedCacheAnalysisProofs where
+  srcDir := "test"
+  roots := #[`PsKernelClosedCacheAnalysisRegression]
+
 lean_exe psc1_kernel_regression where
   srcDir := "test"
   root := `PsKernelCoreRegression

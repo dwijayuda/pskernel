@@ -449,9 +449,31 @@ jobs:
           lake -f kernel-lakefile.lean env lean test/PsKernelExprEqualityProofs.lean \
             | tee "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
           grep -q 'PSKERNEL_EXPR_EQUALITY_NATIVE: PASS comparisons=800 hostile=21 sharedDepth=64' "$RUNNER_TEMP/psc1-expr-equality-proofs.log"
+          lake -f kernel-lakefile.lean build PsKernelClosedCacheAnalysisProofs
+          test "$(grep -c '^#print axioms ' test/PsKernelClosedCacheAnalysisRegression.lean)" -eq 7
+          lake -f kernel-lakefile.lean env lean test/PsKernelClosedCacheAnalysisRegression.lean \
+            2>&1 | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-proofs.log"
+          python3 - <<'PY'
+          import os, pathlib, re
+          log = (pathlib.Path(os.environ['RUNNER_TEMP']) / 'psc1-closed-cache-analysis-proofs.log').read_text()
+          reports = re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log)
+          expected = {'PsKernelClosedCacheAnalysisRegression.' + name for name in
+                      ('analysis_eq', 'semantic_map_get_eq', 'semantic_map_insert_eq',
+                       'semantic_pair_contains_eq', 'semantic_pair_insert_eq',
+                       'infer_map_get_eq', 'infer_map_insert_eq')}
+          if len(reports) != 7 or {name for name, _ in reports} != expected:
+              raise RuntimeError('Missing one of the seven exact closed-cache equivalence reports')
+          if any(bad in log for bad in ('sorryAx', 'Lean.ofReduceBool', 'Lean.trustCompiler')):
+              raise RuntimeError('Forbidden closed-cache equivalence proof dependency')
+          for name, axioms in reports:
+              used = {axiom.strip() for axiom in axioms.split(',') if axiom.strip()}
+              if not used <= {'propext', 'Classical.choice', 'Quot.sound'}:
+                  raise RuntimeError('Unexpected axiom in ' + name + ': ' + repr(used))
+          print('PSC1_CLOSED_CACHE_ANALYSIS_PROOFS: PASS theorems=7 allowedStandardAxiomsOnly=true')
+          PY
           test "$(grep -c '^#print axioms ' test/PsKernelKnotFuelProofs.lean)" -eq 16
           lake -f kernel-lakefile.lean env lean test/PsKernelKnotFuelProofs.lean \
-            | tee "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
+            2>&1 | tee "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
           grep -q 'PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15' "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
           grep -Fq 'PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical' "$RUNNER_TEMP/psc1-knot-fuel-proofs.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2AdmissionGuardProofs.lean \
@@ -479,27 +501,6 @@ jobs:
           test "$(grep -c '^#print axioms PsKernelExprV2OwnedStateProofs\.' test/PsKernelExprV2OwnedStateProofs.lean)" -eq 21
           lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OwnedStateProofs.lean \
             | tee "$RUNNER_TEMP/psc1-owned-state-proofs.log"
-          test "$(grep -c '^#print axioms ' test/PsKernelClosedCacheAnalysisRegression.lean)" -eq 7
-          lake -f kernel-lakefile.lean env lean test/PsKernelClosedCacheAnalysisRegression.lean \
-            2>&1 | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-proofs.log"
-          python3 - <<'PY'
-          import os, pathlib, re
-          log = (pathlib.Path(os.environ['RUNNER_TEMP']) / 'psc1-closed-cache-analysis-proofs.log').read_text()
-          reports = re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log)
-          expected = {'PsKernelClosedCacheAnalysisRegression.' + name for name in
-                      ('analysis_eq', 'semantic_map_get_eq', 'semantic_map_insert_eq',
-                       'semantic_pair_contains_eq', 'semantic_pair_insert_eq',
-                       'infer_map_get_eq', 'infer_map_insert_eq')}
-          if len(reports) != 7 or {name for name, _ in reports} != expected:
-              raise RuntimeError('Missing one of the seven exact closed-cache equivalence reports')
-          if any(bad in log for bad in ('sorryAx', 'Lean.ofReduceBool', 'Lean.trustCompiler')):
-              raise RuntimeError('Forbidden closed-cache equivalence proof dependency')
-          for name, axioms in reports:
-              used = {axiom.strip() for axiom in axioms.split(',') if axiom.strip()}
-              if not used <= {'propext', 'Classical.choice', 'Quot.sound'}:
-                  raise RuntimeError('Unexpected axiom in ' + name + ': ' + repr(used))
-          print('PSC1_CLOSED_CACHE_ANALYSIS_PROOFS: PASS theorems=7 allowedStandardAxiomsOnly=true')
-          PY
           test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 11
           lake -f kernel-lakefile.lean env lean --run test/PsKernelScalarHashWorkerRegression.lean \
             | tee "$RUNNER_TEMP/psc1-scalar-hash-native.log"

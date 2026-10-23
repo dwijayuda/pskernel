@@ -1,6 +1,17 @@
 name: PSC1 T01F closed-cache analysis preflight
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - work/psc1-pskernel-t01f-string-20261022
+    paths:
+      - psc1/kernel-lakefile.lean
+      - psc1/packages/pskernel-core/src/**
+      - psc1/test/PsKernelScalarHashWorkerRegression.lean
+      - psc1/test/PsKernelClosedCacheAnalysisRegression.lean
+      - psc1/test/PsKernelKnotFuelProofs.lean
+      - psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs
+      - .github/workflows/psc1-pskernel-t01f-hash.yml
 permissions:
   contents: read
   actions: read
@@ -42,20 +53,27 @@ jobs:
           grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           grep -Fqx 'PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           if grep -Eq 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"; then exit 1; fi
-      - name: Prove all seven closed-cache equivalences before generated execution
+      - name: Prove seven cache equivalences and all retained Knot equations before generated execution
         working-directory: psc1
         shell: bash
         run: |
           set -euo pipefail
           test "$(grep -c '^#print axioms ' test/PsKernelClosedCacheAnalysisRegression.lean)" -eq 7
+          lake -f kernel-lakefile.lean build PsKernelClosedCacheAnalysisProofs
           lake -f kernel-lakefile.lean env lean test/PsKernelClosedCacheAnalysisRegression.lean \
             2>&1 | tee "$RUNNER_TEMP/psc1-t01f/closed-cache-analysis-proofs.log"
           if grep -Eq 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-t01f/closed-cache-analysis-proofs.log"; then exit 1; fi
+          test "$(grep -c '^#print axioms ' test/PsKernelKnotFuelProofs.lean)" -eq 16
+          lake -f kernel-lakefile.lean env lean test/PsKernelKnotFuelProofs.lean \
+            2>&1 | tee "$RUNNER_TEMP/psc1-t01f/knot-fuel-proofs.log"
+          grep -Fqx 'PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15' "$RUNNER_TEMP/psc1-t01f/knot-fuel-proofs.log"
+          grep -Fqx 'PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical' "$RUNNER_TEMP/psc1-t01f/knot-fuel-proofs.log"
           python3 - <<'PY'
           import os, pathlib, re
           root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'psc1-t01f'
           expected = {'cache-scope-proofs.log': 60, 'session-proofs.log': 14,
-                      'scalar-hash-native.log': 11, 'closed-cache-analysis-proofs.log': 7}
+                      'scalar-hash-native.log': 11, 'closed-cache-analysis-proofs.log': 7,
+                      'knot-fuel-proofs.log': 16}
           allowed = {'propext', 'Classical.choice', 'Quot.sound'}
           total = 0
           for filename, count in expected.items():
@@ -63,6 +81,27 @@ jobs:
               reports = re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])", log)
               if len(reports) != count:
                   raise RuntimeError('Unexpected proof report count for ' + filename + ': ' + str(len(reports)))
+              if filename == 'knot-fuel-proofs.log':
+                  knot_expected = {
+                      'PsKernelKnotFuelProofs.ReduceRecursorBoundedWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.IsDefEqWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.WhnfWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.WhnfCoreWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.WhnfCoreWithFuel_full_mode_preserves_historical',
+                      'PsKernelKnotFuelProofs.InferCoreWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.InferAppOnlyLoopWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.DefEqLazyReductionWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.DefEqLazyProjReductionWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.DefEqArgsWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.DefEqLambdaSpineWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.DefEqForallSpineWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.DefEqCompareExprListsWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.WhnfCountLambdasWithFuel_delayed_recursion_preserves',
+                      'PsKernelKnotFuelProofs.StringConstructorDataWithFuel_delayed_recursion_preserves',
+                  }
+                  if {name for name, _ in reports} != knot_expected:
+                      raise RuntimeError('Missing one of the sixteen exact retained Knot equations')
               if any(bad in log for bad in ('sorryAx', 'Lean.ofReduceBool', 'Lean.trustCompiler')):
                   raise RuntimeError('Forbidden proof dependency in ' + filename)
               for name, axioms in reports:
@@ -70,9 +109,9 @@ jobs:
                   if not used <= allowed:
                       raise RuntimeError('Unexpected axioms for ' + name + ': ' + repr(used - allowed))
               total += len(reports)
-          if total != 92:
-              raise RuntimeError('Expected exactly 92 native proof reports')
-          print('PSC1_CLOSED_CACHE_ANALYSIS_NATIVE: PASS newProofs=7 totalProofs=92 allowedStandardAxiomsOnly=true')
+          if total != 108:
+              raise RuntimeError('Expected exactly 108 native proof reports')
+          print('PSC1_CLOSED_CACHE_ANALYSIS_NATIVE: PASS newProofs=7 retainedKnotProofs=16 totalProofs=108 allowedStandardAxiomsOnly=true')
           PY
       - name: Independently admit actual String declarations and export untrusted inputs
         working-directory: psc1
@@ -105,6 +144,7 @@ jobs:
             ${{ runner.temp }}/psc1-t01f/cache-scope-proofs.log
             ${{ runner.temp }}/psc1-t01f/session-proofs.log
             ${{ runner.temp }}/psc1-t01f/closed-cache-analysis-proofs.log
+            ${{ runner.temp }}/psc1-t01f/knot-fuel-proofs.log
 
   generated-string:
     needs: [native-string]

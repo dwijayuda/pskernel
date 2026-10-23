@@ -1,10 +1,71 @@
-# PSC1 compiler-only self-host architecture
+# PSC1 compiler self-host architecture
 
-> Priority update 2026-10-21: this design is retained for later qualification.
-> G2/G3 and Rust repeat generations are deferred until Practical Core/backend
-> feature freeze. Follow PSC1_DEVELOPMENT_ROADMAP.md for current work; normal CI
-> retains G1 functionality and all correctness gates. Historical blockers below
-> describe their dated checkpoints, not the current normalized closure.
+Current direction: genuine DirectJS and import-free DirectWasm generations after
+Practical Core v1 feature freeze. [Roadmap](PSC1_DEVELOPMENT_ROADMAP.md) orders the
+work; [AI work state](../AI_WORK_STATE.md) and the
+[direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json) bind
+live status to immutable source/CI identities. Qualified Rust and TypeScript
+remain preserved reference implementations generated from the same compiler.
+
+## Shared semantics and authority
+
+All targets execute Ps.Internal.CompilerService.candidate, the same frontend,
+elaborator, ordinary source/logical graph pairing, erasure, checked IR and
+backend-neutral planning. Only target planning/emission and runtime carriers
+differ. The host transports requests, invokes official independent Lean4.35.0,
+validates tools/ABIs/artifacts and supervises resource limits. It does not parse,
+elaborate, lower or print on behalf of a generated compiler.
+
+A qualification uses a native seed once, then removes native compiler tools.
+G1 must execute all positive and negative cases. Its actual emitted service
+compiles the captured compiler closure to G2; G2 does the same to G3. Each
+generation requires independent admission and strict original/transformed IR,
+then the same executable observations. Fixed points compare exact captured
+source closure, canonical admissions/IR/observations and target source bytes;
+owned Wasm additionally binds decoded binary bytes. Same-run equality is
+distinct from independent clean-build reproducibility or semantic preservation.
+
+DirectJS uses a generator driver for ordinary/non-tail calls and conservative
+statement loops for recognized self tails. Immutable parameter snapshots per
+iteration preserve escaping value/function captures. Unsupported aliases,
+fresh-name collisions and exhausted analysis fuel fall back to the old printer.
+
+DirectWasm uses the existing owned GC binary emitter. The generated compiler
+has no native imports. Its small host adapter copies scalar GC String/Nat/Int/
+Bool/Unit values; it rejects unknown ABI/binary inputs. It cannot delegate
+compiler semantics. BinaryBytes is the single bounded-Nat byte algorithm;
+the native UInt8 surface is a carrier adapter. Internal raw float-bit metadata
+is bounded Nat with explicit32/64-bit target validation. This does not admit
+floating source operations or previously refused machine-scalar source IR.
+
+## Patterns learned from actual generated compiler workloads
+
+| Defect class | Mechanism and evidence | Required safeguard |
+| --- | --- | --- |
+|Recursive-prefix construction|A recursive worker bound before remaining dynamic input binders constructs unused closure chains eagerly. Large literal fuel made this catastrophic in Wasm.51 Wasm workers now defer the prefix under inputs; a static guard and all-input equalities protect the shape.|Keep original fuel/errors/APIs; verify actual generated execution as equality alone does not establish space behavior.|
+|Declaration-spine reconstruction|Wasm G2 traces identify ordinary expansion, then psCheckedNestedCollect. An explicit ordered accumulator fixes ordinary expansion. The checked collector uses reversed declarations plus a complete Except-state fold to preserve its original rightmost-error priority; normalization preserves declaration/wrapper order.|Prove complete old/new API equality, exercise refusal priority and10000 declarations. Do not bypass canonical source/logical graph checks.|
+|Generator allocation and captures|An actual retained JS G2 profile exposed generator/GC overhead. Statement loops remove per-let generator IIFEs while retaining the established driver for non-tail work.|Immutable iteration snapshots, alias/capture/hygiene/fuel negatives, native and retained-emitter comparisons, deep tail/non-tail execution.|
+|UTF8 cache-key StringEqual|After statement loops, actual retained G2 profiling40024746671 attributes33.9% of ticks to V8 StringEqual. Port the qualified TS lazy-token pattern to eligible invariant JS self-tail loops. The fixture measures40000→2 cache-key lookups with identical results over10584 comparisons.|At most two indexed views; tokens retain no String/index arrays. Verify lexical aliases and recursive arguments, preserve position evaluation before lookup, reject shadowing/changing sources/freshness collisions, retain size-only non-admission and exact extraction fallback. Never replace source String equality.|
+
+Source normalization follows the supported grammars deliberately: explicit
+constructor matches, typed callbacks, and fully applied structural workers with
+deferred callbacks. Do not broaden the language or weaken recursion validation
+to make a backend helper compile itself.
+
+Native proofs and fixtures do not qualify self-hosting. Current attempts,
+failures and immutable artifact identities remain in the receipt. Both direct
+targets have executed independently admitted G1 with all ten cases; G2/G3 and
+fixed points require successful actual generation chains after the fixes.
+PR174 afed7c4b full CI passed37/37/all seven backends/both grammars/applications;
+later compiler changes require their own full integration run.
+
+G1/tool/corpus limits remain240s, independent checking120s, with unchanged
+memory/stack, semantic fuel and negative/refusal policies. Manual G2/G3
+correctness1800s is separate from the original performance240s profile. No
+correctness receipt implies the shorter performance target or publication
+authorization. The historical design below is preserved as dated evidence.
+
+## Historical compiler-only design baseline
 
 Decision date: 2026-10-21. This design concerns the compiler, not the owned kernel.
 The source census baseline is immutable commit
@@ -44,7 +105,7 @@ owned kernel in the generated compiler source closure. Historical
 Ps.Bootstrap.SelfHost only imports the TS composition root; its outdated
 4.34-Wasm comment is not qualification for current DirectJS/Rust self-hosting.
 
-## Concrete current blockers
+## Historical source-census blockers (2026-10-21)
 
 The source was inspected, but inspection is distinct from running the new probe.
 

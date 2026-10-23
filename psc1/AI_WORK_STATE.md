@@ -9,53 +9,61 @@ Frozen Practical Core v1 remains14 families/37 criteria.
 binds the exact Git blob of the complete17-attempt
 [canonical receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
 
-## Current DirectJS / DirectWasm continuation — 2026-10-24 Asia/Jakarta
+## Current DirectJS / DirectWasm verified checkpoint — 2026-10-24 Asia/Jakarta
 
-Active branch: work/psc1-direct-selfhost-blockers-20261024.
-Latest implementation53c9b895386b8e2f5747a0a03f0c9397561ad3bf; focused gate
-40025082793 is pending. Preserved draft174/integrationafed7c4b remains unmerged;
-qualified Rust83e18fe1 and TS84e1e16f remain unchanged. This section supersedes
-older "active"/"pending" descriptions below; those describe immutable attempts.
+Active branch work/psc1-direct-selfhost-blockers-20261024.
+Implementationfcea1326b6abf02d151a8e0a248d95a70c9e0faf,
+focused Linux40027270768/job120666722896 PASSED completely:
+51 all-input delayed Wasm workers, ordinary accumulator/worker equality,
+checked collector/find/normalization equalities, byte bounds/modulus and JS
+name-visitor equality; no sorry in the successful proof build. Includes10000
+declarations/exact rightmost-error priority,7540 runtime and780 native/reference
+statement comparisons,10584 lazy-view comparisons plus49 native String pairs,
+deep recursion/capture/hygiene/fuel/refusal cases,actual owned GC Wasm execution,
+and complete87-module JS/98-module Wasm .lean/.ps source censuses.
 
-Verified e2743316/Linux40023689471 PASSED51 all-input Wasm worker equalities,
-ordinary-expansion accumulator invariant and public wrapper equality,10000
-declarations,7540 retained-runtime and780 native/reference emitter cases,
-deep recursion/capture/hygiene/negative tests,actual import-free GC Wasm engine,
-and both complete87/98-module Lean/PS censuses. The51-prefix static guard also
-passed. All checking, semantic fuel, heap/stack and timeout policies are unchanged.
+DirectJS uses the measured statement-loop and lazy-view pattern. Actual retained
+G2 profile40024746671 identifies V8 StringEqual33.9% of all ticks after the
+statement-loop improvement. In eligible invariant pure self-tail loops, lazy
+tokens reduce the indexed fixture's cache-key calls40000→2. Follow lexical
+aliases and verify every selected recursive argument; refuse changing/shadowed
+sources/freshness collisions; tokens retain no String/index arrays, cache max2,
+size-only code non-admitting and extraction/source String equality unchanged.
+Portability normalization uses explicit constructors/matches/result types and
+fully applied recursion workers. No new language feature or relaxed recursion
+validation is used to compile these helpers.
+
+DirectWasm actual40024688133/request8b01ac30/sourcee274 passes completeG1,
+then G2 stack failure78817ms/538864KiB. Exact retained replay40025336021 maps
+function644 to psCheckedNestedCollect. Proved new collector folds reversed
+declarations with the complete Except state, preserving rightmost-error priority;
+the adjacent normalization pass preserves declaration/wrapper order. Lookup
+construction is delayed under its input. New actual Wasm request
+6c82fcb45274e8d07016c4683939eac4a994a855/run40026947549/source88432e6e
+is executing these common fixes. Later JS-only edits do not change its closure.
+
+Next actual JS request uses the same proved common fixes and the qualified
+fcea1326 lazy-view source. Resolve its exact request-only commit/run through
+.github/qualification-requests/psc1-direct-selfhost.json and Actions; this
+documentation commit precedes that request. Both targets require genuine
+independently checked/built/executed G1→G2→G3 and exact fixed points.
+No G2/G3 success is inferred from native/source gates or elapsed job time.
 
 Previous dual-target40020523049/request0c0b0be6/source82b27063 is terminal:
 both targets pass independently admitted G1 and all ten authored/refusal cases.
-DirectJS G2 hits1800s at1800162ms/1862136KiB; noG3/fixedpoint.
-Closure0d7371b426f06361a39bf68e3c16baac0766d635aac5d01a4435d0747f3ca114;
-service artifactdf6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84;
-G2 request3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7.
-Artifact12531877337 digest695440e0d7c763d6e0356e8448a5c1d93d8c4ce21a6070e13a735d3ca11a30c6.
-DirectWasm G2 fails123237ms/536280KiB; exact full-frame diagnosis40021807647
-identifies ordinary declaration reconstruction. e274's ordered accumulator
-preserves old errors/witness budgets/canonical declarations and partial-name order.
-Request8b01ac30d9e5e03ed394746148bb20a7cebddb2b/run40024688133 now genuinely
-retests Wasm G1/G2/G3 on e274 source. A running job is not qualification.
+JS G2 hard deadline1800162ms/1862136KiB; Wasm G2 stack123237ms/536280KiB.
+Exact closure/service/request/artifact hashes remain in the canonical direct
+receipt, including preserved failures and the separate diagnostic provenance.
 
-DirectJS53c9b895 ports the qualified TS lazy-view-token pattern into conservative
-pure self-tail loops: select at most two actually indexed invariant String
-parameters, follow lexical aliases, verify each recursive argument, reject
-changing/shadowed sources, bound traversal/freshness, preserve position evaluation
-before lazy lookup, and fall back to the original emitter. Tokens hold no String
-or indexed arrays; only the existing max2 global views retain indexes. Size-only
-code stays non-admitting; extraction/source String equality are unchanged.
-Native/retained-emitter tests cover Unicode/invalid/interior/out-of-range/fuel,
-aliases, fresh-name collisions, changing/shadowed sources, eviction/non-retention,
-and instrument actual cache-key lookup counts. Gate40025082793 is pending.
-Read-only actual retained statement-loop G2 CPU diagnosis40024746671 is executing
-with original240s diagnostic budget; sampling overhead makes it non-qualifying.
-
-PR174 full40015619975 PASSED37/37/all seven backends/both grammars/applications
-on an identical-tree merge of afed7c4b. That result does not qualify later source.
-Remaining: finish current focused gate; use exact actual G2 evidence for further
-class fixes; qualify both genuine G1/G2/G3 fixed points; obtain current-source
-seven-backend/application CI; then separate240s performance and independent clean
-build reproducibility. No merge/publication authorized.
+Preserve draft174/integrationafed7c4b: full40015619975 PASSED37/37,all seven
+targets,both grammars and applications on an identical-tree merge. Start a
+stacked work PR for full current-source CI after issuing the JS request;
+afed's full result does not qualify later code. Qualified Rust83e18fe1 and
+TS84e1e16f remain unchanged. Full architecture/mechanism notes:
+docs/PSC1_COMPILER_SELFHOST_ARCHITECTURE.md. No force update,merge or publication.
+G1/corpus/tools240s,checking120s,correctnessG2/G31800s,performance240s and all
+other resource/semantic/security policies are unchanged. Independent clean
+build repeatability and original240s performance remain separate/unqualified.
 
 ## Corrected TypeScript self-hosting qualified
 

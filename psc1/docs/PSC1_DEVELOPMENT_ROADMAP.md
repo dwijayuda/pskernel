@@ -10,16 +10,17 @@ including17 completed actual attempts, preserved failures and immutable artifact
 
 | Order | Work | Acceptance / current evidence |
 | --- | --- | --- |
-|1|Finish measured DirectJS cache-key and Wasm ordinary-stack defect-class fixes.|e274/40023689471 passes51 all-input prefix proofs, ordinary accumulator/wrapper equivalence, negatives, deep/native/reference/runtime/owned-Wasm tests and both87/98-module grammars. DirectJS53c9b895 lazy-token emitter gate40025082793 pending; actual retained G2 profile40024746671 pending.|
-|2|Execute genuine independent DirectJS and DirectWasm G1→G2→G3.|Previous0c/40020523049: both completeG1; JS G2 deadline1800162ms/1862136KiB, Wasm G2 stack123237ms/536280KiB. Neither has G3/fixedpoint. Actual new Wasm request8b01ac30/run40024688133 on proved e274 source is running. Exact source/admission/original+transformed IR/observations/source-byte (owned Wasm binary) fixed points required.|
-|3|Qualify latest source across all seven backends, both grammars and real applications.|Preserved PR174 afed7c4b full40015619975 passes37/37, identical-tree merge; later source still needs full CI. Preserve independent Lean4.35 and strict IR/negative/refusal gates.|
-|4|Separate performance and reproducibility qualification.|Keep original240s profile and independent clean-build repeatability distinct from1800s correctness. No heap/stack/fuel/checking relaxation; no merge or publication.|
+|1|Execute real generations with the proved/measured fixes.|fcea1326/Linux40027270768 passes all proofs/runtime/negative/capture/owned-Wasm checks and complete87/98-module Lean/PS censuses. Actual retained JS G2 profile40024746671 identifies33.9% StringEqual ticks; lazy-view fixture40000→2 cache-key calls with10584 comparisons. Actual Wasm6c82fcb4/run40026947549 is executing proved checked-admission spine fixes; next request is JS on the same common source.|
+|2|Qualify genuine independent G1→G2→G3 and fixed points for each target.|Previous0c/40020523049: both completeG1; JS G2 deadline1800162ms/1862136KiB, Wasm stack123237ms/536280KiB. Next Wasm8b/40024688133 G2 stack78817ms/538864KiB diagnosed as psCheckedNestedCollect; collector/lookup/normalization now have all-input proofs, including exact rightmost-error priority. Neither direct target has a qualified G2/G3 fixed point yet.|
+|3|Run full latest-source seven-backend/application CI in a stacked work PR.|Preserved draft174/afed7c4b full40015619975 passes37/37, identical-tree merge. Later source requires a separate full CI run; retain independent Lean4.35, strict original/transformed IR and every refusal/regression gate.|
+|4|Qualify performance and independent reproducibility separately.|Retain original240s and1800s correctness profiles, all G1/checker/memory/stack/fuel limits. Same-run fixed points do not imply independent clean builds or package publication authorization.|
 
-Authoritative continuation: [AI_WORK_STATE](../AI_WORK_STATE.md).
-Machine-readable immutable attempt identities, focused gates and current runs:
-[Direct target evidence](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json).
-Preserve qualified Rust83e18fe1 and TS84e1e16f. Earlier sections below retain
-historical attempts; this queue supersedes their older pending descriptions.
+[AI work state](../AI_WORK_STATE.md) owns exact continuation and
+[direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
+records immutable attempts. [Architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md)
+explains shared semantics, host authority and measured defect classes.
+Preserve Rust83e18fe1 and TS84e1e16f. This queue supersedes older pending
+descriptions below, which retain their historical checkpoint scope.
 
 Corrected TS source748fd5fd/request079b26b9/run39993829327 independently qualifies
 genuine G1/G2/G3 and exact source/admissions/IR/ten-case fixed points under1800s.

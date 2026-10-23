@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 21:13:00 UTC",
+  "recordedAtUtc": "2026-10-23 21:32:00 UTC",
   "localDate": "2026-10-24",
-  "status": "blocker-fixes-under-test",
+  "status": "complete-focused-gate-passed-actual-generations-running",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -82,6 +82,8 @@
       },
       "currentCpuDiagnosis": {
         "runId": 40024746671,
+        "status": "passed",
+        "qualification": false,
         "source": {
           "schema": "psc1-direct-generated-profile-request/1",
           "runId": 40020523049,
@@ -97,8 +99,55 @@
           "purpose": "Measure actual generated statement-loop compiler on its exact retained G2 request; diagnostic only, no qualification or policy change.",
           "attempt": 3
         },
-        "qualification": false,
-        "status": "in_progress"
+        "receipt": {
+          "schema": "psc1-direct-generated-cpu-diagnosis/1",
+          "testedCommit": "1e0bc360a158fa3577e0c189e0fc86d8554bf5b0",
+          "source": {
+            "schema": "psc1-direct-generated-profile-request/1",
+            "runId": 40020523049,
+            "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
+            "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+            "artifactId": 12531877337,
+            "artifactDigest": "sha256:695440e0d7c763d6e0356e8448a5c1d93d8c4ce21a6070e13a735d3ca11a30c6",
+            "target": "js",
+            "requestId": "G2-self",
+            "sourceClosureDigest": "0d7371b426f06361a39bf68e3c16baac0766d635aac5d01a4435d0747f3ca114",
+            "serviceSha256": "df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84",
+            "requestSha256": "3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7",
+            "purpose": "Measure actual generated statement-loop compiler on its exact retained G2 request; diagnostic only, no qualification or policy change.",
+            "attempt": 3
+          },
+          "retainedG1": {
+            "sourceSha256": "170cd7c111e90aca8fd3d760e661d6b9bbc83aeef57ee773704806f016222292",
+            "artifactSha256": "df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84",
+            "independentlyAdmitted": true,
+            "observations": 10
+          },
+          "requestSha256": "3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7",
+          "profile": "performance-240s",
+          "samplingOverhead": true,
+          "qualification": false,
+          "nativeDelegation": false,
+          "execution": {
+            "elapsedMs": 240138,
+            "status": null,
+            "signal": "SIGKILL",
+            "error": {
+              "code": "ETIMEDOUT",
+              "message": "process tree exceeded hard deadline"
+            },
+            "maxRssKiB": 1792088,
+            "peakTreeRssKiB": 1792088
+          },
+          "processed": [
+            {
+              "file": "isolate-0x2bdcd000-2437-v8.log",
+              "status": 0,
+              "error": null
+            }
+          ]
+        },
+        "stringEqualAllTicksPercent": 33.9
       }
     },
     "wasm": {
@@ -142,27 +191,41 @@
     }
   },
   "focusedGate": {
-    "commit": "e2743316170f800b8ad84533c1da1834773acccd",
-    "runId": 40023689471,
+    "commit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
+    "runId": 40027270768,
+    "jobId": 120666722896,
     "status": "passed",
     "prefixEqualities": 51,
-    "ordinaryAccumulatorInvariant": true,
     "ordinaryWorkerEquality": true,
-    "ordinarySmokeDeclarations": 10000,
+    "checkedSpineEqualities": 3,
+    "allInputJsNameVisitorEquality": true,
+    "byteModulusAndBounds": true,
+    "containsSorry": false,
     "jsRuntimeComparisons": 7540,
-    "jsNativeReferenceComparisons": 780,
-    "bothCompleteSourceGrammars": true,
-    "sourceModules": {
+    "jsStatementComparisons": 780,
+    "jsLazyViewComparisons": 10584,
+    "nativeStringPairs": 49,
+    "cacheKeyLookups": {
+      "retained": 40000,
+      "current": 2,
+      "maxViews": 2
+    },
+    "sourceCensus": {
       "js": 87,
-      "wasm": 98
+      "wasm": 98,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "refused": []
     },
     "ownedWasmEngine": true
   },
   "currentAttempt": {
     "target": "wasm-core",
-    "sourceCommit": "e2743316170f800b8ad84533c1da1834773acccd",
-    "requestCommit": "8b01ac30d9e5e03ed394746148bb20a7cebddb2b",
-    "runId": 40024688133,
+    "sourceCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
+    "requestCommit": "6c82fcb45274e8d07016c4683939eac4a994a855",
+    "runId": 40026947549,
     "status": "in_progress",
     "fixedPoint": "not-yet-established"
   },
@@ -311,10 +374,328 @@
       "allAccepted": true
     }
   },
-  "pendingFocusedGate": {
-    "commit": "53c9b895386b8e2f5747a0a03f0c9397561ad3bf",
-    "runId": 40025082793,
-    "status": "in_progress",
-    "mechanism": "alias-aware invariant pure-loop lazy UTF8 tokens"
-  }
+  "completedAttempts": [
+    {
+      "runId": 40020523049,
+      "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+      "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
+      "branch": "work/psc1-direct-selfhost-blockers-20261024",
+      "targets": [
+        "js",
+        "wasm-core"
+      ],
+      "jobs": {
+        "js": 120643819553,
+        "wasm": 120643819569
+      },
+      "observedWorkflowStatus": "completed",
+      "terminalResult": "failure",
+      "fixedPoints": "not-run",
+      "js": {
+        "target": "js",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "0d7371b426f06361a39bf68e3c16baac0766d635aac5d01a4435d0747f3ca114",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84\",\"requestSha256\":\"3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1862136,\"peakTreeRssKiB\":1862136,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800162,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84",
+            "startedAt": "2026-10-23T20:38:41.388Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84\",\"requestSha256\":\"3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1862136,\"peakTreeRssKiB\":1862136,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800162,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+            "completedAt": "2026-10-23T21:08:42.116Z"
+          }
+        ]
+      },
+      "wasm-core": {
+        "target": "wasm-core",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 98,
+        "sourceClosureDigest": "cf1fbeba006442a10b687b56cd4be48c73d56a7574758126e337806b0e7568c3",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5\",\"requestSha256\":\"ba9cf85f7f5fa252e18d4b9053a4b6eed2686fbb50314b6c7d1a8ebdda753fe1\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":536280,\"peakTreeRssKiB\":535672,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":123237,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/0061d16a:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae38\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n\nNode.js v22.23.3\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5",
+            "startedAt": "2026-10-23T20:39:08.055Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5\",\"requestSha256\":\"ba9cf85f7f5fa252e18d4b9053a4b6eed2686fbb50314b6c7d1a8ebdda753fe1\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":536280,\"peakTreeRssKiB\":535672,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":123237,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/0061d16a:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae38\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n    at wasm://wasm/0061d16a:wasm-function[11]:0x2ae72\n\nNode.js v22.23.3\n",
+            "completedAt": "2026-10-23T20:41:12.108Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12531877337,
+          "digest": "sha256:695440e0d7c763d6e0356e8448a5c1d93d8c4ce21a6070e13a735d3ca11a30c6",
+          "name": "psc1-direct-selfhost-correctness-1800s-js-0c0b0be64a362e0a16e3c19c8cd057e25e934b6b"
+        },
+        {
+          "id": 12530402614,
+          "digest": "sha256:0b48449adc24ae9430654698650769418116e1aeea3a649a08e361c11cf48d0e",
+          "name": "psc1-direct-selfhost-correctness-1800s-wasm-core-0c0b0be64a362e0a16e3c19c8cd057e25e934b6b"
+        }
+      ]
+    },
+    {
+      "runId": 40024688133,
+      "sourceCommit": "e2743316170f800b8ad84533c1da1834773acccd",
+      "requestCommit": "8b01ac30d9e5e03ed394746148bb20a7cebddb2b",
+      "target": "wasm-core",
+      "status": "failed",
+      "report": {
+        "target": "wasm-core",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 98,
+        "sourceClosureDigest": "64b63a7b7ee0d50f609c2ca2e59d7eba6984bde541ab43b99b4f81e67e67747e",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"3a71c8b28be13c1160a7acc644ba8d5cc2088d49a6e64b1a3fc28382bace90f9\",\"requestSha256\":\"42f05cddda4fe3a44e467d40f0313049c2e02b74e7666a0892918613d62f8a76\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":538864,\"peakTreeRssKiB\":538864,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":78817,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/00610f52:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d6aa\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n\nNode.js v22.23.3\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "3a71c8b28be13c1160a7acc644ba8d5cc2088d49a6e64b1a3fc28382bace90f9",
+            "startedAt": "2026-10-23T21:11:49.881Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"3a71c8b28be13c1160a7acc644ba8d5cc2088d49a6e64b1a3fc28382bace90f9\",\"requestSha256\":\"42f05cddda4fe3a44e467d40f0313049c2e02b74e7666a0892918613d62f8a76\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":538864,\"peakTreeRssKiB\":538864,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":78817,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/00610f52:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d6aa\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n    at wasm://wasm/00610f52:wasm-function[644]:0x4d77f\n\nNode.js v22.23.3\n",
+            "completedAt": "2026-10-23T21:13:09.235Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12531604458,
+          "digest": "sha256:6ee8f6ca50c47e6f1184057c64b9a39421b2eb5a2a3a18c1a2561e3092cfb972"
+        }
+      ]
+    }
+  ],
+  "checkedSpineDiagnosis": {
+    "schema": "psc1-retained-wasm-stack-diagnosis/1",
+    "testedCommit": "219c22608d8d9a4091ac64b11e7729c1c161d607",
+    "source": {
+      "schema": "psc1-retained-wasm-stack-diagnosis/1",
+      "attempts": [
+        {
+          "runId": 40024688133,
+          "requestCommit": "8b01ac30d9e5e03ed394746148bb20a7cebddb2b",
+          "sourceCommit": "e2743316170f800b8ad84533c1da1834773acccd",
+          "artifactId": 12531604458,
+          "artifactDigest": "sha256:6ee8f6ca50c47e6f1184057c64b9a39421b2eb5a2a3a18c1a2561e3092cfb972"
+        }
+      ],
+      "serviceSha256": "3a71c8b28be13c1160a7acc644ba8d5cc2088d49a6e64b1a3fc28382bace90f9",
+      "requestSha256": "42f05cddda4fe3a44e467d40f0313049c2e02b74e7666a0892918613d62f8a76",
+      "closure": "64b63a7b7ee0d50f609c2ca2e59d7eba6984bde541ab43b99b4f81e67e67747e"
+    },
+    "sourceSha256": "9a84a4a7f699a6393f09abd72a239cbb8dd46f9e46226ed8b0abbbe3df43acc8",
+    "binarySha256": "707651c06edf483df11d1d1bfc9e34af857f1a6cca6ba1ef3dbe759f02cf98bd",
+    "runtimeFunctions": 50,
+    "sourceFunctions": 3149,
+    "exportAnchorsVerified": true,
+    "qualification": false,
+    "executionStackSizeChanged": false,
+    "reportedFrameLimit": 16384,
+    "execution": {
+      "elapsedMs": 126875,
+      "status": 1,
+      "signal": null,
+      "error": null,
+      "maxRssKiB": 536372,
+      "peakTreeRssKiB": 535476
+    },
+    "frameCount": 7,
+    "frameCounts": [
+      [
+        "psCheckedNestedCollect",
+        2
+      ],
+      [
+        "psEncodeCheckedAdmissionsCanonical",
+        1
+      ],
+      [
+        "psCompilerPrepareOrdinary",
+        1
+      ],
+      [
+        "Ps_Internal_CompilerService_prepare",
+        1
+      ],
+      [
+        "Ps_Internal_CompilerService_compile",
+        1
+      ],
+      [
+        "Ps_Internal_CompilerService_candidate",
+        1
+      ]
+    ],
+    "firstFrames": [
+      {
+        "index": 644,
+        "name": "psCheckedNestedCollect"
+      },
+      {
+        "index": 644,
+        "name": "psCheckedNestedCollect"
+      },
+      {
+        "index": 650,
+        "name": "psEncodeCheckedAdmissionsCanonical"
+      },
+      {
+        "index": 1736,
+        "name": "psCompilerPrepareOrdinary"
+      },
+      {
+        "index": 2004,
+        "name": "Ps_Internal_CompilerService_prepare"
+      },
+      {
+        "index": 2014,
+        "name": "Ps_Internal_CompilerService_compile"
+      },
+      {
+        "index": 2016,
+        "name": "Ps_Internal_CompilerService_candidate"
+      }
+    ],
+    "lastFrames": [
+      {
+        "index": 644,
+        "name": "psCheckedNestedCollect"
+      },
+      {
+        "index": 644,
+        "name": "psCheckedNestedCollect"
+      },
+      {
+        "index": 650,
+        "name": "psEncodeCheckedAdmissionsCanonical"
+      },
+      {
+        "index": 1736,
+        "name": "psCompilerPrepareOrdinary"
+      },
+      {
+        "index": 2004,
+        "name": "Ps_Internal_CompilerService_prepare"
+      },
+      {
+        "index": 2014,
+        "name": "Ps_Internal_CompilerService_compile"
+      },
+      {
+        "index": 2016,
+        "name": "Ps_Internal_CompilerService_candidate"
+      }
+    ]
+  },
+  "focusedGates": [
+    {
+      "commit": "82b270632beb1df34b65605877eeec3bf940f232",
+      "runId": 40020188747,
+      "status": "passed",
+      "nativeLean": {
+        "recursiveWorkerEqualities": 48,
+        "byteModulusAndRangeProofs": 2,
+        "allInputJsNameVisitorEquality": true,
+        "containsSorry": false
+      },
+      "actualRuntime": {
+        "jsRetainedRuntimeComparisons": 7540,
+        "jsNativeAndRetainedEmitterComparisons": 780,
+        "nativeReferenceRows": 65,
+        "deepTailCalls": 100000,
+        "deepNonTailCalls": 30000,
+        "valueAndFunctionCaptures": true,
+        "aliasFreshnessFuelRefusals": true,
+        "all96WasmOpcodeComparisons": true,
+        "actualOwnedWasmEngine": true,
+        "arbitraryNatIntGcRoundTrips": true,
+        "importRefusals": true
+      },
+      "sourceCensus": {
+        "lean": {
+          "js": 87,
+          "wasm": 98
+        },
+        "ps": {
+          "js": 87,
+          "wasm": 98
+        },
+        "allAccepted": true
+      }
+    },
+    {
+      "commit": "e2743316170f800b8ad84533c1da1834773acccd",
+      "runId": 40023689471,
+      "status": "passed",
+      "prefixEqualities": 51,
+      "ordinaryAccumulatorInvariant": true,
+      "ordinaryWorkerEquality": true,
+      "ordinarySmokeDeclarations": 10000,
+      "jsRuntimeComparisons": 7540,
+      "jsNativeReferenceComparisons": 780,
+      "bothCompleteSourceGrammars": true,
+      "sourceModules": {
+        "js": 87,
+        "wasm": 98
+      },
+      "ownedWasmEngine": true
+    },
+    {
+      "commit": "2c383eed6f2dd4a43c2870d25304961a3dd8b7cf",
+      "runId": 40026533023,
+      "status": "native-proof-runtime-and-wasm-census-pass-js-census-refused",
+      "checkedCollectorEquality": true,
+      "checkedFindEquality": true,
+      "checkedNormalizeEquality": true,
+      "sourceJsFailure": "matchExpectedType; subsequently corrected"
+    }
+  ],
+  "nextRequestedTarget": "js",
+  "nextJsSourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf"
 }

@@ -169,4 +169,9 @@ Current candidate keeps only cursor-demanded UTF8 views: cold size queries count
 bytes without inserting a view; extraction uses existing valid boundary indices
 and keeps the exact old scan for cold/invalid/interior/out-of-range positions.
 No extra view/capacity or fuel/heap/stack/stream/wire/checking limit is added.
-Focused Linux tests and actual generated workload comparisons are pending.
+Focused Linux39959279408 at 1d4d9cc08ee84dab1710acb14a04c6de5db527b3 passes
+95576 cold/warm extraction comparisons,16000 equality-loop comparisons, existing
+proof/negative gates and both85-module source audits. Extract-only modules include
+the required runtime. Diagnostic39958525121 gives20 byte-identical real corpus
+replays (10680 vs12589ms); its unadopted G2 replay still exceeds240s.
+Actual fresh-source G2/G3 correctness qualification is next; no badge is granted.

@@ -74,3 +74,22 @@ laziness. Existing source equality and character comparisons remain unchanged.
 16000 emitted-runtime comparisons and both85-module source audits pass. G2/G3
 and exact fixed point remain pending; the separate240s criterion is unchanged.
 Rust qualified reference83e18fe1/source5e0b548e/request7d8865a0 is preserved.
+
+## Current continuation after token-only G2 timeout
+
+The StringEqual path reaches the real compiler with2 lazy tokens and no direct
+cache-key comparisons in its equality worker (audits39953924361/39957038006).
+Token-only actual G2 still times out1800195ms/3050788KiB (39952593596), and
+240202ms/2281004KiB in the preserved short profile39952866650. G3/fixed point
+remain unqualified. Bounded profile39953992821 points next to generator/helper
+work. Native-invoke and finite-iterator hypotheses remain unadopted diagnostics.
+
+The active branch is `perf/psc1-ts-utf8-size-extract-20261023`: code08b3173e,
+focused checkpoint1d4d9cc0/run39959279408. Cold byte-size requests no longer
+admit position arrays; extraction uses existing valid UTF8 boundaries and the
+exact old fallback for cold/invalid raw offsets. Both85-module source audits,
+95576 extraction and16000 equality comparisons plus existing proof/negative
+gates pass. Diagnostic real compiler corpus responses match exactly; latency
+is10680 vs12589ms across20 fresh-process replays. This does not qualify G2.
+Next: genuine fresh-source G1/G2/G3 and fixed point under1800s, then independent
+240s performance and coherent full integration. Preserve qualified Rust reference.

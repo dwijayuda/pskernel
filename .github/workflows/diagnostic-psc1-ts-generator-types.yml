@@ -1,4 +1,4 @@
-name: PSC1 TS bridge lookup performance 240s
+name: PSC1 TS cursor cache performance 240s
 
 on:
   workflow_dispatch:

@@ -1,5 +1,6 @@
 {
   "schema": "psc1-selfhost-receipt-audit-request/1",
+  "id": "worker-source-vs-generated-variants-1792764436805",
   "attempts": [
     {
       "id": "ts-erasure-workers-performance-240s",

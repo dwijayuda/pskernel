@@ -160,7 +160,7 @@ def psKernelSemanticExprMapInsert
       else
         let hash := Prod.fst analysis;
         let bucket := psKernelExprMapIndexBucket 16 index hash;
-        Option.some
+        let nextCache : PsKernelExprMap :=
           {
             small := List.nil
             index :=
@@ -170,7 +170,8 @@ def psKernelSemanticExprMapInsert
                   index
                   hash
                   (psKernelExprMapInsertIn expr value bucket))
-          }
+          };
+        Option.some nextCache
 
 def psKernelSemanticExprPairSetContains
     (set : PsKernelExprPairSet)
@@ -229,7 +230,7 @@ def psKernelSemanticExprPairSetInsert
           if psKernelExprPairSetContainsIn left right bucket then
             Option.some set
           else
-            Option.some
+            let nextSet : PsKernelExprPairSet :=
               {
                 small := List.nil
                 index :=
@@ -239,7 +240,8 @@ def psKernelSemanticExprPairSetInsert
                       index
                       hash
                       (List.cons (Prod.mk left right) bucket))
-              }
+              };
+            Option.some nextSet
 
 /- Preserve the inference policy's early node-kind gate before any scan/hash. -/
 def psKernelInferCacheMapGet

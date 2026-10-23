@@ -1,3 +1,44 @@
+## 2026-10-24 typed local cache records after dde99 portable elaboration failure
+
+Exact source `dde99ecf74f78b992031d16d14c6f6986195fcf1`, run
+`39998044644`, attempt 1: native job `120566605402` PASS. All 92
+reports (60 scope + 14 session + 11 unchanged hash + 7 new equivalences)
+use only permitted standard axioms. Frozen 2,730 scalar cases / 3 long cases,
+294 ordered independent admissions, 377 metadata comparisons, all six native
+String samples, and retained controls passed. Artifact `12521630084`:
+107,781 bytes, SHA-256
+`dea4ad3e3553a8813d4e18058c248ce3abd221a22743277b20511a52f71f2759`.
+All eight files and source/run/attempt/upload bindings were independently
+verified. Native-only evidence:
+`docs/evidence/2026-10-23-t01f-closed-cache-analysis-portable-native-gates.json`.
+
+Generated job `120567692122` FAILED in bounded PSC1 elaboration:
+`psKernelSemanticExprMapInsert: unsupportedTerm`.
+No bounded JavaScript, generated matrix/body check, complete producer, or
+runtime executed. The secondary artifact-upload failure reflects the absence
+of generated files. Complete log digest and terminal metadata:
+`docs/evidence/2026-10-23-t01f-closed-cache-analysis-portable-elaboration-failure.json`.
+
+The containing correction gives the two indexed insertion records explicit
+local types before passing them to `Option.some`: `PsKernelExprMap` and
+`PsKernelExprPairSet`. PSC1 elaborates application arguments before applying
+the outer result expectation, so the previous anonymous record was ambiguous
+between those two structures. It also annotates the new `DeltaStep`
+`afterFailure` local as `PsKernelCheckerState`, supplying the result type
+required by its nested match. These are source-form corrections; values,
+hashes, guards, collision checks, identity paths, proof statements, fixtures,
+counts, and resource limits remain unchanged.
+
+Follow ONE new native-first narrow run for this new source; no earlier PASS
+is inherited. All five full work-branch triggers remain PAUSED and diagnostics
+remain manual-only. The 1,884 matrix, strict complete generated-body checks,
+authentic complete build, retained generated controls, and exactly 1,400
+mixed assertions must all pass before activating one final qualification
+source. T01F/current A/B/D remain OPEN; C remains FAIL. No integration or T05
+advance before the exact scoped qualification.
+
+---
+
 ## 2026-10-24 ceee native PASS; portable flag syntax corrected after bounded parse failure
 
 Exactceee310e488b92ae6068faf965cb9c96622976a0/run39997274611/attempt1:

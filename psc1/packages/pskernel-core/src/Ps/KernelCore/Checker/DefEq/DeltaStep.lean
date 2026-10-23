@@ -478,7 +478,7 @@ def psKernelDefEqLazyStepBoth
         else
           let comparedState :=
             Prod.snd compared;
-          let afterFailure :=
+          let afterFailure : PsKernelCheckerState :=
             if sameShortcut then
               match
                   psKernelSemanticExprPairSetInsert

@@ -1,0 +1,83 @@
+{
+  "schema": "psc1-t01f-generated-preflight-failure-v1",
+  "sourceSha": "dde99ecf74f78b992031d16d14c6f6986195fcf1",
+  "runId": 39998044644,
+  "runAttempt": 1,
+  "jobId": 120567692122,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39998044644",
+  "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39998044644/job/120567692122",
+  "conclusion": "failure",
+  "stage": "bounded PSC1 CacheAnalysis elaboration",
+  "firstFailure": "PSC1_PROJECT_ELAB_FAILED: packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean: declaration=psKernelSemanticExprMapInsert: unsupportedTerm",
+  "firstFailureAt": "2026-10-23T17:53:25.2829837Z",
+  "proofStatus": "native job120566605402 succeeded; independently verified by the root agent, not requalified by this generated-job inspection",
+  "boundedJavaScriptProduced": false,
+  "cacheAnalysisMatrixExecuted": false,
+  "strictGeneratedBodyChecksExecuted": false,
+  "fullSourceCheckExecuted": false,
+  "fullKernelBuildExecuted": false,
+  "generatedFixtureProductionExecuted": false,
+  "generatedRuntimeExecuted": false,
+  "generatedArtifactProduced": false,
+  "secondaryFailure": "Artifact upload found no generated files; this follows the earlier elaboration failure.",
+  "nativeArtifactMetadataOnly": [
+    {
+      "id": 12521630084,
+      "name": "psc1-t01f-native-preflight",
+      "size_in_bytes": 107781,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12521630084",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12521630084/zip",
+      "expired": false,
+      "created_at": "2026-10-23T17:50:21Z",
+      "expires_at": "2027-01-21T17:48:05Z",
+      "updated_at": "2026-10-23T17:50:21Z",
+      "digest": "sha256:dea4ad3e3553a8813d4e18058c248ce3abd221a22743277b20511a52f71f2759",
+      "workflow_run": {
+        "id": 39998044644,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "dde99ecf74f78b992031d16d14c6f6986195fcf1"
+      }
+    }
+  ],
+  "sourceFileBlobs": {
+    "workflow.yml": "33540c5c2eb9545fe965f7eff7c49efe07bc13ff",
+    "CacheAnalysis.lean": "8c4544b5bdb8ea1e3bd2d9eb798577cfbf1cb62f"
+  },
+  "qualification": false,
+  "nextAction": "Correct the concrete portable elaboration failure, preserve all proof and generated gates, and qualify one new exact candidate. No final activation or T01F acceptance.",
+  "fileDigests": {
+    "CacheAnalysis.lean": {
+      "bytes": 9517,
+      "sha256": "9a67dfd6ac1a6f7cf46396a8aea44d75baa19743b586d5fe73b8dcdaab3d4044"
+    },
+    "artifacts.json": {
+      "bytes": 801,
+      "sha256": "d2a3e9fb25be1b438ac1be69e7fec008a0624e311959c0b18d4c579dd58f4961"
+    },
+    "generated-job-120567692122.log": {
+      "bytes": 97263,
+      "sha256": "6f565b30c80e17a3ca98935c718acfe6ec5147b3ca03f40572b6b10a8b0335ba"
+    },
+    "jobs.json": {
+      "bytes": 10759,
+      "sha256": "ec7b154f365d43e902cf68326be99217e9dda3d798f75391eed2959153f390c8"
+    },
+    "run.json": {
+      "bytes": 13784,
+      "sha256": "d813a29e16f091211c1388570d91b3b3469270e20229f7728c2a7f8d161c9204"
+    },
+    "workflow.yml": {
+      "bytes": 35343,
+      "sha256": "15bb0ebaa7287f5019a76e78aca19fc259f73b89bee8ce7ecbe811cfe6b1487a"
+    }
+  },
+  "verification": {
+    "sourceRunAttempt": true,
+    "sourceWorkflowAndCacheAnalysisGitBlobs": true,
+    "firstFailureUnique": true,
+    "generatedPassMarkersAbsent": true,
+    "artifactMetadataGeneratedArtifactAbsent": true
+  }
+}

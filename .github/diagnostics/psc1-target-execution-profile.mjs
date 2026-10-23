@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import path fro
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const files=[];function scan(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())scan(p);else if(e.isFile())files.push(p);}}scan('input');
 fs.mkdirSync('diagnosis',{recursive:true});
+console.log('PSC1_PROFILE_SOURCE: lexer-normalized closed TS artifact; diagnostic only');
 function artifact(target,expected){
  const file=files.find(p=>p.endsWith('/G1-service/artifact.json')&&JSON.parse(fs.readFileSync(p,'utf8')).target===target);
  assert.ok(file);assert.equal(sha(fs.readFileSync(file)),expected);const m=JSON.parse(fs.readFileSync(file,'utf8')),directory=path.dirname(file);

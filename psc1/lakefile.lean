@@ -515,3 +515,7 @@ lean_lib PsErasureSpineReference where
 lean_lib PsFoundationListReference where
   srcDir := "test"
   roots := #[`FoundationListReference, `FoundationListTests]
+
+lean_lib PsWasmLowerExprPrefixReference where
+  srcDir := "test"
+  roots := #[`WasmLowerExprPrefixReference, `WasmLowerExprPrefixTests]

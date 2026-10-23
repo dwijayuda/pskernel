@@ -4,6 +4,7 @@ import CheckedSpineTests
 import Ps.BackendJs.Print
 import WasmBinaryCarrierTests
 import WasmPrefixTests
+import WasmLowerExprPrefixTests
 import OrdinaryExpansionTests
 import Ps.BackendWasm.CompilerService
 
@@ -354,6 +355,7 @@ def main : IO Unit := do
   runErasureSpineTests
   runCheckedSpineTests
   testWasmPrefixDelay
+  runWasmLowerExprPrefixTests
   testOrdinaryExpansion
   let expressions : List PsJsIrExpr := [
     .literal (.natural 4),.var "x",.unary .boolNot (.var "x"),

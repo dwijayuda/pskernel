@@ -5157,22 +5157,22 @@ def psWasmLowerExprWorker
                   state.currentDefinition
                   "fuel-exhausted")
   | fuel + 1 =>
-      let smaller :
-          List PsWasmBinding ->
-          Option PsWasmValueType ->
-          PsWasmLowerState ->
-          PsVerifiedIrExpr ->
-          Except PsWasmLowerError PsWasmLoweredExpr :=
-        psWasmLowerExprWorker
-          profile
-          allDeclarations
-          structures
-          inductives
-          fuel;
       fun (bindings : List PsWasmBinding) =>
         fun (expected : Option PsWasmValueType) =>
           fun (state : PsWasmLowerState) =>
             fun (expr : PsVerifiedIrExpr) =>
+              let smaller :
+                  List PsWasmBinding ->
+                  Option PsWasmValueType ->
+                  PsWasmLowerState ->
+                  PsVerifiedIrExpr ->
+                  Except PsWasmLowerError PsWasmLoweredExpr :=
+                psWasmLowerExprWorker
+                  profile
+                  allDeclarations
+                  structures
+                  inductives
+                  fuel;
               let lowerWithBindings :
                   List PsWasmBinding ->
                   Option PsWasmValueType ->

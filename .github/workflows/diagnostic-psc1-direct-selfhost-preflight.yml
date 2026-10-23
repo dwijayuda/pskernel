@@ -15,6 +15,7 @@ on:
       - psc1/test/DirectSelfHostPreflightTests.lean
       - psc1/test/WasmBinary*.lean
       - psc1/test/WasmPrefix*.lean
+      - psc1/test/WasmLowerExprPrefix*.lean
       - psc1/test/OrdinaryExpansion*.lean
       - psc1/test/CheckedSpine*.lean
       - psc1/test/ErasureSpine*.lean

@@ -1,6 +1,7 @@
 import Ps.BackendJs.Print
 import WasmBinaryCarrierTests
 import WasmPrefixTests
+import OrdinaryExpansionTests
 import Ps.BackendWasm.CompilerService
 
 namespace PsJsNameVisitorReference
@@ -347,6 +348,7 @@ private def fixtureModule : PsVerifiedIrModule :=
 
 def main : IO Unit := do
   testWasmPrefixDelay
+  testOrdinaryExpansion
   let expressions : List PsJsIrExpr := [
     .literal (.natural 4),.var "x",.unary .boolNot (.var "x"),
     .binary .bigintAdd (.var "left") (.var "right"),.runtime .stringGet [.var "s",.var "p"],

@@ -5,12 +5,14 @@ on:
     paths:
       - psc1/packages/backend-js/**
       - psc1/packages/backend-wasm/**
+      - psc1/packages/compiler/**
       - psc1/scripts/TargetServiceSeed.lean
       - psc1/scripts/generated-target-source-audit.mjs
       - psc1/host-tools/generated-target-profiles.mjs
       - psc1/test/DirectSelfHostPreflightTests.lean
       - psc1/test/WasmBinary*.lean
       - psc1/test/WasmPrefix*.lean
+      - psc1/test/OrdinaryExpansion*.lean
       - psc1/test/JsStatement*.lean
       - psc1/scripts/js-statement-tests.mjs
       - psc1/scripts/direct-selfhost-preflight-tests.mjs

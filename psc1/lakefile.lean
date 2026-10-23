@@ -499,3 +499,7 @@ lean_exe psc1_js_statement_tests where
 lean_lib PsWasmPrefixReference where
   srcDir := "test"
   roots := #[`WasmPrefixReference, `WasmPrefixTests]
+
+lean_lib PsOrdinaryExpansionReference where
+  srcDir := "test"
+  roots := #[`OrdinaryExpansionReference, `OrdinaryExpansionTests]

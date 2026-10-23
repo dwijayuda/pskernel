@@ -314,3 +314,33 @@ docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json.
 PR174 integration checkpointafed7c4b/full40015619975 continues separately;
 do not restart it for focused iterations. Preserve both branch histories.
 Fresh reference reads confirm Rust83e18fe1 and TS84e1e16f unchanged.
+
+## Wasm full G1 and diagnosed shared ordinary-expansion stack blocker
+
+Run40020523049/request0c0b0be6: Wasm full G1 PASSED independent admission and
+all ten authored/refusal cases. Closurecf1fbeba006442a10b687b56cd4be48c73d56a7574758126e337806b0e7568c3,
+G1 artifact8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5.
+G2 failed123237ms/536280KiB with stack exhaustion; noG3/fixedpoint.
+Retained artifact12530402614 digest0b48449adc24ae9430654698650769418116e1aeea3a649a08e361c11cf48d0e.
+Exact replay diagnostic40021807647 (no execution-stack increase, reported frame
+limit16384 only) fails89742ms/534436KiB. Export-anchored function map and full
+trace identify178 declaration-processing closure frames under ordinary
+preparation, but only two Nat-divmod frames. The original pass reconstructs
+logical declarations/partial names after each recursive return.
+
+Replace shared psOrdinaryExpandWorker implementation with a fully applied,
+ordered accumulator worker. Preserve environment insertion order, forbidden
+axiom/opaque refusals,128-budget checked witness search, partial body names/
+binding checks and output declaration/partial-name ordering. Require all-input
+old/new worker equality, canonical small-case comparisons including negatives,
+and10000-declaration smoke before genuine generated runs. Source identities
+change for both targets; preserve the immutable0c0b0be6 attempt independently.
+
+PR174 full integration40015619975 PASSED37/37, all seven targets,both grammars,
+applications,typed IO,minimum Python and installed native package checks.
+Tested merge3ee84d55184e1f458e2f49fbd599ebf0f157e1c4 and head afed7c4b have
+the identical tree9be586614ad592940b6f142109d7a8ca61c2cbf7. Artifact12529619543
+digest0317731c7fdbcb9b426d555e4f194a99dc5271694ca2ef9360dcaecb0ba20091.
+This is the preserved integration checkpoint, not full-suite qualification of
+subsequent statement/prefix/ordinary-pass changes. Current JS0c run continues;
+no fixed point inferred from an active job. No merge or publication.

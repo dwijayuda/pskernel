@@ -1067,7 +1067,7 @@ def psWasmEncodeAbiImports (module : PsWasmModule) :
   match psWasmEncodeAbiImportsWorker module 0 module.functionImports with
   | Except.error error => Except.error error
   | Except.ok encoded =>
-      t memoryImports :=
+      let memoryImports :=
         if module.abiMemoryImports then
           psWasmEncodeByteChunks [psWasmEncodeName "psc1:abi", psWasmEncodeName "memory",
             [psWasmByte 2, psWasmByte 1], psWasmEncodeUleb 256, psWasmEncodeUleb 256,
@@ -1182,7 +1182,7 @@ def psWasmEncodeModule
                                           (psListLength module.functions);
                                       let importSection :=
                                         if psListIsEmpty module.functionImports && !module.abiMemoryImports then []
-                                        else psWasmEncodeSection 2 encodedImports
+                                        else psWasmEncodeSection 2 encodedImports;
                                       let memorySection :=
                                         if module.abiMemory && !module.abiMemoryImports then
                                           psWasmEncodeSection 5

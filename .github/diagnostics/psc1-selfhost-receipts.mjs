@@ -86,7 +86,8 @@ for(const expected of request.attempts) {
   ['psJsonCharNeedsEscape','psBridgeFindConstructor','psBridgeFindRegularHeightInBucket','psBridgeHeightBucket'].some(n=>
    r.text.includes('const __ps$impl$'+n+' ')||r.text.includes('function '+n+'(')||r.text.includes('function* '+n+'(')))
   .slice(0,24).map(r=>({...r,text:r.text.slice(0,4000)}));
- const row={...expected,candidates,selectedIr,selectedSource,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
+ const runtimeReceipts=files.filter(f=>f.endsWith('/ts-utf8-cache/receipt.json')).map(f=>JSON.parse(fs.readFileSync(f)));
+ const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);
  console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));

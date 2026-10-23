@@ -827,7 +827,10 @@ def psTsViewParameters (parameters : List PsVerifiedIrParameter) : List PsVerifi
   | List.nil => List.nil
   | List.cons parameter rest =>
       match parameter.type with
-      | .primitive .string => List.cons parameter (psTsViewParameters rest)
+      | PsVerifiedIrType.primitive primitive =>
+          match primitive with
+          | PsVerifiedIrPrimitiveType.string => List.cons parameter (psTsViewParameters rest)
+          | _ => psTsViewParameters rest
       | _ => psTsViewParameters rest
 
 def psTsViewBindings (parameters : List PsVerifiedIrParameter) (index : Nat) : List (String × String) :=
@@ -892,37 +895,41 @@ def psTsViewInvariant (views : List (String × String))
               | _ => false
 
 -- Position expressions are evaluated before lazy view lookup, as in the old calls.
+def psTsViewIntrinsicKnown (operation : PsVerifiedIrIntrinsic) (getter : String)
+    (printed : List String) : Except PsTsEmitError String :=
+  let ordinary := psTsEmitIntrinsicFromPrinted operation printed;
+  match printed with
+  | List.nil => ordinary
+  | List.cons _ rest =>
+      match operation with
+      | .stringUtf8ByteSize =>
+          if psListIsEmpty rest then Except.ok (psTsJoin "" [getter, "().size"]) else ordinary
+      | _ =>
+          match rest with
+          | List.nil => ordinary
+          | List.cons position tail =>
+              if psListIsEmpty tail then
+                match operation with
+                | .stringAtEnd =>
+                    Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps_p >= ", getter, "().size)(", position, ")"])
+                | .stringGet =>
+                    Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringGetView(", getter, "(), __ps_p))(", position, ")"])
+                | .stringNext =>
+                    Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringNextView(", getter, "(), __ps_p))(", position, ")"])
+                | _ => ordinary
+              else ordinary
+
 def psTsViewIntrinsic (views : List (String × String)) (operation : PsVerifiedIrIntrinsic)
     (arguments : List PsVerifiedIrExpr) (printed : List String) : Except PsTsEmitError String :=
-  let ordinary := psTsEmitIntrinsicFromPrinted operation printed;
   match arguments with
-  | List.cons (.var name) _ =>
-      match psTsLookup views name with
-      | Option.none => ordinary
-      | Option.some getter =>
-          match printed with
-          | List.nil => ordinary
-          | List.cons _ rest =>
-              match operation with
-              | .stringUtf8ByteSize =>
-                  if psListIsEmpty rest then Except.ok (psTsJoin "" [getter, "().size"]) else ordinary
-              | .stringAtEnd =>
-                  match rest with
-                  | List.cons position List.nil =>
-                      Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps_p >= ", getter, "().size)(", position, ")"])
-                  | _ => ordinary
-              | .stringGet =>
-                  match rest with
-                  | List.cons position List.nil =>
-                      Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringGetView(", getter, "(), __ps_p))(", position, ")"])
-                  | _ => ordinary
-              | .stringNext =>
-                  match rest with
-                  | List.cons position List.nil =>
-                      Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringNextView(", getter, "(), __ps_p))(", position, ")"])
-                  | _ => ordinary
-              | _ => ordinary
-  | _ => ordinary
+  | List.nil => psTsEmitIntrinsicFromPrinted operation printed
+  | List.cons first _ =>
+      match first with
+      | PsVerifiedIrExpr.var name =>
+          match psTsLookup views name with
+          | Option.none => psTsEmitIntrinsicFromPrinted operation printed
+          | Option.some getter => psTsViewIntrinsicKnown operation getter printed
+      | _ => psTsEmitIntrinsicFromPrinted operation printed
 
 -- The surrounding recognizer admits only pure expressions. Unhandled shapes use
 -- the original expression printer and therefore cannot introduce a fast path.
@@ -955,16 +962,21 @@ def psTsViewTailValue (views : List (String × String)) (generated : Bool)
   if generated then psTsTailEmitValue true brands tags aliases expected tail expr
   else if psTsTailPureWithFuel aliases 4096 expr then
     match psTsViewPureWithFuel brands tags views 4096 expr with
-    | .error _ => .none
-    | .ok printed => .some printed
-  else .none
+    | Except.error _ => Option.none
+    | Except.ok printed => Option.some printed
+  else Option.none
 
 def psTsViewTailReturn (views : List (String × String)) (generated : Bool)
     (brands tags : List (String × String)) (declaration : PsVerifiedIrDeclaration)
     (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) : Option String :=
-  match psTsViewTailValue views generated brands tags aliases (.some declaration.resultType) true expr with
-  | .none => .none
-  | .some printed => .some (psTsJoin "" ["return ", printed, ";"])
+  match psTsViewTailValue views generated brands tags aliases (Option.some declaration.resultType) true expr with
+  | Option.none => Option.none
+  | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
+
+def psTsViewUnbound (views : List (String × String)) (name : String) : Bool :=
+  match psTsLookup views name with
+  | Option.none => true
+  | Option.some _ => false
 
 def psTsViewTailContextWithFuel (views : List (String × String)) (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
     (generated : Bool) (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
@@ -1035,7 +1047,7 @@ def psTsViewTailContextWithFuel (views : List (String × String)) (brands tags :
                   | Option.some printedScrutinee =>
                       let temporary := psTsFreshMatchTemp declaration.body;
                       let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>
-                        if psTsTailBindingSafe declaration aliases binding.name && (match psTsLookup views binding.name with | Option.none => true | Option.some _ => false) then
+                        if psTsTailBindingSafe declaration aliases binding.name && psTsViewUnbound views binding.name then
                           match psTsEmitType binding.type with
                           | Except.error _ => Option.none
                           | Except.ok type => Option.some (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temporary, ".", binding.field, ";"])
@@ -1062,27 +1074,27 @@ def psTsViewTailContextWithFuel (views : List (String × String)) (brands tags :
 def psTsEmitViewTailLoopWithVisibility (isPublic : Bool) (brands tags : List (String × String))
     (declaration : PsVerifiedIrDeclaration) : Option String :=
   let parameters := psTsViewParameters declaration.parameters;
-  if psListIsEmpty parameters || Nat.blt 2 (psListLength parameters) then .none
+  if psListIsEmpty parameters || Nat.blt 2 (psListLength parameters) then Option.none
   else if psTsNeedsUtf8Runtime declaration.body then
     if psListIsEmpty declaration.typeParameters && psTsViewFresh declaration parameters 0 then
       let views := psTsViewBindings parameters 0;
       let body := psTsInlineEtaApplication declaration.body;
       match psTsViewTailContextWithFuel views brands tags declaration false 4096 [] body with
-      | .none => .none
-      | .some printedBody =>
+      | Option.none => Option.none
+      | Option.some printedBody =>
           match psTsTailMap psTsEmitPureParameter declaration.parameters with
-          | .none => .none
-          | .some printedParameters =>
+          | Option.none => Option.none
+          | Option.some printedParameters =>
               match psTsEmitType declaration.resultType with
-              | .error _ => .none
-              | .ok resultType =>
-                  .some (psTsJoin "" [(if isPublic then "export function " else "function "), declaration.name,
+              | Except.error _ => Option.none
+              | Except.ok resultType =>
+                  Option.some (psTsJoin "" [(if isPublic then "export function " else "function "), declaration.name,
                     "(", psTsJoin ", " printedParameters, "): ", resultType, " { ",
                     psTsViewPrelude parameters 0, "while (true) { ", printedBody, " } }"])
-    else .none
+    else Option.none
 
 
-  else .none
+  else Option.none
 
 def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=

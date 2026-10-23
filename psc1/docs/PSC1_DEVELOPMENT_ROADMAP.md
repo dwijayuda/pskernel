@@ -55,7 +55,14 @@ stream; the 245000 ms outer supervisor guard allows cleanup only. Tests cover
 ignored TERM, exited parents/inherited pipes, and output overflow. Exact source,
 bootstrap, service artifact and completed-case evidence is written incrementally.
 New explicit requests cancel superseded requests; source/docs alone still never
-run G2/G3. Existing runs/history/artifacts remain. Next: execute the new manual matrix,
+run G2/G3. Existing runs/history/artifacts remain. Run 39879776319 at 6b0d40a43a99182b8008820ebe58d475efb093b7 passes all
+process-tree regressions. Both candidates are emitted/admitted, then TS strict
+compilation is killed at 240008 ms and Cargo release build at 240003 ms. No G1
+executable/corpus pass is claimed. Compiler source TS/Rust emitted sizes at the
+preceding checkpoint are 7507069/7693081 bytes. New target profiles retain TS's
+existing supported generic IR (instead of unnecessary closed specialization)
+and use Rust release opt-level=1, keeping strict checks, exact pinned tools and
+all resource bounds. Next: execute the new manual matrix,
 fix target/source blockers as classes, capture exact tool/runtime evidence and
 complete fresh normal qualification after compiler changes.
 

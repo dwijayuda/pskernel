@@ -270,7 +270,7 @@ def planFailure (diagnostic : PsBackendClosedPlanDiagnostic) : Error :=
 
 def targetPlan (target : PsBackendTarget) (source : PsValidatedIrModule)
     (selected : List String) : Except Error PsValidatedIrModule :=
-  if psBackendTargetEq target PsBackendTarget.rust then
+  if psBackendTargetEq target PsBackendTarget.rust || psBackendTargetEq target PsBackendTarget.ts then
     match psFuseClosedWorkers source with
     | Except.error code => Except.error (failure "worker-fusion" code)
     | Except.ok result => Except.ok result

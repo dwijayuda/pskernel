@@ -11,11 +11,11 @@ frontend preparation, elaboration, original strict IR validation, admissions,
 source origin identities and provisional response. Thin target modules provide
 only existing production emission. There is no handwritten target compiler.
 
-Rust keeps its existing generic IR, strictly rechecked shared worker fusion,
-selected public API checks and production Rust emitter/runtime. TypeScript uses
-the same closed specialization/fusion plan as DirectJS, strict target API and
-the production typed emitter. The distinction preserves current target semantics
-rather than forcing Rust through potentially expensive monomorphization.
+Rust and TypeScript keep the generic IR supported by their existing production
+emitters, with strictly rechecked shared worker fusion and selected public API
+checks. DirectJS retains its existing closed specialization/fusion plan. This
+uses existing generic emission; it adds no handwritten compiler or language
+semantics. Every final original/transformed IR graph is still strictly checked.
 
 Both expose String -> String candidates; these cannot authorize admission.
 The host separately admits the exact canonical graph with official Lean 4.35.0
@@ -43,6 +43,10 @@ symlinks and mismatched host target identities have negative tests.
 Measured wall time and peak RSS use actual generated requests; Rust uses the
 child's /usr/bin/time RSS rather than Node's parent RSS. Target compilation time,
 tool failures and generated source size are separate from service execution.
+Rust release optimization level 1 is an explicit reproducible build profile;
+type/borrow checking, locked dependencies and all runtime qualification remain.
+The source, toolchain and profile are recorded. Level 3 build performance and
+whole-file formatting are measured defects, not grounds for larger limits.
 Initial Rust resolver output must be captured and committed as a reviewed lock
 before any reproducibility qualification claim. Historical DirectJS evidence
 is retained; no Rust-vs-TS performance conclusion is assumed before measurement.
@@ -56,3 +60,8 @@ required independently for each target; neither substitutes for the other.
 Retain all seven Practical Core backends and frozen 37-criterion qualification.
 Do not relax fuel, stack/heap limits, strict IR, unsupported ABI refusals,
 negative tests or independent admission to make a generation pass.
+
+Linux process-tree supervision retains the 240000 ms child deadline and 32 MiB
+per-stream cap, with SIGKILL for descendants and negative OS-level tests. The
+245000 ms outer supervisor guard is cleanup only. Incremental candidate/case
+checkpoints survive job interruption; each manual target job remains 15 minutes.

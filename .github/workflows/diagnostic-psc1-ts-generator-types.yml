@@ -1,4 +1,4 @@
-name: PSC1 isolated typed TypeScript generator qualification
+name: PSC1 isolated TypeScript performance 240s
 
 on:
   workflow_dispatch:
@@ -86,9 +86,10 @@ jobs:
       - name: Build the common source facades and separate official checker
         run: |
           set -euo pipefail
-          lake build psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+          lake build psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
       - name: Preserve exact visitor behavior and DirectJS scalar functionality
         run: |
+          .lake/build/bin/psc1_codec_static_schema_tests
           .lake/build/bin/psc1_lexer_normalization_tests
           .lake/build/bin/psc1_target_plan_profile_tests
           .lake/build/bin/psc1_cursor_normalization_tests
@@ -97,7 +98,7 @@ jobs:
       - name: Audit both grammar inputs before expensive generation
         run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
       - name: Execute independent actual target generations and fixed point
-        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host
+        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host performance-240s
       - name: Retain exact sources, graphs, target tool errors and execution evidence
         if: always()
         uses: actions/upload-artifact@v4

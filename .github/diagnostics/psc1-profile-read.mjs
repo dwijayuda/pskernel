@@ -8,5 +8,6 @@ assert.equal(row.requestSha256,'e90eafca56433f509bb9e77d1e26e034f1de34accadac7bf
 assert.equal(row.manifestSha256,'294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec');
 assert.equal(row.sourceClosureDigest,'816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82');
 assert.equal(row.sourceSha256,'edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d');
+if(!row.execution)assert.ok(row.lastTick-row.firstTick>=(row.phase-30)*1000000,'background replay did not reach requested phase');
 assert.equal(row.sourceFilesVerified,true);assert.equal(row.qualification,false);assert.equal(row.admission,'not-run');assert.equal(row.adoption,'not-run');
 console.log('PSC1_PROGRESSIVE_PROFILE_READ: '+JSON.stringify({...expected,receiptSha256:crypto.createHash('sha256').update(bytes).digest('hex'),receipt:row}));

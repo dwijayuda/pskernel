@@ -1,16 +1,16 @@
-name: PSC1 isolated TypeScript performance 240s
+name: PSC1 TS bridge lookup performance 240s
 
 on:
   workflow_dispatch:
   push:
-    branches: [fix/psc1-ts-generator-result-types-20261023]
+    branches: [perf/psc1-bridge-lookup-workers-20261023]
     paths: [.github/qualification-requests/psc1-ts-generator-types.json]
 
 permissions:
   contents: read
 
 concurrency:
-  group: psc1-ts-generator-types-${{ github.ref }}
+  group: psc1-ts-bridge-lookup-performance-240s-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
           const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
           assert.equal(r.schema,'psc1-rust-ts-selfhost-request/1');
           assert.equal(r.action,'qualify-independent-G1-G2-G3');
-          assert.equal(r.branch,'fix/psc1-ts-generator-result-types-20261023');
+          assert.equal(r.branch,'perf/psc1-bridge-lookup-workers-20261023');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.deepEqual(r.targets,['ts']);assert.equal(r.resourcePolicy,'unchanged');
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
@@ -86,9 +86,12 @@ jobs:
       - name: Build the common source facades and separate official checker
         run: |
           set -euo pipefail
-          lake build psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+          lake build psc1_bridge_lookup_normalization_tests psc1_json_escape_predicate_tests psc1_json_quote_tests psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
       - name: Preserve exact visitor behavior and DirectJS scalar functionality
         run: |
+          .lake/build/bin/psc1_bridge_lookup_normalization_tests
+          .lake/build/bin/psc1_json_escape_predicate_tests
+          .lake/build/bin/psc1_json_quote_tests
           .lake/build/bin/psc1_codec_static_schema_tests
           .lake/build/bin/psc1_lexer_normalization_tests
           .lake/build/bin/psc1_target_plan_profile_tests

@@ -1,141 +1,120 @@
-# Executable Rust and TypeScript self-host continuation
+# Executable PSC1 Rust and TypeScript continuation
 
-Continue PSC1 PR #172 autonomously. Use connected GitHub tools and Linux GitHub
-Actions only; no local repository/files/builds/tests. Preserve all Git history,
-fetch current HEAD before mutations, use expected-HEAD non-force updates.
-Do not merge or publish packages. Do not stop at planning.
+Continue PR #172 from the latest remote HEAD, through actual implementation and
+Linux qualification. Use connected GitHub tools and Linux Actions only: no local
+checkout, files, builds or tests. Preserve history with expected-HEAD non-force
+updates. No merge or npm publication is authorized.
 
-## Read and establish exact state
+1. Fetch PR172 and active branch fix/psc1-closure-normalization-20261021 HEAD.
+   Read applicable AGENTS instructions, AI_WORK_STATE.md, the development roadmap,
+   PSC1_SELFHOST_QUALIFICATION_PROFILES.md and the canonical
+   PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json.
+   Integrated code5ce2fc74b9f01682832ddc10ec9ef27f26458564 / tested merge
+   a61eecf46ded19eedcdefcb320aa33118cd8f2ad passes run39909569028:
+   all selected jobs,47 full steps,37/37 finite criteria. Preserve the frozen
+   14-family contract, both grammars, seven targets and four real application
+   categories. Full artifact12483409585 expires2026-11-06T06:45:00Z.
+2. Preserve the qualified isolated Rust reference:
+   branch fix/psc1-rust-owned-string-moves-20261023, source
+   5e0b548e6cb3606ee0d3c129e0a829d830e407e4, request
+   7d8865a08427a28432e427592dfc4263718c9a2f, run39908529181/job120265913272.
+   Actual G1/G2/G3, independent admission and exact fixed point pass with
+   correctness-1800s. G2/G3 are692788/660042ms, RSS668192/668184KiB.
+   All three generated executable hashes are
+   d55a8435a157f021e5a7c073037303429b9787729c963af3842a04b9fb009017.
+   Same-run executable equality is observed; independent clean-build repeatability
+   and the240s performance target remain unqualified.
+3. Re-query both current TypeScript trials before changing or rerunning anything.
+   Latest combined branch perf/psc1-bridge-lookup-workers-20261023 has source
+   0938c895a9ff007a36df72dc49c836dc7443cef3, request
+   10ac556f28782c4efeaa72c168f3969aba68ccca, run39914906360/job120286173371.
+   It inherits the predicate correction and uses fully applied constructor/height
+   lookup workers, retaining old function types. All-input list/name/fuel/index/
+   hash equality proofs, first-duplicate/100001-entry native checks, prior
+   regressions and source audits pass; actual generations are running.
+   Keep psc1_bridge_lookup_normalization_tests and its retained reference workers.
+   Do not infer generation success or alter cache/fuel/index policies.
+   The separate predicate-only comparison remains:
+   branch fix/psc1-ts-generator-result-types-20261023, source
+   083f900a60f6df3ad32f2d4e1c4afac2c53cf12a, request
+   ecd53ad3f7ea96e07b53c7ece405b0f97c67dbf1,
+   run39913434540/job120281442220. At this checkpoint the all-Char official
+   proof,1114112 native comparisons, quote regressions and source audits pass;
+   actual target generations are running. Read final jobs/logs/artifacts.
+   Do not infer new G1/G2/G3 from an older source or a green native proof.
+   Previous shared-codec source29e871ea/requestb5ba1452/run39908439190
+   passed G1 then timed out on G2 at1800240ms/RSS2995304KiB; G3 not run.
+4. The current correction removes lazy Boolean right-operand thunks from
+   psJsonCharNeedsEscape using definitionally equivalent branches.
+   Preserve test/JsonEscapePredicateTests.lean and its explicit lake root
+   psc1_json_escape_predicate_tests, existing psJsonQuote/native regressions,
+   all-input codec/lexer/cursor equalities and both full source audits.
+   Never replace failed proofs with axioms/native_decide/sorry or relax checks.
+   The current TS220s replay39912539573 samples only its last30s; it is not a
+   profile of the final30s of the1800s request. It reaches generator/thunk paths
+   around quoting/codec/constructor lookup. Use full bottom-up data, not flat
+   native samples, before another performance change. UTF8 cache and prefix-scan
+   hypotheses remain unmeasured; preserve the two-entry cache and raw-offset,
+   invalid-boundary, Unicode and resource behavior.
+5. Keep the two executable wall-clock profiles separate. In psc1/ on Linux:
+   ```sh
+   node scripts/generated-target-qualification.mjs rust --self-host performance-240s
+   node scripts/generated-target-qualification.mjs ts --self-host performance-240s
+   node scripts/generated-target-qualification.mjs rust --self-host correctness-1800s
+   node scripts/generated-target-qualification.mjs ts --self-host correctness-1800s
+   ```
+   The default performance profile remains240000ms for every request/tool and
+   existing15-minute jobs. Longer profile changes only G2-self/G3-self to1800000ms.
+   G1, corpus and builds remain240000ms; independent checker120000ms. Long
+   jobs120min/step110min, cleanup5s, streams32MiB/wire128MiB. Never raise fuel,
+   heap/stack, admission, output or wire limits to obtain a pass.
+6. Use the existing dedicated workflows and source-first/request-only protocol.
+   Longer workflow .github/workflows/psc1-rust-ts-selfhost-correctness.yml reads
+   .github/qualification-requests/psc1-rust-ts-selfhost-correctness.json.
+   Request schema psc1-rust-ts-selfhost-request/2; action
+   qualify-independent-G1-G2-G3; profile correctness-1800s; exact branch and
+   targets; g2g3TimeoutMs1800000; g1TimeoutMs240000; resourcePolicy
+   only-G2-G3-wall-clock-extended;all-other-policies-unchanged.
+   Set a fresh id and parentCommit to freshly fetched source HEAD. The next
+   commit must change only that request file. Its parent/event.before/
+   parentCommit must agree and event.after must equal its commit.
+   Existing performance request paths and schema/1 resourcePolicy unchanged
+   stay available; do not silently alter their acceptance criteria.
+7. Qualification must call the native seed once, remove native compiler
+   executables, then actually use emitted compilers for G2 and G3.
+   Independently admit/build/execute every generation and all ten corpus cases.
+   Require exact closure/source/canonical-admission/original/transformed IR and
+   observation fixed points. Keep negative/unsupported-ABI cases and official
+   Lean4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+   Long correctness success cannot grant a240s badge. Record per-request time,
+   Linux child maxRSS, sampled tree RSS scope, failures and all source/tool/
+   manifest/lock/graph identities. Preserve complete artifacts and expiry.
+8. Audit each new terminal artifact once through the existing diagnostic branch:
+   diagnostic/psc1-selfhost-profile-20261023 and
+   .github/diagnostics/psc1-selfhost-receipts.mjs/workflow. Pin actual run,
+   source parent, request commit, artifact ID/digest/expiry and download path.
+   The audit verifies source inventory/request/manifest bytes without executing
+   compiler code; it cannot supply missing admission or qualification.
+   Runs39910276762 and39912095877 already audit the previous four profile results.
+9. After current TS correctness, optimize actual workloads toward240s. Rust late
+   stack39906025465 reaches strict IR nominal-arity lookup; any index must prove
+   all-input equality including duplicates/first binding/structure-before-
+   inductive priority/Array/misses and retain report/resource counters.
+   Do not remove generic worker guards; checked scalar closed planning already
+   removes open generics. Retain Rust String moves/private iterative Drop,
+   TS checked result annotations/structured generators and all seven mappings.
+10. Integrate only coherent validated changes onto fresh main using non-force
+    expected-HEAD commits. Do not copy an entire stale isolated tree or overwrite
+    already integrated TS annotations. New integrated compiler/backend source
+    requires fresh full seven-backend/application qualification. Separate clean
+    build reproducibility/readability/unpublished distribution remains work.
+    DirectJS G1 and its tracked G2 heap evidence stay preserved; PSKernel
+    ExpressionV2 research remains independent.
+11. Continuously update AI_WORK_STATE, roadmap and the existing canonical
+    qualification receipt with actual terminal boundaries. Keep passive
+    historical/declaration JSON snapshots frozen. Avoid unchanged full CI and
+    repeated audits; no merge or package publication.
 
-1. Fetch PR #172 and latest `fix/psc1-closure-normalization-20261021` HEAD,
-   then read `psc1/AI_WORK_STATE.md`,
-   `psc1/docs/PSC1_DEVELOPMENT_ROADMAP.md`,
-   `psc1/docs/PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md`, and
-   `psc1/docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json`.
-   Read any applicable AGENTS instructions through GitHub.
-2. The last full qualified compiler HEAD is
-   `ea10eff9b3de063941c6029bb6c821f9cc10cc3f`, source profile
-   `76bf4120de83bf776a4e790672f7b2d0198e25db`, tested merge
-   `4e5f4d2c8c90178aa7cf301717004cfc6182596f`.
-   Run 39880807914 completed successfully, all selected jobs, all 47 full steps,
-   readiness 37/37; benchmark was dependency-skipped. Do not rerun without cause.
-3. Manual matrix 39880803794: Rust job 120177436334 qualifies actual G1/all ten
-   frozen cases, then G2 times out at 240031 ms, G3 not run. Artifact 12470618024
-   has exact executable/source/admission/IR identities and request bytes.
-   TS job 120177435975 admits the complete bootstrap candidate, then strict
-   checking times out at 240006 ms; no executing G1. Artifact 12470288964.
-   These artifacts expire 2027-01-21; the normal full artifact expires 2026-11-06.
-
-## Execute the measured Rust correction first
-
-4. Fetch isolated branch `fix/psc1-rust-owned-string-moves-20261023`.
-   Last recorded request HEAD `f037377574124cf7a374d627f0c57e4a855e09e5`,
-   source correction `9052b59fe7bafc000a2fa8ec24f0ead266276682`,
-   run 39886083977 was in progress at this recording. Query its actual terminal
-   state and artifacts before changing anything.
-5. Exact generated Rust diagnostic 39882471895 at
-   `c380c7e899fe7d156443c73b43208ab0ecb6936e` identifies repeated
-   `String::clone` from `psJsonStringToChars` in full G2 request decoding.
-   The isolated prototype modifies BackendRust/Expr.lean and Tail.lean:
-   exact monomorphic immutable forwarding wrappers borrow String arguments;
-   already-owned computed expressions move with required grouping; unchanged,
-   initialized, unshadowed String loop parameters move only after changing
-   arguments are fully evaluated.
-6. Review `psc1/test/RustInvariantTailTests.lean` and
-   `psc1/scripts/rust-invariant-tail-runtime-tests.mjs`. They retain the old
-   emitters, compare generated Rust execution, and cover Unicode, duplicates,
-   shadowing, fuel refusal, argument order and reserved identifiers. Prior run
-   39885413596 passes those guards and both complete grammar audits but failed
-   the actual generated handler program due to lost struct-expression grouping.
-   The latest correction restores parentheses without reintroducing copies.
-7. Fix actual failures as general emitter/runtime classes, add meaningful
-   regressions and rerun the same frozen full compiler pipeline. Do not infer
-   whole-compiler speed from the mechanism benchmark. Do not increase stack,
-   heap, fuel or deadlines. If native recursion/destruction fails, diagnose it
-   on the exact artifact before designing an ABI-preserving runtime correction.
-
-## Diagnose and fix TypeScript using its actual checker
-
-8. Fetch diagnostic branch `diagnostic/psc1-selfhost-profile-20261023`.
-   Latest diagnostic recorded:
-   `23626b21cada65ea6f78ac6db8dd0e3ffa6dff29`,
-   run 39886224622. It inspects actual checker descendants using the exact
-   6462076-byte generic compiler module from artifact 12470288964 and locked
-   TypeScript 7.0.2. Query terminal logs and diagnosis artifacts.
-   Earlier run 39885112247 sampled only the Node launcher; it does not identify
-   a checker hotspot.
-9. Fix the measured source/checker issue through the existing TS emitter or
-   shared checked compiler. Preserve strict checking, noEmitOnError, tool
-   identities and existing 264 output/runtime comparisons and all-input
-   visitor equality. No noCheck, any/cast bypasses or handwritten compiler.
-   Largest IR functions are parameterized elaborator workers; global constant
-   outlining was not justified. An unreachable-function estimate is not a
-   preservation argument or implemented optimization.
-10. Build and execute genuine TS G1, all five positive/five negative frozen
-    cases, then G2/G3 and exact fixed points independently of Rust.
-
-## Run the existing Linux qualification, safely
-
-11. Manual workflow:
-    `.github/workflows/psc1-rust-ts-selfhost-qualification.yml`.
-    It runs `lake build psc1_target_service_seed psc1_independent_checker`
-    and the existing native normalization/host/process-bound regressions,
-    audits both complete source grammars, then executes from `psc1/`:
-    `node scripts/generated-target-qualification.mjs rust --self-host`
-    and independently
-    `node scripts/generated-target-qualification.mjs ts --self-host`.
-    Read the workflow for its complete registered test list; execute via
-    Linux Actions, never on the local machine.
-12. Use workflow_dispatch when a connected dispatch mutation is available.
-    Otherwise use the existing committed-request fallback:
-    first commit source changes on the exact current parent, then create
-    **a separate request-only commit** changing only
-    `.github/qualification-requests/psc1-rust-ts-selfhost.json`.
-    Retain schema `psc1-rust-ts-selfhost-request/1`, action
-    `qualify-independent-G1-G2-G3`, exact active branch, targets
-    `["rust","ts"]`, resourcePolicy `unchanged`, a fresh unique id and
-    parentCommit equal to the fetched current source commit.
-    The request commit's sole parent, event.before and parentCommit must match;
-    event.after must be the request commit. Use expected-HEAD lease and no force.
-    Source/docs pushes alone do not run G2/G3.
-13. The isolated ownership workflow uses the same qualification implementation,
-    Rust-only, branch-bound request path
-    `.github/qualification-requests/psc1-rust-owned-moves.json`.
-    Apply the same source-commit / separate request-only-commit rule.
-    It additionally runs `psc1_rust_invariant_tail_tests` and
-    `node scripts/rust-invariant-tail-runtime-tests.mjs`.
-    Keep prototype results explicitly separate until integrated.
-14. Query exact workflow/job/step terminal states; preserve incremental
-    qualification.json, tool stdout/stderr, source inventory, generated source,
-    reviewed lock, request/candidate bytes, artifact hashes, timings and RSS.
-    A failed/timeout attempt is evidence of a blocker, never qualification.
-
-## Promotion and completion
-
-15. Integrate only reviewed, validated prototype changes onto the latest active
-    branch with a history-preserving expected-HEAD commit; no PR merge. Reconcile
-    any concurrent source changes explicitly. Run fresh normal source-selected
-    and full Linux seven-backend qualification after compiler/backend changes.
-    Historical normal success does not qualify new source.
-16. Each target must independently execute G1, G2 and G3, compile the identical
-    registered compiler closure, independently admit exact canonical graphs with
-    official Lean 4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
-    strictly validate original and transformed IR, match source/admission/IR
-    fixed-point digests, and pass identical ten-case observations at each stage.
-    Native compiler binaries must be unavailable after the single seed.
-17. Keep all seven Practical Core mappings, real applications, explicit
-    unsupported ABI refusals, strictness/evaluation order and negative tests.
-    Existing 15-minute job, 240000 ms child, 32 MiB per-stream and 128 MiB
-    request/response limits remain; 245000 ms supervisor guard is cleanup only.
-    Do not suppress diagnostics to hide errors or weaken checking.
-18. Update the machine receipt, AI_WORK_STATE.md and authoritative roadmap with
-    exact commits/run IDs/artifact digests/expiry and completed versus blocked
-    work. Preserve historical text/receipts. DirectJS remains G1 reference;
-    retain its G2 heap defect without returning to DirectJS-first tuning.
-    Record actual generated compiler build/runtime/RSS/source size comparison
-    for Rust and TS only once both execute.
-
-Continue implementation through qualification. If the session must end, leave
-a verified source checkpoint, exact terminal evidence and updated executable
-continuation instructions. Do not claim full self-hosting, production release,
-or npm publication before the required evidence and authorization.
+Continue actual development. If session completion is impossible, leave a verified
+checkpoint and update this executable prompt with exact remaining work. Never
+claim TypeScript self-hosted or either target240s-qualified without its evidence.

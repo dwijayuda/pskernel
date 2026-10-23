@@ -1,14 +1,14 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/2",
+  "id": "psc1-ts-utf8-token-correctness-20261023-1792758024278",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "ts-applied-bridge-lookup-workers-1800s-20261023",
-  "branch": "perf/psc1-bridge-lookup-workers-20261023",
-  "parentCommit": "0938c895a9ff007a36df72dc49c836dc7443cef3",
+  "branch": "perf/psc1-ts-utf8-view-tokens-20261023",
   "targets": [
     "ts"
   ],
   "profile": "correctness-1800s",
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
-  "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged"
+  "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
+  "parentCommit": "d520a49e400be14edd26c098054722cd82b7bca8"
 }

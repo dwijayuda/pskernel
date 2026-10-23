@@ -1,15 +1,14 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
   "branch": "work/psc1-direct-selfhost-blockers-20261024",
-  "parentCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+  "parentCommit": "e2743316170f800b8ad84533c1da1834773acccd",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "js",
     "wasm-core"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "82b27063 Linux gate40020188747 passed48 all-input recursive-prefix equalities, huge-fuel cases,780 native/reference JS statement comparisons,7540 runtime cases, owned Wasm engine/carrier tests and87/98-module census in both grammars; execute independent target generations and fixed points."
+  "reason": "e2743316 preflight 40023689471 PASS: ordinary-expansion all-input ordered accumulator equivalence, 51 delayed prefix guards/proofs, unchanged strict IR and independent Lean admission. Retest actual Wasm G2 stack blocker diagnosed by 40021807647."
 }

@@ -19,6 +19,13 @@ unchanged whole mixed25minutes remain pending. Fuel4096,2048MiB,emptyPATH
 and allpositive/negative/singleton ownership assertions remain unchanged.
 Exact all79 native proof rows/artifact12473897059 and gate status:
 evidence/2026-10-23-t01f-primitive-fusion-native.json.
+The separate fe4aa completed gates,219proofs,128whole-checker/24admission/
+6profile observations,both24CLI+8API provider receipts,actual32/384 ownerABBA,
+all193 individually verified body hashes and four diagnostic cases are saved in
+evidence/2026-10-23-t01f-fe4aa-qualification-gates.json. Its String aggregates
+remain pending; no qualification is inherited by61deda. Fe4aa narrow owner
+observations include32owner trivial-sort warm1.1798x and128owner unknown-
+constant peakRSS+6384KiB; retain earlier ae916 regressions separately.
 This containing documentation child is unqualified; neither native equivalence
 nor code shape proves full generated correctness,adequate performance or global
 soundness/backend preservation.

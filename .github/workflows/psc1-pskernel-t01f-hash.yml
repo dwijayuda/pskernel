@@ -5,6 +5,7 @@ on:
     branches:
       - work/psc1-pskernel-t01f-string-20261022
     paths:
+      - psc1/kernel-lakefile.lean
       - psc1/packages/pskernel-core/src/**
       - psc1/test/PsKernelScalarHashWorkerRegression.lean
       - psc1/test/PsKernelClosedCacheAnalysisRegression.lean

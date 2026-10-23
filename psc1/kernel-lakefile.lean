@@ -143,6 +143,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Environment.Semantic,
     `Ps.KernelCore.Runtime.Acceleration.Cache,
     `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
+    `Ps.KernelCore.Runtime.Acceleration.CacheAnalysis,
     `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
     `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
     `Ps.KernelCore.Runtime.Capability.Types,

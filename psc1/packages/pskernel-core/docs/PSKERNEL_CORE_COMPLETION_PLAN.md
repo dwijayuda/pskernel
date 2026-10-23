@@ -1,3 +1,25 @@
+## 2026-10-24 native module registration corrected after236a build failure
+
+Candidate236aeb62aeadc6a457dc6c7b0e2f5eb970113600, run39996286431 attempt1,
+native job120560537836 FAILED during the initial native build: the isolated
+kernel-lakefile explicitly lists module roots and omitted the new CacheAnalysis
+module. WhnfCore reported a missing CacheAnalysis.olean. No seven-proof or
+retained proof gate, frozen native matrix, complete fixture/runtime, generated
+build or mixed runtime executed; no qualification is claimed for236a.
+
+This containing correction adds only the missing native module root and the
+kernel-lakefile narrow-workflow path filter, plus this failure record. The
+cache-analysis implementation, seven theorem statements/proofs and all generated
+assertions remain unchanged. Follow ONE new native-first narrow run for this
+corrected source; do not rerun or inherit results from236a.
+
+All five full work-branch triggers stay paused; diagnostic workflows manual-only.
+T01F/current A/B/D OPEN, C FAIL. No T05/integration. Exact same-source/attempt
+qualification, all old controls and fixed Lean/TS/Node/fuel4096/2048MiB/emptyPATH/
+25minute requirements remain. Fresh expected-SHA/nonforce preserves history.
+
+---
+
 ## 2026-10-24 shared closed-cache analysis candidate — qualification pending
 
 This containing implementation recreates the saved T01F handoff: one explicit

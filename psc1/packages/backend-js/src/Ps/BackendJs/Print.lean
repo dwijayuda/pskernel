@@ -1851,16 +1851,18 @@ def psJsViewPositionName : String := "__ps$view$position"
 def psJsViewSelect (declaration : PsJsIrDeclaration) (body : PsJsIrExpr)
     (parameters : List PsJsIrParameter) : Nat -> Nat -> Option (List (String × String)) :=
   match parameters with
-  | List.nil => fun _ _ => Option.some []
-  | List.cons parameter rest => fun index count =>
+  | List.nil => fun (_index : Nat) (_count : Nat) => Option.some List.nil
+  | List.cons parameter rest => fun (index : Nat) (count : Nat) =>
       match psJsViewInspect declaration.name parameter.name index 4096 [(parameter.name,"view")] body with
-      | Option.some true =>
-          if Nat.blt count 2 then
-            match psJsViewSelect declaration body rest (Nat.succ index) (Nat.succ count) with
-            | Option.none => Option.none
-            | Option.some others => Option.some (List.cons (Prod.mk parameter.name (psJsViewName count)) others)
-          else Option.none
-      | _ => psJsViewSelect declaration body rest (Nat.succ index) count
+      | Option.some used =>
+          if used then
+            if Nat.blt count 2 then
+              match psJsViewSelect declaration body rest (Nat.succ index) (Nat.succ count) with
+              | Option.none => Option.none
+              | Option.some others => Option.some (List.cons (Prod.mk parameter.name (psJsViewName count)) others)
+            else Option.none
+          else psJsViewSelect declaration body rest (Nat.succ index) count
+      | Option.none => psJsViewSelect declaration body rest (Nat.succ index) count
 
 def psJsViewIntrinsic (views : List (String × String)) (operation : PsJsIrRuntimeOp)
     (arguments : List PsJsIrExpr) : PsJsIrExpr :=
@@ -1968,14 +1970,15 @@ def psJsViewLoopBody (declaration : PsJsIrDeclaration) (available : String -> Bo
   match psJsViewSelect declaration body declaration.parameters 0 0 with
   | Option.none => Option.none
   | Option.some views =>
-      if psListIsEmpty views || !(psJsViewFresh available (psListLength views)) then Option.none
-      else
+      if psListIsEmpty views then Option.none
+      else if psJsViewFresh available (psListLength views) then
         match psJsViewRewrite 4096 views body with
         | Option.none => Option.none
         | Option.some rewritten =>
             match psJsTailEmitWithFuel declaration available 4096 0 rewritten with
             | Option.none => Option.none
             | Option.some printed => Option.some (psJsViewPrelude views 0,printed)
+      else Option.none
 
 def psJsPrintTailLoopWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) : Option String :=

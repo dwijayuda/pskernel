@@ -1,3 +1,39 @@
+## 2026-10-24 handoff: b0 mixed FAILED; cache-analysis implementation NOT committed
+
+The user requested continuation in a new regular chat. This containing commit
+is a documentation/evidence checkpoint only, with V1profile restored manual-only.
+Production remains b0d560cfbbfd976a9d8338dbd2bd26a4d5614418; no new executable
+candidate, proof pass, build or runtime run is claimed. Transient drafted
+CacheAnalysis/proofs/callsite/JS/workflow buffers were NOT committed.
+Recreate them from the complete saved design:
+
+docs/T01F_REGULAR_CHAT_HANDOFF_2026-10-24.md
+
+The completed current-source phase diagnostic39979815911/job120503844633 is
+DIAGNOSTIC ONLY. All24artifactfiles/provenance/copiedinputs independently
+verified. 57198 phase-exclusive samples; ExprHash7442+HasFVar6318=24.0568%.
+Operation67393.613841ms; whole131.84s/677164KiB. Full inspection now durable:
+docs/evidence/2026-10-23-t01f-primitive-short-pairs-defeq-phase-profile.json.
+Do not turn these observations into a wholemixed pass or speedup claim.
+
+Next: implement shared closed-cache eligibility/hash traversal and sixhelpers,
+seven universal proofs,20expression/1884assertion generatedmatrix, seven V1
+checker callsitefiles; preserve old Cache/Policy/Expr/ScalarHash/hashproofs.
+Use exact detailed recipe in the handoff, not a new broad audit.
+Then ONE new native-first narrow Linux run; fix actual failures without
+weakening gates. No T05/integration before full T01F acceptance.
+
+AllFIVE full workbranch pushes PAUSED; narrowhash push ACTIVE for future
+implementation. V1profile andotherdiagnostics manual-only. No new run here.
+After complete narrowPASS: BOTH exactfinalsource6shardaggregates1400/sample,
+8400executed/route with repeatedprefix explicit, and all retained gates.
+T01F/currentA/B/DOPEN,CFAIL; historical scopedA9c87 qualified.
+Integration fresh123c41197950b6761be965fd21c57142ee2b0d1c.
+ActionsLinuxONLY; pinnedLean eb6cafb7/TS7.0.2/Node22; fuel4096/2048MiB/
+emptyPATH/25min unchanged; no main/npm/force; fresh expectedSHA preservehistory.
+
+---
+
 ## Primitive short-pair mixed runtime TIMED OUT; current-source phase diagnostic next
 
 Execution source:b0d560cfbbfd976a9d8338dbd2bd26a4d5614418

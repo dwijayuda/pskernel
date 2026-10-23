@@ -9,7 +9,10 @@ including17 completed actual attempts, preserved failures and immutable artifact
 ## Current remaining queue — DirectJS and DirectWasm
 
 Active child work/psc1-direct-selfhost-spines2-20261024 at52cff171:
-generic reverse fold for three erasure index spines, all-input proof gate pending.
+generic reverse fold for three erasure index spines; full proof/runtime/source
+gate40028430603 PASSED, including generic fold + all three complete-index
+API equalities,10000 declarations/precedence cases and87/98-module Lean/PS census.
+Next run actual Wasm generations on this verified source; no G2/G3 claim.
 Previous Wasm6c82fcb4/run40026947549 completedG1 but G2 stack252550ms/1027508KiB;
 read-only map40027922448 identifies psErasureDeclarationEntryIndex. Complete
 index structure/insertion order/first-entry/count/error priority must match.

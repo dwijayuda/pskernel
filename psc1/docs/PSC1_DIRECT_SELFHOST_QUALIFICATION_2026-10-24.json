@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 21:40:00 UTC",
+  "recordedAtUtc": "2026-10-23 21:43:00 UTC",
   "localDate": "2026-10-24",
-  "status": "erasure-spine-class-fix-under-test",
+  "status": "erasure-spine-proofs-source-runtime-passed-next-wasm-request",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -191,25 +191,20 @@
     }
   },
   "focusedGate": {
-    "commit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
-    "runId": 40027270768,
-    "jobId": 120666722896,
+    "commit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
+    "branch": "work/psc1-direct-selfhost-spines2-20261024",
+    "runId": 40028430603,
+    "jobId": 120670363952,
     "status": "passed",
+    "genericRightFoldEquality": true,
+    "completeErasureIndexApiEqualities": 3,
     "prefixEqualities": 51,
-    "ordinaryWorkerEquality": true,
     "checkedSpineEqualities": 3,
-    "allInputJsNameVisitorEquality": true,
-    "byteModulusAndBounds": true,
+    "ordinaryWorkerEquality": true,
     "containsSorry": false,
-    "jsRuntimeComparisons": 7540,
-    "jsStatementComparisons": 780,
+    "largeDeclarationSmoke": 10000,
     "jsLazyViewComparisons": 10584,
     "nativeStringPairs": 49,
-    "cacheKeyLookups": {
-      "retained": 40000,
-      "current": 2,
-      "maxViews": 2
-    },
     "sourceCensus": {
       "js": 87,
       "wasm": 98,
@@ -219,7 +214,8 @@
       ],
       "refused": []
     },
-    "ownedWasmEngine": true
+    "ownedWasmEngine": true,
+    "allPriorRegressionGates": "passed"
   },
   "currentAttempt": {
     "target": "js",
@@ -740,9 +736,40 @@
       "checkedFindEquality": true,
       "checkedNormalizeEquality": true,
       "sourceJsFailure": "matchExpectedType; subsequently corrected"
+    },
+    {
+      "commit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
+      "runId": 40027270768,
+      "jobId": 120666722896,
+      "status": "passed",
+      "prefixEqualities": 51,
+      "ordinaryWorkerEquality": true,
+      "checkedSpineEqualities": 3,
+      "allInputJsNameVisitorEquality": true,
+      "byteModulusAndBounds": true,
+      "containsSorry": false,
+      "jsRuntimeComparisons": 7540,
+      "jsStatementComparisons": 780,
+      "jsLazyViewComparisons": 10584,
+      "nativeStringPairs": 49,
+      "cacheKeyLookups": {
+        "retained": 40000,
+        "current": 2,
+        "maxViews": 2
+      },
+      "sourceCensus": {
+        "js": 87,
+        "wasm": 98,
+        "grammars": [
+          "lean",
+          "ps"
+        ],
+        "refused": []
+      },
+      "ownedWasmEngine": true
     }
   ],
-  "nextRequestedTarget": "js",
+  "nextRequestedTarget": "wasm-core",
   "nextJsSourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
   "erasureStackMap": {
     "schema": "psc1-retained-wasm-function-map/1",
@@ -1336,11 +1363,5 @@
     "runId": 40027662328,
     "status": "in_progress"
   },
-  "pendingFocusedGate": {
-    "branch": "work/psc1-direct-selfhost-spines2-20261024",
-    "commit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
-    "runId": 40028430603,
-    "status": "in_progress",
-    "required": "generic right-fold plus three retained all-input API equalities; full index structures/order/errors; source/runtime/negative gates unchanged"
-  }
+  "nextWasmSourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0"
 }

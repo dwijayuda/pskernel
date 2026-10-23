@@ -14,8 +14,10 @@ binds the exact Git blob of the complete17-attempt
 Active branch work/psc1-direct-selfhost-spines2-20261024, based on preserved
 PR175/head85433830522dc0cc52541b985510122b67dea364. Implementation52cff17196b71481e3cb8ced1c4d3fee2d1280d0
 introduces one fully applied reverse fold shared by three erasure index passes.
-Its native/all-input proof/source census gate is pending. No new qualification
-claim. This section supersedes older active/pending descriptions below.
+Its full native/all-input proof/runtime/source census gate40028430603
+(job120670363952) PASSED, including generic right-fold and all three retained
+API equalities,10000-declaration/index precedence tests and both87/98-module
+Lean/PS censuses. This is a verified source checkpoint, not a G2/G3 claim. This section supersedes older active/pending descriptions below.
 
 Previous real Wasm request6c82fcb4/run40026947549 passes completeG1, then
 G2 fails252550ms/1027508KiB at function1538, noG3/fixedpoint.
@@ -36,8 +38,8 @@ policies are unchanged. Do not substitute sample lookup parity for full equality
 PR175 full CI40027662328 and genuine JS qualification40027650302/request
 85433830522dc0cc52541b985510122b67dea364 continue on the immutable parent branch
 work/psc1-direct-selfhost-blockers-20261024. Do not cancel/restart them for
-focused child iterations. After the new gate, issue a request-only Wasm run on
-the child. Once fixes are stable, preserve terminal parent evidence before a
+focused child iterations. Next issue a request-only Wasm run on this proved child source;
+its manifest binds the exact parent/request commit and selected target. Once fixes are stable, preserve terminal parent evidence before a
 fresh expected-HEAD non-force fast-forward of the review branch if appropriate.
 No PR merge/publication. New common source requires its own source identities;
 do not inherit the parent's self-hosting/full-suite claims for changed code.

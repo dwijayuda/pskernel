@@ -47,6 +47,16 @@ floating source operations or previously refused machine-scalar source IR.
 |Generator allocation and captures|An actual retained JS G2 profile exposed generator/GC overhead. Statement loops remove per-let generator IIFEs while retaining the established driver for non-tail work.|Immutable iteration snapshots, alias/capture/hygiene/fuel negatives, native and retained-emitter comparisons, deep tail/non-tail execution.|
 |UTF8 cache-key StringEqual|After statement loops, actual retained G2 profiling40024746671 attributes33.9% of ticks to V8 StringEqual. Port the qualified TS lazy-token pattern to eligible invariant JS self-tail loops. The fixture measures40000→2 cache-key lookups with identical results over10584 comparisons.|At most two indexed views; tokens retain no String/index arrays. Verify lexical aliases and recursive arguments, preserve position evaluation before lookup, reject shadowing/changing sources/freshness collisions, retain size-only non-admission and exact extraction fallback. Never replace source String equality.|
 
+Erasure's subsequent actual G2 failure maps to psErasureDeclarationEntryIndex
+via retained-binary/IR audit40027922448. The same source scan finds right-fold
+reconstruction in index prepending and declaration-name indexing. A shared
+fully applied reverse fold now handles all three. Full gate40028430603 at
+52cff171 proves the generic fold and all three old/new APIs, preserving complete
+index structures, duplicate first-entry precedence, insertion/count semantics,
+exact error states,4096 entry-analysis fuel and16-bit index policy. Both full
+source grammars and all earlier runtime/refusal gates pass; actual generations
+must still qualify this changed common compiler source.
+
 Source normalization follows the supported grammars deliberately: explicit
 constructor matches, typed callbacks, and fully applied structural workers with
 deferred callbacks. Do not broaden the language or weaken recursion validation

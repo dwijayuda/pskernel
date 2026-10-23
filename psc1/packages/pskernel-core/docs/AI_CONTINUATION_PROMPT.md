@@ -1,3 +1,28 @@
+## 2026-10-24 ceee native PASS; portable flag syntax corrected after bounded parse failure
+
+Exactceee310e488b92ae6068faf965cb9c96622976a0/run39997274611/attempt1:
+native120563963863 PASS, exactly92reports=60scope+14session+11hash+7new,
+all permitted standard axioms, frozen2730/long3,294sequential admissions,
+377metadata, six actual String case/singleton samples and retained controls.
+Artifact12521075782:107781bytes SHA256
+6287f36b8d1a90724b2bb1394b9b68b31d09b2767fc19f235dc4650725ce07e2;
+all8files/source/run/attempt bindings independently verified.
+Native-only evidence:docs/evidence/2026-10-23-t01f-closed-cache-analysis-native-gates.json.
+
+Generated120565061253 FAILED before bounded output: PSC1 parser rejects the
+parenthesized inline conditional in CacheAnalysis letE hash flag at92:28.
+No generated matrix, body guard, complete producer or mixed runtime executed.
+Actual error:docs/evidence/2026-10-23-t01f-closed-cache-analysis-portable-parser-failure.json.
+
+This containing syntax correction binds the flag with a local let, matching
+unchanged Cache.lean. Hashes, eligibility, order, all seven theorem statements,
+fixtures, assertion counts and resource limits stay unchanged. Native proof
+and all generated gates must run at this NEW source; ceee passes are not inherited.
+Follow ONE new narrow run. All five full triggers remain PAUSED; diagnostics
+manual-only. T01F/current A/B/D OPEN; C FAIL. No T05 or integration yet.
+
+---
+
 ## 2026-10-24 proof-only correction after1902 native proof rejection
 
 Source1902eaad9e7172109955a67b17cfcea690df52f9, run39996684137 attempt1,

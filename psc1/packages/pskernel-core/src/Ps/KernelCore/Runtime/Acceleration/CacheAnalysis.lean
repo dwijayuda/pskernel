@@ -82,6 +82,7 @@ def psKernelExprClosedCacheAnalysis
           if Prod.snd bodyAnalysis then
             Prod.mk 0 true
           else
+            let flag := if nondep then 1 else 0;
             Prod.mk
               (psKernelCacheMix
                 (psKernelCacheMix
@@ -89,7 +90,7 @@ def psKernelExprClosedCacheAnalysis
                     (psKernelCacheMix 29 (Prod.fst typeAnalysis))
                     (Prod.fst valueAnalysis))
                   (Prod.fst bodyAnalysis))
-                (if nondep then 1 else 0))
+                flag)
               false
   | PsKernelExpr.lit literal =>
       Prod.mk

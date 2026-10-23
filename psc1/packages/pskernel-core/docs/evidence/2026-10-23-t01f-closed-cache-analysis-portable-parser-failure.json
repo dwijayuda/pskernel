@@ -1,0 +1,26 @@
+{
+  "schema": "psc1-t01f-bounded-codegen-failure-v1",
+  "source": "ceee310e488b92ae6068faf965cb9c96622976a0",
+  "runId": 39997274611,
+  "runAttempt": 1,
+  "jobId": 120565061253,
+  "status": "FAIL",
+  "stage": "bounded-PSC1-source-parse",
+  "native": {
+    "status": "PASS",
+    "jobId": 120563963863,
+    "proofReports": 92,
+    "newTheorems": 7,
+    "evidence": "2026-10-23-t01f-closed-cache-analysis-native-gates.json"
+  },
+  "actualError": [
+    "2026-10-23T17:46:22.6796534Z uncaught exception: PSC1_PROJECT_PARSE_FAILED: packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean: 92:28: expected ')', got 'then'"
+  ],
+  "boundedGeneratedOutput": "NOT PRODUCED",
+  "newGeneratedMatrix": "NOT RUN",
+  "generatedBodyGuard": "NOT RUN",
+  "completeProducer": "SKIPPED",
+  "mixedRuntime": "SKIPPED",
+  "correction": "Replace the parenthesized inline letE flag conditional with the existing cache's local-let form. No theorem/hash/cache-policy/fuel/limit changes.",
+  "qualification": "Native-only success belongs to ceee310e; no generated or T01F qualification exists."
+}

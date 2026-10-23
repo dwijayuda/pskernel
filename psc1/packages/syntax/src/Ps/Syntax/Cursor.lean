@@ -1,4 +1,5 @@
 import Ps.Foundation.Source
+import Ps.Foundation.List
 
 structure PsLexCursor where
   remaining : List Char
@@ -8,30 +9,28 @@ structure PsLexStep where
   char : Char
   cursor : PsLexCursor
 
-def psLexStringToListFromWithFuel (fuel : Nat) : String -> Nat -> List Char :=
+-- The same input-derived traversal bound, with an accumulator rather than
+-- one native/generator continuation frame per decoded character.
+def psLexStringToListAccWithFuel (fuel : Nat) : String -> Nat -> List Char -> List Char :=
   match fuel with
-  | Nat.zero => fun (_source : String) (_position : Nat) => List.nil
+  | Nat.zero =>
+      fun (_source : String) (_position : Nat) (charsRev : List Char) =>
+        psListReverse charsRev
   | Nat.succ remaining =>
-      fun (source : String) (position : Nat) =>
-        let smaller : String -> Nat -> List Char := psLexStringToListFromWithFuel remaining;
-        if
-            String.Internal.atEnd
-              source
-              (String.Pos.Raw.mk position) then
-          List.nil
+      fun (source : String) (position : Nat) (charsRev : List Char) =>
+        let smaller : String -> Nat -> List Char -> List Char :=
+          psLexStringToListAccWithFuel remaining;
+        if String.Internal.atEnd source (String.Pos.Raw.mk position) then
+          psListReverse charsRev
         else
-          let char : Char :=
-            String.Internal.get
-              source
-              (String.Pos.Raw.mk position);
-          let nextPosition : Nat :=
-            String.Pos.Raw.byteIdx
-              (String.Internal.next
-                source
-                (String.Pos.Raw.mk position));
-          List.cons
-            char
-            (smaller source nextPosition)
+          let char : Char := String.Internal.get source (String.Pos.Raw.mk position);
+          let nextPosition : Nat := String.Pos.Raw.byteIdx
+            (String.Internal.next source (String.Pos.Raw.mk position));
+          smaller source nextPosition (List.cons char charsRev)
+
+def psLexStringToListFromWithFuel (fuel : Nat) : String -> Nat -> List Char :=
+  fun (source : String) (position : Nat) =>
+    psLexStringToListAccWithFuel fuel source position List.nil
 
 def psLexStringToListFrom (source : String) (position : Nat) : List Char :=
   psLexStringToListFromWithFuel (Nat.succ (String.utf8ByteSize source)) source position

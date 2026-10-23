@@ -1,47 +1,46 @@
-## Exact6bed4d6c native+complete generated+controls PASS; mixed RUNNING
+## Exact6bed4d6c octet mixed TIMED OUT; one exact-artifact phase profile active
 
-ExecutableANDharness6bed4d6c613861c052f98dc4d7e66c3fc275bc9d
-(treef3ccee1708cfc6c04f270d3f202c1d2520237c5f).
-Existing run https://github.com/dwijayuda/pskernel/actions/runs/39951009269:
-native120405170256 PASS85proofs/11hash/onlyallowedaxioms/allnativeString;
-completeproducer120406128102 PASS authenticSelfHostcheck/realPSC1/
-TS7.0.2/Node22.23.3/nativefixture. Bounded2730cases8190stages13665assertions/
-long3 PASS. Independent static audit of COMPLETE generated kernel confirms
-four DATA-result helpers,oneanonymousstructuralblock each,no resultstaging/
-Step/Mixdispatch,eightprimitive transitions per octet recursive descent,
-exactpair+odd remainderrouting. No generator-free loop/globalbackend theorem.
-Kernel9961568bytes SHA256
-dbc0a47d8aa2ad6757425c5e7796148f7c1e8acba547e809041fde8f9c051e89.
-Producerartifact12502115716 ZIP1135365bytes SHA256
-410bfc3066f1cd1a6a3f6ef73a553f3a7513651c6fcb482f8be16e4173776d02.
+Narrow source6bed4d6c613861c052f98dc4d7e66c3fc275bc9d,
+run39951009269 terminalCANCELLED. Native120405170256 PASS85proofs/11hash;
+completeproducer120406128102 PASS realPSC1/TS7.0.2/bounded13665assertions/
+completeSelfHostcheck-build; controls120415938000 PASS. BUT unchanged mixed
+120415937943 hit25mincap,422tracebegins/421ends,interruptedcall422
+psKernelV1IsDefEq at validity-right for"Aé€😀". Full294independentrequests
+admitted44618.101565ms,377metadata1489.798245ms,singletonPASS. NO completecase/
+1400assertionreceipt; memoryfileEMPTY,completeRSS/walltimeUNKNOWN.
+Artifact12503031935 ZIP536647bytes SHA256
+799185a6d6b517aa6715df7520f682c831b4b11a721f316dfbbb9bb05ae42801.
+Fulltrace/all9filehashes/provenance/failure:
+docs/evidence/2026-10-23-t01f-octet-mixed-terminal.json.
+Eight-transition grouping alone is INSUFFICIENT. No narrow/fullT01Facceptance.
 
-Controls120415938000 PASS frozenhashmatrix/long3,DAG/minimalString,
-prefix605assertions,session8kinds/direct7/privateIDs5/forks2.
-Artifact12502440268 ZIP664280bytes SHA256
-4b554aa349cec5fef3c48e0e0aa24cfb671bc595859915af701af0b63e724a03.
-DAG134.24s/808872KiBpeakRSS;prefix30.86s/399768KiB.
-Preserve higher DAG peakRSS vs9d558752(+250120KiB) and61d555992(+252880KiB).
-Prior9d145.47s/35.25s and61d141.62s/32.35s plus allprefixRSS remain recorded.
-Cross-runhostCPU/GCvariation prevents causal speedup claim; DOPEN.
-2048MiB oldspace is not a hardRSS cap. No performancequalification.
-Allmarkers,15producerfilehashes,13controlfilehashes,completehelperbodies,
-provenance/verifieddetachedcopies/staticunchangedworker-theorem-test audit:
-docs/evidence/2026-10-23-t01f-octet-generated-preflight.json.
-All85nativeproofrows remain in octet-native-gates.json.
+THIS containing source changes diagnosticworkflowONLY (plusfailuredocs):
+psc1-pskernel-t01f-v1-profile.yml has one work-branch-push trigger. It reuses
+immutable producer12502115716/run39951009269/job120406128102/source6bed,
+authenticates successfulproducersteps and actualcancelledoverallrun, exact
+sourceTreef3ccee.../workflowblob438dba.../ZIP410bfc.../kerneldbc0a47d.../
+fixture563d6ef.../strictfullharnessd3672e...; no rebuild or candidate source change.
+It independently admits full294requests+compares377metadata first, then
+profiles ONLY real V1 DefEq of Array0(ByteArray0(String0(mixedliteral))) against
+genuineUInt8list,asserting equality. CPU Inspector1ms phase-exclusiveprofile,
+samefuel4096/2048MiB/emptyPATH,180secondwhole-diagnosticdeadline/10minjob.
+DiagnosticOnly/qualification=false; cannot closeT01F/providerpromotion.
+Fresh profile harness sourceSHA is separate and recorded, not mixed into final
+qualification. Existing narrow hash push remainsactive but this profile-only
+change does not match its source/test/workflow paths; no duplicatecompile.
+AllFIVE fullworkbranchpushes remainPAUSED. No blind final rerun/activation.
 
-ONE next task: finish ALREADY RUNNING mixed120415937943,actualstart12:33:41Z,
-unchanged25minute jobcap (~12:58:41Z),fuel4096/2048MiB/emptyPATH,
-all294independentrequests/377metadata/full1400assertions/singleton/negatives/
-session/owner/firstandsecondpubliccalls and440diagnostictracecalls unchanged.
-Terminal result UNKNOWN. Neverduplicate. This docschild is unqualified.
-AllFIVE fullworkbranchpushes PAUSED,narrowonlyACTIVE. If whole narrowPASS,
-restorefivefulltriggers/makenarrowmanual-only,qualify ONE coherent NEWsource
-with BOTH strict6shardaggregates/allretainednative/official/proof/provider
-24CLI+8API/research/measurements/unchanged32worker384callowner/full193/profile.
-No pass inheritance acrosssource/run/attempt. Prior2c9bothmixed/aggregatesFAIL.
+ONE next task: fetch this containing profile source's ONE new diagnostic run,
+follow terminal; inspect authenticatedphase-profile-summary.json and exactCPU
+frames to choose next source-proved optimization. Current octaveentry adds
+octet+remainder dispatch, so short-name/helper overhead is only a hypothesis
+until measured; do not claim it is causal. Preserve generatedcontrols regression
+DAG808872KiBpeakRSS vs9d558752/61d555992; allotheractualmeasurementsretained.
 T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integration.
-Integrationlast123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
-ActionsLinuxONLY execution,freshexpected_sha/nonforce,preservehistory,no main/npm.
+Native85 and completegeneratedevidence remain in octet-native-gates.json and
+octet-generated-preflight.json. Prior2c9bothmixed/aggregatesFAIL also retained.
+ActionsLinuxONLY for builds/tests/kernel execution,freshexpected_sha/nonforce,
+preservehistory,unchangedlimits/assertions; no main/npm.
 
 ---
 

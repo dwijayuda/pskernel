@@ -57,6 +57,23 @@ exact error states,4096 entry-analysis fuel and16-bit index policy. Both full
 source grammars and all earlier runtime/refusal gates pass; actual generations
 must still qualify this changed common compiler source.
 
+Subsequent Wasm G2 ran829660ms before a psListLength specialization on
+PsWasmStructType exhausted the stack. The six non-tail foundation list APIs
+(length/append/map/mapExcept/take/zip) now use fully applied accumulators with
+all-input retained API proofs and100000-element ordering/error/truncation tests.
+Full focused40031387906 passes all prior gates and both source grammars.
+
+Actual retained JS profile40031550466 verifies the real String-equality worker
+uses lazy tokens: StringEqual is0.1% of sampled ticks in that240s diagnostic.
+The compiler still timed out in standard1800s G2. It contains12171 invoke and3693
+tail-invoke sites; the helper and driver both perform a dispatch lookup for
+registered functions. Direct emission now yields the existing driver packet,
+preserving callee/argument order and tail semantics while removing the helper
+generator. Full gate40032762325 passes64 foreign-function order/trap cases and
+deep existing regressions; registered lookups40→20 and delegated fixture sites35→0.
+These measurements motivate actual new G1/G2/G3 execution, not a timing or
+fixed-point claim. The driver, private map and fallback helpers remain compatible.
+
 Source normalization follows the supported grammars deliberately: explicit
 constructor matches, typed callbacks, and fully applied structural workers with
 deferred callbacks. Do not broaden the language or weaken recursion validation

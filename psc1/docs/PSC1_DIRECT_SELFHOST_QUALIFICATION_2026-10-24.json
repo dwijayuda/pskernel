@@ -287,9 +287,14 @@
     }
   },
   "currentAttempt": {
-    "status": "no-active-generation-request-after-terminal-failures",
-    "nextTarget": "wasm-core",
-    "nextSourceCommit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5"
+    "target": "wasm-core",
+    "sourceCommit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5",
+    "requestParent": "ef06b357723b2265759dccb955c1575a1bbb78bf",
+    "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
+    "runId": 40031965458,
+    "jobId": 120682317187,
+    "status": "in_progress",
+    "fixedPoint": "not-yet-established"
   },
   "integrationCheckpoint": {
     "pullRequest": 174,

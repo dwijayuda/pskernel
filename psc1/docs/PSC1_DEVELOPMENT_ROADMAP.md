@@ -10,17 +10,16 @@ including17 completed actual attempts, preserved failures and immutable artifact
 
 | Order | Work | Evidence / acceptance |
 | --- | --- | --- |
-|1|Execute Wasm with proved foundational list accumulators; use actual JS CPU/shape diagnosis to fix its next measured blocker.|Current child472f8def/full focused40031387906 PASSES six old/new foundation API equalities,100000 elements, all earlier proofs/regressions and complete87/98-module Lean/PS censuses. Wasmbef/40028857732 G2 stack829660ms/1023424KiB maps to psListLength$spec$PsWasmStructType. JS854/40027650302 G2 deadline1800227ms/3132516KiB; exact retained profile40031550466 is running.|
-|2|Qualify actual current-source G1→G2→G3/fixed points independently for JS and owned Wasm.|Both last attempts complete independently admitted G1 and all ten cases; neither has G2/G3/fixedpoint. Preserve exact source/admission/original+transformed IR/observations/target bytes, including owned binary identity. No timeout/heap/stack/fuel/verification relaxation.|
-|3|Qualify final current-source seven-backend/application CI.|Parent PR175 head85433830/full40027662328 PASSED37/37,0 blocked,releaseReady=true,all seven targets,both grammars,real apps,minimum Python and installed native packages. Merge34d29e21 has identical tree1382a67a. Later child source needs its own final full CI; fast-forward the review branch only after a stable verified checkpoint and fresh expected HEAD. No PR merge or publication.|
-|4|Optimize original240s performance and verify independent clean builds separately.|Correctness1800s does not qualify240s; same-run fixed points do not prove independent clean-build repeatability. Preserve qualified Rust83e18fe1 and TS84e1e16f.|
+|1|Execute genuine JS with direct driver dispatch; let current Wasm qualification finish.|Child82994f85/full focused40032762325 PASSED all proofs and prior runtime/source gates,64 new call-order/trap comparisons, registered lookups40→20 and delegated sites35→0. Actual retained profile40031550466 confirms real lazy getters and StringEqual0.1% sampled ticks; generator dispatch is now targeted. Wasm487e7100/run40031965458 executes proved foundation accumulators; later JS-only edits leave that98-module closure unchanged.|
+|2|Qualify current-source G1→G2→G3/fixed points independently for both targets.|Last JS854/40027650302 G2 deadline1800227ms/3132516KiB; last Wasmbef/40028857732 G2 stack829660ms/1023424KiB mapped to psListLength$spec$PsWasmStructType. Both completedG1/ten cases; neither has G2/G3/fixedpoint. Six foundation APIs now have full retained equalities/100000-element tests. Preserve exact closure/admission/original+transformed IR/observations/target bytes and owned binary identity.|
+|3|Run latest-source full CI through draft175 after expected-HEAD non-force review-branch integration.|Parent85433830/full40027662328 PASSED37/37,0 blocked,releaseReady=true,all seven targets,both grammars,apps,minimum Python and installed native packages. Merge34d29e21 has identical tree1382a67a. New child source needs separate full CI; ref fast-forward is not a PR merge or a request-only compiler invocation. No package publication.|
+|4|Qualify original240s performance and independent clean builds separately.|Correctness1800s does not qualify240s; same-run fixed points do not prove independent clean-build repeatability. Preserve Rust83e18fe1/TS84e1e16f and all resource/verification/refusal policies.|
 
-[AI work state](../AI_WORK_STATE.md) owns continuation. The
+[AI work state](../AI_WORK_STATE.md) owns live continuation. The
 [receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json) preserves immutable
-failures/measurements/checkpoints. The [architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md)
-documents the measured patterns. The [execution prompt](PSC1_DIRECT_SELFHOST_CONTINUATION.md)
-contains exact GitHub-only resumption rules; re-query its dated live snapshot.
-Earlier pending descriptions below are historical and superseded by this queue.
+attempts. [Architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md) explains measured
+classes and [execution prompt](PSC1_DIRECT_SELFHOST_CONTINUATION.md) specifies
+GitHub-only resumption. Earlier pending descriptions are dated history.
 
 Corrected TS source748fd5fd/request079b26b9/run39993829327 independently qualifies
 genuine G1/G2/G3 and exact source/admissions/IR/ten-case fixed points under1800s.

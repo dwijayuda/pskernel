@@ -16,23 +16,30 @@ The preserved review branch is work/psc1-direct-selfhost-blockers-20261024,
 draft PR175, based on draft PR174/integrationafed7c4b. Do not cancel existing
 qualifications or infer success from elapsed job time.
 
-Snapshot as of2026-10-23 21:56UTC (re-query before acting):
-- Child implementation52cff17196b71481e3cb8ced1c4d3fee2d1280d0 passes full
-  focused40028430603/job120670363952: generic reverse fold and three complete
-  erasure index API equalities, all prior ordinary/checked/prefix proofs,
- 10000 declarations, native/reference/runtime/negative/capture/owned-Wasm
-  checks and both87-module JS/98-module Wasm Lean/PS source censuses.
-- Actual child Wasm requestbef0e260a062f89981af514480d9bd7414047d97,
-  parent4f88fac688408adb7a4c059539746719c39c0170, run40028857732,
-  job120671963814 is executing G1/G2/G3 on that source.
-- Parent JS request85433830522dc0cc52541b985510122b67dea364,
-  sourcefcea1326b6abf02d151a8e0a248d95a70c9e0faf,
-  run40027650302/job120667923890 is executing generations.
-- Parent full40027662328 is in Linux job120672846738 after its selected
-  static/native/core/application/closure/G1 jobs passed.
-- Parent merge34d29e215ea568466dcbc96b14b5e10b2dddb438 and head85433830
-  have identical tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
-- Neither active direct-target attempt has a terminal fixed-point result yet.
+Snapshot as of2026-10-23 22:24UTC (re-query before acting):
+- Child production foundation9530b5ee, proof/test472f8def, dispatch3b5a9b9a,
+  instrumented comparison82994f858088a2a14e35eaf9ed17b9156ee91cdb.
+  Full focused40032762325/job120684793164 PASSED every earlier proof/runtime/
+  refusal/census gate plus64 call-order/trap cases; registered lookups40→20.
+  Six foundation APIs have retained all-input equalities and100000-element tests.
+- Wasm request487e710069dca55d018f406e32e9f7c4b92f0adf,
+  parentef06b357723b2265759dccb955c1575a1bbb78bf, run40031965458,
+  job120682317187 executes that foundation fix. Later JS-only changes leave
+  its98-module closure unchanged.
+- Prior JS85433830/run40027650302 completedG1 but G2 hit1800227ms/3132516KiB;
+  noG3/fixedpoint. Actual retained profile40031550466 confirms lazy getters and
+  StringEqual0.1% sampled ticks; direct driver dispatch is the next actual experiment.
+- Prior Wasmbef0e260/run40028857732 completedG1 but G2 stack829660ms/1023424KiB
+  mapped to psListLength$spec$PsWasmStructType by read-only40030902621.
+- Parent full40027662328 PASSED, final gate120680396390/Linux120672846738:
+  37/37,0 blocked,releaseReady=true,all seven,both grammars,apps and packages.
+  Merge34d29e215ea568466dcbc96b14b5e10b2dddb438 and head85433830 have identical
+  tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
+- The next single-commit request selectsJS on the latest verified child.
+  Normal full CI will qualify the review-branch fast-forward separately.
+  Multi-commit ref integrations skip the request job; actual single-commit
+  requests retain every exact path/parent/branch/profile guard.
+- Neither direct target has a terminal qualifiedG2/G3 fixed point yet.
 
 1. Re-query those three runs. If still active, continue waiting without
    dispatching duplicates. If completed, inspect the actual job log and immutable

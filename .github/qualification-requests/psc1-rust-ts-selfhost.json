@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "rust-ts-20261023-06",
+  "id": "rust-ts-20261023-07",
   "branch": "fix/psc1-closure-normalization-20261021",
-  "parentCommit": "9b0f1863fcdd535483f121c7ee04174052535b05",
+  "parentCommit": "e75696a0231992beb28bb4a8d83d97b65a08751b",
   "targets": [
     "rust",
     "ts"

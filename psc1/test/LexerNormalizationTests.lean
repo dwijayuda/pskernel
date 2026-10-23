@@ -124,35 +124,35 @@ def legacyProofScript
                   | Except.ok rest =>
                       Except.ok (List.cons token rest)
 
-def prefix (reversed : List PsToken) (result : Except PsLexError (List PsToken)) :
+def withPrefix (reversed : List PsToken) (result : Except PsLexError (List PsToken)) :
     Except PsLexError (List PsToken) :=
   match result with
   | .error error => .error error
   | .ok tokens => .ok (psListAppend (psListReverse reversed) tokens)
 
 theorem lean_acc_eq (inputBound fuel : Nat) (cursor : PsLexCursor) (reversed : List PsToken) :
-    psLexAllAccWorker inputBound fuel cursor reversed = prefix reversed (legacyLean inputBound fuel cursor) := by
+    psLexAllAccWorker inputBound fuel cursor reversed = withPrefix reversed (legacyLean inputBound fuel cursor) := by
   induction fuel generalizing cursor reversed with
   | zero =>
       simp only [psLexAllAccWorker, legacyLean]
-      split <;> simp only [prefix, PsLexerNormalizationReference.reverse_cons]
+      split <;> simp only [withPrefix, PsLexerNormalizationReference.reverse_cons]
   | succ remaining ih =>
       simp only [psLexAllAccWorker, legacyLean]
       cases skipped : psLexSkipTriviaWithFuel inputBound cursor.remaining cursor.position with
-      | error error => simp only [skipped, prefix]
+      | error error => simp only [skipped, withPrefix]
       | ok ready =>
           simp only [skipped]
           split
-          · simp only [prefix, PsLexerNormalizationReference.reverse_cons]
+          · simp only [withPrefix, PsLexerNormalizationReference.reverse_cons]
           · cases read : psLexReadToken ready with
-            | error error => simp only [read, prefix]
+            | error error => simp only [read, withPrefix]
             | ok pair =>
                 simp only [read]
                 rw [ih]
                 cases result : legacyLean inputBound remaining pair.snd with
-                | error error => simp only [result, prefix]
+                | error error => simp only [result, withPrefix]
                 | ok rest =>
-                    simp only [result, prefix, PsLexerNormalizationReference.reverse_cons,
+                    simp only [result, withPrefix, PsLexerNormalizationReference.reverse_cons,
                       PsLexerNormalizationReference.append_assoc, psListAppend]
 
 theorem lean_normalized_eq (inputBound fuel : Nat) (cursor : PsLexCursor) :
@@ -162,28 +162,28 @@ theorem lean_normalized_eq (inputBound fuel : Nat) (cursor : PsLexCursor) :
   cases legacyLean inputBound fuel cursor <;> rfl
 
 theorem proofscript_acc_eq (inputBound fuel : Nat) (cursor : PsLexCursor) (reversed : List PsToken) :
-    psLexAllProofScriptAccWorker inputBound fuel cursor reversed = prefix reversed (legacyProofScript inputBound fuel cursor) := by
+    psLexAllProofScriptAccWorker inputBound fuel cursor reversed = withPrefix reversed (legacyProofScript inputBound fuel cursor) := by
   induction fuel generalizing cursor reversed with
   | zero =>
       simp only [psLexAllProofScriptAccWorker, legacyProofScript]
-      split <;> simp only [prefix, PsLexerNormalizationReference.reverse_cons]
+      split <;> simp only [withPrefix, PsLexerNormalizationReference.reverse_cons]
   | succ remaining ih =>
       simp only [psLexAllProofScriptAccWorker, legacyProofScript]
       cases skipped : psLexSkipProofScriptTriviaWithFuel inputBound cursor.remaining cursor.position with
-      | error error => simp only [skipped, prefix]
+      | error error => simp only [skipped, withPrefix]
       | ok ready =>
           simp only [skipped]
           split
-          · simp only [prefix, PsLexerNormalizationReference.reverse_cons]
+          · simp only [withPrefix, PsLexerNormalizationReference.reverse_cons]
           · cases read : psLexReadToken ready with
-            | error error => simp only [read, prefix]
+            | error error => simp only [read, withPrefix]
             | ok pair =>
                 simp only [read]
                 rw [ih]
                 cases result : legacyProofScript inputBound remaining pair.snd with
-                | error error => simp only [result, prefix]
+                | error error => simp only [result, withPrefix]
                 | ok rest =>
-                    simp only [result, prefix, PsLexerNormalizationReference.reverse_cons,
+                    simp only [result, withPrefix, PsLexerNormalizationReference.reverse_cons,
                       PsLexerNormalizationReference.append_assoc, psListAppend]
 
 theorem proofscript_normalized_eq (inputBound fuel : Nat) (cursor : PsLexCursor) :
@@ -200,15 +200,21 @@ deriving instance BEq for PsTokenKind
 deriving instance BEq for PsToken
 deriving instance BEq for PsLexError
 
+private def sameResult (left right : Except PsLexError (List PsToken)) : Bool :=
+  match left, right with
+  | .ok a, .ok b => a == b
+  | .error a, .error b => a == b
+  | _, _ => false
+
 def main : IO Unit := do
   let mut cases := 0
   for source in ["", "a b c", "λ \"🙂\" -- line\n42", "/- nested /- x -/ -/ a", "\"unterminated", "a\tb", "a\rb", "a\r\nb"] do
     let cursor := psLexCursorFromString source
     for bound in [0,1,2,source.utf8ByteSize + 1] do
       for fuel in [0,1,2,4,source.utf8ByteSize + 1] do
-        if psLexAllWorker bound fuel cursor != PsLexerNormalizationReference.legacyLean bound fuel cursor then
+        if !sameResult (psLexAllWorker bound fuel cursor) (PsLexerNormalizationReference.legacyLean bound fuel cursor) then
           throw (IO.userError "PSC1_LEXER_LEAN_NORMALIZATION_MISMATCH")
-        if psLexAllProofScriptWorker bound fuel cursor != PsLexerNormalizationReference.legacyProofScript bound fuel cursor then
+        if !sameResult (psLexAllProofScriptWorker bound fuel cursor) (PsLexerNormalizationReference.legacyProofScript bound fuel cursor) then
           throw (IO.userError "PSC1_LEXER_PS_NORMALIZATION_MISMATCH")
         cases := cases + 2
   let large := String.intercalate "" (List.replicate 100000 "a ")

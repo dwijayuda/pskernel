@@ -1,3 +1,47 @@
+## Exact2c9bf2d2 native/official gates PASS; both route qualification pending
+
+Qualification source2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298
+(treeea5d79f5927f61a98ad704b09b1ab495ea3701a3).
+Integration39900914731/native120242036517 PASS222proofreports,27axiomfree,
+allowedunion onlypropext/Classical.choice/Quot.sound; eight scalarhash proofs,
+all294/377/authentic6nativeString cases,retainednative/official/control gates,
+native24CLIprovider and fullnativeperformanceobservations PASS/COMPLETE.
+Artifact12478758116 ZIP33280367bytes SHA256
+832e5210ff970fa383c85030b6ab38fa421894d6fc73bf3d48b7c22260e80e7f.
+Correctness39900914918/native120242037072 PASS allcore/C0parity/measurements.
+
+Research39900914848 fivejobsPASS:120242037305,120242037319,120242037323,
+120242037378,120242037576. Generatedbridge120242037047 stillRUNNING.
+OfficialArena39900914747/job120242036227 PASS193bodies:122accepted71rejected,
+noexclusions,header-onlyadaptation,no native4.35reexport. Read-onlyaudit verified
+ALL193original/adaptedbodySHA256s equal and inputdiagnosticbodyhashes agree;
+indices0-192/names unique. Officialreport53d5781a823a86de790eb971995c26fab33501fcfd34c778f117562d9677f65e.
+Artifact12479225020 ZIP114902bytes SHA256
+dd8f74f575c3e86a8f453a7e0092ff40a1242e311ad65d4af75dc8c0018ce2d9.
+This is ONLY officialoracle qualification; PSKernel C remainspending at2c9.
+Independentcomparison120242716137 alreadyRUNNING; do notduplicate it.
+
+All222proofrows/nativebenchmarkobservations/C0rows/five researchreceipts,
+authenticatedZIP/filehashes and193individuallyverifiedbodyhashes:
+evidence/2026-10-23-t01f-pair-counter-final-source-native-gates.json.
+Nativefixtureprovenance exact2c9/run39900914731/attempt1/pinnedLeancommit,
+294requests377metadata,fixture563d6ef...; Nodeoldspace is null for nativeLean
+oracle,2048MiB remainsrequiredfor detachedNodeconsumers. No hardRSSclaim.
+
+Both producers remainRUNNING: integrationgenerated120242036204 compiling fullJS;
+correctnesscanonical120242036927 checking reconstructed .ps closure. Their
+sixshardmatrices/strictaggregates and unchangedowner32worker384callABBA still
+pending. Profile39900914830/job120242037123 RUNNING. Requireallactualresults
+at2c9; no9d3fb narrowpass inheritance. Fivefullruns alreadyactive,neverduplicate.
+CurrentA/T01F/B/DOPEN,CpriorFAIL/currentpending,historicalscopedA9c87qualified.
+One next task: finish these exactsource finalruns and record bothsixshard
+aggregates/allproviders24CLI+8API/owner/full193/profile. NoT05yet.
+Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged; ActionsLinuxONLY
+for builds/tests/kernelexecution,fresh expected_sha/nonforce,preservehistory,
+no main/npm. This documentation child itself inherits no qualification.
+
+---
+
 ## Exact final source2c9bf2d2 — FIVE full runs active, qualification PENDING
 
 Qualification executableANDharness2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298;

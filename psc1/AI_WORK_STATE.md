@@ -1,3 +1,38 @@
+# PSC1 isolated TypeScript generator candidate
+
+This branch is `fix/psc1-ts-generator-result-types-20261023`, separate from
+PR #172's normal qualification. Its initial result annotations were integrated
+as `d0bef34de7d5d3c495f2a4a73af7eccd892d0d74`; normal run 39887884270
+is in progress. Do not claim that result for later isolated generator changes.
+
+Current structured-generator source
+`07fcc6037330166067d422d15a6630b1f7f626ae`, request
+`0ab4874a22edbde7025e5f29004f3c7ee2bdd4a1`,
+run 39889151346/job 120204444859 is validating at this recording.
+The common structured tail emitter gains a generator mode, retaining exact
+legacy pure output by all-input induction. It preserves ordinary typed emission
+preflight and fuel failures, call-by-value argument evaluation, alias-escape and
+shadow guards, existing driver protocol and public API. No native fallback,
+strict-check bypass, any/cast workaround or resource change.
+
+The prior annotated source a0a0a92f39deb7ff3c9336f41dc6ebcb681ae1d1
+qualifies executing G1/all ten cases in 39887064597; G2 times out at 240091 ms,
+G3 not run. Artifact 12473571856 (digest
+0c5fc53de729edd9d8af10bd189344d0aa85a36b9e22fa1eabdd4573d014f83e)
+retains exact emitted source, admissions, IR, requests and execution results.
+Actual 30-second G2 runtime profile 39887994972 shows JSON parsing and generator
+dispatch overhead; the earlier native-checker bottleneck was contextual return/
+yield/conditional inference and is resolved by checked result annotations.
+
+Next: query current terminal evidence, fix measured defects, exercise all ten
+frozen cases and actual G2/G3 at existing bounds. Promote only reviewed changes
+and run fresh full normal seven-backend qualification after integration.
+No merge/npm publication. Keep official Lean 4.35.0 and strict original/
+transformed IR authoritative; preserve old receipts and DirectJS G1.
+
+---
+The active branch checkpoint below is context, not qualification of this branch.
+
 # PSC1 active work state
 
 Updated 2026-10-23. Draft PR [#172](https://github.com/dwijayuda/pskernel/pull/172),
@@ -6,7 +41,18 @@ and Linux Actions only. Fetch latest remote HEAD before every non-force,
 expected-HEAD update. Preserve concurrent history. No merge or npm publication
 is authorized.
 
-## Verified active compiler checkpoint
+## Latest candidate and verified compiler checkpoint
+
+TypeScript generator result annotations are being integrated from isolated source
+`535f1c3927622c4ed1a23bde67f2bb96cbc2c226`. Run 39887064597 at request
+`a0a0a92f39deb7ff3c9336f41dc6ebcb681ae1d1` passes the all-input legacy
+context equality, 264 old/current comparisons, both full source grammar audits,
+strict TypeScript compilation and all ten actual G1 corpus cases. G2 times out
+at 240091 ms; G3/fixed point remain unqualified. Fresh normal seven-backend
+qualification is required for the integrated source; the previous normal pass
+below remains the verified baseline.
+
+## Verified previous compiler checkpoint
 
 Source/profile commit `76bf4120de83bf776a4e790672f7b2d0198e25db`;
 qualified branch HEAD `ea10eff9b3de063941c6029bb6c821f9cc10cc3f`;
@@ -45,16 +91,19 @@ at qualified HEAD gives:
 | Target | Actually qualified | Current blocker |
 | --- | --- | --- |
 | Rust | G1 executable and all five positive/five negative frozen cases | G2 full compiler request killed at 240031 ms before candidate admission; G3 not run |
-| TypeScript | Both-grammar 85-module closure; bootstrap compiler candidate independently admitted | Strict TypeScript 7.0.2 compilation killed at 240006 ms before executing G1; G2/G3 not run |
+| TypeScript (baseline) | Both-grammar 85-module closure; bootstrap compiler candidate independently admitted | Original strict compilation timed out; later typed-generator source now passes G1 in 39887064597, G2 still times out |
 | DirectJS reference | G1, ten frozen cases in normal CI | Prior G2 heap/time defect retained; no new fixed-point claim |
 
 Rust uses its complete 92-module source closure and exact reviewed Cargo lock,
 release opt-level 1. Real positive compiler requests take 323–538 ms and
 20–23 MiB child RSS at this checkpoint; these small applications are not a
 successful full compiler workload. TypeScript generics are retained rather
-than unnecessarily monomorphized; its 6462076-byte source still cannot finish
-strict checking within the existing deadline. Rust versus TS whole-compiler
-performance cannot yet be compared.
+than unnecessarily monomorphized; its original 6462076-byte source could not finish strict checking. Explicit nested
+generator annotations derived from checked result types now resolve that stall;
+strict checking and actual G1 pass on the isolated annotated source. Both targets now execute real small compiler workloads. Rust positives on the
+ownership candidate take 291–437 ms and 14–17 MiB child RSS; TS annotated G1
+positives take 747–3189 ms and 193–404 MiB RSS. Different candidate sources and
+isolated runner processes limit this comparison; neither completes full G2.
 
 The official checker remains Lean 4.35.0 commit
 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Preserve strict original and
@@ -97,21 +146,28 @@ a generated handler corpus exposed missing struct-expression grouping, fixed
 in `9052b59fe7bafc000a2fa8ec24f0ead266276682`.
 Current request HEAD `f037377574124cf7a374d627f0c57e4a855e09e5`,
 [run 39886083977](https://github.com/dwijayuda/pskernel/actions/runs/39886083977)
-is in progress at this recording. It is **not integrated or qualified** on the
-active branch. Require full corpus and actual compiler workloads, then fresh
+passes all ten G1 cases, then G2 aborts with stack overflow at 103782 ms.
+It is **not integrated or normally qualified** on the active branch. Require full corpus and actual compiler workloads, then fresh
 normal seven-backend qualification before promoting it.
 
 The short TS CPU profile sampled only its Node launcher. It is not evidence
-of a checker hotspot. Actual checker descendant inspection is running at
+of a checker hotspot. Actual checker descendant inspection completed at
 diagnostic commit `23626b21cada65ea6f78ac6db8dd0e3ffa6dff29`,
 [run 39886224622](https://github.com/dwijayuda/pskernel/actions/runs/39886224622).
-Do not implement speculative emitter rewrites or weaken strict checking.
+It identifies the native TypeScript checker repeatedly traversing contextual
+return/yield/conditional inference. The integrated annotation correction uses
+checked declaration/lambda/let result types, retains legacy consumer bytes by
+all-input proof, and preserves strict/noEmitOnError. G2 execution profiling is
+next. Rust exact replay 39886925277 remains in String cloning at its shorter
+180-second diagnostic deadline; it does not identify the crash stack or prove
+a destructor failure. Diagnose before changing destruction or stack behavior.
 
 ## Next execution
 
 Follow the dependency-ordered [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) and
 [executable continuation prompt](docs/PSC1_RUST_TS_SELFHOST_CONTINUATION.md).
-First resolve the ownership prototype and actual TS checker bottleneck.
+First resolve the Rust ownership candidate's remaining cloning/stack failure
+and profile actual TypeScript G2 execution after the checker correction.
 Keep backend changes coherent, validate actual target compiler workloads, and
 record terminal CI before claims. Do not repeatedly rerun the successful normal
 baseline for documentation-only changes; run required fresh qualification after
@@ -120,3 +176,4 @@ source changes.
 Previous full state and roadmap text are preserved verbatim under
 `docs/history/2026-10-23-rust-ts-pivot-pre-reconciliation-*`; all commits,
 qualification receipts, G1 artifacts and failed self-host evidence remain.
+

@@ -14,14 +14,16 @@ private theorem spine_reverse_acc_eq (values acc : List alpha) :
 private theorem spine_reverse_eq (values : List alpha) : psListReverse values = values.reverse := by
   simp [psListReverse, spine_reverse_acc_eq]
 
-private theorem collect_acc_append (all left right state) :
+private theorem collect_acc_append (all left right : List PsDeclaration)
+    (state : Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration))) :
     psCheckedNestedCollectAcc all (left ++ right) state =
       psCheckedNestedCollectAcc all right (psCheckedNestedCollectAcc all left state) := by
   induction left generalizing state with
   | nil => rfl
   | cons declaration rest ih => simp [psCheckedNestedCollectAcc, ih]
 
-private theorem collect_acc_reverse (all declarations state) :
+private theorem collect_acc_reverse (all declarations : List PsDeclaration)
+    (state : Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration))) :
     psCheckedNestedCollectAcc all declarations.reverse state =
       declarations.foldr (psCheckedNestedCollectStep all) state := by
   induction declarations generalizing state with
@@ -29,20 +31,21 @@ private theorem collect_acc_reverse (all declarations state) :
   | cons declaration rest ih =>
       simp [List.reverse_cons, collect_acc_append, psCheckedNestedCollectAcc, ih]
 
-private theorem reference_collect_foldr (all declarations) :
+private theorem reference_collect_foldr (all declarations : List PsDeclaration) :
     CheckedSpineReference.psCheckedNestedCollect all declarations =
       declarations.foldr (psCheckedNestedCollectStep all) (.ok []) := by
   induction declarations with
   | nil => rfl
   | cons declaration rest ih =>
       simp only [CheckedSpineReference.psCheckedNestedCollect, List.foldr, ih, psCheckedNestedCollectStep]
+      rfl
 
-theorem checked_collect_eq (all declarations) :
+theorem checked_collect_eq (all declarations : List PsDeclaration) :
     psCheckedNestedCollect all declarations =
       CheckedSpineReference.psCheckedNestedCollect all declarations := by
   rw [psCheckedNestedCollect, spine_reverse_eq, collect_acc_reverse, reference_collect_foldr]
 
-theorem checked_find_eq (wrappers) :
+theorem checked_find_eq (wrappers : List (Prod PsName PsDeclaration)) :
     psCheckedNestedFind wrappers = CheckedSpineReference.psCheckedNestedFind wrappers := by
   induction wrappers with
   | nil => rfl
@@ -50,7 +53,7 @@ theorem checked_find_eq (wrappers) :
       funext name
       simp only [psCheckedNestedFind, CheckedSpineReference.psCheckedNestedFind, ih]
 
-private theorem normalize_acc_eq (wrappers declarations acc) :
+private theorem normalize_acc_eq (wrappers : List (Prod PsName PsDeclaration)) (declarations acc : List PsDeclaration) :
     psCheckedNestedNormalizeAcc wrappers declarations acc =
       acc.reverse ++ CheckedSpineReference.psCheckedNestedNormalize wrappers declarations := by
   induction declarations generalizing acc with
@@ -58,13 +61,14 @@ private theorem normalize_acc_eq (wrappers declarations acc) :
   | cons declaration rest ih =>
       cases declaration <;>
         simp only [psCheckedNestedNormalizeAcc, CheckedSpineReference.psCheckedNestedNormalize,
-          checked_find_eq] <;>
-        repeat first
-          | split
-          | simp_all only [ih, List.reverse_cons, List.reverse_nil, List.nil_append,
-              List.append_assoc, List.cons_append, List.singleton_append]
+          checked_find_eq]
+      all_goals
+        simp only [ih, List.reverse_cons, List.append_assoc, List.singleton_append]
+        first
+        | rfl
+        | (split <;> simp_all [ih, List.reverse_cons, List.append_assoc])
 
-theorem checked_normalize_eq (wrappers declarations) :
+theorem checked_normalize_eq (wrappers : List (Prod PsName PsDeclaration)) (declarations : List PsDeclaration) :
     psCheckedNestedNormalize wrappers declarations =
       CheckedSpineReference.psCheckedNestedNormalize wrappers declarations := by
   simpa only [psCheckedNestedNormalize, List.reverse_nil, List.nil_append] using

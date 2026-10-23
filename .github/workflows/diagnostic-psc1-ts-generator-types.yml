@@ -86,9 +86,11 @@ jobs:
       - name: Build the common source facades and separate official checker
         run: |
           set -euo pipefail
-          lake build psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+          lake build psc1_json_escape_predicate_tests psc1_json_quote_tests psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
       - name: Preserve exact visitor behavior and DirectJS scalar functionality
         run: |
+          .lake/build/bin/psc1_json_escape_predicate_tests
+          .lake/build/bin/psc1_json_quote_tests
           .lake/build/bin/psc1_codec_static_schema_tests
           .lake/build/bin/psc1_lexer_normalization_tests
           .lake/build/bin/psc1_target_plan_profile_tests

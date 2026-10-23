@@ -49,3 +49,10 @@ request grants no candidate admission or fixed-point qualification.
 Actual runs and their exact identities are recorded in AI_WORK_STATE.md,
 the development roadmap and qualification receipts. Historical 240-second
 failures remain evidence of unmet performance qualification.
+
+Current results are in [the canonical qualification receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
+The initial PSC1_SELFHOST_PROFILES_2026-10-23.json is a historical profile-declaration
+snapshot from before the attempts completed, not the current qualification status.
+Rust correctness-1800s passes G1/G2/G3/fixed point in run39908529181; performance240s
+remains failed. TypeScript shared-codec correctness1800s times out in G2 in
+run39908439190. A later direct-predicate source is under test in run39913434540.

@@ -9,7 +9,40 @@ Frozen Practical Core v1 remains14 families/37 criteria.
 binds the exact Git blob of the complete17-attempt
 [canonical receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
 
-## Current DirectJS / DirectWasm verified checkpoint — 2026-10-24 Asia/Jakarta
+## Active continuation — erasure declaration spines
+
+Active branch work/psc1-direct-selfhost-spines2-20261024, based on preserved
+PR175/head85433830522dc0cc52541b985510122b67dea364. Implementation52cff17196b71481e3cb8ced1c4d3fee2d1280d0
+introduces one fully applied reverse fold shared by three erasure index passes.
+Its native/all-input proof/source census gate is pending. No new qualification
+claim. This section supersedes older active/pending descriptions below.
+
+Previous real Wasm request6c82fcb4/run40026947549 passes completeG1, then
+G2 fails252550ms/1027508KiB at function1538, noG3/fixedpoint.
+Closuref1f0b33b4b2c65f471de0ba2eb0c70df04439a78e1b1719cd55aa385777de0f9;
+service artifactda3ebf86ccc0f58cf0517141e491b10f6963bd8b10a7656a6506396b85e7ecaa;
+G2 requeste8ed29c66a894ea24fd13da32bee270fd1990e87ef6d004b791315c3887e3dd0.
+Artifact12533227841 digesta5c8d1a582b5a85b8583183b2174805f072b1e9eb7a595e5d6ee96e773e92d6e.
+Read-only export-anchored map40027922448 resolves psErasureDeclarationEntryIndex,
+without repeating compiler execution. Inspecting all six erasure source modules
+finds the same right-fold spine pattern in psErasureIndexPrepend and
+psErasureDeclarationNameIndex.52cff171 handles all three with a generic
+reverse-fold worker, preserves exact index shape/insertion/duplicate first-entry
+precedence/counts/error priority, and requires generic fold plus three all-input
+retained API equalities,10000 declarations and a static operational guard.
+Existing4096 entry-analysis fuel,16-bit index depth/hash/equality and all refusal
+policies are unchanged. Do not substitute sample lookup parity for full equality.
+
+PR175 full CI40027662328 and genuine JS qualification40027650302/request
+85433830522dc0cc52541b985510122b67dea364 continue on the immutable parent branch
+work/psc1-direct-selfhost-blockers-20261024. Do not cancel/restart them for
+focused child iterations. After the new gate, issue a request-only Wasm run on
+the child. Once fixes are stable, preserve terminal parent evidence before a
+fresh expected-HEAD non-force fast-forward of the review branch if appropriate.
+No PR merge/publication. New common source requires its own source identities;
+do not inherit the parent's self-hosting/full-suite claims for changed code.
+
+## Preserved DirectJS / DirectWasm parent checkpoint — 2026-10-24 Asia/Jakarta
 
 Active branch work/psc1-direct-selfhost-blockers-20261024.
 Implementationfcea1326b6abf02d151a8e0a248d95a70c9e0faf,

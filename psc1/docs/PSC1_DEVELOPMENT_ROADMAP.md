@@ -8,6 +8,16 @@ including17 completed actual attempts, preserved failures and immutable artifact
 
 ## Current remaining queue — DirectJS and DirectWasm
 
+Active child work/psc1-direct-selfhost-spines2-20261024 at52cff171:
+generic reverse fold for three erasure index spines, all-input proof gate pending.
+Previous Wasm6c82fcb4/run40026947549 completedG1 but G2 stack252550ms/1027508KiB;
+read-only map40027922448 identifies psErasureDeclarationEntryIndex. Complete
+index structure/insertion order/first-entry/count/error priority must match.
+Parent PR175/full40027662328 and JS85433830/run40027650302 continue unchanged;
+preserve their terminal evidence while child fixes proceed. This update
+supersedes older running-Wasm descriptions in the table below.
+
+
 | Order | Work | Acceptance / current evidence |
 | --- | --- | --- |
 |1|Execute real generations with the proved/measured fixes.|fcea1326/Linux40027270768 passes all proofs/runtime/negative/capture/owned-Wasm checks and complete87/98-module Lean/PS censuses. Actual retained JS G2 profile40024746671 identifies33.9% StringEqual ticks; lazy-view fixture40000→2 cache-key calls with10584 comparisons. Actual Wasm6c82fcb4/run40026947549 is executing proved checked-admission spine fixes; next request is JS on the same common source.|

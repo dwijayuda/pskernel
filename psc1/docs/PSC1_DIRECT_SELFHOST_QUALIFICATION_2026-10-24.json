@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 21:32:00 UTC",
+  "recordedAtUtc": "2026-10-23 21:40:00 UTC",
   "localDate": "2026-10-24",
-  "status": "complete-focused-gate-passed-actual-generations-running",
+  "status": "erasure-spine-class-fix-under-test",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -222,10 +222,11 @@
     "ownedWasmEngine": true
   },
   "currentAttempt": {
-    "target": "wasm-core",
-    "sourceCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
-    "requestCommit": "6c82fcb45274e8d07016c4683939eac4a994a855",
-    "runId": 40026947549,
+    "target": "js",
+    "sourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
+    "requestParent": "949d687b8977bb1fec3697293818f6d9d07f92a4",
+    "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
+    "runId": 40027650302,
     "status": "in_progress",
     "fixedPoint": "not-yet-established"
   },
@@ -509,6 +510,51 @@
           "digest": "sha256:6ee8f6ca50c47e6f1184057c64b9a39421b2eb5a2a3a18c1a2561e3092cfb972"
         }
       ]
+    },
+    {
+      "target": "wasm-core",
+      "sourceCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
+      "requestCommit": "6c82fcb45274e8d07016c4683939eac4a994a855",
+      "runId": 40026947549,
+      "status": "failed",
+      "fixedPoint": "not-yet-established",
+      "report": {
+        "target": "wasm-core",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 98,
+        "sourceClosureDigest": "f1f0b33b4b2c65f471de0ba2eb0c70df04439a78e1b1719cd55aa385777de0f9",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"da3ebf86ccc0f58cf0517141e491b10f6963bd8b10a7656a6506396b85e7ecaa\",\"requestSha256\":\"e8ed29c66a894ea24fd13da32bee270fd1990e87ef6d004b791315c3887e3dd0\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1027508,\"peakTreeRssKiB\":1027508,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":252550,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/0061259a:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d2b0\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n\nNode.js v22.23.3\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "da3ebf86ccc0f58cf0517141e491b10f6963bd8b10a7656a6506396b85e7ecaa",
+            "startedAt": "2026-10-23T21:30:11.694Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"da3ebf86ccc0f58cf0517141e491b10f6963bd8b10a7656a6506396b85e7ecaa\",\"requestSha256\":\"e8ed29c66a894ea24fd13da32bee270fd1990e87ef6d004b791315c3887e3dd0\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1027508,\"peakTreeRssKiB\":1027508,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":252550,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/0061259a:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d2b0\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n    at wasm://wasm/0061259a:wasm-function[1538]:0x7d357\n\nNode.js v22.23.3\n",
+            "completedAt": "2026-10-23T21:34:24.787Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12533227841,
+          "digest": "sha256:a5c8d1a582b5a85b8583183b2174805f072b1e9eb7a595e5d6ee96e773e92d6e"
+        }
+      ]
     }
   ],
   "checkedSpineDiagnosis": {
@@ -697,5 +743,604 @@
     }
   ],
   "nextRequestedTarget": "js",
-  "nextJsSourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf"
+  "nextJsSourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
+  "erasureStackMap": {
+    "schema": "psc1-retained-wasm-function-map/1",
+    "testedCommit": "203ac9781bc76b9613da32cc29d6896a5987513b",
+    "source": {
+      "schema": "psc1-retained-wasm-stack-diagnosis/1",
+      "attempts": [
+        {
+          "runId": 40026947549,
+          "requestCommit": "6c82fcb45274e8d07016c4683939eac4a994a855",
+          "sourceCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
+          "artifactId": 12533227841,
+          "artifactDigest": "sha256:a5c8d1a582b5a85b8583183b2174805f072b1e9eb7a595e5d6ee96e773e92d6e"
+        }
+      ],
+      "serviceSha256": "da3ebf86ccc0f58cf0517141e491b10f6963bd8b10a7656a6506396b85e7ecaa",
+      "requestSha256": "e8ed29c66a894ea24fd13da32bee270fd1990e87ef6d004b791315c3887e3dd0",
+      "closure": "f1f0b33b4b2c65f471de0ba2eb0c70df04439a78e1b1719cd55aa385777de0f9",
+      "resolveOnly": [
+        1538
+      ],
+      "purpose": "Read-only resolution of exact terminal G2 stack, no compiler execution or qualification."
+    },
+    "sourceSha256": "2d2b4b974c1a95c1d4047f1e9d8b179cfcdfb0d9a77720165b595870392beba7",
+    "binarySha256": "70d3222311a813d048ddc362f6ad53dbfad581e5c4357eb84e4c215d6fea4c98",
+    "exportAnchorsVerified": true,
+    "runtimeFunctions": 50,
+    "sourceFunctions": 3157,
+    "compilerExecution": false,
+    "qualification": false,
+    "resolved": [
+      {
+        "index": 1538,
+        "name": "psErasureDeclarationEntryIndex",
+        "ir": [
+          "psErasureDeclarationEntryIndex",
+          [],
+          [
+            [
+              "environment",
+              [
+                "named",
+                "PsEnvironment",
+                []
+              ]
+            ],
+            [
+              "declarations",
+              [
+                "named",
+                "List$spec$N$PsDeclaration",
+                []
+              ]
+            ]
+          ],
+          [
+            "named",
+            "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+            []
+          ],
+          [
+            "matchE",
+            "List$spec$N$PsDeclaration",
+            [],
+            [
+              "var",
+              "declarations"
+            ],
+            [
+              [
+                "nil",
+                [],
+                [
+                  "constructor",
+                  "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                  "ok",
+                  [],
+                  [
+                    [
+                      "value",
+                      [
+                        "constructor",
+                        "PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                        "empty",
+                        [],
+                        []
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "cons",
+                [
+                  [
+                    "head",
+                    "declaration",
+                    [
+                      "named",
+                      "PsDeclaration",
+                      []
+                    ]
+                  ],
+                  [
+                    "tail",
+                    "rest",
+                    [
+                      "named",
+                      "List$spec$N$PsDeclaration",
+                      []
+                    ]
+                  ]
+                ],
+                [
+                  "matchE",
+                  "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                  [],
+                  [
+                    "call",
+                    [
+                      "var",
+                      "psErasureDeclarationEntryIndex"
+                    ],
+                    [],
+                    [
+                      [
+                        "var",
+                        "environment"
+                      ],
+                      [
+                        "var",
+                        "rest"
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "error",
+                      [
+                        [
+                          "error",
+                          "error",
+                          [
+                            "named",
+                            "PsErasureError",
+                            []
+                          ]
+                        ]
+                      ],
+                      [
+                        "constructor",
+                        "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                        "error",
+                        [],
+                        [
+                          [
+                            "error",
+                            [
+                              "var",
+                              "error"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "ok",
+                      [
+                        [
+                          "value",
+                          "tail",
+                          [
+                            "named",
+                            "PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                            []
+                          ]
+                        ]
+                      ],
+                      [
+                        "matchE",
+                        "PsDeclaration",
+                        [],
+                        [
+                          "var",
+                          "declaration"
+                        ],
+                        [
+                          [
+                            "axiomDecl",
+                            [
+                              [
+                                "name",
+                                "_wild0",
+                                [
+                                  "named",
+                                  "PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "levelParams",
+                                "_wild1",
+                                [
+                                  "named",
+                                  "List$spec$N$PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "type",
+                                "_wild2",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "constructor",
+                              "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                              "ok",
+                              [],
+                              [
+                                [
+                                  "value",
+                                  [
+                                    "var",
+                                    "tail"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "definitionDecl",
+                            [
+                              [
+                                "name",
+                                "name",
+                                [
+                                  "named",
+                                  "PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "levelParams",
+                                "levelParams$7",
+                                [
+                                  "named",
+                                  "List$spec$N$PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "type",
+                                "_type",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ],
+                              [
+                                "value",
+                                "value",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "call",
+                              [
+                                "var",
+                                "psErasureAddDeclarationEntry"
+                              ],
+                              [],
+                              [
+                                [
+                                  "var",
+                                  "environment"
+                                ],
+                                [
+                                  "var",
+                                  "name"
+                                ],
+                                [
+                                  "var",
+                                  "_type"
+                                ],
+                                [
+                                  "var",
+                                  "value"
+                                ],
+                                [
+                                  "var",
+                                  "tail"
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "theoremDecl",
+                            [
+                              [
+                                "name",
+                                "_wild0",
+                                [
+                                  "named",
+                                  "PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "levelParams",
+                                "_wild1",
+                                [
+                                  "named",
+                                  "List$spec$N$PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "type",
+                                "_wild2",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ],
+                              [
+                                "value",
+                                "_wild3",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "constructor",
+                              "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                              "ok",
+                              [],
+                              [
+                                [
+                                  "value",
+                                  [
+                                    "var",
+                                    "tail"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "partialDecl",
+                            [
+                              [
+                                "name",
+                                "name",
+                                [
+                                  "named",
+                                  "PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "levelParams",
+                                "levelParams$7",
+                                [
+                                  "named",
+                                  "List$spec$N$PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "type",
+                                "_type",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ],
+                              [
+                                "value",
+                                "value",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "call",
+                              [
+                                "var",
+                                "psErasureAddDeclarationEntry"
+                              ],
+                              [],
+                              [
+                                [
+                                  "var",
+                                  "environment"
+                                ],
+                                [
+                                  "var",
+                                  "name"
+                                ],
+                                [
+                                  "var",
+                                  "_type"
+                                ],
+                                [
+                                  "var",
+                                  "value"
+                                ],
+                                [
+                                  "var",
+                                  "tail"
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "opaqueDecl",
+                            [
+                              [
+                                "name",
+                                "_wild0",
+                                [
+                                  "named",
+                                  "PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "levelParams",
+                                "_wild1",
+                                [
+                                  "named",
+                                  "List$spec$N$PsName",
+                                  []
+                                ]
+                              ],
+                              [
+                                "type",
+                                "_wild2",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ],
+                              [
+                                "value",
+                                "_wild3",
+                                [
+                                  "named",
+                                  "PsExpr",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "constructor",
+                              "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                              "ok",
+                              [],
+                              [
+                                [
+                                  "value",
+                                  [
+                                    "var",
+                                    "tail"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "inductiveDecl",
+                            [
+                              [
+                                "info",
+                                "_wild0",
+                                [
+                                  "named",
+                                  "PsInductiveInfo",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "constructor",
+                              "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                              "ok",
+                              [],
+                              [
+                                [
+                                  "value",
+                                  [
+                                    "var",
+                                    "tail"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "constructorDecl",
+                            [
+                              [
+                                "info",
+                                "_wild0",
+                                [
+                                  "named",
+                                  "PsConstructorInfo",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "constructor",
+                              "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                              "ok",
+                              [],
+                              [
+                                [
+                                  "value",
+                                  [
+                                    "var",
+                                    "tail"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ],
+                          [
+                            "recursorDecl",
+                            [
+                              [
+                                "info",
+                                "_wild0",
+                                [
+                                  "named",
+                                  "PsRecursorInfo",
+                                  []
+                                ]
+                              ]
+                            ],
+                            [
+                              "constructor",
+                              "Except$spec$N$PsErasureError$N$PsErasureNameIndex$spec$N$PsErasureEntryInfo",
+                              "ok",
+                              [],
+                              [
+                                [
+                                  "value",
+                                  [
+                                    "var",
+                                    "tail"
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      }
+    ]
+  },
+  "currentFullCi": {
+    "pullRequest": 175,
+    "head": "85433830522dc0cc52541b985510122b67dea364",
+    "runId": 40027662328,
+    "status": "in_progress"
+  },
+  "pendingFocusedGate": {
+    "branch": "work/psc1-direct-selfhost-spines2-20261024",
+    "commit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
+    "runId": 40028430603,
+    "status": "in_progress",
+    "required": "generic right-fold plus three retained all-input API equalities; full index structures/order/errors; source/runtime/negative gates unchanged"
+  }
 }

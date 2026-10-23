@@ -200,3 +200,33 @@ the immutable87-module source from c5ae2ecc/414cb6c2; subsequent Wasm-only
 normalizations do not change that owned closure. Draft174 preserves the new
 work for review and triggers existing Practical Core/seven-backend/native gates.
 No merge/publication; prior qualified Rust/TS branches remain unchanged.
+
+## Generated-run blockers and focused implementation branch — 2026-10-24 Asia/Jakarta
+
+Confirmed preflight88f5b3aa/run40015318305 PASSED: both grammars,87 JS/98 Wasm
+modules; byte bound/modulus proofs, retained96-opcode encoder/module/refusal
+comparisons,7540 JS runtime comparisons and actual GC/Wasm engine fixture.
+Portable encoding preserves exact fixture source1fa2fbaf173505bf8e8cbebf5428b900285e4009a675755813793a45c184b582/
+binary41a9dd34e5bbdcdb92ffcfb881faef0ffaa9c8efef3b06dc8f1851cfb37f8c65.
+
+Genuine JS40012562356/request b9b73a70: G1 independent admission and all ten
+cases PASSED. G2 failed hard1800s deadline at1800208ms/3117056KiB; noG3/fixedpoint.
+Closure102ddaa2536a7c5b095ce3188a67f64ef0e9183c34c33051f0b552b6aab39707;
+G1 artifact7cc7bc0b157d0b7ef400a9b1f8541a7b2d7875472d9ad9e0a007e07e609e1529;
+G2 request34fbc943ac867c321350c0ca554b11e7e4c2ae553c845878ff2e1255135e9e8d.
+Retained artifact12528946630 digestd4e8b6d46e65cd90ce1d6ef266bd068a2e66b3d2bc527a93829ffa764fd9e902.
+Actual workload CPU diagnosis40017280827 reuses those immutable compiler/request
+bytes, with240s sampling and no native seed; this is diagnostic, not qualification.
+
+Genuine Wasm40015615536/request afed7c4b: G1 original-ir strict-validation-refused,
+before target execution; no admitted generation. Closure07f9b73f16fbd46fc27e7d1de96e733b775f3067f8c064fb59491cde640d6574.
+Native diagnostic40017368933 obtains complete findings using the unchanged
+production strict checker and exact captured source; do not relax refusals.
+Its artifact12527599858 digest8cdc274e24aab903f545af4e109785bf3cd0bcd812e6a88504f50d315569d199 is preserved.
+
+PR174 integration stays at afed7c4b while full seven-backend gates finish.
+Active blocker implementation is isolated on work/psc1-direct-selfhost-blockers-20261024
+to avoid restarting integration CI for every focused iteration. Preserve both
+histories; integrate verified fixes by a non-force merge only after focused gates
+and independent generation evidence. Request-only target jobs now serialize per
+target, so JS and Wasm may qualify independently without cancelling each other.

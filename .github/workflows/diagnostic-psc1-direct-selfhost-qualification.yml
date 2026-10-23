@@ -1,12 +1,12 @@
 name: PSC1 direct independent G1 G2 G3 qualification
 on:
   push:
-    branches: [feat/psc1-direct-js-wasm-selfhost-20261024]
+    branches: [feat/psc1-direct-js-wasm-selfhost-20261024, work/psc1-direct-selfhost-blockers-20261024]
     paths: [.github/qualification-requests/psc1-direct-selfhost.json]
 permissions:
   contents: read
 concurrency:
-  group: psc1-direct-qualification-${{ github.ref }}
+  group: psc1-direct-qualification-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 jobs:
   request:
@@ -30,7 +30,7 @@ jobs:
           const r=JSON.parse(fs.readFileSync('../.github/qualification-requests/psc1-direct-selfhost.json'));
           const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
           assert.equal(r.schema,'psc1-direct-selfhost-request/1');
-          assert.equal(r.branch,'feat/psc1-direct-js-wasm-selfhost-20261024');
+          assert.ok(['feat/psc1-direct-js-wasm-selfhost-20261024','work/psc1-direct-selfhost-blockers-20261024'].includes(r.branch));
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.equal(r.action,'qualify-independent-G1-G2-G3');
           assert.equal(r.profile,'correctness-1800s');
@@ -46,6 +46,9 @@ jobs:
           console.log('PSC1_DIRECT_EXPLICIT_REQUEST: '+JSON.stringify(r));
           JS
   qualify:
+    concurrency:
+      group: psc1-direct-target-${{ github.ref }}-${{ matrix.target }}
+      cancel-in-progress: false
     needs: request
     runs-on: ubuntu-24.04
     timeout-minutes: 120

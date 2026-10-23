@@ -1,7 +1,7 @@
 name: PSC1 direct self-host source preflight
 on:
   push:
-    branches: [feat/psc1-direct-js-wasm-selfhost-20261024]
+    branches: [feat/psc1-direct-js-wasm-selfhost-20261024, work/psc1-direct-selfhost-blockers-20261024]
     paths:
       - psc1/packages/backend-js/**
       - psc1/packages/backend-wasm/**

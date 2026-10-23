@@ -1794,7 +1794,7 @@ def psJsViewInspectWorker (self source : String) (index : Nat) (fuel : Nat)
   | Nat.succ remaining =>
       let recur : PsJsIrExpr -> Option Bool := fun (value : PsJsIrExpr) =>
         psJsViewInspectWorker self source index remaining aliases value;
-      let known : String -> Bool := fun name =>
+      let known : String -> Bool := fun (name : String) =>
         match psJsViewLookup aliases name with
         | Option.some _ => true
         | Option.none => false;
@@ -1837,11 +1837,11 @@ def psJsViewInspectWorker (self source : String) (index : Nat) (fuel : Nat)
           else psJsViewAny [recur value,
             psJsViewInspectWorker self source index remaining (psJsViewAlias aliases name value) body]
       | PsJsIrExpr.ifE condition left right => psJsViewAny [recur condition,recur left,recur right]
-      | PsJsIrExpr.record fields => psJsViewAny (psListMap (fun field => recur field.snd) fields)
-      | PsJsIrExpr.constructor _ fields => psJsViewAny (psListMap (fun field => recur field.snd) fields)
+      | PsJsIrExpr.record fields => psJsViewAny (psListMap (fun (field : Prod String PsJsIrExpr) => recur field.snd) fields)
+      | PsJsIrExpr.constructor _ fields => psJsViewAny (psListMap (fun (field : Prod String PsJsIrExpr) => recur field.snd) fields)
       | PsJsIrExpr.matchE scrutinee alternatives =>
           let alternative := fun (entry : String × List PsJsIrMatchBinding × PsJsIrExpr) =>
-            if psListAny (fun binding => known binding.name || psStringEq binding.name source) entry.snd.fst then Option.none
+            if psListAny (fun (binding : PsJsIrMatchBinding) => known binding.name || psStringEq binding.name source) entry.snd.fst then Option.none
             else recur entry.snd.snd;
           psJsViewAny (List.cons (recur scrutinee) (psListMap alternative alternatives))
 
@@ -1930,7 +1930,7 @@ def psJsViewRewriteWorker (fuel : Nat) (views : List (String × String))
       | PsJsIrExpr.literal _ => Option.some expr
       | PsJsIrExpr.var _ => Option.some expr
       | PsJsIrExpr.unary operation value => psJsViewMapOne (PsJsIrExpr.unary operation) (recur value)
-      | PsJsIrExpr.projection value field => psJsViewMapOne (fun target => PsJsIrExpr.projection target field) (recur value)
+      | PsJsIrExpr.projection value field => psJsViewMapOne (fun (target : PsJsIrExpr) => PsJsIrExpr.projection target field) (recur value)
       | PsJsIrExpr.binary operation left right => psJsViewMapTwo (PsJsIrExpr.binary operation) (recur left) (recur right)
       | PsJsIrExpr.runtime operation arguments =>
           psJsViewMapOne (psJsViewIntrinsic views operation) (psJsViewMap recur arguments)
@@ -1946,15 +1946,15 @@ def psJsViewRewriteWorker (fuel : Nat) (views : List (String × String))
           | Option.some c => psJsViewMapTwo (PsJsIrExpr.ifE c) (recur left) (recur right)
       | PsJsIrExpr.record fields =>
           let field := fun (entry : String × PsJsIrExpr) =>
-            psJsViewMapOne (fun value => Prod.mk entry.fst value) (recur entry.snd);
+            psJsViewMapOne (fun (value : PsJsIrExpr) => Prod.mk entry.fst value) (recur entry.snd);
           psJsViewMapOne PsJsIrExpr.record (psJsViewMap field fields)
       | PsJsIrExpr.constructor name fields =>
           let field := fun (entry : String × PsJsIrExpr) =>
-            psJsViewMapOne (fun value => Prod.mk entry.fst value) (recur entry.snd);
+            psJsViewMapOne (fun (value : PsJsIrExpr) => Prod.mk entry.fst value) (recur entry.snd);
           psJsViewMapOne (PsJsIrExpr.constructor name) (psJsViewMap field fields)
       | PsJsIrExpr.matchE scrutinee alternatives =>
           let alternative := fun (entry : String × List PsJsIrMatchBinding × PsJsIrExpr) =>
-            psJsViewMapOne (fun body => Prod.mk entry.fst (Prod.mk entry.snd.fst body)) (recur entry.snd.snd);
+            psJsViewMapOne (fun (body : PsJsIrExpr) => Prod.mk entry.fst (Prod.mk entry.snd.fst body)) (recur entry.snd.snd);
           psJsViewMapTwo PsJsIrExpr.matchE (recur scrutinee) (psJsViewMap alternative alternatives)
 
 def psJsViewRewrite (fuel : Nat) : List (String × String) -> PsJsIrExpr -> Option PsJsIrExpr :=
@@ -2015,7 +2015,7 @@ def psJsPrintTailLoopWithVisibility (isPublic : Bool)
                 | Option.none =>
                     match psJsTailEmitWithFuel declaration available 4096 0 rewritten with
                     | Option.none => Option.none
-                    | Option.some printed => Option.some ("",printed);
+                    | Option.some printed => Option.some (Prod.mk "" printed);
               match emitted with
               | Option.none => Option.none
               | Option.some pair =>

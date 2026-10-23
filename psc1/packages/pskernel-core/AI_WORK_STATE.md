@@ -1,3 +1,55 @@
+## Exact9d3fb complete producer and controls PASS; mixed runtime RUNNING
+
+ExecutableANDharness9d3fb530e67863017c50470dbd5d06aa388d6184,
+tree238f75eb53995732ed2991f18bc98e17cce3f863.
+Existing run https://github.com/dwijayuda/pskernel/actions/runs/39896509889:
+native120228107597 PASS82proofs/eighthash/allnativeString; generatedproducer
+120228660726 terminalPASS complete authenticSelfHostcheck/realPSC1/
+TypeScript7.0.2/Node22.23.3/fullfixture. Kernel9956609bytes SHA256
+546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04.
+Authenticated artifact12478155054 ZIP1133575bytes SHA256
+a616c039685fa355fda790d3e339a651ed01d8c1b27fc9ba8acead1de453886a.
+Read-only inspection of COMPLETE generated kernel confirms strict pair shape:
+one recursivePairinvoke/one anonymousstructuralblock/two inlined transitions;
+publicStateonePairinvoke/oneblock/oneoddtransition; no staged results/Step/Mix
+dispatch. Bounded2730cases8190stages13665assertions/long3 PASS.
+No generator-free loop or globalbackend/speedup theorem claimed.
+
+Retained controls120234072497 terminalPASS: unchanged scalar stagedmatrix/
+long3,DAG/minimalString,prefix605assertions,sessionowners8kinds/direct7/
+privateIDs5/forks2. Artifact12477857582 ZIP663962bytes SHA256
+76463326951cb8245d2d9db7fecc3a9358d230bf1bd121da6bf0c910b8656f6e.
+DAG145.47s/558752KiB peakRSS; prefix35.25s/590952KiB.
+Prior61deda141.62s/555992KiB and32.35s/404792KiB remain visible: current
+observed times and prefix peakRSS are HIGHER. Cross-run hostedCPU/GC variation
+prevents a causal speedup/regression claim; D/performance remainsOPEN.
+2048MiB Nodeoldspace is not a hardRSS cap. Exactprovenance,allartifactfile
+hashes/fullgeneratedbodies/markers/measurements:
+evidence/2026-10-23-t01f-primitive-pair-counter-generated-preflight.json.
+All82proofrows/nativeartifactremain in primitive-pair-counter-native.json.
+
+Whole unchanged mixed120234072408 is ALREADY RUNNING,started04:05:05Z,
+25minutejobcap. Fuel4096/2048MiB/emptyPATH,full294requestindependent admission/
+377metadata,all1400selectedcase assertions/singleton/negatives/session/
+ownership/firstandsecondpubliccalls unchanged. Its terminal result is UNKNOWN.
+Fetch existingrun,neverduplicate. No complete mixed/fullT01F/currentA yet.
+
+Containing docs child is unqualified. Fullintegration/saveddraft eightproofguard
+is already reconciled. All5fullworkbranchpushes remain PAUSED; profilemanual.
+One next task: finish this existing mixed runtime. If PASS,restore all5full
+triggers from fresh files (retain eightproofguard/canonical9file manifest/
+corrected ownerlivejobguard),disable narrowhashpush,then qualify ONE NEW
+coherent source through BOTH6shard strictaggregates and allrequired
+native/official/proofs/provider24CLI+8API/research/measurements/unchanged
+owner32workers384calls/full193/profile. Prior-source passes are not inherited.
+If genuinefailure/cap,retain actual trace/artifact then fix evidencedbottleneck,
+without weakeninglimits/assertions. T01F/currentA/B/D OPEN,C FAIL,
+historicalscopedA9c87 qualified; noT05 yet. Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged,no main/npm.
+ActionsLinux ONLY for builds/tests/kernel execution,fresh expected_sha,
+nonforce updates,preserve history/concurrency.
+
+---
+
 ## Exact9d3fb native AND bounded generated gate PASS; full producer pending
 
 ExecutableANDharness9d3fb530e67863017c50470dbd5d06aa388d6184,

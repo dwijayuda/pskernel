@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "ts-closed-lexer-token-accumulator-20261023",
+  "id": "ts-closed-lexer-token-proof-fixture-20261023",
   "branch": "fix/psc1-ts-generator-result-types-20261023",
-  "parentCommit": "b59100045fca5c3157858de3aa0eee2316e0612d",
+  "parentCommit": "39cc17b3d0bae945df932da9ffccacacfb45d1ca",
   "targets": [
     "ts"
   ],

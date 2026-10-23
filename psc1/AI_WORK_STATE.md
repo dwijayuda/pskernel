@@ -180,7 +180,8 @@ Actual fresh-source G2/G3 correctness qualification is next; no badge is granted
 
 Fresh branch `perf/psc1-erasure-applied-workers-20261023` preserves the cursor-cache candidate.
 Actual cursor-cache G1 and all10 cases pass;240s run39960115125 times out
-240168ms/2370648KiB. Long correctness run39959835622 remains active.
+240168ms/2370648KiB. Long correctness run39959835622 is terminal: G1/ten cases pass; G2 times out
+1800199ms/2989224KiB; G3/fixed point not run. Its artifacts remain retained.
 Current bounded profile39961304634 has StringEqual8/26866 ticks and
 WeakCollectionSet8025/26866 ticks; most weak-map insertion frames are under
 psErasureTypeValuedWithFuel, with psErasureStringInList also present.
@@ -192,3 +193,8 @@ all-input equality proofs against retained old definitions, first-duplicate/fuel
 audits. Proofs use only standard propext/Quot.sound, with no new axiom or native_decide.
 Actual fresh-source G1/G2/G3/fixed point is next.
 Default fuel4096, whnf behavior, strict IR and every admission/resource policy stay.
+
+Actual applied-worker source ba0d5f2916074b6331441b050a38fd0f12347604,
+request d2bc51fcce626297db491890551d2902c710a844, Linux39964278626/job120449945559
+has passed its pre-generation gates and is executing generated requests. Short
+performance qualification is requested separately; no result is inferred yet.

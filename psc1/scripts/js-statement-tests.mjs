@@ -92,3 +92,47 @@ const viewReceipt={schema:'psc1-js-lazy-utf8-loop-regression/1',testedCommit:pro
  selfHostQualification:false};
 fs.writeFileSync(path.join(root,'view-receipt.json'),JSON.stringify(viewReceipt,null,2)+'\n');
 console.log('PSC1_JS_VIEW_REGRESSION: '+JSON.stringify(viewReceipt));
+
+// Real driver transitions, including unregistered foreign functions, must retain
+// exact-once callee/operand order, native trap escape and tail/non-tail results.
+let dispatchComparisons=0;
+for(const module of [current,legacy]){
+ for(const n of [0n,1n,7n,123n]){
+  for(const name of ['orderedTail','orderedNonTail']){
+   let trace=[];
+   const make=x=>{trace.push('callee:'+x);return (a,b)=>{trace.push('apply:'+a+':'+b);return a*10n+b;};};
+   const operand=x=>{trace.push('arg:'+x);return x;};
+   const expected=(n+1n)*10n+n+2n+(name==='orderedNonTail'?1n:0n);
+   assert.equal(module[name](make,operand,n),expected);
+   assert.deepEqual(trace,['callee:'+n,'arg:'+(n+1n),'arg:'+(n+2n),'apply:'+(n+1n)+':'+(n+2n)]);
+   dispatchComparisons++;
+   trace=[];
+   const throwing=x=>{trace.push('arg:'+x);if(x===n+1n)throw Error('operand-trap');return x;};
+   assert.throws(()=>module[name](make,throwing,n),/operand-trap/);
+   assert.deepEqual(trace,['callee:'+n,'arg:'+(n+1n)]);
+   trace=[];
+   const failedMake=x=>{trace.push('callee:'+x);throw Error('callee-trap');};
+   assert.throws(()=>module[name](failedMake,operand,n),/callee-trap/);
+   assert.deepEqual(trace,['callee:'+n]);
+   trace=[];
+   const failedApply=x=>{trace.push('callee:'+x);return(a,b)=>{trace.push('apply');throw Error('apply-trap');};};
+   assert.throws(()=>module[name](failedApply,operand,n),/apply-trap/);
+   assert.deepEqual(trace,['callee:'+n,'arg:'+(n+1n),'arg:'+(n+2n),'apply']);
+   dispatchComparisons+=3;
+  }
+ }
+}
+const delegated=s=>(s.match(/yield\* __ps\$(?:invoke|tailInvoke)\(/g)||[]).length;
+assert.equal(delegated(text),0,'compiler still delegates calls through generator helpers');
+assert.ok(delegated(old)>0);
+assert.ok(text.includes('(yield { fn: '));
+const dispatchReceipt={schema:'psc1-js-direct-driver-dispatch/1',testedCommit:process.env.GITHUB_SHA,
+ sourceSha256:sha(text),legacySourceSha256:sha(old),dispatchComparisons,
+ delegatedCallSites:{current:delegated(text),legacy:delegated(old)},
+ checks:['original and target strict IR','retained emitter and native arithmetic references',
+ 'callee and operands exactly once left-to-right','unregistered function return value',
+ 'tail and non-tail foreign trap escape','deep mutual/non-tail/capture regressions retained'],
+ scope:'typed-IR backend regression; not independent source-ABI admission or self-host qualification',
+ selfHostQualification:false};
+fs.writeFileSync(path.join(root,'dispatch-receipt.json'),JSON.stringify(dispatchReceipt,null,2)+'\n');
+console.log('PSC1_JS_DIRECT_DISPATCH: '+JSON.stringify(dispatchReceipt));

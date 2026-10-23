@@ -83,6 +83,19 @@ private def viewDeclarations : List PsVerifiedIrDeclaration :=
           add (varExpr "acc") (intrinsic .stringUtf8ByteSize [varExpr "text0"])]))
   ]
 
+private def orderedCall : PsVerifiedIrExpr :=
+  .call (invoke "make" [varExpr "n"]) []
+    [invoke "operand" [add (varExpr "n") (number 1)],
+     invoke "operand" [add (varExpr "n") (number 2)]]
+
+private def dispatchDeclarations : List PsVerifiedIrDeclaration :=
+  let pairFunction := PsVerifiedIrType.function [nat,nat] nat
+  let factory := PsVerifiedIrType.function [nat] pairFunction
+  let parameters := [PsVerifiedIrParameter.mk "make" factory,
+    PsVerifiedIrParameter.mk "operand" callback,PsVerifiedIrParameter.mk "n" nat]
+  [.mk "orderedTail" [] parameters nat orderedCall,
+   .mk "orderedNonTail" [] parameters nat (add orderedCall (number 1))]
+
 private def fixture : PsVerifiedIrModule :=
   let declarations : List PsVerifiedIrDeclaration := [
     single "identity" (varExpr "n"),
@@ -119,7 +132,7 @@ private def fixture : PsVerifiedIrModule :=
     .mk "pureCount" [] [.mk "n" nat,.mk "acc" nat] nat
       (.ifE zero (varExpr "acc") (invoke "pureCount" [previous,add (varExpr "acc") (number 1)]))
   ];
-  .mk [] [] [.mk "Maybe" [] [.mk "Maybe.none" [],.mk "Maybe.some" [.mk "value" nat]]] (declarations ++ viewDeclarations)
+  .mk [] [] [.mk "Maybe" [] [.mk "Maybe.none" [],.mk "Maybe.some" [.mk "value" nat]]] (declarations ++ viewDeclarations ++ dispatchDeclarations)
 
 private def referenceValues (n : Nat) : List Nat :=
   [0,n,if n == 0 then 0 else 1,n,n+1,0,n,n+3,n,n,n+3,n]

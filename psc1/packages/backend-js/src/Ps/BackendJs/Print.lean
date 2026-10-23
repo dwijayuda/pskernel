@@ -853,22 +853,14 @@ def psJsPrintExprWithPositionAndFuel
                 | Except.error error => Except.error error
                 | Except.ok printedArguments =>
                     if stackContext then
-                      let suffix : String :=
-                        if psListIsEmpty printedArguments then
-                          ""
-                        else
-                          psJsConcat2
-                            ", "
-                            (psJsJoin ", " printedArguments);
+                      -- The existing driver owns the single dispatch lookup.
+                      -- Object fields preserve callee then left-to-right operands.
                       Except.ok
-                        (psJsJoin
-                          ""
-                          [
-                            (if tailPosition then "(yield* __ps$tailInvoke(" else "(yield* __ps$invoke("),
-                            printedFn,
-                            suffix,
-                            "))"
-                          ])
+                        (psJsJoin "" [
+                          "(yield { fn: ", printedFn, ", args: [",
+                          psJsJoin ", " printedArguments, "], tail: ",
+                          (if tailPosition then "true" else "false"), " })"
+                        ])
                     else
                       Except.ok
                         (psJsConcat4

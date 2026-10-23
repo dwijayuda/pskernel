@@ -175,3 +175,17 @@ proof/negative gates and both85-module source audits. Extract-only modules inclu
 the required runtime. Diagnostic39958525121 gives20 byte-identical real corpus
 replays (10680 vs12589ms); its unadopted G2 replay still exceeds240s.
 Actual fresh-source G2/G3 correctness qualification is next; no badge is granted.
+
+## Applied erasure worker candidate
+
+Fresh branch `perf/psc1-erasure-applied-workers-20261023` preserves the cursor-cache candidate.
+Actual cursor-cache G1 and all10 cases pass;240s run39960115125 times out
+240168ms/2370648KiB. Long correctness run39959835622 remains active.
+Current bounded profile39961304634 has StringEqual8/26866 ticks and
+WeakCollectionSet8025/26866 ticks; most weak-map insertion frames are under
+psErasureTypeValuedWithFuel, with psErasureStringInList also present.
+Source confirms eager recursive prefix construction before returned lambdas.
+Eight classification/membership/lookup helpers now have fully applied workers,
+with public function types retained. All-input equality proofs against retained
+old functions and first-duplicate/fuel/large-list regressions are pending Linux CI.
+Default fuel4096, whnf behavior, strict IR and every admission/resource policy stay.

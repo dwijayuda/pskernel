@@ -48,14 +48,17 @@ def psErasureIndexSet (Value : Type) (fuel : Nat) :
         if Nat.beq (Nat.mod hash 2) 0 then PsErasureNameIndex.branch (smaller left (Nat.div hash 2) entries) right
         else PsErasureNameIndex.branch left (smaller right (Nat.div hash 2) entries)
 
-def psErasureIndexFindInBucket (Value : Type) (entries : List (Prod PsName Value)) : PsName -> Option Value :=
+def psErasureIndexFindInBucketWorker (Value : Type) (entries : List (Prod PsName Value)) (target : PsName) : Option Value :=
   match entries with
-  | List.nil => fun (_target : PsName) => Option.none
+  | List.nil => Option.none
   | List.cons entry rest =>
-      let smaller : PsName -> Option Value := psErasureIndexFindInBucket Value rest;
-      fun (target : PsName) =>
-        match entry with
-        | Prod.mk key value => if psNameEq key target then Option.some value else smaller target
+      match entry with
+      | Prod.mk key value =>
+          if psNameEq key target then Option.some value
+          else psErasureIndexFindInBucketWorker Value rest target
+
+def psErasureIndexFindInBucket (Value : Type) (entries : List (Prod PsName Value)) : PsName -> Option Value :=
+  fun (target : PsName) => psErasureIndexFindInBucketWorker Value entries target
 
 def psErasureIndexFind (Value : Type) (index : PsErasureNameIndex Value) (name : PsName) : Option Value :=
   psErasureIndexFindInBucket Value (psErasureIndexBucket Value 16 index (psEnvironmentNameHash name)) name
@@ -194,31 +197,31 @@ def psErasureScopeEmpty
     currentDefinition := Option.none
   }
 
-def psErasureLookupRuntimeExpression
-    (entries : List (Prod Nat PsVerifiedIrExpr)) :
-    Nat -> Option PsVerifiedIrExpr :=
+def psErasureLookupRuntimeExpressionWorker
+    (entries : List (Prod Nat PsVerifiedIrExpr)) (target : Nat) : Option PsVerifiedIrExpr :=
   match entries with
-  | List.nil => fun (_target : Nat) => Option.none
+  | List.nil => Option.none
   | List.cons entry rest =>
-      let smaller : Nat -> Option PsVerifiedIrExpr := psErasureLookupRuntimeExpression rest;
-      fun (target : Nat) =>
-        match entry with
-        | Prod.mk key value =>
-            if Nat.beq key target then Option.some value
-            else smaller target
+      match entry with
+      | Prod.mk key value =>
+          if Nat.beq key target then Option.some value
+          else psErasureLookupRuntimeExpressionWorker rest target
 
-def psErasureLookupNat
-    (entries : List (Prod Nat String)) :
-    Nat -> Option String :=
+def psErasureLookupRuntimeExpression
+    (entries : List (Prod Nat PsVerifiedIrExpr)) : Nat -> Option PsVerifiedIrExpr :=
+  fun (target : Nat) => psErasureLookupRuntimeExpressionWorker entries target
+
+def psErasureLookupNatWorker (entries : List (Prod Nat String)) (target : Nat) : Option String :=
   match entries with
-  | List.nil => fun (_target : Nat) => Option.none
+  | List.nil => Option.none
   | List.cons entry rest =>
-      let smaller : Nat -> Option String := psErasureLookupNat rest;
-      fun (target : Nat) =>
-        match entry with
-        | Prod.mk key value =>
-            if Nat.beq key target then Option.some value
-            else smaller target
+      match entry with
+      | Prod.mk key value =>
+          if Nat.beq key target then Option.some value
+          else psErasureLookupNatWorker rest target
+
+def psErasureLookupNat (entries : List (Prod Nat String)) : Nat -> Option String :=
+  fun (target : Nat) => psErasureLookupNatWorker entries target
 
 def psErasureLookupName (entries : PsErasureDeclarationNames) (name : PsName) : Option String :=
   psErasureIndexFind String entries.byCore name
@@ -236,13 +239,14 @@ def psErasureLookupRecursor (entries : PsErasureNameIndex PsRuntimeInductiveInfo
   psErasureIndexFind PsRuntimeInductiveInfo entries name
 
 
-def psErasureNatInList (values : List Nat) : Nat -> Bool :=
+def psErasureNatInListWorker (values : List Nat) (target : Nat) : Bool :=
   match values with
-  | List.nil => fun (_target : Nat) => false
+  | List.nil => false
   | List.cons value rest =>
-      let smaller := psErasureNatInList rest;
-      fun (target : Nat) =>
-        if Nat.beq value target then true else smaller target
+      if Nat.beq value target then true else psErasureNatInListWorker rest target
+
+def psErasureNatInList (values : List Nat) : Nat -> Bool :=
+  fun (target : Nat) => psErasureNatInListWorker values target
 
 
 def psLevelNormalizesToZero (level : PsLevel) : Bool :=
@@ -287,20 +291,23 @@ def psErasureIsProp
 -- executable value, including aliases with type/runtime parameters. Open the
 -- full telescope before classifying its result; runtime polymorphic values still
 -- end in a data type and retain their executable declarations.
-def psErasureTypeValuedWithFuel
-    (environment : PsEnvironment) (fuel : Nat) :
-    PsLocalContext -> PsExpr -> Bool :=
+def psErasureTypeValuedWithFuelWorker
+    (environment : PsEnvironment) (fuel : Nat) (locals : PsLocalContext) (type : PsExpr) : Bool :=
   match fuel with
-  | Nat.zero => fun (_locals : PsLocalContext) (_type : PsExpr) => false
+  | Nat.zero => false
   | Nat.succ remaining =>
-      let smaller := psErasureTypeValuedWithFuel environment remaining;
-      fun (locals : PsLocalContext) (type : PsExpr) =>
-        match psWhnf environment psMetaEmpty locals type with
-        | PsExpr.sortE _ => true
-        | PsExpr.forallE name domain body binder =>
-            let pushed := psLocalPushBinding locals name domain binder;
-            smaller pushed.context (psExprInstantiate1 body (PsExpr.fvar pushed.id))
-        | _ => false
+      match psWhnf environment psMetaEmpty locals type with
+      | PsExpr.sortE _ => true
+      | PsExpr.forallE name domain body binder =>
+          let pushed := psLocalPushBinding locals name domain binder;
+          psErasureTypeValuedWithFuelWorker environment remaining pushed.context
+            (psExprInstantiate1 body (PsExpr.fvar pushed.id))
+      | _ => false
+
+def psErasureTypeValuedWithFuel
+    (environment : PsEnvironment) (fuel : Nat) : PsLocalContext -> PsExpr -> Bool :=
+  fun (locals : PsLocalContext) (type : PsExpr) =>
+    psErasureTypeValuedWithFuelWorker environment fuel locals type
 
 def psErasureDefinitionIsErased
     (environment : PsEnvironment) (type : PsExpr) : Bool :=

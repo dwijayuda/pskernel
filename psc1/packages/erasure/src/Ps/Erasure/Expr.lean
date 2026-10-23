@@ -1220,18 +1220,19 @@ def psEraseIteApplication
         Except.ok Option.none
   | _ => Except.ok Option.none
 
-def psErasureLookupTypeSubstitution
-    (entries : List (String × PsVerifiedIrType)) :
-    String -> Option PsVerifiedIrType :=
+def psErasureLookupTypeSubstitutionWorker
+    (entries : List (String × PsVerifiedIrType)) (name : String) : Option PsVerifiedIrType :=
   match entries with
-  | List.nil => fun (name : String) => Option.none
+  | List.nil => Option.none
   | List.cons entry rest =>
-      let smaller := psErasureLookupTypeSubstitution rest;
-      fun (name : String) =>
-        match entry with
-        | Prod.mk key value =>
-            if psStringEq key name then Option.some value
-            else smaller name
+      match entry with
+      | Prod.mk key value =>
+          if psStringEq key name then Option.some value
+          else psErasureLookupTypeSubstitutionWorker rest name
+
+def psErasureLookupTypeSubstitution
+    (entries : List (String × PsVerifiedIrType)) : String -> Option PsVerifiedIrType :=
+  fun (name : String) => psErasureLookupTypeSubstitutionWorker entries name
 
 def psSubstituteVerifiedTypeWithFuel
     (substitutions : List (String × PsVerifiedIrType)) (fuel : Nat) :
@@ -1477,14 +1478,15 @@ def psOpenMatchMinorFields
               Except.error PsErasureError.unsupportedRuntimeTerm
       | _ => Except.error PsErasureError.binderMismatch
 
-def psErasureFindStringIndex (target : String) (values : List String) : Nat -> Option Nat :=
+def psErasureFindStringIndexWorker (target : String) (values : List String) (index : Nat) : Option Nat :=
   match values with
-  | List.nil => fun (_index : Nat) => Option.none
+  | List.nil => Option.none
   | List.cons value rest =>
-      let smaller : Nat -> Option Nat := psErasureFindStringIndex target rest;
-      fun (index : Nat) =>
-        if psStringEq value target then Option.some index
-        else smaller (Nat.succ index)
+      if psStringEq value target then Option.some index
+      else psErasureFindStringIndexWorker target rest (Nat.succ index)
+
+def psErasureFindStringIndex (target : String) (values : List String) : Nat -> Option Nat :=
+  fun (index : Nat) => psErasureFindStringIndexWorker target values index
 
 def psErasureRuntimeVariables
     (names : List String) : List PsVerifiedIrExpr :=

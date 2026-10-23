@@ -462,3 +462,7 @@ lean_exe psc1_bridge_lookup_normalization_tests where
 lean_exe psc1_ts_utf8_view_tests where
   srcDir := "test"
   root := `TsUtf8ViewTests
+
+lean_exe psc1_erasure_worker_normalization_tests where
+  srcDir := "test"
+  root := `ErasureWorkerNormalizationTests

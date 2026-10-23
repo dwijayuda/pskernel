@@ -1,0 +1,174 @@
+{
+  "schema": "psc1-t01f-final-qualification-active-v1",
+  "recordedAt": "2026-10-23T00:40:05.945Z",
+  "executableSource": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+  "harnessSource": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+  "sourceTree": "a8db2401141bc73a00dfb169c9b3f45b6f499dae",
+  "integrationSource": "123c41197950b6761be965fd21c57142ee2b0d1c",
+  "state": "in_progress_unqualified",
+  "runs": [
+    {
+      "id": 39879401425,
+      "name": "PSC1 PSKernel-Core Expression V2 research",
+      "path": ".github/workflows/psc1-pskernel-expr-v2.yml",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39879401425",
+      "jobs": [
+        {
+          "id": 120172865111,
+          "name": "generated-js-full-checker-bridge",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120172865303,
+          "name": "portable-ps-closure",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120172865308,
+          "name": "portable-v2-check",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120172865309,
+          "name": "whnf-subset-regression",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120172865389,
+          "name": "full-checker-bridge",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120172865432,
+          "name": "expr-v2-differential",
+          "status": "queued",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39879401423,
+      "name": "PSC1 Expression V2 production integration",
+      "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39879401423",
+      "jobs": [
+        {
+          "id": 120172865344,
+          "name": "native-dag-integration",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120172865519,
+          "name": "generated-dag-integration",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39879401524,
+      "name": "PSC1 authentic Arena timeout diagnostics",
+      "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39879401524",
+      "jobs": [
+        {
+          "id": 120172865376,
+          "name": "authentic-timeout-diagnostics",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39879401452,
+      "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+      "path": ".github/workflows/psc1-pskernel-arena435.yml",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39879401452",
+      "jobs": [
+        {
+          "id": 120172865174,
+          "name": "official-arena-reference",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "id": 39879401429,
+      "name": "PSC1 PSKernel-Core correctness",
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39879401429",
+      "jobs": [
+        {
+          "id": 120172865185,
+          "name": "psc1-portability",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 120172865463,
+          "name": "native-kernel",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    }
+  ],
+  "firstActivation": {
+    "source": "fad56ef8e983c78cb0c6209975d6e1a9f2300fdb",
+    "state": "unqualified_static_canonical_manifest_defect",
+    "runs": [
+      {
+        "id": 39879215990,
+        "name": "PSC1 PSKernel-Core correctness",
+        "path": ".github/workflows/psc1-pskernel-core-correctness.yml"
+      },
+      {
+        "id": 39879215977,
+        "name": "PSC1 Expression V2 production integration",
+        "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml"
+      },
+      {
+        "id": 39879216137,
+        "name": "PSC1 authentic Arena timeout diagnostics",
+        "path": ".github/workflows/psc1-pskernel-arena435-profile.yml"
+      },
+      {
+        "id": 39879216083,
+        "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+        "path": ".github/workflows/psc1-pskernel-arena435.yml"
+      },
+      {
+        "id": 39879215998,
+        "name": "PSC1 PSKernel-Core Expression V2 research",
+        "path": ".github/workflows/psc1-pskernel-expr-v2.yml"
+      }
+    ]
+  },
+  "preflight": {
+    "source": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
+    "runId": 39873570107,
+    "conclusion": "success",
+    "fullBothRouteMatrixQualified": false
+  },
+  "limits": {
+    "fuel": 4096,
+    "nodeOldSpaceMiB": 2048,
+    "emptyRuntimePATH": true,
+    "shardsPerRoute": 6,
+    "shardMinutes": 25,
+    "shardMaxParallel": 2,
+    "ownerWorkers": 32,
+    "validatedOwnerCalls": 384,
+    "arenaCases": 193,
+    "arenaSecondsPerCase": 60,
+    "arenaWorkers": 2
+  },
+  "integrationAuthorizedOnlyAfterRequiredQualification": true
+}

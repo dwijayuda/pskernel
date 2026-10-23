@@ -1,3 +1,26 @@
+## Live final qualification: ae916be4 — running, not qualified
+
+Executable AND harness: `ae916be40ec30a8a0caf5dd683eb7d1d54966849`.
+Tree: `a8db2401141bc73a00dfb169c9b3f45b6f499dae`.
+The containing documentation child is not an executable qualification source.
+Already-triggered current-source runs (reuse these, never duplicate):
+- PSC1 PSKernel-Core Expression V2 research: https://github.com/dwijayuda/pskernel/actions/runs/39879401425
+- PSC1 Expression V2 production integration: https://github.com/dwijayuda/pskernel/actions/runs/39879401423
+- PSC1 authentic Arena timeout diagnostics: https://github.com/dwijayuda/pskernel/actions/runs/39879401524
+- PSC1 Lean Arena 4.35 full corpus qualification: https://github.com/dwijayuda/pskernel/actions/runs/39879401452
+- PSC1 PSKernel-Core correctness: https://github.com/dwijayuda/pskernel/actions/runs/39879401429
+
+All current-source jobs are pending/running at this checkpoint. Exact initial
+job IDs are saved in evidence/2026-10-23-t01f-final-qualification-active.json.
+Follow all jobs,6 generated shards+aggregate,6 canonical shards+aggregate,
+unchanged ABBA32workers384calls and full193 Arena/profile to terminal results.
+Both complete route markers and every retained required gate must bind ae916.
+Do not inherit16aac's narrow PASS or fad56's first-activation jobs. Keep all
+historical caps/failures and A/B/C/D boundaries below. T01F remains OPEN;
+integration123c411 unchanged; T05 blocked. No local build/test/kernel execution.
+
+---
+
 ## Current: canonical manifest completeness corrected; new exact-source suite required
 
 First activation `fad56ef8e983c78cb0c6209975d6e1a9f2300fdb` started:

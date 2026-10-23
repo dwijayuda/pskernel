@@ -1,0 +1,357 @@
+{
+  "schema": "psc1-t01f-short-pairs-bounded-codegen-rejection-v1",
+  "sourceSha": "9dd75e270f3c9eeb918a262c5f6e43e91b7b14da",
+  "treeSha": "d187bb046f9421b023f9c916760ea1e4b6f182e1",
+  "runId": "39971478026",
+  "runAttempt": "1",
+  "nativeJobId": 120475007169,
+  "generatedJobId": 120475944362,
+  "status": "REJECTED_CODEGEN_HYPOTHESIS",
+  "nativeStatus": "PASS85_HASH11",
+  "jobs": [
+    {
+      "id": 120475007169,
+      "run_id": 39971478026,
+      "workflow_name": "PSC1 T01F pure short-pair hash entry preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39971478026",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcDN64wQ",
+      "head_sha": "9dd75e270f3c9eeb918a262c5f6e43e91b7b14da",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120475007169",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39971478026/job/120475007169",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T14:39:21Z",
+      "started_at": "2026-10-23T14:39:24Z",
+      "completed_at": "2026-10-23T14:41:14Z",
+      "name": "native-string",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T14:39:24Z",
+          "completed_at": "2026-10-23T14:39:26Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T14:39:26Z",
+          "completed_at": "2026-10-23T14:39:45Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T14:39:45Z",
+          "completed_at": "2026-10-23T14:39:46Z"
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T14:39:46Z",
+          "completed_at": "2026-10-23T14:40:07Z"
+        },
+        {
+          "name": "Build authentic fixture exporter and retained checker",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T14:40:07Z",
+          "completed_at": "2026-10-23T14:41:03Z"
+        },
+        {
+          "name": "Prove exact scalar hash equivalence and run frozen native matrix",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T14:41:03Z",
+          "completed_at": "2026-10-23T14:41:04Z"
+        },
+        {
+          "name": "Independently admit actual String declarations and export untrusted inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T14:41:04Z",
+          "completed_at": "2026-10-23T14:41:09Z"
+        },
+        {
+          "name": "Retain existing minimal String and public DAG controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T14:41:09Z",
+          "completed_at": "2026-10-23T14:41:10Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T14:41:10Z",
+          "completed_at": "2026-10-23T14:41:12Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T14:41:12Z",
+          "completed_at": "2026-10-23T14:41:12Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-23T14:41:12Z",
+          "completed_at": "2026-10-23T14:41:12Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-23T14:41:12Z",
+          "completed_at": "2026-10-23T14:41:12Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120475007169",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027893,
+      "runner_name": "GitHub Actions 1000027893",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120475944362,
+      "run_id": 39971478026,
+      "workflow_name": "PSC1 T01F pure short-pair hash entry preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39971478026",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcDO0Fqg",
+      "head_sha": "9dd75e270f3c9eeb918a262c5f6e43e91b7b14da",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120475944362",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39971478026/job/120475944362",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-10-23T14:41:14Z",
+      "started_at": "2026-10-23T14:41:17Z",
+      "completed_at": "2026-10-23T14:42:45Z",
+      "name": "generated-string",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T14:41:18Z",
+          "completed_at": "2026-10-23T14:41:19Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T14:41:19Z",
+          "completed_at": "2026-10-23T14:41:41Z"
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T14:41:41Z",
+          "completed_at": "2026-10-23T14:42:02Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T14:42:02Z",
+          "completed_at": "2026-10-23T14:42:03Z"
+        },
+        {
+          "name": "Build authentic PSC1 for the bounded code-generation gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T14:42:03Z",
+          "completed_at": "2026-10-23T14:42:38Z"
+        },
+        {
+          "name": "Install pinned TypeScript",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T14:42:38Z",
+          "completed_at": "2026-10-23T14:42:40Z"
+        },
+        {
+          "name": "Require data-result scalar hash code generation before full kernel build",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 7,
+          "started_at": "2026-10-23T14:42:40Z",
+          "completed_at": "2026-10-23T14:42:41Z"
+        },
+        {
+          "name": "Check complete authentic kernel source after the bounded gate",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-23T14:42:41Z",
+          "completed_at": "2026-10-23T14:42:41Z"
+        },
+        {
+          "name": "Compile the complete independent kernel to JavaScript",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-23T14:42:41Z",
+          "completed_at": "2026-10-23T14:42:41Z"
+        },
+        {
+          "name": "Produce authentic T01F inputs for generated independent replay",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-23T14:42:41Z",
+          "completed_at": "2026-10-23T14:42:41Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T14:42:41Z",
+          "completed_at": "2026-10-23T14:42:43Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 21,
+          "started_at": "2026-10-23T14:42:43Z",
+          "completed_at": "2026-10-23T14:42:43Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-23T14:42:43Z",
+          "completed_at": "2026-10-23T14:42:43Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-23T14:42:43Z",
+          "completed_at": "2026-10-23T14:42:43Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120475944362",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027894,
+      "runner_name": "GitHub Actions 1000027894",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120476701547,
+      "run_id": 39971478026,
+      "workflow_name": "PSC1 T01F pure short-pair hash entry preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39971478026",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcDPiTaw",
+      "head_sha": "9dd75e270f3c9eeb918a262c5f6e43e91b7b14da",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120476701547",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39971478026/job/120476701547",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-10-23T14:42:46Z",
+      "started_at": "2026-10-23T14:42:46Z",
+      "completed_at": "2026-10-23T14:42:46Z",
+      "name": "generated-hash-runtime",
+      "steps": [],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120476701547",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    }
+  ],
+  "actualMarkers": [
+    "PSC1_PINNED_LEAN_INSTALLED leanprover/lean4:v4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "PSC1_SCALAR_HASH_LONG_JS: PASS cases=3",
+    "PSC1_SCALAR_HASH_WORKER_JS: PASS {\"cases\":2730,\"strings\":12,\"stages\":8190,\"assertions\":13665,\"modulus\":\"65521\",\"algorithmChanged\":false}",
+    "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {\"cases\":19,\"assertions\":38,\"shortMaxPairs\":4,\"genericFallback\":true}",
+    "PSC1_HASH_ITERATOR_BODY psKernelCacheStringHashPairsWithFuel 'function* __ps$impl$psKernelCacheStringHashPairsWithFuel(pairs, value, initial) { return (((pairs) === (0n)) ? initial : (yield* (function* () { {\\n    const remaining = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(pairs, 1n);\\n    {\\n        const state = (yield* __ps$invoke(psKernelCacheStringHashPairsWithFuel, remaining, value, initial));\\n        {\\n            const intermediate = (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, state.fst) ? state : ({ [__ps$brand$0]: true, fst: __ps$stringNext(value, state.fst), snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((state.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(__ps$stringGet(value, state.fst))), psKernelCacheHashModulus) }));\\n            return (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, intermediate.fst) ? intermediate : ({ [__ps$brand$0]: true, fst: __ps$stringNext(value, intermediate.fst), snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((intermediate.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(__ps$stringGet(value, intermediate.fst))), psKernelCacheHashModulus) }));\\n        }\\n    }\\n} })())); }\\n__ps$implementations.set(psKernelCacheStringHashPairsWithFuel, __ps$impl$psKernelCacheStringHashPairsWithFuel);'",
+    "PSC1_HASH_ITERATOR_BODY psKernelCacheStringHashStateWithFuel 'function* __ps$impl$psKernelCacheStringHashStateWithFuel(fuel, value, initial) { return (yield* (function* () { {\\n    const paired = (yield* __ps$invoke(psKernelCacheStringHashPairsWithFuel, ((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(fuel, 2n), value, initial));\\n    return (((((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(fuel, 2n)) === (0n)) ? paired : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, paired.fst) ? paired : ({ [__ps$brand$0]: true, fst: __ps$stringNext(value, paired.fst), snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((paired.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(__ps$stringGet(value, paired.fst))), psKernelCacheHashModulus) })));\\n} })()); }\\n__ps$implementations.set(psKernelCacheStringHashStateWithFuel, __ps$impl$psKernelCacheStringHashStateWithFuel);'",
+    "PSC1_HASH_FUSED_ENTRY_BODY 'function* __ps$impl$psKernelCacheStringHash(value) { return (yield* (function* () { {\\n    const fuel = (__ps$utf8(value).size + 1n);\\n    {\\n        const pairs = ((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(fuel, 2n);\\n        {\\n            const paired = ((pairs <= 4n) ? (yield* __ps$invoke(psKernelCacheStringHashShortPairs, pairs, value, ({ [__ps$brand$0]: true, fst: 0n, snd: 0n }))) : (yield* __ps$invoke(psKernelCacheStringHashPairsWithFuel, pairs, value, ({ [__ps$brand$0]: true, fst: 0n, snd: 0n }))));\\n            {\\n                const final = (((((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(fuel, 2n)) === (0n)) ? paired : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, paired.fst) ? paired : ({ [__ps$brand$0]: true, fst: __ps$stringNext(value, paired.fst), snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((paired.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(__ps$stringGet(value, paired.fst))), psKernelCacheHashModulus) })));\\n                return final.snd;\\n            }\\n        }\\n    }\\n} })()); }\\n__ps$implementations.set(psKernelCacheStringHash, __ps$impl$psKernelCacheStringHash);'"
+  ],
+  "artifactInspection": {
+    "artifactId": 12509766641,
+    "zipBytes": 39220,
+    "zipSha256": "b1a426a8291f9a75e04f388e7a1b0318b624b15221a208d66bcf1a7f4133e5da",
+    "files": [
+      {
+        "path": "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.d.ts",
+        "bytes": 13751,
+        "sha256": "372ef5f9e6e56a03a7abcd5f28fcf45182b7f803d90617017c57fe0a91041f22"
+      },
+      {
+        "path": "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js",
+        "bytes": 175908,
+        "sha256": "f6d806e111441dede88bf87769942e01b577494efa6402bf073979c409421d9c"
+      },
+      {
+        "path": "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js.map",
+        "bytes": 191244,
+        "sha256": "8118ac127f0ef95f103656dd5158acd9d936e54398aa8360ae3819668eebb898"
+      },
+      {
+        "path": "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.ts",
+        "bytes": 169300,
+        "sha256": "ea311157e5dc000c801438e175aafc63814515b42f1151cd5b949f6f85026d27"
+      },
+      {
+        "path": "_temp/psc1-scalar-hash-probe.log",
+        "bytes": 284,
+        "sha256": "94f64394529107ff19b73f0b605673426d523a7f2514b3a525d17c2b84d76553"
+      }
+    ],
+    "bodies": {
+      "psKernelCacheStringHashShortPairs": "function* __ps$impl$psKernelCacheStringHashShortPairs(pairs, value, initial) { return (((pairs) === (0n)) ? initial : (yield* (function* () { {\n    const afterFirst = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(pairs, 1n);\n    {\n        const afterTwo = (yield* __ps$invoke(psKernelCacheStringHashStep, value, (yield* __ps$invoke(psKernelCacheStringHashStep, value, initial))));\n        return (((afterFirst) === (0n)) ? afterTwo : (yield* (function* () { {\n            const afterSecond = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(afterFirst, 1n);\n            {\n                const afterFour = (yield* __ps$invoke(psKernelCacheStringHashStep, value, (yield* __ps$invoke(psKernelCacheStringHashStep, value, afterTwo))));\n                return (((afterSecond) === (0n)) ? afterFour : (yield* (function* () { {\n                    const afterThird = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(afterSecond, 1n);\n                    {\n                        const afterSix = (yield* __ps$invoke(psKernelCacheStringHashStep, value, (yield* __ps$invoke(psKernelCacheStringHashStep, value, afterFour))));\n                        return (((afterThird) === (0n)) ? afterSix : (yield* (function* () { {\n                            const _afterFourth = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(afterThird, 1n);\n                            return (yield* __ps$invoke(psKernelCacheStringHashStep, value, (yield* __ps$invoke(psKernelCacheStringHashStep, value, afterSix))));\n                        } })()));\n                    }\n                } })()));\n            }\n        } })()));\n    }\n} })())); }\n__ps$implementations.set(psKernelCacheStringHashShortPairs, __ps$impl$psKernelCacheStringHashShortPairs);",
+      "psKernelCacheStringHashStep": "export function psKernelCacheStringHashStep(value, state) { while (true) {\n    {\n        const position = state.fst;\n        if (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, position)) {\n            return state;\n        }\n        else {\n            {\n                const char = __ps$stringGet(value, position);\n                {\n                    const next = __ps$stringNext(value, position);\n                    return ({ [__ps$brand$0]: true, fst: next, snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((state.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(char)), psKernelCacheHashModulus) });\n                }\n            }\n        }\n    }\n} }",
+      "psKernelCacheStringHash": "function* __ps$impl$psKernelCacheStringHash(value) { return (yield* (function* () { {\n    const fuel = (__ps$utf8(value).size + 1n);\n    {\n        const pairs = ((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(fuel, 2n);\n        {\n            const paired = ((pairs <= 4n) ? (yield* __ps$invoke(psKernelCacheStringHashShortPairs, pairs, value, ({ [__ps$brand$0]: true, fst: 0n, snd: 0n }))) : (yield* __ps$invoke(psKernelCacheStringHashPairsWithFuel, pairs, value, ({ [__ps$brand$0]: true, fst: 0n, snd: 0n }))));\n            {\n                const final = (((((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(fuel, 2n)) === (0n)) ? paired : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, paired.fst) ? paired : ({ [__ps$brand$0]: true, fst: __ps$stringNext(value, paired.fst), snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((paired.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(__ps$stringGet(value, paired.fst))), psKernelCacheHashModulus) })));\n                return final.snd;\n            }\n        }\n    }\n} })()); }\n__ps$implementations.set(psKernelCacheStringHash, __ps$impl$psKernelCacheStringHash);"
+    },
+    "completeKernelProduced": false,
+    "names": [
+      "psKernelCacheStringHashShortPairs"
+    ]
+  },
+  "actualFailure": "Full entry has two static scheduler call sites, and ShortPairs body has8 __ps$invoke(Step,...) calls plus generator blocks. New helper was not pure. Do not accept values-only as optimization success.",
+  "retainedPasses": "Frozen2730cases8190stages13665assertions/long3 AND new19case38assertion matrix allPASS. Complete SelfHost sourcecheck/build and all generated runtime jobs skipped.",
+  "nextHypothesis": "Inline all8 immutable primitive transitions in the nonrecursive ShortPairs leaf; require ZERO generators,schedulercalls,staging,Step/Mix dispatch there and exactly8 get/next sites. Entry must have exactly1 ShortLeaf static site and1 unchanged Pair fallback static site as mutually exclusive branches of <=4, so exactlyONE executes. Keep one structural entry generator and one primitive odd transition. This does not accept the rejected Step-calling helper or relax its zero-internal-machinery requirement."
+}

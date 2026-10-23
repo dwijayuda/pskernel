@@ -1,4 +1,4 @@
-name: PSC1 T01F pure short-pair hash entry preflight
+name: PSC1 T01F primitive short-pair leaf preflight
 on:
   workflow_dispatch:
   push:
@@ -155,8 +155,12 @@ jobs:
                        'psKernelCacheStringHashOctetsWithFuel','psKernelCacheStringHashStep','psKernelCacheMix')
           if any(name in entry for name in forbidden):
               raise RuntimeError('Full entry retains a staged/state/scan transition dispatch')
-          if entry.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in entry:
-              raise RuntimeError('Full entry must dispatch only once to the pair iterator')
+          if entry.count('__ps$invoke(') != 2:
+              raise RuntimeError('Full entry must have exactly two mutually exclusive static dispatch sites')
+          if entry.count('__ps$invoke(psKernelCacheStringHashPairsWithFuel,') != 1 or entry.count('__ps$invoke(psKernelCacheStringHashShortPairs,') != 1:
+              raise RuntimeError('Full entry must have one short-leaf site and one unchanged pair fallback site')
+          if 'const paired = ((pairs <= 4n) ? (yield* __ps$invoke(psKernelCacheStringHashShortPairs,' not in entry or ': (yield* __ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in entry:
+              raise RuntimeError('Short leaf and generic pair dispatch must be exclusive branches of the exact <=4 bound')
           if len(re.findall(r'function\s*\*\s*\(',entry)) != 1:
               raise RuntimeError('Fused entry still allocates an extra generator block')
           if entry.count('__ps$stringNext(') != 1 or entry.count('__ps$stringGet(') != 1:
@@ -166,13 +170,12 @@ jobs:
           if implementations('psKernelCacheStringHashShortPairs') != ['psKernelCacheStringHashShortPairs']:
               raise RuntimeError('Pure short-pair entry was recurried')
           for machinery in ('function*', '__ps$run', '__ps$invoke', '__ps$wrap',
-                            'psKernelCacheStringHashPairsWithFuel'):
+                            'psKernelCacheStringHashPairsWithFuel',
+                            'psKernelCacheStringHashStep', 'psKernelCacheMix'):
               if machinery in short:
-                  raise RuntimeError('Short pairs must be a pure generated leaf: ' + machinery)
-          if short.count('psKernelCacheStringHashStep(') != 8:
-              raise RuntimeError('Short pairs must contain exactly eight immutable pure step calls')
-          if entry.count('psKernelCacheStringHashShortPairs(') != 1:
-              raise RuntimeError('Full entry must contain exactly one pure bounded short-pair branch')
+                  raise RuntimeError('Short pairs must be a pure primitive generated leaf: ' + machinery)
+          if short.count('__ps$stringNext(') != 8 or short.count('__ps$stringGet(') != 8:
+              raise RuntimeError('Short pairs must contain exactly eight inlined immutable primitive transitions')
           level = body_of('psKernelCacheLevelListHash')
           print('PSC1_HASH_LEVEL_LIST_ENTRY_BODY ' + repr(level))
           if '__ps$wrap' in level or 'case "nil": return 575n;' not in level:
@@ -196,8 +199,8 @@ jobs:
               raise RuntimeError('Full hash still dispatches through the staged public worker')
           print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
-          print('PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairDispatches=1 primitiveRemainder=1 structuralGeneratorBlocks=1')
-          print('PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 immutableSteps=8 selectedMaxPairs=4 genericFallback=true')
+          print('PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairFallbackSites=1 shortLeafSites=1 exclusiveBranches=true primitiveRemainder=1 structuralGeneratorBlocks=1')
+          print('PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true')
           print('PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false')
           PY
       - name: Check complete authentic kernel source after the bounded gate

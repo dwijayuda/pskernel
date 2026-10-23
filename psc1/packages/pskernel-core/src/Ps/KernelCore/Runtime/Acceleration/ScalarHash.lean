@@ -115,23 +115,110 @@ def psKernelCacheStringHashShortPairs
   match pairs with
   | Nat.zero => initial
   | Nat.succ afterFirst =>
-      let afterTwo := psKernelCacheStringHashStep value
-        (psKernelCacheStringHashStep value initial);
+      let afterOne :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst initial)) then
+          initial
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst initial))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd initial) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst initial)))))
+              psKernelCacheHashModulus);
+      let afterTwo :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst afterOne)) then
+          afterOne
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst afterOne))))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd afterOne) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst afterOne)))))
+              psKernelCacheHashModulus);
       match afterFirst with
       | Nat.zero => afterTwo
       | Nat.succ afterSecond =>
-          let afterFour := psKernelCacheStringHashStep value
-            (psKernelCacheStringHashStep value afterTwo);
+          let afterThree :=
+            if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst afterTwo)) then
+              afterTwo
+            else
+              Prod.mk
+                (String.Pos.Raw.byteIdx
+                  (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst afterTwo))))
+                (Nat.mod
+                  (Nat.add
+                    (Nat.mul (Prod.snd afterTwo) 31)
+                    (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst afterTwo)))))
+                  psKernelCacheHashModulus);
+          let afterFour :=
+            if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst afterThree)) then
+              afterThree
+            else
+              Prod.mk
+                (String.Pos.Raw.byteIdx
+                  (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst afterThree))))
+                (Nat.mod
+                  (Nat.add
+                    (Nat.mul (Prod.snd afterThree) 31)
+                    (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst afterThree)))))
+                  psKernelCacheHashModulus);
           match afterSecond with
           | Nat.zero => afterFour
           | Nat.succ afterThird =>
-              let afterSix := psKernelCacheStringHashStep value
-                (psKernelCacheStringHashStep value afterFour);
+              let afterFive :=
+                if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst afterFour)) then
+                  afterFour
+                else
+                  Prod.mk
+                    (String.Pos.Raw.byteIdx
+                      (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst afterFour))))
+                    (Nat.mod
+                      (Nat.add
+                        (Nat.mul (Prod.snd afterFour) 31)
+                        (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst afterFour)))))
+                      psKernelCacheHashModulus);
+              let afterSix :=
+                if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst afterFive)) then
+                  afterFive
+                else
+                  Prod.mk
+                    (String.Pos.Raw.byteIdx
+                      (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst afterFive))))
+                    (Nat.mod
+                      (Nat.add
+                        (Nat.mul (Prod.snd afterFive) 31)
+                        (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst afterFive)))))
+                      psKernelCacheHashModulus);
               match afterThird with
               | Nat.zero => afterSix
               | Nat.succ _afterFourth =>
-                  psKernelCacheStringHashStep value
-                    (psKernelCacheStringHashStep value afterSix)
+                  let afterSeven :=
+                    if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst afterSix)) then
+                      afterSix
+                    else
+                      Prod.mk
+                        (String.Pos.Raw.byteIdx
+                          (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst afterSix))))
+                        (Nat.mod
+                          (Nat.add
+                            (Nat.mul (Prod.snd afterSix) 31)
+                            (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst afterSix)))))
+                          psKernelCacheHashModulus);
+                  if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst afterSeven)) then
+                    afterSeven
+                  else
+                    Prod.mk
+                      (String.Pos.Raw.byteIdx
+                        (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst afterSeven))))
+                      (Nat.mod
+                        (Nat.add
+                          (Nat.mul (Prod.snd afterSeven) 31)
+                          (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst afterSeven)))))
+                        psKernelCacheHashModulus)
 
 def psKernelCacheStringHash
     (value : String) :

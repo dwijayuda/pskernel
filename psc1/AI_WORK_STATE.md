@@ -135,3 +135,26 @@ Keep source-specific implemented/proved/native-tested/self-host-qualified/full-r
 evidence distinct. Preserve17 completed attempts, diagnostics, source identities and
 the tracked earlier G2 heap/performance evidence. DirectJS remains a working
 regression reference; independent PSKernel research does not block this pipeline.
+
+
+## DirectJS and DirectWasm self-host mission — 2026-10-24 Asia/Jakarta
+
+Start from verified84e1e16f, preserve its qualified TypeScript748fd5fd pipeline and
+Rust83e18fe1 reference unchanged on their existing branches. Current implementation
+branch feat/psc1-direct-js-wasm-selfhost-20261024 inherits all source/history.
+User priority is actual DirectJS and owned-binary DirectWasm self-hosting.
+Reuse the same pure compiler service, checked frontend/elaborator/strict IR and
+independent official Lean4.35.0 admission; no handwritten compiler fork.
+
+Research findings: DirectJS already snapshots tail-loop arguments immutably, but
+still has a single-entry Map UTF8 cache and constructor-independent name-visitor
+closures; apply the measured bounded-cache/data-worker pattern with exact native
+reference tests. DirectWasm already has GC ADTs/closures/Nat/Int/String, owned
+binary encoding and structural+operand validation. Add an explicit no-import
+opaque-GC scalar transport and pure Wasm backend facade; host decodes owned hex
+bytes and invokes compiled WebAssembly, never native compiler semantics or WAT
+tools as fallback. Preserve default public ABI refusals outside this explicit
+self-host transport. First run complete source census in both grammars and native
+gates before genuine one-seed G1/G2/G3. This initial change is unqualified
+implementation/preflight only, not a G1 claim. No weakened limits, checking,
+source identities, negatives, force pushes, merges or package publication.

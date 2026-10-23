@@ -1,0 +1,57 @@
+name: PSC1 direct self-host source preflight
+on:
+  push:
+    branches: [feat/psc1-direct-js-wasm-selfhost-20261024]
+    paths:
+      - psc1/packages/backend-js/**
+      - psc1/packages/backend-wasm/**
+      - psc1/scripts/TargetServiceSeed.lean
+      - psc1/scripts/generated-target-source-audit.mjs
+      - psc1/host-tools/generated-target-profiles.mjs
+      - .github/workflows/diagnostic-psc1-direct-selfhost-preflight.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-direct-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [js, wasm-core]
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install official pinned Lean and locked host dependencies
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+      - name: Preserve native semantics and independent checking
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests
+          .lake/build/bin/psc1_js_service_tests
+      - name: Census complete owned backend source in both grammars
+        run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-direct-source-${{ matrix.target }}-${{ github.sha }}
+          path: psc1/dist/generated-${{ matrix.target }}-compiler/source-audit/
+          retention-days: 90

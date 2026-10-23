@@ -4,10 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {readOwnedCompilerSources} from '../host-tools/compiler-source-inputs.mjs';
+import {generatedTarget} from '../host-tools/generated-target-profiles.mjs';
 import {sha} from '../host-tools/generated-target-tools.mjs';
 import {validateCensusLane} from './compiler-source-census-contract.mjs';
-const target=process.argv[2];assert.ok(['rust','ts'].includes(target));
-const sources=readOwnedCompilerSources('Ps.Backend'+(target==='rust'?'Rust':'Ts')+'.CompilerService');
+const target=process.argv[2];const definition=generatedTarget(target);
+const sources=readOwnedCompilerSources(definition.entry);
 const directory=path.resolve('dist/generated-'+target+'-compiler/source-audit');fs.mkdirSync(directory,{recursive:true});
 const modules=sources.map(s=>({name:s.module,path:s.path,utf8Bytes:Buffer.byteLength(s.text),sha256:sha(s.text),
  imports:[...s.text.matchAll(/^import\s+(.+)$/gm)].flatMap(m=>m[1].trim().split(/\s+/))}));

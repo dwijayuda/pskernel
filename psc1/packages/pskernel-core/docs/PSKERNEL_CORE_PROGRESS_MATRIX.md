@@ -1,41 +1,60 @@
-## Exact0fe60cc6 native83 AND bounded fused-entry gates PASS; complete check RUNNING
+## Fused-entry native, bounded, complete producer and retained controls PASS; mixed RUNNING
 
-ExecutableANDharness0fe60cc69e8d7544acb09025944cbfd3d955f992
-(treea6e55931126673894687c9f1d3e582928940ea68).
-ONE existing run https://github.com/dwijayuda/pskernel/actions/runs/39961234382:
-native120439450101 terminalPASS83proofreports(9hash),onlypermittedstandard3
-axioms,no forbiddenaxioms; unchanged8originalhashproofs/newLevelListentry
-equality,2730nativecases/long3/all6authenticStringcases294requests377metadata/
-prefixsession/private-ownercontrols PASS.
-Artifact12505770341 ZIP105588bytes SHA256
-e39ae12c8df7c4e23e1efd202c49a1d1c64bae8d398706fdc75c6df32366a53a.
-Exact83proofrows/markers/all5filehashes/run-jobmetadata:
+Executable and harness source: `0fe60cc69e8d7544acb09025944cbfd3d955f992`
+(tree `a6e55931126673894687c9f1d3e582928940ea68`).
+Follow the one existing run: https://github.com/dwijayuda/pskernel/actions/runs/39961234382.
+
+Native job 120439450101 passed 83 proof reports, including nine hash reports,
+with only permitted standard axioms. The original eight hash proof bodies and
+all theorem statements remain unchanged; the additional theorem proves the
+specialized LevelList entry equal to the unchanged worker.
+The bounded generated matrix passed 2,730 cases, 8,190 partial stages,
+13,665 assertions and three long cases.
+
+Complete producer 120440559608 passed authentic PSC1 SelfHost source checking,
+full compilation and TypeScript 7.0.2 generation. The complete kernel is
+9,959,869 bytes, SHA256 b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d.
+Static inspection verified all 15 artifact files, provenance and all four
+complete emitted helper bodies. The full String hash has one pair invoke and
+one structural generator block; LevelList arities 0, 1 and 2 specialize while
+retaining the unchanged generic curried fallback.
+
+Retained controls job 120449895262 passed the scalar matrix, public DAG,
+minimal String, 605 prefix assertions and session controls
+(eight kinds, seven direct cases, five private IDs and two forks).
+DAG: 145.98 seconds / 558,884 KiB peak RSS.
+Prefix: 34.68 seconds / 396,804 KiB peak RSS.
+All 13 controls artifact files and detached inputs were verified.
+These cross-run measurements do not establish a general speedup; D remains OPEN.
+
+Mixed job 120449895373 started 2026-10-23 13:48:30 UTC and is RUNNING.
+Its unchanged job cap is 25 minutes. Terminal assertions, time and RSS are
+UNKNOWN. Preserve all 294 independent admissions, 377 metadata comparisons,
+1,400 assertions, singleton and negative checks, private/session owners and
+440 traced calls, with fuel 4096, 2048 MiB old-space limit and empty PATH.
+Do not duplicate the run or inherit another source's mixed pass.
+
+Exact jobs, markers, 15+13 file digests, source provenance and helper bodies:
+docs/evidence/2026-10-23-t01f-fused-entry-generated-preflight.json.
+Native proofs and five native artifact file digests:
 docs/evidence/2026-10-23-t01f-portable-fused-entry-native-gates.json.
 
-Generatedproducer120440559608 RUNNING completeSelfHostsourcecheck(step8).
-Boundedstep7 terminalSUCCESS confirms realPSC1 portable syntax nowaccepted,
-frozen2730cases8190stages13665assertions/long3PASS,strictfusedFullHash onePair
-invoke/oneanonymousblock/oneoddprimitive,noScan/State/Worker/Step/Mix/staged
-dispatch,smallLevelListbranches exact575/oneandtwoLevelHashcalls and exactlyone
-unchangedgenericcurriedfallback. The profile-driven entry optimizations have
-cleared nativeequivalence and boundedcodegen gates ONLY; fullkernel build and
-whole1400assertionmixed runtime are UNKNOWN. No fullT01F/currentA qualification.
+All five full push triggers remain PAUSED; narrow hash alone is ACTIVE and
+profile diagnostics are manual-only. After complete narrow PASS, fetch fresh
+full workflows (hash proof guard nine), restore all five triggers and make
+narrow hash manual-only. Qualify ONE new coherent source through BOTH strict
+six-shard aggregates and all retained native, official, provider 24 CLI + 8 API,
+research, measurements, frozen 32-worker/384-call owner, full 193-case Arena
+and profile gates. Each route must compile once and emit its own strict
+PSC1_T01F_FULL_STRING_SHARDED_JS: PASS marker.
 
-One next task: follow THIS existing producer then runtime-onlycontrols/mixed.
-Neverduplicate orinheritoldsourcepasses. Keep4096/2048MiB/emptyPATH/25mincap,
-294independentadmissions/377metadata/all1400assertions/singleton/negatives/
-owners/440traces. Source0feisfinaltupleletsyntaxfix to9c3; its nativepass is
-fresh,notinherited. Prior9c3boundedparserfailure archived;6bedmixedtimeout and
-phaseprofile99af evidence archived. All5fullpushesPAUSED,profilemanual-only,
-narrowhashonlyACTIVE. Do not restorefulltriggers untilwhole narrowPASS.
-IfPASS,fetchFRESHfullworkflowfiles (hashguard9,notcachedold11),restoreall5,
-makenarrowmanual-only,qualify ONE coherent NEWsource through BOTH strict6shard
-aggregates and allretainednative/official/provider24CLI+8API/research/
-measurements/unchanged32worker384callowner/full193/profile beforeT01F/T05.
-T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integration.
-Fresh integrationlast123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
-ActionsLinuxONLY execution,expected_sha/nonforce,preservehistory,no main/npm.
-This containingdocschild is unqualified and must not replace executable0fe.
+T01F/current A/B/D remain OPEN; C remains FAIL. Historical scoped A at 9c87
+remains qualified. No T05 or integration yet. Default provider V1; full-kernel
+DirectJS remains UNSUPPORTED. Integration last observed at
+123c41197950b6761be965fd21c57142ee2b0d1c.
+Execution stays on Actions Linux only. Preserve history with fresh expected SHA
+and non-force updates; no main merge or npm publish. This documentation child
+is unqualified and must not replace the executable source in evidence.
 
 ---
 

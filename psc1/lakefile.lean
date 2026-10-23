@@ -503,3 +503,7 @@ lean_lib PsWasmPrefixReference where
 lean_lib PsOrdinaryExpansionReference where
   srcDir := "test"
   roots := #[`OrdinaryExpansionReference, `OrdinaryExpansionTests]
+
+lean_lib PsCheckedSpineReference where
+  srcDir := "test"
+  roots := #[`CheckedSpineReference, `CheckedSpineTests]

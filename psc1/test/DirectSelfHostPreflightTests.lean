@@ -1,3 +1,4 @@
+import CheckedSpineTests
 import Ps.BackendJs.Print
 import WasmBinaryCarrierTests
 import WasmPrefixTests
@@ -347,6 +348,7 @@ private def fixtureModule : PsVerifiedIrModule :=
   ]
 
 def main : IO Unit := do
+  runCheckedSpineTests
   testWasmPrefixDelay
   testOrdinaryExpansion
   let expressions : List PsJsIrExpr := [

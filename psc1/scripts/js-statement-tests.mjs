@@ -62,6 +62,11 @@ let __testLookups=0; const __testOriginalUtf8=__ps$utf8;
 __ps$utf8=(text)=>{__testLookups++;return __testOriginalUtf8(text);};
 export function __testReset(){__testLookups=0;__ps$lastUtf8=undefined;__ps$previousUtf8=undefined;}
 export function __testState(){return {lookups:__testLookups,views:[__ps$lastUtf8,__ps$previousUtf8].filter(Boolean).length};}
+let __testDispatchLookups=0;const __testOriginalGet=__ps$implementations.get.bind(__ps$implementations);
+__ps$implementations.get=(fn)=>{__testDispatchLookups++;return __testOriginalGet(fn);};
+export function __testDispatchReset(){__testDispatchLookups=0;}
+export function __testDispatchCount(){return __testDispatchLookups;}
+
 `;
 for(const [name,source] of [['debug-current',text],['debug-legacy',old]])
  fs.writeFileSync(path.join(root,name+'.mjs'),source+debug);
@@ -126,9 +131,15 @@ const delegated=s=>(s.match(/yield\* __ps\$(?:invoke|tailInvoke)\(/g)||[]).lengt
 assert.equal(delegated(text),0,'compiler still delegates calls through generator helpers');
 assert.ok(delegated(old)>0);
 assert.ok(text.includes('(yield { fn: '));
+const lookupCounts={};
+for(const [name,module] of [['current',debugCurrent],['legacy',debugLegacy]]){
+ module.__testDispatchReset();assert.equal(module.nonTail(20n),20n);
+ lookupCounts[name]=module.__testDispatchCount();
+}
+assert.deepEqual(lookupCounts,{current:20,legacy:40});
 const dispatchReceipt={schema:'psc1-js-direct-driver-dispatch/1',testedCommit:process.env.GITHUB_SHA,
  sourceSha256:sha(text),legacySourceSha256:sha(old),dispatchComparisons,
- delegatedCallSites:{current:delegated(text),legacy:delegated(old)},
+ delegatedCallSites:{current:delegated(text),legacy:delegated(old)},registeredCallLookupCounts:lookupCounts,
  checks:['original and target strict IR','retained emitter and native arithmetic references',
  'callee and operands exactly once left-to-right','unregistered function return value',
  'tail and non-tail foreign trap escape','deep mutual/non-tail/capture regressions retained'],

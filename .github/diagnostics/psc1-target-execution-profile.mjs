@@ -48,7 +48,7 @@ const helper=[
 '}',
 'export {diagnosticExtractStats};'
 ].join('\n');
-modified+='\n'+helper;
+modified=helper+'\n'+modified;
 console.log('PSC1_EXTRACT_REPLACEMENTS: '+JSON.stringify({callsites:spans.length,legacyBytes:legacy.length,scope:'derived copy only; cache hit and two valid boundaries; exact legacy fallback; no new cache entry'}));
 const candidate=path.resolve(ts.directory,'diagnostic-string-extract.js');fs.writeFileSync(candidate,modified);
 const runner=path.resolve('diagnosis/replay.mjs');

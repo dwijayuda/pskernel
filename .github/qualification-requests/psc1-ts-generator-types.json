@@ -1,11 +1,11 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
-  "id": "psc1-ts-erasure-workers-performance-20261023-1792763749656",
+  "id": "psc1-ts-text-lookup-visitor-performance-20261023-1792773595611",
   "action": "qualify-independent-G1-G2-G3",
   "branch": "perf/psc1-erasure-applied-workers-20261023",
   "targets": [
     "ts"
   ],
   "resourcePolicy": "unchanged",
-  "parentCommit": "09f41833d1c2d5c62de8bc55a25e58076055cc06"
+  "parentCommit": "5b873e2092e59d2ed8add2e1e9cc0bd66620dcd5"
 }

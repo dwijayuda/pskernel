@@ -1,4 +1,5 @@
 import Ps.BackendJs.Print
+import WasmBinaryCarrierTests
 import Ps.BackendWasm.CompilerService
 
 namespace PsJsNameVisitorReference
@@ -366,6 +367,9 @@ def main : IO Unit := do
   IO.FS.writeFile "dist/direct-selfhost-preflight/runtime-current.mjs" (← emitRuntime false)
   IO.FS.writeFile "dist/direct-selfhost-preflight/runtime-legacy.mjs" (← emitRuntime true)
   let module := fixtureModule
+  match psWasmLowerSpecializedModule (PsWasmTargetProfile.mk PsWasmWordSize.wasm32) module with
+  | .error _ => throw (IO.userError "binary carrier fixture lowering refused")
+  | .ok lowered => testWasmBinaryCarrier (psWasmServiceTransport lowered (psListMap (fun d => d.name) module.declarations))
   match psStrictValidateModule module with
   | .error _ => throw (IO.userError "Wasm transport fixture strict IR refused")
   | .ok validated =>

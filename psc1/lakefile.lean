@@ -162,6 +162,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.TailCalls,
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Encode,
+    `Ps.BackendWasm.BinaryBytes,
     `Ps.BackendWasm.Binary,
     `Ps.BackendWasm.RuntimePlan,
     `Ps.BackendWasm.ValidateStructure,

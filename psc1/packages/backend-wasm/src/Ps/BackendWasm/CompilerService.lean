@@ -1,6 +1,6 @@
 import Ps.Compiler.Service
 import Ps.BackendWasm.Lower
-import Ps.BackendWasm.Binary
+import Ps.BackendWasm.BinaryBytes
 import Ps.BackendWasm.ValidateIr
 import Ps.BackendWasm.ServiceAbi
 
@@ -16,11 +16,11 @@ def nibble (value : Nat) : String :=
   else if Nat.beq value 12 then "c" else if Nat.beq value 13 then "d"
   else if Nat.beq value 14 then "e" else "f"
 
-def hexWorker (bytes : List UInt8) (builder : PsTextBuilder) : String :=
+def hexWorker (bytes : List Nat) (builder : PsTextBuilder) : String :=
   match bytes with
   | List.nil => psTextBuilderFinish builder
   | List.cons byte rest =>
-      let value := UInt8.toNat byte;
+      let value := byte;
       let text := String.Internal.append (nibble (Nat.div value 16)) (nibble (Nat.mod value 16));
       hexWorker rest (psTextBuilderAppend builder text)
 
@@ -33,7 +33,7 @@ def emit (module : PsValidatedIrModule) (publicNames : List String) :
       match psWasmIrValidateModule target with
       | Except.error _ => Except.error (Ps.Internal.CompilerService.failure "wasm-validation" "target-refused")
       | Except.ok _ =>
-          match psWasmEncodeModule target with
+          match Ps.Internal.WasmBinaryBytes.psWasmEncodeModule target with
           | Except.error _ => Except.error (Ps.Internal.CompilerService.failure "wasm-binary" "target-refused")
           | Except.ok bytes => Except.ok (Prod.mk
               (String.Internal.append "psc1-wasm-hex/1:" (hexWorker bytes psTextBuilderEmpty))

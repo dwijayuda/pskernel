@@ -632,7 +632,9 @@ def psTsEmitTypedExprContextWithFuel
                 else psTsEmitLetStatementsWithResult smaller result expr) with
               | Except.error error => Except.error error
               | Except.ok statements =>
-                  Except.ok (psTsJoin "" ["(yield* (function*()", annotation, " { ", statements, " })())"])
+                  Except.ok (if annotate then
+                    psTsJoin "" ["(yield* (function*()", annotation, " { ", statements, " })())"]
+                  else psTsJoin "" ["(yield* (function*() { ", statements, " })())"])
           | .ifE condition thenBranch elseBranch =>
               match smaller condition with
               | Except.error error => Except.error error
@@ -750,7 +752,9 @@ def psTsEmitTypedExprContextWithFuel
                         | Except.error error => Except.error error
                         | Except.ok printedScrutinee =>
                             Except.ok
-                              (psTsJoin "" ["(yield* (function*()", annotation, " { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
+                              (if annotate then psTsJoin "" ["(yield* (function*()", annotation, " { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
+                                  "invalid ProofScript constructor tag", "); })())"]
+                              else psTsJoin "" ["(yield* (function*() { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
                                   "invalid ProofScript constructor tag", "); })())"])
     
 -- Existing expression consumers keep exact legacy rendering and fuel behavior.

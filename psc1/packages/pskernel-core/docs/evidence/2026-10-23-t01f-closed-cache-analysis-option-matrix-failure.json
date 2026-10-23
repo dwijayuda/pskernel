@@ -1,0 +1,122 @@
+{
+  "schema": "psc1-t01f-generated-preflight-failure-v1",
+  "sourceSha": "cfed23ce187f170b10b0f0e9822b231da5dfe7b8",
+  "runId": 39999069751,
+  "runAttempt": 1,
+  "jobId": 120571100205,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39999069751",
+  "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39999069751/job/120571100205",
+  "conclusion": "failure",
+  "stage": "new generated closed-cache matrix, first representation assertion",
+  "firstFailure": "PSC1_CLOSED_CACHE_ANALYSIS_FAIL small map representation",
+  "firstFailureAt": "2026-10-23T17:59:29.0298877Z",
+  "scriptLine": 94,
+  "boundedCompilation": {
+    "success": true,
+    "typescript": "7.0.2",
+    "nativeCompilerBuilt": true
+  },
+  "frozenHashMatrixPassed": true,
+  "shortEntryMatrixPassed": true,
+  "cacheAnalysisMatrixExecuted": true,
+  "cacheAnalysisMatrixPassed": false,
+  "analysis40": {
+    "completionInferredFromControlFlow": true,
+    "separatePassMarker": false,
+    "reason": "Failure occurs at the first representation assertion after the 20-expression/two-assertion loop."
+  },
+  "strictGeneratedBodyWorkflowGateExecuted": false,
+  "independentBodyInspection": "See 2026-10-23-t01f-closed-cache-analysis-body-static-inspection.json in this evidence directory; independently inspected complete generated body, static diagnostic only.",
+  "fullSourceCheckExecuted": false,
+  "fullKernelBuildExecuted": false,
+  "generatedFixtureProductionExecuted": false,
+  "generatedRuntimeExecuted": false,
+  "fullProducerProvenanceExists": false,
+  "artifactKind": "bounded code generation and probe logs only",
+  "artifactId": 12521596518,
+  "artifactZipBytes": 69884,
+  "artifactZipSha256": "5cddfa7cf931495162a120ee68c489a3b05d1e2b04a6bbdc881ddccd84eee15e",
+  "sourceFileBlobs": {
+    "workflow.yml": "33540c5c2eb9545fe965f7eff7c49efe07bc13ff",
+    "CacheAnalysis.lean": "4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b",
+    "closed-cache-analysis-smoke.mjs": "b8dbbc667d974159dd2b0216861eacbacaac37e9",
+    "string-environment-smoke.mjs": "68acf28a8b355105e021eb547a4d0b835c40a876",
+    "StringEnvironmentRegression.lean": "154bec1f4350cd948b1451fe6689b9809f05cd11"
+  },
+  "qualification": false,
+  "nextAction": "Correct the concrete generated representation assertion without weakening the matrix or counts, then qualify one new exact candidate.",
+  "artifactFileDigests": {
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.d.ts": {
+      "bytes": 24593,
+      "sha256": "90fac28f079e89c571a7d9a770a8d6400e5c88b0b62504a9a206c662797f3ef5"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js": {
+      "bytes": 360259,
+      "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js.map": {
+      "bytes": 377223,
+      "sha256": "d433c339b01d90c773520567e53fcd3f7f80943c081f6bd3d3730c687a8696e2"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.ts": {
+      "bytes": 352956,
+      "sha256": "83a7c48a77c29478924d2c4ed43afa3c5aaac6eb960ddca7bcc9e7cb1749f0dc"
+    },
+    "_temp/psc1-scalar-hash-probe.log": {
+      "bytes": 284,
+      "sha256": "94f64394529107ff19b73f0b605673426d523a7f2514b3a525d17c2b84d76553"
+    },
+    "_temp/psc1-closed-cache-analysis-probe.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "evidenceFileDigests": {
+    "CacheAnalysis.lean": {
+      "bytes": 9629,
+      "sha256": "fe26126cae9c7757d29b3b2193d9530a2de0dc7d5e76a591abb6f2a4b35421bf"
+    },
+    "StringEnvironmentRegression.lean": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "artifacts.json": {
+      "bytes": 1605,
+      "sha256": "1dbfe4225195f9389d704527daa051a6e177d852aec98d4b8f96848c786f3e27"
+    },
+    "closed-cache-analysis-smoke.mjs": {
+      "bytes": 7466,
+      "sha256": "c98d72ab28d55ba384a17db6e3659b141dd0fe81065ab087cf50950356e1905c"
+    },
+    "generated-job-120571100205.log": {
+      "bytes": 99389,
+      "sha256": "c783d5ac586bde477efbf333737cde9b84fab8515e4c1689dfcdfdfffa66b002"
+    },
+    "jobs.json": {
+      "bytes": 10759,
+      "sha256": "639488f2c7aaefed29b8e4824b705fd03c9d2370089d23c8285cbcc48a21203d"
+    },
+    "run.json": {
+      "bytes": 13774,
+      "sha256": "35ffdb8c18cb1d774d54b0b42a74395e1c914ec739e8990e09f5753d28a50b24"
+    },
+    "string-environment-smoke.mjs": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    },
+    "workflow.yml": {
+      "bytes": 35343,
+      "sha256": "15bb0ebaa7287f5019a76e78aca19fc259f73b89bee8ce7ecbe811cfe6b1487a"
+    }
+  },
+  "verification": {
+    "sourceRunAttemptJob": true,
+    "sourceGitBlobHashes": true,
+    "artifactApiSourceBinding": true,
+    "zipApiAndUploadLogDigest": true,
+    "allSixZipFilesIndependentlyRehashed": true,
+    "frozenExactMarkers": true,
+    "newMatrixAndWorkflowBodyPassMarkersAbsent": true,
+    "fullProducerProvenanceAbsent": true
+  }
+}

@@ -62,7 +62,9 @@ const pairContains=get("psKernelExprPairSetContains"),pairInsert=get("psKernelEx
 const semanticGet=get("psKernelSemanticExprMapGet"),semanticInsert=get("psKernelSemanticExprMapInsert");
 const semanticContains=get("psKernelSemanticExprPairSetContains"),semanticPairInsert=get("psKernelSemanticExprPairSetInsert");
 const inferGet=get("psKernelInferCacheMapGet"),inferInsert=get("psKernelInferCacheMapInsert");
-const optionSame=(actual,expected)=>expected===none?actual===none:same(actual,expected);
+// Generic Option.none constructs a fresh object. Compare its actual private
+// constructor Symbol and exact fields; distinct allocations are not identical.
+const optionSame=(actual,expected)=>same(actual,expected);
 
 for(let i=0;i<expressions.length;i++){
  const expr=expressions[i],result=analyze(expr),isOpen=hasFVar(expr);
@@ -91,10 +93,10 @@ for(let i=0n;i<smallLimit+2n;i++){
  indexedMap=mapInsert(indexedMap,key,value);
  indexedSet=pairInsert(indexedSet,key,bound);
 }
-must(smallMap.index===none,"small map representation");
-must(indexedMap.index!==none,"indexed map representation");
-must(smallSet.index===none,"small pair-set representation");
-must(indexedSet.index!==none,"indexed pair-set representation");
+must(same(smallMap.index,none),"small map representation");
+must(same(indexedMap.index,Option.some(indexedMap.index.value)),"indexed map representation");
+must(same(smallSet.index,none),"small pair-set representation");
+must(same(indexedSet.index,Option.some(indexedSet.index.value)),"indexed pair-set representation");
 for(const map of[smallMap,indexedMap])
  ensure(optionSame(mapGet(map,open),Option.some(value)),"raw ineligible map entry exists");
 for(const set of[smallSet,indexedSet])
@@ -119,7 +121,10 @@ for(let stateIndex=0;stateIndex<states.length;stateIndex++){
   for(let j=0;j<expressions.length;j++){
    const right=expressions[j],canPair=pairEligible(expr,right),pairLabel=label+"/"+j;
    must(semanticContains(set,expr,right)===(canPair?pairContains(set,expr,right):false),"semantic pair contains "+pairLabel);
-   must(optionSame(semanticPairInsert(set,expr,right),canPair?Option.some(pairInsert(set,expr,right)):none),"semantic pair insert "+pairLabel);
+   const expectedSet=canPair?pairInsert(set,expr,right):null;
+   const inserted=semanticPairInsert(set,expr,right);
+   must(optionSame(inserted,canPair?Option.some(expectedSet):none)&&
+    (!canPair||expectedSet!==set||inserted.value===set),"semantic pair insert and retained identity "+pairLabel);
    pairQueries++;
   }
  }

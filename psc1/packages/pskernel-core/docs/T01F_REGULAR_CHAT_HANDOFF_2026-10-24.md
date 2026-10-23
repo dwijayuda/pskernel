@@ -1,3 +1,71 @@
+## 2026-10-24 correct generated Option representation in the 1,884-assertion matrix
+
+Exact source `cfed23ce187f170b10b0f0e9822b231da5dfe7b8`, run
+`39999069751`, attempt 1: native job `120570117704` PASS. All 92 proof
+reports, frozen scalar controls, 294 ordered independent admissions,
+377 metadata comparisons, six native String samples and retained controls
+passed. Native artifact `12520948002`: 107,781 bytes, SHA-256
+`4aca6b162f9d3f3c46414ed8c56bef1980272f29cedf76eb75cfb764f3ac235d`.
+All eight files and source/run/attempt/upload bindings were independently
+verified: `docs/evidence/2026-10-23-t01f-closed-cache-analysis-typed-native-gates.json`.
+
+Generated job `120571100205` compiled the bounded CacheAnalysis module
+through authentic PSC1 -> TypeScript 7.0.2 -> JavaScript. The frozen
+2,730-case / 8,190-stage / 13,665-assertion matrix, three long cases and
+19-case / 38-assertion short matrix PASS. The new matrix then FAILED at
+`small map representation`. Bounded artifact `12521596518`: 69,884 bytes,
+SHA-256 `5cddfa7cf931495162a120ee68c489a3b05d1e2b04a6bbdc881ddccd84eee15e`.
+All six artifact files were independently verified. Failure evidence:
+`docs/evidence/2026-10-23-t01f-closed-cache-analysis-option-matrix-failure.json`.
+
+The actual emitted generic constructor is
+`"none": () => ({ [__ps$tag$1]: "none" })`; each call allocates a fresh object.
+The unchanged old cache produces this exact constructor when staying small
+or returning a miss. Comparing two such allocations with `===` is an invalid
+oracle. This containing harness-only correction uses the existing
+`Reflect.ownKeys` structural comparator, retaining the actual private tag
+Symbol's identity and exact fields. Indexed representation checks explicitly
+require the authentic `Option.some` shape. Pair insertion also checks
+`inserted.value === set` when the old operation returns the original set.
+There are still exactly 20 expressions, two states and 1,884 assertions.
+Production Lean, all proof statements/scripts, original tests and limits
+are unchanged by this correction.
+
+Independent static inspection of the complete bounded worker found one export,
+11 recursive scheduler sites, no old ExprHash/HasFVar calls and no recurry or
+result wrapper. Evidence:
+`docs/evidence/2026-10-23-t01f-closed-cache-analysis-body-static-inspection.json`.
+The workflow body guard itself did NOT execute after the matrix failure;
+neither did the complete producer or runtime. Do not treat this inspection
+as a workflow PASS or claim full T01F qualification.
+
+Follow ONE new exact narrow source through every prerequisite and full mixed
+runtime (exactly 1,400 assertions, unchanged 25-minute cap). All five final
+qualification triggers remain PAUSED; diagnostics remain manual-only.
+T01F/current A/B/D remain OPEN; C remains FAIL. No integration or T05 advance.
+
+---
+
+### Validated portable source forms for the saved recipe
+
+The implementation is now committed and its seven universal statements have
+passed natively. Retain the explicit native module root in
+`psc1/kernel-lakefile.lean`, the local `flag` binding in the worker's letE
+case, typed `nextCache : PsKernelExprMap` and
+`nextSet : PsKernelExprPairSet` record bindings, and
+`afterFailure : PsKernelCheckerState` in DeltaStep. PSC1 requires these source
+forms; previous parse/elaboration failures are recorded separately.
+
+Where the historical recipe below says to preserve `Option.none` identity,
+preserve the authentic constructor's private Symbol identity and exact
+structure. The actual generic constructor allocates fresh objects, so do
+not restore a reference-equality assertion between separate None allocations.
+Existing checker state and retained set objects must still preserve their
+original reference identity. Do not modify the emitter or kernel to make an
+invalid harness assumption true.
+
+---
+
 # T01F handoff — 2026-10-24 Asia/Jakarta
 
 This is an implementation handoff for the authorized public repository

@@ -13,8 +13,39 @@ c3fe670ffbd8a56be552910bbb3a0a20170b2b11, proof repair
 5d819f69ba1ccda0689e7d354fdcab9295807c0d.
 Actual correctness-1800s request66f1e752cfbdc491d9b2974c849825e8a4193227,
 [run39973570792](https://github.com/dwijayuda/pskernel/actions/runs/39973570792),
-job120482257189, is executing. Read its terminal receipt before new expensive work.
-Do not infer qualification from the native proof gate or diagnostic replay.
+job120482257189, is terminal: independently admitted/built G1 and all10 cases
+pass; G2 timeout1800231ms, peak3064892KiB. No G2 candidate/G3/fixed point.
+Read-only audit39978659027 verifies source closure816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82,
+G1 sourceedaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d,
+G1 executable91c9568698e9804805538b6db6041b24607593ba103c1ef8667fc5536cc372ee.
+Its actual saturated encoder callbacks take both arguments inside the lambda;
+the normalization reaches the independently admitted G1.
+Do not repeat this unchanged1800s trial.
+
+## Active measured continuation
+
+One pinned diagnostic replay39978891505/job120500641283 runs the exact failed
+current G2 requeste90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998
+with original G1 manifest294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec.
+Diagnostic commitbac05317679a9e756d093d76dfc7a1d3465fc53a on
+diagnostic/psc1-selfhost-profile-20261023. It publishes immutable final30s
+CPU samples at240/600/1200/1750s from ONE bounded request, retaining the qualified
+supervisor policy, same bytes/Node/heap/stack/stream/wire limits. No adoption,
+admission or qualification. A read-only artifact reader permits inspecting phases
+before the profile job ends; no repeated G2 execution is required.
+
+Phase240 artifact12512911643 digest411a6ef3d22907b28b0f6784c94709b0756922f97329a4758400374217905715
+is verified by reader39979697224. Its27522 ticks show erasure/environment work,
+native Node46.1%, generator dispatch and hashing/equality. WeakCollectionSet228
+(0.8%) is not dominant in this EARLY window. Later samples remain pending;
+do not infer the final remaining blocker from this phase or from older sources.
+
+The exact85-source syntactic prefix census39977097772 finds132 candidates,
+including false positives and many ordinary list workers. This is not132 defects
+or measured/reachable bottlenecks; do not normalize them blindly. Shape inspection
+39975765156 matches the genuine G1 source above and witnesses delayed fully
+saturated encoder recursion. Original/saturated IR assertions and retained
+source/target variants remain valid; no verifier requirement was relaxed.
 
 The previous applied-erasure long trial sourceba0d5f29/requestd2bc51fc/
 run39964278626 is terminal: G1 independently admitted/built and ten cases pass;
@@ -98,8 +129,9 @@ the independent checker stays. DirectJS G1/heap defect and ExpressionV2 work rem
 
 Continue the [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) and
 [executable continuation](docs/PSC1_RUST_TS_SELFHOST_CONTINUATION.md).
-Read the active encoder trial, audit its immutable terminal artifact once, then
-qualify240s separately if correctness passes. Diagnose the new actual phase if
-blocked. Integrate coherent validated source only with fresh full seven-backend/
+Read the remaining progressive phase receipts, then fix the measured new cost
+before a fresh coherent source gate and genuine G2/G3 request. The current
+encoder trial is already audited and failed; no unchanged duplicate. Keep240s
+separate after correctness. Integrate coherent validated source only with fresh full seven-backend/
 application CI. GitHub/Linux Actions exclusively, fresh HEAD/expected-HEAD
 non-force updates, preserve history. No merge/npm publication.

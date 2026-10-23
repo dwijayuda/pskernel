@@ -162,6 +162,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.TailCalls,
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Encode,
+    `Ps.BackendWasm.BinaryBytes,
     `Ps.BackendWasm.Binary,
     `Ps.BackendWasm.RuntimePlan,
     `Ps.BackendWasm.ValidateStructure,
@@ -169,7 +170,9 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.ValidateIr,
     `Ps.BackendWasm.Component,
     `Ps.BackendWasm.StringAbi,
-    `Ps.BackendWasm.StringComponent
+    `Ps.BackendWasm.StringComponent,
+    `Ps.BackendWasm.ServiceAbi,
+    `Ps.BackendWasm.CompilerService
   ]
 
 lean_lib PsBackendPython where
@@ -476,3 +479,11 @@ lean_exe psc1_ir_encoder_worker_normalization_tests where
 lean_exe psc1_text_lookup_worker_normalization_tests where
   srcDir := "test"
   root := `TextLookupWorkerNormalizationTests
+
+lean_lib PsWasmBinaryCarrierReference where
+  srcDir := "test"
+  roots := #[`WasmBinaryReference, `WasmBinaryCarrierTests]
+
+lean_exe psc1_direct_selfhost_preflight_tests where
+  srcDir := "test"
+  root := `DirectSelfHostPreflightTests

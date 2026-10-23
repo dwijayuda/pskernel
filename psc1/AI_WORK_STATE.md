@@ -135,3 +135,68 @@ Keep source-specific implemented/proved/native-tested/self-host-qualified/full-r
 evidence distinct. Preserve17 completed attempts, diagnostics, source identities and
 the tracked earlier G2 heap/performance evidence. DirectJS remains a working
 regression reference; independent PSKernel research does not block this pipeline.
+
+
+## DirectJS and DirectWasm self-host mission — 2026-10-24 Asia/Jakarta
+
+Start from verified84e1e16f, preserve its qualified TypeScript748fd5fd pipeline and
+Rust83e18fe1 reference unchanged on their existing branches. Current implementation
+branch feat/psc1-direct-js-wasm-selfhost-20261024 inherits all source/history.
+User priority is actual DirectJS and owned-binary DirectWasm self-hosting.
+Reuse the same pure compiler service, checked frontend/elaborator/strict IR and
+independent official Lean4.35.0 admission; no handwritten compiler fork.
+
+Research findings: DirectJS already snapshots tail-loop arguments immutably, but
+still has a single-entry Map UTF8 cache and constructor-independent name-visitor
+closures; apply the measured bounded-cache/data-worker pattern with exact native
+reference tests. DirectWasm already has GC ADTs/closures/Nat/Int/String, owned
+binary encoding and structural+operand validation. Add an explicit no-import
+opaque-GC scalar transport and pure Wasm backend facade; host decodes owned hex
+bytes and invokes compiled WebAssembly, never native compiler semantics or WAT
+tools as fallback. Preserve default public ABI refusals outside this explicit
+self-host transport. First run complete source census in both grammars and native
+gates before genuine one-seed G1/G2/G3. This initial change is unqualified
+implementation/preflight only, not a G1 claim. No weakened limits, checking,
+source identities, negatives, force pushes, merges or package publication.
+
+## Direct source preflight checkpoint — 2026-10-24 Asia/Jakarta
+
+Source c5ae2ecc, Linux preflight40010724322: official native builds, all-input
+DirectJS name-visitor equivalence proof,7540 retained-runtime comparisons and
+actual owned Wasm GC scalar tests PASSED. DirectJS87-module closure passes both
+Lean/PS source census. Wasm98-module closure remains source-blocked: Model field
+defaults and anonymous constructor RHS sugar in Binary/Lower/ServiceAbi.
+This commit normalizes internal Wasm module defaults to the same explicit values
+at every fresh constructor, names RHS constructors, and makes imported-function
+encoding an ordered fully applied traversal. Native behavior and complete source
+census must pass before a Wasm G1 claim.
+
+A separate explicit request-only workflow executes genuine independent js and/or
+wasm-core G1/G2/G3 with exact source/IR/admission/ten-observation fixed point.
+Only actual G2/G3 receive1800000ms; G1/corpus/build240000ms, independent
+Lean120000ms and all semantic/resource policies remain unchanged. DirectJS
+qualification can proceed independently while Wasm-only source blockers are
+resolved. No new target is self-host-qualified yet. Prior TS/Rust receipts and
+branches remain preserved; no merge or publication.
+
+## Portable binary carrier architecture — 2026-10-24 Asia/Jakarta
+
+The98-module Wasm census at77f5121e/run40013895915 accepts model, runtime,
+validation, lowering and service transport; Binary alone refuses psWasmByte
+(UInt8.ofNat: unsupportedTerm). Strict IR deliberately refuses machine scalars;
+do not enable UInt8 or bypass that existing negative boundary solely for self-host.
+Instead74d9b8c9 moves the same single encoder algorithm to BinaryBytes.lean,
+using qualified Nat bytes normalized modulo256. Binary.lean preserves all68
+native APIs through carrier-only UInt8 adapters; the pure facade imports the
+portable encoder directly. No handwritten compiler/encoder fork or WAT fallback.
+Native-only retained original encoder tests cover all96 instruction forms,
+LEB/UTF8 edge cases, memory/global flags and import ordering; all-input modulus
+and bound proofs are checked in the Linux preflight. The initial native gate
+found unregistered test modules; this commit registers both explicit Lake roots.
+These new carrier/proof/source gates are pending; no Wasm G1 claim yet.
+
+DirectJS genuine qualification40012562356 at request b9b73a70 remains executing
+the immutable87-module source from c5ae2ecc/414cb6c2; subsequent Wasm-only
+normalizations do not change that owned closure. Draft174 preserves the new
+work for review and triggers existing Practical Core/seven-backend/native gates.
+No merge/publication; prior qualified Rust/TS branches remain unchanged.

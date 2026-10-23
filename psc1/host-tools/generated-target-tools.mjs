@@ -7,6 +7,8 @@ import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {compilerRequestLimit,supervisorLimit,PERFORMANCE_PROFILE} from '../scripts/selfhost-qualification-profiles.mjs';
+import {generatedTarget} from './generated-target-profiles.mjs';
+import {decodeWasmHex} from './generated-wasm-transport.mjs';
 export const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 export function boundedRun(executable,args,options={}) {
  const temporary=!options.logDirectory;
@@ -41,7 +43,7 @@ export function verifyArtifact(manifestFile,expectedHash) {
  assert.equal(sha(fs.readFileSync(manifestFile)),expectedHash,'PSC1_TARGET_MANIFEST_CHANGED');
  const m=JSON.parse(fs.readFileSync(manifestFile,'utf8'));
  assert.equal(m.schema,'psc1-generated-target-artifact/1');
- assert.ok(['ts','rust'].includes(m.target));
+ const definition=generatedTarget(m.target);
  const directory=path.dirname(manifestFile);
  assert.ok(m.files.length>0&&new Set(m.files.map(f=>f.path)).size===m.files.length);
  for(const f of m.files) {
@@ -53,13 +55,17 @@ export function verifyArtifact(manifestFile,expectedHash) {
  assert.ok(m.files.some(f=>f.path===m.executable));
  assert.equal(typeof m.service,'boolean');
  assert.ok(Array.isArray(m.publicNames)&&new Set(m.publicNames).size===m.publicNames.length);
- const source=m.files.find(f=>f.path===(m.target==='ts'?'module.ts':'module.rs'));
+ const source=m.files.find(f=>f.path===definition.sourceFile);
  assert.ok(source);assert.equal(source.sha256,m.sourceSha256,'PSC1_TARGET_SOURCE_IDENTITY');
- assert.equal(m.executable,m.target==='ts'?'module.js':'service.bin');
+ assert.equal(m.executable,definition.executable);
+ if(m.target==='wasm-core'){
+  assert.equal(m.transport,'psc1-wasm-selfhost-gc/1');assert.ok(Array.isArray(m.publicTypes));
+  assert.deepEqual(decodeWasmHex(fs.readFileSync(path.join(directory,definition.sourceFile),'utf8')),fs.readFileSync(path.join(directory,m.executable)));
+ }
  return {...m,directory};
 }
-export function buildTarget({target,source,directory,service=false,consumer='',publicNames=[]}) {
- assert.ok(['ts','rust'].includes(target));fs.mkdirSync(directory,{recursive:true});
+export function buildTarget({target,source,directory,service=false,consumer='',publicNames=[],publicTypes=[]}) {
+ const definition=generatedTarget(target);fs.mkdirSync(directory,{recursive:true});
  const events=[];
  let executable;
  if(target==='ts') {
@@ -78,6 +84,26 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
   if(!service) {
    fs.writeFileSync(path.join(directory,'consumer.mjs'),"import * as m from './module.js';\n"+consumer);
   }
+ } else if(target==='js') {
+  fs.writeFileSync(path.join(directory,'module.js'),source);
+  fs.writeFileSync(path.join(directory,'package.json'),JSON.stringify({type:'module',private:true}));
+  events.push(runTool(process.execPath,['--check',path.join(directory,'module.js')],{logDirectory:directory}).event);
+  executable='module.js';
+  events.push(runTool(process.execPath,['--input-type=module','-e',
+   "import{pathToFileURL}from'node:url';const m=await import(pathToFileURL(process.argv[1]).href);if(JSON.stringify(Object.keys(m).sort())!==process.argv[2])throw Error('PSC1_TARGET_API_MISMATCH');",
+   path.join(directory,executable),JSON.stringify([...publicNames].sort())],{logDirectory:directory}).event);
+  if(!service)fs.writeFileSync(path.join(directory,'consumer.mjs'),"import * as m from './module.js';\n"+consumer);
+ } else if(target==='wasm-core') {
+  fs.writeFileSync(path.join(directory,'module.wasm.hex'),source);
+  fs.writeFileSync(path.join(directory,'module.wasm'),decodeWasmHex(source));
+  const transport=pathToFileURL(path.resolve('host-tools/generated-wasm-transport.mjs')).href;
+  const probe="import{loadWasmApi}from "+JSON.stringify(transport)+";import fs from 'node:fs';loadWasmApi(fs.readFileSync(new URL('./module.wasm',import.meta.url)),"+JSON.stringify(publicTypes)+","+JSON.stringify(publicNames)+");\n";
+  fs.writeFileSync(path.join(directory,'probe.mjs'),probe);
+  events.push(runTool('wasm-tools',['validate',path.join(directory,'module.wasm')],{logDirectory:directory}).event);
+  events.push(runTool(process.execPath,[path.join(directory,'probe.mjs')],{logDirectory:directory}).event);
+  executable='module.wasm';
+  if(!service)fs.writeFileSync(path.join(directory,'consumer.mjs'),
+   "import{loadWasmArtifact}from "+JSON.stringify(transport)+";import{fileURLToPath}from'node:url';const m=loadWasmArtifact(fileURLToPath(new URL('./artifact.json',import.meta.url)));\n"+consumer);
  } else {
   const main=service ?
    'fn main() { let a: Vec<String> = std::env::args().collect(); assert_eq!(a.len(), 3); let input = std::fs::read_to_string(&a[1]).expect("request"); let output = psCompilerRustServiceCandidate(input); assert!(output.len() <= 134217728); std::fs::write(&a[2], output).expect("response"); }' :
@@ -103,15 +129,16 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
  const manifest={schema:'psc1-generated-target-artifact/1',target,sourceSha256:sha(source),
   executable,service,publicNames,files,events,nodeVersion:process.version,
   rustOptimizationLevel:target==='rust'?1:null,
-  compilerVersion:target==='rust'?runTool('rustc',['--version']).stdout.trim():
+  compilerVersion:target==='js'?process.version:target==='wasm-core'?runTool('wasm-tools',['--version']).stdout.trim():target==='rust'?runTool('rustc',['--version']).stdout.trim():
    runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--version']).stdout.trim()};
+ if(target==='wasm-core'){manifest.transport='psc1-wasm-selfhost-gc/1';manifest.publicTypes=publicTypes;}
  fs.writeFileSync(path.join(directory,'artifact.json'),JSON.stringify(manifest,null,2)+'\n');
  return {file:path.join(directory,'artifact.json'),sha256:sha(fs.readFileSync(path.join(directory,'artifact.json'))),manifest};
 }
 export function observeArtifact(artifact) {
  const m=verifyArtifact(artifact.file,artifact.sha256);
- const executable=m.target==='ts'?process.execPath:path.join(m.directory,m.executable);
- const args=m.target==='ts'?[path.join(m.directory,'consumer.mjs')]:[];
+ const executable=m.target!=='rust'?process.execPath:path.join(m.directory,m.executable);
+ const args=m.target!=='rust'?[path.join(m.directory,'consumer.mjs')]:[];
  const r=runTool(executable,args,{logDirectory:m.directory});
  return {observation:JSON.parse(r.stdout.trim()),event:r.event};
 }
@@ -126,10 +153,11 @@ export async function executeService(manifestFile,expectedHash,requestFile,outpu
  } catch {}
  const limits=compilerRequestLimit(profile,id);
  const started=Date.now();let maxRssKiB;
- if(m.target==='ts') {
-  const api=await import(pathToFileURL(path.join(m.directory,m.executable)).href);
-  assert.deepEqual(Object.keys(api),['psCompilerTsServiceCandidate']);
-  const response=api.psCompilerTsServiceCandidate(input.toString('utf8'));
+ if(m.target==='ts'||m.target==='js'||m.target==='wasm-core') {
+  const api=m.target==='wasm-core'?(await import('./generated-wasm-transport.mjs')).loadWasmArtifact(manifestFile):await import(pathToFileURL(path.join(m.directory,m.executable)).href);
+  const exported=generatedTarget(m.target).exportName;
+  assert.deepEqual(Object.keys(api),[exported]);
+  const response=api[exported](input.toString('utf8'));
   assert.equal(typeof response,'string');assert.ok(Buffer.byteLength(response)<=128*1024*1024);
   fs.writeFileSync(outputFile+'.tmp',response,{flag:'wx'});
   maxRssKiB=process.resourceUsage().maxRSS;

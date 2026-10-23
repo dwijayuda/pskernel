@@ -8,9 +8,10 @@ import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-too
 import {sha,buildTarget,observeArtifact,verifyArtifact,runTool,boundedRun} from '../host-tools/generated-target-tools.mjs';
 import {validateClosureCounts} from './compiler-closure-contract.mjs';
 import {corpus,refusals,expectedObservations,observedExpressions,rustObservations} from './generated-target-corpus.mjs';
+import {generatedTarget} from '../host-tools/generated-target-profiles.mjs';
 import {qualificationProfile,compilerRequestLimit,PERFORMANCE_PROFILE} from './selfhost-qualification-profiles.mjs';
 const [target,mode='--self-host',profileName=PERFORMANCE_PROFILE]=process.argv.slice(2);
-assert.ok(['rust','ts'].includes(target)&&['--g1-only','--self-host'].includes(mode));
+const definition=generatedTarget(target);assert.ok(['--g1-only','--self-host'].includes(mode));
 const profile=qualificationProfile(profileName);
 assert.equal(process.version,'v22.23.3');assert.ok(process.env.GITHUB_SHA);
 const root=process.cwd(),directory=path.resolve('dist/generated-'+target+'-compiler');
@@ -20,7 +21,7 @@ const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
 const runner=path.resolve('scripts/generated-target-runner.mjs');
 const inventoryFiles=['scripts/generated-target-qualification.mjs','scripts/generated-target-runner.mjs',
  'scripts/selfhost-qualification-profiles.mjs','scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
- 'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
+ 'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','host-tools/generated-target-profiles.mjs','host-tools/generated-wasm-transport.mjs','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
 const tools=[checker,process.execPath,...inventoryFiles.map(p=>path.resolve(p))].map(file=>({file,sha256:sha(fs.readFileSync(file))}));
 const seedHash=sha(fs.readFileSync(seed));let seedCalls=0;
 const events=[],report={schema:'psc1-generated-target-qualification/1',target,mode,
@@ -36,8 +37,8 @@ const pinned=()=>{
   assert.equal(sha(bytes),row.sha256,'PSC1_COMPILER_SOURCE_CHANGED');
  }
 };
-const entry='Ps.Backend'+(target==='rust'?'Rust':'Ts')+'.CompilerService';
-const exportName='psCompiler'+(target==='rust'?'Rust':'Ts')+'ServiceCandidate';
+const entry=definition.entry;
+const exportName=definition.exportName;
 function request(id,grammar,assurance,entry,sources) {
  const captured=sources.map(s=>({module:s.module,kind:grammar,text:s.text}));
  const digest=compilerSourceClosureDigest(captured);
@@ -112,8 +113,8 @@ function exercise(artifact,generation) {
  for(const item of corpus) {
   const label='G'+generation+'-'+item.id,r=request(label,item.grammar,item.assurance,item.entry,item.sources);
   const c=generated(artifact,r,label),identity=checkCandidate(c,r);
-  const consumer=target==='ts'?item.consumer+'\nconsole.log(JSON.stringify('+observedExpressions[item.id]+'));\n':rustObservations[item.id];
-  const built=buildTarget({target,source:c.value.source,directory:path.join(directory,label),consumer,publicNames:c.value.publicNames});
+  const consumer=target!=='rust'?item.consumer+'\nconsole.log(JSON.stringify('+observedExpressions[item.id]+'));\n':rustObservations[item.id];
+  const built=buildTarget({target,source:c.value.source,directory:path.join(directory,label),consumer,publicNames:c.value.publicNames,publicTypes:target==='wasm-core'?c.value.specializedIr[4].filter(d=>c.value.publicNames.includes(d[0])).map(d=>({name:d[0],parameters:d[2].map(p=>p[1]),result:d[3]})):[]});
   const observation=observeArtifact(built);assert.deepEqual(observation.observation,expectedObservations[item.id]);
   observations.push({id:item.id,...identity,observation:observation.observation});
   (report.cases||=[]).push({generation,...observations.at(-1),execution:observation.event});checkpoint();
@@ -144,7 +145,7 @@ try {
  const initial=candidateFile(output),baseline=checkCandidate(initial,bootstrap);
  assert.deepEqual(initial.value.publicNames,[exportName]);
  report.bootstrap=baseline;checkpoint();
- let artifact=buildTarget({target,source:initial.value.source,directory:path.join(directory,'G1-service'),service:true,publicNames:[exportName]});
+ let artifact=buildTarget({target,source:initial.value.source,directory:path.join(directory,'G1-service'),service:true,publicNames:[exportName],publicTypes:target==='wasm-core'?[{name:exportName,parameters:[['primitive','string']],result:['primitive','string']}]:[]});
  report.serviceArtifact={file:artifact.file,sha256:artifact.sha256,sourceSha256:artifact.manifest.sourceSha256};checkpoint();
  // No native compiler frontend/emitter is available after this sole seed call.
  const disabled=path.resolve('.lake/build/disabled-'+target+'-native-tools');fs.mkdirSync(disabled,{recursive:true});
@@ -161,7 +162,7 @@ try {
   const c=generated(artifact,r,'G'+generation+'-self'),identity=checkCandidate(c,r);
   for(const k of ['sourceClosureDigest','sourceSha256','admissionsSha256','originalIrSha256','specializedIrSha256'])assert.equal(identity[k],baseline[k],'PSC1_FIXED_POINT_MISMATCH:'+k);
   assert.deepEqual(c.value.publicNames,[exportName]);
-  const next=buildTarget({target,source:c.value.source,directory:path.join(directory,'G'+generation+'-service'),service:true,publicNames:[exportName]});
+  const next=buildTarget({target,source:c.value.source,directory:path.join(directory,'G'+generation+'-service'),service:true,publicNames:[exportName],publicTypes:target==='wasm-core'?[{name:exportName,parameters:[['primitive','string']],result:['primitive','string']}]:[]});
   const actual=exercise(next,generation);assert.deepEqual(actual,observations,'PSC1_GENERATION_CORPUS_CHANGED');
   report.generations.push({generation,...identity,artifactSha256:next.sha256,observations:actual});
   attempt.status='passed';attempt.completedAt=new Date().toISOString();artifact=next;checkpoint();

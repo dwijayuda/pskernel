@@ -1,0 +1,126 @@
+name: PSC1 direct independent G1 G2 G3 qualification
+on:
+  push:
+    branches: [feat/psc1-direct-js-wasm-selfhost-20261024]
+    paths: [.github/qualification-requests/psc1-direct-selfhost.json]
+permissions:
+  contents: read
+concurrency:
+  group: psc1-direct-qualification-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      targets: ${{ steps.request.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Require exact request-only commit and authorized targets
+        id: request
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';import fs from 'node:fs';import {spawnSync} from 'node:child_process';
+          const r=JSON.parse(fs.readFileSync('../.github/qualification-requests/psc1-direct-selfhost.json'));
+          const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
+          assert.equal(r.schema,'psc1-direct-selfhost-request/1');
+          assert.equal(r.branch,'feat/psc1-direct-js-wasm-selfhost-20261024');
+          assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
+          assert.equal(r.action,'qualify-independent-G1-G2-G3');
+          assert.equal(r.profile,'correctness-1800s');
+          assert.equal(r.g2g3TimeoutMs,1800000);assert.equal(r.g1TimeoutMs,240000);
+          assert.equal(r.resourcePolicy,'only-G2-G3-wall-clock-extended;all-other-policies-unchanged');
+          assert.ok(Array.isArray(r.targets)&&r.targets.length>0&&r.targets.every(t=>['js','wasm-core'].includes(t)));
+          assert.equal(new Set(r.targets).size,r.targets.length);
+          assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
+          const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);
+          const d=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});assert.equal(d.status,0);
+          assert.deepEqual(d.stdout.split(String.fromCharCode(0)).filter(Boolean),['.github/qualification-requests/psc1-direct-selfhost.json']);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'targets='+JSON.stringify(r.targets)+'\n');
+          console.log('PSC1_DIRECT_EXPLICIT_REQUEST: '+JSON.stringify(r));
+          JS
+  qualify:
+    needs: request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.request.outputs.targets) }}
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native_cache
+        with:
+          path: psc1/.lake
+          key: psc1-direct-service-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install official pinned Lean and locked host dependencies
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+      - name: Install SHA256-pinned owned-binary validator
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Preserve native semantics and independent checking
+        id: native_build
+        run: |
+          set -euo pipefail
+          node --check host-tools/generated-target-profiles.mjs
+          node --check host-tools/generated-wasm-transport.mjs
+          node --check host-tools/generated-target-tools.mjs
+          node --check scripts/generated-target-qualification.mjs
+          node scripts/generated-target-contract-tests.mjs
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests
+      - uses: actions/cache/save@v4
+        if: steps.native_build.outcome == 'success'
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Prove visitors and compare actual runtime and GC transport behavior
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_js_service_tests
+          .lake/build/bin/psc1_direct_selfhost_preflight_tests
+          node scripts/direct-selfhost-preflight-tests.mjs
+      - name: Census complete owned backend source in both grammars
+        run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
+      - name: Execute genuine generated compiler generations and exact fixed point
+        timeout-minutes: 110
+        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host correctness-1800s
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-direct-selfhost-correctness-1800s-${{ matrix.target }}-${{ github.sha }}
+          path: |
+            psc1/dist/direct-selfhost-preflight/
+            psc1/dist/generated-${{ matrix.target }}-compiler/
+          retention-days: 90

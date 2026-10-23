@@ -4386,30 +4386,39 @@ def psWasmBindingTypes
 def psWasmCheckComputedCalleeType
     (module : PsVerifiedIrModule) (bindings : List PsWasmBinding)
     (owner : String) (fn : PsVerifiedIrExpr) :
-    Except PsWasmLowerError PsVerifiedIrType := do
-  let options := psIrCheckDefaultOptions
+    Except PsWasmLowerError PsVerifiedIrType :=
+  let options := psIrCheckDefaultOptions;
   let parameters := psListMap
-    (fun binding => PsVerifiedIrParameter.mk binding.name binding.type) bindings
-  let _ <- match psIrCheckModuleSizeWorker options.maxSteps options.maxSteps
+    (fun (binding : PsWasmBinding) => PsVerifiedIrParameter.mk binding.name binding.type) bindings;
+  match psIrCheckModuleSizeWorker options.maxSteps options.maxSteps
       [PsIrCheckSizeTask.parameters parameters, PsIrCheckSizeTask.expression fn] 0 with
-    | .ok count => .ok count
-    | .error issue => .error (PsWasmLowerError.unsupportedExpressionContext owner
+  | Except.error issue =>
+      Except.error (PsWasmLowerError.unsupportedExpressionContext owner
         (String.Internal.append "computed-call-size:" issue.code))
-  let scope := psIrCheckScopeRoot owner [] parameters
-  let initial := PsIrCheckState.mk
-    [PsIrCheckTask.expression scope fn none false] [] 0 0 0 [] true
-  let checked := psIrCheckRun options module options.maxSteps initial
-  if !checked.traversalComplete || !psListIsEmpty checked.tasks then
-    throw (PsWasmLowerError.unsupportedExpressionContext owner "computed-call-type-budget")
-  if !Nat.beq checked.findingCount 0 then
-    let reason := match checked.findingsRev with
-      | [] => "computed-call-type-invalid"
-      | finding :: _ => String.Internal.append "computed-call-type:" finding.code
-    throw (PsWasmLowerError.unsupportedExpressionContext owner reason)
-  match checked.values with
-  | [PsIrCheckValue.mono type] => pure type
-  | _ => throw (PsWasmLowerError.unsupportedExpressionContext owner
-      "computed-call-type-unresolved")
+  | Except.ok _ =>
+      let scope := psIrCheckScopeRoot owner [] parameters;
+      let initial := PsIrCheckState.mk
+        [PsIrCheckTask.expression scope fn Option.none false] [] 0 0 0 [] true;
+      let checked := psIrCheckRun options module options.maxSteps initial;
+      if !checked.traversalComplete || !psListIsEmpty checked.tasks then
+        Except.error (PsWasmLowerError.unsupportedExpressionContext owner "computed-call-type-budget")
+      else if !Nat.beq checked.findingCount 0 then
+        let reason : String := match checked.findingsRev with
+          | List.nil => "computed-call-type-invalid"
+          | List.cons finding _ => String.Internal.append "computed-call-type:" finding.code;
+        Except.error (PsWasmLowerError.unsupportedExpressionContext owner reason)
+      else
+        match checked.values with
+        | List.cons value rest =>
+            if psListIsEmpty rest then
+              match value with
+              | PsIrCheckValue.mono type => Except.ok type
+              | _ => Except.error (PsWasmLowerError.unsupportedExpressionContext owner
+                  "computed-call-type-unresolved")
+            else Except.error (PsWasmLowerError.unsupportedExpressionContext owner
+                "computed-call-type-unresolved")
+        | List.nil => Except.error (PsWasmLowerError.unsupportedExpressionContext owner
+            "computed-call-type-unresolved")
 
 def psWasmLowerComputedCallWith
     (profile : PsWasmTargetProfile) (module : PsVerifiedIrModule)
@@ -4418,23 +4427,29 @@ def psWasmLowerComputedCallWith
       Except PsWasmLowerError PsWasmLoweredExpr)
     (state : PsWasmLowerState) (fn : PsVerifiedIrExpr)
     (arguments : List PsVerifiedIrExpr) :
-    Except PsWasmLowerError PsWasmLoweredExpr := do
-  let type <- psWasmCheckComputedCalleeType module bindings state.currentDefinition fn
-  let .function parameterTypes resultType := type
-    | throw (PsWasmLowerError.unsupportedExpressionContext state.currentDefinition
-        "computed-call-not-function")
-  let some closureType := psWasmValueTypeOfIrType? profile type
-    | throw PsWasmLowerError.unsupportedType
-  let callee <- lower (some closureType) state fn
-  let allocated := psWasmAddLocal callee.state closureType
-  let binding := PsWasmBinding.mk "_psc1ComputedCallee" allocated.fst type
-  let applied <- psWasmLowerFunctionValueCall profile lower allocated.snd
-    binding parameterTypes resultType arguments
-  pure {
-    instructions := psListAppend callee.instructions
-      (psListAppend [PsWasmInstruction.localSet allocated.fst] applied.instructions)
-    state := applied.state
-  }
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmCheckComputedCalleeType module bindings state.currentDefinition fn with
+  | Except.error error => Except.error error
+  | Except.ok type =>
+      match type with
+      | PsVerifiedIrType.function parameterTypes resultType =>
+          match psWasmValueTypeOfIrType? profile type with
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some closureType =>
+              match lower (Option.some closureType) state fn with
+              | Except.error error => Except.error error
+              | Except.ok callee =>
+                  let allocated := psWasmAddLocal callee.state closureType;
+                  let binding := PsWasmBinding.mk "_psc1ComputedCallee" allocated.fst type;
+                  match psWasmLowerFunctionValueCall profile lower allocated.snd
+                      binding parameterTypes resultType arguments with
+                  | Except.error error => Except.error error
+                  | Except.ok applied => Except.ok (PsWasmLoweredExpr.mk
+                      (psListAppend callee.instructions
+                        (psListAppend [PsWasmInstruction.localSet allocated.fst] applied.instructions))
+                      applied.state)
+      | _ => Except.error (PsWasmLowerError.unsupportedExpressionContext state.currentDefinition
+          "computed-call-not-function")
 
 def psWasmLowerCallWith
     (profile : PsWasmTargetProfile)
@@ -6421,7 +6436,11 @@ def psWasmLowerSpecializedModule
                         lowered.state.generatedFunctionRefs
                       exports :=
                         psWasmExportsOfDeclarations
-                          module.declarations
+                          module.declarations,
+                      abiMemory := false,
+                      abiMemoryImports := false,
+                      abiGlobalsExport := false,
+                      functionImports := []
                     }
 
 

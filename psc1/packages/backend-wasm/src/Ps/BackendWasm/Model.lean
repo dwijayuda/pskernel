@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Model
+import Ps.Foundation.List
 
 inductive PsWasmWordSize where
   | wasm32
@@ -163,10 +164,10 @@ structure PsWasmModule where
   functions : List PsWasmFunction
   functionRefs : List String
   exports : List (String × String)
-  abiMemory : Bool := false
-  abiMemoryImports : Bool := false
-  abiGlobalsExport : Bool := false
-  functionImports : List PsWasmFunctionImport := []
+  abiMemory : Bool
+  abiMemoryImports : Bool
+  abiGlobalsExport : Bool
+  functionImports : List PsWasmFunctionImport
 
 def psWasmModuleEmpty : PsWasmModule :=
   {
@@ -175,8 +176,12 @@ def psWasmModuleEmpty : PsWasmModule :=
     functionTypes := []
     functions := []
     functionRefs := []
-    exports := []
+    exports := [],
+    abiMemory := false,
+    abiMemoryImports := false,
+    abiGlobalsExport := false,
+    functionImports := []
   }
 
 def psWasmAllFunctions (module : PsWasmModule) : List PsWasmFunction :=
-  (module.functionImports.map (fun item => item.function)) ++ module.functions
+  psListAppend (psListMap (fun (item : PsWasmFunctionImport) => item.function) module.functionImports) module.functions

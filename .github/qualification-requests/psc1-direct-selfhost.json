@@ -1,0 +1,14 @@
+{
+  "schema": "psc1-direct-selfhost-request/1",
+  "branch": "feat/psc1-direct-js-wasm-selfhost-20261024",
+  "parentCommit": "88f5b3aa7c51ad805bcfe463bce91a4d86a4fd69",
+  "action": "qualify-independent-G1-G2-G3",
+  "profile": "correctness-1800s",
+  "targets": [
+    "wasm-core"
+  ],
+  "g2g3TimeoutMs": 1800000,
+  "g1TimeoutMs": 240000,
+  "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
+  "reason": "88f5b3aa source closure passes both grammars; actual Wasm transport and portable encoder proofs/reference tests passed40015318305; execute genuine independent generations."
+}

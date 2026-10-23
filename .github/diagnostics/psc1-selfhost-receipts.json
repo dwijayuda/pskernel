@@ -2,22 +2,23 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "ts-text-lookup-visitor-performance-240s",
+      "id": "ts-immutable-generator-captures-correctness-1800s",
       "target": "ts",
-      "profile": "performance-240s",
-      "sourceCommit": "5b873e2092e59d2ed8add2e1e9cc0bd66620dcd5",
-      "requestCommit": "3d426594a09fcfeba8e4c142976571726e479e99",
-      "runId": 39988689772,
-      "jobId": 120534497240,
-      "artifactId": 12516602859,
-      "artifactDigest": "sha256:5601f1334569fe3880a1a71ed10ae61e19461ef275f091a6822e11af11a8fdd3",
-      "artifactExpiresAt": "2027-01-21T16:40:09Z",
+      "profile": "correctness-1800s",
+      "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+      "runId": 39993829327,
+      "jobId": 120552082576,
       "inspectUtf8TokenWorker": true,
       "inspectCursorCacheHelpers": true,
       "inspectErasureWorkers": true,
       "inspectEncoderWorkers": true,
       "inspectTextLookupWorkers": true,
-      "expectedG1SourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452"
+      "expectedG1SourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+      "inspectGeneratorCapture": true,
+      "artifactId": 12519304338,
+      "artifactDigest": "sha256:21b554aaf2803577727554861ba7fd4800cf90706c6ca6a3c1b665e4c99d8962",
+      "artifactExpiresAt": "2027-01-21T17:17:16Z"
     }
   ]
 }

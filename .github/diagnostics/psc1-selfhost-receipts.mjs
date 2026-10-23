@@ -210,7 +210,26 @@ for(const [name,arity] of Object.entries(arities)){
 
  textLookupWorkers.push(...witnesses);
  }
- const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,cursorCacheHelpers,erasureWorkers,encoderWorkers,textLookupWorkers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
+ const generatorCaptureEvidence=[];
+ if(expected.inspectGeneratorCapture){
+  const receipts=files.filter(f=>f.endsWith('/ts-utf8-views/capture-receipt.json'));
+  assert.equal(receipts.length,1,'missing actual generated capture regression receipt');
+  const receipt=JSON.parse(fs.readFileSync(receipts[0]));
+  assert.equal(receipt.schema,'psc1-ts-generator-iteration-capture/1');
+  assert.equal(receipt.testedCommit,expected.requestCommit);
+  assert.equal(receipt.strictIr,true);assert.equal(receipt.strictTypeScript,true);
+  assert.equal(receipt.comparisons,10);
+  const captureSource=fs.readFileSync(path.join(path.dirname(receipts[0]),'captures.ts'),'utf8');
+  assert.equal(sha(captureSource),receipt.sourceSha256);
+  assert.ok(captureSource.includes('const [step, count, __ps$loop$args$0] = __ps$loop$args$1;'));
+  for(const generation of report.generations){
+   const source=fs.readFileSync(path.join(directory,'G'+generation.generation+'-service','module.js'),'utf8');
+   const snapshots=(source.match(/while\s*\(true\)\s*\{\s*const\s*\[/g)||[]).length;
+   assert.ok(snapshots>0,'actual compiler missing immutable generator iteration snapshots');
+   generatorCaptureEvidence.push({generation:generation.generation,immutableLoopSnapshots:snapshots,receipt});
+  }
+ }
+ const row={generatorCaptureEvidence,...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,cursorCacheHelpers,erasureWorkers,encoderWorkers,textLookupWorkers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);
  console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));

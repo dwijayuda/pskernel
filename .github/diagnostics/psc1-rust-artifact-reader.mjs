@@ -18,5 +18,18 @@ for(const file of files){
    bootstrap:q.bootstrap,status:q.status,generations:q.generations,events:q.events,
    failure:q.failure?.slice(0,500)}));
  }
- if(name==='module.rs'||name==='main.rs')console.log('PSC1_RUST_GENERATED_SOURCE: '+JSON.stringify({file,bytes:bytes.length,sha256:sha(bytes),lines:bytes.toString('utf8').split('\n').length}));
+ if(['module.rs','main.rs','module.ts','module.js','module.d.ts','module.js.map'].includes(name))console.log('PSC1_RUST_GENERATED_SOURCE: '+JSON.stringify({file,bytes:bytes.length,sha256:sha(bytes),lines:bytes.toString('utf8').split('\n').length}));
+}
+
+for(const file of files){
+ const name=path.basename(file);
+ if(name==='tool-events.jsonl')console.log('PSC1_TARGET_TOOL_EVENTS: '+JSON.stringify({file,events:fs.readFileSync(file,'utf8').split('\n').filter(Boolean).map(x=>JSON.parse(x))}));
+ if(name==='G1-bootstrap.candidate.json'){
+  const q=JSON.parse(fs.readFileSync(file,'utf8'));
+  console.log('PSC1_TARGET_RETAINED_CANDIDATE: '+JSON.stringify({status:q.status,target:q.target,
+   sourceClosureDigest:q.sourceClosureDigest,sourceBytes:Buffer.byteLength(q.source||''),sourceSha256:sha(q.source||''),
+   admissionsSha256:sha(q.admissionRequest?.admissions||''),originalIrSha256:sha(JSON.stringify(q.originalIr)),
+   specializedIrSha256:sha(JSON.stringify(q.specializedIr)),publicNames:q.publicNames,
+   originalDeclarations:q.originalIr?.[4]?.length,specializedDeclarations:q.specializedIr?.[4]?.length}));
+ }
 }

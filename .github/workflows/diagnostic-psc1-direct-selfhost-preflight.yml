@@ -21,10 +21,6 @@ jobs:
   source:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [js, wasm-core]
     defaults:
       run:
         shell: bash
@@ -81,13 +77,20 @@ jobs:
           .lake/build/bin/psc1_js_service_tests
           .lake/build/bin/psc1_direct_selfhost_preflight_tests
           node scripts/direct-selfhost-preflight-tests.mjs
-      - name: Census complete owned backend source in both grammars
-        run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
+      - name: Census both complete owned backend closures in both grammars
+        run: |
+          set +e
+          node scripts/generated-target-source-audit.mjs js
+          js_status=$?
+          node scripts/generated-target-source-audit.mjs wasm-core
+          wasm_status=$?
+          test "$js_status" -eq 0 && test "$wasm_status" -eq 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-direct-source-${{ matrix.target }}-${{ github.sha }}
+          name: psc1-direct-source-both-${{ github.sha }}
           path: |
             psc1/dist/direct-selfhost-preflight/
-            psc1/dist/generated-${{ matrix.target }}-compiler/source-audit/
+            psc1/dist/generated-js-compiler/source-audit/
+            psc1/dist/generated-wasm-core-compiler/source-audit/
           retention-days: 90

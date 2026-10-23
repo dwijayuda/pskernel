@@ -1046,13 +1046,16 @@ def psWasmEncodeAbiImport (module : PsWasmModule) (index : Nat)
 
 -- Ordered, fully applied traversal preserves imported function type indices.
 def psWasmEncodeAbiImportsWorker (module : PsWasmModule) (index : Nat)
-    (imports : List PsWasmFunctionImport) : Except PsWasmEncodeError (List UInt8) := do
+    (imports : List PsWasmFunctionImport) : Except PsWasmEncodeError (List UInt8) :=
   match imports with
   | List.nil => Except.ok []
   | List.cons value rest =>
-      let first <- psWasmEncodeAbiImport module index value
-      let other <- psWasmEncodeAbiImportsWorker module (Nat.add index 1) rest
-      Except.ok (psListAppend first other)
+      match psWasmEncodeAbiImport module index value with
+      | Except.error error => Except.error error
+      | Except.ok first =>
+          match psWasmEncodeAbiImportsWorker module (Nat.add index 1) rest with
+          | Except.error error => Except.error error
+          | Except.ok other => Except.ok (psListAppend first other)
 
 def psWasmEncodeAbiImports (module : PsWasmModule) :
     Except PsWasmEncodeError (List UInt8) := do

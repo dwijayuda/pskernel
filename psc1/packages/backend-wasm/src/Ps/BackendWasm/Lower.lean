@@ -4403,7 +4403,7 @@ def psWasmCheckComputedCalleeType
       if !checked.traversalComplete || !psListIsEmpty checked.tasks then
         Except.error (PsWasmLowerError.unsupportedExpressionContext owner "computed-call-type-budget")
       else if !Nat.beq checked.findingCount 0 then
-        let reason := match checked.findingsRev with
+        let reason : String := match checked.findingsRev with
           | List.nil => "computed-call-type-invalid"
           | List.cons finding _ => String.Internal.append "computed-call-type:" finding.code;
         Except.error (PsWasmLowerError.unsupportedExpressionContext owner reason)

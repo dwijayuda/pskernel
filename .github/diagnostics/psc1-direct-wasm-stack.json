@@ -2,14 +2,18 @@
   "schema": "psc1-retained-wasm-stack-diagnosis/1",
   "attempts": [
     {
-      "runId": 40024688133,
-      "requestCommit": "8b01ac30d9e5e03ed394746148bb20a7cebddb2b",
-      "sourceCommit": "e2743316170f800b8ad84533c1da1834773acccd",
-      "artifactId": 12531604458,
-      "artifactDigest": "sha256:6ee8f6ca50c47e6f1184057c64b9a39421b2eb5a2a3a18c1a2561e3092cfb972"
+      "runId": 40026947549,
+      "requestCommit": "6c82fcb45274e8d07016c4683939eac4a994a855",
+      "sourceCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
+      "artifactId": 12533227841,
+      "artifactDigest": "sha256:a5c8d1a582b5a85b8583183b2174805f072b1e9eb7a595e5d6ee96e773e92d6e"
     }
   ],
-  "serviceSha256": "3a71c8b28be13c1160a7acc644ba8d5cc2088d49a6e64b1a3fc28382bace90f9",
-  "requestSha256": "42f05cddda4fe3a44e467d40f0313049c2e02b74e7666a0892918613d62f8a76",
-  "closure": "64b63a7b7ee0d50f609c2ca2e59d7eba6984bde541ab43b99b4f81e67e67747e"
+  "serviceSha256": "da3ebf86ccc0f58cf0517141e491b10f6963bd8b10a7656a6506396b85e7ecaa",
+  "requestSha256": "e8ed29c66a894ea24fd13da32bee270fd1990e87ef6d004b791315c3887e3dd0",
+  "closure": "f1f0b33b4b2c65f471de0ba2eb0c70df04439a78e1b1719cd55aa385777de0f9",
+  "resolveOnly": [
+    1538
+  ],
+  "purpose": "Read-only resolution of exact terminal G2 stack, no compiler execution or qualification."
 }

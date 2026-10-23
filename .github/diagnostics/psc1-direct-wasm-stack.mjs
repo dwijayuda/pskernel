@@ -37,6 +37,16 @@ assert.equal(exports.find(e=>e.name==='psCompilerWasmServiceCandidate').index,ru
 const resolve=index=>index<runtime.length?runtime[index]:names[index-runtime.length]||'generated-closure:'+index;
 const input=path.resolve(root,'G2-self.request.json');assert.equal(sha(fs.readFileSync(input)),request.requestSha256);
 const out=path.resolve('dist/direct-wasm-stack');fs.mkdirSync(out,{recursive:true});
+if(request.resolveOnly){
+ const resolved=request.resolveOnly.map(index=>({index,name:resolve(index),
+  ir:candidate.specializedIr[4][index-runtime.length]}));
+ const receipt={schema:'psc1-retained-wasm-function-map/1',testedCommit:process.env.GITHUB_SHA,
+  source:request,sourceSha256:m.sourceSha256,binarySha256:sha(wasm),exportAnchorsVerified:true,
+  runtimeFunctions:runtime.length,sourceFunctions:names.length,compilerExecution:false,qualification:false,resolved};
+ fs.writeFileSync(path.join(out,'resolved.json'),JSON.stringify(receipt,null,2)+'\n');
+ console.log('PSC1_RETAINED_WASM_FUNCTION_MAP: '+JSON.stringify(receipt));process.exit(0);
+}
+
 const preload=path.join(out,'trace-limit.mjs');fs.writeFileSync(preload,'Error.stackTraceLimit=16384;\n');
 assert.equal(fs.existsSync('.lake/build/bin/psc1_target_service_seed'),false);
 const limits=compilerRequestLimit('performance-240s','G2-self');

@@ -11,7 +11,7 @@ function artifact(target,expected){
 }
 const rust=artifact('rust','ec0b0e6b3ddd90f8bc237e65f581a3e64f850b0d9de00b74a09580bbeee8a8fd');
 const rustSource=fs.readFileSync(path.join(rust.directory,'module.rs'),'utf8');
-for(const name of ['psJsonStringToChars','psJsonStringCharsAccWithFuel','psJsonStringCharsWithFuel','psJsonStringAtEnd','psJsonStringNext','psJsonStringGet']){
+for(const name of ['__psr_psJsonStringCharsAccWithFuel_u36_worker','psJsonStringToChars','psJsonStringCharsAccWithFuel','psJsonStringCharsWithFuel','psJsonStringAtEnd','psJsonStringNext','psJsonStringGet']){
  const lines=rustSource.split('\n').filter(l=>new RegExp('\\bfn '+name+'(?:[<( ])').test(l));
  console.log('PSC1_RUST_OWNED_SOURCE: '+JSON.stringify({name,sourceSha256:sha(rustSource),matches:lines.map(l=>({bytes:l.length,source:l.slice(0,16000)}))}));
 }
@@ -31,7 +31,7 @@ fs.writeFileSync(runner,[
 const directory=path.resolve('diagnosis/execution'),output=path.resolve('diagnosis/unadopted-response.json');
 const r=spawnSync('python3',['.github/diagnostics/bounded-process.py',JSON.stringify({
  command:[process.execPath,'--prof','--logfile='+path.resolve('diagnosis/ts-g2-v8.log'),runner,path.resolve(ts.directory,ts.m.executable),path.resolve(request),output],
- directory,timeoutMs:30000,maxBuffer:32*1024*1024})],{encoding:'utf8',timeout:35000,killSignal:'SIGKILL',maxBuffer:1024*1024});
+ directory,timeoutMs:1000,maxBuffer:32*1024*1024})],{encoding:'utf8',timeout:35000,killSignal:'SIGKILL',maxBuffer:1024*1024});
 assert.equal(r.status,0,r.stderr);ts.verify();rust.verify();
 assert.equal(sha(fs.readFileSync(request)),'5373da197f242582478a55863abb9f15a01154b7775c02ff6b3fde8e38d237e6');
 console.log('PSC1_TS_EXECUTION_SAMPLE: '+JSON.stringify({result:JSON.parse(r.stdout),responseProduced:fs.existsSync(output),qualification:false,adoption:'not-run',admission:'not-run'}));

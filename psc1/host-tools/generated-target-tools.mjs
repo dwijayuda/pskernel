@@ -84,7 +84,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
    'fn main() { '+consumer+' }';
   fs.writeFileSync(path.join(directory,'module.rs'),source);
   fs.writeFileSync(path.join(directory,'main.rs'),source+'\n'+main+'\n');
-  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level=1\n');
+  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level=0\n');
   const locked=path.resolve('scripts/fixtures/selfhost-rust.Cargo.lock');
   // The first diagnostic records the exact resolver output. Once checked in,
   // every subsequent build uses that repository lock without re-resolution.
@@ -102,6 +102,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
  });
  const manifest={schema:'psc1-generated-target-artifact/1',target,sourceSha256:sha(source),
   executable,service,publicNames,files,events,nodeVersion:process.version,
+  rustOptimizationLevel:target==='rust'?0:null,
   compilerVersion:target==='rust'?runTool('rustc',['--version']).stdout.trim():
    runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--version']).stdout.trim()};
  fs.writeFileSync(path.join(directory,'artifact.json'),JSON.stringify(manifest,null,2)+'\n');

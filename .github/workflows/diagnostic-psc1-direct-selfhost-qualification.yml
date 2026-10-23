@@ -10,6 +10,9 @@ concurrency:
   cancel-in-progress: false
 jobs:
   request:
+    # A multi-commit ref fast-forward is a source checkpoint, not a request-only push.
+    # The script below still validates every field/path/parent for actual requests.
+    if: ${{ github.event.commits[1] == null }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:

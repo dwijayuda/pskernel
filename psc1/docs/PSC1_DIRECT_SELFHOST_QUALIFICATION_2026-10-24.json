@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 22:10:00 UTC",
+  "recordedAtUtc": "2026-10-23 22:24:00 UTC",
   "localDate": "2026-10-24",
-  "status": "foundation-proofs-runtime-source-passed-actual-fixed-points-blocked",
+  "status": "direct-dispatch-source-proof-runtime-passed-wasm-running-next-js-request",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -151,24 +151,65 @@
       },
       "latestCpuDiagnosis": {
         "runId": 40031550466,
-        "status": "in_progress",
+        "status": "passed",
         "qualification": false,
-        "source": {
-          "schema": "psc1-direct-generated-profile-request/1",
-          "runId": 40027650302,
-          "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
-          "sourceCommit": "949d687b8977bb1fec3697293818f6d9d07f92a4",
-          "artifactId": 12535705338,
-          "artifactDigest": "sha256:d4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e",
-          "target": "js",
-          "requestId": "G2-self",
-          "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31",
-          "serviceSha256": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
+        "receipt": {
+          "schema": "psc1-direct-generated-cpu-diagnosis/1",
+          "testedCommit": "5b32dcd43b5af2a8fa382bc95571198cce976939",
+          "source": {
+            "schema": "psc1-direct-generated-profile-request/1",
+            "runId": 40027650302,
+            "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
+            "sourceCommit": "949d687b8977bb1fec3697293818f6d9d07f92a4",
+            "artifactId": 12535705338,
+            "artifactDigest": "sha256:d4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e",
+            "target": "js",
+            "requestId": "G2-self",
+            "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31",
+            "serviceSha256": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
+            "requestSha256": "b76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d",
+            "purpose": "Profile exact retained lazy-view G1 compiler on its real failed G2 request; verify actual emitted optimization shape; no qualification/resource changes.",
+            "attempt": 4
+          },
+          "retainedG1": {
+            "sourceSha256": "741e2d2c5e36136f1363a15a6966fa606344c1c59e9afcd7049657abb1d70b60",
+            "artifactSha256": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
+            "independentlyAdmitted": true,
+            "observations": 10
+          },
           "requestSha256": "b76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d",
-          "purpose": "Profile exact retained lazy-view G1 compiler on its real failed G2 request; verify actual emitted optimization shape; no qualification/resource changes.",
-          "attempt": 4
+          "profile": "performance-240s",
+          "samplingOverhead": true,
+          "qualification": false,
+          "nativeDelegation": false,
+          "execution": {
+            "elapsedMs": 240103,
+            "status": null,
+            "signal": "SIGKILL",
+            "error": {
+              "code": "ETIMEDOUT",
+              "message": "process tree exceeded hard deadline"
+            },
+            "maxRssKiB": 2530540,
+            "peakTreeRssKiB": 2530540
+          },
+          "processed": [
+            {
+              "file": "isolate-0x17f61000-2309-v8.log",
+              "status": 0,
+              "error": null
+            }
+          ]
         },
-        "emissionShapeAudit": true
+        "actualEmissionShape": {
+          "bytes": 7257030,
+          "generators": 8429,
+          "generatorLetWrappers": 3889,
+          "lazyViewGetters": 6,
+          "invokeSites": 12171,
+          "tailInvokeSites": 3693
+        },
+        "stringEqualAllTicksPercent": 0.1
       }
     },
     "wasm": {
@@ -212,19 +253,29 @@
     }
   },
   "focusedGate": {
-    "commit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5",
-    "productionCommit": "9530b5ee47d85a7d40a54a1b9b999d91080406d8",
-    "runId": 40031387906,
-    "jobId": 120680537575,
+    "commit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
+    "productionDispatchCommit": "3b5a9b9ad16ad3d400f28c50377962609092ee76",
+    "runId": 40032762325,
+    "jobId": 120684793164,
     "status": "passed",
     "foundationApiEqualities": 6,
     "foundationSmokeSize": 100000,
-    "erasureIndexApiEqualities": 3,
+    "erasureApiEqualities": 3,
     "genericErasureFoldEquality": true,
     "checkedSpineEqualities": 3,
     "ordinaryWorkerEquality": true,
     "prefixEqualities": 51,
     "containsSorry": false,
+    "dispatchComparisons": 64,
+    "registeredCallLookups": {
+      "retained": 40,
+      "current": 20
+    },
+    "delegatedSites": {
+      "retained": 35,
+      "current": 0
+    },
+    "allPriorRuntimeAndRefusalGates": "passed",
     "sourceCensus": {
       "js": 87,
       "wasm": 98,
@@ -233,8 +284,7 @@
         "ps"
       ],
       "refused": []
-    },
-    "allPriorRuntimeAndRefusalGates": "passed"
+    }
   },
   "currentAttempt": {
     "status": "no-active-generation-request-after-terminal-failures",
@@ -895,10 +945,35 @@
       },
       "ownedWasmEngine": true,
       "allPriorRegressionGates": "passed"
+    },
+    {
+      "commit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5",
+      "productionCommit": "9530b5ee47d85a7d40a54a1b9b999d91080406d8",
+      "runId": 40031387906,
+      "jobId": 120680537575,
+      "status": "passed",
+      "foundationApiEqualities": 6,
+      "foundationSmokeSize": 100000,
+      "erasureIndexApiEqualities": 3,
+      "genericErasureFoldEquality": true,
+      "checkedSpineEqualities": 3,
+      "ordinaryWorkerEquality": true,
+      "prefixEqualities": 51,
+      "containsSorry": false,
+      "sourceCensus": {
+        "js": 87,
+        "wasm": 98,
+        "grammars": [
+          "lean",
+          "ps"
+        ],
+        "refused": []
+      },
+      "allPriorRuntimeAndRefusalGates": "passed"
     }
   ],
-  "nextRequestedTarget": "wasm-core",
-  "nextJsSourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
+  "nextRequestedTarget": "js",
+  "nextJsSourceCommit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
   "erasureStackMap": {
     "schema": "psc1-retained-wasm-function-map/1",
     "testedCommit": "203ac9781bc76b9613da32cc29d6896a5987513b",
@@ -1512,7 +1587,18 @@
     "scope": "85433830 tree only; subsequent child source needs full CI"
   },
   "nextWasmSourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
-  "activeAttempts": [],
+  "activeAttempts": [
+    {
+      "target": "wasm-core",
+      "sourceCommit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5",
+      "requestParent": "ef06b357723b2265759dccb955c1575a1bbb78bf",
+      "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
+      "runId": 40031965458,
+      "jobId": 120682317187,
+      "status": "in_progress",
+      "fixedPoint": "not-yet-established"
+    }
+  ],
   "diagnosticSpineInventory": {
     "runId": 40029584741,
     "compilerExecution": false,

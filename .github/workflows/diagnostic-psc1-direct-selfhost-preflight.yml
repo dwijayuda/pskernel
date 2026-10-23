@@ -10,6 +10,7 @@ on:
       - psc1/host-tools/generated-target-profiles.mjs
       - psc1/test/DirectSelfHostPreflightTests.lean
       - psc1/test/WasmBinary*.lean
+      - psc1/test/WasmPrefix*.lean
       - psc1/test/JsStatement*.lean
       - psc1/scripts/js-statement-tests.mjs
       - psc1/scripts/direct-selfhost-preflight-tests.mjs

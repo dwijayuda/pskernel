@@ -26,9 +26,9 @@ def psWasmTypingHeapSubtypeWithFuel
   match remainingFuel with
   | Nat.zero => fun (_actual : String) => fun (_expected : String) => false
   | Nat.succ fuel =>
-      let smaller : String -> String -> Bool := psWasmTypingHeapSubtypeWithFuel module fuel;
       fun (actual : String) =>
         fun (expected : String) =>
+          let smaller : String -> String -> Bool := psWasmTypingHeapSubtypeWithFuel module fuel;
           if psStringEq actual expected then true
           else
             match psWasmIrFindStructure module.structures actual with
@@ -71,8 +71,8 @@ def psWasmTypingFieldsMatch
   match parents with
   | List.nil => fun (_fields : List PsWasmStructField) => true
   | List.cons parent rest =>
-      let smaller : List PsWasmStructField -> Bool := psWasmTypingFieldsMatch module rest;
       fun (fields : List PsWasmStructField) =>
+        let smaller : List PsWasmStructField -> Bool := psWasmTypingFieldsMatch module rest;
         match fields with
         | List.nil => false
         | List.cons field tail =>
@@ -86,9 +86,9 @@ def psWasmTypingValidateParents
   match structures with
   | List.nil => fun (_previous : List PsWasmStructType) => Except.ok Unit.unit
   | List.cons structType rest =>
-      let smaller : List PsWasmStructType -> Except PsWasmIrValidationError Unit :=
-        psWasmTypingValidateParents module rest;
       fun (previous : List PsWasmStructType) =>
+        let smaller : List PsWasmStructType -> Except PsWasmIrValidationError Unit :=
+          psWasmTypingValidateParents module rest;
         match structType.superType with
         | Option.none => smaller (List.cons structType previous)
         | Option.some name =>
@@ -105,8 +105,8 @@ def psWasmTypingNth {alpha : Type} (values : List alpha) : Nat -> Option alpha :
   match values with
   | List.nil => fun (_index : Nat) => Option.none
   | List.cons value rest =>
-      let smaller : Nat -> Option alpha := psWasmTypingNth rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option alpha := psWasmTypingNth rest;
         match index with
         | Nat.zero => Option.some value
         | Nat.succ preceding => smaller preceding
@@ -157,7 +157,7 @@ def psWasmTypingPushValues (types : List PsWasmValueType) :
   match types with
   | List.nil => fun (state : PsWasmTypingState) => state
   | List.cons type rest =>
-      let smaller : PsWasmTypingState -> PsWasmTypingState := psWasmTypingPushValues rest;
+                                         let smaller : PsWasmTypingState -> PsWasmTypingState := psWasmTypingPushValues rest;
       fun (state : PsWasmTypingState) => smaller (psWasmTypingPush (PsWasmOperandType.value type) state)
 
 def psWasmTypingPop (state : PsWasmTypingState) :
@@ -184,9 +184,9 @@ def psWasmTypingPopReversed
   match types with
   | List.nil => fun (state : PsWasmTypingState) => Option.some state
   | List.cons type rest =>
-      let smaller : PsWasmTypingState -> Option PsWasmTypingState :=
-        psWasmTypingPopReversed module rest;
       fun (state : PsWasmTypingState) =>
+        let smaller : PsWasmTypingState -> Option PsWasmTypingState :=
+          psWasmTypingPopReversed module rest;
         match psWasmTypingPopValue module type state with
         | Option.none => Option.none
         | Option.some next => smaller next
@@ -395,9 +395,9 @@ def psWasmTypingRepeatPop
   match count with
   | Nat.zero => fun (state : PsWasmTypingState) => Option.some state
   | Nat.succ remaining =>
-      let smaller : PsWasmTypingState -> Option PsWasmTypingState :=
-        psWasmTypingRepeatPop module type remaining;
       fun (state : PsWasmTypingState) =>
+        let smaller : PsWasmTypingState -> Option PsWasmTypingState :=
+          psWasmTypingRepeatPop module type remaining;
         match state.operands with
         | List.nil =>
             if state.unreachable then Option.some state else Option.none
@@ -682,9 +682,9 @@ def psWasmTypingInstructions
   match instructions with
   | List.nil => fun (state : PsWasmTypingState) => Option.some state
   | List.cons instruction rest =>
-      let smaller : PsWasmTypingState -> Option PsWasmTypingState :=
-        psWasmTypingInstructions module function locals rest;
       fun (state : PsWasmTypingState) =>
+        let smaller : PsWasmTypingState -> Option PsWasmTypingState :=
+          psWasmTypingInstructions module function locals rest;
         match psWasmTypingInstruction module function locals instruction state with
         | Option.none => Option.none
         | Option.some next => smaller next

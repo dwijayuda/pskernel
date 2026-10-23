@@ -43,9 +43,9 @@ def psWasmEncodeUlebWithFuel
   | 0 =>
       fun (_value : Nat) => List.nil
   | fuel + 1 =>
-      let smaller : Nat -> List Nat :=
-        psWasmEncodeUlebWithFuel fuel;
       fun (value : Nat) =>
+        let smaller : Nat -> List Nat :=
+          psWasmEncodeUlebWithFuel fuel;
         let low := Nat.mod value 128;
         let rest := Nat.div value 128;
         if Nat.beq rest 0 then
@@ -64,9 +64,9 @@ def psWasmEncodeSlebWithFuel
   | 0 =>
       fun (_value : Int) => List.nil
   | fuel + 1 =>
-      let smaller : Int -> List Nat :=
-        psWasmEncodeSlebWithFuel fuel;
       fun (value : Int) =>
+        let smaller : Int -> List Nat :=
+          psWasmEncodeSlebWithFuel fuel;
         let lowInt := psWasmIntEModNat value 128;
         let low := psWasmIntToNat lowInt;
         let rest := psWasmIntEDivNat value 128;
@@ -118,10 +118,10 @@ def psWasmStringToListFromWithFuel
         fun (_position : Nat) =>
           List.nil
   | Nat.succ fuel =>
-      let smaller : String -> Nat -> List Char :=
-        psWasmStringToListFromWithFuel fuel;
       fun (source : String) =>
         fun (position : Nat) =>
+          let smaller : String -> Nat -> List Char :=
+            psWasmStringToListFromWithFuel fuel;
           if
               String.Internal.atEnd
                 source
@@ -200,9 +200,9 @@ def psWasmFindStructureIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons structType rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindStructureIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindStructureIndexWorker name rest;
         if psStringEq structType.name name then
           Option.some index
         else
@@ -227,9 +227,9 @@ def psWasmFindArrayIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons arrayType rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindArrayIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindArrayIndexWorker name rest;
         if psStringEq arrayType.name name then
           Option.some index
         else
@@ -302,9 +302,9 @@ def psWasmFindFunctionTypeIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons functionType rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindFunctionTypeIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindFunctionTypeIndexWorker name rest;
         if psStringEq functionType.name name then
           Option.some index
         else
@@ -389,9 +389,9 @@ def psWasmFindFunctionIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons function rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindFunctionIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindFunctionIndexWorker name rest;
         if psStringEq function.name name then
           Option.some index
         else
@@ -907,10 +907,10 @@ def psWasmEncodeFunctionTypeIndicesAcc
       fun (_functionIndex : Nat) =>
         fun (reversed : List Nat) => Except.ok (psListReverse reversed)
   | List.cons function rest =>
-      let smaller : Nat -> List Nat -> Except PsWasmEncodeError (List Nat) :=
-        psWasmEncodeFunctionTypeIndicesAcc structures arrays functionTypes rest;
       fun (functionIndex : Nat) =>
         fun (reversed : List Nat) =>
+          let smaller : Nat -> List Nat -> Except PsWasmEncodeError (List Nat) :=
+            psWasmEncodeFunctionTypeIndicesAcc structures arrays functionTypes rest;
           match psWasmFunctionTypeIndex structures arrays functionTypes functionIndex function with
           | Except.error error => Except.error error
           | Except.ok typeIndex =>

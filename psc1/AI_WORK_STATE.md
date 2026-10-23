@@ -268,3 +268,24 @@ carrier/reference tests and bounded raw metadata refusal tests.
 Actual next Wasm request0300717161765ff939a2500d293ca1d985dd6513 uses that
 unchanged98-module Wasm closure. Its independent qualification is in progress;
 subsequent JS-only code does not alter that source closure.
+
+## Wasm G1 execution and recursive-prefix defect class
+
+Request03007171/run40018496394 passes source census, produces an independently
+admitted bootstrap candidate and3076 monomorphic declarations, and executes
+G1-lean-modules compilation/observation in actual Wasm. Full G1 remains
+unqualified: G1-ps-integer-unicode traps with RangeError at function2073 after251ms/
+94152KiB. NoG2/G3. Closureffd66a33dad58930521c072fbbb2e790fbe7bb5af73bed1eb5e1f8c84cf60a22;
+service artifact8bafa750a94b1c58e18534c3c8a61e3170dc8b1ea41c9c90fe2dbae26bfdedc5.
+
+Source diagnosis identifies eager recursive-prefix construction before dynamic
+input binders. Nat literal lowering uses value+1 fuel; constructing all fuel
+prefixes before inspecting the value makes large integer compilation exhaust
+the stack. The same class occurs in48 backend workers across Nat/String literal
+lowering, type collection, lowering, validation and binary encoding. Move each
+recursive-prefix binding beneath its existing input binders, after checking
+capture safety. APIs, recursion/fuel and all leaf results remain unchanged.
+48 retained-definition all-input equality theorems and huge unused fuel/zero,
+2001-bit literal,primitive type and empty String smoke cases are required in
+the Linux gate. These tests and the DirectJS generator statement regressions
+are pending; no fixed point claim or resource-policy extension.

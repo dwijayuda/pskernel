@@ -38,9 +38,9 @@ def psWasmIrTypeKeyWithFuel
   | 0 =>
       fun (_type : PsVerifiedIrType) => Option.none
   | fuel + 1 =>
-      let smaller : PsVerifiedIrType -> Option String :=
-        psWasmIrTypeKeyWithFuel fuel;
       fun (type : PsVerifiedIrType) =>
+        let smaller : PsVerifiedIrType -> Option String :=
+          psWasmIrTypeKeyWithFuel fuel;
         match type with
         | .unknown => Option.none
         | .typeParameter _ => Option.none

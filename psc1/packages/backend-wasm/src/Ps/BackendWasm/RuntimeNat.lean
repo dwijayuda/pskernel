@@ -626,9 +626,9 @@ def psWasmNatLiteralInstructionsWithFuel
       fun (_value : Nat) =>
         [PsWasmInstruction.structNew psWasmNatZeroName]
   | fuel + 1 =>
-      let smaller : Nat -> List PsWasmInstruction :=
-        psWasmNatLiteralInstructionsWithFuel fuel;
       fun (value : Nat) =>
+        let smaller : Nat -> List PsWasmInstruction :=
+          psWasmNatLiteralInstructionsWithFuel fuel;
         if Nat.beq value 0 then
           [PsWasmInstruction.structNew psWasmNatZeroName]
         else

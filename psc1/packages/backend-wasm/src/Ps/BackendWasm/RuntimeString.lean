@@ -108,12 +108,12 @@ def psWasmStringLiteralChunksWithFuel
         psListReverse
           (psWasmStringLiteralFinishChunk byteCount charCount hasPrevious instructionsRev)
   | Nat.succ remaining =>
-      let smaller :
-          String -> Nat -> Nat -> Nat -> Bool ->
-          List PsWasmInstruction -> List PsWasmInstruction :=
-        psWasmStringLiteralChunksWithFuel remaining;
       fun (value : String) (position : Nat) (byteCount : Nat) (charCount : Nat)
           (hasPrevious : Bool) (instructionsRev : List PsWasmInstruction) =>
+        let smaller :
+            String -> Nat -> Nat -> Nat -> Bool ->
+            List PsWasmInstruction -> List PsWasmInstruction :=
+          psWasmStringLiteralChunksWithFuel remaining;
         if String.Internal.atEnd value (String.Pos.Raw.mk position) then
           psListReverse
             (psWasmStringLiteralFinishChunk byteCount charCount hasPrevious instructionsRev)

@@ -75,7 +75,17 @@ if(request.resolveOnly){
   runtimeFunctions:runtime.length,sourceFunctions:names.length,compilerExecution:false,qualification:false,resolved,recursiveListSpines,
   inventoryScope:'heuristic explicit saturated non-tail self calls with changed List parameters; no execution/performance claim'};
  fs.writeFileSync(path.join(out,'resolved.json'),JSON.stringify(receipt,null,2)+'\n');
- console.log('PSC1_RETAINED_WASM_FUNCTION_MAP: '+JSON.stringify(receipt));process.exit(0);
+ const inventorySummary={schema:receipt.schema,testedCommit:receipt.testedCommit,
+  source:receipt.source,sourceSha256:receipt.sourceSha256,binarySha256:receipt.binarySha256,
+  exportAnchorsVerified:true,compilerExecution:false,qualification:false,
+  resolved:resolved.map(({index,name})=>({index,name})),totalCandidates:recursiveListSpines.length,
+  inventoryScope:receipt.inventoryScope,
+  declarationSpines:recursiveListSpines.filter(r=>r.listParameters.some(p=>/PsDeclaration|PsVerifiedIrDeclaration/.test(JSON.stringify(p[1]))))
+    .map(r=>({index:r.index,name:r.name,listParameters:r.listParameters.map(p=>p[0]),sites:r.nonTailSelfSites,bodyBytes:r.bodyBytes})),
+  otherFirst60:recursiveListSpines.filter(r=>!r.listParameters.some(p=>/PsDeclaration|PsVerifiedIrDeclaration/.test(JSON.stringify(p[1]))))
+    .slice(0,60).map(r=>({index:r.index,name:r.name,sites:r.nonTailSelfSites}))};
+ fs.writeFileSync(path.join(out,'inventory-summary.json'),JSON.stringify(inventorySummary,null,2)+'\n');
+ console.log('PSC1_RETAINED_WASM_FUNCTION_MAP: '+JSON.stringify(inventorySummary));process.exit(0);
 }
 
 const preload=path.join(out,'trace-limit.mjs');fs.writeFileSync(preload,'Error.stackTraceLimit=16384;\n');

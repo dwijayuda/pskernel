@@ -47,14 +47,16 @@ Rust release optimization level 1 is an explicit reproducible build profile;
 type/borrow checking, locked dependencies and all runtime qualification remain.
 The source, toolchain and profile are recorded. Level 3 build performance and
 whole-file formatting are measured defects, not grounds for larger limits.
-Initial Rust resolver output must be captured and committed as a reviewed lock
-before any reproducibility qualification claim. Historical DirectJS evidence
+The exact reviewed Cargo lock is committed (SHA256
+4d375c97eebc30fce378df900dd76bdd2cb9d82ce7619f50fb7ab3161f8e576d). Historical DirectJS evidence
 is retained; no Rust-vs-TS performance conclusion is assumed before measurement.
 
 ## Acceptance and boundary
 
-The initial implementation is unqualified until Linux CI actually completes.
-A green build or native source closure is not G1 execution or self-hosting.
+Rust and TypeScript G1 now genuinely execute and pass the frozen ten-case
+corpus. Exact current sources/runs and the fully qualified seven-backend
+baseline are in PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json.
+A green build or native source closure alone is not G1 execution or self-hosting.
 A ten-case G1 pass is not G2/G3. Exact generations and fixed-point evidence are
 required independently for each target; neither substitutes for the other.
 Retain all seven Practical Core backends and frozen 37-criterion qualification.
@@ -65,3 +67,10 @@ Linux process-tree supervision retains the 240000 ms child deadline and 32 MiB
 per-stream cap, with SIGKILL for descendants and negative OS-level tests. The
 245000 ms outer supervisor guard is cleanup only. Incremental candidate/case
 checkpoints survive job interruption; each manual target job remains 15 minutes.
+
+Source/graph/IR fixed points and native build-product bit equality are distinct.
+The current controller asserts source, admission, IR and observation identities;
+record repeated clean Rust executable and TS emitted-product identities before
+claiming binary reproducibility. No G2/G3 or final reproducibility claim currently
+passes. Later backend and shared cursor candidates remain isolated until reviewed
+and normally qualified on the integrated source.

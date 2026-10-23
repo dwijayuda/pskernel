@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "ts-scalar-closed-workers-20261023",
+  "id": "ts-closed-lexer-token-accumulator-20261023",
   "branch": "fix/psc1-ts-generator-result-types-20261023",
-  "parentCommit": "eeba9fadcee74bdcd6f98a74db71d81eea03fa56",
+  "parentCommit": "b59100045fca5c3157858de3aa0eee2316e0612d",
   "targets": [
     "ts"
   ],

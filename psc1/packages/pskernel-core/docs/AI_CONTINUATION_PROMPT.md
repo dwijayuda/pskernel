@@ -1,3 +1,33 @@
+## Portable syntax correction after63ce native PASS / small PSC1 parse FAIL
+
+Source63ce4521744f5f01f570b45b63f8c72f44691761/run39894656919:
+native120222174006 PASS81proofs,including seven exact hash lemmas and allfive
+unchanged original statements. Allowed axiom union onlypropext/Classical.choice/
+Quot.sound;2730cases,three longcases,294requests377metadata,all6authentic
+nativeString samples and retainednative/official/DAG/sessioncontrols PASS.
+Artifact12475284802 ZIP105561bytes SHA256
+572c823d2f1ff292bc501c0c3feffdadabf99d56a25c42c88f1d6ea54c08e6e8.
+Full81proofrows/filehashes: evidence/2026-10-23-t01f-two-transition-native.json.
+
+Generated120222740879 FAILED in SMALL ScalarHash source parsing:
+PSC1_PROJECT_PARSE_FAILED ScalarHash.lean42:17 expected'=>',got'.'.
+PSC1 cannot parse the nested constructor pattern Nat.succ Nat.zero; no small
+generatedmatrix/shapegate,completeSelfHostcheck,fullbuild or runtime executed.
+Do not count this as a generated semantic or performance pass.
+
+This NEW source expresses exactly the same two-transition recurrence with
+nested matches whose patterns are simple Nat.zero / Nat.succ binder.
+No compiler/backend edit,no proof-statement change,no resources/assertion
+change. All native proofs/finite and generated gates rerun at this source.
+Keep the one-helper/one-recursive-invoke/zero-staging/zero-StepMix/
+threeprimitive-transitions/atmost2structuralblocks bounded criterion.
+One next task: nativefirst success,then small actual PSC1 source/value/shape
+gate before fullSelfHost build,and complete unchanged mixed/controls.
+All5full pushes remain paused;currentA/T01F/B/D OPEN,C FAIL,historicalA9c87;
+integration123c411 unchanged,noT05 yet. Preserve both prior failures below.
+
+---
+
 ## Native proof elaboration correction afterb4d6
 
 Candidateb4d6b6825fb06ded08a6dffab8c74985ccf4545c/run39894299060:

@@ -1,28 +1,24 @@
-# Isolated Rust ownership correction
+# Rust ownership prototype
 
-Base: ea10eff9b3de063941c6029bb6c821f9cc10cc3f (PR #172 source lineage).
-The main branch's all-seven qualification continues unchanged while this
-prototype is checked on fix/psc1-rust-owned-string-moves-20261023. No merge or publication is authorized.
+This isolated branch follows exact generated compiler evidence. It uses the same
+production emitter, checked IR, source closure and independent qualification.
 
-Exact G1 in run 39880803794 passes all ten frozen cases. G2 request SHA256
-cd614f55803117ab2a696bcb8e12e9f4940ee1d0f5fcb70a1a1b28d208806aeb times out.
-Diagnostic 39882471895 at c380c7e899fe7d156443c73b43208ab0ecb6936e samples
-the identical executable/request after 12 and 60 seconds. Both stacks are in
-String::clone/memcpy in psJsonStringToChars, before frontend elaboration.
-Neither diagnostic response is adopted or admitted.
+Ordinary expression emission already yields owned values; preserve grouping
+while removing redundant clones of computed values. Exact monomorphic ordered
+String intrinsic forwarding wrappers borrow initialized locals. Tail exits
+evaluate all changing arguments before moving unique, unshadowed String locals.
+Scope-aware last-use lets transfer renamed worker parameters without copying;
+capture-analysis exhaustion or a live original binding conservatively refuses.
+Duplicate roots and shadows retain ordinary cloning.
 
-The correction moves unchanged, initialized, unshadowed String parameters
-back into direct tail-loop state after evaluating every changing argument.
-Captured aliases retain their old path. Exact monomorphic forwarding wrappers
-around eager String intrinsics may use the existing borrowed intrinsic path:
-ordered parameter forwarding only, no local callable shadow or type arguments.
-Ordinary expression results are already owned; fresh rvalues no longer receive
-an additional Clone. Ordinary operand emission, fuel/errors and all strict
-IR/admission/unsupported-ABI checks remain.
+Retained old Expr/Tail emitters and generated Rust runtime comparisons cover
+Unicode, argument ordering, duplicate values, aliases, retained originals,
+captures, lexical shadows and reserved names. Mechanism timings are not full
+compiler qualification. Both owned source grammars must pass before generation.
+Use unchanged official Lean admission, strict IR, frozen ten-case corpus and
+resource limits. No private ABI/runtime changes or stack increase are included.
 
-Tests retain the prior expression/tail emitters, compare actual old/current
-generated Rust, cover shadowing, computed arguments, reserved identifiers,
-wrong arity and fuel refusal, and retain the fixed 60000-byte/100000-step
-Unicode workload. Actual G1/G2/G3 remains separately required with the same
-240000 ms child, 32 MiB stream and 15-minute job limits. This prototype is
-unqualified until Linux evidence says otherwise.
+Run 39886083977 passes G1, then aborts G2 with stack overflow; 39888964045 is
+qualifying the last-use correction. Check actual terminal results before claims.
+Main normal CI 39887884270 concerns the separate integrated TS annotation source.
+No prototype integration, merge or publication is authorized by these results.

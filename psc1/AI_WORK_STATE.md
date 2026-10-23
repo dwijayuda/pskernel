@@ -1,197 +1,187 @@
+# PSC1 isolated Rust ownership candidate
+
+This branch is `fix/psc1-rust-owned-string-moves-20261023`. It is not the
+qualified PR #172 branch. Main active source is
+`d0bef34de7d5d3c495f2a4a73af7eccd892d0d74`; normal run 39887884270 is
+in progress (all preceding selected jobs pass; full job 120204483917 pending).
+
+Current Rust source correction `8b51aba80f35c1435b4c97301541d427a22317e82`;
+request `2526e314666b7d22c99e7f5d65fd0c478ddbc4cb`, run 39888964045,
+job 120203827425, is executing actual generations at this recording.
+Native old/current guards, both complete source audits and runtime fixtures
+must remain prerequisites. No current G2/G3 success is claimed.
+
+Earlier request f037377574124cf7a374d627f0c57e4a855e09e5/run 39886083977
+passes all ten G1 cases, then G2 aborts with stack overflow at 103782 ms.
+Artifact 12472902085 preserves exact source, graph, request, executable and
+receipts (digest 7f0e6e3f12c103b36290c0c5cec12aa5e8c5293a01f5f8e77888dda5b019341e).
+
+Exact emitted-source diagnosis 39888268398 shows the first move guard missed
+fused worker aliases: a synthetic String parameter is cloned into `value`,
+then cloned again on the tail exit. The correction transfers last-use let
+bindings using the existing scope-aware capture analysis, and moves unique
+unshadowed checked String arguments after every changing argument is evaluated.
+Duplicate argument roots, live original bindings, captures, unknown locals,
+shadowing and analysis exhaustion refuse movement. New old/current generated
+Rust fixtures cover renamed and retained bindings in addition to Unicode,
+argument order, duplicates and reserved names. No allocator/stack/fuel/resource
+limit changes. Do not invent a destructor diagnosis from a timeout sample.
+
+Prior source-only/native result 39888673324 passes all guards/runtime comparisons
+but owned syntax refuses compound constructor patterns at Tail:76:57.
+Explicit portable nested matches fix the whole pattern class; latest run audits
+both grammars again. A failed generation attempt is now terminally marked failed
+in incremental receipts.
+
+Next: query 39888964045 terminal evidence; diagnose the exact remaining failure,
+complete actual G1/G2/G3/fixed points, then review and integrate via non-force
+expected-HEAD commit and fresh full seven-backend qualification. Keep this branch
+isolated until evidence supports promotion. Never merge or publish.
+
+---
+The active branch checkpoint below is context, not qualification of this branch.
+
 # PSC1 active work state
 
-## Active Rust and TypeScript priority pivot (2026-10-23)
+Updated 2026-10-23. Draft PR [#172](https://github.com/dwijayuda/pskernel/pull/172),
+branch `fix/psc1-closure-normalization-20261021`. Use connected GitHub tools
+and Linux Actions only. Fetch latest remote HEAD before every non-force,
+expected-HEAD update. Preserve concurrent history. No merge or npm publication
+is authorized.
 
-Rust and TypeScript now lead actual self-hosting qualification. DirectJS stays
-working as a reference/regression; further DirectJS-specific G2 tuning is not
-prioritized. Existing successful and failed evidence below remains historical.
-The compiler source/front end/elaborator/checked IR/admission are shared through
-Ps.Compiler.Service; target facades use existing production emitters. New manual
-Linux matrix qualification seeds once per target, then requires actual target
-execution, all ten frozen cases and independent G1/G2/G3 source/graph/IR fixed
-points without native compiler delegation. No current Rust/TS generation is
-claimed qualified before CI. Resources, official Lean, all-seven Practical Core
-coverage and publication restrictions remain unchanged. Architecture and exact
-execution procedure: docs/PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md (roadmap-relative:
-PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md). First Linux attempt 39875143168 at cda5478553c78eda834a919a2a85f5229d989691
-builds both facades and passes all host negatives/DirectJS scalar tests. No G1:
-Rust facade parse refusal; TS Expr context visitor elaboration refusal at 522:1.
-Corrections bind the Rust runtime plan before projection and retain TS recursive
-arity through a single named worker; an all-input native equality is added.
-Both-grammar exact closure audit now precedes generation.
-Run 39875554029 stopped at the added proof; no generation ran. Run 39875938564
-proves the context visitor equality, then both grammar audits identify native
-open directives in target facades and native do/Option syntax in TS Module.
-The facades now use qualified names; the module helpers use explicit portable
-matches/list helpers. Tests retain old helpers and compare output/runtime choices.
-Artifact/source identity checks and the reviewed Rust lock requirement are tightened. Run 39876380647 stopped on a new fixture's Bool constructor, corrected at
-02e2b6c2714e7b5e727816e9f57e23cfb15b2c2d. Run 39876683792 at
-5176635e0656aed9d937ba13783d8d5b82b0e8b1 proves the visitor equality and all
-264 old/new TS module output/runtime comparisons. Rust passes both 92-module
-grammar audits, emits a full compiler candidate and independently admits it;
-Cargo then reaches ENOBUFS (32 MiB diagnostics), so no G1 executes. Preserve
-artifact 12468503739 (sha256 549e18247437786702b88164be9bede201491f3a580529d18e64ed12027b2b32).
-TS audit identifies one shorthand constructor at Module:731:20; normalized.
-Rust now uses the existing rustfmt target formatting before cargo, without
-suppressing warnings or changing the 32 MiB/240000 ms resource bounds.
-Read-only diagnostic 39877244232 (af235af31b98d626e28d37a7796cfb7705d04bd9)
-confirms 1935 warnings and no Rust errors in the bounded prior log. The exact
-recorded Cargo lock is now committed (sha256 4d375c97eebc30fce378df900dd76bdd2cb9d82ce7619f50fb7ab3161f8e576d),
-including num-bigint 0.4.6 / num-traits 0.2.19 and checksummed transitives.
-TS audit 39877162580 accepts parsing, then identifies an untyped local match
-in psTsEmitInductiveWithVisibility at 162:1. An explicit String annotation and
-a native definitional-equality proof preserve its exact result. No Rust or TS
-G1/G2/G3 execution is qualified yet. Run 39877162580/Rust job 120165435405 subsequently reaches rustfmt ETIMEDOUT
-at 240103 ms before cargo. Failed artifact 12468649397 retains that exact source.
-The self-host tool now compiles raw emitted source with cargo --message-format=short;
-all diagnostics remain, including errors, at the same 32 MiB bound. Per-tool
-start/completion timing is durable. Normal production formatting remains intact;
-large compiler output readability is a separate pending backend task, not an
-excuse to change source semantics or resource limits. Run 39877740380/TS job 120167646244 reaches its 15-minute job bound after the
-G1 candidate (no executing generation is claimed). Soft single-process timeout
-was insufficient for the target process tree. Linux supervision now enforces
-SIGKILL for the whole group at the same 240000 ms child deadline and 32 MiB per
-stream; the 245000 ms outer supervisor guard allows cleanup only. Tests cover
-ignored TERM, exited parents/inherited pipes, and output overflow. Exact source,
-bootstrap, service artifact and completed-case evidence is written incrementally.
-New explicit requests cancel superseded requests; source/docs alone still never
-run G2/G3. Existing runs/history/artifacts remain. Run 39879776319 at 6b0d40a43a99182b8008820ebe58d475efb093b7 passes all
-process-tree regressions. Both candidates are emitted/admitted, then TS strict
-compilation is killed at 240008 ms and Cargo release build at 240003 ms. No G1
-executable/corpus pass is claimed. Compiler source TS/Rust emitted sizes at the
-preceding checkpoint are 7507069/7693081 bytes. New target profiles retain TS's
-existing supported generic IR (instead of unnecessary closed specialization)
-and use Rust release opt-level=1, keeping strict checks, exact pinned tools and
-all resource bounds. Next: execute the new manual matrix,
-fix target/source blockers as classes, capture exact tool/runtime evidence and
-complete fresh normal qualification after compiler changes.
+## Latest candidate and verified compiler checkpoint
 
+TypeScript generator result annotations are being integrated from isolated source
+`535f1c3927622c4ed1a23bde67f2bb96cbc2c226`. Run 39887064597 at request
+`a0a0a92f39deb7ff3c9336f41dc6ebcb681ae1d1` passes the all-input legacy
+context equality, 264 old/current comparisons, both full source grammar audits,
+strict TypeScript compilation and all ten actual G1 corpus cases. G2 times out
+at 240091 ms; G3/fixed point remain unqualified. Fresh normal seven-backend
+qualification is required for the integrated source; the previous normal pass
+below remains the verified baseline.
 
-Updated 2026-10-23 (Asia/Jakarta). Draft PR #172:
-https://github.com/dwijayuda/pskernel/pull/172
-Branch: fix/psc1-closure-normalization-20261021.
-Use connected GitHub and Linux Actions only; no local checkout/files/build/tests.
-Fetch remote HEAD before expected-HEAD, non-force updates. Preserve history.
-Merge and registry publication require separate authorization.
+## Verified previous compiler checkpoint
 
-## Latest candidate and qualification
+Source/profile commit `76bf4120de83bf776a4e790672f7b2d0198e25db`;
+qualified branch HEAD `ea10eff9b3de063941c6029bb6c821f9cc10cc3f`;
+tested merge `4e5f4d2c8c90178aa7cf301717004cfc6182596f`.
+[Normal Linux run 39880807914](https://github.com/dwijayuda/pskernel/actions/runs/39880807914)
+completed successfully: every selected job, all 47 full-job steps, all 37 finite
+Practical Core criteria. The benchmark lane was dependency-skipped. Both
+grammars, all seven targets, real applications, strict IR, official independent
+Lean admission, host negatives, source closure checks and installed native
+package qualification pass. Package remains unpublished.
 
-Compiler source 7732e9786d09d11c1130da4b315c985e9978f23b; tested merge
-055ba9833567d3cb166341ec1da794eb725b0414; base
-1fad9ed53cda9b23ac30be9cea85e7857437564e.
-Normal qualification run 39867567126: success; every selected job and all 47 full-job steps pass; readiness 37/37.
-Exact jobs, steps, readiness, source/IR/checker/package identities and artifacts:
-docs/PSC1_SELFHOST_RESUMPTION_QUALIFICATION_2026-10-23.json.
-The frozen contract remains 14 families, 37 criteria, both grammars, seven
-targets and four actual application categories. No criterion or workload changes.
+The authoritative finite contract is
+[PSC1_PRACTICAL_CORE_V1_CONTRACT.json](docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json):
+14 families, 37 criteria, both grammars, seven targets, four application
+categories. This does not claim unrestricted language completeness or a formal
+backend preservation theorem.
 
-G1: passed all ten frozen positive/negative cases in job 120137606421.
-Service SHA256 d2093ee1d08c561ae62efb259fc834a4873b49684fc8516ac6e82a96783c8efb.
-86-module closure 7c87bfc922a4d8dabae343c47f470bff5d5ad11166d18125f14232fdb785edea.
-Admission and original/specialized IR digests remain in the exact receipt.
-One native seed only, generated frontend/emitter thereafter, separate official
-checking. The normal G1 controller's deferred fixedPoint field is lane-local;
-it does not supersede the explicit manual results below.
+Exact jobs, steps, toolchain/source/package identities, artifact retention,
+manual results and boundaries are recorded in
+[the current machine-readable receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
+Full artifact 12471552943 expires 2026-11-06; preserve needed evidence before
+expiry. Historical receipts remain unchanged.
 
-G2/G3 fixed-point qualification remains incomplete. Latest actual manual
-39864113546/job 120121869892 at source 573bf485 passes the frozen ten-case G1
-corpus, then G2 times out at 240197 ms before admission/publication. G3 is not
-run. That failed source precedes the final local-binding correctness guard;
-no G2 execution result is claimed for the latest changed source.
-docs/PSC1_G2_STABLE_CAPTURE_FAILURE_QUALIFICATION_2026-10-23.json preserves
-the exact failed source/request, profile and diagnostic progress evidence.
-The original G2 heap-exhaustion defect and every later failure remain open.
+## Self-hosting status and priority
 
-## Implemented corrections and verification
+Rust native execution and TypeScript readable npm-compatible distribution lead
+this work. One shared compiler source, frontend, elaborator, checked IR and
+verification pipeline live behind `Ps.Compiler.Service`; thin target facades
+use existing production emitters. No handwritten target compiler was added.
+DirectJS remains the working reference/regression backend. Its diagnosed G2
+heap defect remains open; DirectJS-specific G2 tuning is not prioritized.
 
-Parser primaries avoid unused optional-index span/fuel traversals; nomatch
-helpers bind remaining inputs before recursion setup. Canonical token cursors
-retain exact decreasing counts and both grammars' old numerical fuel, adjacency,
-spans and refusals. Lexer length uses the supported accumulator form. Empty
-term/level assignment guards preserve exact scan/walk results.
+[Manual run 39880803794](https://github.com/dwijayuda/pskernel/actions/runs/39880803794)
+at qualified HEAD gives:
 
-Seven total core/name/level visitors defer 26 recursive helper constructions
-until the final input binder. Native tests retain original definitions and prove
-all-input function equalities, plus count/lexer/empty-substitution identities.
-Unresolved metas, active term assignments and independent universe assignments
-remain tested. These source equalities are not a backend-preservation theorem.
+| Target | Actually qualified | Current blocker |
+| --- | --- | --- |
+| Rust | G1 executable and all five positive/five negative frozen cases | G2 full compiler request killed at 240031 ms before candidate admission; G3 not run |
+| TypeScript (baseline) | Both-grammar 85-module closure; bootstrap compiler candidate independently admitted | Original strict compilation timed out; later typed-generator source now passes G1 in 39887064597, G2 still times out |
+| DirectJS reference | G1, ten frozen cases in normal CI | Prior G2 heap/time defect retained; no new fixed-point claim |
 
-Typed worker fusion removes capture lets only for literals or initialized local
-variables unshadowed throughout the alias body. Conservative scanning covers
-let/lambda/match binders and every child; exhaustion keeps captures. Nonlocals
-retain read timing: a forward global can throw before initialization.
-Original declarations, effect/non-value refusals and strict input/output IR
-rechecking remain. All earlier escape/order/continuation/divergence/resource
-tests stay, with self/lambda/match shadow and forward-global timing cases.
+Rust uses its complete 92-module source closure and exact reviewed Cargo lock,
+release opt-level 1. Real positive compiler requests take 323–538 ms and
+20–23 MiB child RSS at this checkpoint; these small applications are not a
+successful full compiler workload. TypeScript generics are retained rather
+than unnecessarily monomorphized; its original 6462076-byte source could not finish strict checking. Explicit nested
+generator annotations derived from checked result types now resolve that stall;
+strict checking and actual G1 pass on the isolated annotated source. Both targets now execute real small compiler workloads. Rust positives on the
+ownership candidate take 291–437 ms and 14–17 MiB child RSS; TS annotated G1
+positives take 747–3189 ms and 193–404 MiB RSS. Different candidate sources and
+isolated runner processes limit this comparison; neither completes full G2.
 
-Native job 120133933097 passes the reference proofs and actual original/fused
-execution. Both forward-global imports raise ReferenceError before later
-divergence. Its bounded worker corpus measures 945 ms baseline / 557 ms fused,
-with identical observations and prior 100000-step/billion-bound workloads.
-This does not establish whole-compiler speed, memory bounds or preservation.
+The official checker remains Lean 4.35.0 commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Preserve strict original and
+transformed IR, independent canonical admission, negative tests, ABI refusals,
+source identities and unchanged fuel/heap/stack/request limits. Each target
+must independently pass actual G1/G2/G3 and exact source/admission/IR/corpus
+fixed points before qualification. Bootstrap emission alone does not qualify
+a generation.
 
-## Measured remaining G2 blocker
+## Implementation completed on the active branch
 
-Exact failed replay: 240346 ms, 49211026 raw profile bytes,
-artifact 12462609800, ZIP SHA256
-7960b253039c3fe80ac52901f6b45fd0dd84b2f24bb09d216b2a7da7170ef1d0.
-Read-only run 39865901653 splits 208130 ticks into four windows. GC is 36966
-samples (17.8%, previously 22.5%); the inspected substitution worker has no
-redundant capture temporaries. This sampled comparison is not a total-cost proof.
+Shared service/facades, registered roots, native single-seed transport,
+hash-bound target artifacts, independent admission, frozen ten-case corpus,
+source inventory, target runners, locked Rust dependencies and separate manual
+matrix qualification are implemented. The native compiler binaries are removed
+after the sole seed call. Linux whole-process-group supervision enforces
+240000 ms per child and 32 MiB per stream; the 245000 ms outer guard permits
+cleanup only. OS regressions cover ignored TERM, inherited pipes, exited
+parents and output overflow. Incremental receipts survive interruption.
 
-Diagnostic run 39866505167/job 120129917036 instruments a copy only, at commit
-9d60de0c89677d4330645f49961ff0bcd1debee8 on its separate diagnostic branch.
-Original request/service identities stay fixed; no response is adopted, admitted
-or published. At 240 seconds the trace has entered 29/86 modules, last entering
-declaration index 59 in module 28 Ps.Bridge.CheckedAdmissions, with RSS
-2381944 KiB at that point. Entries do not prove completion; logging affects
-timing. Artifact 12465125123 retains the counters/identities. The remaining
-work concerns general frontend/elaboration throughput and lifetime.
+TS source normalization includes an all-input visitor equality proof and
+264 retained-old/current module output/runtime comparisons. Both complete
+owned source closures pass both grammar audits. Whole-file rustfmt times out
+on large compiler output, so this manual build compiles exact raw emitted Rust
+with concise Cargo diagnostics; normal production formatting is unchanged.
+Readable large-source formatting remains open.
 
-The complete 256-declaration ParserScale workload remains a separate opt-in
-probe. Prior measured compile 210139 ms / 696784 KiB / answer42 is an open
-normal-frontend scale defect. Never shrink it or silently add it to the frozen
-ten-ID generation manifest.
+## Isolated measured Rust optimization
 
-## Manual execution policy and continuation
+Bounded exact artifact replay in
+[diagnostic 39882471895](https://github.com/dwijayuda/pskernel/actions/runs/39882471895)
+finds both 12/60-second samples in `String::clone` from
+`psJsonStringToChars`, before frontend decode completes.
 
-Separate psc1-selfhost-qualification.yml retains workflow_dispatch and an explicit
-committed-request fallback because the connector has no dispatch action.
-Only its request path on this branch triggers push qualification; preflight
-binds exact event/parent/HEAD and refuses hidden compiler edits. This is a
-push-explicit-request event, not workflow_dispatch. Normal CI still runs only G1.
-Failures retain exact requests/graphs/stderr and bounded CPU samples for 90 days.
+Branch `fix/psc1-rust-owned-string-moves-20261023` contains a separate ownership
+prototype: exact borrowed String forwarding wrappers, removal of redundant
+rvalue clones, and evaluation-order-preserving invariant String loop moves.
+Native guards and retained-old/current Rust execution comparisons pass;
+a generated handler corpus exposed missing struct-expression grouping, fixed
+in `9052b59fe7bafc000a2fa8ec24f0ead266276682`.
+Current request HEAD `f037377574124cf7a374d627f0c57e4a855e09e5`,
+[run 39886083977](https://github.com/dwijayuda/pskernel/actions/runs/39886083977)
+passes all ten G1 cases, then G2 aborts with stack overflow at 103782 ms.
+It is **not integrated or normally qualified** on the active branch. Require full corpus and actual compiler workloads, then fresh
+normal seven-backend qualification before promoting it.
 
-Do not raise 240000 ms child deadlines, heap/stack/fuel policies or the 15-minute
-manual job limit. Never delegate generated semantics to a native compiler or
-weaken strict original/transformed/target IR, independent official admission at
-eb6cafb7290e8bd5f2937522d8d804f58f02bafc, witnesses, negative tests, unsupported
-ABIs, package provenance or final qualification. PSKernel-Core Expression V2
-research remains independent.
+The short TS CPU profile sampled only its Node launcher. It is not evidence
+of a checker hotspot. Actual checker descendant inspection completed at
+diagnostic commit `23626b21cada65ea6f78ac6db8dd0e3ffa6dff29`,
+[run 39886224622](https://github.com/dwijayuda/pskernel/actions/runs/39886224622).
+It identifies the native TypeScript checker repeatedly traversing contextual
+return/yield/conditional inference. The integrated annotation correction uses
+checked declaration/lambda/let result types, retains legacy consumer bytes by
+all-input proof, and preserves strict/noEmitOnError. G2 execution profiling is
+next. Rust exact replay 39886925277 remains in String cloning at its shorter
+180-second diagnostic deadline; it does not identify the crash stack or prove
+a destructor failure. Diagnose before changing destruction or stack behavior.
 
-1. Address the measured general frontend/elaboration scale and lifetime issue
-   using exact requests and representative normal large-source applications.
-   Require finite measured improvement and fresh correctness/full evidence.
-   Do not replay unchanged expensive failures.
-2. Then explicitly qualify the finalized source through G1/G2/G3. G2 must match
-   all source/admission/IR/output identities, independently admit, publish only
-   to CI staging and pass every frozen corpus/refusal obligation before G3.
-3. Require actual G3/fixed-point evidence before claiming self-hosting. Keep
-   separate authorization for merge and release publication.
+## Next execution
 
-## Preserved baseline and history
+Follow the dependency-ordered [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) and
+[executable continuation prompt](docs/PSC1_RUST_TS_SELFHOST_CONTINUATION.md).
+First resolve the Rust ownership candidate's remaining cloning/stack failure
+and profile actual TypeScript G2 execution after the checker correction.
+Keep backend changes coherent, validate actual target compiler workloads, and
+record terminal CI before claims. Do not repeatedly rerun the successful normal
+baseline for documentation-only changes; run required fresh qualification after
+source changes.
 
-Historical source 9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde remains qualified in
-run 39829564386, tested merge 00decc7fb81fc4023f68cdcdbf8cff1fdd028b12.
-Its immutable v1 receipt, derived release inventory, package/expiry evidence
-and successful G1 remain source-bound historical evidence. New compiler bytes
-have separate exact-source evidence; no old qualification is inherited.
-Unrestricted metaprogramming/effects, unsupported public compound ABIs,
-non-Linux distribution and formal compiler-preservation certificates remain
-outside finite v1.
+Previous full state and roadmap text are preserved verbatim under
+`docs/history/2026-10-23-rust-ts-pivot-pre-reconciliation-*`; all commits,
+qualification receipts, G1 artifacts and failed self-host evidence remain.
 
-PSC1_DEVELOPMENT_ROADMAP.md is the single roadmap;
-PSC1_PRACTICAL_CORE_V1_CONTRACT.json is the single machine release contract.
-The pre-reconciliation state is preserved verbatim in
-docs/history/PSC1_SELFHOST_RESUMPTION_HISTORY_THROUGH_7732E978_2026-10-23.md.
-Earlier histories and all dated failed/successful receipts remain intact.

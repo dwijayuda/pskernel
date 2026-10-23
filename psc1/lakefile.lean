@@ -434,3 +434,45 @@ lean_exe psc1_target_service_seed where
 lean_exe psc1_ts_service_normalization_tests where
   srcDir := "test"
   root := `TsServiceNormalizationTests
+
+lean_exe psc1_cursor_normalization_tests where
+  srcDir := "test"
+  root := `CursorNormalizationTests
+
+lean_exe psc1_target_plan_profile_tests where
+  srcDir := "test"
+  root := `TargetPlanProfileTests
+
+lean_exe psc1_lexer_normalization_tests where
+  srcDir := "test"
+  root := `LexerNormalizationTests
+
+lean_exe psc1_codec_static_schema_tests where
+  root := `CodecStaticSchemaTests
+  srcDir := "test"
+
+lean_exe psc1_json_escape_predicate_tests where
+  srcDir := "test"
+  root := `JsonEscapePredicateTests
+
+lean_exe psc1_bridge_lookup_normalization_tests where
+  srcDir := "test"
+  root := `BridgeLookupNormalizationTests
+
+lean_exe psc1_ts_utf8_view_tests where
+  srcDir := "test"
+  root := `TsUtf8ViewTests
+
+lean_exe psc1_erasure_worker_normalization_tests where
+  srcDir := "test"
+  root := `ErasureWorkerNormalizationTests
+
+
+lean_exe psc1_ir_encoder_worker_normalization_tests where
+  srcDir := "test"
+  root := `IrEncoderWorkerNormalizationTests
+
+
+lean_exe psc1_text_lookup_worker_normalization_tests where
+  srcDir := "test"
+  root := `TextLookupWorkerNormalizationTests

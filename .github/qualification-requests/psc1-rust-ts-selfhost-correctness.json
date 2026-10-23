@@ -1,0 +1,14 @@
+{
+  "schema": "psc1-rust-ts-selfhost-request/2",
+  "id": "ts-immutable-generator-captures-correctness-20261023-1792775824896",
+  "action": "qualify-independent-G1-G2-G3",
+  "branch": "perf/psc1-erasure-applied-workers-20261023",
+  "targets": [
+    "ts"
+  ],
+  "profile": "correctness-1800s",
+  "g2g3TimeoutMs": 1800000,
+  "g1TimeoutMs": 240000,
+  "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
+  "parentCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64"
+}

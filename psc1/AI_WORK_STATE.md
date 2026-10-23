@@ -1,124 +1,137 @@
 # PSC1 AI work state
 
-Updated 2026-10-23 16:14:04 UTC. Integration: fix/psc1-closure-normalization-20261021.
-Active implementation: perf/psc1-erasure-applied-workers-20261023.
-[Compact evidence](docs/PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json)
-binds the exact Git blob of the complete [canonical receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
+Updated 2026-10-23 UTC. Active implementation/draft [PR173](https://github.com/dwijayuda/pskernel/pull/173):
+perf/psc1-erasure-applied-workers-20261023. Base integration/PR172:
+fix/psc1-closure-normalization-20261021. Use connected GitHub/Linux Actions only,
+fresh expected-HEAD non-force commits. No merge or npm publication authorized.
 Frozen Practical Core v1 remains14 families/37 criteria.
+[Compact evidence](docs/PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json)
+binds the exact Git blob of the complete17-attempt
+[canonical receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
 
-## Current actual qualification
+## Corrected TypeScript self-hosting qualified
 
-TypeScript G2/G3/fixed point remain unqualified at every completed trial.
-The current coherent compiler source is3ac0455908b085458192d74585c871e665e06675,
-code0decfd2618d53916824cb9926ef48008732f4066.
-Actual correctness-1800s requestd864d5983525ce0b0f863b7cd87ab5c99a741f89,
-[run39984419742](https://github.com/dwijayuda/pskernel/actions/runs/39984419742),
-job120519775807, is executing. Read its terminal receipt before new expensive work.
-Do not repeat unchanged or infer G2/G3 from the native source gate.
+Compiler code/source748fd5fdbd019fda7993ce0303d966f4c3ddcc64, request-only
+079b26b945ceda507e89846aaab651e17fcb3b06,
+[actual39993829327](https://github.com/dwijayuda/pskernel/actions/runs/39993829327),
+job120552082576: genuine independently admitted/built/executed G1/G2/G3 and exact
+source/closure/canonical admissions/original+transformed IR/ten-case observations
+fixed points PASSED under correctness1800s.
 
-Expected native shape source79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452,
-closure438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2.
-The genuine workflow still must independently admit/build/execute each generation,
-preserve exact source/closure/canonical admissions/original/transformed IR and
-ten-case fixed points. A native provisional candidate is narrower evidence.
+| Request | Elapsed ms | Linux wait4 maxRSS KiB | Sampled tree peak KiB |
+| --- | --- | --- | --- |
+|G2-self|545895|3051772|3002116|
+|G3-self|588552|3005236|2955676|
 
-## Implemented and proved allocation fixes
+The two RSS measurements are distinct; sampled descendant sums can double-count
+shared pages. Raw bounded-process events remain in the canonical receipt.
+Closure85:
+18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28.
+All three TS sources:
+1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9.
+All three emitted JS executable bytes:
+0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2.
+Official Lean4.35.0 checker eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Admissions f845eca356137550f827b17d867ac13823d31883fdada9c1f88668177fa21de2;
+original IR796c3f53665d9a141a0db4e01b195e5abfa6b97a4fe44f12dc569b6ac4172dad;
+transformed IR56d30dcd388fe32fbe4c2dfd537e1447a1df46f4569cab5a4f986c12c0cb9b7b.
+Per-generation manifest and candidate/request hashes are retained canonically.
+Artifact12519304338 digest
+21b554aaf2803577727554861ba7fd4800cf90706c6ca6a3c1b665e4c99d8962,
+expires2027-01-21T17:17:16Z.
 
-[Focused39983383955](https://github.com/dwijayuda/pskernel/actions/runs/39983383955)
-at0decfd26 passes all-input equalities against exact retained originals,
-every prior proof/runtime/negative gate, both85-module Lean/PS audits and actual
-native G1 source/saturated IR mechanism assertions.
+Read-only [audit39996915835](https://github.com/dwijayuda/pskernel/actions/runs/39996915835),
+job120562731012, verifies exact inventory/request/candidate/manifest/executable
+bytes, equality with native G1 shape source, all generation observations/runtime/
+data-worker mechanisms, and1985 immutable generator-loop snapshots per actual
+compiler. It verifies capture fixture bytes and native-Lean-versus-generated-TS
+receipt. Auditing retained artifacts does not execute another compiler.
 
-* psTextInsertApplied and psTextJoinApplied avoid building recursive functions
-  over unused suffixes. Exact carry/chunk/older-newer/separator behavior and
-  public signatures remain; their main equalities use no axioms.
-* psTsLookupApplied preserves first binding/duplicates and exact source String
-  equality. Public function equality uses standard Quot.sound.
-* psTsExprUsesNameWithFuelWorker creates callbacks only in constructors that need
-  them. No callbacks before constructor dispatch; literal/variable branches have
-  none. All-input arbitrary fuel/expression/query equality uses only propext and
-  Quot.sound. Fuel0 remains conservative true; default4096 and all freshness/
-  collision/refusal behavior remain. Binder and match-binding names still count.
+## Defect classes fixed and validated
 
-Regressions cover Unicode/escaping/separators, all11 expression constructors,
-binders/control/fields, missing names, zero/high leaf fuel and100001-entry first
-slots. Text/join/lookup saturated data workers have zero lambdas and full recursive
-arity2/4/2. Visitor data worker has arity3; callbacks inside specific branches are
-legitimate. Keep this distinction in future inspections.
+Lazy UTF8 tokens retain no indexed arrays and avoid repeated cache-key StringEqual
+in eligible invariant loops. Cache remains max2 views. Size is non-admitting;
+extraction uses cached valid boundaries with exact old cold/invalid/interior/
+out-of-range fallback. Fully applied erasure/IR encoders/text insert/join/lookup
+workers avoid constructing unused function prefixes. Constructor-directed name
+visitor allocates callbacks only in branches that need them; conservative fuel0
+true/default4096 and hygiene/freshness refusals remain unchanged.
+All-input equalities against retained originals and actual saturated IR shapes
+are preserved; no source String equality was replaced.
 
-Text/lookup codee15f75cc passed proofs/regressions in39981594291, whose initial
-shape-only inspection wrongly required forwarding helpers. Diagnostic repair
-d749a5f8/39982322889 accepts direct data bodies as well and passes both source
-audits. No genuine generation ran on that failed shape gate.
+Draft173 integration39990180405 exposed a separate prototype generator-loop
+closure-capture defect: unchanged lean-ts higherOrderRecursionCase(false) timed
+out at120s, preserved artifact12517966690. Correction748fd5fd uses a fresh typed
+next-arguments tuple and immutable per-iteration parameter bindings, preserving
+callback captures and exact legacy pure-tail output. Fresh names check unused
+parameters, all expression/binder names, brand/tag keys and values;4096 attempts
+remain bounded with generic fallback.
 
-## Measured reason and preserved completed trials
+[Focused39992803465](https://github.com/dwijayuda/pskernel/actions/runs/39992803465),
+successful attempt2/job120550535646, passes retained-original all-input proofs,
+strict IR capture fixtures and10 native Lean reference comparisons (function and
+changing-Nat captures), unused parameter/brand/tag collisions and zero-fuel refusal,
+alias/self-shadow negatives,16000 cursor comparisons,95576 extraction comparisons,
+both85-module Lean/PS audits and actual native G1 data-worker shapes.
+Attempt1 passed native builds/guards but npm omitted the optional pinned Linux
+TypeScript binary; only that job was retried, same compiler source, and passed.
 
-The encoder-only source45365943/request66f1e752/run39973570792 is terminal:
-G1 independently admitted/built and all10 cases pass; G2 timeout1800231ms,
-peak3064892KiB, no candidate/G3/fixed point. Audit39978659027 verifies exact
-source/request/manifest, token/cache mechanisms and source/saturated encoder IR.
-G1 sourceedaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d,
-executable91c9568698e9804805538b6db6041b24607593ba103c1ef8667fc5536cc372ee.
+## Practical Core and integration
 
-ONE diagnostic replay39978891505 is complete, using that original G1 manifest
-294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec and exact
-G2 requeste90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998.
-It publishes verified immutable240/600/1200/1750s samples without repeated G2.
-Phase600 shows text insertion/lookup/JSON generation, WeakCollectionSet2575/27178.
-At1200 and1750, all28004/28061 sampled stacks are native Node beneath
-WeakMapPrototypeSet in psTsExprUsesNameWithFuel$worker. This is the measured
-late blocker addressed by constructor-directed callbacks.
-Replay ends1750091ms/2898528KiB, no response/admission/adoption/qualification.
-Each phase is provenance-verified by reader39979697224/39980608508/39982434007/
-39983586849. Full artifact12514880803 and all phase IDs/digests/expiries remain in
-the canonical receipt. No whole-run speed claim follows from sampled percentages.
+[Normal39993835819](https://github.com/dwijayuda/pskernel/actions/runs/39993835819)
+PASSED at request/head079b26b945ceda507e89846aaab651e17fcb3b06,
+tested merge9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01 (identical Git tree to head).
+Full Linux job120557858120 and final gate120570273055 passed:
+37/37 qualified,0 blocked, releaseReady=true, both .lean/.ps grammars,
+all seven backends, all four application categories, minimum-Python compatibility,
+installed native package/standalone IO and explicit negative/refusal boundaries.
+Artifact12521052731 digest010fff20b7522ae545672fb06e9d2c2500b40c81b53ec45e74be6b273de154d5,
+expires2026-11-06T17:55:42Z. This qualifies the source candidate; draft173 remains
+unmerged. The post-qualification record update changes documentation only.
 
-Earlier lazy2-view UTF8 tokens, non-admitting size, cached valid extraction and
-exact legacy invalid/cold fallback remain. Source String equality/fuel and max2
-views are unchanged.16000 equality/95576 extraction checks pass.
-Eight erasure applied workers retain original public signatures/default4096/whnf,
-all-input proofs and first-duplicate/100001-entry tests. IR encoder workers retain
-default4096, fuel exhaustion, error order and exact tagged bytes. Their proved
-normalization reaches admitted G1 but alone did not finish G2.
+Earlier integrated5ce2fc74b9f01682832ddc10ec9ef27f26458564/tested merge
+a61eecf46ded19eedcdefcb320aa33118cd8f2ad/run39909569028 remains preserved.
+The prototype/history synchronization bab5d1a3 had two parents3d426594/27aaa390
+and changed no qualified compiler source. It preserved generic manual Rust/TS
+correctness workflow; active TS requests use separate
+.github/workflows/diagnostic-psc1-ts-selfhost-correctness.yml.
 
-All14 completed attempts and failed evidence remain. Earlier erasure-only
-39964278626 times out1800138ms/3002380KiB; its240s sibling39965349252 ends
-240170ms/2277344KiB. Token/cursor/lookup/Map history is retained. Source census132
-is syntactic, includes false positives and is not132 defects or reachability proof.
-Do not refork obsolete applied-lookup/Map source or normalize unmeasured classes.
+## Preserved Rust and performance boundaries
 
-## Qualified Rust and integrated baseline
+Qualified Rust source5e0b548e6cb3606ee0d3c129e0a829d830e407e4/request7d8865a0/
+[39908529181](https://github.com/dwijayuda/pskernel/actions/runs/39908529181)
+passes actual G1/G2/G3/exact fixed point. G2/G3:692788/660042ms,
+668192/668184KiB maxRSS. Preserve untouched reference branch
+fix/psc1-rust-owned-string-moves-20261023 at83e18fe183498f7d8b0fc3e3faa5bdacc41cb23d.
 
-Rust branch fix/psc1-rust-owned-string-moves-20261023 stays untouched at
-83e18fe183498f7d8b0fc3e3faa5bdacc41cb23d. Source5e0b548e6cb3606ee0d3c129e0a829d830e407e4,
-request7d8865a08427a28432e427592dfc4263718c9a2f/run39908529181 genuinely qualifies
-G1/G2/G3 and exact fixed point under1800s. G2/G3 692788/660042ms,
-peak668192/668184KiB; all executable bytes
-d55a8435a157f021e5a7c073037303429b9787729c963af3842a04b9fb009017.
-Original240s and independent clean-build repeatability remain unqualified.
+Earlier TS0decfd26/source3ac04559/requestd864d598/run39984419742 independently
+passed G1/G2/G3/fixed point (641519/616135ms); audit39988499005 preserves it.
+Separate original240s request3d426594/run39988689772 on identical earlier code/
+source/closure/executable/G2 wire passed G1/ten cases then timed out G2 at240170ms/
+2027880KiB; noG3. Audit39990538985 verifies the separate failure.
+Current corrected G2 long execution545895ms also exceeds240s; current short
+performance qualification remains open. Avoid repeating unchanged expected
+timeouts solely to restate this gap.
 
-Integrated code5ce2fc74/mergea61eecf4/normal39909569028 passes all selected jobs,
-47 full steps,37/37 frozen criteria, both grammars/seven backends/four application
-categories, independent checking, strict IR, negatives and installed native package
-tests. Later source is isolated; documentation39980079349 at11f4e5ee passes only
-static/dependency gate and does not qualify the new source.
+G1/corpus/build240000ms, independent checker120000ms, semantic fuel, heap/stack,
+32MiB streams,128MiB wire and cleanup5000ms remain unchanged. Only actual G2/G3
+may use1800000ms in the separate120min-job/110min-step correctness profile.
+Official independent kernel checking, original/transformed strict IR, negative
+tests, identities, all seven backends and explicit unsupported-ABI refusals remain.
 
-## Policy and next action
+Same-run Rust native/TS JS executable equality is verified; independent clean
+builds remain unqualified. No formal whole-backend preservation claim, merge or
+publication follows from these finite qualification receipts.
 
-Default performance240s remains separate;15-minute jobs. Correctness1800s extends
-only actual G2-self/G3-self;120-minute jobs/110-minute execution step.
-G1/corpus/build240000ms, independent checker120000ms, cleanup5s, streams32MiB,
-wire128MiB; semantic fuel, heap/stack, identities, negative/unsupported-ABI and
-name-hygiene boundaries unchanged. Official Lean4.35.0
-eb6cafb7290e8bd5f2937522d8d804f58f02bafc remains authoritative.
-One native seed then native compiler executables removed; checker retained.
-DirectJS G1/heap evidence and ExpressionV2 remain separate.
+## Dependency-ordered remaining work
 
-Continue the [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) and
-[executable continuation](docs/PSC1_RUST_TS_SELFHOST_CONTINUATION.md):
-wait for the current genuine trial, audit its immutable artifact once and verify
-its G1 matches the expected native shape source. If correctness passes, run the
-unchanged240s profile separately; then coherent integration requires fresh full
-seven-backend/application qualification. If blocked, profile the new current G1
-before further edits; do not reuse older-source diagnoses.
-GitHub/Linux Actions only, fresh HEAD/expected-HEAD non-force history. No merge/npm.
+1. Preserve this qualified draft173 checkpoint for review; next implementation work is measured current-source240s performance and independent clean-build reproducibility. No source CI or self-host rerun is needed for this documentation-only checkpoint.
+2. Optimize toward original240s only from current actual generated compiler
+   workload measurements. Preserve qualified snapshots and all safety policies;
+   no DirectJS-specific detour or speculative architecture rewrite.
+3. Qualify independent clean-build reproducibility separately, then distribution
+   readiness through existing release gates; no npm publication without authorization.
+Keep source-specific implemented/proved/native-tested/self-host-qualified/full-release
+evidence distinct. Preserve17 completed attempts, diagnostics, source identities and
+the tracked earlier G2 heap/performance evidence. DirectJS remains a working
+regression reference; independent PSKernel research does not block this pipeline.

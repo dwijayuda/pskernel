@@ -8,13 +8,14 @@ structure PsOpenedErasedDefinition where
   resultType : PsVerifiedIrType
   body : PsVerifiedIrExpr
 
-def psErasureStringInList (values : List String) : String -> Bool :=
+def psErasureStringInListWorker (values : List String) (target : String) : Bool :=
   match values with
-  | List.nil => fun (_target : String) => false
+  | List.nil => false
   | List.cons value rest =>
-      let smaller : String -> Bool := psErasureStringInList rest;
-      fun (target : String) =>
-        if psStringEq value target then true else smaller target
+      if psStringEq value target then true else psErasureStringInListWorker rest target
+
+def psErasureStringInList (values : List String) : String -> Bool :=
+  fun (target : String) => psErasureStringInListWorker values target
 
 def psErasureAddUniqueStringWorker
     (used : List String)

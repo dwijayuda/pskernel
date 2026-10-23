@@ -291,8 +291,128 @@ example (isPublic : Bool) (tags : List (String × String)) (info : PsVerifiedIrI
 
 end PsTsModuleReference
 
+
+namespace PsTsLegacyTailReference
+def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+  match fuel with
+  | Nat.zero => fun (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining =>
+      fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
+        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitWithFuel brands tags declaration remaining;
+        let emitPure : PsVerifiedIrExpr -> Option String := psTsTailPrintPure brands tags aliases;
+        match expr with
+        | PsVerifiedIrExpr.call fn types arguments =>
+            if psListIsEmpty types then
+              match psTsTailCallArguments declaration.name aliases fn arguments with
+              | Option.none => Option.none
+              | Option.some actual =>
+                  if Nat.beq (psListLength actual) (psListLength declaration.parameters) then
+                    match psTsTailMap emitPure actual with
+                    | Option.none => Option.none
+                    | Option.some printed =>
+                        let parameterName : PsVerifiedIrParameter -> String := fun (parameter : PsVerifiedIrParameter) => parameter.name;
+                        Option.some (psTsJoin "" ["[", psTsJoin ", " (psListMap parameterName declaration.parameters),
+                          "] = [", psTsJoin ", " printed, "]; continue;"])
+                  else Option.none
+            else Option.none
+        | PsVerifiedIrExpr.letE name type value body =>
+            if psTsExprUsesNameWithFuel 4096 value name then Option.none
+            else if psTsTailBindingSafe declaration aliases name then
+              match psTsTailAliasValue declaration.name name value with
+              | Option.some alias =>
+                  let capturedAlias : PsVerifiedIrExpr -> Bool := fun (argument : PsVerifiedIrExpr) =>
+                    if psTsTailPureWithFuel aliases 4096 argument then false else true;
+                  if psListAny capturedAlias alias.captured then Option.none
+                  else smaller (List.cons alias aliases) body
+              | Option.none =>
+                  match emitPure value with
+                  | Option.none => Option.none
+                  | Option.some printedValue =>
+                      match psTsEmitType type with
+                      | Except.error _ => Option.none
+                      | Except.ok printedType =>
+                          match smaller aliases body with
+                          | Option.none => Option.none
+                          | Option.some printedBody => Option.some (psTsJoin "" ["{ const ", name, ": ", printedType,
+                              " = ", printedValue, "; ", printedBody, " }"])
+            else Option.none
+        | PsVerifiedIrExpr.ifE condition left right =>
+            match emitPure condition with
+            | Option.none => Option.none
+            | Option.some printedCondition =>
+                match smaller aliases left with
+                | Option.none => Option.none
+                | Option.some printedLeft =>
+                    match smaller aliases right with
+                    | Option.none => Option.none
+                    | Option.some printedRight => Option.some (psTsJoin "" ["if (", printedCondition, ") { ",
+                        printedLeft, " } else { ", printedRight, " }"])
+        | PsVerifiedIrExpr.matchE name _ scrutinee alternatives =>
+            if psListIsEmpty alternatives then Option.none
+            else
+              match psTsLookup tags name with
+              | Option.none => Option.none
+              | Option.some tag =>
+                  match emitPure scrutinee with
+                  | Option.none => Option.none
+                  | Option.some printedScrutinee =>
+                      let temporary := psTsFreshMatchTemp declaration.body;
+                      let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>
+                        if psTsTailBindingSafe declaration aliases binding.name then
+                          match psTsEmitType binding.type with
+                          | Except.error _ => Option.none
+                          | Except.ok type => Option.some (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temporary, ".", binding.field, ";"])
+                        else Option.none;
+                      let printAlternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Option String :=
+                        fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                          match psTsTailMap printBinding (Prod.fst (Prod.snd alternative)) with
+                          | Option.none => Option.none
+                          | Option.some bindings =>
+                              match smaller aliases (Prod.snd (Prod.snd alternative)) with
+                              | Option.none => Option.none
+                              | Option.some body => Option.some (psTsJoin "" ["case ", psJsonQuote (Prod.fst alternative), ": { ",
+                                  psTsJoin " " bindings, " ", body, " }"]);
+                      if psTsTailBindingSafe declaration aliases temporary then
+                        match psTsTailMap printAlternative alternatives with
+                        | Option.none => Option.none
+                        | Option.some cases => Option.some (psTsJoin "" ["{ const ", temporary, " = ", printedScrutinee,
+                            "; switch (", temporary, "[", tag, "]) { ", psTsJoin " " cases,
+                            " } throw new Error(\"invalid ProofScript constructor tag\"); }"])
+                      else Option.none
+        | _ =>
+            match emitPure expr with
+            | Option.none => Option.none
+            | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
+
+
+theorem target_none_eq (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
+    psTsTailEmitWithFuel brands tags declaration fuel =
+      _root_.psTsTailEmitTargetContextWithFuel brands tags declaration false Option.none fuel := by
+  induction fuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psTsTailEmitWithFuel, _root_.psTsTailEmitTargetContextWithFuel,
+        _root_.psTsTailEmitValue, _root_.psTsTailReturnValue, ih]
+      rfl
+theorem disabled_eq (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
+    psTsTailEmitWithFuel brands tags declaration fuel =
+      _root_.psTsTailEmitContextWithFuel brands tags declaration false fuel :=
+  target_none_eq brands tags declaration fuel
+end PsTsLegacyTailReference
+
 def main : IO Unit := do
-  IO.println "PSC1_TS_SERVICE_NORMALIZATION: all-input context equality proved"
+  IO.println "PSC1_TS_SERVICE_NORMALIZATION: all-input context and legacy tail equality proved"
+  let alias : PsTsTailAlias := .mk "hop" [] 1
+  if psTsTailEmitValue true [] [] [alias] .none false (.var "hop") != .none then
+    throw (IO.userError "PSC1_TS_GENERATOR_ALIAS_ESCAPE")
+  let selfShadow : PsVerifiedIrDeclaration := .mk "self" []
+    [.mk "self" (.primitive .nat)] (.primitive .nat) (.var "self")
+  if psTsEmitGeneratorLoopWithVisibility true [] [] selfShadow != .none then
+    throw (IO.userError "PSC1_TS_GENERATOR_SELF_SHADOW")
+  IO.println "PSC1_TS_GENERATOR_GUARDS: alias escape and self shadow refuse flattening"
   let natT : PsVerifiedIrType := .primitive .nat
   let stringT : PsVerifiedIrType := .primitive .string
   let expressions : List PsVerifiedIrExpr := [

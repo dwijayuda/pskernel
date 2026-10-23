@@ -1,6 +1,14 @@
-name: PSC1 T01F pure byte-step hash iteration preflight
+name: PSC1 T01F tail data-accumulator hash preflight
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - work/psc1-pskernel-t01f-string-20261022
+    paths:
+      - '.github/workflows/psc1-pskernel-t01f-hash.yml'
+      - 'psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean'
+      - 'psc1/test/PsKernelScalarHashWorkerRegression.lean'
+      - 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs'
 permissions:
   contents: read
   actions: read
@@ -35,7 +43,7 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           grep -Fqx 'PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
-          if grep -Fq 'sorryAx' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"; then exit 1; fi
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|Lean.trustCompiler' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"; then exit 1; fi
       - name: Independently admit actual String declarations and export untrusted inputs
         working-directory: psc1
         run: |
@@ -78,14 +86,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build authentic PSC1 and check complete kernel source
+      - name: Build authentic PSC1 for the bounded code-generation gate
         working-directory: psc1
         run: |
           set -euo pipefail
           test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           lake build psc1
-          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
       - name: Install pinned TypeScript
         run: |
           set -euo pipefail
@@ -107,17 +114,19 @@ jobs:
           import pathlib, re
           text = pathlib.Path('dist/expr-v2/scalar-hash/kernel.js').read_text()
           names = re.findall(r'^export function (psKernelCacheStringHashStateWithFuel[A-Za-z0-9_$]*)\(', text, re.M)
-          if not names: raise RuntimeError('Missing data-result hash iterator')
-          for name in names:
-              marker = 'function* __ps$impl$' + name + '('
-              if marker not in text: marker = 'export function ' + name + '('
-              start = text.index(marker)
-              end = text.find('\nexport ', start + len(marker))
-              body = text[start:] if end < 0 else text[start:end]
-              if '__ps$wrap' in body:
-                  raise RuntimeError('Iterator still constructs staged function results: ' + name)
-              if '__ps$invoke(psKernelCacheMix,' in body:
-                  raise RuntimeError('Iterator dispatches to the scalar mix')
+          if names != ['psKernelCacheStringHashStateWithFuel']:
+              raise RuntimeError('Iterator was recurried into staged helpers: ' + repr(names))
+          marker = 'export function psKernelCacheStringHashStateWithFuel('
+          start = text.index(marker)
+          end = text.find('\nexport ', start + len(marker))
+          body = text[start:] if end < 0 else text[start:end]
+          print('PSC1_HASH_ITERATOR_BODY ' + repr(body))
+          for machinery in ('function*', '__ps$run', '__ps$invoke', '__ps$wrap',
+                            'psKernelCacheStringHashStep', 'psKernelCacheMix'):
+              if machinery in body:
+                  raise RuntimeError('Tail data iterator still uses per-byte machinery: ' + machinery)
+          if not re.search(r'while\s*\(\s*true\s*\)', body) or not re.search(r'\bcontinue\b', body):
+              raise RuntimeError('Tail data iterator is not a generated loop')
           marker = 'export function psKernelCacheStringHashStep('
           start = text.index(marker)
           end = text.find('\nexport ', start + len(marker))
@@ -133,7 +142,13 @@ jobs:
               raise RuntimeError('Full hash still dispatches through the staged public worker')
           print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
+          print('PSC1_HASH_TAIL_DATA_CODEGEN: PASS generators=0 resultStaging=0 byteStepDispatch=false loop=true')
           PY
+      - name: Check complete authentic kernel source after the bounded gate
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
       - name: Compile the complete independent kernel to JavaScript
         working-directory: psc1
         run: |

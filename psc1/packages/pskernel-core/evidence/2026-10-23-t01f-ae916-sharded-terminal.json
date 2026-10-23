@@ -1,0 +1,460 @@
+{
+  "schema": "psc1-t01f-ae916-sharded-terminal-v1",
+  "recordedAt": "2026-10-23T02:07:36.558Z",
+  "sourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+  "harnessSourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+  "kernelSha256": "4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa",
+  "canonical": {
+    "runId": 39879401429,
+    "aggregateJobId": 120194717097,
+    "conclusion": "success",
+    "qualification": {
+      "schema": "psc1-t01f-sharded-qualification-v1",
+      "status": "pass",
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+        "runId": "39879401429",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9954778,
+            "sha256": "cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "88951123aec2a49ee6e36d6a709da4a0d05c86a402c3f769132cddde28911f36"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 43948,
+            "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "2cf27dc031d1071d7844351b68f209ad84bf9fde3eb7151f13c808a24c22f588"
+          }
+        }
+      },
+      "job": "t01f-canonical-complete",
+      "node": "v22.23.3",
+      "shards": 6,
+      "samples": [
+        "",
+        "a",
+        "é",
+        "€",
+        "😀",
+        "Aé€😀"
+      ],
+      "requestsPerShard": 294,
+      "metadataPerShard": 377,
+      "independentAdmissionPerShard": true,
+      "completeNegativesPerSample": true,
+      "singletonSequences": 6,
+      "performanceQualified": false,
+      "receipts": [
+        {
+          "sampleIndex": 0,
+          "sample": "",
+          "receipt": {
+            "bytes": 3462,
+            "sha256": "7be7b980f68241f20fc417f70bc0d5e9d9d73b946ee35a349a80f20d69b1ef38"
+          },
+          "measurement": "peak_rss_kib=758868 wall_seconds=202.44 exit_status=0",
+          "runtime": {
+            "kernelSha256": "cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048",
+            "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+            "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+            "requests": 294,
+            "metadata": 377,
+            "declarations": "377",
+            "samples": 1,
+            "availableSamples": 6,
+            "executedSamples": 1,
+            "fuel": 4096,
+            "independentAdmission": true,
+            "assertions": 1400,
+            "constructionMs": 32.071631000000025,
+            "admissionMs": 35858.865496000006,
+            "metadataMs": 1085.8028260000065,
+            "totalMs": 202342.551798,
+            "diagnosticTracing": false,
+            "measurements": [
+              {
+                "sample": "",
+                "utf8Bytes": 0,
+                "owners": 224,
+                "ownerAndConstructionMs": 4330.896076999998,
+                "totalMs": 165261.593475,
+                "arenaNodes": "32",
+                "ownedArenaNodes": "10220",
+                "memory": {
+                  "rss": 771448832,
+                  "heapTotal": 509222912,
+                  "heapUsed": 287117352,
+                  "external": 4806393,
+                  "arrayBuffers": 2809244
+                }
+              }
+            ],
+            "sampleIndex": 0,
+            "sample": ""
+          }
+        },
+        {
+          "sampleIndex": 1,
+          "sample": "a",
+          "receipt": {
+            "bytes": 3455,
+            "sha256": "fcd1cf2d4d600d4f5746fc823043de2f5c5509d5385f548e2d6c29454160f7e4"
+          },
+          "measurement": "peak_rss_kib=800944 wall_seconds=397.17 exit_status=0",
+          "runtime": {
+            "kernelSha256": "cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048",
+            "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+            "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+            "requests": 294,
+            "metadata": 377,
+            "declarations": "377",
+            "samples": 1,
+            "availableSamples": 6,
+            "executedSamples": 1,
+            "fuel": 4096,
+            "independentAdmission": true,
+            "assertions": 1400,
+            "constructionMs": 40.425713,
+            "admissionMs": 46711.792632,
+            "metadataMs": 1490.119752999999,
+            "totalMs": 397073.98059199995,
+            "diagnosticTracing": false,
+            "measurements": [
+              {
+                "sample": "a",
+                "utf8Bytes": 1,
+                "owners": 224,
+                "ownerAndConstructionMs": 5618.3235300000015,
+                "totalMs": 348688.269126,
+                "arenaNodes": "72",
+                "ownedArenaNodes": "10260",
+                "memory": {
+                  "rss": 819601408,
+                  "heapTotal": 510533632,
+                  "heapUsed": 176503680,
+                  "external": 4805513,
+                  "arrayBuffers": 2808364
+                }
+              }
+            ],
+            "sampleIndex": 1,
+            "sample": "a"
+          }
+        },
+        {
+          "sampleIndex": 2,
+          "sample": "é",
+          "receipt": {
+            "bytes": 3459,
+            "sha256": "9e59f835e4141a2f7dfb79edc422fa212c8ab6f6a1663db0c4176d18b0e4d469"
+          },
+          "measurement": "peak_rss_kib=883404 wall_seconds=574.58 exit_status=0",
+          "runtime": {
+            "kernelSha256": "cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048",
+            "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+            "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+            "requests": 294,
+            "metadata": 377,
+            "declarations": "377",
+            "samples": 1,
+            "availableSamples": 6,
+            "executedSamples": 1,
+            "fuel": 4096,
+            "independentAdmission": true,
+            "assertions": 1400,
+            "constructionMs": 75.66565899999998,
+            "admissionMs": 54755.470165,
+            "metadataMs": 1845.9878979999994,
+            "totalMs": 574437.460798,
+            "diagnosticTracing": false,
+            "measurements": [
+              {
+                "sample": "é",
+                "utf8Bytes": 2,
+                "owners": 224,
+                "ownerAndConstructionMs": 6951.510070999997,
+                "totalMs": 517570.0462,
+                "arenaNodes": "88",
+                "ownedArenaNodes": "10276",
+                "memory": {
+                  "rss": 903606272,
+                  "heapTotal": 507650048,
+                  "heapUsed": 383382472,
+                  "external": 4807273,
+                  "arrayBuffers": 2810124
+                }
+              }
+            ],
+            "sampleIndex": 2,
+            "sample": "é"
+          }
+        },
+        {
+          "sampleIndex": 3,
+          "sample": "€",
+          "receipt": {
+            "bytes": 3462,
+            "sha256": "ef12b817dea529ca62ae4b905c44d913a63bc0b22a47f5156afd85c5b19362c0"
+          },
+          "measurement": "peak_rss_kib=956088 wall_seconds=716.46 exit_status=0",
+          "runtime": {
+            "kernelSha256": "cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048",
+            "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+            "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+            "requests": 294,
+            "metadata": 377,
+            "declarations": "377",
+            "samples": 1,
+            "availableSamples": 6,
+            "executedSamples": 1,
+            "fuel": 4096,
+            "independentAdmission": true,
+            "assertions": 1400,
+            "constructionMs": 60.04702,
+            "admissionMs": 56770.284888999995,
+            "metadataMs": 1806.2416599999997,
+            "totalMs": 716312.263624,
+            "diagnosticTracing": false,
+            "measurements": [
+              {
+                "sample": "€",
+                "utf8Bytes": 3,
+                "owners": 224,
+                "ownerAndConstructionMs": 7049.771886000002,
+                "totalMs": 657485.401939,
+                "arenaNodes": "104",
+                "ownedArenaNodes": "10292",
+                "memory": {
+                  "rss": 978477056,
+                  "heapTotal": 523116544,
+                  "heapUsed": 336858136,
+                  "external": 4808389,
+                  "arrayBuffers": 2811240
+                }
+              }
+            ],
+            "sampleIndex": 3,
+            "sample": "€"
+          }
+        },
+        {
+          "sampleIndex": 4,
+          "sample": "😀",
+          "receipt": {
+            "bytes": 3481,
+            "sha256": "e74c004e8f68708eab52f53c6d23e8e415ce04ad30f1b79716838d4a1a49db48"
+          },
+          "measurement": "peak_rss_kib=798804 wall_seconds=813.27 exit_status=0",
+          "runtime": {
+            "kernelSha256": "cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048",
+            "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+            "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+            "requests": 294,
+            "metadata": 377,
+            "declarations": "377",
+            "samples": 1,
+            "availableSamples": 6,
+            "executedSamples": 1,
+            "fuel": 4096,
+            "independentAdmission": true,
+            "assertions": 1400,
+            "constructionMs": 53.808528000000024,
+            "admissionMs": 57952.835621,
+            "metadataMs": 2006.1807039999985,
+            "totalMs": 813138.8752789999,
+            "diagnosticTracing": false,
+            "measurements": [
+              {
+                "sample": "😀",
+                "utf8Bytes": 4,
+                "owners": 224,
+                "ownerAndConstructionMs": 7471.684655999998,
+                "totalMs": 752942.4191149999,
+                "arenaNodes": "120",
+                "ownedArenaNodes": "10308",
+                "memory": {
+                  "rss": 817029120,
+                  "heapTotal": 521805824,
+                  "heapUsed": 315665960,
+                  "external": 4809989,
+                  "arrayBuffers": 2812840
+                }
+              }
+            ],
+            "sampleIndex": 4,
+            "sample": "😀"
+          }
+        },
+        {
+          "sampleIndex": 5,
+          "sample": "Aé€😀",
+          "receipt": {
+            "bytes": 3497,
+            "sha256": "854a994676927dab113a0da88459a3890b20c8a84d3a46a2ec854b27cc5e9ab6"
+          },
+          "measurement": "peak_rss_kib=1293796 wall_seconds=1192.87 exit_status=0",
+          "runtime": {
+            "kernelSha256": "cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048",
+            "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+            "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+            "requests": 294,
+            "metadata": 377,
+            "declarations": "377",
+            "samples": 1,
+            "availableSamples": 6,
+            "executedSamples": 1,
+            "fuel": 4096,
+            "independentAdmission": true,
+            "assertions": 1400,
+            "constructionMs": 31.752776999999995,
+            "admissionMs": 33817.04139,
+            "metadataMs": 1060.6266959999994,
+            "totalMs": 1192714.087625,
+            "diagnosticTracing": false,
+            "measurements": [
+              {
+                "sample": "Aé€😀",
+                "utf8Bytes": 10,
+                "owners": 224,
+                "ownerAndConstructionMs": 4560.984386999997,
+                "totalMs": 1157706.248659,
+                "arenaNodes": "288",
+                "ownedArenaNodes": "10476",
+                "memory": {
+                  "rss": 1323839488,
+                  "heapTotal": 556027904,
+                  "heapUsed": 508176720,
+                  "external": 4809557,
+                  "arrayBuffers": 2812408
+                }
+              }
+            ],
+            "sampleIndex": 5,
+            "sample": "Aé€😀"
+          }
+        }
+      ]
+    }
+  },
+  "generated": {
+    "runId": 39879401423,
+    "shards": [
+      {
+        "id": 120183768055,
+        "name": "t01f-generated-shards (3)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 120183768094,
+        "name": "t01f-generated-shards (5)",
+        "status": "completed",
+        "conclusion": "cancelled"
+      },
+      {
+        "id": 120183768126,
+        "name": "t01f-generated-shards (1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 120183768144,
+        "name": "t01f-generated-shards (4)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 120183768157,
+        "name": "t01f-generated-shards (2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 120183768172,
+        "name": "t01f-generated-shards (0)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "mixed": {
+      "jobId": 120183768094,
+      "conclusion": "cancelled",
+      "jobMinutes": 25,
+      "startedAt": "2026-10-23T01:30:18Z",
+      "completedAt": "2026-10-23T01:55:36Z",
+      "prefixMarkers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":55340.88065200001}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1777.6028129999977}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\""
+      ],
+      "casePass": false,
+      "shardReceipt": false,
+      "diagnosticTracing": false,
+      "interruptedApiUnknown": true,
+      "completedPeakRssMeasurement": false,
+      "observedAssertionFailure": false,
+      "observedHeapFailure": false
+    },
+    "aggregate": {
+      "jobId": 120196521995,
+      "conclusion": "failure"
+    }
+  },
+  "sameKernelEarlierDiagnostic": {
+    "source": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
+    "runId": 39873570107,
+    "completeMixedPass": true,
+    "wallSeconds": 1455.04,
+    "peakRssKiB": 1165840,
+    "scope": "Separate traced narrow success; not a replacement for this failed complete generated matrix."
+  },
+  "staticIterator": [
+    {
+      "name": "psKernelCacheStringHashStateWithFuel",
+      "body": "function* __ps$impl$psKernelCacheStringHashStateWithFuel(fuel, value, initial) { return (((fuel) === (0n)) ? initial : (yield* (function* () { {\n    const remaining = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n);\n    return (yield* __ps$invoke(psKernelCacheStringHashStep, value, (yield* __ps$invoke(psKernelCacheStringHashStateWithFuel, remaining, value, initial))));\n} })())); }\n__ps$implementations.set(psKernelCacheStringHashStateWithFuel, __ps$impl$psKernelCacheStringHashStateWithFuel);",
+      "anonymousGenerators": 1
+    }
+  ],
+  "interpretation": "Canonical6PASS/generated5PASS+mixedTIMEOUT is not full T01F or A. Native hash equivalence remains scoped. Host variance and a near-cap narrow pass do not establish adequate runtime margin."
+}

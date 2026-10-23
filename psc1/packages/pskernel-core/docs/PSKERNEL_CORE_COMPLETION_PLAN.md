@@ -1,3 +1,89 @@
+## Current: ae916 generated mixed TIMEOUT; bounded tail-data hash candidate
+
+Source ae916be40ec30a8a0caf5dd683eb7d1d54966849 ended with canonical
+all6shards+aggregate120194717097 PASS (8400executed assertions), generated
+5shards PASS but mixed120183768094 CANCELLED at unchanged25minute job cap.
+Its294requests/377metadata/singleton passed; no complete case/shard receipt,
+no completed peakRSS, no observed assertion/heap failure. Tracing was disabled,
+so the interrupted API is unknown. Aggregate120196521995 correctly FAILED.
+Exact all6 canonical measurements,source/provider/log/memory bindings,
+5generated successes/timeout and static remaining scheduler dispatch:
+evidence/2026-10-23-t01f-ae916-sharded-terminal.json.
+This is NOT a complete T01F qualification. The earlier16aac narrow mixed
+PASS1455.04s is separate and did not provide reliable final-run time margin.
+
+Owner-auth corrected final sourcefe4aa456fb8d9e488a98dfed836cc7c991a00591
+is still running its own five workflows:
+integration39884267668,correctness39884267679,research39884267645,
+Arena39884267651,profile39884267675. Native integration120188654676 and
+native correctness120188654332 PASS; native219proofs/27axiom-free allowed3.
+Continue collecting those exact existing runs; no duplicate/cancellation.
+Its production hash is the same previous candidate; it remains unqualified.
+The live containing HEAD is a NEW bounded optimization candidate, not fe4aa.
+
+Concrete bottleneck hypothesis: complete generated hash StateWithFuel still
+recurses through scheduler and invokes Step per fuel transition. Exact frozen
+4d530ea1... kernel code was statically authenticated and inspected. A previous
+same-byte traced mixed run spent726969ms V1DefEq,427855ms publicRunDag,
+154108ms V1WHNF. Those outer timings are diagnostic,not phase-isolated profiles.
+Current candidate moves the immutable primitive transition BEFORE the recursive
+call and inlines it, preserving exact hash values,Raw semantics,modulus,fuel
+outputs and all public partial stages. Result remains Prod Nat Nat.
+This is an UNQUALIFIED source/code-generation hypothesis. Lean may recurry it;
+the bounded gate must reject that rather than claiming an optimization.
+
+The five theorem STATEMENTS/assumptions and frozen19fb worker are unchanged;
+three proof tactics follow the new recurrence. Native/generated2730cases,
+8190public stages,13665assertions,long3 and entire String harness stay unchanged.
+No unchecked axiom,fixture weakening,resource increase,ownership or cache-key
+authorization change. Source axioms remain forbidden. New proof gates must pass.
+
+### Ready-to-copy continuation
+
+Fetch live work HEAD and integration123c41197950b6761be965fd21c57142ee2b0d1c,
+then fetch the already-triggered narrow hash preflight for this new source.
+Do not duplicate CI or inherit parent passes. The narrow workflow runs native
+proofs/fixture first,then builds real PSC1 and compiles ONLY ScalarHash's import
+closure before any complete kernel check/build. It requires exactly one normal
+StateWithFuel function containing a loop/continue and ZERO generator/run/invoke/
+wrap/Step/Mix machinery. It also retains pure Step,unstaged full hash,2730/8190
+matrix and long3 gates. Its marker is PSC1_HASH_TAIL_DATA_CODEGEN: PASS.
+If generated code is recurried or not a pure loop,retain its printed body/failure
+and choose the next concrete source fix. Do not suppress the falsified gate.
+Only after this bounded gate passes does complete authentic SelfHost checking,
+full TS7.0.2 compilation,retained controls and unchanged whole mixed replay run.
+Caps remainnative25/producer25,controls10,mixed25,fuel4096,2048MiB,emptyPATH.
+
+To avoid repeated full builds during this evidenced optimization,only the
+work/psc1-pskernel-t01f-string-20261022 push branch was temporarily removed
+from the FIVE full workflows. Other branch triggers and every job body remain
+unchanged. Existing fe4aa runs continue. Focus/V1profile/owner diagnostics remain
+manual-only; narrow hash push is active. After a COMPLETE narrow mixed PASS,
+restore that work-branch line in integration/correctness/research/Arena/profile
+using fresh files (retain fe4aa's corrected owner gate),disable narrow hash push,
+and run ONE coherent new final source. Both six-shard aggregates and all
+native/official/proof/provider24CLI+8API/research/measurements/unchanged32/384
+ABBA/full193/profile must re-execute at that exact source. No partial re-run
+attempt may silently reuse incompatible producer/receipt attempts.
+
+Historical scopedA9c87 stays valid; currentA/T01F OPEN. B OPEN (ordinary/mutual/
+nested V1 admission,recursive metadata,eager decode,four whole-op fallbacks).
+C latestae916 FAIL173semantic matches+2separate safety agreements+17timeouts+
+1Church resource exhaustion+0unsupported; all193 hashes retained. D OPEN;
+keep cold/warm/heap/Name-memory regressions,including owner diagnostic32owner
+ill-typed cold1.2885x and128owner trivial-sort warm1.2024x. Native equations,
+code shape and finite tests do not prove global soundness/backend preservation.
+Full-kernel DirectJS remains unsupported. No T05 until full T01F acceptance.
+Then T05 ordinary DAG admission,T06/T07,T04a;T04b separate. Actions Linux ONLY
+for builds/tests/kernel execution. Branch updates fresh expected_sha/non-force,
+preserve concurrency/history;no main merge/npm publish. Integrate only after
+required scoped qualification. One next task: evaluate this exact narrow
+tail-data candidate and fix its first evidenced failure without weakening gates.
+
+Earlier chronological entries below are historical.
+
+---
+
 ## Live qualification: fe4aa456 — exact source/run checkpoint
 
 Executable AND harness `fe4aa456fb8d9e488a98dfed836cc7c991a00591`.

@@ -50,10 +50,10 @@ theorem state_step_commutes (fuel : Nat) (value : String) (state : Prod Nat Nat)
         (psKernelCacheStringHashStep value state) =
       psKernelCacheStringHashStep value
         (psKernelCacheStringHashStateWithFuel fuel value state) := by
-  induction fuel with
+  induction fuel generalizing state with
   | zero => rfl
   | succ remaining ih =>
-      exact congrArg (psKernelCacheStringHashStep value) ih
+      exact ih (psKernelCacheStringHashStep value state)
 
 theorem state_fixed (fuel : Nat) (value : String) (state : Prod Nat Nat)
     (fixed : psKernelCacheStringHashStep value state = state) :
@@ -61,10 +61,10 @@ theorem state_fixed (fuel : Nat) (value : String) (state : Prod Nat Nat)
   induction fuel with
   | zero => rfl
   | succ remaining ih =>
-      change psKernelCacheStringHashStep value
-        (psKernelCacheStringHashStateWithFuel remaining value state) = state
-      rw [ih]
-      exact fixed
+      change psKernelCacheStringHashStateWithFuel remaining value
+        (psKernelCacheStringHashStep value state) = state
+      rw [fixed]
+      exact ih
 
 theorem scan_eq_before (fuel : Nat) (value : String) (position hash : Nat) :
     psKernelCacheStringHashScan fuel value position hash =
@@ -72,10 +72,9 @@ theorem scan_eq_before (fuel : Nat) (value : String) (position hash : Nat) :
   induction fuel generalizing position hash with
   | zero => rfl
   | succ remaining ih =>
-      change (psKernelCacheStringHashStep value
-        (psKernelCacheStringHashStateWithFuel remaining value (Prod.mk position hash))).snd =
+      change (psKernelCacheStringHashStateWithFuel remaining value
+        (psKernelCacheStringHashStep value (Prod.mk position hash))).snd =
           stringHashWorkerBefore (Nat.succ remaining) value position hash
-      rw [← state_step_commutes remaining value (Prod.mk position hash)]
       cases finished : String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) with
       | false =>
           simpa [psKernelCacheStringHashScan, psKernelCacheStringHashStep,

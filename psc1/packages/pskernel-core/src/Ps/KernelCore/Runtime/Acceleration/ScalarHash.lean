@@ -40,10 +40,22 @@ def psKernelCacheStringHashStateWithFuel
   match fuel with
   | Nat.zero => initial
   | Nat.succ remaining =>
-      /- Keep the byte transition a nonrecursive primitive-only data function,
-      so generated iteration does not allocate a byte-step generator. -/
-      psKernelCacheStringHashStep value
-        (psKernelCacheStringHashStateWithFuel remaining value initial)
+      /- Inline the pure transition before the tail call. Keeping the result in
+      data space lets the checked backend eliminate per-byte scheduler calls. -/
+      let position := Prod.fst initial;
+      let nextState :=
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+          initial
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd initial) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+              psKernelCacheHashModulus);
+      psKernelCacheStringHashStateWithFuel remaining value nextState
 
 def psKernelCacheStringHashScan
     (fuel : Nat)

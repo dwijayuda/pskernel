@@ -173,7 +173,7 @@ def main : IO Unit := do
   let rows := (List.range 65).map fun n =>
     psJsonArray (List.map (fun value => psNatToString value) (referenceValues n))
   IO.FS.writeFile "dist/js-statement-tests/native-values.json" (psJsonArray rows)
-  let samples := ["","abc","λ🙂","A\0é𝄞Z","𝄞","equal λ🙂 end","different"]
+  let samples := ["","abc","λ🙂",(String.Internal.append "A" (String.Internal.append (String.singleton (Char.ofNat 0)) "é𝄞Z")),"𝄞","equal λ🙂 end","different"]
   let pairs := samples.flatMap fun left => samples.map fun right =>
     psJsonArray [psJsonQuote left,psJsonQuote right,if psStringEq left right then "true" else "false"]
   IO.FS.writeFile "dist/js-statement-tests/native-strings.json" (psJsonArray pairs)

@@ -9,6 +9,7 @@ on:
       - psc1/scripts/generated-target-source-audit.mjs
       - psc1/host-tools/generated-target-profiles.mjs
       - psc1/test/DirectSelfHostPreflightTests.lean
+      - psc1/test/WasmBinary*.lean
       - psc1/scripts/direct-selfhost-preflight-tests.mjs
       - psc1/lakefile.lean
       - .github/workflows/diagnostic-psc1-direct-selfhost-preflight.yml

@@ -178,3 +178,25 @@ Lean120000ms and all semantic/resource policies remain unchanged. DirectJS
 qualification can proceed independently while Wasm-only source blockers are
 resolved. No new target is self-host-qualified yet. Prior TS/Rust receipts and
 branches remain preserved; no merge or publication.
+
+## Portable binary carrier architecture — 2026-10-24 Asia/Jakarta
+
+The98-module Wasm census at77f5121e/run40013895915 accepts model, runtime,
+validation, lowering and service transport; Binary alone refuses psWasmByte
+(UInt8.ofNat: unsupportedTerm). Strict IR deliberately refuses machine scalars;
+do not enable UInt8 or bypass that existing negative boundary solely for self-host.
+Instead74d9b8c9 moves the same single encoder algorithm to BinaryBytes.lean,
+using qualified Nat bytes normalized modulo256. Binary.lean preserves all68
+native APIs through carrier-only UInt8 adapters; the pure facade imports the
+portable encoder directly. No handwritten compiler/encoder fork or WAT fallback.
+Native-only retained original encoder tests cover all96 instruction forms,
+LEB/UTF8 edge cases, memory/global flags and import ordering; all-input modulus
+and bound proofs are checked in the Linux preflight. The initial native gate
+found unregistered test modules; this commit registers both explicit Lake roots.
+These new carrier/proof/source gates are pending; no Wasm G1 claim yet.
+
+DirectJS genuine qualification40012562356 at request b9b73a70 remains executing
+the immutable87-module source from c5ae2ecc/414cb6c2; subsequent Wasm-only
+normalizations do not change that owned closure. Draft174 preserves the new
+work for review and triggers existing Practical Core/seven-backend/native gates.
+No merge/publication; prior qualified Rust/TS branches remain unchanged.

@@ -480,6 +480,10 @@ lean_exe psc1_text_lookup_worker_normalization_tests where
   srcDir := "test"
   root := `TextLookupWorkerNormalizationTests
 
+lean_lib PsWasmBinaryCarrierReference where
+  srcDir := "test"
+  roots := #[`WasmBinaryReference, `WasmBinaryCarrierTests]
+
 lean_exe psc1_direct_selfhost_preflight_tests where
   srcDir := "test"
   root := `DirectSelfHostPreflightTests

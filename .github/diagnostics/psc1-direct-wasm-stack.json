@@ -2,18 +2,19 @@
   "schema": "psc1-retained-wasm-stack-diagnosis/1",
   "attempts": [
     {
-      "runId": 40028857732,
-      "requestCommit": "bef0e260a062f89981af514480d9bd7414047d97",
-      "sourceCommit": "4f88fac688408adb7a4c059539746719c39c0170",
-      "artifactId": 12534143433,
-      "artifactDigest": "sha256:fc447bc8aea156bd8f44e43559ff50ec7d61351bfe1a46dde8829cef0e9a1761"
+      "runId": 40031965458,
+      "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
+      "sourceCommit": "ef06b357723b2265759dccb955c1575a1bbb78bf",
+      "artifactId": 12535892025,
+      "artifactDigest": "sha256:a2593af908c9ec59985a6c8f19349b2e73d458f88aaea4baab551b4d766fcccd"
     }
   ],
-  "serviceSha256": "97ffc3e636393abff03ae218c118e44fb5678ec2dc0828eecc31881f542c0ae6",
-  "requestSha256": "788666f9adc7fafd1b476b729dc65c9cffac93cb3fd42b5502d0ffe441ccb18e",
-  "closure": "362daf0af085908865d09a74276431b010c9f60e914370a65382e79031315f1f",
+  "serviceSha256": "1b7cc49ab3f1b22e8f6c800305c2a8ea05ed87ea3bdf983905bcb20fb6301ba5",
+  "requestSha256": "4529904f51dd278f15740190b11edc907d383efd1851a7959895400ac2beef20",
+  "closure": "0313a6571d90c544bc6b88ed9a4809ca0d74733ed86e24ac57ec7766a0295a29",
   "resolveOnly": [
-    2712
+    6,
+    2286
   ],
-  "purpose": "Map exact829.7-second G2 terminal stack using immutable generated binary and candidate IR, without repeating compiler execution."
+  "purpose": "Resolve exact terminal G2 repeated frames after foundation fix; read-only, no repeated compiler execution."
 }

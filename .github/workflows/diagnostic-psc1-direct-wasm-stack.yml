@@ -39,8 +39,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '40028857732'
-          artifact-ids: '12534143433'
+          run-id: '40031965458'
+          artifact-ids: '12535892025'
           path: input/wasm-stack
       - name: Capture actual retained G2 call chain with unchanged execution stack
         working-directory: psc1

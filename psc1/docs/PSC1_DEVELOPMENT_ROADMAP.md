@@ -1,70 +1,45 @@
 # PSC1 development roadmap
 
-Updated 2026-10-23 16:14:04 UTC. [AI_WORK_STATE](../AI_WORK_STATE.md) owns continuation.
-Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json) owns14 families/
-37 finite criteria. [Compact evidence](PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json)
-binds the full [canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
+Updated 2026-10-23 UTC. [AI_WORK_STATE](../AI_WORK_STATE.md) owns continuation.
+Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 criteria.
+[Compact evidence](PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json) binds the
+full [canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json),
+including17 completed actual attempts, preserved failures and immutable artifacts.
 
-## Qualified state
+Corrected TS source748fd5fd/request079b26b9/run39993829327 independently qualifies
+genuine G1/G2/G3 and exact source/admissions/IR/ten-case fixed points under1800s.
+G2/G3:545895/588552ms,3051772/3005236KiB maxRSS. Audit39996915835 verifies
+native G1 source equality, retained bytes and immutable iteration captures.
+Same-run emitted JS SHA2560f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2
+matches across all generations. Focused39992803465 passes all retained-original
+proofs/strict IR/native capture comparisons/both85-module grammars/runtime guards.
+The closure regression exposed by39990180405 is corrected, its failure preserved.
 
-Integrated5ce2fc74/mergea61eecf4/normal39909569028 qualifies37/37 criteria,
-both grammars/all seven backends/four application categories and all selected
-correctness, independent admission, strict IR, negative/native-package gates.
-Later source remains isolated; documentation static/gate is not source qualification.
+[Normal39993835819](https://github.com/dwijayuda/pskernel/actions/runs/39993835819)
+PASSED at request/head079b26b945ceda507e89846aaab651e17fcb3b06,
+tested merge9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01 (identical Git tree to head).
+Full Linux job120557858120 and final gate120570273055 passed:
+37/37 qualified,0 blocked, releaseReady=true, both .lean/.ps grammars,
+all seven backends, all four application categories, minimum-Python compatibility,
+installed native package/standalone IO and explicit negative/refusal boundaries.
+Artifact12521052731 digest010fff20b7522ae545672fb06e9d2c2500b40c81b53ec45e74be6b273de154d5,
+expires2026-11-06T17:55:42Z. This qualifies the source candidate; draft173 remains
+unmerged. The post-qualification record update changes documentation only.
 
-Rust5e0b548e/request7d8865a0/run39908529181 qualifies genuine G1/G2/G3/fixed
-point under1800s,692788/660042ms. Preserve untouched branch83e18fe1.
-240s and independent clean builds remain incomplete.
+Preserve qualified Rust branch83e18fe1/source5e0b548e/run39908529181:
+actual G1/G2/G3/exact fixed point,692788/660042ms. Neither target's1800s correctness
+replaces original240s performance. Prior exact240s TS39988689772 fails G2;
+current corrected G2 also exceeds240s. Same-run executable equality is narrower
+than independent clean-build repeatability.
 
-TypeScript is G1-only in all14 completed attempts. Encoder-only39973570792 passes
-G1/ten cases then G2 timeout1800231ms/3064892KiB; audit39978659027 verifies
-identities and actual worker paths. No completed TS G3/fixed-point evidence yet.
+| Order | Remaining work | Finite acceptance |
+| --- | --- | --- |
+|1|Preserve this qualified draft173 checkpoint for review; next implementation work is measured current-source240s performance and independent clean-build reproducibility. No source CI or self-host rerun is needed for this documentation-only checkpoint.|Preserve existing37 criteria, all seven target mappings, applications, official independent Lean, strict IR and negative boundaries|
+|2|Measured current compiler performance|Original240s qualification, source identities and unchanged fuel/heap/stack/stream/wire; no unchanged duplicate timeout run or speculative redesign|
+|3|Independent reproducibility|Separate clean environments reproduce exact admitted compiler sources and comparable generated executable identities|
+|4|Distribution/release|Existing native/standalone package and application gates; no merge/npm publication without authorization|
 
-## Dependency-ordered queue
-
-| Order | Work | Current evidence | Acceptance |
-| --- | --- | --- | --- |
-|1|Complete coherent TS correctness trial|Source3ac04559/requestd864d598/run39984419742/job120519775807 is executing; code0decfd26 passes all-input proofs, actual G1 IR mechanism checks and both85-module grammars in39983383955|Generated G2/G3 independently admitted/built/executed, exact source/closure/canonical admission/original/transformed IR/ten-case fixed points under1800s|
-|2|Original performance target|240s remains separate and unqualified|Genuine performance-240s qualification with identical checking/fuel/heap/stack/negative policies|
-|3|Coherent integration|Later code remains isolated; Rust reference untouched|Fresh HEAD/non-force updates, preserve TS typed/generic guards and Rust ownership/private safe Drop, full seven-backend/application CI|
-|4|Reproducibility/distribution readiness|Same-run Rust executable equality and TS G1 records are narrower evidence|Independent clean builds and readable generated artifacts; no inference from same-run equality|
-|5|Distribution|Packages/artifacts unpublished|Required final qualification and explicit merge/publication authorization|
-
-Do not rerun an unchanged failed source or re-audit old artifacts.
-Read current genuine trial terminal receipt first. Audit its new immutable artifact
-once, including actual G1 source equality to focused shape source79b9e992.
-If blocked, measure the new executing source before selecting another change.
-
-## Measured source mechanisms
-
-Lazy symbol tokens retain only2 UTF8 views; source equality/fuel stays identical.
-Cold size does not admit arrays; valid cached extraction slices, invalid/cold
-offsets use the old scan. Existing16000/95576/runtime/negative checks remain.
-Eight erasure workers and two IR encoder workers retain all-input equivalence,
-public APIs/default4096/whnf/transport/error order and source/saturated IR guards.
-
-The completed one-request progressive diagnosis39978891505 publishes verified
-240/600/1200/1750s evidence. Text insertion/lookup/JSON generation appear at600.
-At1200/1750 every sampled stack is native WeakMap insertion in the name visitor.
-Current text/join/lookup workers avoid recursive function construction before
-supplied arguments. Constructor-directed name visiting creates callbacks only
-where needed; literal/variable cases have none. Fuel0 stays conservative true,
-default4096 and fresh-name capture/collision/refusal policies remain.
-
-All-input text insert/join proofs use no axioms; lookup public equality standard
-Quot.sound; visitor arbitrary fuel/expression/query equality propext/Quot.sound.
-100001-entry first slots, ordering/Unicode/escaping/separators, all11 AST
-constructors/binders/match bindings, existing regressions and both grammars pass.
-Actual saturated data worker arities2/4/2/3 and pre-dispatch no-callback checks pass.
-Legitimate branch callbacks remain; do not impose a global zero-lambda rule.
-
-The132-source-pattern census is syntactic and includes false positives; it is not
-a queue of132 defects. Native-invoke/manual-iterator experiments remain unadopted;
-no small-corpus timing or bounded CPU window substitutes for genuine qualification.
-
-Keep shared source/frontend/elaborator/checked IR/verifier and all seven emitters.
-Preserve independent official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
-Default240s/15min; only actual G2/G3 correctness1800s/120min job/110min step.
-G1/corpus/build240s, checker120s, cleanup5s, streams32MiB/wire128MiB; all fuel,
-heap/stack, strict validation, identities and ABI boundaries unchanged.
-DirectJS G1/heap evidence and ExpressionV2 research remain separate.
+Use shared source/frontend/elaboration/checked IR for all backends. Preserve generic
+fallbacks and explicit unsupported-ABI refusals. Keep DirectJS regression coverage,
+qualified Rust history and separate PSKernel research. Deferred feature expansion
+does not remove working language functionality.

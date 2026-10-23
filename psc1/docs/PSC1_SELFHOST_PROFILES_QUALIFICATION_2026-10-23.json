@@ -1,14 +1,16 @@
 {
   "schema": "psc1-selfhost-profile-results-projection/1",
-  "recordedAt": "2026-10-23 16:14:04 UTC",
+  "recordedAt": "2026-10-23T17:58:00Z",
   "projectionOf": "PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json",
-  "sourceReceiptGitBlob": "1d47514b79d9ddbb6709695d397c9f88874512e5",
+  "sourceReceiptGitBlob": "dc6397e02aa414048f39126d02e7f10bf974de46",
   "authority": "read-only projection of actual canonical CI receipts; not a new release contract",
   "normalQualification": {
-    "sourceCommit": "5ce2fc74b9f01682832ddc10ec9ef27f26458564",
-    "testedMerge": "a61eecf46ded19eedcdefcb320aa33118cd8f2ad",
-    "runId": 39909569028,
+    "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+    "head": "079b26b945ceda507e89846aaab651e17fcb3b06",
+    "testedMerge": "9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01",
+    "runId": 39993835819,
     "conclusion": "success",
+    "fullJobId": 120557858120,
     "fullSteps": 47,
     "practicalCore": {
       "counts": {
@@ -20,7 +22,14 @@
       "releaseReady": true
     },
     "targets": 7,
-    "grammars": 2
+    "grammars": 2,
+    "integrated": false,
+    "pullRequest": 173,
+    "artifact": {
+      "id": 12521052731,
+      "digest": "sha256:010fff20b7522ae545672fb06e9d2c2500b40c81b53ec45e74be6b273de154d5",
+      "expiresAt": "2026-11-06T17:55:42Z"
+    }
   },
   "profiles": {
     "performance": {
@@ -924,6 +933,263 @@
       },
       "reportSha256": "ae47df7c7ca489d89b291dfb3c9c90850207f61b1f6504b59d624da8f1762825",
       "auditRunId": 39978659027
+    },
+    {
+      "id": "ts-text-lookup-visitor-correctness-1800s",
+      "target": "ts",
+      "profile": "correctness-1800s",
+      "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
+      "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+      "runId": 39984419742,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39984419742",
+      "status": "passed",
+      "g1Qualified": true,
+      "correctnessQualified": true,
+      "performance240Qualified": false,
+      "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-and-ten-case-observations",
+      "inputModules": 85,
+      "sourceClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
+        "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+        "admissionsSha256": "9898ff573f4cad85470f5e7b8ecaeeabc6ad071729d0b792a4e1c0d926a7b267",
+        "originalIrSha256": "f16b9d7d87688f6a641a95ae061a2ad5c47e9cd2234e5ab2c92b697a85703586",
+        "specializedIrSha256": "3f3e994f2f23f5773df03c67a797472e91e59417fb2e70e63572b76ca420ac6c",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "21c57677c86dbe6c0cd8fee0dc283e982bca4700319d966a78faccfdc6fcb9c4",
+          "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+          "executableSha256": "31c7723738d004e1f61785cd538412fc8e4e7d1c39a46c3a14d85bef7b2ff9af",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        },
+        {
+          "generation": "G2-service",
+          "sha256": "1a2e2db90075c926ef1b975d99cabf282ae48337fd58ec0dfe3acfbcda285a90",
+          "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+          "executableSha256": "31c7723738d004e1f61785cd538412fc8e4e7d1c39a46c3a14d85bef7b2ff9af",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        },
+        {
+          "generation": "G3-service",
+          "sha256": "3a40898d69a8faefdb039ce6c1948fa8480c3cd2e74433a93ec502c793a1972d",
+          "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+          "executableSha256": "31c7723738d004e1f61785cd538412fc8e4e7d1c39a46c3a14d85bef7b2ff9af",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "21c57677c86dbe6c0cd8fee0dc283e982bca4700319d966a78faccfdc6fcb9c4",
+          "requestSha256": "8dd10a43a4262e7130528a6f3799a0158e5a78c52269f4a80de37357f08a8571",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 3004104,
+          "peakTreeRssKiB": 3004104,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 641519,
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "serviceMaxRssKiB": 3004104
+        },
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G3-self",
+          "serviceSha256": "1a2e2db90075c926ef1b975d99cabf282ae48337fd58ec0dfe3acfbcda285a90",
+          "requestSha256": "934b96b1c0f92c5643c98ecbd7c21536a950576f45feed83c5d8cb3b542906ca",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 3013064,
+          "peakTreeRssKiB": 2964036,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 616135,
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "serviceMaxRssKiB": 3013064
+        }
+      ],
+      "artifact": {
+        "id": 12516855369,
+        "digest": "sha256:e92065e83fe52d701f4342d7c63f3a85895ccad9094034f8bc552fbb21a39423",
+        "expiresAt": "2027-01-21T16:09:31Z"
+      },
+      "reportSha256": "a6b95426450b02514d228d231e6a81a5db1f082a4a0ca846f512253eee84a566",
+      "auditRunId": 39988499005
+    },
+    {
+      "id": "ts-text-lookup-visitor-performance-240s",
+      "target": "ts",
+      "profile": "performance-240s",
+      "sourceCommit": "5b873e2092e59d2ed8add2e1e9cc0bd66620dcd5",
+      "requestCommit": "3d426594a09fcfeba8e4c142976571726e479e99",
+      "runId": 39988689772,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39988689772",
+      "status": "failed",
+      "g1Qualified": true,
+      "correctnessQualified": false,
+      "performance240Qualified": false,
+      "fixedPoint": "not-run",
+      "inputModules": 85,
+      "sourceClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
+        "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+        "admissionsSha256": "9898ff573f4cad85470f5e7b8ecaeeabc6ad071729d0b792a4e1c0d926a7b267",
+        "originalIrSha256": "f16b9d7d87688f6a641a95ae061a2ad5c47e9cd2234e5ab2c92b697a85703586",
+        "specializedIrSha256": "3f3e994f2f23f5773df03c67a797472e91e59417fb2e70e63572b76ca420ac6c",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "b93c8c1d521997e5f3e04615e9c0da5bf2aacb31d916e17b6f7c52ca3fba2ab6",
+          "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+          "executableSha256": "31c7723738d004e1f61785cd538412fc8e4e7d1c39a46c3a14d85bef7b2ff9af",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "b93c8c1d521997e5f3e04615e9c0da5bf2aacb31d916e17b6f7c52ca3fba2ab6",
+          "requestSha256": "8dd10a43a4262e7130528a6f3799a0158e5a78c52269f4a80de37357f08a8571",
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxRssKiB": 2027880,
+          "peakTreeRssKiB": 2027880,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 240170,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        }
+      ],
+      "artifact": {
+        "id": 12516602859,
+        "digest": "sha256:5601f1334569fe3880a1a71ed10ae61e19461ef275f091a6822e11af11a8fdd3",
+        "expiresAt": "2027-01-21T16:40:09Z"
+      },
+      "reportSha256": "5a4951ce6342c4233cbb74395b9cbd30ffca80bac6ad280d7bd7cb85ee7e3285",
+      "auditRunId": 39990538985
+    },
+    {
+      "id": "ts-immutable-generator-captures-correctness-1800s",
+      "target": "ts",
+      "profile": "correctness-1800s",
+      "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+      "runId": 39993829327,
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39993829327",
+      "status": "passed",
+      "g1Qualified": true,
+      "correctnessQualified": true,
+      "performance240Qualified": false,
+      "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-and-ten-case-observations",
+      "inputModules": 85,
+      "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+      "bootstrapIdentity": {
+        "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+        "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+        "admissionsSha256": "f845eca356137550f827b17d867ac13823d31883fdada9c1f88668177fa21de2",
+        "originalIrSha256": "796c3f53665d9a141a0db4e01b195e5abfa6b97a4fe44f12dc569b6ac4172dad",
+        "specializedIrSha256": "56d30dcd388fe32fbe4c2dfd537e1447a1df46f4569cab5a4f986c12c0cb9b7b",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerTsServiceCandidate"
+        ]
+      },
+      "serviceArtifacts": [
+        {
+          "generation": "G1-service",
+          "sha256": "ded61a930d23c4188123262fceb91ccb8722fcaaacc71a6cd93c1754debba1a8",
+          "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+          "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        },
+        {
+          "generation": "G2-service",
+          "sha256": "43c6d8791b846c45ba104d61ed06815996d4334102ca8531d7c85e42f1367f78",
+          "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+          "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        },
+        {
+          "generation": "G3-service",
+          "sha256": "7219b0dae13ba539d884c178b4b89e2a120a77217d86f29b545b5e3f869afbc1",
+          "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+          "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+          "compilerVersion": "Version 7.0.2",
+          "rustOptimizationLevel": null
+        }
+      ],
+      "selfRequests": [
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G2-self",
+          "serviceSha256": "ded61a930d23c4188123262fceb91ccb8722fcaaacc71a6cd93c1754debba1a8",
+          "requestSha256": "50247809286ae499d251c77fe45c40d9c45226be184d72e7baacba5220c0779d",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 3051772,
+          "peakTreeRssKiB": 3002116,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 545895,
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "serviceMaxRssKiB": 3051772
+        },
+        {
+          "role": "generated-compiler",
+          "target": "ts",
+          "id": "G3-self",
+          "serviceSha256": "43c6d8791b846c45ba104d61ed06815996d4334102ca8531d7c85e42f1367f78",
+          "requestSha256": "74cd049b3f2f7456c2acf9f592431d3196ab1e12a0459f4d6aa9fc027d5f1fde",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 3005236,
+          "peakTreeRssKiB": 2955676,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 588552,
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "serviceMaxRssKiB": 3005236
+        }
+      ],
+      "artifact": {
+        "id": 12519304338,
+        "digest": "sha256:21b554aaf2803577727554861ba7fd4800cf90706c6ca6a3c1b665e4c99d8962",
+        "expiresAt": "2027-01-21T17:17:16Z"
+      },
+      "reportSha256": "6167ed233611007c693ebbf6575abfc3a86ecb5aecf065f0207f514b6e566ce2",
+      "auditRunId": 39996915835
     }
   ],
   "currentDiagnosis": {
@@ -968,7 +1234,7 @@
       "dominant": "WeakCollectionSet26481/27754 ticks;type encoder23006/expr encoder3397 beneathWeakMapSet",
       "qualification": false
     },
-    "next": "Read actual coherent text/lookup/name-visitor trial39984419742 terminal result, audit its immutable artifact once and verify native shape G1 source hash. Ifcorrect, run original240s separately; ifblocked, measure new current G1 before source changes.",
+    "next": "Optimize measured current generated compiler workloads toward240s, then qualify independent clean builds; preserve qualified draft173 and untouched Rust reference; no merge/publication authorized.",
     "encoderTrial": {
       "runId": 39973570792,
       "status": "failed",
@@ -1040,83 +1306,129 @@
           "scope": "text insertion, lookup, JSON generation and scheduler work; early/middle sample only"
         }
       }
+    },
+    "qualificationResult": {
+      "branch": "perf/psc1-erasure-applied-workers-20261023",
+      "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+      "runId": 39993829327,
+      "jobId": 120552082576,
+      "status": "qualified-G1-G2-G3-exact-fixed-point-and-normal37-of37-candidate",
+      "profile": "correctness-1800s",
+      "nativeProofRunId": 39992803465,
+      "nativeProofJobId": 120550535646,
+      "auditRunId": 39996915835,
+      "auditJobId": 120562731012,
+      "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+      "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+      "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+      "g2ElapsedMs": 545895,
+      "g3ElapsedMs": 588552,
+      "g2MaxRssKiB": 3051772,
+      "g3MaxRssKiB": 3005236,
+      "independentCleanBuilds": "not-qualified",
+      "normalRunId": 39993835819,
+      "testedMerge": "9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01",
+      "normalStatus": "qualified37-of37-seven-backend-both-grammar-applications-packages",
+      "integrationPullRequest": 173,
+      "integrated": false
+    },
+    "integrationCaptureCorrection": {
+      "branch": "perf/psc1-erasure-applied-workers-20261023",
+      "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "integrationPullRequest": 173,
+      "status": "qualified-G1-G2-G3-exact-fixed-point-and-normal37-of37-candidate",
+      "nativeProofRunId": 39992803465,
+      "normalRunId": 39993835819,
+      "priorIntegrationFailure": {
+        "runId": 39990180405,
+        "jobId": 120539959341,
+        "case": "lean-ts higherOrderRecursionCase(false)",
+        "timeoutMs": 120000,
+        "artifactId": 12517966690
+      },
+      "qualifiedPreCorrection": {
+        "branch": "perf/psc1-erasure-applied-workers-20261023",
+        "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
+        "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
+        "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+        "runId": 39984419742,
+        "jobId": 120519775807,
+        "profile": "correctness-1800s",
+        "status": "source-specific G1/G2/G3/exact fixed point passed; integration regression discovered separately",
+        "sourceClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
+        "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+        "executableSha256": "31c7723738d004e1f61785cd538412fc8e4e7d1c39a46c3a14d85bef7b2ff9af",
+        "auditRunId": 39988499005
+      },
+      "nativeProofStatus": "success",
+      "nativeProofJobId": 120550535646,
+      "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+      "runId": 39993829327,
+      "jobId": 120552082576,
+      "expectedNativeShapeSourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+      "expectedNativeShapeClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+      "normalFocusedStatus": "all focused/native/PHP/application, closure/G1/full and final gate success",
+      "testedMerge": "9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01",
+      "qualification": {
+        "branch": "perf/psc1-erasure-applied-workers-20261023",
+        "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+        "runId": 39993829327,
+        "jobId": 120552082576,
+        "status": "qualified-G1-G2-G3-exact-fixed-point-and-normal37-of37-candidate",
+        "profile": "correctness-1800s",
+        "nativeProofRunId": 39992803465,
+        "nativeProofJobId": 120550535646,
+        "auditRunId": 39996915835,
+        "auditJobId": 120562731012,
+        "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+        "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+        "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+        "g2ElapsedMs": 545895,
+        "g3ElapsedMs": 588552,
+        "g2MaxRssKiB": 3051772,
+        "g3MaxRssKiB": 3005236,
+        "independentCleanBuilds": "not-qualified",
+        "normalRunId": 39993835819,
+        "testedMerge": "9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01",
+        "normalStatus": "qualified37-of37-seven-backend-both-grammar-applications-packages",
+        "integrationPullRequest": 173,
+        "integrated": false
+      },
+      "normalStatus": "qualified37-of37-seven-backend-both-grammar-applications-packages"
     }
   },
   "preferredContinuation": {
     "branch": "perf/psc1-erasure-applied-workers-20261023",
-    "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
-    "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
-    "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
-    "runId": 39984419742,
-    "jobId": 120519775807,
-    "status": "in_progress",
-    "nativeProofRunId": 39983383955,
+    "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+    "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+    "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+    "runId": 39993829327,
+    "jobId": 120552082576,
+    "status": "qualified-G1-G2-G3-exact-fixed-point-and-normal37-of37-candidate",
     "profile": "correctness-1800s",
-    "expectedNativeShapeSourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
-    "expectedNativeShapeClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
-    "scope": "continue current coherent source; await actual terminal receipt, no unchanged duplicate; preserve all14 completed historical receipts, qualified Rust and separate240s",
-    "completedDiagnosis": {
-      "runId": 39978891505,
-      "status": "completed diagnostic; one G2 replay timed out1750091ms/2898528KiB; no response/admission/adoption",
-      "qualification": false,
-      "phases": [
-        {
-          "phase": 240,
-          "artifactId": 12512911643,
-          "artifactDigest": "sha256:411a6ef3d22907b28b0f6784c94709b0756922f97329a4758400374217905715",
-          "artifactExpiresAt": "2027-01-21T15:30:43Z",
-          "readRunId": 39979697224,
-          "readCommit": "fcdca79fef427358e2dfe322e856d594a77a0417",
-          "receiptSha256": "80ebfdc7927dc31b671332976ce2b90a659edb9a9d5ed6477f31e4adcefe944e",
-          "ticks": 27522
-        },
-        {
-          "phase": 600,
-          "artifactId": 12512812701,
-          "artifactDigest": "sha256:a686cdda7af4f17e9cd499bed5c1caf3b41a1593a23fb52a623bd6fee5de3dd1",
-          "artifactExpiresAt": "2027-01-21T15:30:43Z",
-          "readRunId": 39980608508,
-          "readCommit": "8a0b0774e45733cbb80b1d7e4b85fb34ca023b72",
-          "receiptSha256": "5ddcf053ad5e8740f8969e7345e61b982fa1b00f588024a7cfd5a9f4608bf4c6",
-          "ticks": 27178
-        },
-        {
-          "phase": 1200,
-          "artifactId": 12512829379,
-          "artifactDigest": "sha256:8a921516d3df815a82658cc1be0ab6fede2cd6adfbb8995dda3bab7c6a757472",
-          "artifactExpiresAt": "2027-01-21T15:30:43Z",
-          "readRunId": 39982434007,
-          "readCommit": "4efe9c6fd0c57eb14c99b83b0f1c60f86f0a1317",
-          "receiptSha256": "6be9f850144f77eaecbe88dcc4b1fa7694fbe6ebdd1714e46764836cbe5ff2c9",
-          "ticks": 28004
-        },
-        {
-          "phase": 1750,
-          "artifactId": 12514601466,
-          "artifactDigest": "sha256:477a6d8d5d4b2e276fc63c0a35c89f596b36cc36e9d15fbd157a548f4da445b8",
-          "artifactExpiresAt": "2027-01-21T15:30:43Z",
-          "readRunId": 39983586849,
-          "readCommit": "676150e353f036663c891e9e1fdde75359da6664",
-          "receiptSha256": "76f562c478dca230b0e2147c3e581a78135a40fda121c89eeeb83a765d4fb928",
-          "ticks": 28061
-        }
-      ],
-      "measuredRemainingClass": {
-        "phase1200": {
-          "ticks": 28004,
-          "scope": "all sampled stacks nativeNode -> WeakMapPrototypeSet -> psTsExprUsesNameWithFuel$worker"
-        },
-        "phase1750": {
-          "ticks": 28061,
-          "scope": "all sampled stacks same name visitor metadata insertion"
-        },
-        "phase600": {
-          "ticks": 27178,
-          "weakCollectionSet": 2575,
-          "scope": "text insertion, lookup, JSON generation and scheduler work; early/middle sample only"
-        }
-      }
-    }
+    "nativeProofRunId": 39992803465,
+    "nativeProofJobId": 120550535646,
+    "auditRunId": 39996915835,
+    "auditJobId": 120562731012,
+    "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+    "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+    "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+    "g2ElapsedMs": 545895,
+    "g3ElapsedMs": 588552,
+    "g2MaxRssKiB": 3051772,
+    "g3MaxRssKiB": 3005236,
+    "independentCleanBuilds": "not-qualified",
+    "normalRunId": 39993835819,
+    "testedMerge": "9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01",
+    "normalStatus": "qualified37-of37-seven-backend-both-grammar-applications-packages",
+    "integrationPullRequest": 173,
+    "integrated": false,
+    "next": "Optimize measured current generated compiler workloads toward240s, then qualify independent clean builds; preserve qualified draft173 and untouched Rust reference; no merge/publication authorized."
   },
   "mapExperiment": {
     "selectedForPromotion": false,
@@ -1171,7 +1483,12 @@
       "partialVariants": "retained"
     },
     "independentKernelAndStrictIrAndNegativesAndPolicies": "unchanged",
-    "sourcePromotion": "not integrated; full seven-backend/application qualification required",
+    "sourcePromotion": {
+      "status": "qualified corrected candidate: self-host39993829327, normal37/37/both grammars/seven targets/apps/packages39993835819; draft173 unmerged",
+      "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "normalRunId": 39993835819,
+      "selfHostRunId": 39993829327
+    },
     "encoder": {
       "branch": "perf/psc1-erasure-applied-workers-20261023",
       "codeCommit": "c3fe670ffbd8a56be552910bbb3a0a20170b2b11",
@@ -1325,7 +1642,15 @@
         "textJoin": "none",
         "lookupPublic": "Quot.sound"
       },
-      "mechanism": "fully applied recursive data workers avoid constructing functions over unused suffixes; public types and data ordering unchanged"
+      "mechanism": "fully applied recursive data workers avoid constructing functions over unused suffixes; public types and data ordering unchanged",
+      "currentQualification": {
+        "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "runId": 39993829327,
+        "auditRunId": 39996915835,
+        "status": "qualified-G1-G2-G3-exact-fixed-point-and-normal37-of37-candidate",
+        "normalStatus": "qualified37-of37-seven-backend-both-grammar-applications-packages",
+        "normalRunId": 39993835819
+      }
     },
     "nameVisitor": {
       "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
@@ -1488,7 +1813,399 @@
         "profile": "correctness-1800s",
         "expectedNativeShapeSourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
         "expectedNativeShapeClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2"
+      },
+      "currentQualification": {
+        "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "runId": 39993829327,
+        "auditRunId": 39996915835,
+        "status": "qualified-G1-G2-G3-exact-fixed-point-and-normal37-of37-candidate",
+        "normalStatus": "qualified37-of37-seven-backend-both-grammar-applications-packages",
+        "normalRunId": 39993835819
       }
+    },
+    "generatorIterationCapture": {
+      "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "focusedRunId": 39992803465,
+      "successfulJobId": 120550535646,
+      "attempt": 2,
+      "initialAttempt": "native proofs and strict IR guards passed; optional Linux TS binary missing from npm install; single job retried unchanged source",
+      "capture": {
+        "schema": "psc1-ts-generator-iteration-capture/1",
+        "testedCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "sourceSha256": "3528bdd0ef9b5748c3cea931ce2e9134fd0aba5ebf2befd0144b4c31af382de6",
+        "comparisons": 10,
+        "reference": "independently executed native Lean recursion",
+        "strictIr": true,
+        "strictTypeScript": true,
+        "checks": [
+          "function and changing Nat captures",
+          "unused parameter collision",
+          "brand/tag collision",
+          "freshness fuel-zero refusal",
+          "actual optimized generator loop"
+        ]
+      },
+      "nativeShape": {
+        "schema": "psc1-text-lookup-worker-shapes/1",
+        "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+        "sourceModules": 85,
+        "requestSha256": "6afafbb8d11255c5b1853d10c84b98ed8b9c6cb23e361186a5a1a53940710c15",
+        "candidateSha256": "3804fe644b870cb34a50e45b47d5342dd6b326b492511a79507ad44e1023f129",
+        "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+        "seedHash": "e269cd003f20e576a3955ee98806ffd15e367aba54f5c299d41d7d30d88bb5d4",
+        "event": {
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_target_service_seed",
+          "args": [
+            "ts",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/text-lookup-workers/G1-bootstrap.request.json",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/text-lookup-workers/G1-bootstrap.candidate.json"
+          ],
+          "status": 0,
+          "signal": null,
+          "elapsedMs": 14787,
+          "maxRssKiB": 384600,
+          "peakTreeRssKiB": 322568,
+          "error": null
+        },
+        "witnesses": [
+          {
+            "name": "psTextInsertApplied",
+            "arity": 2,
+            "helper": "psTextInsertApplied_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "named",
+                  "List$spec$N$Option$spec$String",
+                  []
+                ]
+              ],
+              [
+                "__pscWorkerArg$0__________________________________________________________________",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            "helperResult": [
+              "named",
+              "List$spec$N$Option$spec$String",
+              []
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTextJoinApplied",
+            "arity": 4,
+            "helper": "psTextJoinApplied_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ],
+              [
+                "$psc0SH_1",
+                [
+                  "named",
+                  "List$spec$String",
+                  []
+                ]
+              ],
+              [
+                "__pscWorkerArg$0___________________________________________________________________",
+                [
+                  "primitive",
+                  "bool"
+                ]
+              ],
+              [
+                "__pscWorkerArg$1___________________________________________________",
+                [
+                  "named",
+                  "PsTextBuilder",
+                  []
+                ]
+              ]
+            ],
+            "helperResult": [
+              "primitive",
+              "string"
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTsLookupApplied",
+            "arity": 2,
+            "helper": "psTsLookupApplied",
+            "helperParameters": [
+              [
+                "entries",
+                [
+                  "named",
+                  "List$spec$N$Prod$spec$String$String",
+                  []
+                ]
+              ],
+              [
+                "name",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            "helperResult": [
+              "named",
+              "Option$spec$String",
+              []
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTsExprUsesNameWithFuelWorker",
+            "arity": 3,
+            "helper": "psTsExprUsesNameWithFuelWorker_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "primitive",
+                  "nat"
+                ]
+              ],
+              [
+                "$psc0SH_2",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ],
+              [
+                "__pscWorkerArg$0_________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+                [
+                  "named",
+                  "PsVerifiedIrExpr",
+                  []
+                ]
+              ]
+            ],
+            "helperResult": [
+              "primitive",
+              "bool"
+            ],
+            "helperBodyLambdas": 8
+          }
+        ],
+        "qualification": false,
+        "admission": "not-run; genuine qualification separate"
+      },
+      "grammarAudits": [
+        {
+          "target": "ts",
+          "grammar": "lean",
+          "modules": 85,
+          "refused": []
+        },
+        {
+          "target": "ts",
+          "grammar": "ps",
+          "modules": 85,
+          "refused": []
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 12519590213,
+          "name": "psc1-ts-utf8-view-tests-748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+          "size_in_bytes": 2435632,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12519590213",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12519590213/zip",
+          "expired": false,
+          "created_at": "2026-10-23T17:16:04Z",
+          "expires_at": "2027-01-21T17:14:00Z",
+          "updated_at": "2026-10-23T17:16:04Z",
+          "digest": "sha256:dac7745a946ba7941ea6f1471c3af8ba80c24784c99cea6132107887bb2ebf24",
+          "workflow_run": {
+            "id": 39992803465,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "perf/psc1-erasure-applied-workers-20261023",
+            "head_sha": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64"
+          }
+        },
+        {
+          "id": 12518662121,
+          "name": "psc1-ts-utf8-view-tests-748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+          "size_in_bytes": 6085,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12518662121",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12518662121/zip",
+          "expired": false,
+          "created_at": "2026-10-23T17:11:45Z",
+          "expires_at": "2027-01-21T17:09:50Z",
+          "updated_at": "2026-10-23T17:11:45Z",
+          "digest": "sha256:2b7a76a7a1583be4deea6f13a4c21d52b1f3f0bfc8c883abec3ee147789db8ed",
+          "workflow_run": {
+            "id": 39992803465,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "perf/psc1-erasure-applied-workers-20261023",
+            "head_sha": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64"
+          }
+        }
+      ],
+      "normalRegression": {
+        "runId": 39993835819,
+        "testedMerge": "9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01",
+        "focusedCore": {
+          "jobId": 120552972057,
+          "conclusion": "success",
+          "inferenceControlObligations": 108
+        },
+        "applications": {
+          "jobId": 120552972375,
+          "conclusion": "success",
+          "authoredGrammars": [
+            "lean",
+            "ps"
+          ],
+          "targets": [
+            "js",
+            "ts",
+            "rust",
+            "wasm-core",
+            "wasm-component"
+          ]
+        },
+        "php": {
+          "jobId": 120552972085,
+          "conclusion": "success"
+        },
+        "closuresAndG1": "success",
+        "full": "success-37-of37-releaseReady",
+        "fullJobId": 120557858120,
+        "readiness": {
+          "counts": {
+            "implemented": 0,
+            "tested": 0,
+            "qualified": 37,
+            "blocked": 0
+          },
+          "releaseReady": true
+        }
+      },
+      "qualification": {
+        "branch": "perf/psc1-erasure-applied-workers-20261023",
+        "codeCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+        "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+        "runId": 39993829327,
+        "jobId": 120552082576,
+        "status": "qualified-G1-G2-G3-exact-fixed-point-and-normal37-of37-candidate",
+        "profile": "correctness-1800s",
+        "nativeProofRunId": 39992803465,
+        "nativeProofJobId": 120550535646,
+        "auditRunId": 39996915835,
+        "auditJobId": 120562731012,
+        "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+        "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+        "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+        "g2ElapsedMs": 545895,
+        "g3ElapsedMs": 588552,
+        "g2MaxRssKiB": 3051772,
+        "g3MaxRssKiB": 3005236,
+        "independentCleanBuilds": "not-qualified",
+        "normalRunId": 39993835819,
+        "testedMerge": "9731f74f3d4ecaa93ad283ffedddfa7ddddc5f01",
+        "normalStatus": "qualified37-of37-seven-backend-both-grammar-applications-packages",
+        "integrationPullRequest": 173,
+        "integrated": false
+      },
+      "auditedGenerationSnapshots": [
+        {
+          "generation": 1,
+          "immutableLoopSnapshots": 1985,
+          "receipt": {
+            "schema": "psc1-ts-generator-iteration-capture/1",
+            "testedCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+            "sourceSha256": "3528bdd0ef9b5748c3cea931ce2e9134fd0aba5ebf2befd0144b4c31af382de6",
+            "comparisons": 10,
+            "reference": "independently executed native Lean recursion",
+            "strictIr": true,
+            "strictTypeScript": true,
+            "checks": [
+              "function and changing Nat captures",
+              "unused parameter collision",
+              "brand/tag collision",
+              "freshness fuel-zero refusal",
+              "actual optimized generator loop"
+            ]
+          }
+        },
+        {
+          "generation": 2,
+          "immutableLoopSnapshots": 1985,
+          "receipt": {
+            "schema": "psc1-ts-generator-iteration-capture/1",
+            "testedCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+            "sourceSha256": "3528bdd0ef9b5748c3cea931ce2e9134fd0aba5ebf2befd0144b4c31af382de6",
+            "comparisons": 10,
+            "reference": "independently executed native Lean recursion",
+            "strictIr": true,
+            "strictTypeScript": true,
+            "checks": [
+              "function and changing Nat captures",
+              "unused parameter collision",
+              "brand/tag collision",
+              "freshness fuel-zero refusal",
+              "actual optimized generator loop"
+            ]
+          }
+        },
+        {
+          "generation": 3,
+          "immutableLoopSnapshots": 1985,
+          "receipt": {
+            "schema": "psc1-ts-generator-iteration-capture/1",
+            "testedCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+            "sourceSha256": "3528bdd0ef9b5748c3cea931ce2e9134fd0aba5ebf2befd0144b4c31af382de6",
+            "comparisons": 10,
+            "reference": "independently executed native Lean recursion",
+            "strictIr": true,
+            "strictTypeScript": true,
+            "checks": [
+              "function and changing Nat captures",
+              "unused parameter collision",
+              "brand/tag collision",
+              "freshness fuel-zero refusal",
+              "actual optimized generator loop"
+            ]
+          }
+        }
+      ]
     }
+  },
+  "previousIntegratedNormalQualification": {
+    "sourceCommit": "5ce2fc74b9f01682832ddc10ec9ef27f26458564",
+    "testedMerge": "a61eecf46ded19eedcdefcb320aa33118cd8f2ad",
+    "runId": 39909569028,
+    "conclusion": "success",
+    "fullSteps": 47,
+    "practicalCore": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "targets": 7,
+    "grammars": 2
   }
 }

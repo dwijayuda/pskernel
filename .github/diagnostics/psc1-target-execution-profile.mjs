@@ -17,30 +17,47 @@ const qualification=JSON.parse(fs.readFileSync(path.join(path.dirname(ts.directo
 assert.equal(qualification.sourceClosureDigest,'b5e496cc6734849116a7dd113257853d755271b20a44f419750993cd99069217');
 assert.equal(ts.m.sourceSha256,qualification.bootstrap.sourceSha256);
 console.log('PSC1_TS_EXECUTING_RECEIPT: '+JSON.stringify({bootstrap:qualification.bootstrap,serviceArtifact:qualification.serviceArtifact,generations:qualification.generations.map(g=>({generation:g.generation,observations:g.observations})),sourceClosureDigest:qualification.sourceClosureDigest,events:qualification.events,targetPlans:qualification.targetPlans}));
-const runner=path.resolve('diagnosis/runner.mjs');
+
+const originalFile=path.resolve(ts.directory,ts.m.executable),original=fs.readFileSync(originalFile,'utf8');
+const matcher=/function\* __ps\$invoke\(fn, \.\.\.args\) \{\s*return \(yield \{ fn, args, tail: false \}\);\s*\}/;
+assert.equal((original.match(new RegExp(matcher.source,'g'))||[]).length,1);
+const modified=original.replace(matcher,()=>[
+'function* __ps$invoke(fn, ...args) {',
+'  if (!__ps$implementations.has(fn)) return Reflect.apply(fn, undefined, args);',
+'  return (yield { fn, args, tail: false });',
+'}'].join('\n'));
+const candidate=path.resolve(ts.directory,'diagnostic-native-invoke.js');fs.writeFileSync(candidate,modified);
+const runner=path.resolve('diagnosis/replay.mjs');
 fs.writeFileSync(runner,[
 "import fs from 'node:fs';import{pathToFileURL}from'node:url';",
 "const api=await import(pathToFileURL(process.argv[2]).href);",
 "const input=fs.readFileSync(process.argv[3],'utf8');",
-"const response=api.psCompilerTsServiceCandidate(input);",
-"if(typeof response!=='string'||Buffer.byteLength(response)>134217728)throw Error('response bound');",
-"fs.writeFileSync(process.argv[4],response);"].join('\n'));
-const directory=path.resolve('diagnosis/execution'),output=path.resolve('diagnosis/unadopted-response.json');
-const r=spawnSync('python3',['.github/diagnostics/bounded-process.py',JSON.stringify({
- command:[process.execPath,'--prof','--logfile='+path.resolve('diagnosis/ts-g2-v8.log'),runner,path.resolve(ts.directory,ts.m.executable),path.resolve(request),output],
- directory,timeoutMs:220000,maxBuffer:32*1024*1024})],{encoding:'utf8',timeout:225000,killSignal:'SIGKILL',maxBuffer:1024*1024});
-assert.equal(r.status,0,r.stderr);ts.verify();
-assert.equal(sha(fs.readFileSync(request)),'50cedd8dd842d2d64723696097fff3c200b560ff1996cba7f929d1ddc227cf08');
-console.log('PSC1_TS_EXECUTION_SAMPLE: '+JSON.stringify({result:JSON.parse(r.stdout),responseProduced:fs.existsSync(output),qualification:false,adoption:'not-run',admission:'not-run'}));
-for(const name of fs.readdirSync('diagnosis').filter(n=>n.endsWith('.log'))){
- const original=path.resolve('diagnosis',name),lines=fs.readFileSync(original,'utf8').split('\n');
- const ticks=lines.filter(l=>l.startsWith('tick,')).map(l=>l.split(','));
- const first=Number(ticks[0]?.[2]),last=Number(ticks.at(-1)?.[2]);
- assert.ok(last-first>150000000&&last-first<300000000,'tick timestamps must match bounded replay');
- const selected=lines.filter(l=>!l.startsWith('tick,')||Number(l.split(',')[2])>=last-30000000);
- const p=original+'.late.log';fs.writeFileSync(p,selected.join('\n'));
- console.log('PSC1_TS_LATE_TICKS: '+JSON.stringify({first,last,total:ticks.length,selected:selected.filter(l=>l.startsWith('tick,')).length,windowMicros:30000000,qualification:false}));
- const profile=spawnSync(process.execPath,['--prof-process',p],{encoding:'utf8',timeout:30000,killSignal:'SIGKILL',maxBuffer:32*1024*1024});
- fs.writeFileSync(p+'.txt',profile.stdout||'');
- console.log('PSC1_TS_EXECUTION_CPU: '+JSON.stringify({file:name,status:profile.status,summary:(profile.stdout||'').split('\n').slice(0,65),bottomUp:(profile.stdout||'').split('\n').slice((profile.stdout||'').split('\n').findIndex(l=>l.includes('[Bottom up')), (profile.stdout||'').split('\n').findIndex(l=>l.includes('[Bottom up'))+240)}));
+"const output=api.psCompilerTsServiceCandidate(input);",
+"if(typeof output!=='string'||Buffer.byteLength(output)>134217728)throw Error('response bound');",
+"fs.writeFileSync(process.argv[4],output);"].join('\n'));
+const requests=files.filter(p=>/\/G1-(?!bootstrap)[^/]+\.request\.json$/.test(p)&&p.includes('generated-ts-compiler')).sort();
+assert.equal(requests.length,10);
+const results=[];
+for(let round=0;round<2;round++){
+ for(const input of requests){
+  const id=path.basename(input,'.request.json'),row={round,id};
+  for(const mode of (round===0?['original','nativeInvoke']:['nativeInvoke','original'])){
+   const directory=path.resolve('diagnosis',String(round),id,mode),output=path.join(directory,'response.json');
+   const r=spawnSync('python3',['.github/diagnostics/bounded-process.py',JSON.stringify({
+    command:[process.execPath,runner,mode==='original'?originalFile:candidate,path.resolve(input),output],
+    directory,timeoutMs:240000,maxBuffer:32*1024*1024})],{encoding:'utf8',timeout:245000,killSignal:'SIGKILL',maxBuffer:1024*1024});
+   assert.equal(r.status,0,r.stderr);const execution=JSON.parse(r.stdout);
+   assert.equal(execution.status,0,JSON.stringify(execution));assert.equal(execution.error,null);
+   row[mode]={...execution,responseSha256:sha(fs.readFileSync(output))};
+  }
+  assert.equal(row.original.responseSha256,row.nativeInvoke.responseSha256);
+  console.log('PSC1_NATIVE_INVOKE_REPLAY: '+JSON.stringify(row));results.push(row);
+ }
 }
+ts.verify();
+const receipt={schema:'psc1-ts-native-invoke-diagnostic/1',originalManifestSha256:sha(fs.readFileSync(path.join(ts.directory,'artifact.json'))),
+ originalExecutableSha256:sha(original),derivedExecutableSha256:sha(modified),workload:'ten actual stored G1 compiler corpus requests; each twice; alternating fresh-process order',
+ originalElapsedMs:results.reduce((s,r)=>s+r.original.elapsedMs,0),candidateElapsedMs:results.reduce((s,r)=>s+r.nativeInvoke.elapsedMs,0),
+ results,qualification:false,adoption:'not-run',admission:'not-run',scope:'unadopted runtime hypothesis only; no G2 performance claim'};
+fs.writeFileSync('diagnosis/native-invoke-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+console.log('PSC1_NATIVE_INVOKE_DIAGNOSTIC: '+JSON.stringify(receipt));

@@ -1,4 +1,4 @@
-name: PSC1 bounded-token TS G2 runtime diagnosis
+name: PSC1 TS native leaf invoke workload comparison
 on:
   push:
     branches: [diagnostic/psc1-selfhost-profile-20261023]
@@ -21,7 +21,7 @@ jobs:
           run-id: '39952866650'
           artifact-ids: '12501172293'
           path: input/ts
-      - name: Sample current closed compiler workload without adoption
+      - name: Compare actual corpus requests without adoption
         run: node .github/diagnostics/psc1-target-execution-profile.mjs
       - uses: actions/upload-artifact@v4
         if: always()

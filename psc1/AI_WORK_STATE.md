@@ -6,6 +6,33 @@ Use connected GitHub tools and Linux Actions only. Fetch latest remote HEAD
 before non-force expected-HEAD updates. Preserve history; no merge or npm
 publication is authorized.
 
+## Separate correctness and performance profiles
+
+The user explicitly authorized `correctness-1800s`: only generated G2-self and
+G3-self requests may run for 1800000 ms each. The default `performance-240s`
+profile, existing 15-minute workflows and their acceptance criteria remain.
+G1, all corpus requests and target builds remain 240000 ms; every verification,
+semantic fuel, memory/stack, 32 MiB stream and 128 MiB wire policy is preserved.
+The separate correctness workflow has a 120-minute job, 110-minute execution
+step and per-request supervisor bounds; five extra seconds allow cleanup only.
+
+Actual longer-profile attempts are running, independently:
+- Rust source `5e0b548e6cb3606ee0d3c129e0a829d830e407e4`, request
+  `7d8865a08427a28432e427592dfc4263718c9a2f`,
+  [run 39908529181](https://github.com/dwijayuda/pskernel/actions/runs/39908529181).
+- TypeScript source `29e871eae0df41a2f782a501fc4110b928fafa2e`, request
+  `b5ba1452196c2a64932310f0bc828beb617650ae`,
+  [run 39908439190](https://github.com/dwijayuda/pskernel/actions/runs/39908439190).
+
+These remain isolated compiler candidates; this checkpoint integrates the host
+profile machinery, not their unqualified compiler/backend changes. The shared
+codec candidate has all-input official equality proof gates against retained
+encoders; both longer runs still require actual generated G1/G2/G3, independent
+admission and exact fixed points. No success is claimed before terminal evidence.
+[Profiles](docs/PSC1_SELFHOST_QUALIFICATION_PROFILES.md) and
+[the profile receipt](docs/PSC1_SELFHOST_PROFILES_2026-10-23.json) distinguish
+correctness from performance. A long-profile pass does not qualify 240 seconds.
+
 ## Verified integrated checkpoint
 
 Branch HEAD `78fe34b8d08d3f01dcc06ca9592668c958526849`, tested merge
@@ -159,8 +186,8 @@ bit equality. Promote coherent validated changes with fresh full seven-backend,
 application and regression qualification on the integrated source.
 
 No strictness, unsupported ABI refusals, negatives, semantic/resource policies or
-official checking are relaxed. Manual jobs retain 15 minutes, 240000 ms process-tree
-deadlines, 32 MiB per stream and 128 MiB request/response limits; 245000 ms is
+official checking are relaxed. Performance jobs retain 15 minutes and 240000 ms process-tree
+deadlines; the explicit correctness profile above extends only G2/G3 requests, with 32 MiB per stream and 128 MiB request/response limits; 245000 ms is
 supervisor cleanup only. Failures retain terminal incremental receipts/artifacts.
 Expensive generations stay in manual/release workflows. PSKernel Expression V2
 research remains independent and does not replace official Lean admission.

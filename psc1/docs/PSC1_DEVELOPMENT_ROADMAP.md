@@ -18,11 +18,38 @@ collections, real applications, ABI/negative boundaries, official admission,
 strict IR and scoped installed native package remain qualified and unpublished.
 All prior source qualifications and failed experiments remain retained.
 
+## Separate correctness and performance profiles
+
+The user explicitly authorized `correctness-1800s`: only generated G2-self and
+G3-self requests may run for 1800000 ms each. The default `performance-240s`
+profile, existing 15-minute workflows and their acceptance criteria remain.
+G1, all corpus requests and target builds remain 240000 ms; every verification,
+semantic fuel, memory/stack, 32 MiB stream and 128 MiB wire policy is preserved.
+The separate correctness workflow has a 120-minute job, 110-minute execution
+step and per-request supervisor bounds; five extra seconds allow cleanup only.
+
+Actual longer-profile attempts are running, independently:
+- Rust source `5e0b548e6cb3606ee0d3c129e0a829d830e407e4`, request
+  `7d8865a08427a28432e427592dfc4263718c9a2f`,
+  [run 39908529181](https://github.com/dwijayuda/pskernel/actions/runs/39908529181).
+- TypeScript source `29e871eae0df41a2f782a501fc4110b928fafa2e`, request
+  `b5ba1452196c2a64932310f0bc828beb617650ae`,
+  [run 39908439190](https://github.com/dwijayuda/pskernel/actions/runs/39908439190).
+
+These remain isolated compiler candidates; this checkpoint integrates the host
+profile machinery, not their unqualified compiler/backend changes. The shared
+codec candidate has all-input official equality proof gates against retained
+encoders; both longer runs still require actual generated G1/G2/G3, independent
+admission and exact fixed points. No success is claimed before terminal evidence.
+[Profiles](PSC1_SELFHOST_QUALIFICATION_PROFILES.md) and
+[the profile receipt](PSC1_SELFHOST_PROFILES_2026-10-23.json) distinguish
+correctness from performance. A long-profile pass does not qualify 240 seconds.
+
 ## Dependency-ordered remaining queue
 
 | Order | Work | Current evidence | Acceptance |
 | --- | --- | --- | --- |
-| 1 | Resolve normalized full-workload throughput | Both grammar lexer all-input proofs, 320 comparisons, 100001-token cases and ten G1 cases pass. Rust 2697 / TS 2610 declarations have zero open generics; current G2 timeouts are 240038 / 240106 ms | Inspect current Rust late call path and TS profile 39900956833 (codec/JSON/text builder/generator dispatch); fix measured classes under original limits |
+| 1 | Establish independent longer-profile correctness; retain throughput target | Both grammar lexer all-input proofs, 320 comparisons, 100001-token cases and ten G1 cases pass. Rust 2697 / TS 2610 declarations have zero open generics; current G2 timeouts are 240038 / 240106 ms | Finish actual 1800-second Rust/TS G2/G3 and fixed points; then optimize measured classes toward the separate unchanged 240-second profile |
 | 2 | Complete independent Rust generations | Ownership, safe private linear destruction, all-input cursor/length/lexer proofs, both grammar audits and level-1 G1 pass; current G2 times out | Independently admit/build/execute G2/G3 and exact closure/source/admission/original/transformed IR/ten-case fixed points |
 | 3 | Complete independent TypeScript generations | Strict annotations integrated; isolated structured generator, closed plan and lexer normalization pass G1; current late profile reaches codec/JSON/text operations | Strict/noEmitOnError, same source, actual independent G2/G3 and fixed points; measured late-runtime improvements |
 | 4 | Promote coherent validated changes | Main remains fully qualified; later source/backend candidates isolated | Fetch latest HEAD, reconcile concurrent edits, non-force expected-HEAD integration, fresh full seven-backend and application qualification |

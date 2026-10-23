@@ -8,8 +8,10 @@ import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-too
 import {sha,buildTarget,observeArtifact,verifyArtifact,runTool,boundedRun} from '../host-tools/generated-target-tools.mjs';
 import {validateClosureCounts} from './compiler-closure-contract.mjs';
 import {corpus,refusals,expectedObservations,observedExpressions,rustObservations} from './generated-target-corpus.mjs';
-const [target,mode='--self-host']=process.argv.slice(2);
+import {qualificationProfile,compilerRequestLimit,PERFORMANCE_PROFILE} from './selfhost-qualification-profiles.mjs';
+const [target,mode='--self-host',profileName=PERFORMANCE_PROFILE]=process.argv.slice(2);
 assert.ok(['rust','ts'].includes(target)&&['--g1-only','--self-host'].includes(mode));
+const profile=qualificationProfile(profileName);
 assert.equal(process.version,'v22.23.3');assert.ok(process.env.GITHUB_SHA);
 const root=process.cwd(),directory=path.resolve('dist/generated-'+target+'-compiler');
 fs.mkdirSync(directory,{recursive:true});
@@ -17,11 +19,12 @@ const seed=path.resolve('.lake/build/bin/psc1_target_service_seed');
 const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
 const runner=path.resolve('scripts/generated-target-runner.mjs');
 const inventoryFiles=['scripts/generated-target-qualification.mjs','scripts/generated-target-runner.mjs',
- 'scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
+ 'scripts/selfhost-qualification-profiles.mjs','scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
  'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
 const tools=[checker,process.execPath,...inventoryFiles.map(p=>path.resolve(p))].map(file=>({file,sha256:sha(fs.readFileSync(file))}));
 const seedHash=sha(fs.readFileSync(seed));let seedCalls=0;
 const events=[],report={schema:'psc1-generated-target-qualification/1',target,mode,
+ profile,correctnessQualification:'not-qualified',performanceQualification:'not-qualified',
  testedCommit:process.env.GITHUB_SHA,branchHead:process.env.PSC1_BRANCH_HEAD,
  nativeSeedSha256:seedHash,tools,events,status:'running',generations:[],attempts:[],
  fixedPoint:'not-run',productionPublication:'not-run',formalPreservation:'not-provided'};
@@ -63,6 +66,13 @@ function checkCandidate(c,r) {
  });
  validateClosureCounts({assurance:r.assurance,sourceCoreDeclarations:v.sourceDeclarations,coreDeclarations:v.logicalDeclarations,partialNames:v.partialNames},sourceCount,r.assurance);
  for(const graph of [v.originalIr,v.specializedIr]){assert.equal(graph.length,5);assert.equal(graph[0],'psc1-ir/1');assert.ok(graph.slice(1).every(Array.isArray));}
+ if(r.id==='G1-bootstrap'||r.id.endsWith('-self')){
+  const declarations=v.specializedIr[4],stats={request:r.id,declarations:declarations.length,
+   genericDeclarations:declarations.filter(d=>d[1].length>0).length,
+   genericCurried:declarations.filter(d=>d[1].length>0&&d[3][0]==='function').length};
+  (report.targetPlans||=[]).push(stats);checkpoint();
+  console.log('PSC1_TARGET_PLAN_PROFILE: '+JSON.stringify(stats));
+ }
  pinned();
  const session=createCompilerHostSession({requestId:r.id,target,sources:r.sources,
   canonicalAdmissions:v.admissionRequest.admissions,checkerExecutable:checker});
@@ -77,11 +87,13 @@ function generated(artifact,r,label) {
  const input=path.join(directory,label+'.request.json'),output=path.join(directory,label+'.candidate.json');
  fs.writeFileSync(input,r.text);
  report.activeRequest={id:r.id,requestSha256:sha(r.text),producer:artifact.sha256};checkpoint();
- const began=Date.now(),result=boundedRun(process.execPath,[runner,artifact.file,artifact.sha256,input,output],
-  {logDirectory:path.join(directory,label+'-process')});
+ const limits=compilerRequestLimit(profileName,r.id);
+ const began=Date.now(),result=boundedRun(process.execPath,[runner,artifact.file,artifact.sha256,input,output,profileName],
+  {logDirectory:path.join(directory,label+'-process'),...limits});
  const event={role:'generated-compiler',target,id:r.id,serviceSha256:artifact.sha256,
-  requestSha256:sha(r.text),elapsedMs:Date.now()-began,status:result.status,signal:result.signal,error:result.error?.message||null};
- events.push(event);
+  requestSha256:sha(r.text),...limits,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,memoryMeasurement:result.memoryMeasurement,elapsedMs:Date.now()-began,status:result.status,signal:result.signal,error:result.error?.message||null};
+ events.push(event);checkpoint();
+ console.log('PSC1_TARGET_REQUEST_EXECUTION: '+JSON.stringify(event));
  fs.writeFileSync(path.join(directory,label+'.stdout.txt'),result.stdout||'');
  fs.writeFileSync(path.join(directory,label+'.stderr.txt'),result.stderr||'');
  pinned();verifyArtifact(artifact.file,artifact.sha256);assert.equal(sha(fs.readFileSync(input)),sha(r.text));
@@ -90,7 +102,7 @@ function generated(artifact,r,label) {
  assert.equal(execution.protocol,'psc1-generated-target-run/1');
  assert.equal(execution.target,target);assert.equal(execution.serviceSha256,artifact.sha256);
  assert.equal(execution.requestSha256,sha(r.text));assert.equal(execution.responseSha256,c.sha256);
- event.maxRssKiB=execution.maxRssKiB;
+ event.serviceMaxRssKiB=execution.maxRssKiB;
  console.log('PSC1_TARGET_GENERATED_WORKLOAD: '+JSON.stringify(event));
  report.activeRequest=null;checkpoint();
  return c;
@@ -145,19 +157,21 @@ try {
  report.generations.push({generation:1,...baseline,artifactSha256:artifact.sha256,observations});checkpoint();
  for(const generation of (mode==='--self-host'?[2,3]:[])){
   const r=request('G'+generation+'-self','lean','ordinary-checked',entry,sources);
-  const attempt={generation,producer:artifact.sha256,status:'running'};report.attempts.push(attempt);checkpoint();
+  const attempt={generation,producer:artifact.sha256,startedAt:new Date().toISOString(),status:'running'};report.attempts.push(attempt);checkpoint();
   const c=generated(artifact,r,'G'+generation+'-self'),identity=checkCandidate(c,r);
   for(const k of ['sourceClosureDigest','sourceSha256','admissionsSha256','originalIrSha256','specializedIrSha256'])assert.equal(identity[k],baseline[k],'PSC1_FIXED_POINT_MISMATCH:'+k);
   assert.deepEqual(c.value.publicNames,[exportName]);
   const next=buildTarget({target,source:c.value.source,directory:path.join(directory,'G'+generation+'-service'),service:true,publicNames:[exportName]});
   const actual=exercise(next,generation);assert.deepEqual(actual,observations,'PSC1_GENERATION_CORPUS_CHANGED');
   report.generations.push({generation,...identity,artifactSha256:next.sha256,observations:actual});
-  attempt.status='passed';artifact=next;checkpoint();
+  attempt.status='passed';attempt.completedAt=new Date().toISOString();artifact=next;checkpoint();
  }
  assert.equal(seedCalls,1);pinned();
  if(target==='rust')assert.ok(fs.existsSync('scripts/fixtures/selfhost-rust.Cargo.lock'),
   'PSC1_REPRODUCIBILITY_REQUIRES_REVIEWED_RUST_LOCK');
  report.fixedPoint=mode==='--self-host'?'passed-G1-G2-G3-exact-source-admission-IR-and-ten-case-observations':'not-requested';
+ report.correctnessQualification=mode==='--self-host'?'qualified':'G1-only';
+ report.performanceQualification=mode==='--self-host'&&profileName===PERFORMANCE_PROFILE?'qualified-240s':'not-run-in-this-profile';
  report.status='passed';
 } catch(error){
  report.status='failed';report.failure=error.message;
@@ -169,6 +183,6 @@ try {
 finally{
  report.completedAt=new Date().toISOString();
  fs.writeFileSync(path.join(directory,'qualification.json'),JSON.stringify(report,null,2)+'\n');
- console.log('PSC1_GENERATED_TARGET_QUALIFICATION: '+JSON.stringify({target,status:report.status,sourceModules:report.sourceModules,
+ console.log('PSC1_GENERATED_TARGET_QUALIFICATION: '+JSON.stringify({target,profile,correctnessQualification:report.correctnessQualification,performanceQualification:report.performanceQualification,status:report.status,sourceModules:report.sourceModules,
   sourceClosureDigest:report.sourceClosureDigest,generations:report.generations.map(g=>g.generation),fixedPoint:report.fixedPoint,failure:report.failure,attempts:report.attempts}));
 }

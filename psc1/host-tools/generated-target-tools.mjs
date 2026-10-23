@@ -6,6 +6,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
+import {compilerRequestLimit,supervisorLimit,PERFORMANCE_PROFILE} from '../scripts/selfhost-qualification-profiles.mjs';
 export const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 export function boundedRun(executable,args,options={}) {
  const temporary=!options.logDirectory;
@@ -14,11 +15,10 @@ export function boundedRun(executable,args,options={}) {
  const started=Date.now();
  fs.appendFileSync(path.join(directory,'tool-events.jsonl'),JSON.stringify({
   state:'started',executable,args,at:new Date(started).toISOString()})+'\n');
- // The child process tree has the unchanged 240000 ms deadline. This outer
- // 245000 ms guard allows supervisor cleanup only; it cannot extend child work.
+ const limits=supervisorLimit(options.timeoutMs,options.timeoutPolicy);
  const control=spawnSync('python3',[path.resolve('scripts/bounded-process.py'),JSON.stringify({
-  command:[executable,...args],directory,timeoutMs:options.timeoutMs||240000,maxBuffer:32*1024*1024})],
-  {encoding:'utf8',timeout:245000,killSignal:'SIGKILL',maxBuffer:1024*1024,
+  command:[executable,...args],directory,...limits,maxBuffer:32*1024*1024})],
+  {encoding:'utf8',timeout:limits.supervisorGuardMs,killSignal:'SIGKILL',maxBuffer:1024*1024,
    cwd:options.cwd,env:options.env||process.env});
  if(control.error||control.status!==0)throw Error('PSC1_SUPERVISOR_FAILED:'+(control.error?.message||control.stderr));
  const result=JSON.parse(control.stdout);
@@ -26,13 +26,13 @@ export function boundedRun(executable,args,options={}) {
  result.stderr=fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8');
  fs.appendFileSync(path.join(directory,'tool-events.jsonl'),JSON.stringify({state:'finished',
   executable,args,status:result.status,signal:result.signal,error:result.error,
-  elapsedMs:result.elapsedMs,stdoutBytes:result.stdoutBytes,stderrBytes:result.stderrBytes})+'\n');
+  elapsedMs:result.elapsedMs,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,timeoutMs:result.timeoutMs,timeoutPolicy:result.timeoutPolicy,stdoutBytes:result.stdoutBytes,stderrBytes:result.stderrBytes})+'\n');
  if(temporary)fs.rmSync(directory,{recursive:true,force:true});
  return result;
 }
 export function runTool(executable,args,options={}) {
  const r=boundedRun(executable,args,options);
- const event={executable,args,status:r.status,signal:r.signal,elapsedMs:r.elapsedMs,error:r.error?.message||null};
+ const event={executable,args,status:r.status,signal:r.signal,elapsedMs:r.elapsedMs,maxRssKiB:r.maxRssKiB,peakTreeRssKiB:r.peakTreeRssKiB,error:r.error?.message||null};
  if(r.error||r.status!==0)throw Error('PSC1_TARGET_TOOL_FAILED:'+JSON.stringify(event)+'\n'+
   (r.stderr||r.stdout||'').split('\n').slice(0,28).map(line=>line.slice(0,320)).join('\n'));
  return {stdout:r.stdout,event};
@@ -102,6 +102,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
  });
  const manifest={schema:'psc1-generated-target-artifact/1',target,sourceSha256:sha(source),
   executable,service,publicNames,files,events,nodeVersion:process.version,
+  rustOptimizationLevel:target==='rust'?1:null,
   compilerVersion:target==='rust'?runTool('rustc',['--version']).stdout.trim():
    runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--version']).stdout.trim()};
  fs.writeFileSync(path.join(directory,'artifact.json'),JSON.stringify(manifest,null,2)+'\n');
@@ -114,9 +115,10 @@ export function observeArtifact(artifact) {
  const r=runTool(executable,args,{logDirectory:m.directory});
  return {observation:JSON.parse(r.stdout.trim()),event:r.event};
 }
-export async function executeService(manifestFile,expectedHash,requestFile,outputFile) {
+export async function executeService(manifestFile,expectedHash,requestFile,outputFile,profile=PERFORMANCE_PROFILE) {
  const m=verifyArtifact(manifestFile,expectedHash);assert.equal(m.service,true);
  const input=fs.readFileSync(requestFile);assert.ok(input.length<=128*1024*1024);
+ const id=JSON.parse(input.toString('utf8'))[1],limits=compilerRequestLimit(profile,id);
  const started=Date.now();let maxRssKiB;
  if(m.target==='ts') {
   const api=await import(pathToFileURL(path.join(m.directory,m.executable)).href);
@@ -127,7 +129,7 @@ export async function executeService(manifestFile,expectedHash,requestFile,outpu
   maxRssKiB=process.resourceUsage().maxRSS;
  } else {
   const rss=outputFile+'.rss.txt';
-  runTool('/usr/bin/time',['-f','%M','-o',rss,path.join(m.directory,m.executable),requestFile,outputFile+'.tmp'],{logDirectory:path.dirname(outputFile)});
+  runTool('/usr/bin/time',['-f','%M','-o',rss,path.join(m.directory,m.executable),requestFile,outputFile+'.tmp'],{logDirectory:path.dirname(outputFile),...limits});
   maxRssKiB=Number(fs.readFileSync(rss,'utf8').trim());
  }
  const response=fs.readFileSync(outputFile+'.tmp');assert.ok(response.length>0&&response.length<=128*1024*1024);

@@ -534,10 +534,14 @@ def psWasmTypingInstruction
       Option.some (psWasmTypingPush (PsWasmOperandType.value PsWasmValueType.i32) state)
   | PsWasmInstruction.i64Const _ =>
       Option.some (psWasmTypingPush (PsWasmOperandType.value PsWasmValueType.i64) state)
-  | PsWasmInstruction.f32ConstBits _ =>
-      Option.some (psWasmTypingPush (PsWasmOperandType.value PsWasmValueType.f32) state)
-  | PsWasmInstruction.f64ConstBits _ =>
-      Option.some (psWasmTypingPush (PsWasmOperandType.value PsWasmValueType.f64) state)
+  | PsWasmInstruction.f32ConstBits bits =>
+      if Nat.blt bits 4294967296 then
+        Option.some (psWasmTypingPush (PsWasmOperandType.value PsWasmValueType.f32) state)
+      else Option.none
+  | PsWasmInstruction.f64ConstBits bits =>
+      if Nat.blt bits 18446744073709551616 then
+        Option.some (psWasmTypingPush (PsWasmOperandType.value PsWasmValueType.f64) state)
+      else Option.none
   | PsWasmInstruction.i32Add =>
       psWasmTypingApply module [PsWasmValueType.i32, PsWasmValueType.i32] [PsWasmValueType.i32] state
   | PsWasmInstruction.i32Sub =>

@@ -230,3 +230,16 @@ to avoid restarting integration CI for every focused iteration. Preserve both
 histories; integrate verified fixes by a non-force merge only after focused gates
 and independent generation evidence. Request-only target jobs now serialize per
 target, so JS and Wasm may qualify independently without cancelling each other.
+
+## Wasm original-IR defect class diagnosed
+
+Diagnostic40017368933 PASSED on exact captured afed7c4b input: full traversal,
+1512519 steps (unchanged5000000 budget),30 findings, all uint32/uint64 payloads
+from PsWasmInstruction.f32ConstBits/f64ConstBits and propagated wildcard bindings.
+No other original-IR defect class was reported. This commit represents those
+raw bit-pattern metadata payloads as portable Nat, with explicit32/64-bit target
+typing bounds. Floating source operations and machine scalars remain refused;
+binary encoding of float constants remains refused. Boundary tests exercise
+valid maximum patterns, overflowing patterns and preserved scalar-capability
+refusals. This is representation normalization, not qualification of floats.
+Next: focused proof/runtime/source gates, then actual Wasm generations.

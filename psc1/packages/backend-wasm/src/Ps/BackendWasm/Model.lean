@@ -47,8 +47,10 @@ inductive PsWasmInstruction where
   | end_
   | i32Const (value : Int)
   | i64Const (value : Int)
-  | f32ConstBits (bits : UInt32)
-  | f64ConstBits (bits : UInt64)
+  -- Bit-pattern metadata uses portable Nat; target typing enforces 32/64-bit bounds.
+  -- Floating language operations remain explicitly unqualified.
+  | f32ConstBits (bits : Nat)
+  | f64ConstBits (bits : Nat)
   | i32Add
   | i32Sub
   | i32Mul

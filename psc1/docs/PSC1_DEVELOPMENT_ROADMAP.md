@@ -59,3 +59,18 @@ service/frontend/elaborator/strict IR and official independent Lean4.35.0 checke
    independent reproducibility separately, and optimize measured generated
    compiler bottlenecks without weakening fuel, checking, memory/stack or ABI
    refusal policies. Neither native fixtures nor source census qualify self-hosting.
+
+### Current measured blockers — 2026-10-24 Asia/Jakarta
+
+1. DirectWasm: both source grammars/native transport/carrier gates passed88f5b3aa.
+   G1 afed7c4b/run40015615536 refuses original IR; complete diagnostic40017368933
+   identifies exactly30 propagated UInt32/UInt64 raw bit-metadata findings.
+   Normalize metadata to bounded Nat and retain scalar/float refusals; then
+   execute independent G1/G2/G3 and exact source/admission/IR/binary fixed point.
+2. DirectJS: request b9b73a70/run40012562356 passes independent G1 and ten cases;
+   G2 exceeds1800s at1800208ms/3117056KiB. Profile the immutable G1 artifact and
+   exact G2 request40017280827 before the next generic backend optimization.
+3. Keep PR174 integration checkpointafed7c4b while focused work proceeds on
+   work/psc1-direct-selfhost-blockers-20261024; preserve both histories and all
+   qualified Rust/TS evidence. Finish all-seven-backend/native/application gates
+   and independent generation evidence before integrating qualified claims.

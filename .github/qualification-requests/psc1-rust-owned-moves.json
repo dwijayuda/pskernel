@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "rust-string-alias-portable-guards-20261023",
+  "id": "rust-private-linear-drop-20261023",
   "branch": "fix/psc1-rust-owned-string-moves-20261023",
-  "parentCommit": "8b51aba80f35c1435b4c97301541d427a22317e8",
+  "parentCommit": "981f9dff23ea8c04da730eeefc9fb42c4a2012f6",
   "targets": [
     "rust"
   ],

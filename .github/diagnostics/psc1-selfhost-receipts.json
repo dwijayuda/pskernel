@@ -2,15 +2,17 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "ts-two-view-map-correctness-1800s",
+      "id": "ts-utf8-token-performance-240s",
       "target": "ts",
-      "profile": "correctness-1800s",
-      "sourceCommit": "aae4aac442154bb0c95fedb35f19fdb1552cc271",
-      "requestCommit": "9f39ab515a3a0c88979ac7f8902aea731975bbcc",
-      "runId": 39920694158,
-      "artifactId": 12488294175,
-      "artifactDigest": "sha256:515d90795f00cc2c3c22af72d65e272ec0bc24d42e632bbb051ac3e4253ea8da",
-      "artifactExpiresAt": "2027-01-21T07:52:25Z"
+      "profile": "performance-240s",
+      "sourceCommit": "27f2a2164560089d530d6b6b9d8cdbc4754d162a",
+      "requestCommit": "e6df0e0dd54bfe1f243489f62c7ee8f80efb15af",
+      "runId": 39952866650,
+      "jobId": 120411384045,
+      "artifactId": 12501172293,
+      "artifactDigest": "sha256:2c7e1ad82f93b3d54b56b48213e77b5bf1d26ed5f24eeec257b50126702d2e9e",
+      "artifactExpiresAt": "2027-01-21T12:22:51Z",
+      "inspectUtf8TokenWorker": true
     }
   ]
 }

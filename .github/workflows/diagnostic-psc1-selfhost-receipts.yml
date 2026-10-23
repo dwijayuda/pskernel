@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
-      - name: Check audit syntax
+      - name: Validate read-only audit syntax
         run: node --check .github/diagnostics/psc1-selfhost-receipts.mjs
       - name: Verify immutable artifact and source provenance
         env:
@@ -41,9 +41,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39920694158'
-          artifact-ids: '12488294175'
-          path: input/ts-two-view-map-correctness-1800s
+          run-id: '39952866650'
+          artifact-ids: '12501172293'
+          path: input/ts-utf8-token-performance-240s
       - name: Audit recorded byte identities without compiler execution
         run: node .github/diagnostics/psc1-selfhost-receipts.mjs
       - uses: actions/upload-artifact@v4

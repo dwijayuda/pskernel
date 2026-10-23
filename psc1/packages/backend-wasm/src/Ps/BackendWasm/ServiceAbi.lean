@@ -10,30 +10,30 @@ def psWasmServiceFunction (name : String) (parameters results locals : List PsWa
 
 def psWasmServiceStringFunctions : List PsWasmFunction :=
   [
-    psWasmServiceFunction "__psc1_service_string_new" [.i32] [psWasmStringCharsRef] []
-      [.localGet 0,.arrayNewDefault psWasmStringCharsName],
-    psWasmServiceFunction "__psc1_service_string_set" [psWasmStringCharsRef,.i32,.i32] [] []
-      [.localGet 2,.call psWasmCharUtf8WidthFn,.drop,.localGet 0,.localGet 1,.localGet 2,.arraySet psWasmStringCharsName],
+    psWasmServiceFunction "__psc1_service_string_new" [PsWasmValueType.i32] [psWasmStringCharsRef] []
+      [PsWasmInstruction.localGet 0,PsWasmInstruction.arrayNewDefault psWasmStringCharsName],
+    psWasmServiceFunction "__psc1_service_string_set" [psWasmStringCharsRef,PsWasmValueType.i32,PsWasmValueType.i32] [] []
+      [PsWasmInstruction.localGet 2,PsWasmInstruction.call psWasmCharUtf8WidthFn,PsWasmInstruction.drop,PsWasmInstruction.localGet 0,PsWasmInstruction.localGet 1,PsWasmInstruction.localGet 2,PsWasmInstruction.arraySet psWasmStringCharsName],
     psWasmServiceFunction "__psc1_service_string_finish" [psWasmStringCharsRef] [psWasmStringRef] []
-      [.localGet 0,.call psWasmStringFromCharsFn],
-    psWasmServiceFunction "__psc1_service_string_size" [psWasmStringRef] [.i32] []
-      [.localGet 0,.structGet psWasmStringName 0,.arrayLen],
-    psWasmServiceFunction "__psc1_service_string_byte" [psWasmStringRef,.i32] [.i32] []
-      [.localGet 0,.structGet psWasmStringName 0,.localGet 1,.arrayGetU psWasmStringBytesName]
+      [PsWasmInstruction.localGet 0,PsWasmInstruction.call psWasmStringFromCharsFn],
+    psWasmServiceFunction "__psc1_service_string_size" [psWasmStringRef] [PsWasmValueType.i32] []
+      [PsWasmInstruction.localGet 0,PsWasmInstruction.structGet psWasmStringName 0,PsWasmInstruction.arrayLen],
+    psWasmServiceFunction "__psc1_service_string_byte" [psWasmStringRef,PsWasmValueType.i32] [PsWasmValueType.i32] []
+      [PsWasmInstruction.localGet 0,PsWasmInstruction.structGet psWasmStringName 0,PsWasmInstruction.localGet 1,PsWasmInstruction.arrayGetU psWasmStringBytesName]
   ]
 
 def psWasmServiceNatFunctions : List PsWasmFunction :=
   [
-    psWasmServiceFunction "__psc1_service_nat_is_zero" [psWasmNatRef] [.i32] []
-      [.localGet 0,.refTest psWasmNatZeroName]
+    psWasmServiceFunction "__psc1_service_nat_is_zero" [psWasmNatRef] [PsWasmValueType.i32] []
+      [PsWasmInstruction.localGet 0,PsWasmInstruction.refTest psWasmNatZeroName]
   ]
 
 def psWasmServiceIntFunctions : List PsWasmFunction :=
   [
-    psWasmServiceFunction "__psc1_service_int_sign" [psWasmIntRef] [.i32] []
-      [.localGet 0,.structGet psWasmIntName 0],
+    psWasmServiceFunction "__psc1_service_int_sign" [psWasmIntRef] [PsWasmValueType.i32] []
+      [PsWasmInstruction.localGet 0,PsWasmInstruction.structGet psWasmIntName 0],
     psWasmServiceFunction "__psc1_service_int_magnitude" [psWasmIntRef] [psWasmNatRef] []
-      [.localGet 0,.structGet psWasmIntName 1]
+      [PsWasmInstruction.localGet 0,PsWasmInstruction.structGet psWasmIntName 1]
   ]
 
 def psWasmServiceHasType (name : String) (module : PsWasmModule) : Bool :=

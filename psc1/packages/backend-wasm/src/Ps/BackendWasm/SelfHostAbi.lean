@@ -168,5 +168,9 @@ def psWasmAddSelfHostGcAbi
     exports :=
       psListAppend
         module.exports
-        psWasmSelfHostAbiExports
+        psWasmSelfHostAbiExports,
+    abiMemory := false,
+    abiMemoryImports := false,
+    abiGlobalsExport := false,
+    functionImports := []
   } else module

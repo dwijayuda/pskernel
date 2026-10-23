@@ -43,3 +43,19 @@ Use shared source/frontend/elaboration/checked IR for all backends. Preserve gen
 fallbacks and explicit unsupported-ABI refusals. Keep DirectJS regression coverage,
 qualified Rust history and separate PSKernel research. Deferred feature expansion
 does not remove working language functionality.
+
+## Active user-directed DirectJS/DirectWasm mission — 2026-10-24 Asia/Jakarta
+
+This supersedes the earlier no-DirectJS-detour work order while preserving all
+qualified Rust/TS snapshots and Practical Core gates. Reuse the same compiler
+service/frontend/elaborator/strict IR and official independent Lean4.35.0 checker.
+1. DirectJS: bounded UTF8 cache and constructor-directed visitor proven/native
+   tested at c5ae2ecc;87-module Lean/PS source census passes40010724322. Execute
+   actual independent G1/G2/G3 and exact fixed point under the separate1800s profile.
+2. DirectWasm: owned binary facade and import-free opaque-GC transport pass actual
+   scalar/Unicode/arbitrary Nat/Int engine tests. Normalize98-module source closure
+   within supported grammar, then execute the same genuine generation chain.
+3. Preserve all-seven-backend/application/negative regression gates, qualify
+   independent reproducibility separately, and optimize measured generated
+   compiler bottlenecks without weakening fuel, checking, memory/stack or ABI
+   refusal policies. Neither native fixtures nor source census qualify self-hosting.

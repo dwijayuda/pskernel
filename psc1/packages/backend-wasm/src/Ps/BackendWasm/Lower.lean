@@ -4389,11 +4389,11 @@ def psWasmCheckComputedCalleeType
     Except PsWasmLowerError PsVerifiedIrType := do
   let options := psIrCheckDefaultOptions
   let parameters := psListMap
-    (fun binding => PsVerifiedIrParameter.mk binding.name binding.type) bindings
+    (fun (binding : PsWasmBinding) => PsVerifiedIrParameter.mk binding.name binding.type) bindings
   let _ <- match psIrCheckModuleSizeWorker options.maxSteps options.maxSteps
       [PsIrCheckSizeTask.parameters parameters, PsIrCheckSizeTask.expression fn] 0 with
-    | .ok count => .ok count
-    | .error issue => .error (PsWasmLowerError.unsupportedExpressionContext owner
+    | Except.ok count => Except.ok count
+    | Except.error issue => Except.error (PsWasmLowerError.unsupportedExpressionContext owner
         (String.Internal.append "computed-call-size:" issue.code))
   let scope := psIrCheckScopeRoot owner [] parameters
   let initial := PsIrCheckState.mk
@@ -6421,7 +6421,11 @@ def psWasmLowerSpecializedModule
                         lowered.state.generatedFunctionRefs
                       exports :=
                         psWasmExportsOfDeclarations
-                          module.declarations
+                          module.declarations,
+                      abiMemory := false,
+                      abiMemoryImports := false,
+                      abiGlobalsExport := false,
+                      functionImports := []
                     }
 
 

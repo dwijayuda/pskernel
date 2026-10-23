@@ -158,3 +158,23 @@ self-host transport. First run complete source census in both grammars and nativ
 gates before genuine one-seed G1/G2/G3. This initial change is unqualified
 implementation/preflight only, not a G1 claim. No weakened limits, checking,
 source identities, negatives, force pushes, merges or package publication.
+
+## Direct source preflight checkpoint — 2026-10-24 Asia/Jakarta
+
+Source c5ae2ecc, Linux preflight40010724322: official native builds, all-input
+DirectJS name-visitor equivalence proof,7540 retained-runtime comparisons and
+actual owned Wasm GC scalar tests PASSED. DirectJS87-module closure passes both
+Lean/PS source census. Wasm98-module closure remains source-blocked: Model field
+defaults and anonymous constructor RHS sugar in Binary/Lower/ServiceAbi.
+This commit normalizes internal Wasm module defaults to the same explicit values
+at every fresh constructor, names RHS constructors, and makes imported-function
+encoding an ordered fully applied traversal. Native behavior and complete source
+census must pass before a Wasm G1 claim.
+
+A separate explicit request-only workflow executes genuine independent js and/or
+wasm-core G1/G2/G3 with exact source/IR/admission/ten-observation fixed point.
+Only actual G2/G3 receive1800000ms; G1/corpus/build240000ms, independent
+Lean120000ms and all semantic/resource policies remain unchanged. DirectJS
+qualification can proceed independently while Wasm-only source blockers are
+resolved. No new target is self-host-qualified yet. Prior TS/Rust receipts and
+branches remain preserved; no merge or publication.

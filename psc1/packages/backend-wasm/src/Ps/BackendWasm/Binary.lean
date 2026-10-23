@@ -6,7 +6,7 @@ import Ps.Foundation.List
 -- Ordered, fail-closed concatenation for encoded instruction lists.
 def psListFlatMapExcept {α β ε : Type}
     (convert : α → Except ε (List β)) : List α → Except ε (List β)
-  | [] => .ok []
+  | [] => Except.ok []
   | value :: rest => do
       let first ← convert value
       let other ← psListFlatMapExcept convert rest
@@ -1039,10 +1039,19 @@ def psWasmEncodeAbiImport (module : PsWasmModule) (index : Nat)
   return psWasmEncodeName value.moduleName ++ psWasmEncodeName value.importName ++
     [psWasmByte 0] ++ psWasmEncodeUleb typeIndex
 
+-- Ordered, fully applied traversal preserves imported function type indices.
+def psWasmEncodeAbiImportsWorker (module : PsWasmModule) (index : Nat)
+    (imports : List PsWasmFunctionImport) : Except PsWasmEncodeError (List UInt8) := do
+  match imports with
+  | List.nil => Except.ok []
+  | List.cons value rest =>
+      let first <- psWasmEncodeAbiImport module index value
+      let other <- psWasmEncodeAbiImportsWorker module (Nat.add index 1) rest
+      Except.ok (psListAppend first other)
+
 def psWasmEncodeAbiImports (module : PsWasmModule) :
     Except PsWasmEncodeError (List UInt8) := do
-  let encoded <- (module.functionImports.zipIdx.map (fun pair =>
-    psWasmEncodeAbiImport module pair.2 pair.1)).mapM id
+  let encoded <- psWasmEncodeAbiImportsWorker module 0 module.functionImports
   let memoryImports :=
     if module.abiMemoryImports then
       psWasmEncodeName "psc1:abi" ++ psWasmEncodeName "memory" ++
@@ -1052,8 +1061,8 @@ def psWasmEncodeAbiImports (module : PsWasmModule) :
       psWasmEncodeName "psc1:abi" ++ psWasmEncodeName "busy" ++
         [psWasmByte 3, psWasmByte 127, psWasmByte 1]
     else []
-  return psWasmEncodeVector (encoded.flatten ++ memoryImports)
-    (module.functionImports.length + (if module.abiMemoryImports then 3 else 0))
+  return psWasmEncodeVector (psListAppend encoded memoryImports)
+    (psListLength module.functionImports + (if module.abiMemoryImports then 3 else 0))
 
 def psWasmEncodeModule
     (module : PsWasmModule) :

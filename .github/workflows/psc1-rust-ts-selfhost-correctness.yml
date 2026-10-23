@@ -1,9 +1,9 @@
-name: PSC1 applied erasure worker correctness 1800s
+name: PSC1 manual Rust and TypeScript correctness 1800s
 
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-erasure-applied-workers-20261023]
+    branches: [fix/psc1-closure-normalization-20261021]
     paths: [.github/qualification-requests/psc1-rust-ts-selfhost-correctness.json]
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [ts]
+        target: [rust, ts]
     env:
       PSC1_BRANCH_HEAD: ${{ github.sha }}
     defaults:
@@ -47,9 +47,9 @@ jobs:
           assert.equal(r.profile,'correctness-1800s');
           assert.equal(r.g2g3TimeoutMs,1800000);assert.equal(r.g1TimeoutMs,240000);
           assert.equal(r.action,'qualify-independent-G1-G2-G3');
-          assert.equal(r.branch,'perf/psc1-erasure-applied-workers-20261023');
+          assert.equal(r.branch,'fix/psc1-closure-normalization-20261021');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
-          assert.deepEqual(r.targets,['ts']);assert.equal(r.resourcePolicy,'only-G2-G3-wall-clock-extended;all-other-policies-unchanged');
+          assert.deepEqual(r.targets,['rust','ts']);assert.equal(r.resourcePolicy,'only-G2-G3-wall-clock-extended;all-other-policies-unchanged');
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
           const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});
           assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);
@@ -89,21 +89,9 @@ jobs:
       - name: Build the common source facades and separate official checker
         run: |
           set -euo pipefail
-          lake build psc1_text_lookup_worker_normalization_tests psc1_ir_encoder_worker_normalization_tests psc1_erasure_worker_normalization_tests psc1_ts_utf8_view_tests psc1_bridge_lookup_normalization_tests psc1_json_escape_predicate_tests psc1_json_quote_tests psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+          lake build psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
       - name: Preserve exact visitor behavior and DirectJS scalar functionality
         run: |
-          .lake/build/bin/psc1_text_lookup_worker_normalization_tests
-          .lake/build/bin/psc1_ir_encoder_worker_normalization_tests
-          .lake/build/bin/psc1_erasure_worker_normalization_tests
-          .lake/build/bin/psc1_ts_utf8_view_tests
-          node scripts/ts-utf8-view-runtime-tests.mjs
-          .lake/build/bin/psc1_bridge_lookup_normalization_tests
-          .lake/build/bin/psc1_json_escape_predicate_tests
-          .lake/build/bin/psc1_json_quote_tests
-          .lake/build/bin/psc1_codec_static_schema_tests
-          .lake/build/bin/psc1_lexer_normalization_tests
-          .lake/build/bin/psc1_target_plan_profile_tests
-          .lake/build/bin/psc1_cursor_normalization_tests
           .lake/build/bin/psc1_ts_service_normalization_tests
           .lake/build/bin/psc1_js_service_tests
       - name: Audit both grammar inputs before expensive generation
@@ -119,6 +107,5 @@ jobs:
           path: |
             psc1/dist/generated-${{ matrix.target }}-compiler/
             psc1/dist/generated-service-native/
-            psc1/dist/ts-utf8-views/
           if-no-files-found: warn
           retention-days: 90

@@ -42,11 +42,12 @@ assert.equal(profileReceipt.qualification,false);assert.equal(profileReceipt.nat
 assert.equal(profileReceipt.source.sourceClosureDigest,request.attempts[0].sourceClosureDigest);
 const cpu=[];
 for(const file of profileFiles.filter(f=>f.endsWith('.log.txt'))){
- const text=fs.readFileSync(file,'utf8'),lines=text.split('\\n');
+ const text=fs.readFileSync(file,'utf8'),lines=text.split(String.fromCharCode(10));
  const sections={};
  for(const name of ['Summary','Bottom up (heavy) profile']){
    const at=lines.findIndex(l=>l.includes('['+name+']'));
-   sections[name]=at<0?[]:lines.slice(at,at+(name==='Summary'?15:85));
+   assert.ok(at>=0,'missing retained CPU section '+name);
+   sections[name]=lines.slice(at,at+(name==='Summary'?15:85));
  }
  cpu.push({file:path.basename(file),sha256:sha(text),sections});
 }

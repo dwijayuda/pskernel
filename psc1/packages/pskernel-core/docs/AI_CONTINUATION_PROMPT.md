@@ -1,3 +1,59 @@
+## Current checkpoint: primitive fusion built; whole mixed preflight pending
+
+Executable and harness `61deda52ef95b5e932e179663e60ba59fa9777df`,
+run https://github.com/dwijayuda/pskernel/actions/runs/39888872678.
+Native120203522175 PASS79 proof reports, five unchanged exact hash statements,
+2730 finite cases/three long cases. Generated producer120204250635 PASS:
+authentic complete SelfHost source check, PSC1->TS7.0.2->JS, unchanged fixture.
+Kernel9955170bytes SHA256 e58459e63fd78a34c867b7ccbc913d2f8b38c9881067fcb45cf526ce7e7e1780.
+Authenticated artifact12474053112 ZIP1132696bytes SHA256
+36b1e3befc0a8fac6ef36a72d048988c06107f053015c08a0b89de3941d46869.
+Read-only inspection of COMPLETE generated code confirms one recursive scheduler
+dispatch, one structural generator block, zero separate byte-step dispatch and
+zero staged result wrappers. This is primitive fusion, not a generator-free loop.
+
+Detached controls120209378192 PASS:2730cases/8190stages/13665assertions,long3,
+DAG controls, prefix605assertions, ownership kinds8/direct7/privateIDs5/forks2.
+Artifact12474623171 authenticated ZIP663830bytes SHA256
+2dfab63760276f8e2b7c4d0de2f32c39b300d2a52ebeefe910653110a3fc85d7.
+DAG /usr/bin/time141.62seconds/555992KiB peakRSS; prefix32.35seconds/404792KiB.
+Node heap2048MiB is not a hardRSS limit. No causal/general speedup claim.
+Complete receipts, exact body and all artifact file hashes:
+evidence/2026-10-23-t01f-primitive-fusion-generated-preflight.json.
+
+Whole unchanged mixed Unicode job120209378115 is RUNNING (started02:38:28Z).
+Fetch the existing job; do not launch a duplicate. All1400assertions,440API
+trace calls,independent294request admission/377metadata,singleton,positive/
+negative,owner/session/resource checks remain. Fuel4096/heap2048MiB/emptyPATH/
+25minute cap unchanged. Native/codegen/controls do not qualify the full matrix.
+
+Separate full sourcefe4aa456fb8d9e488a98dfed836cc7c991a00591 is terminal:
+generated39884267668 and canonical39884267679 passed samples0-4, but BOTH
+mixed sample5 jobs120198520713/120201333214 CANCELLED at unchanged25m cap.
+Both had294admissions/377metadata and mixed singleton PASS; neither produced
+a complete mixed case/shard receipt. Strict aggregates120211522804/
+120214603476 FAIL. No assertion/heap failure observed; interrupted API unknown
+because final-route tracing was disabled. Evidence:
+evidence/2026-10-23-t01f-fe4aa-sharded-terminal.json.
+Its other retained gates/owner32workers384calls passed,193Arena remains
+173matches+2safetyagreements+17timeouts+1resourceexhaustion FAIL; full receipts
+remain in evidence/2026-10-23-t01f-fe4aa-qualification-gates.json.
+No predecessor/source qualification is inherited by61deda or this docs child.
+
+One next task: finish existing61deda mixed preflight. If PASS, restore the work
+branch trigger in all5paused full workflows, keep corrected owner live-job/
+producer provenance guard and canonical9file manifest, disable hash narrow
+push, then qualify ONE NEW source with BOTH6-shard strict aggregates and all
+retained native/official/proofs/provider24CLI+8API/research/measurements/
+unchanged32worker384callABBA/full193/profile gates. If timeout/failure, preserve
+trace/artifact and fix the concrete bottleneck without changing assertions,
+semantics or limits. No T05 before complete T01F. CurrentA/B/D OPEN,C FAIL;
+historical scopedA9c87 remains qualified. Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
+Actions Linux only for builds/tests/kernel execution. Fresh expected_sha,
+nonforce updates,preserve concurrent history,no main merge/npm publication.
+
+---
+
 ## Live primitive-fusion source61deda52: native and bounded codegen PASS
 
 Executable AND harness `61deda52ef95b5e932e179663e60ba59fa9777df`;

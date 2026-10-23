@@ -1,0 +1,195 @@
+{
+  "schema": "psc1-t01f-fe4aa-sharded-terminal-v1",
+  "observedAt": "2026-10-23T02:57:59.763Z",
+  "source": "fe4aa456fb8d9e488a98dfed836cc7c991a00591",
+  "tree": "2c747f3fb82ddb1c4bf799ace9064344c51b8777",
+  "runs": {
+    "generated": 39884267668,
+    "canonical": 39884267679
+  },
+  "rows": [
+    {
+      "id": 120198520706,
+      "name": "t01f-generated-shards (2)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":55502.053366}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1728.0255410000027}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"é\"",
+        "PSC1_T01F_JS_CASE_PASS \"é\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":52.62122899999997,\"admissionMs\":55502.053366,\"metadataMs\":1728.0255410000027,\"totalMs\":585762.076175,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"é\",\"utf8Bytes\":2,\"owners\":224,\"ownerAndConstructionMs\":7013.108813999999,\"totalMs\":528295.0370720001,\"arenaNodes\":\"88\",\"ownedArenaNodes\":\"10276\",\"memory\":{\"rss\":888905728,\"heapTotal\":539250688,\"heapUsed\":413172064,\"external\":4810797,\"arrayBuffers\":2809696}}],\"sampleIndex\":2,\"sample\":\"é\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"generated\",\"index\":2,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120198520713,
+      "name": "t01f-generated-shards (5)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":53812.536458}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1774.0823080000046}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\"",
+        "##[error]The operation was canceled."
+      ]
+    },
+    {
+      "id": 120198520731,
+      "name": "t01f-generated-shards (1)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":52541.116625999995}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1680.2510860000039}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"a\"",
+        "PSC1_T01F_JS_CASE_PASS \"a\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":54.444833999999986,\"admissionMs\":52541.116625999995,\"metadataMs\":1680.2510860000039,\"totalMs\":460716.53326,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"a\",\"utf8Bytes\":1,\"owners\":224,\"ownerAndConstructionMs\":6604.077773999998,\"totalMs\":406261.21929900005,\"arenaNodes\":\"72\",\"ownedArenaNodes\":\"10260\",\"memory\":{\"rss\":899203072,\"heapTotal\":540037120,\"heapUsed\":264048800,\"external\":4810141,\"arrayBuffers\":2812992}}],\"sampleIndex\":1,\"sample\":\"a\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"generated\",\"index\":1,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120198520770,
+      "name": "t01f-generated-shards (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":51955.176318}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1672.617091}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"\"",
+        "PSC1_T01F_JS_CASE_PASS \"\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":106.20852300000001,\"admissionMs\":51955.176318,\"metadataMs\":1672.617091,\"totalMs\":303890.169451,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"\",\"utf8Bytes\":0,\"owners\":224,\"ownerAndConstructionMs\":6468.005176999999,\"totalMs\":249973.957761,\"arenaNodes\":\"32\",\"ownedArenaNodes\":\"10220\",\"memory\":{\"rss\":943443968,\"heapTotal\":515395584,\"heapUsed\":373389704,\"external\":4809769,\"arrayBuffers\":2812620}}],\"sampleIndex\":0,\"sample\":\"\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"generated\",\"index\":0,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120198520806,
+      "name": "t01f-generated-shards (4)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":35175.55511}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1230.775612000005}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"😀\"",
+        "PSC1_T01F_JS_CASE_PASS \"😀\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":37.11972700000001,\"admissionMs\":35175.55511,\"metadataMs\":1230.775612000005,\"totalMs\":533690.092456,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"😀\",\"utf8Bytes\":4,\"owners\":224,\"ownerAndConstructionMs\":4393.177324999997,\"totalMs\":497147.624624,\"arenaNodes\":\"120\",\"ownedArenaNodes\":\"10308\",\"memory\":{\"rss\":944590848,\"heapTotal\":514990080,\"heapUsed\":438498488,\"external\":4805665,\"arrayBuffers\":2808516}}],\"sampleIndex\":4,\"sample\":\"😀\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"generated\",\"index\":4,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120198520945,
+      "name": "t01f-generated-shards (3)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":43626.303429}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1487.4856300000029}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"€\"",
+        "PSC1_T01F_JS_CASE_PASS \"€\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":74.01027400000001,\"admissionMs\":43626.303429,\"metadataMs\":1487.4856300000029,\"totalMs\":559583.775939,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"€\",\"utf8Bytes\":3,\"owners\":224,\"ownerAndConstructionMs\":5698.017921000006,\"totalMs\":514256.98278,\"arenaNodes\":\"104\",\"ownedArenaNodes\":\"10292\",\"memory\":{\"rss\":884756480,\"heapTotal\":517087232,\"heapUsed\":215451472,\"external\":4808321,\"arrayBuffers\":2811172}}],\"sampleIndex\":3,\"sample\":\"€\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"generated\",\"index\":3,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120211522804,
+      "name": "t01f-generated-complete",
+      "status": "completed",
+      "conclusion": "failure",
+      "markers": []
+    },
+    {
+      "id": 120201333080,
+      "name": "t01f-canonical-shards (4)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":55844.895234}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1906.5344019999975}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"😀\"",
+        "PSC1_T01F_JS_CASE_PASS \"😀\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":53.30544999999998,\"admissionMs\":55844.895234,\"metadataMs\":1906.5344019999975,\"totalMs\":827109.080286,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"😀\",\"utf8Bytes\":4,\"owners\":224,\"ownerAndConstructionMs\":7620.576046999995,\"totalMs\":769120.630407,\"arenaNodes\":\"120\",\"ownedArenaNodes\":\"10308\",\"memory\":{\"rss\":1021284352,\"heapTotal\":570970112,\"heapUsed\":157299840,\"external\":4806105,\"arrayBuffers\":2808956}}],\"sampleIndex\":4,\"sample\":\"😀\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"canonical\",\"index\":4,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120201333113,
+      "name": "t01f-canonical-shards (1)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":47014.470386}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1530.307514}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"a\"",
+        "PSC1_T01F_JS_CASE_PASS \"a\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":58.752195,\"admissionMs\":47014.470386,\"metadataMs\":1530.307514,\"totalMs\":411043.760561,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"a\",\"utf8Bytes\":1,\"owners\":224,\"ownerAndConstructionMs\":5857.409395000002,\"totalMs\":362297.18550599995,\"arenaNodes\":\"72\",\"ownedArenaNodes\":\"10260\",\"memory\":{\"rss\":971845632,\"heapTotal\":544874496,\"heapUsed\":335682456,\"external\":4808973,\"arrayBuffers\":2811824}}],\"sampleIndex\":1,\"sample\":\"a\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"canonical\",\"index\":1,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120201333152,
+      "name": "t01f-canonical-shards (2)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":59925.638991}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1881.944316000001}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"é\"",
+        "PSC1_T01F_JS_CASE_PASS \"é\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":57.221858,\"admissionMs\":59925.638991,\"metadataMs\":1881.944316000001,\"totalMs\":648907.090983,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"é\",\"utf8Bytes\":2,\"owners\":224,\"ownerAndConstructionMs\":7628.737624999994,\"totalMs\":586851.845885,\"arenaNodes\":\"88\",\"ownedArenaNodes\":\"10276\",\"memory\":{\"rss\":852951040,\"heapTotal\":525213696,\"heapUsed\":301902720,\"external\":4809413,\"arrayBuffers\":2812264}}],\"sampleIndex\":2,\"sample\":\"é\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"canonical\",\"index\":2,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120201333191,
+      "name": "t01f-canonical-shards (3)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":57070.403682000004}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1877.1540680000035}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"€\"",
+        "PSC1_T01F_JS_CASE_PASS \"€\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":50.175411999999994,\"admissionMs\":57070.403682000004,\"metadataMs\":1877.1540680000035,\"totalMs\":692414.744755,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"€\",\"utf8Bytes\":3,\"owners\":224,\"ownerAndConstructionMs\":7160.917325000002,\"totalMs\":633228.50744,\"arenaNodes\":\"104\",\"ownedArenaNodes\":\"10292\",\"memory\":{\"rss\":881836032,\"heapTotal\":516038656,\"heapUsed\":440015568,\"external\":4808965,\"arrayBuffers\":2811816}}],\"sampleIndex\":3,\"sample\":\"€\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"canonical\",\"index\":3,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120201333214,
+      "name": "t01f-canonical-shards (5)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":52956.741544}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1734.5661830000026}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\"",
+        "##[error]The operation was canceled."
+      ]
+    },
+    {
+      "id": 120201333232,
+      "name": "t01f-canonical-shards (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":57263.067001}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1936.5018169999967}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"\"",
+        "PSC1_T01F_JS_CASE_PASS \"\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"cf72d345e2c2e65a985359cd4b008d43dfb3dfea2ec7cbe7c9de97dac53ca048\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":50.19595700000002,\"admissionMs\":57263.067001,\"metadataMs\":1936.5018169999967,\"totalMs\":324493.328941,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"\",\"utf8Bytes\":0,\"owners\":224,\"ownerAndConstructionMs\":7106.630349999999,\"totalMs\":265062.099547,\"arenaNodes\":\"32\",\"ownedArenaNodes\":\"10220\",\"memory\":{\"rss\":919404544,\"heapTotal\":523784192,\"heapUsed\":420449608,\"external\":4810285,\"arrayBuffers\":2813136}}],\"sampleIndex\":0,\"sample\":\"\"}",
+        "PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"canonical\",\"index\":0,\"sourceSha\":\"fe4aa456fb8d9e488a98dfed836cc7c991a00591\"}"
+      ]
+    },
+    {
+      "id": 120214603476,
+      "name": "t01f-canonical-complete",
+      "status": "completed",
+      "conclusion": "failure",
+      "markers": []
+    }
+  ],
+  "qualification": {
+    "fullStringMatrix": false,
+    "performanceQualified": false,
+    "reason": "Both routes passed samples 0–4 but mixed sample5 was cancelled at unchanged25-minute cap; both strict aggregates failed. No assertion/heap failure observed; tracing disabled, interrupted API unknown."
+  }
+}

@@ -135,7 +135,7 @@ theorem state_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
   unfold psKernelCacheStringHashStateWithFuel
   rw [remainder_eq_before, octets_eq_before, ← before_add]
   have count : (fuel / 8) * 8 + fuel % 8 = fuel := by omega
-  rw [count]
+  exact congrArg (fun steps => stringHashStateBefore steps value initial) count
 
 theorem state_succ (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
     psKernelCacheStringHashStateWithFuel (Nat.succ fuel) value initial =

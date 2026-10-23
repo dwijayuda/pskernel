@@ -1,3 +1,30 @@
+## Eight-transition native proof rewrite corrected; narrow check required
+
+Candidate86d72010e4c283b0e8385e2a1df666c4bfbefd1f/run39911503673/native120275329788
+FAILED final state_eq_before rewrite: explicit Nat.div/Nat.mod did not match
+overloaded division/modulo notation under rw. Octet/composition/remainder/pair
+lemmas elaborated, but final theorem/dependents included sorryAx and are NOT
+qualified. Generated producer/runtime skipped. Failure log and actual proof
+reports: docs/evidence/2026-10-23-t01f-octet-native-proof-rewrite-failure.json.
+
+This containing executable/harness candidate changes ONLY that proof's final
+step to congrArg applied to the exact count equality; production8transition
+implementation and all theorem statements remain unchanged.
+No native/generated proof acceptance yet. Follow this NEW candidate's one
+narrow hash run; all five full work-branch triggers remain PAUSED.
+
+Exact2c9 final mixed5 and both aggregates FAILED; ten other shardjobs PASS.
+No completed mixedRSS or timing is invented. Source-specific222proof/provider/
+owner/research results and C/D failures stay separate.
+T01F/currentA/B/D OPEN,C FAIL,historicalscopedA9c87 qualified. NoT05/integration.
+After complete narrow native/codegen/controls/mixed PASS, restore full five
+triggers and qualify ONE new coherent source through BOTH six-shard aggregates
+and all retained gates. No prior-source pass inheritance or duplicate runs.
+ActionsLinuxONLY for builds/tests/kernel execution; expected_sha/nonforce,
+preservehistory,unchangedfuel4096/2048MiB/emptyPATH/25mincap; no main/npm.
+
+---
+
 ## Final pair-counter qualification FAILED; eight-transition candidate in narrow preflight
 
 Exact final source 2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298 failed BOTH

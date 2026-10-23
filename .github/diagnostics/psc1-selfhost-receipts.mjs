@@ -105,7 +105,27 @@ for(const expected of request.attempts) {
     startLine:source.slice(0,start).split('\n').length,sourceSha256:sha(body),body});
   }
  }
- const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
+
+ const cursorCacheHelpers=[];
+ if(expected.inspectCursorCacheHelpers){
+  assert.equal(expected.target,'ts');
+  for(const generation of report.generations){
+   const text=fs.readFileSync(path.join(directory,'G'+generation.generation+'-service','module.js'),'utf8');
+   const helpers={};
+   for(const name of ['__ps$stringUtf8Size','__ps$stringExtract']){
+    const start=text.indexOf('function '+name+'(');assert.ok(start>=0);
+    const next=text.indexOf('\nfunction',start+10),body=text.slice(start,next<0?text.length:next);
+    assert.equal(/__ps\$(?:last|previous)Utf8\s*=/.test(body),false);
+    assert.equal(body.includes('new Uint32Array'),false);
+    if(name==='__ps$stringUtf8Size')assert.equal(body.includes('__ps$utf8('),false);
+    else {assert.ok(body.includes('.slice('));assert.ok(body.includes('for (const char of text)'));}
+    helpers[name]={sourceSha256:sha(body),body};
+   }
+   cursorCacheHelpers.push({generation:generation.generation,helpers,scope:'size-only requests and extraction do not admit/promote views; cold/invalid extraction fallback retained'});
+  }
+ }
+
+ const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,cursorCacheHelpers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);
  console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));

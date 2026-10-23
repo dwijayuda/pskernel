@@ -1,18 +1,17 @@
 {
   "schema": "psc1-selfhost-receipt-audit-request/1",
-  "id": "worker-source-vs-generated-variants-1792764436805",
   "attempts": [
     {
-      "id": "ts-erasure-workers-performance-240s",
+      "id": "ts-erasure-workers-correctness-1800s",
       "target": "ts",
-      "profile": "performance-240s",
-      "sourceCommit": "09f41833d1c2d5c62de8bc55a25e58076055cc06",
-      "requestCommit": "9a0a9e6f5b6b8c6546c1833b243115f97888c561",
-      "runId": 39965349252,
-      "jobId": 120453647159,
-      "artifactId": 12506727938,
-      "artifactDigest": "sha256:d1090e31f9c534f40c2821d3581c90b250be7fabe8cda99cdd956cae7d3071bf",
-      "artifactExpiresAt": "2027-01-21T13:56:11Z",
+      "profile": "correctness-1800s",
+      "sourceCommit": "ba0d5f2916074b6331441b050a38fd0f12347604",
+      "requestCommit": "d2bc51fcce626297db491890551d2902c710a844",
+      "runId": 39964278626,
+      "jobId": 120449945559,
+      "artifactId": 12508002820,
+      "artifactDigest": "sha256:345dcf59f4b5707a0c9ee9c5301d0e83b3e8aaa86c88b1552c1511b0838a4bb3",
+      "artifactExpiresAt": "2027-01-21T13:48:33Z",
       "inspectUtf8TokenWorker": true,
       "inspectCursorCacheHelpers": true,
       "inspectErasureWorkers": true

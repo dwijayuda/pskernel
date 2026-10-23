@@ -61,7 +61,22 @@ for(const expected of request.attempts) {
    assert.equal(g.logicalAdmission,'accepted');assert.equal(g.observations.length,10);
   }
  }
- const row={...expected,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
+ const candidates=[];
+ for(const generation of [2,3]) {
+  const candidate=path.join(directory,'G'+generation+'-self.candidate.json');
+  if(!fs.existsSync(candidate))continue;
+  const bytes=fs.readFileSync(candidate);
+  try {
+   const value=JSON.parse(bytes);
+   candidates.push({generation,wireSha256:sha(bytes),status:value.status,phase:value.phase,code:value.code,
+    sourceClosureDigest:value.sourceClosureDigest,sourceSha256:typeof value.source==='string'?sha(value.source):undefined,
+    admissionsSha256:value.admissionRequest?.admissions?sha(value.admissionRequest.admissions):undefined,
+    originalIrSha256:value.originalIr?sha(JSON.stringify(value.originalIr)):undefined,
+    specializedIrSha256:value.specializedIr?sha(JSON.stringify(value.specializedIr)):undefined,
+    logicalAdmission:report.generations.find(g=>g.generation===generation)?.logicalAdmission||'not-established-by-this-audit'});
+  } catch(error) { candidates.push({generation,wireSha256:sha(bytes),parseError:error.message}); }
+ }
+ const row={...expected,candidates,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);
  console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));

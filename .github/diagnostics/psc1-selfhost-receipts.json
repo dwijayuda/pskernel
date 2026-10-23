@@ -2,15 +2,37 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "rust-performance-240s",
       "target": "rust",
+      "id": "rust-correctness-1800s",
+      "profile": "correctness-1800s",
+      "runId": 39908529181,
+      "sourceCommit": "5e0b548e6cb3606ee0d3c129e0a829d830e407e4",
+      "requestCommit": "7d8865a08427a28432e427592dfc4263718c9a2f",
+      "artifactId": 12482993158,
+      "artifactDigest": "sha256:626e5300c83a9e454ed2e98aa7b8ad4812cec1a6350691758061ff9c6da1457e",
+      "artifactExpiresAt": "2027-01-21T05:56:14Z"
+    },
+    {
+      "target": "ts",
+      "id": "ts-correctness-1800s",
+      "profile": "correctness-1800s",
+      "runId": 39908439190,
+      "sourceCommit": "29e871eae0df41a2f782a501fc4110b928fafa2e",
+      "requestCommit": "b5ba1452196c2a64932310f0bc828beb617650ae",
+      "artifactId": 12483530422,
+      "artifactDigest": "sha256:88e63699fad2034f31f557631e6031bc1de8882b6b77c65a04b8285ac9974d34",
+      "artifactExpiresAt": "2027-01-21T05:55:15Z"
+    },
+    {
+      "target": "ts",
+      "id": "ts-performance-240s",
       "profile": "performance-240s",
-      "sourceCommit": "69bb7d0268a8f3ff2d2282d8b037d89de06db424",
-      "requestCommit": "26faa27edc537d55c2d3622d8046f6140c74bc61",
-      "runId": 39908086775,
-      "artifactId": 12481404904,
-      "artifactDigest": "sha256:a82d94eeb905ddef6721b9b24248a3224d1d3e09b4301026dd8213138f27cd34",
-      "artifactExpiresAt": "2027-01-21T05:51:32Z"
+      "runId": 39909753534,
+      "sourceCommit": "6e5726e950d774cc31580fb4d7dc630ad134e46d",
+      "requestCommit": "e7c4d8b504c1680985f0b2d89e84da29aeb26617",
+      "artifactId": 12482786538,
+      "artifactDigest": "sha256:1da8d68ad8b13cb13ffd19ab1e428f6810a7ac203901a7cae3c25c6c8d47fe30",
+      "artifactExpiresAt": "2027-01-21T06:08:53Z"
     }
   ]
 }

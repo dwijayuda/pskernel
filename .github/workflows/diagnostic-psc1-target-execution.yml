@@ -18,14 +18,14 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39886083977'
-          artifact-ids: '12472902085'
+          run-id: '39888964045'
+          artifact-ids: '12474496053'
           path: input/rust
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39887064597'
-          artifact-ids: '12473571856'
+          run-id: '39889151346'
+          artifact-ids: '12474077616'
           path: input/ts
       - name: Inspect exact source and sample actual generated execution without adoption
         run: node .github/diagnostics/psc1-target-execution-profile.mjs

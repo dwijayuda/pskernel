@@ -42,18 +42,26 @@ theorem ordinary_expansion_worker_eq (declarations : List PsDeclaration) :
     psOrdinaryExpandWorker declarations =
       OrdinaryExpansionReference.psOrdinaryExpandWorker declarations := by
   funext environment
-  simpa only [psOrdinaryExpandWorker, List.reverse_nil, List.nil_append]
-    using ordinary_expansion_acc_eq declarations environment [] []
+  have h := ordinary_expansion_acc_eq declarations environment [] []
+  cases result : OrdinaryExpansionReference.psOrdinaryExpandWorker declarations environment with
+  | error error =>
+      simpa only [psOrdinaryExpandWorker, List.reverse_nil, List.nil_append, result] using h
+  | ok expanded =>
+      cases expanded with
+      | mk logical partials =>
+          simpa only [psOrdinaryExpandWorker, List.reverse_nil, List.nil_append, result] using h
 
 #print axioms ordinary_expansion_worker_eq
 
-private def requireSame (declarations : List PsDeclaration) : IO Unit := do
+private def requireSame (declarations : List PsDeclaration) (shouldAccept : Bool) : IO Unit := do
   let actual := psOrdinaryExpandWorker declarations psSelfHostProdPreludeEnvironment
   let expected := OrdinaryExpansionReference.psOrdinaryExpandWorker declarations psSelfHostProdPreludeEnvironment
   match actual,expected with
   | .error a,.error b =>
+      if shouldAccept then throw (IO.userError "expected ordinary acceptance")
       if a != b then throw (IO.userError "ordinary refusal/order changed")
   | .ok a,.ok b =>
+      if !shouldAccept then throw (IO.userError "forbidden ordinary input was accepted")
       match psEncodeCheckedAdmissionsCanonical a.fst, psEncodeCheckedAdmissionsCanonical b.fst with
       | .ok x,.ok y =>
           if x != y || a.snd.map psNameToString != b.snd.map psNameToString then
@@ -69,15 +77,16 @@ def testOrdinaryExpansion : IO Unit := do
   let type := PsExpr.forallE binder nat nat .explicit
   let body := PsExpr.lam binder nat (.app (.constE name []) (.bvar 0)) .explicit
   let recursive := PsDeclaration.partialDecl name [] type body
-  for declarations in [
-    [],[definition],[recursive],[definition,recursive],[recursive,definition],
-    [definition,definition],
-    [PsDeclaration.axiomDecl (psRootName "forbidden") [] nat],
-    [PsDeclaration.opaqueDecl (psRootName "forbidden") [] nat (.lit (.natural 0))],
-    [PsDeclaration.partialDecl name [] nat (.lit (.natural 0))],
-    [PsDeclaration.partialDecl name [] (PsExpr.forallE binder nat (.constE (psRootName "Missing") []) .explicit) body],
-    [PsDeclaration.definitionDecl (psOrdinaryBodyName name) [] type body,recursive]
-  ] do requireSame declarations
+  let scenarios : List (Prod (List PsDeclaration) Bool) := [
+    ([],true),([definition],true),([recursive],true),([definition,recursive],true),([recursive,definition],true),
+    ([definition,definition],false),
+    ([PsDeclaration.axiomDecl (psRootName "forbidden") [] nat],false),
+    ([PsDeclaration.opaqueDecl (psRootName "forbidden") [] nat (.lit (.natural 0))],false),
+    ([PsDeclaration.partialDecl name [] nat (.lit (.natural 0))],false),
+    ([PsDeclaration.partialDecl name [] (PsExpr.forallE binder nat (.constE (psRootName "Missing") []) .explicit) body],false),
+    ([PsDeclaration.definitionDecl (psOrdinaryBodyName name) [] type body,recursive],false)
+  ]
+  for scenario in scenarios do requireSame scenario.fst scenario.snd
   let many := (List.range 10000).map fun index =>
     PsDeclaration.definitionDecl (PsName.num (psRootName "large") index) [] nat (.lit (.natural index))
   match psOrdinaryExpandWorker many psSelfHostProdPreludeEnvironment with

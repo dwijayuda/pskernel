@@ -344,3 +344,12 @@ digest0317731c7fdbcb9b426d555e4f194a99dc5271694ca2ef9360dcaecb0ba20091.
 This is the preserved integration checkpoint, not full-suite qualification of
 subsequent statement/prefix/ordinary-pass changes. Current JS0c run continues;
 no fixed point inferred from an active job. No merge or publication.
+
+The ordinary-expansion accumulator invariant already passed its native proof;
+the public wrapper proof needed explicit Except/Prod case reduction, now added.
+Small cases assert expected acceptance/refusal as well as retained canonical
+output equality. Source audit also found three additional Wasm prefix workers
+in IntUtil/tail-call passes and one inline-lambda formatting case left eager by
+the first rewrite. Correct those placements, retain all51 equality obligations,
+and add a fast source guard against recursive-prefix construction before inputs.
+The earlier48-equality checkpoint remains exactly scoped to82b27063.

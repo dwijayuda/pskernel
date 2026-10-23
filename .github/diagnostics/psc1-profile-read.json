@@ -1,10 +1,10 @@
 {
   "schema": "psc1-profile-read-request/1",
-  "id": 1792769764907,
-  "phase": 240,
+  "id": 1792770142953,
+  "phase": 600,
   "runId": 39978891505,
   "sourceCommit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
-  "artifactId": 12512911643,
-  "artifactDigest": "sha256:411a6ef3d22907b28b0f6784c94709b0756922f97329a4758400374217905715",
+  "artifactId": 12512812701,
+  "artifactDigest": "sha256:a686cdda7af4f17e9cd499bed5c1caf3b41a1593a23fb52a623bd6fee5de3dd1",
   "artifactExpiresAt": "2027-01-21T15:30:43Z"
 }

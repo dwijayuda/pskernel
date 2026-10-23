@@ -1,3 +1,46 @@
+## Final qualification reactivated after exact9d3fb mixed PASS
+
+Narrow prerequisite executableANDharness9d3fb530e67863017c50470dbd5d06aa388d6184
+has terminal run39896509889 ALL4jobsSUCCESS: native120228107597 (82proofs,
+eighthash),completeauthenticgeneratedproducer120228660726,retainedcontrols
+120234072497,and COMPLETE mixed120234072408.
+Mixed294independent admissions/377metadata,1400assertions,all440/440tracecalls,
+singleton,allnegative/session/owner controls PASS underunchangedfuel4096/
+2048MiB/emptyPATH/25minutejobcap. /usr/bin/time1423.67seconds/1064712KiBpeakRSS;
+resulttotal1423528.100563ms,admission42493.374321ms,metadata1415.246222ms.
+Mixedartifact12478622243 ZIP538409bytes SHA256
+82137768fb09e3435fc40622411012a87efefbd212e103734d6d3827d8b53064.
+Exactall440traces,fullreceipt,authenticatedZIP/filehashes:
+evidence/2026-10-23-t01f-primitive-pair-counter-mixed-terminal.json.
+Kernel9956609bytes SHA256546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04.
+BoundedandCOMPLETEcodebothverifyonePairrecursiveinvoke/oneblock/twotransitions,
+StateonePairinvoke/oneblock/oneoddtransition,noStage/Step/Mixdispatch.
+No generator-free loop/globalbackend theorem/general causal speedup claimed.
+HighercurrentDAG/prefix times and prefixRSS vs61deda stay visible; DOPEN.
+
+THIS containing activation is a NEW qualification source and inheritsNONE of
+those source9d3fb passes. Workbranchtrigger restored in allFIVE full workflows:
+integration,correctness,research,full193Arena,authenticprofile. Every jobbody,
+alllimits/assertions,strictsixshardaggregates,canonical9files and corrected
+ownerlivejobguard are retained; nativehashproofcount8 alreadyreconciled.
+Narrow hash push is nowDISABLED(manual-only); focus/profile/ownerdiagnostics
+remainmanual-only. No duplicate fullpreflight builds should be launched.
+
+One next task: fetch this activation commit's exact sourceSHA and its FIVE
+already-triggered runs,record IDs,follow all toterminal. Require at ONE source
+bothgeneratedandcanonical sixsamples/strictaggregates
+PSC1_T01F_FULL_STRING_SHARDED_JS: PASS,allnative/official/proofs,eachprovider
+24CLI+8API,research/fullmeasurements,unchanged32worker384callownerABBA,
+unchanged193bodyhashes/profile. No partialrerun mayinheritdifferentattempts.
+Full193C failures are distinct from scopedA/T01F; retain actualtiming/RSS and
+openD obligations. Do not startT05beforefullT01Facceptance. No correctness
+integration yet; targetintegration123c41197950b6761be965fd21c57142ee2b0d1c
+unchanged,preserveconcurrencywithfresh expected_sha/nonforce updates,no main/npm.
+HistoricalscopedA9c87 qualified,currentA/T01F/B/DOPEN,CFAILuntilnewactualgates.
+ActionsLinux ONLY for builds/tests/kernel execution; no localkernelexecution.
+
+---
+
 ## Exact9d3fb complete producer and controls PASS; mixed runtime RUNNING
 
 ExecutableANDharness9d3fb530e67863017c50470dbd5d06aa388d6184,

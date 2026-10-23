@@ -1,14 +1,6 @@
 name: PSC1 T01F pair-counter data-result preflight
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - work/psc1-pskernel-t01f-string-20261022
-    paths:
-      - '.github/workflows/psc1-pskernel-t01f-hash.yml'
-      - 'psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean'
-      - 'psc1/test/PsKernelScalarHashWorkerRegression.lean'
-      - 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs'
 permissions:
   contents: read
   actions: read

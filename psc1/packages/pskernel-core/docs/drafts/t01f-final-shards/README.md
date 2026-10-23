@@ -1,3 +1,13 @@
+# Current: reactivated after exact9d3fb complete mixed PASS
+
+The containing activation restores all five full work-branch pushes after run
+39896509889 passed all four narrow jobs,including1400mixedassertions/440calls,
+1423.67seconds/1064712KiBpeakRSS. This is a NEW source; all final same-source
+gates and both six-shard strict aggregates must execute before qualification.
+The eight-proof guard,canonical nine-file manifest and corrected owner live-job
+authentication remain. All narrow diagnostic pushes are now manual-only.
+Earlier paused/activation wording below is historical; current work state wins.
+
 # Current: full pushes paused; eight hash proof reports reconciled
 
 The exact9d3fb native and bounded generated gates passed,while complete producer

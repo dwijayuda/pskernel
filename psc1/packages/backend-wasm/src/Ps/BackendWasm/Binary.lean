@@ -12,6 +12,11 @@ def psListFlatMapExcept {α β ε : Type}
       let other ← psListFlatMapExcept convert rest
       pure (psListAppend first other)
 
+def psWasmEncodeByteChunks (chunks : List (List UInt8)) : List UInt8 :=
+  match chunks with
+  | List.nil => []
+  | List.cons chunk rest => psListAppend chunk (psWasmEncodeByteChunks rest)
+
 inductive PsWasmEncodeError where
   | unsupportedValueType
   | unsupportedInstruction
@@ -402,8 +407,8 @@ def psWasmEncodeInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
   match instruction with
-  | .i32Load offset => Except.ok ([psWasmByte 40, psWasmByte 2] ++ psWasmEncodeUleb offset)
-  | .i32Store offset => Except.ok ([psWasmByte 54, psWasmByte 2] ++ psWasmEncodeUleb offset)
+  | .i32Load offset => Except.ok (psListAppend [psWasmByte 40, psWasmByte 2] (psWasmEncodeUleb offset))
+  | .i32Store offset => Except.ok (psListAppend [psWasmByte 54, psWasmByte 2] (psWasmEncodeUleb offset))
   | .i32Load8U => Except.ok [psWasmByte 45, psWasmByte 0, psWasmByte 0]
   | .i32Store8 => Except.ok [psWasmByte 58, psWasmByte 0, psWasmByte 0]
   | .abiHeapGet => Except.ok [psWasmByte 35, psWasmByte 0]
@@ -1036,8 +1041,8 @@ def psWasmEncodeAbiImport (module : PsWasmModule) (index : Nat)
     (value : PsWasmFunctionImport) : Except PsWasmEncodeError (List UInt8) := do
   let typeIndex <- psWasmFunctionTypeIndex module.structures module.arrays
     module.functionTypes index value.function
-  return psWasmEncodeName value.moduleName ++ psWasmEncodeName value.importName ++
-    [psWasmByte 0] ++ psWasmEncodeUleb typeIndex
+  return psWasmEncodeByteChunks [psWasmEncodeName value.moduleName,
+    psWasmEncodeName value.importName, [psWasmByte 0], psWasmEncodeUleb typeIndex]
 
 -- Ordered, fully applied traversal preserves imported function type indices.
 def psWasmEncodeAbiImportsWorker (module : PsWasmModule) (index : Nat)
@@ -1054,12 +1059,12 @@ def psWasmEncodeAbiImports (module : PsWasmModule) :
   let encoded <- psWasmEncodeAbiImportsWorker module 0 module.functionImports
   let memoryImports :=
     if module.abiMemoryImports then
-      psWasmEncodeName "psc1:abi" ++ psWasmEncodeName "memory" ++
-        [psWasmByte 2, psWasmByte 1] ++ psWasmEncodeUleb 256 ++ psWasmEncodeUleb 256 ++
-      psWasmEncodeName "psc1:abi" ++ psWasmEncodeName "heap" ++
-        [psWasmByte 3, psWasmByte 127, psWasmByte 1] ++
-      psWasmEncodeName "psc1:abi" ++ psWasmEncodeName "busy" ++
-        [psWasmByte 3, psWasmByte 127, psWasmByte 1]
+      psWasmEncodeByteChunks [psWasmEncodeName "psc1:abi", psWasmEncodeName "memory",
+        [psWasmByte 2, psWasmByte 1], psWasmEncodeUleb 256, psWasmEncodeUleb 256,
+        psWasmEncodeName "psc1:abi", psWasmEncodeName "heap",
+        [psWasmByte 3, psWasmByte 127, psWasmByte 1],
+        psWasmEncodeName "psc1:abi", psWasmEncodeName "busy",
+        [psWasmByte 3, psWasmByte 127, psWasmByte 1]]
     else []
   return psWasmEncodeVector (psListAppend encoded memoryImports)
     (psListLength module.functionImports + (if module.abiMemoryImports then 3 else 0))
@@ -1143,13 +1148,13 @@ def psWasmEncodeModule
                                       (psListLength module.functions);
                                   let exportPayload :=
                                     psWasmEncodeVector
-                                      (encodedExports ++
+                                      (psWasmEncodeByteChunks [encodedExports,
                                         (if module.abiMemory then
-                                          psWasmEncodeName "memory" ++ [psWasmByte 2, psWasmByte 0]
-                                        else []) ++ (if module.abiGlobalsExport then
-                                          psWasmEncodeName "heap" ++ [psWasmByte 3, psWasmByte 0] ++
-                                          psWasmEncodeName "busy" ++ [psWasmByte 3, psWasmByte 1]
-                                        else []))
+                                          psListAppend (psWasmEncodeName "memory") [psWasmByte 2, psWasmByte 0]
+                                        else []), (if module.abiGlobalsExport then
+                                          psWasmEncodeByteChunks [psWasmEncodeName "heap", [psWasmByte 3, psWasmByte 0],
+                                            psWasmEncodeName "busy", [psWasmByte 3, psWasmByte 1]]
+                                        else [])])
                                       (psListLength module.exports + (if module.abiMemory then 1 else 0) +
                                         (if module.abiGlobalsExport then 2 else 0));
                                   let elementSection : List UInt8 :=
@@ -1169,7 +1174,7 @@ def psWasmEncodeModule
                                   let memorySection :=
                                     if module.abiMemory && !module.abiMemoryImports then
                                       psWasmEncodeSection 5
-                                        ([psWasmByte 1, psWasmByte 1] ++ psWasmEncodeUleb 256 ++ psWasmEncodeUleb 256)
+                                        (psWasmEncodeByteChunks [[psWasmByte 1, psWasmByte 1], psWasmEncodeUleb 256, psWasmEncodeUleb 256])
                                     else []
                                   let globalSection :=
                                     if module.abiMemory && !module.abiMemoryImports then
@@ -1180,9 +1185,9 @@ def psWasmEncodeModule
                                          psWasmByte 65, psWasmByte 0, psWasmByte 11]
                                     else []
                                   Except.ok
-                                    ([psWasmByte 0, psWasmByte 97, psWasmByte 115, psWasmByte 109,
-                                      psWasmByte 1, psWasmByte 0, psWasmByte 0, psWasmByte 0] ++
-                                     psWasmEncodeSection 1 typePayload ++ importSection ++
-                                     psWasmEncodeSection 3 functionPayload ++ memorySection ++ globalSection ++
-                                     psWasmEncodeSection 7 exportPayload ++ elementSection ++
-                                     psWasmEncodeSection 10 codePayload)
+                                    (psWasmEncodeByteChunks [[psWasmByte 0, psWasmByte 97, psWasmByte 115, psWasmByte 109,
+                                      psWasmByte 1, psWasmByte 0, psWasmByte 0, psWasmByte 0],
+                                     psWasmEncodeSection 1 typePayload, importSection,
+                                     psWasmEncodeSection 3 functionPayload, memorySection, globalSection,
+                                     psWasmEncodeSection 7 exportPayload, elementSection,
+                                     psWasmEncodeSection 10 codePayload])

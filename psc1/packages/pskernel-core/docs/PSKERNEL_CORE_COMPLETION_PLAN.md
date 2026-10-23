@@ -1,3 +1,32 @@
+## 2026-10-24 proof-only correction after1902 native proof rejection
+
+Source1902eaad9e7172109955a67b17cfcea690df52f9, run39996684137 attempt1,
+native120561914917 built the authentic native targets and passed all85retained
+scope/session/hash reports plus frozen2730/long3. Four new universal theorems
+elaborated with permitted standard axioms. Three remained incomplete:
+semantic_pair_insert_eq and infer_map_get_eq/infer_map_insert_eq. Their actual
+reports include sorryAx from unsolved goals; the gate FAILED correctly.
+No complete String fixture, generated producer or mixed runtime executed.
+
+Verified artifact12519779027:3778bytes, SHA256
+84ccc857f61c87f3863c1f3dfafdee9c6cfd84b1159ea5df7b33eefaf9d35895.
+All four contained logs independently rehashed; exact errors and reports:
+docs/evidence/2026-10-23-t01f-closed-cache-analysis-native-proof-failure.json.
+
+This containing candidate changes ONLY the three proof scripts plus evidence/
+status. Pair insertion splits the actual residual conditional after hash
+normalization; inference equations directly apply the universal semantic-map
+equivalences after constructor/mode cases. All seven theorem statements,
+production source, cache policies, fixtures, assertions and resource limits
+remain unchanged. New proof elaboration and all downstream gates are PENDING.
+Follow ONE new narrow run, without duplicating1902 or inheriting its results.
+
+All five full work-branch triggers remain paused. T01F/current A/B/D OPEN;
+C FAIL. No T05/integration before complete exact-source scoped qualification.
+Preserve Lean4.35.0/TS7.0.2/Node22/fuel4096/2048MiB/emptyPATH/25minute cap.
+
+---
+
 ## 2026-10-24 native module registration corrected after236a build failure
 
 Candidate236aeb62aeadc6a457dc6c7b0e2f5eb970113600, run39996286431 attempt1,

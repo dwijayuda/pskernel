@@ -110,15 +110,10 @@ theorem semantic_pair_insert_eq
   | some index =>
       cases hLeft : psKernelExprHasFVar left <;>
         cases hRight : psKernelExprHasFVar right <;>
-          cases hContains : psKernelExprPairSetContainsIn left right
-            (psKernelExprPairSetIndexBucket 16 index
-              (Nat.mod
-                (Nat.add (psKernelExprHash left) (psKernelExprHash right))
-                psKernelCacheHashModulus)) <;>
-            simp [psKernelSemanticExprPairSetInsert, analysis_eq,
-              psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
-              psKernelExprPairSetInsert, psKernelExprPairHash,
-              hLeft, hRight, hContains]
+          simp [psKernelSemanticExprPairSetInsert, analysis_eq,
+            psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
+            psKernelExprPairSetInsert, psKernelExprPairHash, hLeft, hRight]
+      split <;> simp_all
 
 theorem infer_map_get_eq
     (cache : PsKernelExprMap) (inferOnly : Bool) (expr : PsKernelExpr) :
@@ -128,8 +123,9 @@ theorem infer_map_get_eq
       else
         Option.none := by
   cases expr <;> cases inferOnly <;>
-    simp [psKernelInferCacheMapGet, psKernelInferCacheEligible,
-      semantic_map_get_eq]
+    first
+    | rfl
+    | apply semantic_map_get_eq
 
 theorem infer_map_insert_eq
     (cache : PsKernelExprMap) (inferOnly : Bool) (expr value : PsKernelExpr) :
@@ -139,8 +135,9 @@ theorem infer_map_insert_eq
       else
         Option.none := by
   cases expr <;> cases inferOnly <;>
-    simp [psKernelInferCacheMapInsert, psKernelInferCacheEligible,
-      semantic_map_insert_eq]
+    first
+    | rfl
+    | apply semantic_map_insert_eq
 
 #print axioms analysis_eq
 #print axioms semantic_map_get_eq

@@ -106,12 +106,44 @@ def psKernelCacheStringHashWorker
       fun (value : String) (position : Nat) (hash : Nat) =>
         psKernelCacheStringHashScan (Nat.succ remaining) value position hash
 
+/- Pure bounded entry for zero through four pairs. Larger inputs deliberately
+   stop after four pairs; the public entry selects this only when pairs <= 4. -/
+def psKernelCacheStringHashShortPairs
+    (pairs : Nat)
+    (value : String)
+    (initial : Prod Nat Nat) : Prod Nat Nat :=
+  match pairs with
+  | Nat.zero => initial
+  | Nat.succ afterFirst =>
+      let afterTwo := psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStep value initial);
+      match afterFirst with
+      | Nat.zero => afterTwo
+      | Nat.succ afterSecond =>
+          let afterFour := psKernelCacheStringHashStep value
+            (psKernelCacheStringHashStep value afterTwo);
+          match afterSecond with
+          | Nat.zero => afterFour
+          | Nat.succ afterThird =>
+              let afterSix := psKernelCacheStringHashStep value
+                (psKernelCacheStringHashStep value afterFour);
+              match afterThird with
+              | Nat.zero => afterSix
+              | Nat.succ _afterFourth =>
+                  psKernelCacheStringHashStep value
+                    (psKernelCacheStringHashStep value afterSix)
+
 def psKernelCacheStringHash
     (value : String) :
     Nat :=
   /- Fuse the public zero-cursor entry; preserve the staged general worker. -/
   let fuel := Nat.succ (String.utf8ByteSize value);
-  let paired := psKernelCacheStringHashPairsWithFuel (Nat.div fuel 2) value (Prod.mk 0 0);
+  let pairs := Nat.div fuel 2;
+  let paired :=
+    if Nat.ble pairs 4 then
+      psKernelCacheStringHashShortPairs pairs value (Prod.mk 0 0)
+    else
+      psKernelCacheStringHashPairsWithFuel pairs value (Prod.mk 0 0);
   let final :=
     if Nat.beq (Nat.mod fuel 2) 0 then
       paired

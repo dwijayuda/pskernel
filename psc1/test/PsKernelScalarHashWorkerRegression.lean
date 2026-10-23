@@ -156,9 +156,42 @@ theorem worker_eq_before (fuel : Nat) :
   | succ remaining =>
       exact scan_eq_before (Nat.succ remaining) value position hash
 
+/- The pure short entry is exact on its selected bounded domain. -/
+theorem short_pairs_eq (pairs : Nat) (value : String) (initial : Prod Nat Nat)
+    (bounded : pairs <= 4) :
+    psKernelCacheStringHashShortPairs pairs value initial =
+      psKernelCacheStringHashPairsWithFuel pairs value initial := by
+  cases pairs with
+  | zero => rfl
+  | succ first =>
+      cases first with
+      | zero => rfl
+      | succ second =>
+          cases second with
+          | zero => rfl
+          | succ third =>
+              cases third with
+              | zero => rfl
+              | succ fourth =>
+                  cases fourth with
+                  | zero => rfl
+                  | succ remaining => omega
+
+theorem entry_pairs_eq (pairs : Nat) (value : String) (initial : Prod Nat Nat) :
+    (if Nat.ble pairs 4 then psKernelCacheStringHashShortPairs pairs value initial
+     else psKernelCacheStringHashPairsWithFuel pairs value initial) =
+      psKernelCacheStringHashPairsWithFuel pairs value initial := by
+  cases comparison : Nat.ble pairs 4 with
+  | false => rfl
+  | true =>
+      have bounded : pairs <= 4 := by omega
+      exact short_pairs_eq pairs value initial bounded
+
 theorem hash_eq_before (value : String) :
     psKernelCacheStringHash value =
       stringHashWorkerBefore (Nat.succ (String.utf8ByteSize value)) value 0 0 := by
+  unfold psKernelCacheStringHash
+  rw [entry_pairs_eq]
   exact congrArg (fun worker => worker value 0 0)
     (worker_eq_before (Nat.succ (String.utf8ByteSize value)))
 
@@ -177,6 +210,8 @@ theorem level_list_hash_eq_worker (values : List PsKernelLevel) :
 
 end PsKernelScalarHashWorkerRegression
 
+#print axioms PsKernelScalarHashWorkerRegression.short_pairs_eq
+#print axioms PsKernelScalarHashWorkerRegression.entry_pairs_eq
 #print axioms PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker
 #print axioms PsKernelScalarHashWorkerRegression.pairs_eq_before
 #print axioms PsKernelScalarHashWorkerRegression.state_eq_before

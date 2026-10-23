@@ -1,4 +1,4 @@
-name: PSC1 T01F fused scalar hash entries preflight
+name: PSC1 T01F pure short-pair hash entry preflight
 on:
   workflow_dispatch:
   push:
@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/psc1-t01f"
-          test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 9
+          test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 11
           lake -f kernel-lakefile.lean env lean --run test/PsKernelScalarHashWorkerRegression.lean \
             2>&1 | tee "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
@@ -110,6 +110,9 @@ jobs:
           cp dist/expr-v2/scalar-hash/kernel.js "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs"
           node scripts/pskernel-scalar-hash-worker-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
             | tee "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
+          node scripts/pskernel-scalar-hash-short-entry-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
+            | tee -a "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {"cases":19,"assertions":38,"shortMaxPairs":4,"genericFallback":true}' "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
           python3 - <<'PY'
           import pathlib, re
           text = pathlib.Path('dist/expr-v2/scalar-hash/kernel.js').read_text()
@@ -158,6 +161,18 @@ jobs:
               raise RuntimeError('Fused entry still allocates an extra generator block')
           if entry.count('__ps$stringNext(') != 1 or entry.count('__ps$stringGet(') != 1:
               raise RuntimeError('Fused entry must contain exactly one odd remainder transition')
+          short = body_of('psKernelCacheStringHashShortPairs')
+          print('PSC1_HASH_SHORT_PAIRS_BODY ' + repr(short))
+          if implementations('psKernelCacheStringHashShortPairs') != ['psKernelCacheStringHashShortPairs']:
+              raise RuntimeError('Pure short-pair entry was recurried')
+          for machinery in ('function*', '__ps$run', '__ps$invoke', '__ps$wrap',
+                            'psKernelCacheStringHashPairsWithFuel'):
+              if machinery in short:
+                  raise RuntimeError('Short pairs must be a pure generated leaf: ' + machinery)
+          if short.count('psKernelCacheStringHashStep(') != 8:
+              raise RuntimeError('Short pairs must contain exactly eight immutable pure step calls')
+          if entry.count('psKernelCacheStringHashShortPairs(') != 1:
+              raise RuntimeError('Full entry must contain exactly one pure bounded short-pair branch')
           level = body_of('psKernelCacheLevelListHash')
           print('PSC1_HASH_LEVEL_LIST_ENTRY_BODY ' + repr(level))
           if '__ps$wrap' in level or 'case "nil": return 575n;' not in level:
@@ -182,6 +197,7 @@ jobs:
           print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
           print('PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairDispatches=1 primitiveRemainder=1 structuralGeneratorBlocks=1')
+          print('PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 immutableSteps=8 selectedMaxPairs=4 genericFallback=true')
           print('PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false')
           PY
       - name: Check complete authentic kernel source after the bounded gate

@@ -1,0 +1,1270 @@
+{
+  "schema": "psc1-t01f-fused-entry-defeq-phase-profile-v1",
+  "observedAt": "2026-10-23T14:33:25.789Z",
+  "generatedSourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+  "generatedSourceTree": "a6e55931126673894687c9f1d3e582928940ea68",
+  "harnessSourceSha": "32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f",
+  "harnessTree": "3f402695125d73961cd2874e36b62b96da43cf1a",
+  "runId": "39968440469",
+  "runAttempt": "1",
+  "jobId": 120464388191,
+  "status": "PASS_DIAGNOSTIC_ONLY",
+  "qualification": false,
+  "jobs": [
+    {
+      "id": 120464388191,
+      "run_id": 39968440469,
+      "workflow_name": "PSC1 T01F fused-entry V1 UTF8 DefEq diagnostic",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39968440469",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcDDywXw",
+      "head_sha": "32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120464388191",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39968440469/job/120464388191",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T14:18:02Z",
+      "started_at": "2026-10-23T14:18:04Z",
+      "completed_at": "2026-10-23T14:20:14Z",
+      "name": "generated-reuse",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T14:18:05Z",
+          "completed_at": "2026-10-23T14:18:07Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T14:18:07Z",
+          "completed_at": "2026-10-23T14:18:26Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T14:18:26Z",
+          "completed_at": "2026-10-23T14:18:26Z"
+        },
+        {
+          "name": "Authenticate producer steps, artifact bytes, and current harness sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T14:18:26Z",
+          "completed_at": "2026-10-23T14:18:31Z"
+        },
+        {
+          "name": "Derive isolated operation after full unchanged admission and metadata checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T14:18:31Z",
+          "completed_at": "2026-10-23T14:18:31Z"
+        },
+        {
+          "name": "Profile measured UTF8 literal DefEq under fixed diagnostic deadline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T14:18:31Z",
+          "completed_at": "2026-10-23T14:20:05Z"
+        },
+        {
+          "name": "Process sampled V8 profile and retain incomplete outcomes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T14:20:05Z",
+          "completed_at": "2026-10-23T14:20:10Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T14:20:10Z",
+          "completed_at": "2026-10-23T14:20:12Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-23T14:20:12Z",
+          "completed_at": "2026-10-23T14:20:12Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-23T14:20:12Z",
+          "completed_at": "2026-10-23T14:20:12Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T14:20:12Z",
+          "completed_at": "2026-10-23T14:20:12Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120464388191",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027888,
+      "runner_name": "GitHub Actions 1000027888",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ],
+  "markers": [
+    "PSC1_T01F_V1_PROFILE_DRIVER {\"schema\": \"psc1-t01f-derived-operation-diagnostic-v1\", \"diagnosticOnly\": true, \"qualification\": false, \"generatedSourceSha\": \"0fe60cc69e8d7544acb09025944cbfd3d955f992\", \"harnessSourceSha\": \"32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f\", \"fullRunnerSha256\": \"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\", \"derivedDriverSha256\": \"6b85fbcb0357ddcf3313f71b3bb7dda2783a33f6bcdbe549a9c0d86bcd1354de\", \"phaseExclusiveProfile\": true, \"samplingIntervalMicroseconds\": 1000, \"prefixBytes\": 17182, \"operation\": \"psKernelV1IsDefEq(Array0(ByteArray0(String0(literal))),genuine-UInt8-byte-list)\", \"sample\": \"Aé€😀\", \"fullIndependentAdmission\": 294, \"metadataComparison\": 377, \"fuel\": 4096, \"oldSpaceMiB\": 2048, \"operationDiagnosticSeconds\": 180, \"emptyPATH\": true}",
+    "PSC1_T01F_V1_DEFEQ_DIAGNOSTIC_COMPLETE {\"diagnosticOnly\":true,\"qualification\":false,\"phaseExclusiveProfile\":true,\"sample\":\"Aé€😀\",\"requests\":294,\"metadata\":377,\"milliseconds\":51333.17774399999,\"kernelSha256\":\"b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"6b85fbcb0357ddcf3313f71b3bb7dda2783a33f6bcdbe549a9c0d86bcd1354de\",\"profileSamples\":42652,\"memory\":{\"rss\":887525376,\"heapTotal\":493854720,\"heapUsed\":348929720,\"external\":4858343,\"arrayBuffers\":2808148}}",
+    "PSC1_T01F_V1_DEFEQ_PHASE_PROFILE {\"diagnosticOnly\": true, \"qualification\": false, \"phaseExclusive\": true, \"profilePresent\": true, \"samples\": 42652, \"startTime\": 90325886, \"endTime\": 141867640, \"topSelf\": [{\"samples\": 9339, \"frame\": {\"functionName\": \"(garbage collector)\", \"scriptId\": \"0\", \"url\": \"\", \"lineNumber\": -1, \"columnNumber\": -1}, \"generatedLine\": null}, {\"samples\": 3903, \"frame\": {\"functionName\": \"__ps$run\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 1, \"columnNumber\": 17}, \"generatedLine\": \"function __ps$run(root) {\"}, {\"samples\": 2774, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheStringHashPairsWithFuel\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8028, \"columnNumber\": 56}, \"generatedLine\": \"function* __ps$impl$psKernelCacheStringHashPairsWithFuel(pairs, value, initial) { return (((pairs) === (0n)) ? initial : (yield* (function* () { {\"}, {\"samples\": 2401, \"frame\": {\"functionName\": \"__ps$impl$psKernelExprHash\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8176, \"columnNumber\": 36}, \"generatedLine\": \"function* __ps$impl$psKernelExprHash(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 2313, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8028, \"columnNumber\": 140}, \"generatedLine\": \"function* __ps$impl$psKernelCacheStringHashPairsWithFuel(pairs, value, initial) { return (((pairs) === (0n)) ? initial : (yield* (function* () { {\"}, {\"samples\": 2270, \"frame\": {\"functionName\": \"__ps$impl$psKernelExprHasFVar\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 5415, \"columnNumber\": 39}, \"generatedLine\": \"function* __ps$impl$psKernelExprHasFVar(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 2075, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8176, \"columnNumber\": 71}, \"generatedLine\": \"function* __ps$impl$psKernelExprHash(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 1902, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheNameHash\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8067, \"columnNumber\": 41}, \"generatedLine\": \"function* __ps$impl$psKernelCacheNameHash(name) { return (yield* (function* () { const __ps$match$0 = name; switch (__ps$match$0[__ps$tag$3]) {\"}, {\"samples\": 1567, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8067, \"columnNumber\": 76}, \"generatedLine\": \"function* __ps$impl$psKernelCacheNameHash(name) { return (yield* (function* () { const __ps$match$0 = name; switch (__ps$match$0[__ps$tag$3]) {\"}, {\"samples\": 1480, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 5415, \"columnNumber\": 74}, \"generatedLine\": \"function* __ps$impl$psKernelExprHasFVar(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 1078, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheStringHash\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8055, \"columnNumber\": 43}, \"generatedLine\": \"function* __ps$impl$psKernelCacheStringHash(value) { return (yield* (function* () { {\"}, {\"samples\": 883, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8122, \"columnNumber\": 83}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLevelListHash(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {\"}, {\"samples\": 873, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8055, \"columnNumber\": 79}, \"generatedLine\": \"function* __ps$impl$psKernelCacheStringHash(value) { return (yield* (function* () { {\"}, {\"samples\": 863, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheLevelListHash\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8122, \"columnNumber\": 46}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLevelListHash(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {\"}, {\"samples\": 861, \"frame\": {\"functionName\": \"psKernelV1IsDefEq\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 71670, \"columnNumber\": 33}, \"generatedLine\": \"export function psKernelV1IsDefEq(session, levelParams, safety, left, right) { return __ps$run(__ps$impl$psKernelV1IsDefEq(session, levelParams, safety, left, right)); }\"}, {\"samples\": 583, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8127, \"columnNumber\": 34}, \"generatedLine\": \"        return (yield* (function* () { const __ps$match$0 = rest; switch (__ps$match$0[__ps$tag$0]) {\"}, {\"samples\": 539, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheLevelHash\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8082, \"columnNumber\": 42}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLevelHash(level) { return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$9]) {\"}, {\"samples\": 402, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8082, \"columnNumber\": 78}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLevelHash(level) { return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$9]) {\"}, {\"samples\": 315, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 261, \"frame\": {\"functionName\": \"__ps$utf8\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 34, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$utf8(text) {\"}, {\"samples\": 195, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8128, \"columnNumber\": 50}, \"generatedLine\": \"            case \\\"nil\\\": return (yield* (function* () { {\"}, {\"samples\": 189, \"frame\": {\"functionName\": \"__ps$invoke\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 28, \"columnNumber\": 21}, \"generatedLine\": \"function* __ps$invoke(fn, ...args) {\"}, {\"samples\": 153, \"frame\": {\"functionName\": \"psKernelCacheMix\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8007, \"columnNumber\": 32}, \"generatedLine\": \"export function psKernelCacheMix(left, right) { while (true) {\"}, {\"samples\": 140, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8138, \"columnNumber\": 42}, \"generatedLine\": \"                return (yield* (function* () { const __ps$match$0 = tail; switch (__ps$match$0[__ps$tag$0]) {\"}, {\"samples\": 130, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8109, \"columnNumber\": 89}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLevelListHashWorker(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {\"}, {\"samples\": 121, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 117, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 432, \"columnNumber\": 72}, \"generatedLine\": \"    return __ps$wrap(function* ($psc0SH_3) { return __ps$wrap(function* ($psc0SH_4) { return (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_1, $psc0SH_3) ? ((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) ? false : (yield* (function* () { {\"}, {\"samples\": 113, \"frame\": {\"functionName\": \"__ps$invoke\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 28, \"columnNumber\": 21}, \"generatedLine\": \"function* __ps$invoke(fn, ...args) {\"}, {\"samples\": 109, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheLevelListHashWorker\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8109, \"columnNumber\": 52}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLevelListHashWorker(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {\"}, {\"samples\": 103, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 83, \"frame\": {\"functionName\": \"__ps$stringGet\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 54, \"columnNumber\": 23}, \"generatedLine\": \"function __ps$stringGet(text, position) {\"}, {\"samples\": 82, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8116, \"columnNumber\": 39}, \"generatedLine\": \"            return __ps$wrap(function* (hash) { return (yield* __ps$invoke(smaller, (yield* __ps$invoke(psKernelCacheMix, hash, (yield* __ps$invoke(psKernelCacheLevelHash, head)))))); });\"}, {\"samples\": 81, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 80, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 76, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 73, \"frame\": {\"functionName\": \"__ps$stringNext\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 61, \"columnNumber\": 24}, \"generatedLine\": \"function __ps$stringNext(text, position) {\"}, {\"samples\": 71, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheLiteralHash\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8164, \"columnNumber\": 44}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLiteralHash(literal) { return (yield* (function* () { const __ps$match$0 = literal; switch (__ps$match$0[__ps$tag$12]) {\"}, {\"samples\": 68, \"frame\": {\"functionName\": \"__ps$impl$psKernelStringEqFromWorkerWithFuel_$psc0SH_0\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 430, \"columnNumber\": 64}, \"generatedLine\": \"function* __ps$impl$psKernelStringEqFromWorkerWithFuel_$psc0SH_0($psc0SH_0, $psc0SH_1, $psc0SH_2) { return ((($psc0SH_0) === (0n)) ? __ps$wrap(function* ($psc0SH_3) { return __ps$wrap(function* ($psc0SH_4) { return false; }); }) : (yield* (function* () { {\"}, {\"samples\": 66, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 432, \"columnNumber\": 365}, \"generatedLine\": \"    return __ps$wrap(function* ($psc0SH_3) { return __ps$wrap(function* ($psc0SH_4) { return (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_1, $psc0SH_3) ? ((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) ? false : (yield* (function* () { {\"}, {\"samples\": 62, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8270, \"columnNumber\": 72}, \"generatedLine\": \"        return __ps$wrap(function* (index) { return __ps$wrap(function* (hash) { return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$20]) {\"}, {\"samples\": 61, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8290, \"columnNumber\": 146}, \"generatedLine\": \"        return __ps$wrap(function* (index) { return __ps$wrap(function* (hash) { return __ps$wrap(function* (entries) { return (yield* (function* () { {\"}, {\"samples\": 61, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8139, \"columnNumber\": 58}, \"generatedLine\": \"                    case \\\"nil\\\": return (yield* (function* () { {\"}, {\"samples\": 57, \"frame\": {\"functionName\": \"__ps$impl$psKernelExprMapIndexBucket\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8255, \"columnNumber\": 46}, \"generatedLine\": \"function* __ps$impl$psKernelExprMapIndexBucket(fuel) { return (((fuel) === (0n)) ? __ps$wrap(function* (index) { return __ps$wrap(function* (_hash) { return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$20]) {\"}, {\"samples\": 57, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8164, \"columnNumber\": 82}, \"generatedLine\": \"function* __ps$impl$psKernelCacheLiteralHash(literal) { return (yield* (function* () { const __ps$match$0 = literal; switch (__ps$match$0[__ps$tag$12]) {\"}, {\"samples\": 56, \"frame\": {\"functionName\": \"__ps$invoke\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 28, \"columnNumber\": 21}, \"generatedLine\": \"function* __ps$invoke(fn, ...args) {\"}, {\"samples\": 55, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 7016, \"columnNumber\": 145}, \"generatedLine\": \"        return __ps$wrap(function* (expr) { return __ps$wrap(function* (start) { return __ps$wrap(function* (subst) { return __ps$wrap(function* (offset) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 54, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 7016, \"columnNumber\": 182}, \"generatedLine\": \"        return __ps$wrap(function* (expr) { return __ps$wrap(function* (start) { return __ps$wrap(function* (subst) { return __ps$wrap(function* (offset) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 51, \"frame\": {\"functionName\": \"__ps$invoke\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 28, \"columnNumber\": 21}, \"generatedLine\": \"function* __ps$invoke(fn, ...args) {\"}, {\"samples\": 43, \"frame\": {\"functionName\": \"__ps$utf8\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 34, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$utf8(text) {\"}, {\"samples\": 41, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 430, \"columnNumber\": 250}, \"generatedLine\": \"function* __ps$impl$psKernelStringEqFromWorkerWithFuel_$psc0SH_0($psc0SH_0, $psc0SH_1, $psc0SH_2) { return ((($psc0SH_0) === (0n)) ? __ps$wrap(function* ($psc0SH_3) { return __ps$wrap(function* ($psc0SH_4) { return false; }); }) : (yield* (function* () { {\"}, {\"samples\": 41, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 6089, \"columnNumber\": 72}, \"generatedLine\": \"        return __ps$wrap(function* (index) { return __ps$wrap(function* (hash) { return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$18]) {\"}, {\"samples\": 39, \"frame\": {\"functionName\": \"__ps$impl$psKernelExprNodeCount\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 5245, \"columnNumber\": 41}, \"generatedLine\": \"function* __ps$impl$psKernelExprNodeCount(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 38, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 432, \"columnNumber\": 31}, \"generatedLine\": \"    return __ps$wrap(function* ($psc0SH_3) { return __ps$wrap(function* ($psc0SH_4) { return (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_1, $psc0SH_3) ? ((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) ? false : (yield* (function* () { {\"}, {\"samples\": 38, \"frame\": {\"functionName\": \"__ps$impl$psKernelC0LiftNonzeroChanged_$psc0SH_0\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 6897, \"columnNumber\": 58}, \"generatedLine\": \"function* __ps$impl$psKernelC0LiftNonzeroChanged_$psc0SH_0($psc0SH_0, $psc0SH_2) { return (yield* (function* () { const __ps$match$0 = $psc0SH_0; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 37, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 37, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8270, \"columnNumber\": 107}, \"generatedLine\": \"        return __ps$wrap(function* (index) { return __ps$wrap(function* (hash) { return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$20]) {\"}, {\"samples\": 36, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 5495, \"columnNumber\": 89}, \"generatedLine\": \"function* __ps$impl$psKernelExprInstantiateLevelParams(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 36, \"frame\": {\"functionName\": \"__ps$wrap\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 23, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$wrap(implementation) {\"}, {\"samples\": 36, \"frame\": {\"functionName\": \"__ps$impl$psKernelExprInstantiateAtChangedWithFuel\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 7012, \"columnNumber\": 60}, \"generatedLine\": \"function* __ps$impl$psKernelExprInstantiateAtChangedWithFuel(fuel) { return (((fuel) === (0n)) ? __ps$wrap(function* (expr) { return __ps$wrap(function* (_start) { return __ps$wrap(function* (_subst) { return __ps$wrap(function* (_offset) { return ({ [__ps$brand$0]: true, fst: expr, snd: false }); }); }); }); }) : (yield* (function* () { {\"}, {\"samples\": 36, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8114, \"columnNumber\": 34}, \"generatedLine\": \"        return (yield* (function* () { {\"}, {\"samples\": 35, \"frame\": {\"functionName\": \"__ps$impl$psKernelCacheStringHashPairsWithFuel\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8028, \"columnNumber\": 56}, \"generatedLine\": \"function* __ps$impl$psKernelCacheStringHashPairsWithFuel(pairs, value, initial) { return (((pairs) === (0n)) ? initial : (yield* (function* () { {\"}, {\"samples\": 34, \"frame\": {\"functionName\": \"__ps$impl$psKernelNameEqWorker_$psc0SH_0\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 502, \"columnNumber\": 50}, \"generatedLine\": \"function* __ps$impl$psKernelNameEqWorker_$psc0SH_0($psc0SH_0) { return (yield* (function* () { const __ps$match$0 = $psc0SH_0; switch (__ps$match$0[__ps$tag$3]) {\"}, {\"samples\": 34, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8266, \"columnNumber\": 93}, \"generatedLine\": \"} throw new Error(\\\"invalid ProofScript constructor tag\\\"); })()); }); }) : (yield* (function* () { {\"}, {\"samples\": 34, \"frame\": {\"functionName\": \"__ps$utf8\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 34, \"columnNumber\": 18}, \"generatedLine\": \"function __ps$utf8(text) {\"}, {\"samples\": 32, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 6089, \"columnNumber\": 107}, \"generatedLine\": \"        return __ps$wrap(function* (index) { return __ps$wrap(function* (hash) { return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$18]) {\"}, {\"samples\": 31, \"frame\": {\"functionName\": \"__ps$impl$psKernelExprInstantiateLevelParams\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 5495, \"columnNumber\": 54}, \"generatedLine\": \"function* __ps$impl$psKernelExprInstantiateLevelParams(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}, {\"samples\": 31, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 6922, \"columnNumber\": 35}, \"generatedLine\": \"        return __ps$wrap(function* ($psc0SH_1) { return (yield* (function* () { {\"}, {\"samples\": 31, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 8290, \"columnNumber\": 108}, \"generatedLine\": \"        return __ps$wrap(function* (index) { return __ps$wrap(function* (hash) { return __ps$wrap(function* (entries) { return (yield* (function* () { {\"}, {\"samples\": 30, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 6711, \"columnNumber\": 76}, \"generatedLine\": \"function* __ps$impl$psKernelExprListGet(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {\"}, {\"samples\": 29, \"frame\": {\"functionName\": \"\", \"scriptId\": \"145\", \"url\": \"file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs\", \"lineNumber\": 7016, \"columnNumber\": 71}, \"generatedLine\": \"        return __ps$wrap(function* (expr) { return __ps$wrap(function* (start) { return __ps$wrap(function* (subst) { return __ps$wrap(function* (offset) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\"}]}"
+  ],
+  "artifactInspection": {
+    "artifactId": 12507772502,
+    "zipBytes": 4833769,
+    "zipSha256": "6be763746412d2dcaeac0908f453d11dd33098d3c7056c77ff80d5e7545a95e5",
+    "files": [
+      {
+        "path": "detached/dag-smoke.mjs",
+        "bytes": 244729,
+        "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+      },
+      {
+        "path": "detached/isolate-0x467c8000-2249-v1-defeq.log",
+        "bytes": 22563845,
+        "sha256": "8d34966c7a1b87bdce6c92878076495e7f5ab48ac1232428582c4208258ab9d1"
+      },
+      {
+        "path": "detached/fixture.json",
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      {
+        "path": "detached/kernel.mjs",
+        "bytes": 9959869,
+        "sha256": "b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d"
+      },
+      {
+        "path": "detached/prefix-smoke.mjs",
+        "bytes": 28982,
+        "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+      },
+      {
+        "path": "detached/string-smoke.mjs",
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      {
+        "path": "detached/v1-defeq-profile.mjs",
+        "bytes": 18772,
+        "sha256": "6b85fbcb0357ddcf3313f71b3bb7dda2783a33f6bcdbe549a9c0d86bcd1354de"
+      },
+      {
+        "path": "diagnostic-driver-provenance.json",
+        "bytes": 811,
+        "sha256": "1b51d9c4639555ae047196e5ca58397eac546f56a82b2642bfbb5d3dcf0537fb"
+      },
+      {
+        "path": "diagnostic-exit-status.txt",
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      {
+        "path": "operation.cpuprofile",
+        "bytes": 527344,
+        "sha256": "f78892b378dd93c33a1559cf275f1ac26edacbaee349ef03e85697940f178d58"
+      },
+      {
+        "path": "producer-artifact.zip",
+        "bytes": 1134942,
+        "sha256": "9121de89238f6f1e5a9109387e7e78ffa86435b0057005dbba1be2412b4bc7d8"
+      },
+      {
+        "path": "phase-profile-summary.json",
+        "bytes": 31050,
+        "sha256": "fd09016aea846e1325bfb96a4e0ea8030e5a745d46caa527ea7104b71803b80b"
+      },
+      {
+        "path": "producer-fixtureProducer.lean",
+        "bytes": 39734,
+        "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+      },
+      {
+        "path": "producer-generatedRunner.mjs",
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      {
+        "path": "producer-leanToolchain",
+        "bytes": 25,
+        "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+      },
+      {
+        "path": "producer-native.log",
+        "bytes": 25860,
+        "sha256": "8218c1988126cc4930d4f71cb619c5badafe5dab18e6a0e946c9d1813d2dbe82"
+      },
+      {
+        "path": "producer-provenance.json",
+        "bytes": 1199,
+        "sha256": "e5213bd166f631ef30d3d618e8f0f9c92ab01abbaed434cfa3bae4fd13d3220a"
+      },
+      {
+        "path": "producer-selfHost.lean",
+        "bytes": 524,
+        "sha256": "9bef757aed5d4b9d34d438190f68ee9d76c97c64e0a0d2543179be695a0b7bb6"
+      },
+      {
+        "path": "profile-process.stderr",
+        "bytes": 210,
+        "sha256": "314f06c7638e98f0bd5f96b3223caa2023ce25a2ef07963901f2e3e7f1f8832c"
+      },
+      {
+        "path": "profile.log",
+        "bytes": 93866,
+        "sha256": "4d2d671fd871721c0e8f1409d902bb1b6d8bfc4215456c4e77d48a6812604fc2"
+      },
+      {
+        "path": "producer-workflow.yml",
+        "bytes": 28153,
+        "sha256": "35d1830f57990a8b55a5c9e56455aad812fcfb9ed9bcb23d0c743e3529983af5"
+      },
+      {
+        "path": "profile.memory",
+        "bytes": 53,
+        "sha256": "96701f86ea447e480323e74a85ec401ebb951ae340de25a5651f8983f5829888"
+      },
+      {
+        "path": "profile.txt",
+        "bytes": 290927,
+        "sha256": "6bf8f68464f840506f450f8df9e08dbe0946bed390d4cdb952862966af090d55"
+      },
+      {
+        "path": "reuse-provenance.json",
+        "bytes": 7911,
+        "sha256": "4dea5a03072e54e2bcef8792dc85c57b12019fb7854516aba4858651c7f9797a"
+      }
+    ],
+    "provenance": {
+      "schema": "psc1-t01f-authenticated-reuse-diagnostic-v1",
+      "authority": "Diagnostic only. The 0fe60cc6 mixed runtime was cancelled at the unchanged 25-minute cap; no final-source qualification or provider promotion.",
+      "inputAuthority": "Raw requests only. This generated process must independently admit all 294 requests from empty before querying.",
+      "repository": "dwijayuda/pskernel",
+      "harnessSourceSha": "32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f",
+      "generatedSourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "generatedSourceTree": "a6e55931126673894687c9f1d3e582928940ea68",
+      "runId": "39968440469",
+      "runAttempt": "1",
+      "mode": "v1-defeq-profile",
+      "jobMinutes": 10,
+      "node": "v22.23.3",
+      "producerTypeScript": "7.0.2",
+      "producerLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "fuel": 4096,
+      "nodeOldSpaceLimitMiB": 2048,
+      "emptyPATH": true,
+      "exposeGC": true,
+      "requestedSampleIndex": 5,
+      "requestedSample": "Aé€😀",
+      "producer": {
+        "runId": 39961234382,
+        "runAttempt": 1,
+        "jobId": 120440559608,
+        "runConclusion": "cancelled",
+        "jobConclusion": "success",
+        "verifiedSteps": [
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T13:29:03Z",
+            "completed_at": "2026-10-23T13:29:23Z"
+          },
+          {
+            "name": "Install pinned Lean",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T13:29:23Z",
+            "completed_at": "2026-10-23T13:29:37Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T13:29:37Z",
+            "completed_at": "2026-10-23T13:29:37Z"
+          },
+          {
+            "name": "Build authentic PSC1 for the bounded code-generation gate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T13:29:37Z",
+            "completed_at": "2026-10-23T13:30:26Z"
+          },
+          {
+            "name": "Check complete authentic kernel source after the bounded gate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T13:30:29Z",
+            "completed_at": "2026-10-23T13:37:44Z"
+          },
+          {
+            "name": "Install pinned TypeScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T13:30:26Z",
+            "completed_at": "2026-10-23T13:30:28Z"
+          },
+          {
+            "name": "Compile the complete independent kernel to JavaScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T13:37:44Z",
+            "completed_at": "2026-10-23T13:47:25Z"
+          },
+          {
+            "name": "Produce authentic T01F inputs for generated independent replay",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-23T13:47:25Z",
+            "completed_at": "2026-10-23T13:48:23Z"
+          },
+          {
+            "name": "Require data-result scalar hash code generation before full kernel build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T13:30:28Z",
+            "completed_at": "2026-10-23T13:30:29Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-23T13:48:23Z",
+            "completed_at": "2026-10-23T13:48:25Z"
+          }
+        ]
+      },
+      "artifact": {
+        "id": 12506595313,
+        "name": "psc1-t01f-hash-generated-producer",
+        "bytes": 1134942,
+        "sha256": "9121de89238f6f1e5a9109387e7e78ffa86435b0057005dbba1be2412b4bc7d8"
+      },
+      "kernel": {
+        "bytes": 9959869,
+        "sha256": "b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d"
+      },
+      "fixture": {
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      "originalSources": {
+        "fixtureProducer": {
+          "path": "psc1/test/PsKernelExprV2StringEnvironmentRegression.lean",
+          "sourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+          "gitBlobSha": "154bec1f4350cd948b1451fe6689b9809f05cd11",
+          "bytes": 39734,
+          "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+        },
+        "generatedRunner": {
+          "path": "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+          "sourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+          "gitBlobSha": "68acf28a8b355105e021eb547a4d0b835c40a876",
+          "bytes": 27140,
+          "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+        },
+        "selfHost": {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+          "sourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+          "gitBlobSha": "ef42fe8d6d1312e3d31936a703def741b42290f7",
+          "bytes": 524,
+          "sha256": "9bef757aed5d4b9d34d438190f68ee9d76c97c64e0a0d2543179be695a0b7bb6"
+        },
+        "leanToolchain": {
+          "path": "psc1/lean-toolchain",
+          "sourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+          "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915",
+          "bytes": 25,
+          "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+        },
+        "workflow": {
+          "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+          "sourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+          "gitBlobSha": "c5074a5ed996b5e33134345b2960714b9728916d",
+          "bytes": 28153,
+          "sha256": "35d1830f57990a8b55a5c9e56455aad812fcfb9ed9bcb23d0c743e3529983af5"
+        }
+      },
+      "currentScripts": {
+        "string": {
+          "path": "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+          "detachedPath": "string-smoke.mjs",
+          "sourceSha": "32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f",
+          "gitBlobSha": "68acf28a8b355105e021eb547a4d0b835c40a876",
+          "bytes": 27140,
+          "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+        },
+        "dag": {
+          "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+          "detachedPath": "dag-smoke.mjs",
+          "sourceSha": "32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f",
+          "gitBlobSha": "065ed4d1de1bdded148a2774de9f13bb8b1a406a",
+          "bytes": 244729,
+          "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+        },
+        "prefix": {
+          "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+          "detachedPath": "prefix-smoke.mjs",
+          "sourceSha": "32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f",
+          "gitBlobSha": "529a05c4345983eb96420d17e10415538d645f54",
+          "bytes": 28982,
+          "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+        }
+      },
+      "extractedEntries": [
+        {
+          "archivePath": "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js",
+          "outputPath": "detached/kernel.mjs",
+          "bytes": 9959869,
+          "sha256": "b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d"
+        },
+        {
+          "archivePath": "_temp/psc1-t01f-generated/fixture.json",
+          "outputPath": "detached/fixture.json",
+          "bytes": 2791525,
+          "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+        },
+        {
+          "archivePath": "_temp/psc1-t01f-generated/provenance.json",
+          "outputPath": "producer-provenance.json",
+          "bytes": 1199,
+          "sha256": "e5213bd166f631ef30d3d618e8f0f9c92ab01abbaed434cfa3bae4fd13d3220a"
+        },
+        {
+          "archivePath": "_temp/psc1-t01f-generated/native.log",
+          "outputPath": "producer-native.log",
+          "bytes": 25860,
+          "sha256": "8218c1988126cc4930d4f71cb619c5badafe5dab18e6a0e946c9d1813d2dbe82"
+        }
+      ]
+    },
+    "driverProvenance": {
+      "schema": "psc1-t01f-derived-operation-diagnostic-v1",
+      "diagnosticOnly": true,
+      "qualification": false,
+      "generatedSourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "harnessSourceSha": "32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f",
+      "fullRunnerSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+      "derivedDriverSha256": "6b85fbcb0357ddcf3313f71b3bb7dda2783a33f6bcdbe549a9c0d86bcd1354de",
+      "phaseExclusiveProfile": true,
+      "samplingIntervalMicroseconds": 1000,
+      "prefixBytes": 17182,
+      "operation": "psKernelV1IsDefEq(Array0(ByteArray0(String0(literal))),genuine-UInt8-byte-list)",
+      "sample": "Aé€😀",
+      "fullIndependentAdmission": 294,
+      "metadataComparison": 377,
+      "fuel": 4096,
+      "oldSpaceMiB": 2048,
+      "operationDiagnosticSeconds": 180,
+      "emptyPATH": true
+    },
+    "profileSamples": 42652,
+    "groups": {
+      "stringHashAll": 3891,
+      "pairs": 2809,
+      "fullStringHash": 1082,
+      "levelListAll": 982,
+      "nameHash": 1919,
+      "exprHash": 2403,
+      "exprHasFVar": 2281,
+      "scheduler": 3903,
+      "wrapper": 1296,
+      "gc": 9339
+    },
+    "topSelf": [
+      {
+        "samples": 9339,
+        "frame": {
+          "functionName": "(garbage collector)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1
+        },
+        "generatedLine": null
+      },
+      {
+        "samples": 3903,
+        "frame": {
+          "functionName": "__ps$run",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 1,
+          "columnNumber": 17
+        },
+        "generatedLine": "function __ps$run(root) {"
+      },
+      {
+        "samples": 2774,
+        "frame": {
+          "functionName": "__ps$impl$psKernelCacheStringHashPairsWithFuel",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8028,
+          "columnNumber": 56
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheStringHashPairsWithFuel(pairs, value, initial) { return (((pairs) === (0n)) ? initial : (yield* (function* () { {"
+      },
+      {
+        "samples": 2401,
+        "frame": {
+          "functionName": "__ps$impl$psKernelExprHash",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8176,
+          "columnNumber": 36
+        },
+        "generatedLine": "function* __ps$impl$psKernelExprHash(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {"
+      },
+      {
+        "samples": 2313,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8028,
+          "columnNumber": 140
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheStringHashPairsWithFuel(pairs, value, initial) { return (((pairs) === (0n)) ? initial : (yield* (function* () { {"
+      },
+      {
+        "samples": 2270,
+        "frame": {
+          "functionName": "__ps$impl$psKernelExprHasFVar",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 5415,
+          "columnNumber": 39
+        },
+        "generatedLine": "function* __ps$impl$psKernelExprHasFVar(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {"
+      },
+      {
+        "samples": 2075,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8176,
+          "columnNumber": 71
+        },
+        "generatedLine": "function* __ps$impl$psKernelExprHash(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {"
+      },
+      {
+        "samples": 1902,
+        "frame": {
+          "functionName": "__ps$impl$psKernelCacheNameHash",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8067,
+          "columnNumber": 41
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheNameHash(name) { return (yield* (function* () { const __ps$match$0 = name; switch (__ps$match$0[__ps$tag$3]) {"
+      },
+      {
+        "samples": 1567,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8067,
+          "columnNumber": 76
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheNameHash(name) { return (yield* (function* () { const __ps$match$0 = name; switch (__ps$match$0[__ps$tag$3]) {"
+      },
+      {
+        "samples": 1480,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 5415,
+          "columnNumber": 74
+        },
+        "generatedLine": "function* __ps$impl$psKernelExprHasFVar(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {"
+      },
+      {
+        "samples": 1078,
+        "frame": {
+          "functionName": "__ps$impl$psKernelCacheStringHash",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8055,
+          "columnNumber": 43
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheStringHash(value) { return (yield* (function* () { {"
+      },
+      {
+        "samples": 883,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8122,
+          "columnNumber": 83
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheLevelListHash(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {"
+      },
+      {
+        "samples": 873,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8055,
+          "columnNumber": 79
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheStringHash(value) { return (yield* (function* () { {"
+      },
+      {
+        "samples": 863,
+        "frame": {
+          "functionName": "__ps$impl$psKernelCacheLevelListHash",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8122,
+          "columnNumber": 46
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheLevelListHash(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {"
+      },
+      {
+        "samples": 861,
+        "frame": {
+          "functionName": "psKernelV1IsDefEq",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 71670,
+          "columnNumber": 33
+        },
+        "generatedLine": "export function psKernelV1IsDefEq(session, levelParams, safety, left, right) { return __ps$run(__ps$impl$psKernelV1IsDefEq(session, levelParams, safety, left, right)); }"
+      },
+      {
+        "samples": 583,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8127,
+          "columnNumber": 34
+        },
+        "generatedLine": "        return (yield* (function* () { const __ps$match$0 = rest; switch (__ps$match$0[__ps$tag$0]) {"
+      },
+      {
+        "samples": 539,
+        "frame": {
+          "functionName": "__ps$impl$psKernelCacheLevelHash",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8082,
+          "columnNumber": 42
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheLevelHash(level) { return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$9]) {"
+      },
+      {
+        "samples": 402,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8082,
+          "columnNumber": 78
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheLevelHash(level) { return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$9]) {"
+      },
+      {
+        "samples": 315,
+        "frame": {
+          "functionName": "__ps$wrap",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 23,
+          "columnNumber": 18
+        },
+        "generatedLine": "function __ps$wrap(implementation) {"
+      },
+      {
+        "samples": 261,
+        "frame": {
+          "functionName": "__ps$utf8",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 34,
+          "columnNumber": 18
+        },
+        "generatedLine": "function __ps$utf8(text) {"
+      },
+      {
+        "samples": 195,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8128,
+          "columnNumber": 50
+        },
+        "generatedLine": "            case \"nil\": return (yield* (function* () { {"
+      },
+      {
+        "samples": 189,
+        "frame": {
+          "functionName": "__ps$invoke",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 28,
+          "columnNumber": 21
+        },
+        "generatedLine": "function* __ps$invoke(fn, ...args) {"
+      },
+      {
+        "samples": 153,
+        "frame": {
+          "functionName": "psKernelCacheMix",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8007,
+          "columnNumber": 32
+        },
+        "generatedLine": "export function psKernelCacheMix(left, right) { while (true) {"
+      },
+      {
+        "samples": 140,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8138,
+          "columnNumber": 42
+        },
+        "generatedLine": "                return (yield* (function* () { const __ps$match$0 = tail; switch (__ps$match$0[__ps$tag$0]) {"
+      },
+      {
+        "samples": 130,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8109,
+          "columnNumber": 89
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheLevelListHashWorker(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {"
+      },
+      {
+        "samples": 121,
+        "frame": {
+          "functionName": "__ps$wrap",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 23,
+          "columnNumber": 18
+        },
+        "generatedLine": "function __ps$wrap(implementation) {"
+      },
+      {
+        "samples": 117,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 432,
+          "columnNumber": 72
+        },
+        "generatedLine": "    return __ps$wrap(function* ($psc0SH_3) { return __ps$wrap(function* ($psc0SH_4) { return (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_1, $psc0SH_3) ? ((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))($psc0SH_2, $psc0SH_4) ? false : (yield* (function* () { {"
+      },
+      {
+        "samples": 113,
+        "frame": {
+          "functionName": "__ps$invoke",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 28,
+          "columnNumber": 21
+        },
+        "generatedLine": "function* __ps$invoke(fn, ...args) {"
+      },
+      {
+        "samples": 109,
+        "frame": {
+          "functionName": "__ps$impl$psKernelCacheLevelListHashWorker",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8109,
+          "columnNumber": 52
+        },
+        "generatedLine": "function* __ps$impl$psKernelCacheLevelListHashWorker(values) { return (yield* (function* () { const __ps$match$0 = values; switch (__ps$match$0[__ps$tag$0]) {"
+      },
+      {
+        "samples": 103,
+        "frame": {
+          "functionName": "__ps$wrap",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 23,
+          "columnNumber": 18
+        },
+        "generatedLine": "function __ps$wrap(implementation) {"
+      },
+      {
+        "samples": 83,
+        "frame": {
+          "functionName": "__ps$stringGet",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 54,
+          "columnNumber": 23
+        },
+        "generatedLine": "function __ps$stringGet(text, position) {"
+      },
+      {
+        "samples": 82,
+        "frame": {
+          "functionName": "",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 8116,
+          "columnNumber": 39
+        },
+        "generatedLine": "            return __ps$wrap(function* (hash) { return (yield* __ps$invoke(smaller, (yield* __ps$invoke(psKernelCacheMix, hash, (yield* __ps$invoke(psKernelCacheLevelHash, head)))))); });"
+      },
+      {
+        "samples": 81,
+        "frame": {
+          "functionName": "__ps$wrap",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 23,
+          "columnNumber": 18
+        },
+        "generatedLine": "function __ps$wrap(implementation) {"
+      },
+      {
+        "samples": 80,
+        "frame": {
+          "functionName": "__ps$wrap",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 23,
+          "columnNumber": 18
+        },
+        "generatedLine": "function __ps$wrap(implementation) {"
+      },
+      {
+        "samples": 76,
+        "frame": {
+          "functionName": "__ps$wrap",
+          "scriptId": "145",
+          "url": "file:///home/runner/work/_temp/psc1-t01f-reuse-v1-defeq-profile/detached/kernel.mjs",
+          "lineNumber": 23,
+          "columnNumber": 18
+        },
+        "generatedLine": "function __ps$wrap(implementation) {"
+      }
+    ],
+    "topFunctions": [
+      [
+        "",
+        13144
+      ],
+      [
+        "(garbage collector)",
+        9339
+      ],
+      [
+        "__ps$run",
+        3903
+      ],
+      [
+        "__ps$impl$psKernelCacheStringHashPairsWithFuel",
+        2809
+      ],
+      [
+        "__ps$impl$psKernelExprHash",
+        2403
+      ],
+      [
+        "__ps$impl$psKernelExprHasFVar",
+        2281
+      ],
+      [
+        "__ps$impl$psKernelCacheNameHash",
+        1919
+      ],
+      [
+        "__ps$wrap",
+        1296
+      ],
+      [
+        "__ps$impl$psKernelCacheStringHash",
+        1082
+      ],
+      [
+        "__ps$impl$psKernelCacheLevelListHash",
+        872
+      ],
+      [
+        "psKernelV1IsDefEq",
+        861
+      ],
+      [
+        "__ps$impl$psKernelCacheLevelHash",
+        543
+      ],
+      [
+        "__ps$invoke",
+        523
+      ],
+      [
+        "__ps$utf8",
+        421
+      ],
+      [
+        "psKernelCacheMix",
+        179
+      ],
+      [
+        "__ps$impl$psKernelCacheLevelListHashWorker",
+        110
+      ],
+      [
+        "__ps$stringGet",
+        86
+      ],
+      [
+        "__ps$stringNext",
+        74
+      ],
+      [
+        "__ps$impl$psKernelCacheLiteralHash",
+        72
+      ],
+      [
+        "__ps$impl$psKernelStringEqFromWorkerWithFuel_$psc0SH_0",
+        69
+      ],
+      [
+        "__ps$impl$psKernelExprMapIndexBucket",
+        58
+      ],
+      [
+        "__ps$impl$psKernelExprNodeCount",
+        39
+      ],
+      [
+        "__ps$impl$psKernelC0LiftNonzeroChanged_$psc0SH_0",
+        39
+      ],
+      [
+        "__ps$impl$psKernelExprInstantiateAtChangedWithFuel",
+        36
+      ],
+      [
+        "__ps$impl$psKernelNameEqWorker_$psc0SH_0",
+        35
+      ],
+      [
+        "__ps$impl$psKernelExprInstantiateLevelParams",
+        31
+      ],
+      [
+        "__ps$utf8Width",
+        28
+      ],
+      [
+        "__ps$impl$psKernelEnvironmentIndexFindWorker",
+        26
+      ],
+      [
+        "__ps$impl$psKernelExprListGet",
+        25
+      ],
+      [
+        "__ps$impl$psKernelExprMapIndexSet",
+        24
+      ],
+      [
+        "__ps$impl$psKernelLevelListEq",
+        22
+      ],
+      [
+        "__ps$impl$psKernelNameEq",
+        21
+      ],
+      [
+        "__ps$impl$psKernelExprEq",
+        18
+      ],
+      [
+        "__ps$impl$psKernelEnvironmentHashStringWorker",
+        18
+      ],
+      [
+        "__ps$impl$psKernelNameLookupLevel",
+        15
+      ],
+      [
+        "__ps$impl$psKernelInstantiateLevelList",
+        12
+      ],
+      [
+        "__ps$impl$psKernelExprGetAppFnArgsWorker",
+        12
+      ],
+      [
+        "__ps$impl$psKernelExprHasLooseAt",
+        11
+      ],
+      [
+        "__ps$impl$psKernelExprMapGet",
+        10
+      ],
+      [
+        "__ps$impl$psKernelWhnfCoreWithFuel",
+        9
+      ]
+    ],
+    "memory": "peak_rss_kib=875084 wall_seconds=93.84 exit_status=0\n",
+    "markers": [
+      "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":40513.782766}",
+      "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1246.5844020000004}",
+      "PSC1_T01F_V1_DEFEQ_DIAGNOSTIC_COMPLETE {\"diagnosticOnly\":true,\"qualification\":false,\"phaseExclusiveProfile\":true,\"sample\":\"Aé€😀\",\"requests\":294,\"metadata\":377,\"milliseconds\":51333.17774399999,\"kernelSha256\":\"b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"6b85fbcb0357ddcf3313f71b3bb7dda2783a33f6bcdbe549a9c0d86bcd1354de\",\"profileSamples\":42652,\"memory\":{\"rss\":887525376,\"heapTotal\":493854720,\"heapUsed\":348929720,\"external\":4858343,\"arrayBuffers\":2808148}}"
+    ],
+    "copiedInputsVerified": true
+  },
+  "staticHashAnalysis": {
+    "histogram": [
+      [
+        1,
+        7982
+      ],
+      [
+        2,
+        11088
+      ],
+      [
+        3,
+        14130
+      ],
+      [
+        4,
+        13494
+      ],
+      [
+        5,
+        4325
+      ],
+      [
+        6,
+        894
+      ],
+      [
+        7,
+        8197
+      ],
+      [
+        8,
+        700
+      ],
+      [
+        9,
+        3451
+      ],
+      [
+        10,
+        260
+      ],
+      [
+        11,
+        119
+      ],
+      [
+        12,
+        1217
+      ],
+      [
+        13,
+        139
+      ],
+      [
+        14,
+        26
+      ],
+      [
+        15,
+        165
+      ],
+      [
+        16,
+        60
+      ],
+      [
+        17,
+        56
+      ],
+      [
+        18,
+        56
+      ],
+      [
+        19,
+        12
+      ],
+      [
+        20,
+        4
+      ],
+      [
+        25,
+        4
+      ]
+    ],
+    "topNames": [
+      [
+        "Nat",
+        11142
+      ],
+      [
+        "Prelude",
+        3921
+      ],
+      [
+        "Init",
+        3921
+      ],
+      [
+        "_hygCtx",
+        3789
+      ],
+      [
+        "_hyg",
+        3559
+      ],
+      [
+        "_@",
+        3559
+      ],
+      [
+        "x",
+        2546
+      ],
+      [
+        "le",
+        2112
+      ],
+      [
+        "u",
+        1335
+      ],
+      [
+        "Bool",
+        1263
+      ],
+      [
+        "ofNat",
+        1204
+      ],
+      [
+        "instLENat",
+        1200
+      ],
+      [
+        "OfNat",
+        1176
+      ],
+      [
+        "LE",
+        1171
+      ],
+      [
+        "instOfNatNat",
+        1149
+      ],
+      [
+        "succ",
+        1000
+      ],
+      [
+        "LT",
+        944
+      ],
+      [
+        "lt",
+        926
+      ],
+      [
+        "u_1",
+        922
+      ],
+      [
+        "instLTNat",
+        917
+      ],
+      [
+        "List",
+        827
+      ],
+      [
+        "below",
+        780
+      ],
+      [
+        "h",
+        714
+      ],
+      [
+        "Eq",
+        674
+      ],
+      [
+        "a",
+        656
+      ]
+    ],
+    "bodies": {
+      "psKernelCacheStringHashStep": "export function psKernelCacheStringHashStep(value, state) { while (true) {\n    {\n        const position = state.fst;\n        if (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, position)) {\n            return state;\n        }\n        else {\n            {\n                const char = __ps$stringGet(value, position);\n                {\n                    const next = __ps$stringNext(value, position);\n                    return ({ [__ps$brand$0]: true, fst: next, snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((state.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(char)), psKernelCacheHashModulus) });\n                }\n            }\n        }\n    }\n} }",
+      "psKernelCacheMix": "export function psKernelCacheMix(left, right) { while (true) {\n    return ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((left * 31n) + right), psKernelCacheHashModulus);\n} }",
+      "psKernelCacheStringHash": "export function psKernelCacheStringHash(value) { return __ps$run(__ps$impl$psKernelCacheStringHash(value)); }\nfunction* __ps$impl$psKernelCacheStringHash(value) { return (yield* (function* () { {\n    const fuel = (__ps$utf8(value).size + 1n);\n    {\n        const paired = (yield* __ps$invoke(psKernelCacheStringHashPairsWithFuel, ((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(fuel, 2n), value, ({ [__ps$brand$0]: true, fst: 0n, snd: 0n })));\n        {\n            const final = (((((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(fuel, 2n)) === (0n)) ? paired : (((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(value, paired.fst) ? paired : ({ [__ps$brand$0]: true, fst: __ps$stringNext(value, paired.fst), snd: ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(((paired.snd * 31n) + ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(__ps$stringGet(value, paired.fst))), psKernelCacheHashModulus) })));\n            return final.snd;\n        }\n    }\n} })()); }\n__ps$implementations.set(psKernelCacheStringHash, __ps$impl$psKernelCacheStringHash);",
+      "psKernelExprHasFVar": "export function psKernelExprHasFVar(expr) { return __ps$run(__ps$impl$psKernelExprHasFVar(expr)); }\nfunction* __ps$impl$psKernelExprHasFVar(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\n    case \"bvar\": {\n        const _wild0 = __ps$match$0.index;\n        return false;\n    }\n    case \"fvar\": {\n        const name$1 = __ps$match$0.name;\n        return true;\n    }\n    case \"mvar\": {\n        const _wild0 = __ps$match$0.name;\n        return false;\n    }\n    case \"sort\": {\n        const _wild0 = __ps$match$0.level;\n        return false;\n    }\n    case \"const\": {\n        const _wild0 = __ps$match$0.name;\n        const _wild1 = __ps$match$0.levels;\n        return false;\n    }\n    case \"app\": {\n        const fn = __ps$match$0.fn;\n        const arg = __ps$match$0.arg;\n        return ((yield* __ps$invoke(psKernelExprHasFVar, fn)) ? true : (yield* __ps$invoke(psKernelExprHasFVar, arg)));\n    }\n    case \"lam\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return ((yield* __ps$invoke(psKernelExprHasFVar, type)) ? true : (yield* __ps$invoke(psKernelExprHasFVar, body)));\n    }\n    case \"forallE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return ((yield* __ps$invoke(psKernelExprHasFVar, type)) ? true : (yield* __ps$invoke(psKernelExprHasFVar, body)));\n    }\n    case \"letE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const value = __ps$match$0.value;\n        const body = __ps$match$0.body;\n        const nondep$5 = __ps$match$0.nondep;\n        return ((yield* __ps$invoke(psKernelExprHasFVar, type)) ? true : ((yield* __ps$invoke(psKernelExprHasFVar, value)) ? true : (yield* __ps$invoke(psKernelExprHasFVar, body))));\n    }\n    case \"lit\": {\n        const _wild0 = __ps$match$0.value;\n        return false;\n    }\n    case \"mdata\": {\n        const metadata$1 = __ps$match$0.metadata;\n        const body = __ps$match$0.expr;\n        return (yield* __ps$invoke(psKernelExprHasFVar, body));\n    }\n    case \"proj\": {\n        const typeName$1 = __ps$match$0.typeName;\n        const index$2 = __ps$match$0.index;\n        const body = __ps$match$0.expr;\n        return (yield* __ps$invoke(psKernelExprHasFVar, body));\n    }\n} throw new Error(\"invalid ProofScript constructor tag\"); })()); }\n__ps$implementations.set(psKernelExprHasFVar, __ps$impl$psKernelExprHasFVar);"
+    }
+  },
+  "staticShortOccurrenceSummary": {
+    "total": 66379,
+    "selected": 60810,
+    "percentage": 91.61029843775893,
+    "runtimeFrequencyUnknown": true
+  },
+  "interpretation": "Phase-exclusive authentic V1 UTF8 literal DefEq after full294 admissions and377 metadata. 51333.177744 ms operation,93.84s whole diagnostic,875084KiB peak RSS;42652 phase samples. Named-function groups exclude anonymous generated blocks and must not be treated as full family attribution. GC9339 samples=21.8958%; named Pair2809 plus its anonymous block2313 remain prominent. Use exact staticShortOccurrenceSummary selected60810/total66379; these are NOT runtime call frequencies. No whole-kernel performance or final-source qualification claim. Current0fe mixed remains failed at unchanged25minute cap.",
+  "nextHypothesis": "Pure bounded0..4-pair path calls unchanged pure Step2/4/6/8 times without recursive scheduler machinery; full entry chooses it only when paircount<=4 and otherwise keeps the unchanged data-result pair iterator. Require native universal bounded equality plus full-entry equality and bounded emitted-code proof of zero generators/invokes/staging for the new helper before complete rebuild/runtime."
+}

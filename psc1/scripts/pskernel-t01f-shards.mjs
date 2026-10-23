@@ -101,7 +101,8 @@ function authenticate(route,artifactDirectory){
   must(/^v22\./u.test(manifest.node),'provider manifest Node22');
   const expected=[config.kernelName+'.js',config.kernelName+'.ts',config.kernelName+'.d.ts',
     config.kernelName+'.js.map','scripts/pskernel-canonical-provider.mjs',
-    'npm-runtime/canonical-admissions-wire.mjs','package.json','README.md'].map(x=>config.provider+x).sort();
+    'npm-runtime/canonical-admissions-wire.mjs','package.json','README.md',
+    ...(route==='canonical'?['canonical-source.tar.gz']:[])].map(x=>config.provider+x).sort();
   must(Array.isArray(manifest.files)&&same(manifest.files.map(x=>x.path).sort(),expected),'complete provider manifest');
   for(const record of manifest.files)
     must(digestEqual(record,digest(suffix(all,record.path))),'provider file digest: '+record.path);

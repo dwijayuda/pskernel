@@ -1,3 +1,36 @@
+## Current: canonical manifest completeness corrected; new exact-source suite required
+
+First activation `fad56ef8e983c78cb0c6209975d6e1a9f2300fdb` started:
+- PSC1 PSKernel-Core correctness: https://github.com/dwijayuda/pskernel/actions/runs/39879215990
+- PSC1 Expression V2 production integration: https://github.com/dwijayuda/pskernel/actions/runs/39879215977
+- PSC1 authentic Arena timeout diagnostics: https://github.com/dwijayuda/pskernel/actions/runs/39879216137
+- PSC1 Lean Arena 4.35 full corpus qualification: https://github.com/dwijayuda/pskernel/actions/runs/39879216083
+- PSC1 PSKernel-Core Expression V2 research: https://github.com/dwijayuda/pskernel/actions/runs/39879215998
+
+Static review of its helper and the unchanged manifest producer established a
+concrete transport-gate defect before canonical replay: the producer lists
+canonical-source.tar.gz as its ninth canonical provider file, while the helper
+expected only the eight shared generated files. This containing correction adds
+that exact canonical-only archive to the strict expected set, then authenticates
+its recorded bytes/digest through the existing every-file loop. Generated still
+requires exactly eight files; canonical exactly nine. No file is ignored.
+The active helper and saved draft are identical. Production, native proofs,
+String fixture/runner,all judgments/assertions,budgets and job bodies are unchanged.
+The profile branch list is reordered only; job semantics and cases are unchanged.
+
+The first activation is UNQUALIFIED; do not inherit its jobs at this correction.
+This correction triggers a new coherent exact-source full suite. Fetch live HEAD,
+record its actual SHA and the already-triggered five workflow run IDs, and follow
+those existing runs without duplication. Source-bound both-route six-shard
+aggregates,all retained native/official/proof/provider/research/measurement gates,
+32worker384call ABBA and full193 Arena/profile remain pending. Keep first
+activation results distinct even if other jobs pass. No integration change.
+Historical16aac narrow full-mixed preflight is PASS and unchanged; T01F/currentA,
+B,C,D remain OPEN and T05 stays blocked. Read the next chronological activation
+entry for exact budgets,source/kernel digests,preflight receipts and task order.
+
+---
+
 ## Current: complete16aac preflight PASS; final same-source qualification activated
 
 Executable/harness `16aac21740fa7870e502fdf712eff76e5c33e1a2`,

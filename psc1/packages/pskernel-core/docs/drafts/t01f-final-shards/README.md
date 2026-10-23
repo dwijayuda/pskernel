@@ -1,3 +1,9 @@
+# Current manifest correction
+
+The active/saved helper now authenticates all nine canonical provider files,
+including canonical-source.tar.gz, and exactly eight generated provider files.
+First activation fad56ef8 is unqualified; use this correction source's full CI.
+
 # T01F final qualification preparations — activated
 
 The saved bytes were installed by the containing activation commit after exact
@@ -77,7 +83,7 @@ global soundness. The generated kernel must perform its own checks.
 
 - psc1-pskernel-expr-v2-integration.yml: 93401 bytes; SHA256 5c67395b97c16d6810678289d9ed0fdb8bdba4448ae1d9e20a96c3175050790c
 - psc1-pskernel-core-correctness.yml: 43948 bytes; SHA256 793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff
-- pskernel-t01f-shards.mjs:15142 bytes; SHA256 1b8a302fcf22a573ee3b005578dd4930e6e773a9b803ec19c32f7f45bd3161d8
+- pskernel-t01f-shards.mjs:15203 bytes; SHA256 daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287
 - paired-owner-job.fragment.yml:16984 bytes; SHA256 34cacbc1b11b907b94771460086b004a9cdee60231fdfb436b9107129c2f0fb8
 
 See [INTEGRATION_NOTES.md](INTEGRATION_NOTES.md) for additional contract details.

@@ -85,9 +85,13 @@ jobs:
       - name: Build the common source facades and separate official checker
         run: |
           set -euo pipefail
-          lake build psc1_target_service_seed psc1_independent_checker psc1_js_service_tests
-      - name: Keep DirectJS scalar functionality
-        run: .lake/build/bin/psc1_js_service_tests
+          lake build psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+      - name: Preserve exact visitor behavior and DirectJS scalar functionality
+        run: |
+          .lake/build/bin/psc1_ts_service_normalization_tests
+          .lake/build/bin/psc1_js_service_tests
+      - name: Audit both grammar inputs before expensive generation
+        run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
       - name: Execute independent actual target generations and fixed point
         run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host
       - name: Retain exact sources, graphs, target tool errors and execution evidence

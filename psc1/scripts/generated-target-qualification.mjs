@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
+import {readOwnedCompilerSources} from '../host-tools/compiler-source-inputs.mjs';
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
 import {sha,buildTarget,observeArtifact,verifyArtifact,runTool} from '../host-tools/generated-target-tools.mjs';
 import {validateClosureCounts} from './compiler-closure-contract.mjs';
@@ -17,7 +18,7 @@ const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
 const runner=path.resolve('scripts/generated-target-runner.mjs');
 const inventoryFiles=['scripts/generated-target-qualification.mjs','scripts/generated-target-runner.mjs',
  'scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
- 'host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs'];
+ 'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','scripts/compiler-closure-contract.mjs'];
 const tools=[checker,process.execPath,...inventoryFiles.map(p=>path.resolve(p))].map(file=>({file,sha256:sha(fs.readFileSync(file))}));
 const seedHash=sha(fs.readFileSync(seed));let seedCalls=0;
 const events=[],report={schema:'psc1-generated-target-qualification/1',target,mode,
@@ -106,22 +107,7 @@ function exercise(artifact,generation) {
 }
 try {
  // Exact portable source ownership, taken from registered roots; no host/compiler executable import.
- const lake=fs.readFileSync('lakefile.lean','utf8'),index=new Map();
- for(const match of lake.matchAll(/lean_lib\s+(\w+)\s+where\n([\s\S]*?)(?=\n(?:lean_|@)|$)/g)){
-  const dir=match[2].match(/srcDir\s*:=\s*"([^"]+)"/)?.[1];if(!dir)continue;
-  for(const m of match[2].matchAll(/`([\w.]+)/g)){
-   const name=m[1],file=path.join(dir,...name.split('.'))+'.lean';
-   index.set(name,{module:name,path:file,text:fs.readFileSync(file,'utf8')});
-  }
- }
- const ordered=[],seen=new Set(),active=new Set();
- function visit(name){
-  if(seen.has(name))return;assert.ok(!active.has(name),'source cycle');active.add(name);
-  const row=index.get(name);assert.ok(row&&row.path.startsWith('packages/')&&!/pskernel-lean|\/cli\//.test(row.path),'owned portable source '+name);
-  for(const m of row.text.matchAll(/^import\s+(.+)$/gm))for(const dep of m[1].trim().split(/\s+/))visit(dep);
-  active.delete(name);seen.add(name);ordered.push(row);
- }
- visit(entry);
+ const ordered=readOwnedCompilerSources(entry);
  const sources=ordered.map(({module,text})=>({module,text}));
  const sourceInventory=ordered.map(s=>({module:s.module,path:s.path,bytes:Buffer.byteLength(s.text),sha256:sha(s.text)}));
  report.sourceInventory=sourceInventory;report.sourceModules=sources.length;

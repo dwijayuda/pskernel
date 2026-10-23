@@ -430,3 +430,7 @@ lean_exe psc1_php_utf8_tests where
 lean_exe psc1_target_service_seed where
   srcDir := "scripts"
   root := `TargetServiceSeed
+
+lean_exe psc1_ts_service_normalization_tests where
+  srcDir := "test"
+  root := `TsServiceNormalizationTests

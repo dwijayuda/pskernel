@@ -9,7 +9,8 @@ def emit (module : PsValidatedIrModule) (publicNames : List String) :
   match psRustEmitSelectedValidatedModule module publicNames [] with
   | Except.error code => Except.error (failure "rust-lowering" code)
   | Except.ok source =>
-      Except.ok (Prod.mk source (psRustPlanRuntime module.raw).requirements)
+      let runtime : PsRustRuntimePlan := psRustPlanRuntime module.raw;
+      Except.ok (Prod.mk source runtime.requirements)
 
 end Ps.Internal.RustCompilerService
 

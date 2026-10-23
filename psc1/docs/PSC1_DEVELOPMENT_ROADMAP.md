@@ -13,7 +13,12 @@ points without native compiler delegation. No current Rust/TS generation is
 claimed qualified before CI. Resources, official Lean, all-seven Practical Core
 coverage and publication restrictions remain unchanged. Architecture and exact
 execution procedure: docs/PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md (roadmap-relative:
-PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md). Next: execute the new manual matrix,
+PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md). First Linux attempt 39875143168 at cda5478553c78eda834a919a2a85f5229d989691
+builds both facades and passes all host negatives/DirectJS scalar tests. No G1:
+Rust facade parse refusal; TS Expr context visitor elaboration refusal at 522:1.
+Corrections bind the Rust runtime plan before projection and retain TS recursive
+arity through a single named worker; an all-input native equality is added.
+Both-grammar exact closure audit now precedes generation. Next: execute the new manual matrix,
 fix target/source blockers as classes, capture exact tool/runtime evidence and
 complete fresh normal qualification after compiler changes.
 

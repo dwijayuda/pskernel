@@ -526,9 +526,11 @@ def psTsEmitExprContextWithFuel
   | Nat.zero => fun (_tail : Bool) (_expr : PsVerifiedIrExpr) => Except.error PsTsEmitError.fuelExhausted
   | Nat.succ remaining =>
     fun (tail : Bool) (expr : PsVerifiedIrExpr) =>
-      let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprContextWithFuel brands tags remaining false;
-      let result : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprContextWithFuel brands tags remaining tail;
-      let owned : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprContextWithFuel brands tags remaining true;
+      let recur : Bool -> PsVerifiedIrExpr -> Except PsTsEmitError String :=
+        psTsEmitExprContextWithFuel brands tags remaining;
+      let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := recur false;
+      let result : PsVerifiedIrExpr -> Except PsTsEmitError String := recur tail;
+      let owned : PsVerifiedIrExpr -> Except PsTsEmitError String := recur true;
       match expr with
       | .literal literal =>
           psTsEmitLiteral literal

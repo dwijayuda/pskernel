@@ -40,9 +40,40 @@ const out=path.resolve('dist/direct-wasm-stack');fs.mkdirSync(out,{recursive:tru
 if(request.resolveOnly){
  const resolved=request.resolveOnly.map(index=>({index,name:resolve(index),
   ir:candidate.specializedIr[4][index-runtime.length]}));
+
+ let recursiveListSpines=[];
+ if(request.inventoryNonTailListSpines){
+  for(let d=0;d<candidate.specializedIr[4].length;d++){
+   const decl=candidate.specializedIr[4][d],self=decl[0],params=decl[2],calls=[];
+   const listIndices=params.map((p,i)=>[p,i]).filter(([p])=>p[1]?.[0]==='named'&&p[1][1].startsWith('List$spec$'));
+   if(!listIndices.length)continue;
+   function walk(e,tail=false,lambdaDepth=0){
+    if(!Array.isArray(e))return;
+    const tag=e[0];
+    if(tag==='call'){
+     if(e[1]?.[0]==='var'&&e[1][1]===self&&!tail&&lambdaDepth===0){
+      const changed=listIndices.filter(([p,i])=>!(e[3]?.[i]?.[0]==='var'&&e[3][i][1]===p[0]));
+      if(changed.length)calls.push({changedListParameters:changed.map(([p])=>p[0]),arity:e[3]?.length});
+     }
+     walk(e[1],false,lambdaDepth);for(const a of e[3]||[])walk(a,false,lambdaDepth);
+    }else if(tag==='letE'){walk(e[3],false,lambdaDepth);walk(e[4],tail,lambdaDepth);}
+    else if(tag==='ifE'){walk(e[1],false,lambdaDepth);walk(e[2],tail,lambdaDepth);walk(e[3],tail,lambdaDepth);}
+    else if(tag==='matchE'){walk(e[3],false,lambdaDepth);for(const a of e[4]||[])walk(a[2],tail,lambdaDepth);}
+    else if(tag==='lambda')walk(e[3],true,lambdaDepth+1);
+    else if(tag==='intrinsic')for(const a of e[3]||[])walk(a,false,lambdaDepth);
+    else if(tag==='projection')walk(e[3],false,lambdaDepth);
+    else if(tag==='record')for(const f of e[3]||[])walk(f[1],false,lambdaDepth);
+    else if(tag==='constructor')for(const f of e[4]||[])walk(f[1],false,lambdaDepth);
+   }
+   walk(decl[4],true);
+   if(calls.length)recursiveListSpines.push({index:d+runtime.length,name:self,
+    listParameters:listIndices.map(([p])=>p),nonTailSelfSites:calls.length,calls,bodyBytes:JSON.stringify(decl[4]).length});
+  }
+ }
  const receipt={schema:'psc1-retained-wasm-function-map/1',testedCommit:process.env.GITHUB_SHA,
   source:request,sourceSha256:m.sourceSha256,binarySha256:sha(wasm),exportAnchorsVerified:true,
-  runtimeFunctions:runtime.length,sourceFunctions:names.length,compilerExecution:false,qualification:false,resolved};
+  runtimeFunctions:runtime.length,sourceFunctions:names.length,compilerExecution:false,qualification:false,resolved,recursiveListSpines,
+  inventoryScope:'heuristic explicit saturated non-tail self calls with changed List parameters; no execution/performance claim'};
  fs.writeFileSync(path.join(out,'resolved.json'),JSON.stringify(receipt,null,2)+'\n');
  console.log('PSC1_RETAINED_WASM_FUNCTION_MAP: '+JSON.stringify(receipt));process.exit(0);
 }

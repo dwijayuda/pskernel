@@ -15,5 +15,6 @@
   "resolveOnly": [
     1538
   ],
-  "purpose": "Read-only resolution of exact terminal G2 stack, no compiler execution or qualification."
+  "purpose": "Inventory the exact captured compiler IR for the measured declaration-spine class. Read-only; no compiler execution, recursion rewrite or qualification.",
+  "inventoryNonTailListSpines": true
 }

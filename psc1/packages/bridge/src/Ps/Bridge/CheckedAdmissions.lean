@@ -61,25 +61,15 @@ def psCheckedAdmissionNatToString
 def psEncodeCodecName (name : PsName) : String :=
   match name with
   | .anonymous =>
-      psJsonObject [
-        Prod.mk "k" (psJsonQuote "a")
-      ]
+      (String.Internal.append ("{") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"a\"")))) ("}")))
   | .str parent value =>
       let encodedParent : String :=
         psEncodeCodecName parent;
-      psJsonObject [
-        psCheckedAdmissionJsonField "k" (psJsonQuote "s"),
-        psCheckedAdmissionJsonField "p" encodedParent,
-        psCheckedAdmissionJsonField "v" (psJsonQuote value)
-      ]
+      (String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"s\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"p\"") (String.Internal.append (":") (encodedParent))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") ((psJsonQuote value)))))))) ("}")))
   | .num parent value =>
       let encodedParent : String :=
         psEncodeCodecName parent;
-      psJsonObject [
-        psCheckedAdmissionJsonField "k" (psJsonQuote "n"),
-        psCheckedAdmissionJsonField "p" encodedParent,
-        psCheckedAdmissionJsonField "v" (psJsonQuote (psCheckedAdmissionNatToString value))
-      ]
+      (String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"n\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"p\"") (String.Internal.append (":") (encodedParent))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") ((psJsonQuote (psCheckedAdmissionNatToString value))))))))) ("}")))
 
 def psEncodeCodecLevel
     (level : PsLevel) :
@@ -87,18 +77,13 @@ def psEncodeCodecLevel
   match level with
   | .zero =>
       Except.ok
-        (psJsonObject [
-          psCheckedAdmissionJsonField "k" (psJsonQuote "z")
-        ])
+        ((String.Internal.append ("{") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"z\"")))) ("}"))))
   | .succ inner =>
       match psEncodeCodecLevel inner with
       | Except.error error => Except.error error
       | Except.ok encoded =>
           Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "k" (psJsonQuote "s"),
-              psCheckedAdmissionJsonField "o" (encoded)
-            ])
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"s\"")))) (String.Internal.append (",") (String.Internal.append ("\"o\"") (String.Internal.append (":") ((encoded)))))) ("}"))))
   | .max left right =>
       match psEncodeCodecLevel left with
       | Except.error error => Except.error error
@@ -107,11 +92,7 @@ def psEncodeCodecLevel
           | Except.error error => Except.error error
           | Except.ok encodedRight =>
               Except.ok
-                (psJsonObject [
-                  psCheckedAdmissionJsonField "k" (psJsonQuote "max"),
-                  psCheckedAdmissionJsonField "l" (encodedLeft),
-                  psCheckedAdmissionJsonField "r" (encodedRight)
-                ])
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"max\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"l\"") (String.Internal.append (":") ((encodedLeft)))) (String.Internal.append (",") (String.Internal.append ("\"r\"") (String.Internal.append (":") ((encodedRight)))))))) ("}"))))
   | .imax left right =>
       match psEncodeCodecLevel left with
       | Except.error error => Except.error error
@@ -120,17 +101,10 @@ def psEncodeCodecLevel
           | Except.error error => Except.error error
           | Except.ok encodedRight =>
               Except.ok
-                (psJsonObject [
-                  psCheckedAdmissionJsonField "k" (psJsonQuote "imax"),
-                  psCheckedAdmissionJsonField "l" (encodedLeft),
-                  psCheckedAdmissionJsonField "r" (encodedRight)
-                ])
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"imax\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"l\"") (String.Internal.append (":") ((encodedLeft)))) (String.Internal.append (",") (String.Internal.append ("\"r\"") (String.Internal.append (":") ((encodedRight)))))))) ("}"))))
   | .param name =>
       Except.ok
-        (psJsonObject [
-          psCheckedAdmissionJsonField "k" (psJsonQuote "p"),
-          psCheckedAdmissionJsonField "n" (psEncodeCodecName name)
-        ])
+        ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"p\"")))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") ((psEncodeCodecName name)))))) ("}"))))
   | .mvar _ =>
       Except.error PsCheckedAdmissionCodecError.universeMetavariable
 
@@ -171,10 +145,7 @@ def psEncodeCodecExpr
   match expr with
   | .bvar index =>
       Except.ok
-        (psJsonObject [
-          psCheckedAdmissionJsonField "i" (psCheckedAdmissionNatToString index),
-          psCheckedAdmissionJsonField "k" (psJsonQuote "b")
-        ])
+        ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"i\"") (String.Internal.append (":") ((psCheckedAdmissionNatToString index)))) (String.Internal.append (",") (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"b\"")))))) ("}"))))
   | .fvar _ =>
       Except.error PsCheckedAdmissionCodecError.freeVariable
   | .mvar _ =>
@@ -184,20 +155,13 @@ def psEncodeCodecExpr
       | Except.error error => Except.error error
       | Except.ok encodedLevel =>
           Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "k" (psJsonQuote "sort"),
-              psCheckedAdmissionJsonField "l" (encodedLevel)
-            ])
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"sort\"")))) (String.Internal.append (",") (String.Internal.append ("\"l\"") (String.Internal.append (":") ((encodedLevel)))))) ("}"))))
   | .constE name levels =>
       match psEncodeCodecLevels levels with
       | Except.error error => Except.error error
       | Except.ok encodedLevels =>
           Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "k" (psJsonQuote "const"),
-              psCheckedAdmissionJsonField "ls" (encodedLevels),
-              psCheckedAdmissionJsonField "n" (psEncodeCodecName name)
-            ])
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"const\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"ls\"") (String.Internal.append (":") ((encodedLevels)))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") ((psEncodeCodecName name)))))))) ("}"))))
   | .app fn arg =>
       match psEncodeCodecExpr arg with
       | Except.error error => Except.error error
@@ -206,11 +170,7 @@ def psEncodeCodecExpr
           | Except.error error => Except.error error
           | Except.ok encodedFn =>
               Except.ok
-                (psJsonObject [
-                  psCheckedAdmissionJsonField "a" (encodedArg),
-                  psCheckedAdmissionJsonField "f" (encodedFn),
-                  psCheckedAdmissionJsonField "k" (psJsonQuote "app")
-                ])
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"a\"") (String.Internal.append (":") ((encodedArg)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"f\"") (String.Internal.append (":") ((encodedFn)))) (String.Internal.append (",") (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"app\"")))))))) ("}"))))
   | .lam name type body binder =>
       match psEncodeCodecExpr body with
       | Except.error error => Except.error error
@@ -219,13 +179,7 @@ def psEncodeCodecExpr
           | Except.error error => Except.error error
           | Except.ok encodedType =>
               Except.ok
-                (psJsonObject [
-                  psCheckedAdmissionJsonField "b" (encodedBody),
-                  psCheckedAdmissionJsonField "bi" (psJsonQuote (psEncodeCodecBinderInfo binder)),
-                  psCheckedAdmissionJsonField "k" (psJsonQuote "lam"),
-                  psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
-                  psCheckedAdmissionJsonField "t" (encodedType)
-                ])
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"b\"") (String.Internal.append (":") ((encodedBody)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"bi\"") (String.Internal.append (":") ((psJsonQuote (psEncodeCodecBinderInfo binder))))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"lam\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"n\"") (String.Internal.append (":") ((psEncodeCodecName name)))) (String.Internal.append (",") (String.Internal.append ("\"t\"") (String.Internal.append (":") ((encodedType)))))))))))) ("}"))))
   | .forallE name type body binder =>
       match psEncodeCodecExpr body with
       | Except.error error => Except.error error
@@ -234,13 +188,7 @@ def psEncodeCodecExpr
           | Except.error error => Except.error error
           | Except.ok encodedType =>
               Except.ok
-                (psJsonObject [
-                  psCheckedAdmissionJsonField "b" (encodedBody),
-                  psCheckedAdmissionJsonField "bi" (psJsonQuote (psEncodeCodecBinderInfo binder)),
-                  psCheckedAdmissionJsonField "k" (psJsonQuote "forall"),
-                  psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
-                  psCheckedAdmissionJsonField "t" (encodedType)
-                ])
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"b\"") (String.Internal.append (":") ((encodedBody)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"bi\"") (String.Internal.append (":") ((psJsonQuote (psEncodeCodecBinderInfo binder))))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"forall\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"n\"") (String.Internal.append (":") ((psEncodeCodecName name)))) (String.Internal.append (",") (String.Internal.append ("\"t\"") (String.Internal.append (":") ((encodedType)))))))))))) ("}"))))
   | .letE name type value body =>
       match psEncodeCodecExpr body with
       | Except.error error => Except.error error
@@ -252,38 +200,21 @@ def psEncodeCodecExpr
               | Except.error error => Except.error error
               | Except.ok encodedValue =>
                   Except.ok
-                    (psJsonObject [
-                      psCheckedAdmissionJsonField "b" (encodedBody),
-                      psCheckedAdmissionJsonField "k" (psJsonQuote "let"),
-                      psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
-                      psCheckedAdmissionJsonField "t" (encodedType),
-                      psCheckedAdmissionJsonField "v" (encodedValue)
-                    ])
+                    ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"b\"") (String.Internal.append (":") ((encodedBody)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"let\"")))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"n\"") (String.Internal.append (":") ((psEncodeCodecName name)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"t\"") (String.Internal.append (":") ((encodedType)))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") ((encodedValue)))))))))))) ("}"))))
   | .lit literal =>
       match literal with
       | .natural value =>
           Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "k" (psJsonQuote "nat"),
-              psCheckedAdmissionJsonField "v" (psJsonQuote (psCheckedAdmissionNatToString value))
-            ])
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"nat\"")))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") ((psJsonQuote (psCheckedAdmissionNatToString value))))))) ("}"))))
       | .string value =>
           Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "k" (psJsonQuote "str"),
-              psCheckedAdmissionJsonField "v" (psJsonQuote value)
-            ])
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"str\"")))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") ((psJsonQuote value)))))) ("}"))))
   | .proj typeName index value =>
       match psEncodeCodecExpr value with
       | Except.error error => Except.error error
       | Except.ok encodedValue =>
           Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "e" (encodedValue),
-              psCheckedAdmissionJsonField "i" (psCheckedAdmissionNatToString index),
-              psCheckedAdmissionJsonField "k" (psJsonQuote "proj"),
-              psCheckedAdmissionJsonField "n" (psEncodeCodecName typeName)
-            ])
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"e\"") (String.Internal.append (":") ((encodedValue)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"i\"") (String.Internal.append (":") ((psCheckedAdmissionNatToString index)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (("\"proj\"")))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") ((psEncodeCodecName typeName)))))))))) ("}"))))
 
 def psEncodeCodecNames
     (names : List PsName) : List String :=

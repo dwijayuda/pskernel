@@ -1,0 +1,37 @@
+name: PSC1 exact Rust source and executing TS G2 diagnosis
+on:
+  push:
+    branches: [diagnostic/psc1-selfhost-profile-20261023]
+    paths: [.github/diagnostics/psc1-target-execution-profile.mjs]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39886083977'
+          artifact-ids: '12472902085'
+          path: input/rust
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39887064597'
+          artifact-ids: '12473571856'
+          path: input/ts
+      - name: Inspect exact source and sample actual generated execution without adoption
+        run: node .github/diagnostics/psc1-target-execution-profile.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-target-execution-profile-${{ github.sha }}
+          path: diagnosis/
+          retention-days: 90

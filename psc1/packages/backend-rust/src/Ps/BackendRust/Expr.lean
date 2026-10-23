@@ -3,7 +3,7 @@ import Ps.BackendRust.Captures
 -- Ordinary expression emission returns an owned value. Local variable and
 -- projection reads already clone; computed values can move without another copy.
 def psRustCloneExprPrinted (_expr : PsVerifiedIrExpr) (printed : String) : String :=
-  printed
+  psRustConcat3 "(" printed ")"
 
 def psRustEmitExprListWith
     (emitExpr :

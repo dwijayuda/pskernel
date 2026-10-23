@@ -1,5 +1,5 @@
 // Inspect only immutable, independently admitted generated compiler artifacts.
-import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';
+import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';
 import {sha,verifyArtifact} from '../../psc1/host-tools/generated-target-tools.mjs';
 import {compilerSourceClosureDigest} from '../../psc1/host-tools/compiler-host-protocol.mjs';
 const request=JSON.parse(fs.readFileSync('../.github/diagnostics/psc1-ecmascript-architecture.json'));
@@ -52,6 +52,20 @@ for(const file of profileFiles.filter(f=>f.endsWith('.log.txt'))){
  cpu.push({file:path.basename(file),sha256:sha(text),sections});
 }
 assert.ok(cpu.length>0,'full retained processed CPU report must be present');
-const receipt={schema:request.schema,testedCommit:process.env.GITHUB_SHA,compilerExecution:false,nativeDelegation:false,qualification:false,comparisonLimits:'Different target closures and source snapshots; shape comparison is not a matched performance benchmark.',results,cpu};
+const sourceRoot=path.resolve('../input/source/psc1'),priorCwd=process.cwd();
+const sourceReader=await import(pathToFileURL(path.join(sourceRoot,'host-tools/compiler-source-inputs.mjs')));
+const sourceCheckpoint=request.sourceCheckpoint,sourceRows=new Map();
+process.chdir(sourceRoot);
+try{for(const entry of sourceCheckpoint.entries)for(const row of sourceReader.readOwnedCompilerSources(entry))sourceRows.set(row.module,row);}finally{process.chdir(priorCwd);}
+const prefixCandidates=[];
+for(const row of sourceRows.values()){
+ for(const block of row.text.split(/(?=^def )/m)){
+  const match=/^def\s+([A-Za-z0-9_]+)/.exec(block);if(!match)continue;
+  const name=match[1],unsafe=new RegExp('let\\\\s+\\\\w+(?:(?!:=)[\\\\s\\\\S])*:=\\\\s*'+name+'\\\\b[^;]*;\\\\s*fun\\\\b');
+  if(unsafe.test(block))prefixCandidates.push({module:row.module,name,definitionSha256:sha(block)});
+ }
+}
+const prefixInventory={sourceCheckpoint,modules:sourceRows.size,candidates:prefixCandidates,scope:'Source-shape candidates in real owned JS/Wasm union, not proven reachable defects or a performance qualification.'};
+const receipt={schema:request.schema,testedCommit:process.env.GITHUB_SHA,compilerExecution:false,nativeDelegation:false,qualification:false,comparisonLimits:'Different target closures and source snapshots; shape comparison is not a matched performance benchmark.',results,cpu,prefixInventory};
 fs.mkdirSync('dist/ecmascript-architecture',{recursive:true});fs.writeFileSync('dist/ecmascript-architecture/receipt.json',JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_RETAINED_ECMASCRIPT_ARCHITECTURE: '+JSON.stringify({...receipt,results:results.map(({selected,...row})=>({...row,selected:selected.map(({snippet,...fn})=>fn)}))}));

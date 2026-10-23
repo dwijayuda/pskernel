@@ -54,6 +54,10 @@ jobs:
           run-id: '40031550466'
           artifact-ids: '12534609434'
           path: input/architecture/profile
+      - uses: actions/checkout@v4
+        with:
+          ref: '88e45f044da1f75d3a1d8cef89636ea368312dd9'
+          path: input/source
       - name: Compare retained generated compiler source without execution
         working-directory: psc1
         run: node ../.github/diagnostics/psc1-ecmascript-architecture.mjs

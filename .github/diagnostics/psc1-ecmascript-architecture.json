@@ -30,5 +30,13 @@
       "artifactDigest": "sha256:78e06d1fab67943acca2bbe17d716c0c8f3b7d944373052832b4ea06efe50af5"
     }
   ],
-  "attempt": 3
+  "attempt": 4,
+  "sourceCheckpoint": {
+    "commit": "88e45f044da1f75d3a1d8cef89636ea368312dd9",
+    "tree": "86aabcca08717acad6d576044416c0a9562138e6",
+    "entries": [
+      "Ps.BackendJs.CompilerService",
+      "Ps.BackendWasm.CompilerService"
+    ]
+  }
 }

@@ -1,0 +1,24 @@
+{
+  "schema": "psc1-retained-ecmascript-architecture/1",
+  "purpose": "Read-only comparison of genuine generated JS and qualified TS compiler artifacts; no compiler execution or qualification.",
+  "attempts": [
+    {
+      "target": "js",
+      "runId": 40027650302,
+      "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
+      "sourceCommit": "949d687b8977bb1fec3697293818f6d9d07f92a4",
+      "artifactId": 12535705338,
+      "artifactDigest": "sha256:d4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e",
+      "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31"
+    },
+    {
+      "target": "ts",
+      "runId": 39993829327,
+      "requestCommit": "079b26b945ceda507e89846aaab651e17fcb3b06",
+      "sourceCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64",
+      "artifactId": 12519304338,
+      "artifactDigest": "sha256:21b554aaf2803577727554861ba7fd4800cf90706c6ca6a3c1b665e4c99d8962",
+      "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28"
+    }
+  ]
+}

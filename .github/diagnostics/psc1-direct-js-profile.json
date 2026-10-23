@@ -1,16 +1,15 @@
 {
   "schema": "psc1-direct-generated-profile-request/1",
-  "runId": 40012562356,
-  "requestCommit": "b9b73a702141901e03563dff36477c6b788c6439",
-  "sourceCommit": "414cb6c26f682464af5c49efa7c62894d3588f3c",
-  "artifactId": 12528946630,
-  "artifactDigest": "sha256:d4e8b6d46e65cd90ce1d6ef266bd068a2e66b3d2bc527a93829ffa764fd9e902",
+  "runId": 40020523049,
+  "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
+  "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+  "artifactId": 12531877337,
+  "artifactDigest": "sha256:695440e0d7c763d6e0356e8448a5c1d93d8c4ce21a6070e13a735d3ca11a30c6",
   "target": "js",
   "requestId": "G2-self",
-  "sourceClosureDigest": "102ddaa2536a7c5b095ce3188a67f64ef0e9183c34c33051f0b552b6aab39707",
-  "serviceSha256": "7cc7bc0b157d0b7ef400a9b1f8541a7b2d7875472d9ad9e0a007e07e609e1529",
-  "requestSha256": "34fbc943ac867c321350c0ca554b11e7e4c2ae553c845878ff2e1255135e9e8d",
-  "purpose": "Actual retained generated compiler CPU diagnosis only; no qualification or timeout-policy change.",
-  "attempt": 2,
-  "note": "Locate the single report beneath GitHub artifact-id extraction directory; prior attempt did not execute compiler code."
+  "sourceClosureDigest": "0d7371b426f06361a39bf68e3c16baac0766d635aac5d01a4435d0747f3ca114",
+  "serviceSha256": "df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84",
+  "requestSha256": "3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7",
+  "purpose": "Measure actual generated statement-loop compiler on its exact retained G2 request; diagnostic only, no qualification or policy change.",
+  "attempt": 3
 }

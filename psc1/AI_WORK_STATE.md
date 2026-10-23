@@ -1,6 +1,6 @@
 # PSC1 AI work state
 
-Updated2026-10-24 Asia/Jakarta (2026-10-23 22:24UTC).
+Updated2026-10-24 Asia/Jakarta (2026-10-23 22:38UTC).
 Use connected GitHub tools and Linux Actions only; fresh expected-HEAD,
 non-force updates. No PR merge or npm release authorized.
 Practical Core v1 remains14 families/37 finite criteria.
@@ -8,6 +8,15 @@ Practical Core v1 remains14 families/37 finite criteria.
 [canonical direct receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts/measurements. The complete prior work-state history is
 [preserved at ef06b357](https://github.com/dwijayuda/pskernel/blob/ef06b357723b2265759dccb955c1575a1bbb78bf/psc1/AI_WORK_STATE.md).
+
+## Current experiment
+
+Childc115c65732ea1bf78aba263658e9ab804e116822 moves the main Wasm
+lower-expression worker recursive prefix under all four dynamic inputs. Retained
+all-input equality, million-fuel early result, exact zero-fuel refusal and an
+owned Wasm closure scan are under validation in40034701526/job120691199253.
+The guard must reject the exact original long-annotation definition too.
+No generated-execution improvement is claimed before the next qualification.
 
 ## Verified implementation checkpoint
 
@@ -49,16 +58,20 @@ versus33.9% in the earlier actual profile; emitted compiler7,257,030 bytes,
 lazy-token path. The latest dispatch change emits the existing driver's request
 packet directly, removing the helper generator and duplicate lookup. Callee and
 operands remain exact-once left-to-right; tail/non-tail foreign traps escape.
-Next request is genuine JS G1→G2→G3 on this verified child source.
+Current request8d7a5dc5488e872c0f81b5f848fd6b44d3654456, parent844f8c3b,
+run40033515365/job120687475727 is executing genuine JS G1→G2→G3.
+Request validation and all source/proof/runtime gates passed; terminal generation
+results are pending. Later Wasm-only source edits do not change its JS closure.
 
-Wasm requestbef0e260/run40028857732:
-G2 stack829660ms/1023424KiB maxRSS/1020592KiB sampled tree peak; noG3/fixedpoint.
-Read-only retained map40030902621 resolves function2712 to psListLength
-specialized on PsWasmStructType; the foundation accumulator class fix addresses
-it. Current Wasm request487e710069dca55d018f406e32e9f7c4b92f0adf,
-parentef06b357723b2265759dccb955c1575a1bbb78bf, run40031965458,
-job120682317187 is executing that fix. Later JS-only changes do not alter its
-98-module source closure. Re-query before acting; do not dispatch duplicates.
+Wasm request487e710069dca55d018f406e32e9f7c4b92f0adf/run40031965458
+completed independently admitted G1/ten cases, then G2 stack666386ms/1026060KiB;
+noG3/fixedpoint. Closure0313a6571d90c544bc6b88ed9a4809ca0d74733ed86e24ac57ec7766a0295a29.
+Read-only map40033860834 verifies retained binary/export anchors and resolves
+repeated function2286 to psWasmLowerExprWorker (top6 is runtime Nat comparison).
+Its multiline335-character recursive-binding type exceeded the old guard bound:
+the binding was still before the four dynamic inputs. c115c657 fixes that exact
+class without changing4096 semantic fuel, APIs, result order or resource limits.
+Artifact12535892025 digesta2593af908c9ec59985a6c8f19349b2e73d458f88aaea4baab551b4d766fcccd.
 
 Source/module/request/service/candidate/binary/artifact hashes and older
 failures remain in the canonical receipt. Diagnostics reuse exact captured
@@ -76,12 +89,13 @@ tests. Merge34d29e21 and head85433830 have identical
 tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
 Artifact12534827970 digestb54bfd96377fd53d7e9bfaeec94a2242fbd7ef3434f805e0540193baad6ab039.
 
-After the next JS request, fast-forward the review branch from fresh expected
-head85433830 to this verified child checkpoint, without force or a PR merge,
-and let normal full CI qualify the new source. Request workflows skip multi-commit
-ref fast-forwards because those already fail the request-only parent invariant;
-every actual single-commit request retains exact branch/path/parent/profile
-validation. Do not inherit854's full-source result for newer compiler files.
+The review branch was expected-HEAD non-force fast-forwarded to8d7a5dc5 after
+the old full gate completed. New full40033570924 is active; source40033565233
+passed. Multi-commit request workflow40033565129 correctly skipped, avoiding a
+duplicate/mismatched compiler request. The real child JS request40033515365 is
+separate. Keep the review branch stable while full CI runs, then integrate the
+later verified Wasm fix by another expected-HEAD non-force fast-forward.
+Do not inherit854's full-source result for changed compiler files.
 
 ## Preserved references and boundaries
 
@@ -108,8 +122,10 @@ the one native seed. PSKernel-Core research does not block this pipeline.
 
 ## Execute next
 
-1. Read current request manifest and re-query Wasm40031965458, the next JS run,
-   and PR175 full CI. Preserve terminal artifacts and exact outcomes.
+1. Re-query LowerExpr prefix gate40034701526, actual JS40033515365 and PR175
+   full40033570924. Preserve terminal artifacts and exact outcomes. Once the
+   focused gate passes, dispatch Wasm-only on the latest child as a request-only
+   commit. Do not duplicate the active JS run.
 2. Diagnose actual failures using captured generated bytes/requests. Fix measured
    classes; retain all-input semantic proofs and operational guards where applicable.
 3. Qualify current-source JS and owned Wasm G1→G2→G3, exact closure/admission/

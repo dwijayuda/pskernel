@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 22:24:00 UTC",
+  "recordedAtUtc": "2026-10-23 22:38:00 UTC",
   "localDate": "2026-10-24",
-  "status": "direct-dispatch-source-proof-runtime-passed-wasm-running-next-js-request",
+  "status": "wasm-lower-expression-prefix-fix-under-focused-validation-js-generations-running",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -287,12 +287,12 @@
     }
   },
   "currentAttempt": {
-    "target": "wasm-core",
-    "sourceCommit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5",
-    "requestParent": "ef06b357723b2265759dccb955c1575a1bbb78bf",
-    "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
-    "runId": 40031965458,
-    "jobId": 120682317187,
+    "target": "js",
+    "sourceCommit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
+    "requestParent": "844f8c3b765b6cc1378f164ac4cfcc39b02364a6",
+    "requestCommit": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
+    "runId": 40033515365,
+    "jobId": 120687475727,
     "status": "in_progress",
     "fixedPoint": "not-yet-established"
   },
@@ -707,6 +707,49 @@
           "digest": "sha256:fc447bc8aea156bd8f44e43559ff50ec7d61351bfe1a46dde8829cef0e9a1761"
         }
       ]
+    },
+    {
+      "runId": 40031965458,
+      "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
+      "target": "wasm-core",
+      "status": "failed",
+      "report": {
+        "target": "wasm-core",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 98,
+        "sourceClosureDigest": "0313a6571d90c544bc6b88ed9a4809ca0d74733ed86e24ac57ec7766a0295a29",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"1b7cc49ab3f1b22e8f6c800305c2a8ea05ed87ea3bdf983905bcb20fb6301ba5\",\"requestSha256\":\"4529904f51dd278f15740190b11edc907d383efd1851a7959895400ac2beef20\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1026060,\"peakTreeRssKiB\":1026060,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":666386,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/006336da:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/006336da:wasm-function[6]:0x2de46\n    at wasm://wasm/006336da:wasm-function[2286]:0xb0936\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n\nNode.js v22.23.3\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "1b7cc49ab3f1b22e8f6c800305c2a8ea05ed87ea3bdf983905bcb20fb6301ba5",
+            "startedAt": "2026-10-23T22:14:16.018Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"1b7cc49ab3f1b22e8f6c800305c2a8ea05ed87ea3bdf983905bcb20fb6301ba5\",\"requestSha256\":\"4529904f51dd278f15740190b11edc907d383efd1851a7959895400ac2beef20\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1026060,\"peakTreeRssKiB\":1026060,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":666386,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/006336da:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/006336da:wasm-function[6]:0x2de46\n    at wasm://wasm/006336da:wasm-function[2286]:0xb0936\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n    at wasm://wasm/006336da:wasm-function[2286]:0xb095c\n\nNode.js v22.23.3\n",
+            "completedAt": "2026-10-23T22:25:23.170Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12535892025,
+          "digest": "sha256:a2593af908c9ec59985a6c8f19349b2e73d458f88aaea4baab551b4d766fcccd"
+        }
+      ]
     }
   ],
   "checkedSpineDiagnosis": {
@@ -977,7 +1020,7 @@
       "allPriorRuntimeAndRefusalGates": "passed"
     }
   ],
-  "nextRequestedTarget": "js",
+  "nextRequestedTarget": "wasm-core",
   "nextJsSourceCommit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
   "erasureStackMap": {
     "schema": "psc1-retained-wasm-function-map/1",
@@ -1567,39 +1610,20 @@
   },
   "currentFullCi": {
     "pullRequest": 175,
-    "head": "85433830522dc0cc52541b985510122b67dea364",
-    "runId": 40027662328,
-    "jobId": 120672846738,
-    "gateJobId": 120680396390,
-    "status": "passed",
-    "testedMerge": "34d29e215ea568466dcbc96b14b5e10b2dddb438",
-    "identicalTree": "1382a67a7af0975fda2ecb855a1ee011d035af8f",
-    "readiness": {
-      "counts": {
-        "implemented": 0,
-        "tested": 0,
-        "qualified": 37,
-        "blocked": 0
-      },
-      "releaseReady": true
-    },
-    "allSevenBackends": true,
-    "bothGrammars": true,
-    "artifact": {
-      "id": 12534827970,
-      "digest": "sha256:b54bfd96377fd53d7e9bfaeec94a2242fbd7ef3434f805e0540193baad6ab039"
-    },
-    "scope": "85433830 tree only; subsequent child source needs full CI"
+    "head": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
+    "runId": 40033570924,
+    "status": "in_progress",
+    "scope": "current review branch; c115c657 later Wasm fix requires subsequent full CI"
   },
-  "nextWasmSourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
+  "nextWasmSourceCommit": "c115c65732ea1bf78aba263658e9ab804e116822",
   "activeAttempts": [
     {
-      "target": "wasm-core",
-      "sourceCommit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5",
-      "requestParent": "ef06b357723b2265759dccb955c1575a1bbb78bf",
-      "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
-      "runId": 40031965458,
-      "jobId": 120682317187,
+      "target": "js",
+      "sourceCommit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
+      "requestParent": "844f8c3b765b6cc1378f164ac4cfcc39b02364a6",
+      "requestCommit": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
+      "runId": 40033515365,
+      "jobId": 120687475727,
       "status": "in_progress",
       "fixedPoint": "not-yet-established"
     }
@@ -1649,5 +1673,81 @@
     "inventoryScope": "heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof",
     "declarationSpines": [],
     "otherFirst60": []
+  },
+  "lowerExprStackMap": {
+    "schema": "psc1-retained-wasm-function-map/1",
+    "testedCommit": "f9d16cd02ed086eb8e3066ca8ca0888ddcb775d1",
+    "source": {
+      "schema": "psc1-retained-wasm-stack-diagnosis/1",
+      "attempts": [
+        {
+          "runId": 40031965458,
+          "requestCommit": "487e710069dca55d018f406e32e9f7c4b92f0adf",
+          "sourceCommit": "ef06b357723b2265759dccb955c1575a1bbb78bf",
+          "artifactId": 12535892025,
+          "artifactDigest": "sha256:a2593af908c9ec59985a6c8f19349b2e73d458f88aaea4baab551b4d766fcccd"
+        }
+      ],
+      "serviceSha256": "1b7cc49ab3f1b22e8f6c800305c2a8ea05ed87ea3bdf983905bcb20fb6301ba5",
+      "requestSha256": "4529904f51dd278f15740190b11edc907d383efd1851a7959895400ac2beef20",
+      "closure": "0313a6571d90c544bc6b88ed9a4809ca0d74733ed86e24ac57ec7766a0295a29",
+      "resolveOnly": [
+        6,
+        2286
+      ],
+      "purpose": "Resolve exact terminal G2 repeated frames after foundation fix; read-only, no repeated compiler execution."
+    },
+    "sourceSha256": "dfe185aee0cf39d4da7031d3aeb099bc9d02b40ecffc85773ef72d3adc958b52",
+    "binarySha256": "7e5e3dfb12d7dd32db00f49afd3f2ce58b8ad8bf631c1f6cf1392d3fc6275afe",
+    "exportAnchorsVerified": true,
+    "compilerExecution": false,
+    "qualification": false,
+    "resolved": [
+      {
+        "index": 6,
+        "name": "__ps_wasm_nat_cmp"
+      },
+      {
+        "index": 2286,
+        "name": "psWasmLowerExprWorker"
+      }
+    ],
+    "totalCandidates": 0,
+    "inventoryScope": "heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof",
+    "declarationSpines": [],
+    "otherFirst60": []
+  },
+  "previousQualifiedFullCi": {
+    "pullRequest": 175,
+    "head": "85433830522dc0cc52541b985510122b67dea364",
+    "runId": 40027662328,
+    "jobId": 120672846738,
+    "gateJobId": 120680396390,
+    "status": "passed",
+    "testedMerge": "34d29e215ea568466dcbc96b14b5e10b2dddb438",
+    "identicalTree": "1382a67a7af0975fda2ecb855a1ee011d035af8f",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "allSevenBackends": true,
+    "bothGrammars": true,
+    "artifact": {
+      "id": 12534827970,
+      "digest": "sha256:b54bfd96377fd53d7e9bfaeec94a2242fbd7ef3434f805e0540193baad6ab039"
+    },
+    "scope": "85433830 tree only; subsequent child source needs full CI"
+  },
+  "pendingFocusedGate": {
+    "commit": "c115c65732ea1bf78aba263658e9ab804e116822",
+    "runId": 40034701526,
+    "jobId": 120691199253,
+    "status": "in_progress",
+    "change": "Delay main Wasm lower-expression worker recursive prefix under all four inputs; retained all-input Lean equality; owned closure source guard rejects original 335-character type annotation."
   }
 }

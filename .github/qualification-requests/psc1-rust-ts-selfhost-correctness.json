@@ -1,8 +1,8 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/2",
-  "id": "psc1-ts-size-extract-correctness-20261023-1792761367124",
+  "id": "psc1-ts-erasure-workers-correctness-20261023-1792763278654",
   "action": "qualify-independent-G1-G2-G3",
-  "branch": "perf/psc1-ts-utf8-size-extract-20261023",
+  "branch": "perf/psc1-erasure-applied-workers-20261023",
   "targets": [
     "ts"
   ],
@@ -10,5 +10,5 @@
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "parentCommit": "edc3e17ba2195649428f9ce020789404a9406beb"
+  "parentCommit": "ba0d5f2916074b6331441b050a38fd0f12347604"
 }

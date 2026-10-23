@@ -192,6 +192,7 @@ theorem context_eq (brands tags : List (String × String)) (fuel : Nat) :
   | zero => rfl
   | succ remaining ih =>
       simp only [legacyContext, psTsEmitExprContextWithFuel, ih]
+      rfl
 end PsTsServiceReference
 
 def main : IO Unit :=

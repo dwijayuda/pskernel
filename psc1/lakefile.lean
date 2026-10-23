@@ -454,3 +454,7 @@ lean_exe psc1_codec_static_schema_tests where
 lean_exe psc1_json_escape_predicate_tests where
   srcDir := "test"
   root := `JsonEscapePredicateTests
+
+lean_exe psc1_bridge_lookup_normalization_tests where
+  srcDir := "test"
+  root := `BridgeLookupNormalizationTests

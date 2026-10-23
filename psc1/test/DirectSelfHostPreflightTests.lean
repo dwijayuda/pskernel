@@ -1,3 +1,4 @@
+import FoundationListTests
 import ErasureSpineTests
 import CheckedSpineTests
 import Ps.BackendJs.Print
@@ -349,6 +350,7 @@ private def fixtureModule : PsVerifiedIrModule :=
   ]
 
 def main : IO Unit := do
+  runFoundationListTests
   runErasureSpineTests
   runCheckedSpineTests
   testWasmPrefixDelay

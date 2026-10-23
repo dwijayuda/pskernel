@@ -8,6 +8,7 @@ on:
       - psc1/packages/compiler/**
       - psc1/packages/bridge/**
       - psc1/packages/erasure/**
+      - psc1/packages/foundation/**
       - psc1/scripts/TargetServiceSeed.lean
       - psc1/scripts/generated-target-source-audit.mjs
       - psc1/host-tools/generated-target-profiles.mjs
@@ -17,6 +18,7 @@ on:
       - psc1/test/OrdinaryExpansion*.lean
       - psc1/test/CheckedSpine*.lean
       - psc1/test/ErasureSpine*.lean
+      - psc1/test/FoundationList*.lean
       - psc1/scripts/check-erasure-declaration-spines.mjs
       - psc1/test/JsStatement*.lean
       - psc1/scripts/js-statement-tests.mjs

@@ -511,3 +511,7 @@ lean_lib PsCheckedSpineReference where
 lean_lib PsErasureSpineReference where
   srcDir := "test"
   roots := #[`ErasureSpineReference, `ErasureSpineTests]
+
+lean_lib PsFoundationListReference where
+  srcDir := "test"
+  roots := #[`FoundationListReference, `FoundationListTests]

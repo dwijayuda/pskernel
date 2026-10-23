@@ -2,20 +2,18 @@
   "schema": "psc1-retained-wasm-stack-diagnosis/1",
   "attempts": [
     {
-      "runId": 40026947549,
-      "requestCommit": "6c82fcb45274e8d07016c4683939eac4a994a855",
-      "sourceCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
-      "artifactId": 12533227841,
-      "artifactDigest": "sha256:a5c8d1a582b5a85b8583183b2174805f072b1e9eb7a595e5d6ee96e773e92d6e"
+      "runId": 40028857732,
+      "requestCommit": "bef0e260a062f89981af514480d9bd7414047d97",
+      "sourceCommit": "4f88fac688408adb7a4c059539746719c39c0170",
+      "artifactId": 12534143433,
+      "artifactDigest": "sha256:fc447bc8aea156bd8f44e43559ff50ec7d61351bfe1a46dde8829cef0e9a1761"
     }
   ],
-  "serviceSha256": "da3ebf86ccc0f58cf0517141e491b10f6963bd8b10a7656a6506396b85e7ecaa",
-  "requestSha256": "e8ed29c66a894ea24fd13da32bee270fd1990e87ef6d004b791315c3887e3dd0",
-  "closure": "f1f0b33b4b2c65f471de0ba2eb0c70df04439a78e1b1719cd55aa385777de0f9",
+  "serviceSha256": "97ffc3e636393abff03ae218c118e44fb5678ec2dc0828eecc31881f542c0ae6",
+  "requestSha256": "788666f9adc7fafd1b476b729dc65c9cffac93cb3fd42b5502d0ffe441ccb18e",
+  "closure": "362daf0af085908865d09a74276431b010c9f60e914370a65382e79031315f1f",
   "resolveOnly": [
-    1538
+    2712
   ],
-  "purpose": "Inventory the exact captured compiler IR for the measured declaration-spine class. Read-only; no compiler execution, recursion rewrite or qualification.",
-  "inventoryNonTailListSpines": true,
-  "note": "Flatten curried application chains and check declared plus returned function arity to exclude partial-factory and tail-call false positives. Read-only inventory, not421 proven defects."
+  "purpose": "Map exact829.7-second G2 terminal stack using immutable generated binary and candidate IR, without repeating compiler execution."
 }

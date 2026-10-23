@@ -1,14 +1,14 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
   "branch": "work/psc1-direct-selfhost-spines2-20261024",
-  "parentCommit": "ef06b357723b2265759dccb955c1575a1bbb78bf",
+  "parentCommit": "844f8c3b765b6cc1378f164ac4cfcc39b02364a6",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "wasm-core"
+    "js"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "472f8def/full focused40031387906 PASSED six retained foundation API equalities,100000-element tests, all earlier erasure/checked/ordinary/prefix proofs and87/98-module Lean/PS gates. Actual previous G2 failed829660ms at psListLength$spec$PsWasmStructType, verified by retained map40030902621. Execute genuine G1/G2/G3 with fully applied list accumulators; all verification/fuel/heap/stack policies unchanged."
+  "reason": "82994f85/full gate40032762325 passes all proofs/runtime/refusals/both complete grammars plus64 direct-dispatch callee/operand/trap cases and registered lookups40 to20. Real retained lazy-view G2 profile40031550466 confirms StringEqual0.1% and12171 invoke sites. Current compiler emits existing driver packets directly, includes proved erasure/foundation folds, and preserves all policies. Execute actual independent G1/G2/G3/fixed point."
 }

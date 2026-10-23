@@ -163,8 +163,7 @@ def testWasmBinaryCarrier (module : PsWasmModule) : IO Unit := do
   for memory in [false,true] do
     for globals in [false,true] do
       for imported in [false,true] do
-        checkModule { module with abiMemory := memory, abiGlobalsExport := globals,
-          abiMemoryImports := imported }
+        checkModule { module with abiMemory := memory, abiGlobalsExport := globals, abiMemoryImports := imported }
   let importedFunction := PsWasmFunction.mk "imported" Option.none [] [PsWasmValueType.i32]
     [] [PsWasmInstruction.i32Const 42]
   checkModule { module with functionImports := [

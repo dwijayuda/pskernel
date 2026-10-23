@@ -1,90 +1,63 @@
-## Short-pair native proof elaboration corrected; fresh gates PENDING
+## Exact short-pair source9dd75e2 native85 PASS; generated gates RUNNING
 
-Candidate e996075be53951613d3548d6f5591d4a53af9e00/run39970749692 FAILED
-native job120472453623. The bounded short_pairs_eq theorem elaborated with
-standard axioms, but entry_pairs_eq could not derive the Nat bound from its
-Boolean comparison; hash_eq_before could not rewrite beneath local lets.
-Those two failed reports include sorryAx and are NOT accepted. Generated jobs
-were skipped; no code-generation or runtime acceptance is claimed.
+Executable and harness source:9dd75e270f3c9eeb918a262c5f6e43e91b7b14da
+(tree d187bb046f9421b023f9c916760ea1e4b6f182e1).
+ONE existing run: https://github.com/dwijayuda/pskernel/actions/runs/39971478026.
+Native job120475007169 terminalPASS:85 proof reports,11 hash reports, all only
+permitted propext/Classical.choice/Quot.sound. Both new ShortPairs/guarded-entry
+theorems and the original full hash equality now elaborate without forbidden
+axioms. Frozen2730 native cases/long3 and all294 genuine requests377 metadata/
+six native String cases/singletons/retained prefix-session-DAG controls PASS.
 
-This containing candidate changes ONLY the proof steps: use the exact pinned
-Lean Nat.le_of_ble_eq_true comparison lemma, reduce local lets explicitly,
-then simplify all occurrences of entry_pairs_eq before the original worker
-equality proof. Production, theorem statements, all tests, limits and codegen
-guards remain unchanged. Follow its ONE fresh native-first narrow run.
-Failure evidence/all85 actual reports/one artifact file hash:
-docs/evidence/2026-10-23-t01f-short-pair-native-elaboration-failure.json.
+Native artifact12508912621 ZIP105,603 bytes SHA256
+03801ecf5df242ca24b08d88fe17a4d6eb0c533fe5f12a6e7f7ca2ffa77cae2b.
+All five files independently hash-verified. Raw fixture remains2,791,525 bytes,
+SHA256563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d.
+Exact85 proof rows/all markers/file hashes/job identities:
+docs/evidence/2026-10-23-t01f-short-pairs-native-gates.json.
 
-The prior executable0fe60cc69e8d7544acb09025944cbfd3d955f992 FAILED the complete
-mixed runtime at the unchanged25-minute cap. Run39961234382/job120449895373:
-418 trace begins,417 ends; interrupted call418 was psKernelV1RunDag /
-validity-right / Aé€😀. Admission294,metadata377 and mixed singleton PASS,
-but no fullcase/1,400-assertion receipt; mixed.memory empty, completed whole
-wall time/RSS UNKNOWN. All nine mixed artifact files were authenticated.
-Evidence: docs/evidence/2026-10-23-t01f-fused-entry-mixed-terminal.json.
-Its native83/hash9,bounded2730/8190/13665/long3, complete authentic producer
-and retained controls PASS remain source-specific and do not qualify T01F.
+Producer120475944362 RUNNING bounded compiler build as of14:42UTC.
+No generated matrix, pure codegen, complete build or mixed runtime acceptance
+is claimed yet. Follow THIS existing run; never duplicate. Reject any new
+helper generator/scheduler/staging, failed matrix or failed source check.
+Existing frozen2730/8190/13665/long3 plus new19case38assertion boundary matrix
+must pass before complete authentic SelfHost compilation and unchanged mixed
+294admissions/377metadata/1400assertions/440tracecalls at4096fuel,2048MiB,
+emptyPATH,25-minute cap. T01F/currentA/B/DOPEN,CFAIL; noT05/integration.
 
-Current-source phase diagnostic32a9cf833b09ec9f511bf1b42b23f4fa5b8bb14f,
-run39968440469/job120464388191 PASSED DIAGNOSTIC ONLY. It authenticated the
-exact0fe complete producer, independently admitted294 requests and compared377
-metadata before the genuine mixed UTF8-literal V1 DefEq operation.
-Operation51,333.177744ms; whole diagnostic93.84s /875,084KiB peak RSS;
-42,652 phase samples, GC9,339(21.9%). Named pair function2,809 samples plus
-its anonymous block2,313 remain prominent. Named groups exclude anonymous
-frames and are not full family totals. All24 files independently hash-verified.
-Evidence: docs/evidence/2026-10-23-t01f-fused-entry-defeq-phase-profile.json.
-Cross-run timings are not a causal or general speedup claim.
+The new ShortPairs helper is nonrecursive and computes zero through four
+pairs using unchanged pure immutable Step calls. The full entry selects it
+only when paircount <= 4; larger inputs use the unchanged generic Pair
+recurrence. General State/Scan/staged Worker and public partial applications
+are unchanged. Native short_pairs_eq proves exact equality for every selected
+paircount, String and initial cursor/hash; entry_pairs_eq proves the guarded
+selection equal to the generic recurrence for every input. All original
+theorem statements remain unchanged.
 
-THIS containing implementation is an unqualified candidate. It adds a
-nonrecursive pure ShortPairs helper computing2/4/6/8 unchanged immutable
-steps for paircounts1/2/3/4 (zero returns initial; larger truncates to4).
-The full String hash selects it ONLY when paircount<=4; otherwise it invokes
-the unchanged generic Pair worker. The general State/Scan/staged Worker,
-all original hash algorithms/modulus/raw cursor semantics, LevelList fallback
-and public partial stages stay unchanged. Static fixture names have60,810 of
-66,379 segment occurrences(91.6%) within this bound; actual runtime call
-frequency remains UNKNOWN. This is a measured-hotspot hypothesis, not a pass.
+This targets the actual current-source phase profile: run39968440469,
+job120464388191, generated0fe/harness32a9,42,652 samples with9,339 GC samples
+and prominent Pair/anonymous-block allocation. Its diagnostic operation
+51,333.177744ms and93.84s/875,084KiB whole-process observations are not
+T01F qualification or a general speedup claim. All24 files are verified in
+docs/evidence/2026-10-23-t01f-fused-entry-defeq-phase-profile.json.
+Static fixture name occurrences60,810/66,379(91.6%) fit the bounded branch;
+runtime call frequency remains UNKNOWN.
 
-Two new native theorems prove exact bounded ShortPairs equality and exact
-guarded entry equality for every String, initial cursor/hash and paircount.
-All existing theorem statements remain unchanged; seven original hash proof
-bodies remain unchanged, and hash_eq_before prepends the entry rewrite before
-its original proof. LevelList theorem remains unchanged. Expected11 hash
-axiom reports /85 total narrow reports; every actual proof must elaborate
-without forbidden axioms. Existing frozen2730case/8190stage/13665assertion
-and long3 scripts remain byte-for-byte unchanged.
-
-A separate generated19-case/38-assertion matrix covers ASCII lengths0..10,
-Unicode and NUL, every short paircount and both odd/even lengths plus the
-generic fallback. It checks full entry and staged worker against an
-independent codepoint hash. Bounded CI must additionally prove the new
-helper has ZERO generators,scheduler calls or staged machinery, exactly8
-static pure Step calls, and one guarded use from the full entry. Existing
-Pair/State/full-entry/LevelList shape guards remain enforced. Reject emitted
-code that violates this hypothesis; do not soften the guard.
-
-Follow this source's ONE narrow native-first hash run. All execution stays
-on Actions Linux. After bounded PASS, require complete authentic SelfHost
-check/build, retained DAG/prefix/session controls and the entire unchanged
-mixed runtime with294 admissions/377 metadata/1,400 assertions/singletons/
-negatives/private owners/440 trace calls. Keep fuel4096,2048MiB,emptyPATH
-and25-minute mixed cap. No older-source pass inheritance or duplicate runs.
-
-All five full work-branch triggers remain PAUSED; diagnostic profile is
-manual-only again; narrow hash alone is ACTIVE. Paused integration and saved
-draft now require11 hash proof prints and both full routes include the new
-19case matrix. After whole narrow PASS fetch fresh full workflows, restore
-all five, make narrow hash manual-only and qualify ONE coherent new source
-through BOTH strict six-shard aggregates plus all retained gates. Strengthen
-the aggregate to exact1,400 assertions/shard and8,400 executed/route
-(repeated prefix included) before final activation.
-
-T01F/current A/B/D remain OPEN; C remains FAIL; historical scopedA9c87 remains
-qualified. No T05 or integration yet. Default providerV1; full-kernel DirectJS
-UNSUPPORTED. Preserve all frozen32-worker384-call owner and full193 Arena/
-profile requirements and actual regressions. Integration last123c41197950b6761be965fd21c57142ee2b0d1c.
-Fresh expected SHA/non-force, preserve history, no main merge/npm publication.
+Prior0fe mixed job120449895373 timed out at25minutes with418begins417ends,
+interrupted psKernelV1RunDag/validity-right, no complete receipt or memory.
+Its complete failure and all9 file hashes are preserved in
+docs/evidence/2026-10-23-t01f-fused-entry-mixed-terminal.json. The failed
+e996 native proof reports are archived and not inherited. Current9dd is a
+proof-only correction with production unchanged. All five full work-branch
+push triggers remainPAUSED, profilemanual-only and narrowhashonlyACTIVE.
+Paused full integration and saved draft hash guard11 match current11 reports.
+Both full routes include the additional19-case matrix. Only after complete
+narrowPASS restorefull5, makenarrowmanual-only, strengthen aggregate toexact
+1400/shard8400executed/route, qualifyONE coherent new source throughBOTH strict
+sixshardaggregates andall retainedgates/frozen32worker384owner/full193/profile.
+This documentation child is unqualified; source9dd remains the execution
+identity. Fresh expectedSHA/nonforce,preservehistory,ActionsLinux execution,
+defaultV1/fullkernelDirectJSUNSUPPORTED,no main/npm.
 
 ---
 

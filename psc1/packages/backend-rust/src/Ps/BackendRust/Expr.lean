@@ -1,9 +1,9 @@
 import Ps.BackendRust.Captures
 
-def psRustCloneExprPrinted (expr : PsVerifiedIrExpr) (printed : String) : String :=
-  match expr with
-  | PsVerifiedIrExpr.var _ => printed
-  | _ => psRustClonePrinted printed
+-- Ordinary expression emission returns an owned value. Local variable and
+-- projection reads already clone; computed values can move without another copy.
+def psRustCloneExprPrinted (_expr : PsVerifiedIrExpr) (printed : String) : String :=
+  printed
 
 def psRustEmitExprListWith
     (emitExpr :
@@ -1055,9 +1055,76 @@ def psRustEmitAlternativeListWith
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
-def psRustEmitExprWorker
+-- Exact, monomorphic forwarding wrappers around eager String intrinsics can
+-- use the existing borrowed intrinsic path. Never substitute arbitrary bodies,
+-- reorder/duplicate arguments, or inline a locally shadowed callable.
+def psRustForwardsParameters (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrExpr -> Bool :=
+  match parameters with
+  | List.nil => fun (arguments : List PsVerifiedIrExpr) => psListIsEmpty arguments
+  | List.cons parameter rest =>
+      fun (arguments : List PsVerifiedIrExpr) =>
+        let smaller : List PsVerifiedIrExpr -> Bool := psRustForwardsParameters rest;
+        match arguments with
+        | List.nil => false
+        | List.cons argument others =>
+            match argument with
+            | PsVerifiedIrExpr.var name => psStringEq name parameter.name && smaller others
+            | _ => false
+
+structure PsRustBorrowedWrapper where
+  name : String
+  operation : PsVerifiedIrIntrinsic
+  arity : Nat
+
+def psRustBorrowedWrapper (declaration : PsVerifiedIrDeclaration) : Option PsRustBorrowedWrapper :=
+  if psListIsEmpty declaration.typeParameters then
+    match declaration.body with
+    | PsVerifiedIrExpr.intrinsic operation types arguments =>
+        if psRustIntrinsicBorrowsStringArgument operation 0 &&
+            psListIsEmpty types && psRustForwardsParameters declaration.parameters arguments then
+          Option.some (PsRustBorrowedWrapper.mk declaration.name operation (psListLength arguments))
+        else Option.none
+    | _ => Option.none
+  else Option.none
+
+def psRustBorrowedWrappersAcc (declarations : List PsVerifiedIrDeclaration) :
+    List PsRustBorrowedWrapper -> List PsRustBorrowedWrapper :=
+  match declarations with
+  | List.nil => fun (acc : List PsRustBorrowedWrapper) => acc
+  | List.cons declaration rest =>
+      fun (acc : List PsRustBorrowedWrapper) =>
+        let smaller : List PsRustBorrowedWrapper -> List PsRustBorrowedWrapper :=
+          psRustBorrowedWrappersAcc rest;
+        match psRustBorrowedWrapper declaration with
+        | Option.none => smaller acc
+        | Option.some wrapper => smaller (List.cons wrapper acc)
+
+def psRustBorrowedWrappers (declarations : List PsVerifiedIrDeclaration) : List PsRustBorrowedWrapper :=
+  psListReverse (psRustBorrowedWrappersAcc declarations [])
+
+def psRustFindBorrowedWrapper (wrappers : List PsRustBorrowedWrapper) (name : String)
+    (arity : Nat) : Option PsVerifiedIrIntrinsic :=
+  match wrappers with
+  | List.nil => Option.none
+  | List.cons wrapper rest =>
+      if psStringEq wrapper.name name && Nat.beq wrapper.arity arity then Option.some wrapper.operation
+      else psRustFindBorrowedWrapper rest name arity
+
+def psRustBorrowedCall (wrappers : List PsRustBorrowedWrapper) (locals : List String)
+    (fn : PsVerifiedIrExpr) (types : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) : Option PsVerifiedIrIntrinsic :=
+  if psListIsEmpty types then
+    match fn with
+    | PsVerifiedIrExpr.var name =>
+        if psRustStringListContains locals name then Option.none
+        else psRustFindBorrowedWrapper wrappers name (psListLength arguments)
+    | _ => Option.none
+  else Option.none
+
+def psRustEmitExprWorkerWithBorrowed
     (declarations : List PsVerifiedIrDeclaration)
-    (fuel : Nat) :
+    (wrappers : List PsRustBorrowedWrapper) (fuel : Nat) :
     List String ->
     PsVerifiedIrExpr ->
     Except PsRustEmitError String :=
@@ -1068,7 +1135,7 @@ def psRustEmitExprWorker
   | Nat.succ remaining =>
       let smaller :
           List String -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
-        psRustEmitExprWorker declarations remaining;
+        psRustEmitExprWorkerWithBorrowed declarations wrappers remaining;
       fun (locals : List String) (expr : PsVerifiedIrExpr) =>
         let emitNested : PsVerifiedIrExpr -> Except PsRustEmitError String :=
           smaller locals;
@@ -1119,28 +1186,34 @@ def psRustEmitExprWorker
                                 " = std::rc::Rc::new(move |", psRustJoin ", " printedParameters,
                                 "| -> ", printedResult, " { ", printedBody,
                                 " }); __ps_internal_lambda }"])
-        | PsVerifiedIrExpr.call fn _ arguments =>
-          let emittedFn : Except PsRustEmitError String :=
-            match fn with
-            | PsVerifiedIrExpr.var name => Except.ok (psRustIdentifier name)
-            | _ => emitNested fn;
-          match emittedFn with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedFn =>
-              match psRustEmitExprListWith emitNested arguments with
+        | PsVerifiedIrExpr.call fn typeArguments arguments =>
+            match psRustBorrowedCall wrappers locals fn typeArguments arguments with
+            | Option.some operation =>
+                match psRustEmitIntrinsicArgumentsWith emitNested locals operation arguments 0 with
+                | Except.error error => Except.error error
+                | Except.ok printed => psRustEmitIntrinsicFromPrinted operation printed
+            | Option.none =>
+              let emittedFn : Except PsRustEmitError String :=
+                match fn with
+                | PsVerifiedIrExpr.var name => Except.ok (psRustIdentifier name)
+                | _ => emitNested fn;
+              match emittedFn with
               | Except.error error =>
                   Except.error error
-              | Except.ok printedArguments =>
-                  Except.ok
-                    (psRustConcat4
-                      "("
-                      printedFn
-                      ")("
-                      (psRustConcat2
-                        (psRustJoin ", " printedArguments)
-                        ")"))
-        | PsVerifiedIrExpr.letE name type value body =>
+              | Except.ok printedFn =>
+                  match psRustEmitExprListWith emitNested arguments with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok printedArguments =>
+                      Except.ok
+                        (psRustConcat4
+                          "("
+                          printedFn
+                          ")("
+                          (psRustConcat2
+                            (psRustJoin ", " printedArguments)
+                            ")"))
+            | PsVerifiedIrExpr.letE name type value body =>
           match emitNested value with
           | Except.error error => Except.error error
           | Except.ok printedValue =>
@@ -1266,6 +1339,11 @@ def psRustEmitExprWorker
                       (psRustConcat2
                         (psRustJoin ", " printedAlternatives)
                         " })"))
+
+-- Keep the public emitter interface and every original fuel/error boundary.
+def psRustEmitExprWorker (declarations : List PsVerifiedIrDeclaration) (fuel : Nat)
+    (locals : List String) (expr : PsVerifiedIrExpr) : Except PsRustEmitError String :=
+  psRustEmitExprWorkerWithBorrowed declarations (psRustBorrowedWrappers declarations) fuel locals expr
 
 def psRustEmitExprWithFuel
     (fuel : Nat) (expr : PsVerifiedIrExpr) : Except PsRustEmitError String :=

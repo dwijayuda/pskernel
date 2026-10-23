@@ -49,6 +49,98 @@ def psRustTailParameterNames (parameters : List PsVerifiedIrParameter) : List St
   | List.cons parameter rest =>
       List.cons (psRustIdentifier parameter.name) (psRustTailParameterNames rest)
 
+-- A loop parameter is owned and initialized. Moving an unchanged String
+-- after all other arguments have been computed avoids copying the full input
+-- at every scan step. Repeated local names conservatively detect shadowing.
+def psRustTailSingleLocal (locals : List String) : String -> Bool :=
+  match locals with
+  | List.nil => fun (_name : String) => false
+  | List.cons head rest =>
+      fun (name : String) =>
+        let smaller : String -> Bool := psRustTailSingleLocal rest;
+        if psStringEq head name then
+          !psListAny (fun (other : String) => psStringEq other name) rest
+        else smaller name
+
+def psRustTailInvariantString (locals : List String)
+    (parameter : PsVerifiedIrParameter) (argument : PsVerifiedIrExpr) : Bool :=
+  match parameter.type with
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.string =>
+          match argument with
+          | PsVerifiedIrExpr.var name =>
+              psStringEq name parameter.name && psRustTailSingleLocal locals name
+          | _ => false
+      | _ => false
+  | _ => false
+
+structure PsRustTailMovePlan where
+  statements : List String
+  values : List String
+  original : List String
+  moved : Bool
+
+def psRustTailMoveArguments
+    (emit : PsVerifiedIrExpr -> Except PsRustEmitError String)
+    (locals : List String) (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrExpr -> Nat -> Except PsRustEmitError PsRustTailMovePlan :=
+  match parameters with
+  | List.nil =>
+      fun (arguments : List PsVerifiedIrExpr) (_index : Nat) =>
+        if psListIsEmpty arguments then Except.ok (PsRustTailMovePlan.mk [] [] [] false)
+        else Except.error PsRustEmitError.intrinsicArity
+  | List.cons parameter rest =>
+      fun (arguments : List PsVerifiedIrExpr) (index : Nat) =>
+        let smaller : List PsVerifiedIrExpr -> Nat -> Except PsRustEmitError PsRustTailMovePlan :=
+          psRustTailMoveArguments emit locals rest;
+        match arguments with
+        | List.nil => Except.error PsRustEmitError.intrinsicArity
+        | List.cons argument others =>
+            -- Retain ordinary emission and its errors even for moved operands.
+            match emit argument with
+            | Except.error error => Except.error error
+            | Except.ok printed =>
+                match smaller others (Nat.succ index) with
+                | Except.error error => Except.error error
+                | Except.ok tail =>
+                    let original : String := psRustCloneExprPrinted argument printed;
+                    if psRustTailInvariantString locals parameter argument then
+                      Except.ok (PsRustTailMovePlan.mk tail.statements
+                        (List.cons (psRustIdentifier parameter.name) tail.values)
+                        (List.cons original tail.original) true)
+                    else
+                      match psRustEmitHigherOrderParameterType parameter.type with
+                      | Except.error error => Except.error error
+                      | Except.ok type =>
+                          let temporary : String := psRustConcat2 "__ps_internal_tail_next_" (psNatToString index);
+                          let statement : String := psRustJoin "" [
+                            "let ", temporary, ": ", type, " = ", original, ";"];
+                          Except.ok (PsRustTailMovePlan.mk (List.cons statement tail.statements)
+                            (List.cons temporary tail.values) (List.cons original tail.original) tail.moved)
+
+def psRustTailNextState
+    (emit : PsVerifiedIrExpr -> Except PsRustEmitError String)
+    (declaration : PsVerifiedIrDeclaration) (locals : List String)
+    (captured : List String) (arguments : List PsVerifiedIrExpr) :
+    Except PsRustEmitError String :=
+  if psListIsEmpty captured then
+    match psRustTailMoveArguments emit locals declaration.parameters arguments 0 with
+    | Except.error error => Except.error error
+    | Except.ok plan =>
+        if plan.moved then
+          Except.ok (psRustJoin "" ["{ ", psRustJoin " " plan.statements,
+            " __ps_internal_tail_state = ", psRustTailTuple plan.values, "; continue; }"])
+        else
+          Except.ok (psRustConcat3 "{ __ps_internal_tail_state = "
+            (psRustTailTuple plan.original) "; continue; }")
+  else
+    match psRustEmitExprListWith emit arguments with
+    | Except.error error => Except.error error
+    | Except.ok printed =>
+        Except.ok (psRustConcat3 "{ __ps_internal_tail_state = "
+          (psRustTailTuple (psListAppend captured printed)) "; continue; }")
+
 def psRustTailLet (name : String) (type : PsVerifiedIrType) (value : PsVerifiedIrExpr)
     (printedValue printedBody : String) : Except PsRustEmitError String :=
   let annotation : Except PsRustEmitError String :=
@@ -82,11 +174,7 @@ def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
           psRustEmitExprWorker declarations remaining locals;
         match psRustTailCallFor declaration locals aliases expr with
         | Option.some call =>
-            match psRustEmitExprListWith ordinary call.arguments with
-            | Except.error error => Except.error error
-            | Except.ok printed =>
-                Except.ok (psRustConcat3 "{ __ps_internal_tail_state = "
-                  (psRustTailTuple (psListAppend call.captured printed)) "; continue; }")
+            psRustTailNextState ordinary declaration locals call.captured call.arguments
         | Option.none =>
             match expr with
             | PsVerifiedIrExpr.letE name type value body =>

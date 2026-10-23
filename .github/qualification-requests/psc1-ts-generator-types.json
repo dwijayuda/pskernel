@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "ts-shared-cursor-accumulator-20261023",
+  "id": "ts-generic-lexer-tail-arity-20261023",
   "branch": "fix/psc1-ts-generator-result-types-20261023",
-  "parentCommit": "ee45ca9035698ca12f0c6814c91b615db01242ff",
+  "parentCommit": "ef47f848938a3d604c4878b56513d6c25dfbaec8",
   "targets": [
     "ts"
   ],

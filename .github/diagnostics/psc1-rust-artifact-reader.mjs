@@ -53,3 +53,27 @@ for(const file of files){
   }
  }
 }
+
+for(const file of files.filter(f=>path.basename(f)==='G1-bootstrap.candidate.json')){
+ const q=JSON.parse(fs.readFileSync(file,'utf8')),decls=q.specializedIr[4],index=new Map(decls.map(d=>[d[0],d]));
+ for(const mode of ['variables','all-string-overapproximation']){
+  const live=new Set([...q.publicNames,...decls.filter(d=>d[2].length===0).map(d=>d[0])]),work=[...live];
+  for(let i=0;i<work.length;i++){
+   const d=index.get(work[i]);if(!d)continue;
+   const stack=[d[4]];
+   while(stack.length){
+    const x=stack.pop();if(!Array.isArray(x))continue;
+    const references=mode==='variables'?(x[0]==='var'?[x[1]]:[]):x.filter(y=>typeof y==='string');
+    for(const name of references)if(index.has(name)&&!live.has(name)){live.add(name);work.push(name);}
+    for(const y of x)if(Array.isArray(y))stack.push(y);
+   }
+  }
+  const removed=decls.filter(d=>!live.has(d[0])),totalBytes=decls.reduce((n,d)=>n+JSON.stringify(d[4]).length,0);
+  console.log('PSC1_DIAGNOSTIC_FUNCTION_REACHABILITY: '+JSON.stringify({target:q.target,mode,claim:'read-only estimate, no transformation or qualification',
+   total:decls.length,retained:decls.length-removed.length,removed:removed.length,
+   bodyBytes:totalBytes,removedBodyBytes:removed.reduce((n,d)=>n+JSON.stringify(d[4]).length,0),
+   zeroArityRetained:decls.filter(d=>d[2].length===0).length,
+   largestRemoved:removed.map(d=>({name:d[0],parameters:d[2].length,bytes:JSON.stringify(d[4]).length}))
+    .sort((a,b)=>b.bytes-a.bytes).slice(0,15)}));
+ }
+}

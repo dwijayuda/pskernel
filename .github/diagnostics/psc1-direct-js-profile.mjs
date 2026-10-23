@@ -41,7 +41,7 @@ const processed=[];
 for(const file of logs){
  const r=boundedRun(process.execPath,['--prof-process',path.join(out,file)],{timeoutMs:120000,logDirectory:path.join(out,'processed-'+processed.length)});
  fs.writeFileSync(path.join(out,file+'.txt'),r.stdout);processed.push({file,status:r.status,error:r.error});
- console.log('PSC1_DIRECT_JS_CPU_PROFILE:\\n'+r.stdout.split('\\n').slice(0,180).join('\\n'));
+ console.log('PSC1_DIRECT_JS_CPU_PROFILE:\n'+r.stdout.split('\n').slice(0,180).join('\n'));
 }
 const receipt={schema:'psc1-direct-generated-cpu-diagnosis/1',testedCommit:process.env.GITHUB_SHA,
  source:expected,retainedG1:{sourceSha256:m.sourceSha256,artifactSha256:expected.serviceSha256,
@@ -49,5 +49,5 @@ const receipt={schema:'psc1-direct-generated-cpu-diagnosis/1',testedCommit:proce
  profile:'performance-240s',samplingOverhead:true,qualification:false,nativeDelegation:false,
  execution:{elapsedMs:result.elapsedMs,status:result.status,signal:result.signal,error:result.error,
  maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB},processed};
-fs.writeFileSync(path.join(out,'receipt.json'),JSON.stringify(receipt,null,2)+'\\n');
+fs.writeFileSync(path.join(out,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_DIRECT_JS_CPU_DIAGNOSIS: '+JSON.stringify(receipt));

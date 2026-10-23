@@ -1,0 +1,19 @@
+{
+  "schema": "psc1-retained-direct-profile-inspection/1",
+  "attempts": [
+    {
+      "runId": 40017280827,
+      "requestCommit": "141eb4f3081c9b3c1e6068c6facaaeabc1b6ac17",
+      "sourceCommit": "c3e2ef30124e1482d005d68c7b1828a96341fd36",
+      "artifactId": 12529008361,
+      "artifactDigest": "sha256:5d28ecf3fc62c7bcfb14940170c219c28653816b1b541a22204864269494c63a"
+    },
+    {
+      "runId": 40012562356,
+      "requestCommit": "b9b73a702141901e03563dff36477c6b788c6439",
+      "sourceCommit": "414cb6c26f682464af5c49efa7c62894d3588f3c",
+      "artifactId": 12528946630,
+      "artifactDigest": "sha256:d4e8b6d46e65cd90ce1d6ef266bd068a2e66b3d2bc527a93829ffa764fd9e902"
+    }
+  ]
+}

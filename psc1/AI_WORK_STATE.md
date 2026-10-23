@@ -122,3 +122,8 @@ unchanged240s profile separately; then coherent integration requires fresh full
 seven-backend/application qualification. If blocked, profile the new current G1
 before further edits; do not reuse older-source diagnoses.
 GitHub/Linux Actions only, fresh HEAD/expected-HEAD non-force history. No merge/npm.
+
+
+## Genuine TypeScript correctness qualified
+
+Run39984419742/job120519775807 at requestd864d5983525ce0b0f863b7cd87ab5c99a741f89 (source3ac0455908b085458192d74585c871e665e06675) is SUCCESS: genuinely executing G1/G2/G3, independently admitted exact source/closure/canonical admissions/original/transformed IR and10-case fixed points. G2-self641519ms, maxRSS3004104KiB (sampled tree3004104); G3-self616135ms, maxRSS3013064KiB (sampled tree2964036). Full artifact12516855369 digeste92065e83fe52d701f4342d7c63f3a85895ccad9094034f8bc552fbb21a39423 expires2027-01-21T16:09:31Z. Read-only audit verifies actual bytes and all new worker mechanisms; original240s is separate and still requires its own run. Qualified Rust remains untouched83e18fe1. No integration, independent clean-build or package-publication claim follows from this isolated correctness qualification.

@@ -1,0 +1,1708 @@
+{
+  "schema": "psc1-t01f-portable-fused-entry-native-gates-v1",
+  "sourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+  "treeSha": "a6e55931126673894687c9f1d3e582928940ea68",
+  "runId": 39961234382,
+  "runAttempt": 1,
+  "nativeJobId": 120439450101,
+  "status": "PASS_NATIVE_AND_BOUNDED_PREREQUISITES",
+  "proofs": [
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_restores_all_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_parent",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_fvar_ineligible",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_counter_exact",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.constant_reference_factorization_extensional",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_starts_without_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_preserves",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_extensional",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SessionProofs.append_demands_preserves_order",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.pairs_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_succ",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_step_commutes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.state_fixed",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.scan_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.worker_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelScalarHashWorkerRegression.hash_eq_before",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "proofCount": 83,
+  "hashProofCount": 9,
+  "markers": [
+    "PSC1_PINNED_LEAN_INSTALLED leanprover/lean4:v4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3",
+    "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7",
+    "PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2",
+    "PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7",
+    "PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3",
+    "PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12",
+    "PSC1_T01F_ADMIT_BEGIN 0 List",
+    "PSC1_T01F_ADMIT_PASS List",
+    "PSC1_T01F_ADMIT_BEGIN 1 Nat",
+    "PSC1_T01F_ADMIT_PASS Nat",
+    "PSC1_T01F_ADMIT_BEGIN 2 LT",
+    "PSC1_T01F_ADMIT_PASS LT",
+    "PSC1_T01F_ADMIT_BEGIN 3 LT.lt",
+    "PSC1_T01F_ADMIT_PASS LT.lt",
+    "PSC1_T01F_ADMIT_BEGIN 4 Nat.le",
+    "PSC1_T01F_ADMIT_PASS Nat.le",
+    "PSC1_T01F_ADMIT_BEGIN 5 Nat.lt",
+    "PSC1_T01F_ADMIT_PASS Nat.lt",
+    "PSC1_T01F_ADMIT_BEGIN 6 instLTNat",
+    "PSC1_T01F_ADMIT_PASS instLTNat",
+    "PSC1_T01F_ADMIT_BEGIN 7 Fin",
+    "PSC1_T01F_ADMIT_PASS Fin",
+    "PSC1_T01F_ADMIT_BEGIN 8 outParam",
+    "PSC1_T01F_ADMIT_PASS outParam",
+    "PSC1_T01F_ADMIT_BEGIN 9 HPow",
+    "PSC1_T01F_ADMIT_PASS HPow",
+    "PSC1_T01F_ADMIT_BEGIN 10 HPow.hPow",
+    "PSC1_T01F_ADMIT_PASS HPow.hPow",
+    "PSC1_T01F_ADMIT_BEGIN 11 Pow",
+    "PSC1_T01F_ADMIT_PASS Pow",
+    "PSC1_T01F_ADMIT_BEGIN 12 Pow.pow",
+    "PSC1_T01F_ADMIT_PASS Pow.pow",
+    "PSC1_T01F_ADMIT_BEGIN 13 instHPow",
+    "PSC1_T01F_ADMIT_PASS instHPow",
+    "PSC1_T01F_ADMIT_BEGIN 14 NatPow",
+    "PSC1_T01F_ADMIT_PASS NatPow",
+    "PSC1_T01F_ADMIT_BEGIN 15 NatPow.pow",
+    "PSC1_T01F_ADMIT_PASS NatPow.pow",
+    "PSC1_T01F_ADMIT_BEGIN 16 instPowNat",
+    "PSC1_T01F_ADMIT_PASS instPowNat",
+    "PSC1_T01F_ADMIT_BEGIN 17 PUnit",
+    "PSC1_T01F_ADMIT_PASS PUnit",
+    "PSC1_T01F_ADMIT_BEGIN 18 PProd",
+    "PSC1_T01F_ADMIT_PASS PProd",
+    "PSC1_T01F_ADMIT_BEGIN 19 Nat.below",
+    "PSC1_T01F_ADMIT_PASS Nat.below",
+    "PSC1_T01F_ADMIT_BEGIN 20 Nat.brecOn.go",
+    "PSC1_T01F_ADMIT_PASS Nat.brecOn.go",
+    "PSC1_T01F_ADMIT_BEGIN 21 Nat.brecOn",
+    "PSC1_T01F_ADMIT_PASS Nat.brecOn",
+    "PSC1_T01F_ADMIT_BEGIN 22 Unit",
+    "PSC1_T01F_ADMIT_PASS Unit",
+    "PSC1_T01F_ADMIT_BEGIN 23 OfNat",
+    "PSC1_T01F_ADMIT_PASS OfNat",
+    "PSC1_T01F_ADMIT_BEGIN 24 OfNat.ofNat",
+    "PSC1_T01F_ADMIT_PASS OfNat.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 25 instOfNatNat",
+    "PSC1_T01F_ADMIT_PASS instOfNatNat",
+    "PSC1_T01F_ADMIT_BEGIN 26 Nat.casesOn",
+    "PSC1_T01F_ADMIT_PASS Nat.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 27 Unit.unit",
+    "PSC1_T01F_ADMIT_PASS Unit.unit",
+    "PSC1_T01F_ADMIT_BEGIN 28 Nat.pow.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.pow.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 29 Nat.mul.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.mul.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 30 Nat.add.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.add.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 31 Nat.add._f",
+    "PSC1_T01F_ADMIT_PASS Nat.add._f",
+    "PSC1_T01F_ADMIT_BEGIN 32 Nat.add",
+    "PSC1_T01F_ADMIT_PASS Nat.add",
+    "PSC1_T01F_ADMIT_BEGIN 33 Nat.mul._f",
+    "PSC1_T01F_ADMIT_PASS Nat.mul._f",
+    "PSC1_T01F_ADMIT_BEGIN 34 Nat.mul",
+    "PSC1_T01F_ADMIT_PASS Nat.mul",
+    "PSC1_T01F_ADMIT_BEGIN 35 Nat.pow._f",
+    "PSC1_T01F_ADMIT_PASS Nat.pow._f",
+    "PSC1_T01F_ADMIT_BEGIN 36 Nat.pow",
+    "PSC1_T01F_ADMIT_PASS Nat.pow",
+    "PSC1_T01F_ADMIT_BEGIN 37 instNatPowNat",
+    "PSC1_T01F_ADMIT_PASS instNatPowNat",
+    "PSC1_T01F_ADMIT_BEGIN 38 BitVec",
+    "PSC1_T01F_ADMIT_PASS BitVec",
+    "PSC1_T01F_ADMIT_BEGIN 39 UInt32",
+    "PSC1_T01F_ADMIT_PASS UInt32",
+    "PSC1_T01F_ADMIT_BEGIN 40 Or",
+    "PSC1_T01F_ADMIT_PASS Or",
+    "PSC1_T01F_ADMIT_BEGIN 41 And",
+    "PSC1_T01F_ADMIT_PASS And",
+    "PSC1_T01F_ADMIT_BEGIN 42 Nat.isValidChar",
+    "PSC1_T01F_ADMIT_PASS Nat.isValidChar",
+    "PSC1_T01F_ADMIT_BEGIN 43 Fin.val",
+    "PSC1_T01F_ADMIT_PASS Fin.val",
+    "PSC1_T01F_ADMIT_BEGIN 44 BitVec.toFin",
+    "PSC1_T01F_ADMIT_PASS BitVec.toFin",
+    "PSC1_T01F_ADMIT_BEGIN 45 BitVec.toNat",
+    "PSC1_T01F_ADMIT_PASS BitVec.toNat",
+    "PSC1_T01F_ADMIT_BEGIN 46 UInt32.toBitVec",
+    "PSC1_T01F_ADMIT_PASS UInt32.toBitVec",
+    "PSC1_T01F_ADMIT_BEGIN 47 UInt32.toNat",
+    "PSC1_T01F_ADMIT_PASS UInt32.toNat",
+    "PSC1_T01F_ADMIT_BEGIN 48 UInt32.isValidChar",
+    "PSC1_T01F_ADMIT_PASS UInt32.isValidChar",
+    "PSC1_T01F_ADMIT_BEGIN 49 Char",
+    "PSC1_T01F_ADMIT_PASS Char",
+    "PSC1_T01F_ADMIT_BEGIN 50 Array",
+    "PSC1_T01F_ADMIT_PASS Array",
+    "PSC1_T01F_ADMIT_BEGIN 51 UInt8",
+    "PSC1_T01F_ADMIT_PASS UInt8",
+    "PSC1_T01F_ADMIT_BEGIN 52 ByteArray",
+    "PSC1_T01F_ADMIT_PASS ByteArray",
+    "PSC1_T01F_ADMIT_BEGIN 53 Eq",
+    "PSC1_T01F_ADMIT_PASS Eq",
+    "PSC1_T01F_ADMIT_BEGIN 54 List.below",
+    "PSC1_T01F_ADMIT_PASS List.below",
+    "PSC1_T01F_ADMIT_BEGIN 55 List.brecOn.go",
+    "PSC1_T01F_ADMIT_PASS List.brecOn.go",
+    "PSC1_T01F_ADMIT_BEGIN 56 List.brecOn",
+    "PSC1_T01F_ADMIT_PASS List.brecOn",
+    "PSC1_T01F_ADMIT_BEGIN 57 List.casesOn",
+    "PSC1_T01F_ADMIT_PASS List.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 58 List.toByteArray.match_1",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 59 ByteArray.casesOn",
+    "PSC1_T01F_ADMIT_PASS ByteArray.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 60 ByteArray.push.match_1",
+    "PSC1_T01F_ADMIT_PASS ByteArray.push.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 61 List.concat.match_1",
+    "PSC1_T01F_ADMIT_PASS List.concat.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 62 List.concat._f",
+    "PSC1_T01F_ADMIT_PASS List.concat._f",
+    "PSC1_T01F_ADMIT_BEGIN 63 List.concat",
+    "PSC1_T01F_ADMIT_PASS List.concat",
+    "PSC1_T01F_ADMIT_BEGIN 64 Array.toList",
+    "PSC1_T01F_ADMIT_PASS Array.toList",
+    "PSC1_T01F_ADMIT_BEGIN 65 Array.push",
+    "PSC1_T01F_ADMIT_PASS Array.push",
+    "PSC1_T01F_ADMIT_BEGIN 66 ByteArray.push",
+    "PSC1_T01F_ADMIT_PASS ByteArray.push",
+    "PSC1_T01F_ADMIT_BEGIN 67 List.toByteArray.loop._f",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray.loop._f",
+    "PSC1_T01F_ADMIT_BEGIN 68 List.toByteArray.loop",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray.loop",
+    "PSC1_T01F_ADMIT_BEGIN 69 Array.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_PASS Array.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_BEGIN 70 Array.empty",
+    "PSC1_T01F_ADMIT_PASS Array.empty",
+    "PSC1_T01F_ADMIT_BEGIN 71 ByteArray.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_PASS ByteArray.emptyWithCapacity",
+    "PSC1_T01F_ADMIT_BEGIN 72 ByteArray.empty",
+    "PSC1_T01F_ADMIT_PASS ByteArray.empty",
+    "PSC1_T01F_ADMIT_BEGIN 73 List.toByteArray",
+    "PSC1_T01F_ADMIT_PASS List.toByteArray",
+    "PSC1_T01F_ADMIT_BEGIN 74 List.flatten.match_1",
+    "PSC1_T01F_ADMIT_PASS List.flatten.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 75 List.append.match_1",
+    "PSC1_T01F_ADMIT_PASS List.append.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 76 List.append._f",
+    "PSC1_T01F_ADMIT_PASS List.append._f",
+    "PSC1_T01F_ADMIT_BEGIN 77 List.append",
+    "PSC1_T01F_ADMIT_PASS List.append",
+    "PSC1_T01F_ADMIT_BEGIN 78 List.flatten._f",
+    "PSC1_T01F_ADMIT_PASS List.flatten._f",
+    "PSC1_T01F_ADMIT_BEGIN 79 List.flatten",
+    "PSC1_T01F_ADMIT_PASS List.flatten",
+    "PSC1_T01F_ADMIT_BEGIN 80 instDecidableEqList.match_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableEqList.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 81 List.map._f",
+    "PSC1_T01F_ADMIT_PASS List.map._f",
+    "PSC1_T01F_ADMIT_BEGIN 82 List.map",
+    "PSC1_T01F_ADMIT_PASS List.map",
+    "PSC1_T01F_ADMIT_BEGIN 83 List.flatMap",
+    "PSC1_T01F_ADMIT_PASS List.flatMap",
+    "PSC1_T01F_ADMIT_BEGIN 84 Char.val",
+    "PSC1_T01F_ADMIT_PASS Char.val",
+    "PSC1_T01F_ADMIT_BEGIN 85 Bool",
+    "PSC1_T01F_ADMIT_PASS Bool",
+    "PSC1_T01F_ADMIT_BEGIN 86 Bool.casesOn",
+    "PSC1_T01F_ADMIT_PASS Bool.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 87 Bool.Reflects.match_1",
+    "PSC1_T01F_ADMIT_PASS Bool.Reflects.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 88 False",
+    "PSC1_T01F_ADMIT_PASS False",
+    "PSC1_T01F_ADMIT_BEGIN 89 Not",
+    "PSC1_T01F_ADMIT_PASS Not",
+    "PSC1_T01F_ADMIT_BEGIN 90 Bool.Reflects",
+    "PSC1_T01F_ADMIT_PASS Bool.Reflects",
+    "PSC1_T01F_ADMIT_BEGIN 91 Decidable",
+    "PSC1_T01F_ADMIT_PASS Decidable",
+    "PSC1_T01F_ADMIT_BEGIN 92 Decidable.decide",
+    "PSC1_T01F_ADMIT_PASS Decidable.decide",
+    "PSC1_T01F_ADMIT_BEGIN 93 Decidable.reflects_decide",
+    "PSC1_T01F_ADMIT_PASS Decidable.reflects_decide",
+    "PSC1_T01F_ADMIT_BEGIN 94 dite",
+    "PSC1_T01F_ADMIT_PASS dite",
+    "PSC1_T01F_ADMIT_BEGIN 95 ite",
+    "PSC1_T01F_ADMIT_PASS ite",
+    "PSC1_T01F_ADMIT_BEGIN 96 LE",
+    "PSC1_T01F_ADMIT_PASS LE",
+    "PSC1_T01F_ADMIT_BEGIN 97 LE.le",
+    "PSC1_T01F_ADMIT_PASS LE.le",
+    "PSC1_T01F_ADMIT_BEGIN 98 instLENat",
+    "PSC1_T01F_ADMIT_PASS instLENat",
+    "PSC1_T01F_ADMIT_BEGIN 99 Nat.ble.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.ble.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 100 Nat.ble._f",
+    "PSC1_T01F_ADMIT_PASS Nat.ble._f",
+    "PSC1_T01F_ADMIT_BEGIN 101 Nat.ble",
+    "PSC1_T01F_ADMIT_PASS Nat.ble",
+    "PSC1_T01F_ADMIT_BEGIN 102 Nat.decEq.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.decEq.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 103 False.elim",
+    "PSC1_T01F_ADMIT_PASS False.elim",
+    "PSC1_T01F_ADMIT_BEGIN 104 Eq.casesOn",
+    "PSC1_T01F_ADMIT_PASS Eq.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 105 HEq",
+    "PSC1_T01F_ADMIT_PASS HEq",
+    "PSC1_T01F_ADMIT_BEGIN 106 True",
+    "PSC1_T01F_ADMIT_PASS True",
+    "PSC1_T01F_ADMIT_BEGIN 107 Nat.beq.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.beq.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 108 Nat.beq._f",
+    "PSC1_T01F_ADMIT_PASS Nat.beq._f",
+    "PSC1_T01F_ADMIT_BEGIN 109 Nat.beq",
+    "PSC1_T01F_ADMIT_PASS Nat.beq",
+    "PSC1_T01F_ADMIT_BEGIN 110 _private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 111 _private.Init.Prelude.0.noConfusion_of_Nat.aux._f",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.noConfusion_of_Nat.aux._f",
+    "PSC1_T01F_ADMIT_BEGIN 112 _private.Init.Prelude.0.noConfusion_of_Nat.aux",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.noConfusion_of_Nat.aux",
+    "PSC1_T01F_ADMIT_BEGIN 113 rfl",
+    "PSC1_T01F_ADMIT_PASS rfl",
+    "PSC1_T01F_ADMIT_BEGIN 114 congrArg",
+    "PSC1_T01F_ADMIT_PASS congrArg",
+    "PSC1_T01F_ADMIT_BEGIN 115 noConfusion_of_Nat",
+    "PSC1_T01F_ADMIT_PASS noConfusion_of_Nat",
+    "PSC1_T01F_ADMIT_BEGIN 116 Bool.ctorIdx",
+    "PSC1_T01F_ADMIT_PASS Bool.ctorIdx",
+    "PSC1_T01F_ADMIT_BEGIN 117 _private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 118 _private.Init.Prelude.0.Nat.zero_le.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.zero_le.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 119 Nat.zero_le._f",
+    "PSC1_T01F_ADMIT_PASS Nat.zero_le._f",
+    "PSC1_T01F_ADMIT_BEGIN 120 Nat.zero_le",
+    "PSC1_T01F_ADMIT_PASS Nat.zero_le",
+    "PSC1_T01F_ADMIT_BEGIN 121 Nat.le.below",
+    "PSC1_T01F_ADMIT_PASS Nat.le.below",
+    "PSC1_T01F_ADMIT_BEGIN 122 Nat.le.brecOn",
+    "PSC1_T01F_ADMIT_PASS Nat.le.brecOn",
+    "PSC1_T01F_ADMIT_BEGIN 123 Nat.le.below.casesOn",
+    "PSC1_T01F_ADMIT_PASS Nat.le.below.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 124 Eq.ndrec",
+    "PSC1_T01F_ADMIT_PASS Eq.ndrec",
+    "PSC1_T01F_ADMIT_BEGIN 125 Eq.symm",
+    "PSC1_T01F_ADMIT_PASS Eq.symm",
+    "PSC1_T01F_ADMIT_BEGIN 126 cast",
+    "PSC1_T01F_ADMIT_PASS cast",
+    "PSC1_T01F_ADMIT_BEGIN 127 eq_of_heq",
+    "PSC1_T01F_ADMIT_PASS eq_of_heq",
+    "PSC1_T01F_ADMIT_BEGIN 128 _private.Init.Prelude.0.Nat.succ_le_succ.match_1_7",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.succ_le_succ.match_1_7",
+    "PSC1_T01F_ADMIT_BEGIN 129 HAdd",
+    "PSC1_T01F_ADMIT_PASS HAdd",
+    "PSC1_T01F_ADMIT_BEGIN 130 HAdd.hAdd",
+    "PSC1_T01F_ADMIT_PASS HAdd.hAdd",
+    "PSC1_T01F_ADMIT_BEGIN 131 Add",
+    "PSC1_T01F_ADMIT_PASS Add",
+    "PSC1_T01F_ADMIT_BEGIN 132 Add.add",
+    "PSC1_T01F_ADMIT_PASS Add.add",
+    "PSC1_T01F_ADMIT_BEGIN 133 instHAdd",
+    "PSC1_T01F_ADMIT_PASS instHAdd",
+    "PSC1_T01F_ADMIT_BEGIN 134 instAddNat",
+    "PSC1_T01F_ADMIT_PASS instAddNat",
+    "PSC1_T01F_ADMIT_BEGIN 135 Nat.succ_le_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.succ_le_succ",
+    "PSC1_T01F_ADMIT_BEGIN 136 Nat.le_of_ble_eq_true._f",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_ble_eq_true._f",
+    "PSC1_T01F_ADMIT_BEGIN 137 Nat.le_of_ble_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_ble_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 138 absurd",
+    "PSC1_T01F_ADMIT_PASS absurd",
+    "PSC1_T01F_ADMIT_BEGIN 139 _private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7",
+    "PSC1_T01F_ADMIT_BEGIN 140 _private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 141 Nat.ble_self_eq_true._f",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_self_eq_true._f",
+    "PSC1_T01F_ADMIT_BEGIN 142 Nat.ble_self_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_self_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 143 _private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 144 Nat.ble_succ_eq_true._f",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_succ_eq_true._f",
+    "PSC1_T01F_ADMIT_BEGIN 145 Nat.ble_succ_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_succ_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 146 Nat.ble_eq_true_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.ble_eq_true_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 147 Nat.not_le_of_not_ble_eq_true",
+    "PSC1_T01F_ADMIT_PASS Nat.not_le_of_not_ble_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 148 Bool.noConfusionType",
+    "PSC1_T01F_ADMIT_PASS Bool.noConfusionType",
+    "PSC1_T01F_ADMIT_BEGIN 149 Bool.noConfusion",
+    "PSC1_T01F_ADMIT_PASS Bool.noConfusion",
+    "PSC1_T01F_ADMIT_BEGIN 150 Nat.decLe._proof_1",
+    "PSC1_T01F_ADMIT_PASS Nat.decLe._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 151 Nat.decLe",
+    "PSC1_T01F_ADMIT_PASS Nat.decLe",
+    "PSC1_T01F_ADMIT_BEGIN 152 HMod",
+    "PSC1_T01F_ADMIT_PASS HMod",
+    "PSC1_T01F_ADMIT_BEGIN 153 HMod.hMod",
+    "PSC1_T01F_ADMIT_PASS HMod.hMod",
+    "PSC1_T01F_ADMIT_BEGIN 154 Mod",
+    "PSC1_T01F_ADMIT_PASS Mod",
+    "PSC1_T01F_ADMIT_BEGIN 155 Mod.mod",
+    "PSC1_T01F_ADMIT_PASS Mod.mod",
+    "PSC1_T01F_ADMIT_BEGIN 156 instHMod",
+    "PSC1_T01F_ADMIT_PASS instHMod",
+    "PSC1_T01F_ADMIT_BEGIN 157 namedPattern",
+    "PSC1_T01F_ADMIT_PASS namedPattern",
+    "PSC1_T01F_ADMIT_BEGIN 158 Nat.mod.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.mod.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 159 Nat.decLt",
+    "PSC1_T01F_ADMIT_PASS Nat.decLt",
+    "PSC1_T01F_ADMIT_BEGIN 160 Nat.le.casesOn",
+    "PSC1_T01F_ADMIT_PASS Nat.le.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 161 Nat.ctorIdx",
+    "PSC1_T01F_ADMIT_PASS Nat.ctorIdx",
+    "PSC1_T01F_ADMIT_BEGIN 162 Nat.div.go.match_1",
+    "PSC1_T01F_ADMIT_PASS Nat.div.go.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 163 HSub",
+    "PSC1_T01F_ADMIT_PASS HSub",
+    "PSC1_T01F_ADMIT_BEGIN 164 HSub.hSub",
+    "PSC1_T01F_ADMIT_PASS HSub.hSub",
+    "PSC1_T01F_ADMIT_BEGIN 165 Sub",
+    "PSC1_T01F_ADMIT_PASS Sub",
+    "PSC1_T01F_ADMIT_BEGIN 166 Sub.sub",
+    "PSC1_T01F_ADMIT_PASS Sub.sub",
+    "PSC1_T01F_ADMIT_BEGIN 167 instHSub",
+    "PSC1_T01F_ADMIT_PASS instHSub",
+    "PSC1_T01F_ADMIT_BEGIN 168 Nat.pred",
+    "PSC1_T01F_ADMIT_PASS Nat.pred",
+    "PSC1_T01F_ADMIT_BEGIN 169 Nat.sub._f",
+    "PSC1_T01F_ADMIT_PASS Nat.sub._f",
+    "PSC1_T01F_ADMIT_BEGIN 170 Nat.sub",
+    "PSC1_T01F_ADMIT_PASS Nat.sub",
+    "PSC1_T01F_ADMIT_BEGIN 171 instSubNat",
+    "PSC1_T01F_ADMIT_PASS instSubNat",
+    "PSC1_T01F_ADMIT_BEGIN 172 _private.Init.Prelude.0.Nat.le_trans.match_1_10",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.le_trans.match_1_10",
+    "PSC1_T01F_ADMIT_BEGIN 173 Nat.le_trans",
+    "PSC1_T01F_ADMIT_PASS Nat.le_trans",
+    "PSC1_T01F_ADMIT_BEGIN 174 Nat.lt_of_lt_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_of_lt_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 175 And.casesOn",
+    "PSC1_T01F_ADMIT_PASS And.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 176 _private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 177 _private.Init.Prelude.0.Nat.sub_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.sub_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 178 _private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 179 Nat.noConfusionType",
+    "PSC1_T01F_ADMIT_PASS Nat.noConfusionType",
+    "PSC1_T01F_ADMIT_BEGIN 180 Nat.noConfusion",
+    "PSC1_T01F_ADMIT_PASS Nat.noConfusion",
+    "PSC1_T01F_ADMIT_BEGIN 181 Nat.not_succ_le_zero",
+    "PSC1_T01F_ADMIT_PASS Nat.not_succ_le_zero",
+    "PSC1_T01F_ADMIT_BEGIN 182 _private.Init.Prelude.0.Nat.pred_le_pred.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.pred_le_pred.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 183 Nat.le_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.le_succ",
+    "PSC1_T01F_ADMIT_BEGIN 184 Nat.pred_le_pred",
+    "PSC1_T01F_ADMIT_PASS Nat.pred_le_pred",
+    "PSC1_T01F_ADMIT_BEGIN 185 Nat.le_of_succ_le_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_succ_le_succ",
+    "PSC1_T01F_ADMIT_BEGIN 186 Nat.not_succ_le_self._f",
+    "PSC1_T01F_ADMIT_PASS Nat.not_succ_le_self._f",
+    "PSC1_T01F_ADMIT_BEGIN 187 Nat.not_succ_le_self",
+    "PSC1_T01F_ADMIT_PASS Nat.not_succ_le_self",
+    "PSC1_T01F_ADMIT_BEGIN 188 Nat.lt_irrefl",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_irrefl",
+    "PSC1_T01F_ADMIT_BEGIN 189 Nat.lt_succ_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_succ_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 190 Nat.le_refl",
+    "PSC1_T01F_ADMIT_PASS Nat.le_refl",
+    "PSC1_T01F_ADMIT_BEGIN 191 _private.Init.Prelude.0.Nat.pred_le.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.pred_le.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 192 Nat.pred_le",
+    "PSC1_T01F_ADMIT_PASS Nat.pred_le",
+    "PSC1_T01F_ADMIT_BEGIN 193 Nat.sub_le",
+    "PSC1_T01F_ADMIT_PASS Nat.sub_le",
+    "PSC1_T01F_ADMIT_BEGIN 194 Nat.succ_sub_succ_eq_sub",
+    "PSC1_T01F_ADMIT_PASS Nat.succ_sub_succ_eq_sub",
+    "PSC1_T01F_ADMIT_BEGIN 195 Nat.sub_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.sub_lt",
+    "PSC1_T01F_ADMIT_BEGIN 196 Nat.div_rec_lemma",
+    "PSC1_T01F_ADMIT_PASS Nat.div_rec_lemma",
+    "PSC1_T01F_ADMIT_BEGIN 197 Nat.le_of_lt_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.le_of_lt_succ",
+    "PSC1_T01F_ADMIT_BEGIN 198 Nat.div_rec_fuel_lemma",
+    "PSC1_T01F_ADMIT_PASS Nat.div_rec_fuel_lemma",
+    "PSC1_T01F_ADMIT_BEGIN 199 Nat.modCore.go._f",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore.go._f",
+    "PSC1_T01F_ADMIT_BEGIN 200 Nat.modCore.go",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore.go",
+    "PSC1_T01F_ADMIT_BEGIN 201 Nat.lt_add_one",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_add_one",
+    "PSC1_T01F_ADMIT_BEGIN 202 Nat.lt_succ_self",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_succ_self",
+    "PSC1_T01F_ADMIT_BEGIN 203 Nat.modCore",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore",
+    "PSC1_T01F_ADMIT_BEGIN 204 Nat.mod",
+    "PSC1_T01F_ADMIT_PASS Nat.mod",
+    "PSC1_T01F_ADMIT_BEGIN 205 Nat.instMod",
+    "PSC1_T01F_ADMIT_PASS Nat.instMod",
+    "PSC1_T01F_ADMIT_BEGIN 206 _private.Init.Prelude.0.Nat.mod_lt.match_1_3",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.mod_lt.match_1_3",
+    "PSC1_T01F_ADMIT_BEGIN 207 Nat.zero_lt_succ",
+    "PSC1_T01F_ADMIT_PASS Nat.zero_lt_succ",
+    "PSC1_T01F_ADMIT_BEGIN 208 Decidable.casesOn",
+    "PSC1_T01F_ADMIT_PASS Decidable.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 209 _private.Init.Prelude.0.Nat.mod_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.mod_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 210 _private.Init.Prelude.0.Nat.modCore_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.modCore_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 211 Nat.not_lt_zero",
+    "PSC1_T01F_ADMIT_PASS Nat.not_lt_zero",
+    "PSC1_T01F_ADMIT_BEGIN 212 _private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 213 Decidable.isTrue",
+    "PSC1_T01F_ADMIT_PASS Decidable.isTrue",
+    "PSC1_T01F_ADMIT_BEGIN 214 Or.casesOn",
+    "PSC1_T01F_ADMIT_PASS Or.casesOn",
+    "PSC1_T01F_ADMIT_BEGIN 215 _private.Init.Prelude.0.Or.elim.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Or.elim.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 216 Or.elim",
+    "PSC1_T01F_ADMIT_PASS Or.elim",
+    "PSC1_T01F_ADMIT_BEGIN 217 id",
+    "PSC1_T01F_ADMIT_PASS id",
+    "PSC1_T01F_ADMIT_BEGIN 218 Or.resolve_right",
+    "PSC1_T01F_ADMIT_PASS Or.resolve_right",
+    "PSC1_T01F_ADMIT_BEGIN 219 GE.ge",
+    "PSC1_T01F_ADMIT_PASS GE.ge",
+    "PSC1_T01F_ADMIT_BEGIN 220 _private.Init.Prelude.0.Nat.lt_or_ge.match_1_5",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.lt_or_ge.match_1_5",
+    "PSC1_T01F_ADMIT_BEGIN 221 _private.Init.Prelude.0.Nat.lt_or_ge.match_1_3",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.lt_or_ge.match_1_3",
+    "PSC1_T01F_ADMIT_BEGIN 222 Nat.le_succ_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.le_succ_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 223 _private.Init.Prelude.0.Nat.lt_or_ge.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.lt_or_ge.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 224 _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3",
+    "PSC1_T01F_ADMIT_BEGIN 225 _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 226 Nat.eq_or_lt_of_le._f",
+    "PSC1_T01F_ADMIT_PASS Nat.eq_or_lt_of_le._f",
+    "PSC1_T01F_ADMIT_BEGIN 227 Nat.eq_or_lt_of_le",
+    "PSC1_T01F_ADMIT_PASS Nat.eq_or_lt_of_le",
+    "PSC1_T01F_ADMIT_BEGIN 228 Nat.lt_or_ge._f",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_or_ge._f",
+    "PSC1_T01F_ADMIT_BEGIN 229 Nat.lt_or_ge",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_or_ge",
+    "PSC1_T01F_ADMIT_BEGIN 230 Nat.lt_of_not_le",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_of_not_le",
+    "PSC1_T01F_ADMIT_BEGIN 231 Decidable.isFalse",
+    "PSC1_T01F_ADMIT_PASS Decidable.isFalse",
+    "PSC1_T01F_ADMIT_BEGIN 232 Nat.modCoreGo_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.modCoreGo_lt",
+    "PSC1_T01F_ADMIT_BEGIN 233 Nat.modCore_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.modCore_lt",
+    "PSC1_T01F_ADMIT_BEGIN 234 Nat.mod_lt",
+    "PSC1_T01F_ADMIT_PASS Nat.mod_lt",
+    "PSC1_T01F_ADMIT_BEGIN 235 Fin.Internal.ofNat",
+    "PSC1_T01F_ADMIT_PASS Fin.Internal.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 236 _private.Init.Prelude.0.Nat.pow_pos.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.pow_pos.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 237 HMul",
+    "PSC1_T01F_ADMIT_PASS HMul",
+    "PSC1_T01F_ADMIT_BEGIN 238 HMul.hMul",
+    "PSC1_T01F_ADMIT_PASS HMul.hMul",
+    "PSC1_T01F_ADMIT_BEGIN 239 Mul",
+    "PSC1_T01F_ADMIT_PASS Mul",
+    "PSC1_T01F_ADMIT_BEGIN 240 Mul.mul",
+    "PSC1_T01F_ADMIT_PASS Mul.mul",
+    "PSC1_T01F_ADMIT_BEGIN 241 instHMul",
+    "PSC1_T01F_ADMIT_PASS instHMul",
+    "PSC1_T01F_ADMIT_BEGIN 242 instMulNat",
+    "PSC1_T01F_ADMIT_PASS instMulNat",
+    "PSC1_T01F_ADMIT_BEGIN 243 _private.Init.Prelude.0.Nat.mul_pos.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.mul_pos.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 244 _private.Init.Prelude.0.Nat.add_pos_right.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Nat.add_pos_right.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 245 Nat.add_pos_right",
+    "PSC1_T01F_ADMIT_PASS Nat.add_pos_right",
+    "PSC1_T01F_ADMIT_BEGIN 246 Nat.mul_pos",
+    "PSC1_T01F_ADMIT_PASS Nat.mul_pos",
+    "PSC1_T01F_ADMIT_BEGIN 247 Nat.pow_pos._f",
+    "PSC1_T01F_ADMIT_PASS Nat.pow_pos._f",
+    "PSC1_T01F_ADMIT_BEGIN 248 Nat.pow_pos",
+    "PSC1_T01F_ADMIT_PASS Nat.pow_pos",
+    "PSC1_T01F_ADMIT_BEGIN 249 BitVec.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_PASS BitVec.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 250 BitVec.ofNat",
+    "PSC1_T01F_ADMIT_PASS BitVec.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 251 UInt8.ofNat",
+    "PSC1_T01F_ADMIT_PASS UInt8.ofNat",
+    "PSC1_T01F_ADMIT_BEGIN 252 HDiv",
+    "PSC1_T01F_ADMIT_PASS HDiv",
+    "PSC1_T01F_ADMIT_BEGIN 253 HDiv.hDiv",
+    "PSC1_T01F_ADMIT_PASS HDiv.hDiv",
+    "PSC1_T01F_ADMIT_BEGIN 254 Div",
+    "PSC1_T01F_ADMIT_PASS Div",
+    "PSC1_T01F_ADMIT_BEGIN 255 Div.div",
+    "PSC1_T01F_ADMIT_PASS Div.div",
+    "PSC1_T01F_ADMIT_BEGIN 256 instHDiv",
+    "PSC1_T01F_ADMIT_PASS instHDiv",
+    "PSC1_T01F_ADMIT_BEGIN 257 Nat.div.go._f",
+    "PSC1_T01F_ADMIT_PASS Nat.div.go._f",
+    "PSC1_T01F_ADMIT_BEGIN 258 Nat.div.go",
+    "PSC1_T01F_ADMIT_PASS Nat.div.go",
+    "PSC1_T01F_ADMIT_BEGIN 259 Nat.div",
+    "PSC1_T01F_ADMIT_PASS Nat.div",
+    "PSC1_T01F_ADMIT_BEGIN 260 Nat.instDiv",
+    "PSC1_T01F_ADMIT_PASS Nat.instDiv",
+    "PSC1_T01F_ADMIT_BEGIN 261 String.utf8EncodeChar",
+    "PSC1_T01F_ADMIT_PASS String.utf8EncodeChar",
+    "PSC1_T01F_ADMIT_BEGIN 262 List.utf8Encode",
+    "PSC1_T01F_ADMIT_PASS List.utf8Encode",
+    "PSC1_T01F_ADMIT_BEGIN 263 ByteArray.IsValidUTF8",
+    "PSC1_T01F_ADMIT_PASS ByteArray.IsValidUTF8",
+    "PSC1_T01F_ADMIT_BEGIN 264 String",
+    "PSC1_T01F_ADMIT_PASS String",
+    "PSC1_T01F_ADMIT_BEGIN 265 String.ofList._proof_1",
+    "PSC1_T01F_ADMIT_PASS String.ofList._proof_1",
+    "PSC1_T01F_INVALID_DEFINITION_PASS",
+    "PSC1_T01F_ADMIT_BEGIN 266 String.ofList",
+    "PSC1_T01F_ADMIT_PASS String.ofList",
+    "PSC1_T01F_ADMIT_BEGIN 267 Bool.or",
+    "PSC1_T01F_ADMIT_PASS Bool.or",
+    "PSC1_T01F_ADMIT_BEGIN 268 instDecidableOr.match_3",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr.match_3",
+    "PSC1_T01F_ADMIT_BEGIN 269 instDecidableOr.match_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 270 instDecidableOr._proof_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 271 instDecidableOr",
+    "PSC1_T01F_ADMIT_PASS instDecidableOr",
+    "PSC1_T01F_ADMIT_BEGIN 272 Bool.and",
+    "PSC1_T01F_ADMIT_PASS Bool.and",
+    "PSC1_T01F_ADMIT_BEGIN 273 instDecidableAnd.match_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableAnd.match_1",
+    "PSC1_T01F_ADMIT_BEGIN 274 And.right",
+    "PSC1_T01F_ADMIT_PASS And.right",
+    "PSC1_T01F_ADMIT_BEGIN 275 And.left",
+    "PSC1_T01F_ADMIT_PASS And.left",
+    "PSC1_T01F_ADMIT_BEGIN 276 instDecidableAnd._proof_1",
+    "PSC1_T01F_ADMIT_PASS instDecidableAnd._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 277 instDecidableAnd",
+    "PSC1_T01F_ADMIT_PASS instDecidableAnd",
+    "PSC1_T01F_ADMIT_BEGIN 278 BitVec.ofNatLT",
+    "PSC1_T01F_ADMIT_PASS BitVec.ofNatLT",
+    "PSC1_T01F_ADMIT_BEGIN 279 UInt32.size",
+    "PSC1_T01F_ADMIT_PASS UInt32.size",
+    "PSC1_T01F_ADMIT_BEGIN 280 _private.Init.Prelude.0.isValidChar_UInt32.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.isValidChar_UInt32.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 281 Nat.lt_trans",
+    "PSC1_T01F_ADMIT_PASS Nat.lt_trans",
+    "PSC1_T01F_ADMIT_BEGIN 282 _private.Init.Prelude.0.of_decide_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.of_decide_eq_true.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 283 _private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 284 Bool.ne_true_of_eq_false",
+    "PSC1_T01F_ADMIT_PASS Bool.ne_true_of_eq_false",
+    "PSC1_T01F_ADMIT_BEGIN 285 _private.Init.Prelude.0.decide_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.decide_eq_false.match_1_1",
+    "PSC1_T01F_ADMIT_BEGIN 286 decide_eq_false",
+    "PSC1_T01F_ADMIT_PASS decide_eq_false",
+    "PSC1_T01F_ADMIT_BEGIN 287 of_decide_eq_true",
+    "PSC1_T01F_ADMIT_PASS of_decide_eq_true",
+    "PSC1_T01F_ADMIT_BEGIN 288 _private.Init.Prelude.0.isValidChar_UInt32",
+    "PSC1_T01F_ADMIT_PASS _private.Init.Prelude.0.isValidChar_UInt32",
+    "PSC1_T01F_ADMIT_BEGIN 289 Char.ofNatAux._private_1",
+    "PSC1_T01F_ADMIT_PASS Char.ofNatAux._private_1",
+    "PSC1_T01F_ADMIT_BEGIN 290 Char.ofNatAux",
+    "PSC1_T01F_ADMIT_PASS Char.ofNatAux",
+    "PSC1_T01F_ADMIT_BEGIN 291 Char.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_PASS Char.ofNat._proof_1",
+    "PSC1_T01F_ADMIT_BEGIN 292 Char.ofNat._proof_2",
+    "PSC1_T01F_ADMIT_PASS Char.ofNat._proof_2",
+    "PSC1_T01F_ADMIT_BEGIN 293 Char.ofNat",
+    "PSC1_T01F_ADMIT_PASS Char.ofNat",
+    "PSC1_T01F_METADATA_PASS declarations=377",
+    "PSC1_T01F_FIXTURE_WRITTEN /home/runner/work/_temp/psc1-t01f/fixture.json requests=294",
+    "PSC1_T01F_CLOSURE_PASS requests=294 declarations=377",
+    "PSC1_T01F_QUERY_BEGIN string \"\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"\"",
+    "PSC1_T01F_SINGLETON_PASS \"\"",
+    "PSC1_T01F_CASE_PASS \"\"",
+    "PSC1_T01F_QUERY_BEGIN string \"a\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"a\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"a\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"a\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"a\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"a\"",
+    "PSC1_T01F_SINGLETON_PASS \"a\"",
+    "PSC1_T01F_CASE_PASS \"a\"",
+    "PSC1_T01F_QUERY_BEGIN string \"é\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"é\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"é\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"é\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"é\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"é\"",
+    "PSC1_T01F_SINGLETON_PASS \"é\"",
+    "PSC1_T01F_CASE_PASS \"é\"",
+    "PSC1_T01F_QUERY_BEGIN string \"€\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"€\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"€\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"€\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"€\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"€\"",
+    "PSC1_T01F_SINGLETON_PASS \"€\"",
+    "PSC1_T01F_CASE_PASS \"€\"",
+    "PSC1_T01F_QUERY_BEGIN string \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"😀\"",
+    "PSC1_T01F_SINGLETON_PASS \"😀\"",
+    "PSC1_T01F_CASE_PASS \"😀\"",
+    "PSC1_T01F_QUERY_BEGIN string \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN ofList \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8 \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN utf8-ofList \"Aé€😀\"",
+    "PSC1_T01F_QUERY_BEGIN validity-ofList \"Aé€😀\"",
+    "PSC1_T01F_SINGLETON_PASS \"Aé€😀\"",
+    "PSC1_T01F_CASE_PASS \"Aé€😀\"",
+    "PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096",
+    "PSC1_V2_DAG_NATIVE_NESTED_OUTCOMES: PASS",
+    "PSC1_V2_DAG_NATIVE_INFERENCE: PASS",
+    "PSC1_V2_DAG_NATIVE_WHNF_IDENTITY: PASS",
+    "PSC1_V2_DAG_NATIVE_ZETA: PASS",
+    "PSC1_V2_DAG_NATIVE_BETA: PASS",
+    "PSC1_V2_DAG_NATIVE_WHNF_STATE: PASS",
+    "PSC1_V2_DAG_NATIVE_PUBLIC_CACHE: PASS",
+    "PSC1_V2_DAG_NATIVE_PROJECTION_UNSELECTED_FIELD: PASS",
+    "PSC1_V2_DAG_NATIVE_OFFICIAL_NAT: PASS",
+    "PSC1_V2_DAG_NATIVE_NAT_PROJECTION: PASS",
+    "PSC1_V2_DAG_STRUCTURAL_SHORTCUT: PASS",
+    "PSC1_V2_DAG_OFFICIAL_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_NATIVE_OFFICIAL_POLY_DELTA: PASS",
+    "PSC1_V2_DAG_NATIVE_CONSTANT_INDEX: PASS",
+    "PSC1_V2_DAG_NATIVE_DELTA: PASS",
+    "PSC1_V2_DAG_NATIVE_MUTUAL_INDEX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_BINDER: PASS",
+    "PSC1_V2_DAG_BINDER: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_APP: PASS",
+    "PSC1_V2_DAG_CHECK_APP: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_CHECK_LET: PASS",
+    "PSC1_V2_DAG_OFFICIAL_CHECK_LET: PASS",
+    "PSC1_V2_DAG_LET_CACHE_SCOPE: PASS",
+    "PSC1_V2_DAG_LET_LOCAL_WHNF: PASS",
+    "PSC1_V2_DAG_STATEFUL_DEFEQ: PASS",
+    "PSC1_V2_DAG_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_APP_CONVERSION_CACHE: PASS",
+    "PSC1_V2_DAG_APP_EAGER_CONTEXT: PASS",
+    "PSC1_V2_DAG_OFFICIAL_SIMPLE_ADMISSION: PASS",
+    "PSC1_V2_DAG_SIMPLE_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_ADMISSION_SHARED_STATE: PASS",
+    "PSC1_V2_DAG_UNSAFE_FRESH_BODY: PASS",
+    "PSC1_V2_DAG_ADMISSION_POLICY_SAFETY: PASS",
+    "PSC1_V2_DAG_ADMISSION_FINAL_GUARDS: PASS",
+    "PSC1_V2_DAG_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_OFFICIAL_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_MUTUAL_FRESH_MEMBER: PASS",
+    "PSC1_V2_DAG_THEOREM_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_THEOREM_ADMISSION: PASS",
+    "PSC1_V2_DAG_THEOREM_ISPROP_STATE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_OFFICIAL_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_BUDGET: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_CACHE: PASS",
+    "PSC1_V2_DAG_BINDER_SPINE_FALLBACK: PASS",
+    "PSC1_V2_DAG_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_OFFICIAL_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_CHEAP_CORE_POLICY: PASS",
+    "PSC1_V2_DAG_CHEAP_PROJECTION_POLICY: PASS",
+    "PSC1_V2_DAG_DEFEQ_REFLECTION: PASS",
+    "PSC1_V2_DAG_DEFEQ_PREFIX_GUARDS: PASS",
+    "PSC1_V2_DAG_OFFICIAL_LEAN: PASS",
+    "PSC1_V2_DAG_REGRESSION: PASS"
+  ],
+  "artifactInspection": {
+    "artifactId": 12505770341,
+    "zipBytes": 105588,
+    "zipSha256": "e39ae12c8df7c4e23e1efd202c49a1d1c64bae8d398706fdc75c6df32366a53a",
+    "files": [
+      {
+        "path": "fixture.json",
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      {
+        "path": "native.log",
+        "bytes": 25850,
+        "sha256": "dfe01cd71b5f54fc9c0d0b87d51d3efee10cdc4394688072583f6d825f40572c"
+      },
+      {
+        "path": "fixture.sha256",
+        "bytes": 113,
+        "sha256": "f48476f51e7a14d206ab922d3cabc568498a350c4af5b81cb66873c5c143e9e6"
+      },
+      {
+        "path": "retained.log",
+        "bytes": 2197,
+        "sha256": "dd8027463b01693baa8afb677bd585c757df0b69b775c7b1aa035ea6d58c8d35"
+      },
+      {
+        "path": "scalar-hash-native.log",
+        "bytes": 1116,
+        "sha256": "f1798656df66cc0f711823fc5aa2c50b423ad3258ce135707275a1f80b3165fc"
+      }
+    ]
+  },
+  "run": {
+    "id": 39961234382,
+    "name": "PSC1 T01F fused scalar hash entries preflight",
+    "node_id": "WFR_kwLOUlmxxc8AAAAJTeALzg",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "head_sha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+    "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+    "display_title": "fix(pskernel): express fused hash result using portable let syntax",
+    "run_number": 17,
+    "event": "push",
+    "status": "in_progress",
+    "conclusion": null,
+    "workflow_id": 393360905,
+    "check_suite_id": 108312315294,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAZN-rFng",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39961234382",
+    "pull_requests": [],
+    "created_at": "2026-10-23T13:26:37Z",
+    "updated_at": "2026-10-23T13:26:41Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-23T13:26:37Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/108312315294",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/393360905",
+    "head_commit": {
+      "id": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "tree_id": "a6e55931126673894687c9f1d3e582928940ea68",
+      "message": "fix(pskernel): express fused hash result using portable let syntax",
+      "timestamp": "2026-10-23T13:26:27Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "jobs": {
+    "jobs": [
+      {
+        "id": 120439450101,
+        "name": "native-string",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 39961234382,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned Lean",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Build authentic fixture exporter and retained checker",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Prove exact scalar hash equivalence and run frozen native matrix",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Independently admit actual String declarations and export untrusted inputs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Retain existing minimal String and public DAG controls",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          }
+        ]
+      },
+      {
+        "id": 120440559608,
+        "name": "generated-string",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 39961234382,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Install pinned Lean",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Build authentic PSC1 for the bounded code-generation gate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned TypeScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Require data-result scalar hash code generation before full kernel build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Check complete authentic kernel source after the bounded gate",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 8
+          },
+          {
+            "name": "Compile the complete independent kernel to JavaScript",
+            "status": "pending",
+            "conclusion": null,
+            "number": 9
+          },
+          {
+            "name": "Produce authentic T01F inputs for generated independent replay",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 21
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 22
+          }
+        ]
+      }
+    ]
+  },
+  "boundedPassAuthority": "generated-string step7 completedSUCCESS: exact source workflow runs frozen13665assertions then strongonePair/oneblock/oneoddtransition/noScan-State-Stage and level-list0,1,2/fallback guards under set-e. Complete source checking is currentlystep8inprogress; do not claim fullJS/fullT01F.",
+  "retainedSemantics": "Alloriginal8hashproofs and frozen19fb worker unchanged;new forall-list entry equality9thproof. Frozen2730cases/long3/allnativeauthenticString/privateowners PASS.",
+  "nextTask": "Finish existing complete generated producer and both runtimeonly controls/mixed jobs; no duplicateCI. Allfivefullworkpushes paused."
+}

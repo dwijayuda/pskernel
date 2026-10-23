@@ -1,32 +1,41 @@
-## Fused entry native83 PASS; portable syntax correction requires new narrow run
+## Exact0fe60cc6 native83 AND bounded fused-entry gates PASS; complete check RUNNING
 
-Source9c3c0b546e388e3cca44aa3855587efff7c34bd2/tree9d0e353d...,
-run39960385954/native120436606817 PASS83proofreports(9hash),onlypermitted
-propext/Classical.choice/Quot.sound,allnative2730cases/long3/full6String/
-294requests377metadata/session/prefixcontrols. NewLevelListentry equality and
-unchangedfrozenStringhash proof bothPASS.
-Nativeartifact12503823535 ZIP105588 SHA256
-699fb36de783dc25255e1fc7863925bf90cabdb853942f34f1daefb6cb28680e.
-BUT producer120437719668 failed EARLY bounded PSCparser: ScalarHash116:36
-expected')'got'then' from a parenthesizedif argument ofProd.snd.
-No generatedJS assertions/fullbuild/runtime executed. Nativepass is notT01F.
-Exact83proofrows/markers/nativefilehashes/producerfailure:
-docs/evidence/2026-10-23-t01f-fused-entry-native-parser-result.json.
+ExecutableANDharness0fe60cc69e8d7544acb09025944cbfd3d955f992
+(treea6e55931126673894687c9f1d3e582928940ea68).
+ONE existing run https://github.com/dwijayuda/pskernel/actions/runs/39961234382:
+native120439450101 terminalPASS83proofreports(9hash),onlypermittedstandard3
+axioms,no forbiddenaxioms; unchanged8originalhashproofs/newLevelListentry
+equality,2730nativecases/long3/all6authenticStringcases294requests377metadata/
+prefixsession/private-ownercontrols PASS.
+Artifact12505770341 ZIP105588bytes SHA256
+e39ae12c8df7c4e23e1efd202c49a1d1c64bae8d398706fdc75c6df32366a53a.
+Exact83proofrows/markers/all5filehashes/run-jobmetadata:
+docs/evidence/2026-10-23-t01f-portable-fused-entry-native-gates.json.
 
-THIS containing new candidate changes ONLY expression layout:
-let final := if...;Prod.snd final, using the supported portable top-levellet
-form with the identical tuple result. Production hashvalues/theorem statements/
-all9proofbodies/frozen19fbworker/nativeJSmatrices unchanged. Strongboundedshape
-guard remains1Pairinvoke/1structuralblock/1oddtransition/noScan-State-staging,
-plusLevelList0,1,2/fallback exactguard. No parser/checker weakening.
-Fetch this NEW candidate's ONE narrowrun and follow native,bounded+complete
-codegen,controls and fullmixed toterminal; no duplicatebuild.
-NarrowonlyACTIVE,allFIVE fullpushesPAUSED,profilemanual-only.
+Generatedproducer120440559608 RUNNING completeSelfHostsourcecheck(step8).
+Boundedstep7 terminalSUCCESS confirms realPSC1 portable syntax nowaccepted,
+frozen2730cases8190stages13665assertions/long3PASS,strictfusedFullHash onePair
+invoke/oneanonymousblock/oneoddprimitive,noScan/State/Worker/Step/Mix/staged
+dispatch,smallLevelListbranches exact575/oneandtwoLevelHashcalls and exactlyone
+unchangedgenericcurriedfallback. The profile-driven entry optimizations have
+cleared nativeequivalence and boundedcodegen gates ONLY; fullkernel build and
+whole1400assertionmixed runtime are UNKNOWN. No fullT01F/currentA qualification.
+
+One next task: follow THIS existing producer then runtime-onlycontrols/mixed.
+Neverduplicate orinheritoldsourcepasses. Keep4096/2048MiB/emptyPATH/25mincap,
+294independentadmissions/377metadata/all1400assertions/singleton/negatives/
+owners/440traces. Source0feisfinaltupleletsyntaxfix to9c3; its nativepass is
+fresh,notinherited. Prior9c3boundedparserfailure archived;6bedmixedtimeout and
+phaseprofile99af evidence archived. All5fullpushesPAUSED,profilemanual-only,
+narrowhashonlyACTIVE. Do not restorefulltriggers untilwhole narrowPASS.
+IfPASS,fetchFRESHfullworkflowfiles (hashguard9,notcachedold11),restoreall5,
+makenarrowmanual-only,qualify ONE coherent NEWsource through BOTH strict6shard
+aggregates and allretainednative/official/provider24CLI+8API/research/
+measurements/unchanged32worker384callowner/full193/profile beforeT01F/T05.
 T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integration.
-Profile evidence motivating entryfusion remains octet-defeq-phase-profile.json;
-prior6bed mixedtimeout and2c9bothfullmixed/aggregatesFAIL retained.
-ActionsLinuxONLY execution,freshexpected_sha/nonforce,preservehistory,
-unchanged4096/2048MiB/emptyPATH/25mincap; no main/npm.
+Fresh integrationlast123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
+ActionsLinuxONLY execution,expected_sha/nonforce,preservehistory,no main/npm.
+This containingdocschild is unqualified and must not replace executable0fe.
 
 ---
 

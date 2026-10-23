@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "rust-generic-lexer-tail-arity-20261023",
+  "id": "rust-scalar-closed-release0-20261023",
   "branch": "fix/psc1-rust-owned-string-moves-20261023",
-  "parentCommit": "60d983a764373dbc00c92d3f36af37ed1de2a99b",
+  "parentCommit": "734f01ea364c543547eb3755697a651329502a07",
   "targets": [
     "rust"
   ],

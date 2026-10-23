@@ -45,6 +45,46 @@ def stringHashWorkerBefore
               (Char.toNat char))
 
 
+/- Frozen one-transition data recurrence from61deda; proof only, not runtime. -/
+def stringHashStateBefore (fuel : Nat) (value : String)
+    (initial : Prod Nat Nat) : Prod Nat Nat :=
+  match fuel with
+  | Nat.zero => initial
+  | Nat.succ remaining =>
+      psKernelCacheStringHashStep value (stringHashStateBefore remaining value initial)
+
+theorem state_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
+    psKernelCacheStringHashStateWithFuel fuel value initial =
+      stringHashStateBefore fuel value initial := by
+  apply Nat.strongRecOn fuel
+  intro count ih
+  cases count with
+  | zero => rfl
+  | succ count =>
+      cases count with
+      | zero => rfl
+      | succ remaining =>
+          change psKernelCacheStringHashStep value
+            (psKernelCacheStringHashStep value
+              (psKernelCacheStringHashStateWithFuel remaining value initial)) =
+            psKernelCacheStringHashStep value
+              (psKernelCacheStringHashStep value
+                (stringHashStateBefore remaining value initial))
+          rw [ih remaining (by omega)]
+
+theorem state_succ (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
+    psKernelCacheStringHashStateWithFuel (Nat.succ fuel) value initial =
+      psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStateWithFuel fuel value initial) := by
+  calc
+    psKernelCacheStringHashStateWithFuel (Nat.succ fuel) value initial =
+        stringHashStateBefore (Nat.succ fuel) value initial :=
+      state_eq_before (Nat.succ fuel) value initial
+    _ = psKernelCacheStringHashStep value (stringHashStateBefore fuel value initial) := rfl
+    _ = psKernelCacheStringHashStep value
+        (psKernelCacheStringHashStateWithFuel fuel value initial) :=
+      congrArg (psKernelCacheStringHashStep value) (state_eq_before fuel value initial).symm
+
 theorem state_step_commutes (fuel : Nat) (value : String) (state : Prod Nat Nat) :
     psKernelCacheStringHashStateWithFuel fuel value
         (psKernelCacheStringHashStep value state) =
@@ -53,6 +93,7 @@ theorem state_step_commutes (fuel : Nat) (value : String) (state : Prod Nat Nat)
   induction fuel with
   | zero => rfl
   | succ remaining ih =>
+      rw [state_succ, state_succ]
       exact congrArg (psKernelCacheStringHashStep value) ih
 
 theorem state_fixed (fuel : Nat) (value : String) (state : Prod Nat Nat)
@@ -61,8 +102,7 @@ theorem state_fixed (fuel : Nat) (value : String) (state : Prod Nat Nat)
   induction fuel with
   | zero => rfl
   | succ remaining ih =>
-      change psKernelCacheStringHashStep value
-        (psKernelCacheStringHashStateWithFuel remaining value state) = state
+      rw [state_succ]
       rw [ih]
       exact fixed
 
@@ -72,9 +112,10 @@ theorem scan_eq_before (fuel : Nat) (value : String) (position hash : Nat) :
   induction fuel generalizing position hash with
   | zero => rfl
   | succ remaining ih =>
-      change (psKernelCacheStringHashStep value
-        (psKernelCacheStringHashStateWithFuel remaining value (Prod.mk position hash))).snd =
+      change (psKernelCacheStringHashStateWithFuel (Nat.succ remaining) value
+        (Prod.mk position hash)).snd =
           stringHashWorkerBefore (Nat.succ remaining) value position hash
+      rw [state_succ]
       rw [← state_step_commutes remaining value (Prod.mk position hash)]
       cases finished : String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) with
       | false =>
@@ -107,6 +148,8 @@ theorem hash_eq_before (value : String) :
 
 end PsKernelScalarHashWorkerRegression
 
+#print axioms PsKernelScalarHashWorkerRegression.state_eq_before
+#print axioms PsKernelScalarHashWorkerRegression.state_succ
 #print axioms PsKernelScalarHashWorkerRegression.state_step_commutes
 #print axioms PsKernelScalarHashWorkerRegression.state_fixed
 #print axioms PsKernelScalarHashWorkerRegression.scan_eq_before

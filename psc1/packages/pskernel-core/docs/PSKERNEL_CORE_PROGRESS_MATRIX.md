@@ -1,3 +1,57 @@
+## Current candidate: two transitions per data-iterator descent; unqualified
+
+Exact61deda whole mixed TIMEOUT is preserved below and in
+evidence/2026-10-23-t01f-primitive-fusion-mixed-terminal.json.
+The completed exact-artifact profile at harnessdca7186bd7bff21e60a32826d77064a0996f2955,
+run39893421496/job120218203426 PASS diagnostic collection, shows a completed
+mixed UTF8 literal V1DefEq taking92211.974ms under profiling after unchanged
+294admissions/377metadata. Phase-only78608CPU samples start after term construction:
+17167(21.84%) in StringHashState/its structural closure,10946(13.92%)GC;
+runtime,ExprHash,HasFVar,NameHash and LevelList are also substantial.
+Whole diagnostic148.69seconds,585368KiB peakRSS; no unprofiled causal speedup claim.
+Artifact12474989155 ZIP5092574bytes SHA256
+51064b7c091b392cebb843f0c19e3b855bcf46046aa794cf3da710920fa68107.
+Operation cpuprofile839195bytes SHA256
+3521ea8cb7a04b7b33844b5d683b0e4393353390157ce80aaee6f8db4bb9e3f3.
+Full source/artifact/driver/phase summary evidence:
+evidence/2026-10-23-t01f-primitive-fusion-defeq-phase-profile.json.
+Collection success is not full T01F or release performance qualification.
+
+This NEW source batches TWO immutable primitive transitions after each recursive
+data-state descent. Fuel0/1 base cases preserve exact behavior; fuel(n+2)
+computes the same two transitions after the fuel(n) state. Public Step,Scan,
+curried Worker stages,fullhash,modulus65521,mix31,rawUTF8,initialaccumulator,
+index/equality/cache/owner/session policies and4096resources remain unchanged.
+The five original theorem STATEMENTS and exact frozen19fb worker remain.
+Two new proof statements compare against a frozen one-step DATA recurrence and
+derive the one-step successor equation; all seven must pass natively, then all
+2730finite cases/8190JS stages/13665assertions/three long cases must pass.
+No equivalence or performance result is claimed before these new-source gates.
+
+The bounded codegen criterion is explicit and distinct: one data helper,
+one recursive scheduler invoke, zero staged results/Step/Mix dispatch,
+three inlined primitive transitions in the body (one single-fuel base plus two
+after descent), and at most TWO structural generator blocks. Print actual
+bodies and reject failed shape before COMPLETE authentic source check/build.
+It does not promise a generator-free loop or remove all allocation.
+Native-first workflow psc1-pskernel-t01f-hash.yml runs at this containing source.
+The exact-artifact profile is back to manual-only; all5full pushes stay paused.
+Never duplicate an existing source run. Follow this new source's actual native,
+bounded generated and whole unchanged mixed/retained-control terminal results.
+
+If whole mixed PASSES, reconcile added proof reports into both final route
+workflows/drafts as necessary,restore all5full work-branch triggers,disable
+narrow hash push,then qualify ONE NEW coherent source through both6-shard strict
+aggregates plus allretained gates/providers24CLI+8API/research/measurements/
+unchangedowner32workers384calls/full193/profile. No predecessor qualification.
+If a gate fails,retain actual output and fix that exact failure. No acceptance
+or resource weakening. T01F/currentA/B/D OPEN,C FAIL,historicalscopedA9c87
+qualified; noT05 yet. Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
+Actions Linux only for builds/tests/kernel execution;fresh expected_sha,
+nonforce updates,preserve history/concurrency,no main/npm.
+
+---
+
 ## Current:61deda whole mixed TIMEOUT; exact-artifact phase profile next
 
 Executable/harness61deda52ef95b5e932e179663e60ba59fa9777df,

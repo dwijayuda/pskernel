@@ -1,4 +1,4 @@
-name: PSC1 T01F fused primitive data-transition preflight
+name: PSC1 T01F two-transition data-result preflight
 on:
   workflow_dispatch:
   push:
@@ -131,8 +131,11 @@ jobs:
                   raise RuntimeError('Fused data iterator still has staged results or byte dispatch: ' + machinery)
           if body.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashStateWithFuel,' not in body:
               raise RuntimeError('Expected only one recursive scheduler call in the data iterator')
-          if len(re.findall(r'function\s*\*\s*\(', body)) != 1:
-              raise RuntimeError('Expected one structural generator block and no nested byte generator')
+          blocks = len(re.findall(r'function\s*\*\s*\(', body))
+          if blocks not in (1, 2):
+              raise RuntimeError('Expected at most two structural blocks for a two-transition descent')
+          if body.count('__ps$stringNext(') != 3 or body.count('__ps$stringGet(') != 3:
+              raise RuntimeError('Expected one base transition and two transitions after recursive descent')
           marker = 'export function psKernelCacheStringHashStep('
           start = text.index(marker)
           end = text.find('\nexport ', start + len(marker))
@@ -148,7 +151,7 @@ jobs:
               raise RuntimeError('Full hash still dispatches through the staged public worker')
           print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
-          print('PSC1_HASH_FUSED_TRANSITION_CODEGEN: PASS resultStaging=0 byteStepDispatch=false recursiveDispatches=1 structuralGeneratorBlocks=1')
+          print('PSC1_HASH_TWO_TRANSITION_CODEGEN: PASS resultStaging=0 byteStepDispatch=false recursiveDispatches=1 transitionsPerDescent=2 structuralGeneratorBlocks=' + str(blocks))
           PY
       - name: Check complete authentic kernel source after the bounded gate
         working-directory: psc1

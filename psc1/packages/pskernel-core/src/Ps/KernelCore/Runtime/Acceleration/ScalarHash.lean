@@ -39,20 +39,46 @@ def psKernelCacheStringHashStateWithFuel
     (initial : Prod Nat Nat) : Prod Nat Nat :=
   match fuel with
   | Nat.zero => initial
-  | Nat.succ remaining =>
-      /- Keep the data motive and inline the transition after recursion.
-      No inner char/next bindings: generated code needs only its recursive block. -/
-      let state := psKernelCacheStringHashStateWithFuel remaining value initial;
-      let position := Prod.fst state;
+  | Nat.succ Nat.zero =>
+      let position := Prod.fst initial;
       if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
-        state
+        initial
       else
         Prod.mk
           (String.Pos.Raw.byteIdx
             (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
           (Nat.mod
             (Nat.add
-              (Nat.mul (Prod.snd state) 31)
+              (Nat.mul (Prod.snd initial) 31)
+              (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+            psKernelCacheHashModulus)
+  | Nat.succ (Nat.succ remaining) =>
+      /- Two immutable transitions share one recursive scheduler descent.
+      Keep the data motive and every exact bounded-prefix result. -/
+      let state := psKernelCacheStringHashStateWithFuel remaining value initial;
+      let intermediate :=
+        let position := Prod.fst state;
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+          state
+        else
+          Prod.mk
+            (String.Pos.Raw.byteIdx
+              (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+            (Nat.mod
+              (Nat.add
+                (Nat.mul (Prod.snd state) 31)
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+              psKernelCacheHashModulus);
+      let position := Prod.fst intermediate;
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+        intermediate
+      else
+        Prod.mk
+          (String.Pos.Raw.byteIdx
+            (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+          (Nat.mod
+            (Nat.add
+              (Nat.mul (Prod.snd intermediate) 31)
               (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
             psKernelCacheHashModulus)
 

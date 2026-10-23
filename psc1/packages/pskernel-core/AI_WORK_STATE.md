@@ -1,3 +1,48 @@
+## Live primitive-fusion source61deda52: native and bounded codegen PASS
+
+Executable AND harness `61deda52ef95b5e932e179663e60ba59fa9777df`;
+tree `79711d9d637ebea88f5f09f06bdd54c1d48c3e08`.
+Existing narrow run https://github.com/dwijayuda/pskernel/actions/runs/39888872678
+native120203522175 PASS79proofs,5unchanged exact hash statements,2730cases,
+long3,294requests377metadata,all6native String cases/singletons andretained
+controls. All proof reports use only permitted propext,Classical.choice,Quot.sound.
+Generated120204250635 bounded gate PASSED2730cases8190stages13665assertions,
+long3 and the distinct primitive-fusion shape criterion: ONE data iterator,
+ONE recursive scheduler call,ONE structural generator block,ZERO separate
+byteStep/Mix dispatch and ZERO staged results. The loop hypothesis at338bb
+FAILED and stays rejected; this result does not claim a generator-free loop.
+
+Producer120204250635 is already checking COMPLETE authentic SelfHost source
+after that bounded pass,then full TS7.0.2 compilation/fixture. Fetch that
+existing run; never duplicate. Retained generated controls10minutes and
+unchanged whole mixed25minutes remain pending. Fuel4096,2048MiB,emptyPATH
+and allpositive/negative/singleton ownership assertions remain unchanged.
+Exact all79 native proof rows/artifact12473897059 and gate status:
+evidence/2026-10-23-t01f-primitive-fusion-native.json.
+This containing documentation child is unqualified; neither native equivalence
+nor code shape proves full generated correctness,adequate performance or global
+soundness/backend preservation.
+
+The fullfe4aa source/runs below continue separately. Its native,generated/
+canonical producers,research and actual corrected32worker384call owner PASS;
+full193 C still FAIL173matches+2safetyagreements+17timeouts+1resourceexhaustion.
+Its String matrices are still running. Do not inherit their passes here.
+All5new work-branch full pushes remain paused; existing jobs continue.
+If61deda whole mixed PASSES,restore work-branch triggers in5fullworkflows,
+retain corrected owner guard,disable narrow push,and qualify one NEW source
+through both6-shard aggregates,allretained required gates,measurements/owner
+ABBA/full193/profile. If genuine failure/cap,retain source/receipt and fix the
+concrete bottleneck. No assertion/resource weakening or cached predecessor PASS.
+
+One next task: finish the existing61deda complete producer and mixed preflight.
+T01F/currentA/B/C/D remain OPEN; scopedhistoricalA9c87. No T05 until fullT01F.
+Integration123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
+Actions Linux ONLY for builds/tests/kernel execution. Fresh expected_sha,
+non-force updates,preserve history/concurrency,no main/npm.
+Earlier entries retain complete gate definitions and rejected-source evidence.
+
+---
+
 ## Current: tail-data pure-loop hypothesis REJECTED; primitive fusion probe next
 
 Exact338bb5a115290b43e11c4e6acf4b1f9f3c418dad,run39887910080:

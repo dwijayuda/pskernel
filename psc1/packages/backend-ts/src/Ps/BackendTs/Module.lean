@@ -578,19 +578,43 @@ def psTsTailCallArguments (self : String) (aliases : List PsTsTailAlias)
             else Option.none
   | _ => Option.none
 
-def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
-    (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+-- A removed tail alias must never escape through an ordinary expression.
+def psTsTailMentionsAlias (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) : Bool :=
+  psListAny (fun (alias : PsTsTailAlias) => psTsExprUsesNameWithFuel 4096 expr alias.name) aliases
+
+def psTsTailEmitValue (generated : Bool) (brands tags : List (Prod String String))
+    (aliases : List PsTsTailAlias) (expected : Option PsVerifiedIrType)
+    (tail : Bool) (expr : PsVerifiedIrExpr) : Option String :=
+  if generated then
+    if psTsTailMentionsAlias aliases expr then Option.none
+    else
+      match psTsEmitTypedExprContextWithFuel brands tags true 4096 expected tail expr with
+      | Except.error _ => Option.none
+      | Except.ok printed => Option.some printed
+  else psTsTailPrintPure brands tags aliases expr
+
+def psTsTailReturnValue (generated : Bool) (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) (aliases : List PsTsTailAlias)
+    (expr : PsVerifiedIrExpr) : Option String :=
+  match psTsTailEmitValue generated brands tags aliases (Option.some declaration.resultType) true expr with
+  | Option.none => Option.none
+  | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
+
+def psTsTailEmitContextWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (generated : Bool) (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
   match fuel with
   | Nat.zero => fun (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
   | Nat.succ remaining =>
       fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
-        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitWithFuel brands tags declaration remaining;
-        let emitPure : PsVerifiedIrExpr -> Option String := psTsTailPrintPure brands tags aliases;
+        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitContextWithFuel brands tags declaration generated remaining;
+        let emitPure : PsVerifiedIrExpr -> Option String := psTsTailEmitValue generated brands tags aliases Option.none false;
         match expr with
         | PsVerifiedIrExpr.call fn types arguments =>
             if psListIsEmpty types then
               match psTsTailCallArguments declaration.name aliases fn arguments with
-              | Option.none => Option.none
+              | Option.none =>
+                  if generated then psTsTailReturnValue true brands tags declaration aliases expr
+                  else Option.none
               | Option.some actual =>
                   if Nat.beq (psListLength actual) (psListLength declaration.parameters) then
                     match psTsTailMap emitPure actual with
@@ -600,6 +624,7 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
                         Option.some (psTsJoin "" ["[", psTsJoin ", " (psListMap parameterName declaration.parameters),
                           "] = [", psTsJoin ", " printed, "]; continue;"])
                   else Option.none
+            else if generated then psTsTailReturnValue true brands tags declaration aliases expr
             else Option.none
         | PsVerifiedIrExpr.letE name type value body =>
             if psTsExprUsesNameWithFuel 4096 value name then Option.none
@@ -611,7 +636,7 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
                   if psListAny capturedAlias alias.captured then Option.none
                   else smaller (List.cons alias aliases) body
               | Option.none =>
-                  match emitPure value with
+                  match psTsTailEmitValue generated brands tags aliases (Option.some type) false value with
                   | Option.none => Option.none
                   | Option.some printedValue =>
                       match psTsEmitType type with
@@ -665,10 +690,11 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
                             "; switch (", temporary, "[", tag, "]) { ", psTsJoin " " cases,
                             " } throw new Error(\"invalid ProofScript constructor tag\"); }"])
                       else Option.none
-        | _ =>
-            match emitPure expr with
-            | Option.none => Option.none
-            | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
+        | _ => psTsTailReturnValue generated brands tags declaration aliases expr
+
+def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+  psTsTailEmitContextWithFuel brands tags declaration false fuel
 
 def psTsEmitTailLoopWithVisibility (isPublic : Bool) (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
   if psListIsEmpty declaration.typeParameters then
@@ -725,6 +751,40 @@ def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (Prod String S
                     psTsGenericNames declaration.typeParameters, "(", psTsJoin ", " parameters,
                     "): ", result, " { return ", body, "; }"])
 
+-- Flatten structured tail statements inside the existing generator protocol.
+-- Ordinary expression preflight preserves its original fuel/error boundary.
+def psTsEmitGeneratorLoopWithVisibility (isPublic : Bool)
+    (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+  let shadowsSelf : PsVerifiedIrParameter -> Bool :=
+    fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name declaration.name;
+  if psListIsEmpty declaration.parameters || psListAny shadowsSelf declaration.parameters then Option.none
+  else
+    let body := psTsInlineEtaApplication declaration.body;
+    match psTsEmitTypedTailExpr brands tags declaration.resultType body with
+    | Except.error _ => Option.none
+    | Except.ok _ =>
+        match psTsTailEmitContextWithFuel brands tags declaration true 4096 List.nil body with
+        | Option.none => Option.none
+        | Option.some statements =>
+            match psTsTailMap psTsEmitPureParameter declaration.parameters with
+            | Option.none => Option.none
+            | Option.some parameters =>
+                match psTsEmitType declaration.resultType with
+                | Except.error _ => Option.none
+                | Except.ok result =>
+                    let parameterName : PsVerifiedIrParameter -> String :=
+                      fun (parameter : PsVerifiedIrParameter) => parameter.name;
+                    let arguments := psTsJoin ", " (psListMap parameterName declaration.parameters);
+                    let generic := psTsGenericNames declaration.typeParameters;
+                    let implementation := String.Internal.append "__ps$impl$" declaration.name;
+                    Option.some (psTsJoin "" [
+                      (if isPublic then "export function " else "function "), declaration.name, generic,
+                      "(", psTsJoin ", " parameters, "): ", result, " { return __ps$run(",
+                      implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic,
+                      "(", psTsJoin ", " parameters, "): __ps$Computation<", result,
+                      "> { while (true) { ", statements, " } }\n__ps$implementations.set(",
+                      declaration.name, ", ", implementation, ");"])
+
 def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
   match psTsEmitPureDeclaration isPublic brands tags declaration with
@@ -735,7 +795,10 @@ def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Pro
       | Option.none =>
           match psTsEmitTailLoopWithVisibility isPublic brands tags declaration with
           | Option.some loop => Except.ok loop
-          | Option.none => psTsEmitDeclarationGeneralWithVisibility isPublic brands tags declaration
+          | Option.none =>
+              match psTsEmitGeneratorLoopWithVisibility isPublic brands tags declaration with
+              | Option.some loop => Except.ok loop
+              | Option.none => psTsEmitDeclarationGeneralWithVisibility isPublic brands tags declaration
 
 def psTsEmitDeclaration (brands tags : List (Prod String String)) (value : PsVerifiedIrDeclaration) :
     Except PsTsEmitError String := psTsEmitDeclarationWithVisibility true brands tags value

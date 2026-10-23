@@ -1,27 +1,34 @@
-## Corrected octet source6bed4d6c: one narrow run ACTIVE
+## Exact6bed4d6c native prerequisite PASS; generated preflight RUNNING
 
 ExecutableANDharness6bed4d6c613861c052f98dc4d7e66c3fc275bc9d
 (treef3ccee1708cfc6c04f270d3f202c1d2520237c5f) has ONE existing run:
 https://github.com/dwijayuda/pskernel/actions/runs/39951009269
-native120405170256 RUNNING; producer/runtime follow after native PASS.
-Do not duplicate. Fetch live status. This containing docs child is unqualified.
+native120405170256 terminalPASS:85proofreports including11hashlemmas,
+onlypropext/Classical.choice/Quot.sound,zero forbidden proof axioms.
+Frozen native2730cases12strings/long3,all294authenticrequests/377metadata/
+sixStringcases+singletons,retained publicDAG/minimalString/prefix controls PASS.
+Nativeartifact12499733686 ZIP105587bytes SHA256
+b75c002cbc3e51ccd9315f3a4b92a0270d6621248818991f4403d8d04ffc0f7c.
+All85proofrows/markers/fiveartifactfilehashes:
+docs/evidence/2026-10-23-t01f-octet-native-gates.json.
+This is a narrow prerequisite ONLY; source6bed/fullT01F/currentA not qualified.
 
-Final2c9 failure evidence now preserves independently authenticated ALL12
-shard ZIPs, source/run/attempt/kernel/fixture/harness/provider identities,
-raw log-memory digests and TEN complete1400assertion receipts (samples0–4
-each route). Mixed5 both incomplete, no receipt/complete case marker, memory
-files empty. Both strict aggregates FAIL. No source2c9 T01F acceptance.
-Evidence: docs/evidence/2026-10-23-t01f-pair-counter-final-shards-terminal.json.
+Generatedproducer120406128102 alreadyRUNNING realPSC1 build; bounded strict
+eight-transition/data-result shape,completeSelfHostcheck/build/TS7.0.2 and
+unchanged JS2730cases8190stages13665assertions/long3 must pass. Retained controls
+and complete mixed1400assertions/440calls follow runtime-only without recompiling.
+All five full work-branch pushes remainPAUSED,narrowonlyACTIVE. Do notduplicate.
+One next task: finish THIS run. If entire narrowPASS, restore fivefulltriggers,
+make narrowmanual-only,qualify ONE coherent NEWsource through BOTH strictsix-
+shardaggregates/allnative/official/provider24CLI+8API/research/measurements/
+unchangedowner32workers384calls/full193/profile. No prior-source pass inheritance.
 
-Source6bed only corrects the failed final count proof through congrArg.
-Native11hash reports/all294/377/retained controls, realPSC1/TS7.0.2 bounded+
-complete codegen and mixed1400assertions/440calls still must execute.
-Full five work-branch pushes PAUSED; narrowonlyACTIVE; no new fullruns yet.
-All limits/assertions/independence unchanged. After narrowPASS, qualify ONE new
-coherent finalsource with BOTH strictsixshardaggregates/allretainedgates.
-T01F/currentA/B/D OPEN,C FAIL,historicalA9c87 qualified; noT05/integration.
-Fresh integrationhead123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
-ActionsLinuxONLY execution,expected_sha/nonforce,preservehistory,no main/npm.
+Final2c9bothmixed/aggregatesFAIL withall12shardZIPs/tencomplete1400assertion
+receipts independentlyverified. No completed mixedRSS/timing invented.
+T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integration.
+This containing documentationchild is unqualified. Fresh integrationlast123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
+ActionsLinuxONLY execution,expected_sha/nonforce,preservehistory,unchanged
+fuel4096/2048MiB/emptyPATH/25mincap; no main/npm.
 
 ---
 

@@ -1,3 +1,37 @@
+## Live qualification: fe4aa456 — exact source/run checkpoint
+
+Executable AND harness `fe4aa456fb8d9e488a98dfed836cc7c991a00591`.
+Tree `2c747f3fb82ddb1c4bf799ace9064344c51b8777`.
+This containing documentation child runs no CI and inherits no qualification.
+Already-running current-source workflows:
+- PSC1 authentic Arena timeout diagnostics: https://github.com/dwijayuda/pskernel/actions/runs/39884267675
+  authentic-timeout-diagnostics:job120188654360 in_progress
+- PSC1 Expression V2 production integration: https://github.com/dwijayuda/pskernel/actions/runs/39884267668
+  generated-dag-integration:job120188654193 in_progress; native-dag-integration:job120188654676 in_progress
+- PSC1 Lean Arena 4.35 full corpus qualification: https://github.com/dwijayuda/pskernel/actions/runs/39884267651
+  official-arena-reference:job120188653802 in_progress
+- PSC1 PSKernel-Core Expression V2 research: https://github.com/dwijayuda/pskernel/actions/runs/39884267645
+  portable-ps-closure:job120188654185 in_progress; portable-v2-check:job120188654338 in_progress; expr-v2-differential:job120188654366 in_progress; full-checker-bridge:job120188654482 in_progress; whnf-subset-regression:job120188654483 in_progress; generated-js-full-checker-bridge:job120188654710 in_progress
+- PSC1 PSKernel-Core correctness: https://github.com/dwijayuda/pskernel/actions/runs/39884267679
+  psc1-portability:job120188653998 in_progress; native-kernel:job120188654332 in_progress
+
+Require both route six-shard strict aggregates and all retained native/official/
+proof/provider24CLI+8API/research/measurement gates plus unchanged owner32/384
+ABBA and full193 Arena/profile at fe4aa. All are pending/running at this checkpoint.
+Reuse existing runs. ae916 predecessors still have their own active String
+shards; finish collecting them without transferring their qualification.
+Validated runtime-only owner diagnostic39883705815 PASSED32workers384calls
+at harnessac0b/generatedae916; final fe4aa still needs its own owner job.
+The correction below preserves all limits/acceptance and adds exact live-job
+authentication while accepting the observed active queued-run state.
+T01F/currentA/B/C/D OPEN; scopedhistoricalA9c87,latestfull193Cfailedat ae916.
+Integration123c411 unchanged. No T05 until T01F acceptance.
+Exact inventory: evidence/2026-10-23-t01f-final-qualification-active.json.
+Read the next entry for terminal predecessor receipts,remaining regressions
+and ready-to-execute constraints. Next task is follow/evaluate these runs.
+
+---
+
 ## Current: owner lifecycle gate corrected after validated exact-artifact preflight
 
 The containing commit activates a NEW coherent final qualification source.

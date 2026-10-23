@@ -18,16 +18,16 @@ console.log('PSC1_TS_CHECKER_LAUNCHER: '+JSON.stringify(fs.readFileSync('node_mo
 const child=spawn('python3',['.github/diagnostics/bounded-process.py',JSON.stringify(request)],{stdio:['ignore','pipe','pipe']});
 let stdout='',stderr='';child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);
 const sample=setTimeout(()=>{
- const rows=[];for(const id of fs.readdirSync('/proc').filter(x=>/^\\d+$/.test(x))){try{
+ const rows=[];for(const id of fs.readdirSync('/proc').filter(x=>/^\d+$/.test(x))){try{
   const stat=fs.readFileSync('/proc/'+id+'/stat','utf8'),tail=stat.slice(stat.lastIndexOf(')')+2).split(' ');
-  rows.push({pid:Number(id),ppid:Number(tail[1]),pgid:Number(tail[2]),command:fs.readFileSync('/proc/'+id+'/cmdline','utf8').replaceAll('\\0',' ')});
+  rows.push({pid:Number(id),ppid:Number(tail[1]),pgid:Number(tail[2]),command:fs.readFileSync('/proc/'+id+'/cmdline','utf8').replaceAll('\0',' ')});
  }catch{}}
  const descendants=new Set([child.pid]);let changed=true;while(changed){changed=false;for(const r of rows)if(descendants.has(r.ppid)&&!descendants.has(r.pid)){descendants.add(r.pid);changed=true;}}
  const selected=rows.filter(r=>descendants.has(r.pid));
  console.log('PSC1_TS_CHECKER_PROCESSES: '+JSON.stringify(selected));
  const ps=spawnSync('ps',['-eo','pid,ppid,pcpu,rss,etime,args','--forest'],{encoding:'utf8',timeout:3000,maxBuffer:1024*1024});
  fs.writeFileSync('diagnosis/processes.txt',ps.stdout||'');
- for(const r of selected)if(r.pid!==child.pid&&!r.command.startsWith(process.execPath+' ')&&/\\/(?:tsgo|tsc)(?: |$)/.test(r.command)){
+ for(const r of selected)if(r.pid!==child.pid&&!r.command.startsWith(process.execPath+' ')&&/\/(?:tsgo|tsc)(?: |$)/.test(r.command)){
   console.log('PSC1_TS_NATIVE_STACK_REQUEST: '+JSON.stringify(r));process.kill(r.pid,'SIGQUIT');
  }
 },15000);
@@ -35,6 +35,7 @@ const exit=await new Promise(resolve=>child.on('close',(status,signal)=>resolve(
 const result={...exit,stdout,stderr};
 assert.equal(result.status,0,result.stderr);assert.equal(sha(fs.readFileSync(source)),sourceSha256);
 console.log('PSC1_TS_CHECKER_SAMPLE: '+result.stdout.trim());
+console.log('PSC1_TS_NATIVE_STDERR: '+JSON.stringify(fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8').slice(0,22000)));
 const profiles=fs.readdirSync('diagnosis').filter(n=>n.endsWith('.log'));
 for(const name of profiles){
  const file=path.resolve('diagnosis',name),r=spawnSync(process.execPath,['--prof-process',file],{encoding:'utf8',timeout:30000,killSignal:'SIGKILL',maxBuffer:32*1024*1024});

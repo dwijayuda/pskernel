@@ -48,6 +48,9 @@ def psWasmServiceTransport (module : PsWasmModule) (publicNames : List String) :
       (if psWasmServiceHasType psWasmIntName module then psWasmServiceIntFunctions else []));
   let helperExports := psListMap
     (fun (function : PsWasmFunction) => Prod.mk function.name function.name) functions;
+  let intExports := if psWasmServiceHasType psWasmIntName module then [
+      Prod.mk "__psc1_service_int_of_nat" psWasmIntOfNatFn,
+      Prod.mk "__psc1_service_int_neg" psWasmIntNegFn] else [];
   let natExports := if nat then [
       Prod.mk "__psc1_service_nat_half" psWasmNatHalfFn,
       Prod.mk "__psc1_service_nat_low" psWasmNatLowFn,
@@ -58,6 +61,6 @@ def psWasmServiceTransport (module : PsWasmModule) (publicNames : List String) :
     (fun (entry : Prod String String) => psBackendNameSeen entry.fst publicNames) module.exports;
   { structures := module.structures, arrays := module.arrays, functionTypes := module.functionTypes,
     functions := psListAppend module.functions functions, functionRefs := module.functionRefs,
-    exports := psListAppend exports (psListAppend helperExports natExports),
+    exports := psListAppend exports (psListAppend helperExports (psListAppend natExports intExports)),
     abiMemory := module.abiMemory, abiMemoryImports := module.abiMemoryImports,
     abiGlobalsExport := module.abiGlobalsExport, functionImports := module.functionImports }

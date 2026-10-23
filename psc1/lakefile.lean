@@ -169,7 +169,9 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.ValidateIr,
     `Ps.BackendWasm.Component,
     `Ps.BackendWasm.StringAbi,
-    `Ps.BackendWasm.StringComponent
+    `Ps.BackendWasm.StringComponent,
+    `Ps.BackendWasm.ServiceAbi,
+    `Ps.BackendWasm.CompilerService
   ]
 
 lean_lib PsBackendPython where

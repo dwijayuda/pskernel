@@ -8,6 +8,7 @@ on:
       - psc1/scripts/TargetServiceSeed.lean
       - psc1/scripts/generated-target-source-audit.mjs
       - psc1/host-tools/generated-target-profiles.mjs
+      - psc1/lakefile.lean
       - .github/workflows/diagnostic-psc1-direct-selfhost-preflight.yml
 permissions:
   contents: read
@@ -44,6 +45,11 @@ jobs:
       - name: Preserve native semantics and independent checking
         run: |
           set -euo pipefail
+          node --check host-tools/generated-target-profiles.mjs
+          node --check host-tools/generated-wasm-transport.mjs
+          node --check host-tools/generated-target-tools.mjs
+          node --check scripts/generated-target-qualification.mjs
+          node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests
           .lake/build/bin/psc1_js_service_tests

@@ -1,4 +1,5 @@
 name: PSC1 authentic Arena timeout diagnostics
+# Requalify this diagnostic at the owner-authentication correction source.
 
 on:
   workflow_dispatch:

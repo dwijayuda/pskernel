@@ -1,3 +1,10 @@
+# Current owner lifecycle correction
+
+Queued matrix jobs keep an active run queued. The final owner gate now accepts
+that state and additionally authenticates its exact live job/source/run/attempt.
+Exact-artifact diagnostic ac0b passed32workers384calls; a new full source must
+qualify independently. See current work state and ae916 source-bound receipts.
+
 # Current manifest correction
 
 The active/saved helper now authenticates all nine canonical provider files,
@@ -81,10 +88,10 @@ global soundness. The generated kernel must perform its own checks.
 
 ## Current exact digests
 
-- psc1-pskernel-expr-v2-integration.yml: 93401 bytes; SHA256 5c67395b97c16d6810678289d9ed0fdb8bdba4448ae1d9e20a96c3175050790c
+- psc1-pskernel-expr-v2-integration.yml: 93833 bytes; SHA256 8a8a0fd21cf381543d342509e862b5888a2da0a0e573efb662a24a8302483099
 - psc1-pskernel-core-correctness.yml: 43948 bytes; SHA256 793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff
 - pskernel-t01f-shards.mjs:15203 bytes; SHA256 daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287
-- paired-owner-job.fragment.yml:16984 bytes; SHA256 34cacbc1b11b907b94771460086b004a9cdee60231fdfb436b9107129c2f0fb8
+- paired-owner-job.fragment.yml:17261 bytes; SHA256 bc99a5c9029d0dd30eacf60a975d9a0230f3739b999112dc5f3e259ca2941fcd
 
 See [INTEGRATION_NOTES.md](INTEGRATION_NOTES.md) for additional contract details.
 Its original scratch-preparation wording is historical; these bytes are durable

@@ -1,67 +1,75 @@
-## Progress checkpoint: ae916be4 native integration PASS; generated qualification pending
+## Current: owner lifecycle gate corrected after validated exact-artifact preflight
 
-Executable/harness `ae916be40ec30a8a0caf5dd683eb7d1d54966849`;
-tree `a8db2401141bc73a00dfb169c9b3f45b6f499dae`. This documentation-only child inherits no
-executable qualification. Live integration remains123c41197950b6761be965fd21c57142ee2b0d1c.
-Current exact jobs:
-- PSC1 PSKernel-Core Expression V2 research: https://github.com/dwijayuda/pskernel/actions/runs/39879401425
-  generated-js-full-checker-bridge=in_progress (job120172865111); portable-ps-closure=success (job120172865303); portable-v2-check=success (job120172865308); whnf-subset-regression=success (job120172865309); full-checker-bridge=success (job120172865389); expr-v2-differential=success (job120172865432)
-- PSC1 Expression V2 production integration: https://github.com/dwijayuda/pskernel/actions/runs/39879401423
-  native-dag-integration=success (job120172865344); generated-dag-integration=in_progress (job120172865519)
-- PSC1 authentic Arena timeout diagnostics: https://github.com/dwijayuda/pskernel/actions/runs/39879401524
-  authentic-timeout-diagnostics=in_progress (job120172865376)
-- PSC1 Lean Arena 4.35 full corpus qualification: https://github.com/dwijayuda/pskernel/actions/runs/39879401452
-  official-arena-reference=success (job120172865174); generated-arena-comparison=in_progress (job120173469604)
-- PSC1 PSKernel-Core correctness: https://github.com/dwijayuda/pskernel/actions/runs/39879401429
-  psc1-portability=in_progress (job120172865185); native-kernel=success (job120172865463)
+The containing commit activates a NEW coherent final qualification source.
+Production,proofs,String fixture/runner,shard helper,all acceptance assertions,
+measurement driver and resource policies are unchanged. Fetch the actual source
+SHA and its five already-triggered workflow IDs; never duplicate CI or inherit
+ae916/ac0b predecessor qualification. Diagnostics including owner preflight are
+manual-only. The Arena profile adds only a source-qualification annotation;
+its job body/cases/budgets remain unchanged.
 
-Native integration120172865344 PASSED all retained steps:219 proof reports,
-27 axiom-free; remaining axiom union only propext,Classical.choice,Quot.sound.
-Allfive scalar hash equations,2730 native cases,3 long cases,genuine String
-294/377/all6cases+singletons,official provider comparisons,24 detached native
-provider cases and complete native measurement rows passed. Exact proofs,
-native executable/fixture/harness digests,steps,measurements and artifact12469314736:
-evidence/2026-10-23-t01f-final-source-native.json.
-Native-kernel120172865463 also PASS; five of six research jobs PASS.
-Official Arena120172865174 PASS:193cases,122accepted,71rejected,complete.
-The independent comparison is pending; official results do not qualify it.
+At executable/harness ae916be40ec30a8a0caf5dd683eb7d1d54966849:
+- Native integration120172865344/native correctness120172865463 PASS;
+  219 proof reports,27 axiom-free,only permitted3axioms; genuine native six-case fixture.
+- Generated producer120172865519 and canonical producer120172865185 PASS,
+  both detached24CLI+8API,2730hashcases8190stages13665assertions,long3,
+  all retained DAG/ownership/proof gates. Generated measurements COMPLETE:
+  128whole-checker,24admission,whole-program and6profile rows.
+- All6 research39879401425 jobs PASS. Both full String matrices are still
+  running at their original exact source; preserve eventual successes/failures.
+- Owner job120183767998 FAILED before benchmark: GitHub reports an enclosing
+  run queued while matrix jobs wait. The old gate wrongly accepted only
+  in_progress/completed-success. No benchmark outcome existed at that job.
 
-Both authentic generated producers are running; their six-sample runtime-only
-matrices/aggregates,generated provider24CLI+8API/measurements and unchanged
-32worker384call ABBA remain pending. Profile and full193 independent Arena
-are pending. No current-source full A/T01F acceptance or integration yet.
-T05 remains blocked. All historical timeouts/regressions and B/C/D gaps remain.
-Complete preflight16aac mixed PASS was1455.04s/1165840KiB,1400assertions;
-it qualifies only that narrow source/sample, not current final matrices.
-Active inventory: evidence/2026-10-23-t01f-final-qualification-active.json.
+Runtime-only owner validation then PASSED at harness
+ac0b0c927683671c29efe9cac62b1fdc767de307,run39883705815,job120186833027.
+It authenticated exact ae916 candidate artifact12471410988 and historical
+9c87 baseline12391568345,unchanged driver4ebfd97b/7c8a8275,32workers384calls,
+ABBA,fuel4096,60seconds/worker,2048MiB,emptyPATH. All source/byte/report
+bindings passed. It is DIAGNOSTIC ONLY with separate harness/generated SHAs.
+Final workflow now accepts active queued/in_progress with null conclusion and
+additionally requires its own exact in_progress job/head/run/attempt before
+checking both producer successes. Artifact,source,driver/count/limit checks remain.
+Full source-bound final qualification must rerun after this workflow change.
 
-### Ready-to-copy continuation
+Do not claim general performance improvement. Narrow diagnostic observations
+include32-owner ill-typed cold1.2885x baseline,128-owner trivial-sort warm1.2024x,
+128-owner owned-constant warm1.0489x with3728KiB larger peakRSS; retained-heap
+and prior Name-memory/warm/cold regressions remain visible. D OPEN.
 
-Continue PSC1 PSKernel-Core T01F in dwijayuda/pskernel. Fetch fresh work branch
-work/psc1-pskernel-t01f-string-20261022 and integration branch
-integration/psc1-pskernel-expr-v2-lean435-20261021 before mutation.
-Read this newest checkpoint and saved active/native evidence. Qualified-candidate
-executable AND harness source is ae916be40ec30a8a0caf5dd683eb7d1d54966849;
-the live work HEAD may be a [skip ci] documentation child. Reuse the five
-already-triggered exact-source runs above, not the earlier fad56 activation.
-Do not launch duplicate builds or transfer a parent's qualification.
-Follow both authentic route producers,all6 whole-case shards+strict aggregates,
-all retained native/official/proof/provider24CLI+8API/research/measurement gates,
-unchanged32worker384call owner ABBA and all193 Arena/profile to terminal.
-Keep scoped A,T01F,B,C,D distinct; corpus collection success is not corpus PASS.
-Preserve fuel4096,2048MiB,empty runtimePATH,25minutes/shard,maxparallel2,
-allpositive/negative assertions,exact ownership/sessions/private IDs,
-Arena60seconds/case2workers and full original/adapted case hashes.
-Actions Linux only for builds/tests/kernel execution. No local execution.
-Fix genuine failures narrowly and retain every rejected source/receipt;
-any source change requires fresh full source-bound qualification.
-Only integrate after required scoped qualification using fresh expected_sha,
-force:false,preserving concurrent changes. No main merge or npm publish.
-One next task is finish/evaluate the existing final T01F suite. T05 follows
-full T01F acceptance,then T06/T07,T04a;T04b separate. Save exact durable
-continuation and truthful pending/failure/performance boundaries if unfinished.
+Full193 current-source Arena39879401452 FAILED:173semantic matches
+(105accepted,60kernelRejected,1metadataRejected,7transportRejected),
+2separate safety-contract agreements,17timeouts,1Church resource exhaustion,
+0unsupported. Official122accepted71rejected0timeouts. All193 body hashes
+individually verified original=adapted with no exclusions/reexport.
+Report667306bytes SHA256f28756611788377e9fca4fc1e7ef39f832804b91664b48331b271238509f5868.
+Profile39879401524 collection PASS for4cases; Church still exhausts and Prelude
+still times out. Collection success is not corpus qualification; C FAIL/OPEN.
+FullArena is separate from scoped T01F/A; do not suppress its failures.
 
-Older chronological entries below remain historical.
+Exact durable receipts:
+- evidence/2026-10-23-t01f-ae916-producers.json
+- evidence/2026-10-23-t01f-ae916-arena-terminal.json (all193 case body hashes)
+- evidence/2026-10-23-t01f-ae916-owner-diagnostic.json
+- evidence/2026-10-23-t01f-final-source-native.json
+- evidence/2026-10-23-t01f-pure-byte-step-mixed-terminal.json (16aac narrowPASS)
+
+One next task: evaluate this NEW source's complete same-source T01F suite:
+both six-shard strict aggregates,allnative/official/proof/provider/research/
+measurement gates,unchanged32worker384call ownerABBA and unchanged193/profile.
+Follow existing ae916 shard runs to terminal too; do not confuse their source.
+Keep25minutes/shard,maxparallel2,failfastfalse,fuel4096,2048MiB,emptyPATH,
+all294independent requests377metadata per process,allpositive/negative cases,
+singleton sequencing,exactowners/sessions/privateIDs and current input digests.
+Actions Linux only for builds/tests/kernel execution; no local execution.
+T01F/currentA OPEN; historical scopedA9c87; B/C/D OPEN. No T05 until fullT01F
+acceptance. Only integrate after required scoped qualification via fresh
+expected_sha/non-force,preserving concurrent changes. Integration remains
+123c41197950b6761be965fd21c57142ee2b0d1c. No main merge or npm publish.
+Then follow T05 ordinary DAG inductive admission,T06/T07,T04a;T04b separate.
+If unfinished,save exact sources,runs,outcomes and ready-to-copy continuation.
+
+Older chronological checkpoints remain below.
 
 ---
 

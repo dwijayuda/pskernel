@@ -1,11 +1,6 @@
 name: PSC1 T01F exact-artifact owner preflight
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - work/psc1-pskernel-t01f-string-20261022
-    paths:
-      - '.github/workflows/psc1-pskernel-t01f-owner-preflight.yml'
 permissions:
   contents: read
   actions: read

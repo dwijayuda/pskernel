@@ -1,0 +1,515 @@
+{
+  "schema": "psc1-t01f-ae916-owner-diagnostic-v1",
+  "recordedAt": "2026-10-23T01:28:46.345Z",
+  "original": {
+    "sourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+    "runId": 39879401423,
+    "jobId": 120183767998,
+    "conclusion": "failure",
+    "reason": "candidate enclosing workflow queued while its matrix waits; run-status assertion rejected before candidate artifact authentication/measurement",
+    "traceback": [
+      "Traceback (most recent call last):",
+      "  File \"<stdin>\", line 146, in <module>",
+      "  File \"<stdin>\", line 57, in restore",
+      "AssertionError",
+      "##[error]Process completed with exit code 1.",
+      "##[group]Run if test -f \"$RUNNER_TEMP/psc1-t01f-owner-pair/measurements/initial-owner-complete-batch.md\"; then",
+      "\u001b[36;1mif test -f \"$RUNNER_TEMP/psc1-t01f-owner-pair/measurements/initial-owner-complete-batch.md\"; then\u001b[0m"
+    ],
+    "driverWasSkipped": true,
+    "observedRunStatus": "queued"
+  },
+  "diagnostic": {
+    "harnessSource": "ac0b0c927683671c29efe9cac62b1fdc767de307",
+    "runId": 39883705815,
+    "jobId": 120186833027,
+    "conclusion": "success",
+    "diagnosticOnly": true,
+    "authentication": {
+      "baseline": {
+        "artifactBytes": 3410883,
+        "artifactId": 12391568345,
+        "artifactSha256": "6c63a2fa2981610f14e91e3aeb37ae6f00e5fdc1107a4c942841d25208af3ff7",
+        "files": [
+          {
+            "bytes": 9952970,
+            "path": "dist/expr-v2/integration/provider/kernel.js",
+            "sha256": "f1ac31f1527103877268b5dea86075795401fc7679357878064f9194e0e9fd32"
+          },
+          {
+            "bytes": 9134512,
+            "path": "dist/expr-v2/integration/provider/kernel.ts",
+            "sha256": "ab7004bb627e3af720cb158ad299f3c0f3528140dbe880fded225c3614220476"
+          },
+          {
+            "bytes": 367466,
+            "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+            "sha256": "dc8900b074c8b6391fc6eb179289caa900dd8769b5625dd13688ac41eb36f468"
+          },
+          {
+            "bytes": 8096611,
+            "path": "dist/expr-v2/integration/provider/kernel.js.map",
+            "sha256": "bce797967f5797226ac2466227c3d2115b213f21837caa80037e640d63b2e08a"
+          },
+          {
+            "bytes": 12759,
+            "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "bytes": 5462,
+            "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "bytes": 42,
+            "path": "dist/expr-v2/integration/provider/package.json",
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "bytes": 11813,
+            "path": "dist/expr-v2/integration/provider/README.md",
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ],
+        "kernelSha256": "f1ac31f1527103877268b5dea86075795401fc7679357878064f9194e0e9fd32",
+        "manifestSha256": "f32cd016edb60fab2f32876319efe060626e120346a53d7a43e663eb34125f35",
+        "producerJobs": [
+          {
+            "conclusion": "success",
+            "id": 119547118983,
+            "name": "native-dag-integration"
+          },
+          {
+            "conclusion": "success",
+            "id": 119547118855,
+            "name": "generated-dag-integration"
+          }
+        ],
+        "producerNode": "v22.23.3",
+        "producerRun": 39694087886,
+        "producerRunAttempt": 1,
+        "producerTypescript": "7.0.2",
+        "role": "authentic Lean-source PSC1/TypeScript provider bundle",
+        "runtime": "/home/runner/work/_temp/psc1-t01f-owner-pair/baseline",
+        "sourceSha": "9c87f631758862285273ddb0ea0a3987c671022e"
+      },
+      "candidate": {
+        "artifactBytes": 3516096,
+        "artifactId": 12471410988,
+        "artifactSha256": "0e8102d98f33cd17d048700d299f3d140e8f6e3cf096a307a2e3eb416d2f6d3d",
+        "files": [
+          {
+            "bytes": 9954771,
+            "path": "dist/expr-v2/integration/provider/kernel.js",
+            "sha256": "4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa"
+          },
+          {
+            "bytes": 9136708,
+            "path": "dist/expr-v2/integration/provider/kernel.ts",
+            "sha256": "55e4f4e521e0693b388e1c04159cae0043fb30fa0cd4a619004a6cb42d6ff550"
+          },
+          {
+            "bytes": 368023,
+            "path": "dist/expr-v2/integration/provider/kernel.d.ts",
+            "sha256": "fc5a57a5fc7870a776b0b98446789f3e6529790d4bc3ac5af86ae0cd6cb5e875"
+          },
+          {
+            "bytes": 8098247,
+            "path": "dist/expr-v2/integration/provider/kernel.js.map",
+            "sha256": "1e1a636b7842a002795132e2e357d49f0f0ee77ba41e83aab07582589e6bb721"
+          },
+          {
+            "bytes": 12759,
+            "path": "dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs",
+            "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+          },
+          {
+            "bytes": 5462,
+            "path": "dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs",
+            "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+          },
+          {
+            "bytes": 42,
+            "path": "dist/expr-v2/integration/provider/package.json",
+            "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+          },
+          {
+            "bytes": 11813,
+            "path": "dist/expr-v2/integration/provider/README.md",
+            "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+          }
+        ],
+        "kernelSha256": "4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa",
+        "manifestSha256": "62de9163fec1f2ac023f6a2f6128e54c44313eadf44e8fd9eaecc64f5d0c1751",
+        "producerJobs": [
+          {
+            "conclusion": "success",
+            "id": 120172865344,
+            "name": "native-dag-integration"
+          },
+          {
+            "conclusion": "success",
+            "id": 120172865519,
+            "name": "generated-dag-integration"
+          }
+        ],
+        "producerNode": "v22.23.3",
+        "producerRun": 39879401423,
+        "producerRunAttempt": 1,
+        "producerTypescript": "7.0.2",
+        "role": "authentic Lean-source PSC1/TypeScript provider bundle",
+        "runtime": "/home/runner/work/_temp/psc1-t01f-owner-pair/candidate",
+        "sourceSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849"
+      },
+      "compilerReexecuted": false,
+      "diagnosticOnly": true,
+      "driverPath": "psc1/scripts/pskernel-expr-v2-initial-owner-bench.mjs",
+      "driverSha256": "7c8a82758b90958d973623d26e4c4dfbd900126cd737c190adffb76cb1563221",
+      "driverSource": "4ebfd97b4588f8651e8b7a81bc00b2a05cfe1e3c",
+      "generatedSource": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+      "producerRun": 39879401423,
+      "repository": "dwijayuda/pskernel",
+      "schema": "psc1-t01f-owner-pair-authentication-v1",
+      "scope": "Narrow paired owner regression; full qualification remains tied to terminal producer workflows.",
+      "workflowRun": 39883705815,
+      "workflowSource": "ac0b0c927683671c29efe9cac62b1fdc767de307"
+    },
+    "receipt": {
+      "allSourceAndArtifactBindingsMatched": true,
+      "authenticationSha256": "0951192e6f18b1936b662cb042e5e222db59aebdf1b7c9eaef3271139605054f",
+      "baselineSource": "9c87f631758862285273ddb0ea0a3987c671022e",
+      "candidateSource": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+      "diagnosticOnly": true,
+      "driverSha256": "7c8a82758b90958d973623d26e4c4dfbd900126cd737c190adffb76cb1563221",
+      "driverSource": "4ebfd97b4588f8651e8b7a81bc00b2a05cfe1e3c",
+      "hardRssLimitClaim": false,
+      "harnessSource": "ac0b0c927683671c29efe9cac62b1fdc767de307",
+      "kernelCompiledHere": false,
+      "performanceThresholdClaim": false,
+      "reportSha256": "dfc0ea6291494b4c710e227f45250f2b74580c6c4a1ad9898c16ffe98ec1424a",
+      "schema": "psc1-t01f-owner-pair-receipt-v1",
+      "validatedCalls": 384,
+      "wholeKernelSpeedupClaim": false,
+      "workers": 32,
+      "workflowRun": 39883705815
+    },
+    "summary": {
+      "baselineSha": "9c87f631758862285273ddb0ea0a3987c671022e",
+      "callsPerWorker": {
+        "cold": 1,
+        "warm": 9,
+        "warmup": 2
+      },
+      "candidateSha": "ae916be40ec30a8a0caf5dd683eb7d1d54966849",
+      "coldDefinition": "First second-batch call in a fresh process after checked-session setup and the independent V1 outcome control; not the first kernel operation.",
+      "completedWorkers": 32,
+      "driverSha256": "7c8a82758b90958d973623d26e4c4dfbd900126cd737c190adffb76cb1563221",
+      "expectedDigests": {
+        "baseline": "f1ac31f1527103877268b5dea86075795401fc7679357878064f9194e0e9fd32",
+        "candidate": "4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa"
+      },
+      "expectedWorkers": 32,
+      "failures": [],
+      "limits": {
+        "hardRssLimitClaim": false,
+        "hostPerWorkerSeconds": 60,
+        "kernelFuel": 4096,
+        "v8OldSpaceMiB": 2048
+      },
+      "order": "ABBA: baseline,candidate,candidate,baseline for each size/query; each worker is a new detached process.",
+      "rows": [
+        {
+          "baseline": {
+            "coldMedianMs": 1.8130084999999951,
+            "firstBatchMeanMs": 142.6296825,
+            "inputConstructionMeanMs": 0.49743649999999207,
+            "maxProcessPeakRssKiB": 125192,
+            "medianRetainedHeapBytes": 28840692,
+            "medianRetainedHeapDeltaBytes": 295508,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 3192.8333333333335,
+            "warmMeanMs": 1.6120311111111063,
+            "warmMedianMs": 1.7206074999999998
+          },
+          "candidate": {
+            "coldMedianMs": 1.8221049999999934,
+            "firstBatchMeanMs": 140.429587,
+            "inputConstructionMeanMs": 0.5051260000000184,
+            "maxProcessPeakRssKiB": 125976,
+            "medianRetainedHeapBytes": 28846876,
+            "medianRetainedHeapDeltaBytes": 295500,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 2619.3333333333335,
+            "warmMeanMs": 1.259535944444448,
+            "warmMedianMs": 1.1426165000000026
+          },
+          "candidateMinusBaselinePeakRssKiB": 784,
+          "candidateOverBaselineCold": 1.0050173509942166,
+          "candidateOverBaselineWarm": 0.78133476194284,
+          "owners": 32,
+          "query": "trivial-sort"
+        },
+        {
+          "baseline": {
+            "coldMedianMs": 6.018296000000021,
+            "firstBatchMeanMs": 140.939686,
+            "inputConstructionMeanMs": 1.5157205000000147,
+            "maxProcessPeakRssKiB": 126744,
+            "medianRetainedHeapBytes": 29401424,
+            "medianRetainedHeapDeltaBytes": 774908,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 7716.5,
+            "warmMeanMs": 4.023691444444448,
+            "warmMedianMs": 4.4055145000000095
+          },
+          "candidate": {
+            "coldMedianMs": 5.843057499999986,
+            "firstBatchMeanMs": 139.8292475,
+            "inputConstructionMeanMs": 1.259573500000016,
+            "maxProcessPeakRssKiB": 126924,
+            "medianRetainedHeapBytes": 29397060,
+            "medianRetainedHeapDeltaBytes": 775880,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 7481.5,
+            "warmMeanMs": 3.495924666666658,
+            "warmMedianMs": 2.9621104999999943
+          },
+          "candidateMinusBaselinePeakRssKiB": 180,
+          "candidateOverBaselineCold": 0.9708823726848872,
+          "candidateOverBaselineWarm": 0.8688351765872895,
+          "owners": 32,
+          "query": "owned-constant"
+        },
+        {
+          "baseline": {
+            "coldMedianMs": 4.254605499999997,
+            "firstBatchMeanMs": 140.00127650000002,
+            "inputConstructionMeanMs": 2.160507999999993,
+            "maxProcessPeakRssKiB": 126952,
+            "medianRetainedHeapBytes": 29067052,
+            "medianRetainedHeapDeltaBytes": 457024,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 7850.888888888889,
+            "warmMeanMs": 3.6920934999999986,
+            "warmMedianMs": 4.005201999999997
+          },
+          "candidate": {
+            "coldMedianMs": 3.406115500000027,
+            "firstBatchMeanMs": 139.69217,
+            "inputConstructionMeanMs": 1.2704544999999996,
+            "maxProcessPeakRssKiB": 126924,
+            "medianRetainedHeapBytes": 29060924,
+            "medianRetainedHeapDeltaBytes": 454408,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 6758.111111111111,
+            "warmMeanMs": 3.1293301111111114,
+            "warmMedianMs": 3.028023499999989
+          },
+          "candidateMinusBaselinePeakRssKiB": -28,
+          "candidateOverBaselineCold": 0.8005714043287985,
+          "candidateOverBaselineWarm": 0.8475760733337637,
+          "owners": 32,
+          "query": "unknown-constant"
+        },
+        {
+          "baseline": {
+            "coldMedianMs": 4.3901405000000295,
+            "firstBatchMeanMs": 138.95374149999998,
+            "inputConstructionMeanMs": 0.5937020000000075,
+            "maxProcessPeakRssKiB": 126944,
+            "medianRetainedHeapBytes": 29224092,
+            "medianRetainedHeapDeltaBytes": 442176,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 7028.166666666667,
+            "warmMeanMs": 4.04459983333334,
+            "warmMedianMs": 3.542051000000015
+          },
+          "candidate": {
+            "coldMedianMs": 5.656857500000001,
+            "firstBatchMeanMs": 144.74011000000002,
+            "inputConstructionMeanMs": 0.5400105000000224,
+            "maxProcessPeakRssKiB": 127048,
+            "medianRetainedHeapBytes": 29230372,
+            "medianRetainedHeapDeltaBytes": 438760,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 6876.277777777777,
+            "warmMeanMs": 3.892154666666676,
+            "warmMedianMs": 3.0007325000000264
+          },
+          "candidateMinusBaselinePeakRssKiB": 104,
+          "candidateOverBaselineCold": 1.2885367791759654,
+          "candidateOverBaselineWarm": 0.9623089618383763,
+          "owners": 32,
+          "query": "ill-typed-definition"
+        },
+        {
+          "baseline": {
+            "coldMedianMs": 1.7717549999999846,
+            "firstBatchMeanMs": 460.244278,
+            "inputConstructionMeanMs": 0.8131429999999682,
+            "maxProcessPeakRssKiB": 172456,
+            "medianRetainedHeapBytes": 29845044,
+            "medianRetainedHeapDeltaBytes": 290192,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 2300.3333333333335,
+            "warmMeanMs": 1.1090709444444542,
+            "warmMedianMs": 1.057737999999972
+          },
+          "candidate": {
+            "coldMedianMs": 1.7587204999999813,
+            "firstBatchMeanMs": 431.6523625,
+            "inputConstructionMeanMs": 0.8400800000000004,
+            "maxProcessPeakRssKiB": 171680,
+            "medianRetainedHeapBytes": 29858444,
+            "medianRetainedHeapDeltaBytes": 297360,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 2655.722222222222,
+            "warmMeanMs": 1.333524777777787,
+            "warmMedianMs": 1.2672530000000393
+          },
+          "candidateMinusBaselinePeakRssKiB": -776,
+          "candidateOverBaselineCold": 0.9926431701900074,
+          "candidateOverBaselineWarm": 1.2023800501290423,
+          "owners": 128,
+          "query": "trivial-sort"
+        },
+        {
+          "baseline": {
+            "coldMedianMs": 5.7844695,
+            "firstBatchMeanMs": 442.42006850000007,
+            "inputConstructionMeanMs": 1.5161295000000337,
+            "maxProcessPeakRssKiB": 169756,
+            "medianRetainedHeapBytes": 30362428,
+            "medianRetainedHeapDeltaBytes": 726280,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 7476.055555555556,
+            "warmMeanMs": 3.5809018333333396,
+            "warmMedianMs": 3.1608624999999506
+          },
+          "candidate": {
+            "coldMedianMs": 5.744524000000013,
+            "firstBatchMeanMs": 444.10689549999995,
+            "inputConstructionMeanMs": 1.4200285000000576,
+            "maxProcessPeakRssKiB": 173484,
+            "medianRetainedHeapBytes": 30360884,
+            "medianRetainedHeapDeltaBytes": 730072,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 8316.722222222223,
+            "warmMeanMs": 3.7561528888888978,
+            "warmMedianMs": 3.2402119999999854
+          },
+          "candidateMinusBaselinePeakRssKiB": 3728,
+          "candidateOverBaselineCold": 0.9930943537691767,
+          "candidateOverBaselineWarm": 1.0489404802790763,
+          "owners": 128,
+          "query": "owned-constant"
+        },
+        {
+          "baseline": {
+            "coldMedianMs": 3.3213304999999878,
+            "firstBatchMeanMs": 443.426161,
+            "inputConstructionMeanMs": 1.978949000000057,
+            "maxProcessPeakRssKiB": 172568,
+            "medianRetainedHeapBytes": 30059180,
+            "medianRetainedHeapDeltaBytes": 440076,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 8743.333333333334,
+            "warmMeanMs": 3.586194000000003,
+            "warmMedianMs": 3.325422500000002
+          },
+          "candidate": {
+            "coldMedianMs": 3.1875479999999925,
+            "firstBatchMeanMs": 438.09084600000006,
+            "inputConstructionMeanMs": 1.6875440000000026,
+            "maxProcessPeakRssKiB": 172564,
+            "medianRetainedHeapBytes": 30053432,
+            "medianRetainedHeapDeltaBytes": 437528,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 7872.666666666667,
+            "warmMeanMs": 3.2214426666666642,
+            "warmMedianMs": 3.0818080000000236
+          },
+          "candidateMinusBaselinePeakRssKiB": -4,
+          "candidateOverBaselineCold": 0.9597202085128247,
+          "candidateOverBaselineWarm": 0.8982901278253942,
+          "owners": 128,
+          "query": "unknown-constant"
+        },
+        {
+          "baseline": {
+            "coldMedianMs": 4.425761999999963,
+            "firstBatchMeanMs": 448.50754950000004,
+            "inputConstructionMeanMs": 0.791330500000015,
+            "maxProcessPeakRssKiB": 174928,
+            "medianRetainedHeapBytes": 30190048,
+            "medianRetainedHeapDeltaBytes": 398672,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 8505.777777777777,
+            "warmMeanMs": 4.355550111111118,
+            "warmMedianMs": 4.103678499999944
+          },
+          "candidate": {
+            "coldMedianMs": 4.346773499999983,
+            "firstBatchMeanMs": 445.29704399999997,
+            "inputConstructionMeanMs": 0.7619799999999941,
+            "maxProcessPeakRssKiB": 174324,
+            "medianRetainedHeapBytes": 30196388,
+            "medianRetainedHeapDeltaBytes": 398672,
+            "processes": 2,
+            "validatedCalls": 24,
+            "warmMeanCpuUs": 7552.222222222223,
+            "warmMeanMs": 3.772880555555566,
+            "warmMedianMs": 3.1838710000000674
+          },
+          "candidateMinusBaselinePeakRssKiB": -604,
+          "candidateOverBaselineCold": 0.9821525649142496,
+          "candidateOverBaselineWarm": 0.8662236593101874,
+          "owners": 128,
+          "query": "ill-typed-definition"
+        }
+      ],
+      "schema": "psc1-initial-owner-complete-batch-v1",
+      "scope": "Actual original and candidate public RunDag calls; complete import/validation/checking cost included.",
+      "validatedCalls": 384
+    },
+    "artifacts": [
+      {
+        "id": 12471726775,
+        "name": "psc1-t01f-owner-pair-39883705815",
+        "size_in_bytes": 8644762,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12471726775",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12471726775/zip",
+        "expired": false,
+        "created_at": "2026-10-23T01:23:49Z",
+        "expires_at": "2026-11-22T01:23:48Z",
+        "updated_at": "2026-10-23T01:23:49Z",
+        "digest": "sha256:388ea4609e2c59355784e8b28940e7d6226b52b0fa888583aab5984ede63ba57",
+        "workflow_run": {
+          "id": 39883705815,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+          "head_sha": "ac0b0c927683671c29efe9cac62b1fdc767de307"
+        }
+      }
+    ]
+  },
+  "correction": "Accept queued/in_progress run with no conclusion; additionally require own exact current running job/head/run/attempt and both producer successes. All artifact/driver/source/count/limit assertions retained.",
+  "performance": "NarrowABBA only; no full-kernel speedup or release threshold claim. Retain32owner ill-typed cold1.2885x;128owner trivial-sort warm1.2024x;128owner owned-constant warm1.0489x and3728KiB peakRSS increase."
+}

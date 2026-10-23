@@ -1118,14 +1118,19 @@ jobs:
               if label == "baseline":
                   assert run["status"] == "completed" and run["conclusion"] == "success"
               else:
-                  # This job keeps its own enclosing workflow running. Both producer jobs,
-                  # rather than the enclosing run, must already have terminal success.
+                  # Waiting matrix jobs can keep an active enclosing run queued.
+                  # Authenticate this exact live job and both completed producers below.
                   assert run_id == candidate_run and source == candidate_source
-                  assert run["status"] == "in_progress" or (
-                      run["status"] == "completed" and run["conclusion"] == "success")
+                  assert run["status"] in ("queued", "in_progress") and run["conclusion"] is None, (
+                      "candidate run state", run["status"], run["conclusion"])
               response = api("/actions/runs/" + str(run_id) + "/jobs?per_page=100")
               jobs = response["jobs"]
               assert response["total_count"] == len(jobs)
+              if label == "candidate":
+                  live = one(jobs, lambda value: value["name"] == os.environ["GITHUB_JOB"])
+                  assert live["status"] == "in_progress" and live["conclusion"] is None
+                  assert live["head_sha"] == source and live["run_id"] == run_id
+                  assert live["run_attempt"] == int(os.environ["GITHUB_RUN_ATTEMPT"]) == run["run_attempt"]
               producers = []
               for name in ("native-dag-integration", "generated-dag-integration"):
                   job = one(jobs, lambda value: value["name"] == name)

@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: psc1-rust-ts-selfhost-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   generated:
@@ -80,6 +80,7 @@ jobs:
           node --check scripts/generated-target-runner.mjs
           node --check host-tools/generated-target-tools.mjs
           node scripts/generated-target-contract-tests.mjs
+          node scripts/bounded-process-contract-tests.mjs
           node scripts/js-generation-manifest-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
       - name: Build the common source facades and separate official checker

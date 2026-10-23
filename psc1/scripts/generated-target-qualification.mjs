@@ -5,7 +5,7 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {readOwnedCompilerSources} from '../host-tools/compiler-source-inputs.mjs';
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
-import {sha,buildTarget,observeArtifact,verifyArtifact,runTool} from '../host-tools/generated-target-tools.mjs';
+import {sha,buildTarget,observeArtifact,verifyArtifact,runTool,boundedRun} from '../host-tools/generated-target-tools.mjs';
 import {validateClosureCounts} from './compiler-closure-contract.mjs';
 import {corpus,refusals,expectedObservations,observedExpressions,rustObservations} from './generated-target-corpus.mjs';
 const [target,mode='--self-host']=process.argv.slice(2);
@@ -18,13 +18,14 @@ const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
 const runner=path.resolve('scripts/generated-target-runner.mjs');
 const inventoryFiles=['scripts/generated-target-qualification.mjs','scripts/generated-target-runner.mjs',
  'scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
- 'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','scripts/compiler-closure-contract.mjs'];
+ 'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
 const tools=[checker,process.execPath,...inventoryFiles.map(p=>path.resolve(p))].map(file=>({file,sha256:sha(fs.readFileSync(file))}));
 const seedHash=sha(fs.readFileSync(seed));let seedCalls=0;
 const events=[],report={schema:'psc1-generated-target-qualification/1',target,mode,
  testedCommit:process.env.GITHUB_SHA,branchHead:process.env.PSC1_BRANCH_HEAD,
  nativeSeedSha256:seedHash,tools,events,status:'running',generations:[],attempts:[],
  fixedPoint:'not-run',productionPublication:'not-run',formalPreservation:'not-provided'};
+const checkpoint=()=>fs.writeFileSync(path.join(directory,'qualification.json'),JSON.stringify(report,null,2)+'\n');
 const pinned=()=>{
  tools.forEach(t=>assert.equal(sha(fs.readFileSync(t.file)),t.sha256,'PSC1_QUALIFICATION_TOOL_CHANGED'));
  for(const row of report.sourceInventory||[]){
@@ -75,8 +76,9 @@ function generated(artifact,r,label) {
  pinned();verifyArtifact(artifact.file,artifact.sha256);
  const input=path.join(directory,label+'.request.json'),output=path.join(directory,label+'.candidate.json');
  fs.writeFileSync(input,r.text);
- const began=Date.now(),result=spawnSync(process.execPath,[runner,artifact.file,artifact.sha256,input,output],
-  {encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});
+ report.activeRequest={id:r.id,requestSha256:sha(r.text),producer:artifact.sha256};checkpoint();
+ const began=Date.now(),result=boundedRun(process.execPath,[runner,artifact.file,artifact.sha256,input,output],
+  {logDirectory:path.join(directory,label+'-process')});
  const event={role:'generated-compiler',target,id:r.id,serviceSha256:artifact.sha256,
   requestSha256:sha(r.text),elapsedMs:Date.now()-began,status:result.status,signal:result.signal,error:result.error?.message||null};
  events.push(event);
@@ -90,6 +92,7 @@ function generated(artifact,r,label) {
  assert.equal(execution.requestSha256,sha(r.text));assert.equal(execution.responseSha256,c.sha256);
  event.maxRssKiB=execution.maxRssKiB;
  console.log('PSC1_TARGET_GENERATED_WORKLOAD: '+JSON.stringify(event));
+ report.activeRequest=null;checkpoint();
  return c;
 }
 function exercise(artifact,generation) {
@@ -101,12 +104,14 @@ function exercise(artifact,generation) {
   const built=buildTarget({target,source:c.value.source,directory:path.join(directory,label),consumer,publicNames:c.value.publicNames});
   const observation=observeArtifact(built);assert.deepEqual(observation.observation,expectedObservations[item.id]);
   observations.push({id:item.id,...identity,observation:observation.observation});
+  (report.cases||=[]).push({generation,...observations.at(-1),execution:observation.event});checkpoint();
  }
  for(const item of refusals) {
   const label='G'+generation+'-'+item.id,r=request(label,item.grammar,item.assurance,'Entry',[{module:'Entry',text:item.source}]);
   const c=generated(artifact,r,label);assert.equal(c.value.status,'refused');assert.equal(c.value.phase,item.phase);
   assert.equal(c.value.admission,'not-run');assert.equal(c.value.source,undefined);
   observations.push({id:item.id,refused:true,phase:item.phase,code:c.value.code});
+  (report.cases||=[]).push({generation,...observations.at(-1)});checkpoint();
  }
  assert.equal(observations.length,10);
  return observations;
@@ -118,7 +123,7 @@ try {
  const sourceInventory=ordered.map(s=>({module:s.module,path:s.path,bytes:Buffer.byteLength(s.text),sha256:sha(s.text)}));
  report.sourceInventory=sourceInventory;report.sourceModules=sources.length;
  const bootstrap=request('G1-bootstrap','lean','ordinary-checked',entry,sources);
- report.sourceClosureDigest=bootstrap.digest;
+ report.sourceClosureDigest=bootstrap.digest;checkpoint();
  const input=path.join(directory,'G1-bootstrap.request.json'),output=path.join(directory,'G1-bootstrap.candidate.json');
  fs.writeFileSync(input,bootstrap.text);assert.equal(seedCalls,0);
  assert.equal(sha(fs.readFileSync(seed)),seedHash);seedCalls++;
@@ -126,8 +131,9 @@ try {
  assert.equal(sha(fs.readFileSync(seed)),seedHash);assert.equal(sha(fs.readFileSync(input)),sha(bootstrap.text));
  const initial=candidateFile(output),baseline=checkCandidate(initial,bootstrap);
  assert.deepEqual(initial.value.publicNames,[exportName]);
- report.bootstrap=baseline;
+ report.bootstrap=baseline;checkpoint();
  let artifact=buildTarget({target,source:initial.value.source,directory:path.join(directory,'G1-service'),service:true,publicNames:[exportName]});
+ report.serviceArtifact={file:artifact.file,sha256:artifact.sha256,sourceSha256:artifact.manifest.sourceSha256};checkpoint();
  // No native compiler frontend/emitter is available after this sole seed call.
  const disabled=path.resolve('.lake/build/disabled-'+target+'-native-tools');fs.mkdirSync(disabled,{recursive:true});
  for(const n of fs.readdirSync('.lake/build/bin')){
@@ -136,17 +142,17 @@ try {
  }
  assert.equal(fs.existsSync(seed),false);report.nativeDelegationBoundary='one-seed; native compiler executables removed; generated source semantics only';
  const observations=exercise(artifact,1);
- report.generations.push({generation:1,...baseline,artifactSha256:artifact.sha256,observations});
+ report.generations.push({generation:1,...baseline,artifactSha256:artifact.sha256,observations});checkpoint();
  for(const generation of (mode==='--self-host'?[2,3]:[])){
   const r=request('G'+generation+'-self','lean','ordinary-checked',entry,sources);
-  const attempt={generation,producer:artifact.sha256,status:'running'};report.attempts.push(attempt);
+  const attempt={generation,producer:artifact.sha256,status:'running'};report.attempts.push(attempt);checkpoint();
   const c=generated(artifact,r,'G'+generation+'-self'),identity=checkCandidate(c,r);
   for(const k of ['sourceClosureDigest','sourceSha256','admissionsSha256','originalIrSha256','specializedIrSha256'])assert.equal(identity[k],baseline[k],'PSC1_FIXED_POINT_MISMATCH:'+k);
   assert.deepEqual(c.value.publicNames,[exportName]);
   const next=buildTarget({target,source:c.value.source,directory:path.join(directory,'G'+generation+'-service'),service:true,publicNames:[exportName]});
   const actual=exercise(next,generation);assert.deepEqual(actual,observations,'PSC1_GENERATION_CORPUS_CHANGED');
   report.generations.push({generation,...identity,artifactSha256:next.sha256,observations:actual});
-  attempt.status='passed';artifact=next;
+  attempt.status='passed';artifact=next;checkpoint();
  }
  assert.equal(seedCalls,1);pinned();
  if(target==='rust')assert.ok(fs.existsSync('scripts/fixtures/selfhost-rust.Cargo.lock'),

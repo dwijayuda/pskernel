@@ -47,7 +47,15 @@ The self-host tool now compiles raw emitted source with cargo --message-format=s
 all diagnostics remain, including errors, at the same 32 MiB bound. Per-tool
 start/completion timing is durable. Normal production formatting remains intact;
 large compiler output readability is a separate pending backend task, not an
-excuse to change source semantics or resource limits. Next: execute the new manual matrix,
+excuse to change source semantics or resource limits. Run 39877740380/TS job 120167646244 reaches its 15-minute job bound after the
+G1 candidate (no executing generation is claimed). Soft single-process timeout
+was insufficient for the target process tree. Linux supervision now enforces
+SIGKILL for the whole group at the same 240000 ms child deadline and 32 MiB per
+stream; the 245000 ms outer supervisor guard allows cleanup only. Tests cover
+ignored TERM, exited parents/inherited pipes, and output overflow. Exact source,
+bootstrap, service artifact and completed-case evidence is written incrementally.
+New explicit requests cancel superseded requests; source/docs alone still never
+run G2/G3. Existing runs/history/artifacts remain. Next: execute the new manual matrix,
 fix target/source blockers as classes, capture exact tool/runtime evidence and
 complete fresh normal qualification after compiler changes.
 

@@ -2,23 +2,39 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 export const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
-export function runTool(executable,args,options={}) {
+export function boundedRun(executable,args,options={}) {
+ const temporary=!options.logDirectory;
+ const directory=options.logDirectory||fs.mkdtempSync(path.join(os.tmpdir(),'psc1-target-process-'));
+ fs.mkdirSync(directory,{recursive:true});
  const started=Date.now();
- if(options.logDirectory)fs.appendFileSync(path.join(options.logDirectory,'tool-events.jsonl'),
-  JSON.stringify({state:'started',executable,args,at:new Date(started).toISOString()})+'\n');
- const r=spawnSync(executable,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024,...options});
- const event={executable,args,status:r.status,signal:r.signal,elapsedMs:Date.now()-started,error:r.error?.message||null};
- if(options.logDirectory) {
-  fs.appendFileSync(path.join(options.logDirectory,'tool-events.jsonl'),JSON.stringify({state:'finished',...event,
-   stdoutBytes:Buffer.byteLength(r.stdout||''),stderrBytes:Buffer.byteLength(r.stderr||'')})+'\n');
-  fs.writeFileSync(path.join(options.logDirectory,'tool.stdout.txt'),r.stdout||'');
-  fs.writeFileSync(path.join(options.logDirectory,'tool.stderr.txt'),r.stderr||'');
- }
- if(r.error||r.status!==0) throw Error('PSC1_TARGET_TOOL_FAILED:'+JSON.stringify(event)+'\n'+(r.stderr||r.stdout||'').split('\n').slice(0,28).map(line=>line.slice(0,320)).join('\n'));
+ fs.appendFileSync(path.join(directory,'tool-events.jsonl'),JSON.stringify({
+  state:'started',executable,args,at:new Date(started).toISOString()})+'\n');
+ // The child process tree has the unchanged 240000 ms deadline. This outer
+ // 245000 ms guard allows supervisor cleanup only; it cannot extend child work.
+ const control=spawnSync('python3',[path.resolve('scripts/bounded-process.py'),JSON.stringify({
+  command:[executable,...args],directory,timeoutMs:options.timeoutMs||240000,maxBuffer:32*1024*1024})],
+  {encoding:'utf8',timeout:245000,killSignal:'SIGKILL',maxBuffer:1024*1024,
+   cwd:options.cwd,env:options.env||process.env});
+ if(control.error||control.status!==0)throw Error('PSC1_SUPERVISOR_FAILED:'+(control.error?.message||control.stderr));
+ const result=JSON.parse(control.stdout);
+ result.stdout=fs.readFileSync(path.join(directory,'tool.stdout.txt'),'utf8');
+ result.stderr=fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8');
+ fs.appendFileSync(path.join(directory,'tool-events.jsonl'),JSON.stringify({state:'finished',
+  executable,args,status:result.status,signal:result.signal,error:result.error,
+  elapsedMs:result.elapsedMs,stdoutBytes:result.stdoutBytes,stderrBytes:result.stderrBytes})+'\n');
+ if(temporary)fs.rmSync(directory,{recursive:true,force:true});
+ return result;
+}
+export function runTool(executable,args,options={}) {
+ const r=boundedRun(executable,args,options);
+ const event={executable,args,status:r.status,signal:r.signal,elapsedMs:r.elapsedMs,error:r.error?.message||null};
+ if(r.error||r.status!==0)throw Error('PSC1_TARGET_TOOL_FAILED:'+JSON.stringify(event)+'\n'+
+  (r.stderr||r.stdout||'').split('\n').slice(0,28).map(line=>line.slice(0,320)).join('\n'));
  return {stdout:r.stdout,event};
 }
 export function verifyArtifact(manifestFile,expectedHash) {
@@ -80,7 +96,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
   fs.copyFileSync(path.resolve('dist/selfhost-rust-cargo/release/psc1-generated-target'),path.join(directory,executable));
   fs.chmodSync(path.join(directory,executable),0o700);
  }
- const excluded=new Set(['tool.stdout.txt','tool.stderr.txt','artifact.json']);
+ const excluded=new Set(['tool.stdout.txt','tool.stderr.txt','tool-events.jsonl','artifact.json']);
  const files=fs.readdirSync(directory).filter(n=>!excluded.has(n)&&fs.lstatSync(path.join(directory,n)).isFile()).sort().map(p=>{
   const b=fs.readFileSync(path.join(directory,p));return{path:p,bytes:b.length,sha256:sha(b)};
  });

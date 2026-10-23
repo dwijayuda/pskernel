@@ -18,8 +18,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39877740380'
-          artifact-ids: '12469393863'
+          run-id: '39879776319'
+          artifact-ids: '12470526315,12470087184'
           path: input
       - name: Summarize exact retained Rust build diagnostics without execution
         run: node .github/diagnostics/psc1-rust-artifact-reader.mjs

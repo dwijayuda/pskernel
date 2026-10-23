@@ -33,3 +33,23 @@ for(const file of files){
    originalDeclarations:q.originalIr?.[4]?.length,specializedDeclarations:q.specializedIr?.[4]?.length}));
  }
 }
+
+for(const file of files){
+ const name=path.basename(file);
+ if(['module.rs','module.ts'].includes(name)){
+  const lines=fs.readFileSync(file,'utf8').split('\n');
+  const longest=lines.map((line,i)=>({line:i+1,chars:line.length,
+   declaration:line.match(/^(?:(?:pub|export) )?(?:fn|function\\*?|const)\\s+([^\\s<(]+)/)?.[1]||null}))
+   .sort((a,b)=>b.chars-a.chars).slice(0,25);
+  console.log('PSC1_GENERATED_LARGEST_LINES: '+JSON.stringify({file,longest}));
+ }
+ if(name==='G1-bootstrap.candidate.json'){
+  const q=JSON.parse(fs.readFileSync(file,'utf8'));
+  function measure(value){let arrays=0,depth=0,stack=[[value,0]];while(stack.length){const[x,d]=stack.pop();if(Array.isArray(x)){arrays++;depth=Math.max(depth,d);for(const child of x)if(Array.isArray(child))stack.push([child,d+1]);}}return{arrays,depth};}
+  for(const kind of ['originalIr','specializedIr']){
+   const largest=q[kind][4].map(d=>({name:d[0],typeParameters:d[1].length,parameters:d[2].length,bodyBytes:JSON.stringify(d[4]).length,...measure(d[4])}))
+    .sort((a,b)=>b.arrays-a.arrays).slice(0,25);
+   console.log('PSC1_GENERATED_LARGEST_IR: '+JSON.stringify({target:q.target,kind,largest}));
+  }
+ }
+}

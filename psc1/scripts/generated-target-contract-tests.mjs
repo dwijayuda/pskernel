@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {sha,verifyArtifact} from '../host-tools/generated-target-tools.mjs';
+import {sha,verifyArtifact,executeService} from '../host-tools/generated-target-tools.mjs';
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
 import {corpus,refusals,expectedObservations,rustObservations} from './generated-target-corpus.mjs';
 assert.equal(corpus.length,5);assert.equal(refusals.length,5);
@@ -33,3 +33,27 @@ try{
  fs.appendFileSync(manifestFile,' ');assert.throws(()=>verifyArtifact(manifestFile,hash),/MANIFEST_CHANGED/);
 }finally{fs.rmSync(dir,{recursive:true,force:true});}
 console.log('PSC1_GENERATED_TARGET_CONTRACT: corpus frozen; wrong target, changed artifact and symlink refused');
+
+// A constructed refusal transport fixture proves invalid wire is forwarded unchanged.
+// It supplies no compiler semantics, admission evidence or qualification.
+const transport=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-target-wire-'));
+try {
+ const js='export function psCompilerTsServiceCandidate(input) { return JSON.stringify({status:"refused",input}); }\n';
+ fs.writeFileSync(path.join(transport,'module.js'),js);
+ fs.writeFileSync(path.join(transport,'module.ts'),'export {};\n');
+ fs.writeFileSync(path.join(transport,'package.json'),'{"type":"module"}\n');
+ const files=['module.js','module.ts','package.json'].map(p=>{
+  const b=fs.readFileSync(path.join(transport,p));return {path:p,bytes:b.length,sha256:sha(b)};
+ });
+ const manifest={schema:'psc1-generated-target-artifact/1',target:'ts',executable:'module.js',
+  service:true,publicNames:['psCompilerTsServiceCandidate'],sourceSha256:files.find(f=>f.path==='module.ts').sha256,files};
+ const manifestFile=path.join(transport,'artifact.json');
+ fs.writeFileSync(manifestFile,JSON.stringify(manifest));const hash=sha(fs.readFileSync(manifestFile));
+ for(const [i,input] of ['malformed JSON','null','{}','["wrong-protocol","G2-self"]'].entries()) {
+  const request=path.join(transport,'request-'+i+'.json'),output=path.join(transport,'response-'+i+'.json');
+  fs.writeFileSync(request,input);
+  await executeService(manifestFile,hash,request,output,'correctness-1800s');
+  assert.deepEqual(JSON.parse(fs.readFileSync(output)),{status:'refused',input});
+ }
+ console.log('PSC1_GENERATED_TARGET_WIRE_REFUSAL: malformed wire forwarded unchanged');
+} finally { fs.rmSync(transport,{recursive:true,force:true}); }

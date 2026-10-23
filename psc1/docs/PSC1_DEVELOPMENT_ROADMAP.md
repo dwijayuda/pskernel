@@ -1,76 +1,81 @@
 # PSC1 development roadmap
 
-Updated 2026-10-23. Release authority:
-[PSC1_PRACTICAL_CORE_V1_CONTRACT.json](PSC1_PRACTICAL_CORE_V1_CONTRACT.json)
-(14 frozen families, 37 criteria, both grammars, seven targets, four application
-categories). [AI_WORK_STATE.md](../AI_WORK_STATE.md) owns continuation;
-[the machine receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json) owns
-exact tested identities and evidence. Preserve working functionality.
+Updated 2026-10-23. The frozen [Practical Core v1 contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json)
+owns the 14 feature families, 37 finite criteria, both grammars, seven targets and
+four application categories. [AI_WORK_STATE.md](../AI_WORK_STATE.md) owns current
+continuation; [the canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json)
+owns exact source/tool identities, runs, timings, memory, failures and artifacts.
 
-## Explicit longer correctness profile (2026-10-23)
+## Qualified baseline and profile outcomes
 
-User-authorized separate `correctness-1800s` extends only G2-self/G3-self requests
-to 1800000 ms. G1, corpus and build limits stay 240000 ms. Existing performance
-workflows and their 240-second failures remain separate and unchanged.
-See [profile contract](PSC1_SELFHOST_QUALIFICATION_PROFILES.md).
-Longer qualification is pending actual Linux execution. The isolated codec
-candidate passes official all-input native proof/regression gates on run
-39908086775; actual generated work and full integration remain separate gates.
-No G2/G3 or fixed-point success is claimed.
+Integrated source 5ce2fc74b9f01682832ddc10ec9ef27f26458564, tested merge
+a61eecf46ded19eedcdefcb320aa33118cd8f2ad,
+[run 39909569028](https://github.com/dwijayuda/pskernel/actions/runs/39909569028):
+all selected jobs, 47 full-job steps and 37/37 criteria pass. Benchmark is
+dependency-skipped. Both grammars, seven mappings, applications, official
+admission, strict IR, negatives and unpublished installed native package remain
+qualified. PSC1 Lean source is unchanged from qualified 78fe34b8.
 
-## Qualified finite baseline
+Rust isolated source 5e0b548e6cb3606ee0d3c129e0a829d830e407e4 / request
+7d8865a08427a28432e427592dfc4263718c9a2f qualifies actual G1/G2/G3 and the exact
+fixed point in [run 39908529181](https://github.com/dwijayuda/pskernel/actions/runs/39908529181).
+G2/G3 requests complete in 692788/660042 ms at 668192/668184 KiB maxRSS.
+Source/admission/original-IR/transformed-IR/corpus and executable bytes match
+across the three generations. Independent clean-build repeats remain distinct.
 
-HEAD 78fe34b8d08d3f01dcc06ca9592668c958526849, tested merge
-9fc3bade30bb0dc2ab4535e17319af52bee62250,
-[run 39894605462](https://github.com/dwijayuda/pskernel/actions/runs/39894605462):
-all selected jobs, 47 full steps and 37/37 criteria pass. Benchmark is
-dependency-skipped. Both grammars, seven mappings, typed IO/control/order/
-collections, real applications, ABI/negative boundaries, official admission,
-strict IR and scoped installed native package remain qualified and unpublished.
-All prior source qualifications and failed experiments remain retained.
+TypeScript shared-codec source passes G1 and ten cases, then times out at
+1800240 ms / 2995304 KiB in run39908439190; G3/fixed point are not run.
+Original performance-240s runs still fail G2: Rust240034 ms and TS240141 ms.
+A long correctness pass never grants a performance badge.
+[Profile policy and commands](PSC1_SELFHOST_QUALIFICATION_PROFILES.md).
 
 ## Dependency-ordered remaining queue
 
-| Order | Work | Current evidence | Acceptance |
+| Order | Work | Current evidence | Finite acceptance |
 | --- | --- | --- | --- |
-| 1 | Resolve normalized full-workload throughput | Both grammar lexer all-input proofs, 320 comparisons, 100001-token cases and ten G1 cases pass. Rust 2697 / TS 2610 declarations have zero open generics; current G2 timeouts are 240038 / 240106 ms | Inspect current Rust late call path and TS profile 39900956833 (codec/JSON/text builder/generator dispatch); fix measured classes under original limits |
-| 2 | Complete independent Rust generations | Ownership, safe private linear destruction, all-input cursor/length/lexer proofs, both grammar audits and level-1 G1 pass; current G2 times out | Independently admit/build/execute G2/G3 and exact closure/source/admission/original/transformed IR/ten-case fixed points |
-| 3 | Complete independent TypeScript generations | Strict annotations integrated; isolated structured generator, closed plan and lexer normalization pass G1; current late profile reaches codec/JSON/text operations | Strict/noEmitOnError, same source, actual independent G2/G3 and fixed points; measured late-runtime improvements |
-| 4 | Promote coherent validated changes | Main remains fully qualified; later source/backend candidates isolated | Fetch latest HEAD, reconcile concurrent edits, non-force expected-HEAD integration, fresh full seven-backend and application qualification |
-| 5 | Reproducible readable target distribution | Exact source/tool/lock and hash-bound artifacts exist; no final binary repeatability claim | Repeated clean target build-product identities, readable output and TS declarations/maps; no npm publication or merge without authorization |
+| 1 | Finish TS predicate and applied-lookup corrections | Predicate run39913434540 and combined source0938c895/request10ac556f/run39914906360; all-Char and all-list/name/fuel/index/hash proofs, native regressions and audits pass; actual generations running | Independently admit/build/execute G2/G3 and exact source/closure/admission/original/transformed IR/ten-case fixed points under correctness-1800s |
+| 2 | Optimize both targets toward 240s | Rust correctness qualified but G2/G3 take about11min; TS remains blocked; actual current profiles retained | Actual performance-240s G1/G2/G3 and unchanged fixed-point/negative/identity requirements |
+| 3 | Promote coherent validated sources | Main profile/host machinery is qualified; compiler/backend/codec candidates stay isolated | Fetch latest HEAD, reconcile by dependency-coherent files, preserve TS result annotations/all targets, non-force integration and fresh full seven-backend/application qualification |
+| 4 | Qualify separate clean-build reproducibility | Rust executable bytes match G1/G2/G3 within one pipeline and pinned tool/lock identities | Repeated clean target builds in independent directories/environments; readable code, TS declarations/maps |
+| 5 | Finish practical distribution | Native package and target artifacts remain unpublished | Required final qualification and explicit authorization before any merge or publication |
 
-## Architectural direction
+## Measured engineering direction
 
-Rust leads native performance; TypeScript leads readable npm-compatible
-distribution. Both reuse Ps.Compiler.Service and the same existing frontend,
-elaborator, checked IR, verification and production emitters. DirectJS remains
-a qualified G1 regression/reference; its G2 heap defect/evidence remain preserved
-without DirectJS-first optimization. All seven targets remain supported.
+Use the same existing Ps.Compiler.Service source, frontend, elaborator, checked
+IR, verifier and emitters. Rust leads native execution; TypeScript leads readable
+npm-compatible distribution. DirectJS remains the qualified G1 reference; its
+tracked G2 heap defect and all previous evidence are retained.
 
-The generic route leaves fourteen recursive polymorphic curried workers unchanged.
-Source wrapper arity normalization does not change synthesized recursive helpers.
-For scalar public interfaces, try the existing checked closed specialization/
-worker pipeline before adding generic compiler machinery. Preserve generic,
-nominal and callback public API/refusal behavior. If generic fusion becomes
-necessary, propagate and instantiate type parameters through companion signatures,
-call spines and captured partial applications; do not just remove its guard.
+Current TS replay39912539573 covers the final30s of a bounded220s G2 run, not the
+end of the 1800s request. It still exposes generator/thunk overhead around the
+escape predicate, codec and constructor lookup. The current small correction
+replaces lazy Boolean disjunction with explicit branches and retains an official
+all-input equality theorem. The combined trial normalizes eager curried constructor/height lookup recursion into fully applied workers, with universal equality proofs and a 100001-entry native miss test. Existing function types and first-binding/fuel behavior remain. Measure actual compiler requests before declaring a gain.
+UTF-8 size/index cache-thrashing and prefix-scanning hypotheses remain unmeasured;
+do not expand the two-entry cache or alter raw-offset/Unicode behavior casually.
 
-Compare full generated compiler workloads, wall time/RSS, tool build time and
-source sizes separately. The same compiler-input closure/request comparison measures five positive Rust
-G1 requests at 5853 ms (level 0) versus 2303 ms (level 1), across separate hosted
-runs and including startup. Keep established level 1. Both full G2 observations
-are deadline-censored; no completed G2 or cross-target full-workload advantage
-is established. Diagnostic success, native
-proof, G1 and G2/G3/repeated-build qualification are distinct statuses.
+Rust late stack39906025465 reaches strict transformed-IR checking and nominal
+arity lookup. A bounded derived index is a possible measured-class correction,
+provided all-input lookup equality preserves first binding, duplicate names,
+structure/inductive priority, Array override, misses and report/resource behavior.
+Do not skip strict validation or remove generic worker guards. Checked scalar
+closed planning already removes open generics from these actual compiler plans.
 
-Keep the fixed contract; defer optional v1 scope expansion while preserving
-working features. Language/compiler/backend work and PSKernel-Core Expression V2
-research proceed independently. Official Lean 4.35.0 remains authoritative.
+## Invariants and workstreams
 
-G2/G3 qualification has resumed after Practical Core freeze but stays manual/release.
-Tiered static/focused/integration/full Linux CI, dependency-aware selection,
-source/dependency caches and request concurrency remain. Preserve strict IR,
-independent admission, all negative tests, semantic/resource policies and
-unsupported ABI refusals. Avoid rerunning full CI for unchanged source or
-repeatedly planning/patching source symptoms of a shared lowering defect.
-No force pushes, merges or registry publication.
+performance-240s retains the existing 15-minute jobs and 240000ms process-tree
+deadline. correctness-1800s is a separate manual/release workflow with120-minute
+jobs and110-minute execution steps; only G2-self/G3-self receive1800000ms.
+G1/corpus/builds remain240000ms, independent checking120000ms, streams32MiB,
+wire128MiB and cleanup5s. Fuel, heap/stack, negatives, strict IR, official Lean
+4.35.0 admission and unsupported ABI refusals remain unchanged.
+
+Keep all-input lexer/cursor/codec proofs, Rust ownership/private linear Drop,
+checked TS generator results and generic ABI fallback. Preserve both grammars
+and all seven backend mappings. PSKernel Expression V2 research remains
+independent; it cannot block compiler work or replace official Lean admission.
+
+Avoid architectural duplication, unchanged full reruns and repeated audits.
+Evidence-only changes belong in the recognized canonical receipt and active
+Markdown. Passive historical JSON, including the initial profile-declaration
+snapshot, stays historical. No force pushes, merges or registry publication.

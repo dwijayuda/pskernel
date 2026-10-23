@@ -41,7 +41,13 @@ including num-bigint 0.4.6 / num-traits 0.2.19 and checksummed transitives.
 TS audit 39877162580 accepts parsing, then identifies an untyped local match
 in psTsEmitInductiveWithVisibility at 162:1. An explicit String annotation and
 a native definitional-equality proof preserve its exact result. No Rust or TS
-G1/G2/G3 execution is qualified yet. Next: execute the new manual matrix,
+G1/G2/G3 execution is qualified yet. Run 39877162580/Rust job 120165435405 subsequently reaches rustfmt ETIMEDOUT
+at 240103 ms before cargo. Failed artifact 12468649397 retains that exact source.
+The self-host tool now compiles raw emitted source with cargo --message-format=short;
+all diagnostics remain, including errors, at the same 32 MiB bound. Per-tool
+start/completion timing is durable. Normal production formatting remains intact;
+large compiler output readability is a separate pending backend task, not an
+excuse to change source semantics or resource limits. Next: execute the new manual matrix,
 fix target/source blockers as classes, capture exact tool/runtime evidence and
 complete fresh normal qualification after compiler changes.
 

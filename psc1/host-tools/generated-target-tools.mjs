@@ -8,9 +8,13 @@ import {pathToFileURL} from 'node:url';
 export const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 export function runTool(executable,args,options={}) {
  const started=Date.now();
+ if(options.logDirectory)fs.appendFileSync(path.join(options.logDirectory,'tool-events.jsonl'),
+  JSON.stringify({state:'started',executable,args,at:new Date(started).toISOString()})+'\n');
  const r=spawnSync(executable,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024,...options});
  const event={executable,args,status:r.status,signal:r.signal,elapsedMs:Date.now()-started,error:r.error?.message||null};
  if(options.logDirectory) {
+  fs.appendFileSync(path.join(options.logDirectory,'tool-events.jsonl'),JSON.stringify({state:'finished',...event,
+   stdoutBytes:Buffer.byteLength(r.stdout||''),stderrBytes:Buffer.byteLength(r.stderr||'')})+'\n');
   fs.writeFileSync(path.join(options.logDirectory,'tool.stdout.txt'),r.stdout||'');
   fs.writeFileSync(path.join(options.logDirectory,'tool.stderr.txt'),r.stderr||'');
  }
@@ -64,14 +68,13 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
    'fn main() { '+consumer+' }';
   fs.writeFileSync(path.join(directory,'module.rs'),source);
   fs.writeFileSync(path.join(directory,'main.rs'),source+'\n'+main+'\n');
-  events.push(runTool('rustfmt',['--edition','2021',path.join(directory,'main.rs')],{logDirectory:directory}).event);
   fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n');
   const locked=path.resolve('scripts/fixtures/selfhost-rust.Cargo.lock');
   // The first diagnostic records the exact resolver output. Once checked in,
   // every subsequent build uses that repository lock without re-resolution.
   if(fs.existsSync(locked)) fs.copyFileSync(locked,path.join(directory,'Cargo.lock'));
   else events.push(runTool('cargo',['generate-lockfile','--manifest-path',path.join(directory,'Cargo.toml')],{logDirectory:directory}).event);
-  events.push(runTool('cargo',['build','--release','--locked','--manifest-path',path.join(directory,'Cargo.toml')],
+  events.push(runTool('cargo',['build','--release','--locked','--message-format=short','--manifest-path',path.join(directory,'Cargo.toml')],
    {env:{...process.env,CARGO_TARGET_DIR:path.resolve('dist/selfhost-rust-cargo')},logDirectory:directory}).event);
   executable='service.bin';
   fs.copyFileSync(path.resolve('dist/selfhost-rust-cargo/release/psc1-generated-target'),path.join(directory,executable));

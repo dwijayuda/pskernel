@@ -42,30 +42,29 @@ def psKernelCacheStringHashPairsWithFuel
   | Nat.zero => initial
   | Nat.succ remaining =>
       let state := psKernelCacheStringHashPairsWithFuel remaining value initial;
+      /- Direct projections keep the intermediate transition a pure expression. -/
       let intermediate :=
-        let position := Prod.fst state;
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state)) then
           state
         else
           Prod.mk
             (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state))))
             (Nat.mod
               (Nat.add
                 (Nat.mul (Prod.snd state) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state)))))
               psKernelCacheHashModulus);
-      let position := Prod.fst intermediate;
-      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst intermediate)) then
         intermediate
       else
         Prod.mk
           (String.Pos.Raw.byteIdx
-            (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+            (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst intermediate))))
           (Nat.mod
             (Nat.add
               (Nat.mul (Prod.snd intermediate) 31)
-              (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+              (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst intermediate)))))
             psKernelCacheHashModulus)
 
 def psKernelCacheStringHashStateWithFuel
@@ -76,17 +75,16 @@ def psKernelCacheStringHashStateWithFuel
   if Nat.beq (Nat.mod fuel 2) 0 then
     paired
   else
-    let position := Prod.fst paired;
-    if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+    if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst paired)) then
       paired
     else
       Prod.mk
         (String.Pos.Raw.byteIdx
-          (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+          (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst paired))))
         (Nat.mod
           (Nat.add
             (Nat.mul (Prod.snd paired) 31)
-            (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+            (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst paired)))))
           psKernelCacheHashModulus)
 
 def psKernelCacheStringHashScan

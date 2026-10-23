@@ -140,6 +140,8 @@ jobs:
               raise RuntimeError('Expected one structural block with two inlined primitive transitions')
           if state_body.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in state_body:
               raise RuntimeError('Expected exactly one public-state dispatch to pair counter')
+          if len(re.findall(r'function\s*\*\s*\(',state_body)) != 1:
+              raise RuntimeError('Public state remainder still has an extra generator block')
           if state_body.count('__ps$stringNext(') != 1 or state_body.count('__ps$stringGet(') != 1:
               raise RuntimeError('Expected one public-state odd remainder transition')
           marker = 'export function psKernelCacheStringHashStep('

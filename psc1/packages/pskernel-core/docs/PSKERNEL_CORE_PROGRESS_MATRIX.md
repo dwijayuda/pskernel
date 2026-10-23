@@ -1,3 +1,48 @@
+## Current: primitive pair counter after27c85 code-shape rejection
+
+Source27c85aef9a5fd11f4074976b60c7ec482a83260f/run39895889666:
+native120226130602 PASS82proofs (eighthash),2730cases,long3,294/377/all6native
+Stringcases. Permitted axiom union onlypropext/Classical.choice/Quot.sound.
+Generated120226787133 small authentic PSC1->TS7.0.2->JS compiled and PASS
+2730cases/8190stages/13665assertions/long3,THEN code-shape gate FAILED.
+Pair iterator and publicState EACH hadTWO structural generator blocks rather
+than promisedONE. One recursive pair dispatch/two inlined transitions existed,
+but the local cursor let in intermediate expression added a generator block.
+Do not suppress this rejected criterion or call it an optimization success.
+Complete SelfHostcheck/fullkernelbuild/runtime were SKIPPED.
+Nativeartifact12476926971 ZIP105566bytes SHA256
+6bc8b52749a714b1bf0ba907f417946a48c581af72b76ce761d512d02090755e.
+Generatedsmallartifact12476862821 ZIP37804bytes SHA256
+ecfe165aa5fd32f876abc26d91ab9f7e5f744cfac4ec7d1a1bc141f8f88ca0ee.
+All82proofrows,authenticated ZIP/file hashes and exact generated bodies:
+evidence/2026-10-23-t01f-pair-counter-codegen-rejected.json.
+
+This NEW source inlines immutable Prod.fst cursor projections instead of the
+inner cursor let. Pair-count/parity algorithm,all EIGHT theorem statements,
+frozen19fb worker,finite/staged/long cases,ABI,hash31/mod65521 and allresources/
+owners/sessions/cache/index/equality policies are unchanged.
+Require EXACTLYONE pair helper andONEState helper,zero stagedresults/Step/Mix
+dispatch,ONE recursive invoke plusTWOprimitive transitions/ONEstructuralblock
+in pair iterator; ONEpair dispatch/ONEodd transition/ONEstructuralblock in
+State wrapper. Gate is strengthened to explicitly check wrapperblockcount.
+Print bodies and reject actual failure before fullSelfHostcheck/build.
+
+Native-first narrow workflow at this containing source must rerun82proofs,
+matrix/long/nativeString,then small realPSC1 value/shape gates,then COMPLETE
+authentic source+kernel and unchanged whole mixed25m/controls10m. No inherited
+passes,new-source equivalence/performance/fullT01F not yet claimed.
+One next task: follow that existing run. Do not duplicate CI. All5full pushes
+stay paused,profilemanual-only. If mixedPASS,reconcile BOTH final route
+workflows/drafts with native hash proofcount8,restore5fulltriggers,disable
+narrowpush,and requalify ONE coherent source through both6shardaggregates,
+allrequirednative/official/proofs/providers24CLI+8API/research/measurements,
+unchangedowner32workers384calls/full193/profile. C remainsFAIL,D/B/currentA/
+T01F OPEN,historicalA9c87 scopedqualified;noT05 yet,integration123c411 unchanged.
+ActionsLinux only for builds/tests/kernel execution;fresh expected_sha,
+nonforce updates,preserve history/concurrency,no main/npm.
+
+---
+
 ## Current pair-counter candidate after portable nested-recursion rejection
 
 Source2b32b76d3dfaf2134aa1f8496a0745a03a8c9a82/run39895167983:

@@ -1,14 +1,14 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
   "branch": "work/psc1-direct-selfhost-blockers-20261024",
-  "parentCommit": "88432e6e2bc2211e1be78fafb7105c4642a036a0",
+  "parentCommit": "949d687b8977bb1fec3697293818f6d9d07f92a4",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "wasm-core"
+    "js"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "Both declaration-spine fixes now proved: 40026533023 passes all native proofs and runtime checks and complete98-module Wasm Lean/PS census. Source includes exact rightmost-error collector/ordered normalization and lookup equality. JS source-only worker normalization does not change the Wasm closure. Retest real G1/G2/G3 without stack/fuel/checker changes."
+  "reason": "fcea1326 complete focused gate40027270768 passed all native/proof/refusal/runtime and87/98-module Lean/PS censuses. Actual retained G2 profile40024746671 identifies StringEqual33.9% ticks; current generic invariant-loop lazy tokens reduce fixture cache-key calls40000 to2 with10584 retained-emitter comparisons plus49 native pairs. Run genuine G1/G2/G3 with unchanged independent checker/strict IR/fuel/heap/stack."
 }

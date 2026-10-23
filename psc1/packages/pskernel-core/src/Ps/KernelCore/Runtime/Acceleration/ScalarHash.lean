@@ -67,113 +67,7 @@ def psKernelCacheStringHashPairsWithFuel
               (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst intermediate)))))
             psKernelCacheHashModulus)
 
-/- Eight immutable transitions share one structural scheduler descent.
-The remainder uses the unchanged pair counter, so every fuel is exact. -/
-def psKernelCacheStringHashOctetsWithFuel
-    (octets : Nat)
-    (value : String)
-    (initial : Prod Nat Nat) : Prod Nat Nat :=
-  match octets with
-  | Nat.zero => initial
-  | Nat.succ remaining =>
-      let state0 := psKernelCacheStringHashOctetsWithFuel remaining value initial;
-      let state1 :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state0)) then
-          state0
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state0))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state0) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state0)))))
-              psKernelCacheHashModulus);
-      let state2 :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state1)) then
-          state1
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state1))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state1) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state1)))))
-              psKernelCacheHashModulus);
-      let state3 :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state2)) then
-          state2
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state2))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state2) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state2)))))
-              psKernelCacheHashModulus);
-      let state4 :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state3)) then
-          state3
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state3))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state3) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state3)))))
-              psKernelCacheHashModulus);
-      let state5 :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state4)) then
-          state4
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state4))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state4) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state4)))))
-              psKernelCacheHashModulus);
-      let state6 :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state5)) then
-          state5
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state5))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state5) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state5)))))
-              psKernelCacheHashModulus);
-      let state7 :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state6)) then
-          state6
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state6))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state6) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state6)))))
-              psKernelCacheHashModulus);
-      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst state7)) then
-          state7
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst state7))))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd state7) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst state7)))))
-              psKernelCacheHashModulus)
-
-def psKernelCacheStringHashRemainderWithFuel
+def psKernelCacheStringHashStateWithFuel
     (fuel : Nat)
     (value : String)
     (initial : Prod Nat Nat) : Prod Nat Nat :=
@@ -192,13 +86,6 @@ def psKernelCacheStringHashRemainderWithFuel
             (Nat.mul (Prod.snd paired) 31)
             (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst paired)))))
           psKernelCacheHashModulus)
-
-def psKernelCacheStringHashStateWithFuel
-    (fuel : Nat)
-    (value : String)
-    (initial : Prod Nat Nat) : Prod Nat Nat :=
-  let complete := psKernelCacheStringHashOctetsWithFuel (Nat.div fuel 8) value initial;
-  psKernelCacheStringHashRemainderWithFuel (Nat.mod fuel 8) value complete
 
 def psKernelCacheStringHashScan
     (fuel : Nat)
@@ -222,12 +109,24 @@ def psKernelCacheStringHashWorker
 def psKernelCacheStringHash
     (value : String) :
     Nat :=
-  psKernelCacheStringHashScan
-    (Nat.succ
-      (String.utf8ByteSize value))
-    value
-    0
-    0
+  /- Fuse the public zero-cursor entry; preserve the staged general worker. -/
+  let fuel := Nat.succ (String.utf8ByteSize value);
+  let paired := psKernelCacheStringHashPairsWithFuel (Nat.div fuel 2) value (Prod.mk 0 0);
+  Prod.snd
+    (if Nat.beq (Nat.mod fuel 2) 0 then
+      paired
+    else
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk (Prod.fst paired)) then
+        paired
+      else
+        Prod.mk
+          (String.Pos.Raw.byteIdx
+            (String.Pos.Raw.next value (String.Pos.Raw.mk (Prod.fst paired))))
+          (Nat.mod
+            (Nat.add
+              (Nat.mul (Prod.snd paired) 31)
+              (Char.toNat (String.Internal.get value (String.Pos.Raw.mk (Prod.fst paired)))))
+            psKernelCacheHashModulus))
 
 def psKernelCacheNameHash
     (name : PsKernelName) :
@@ -298,9 +197,32 @@ def psKernelCacheLevelListHashWorker
 def psKernelCacheLevelListHash
     (values : List PsKernelLevel) :
     Nat :=
-  psKernelCacheLevelListHashWorker
-    values
-    18
+  /- Common universe-argument arities avoid constructing a curried worker.
+     The worker remains the exact fallback and public staged reference. -/
+  match values with
+  | List.nil =>
+      575
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          let firstHash := psKernelCacheLevelHash first;
+          let afterFirst := Nat.mod
+            (Nat.add (Nat.mul 18 31) firstHash) psKernelCacheHashModulus;
+          Nat.mod
+            (Nat.add (Nat.mul afterFirst 31) 17) psKernelCacheHashModulus
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              let firstHash := psKernelCacheLevelHash first;
+              let secondHash := psKernelCacheLevelHash second;
+              let afterFirst := Nat.mod
+                (Nat.add (Nat.mul 18 31) firstHash) psKernelCacheHashModulus;
+              let afterSecond := Nat.mod
+                (Nat.add (Nat.mul afterFirst 31) secondHash) psKernelCacheHashModulus;
+              Nat.mod
+                (Nat.add (Nat.mul afterSecond 31) 17) psKernelCacheHashModulus
+          | List.cons _third _remaining =>
+              psKernelCacheLevelListHashWorker values 18
 
 def psKernelCacheLiteralHash
     (literal : PsKernelLiteral) :

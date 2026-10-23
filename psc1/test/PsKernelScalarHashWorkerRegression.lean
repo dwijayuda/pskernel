@@ -70,49 +70,8 @@ theorem pairs_eq_before (pairs : Nat) (value : String) (initial : Prod Nat Nat) 
             (stringHashStateBefore (remaining * 2) value initial))
       rw [ih]
 
-theorem octets_eq_before (octets : Nat) (value : String) (initial : Prod Nat Nat) :
-    psKernelCacheStringHashOctetsWithFuel octets value initial =
-      stringHashStateBefore (octets * 8) value initial := by
-  induction octets with
-  | zero => rfl
-  | succ remaining ih =>
-      have count : (Nat.succ remaining) * 8 =
-          Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (remaining * 8)))))))) := by omega
-      rw [count]
-      change psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashOctetsWithFuel remaining value initial)))))))) =
-        psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (psKernelCacheStringHashStep value
-          (stringHashStateBefore (remaining * 8) value initial))))))))
-      rw [ih]
-
-theorem before_add (first second : Nat) (value : String) (initial : Prod Nat Nat) :
-    stringHashStateBefore (first + second) value initial =
-      stringHashStateBefore second value (stringHashStateBefore first value initial) := by
-  induction second with
-  | zero => rfl
-  | succ remaining ih =>
-      change psKernelCacheStringHashStep value
-        (stringHashStateBefore (first + remaining) value initial) =
-        psKernelCacheStringHashStep value
-          (stringHashStateBefore remaining value (stringHashStateBefore first value initial))
-      rw [ih]
-
-theorem remainder_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
-    psKernelCacheStringHashRemainderWithFuel fuel value initial =
+theorem state_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
+    psKernelCacheStringHashStateWithFuel fuel value initial =
       stringHashStateBefore fuel value initial := by
   change (if Nat.beq (fuel % 2) 0 then
       psKernelCacheStringHashPairsWithFuel (fuel / 2) value initial
@@ -128,14 +87,6 @@ theorem remainder_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Na
     have count : Nat.succ ((fuel / 2) * 2) = fuel := by omega
     simpa [odd, stringHashStateBefore] using
       congrArg (fun count => stringHashStateBefore count value initial) count
-
-theorem state_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
-    psKernelCacheStringHashStateWithFuel fuel value initial =
-      stringHashStateBefore fuel value initial := by
-  unfold psKernelCacheStringHashStateWithFuel
-  rw [remainder_eq_before, octets_eq_before, ← before_add]
-  have count : (fuel / 8) * 8 + fuel % 8 = fuel := by omega
-  exact congrArg (fun steps => stringHashStateBefore steps value initial) count
 
 theorem state_succ (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
     psKernelCacheStringHashStateWithFuel (Nat.succ fuel) value initial =
@@ -211,11 +162,22 @@ theorem hash_eq_before (value : String) :
   exact congrArg (fun worker => worker value 0 0)
     (worker_eq_before (Nat.succ (String.utf8ByteSize value)))
 
+/- Entry specialization only; the public staged worker is unchanged. -/
+theorem level_list_hash_eq_worker (values : List PsKernelLevel) :
+    psKernelCacheLevelListHash values = psKernelCacheLevelListHashWorker values 18 := by
+  cases values with
+  | nil => rfl
+  | cons first rest =>
+      cases rest with
+      | nil => rfl
+      | cons second tail =>
+          cases tail with
+          | nil => rfl
+          | cons third remaining => rfl
+
 end PsKernelScalarHashWorkerRegression
 
-#print axioms PsKernelScalarHashWorkerRegression.octets_eq_before
-#print axioms PsKernelScalarHashWorkerRegression.before_add
-#print axioms PsKernelScalarHashWorkerRegression.remainder_eq_before
+#print axioms PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker
 #print axioms PsKernelScalarHashWorkerRegression.pairs_eq_before
 #print axioms PsKernelScalarHashWorkerRegression.state_eq_before
 #print axioms PsKernelScalarHashWorkerRegression.state_succ

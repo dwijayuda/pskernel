@@ -1,4 +1,4 @@
-name: PSC1 T01F eight-transition data-result preflight
+name: PSC1 T01F fused scalar hash entries preflight
 on:
   workflow_dispatch:
   push:
@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/psc1-t01f"
-          test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 11
+          test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 9
           lake -f kernel-lakefile.lean env lean --run test/PsKernelScalarHashWorkerRegression.lean \
             2>&1 | tee "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
           grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$RUNNER_TEMP/psc1-t01f/scalar-hash-native.log"
@@ -123,9 +123,7 @@ jobs:
               return text[start:] if end < 0 else text[start:end]
           expected = {
               'psKernelCacheStringHashPairsWithFuel': (2, ['psKernelCacheStringHashPairsWithFuel']),
-              'psKernelCacheStringHashOctetsWithFuel': (8, ['psKernelCacheStringHashOctetsWithFuel']),
-              'psKernelCacheStringHashRemainderWithFuel': (1, ['psKernelCacheStringHashPairsWithFuel']),
-              'psKernelCacheStringHashStateWithFuel': (0, ['psKernelCacheStringHashOctetsWithFuel', 'psKernelCacheStringHashRemainderWithFuel']),
+              'psKernelCacheStringHashStateWithFuel': (1, ['psKernelCacheStringHashPairsWithFuel']),
           }
           names = []
           for name, (transitions, calls) in expected.items():
@@ -147,6 +145,27 @@ jobs:
                   raise RuntimeError('Expected exactly one structural generator block in ' + name)
               if body.count('__ps$stringNext(') != transitions or body.count('__ps$stringGet(') != transitions:
                   raise RuntimeError('Unexpected primitive transition count in ' + name)
+          entry = body_of('psKernelCacheStringHash')
+          print('PSC1_HASH_FUSED_ENTRY_BODY ' + repr(entry))
+          forbidden = ('__ps$wrap','psKernelCacheStringHashWorker','psKernelCacheStringHashScan',
+                       'psKernelCacheStringHashStateWithFuel','psKernelCacheStringHashRemainderWithFuel',
+                       'psKernelCacheStringHashOctetsWithFuel','psKernelCacheStringHashStep','psKernelCacheMix')
+          if any(name in entry for name in forbidden):
+              raise RuntimeError('Full entry retains a staged/state/scan transition dispatch')
+          if entry.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in entry:
+              raise RuntimeError('Full entry must dispatch only once to the pair iterator')
+          if len(re.findall(r'function\s*\*\s*\(',entry)) != 1:
+              raise RuntimeError('Fused entry still allocates an extra generator block')
+          if entry.count('__ps$stringNext(') != 1 or entry.count('__ps$stringGet(') != 1:
+              raise RuntimeError('Fused entry must contain exactly one odd remainder transition')
+          level = body_of('psKernelCacheLevelListHash')
+          print('PSC1_HASH_LEVEL_LIST_ENTRY_BODY ' + repr(level))
+          if '__ps$wrap' in level or 'case "nil": return 575n;' not in level:
+              raise RuntimeError('Empty universe arguments must return exact constant575 without a staged result')
+          if level.count('__ps$invoke(psKernelCacheLevelListHashWorker,') != 1:
+              raise RuntimeError('Keep exactly one generic staged-worker fallback')
+          if level.count('__ps$invoke(psKernelCacheLevelHash,') != 3:
+              raise RuntimeError('Expected specialized one-level and two-level branches')
           marker = 'export function psKernelCacheStringHashStep('
           start = text.index(marker)
           end = text.find('\nexport ', start + len(marker))
@@ -162,7 +181,8 @@ jobs:
               raise RuntimeError('Full hash still dispatches through the staged public worker')
           print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
-          print('PSC1_HASH_OCTET_COUNTER_CODEGEN: PASS resultStaging=0 byteStepDispatch=false recursiveDispatches=1 transitionsPerDescent=8 structuralGeneratorBlocks=1 exactRemainder=true')
+          print('PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairDispatches=1 primitiveRemainder=1 structuralGeneratorBlocks=1')
+          print('PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false')
           PY
       - name: Check complete authentic kernel source after the bounded gate
         working-directory: psc1

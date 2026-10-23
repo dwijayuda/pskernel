@@ -1,3 +1,55 @@
+## Fused scalar-hash entries candidate; exact octet profile shows staging costs
+
+Exact6bed4d6c octet narrow mixed FAILED25mincap at421completed/422begun
+publiccalls; fullfailureevidence in octet-mixed-terminal.json. NoT01Facceptance.
+Exactgenerated6bed/profileharness99af98944f9669d63a0a33f79a98600ad9c88219
+diagnostic39958132429/job120429021696 PASSED COLLECTION ONLY. After unchanged
+294independentrequests/377metadata,realUTF8 DefEq assertedtrue in93493.655482ms;
+phase-exclusiveCPU78999samples. Whole155.73s/631636KiBpeakRSS.
+Artifact12502819580 ZIP5318634bytes SHA256
+6bef9211a17a3bbace05016d910072ac9c58de40d8aa3a3f2aa8219ed6652544.
+All24artifactfilehashes/provenance/phaseframes/fullCPUfamilycounts:
+docs/evidence/2026-10-23-t01f-octet-defeq-phase-profile.json.
+
+Measuredselfsamples:pairiterator7745(9.80%),State3559(4.51%),remainder3210
+(4.06%),octet615(0.78%),curriedlevel-listworker6729(8.52%). AllStringhashfamilies
+15812(20.02%);GC11661(14.76%),scheduler9165(11.60%). These are observations,
+not a generalcausalspeedup claim. The profile motivates eliminating entry and
+function-space dispatch; octet grouping alone was insufficient.
+
+THIS containing executableANDharness is a NEW UNQUALIFIED implementation:
+restore original2c9 pair-basedgeneralState/Scan/Worker and alloriginalEIGHT
+hashproofs unchanged; REMOVE failed octet/remainder helpers and theirTHREE
+implementation-specificlemmas. The public zero-cursor StringHash entry directly
+inlines pair+odd handling,removingScan/State dispatch while preservingexact
+hashes/modulus65521/mix31/Rawcursorsemantics/publicpartialstages.
+Original hash_eq_before proof still checks equality to frozen19fb worker.
+Specialize publicLevelListHash arities0,1,2 with identical mixing (emptyexact575),
+retaining unchangedpubliccurriedWorker as fallback forlength>=3. ONE added
+forall-list kernel theorem proves entry=unchangedWorker(values)(18) bycases/rfl.
+Totalhashreports9 (original8+new1),nativepreflight expected83(60scope+14session+9).
+Count reduction retires obsolete octet-only lemmas WITH their deleted helper;
+no original proof/test/assertion weakened. Fullintegration and saved draft
+hash-countguards reconciled9. Frozen2730native/8190JSstages/13665assertions/
+long3,fullfixture/harness/294/377/1400mixed/440calls ALL unchanged.
+
+Only narrowhash work-branch pushACTIVE; V1profilebackmanual-only; allFIVE full
+workbranchpushes remainPAUSED. New bounded guard requires onepair dispatch/
+oneblock/oneoddprimitive in FULLHash, noScan/State/Worker/Step/Mixdispatch or
+stagedresult; commonlevel-listbranches literal575/oneandtwoLevelHashcalls,
+exactlyonegenericWorkerfallback,no stagedresult. Require nativeproofs first.
+ONE next task: fetch this NEW candidate's one narrowrun; follow native then
+bounded+completecodegen,retainedcontrols and complete mixed toterminal.
+If failure, preserve exact evidence and fix actual cause; do not weakenlimits.
+If allPASS, restorefullfive and qualify ONE coherent newsource through BOTH
+strictsixshardaggregates/allretainedgates beforeT01F/T05.
+T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integrationyet.
+Fresh integrationlast123c41197950b6761be965fd21c57142ee2b0d1c; ActionsLinuxONLY
+execution,expected_sha/nonforce,preservehistory,4096/2048MiB/emptyPATH/25min,
+no main/npm. This candidate inherits no prior-source qualification.
+
+---
+
 ## Final pair-counter qualification FAILED; eight-transition candidate in narrow preflight
 
 Exact final source 2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298 failed BOTH

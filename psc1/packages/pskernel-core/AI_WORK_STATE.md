@@ -1,46 +1,52 @@
-## Exact6bed4d6c octet mixed TIMED OUT; one exact-artifact phase profile active
+## Fused scalar-hash entries candidate; exact octet profile shows staging costs
 
-Narrow source6bed4d6c613861c052f98dc4d7e66c3fc275bc9d,
-run39951009269 terminalCANCELLED. Native120405170256 PASS85proofs/11hash;
-completeproducer120406128102 PASS realPSC1/TS7.0.2/bounded13665assertions/
-completeSelfHostcheck-build; controls120415938000 PASS. BUT unchanged mixed
-120415937943 hit25mincap,422tracebegins/421ends,interruptedcall422
-psKernelV1IsDefEq at validity-right for"Aé€😀". Full294independentrequests
-admitted44618.101565ms,377metadata1489.798245ms,singletonPASS. NO completecase/
-1400assertionreceipt; memoryfileEMPTY,completeRSS/walltimeUNKNOWN.
-Artifact12503031935 ZIP536647bytes SHA256
-799185a6d6b517aa6715df7520f682c831b4b11a721f316dfbbb9bb05ae42801.
-Fulltrace/all9filehashes/provenance/failure:
-docs/evidence/2026-10-23-t01f-octet-mixed-terminal.json.
-Eight-transition grouping alone is INSUFFICIENT. No narrow/fullT01Facceptance.
+Exact6bed4d6c octet narrow mixed FAILED25mincap at421completed/422begun
+publiccalls; fullfailureevidence in octet-mixed-terminal.json. NoT01Facceptance.
+Exactgenerated6bed/profileharness99af98944f9669d63a0a33f79a98600ad9c88219
+diagnostic39958132429/job120429021696 PASSED COLLECTION ONLY. After unchanged
+294independentrequests/377metadata,realUTF8 DefEq assertedtrue in93493.655482ms;
+phase-exclusiveCPU78999samples. Whole155.73s/631636KiBpeakRSS.
+Artifact12502819580 ZIP5318634bytes SHA256
+6bef9211a17a3bbace05016d910072ac9c58de40d8aa3a3f2aa8219ed6652544.
+All24artifactfilehashes/provenance/phaseframes/fullCPUfamilycounts:
+docs/evidence/2026-10-23-t01f-octet-defeq-phase-profile.json.
 
-THIS containing source changes diagnosticworkflowONLY (plusfailuredocs):
-psc1-pskernel-t01f-v1-profile.yml has one work-branch-push trigger. It reuses
-immutable producer12502115716/run39951009269/job120406128102/source6bed,
-authenticates successfulproducersteps and actualcancelledoverallrun, exact
-sourceTreef3ccee.../workflowblob438dba.../ZIP410bfc.../kerneldbc0a47d.../
-fixture563d6ef.../strictfullharnessd3672e...; no rebuild or candidate source change.
-It independently admits full294requests+compares377metadata first, then
-profiles ONLY real V1 DefEq of Array0(ByteArray0(String0(mixedliteral))) against
-genuineUInt8list,asserting equality. CPU Inspector1ms phase-exclusiveprofile,
-samefuel4096/2048MiB/emptyPATH,180secondwhole-diagnosticdeadline/10minjob.
-DiagnosticOnly/qualification=false; cannot closeT01F/providerpromotion.
-Fresh profile harness sourceSHA is separate and recorded, not mixed into final
-qualification. Existing narrow hash push remainsactive but this profile-only
-change does not match its source/test/workflow paths; no duplicatecompile.
-AllFIVE fullworkbranchpushes remainPAUSED. No blind final rerun/activation.
+Measuredselfsamples:pairiterator7745(9.80%),State3559(4.51%),remainder3210
+(4.06%),octet615(0.78%),curriedlevel-listworker6729(8.52%). AllStringhashfamilies
+15812(20.02%);GC11661(14.76%),scheduler9165(11.60%). These are observations,
+not a generalcausalspeedup claim. The profile motivates eliminating entry and
+function-space dispatch; octet grouping alone was insufficient.
 
-ONE next task: fetch this containing profile source's ONE new diagnostic run,
-follow terminal; inspect authenticatedphase-profile-summary.json and exactCPU
-frames to choose next source-proved optimization. Current octaveentry adds
-octet+remainder dispatch, so short-name/helper overhead is only a hypothesis
-until measured; do not claim it is causal. Preserve generatedcontrols regression
-DAG808872KiBpeakRSS vs9d558752/61d555992; allotheractualmeasurementsretained.
-T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integration.
-Native85 and completegeneratedevidence remain in octet-native-gates.json and
-octet-generated-preflight.json. Prior2c9bothmixed/aggregatesFAIL also retained.
-ActionsLinuxONLY for builds/tests/kernel execution,freshexpected_sha/nonforce,
-preservehistory,unchangedlimits/assertions; no main/npm.
+THIS containing executableANDharness is a NEW UNQUALIFIED implementation:
+restore original2c9 pair-basedgeneralState/Scan/Worker and alloriginalEIGHT
+hashproofs unchanged; REMOVE failed octet/remainder helpers and theirTHREE
+implementation-specificlemmas. The public zero-cursor StringHash entry directly
+inlines pair+odd handling,removingScan/State dispatch while preservingexact
+hashes/modulus65521/mix31/Rawcursorsemantics/publicpartialstages.
+Original hash_eq_before proof still checks equality to frozen19fb worker.
+Specialize publicLevelListHash arities0,1,2 with identical mixing (emptyexact575),
+retaining unchangedpubliccurriedWorker as fallback forlength>=3. ONE added
+forall-list kernel theorem proves entry=unchangedWorker(values)(18) bycases/rfl.
+Totalhashreports9 (original8+new1),nativepreflight expected83(60scope+14session+9).
+Count reduction retires obsolete octet-only lemmas WITH their deleted helper;
+no original proof/test/assertion weakened. Fullintegration and saved draft
+hash-countguards reconciled9. Frozen2730native/8190JSstages/13665assertions/
+long3,fullfixture/harness/294/377/1400mixed/440calls ALL unchanged.
+
+Only narrowhash work-branch pushACTIVE; V1profilebackmanual-only; allFIVE full
+workbranchpushes remainPAUSED. New bounded guard requires onepair dispatch/
+oneblock/oneoddprimitive in FULLHash, noScan/State/Worker/Step/Mixdispatch or
+stagedresult; commonlevel-listbranches literal575/oneandtwoLevelHashcalls,
+exactlyonegenericWorkerfallback,no stagedresult. Require nativeproofs first.
+ONE next task: fetch this NEW candidate's one narrowrun; follow native then
+bounded+completecodegen,retainedcontrols and complete mixed toterminal.
+If failure, preserve exact evidence and fix actual cause; do not weakenlimits.
+If allPASS, restorefullfive and qualify ONE coherent newsource through BOTH
+strictsixshardaggregates/allretainedgates beforeT01F/T05.
+T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integrationyet.
+Fresh integrationlast123c41197950b6761be965fd21c57142ee2b0d1c; ActionsLinuxONLY
+execution,expected_sha/nonforce,preservehistory,4096/2048MiB/emptyPATH/25min,
+no main/npm. This candidate inherits no prior-source qualification.
 
 ---
 

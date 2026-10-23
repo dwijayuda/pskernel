@@ -17,5 +17,5 @@
   ],
   "purpose": "Inventory the exact captured compiler IR for the measured declaration-spine class. Read-only; no compiler execution, recursion rewrite or qualification.",
   "inventoryNonTailListSpines": true,
-  "note": "Full immutable inventory retained; compact log summary avoids GitHub's64KiB line truncation. No repeated compiler execution."
+  "note": "Flatten curried application chains and check declared plus returned function arity to exclude partial-factory and tail-call false positives. Read-only inventory, not421 proven defects."
 }

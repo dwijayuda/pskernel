@@ -45,17 +45,21 @@ if(request.resolveOnly){
  if(request.inventoryNonTailListSpines){
   for(let d=0;d<candidate.specializedIr[4].length;d++){
    const decl=candidate.specializedIr[4][d],self=decl[0],params=decl[2],calls=[];
+   let resultArity=0,resultType=decl[3];
+   while(resultType?.[0]==='function'){resultArity+=resultType[1].length;resultType=resultType[2];}
+   const fullArity=params.length+resultArity;
    const listIndices=params.map((p,i)=>[p,i]).filter(([p])=>p[1]?.[0]==='named'&&p[1][1].startsWith('List$spec$'));
    if(!listIndices.length)continue;
    function walk(e,tail=false,lambdaDepth=0){
     if(!Array.isArray(e))return;
     const tag=e[0];
     if(tag==='call'){
-     if(e[1]?.[0]==='var'&&e[1][1]===self&&!tail&&lambdaDepth===0){
-      const changed=listIndices.filter(([p,i])=>!(e[3]?.[i]?.[0]==='var'&&e[3][i][1]===p[0]));
-      if(changed.length)calls.push({changedListParameters:changed.map(([p])=>p[0]),arity:e[3]?.length});
+     let fn=e,args=[];while(fn?.[0]==='call'){args=[...fn[3],...args];fn=fn[1];}
+     if(fn?.[0]==='var'&&fn[1]===self&&!tail&&lambdaDepth===0&&args.length===fullArity){
+      const changed=listIndices.filter(([p,i])=>!(args[i]?.[0]==='var'&&args[i][1]===p[0]));
+      if(changed.length)calls.push({changedListParameters:changed.map(([p])=>p[0]),arity:args.length});
      }
-     walk(e[1],false,lambdaDepth);for(const a of e[3]||[])walk(a,false,lambdaDepth);
+     walk(fn,false,lambdaDepth);for(const a of args)walk(a,false,lambdaDepth);
     }else if(tag==='letE'){walk(e[3],false,lambdaDepth);walk(e[4],tail,lambdaDepth);}
     else if(tag==='ifE'){walk(e[1],false,lambdaDepth);walk(e[2],tail,lambdaDepth);walk(e[3],tail,lambdaDepth);}
     else if(tag==='matchE'){walk(e[3],false,lambdaDepth);for(const a of e[4]||[])walk(a[2],tail,lambdaDepth);}
@@ -73,7 +77,7 @@ if(request.resolveOnly){
  const receipt={schema:'psc1-retained-wasm-function-map/1',testedCommit:process.env.GITHUB_SHA,
   source:request,sourceSha256:m.sourceSha256,binarySha256:sha(wasm),exportAnchorsVerified:true,
   runtimeFunctions:runtime.length,sourceFunctions:names.length,compilerExecution:false,qualification:false,resolved,recursiveListSpines,
-  inventoryScope:'heuristic explicit saturated non-tail self calls with changed List parameters; no execution/performance claim'};
+  inventoryScope:'heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof'};
  fs.writeFileSync(path.join(out,'resolved.json'),JSON.stringify(receipt,null,2)+'\n');
  const inventorySummary={schema:receipt.schema,testedCommit:receipt.testedCommit,
   source:receipt.source,sourceSha256:receipt.sourceSha256,binarySha256:receipt.binarySha256,

@@ -24,23 +24,35 @@ updates. No merge or npm publication is authorized.
    d55a8435a157f021e5a7c073037303429b9787729c963af3842a04b9fb009017.
    Same-run executable equality is observed; independent clean-build repeatability
    and the240s performance target remain unqualified.
-3. Re-query both current TypeScript trials before changing or rerunning anything.
+3. Re-query the latest bounded two-view-map trial first: branch
+   perf/psc1-bridge-lookup-workers-20261023, source
+   aae4aac442154bb0c95fedb35f19fdb1552cc271, request
+   9f39ab515a3a0c88979ac7f8902aea731975bbcc, run39920694158/job120304921482.
+   Exactly the existing two UTF8 views are indexed by a Map with unchanged
+   insertion/eviction order. Strict TS7 old/current differential tests, invalid
+   raw offsets, equal separately allocated strings, capacity/state checks and all
+   prior proof/audit gates pass. Actual generated qualification is running.
+   Keep psc1_ts_utf8_cache_fixture and scripts/ts-utf8-cache-runtime-tests.mjs.
+   It follows current profile39918874112: last30s of220s, StringEqual61.8% under
+   psStringEqFromWithFuel. Cache-versus-character/inlining attribution and full
+   compiler performance improvement are not yet established.
+   Previous trials are terminal controls:
    Latest combined branch perf/psc1-bridge-lookup-workers-20261023 has source
    0938c895a9ff007a36df72dc49c836dc7443cef3, request
    10ac556f28782c4efeaa72c168f3969aba68ccca, run39914906360/job120286173371.
    It inherits the predicate correction and uses fully applied constructor/height
    lookup workers, retaining old function types. All-input list/name/fuel/index/
    hash equality proofs, first-duplicate/100001-entry native checks, prior
-   regressions and source audits pass; actual generations are running.
+   regressions and source audits pass; G1 and ten cases pass; G2 times out1800149ms/RSS1630836KiB; G3 not run.
    Keep psc1_bridge_lookup_normalization_tests and its retained reference workers.
    Do not infer generation success or alter cache/fuel/index policies.
-   The separate predicate-only comparison remains:
+   The separate predicate-only comparison is also terminal (G2 timeout1800199ms/RSS2878304KiB):
    branch fix/psc1-ts-generator-result-types-20261023, source
    083f900a60f6df3ad32f2d4e1c4afac2c53cf12a, request
    ecd53ad3f7ea96e07b53c7ece405b0f97c67dbf1,
    run39913434540/job120281442220. At this checkpoint the all-Char official
    proof,1114112 native comparisons, quote regressions and source audits pass;
-   actual target generations are running. Read final jobs/logs/artifacts.
+   G1 and ten cases pass; G2 times out1800199ms. Read final jobs/logs/artifacts.
    Do not infer new G1/G2/G3 from an older source or a green native proof.
    Previous shared-codec source29e871ea/requestb5ba1452/run39908439190
    passed G1 then timed out on G2 at1800240ms/RSS2995304KiB; G3 not run.

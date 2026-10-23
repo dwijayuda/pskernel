@@ -44,8 +44,8 @@ are killed at deadline. Stream/wire caps remain 32 MiB/128 MiB.
 | --- | --- | --- | --- |
 | Rust / correctness-1800s | G1/G2/G3 admitted and executed; exact fixed point passed | G2 692788 ms; G3 660042 ms | 668192 / 668184 |
 | Rust / performance-240s | G1 and ten cases passed; G2 deadline failure | 240034 ms | original failure RSS unavailable |
-| TypeScript / correctness-1800s | G1 and ten cases passed; G2 deadline failure; G3 not run | 1800240 ms | 2995304 |
-| TypeScript / performance-240s | G1 and ten cases passed; G2 deadline failure | 240141 ms | 2747248 |
+| TypeScript latest applied lookups / correctness-1800s | G1 and ten cases passed; G2 deadline failure; G3 not run | 1800149 ms | 1630836 |
+| TypeScript earlier shared codec / performance-240s | G1 and ten cases passed; G2 deadline failure | 240141 ms | 2747248 |
 
 Rust source `5e0b548e6cb3606ee0d3c129e0a829d830e407e4`, request
 `7d8865a08427a28432e427592dfc4263718c9a2f`,
@@ -88,8 +88,8 @@ disjunction with explicit branches. Source
 `ecd53ad3f7ea96e07b53c7ece405b0f97c67dbf1`,
 [run 39913434540](https://github.com/dwijayuda/pskernel/actions/runs/39913434540)
 passes its all-Char official equality proof, 1114112 native code-point
-comparisons, quote regressions and both source audits. Actual target generations
-are still running; no new generation qualification is claimed yet.
+comparisons, quote regressions and both source audits. G1 and ten cases then passed, but G2 timed out at 1800199ms with 2878304KiB
+maxRSS; G3/fixed point did not run.
 Do not infer G1/G2/G3 success for this new source from the earlier source.
 
 
@@ -101,10 +101,29 @@ branch `perf/psc1-bridge-lookup-workers-20261023`, source
 Constructor/height lookups now receive all arguments before list/fuel recursion;
 the old public function types remain. Official equalities cover every declaration
 list/name, height-entry list/name, and fuel/index/hash. Native first-duplicate and
-100001-entry miss tests, prior proofs/regressions and audits pass. Actual generated
-qualification is running. This trial inherits the predicate correction and leaves
-the predicate-only trial running independently. Neither new source is yet declared
-G1/G2/G3 qualified. It changes no index, cache capacity or semantic fuel.
+100001-entry miss tests, prior proofs/regressions, audits and all ten G1 cases pass.
+G2 then times out at1800149ms /1630836KiB; G3/fixed point did not run.
+The earlier predicate-only trial also times out. Neither source is G2/G3 qualified.
+Audited specialized IR confirms the constructor/height list functions now have two
+parameters, data/scalar results and no lambda in their worker bodies; the predicate
+emits as a plain function. These are real lowering changes, not a claimed completed
+throughput gain. Their source/helper normalization changes no index or cache limit.
+
+
+The latest bounded-map cache trial follows
+[profile39918874112](https://github.com/dwijayuda/pskernel/actions/runs/39918874112):
+in the final30s of a220s replay, StringEqual takes17099/27684 ticks(61.8%),
+almost entirely under psStringEqFromWithFuel. This does not by itself distinguish
+inlined cache text comparisons from character comparison. The localized trial
+indexes exactly the existing two immutable UTF8 views with a Map, keeping their
+insertion/eviction order and capacity. Source
+`aae4aac442154bb0c95fedb35f19fdb1552cc271`, request
+`9f39ab515a3a0c88979ac7f8902aea731975bbcc`,
+[run39920694158](https://github.com/dwijayuda/pskernel/actions/runs/39920694158).
+Strict TS7 retained/current runtime comparisons pass for Unicode/surrogates,
+invalid raw positions, separately allocated equal values and exact two-view state.
+Prior proof/regression/audit gates also pass; actual generated qualification is
+running. No new G1/G2/G3 or full-workload speed claim is made for this source yet.
 
 Preserve the qualified Rust reference while finishing that TS trial, then
 optimize measured costs toward 240 seconds. Earlier exact Rust late stack

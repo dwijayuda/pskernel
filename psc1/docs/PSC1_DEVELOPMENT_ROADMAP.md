@@ -33,7 +33,7 @@ A long correctness pass never grants a performance badge.
 
 | Order | Work | Current evidence | Finite acceptance |
 | --- | --- | --- | --- |
-| 1 | Finish TS predicate and applied-lookup corrections | Predicate run39913434540 and combined source0938c895/request10ac556f/run39914906360; all-Char and all-list/name/fuel/index/hash proofs, native regressions and audits pass; actual generations running | Independently admit/build/execute G2/G3 and exact source/closure/admission/original/transformed IR/ten-case fixed points under correctness-1800s |
+| 1 | Finish TS bounded two-view-map trial | Sourceaae4aac4/request9f39ab51/run39920694158; strict old/current runtime, exact capacity/order, prior proofs/regressions and audits pass; actual generations running | Independently admit/build/execute G2/G3 and exact source/closure/admission/original/transformed IR/ten-case fixed points under correctness-1800s |
 | 2 | Optimize both targets toward 240s | Rust correctness qualified but G2/G3 take about11min; TS remains blocked; actual current profiles retained | Actual performance-240s G1/G2/G3 and unchanged fixed-point/negative/identity requirements |
 | 3 | Promote coherent validated sources | Main profile/host machinery is qualified; compiler/backend/codec candidates stay isolated | Fetch latest HEAD, reconcile by dependency-coherent files, preserve TS result annotations/all targets, non-force integration and fresh full seven-backend/application qualification |
 | 4 | Qualify separate clean-build reproducibility | Rust executable bytes match G1/G2/G3 within one pipeline and pinned tool/lock identities | Repeated clean target builds in independent directories/environments; readable code, TS declarations/maps |
@@ -50,9 +50,8 @@ Current TS replay39912539573 covers the final30s of a bounded220s G2 run, not th
 end of the 1800s request. It still exposes generator/thunk overhead around the
 escape predicate, codec and constructor lookup. The current small correction
 replaces lazy Boolean disjunction with explicit branches and retains an official
-all-input equality theorem. The combined trial normalizes eager curried constructor/height lookup recursion into fully applied workers, with universal equality proofs and a 100001-entry native miss test. Existing function types and first-binding/fuel behavior remain. Measure actual compiler requests before declaring a gain.
-UTF-8 size/index cache-thrashing and prefix-scanning hypotheses remain unmeasured;
-do not expand the two-entry cache or alter raw-offset/Unicode behavior casually.
+all-input equality theorem. The predicate-only run39913434540 ends G2 at1800199ms/2878304KiB; the combined applied-lookup run39914906360 ends G2 at1800149ms/1630836KiB. Both pass native proofs and G1, neither produces G2. Actual specialized IR confirms constructor/height list calls are fully applied and predicate output is plain. These censored outcomes do not establish completed throughput.
+Current applied-lookup profile39918874112 shows StringEqual61.8% under psStringEqFromWithFuel. The new private bounded Map indexes exactly the original two UTF8 views; strict differential tests retain exact state/order/raw-offset/Unicode behavior. Actual compiler benefit remains under test; preserve capacity, all limits and both old controls.
 
 Rust late stack39906025465 reaches strict transformed-IR checking and nominal
 arity lookup. A bounded derived index is a possible measured-class correction,

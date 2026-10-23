@@ -1,10 +1,12 @@
+import FoundationListTests
 import OrdinaryExpansionReference
 
 private theorem append_std {α : Type} (left right : List α) :
     psListAppend left right = left ++ right := by
+  rw [foundation_append_eq]
   induction left with
   | nil => rfl
-  | cons value rest ih => simp only [psListAppend, List.cons_append, ih]
+  | cons value rest ih => simp only [FoundationListReference.psListAppend, List.cons_append, ih]
 
 private theorem reverse_acc_std {α : Type} (values acc : List α) :
     psListReverseAcc values acc = values.reverse ++ acc := by

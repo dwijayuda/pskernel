@@ -43,7 +43,7 @@ const old=timing(legacy,left,right),optimized=timing(current,left,right);
 assert.equal(old.value,optimized.value);assert.equal(old.value,true);
 const receipt={schema:'psc1-ts-utf8-view-tokens/1',testedCommit:process.env.GITHUB_SHA,
  comparisons,maxViews,checks:['unchanged fuel-zero laziness','all tested Unicode/raw positions','equal separately allocated strings',
- 'identical two-view cache order','evicted token fallback','actual current and legacy emitted tail loops','strict native TypeScript 7'],
+ 'identical cursor-cache order for compared equality loops','evicted token fallback','actual current and legacy emitted tail loops','strict native TypeScript 7'],
  sourceSha256:sha(fs.readFileSync(path.join(dir,'current.ts'))),compiler:compiled.event,
  syntheticOnly:{characters:left.length,legacy:old,optimized},qualification:false};
 fs.writeFileSync(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');

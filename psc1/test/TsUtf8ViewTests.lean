@@ -61,5 +61,5 @@ def main : IO Unit := do
     | Except.ok text => pure text
     | Except.error _ => throw (IO.userError "extract-only emission")
   IO.FS.writeFile "dist/ts-utf8-views/extract-only.ts"
-    (String.Internal.append (psTsSelectedRuntimeSource extractModule) emitted)
+    emitted
   IO.println "PSC1_TS_UTF8_VIEW_GUARDS: invariant alias, changing argument, shadowing, collision pass"

@@ -7586,9 +7586,9 @@
     "previousQualifiedHead": "ea10eff9b3de063941c6029bb6c821f9cc10cc3f"
   },
   "remaining": [
-    "Current encoder source45365943/request66f1e752/run39973570792 is terminal G1-only: G2 timeout1800231ms/3064892KiB; audit39978659027 verified actual worker paths and G1 source. No unchanged duplicate.",
+    "Coherent source3ac04559/requestd864d598/run39984419742 is executing actual G1/G2/G3 correctness1800s. Source0decfd26 passes all-input proofs/regressions/actual IR shapes/both grammar gates39983383955. Read terminal result; no unchanged duplicate.",
     "Token and cursor-cache candidates pass G1/ten cases but remain G2-timeout1800s. Source string equality/fuel stays unchanged; cursor cache remains max2. Current source's240s run39965349252 also times out240170ms.",
-    "New progressive diagnostic39978891505 retains phase240/600/1200/1750 CPU receipts from one exact current G2 replay. Read available immutable artifacts via the read-only profile reader to locate remaining cost; this is not admission/qualification.",
+    "Completed progressive39978891505 confirms late WeakMapPrototypeSet in psTsExprUsesNameWithFuel$worker (all28004/28061 stacks at1200/1750). New constructor-directed visitor removes unused per-node callbacks while preserving fuel0true/hygiene. Current new source has not yet supplied G2/G3 evidence.",
     "All eight erasure helpers have official all-input equality and source/saturated IR data-worker witnesses; keep partial-application variants and generic/public ABI fallback. Do not weaken strict IR, source identity or checking to improve time.",
     "Preserve qualified Rust source5e0b548e/request7d8865a0/run39908529181 and untouched branch83e18fe1. Correctness1800s is separate from failed240s and from independent clean-build repeatability.",
     "After target correctness, retain separate performance240s and integrate only coherent validated sources onto fresh main with full seven-backend/application qualification. Frozen14-family37-criterion Practical Core remains unchanged; no merge/npm publication."
@@ -22030,7 +22030,7 @@
       "documentationOnly": true
     }
   },
-  "recordedAt": "2026-10-23 15:38:08 UTC",
+  "recordedAt": "2026-10-23 16:14:04 UTC",
   "currentCheckpoint": {
     "qualifiedIntegratedSource": "5ce2fc74b9f01682832ddc10ec9ef27f26458564",
     "testedMerge": "a61eecf46ded19eedcdefcb320aa33118cd8f2ad",
@@ -22053,21 +22053,23 @@
       "request": "b5ba1452196c2a64932310f0bc828beb617650ae",
       "runId": 39908439190,
       "qualification": "G2/G3/fixed point not yet qualified",
-      "currentSource": "453659433789ae3c6322f61b956e784891776c71",
-      "currentRequest": "66f1e752cfbdc491d9b2974c849825e8a4193227",
-      "currentRunId": 39973570792,
-      "currentStatus": "all-input-proved, focused native/source/runtime gates pass; independently admitted G1/ten cases pass; G2 still times out1800s",
+      "currentSource": "3ac0455908b085458192d74585c871e665e06675",
+      "currentRequest": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+      "currentRunId": 39984419742,
+      "currentStatus": "proved coherent text/lookup/constructor-directed visitor source; actual correctness1800s G1/G2/G3 trial in progress; no new generation claim",
       "integrated": false,
       "latestCandidate": {
         "branch": "perf/psc1-erasure-applied-workers-20261023",
-        "codeCommit": "c3fe670ffbd8a56be552910bbb3a0a20170b2b11",
-        "proofCommit": "5d819f69ba1ccda0689e7d354fdcab9295807c0d",
-        "sourceCommit": "453659433789ae3c6322f61b956e784891776c71",
-        "requestCommit": "66f1e752cfbdc491d9b2974c849825e8a4193227",
-        "runId": 39973570792,
-        "jobId": 120482257189,
-        "status": "failed: G2 timeout1800231ms/3064892KiB; noG3/fixedpoint",
-        "nativeProofRunId": 39972917410
+        "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
+        "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
+        "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+        "runId": 39984419742,
+        "jobId": 120519775807,
+        "status": "in_progress",
+        "nativeProofRunId": 39983383955,
+        "profile": "correctness-1800s",
+        "expectedNativeShapeSourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+        "expectedNativeShapeClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2"
       },
       "latestCompleted": {
         "branch": "perf/psc1-erasure-applied-workers-20261023",
@@ -22082,14 +22084,22 @@
       },
       "preferredContinuation": {
         "branch": "perf/psc1-erasure-applied-workers-20261023",
-        "sourceCommit": "453659433789ae3c6322f61b956e784891776c71",
-        "testedRequest": "66f1e752cfbdc491d9b2974c849825e8a4193227",
-        "scope": "current encoder workers are proved and reach admitted G1; completed trial still G2-timeout; read progressive phase receipts to locate remaining cost, preserve original240s and qualified Rust"
+        "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
+        "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
+        "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+        "runId": 39984419742,
+        "jobId": 120519775807,
+        "status": "in_progress",
+        "nativeProofRunId": 39983383955,
+        "profile": "correctness-1800s",
+        "expectedNativeShapeSourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+        "expectedNativeShapeClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
+        "scope": "continue current coherent source; await actual terminal receipt, no unchanged duplicate; preserve all14 completed historical receipts, qualified Rust and separate240s"
       },
       "currentBranch": "perf/psc1-erasure-applied-workers-20261023",
-      "currentCodeCommit": "c3fe670ffbd8a56be552910bbb3a0a20170b2b11"
+      "currentCodeCommit": "0decfd2618d53916824cb9926ef48008732f4066"
     },
-    "nextDependency": "Read progressive CPU phases from39978891505 (one pinned exact G2); diagnose the measured remaining class before another source edit or generation attempt; G2/G3/fixedpoint still unqualified."
+    "nextDependency": "Read actual coherent text/lookup/name-visitor trial39984419742 terminal result, audit its immutable artifact once and verify native shape G1 source hash. Ifcorrect, run original240s separately; ifblocked, measure new current G1 before source changes."
   },
   "previousSelfHostProfileCheckpoint": {
     "qualifiedIntegratedSource": "78fe34b8d08d3f01dcc06ca9592668c958526849",
@@ -79906,7 +79916,7 @@
     ],
     "correctness": {
       "rust": "qualified-isolated-source",
-      "typescript": "not-qualified; encoder trial G1/ten cases pass then G2 timeout1800231ms/3064892KiB"
+      "typescript": "not-qualified; coherent text/lookup/visitor trial39984419742 in progress"
     },
     "performance": {
       "rust": "failed-240s",
@@ -79949,23 +79959,24 @@
     "semanticFuel": "unchanged",
     "memoryAndStackPolicies": "unchanged",
     "mostRecentDocumentationGate": {
-      "head": "da4136ea7abfc2b2b2bad6a54a18a97cd094945b",
-      "runId": 39974187094,
+      "head": "11f4e5eeccd8bf8beb60e8669d3cede4eb833759",
+      "runId": 39980079349,
       "status": "success",
       "sourceUnchanged": true,
-      "scope": "documentation-only static and selected-dependency gate; not isolated source qualification"
+      "scope": "documentation-only static/dependency gate, not isolated new source qualification"
     },
     "activeRequest": {
-      "sourceCommit": "453659433789ae3c6322f61b956e784891776c71",
-      "requestCommit": "66f1e752cfbdc491d9b2974c849825e8a4193227",
-      "runId": 39973570792,
-      "jobId": 120482257189,
-      "status": "failed",
+      "branch": "perf/psc1-erasure-applied-workers-20261023",
+      "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
+      "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
+      "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+      "runId": 39984419742,
+      "jobId": 120519775807,
+      "status": "in_progress",
+      "nativeProofRunId": 39983383955,
       "profile": "correctness-1800s",
-      "generations": [
-        1
-      ],
-      "fixedPoint": "not-run"
+      "expectedNativeShapeSourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+      "expectedNativeShapeClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2"
     }
   },
   "currentTypeScriptSharedCodecRuntimeDiagnosis": {
@@ -82080,7 +82091,7 @@
         "commit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
         "runId": 39978891505,
         "jobId": 120500641283,
-        "status": "in_progress; phase240 immutable receipt verified; later phases pending",
+        "status": "completed diagnostic; one G2 replay timed out1750091ms/2898528KiB; no response/admission/adoption",
         "profile": "one pinned actual G2 replay up to1750s under existing correctness policy",
         "phases": [
           240,
@@ -82427,8 +82438,910 @@
                 ]
               }
             }
+          },
+          {
+            "schema": "psc1-profile-read-request/1",
+            "id": 1792770142953,
+            "phase": 600,
+            "runId": 39978891505,
+            "sourceCommit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
+            "artifactId": 12512812701,
+            "artifactDigest": "sha256:a686cdda7af4f17e9cd499bed5c1caf3b41a1593a23fb52a623bd6fee5de3dd1",
+            "artifactExpiresAt": "2027-01-21T15:30:43Z",
+            "readRunId": 39980608508,
+            "readJobId": 120506596742,
+            "readCommit": "8a0b0774e45733cbb80b1d7e4b85fb34ca023b72",
+            "receiptSha256": "5ddcf053ad5e8740f8969e7345e61b982fa1b00f588024a7cfd5a9f4608bf4c6",
+            "receipt": {
+              "schema": "psc1-progressive-profile/1",
+              "phase": 600,
+              "elapsedMs": 608653,
+              "requestSha256": "e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998",
+              "manifestSha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+              "sourceClosureDigest": "816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82",
+              "sourceSha256": "edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d",
+              "firstTick": 313,
+              "lastTick": 600900040,
+              "totalTicks": 552242,
+              "selectedTicks": 27178,
+              "windowMicros": 30000000,
+              "execution": null,
+              "responseProduced": false,
+              "sourceFilesVerified": true,
+              "qualification": false,
+              "admission": "not-run",
+              "adoption": "not-run",
+              "cpu": {
+                "summary": [
+                  "Statistical profiling result from /home/runner/work/pskernel/pskernel/diagnosis/phase-600/slice.log, (27178 ticks, 271 unaccounted, 0 excluded).",
+                  "",
+                  " [Shared libraries]:",
+                  "   ticks  total  nonlib   name",
+                  "  13150   48.4%          /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "    988    3.6%          /usr/lib/x86_64-linux-gnu/libc.so.6",
+                  "     74    0.3%          [vdso]",
+                  "",
+                  " [JavaScript]:",
+                  "   ticks  total  nonlib   name",
+                  "   2575    9.5%   19.9%  Builtin: WeakCollectionSet",
+                  "    732    2.7%    5.6%  JS: *__ps$impl$psJsonEscapeStringWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:113292:54",
+                  "    645    2.4%    5.0%  JS: *__ps$impl$psStringEq file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:4870:31",
+                  "    578    2.1%    4.5%  Builtin: ResumeGeneratorTrampoline",
+                  "    574    2.1%    4.4%  JS: ~__ps$tail file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:34:20",
+                  "    542    2.0%    4.2%  Builtin: LoadIC_Megamorphic",
+                  "    532    2.0%    4.1%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:31:22",
+                  "    483    1.8%    3.7%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    473    1.7%    3.6%  Builtin: GeneratorPrototypeNext",
+                  "    470    1.7%    3.6%  Builtin: WeakMapLookupHashIndex",
+                  "    337    1.2%    2.6%  Builtin: StringFromCodePointAt",
+                  "    242    0.9%    1.9%  Builtin: RecordWriteSaveFP",
+                  "    238    0.9%    1.8%  Builtin: InterpreterEntryTrampoline",
+                  "    184    0.7%    1.4%  Builtin: CreateIterResultObject",
+                  "    169    0.6%    1.3%  JS: *__ps$utf8 file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:40:19",
+                  "    151    0.6%    1.2%  JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:136151:62",
+                  "    140    0.5%    1.1%  JS: *psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:105050:39",
+                  "    120    0.4%    0.9%  JS: *psJsonStringNext file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22670:26",
+                  "    115    0.4%    0.9%  Builtin: WeakMapGet",
+                  "    109    0.4%    0.8%  JS: *__ps$impl$psTsLookup file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82482:31",
+                  "    103    0.4%    0.8%  Builtin: CreateGeneratorObject",
+                  "    101    0.4%    0.8%  Builtin: CallFunction_ReceiverIsAny",
+                  "     99    0.4%    0.8%  Builtin: GetProperty",
+                  "     97    0.4%    0.7%  JS: *psJsonStringAtEnd file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22668:27",
+                  "     97    0.4%    0.7%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+                  "     96    0.4%    0.7%  JS: *psJsonStringGet file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22669:25",
+                  "     93    0.3%    0.7%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+                  "     91    0.3%    0.7%  JS: *__ps$impl$psJsonQuote file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:23071:32",
+                  "     89    0.3%    0.7%  Builtin: LoadICTrampoline_Megamorphic",
+                  "     85    0.3%    0.7%  Builtin: CallWithArrayLike",
+                  "     84    0.3%    0.6%  JS: *psJsonCharNeedsEscape file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:23017:31",
+                  "     80    0.3%    0.6%  Builtin: CompileLazy",
+                  "     77    0.3%    0.6%  Builtin: CallVarargs",
+                  "     74    0.3%    0.6%  Builtin: DefineNamedOwnIC_NoFeedback",
+                  "     73    0.3%    0.6%  Builtin: Call_ReceiverIsNotNullOrUndefined",
+                  "     68    0.3%    0.5%  JS: *__ps$impl$psJsonConcat3 file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22658:34",
+                  "     66    0.2%    0.5%  Builtin: LoadIC",
+                  "     64    0.2%    0.5%  JS: *__ps$impl$psJsonJoin file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:23076:31",
+                  "     60    0.2%    0.5%  Builtin: LoadIC_NoFeedback",
+                  "     58    0.2%    0.4%  JS: *__ps$impl$psTextBuilderAppend file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22582:40",
+                  "     52    0.2%    0.4%  JS: *__ps$impl$psListAny$spec$String file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98812:42",
+                  "     48    0.2%    0.4%  Builtin: KeyedLoadIC_Megamorphic",
+                  "     45    0.2%    0.3%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82494:83",
+                  "     42    0.2%    0.3%  JS: ~__ps$impl$psTextBuilderFinish file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22620:40",
+                  "     40    0.1%    0.3%  JS: *__ps$stringNextView file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:89:29",
+                  "     37    0.1%    0.3%  JS: *__ps$impl$psTextFinish file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22587:33",
+                  "     35    0.1%    0.3%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130641:43",
+                  "     31    0.1%    0.2%  JS: *__ps$impl$psJsonArray file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:23107:32",
+                  "     30    0.1%    0.2%  Builtin: ToNumberConvertBigInt",
+                  "     29    0.1%    0.2%  Builtin: StringAdd_CheckNone",
+                  "     29    0.1%    0.2%  Builtin: Call_ReceiverIsAny",
+                  "     25    0.1%    0.2%  Builtin: DefineNamedOwnIC",
+                  "     22    0.1%    0.2%  JS: *__ps$impl$psTextInsert file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22555:33",
+                  "     20    0.1%    0.2%  Builtin: SuspendGeneratorBaseline",
+                  "     19    0.1%    0.1%  Builtin: StringEqual",
+                  "     19    0.1%    0.1%  Builtin: ResumeGeneratorBaseline",
+                  "     18    0.1%    0.1%  JS: *__ps$impl$psTsJoin file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82110:29",
+                  "     18    0.1%    0.1%  JS: *__ps$impl$psIrEncodeMatchBinding file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:72075:43",
+                  "     17    0.1%    0.1%  JS: ~__ps$impl$psStringEqFrom file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:4865:35",
+                  "     17    0.1%    0.1%  Builtin: KeyedLoadIC",
+                  "     16    0.1%    0.1%  JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130629:49",
+                  "     16    0.1%    0.1%  Builtin: EphemeronKeyBarrierSaveFP",
+                  "     15    0.1%    0.1%  JS: *__ps$impl$psListMapExcept$spec$N$Prod$spec$String$N$PsVerifiedIrExpr$String$N$PsIrEncodeError file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:102851:104",
+                  "     15    0.1%    0.1%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130568:39",
+                  "     15    0.1%    0.1%  Builtin: CreateTypedArray",
+                  "     15    0.1%    0.1%  Builtin: BaselineOutOfLinePrologue",
+                  "     14    0.1%    0.1%  JS: *psJsonConcat2 file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22656:23",
+                  "     13    0.0%    0.1%  JS: *__ps$impl$psListMapExcept$spec$N$PsVerifiedIrExpr$String$N$PsIrEncodeError file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:102763:85",
+                  "     13    0.0%    0.1%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130868:59",
+                  "     12    0.0%    0.1%  JS: *__ps$impl$psIrEncodeExprWithFuelWorker_$psc0SH_0$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130621:66",
+                  "     12    0.0%    0.1%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130604:47",
+                  "     11    0.0%    0.1%  JS: *__ps$utf8Known file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:74:24",
+                  "     11    0.0%    0.1%  JS: *__ps$impl$psListMapExcept$spec$N$PsVerifiedIrMatchBinding$String$N$PsIrEncodeError file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:102895:93",
+                  "     11    0.0%    0.1%  JS: *__ps$impl$psListMapExcept$spec$N$Prod$spec$String$N$Prod$spec$N$List$spec$N$PsVerifiedIrMatchBinding$N$PsVerifiedIrExpr$String$N$PsIrEncodeError file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:102939:155",
+                  "     10    0.0%    0.1%  JS: *__ps$stringUtf8Size file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:95:29",
+                  "     10    0.0%    0.1%  JS: *__ps$stringExtract file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:105:28",
+                  "     10    0.0%    0.1%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82494:48",
+                  "     10    0.0%    0.1%  Builtin: InterpreterPushUndefinedAndArgsThenCall",
+                  "      9    0.0%    0.1%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:83968:151",
+                  "      9    0.0%    0.1%  Builtin: WeakMapPrototypeSet"
+                ],
+                "stringEqual": [
+                  "     19    0.1%    0.1%  Builtin: StringEqual"
+                ],
+                "bottomUp": [
+                  " [Bottom up (heavy) profile]:",
+                  "  Note: percentage shows a share of a particular caller in the total",
+                  "  amount of its parent calls.",
+                  "  Callers occupying less than 1.0% are not shown.",
+                  "",
+                  "   ticks parent  name",
+                  "  13150   48.4%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "   7083   53.9%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "   3152   44.5%      JS: ~__ps$tail file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:34:20",
+                  "   3151  100.0%        Builtin: GeneratorPrototypeNext",
+                  "    972   30.8%          JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:136151:62",
+                  "    972  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    577   18.3%          JS: *__ps$impl$psJsonConcat3 file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22658:34",
+                  "    577  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    250    7.9%          JS: *__ps$impl$psJsonEscapeStringWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:113292:54",
+                  "    250  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    226    7.2%          JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82494:83",
+                  "    226  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    220    7.0%          JS: *__ps$impl$psJsonJoin file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:23076:31",
+                  "    220  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    215    6.8%          JS: ~__ps$impl$psTextBuilderFinish file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22620:40",
+                  "    215  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    188    6.0%          JS: *__ps$impl$psJsonQuote file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:23071:32",
+                  "    188  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    157    5.0%          JS: *__ps$impl$psJsonArray file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:23107:32",
+                  "    157  100.0%            Builtin: GeneratorPrototypeNext",
+                  "     67    2.1%          JS: *__ps$impl$psStringEq file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:4870:31",
+                  "     67  100.0%            Builtin: GeneratorPrototypeNext",
+                  "     56    1.8%          JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130629:49",
+                  "     56  100.0%            Builtin: GeneratorPrototypeNext",
+                  "     52    1.7%          JS: ~__ps$impl$psStringEqFrom file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:4865:35",
+                  "     52  100.0%            Builtin: GeneratorPrototypeNext",
+                  "   1413   19.9%      Builtin: WeakMapPrototypeSet",
+                  "   1222   86.5%        JS: *__ps$impl$psTextInsert file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22555:33",
+                  "   1222  100.0%          Builtin: GeneratorPrototypeNext",
+                  "   1222  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    136    9.6%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130624:30",
+                  "    136  100.0%          Builtin: GeneratorPrototypeNext",
+                  "    136  100.0%            JS: *__ps$impl$psIrEncodeExprWithFuelWorker_$psc0SH_0$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130621:66",
+                  "     38    2.7%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130718:59",
+                  "     38  100.0%          Builtin: GeneratorPrototypeNext",
+                  "     38  100.0%            JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130711:51",
+                  "     16    1.1%        JS: *__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "     16  100.0%          Builtin: GeneratorPrototypeNext",
+                  "     16  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    612    8.6%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82494:48",
+                  "    434   70.9%        Builtin: GeneratorPrototypeNext",
+                  "    434  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    434  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "    178   29.1%        JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    178  100.0%          JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "    178  100.0%            Script: ~<anonymous> file:///home/runner/work/pskernel/pskernel/diagnosis/runner.mjs:1:1",
+                  "    566    8.0%      JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    566  100.0%        JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "    566  100.0%          Script: ~<anonymous> file:///home/runner/work/pskernel/pskernel/diagnosis/runner.mjs:1:1",
+                  "    566  100.0%            Builtin: AsyncFunctionAwaitResolveClosure",
+                  "    243    3.4%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22560:44",
+                  "    189   77.8%        JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    189  100.0%          JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "    189  100.0%            Script: ~<anonymous> file:///home/runner/work/pskernel/pskernel/diagnosis/runner.mjs:1:1",
+                  "     54   22.2%        Builtin: GeneratorPrototypeNext",
+                  "     54  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "     54  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "    121    1.7%      JS: *__ps$impl$psIrEncodeExprWithFuelWorker_$psc0SH_0$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130621:66",
+                  "    121  100.0%        Builtin: GeneratorPrototypeNext",
+                  "    121  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    121  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "     88    1.2%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130641:43",
+                  "     56   63.6%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130624:30",
+                  "     56  100.0%          Builtin: GeneratorPrototypeNext",
+                  "     56  100.0%            JS: *__ps$impl$psIrEncodeExprWithFuelWorker_$psc0SH_0$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130621:66",
+                  "     32   36.4%        Builtin: GeneratorPrototypeNext",
+                  "     32  100.0%          JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130624:30",
+                  "     32  100.0%            Builtin: GeneratorPrototypeNext",
+                  "    475    3.6%    Builtin: WeakMapPrototypeSet",
+                  "    275   57.9%      JS: *__ps$impl$psTsLookup file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82482:31",
+                  "    275  100.0%        Builtin: GeneratorPrototypeNext",
+                  "    275  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    275  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "     80   16.8%      JS: *__ps$impl$psTextInsert file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22555:33",
+                  "     80  100.0%        Builtin: GeneratorPrototypeNext",
+                  "     80  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "     80  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "     34    7.2%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130624:30",
+                  "     34  100.0%        Builtin: GeneratorPrototypeNext",
+                  "     34  100.0%          JS: *__ps$impl$psIrEncodeExprWithFuelWorker_$psc0SH_0$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130621:66",
+                  "     34  100.0%            Builtin: GeneratorPrototypeNext",
+                  "     33    6.9%      JS: *__ps$wrap file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:26:19",
+                  "     13   39.4%        JS: ^__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "     13  100.0%          Builtin: GeneratorPrototypeNext",
+                  "     13  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      4   12.1%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130861:51",
+                  "      4  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      4  100.0%            JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130641:43",
+                  "      2    6.1%        JS: ^__ps$impl$psTsEmitTypeArguments file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82671:42",
+                  "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      2  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      2    6.1%        JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:83968:80",
+                  "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      2  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      2    6.1%        JS: *__ps$impl$psTsLookup file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82482:31",
+                  "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      2  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      2    6.1%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130886:51",
+                  "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      2  100.0%            JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130641:43",
+                  "      1    3.0%        JS: ^__ps$impl$psTsTailPureWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:136358:48",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    3.0%        JS: ^__ps$impl$psTsTailBindingSafe file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:87217:40",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    3.0%        JS: ^__ps$impl$psTsEmitInductiveWithVisibility file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:84738:52",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    3.0%        JS: ^__ps$impl$psTsAppendLines file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:84454:36",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    3.0%        JS: ^__ps$impl$psIrEncodeTypeParameters file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:72428:45",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    3.0%        JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:83168:54",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    3.0%        JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:136004:95",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135997:87",
+                  "      1    3.0%        JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130836:51",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:130641:43",
+                  "     26    5.5%      JS: *__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "     26  100.0%        Builtin: GeneratorPrototypeNext",
+                  "     26  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "     26  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "     12    2.5%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:83968:80",
+                  "     12  100.0%        Builtin: GeneratorPrototypeNext",
+                  "     12  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "     12  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "      6    1.3%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:83968:40",
+                  "      6  100.0%        Builtin: GeneratorPrototypeNext",
+                  "      6  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      6  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "",
+                  "   2575    9.5%  Builtin: WeakCollectionSet",
+                  "   2573   99.9%    Builtin: WeakMapPrototypeSet",
+                  "   1926   74.9%      JS: *__ps$impl$psTsLookup file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82482:31",
+                  "   1926  100.0%        Builtin: GeneratorPrototypeNext",
+                  "   1926  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "   1926  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "    288   11.2%      JS: *__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "    288  100.0%        Builtin: GeneratorPrototypeNext",
+                  "    288  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "    288  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "     90    3.5%      JS: *__ps$impl$psTextInsert file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:22555:33",
+                  "     90  100.0%        Builtin: GeneratorPrototypeNext",
+                  "     90  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "     90  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "     78    3.0%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:83968:80",
+                  "     78  100.0%        Builtin: GeneratorPrototypeNext",
+                  "     78  100.0%          JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "     78  100.0%            JS: ~psCompilerTsServiceCandidate file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:98129:45",
+                  "     52    2.0%      JS: *__ps$wrap file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:26:19",
+                  "     13   25.0%        JS: ^__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "     13  100.0%          Builtin: GeneratorPrototypeNext",
+                  "     13  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      5    9.6%        JS: ^__ps$impl$psTsTailBindingSafe file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:87217:40",
+                  "      5  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      5  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      5    9.6%        JS: *__ps$impl$psTsLookup file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82482:31",
+                  "      5  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      5  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      3    5.8%        JS: ^__ps$impl$psTsIndexTypesWorker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82203:41",
+                  "      3  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      3  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      2    3.8%        JS: ^__ps$impl$psTsAppendLines file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:84454:36",
+                  "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      2  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      2    3.8%        JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:137057:61",
+                  "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      2  100.0%            JS: ^__ps$impl$psTsTailEmitContextWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:137039:55",
+                  "      2    3.8%        JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:136004:95",
+                  "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      2  100.0%            JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135997:87",
+                  "      1    1.9%        JS: ~__ps$impl$psTsTailMentionsAlias file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:87362:42",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    1.9%        JS: ~__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    1.9%        JS: ^__ps$impl$psTsTailPureWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:136358:48",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    1.9%        JS: ^__ps$impl$psTsLookup file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82482:31",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    1.9%        JS: ^__ps$impl$psTsEmitTypeWithFuel file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82229:41",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext",
+                  "      1  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "      1    1.9%        JS: ^__ps$impl$psTsEmitTypeArguments file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:82671:42",
+                  "      1  100.0%          Builtin: GeneratorPrototypeNext"
+                ]
+              }
+            }
+          },
+          {
+            "schema": "psc1-profile-read-request/1",
+            "id": 1792770884431,
+            "phase": 1200,
+            "runId": 39978891505,
+            "sourceCommit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
+            "artifactId": 12512829379,
+            "artifactDigest": "sha256:8a921516d3df815a82658cc1be0ab6fede2cd6adfbb8995dda3bab7c6a757472",
+            "artifactExpiresAt": "2027-01-21T15:30:43Z",
+            "readRunId": 39982434007,
+            "readJobId": 120512892028,
+            "readCommit": "4efe9c6fd0c57eb14c99b83b0f1c60f86f0a1317",
+            "receiptSha256": "6be9f850144f77eaecbe88dcc4b1fa7694fbe6ebdd1714e46764836cbe5ff2c9",
+            "receipt": {
+              "schema": "psc1-progressive-profile/1",
+              "phase": 1200,
+              "elapsedMs": 1208313,
+              "requestSha256": "e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998",
+              "manifestSha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+              "sourceClosureDigest": "816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82",
+              "sourceSha256": "edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d",
+              "firstTick": 313,
+              "lastTick": 1200401268,
+              "totalTicks": 1105624,
+              "selectedTicks": 28004,
+              "windowMicros": 30000000,
+              "execution": null,
+              "responseProduced": false,
+              "sourceFilesVerified": true,
+              "qualification": false,
+              "admission": "not-run",
+              "adoption": "not-run",
+              "cpu": {
+                "summary": [
+                  "Statistical profiling result from /home/runner/work/pskernel/pskernel/diagnosis/phase-1200/slice.log, (28004 ticks, 0 unaccounted, 0 excluded).",
+                  "",
+                  " [Shared libraries]:",
+                  "   ticks  total  nonlib   name",
+                  "  28004  100.0%          /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "",
+                  " [JavaScript]:",
+                  "   ticks  total  nonlib   name",
+                  "",
+                  " [C++]:",
+                  "   ticks  total  nonlib   name",
+                  "",
+                  " [Summary]:",
+                  "   ticks  total  nonlib   name",
+                  "      0    0.0%    NaN%  JavaScript",
+                  "      0    0.0%    NaN%  C++",
+                  "      0    0.0%    NaN%  GC",
+                  "  28004  100.0%          Shared libraries",
+                  "",
+                  " [C++ entry points]:",
+                  "   ticks    cpp   total   name",
+                  "",
+                  " [Bottom up (heavy) profile]:",
+                  "  Note: percentage shows a share of a particular caller in the total",
+                  "  amount of its parent calls.",
+                  "  Callers occupying less than 1.0% are not shown.",
+                  "",
+                  "   ticks parent  name",
+                  "  28004  100.0%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28004  100.0%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28004  100.0%      Builtin: WeakMapPrototypeSet",
+                  "  28004  100.0%        JS: *__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "  28004  100.0%          Builtin: GeneratorPrototypeNext",
+                  "  28004  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "",
+                  ""
+                ],
+                "stringEqual": [],
+                "bottomUp": [
+                  " [Bottom up (heavy) profile]:",
+                  "  Note: percentage shows a share of a particular caller in the total",
+                  "  amount of its parent calls.",
+                  "  Callers occupying less than 1.0% are not shown.",
+                  "",
+                  "   ticks parent  name",
+                  "  28004  100.0%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28004  100.0%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28004  100.0%      Builtin: WeakMapPrototypeSet",
+                  "  28004  100.0%        JS: *__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "  28004  100.0%          Builtin: GeneratorPrototypeNext",
+                  "  28004  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "",
+                  ""
+                ]
+              }
+            }
+          },
+          {
+            "schema": "psc1-profile-read-request/1",
+            "id": 1792771407996,
+            "phase": 1750,
+            "runId": 39978891505,
+            "sourceCommit": "bac05317679a9e756d093d76dfc7a1d3465fc53a",
+            "artifactId": 12514601466,
+            "artifactDigest": "sha256:477a6d8d5d4b2e276fc63c0a35c89f596b36cc36e9d15fbd157a548f4da445b8",
+            "artifactExpiresAt": "2027-01-21T15:30:43Z",
+            "readRunId": 39983586849,
+            "readJobId": 120516888810,
+            "readCommit": "676150e353f036663c891e9e1fdde75359da6664",
+            "receiptSha256": "76f562c478dca230b0e2147c3e581a78135a40fda121c89eeeb83a765d4fb928",
+            "receipt": {
+              "schema": "psc1-progressive-profile/1",
+              "phase": 1750,
+              "elapsedMs": 1758922,
+              "requestSha256": "e90eafca56433f509bb9e77d1e26e034f1de34accadac7bfb2d913893a7e8998",
+              "manifestSha256": "294fa864b22b32138696ed9dfd54a6e2ae94799ce381628b256dcc0d2d7c3cec",
+              "sourceClosureDigest": "816b37f9e38262105edb4e8930da0cda34e53e9ba3b0338841fe99b5a6cd5a82",
+              "sourceSha256": "edaa13a2a9e3081892175e79d353f6b12af2f4bfb03da703023062cc603ce62d",
+              "firstTick": 313,
+              "lastTick": 1749997695,
+              "totalTicks": 1618647,
+              "selectedTicks": 28061,
+              "windowMicros": 30000000,
+              "execution": {
+                "status": null,
+                "signal": "SIGKILL",
+                "error": {
+                  "code": "ETIMEDOUT",
+                  "message": "process tree exceeded hard deadline"
+                },
+                "elapsedMs": 1750091,
+                "stdoutBytes": 0,
+                "stderrBytes": 0,
+                "timeoutMs": 1750000,
+                "timeoutPolicy": "g2g3-correctness-1800s",
+                "maxBuffer": 33554432,
+                "maxRssKiB": 2898528,
+                "peakTreeRssKiB": 2898528,
+                "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+                "processGroup": 2164
+              },
+              "responseProduced": false,
+              "sourceFilesVerified": true,
+              "qualification": false,
+              "admission": "not-run",
+              "adoption": "not-run",
+              "cpu": {
+                "summary": [
+                  "Statistical profiling result from /home/runner/work/pskernel/pskernel/diagnosis/phase-1750/slice.log, (28061 ticks, 0 unaccounted, 0 excluded).",
+                  "",
+                  " [Shared libraries]:",
+                  "   ticks  total  nonlib   name",
+                  "  28061  100.0%          /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "",
+                  " [JavaScript]:",
+                  "   ticks  total  nonlib   name",
+                  "",
+                  " [C++]:",
+                  "   ticks  total  nonlib   name",
+                  "",
+                  " [Summary]:",
+                  "   ticks  total  nonlib   name",
+                  "      0    0.0%    NaN%  JavaScript",
+                  "      0    0.0%    NaN%  C++",
+                  "      0    0.0%    NaN%  GC",
+                  "  28061  100.0%          Shared libraries",
+                  "",
+                  " [C++ entry points]:",
+                  "   ticks    cpp   total   name",
+                  "",
+                  " [Bottom up (heavy) profile]:",
+                  "  Note: percentage shows a share of a particular caller in the total",
+                  "  amount of its parent calls.",
+                  "  Callers occupying less than 1.0% are not shown.",
+                  "",
+                  "   ticks parent  name",
+                  "  28061  100.0%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28061  100.0%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28061  100.0%      Builtin: WeakMapPrototypeSet",
+                  "  28061  100.0%        JS: *__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "  28061  100.0%          Builtin: GeneratorPrototypeNext",
+                  "  28061  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "",
+                  ""
+                ],
+                "stringEqual": [],
+                "bottomUp": [
+                  " [Bottom up (heavy) profile]:",
+                  "  Note: percentage shows a share of a particular caller in the total",
+                  "  amount of its parent calls.",
+                  "  Callers occupying less than 1.0% are not shown.",
+                  "",
+                  "   ticks parent  name",
+                  "  28061  100.0%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28061  100.0%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                  "  28061  100.0%      Builtin: WeakMapPrototypeSet",
+                  "  28061  100.0%        JS: *__ps$impl$psTsExprUsesNameWithFuel$worker file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:135443:52",
+                  "  28061  100.0%          Builtin: GeneratorPrototypeNext",
+                  "  28061  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/input/ts/psc1-ts-selfhost-correctness-1800s-66f1e752cfbdc491d9b2974c849825e8a4193227-attempt-1/generated-ts-compiler/G1-service/module.js:2:18",
+                  "",
+                  ""
+                ]
+              }
+            }
           }
-        ]
+        ],
+        "completeArtifact": {
+          "id": 12514880803,
+          "name": "psc1-progressive-complete-bac05317679a9e756d093d76dfc7a1d3465fc53a",
+          "size_in_bytes": 29700485,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12514880803",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12514880803/zip",
+          "expired": false,
+          "created_at": "2026-10-23T16:00:40Z",
+          "expires_at": "2027-01-21T15:30:43Z",
+          "updated_at": "2026-10-23T16:00:40Z",
+          "digest": "sha256:ced5322e476cd9715452b3623e79219ef7e036e0014cb2983eb87a8952054853",
+          "workflow_run": {
+            "id": 39978891505,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "diagnostic/psc1-selfhost-profile-20261023",
+            "head_sha": "bac05317679a9e756d093d76dfc7a1d3465fc53a"
+          }
+        },
+        "measuredRemainingClass": {
+          "phase1200": {
+            "ticks": 28004,
+            "scope": "all sampled stacks nativeNode -> WeakMapPrototypeSet -> psTsExprUsesNameWithFuel$worker"
+          },
+          "phase1750": {
+            "ticks": 28061,
+            "scope": "all sampled stacks same name visitor metadata insertion"
+          },
+          "phase600": {
+            "ticks": 27178,
+            "weakCollectionSet": 2575,
+            "scope": "text insertion, lookup, JSON generation and scheduler work; early/middle sample only"
+          }
+        }
+      }
+    },
+    "sharedTextLookup": {
+      "codeCommit": "e15f75cc121b2edb53e27fbffe0485cd96aca2cc",
+      "shapeRepairCommit": "d749a5f8cc273cc892e6f46e199cf6bf26229751",
+      "focusedRunId": 39982322889,
+      "focusedJobId": 120512511625,
+      "status": "all-input-proved, regressions and actual saturated G1 IR source mechanism/both grammars passed",
+      "workers": [
+        "psTextInsertApplied",
+        "psTextJoinApplied",
+        "psTsLookupApplied"
+      ],
+      "axioms": {
+        "textInsert": "none",
+        "textJoin": "none",
+        "lookupPublic": "Quot.sound"
+      },
+      "regressions": "all-input original/public equalities; Unicode/escaping/separators; carry order/first duplicate precedence;100001-entry first-slot exits",
+      "measurement": "phase600 profiles current original G2 before this source; text insertion metadata allocations and TS lookup/source generation observed",
+      "mechanism": "fully applied recursive data workers avoid constructing functions over unused suffixes; public types and data ordering unchanged",
+      "nativeShape": {
+        "schema": "psc1-text-lookup-worker-shapes/1",
+        "sourceCommit": "d749a5f8cc273cc892e6f46e199cf6bf26229751",
+        "sourceClosureDigest": "239de41d0a685aaf4fb17357ed824549e27745094ca5c5034f8dcd024b42d356",
+        "sourceModules": 85,
+        "requestSha256": "8b89b5371af3cc07a3a6526d88fb52256ce271da1f22ad291504f6cba7a92e25",
+        "candidateSha256": "f279c451c7f92ea6e4e999d7d6edbb20b27666e78700f1aca2c22bf904af68bb",
+        "sourceSha256": "803024afe93c7f5a883ec7025ddf0f4e6291c39f1897de6532a2abbf231ada81",
+        "seedHash": "816ba2828329063a493aff72d416a4a7f0660f3c64f6a76abe1d53195ebd4994",
+        "event": {
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_target_service_seed",
+          "args": [
+            "ts",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/text-lookup-workers/G1-bootstrap.request.json",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/text-lookup-workers/G1-bootstrap.candidate.json"
+          ],
+          "status": 0,
+          "signal": null,
+          "elapsedMs": 28269,
+          "maxRssKiB": 325752,
+          "peakTreeRssKiB": 325752,
+          "error": null
+        },
+        "witnesses": [
+          {
+            "name": "psTextInsertApplied",
+            "arity": 2,
+            "helper": "psTextInsertApplied_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "named",
+                  "List$spec$N$Option$spec$String",
+                  []
+                ]
+              ],
+              [
+                "__pscWorkerArg$0__________________________________________________________________",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            "helperResult": [
+              "named",
+              "List$spec$N$Option$spec$String",
+              []
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTextJoinApplied",
+            "arity": 4,
+            "helper": "psTextJoinApplied_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ],
+              [
+                "$psc0SH_1",
+                [
+                  "named",
+                  "List$spec$String",
+                  []
+                ]
+              ],
+              [
+                "__pscWorkerArg$0___________________________________________________________________",
+                [
+                  "primitive",
+                  "bool"
+                ]
+              ],
+              [
+                "__pscWorkerArg$1___________________________________________________",
+                [
+                  "named",
+                  "PsTextBuilder",
+                  []
+                ]
+              ]
+            ],
+            "helperResult": [
+              "primitive",
+              "string"
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTsLookupApplied",
+            "arity": 2,
+            "helper": "psTsLookupApplied",
+            "helperParameters": [
+              [
+                "entries",
+                [
+                  "named",
+                  "List$spec$N$Prod$spec$String$String",
+                  []
+                ]
+              ],
+              [
+                "name",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            "helperResult": [
+              "named",
+              "Option$spec$String",
+              []
+            ],
+            "helperBodyLambdas": 0
+          }
+        ],
+        "qualification": false,
+        "admission": "not-run; genuine qualification separate"
+      },
+      "failedShapeGate": {
+        "runId": 39981594291,
+        "commit": "e15f75cc121b2edb53e27fbffe0485cd96aca2cc",
+        "scope": "native equalities/regressions passed; initial inspection wrongly required forwarding helper for direct List data body; repaired only diagnostic; no generation attempt"
+      }
+    },
+    "nameVisitor": {
+      "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
+      "focusedRunId": 39983383955,
+      "focusedJobId": 120516185657,
+      "status": "all-input-proved and source-mechanism gate passed; actual target qualification in progress",
+      "worker": "psTsExprUsesNameWithFuelWorker",
+      "mechanism": "constructor-directed callback construction; no callbacks before Expr match, literal/variable branches none; actual recursive calls remain fully applied",
+      "proofBoundary": "arbitrary fuel/expression/query equality to exact retained original, including binding names; standard propext/Quot.sound only",
+      "policies": "fuel0 remains conservative true; default4096/fresh-candidate limits/refusals/capture safety unchanged",
+      "tests": "all11 expression constructors, binder/binding/field/call/control coverage, Unicode/missing names, zero and high leaf fuel, all existing proof/runtime/negative gates and85 modules both grammars",
+      "nativeCandidateShape": {
+        "schema": "psc1-text-lookup-worker-shapes/1",
+        "sourceCommit": "0decfd2618d53916824cb9926ef48008732f4066",
+        "sourceClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2",
+        "sourceModules": 85,
+        "requestSha256": "47a71964666e299fadc6f88b5882c346a2d0aac0edf07dccde53afaf664e5617",
+        "candidateSha256": "a91440079af6ca8a09c45ed4a9dacf33b25d4a5ca0331be65cf71c0d7fba595d",
+        "sourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+        "seedHash": "660b51b4ebc06f7382b0e399ee33f61d1092102c863abc373ee6b0485cbdc6c3",
+        "event": {
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_target_service_seed",
+          "args": [
+            "ts",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/text-lookup-workers/G1-bootstrap.request.json",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/text-lookup-workers/G1-bootstrap.candidate.json"
+          ],
+          "status": 0,
+          "signal": null,
+          "elapsedMs": 31296,
+          "maxRssKiB": 373096,
+          "peakTreeRssKiB": 371048,
+          "error": null
+        },
+        "witnesses": [
+          {
+            "name": "psTextInsertApplied",
+            "arity": 2,
+            "helper": "psTextInsertApplied_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "named",
+                  "List$spec$N$Option$spec$String",
+                  []
+                ]
+              ],
+              [
+                "__pscWorkerArg$0__________________________________________________________________",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            "helperResult": [
+              "named",
+              "List$spec$N$Option$spec$String",
+              []
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTextJoinApplied",
+            "arity": 4,
+            "helper": "psTextJoinApplied_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ],
+              [
+                "$psc0SH_1",
+                [
+                  "named",
+                  "List$spec$String",
+                  []
+                ]
+              ],
+              [
+                "__pscWorkerArg$0___________________________________________________________________",
+                [
+                  "primitive",
+                  "bool"
+                ]
+              ],
+              [
+                "__pscWorkerArg$1___________________________________________________",
+                [
+                  "named",
+                  "PsTextBuilder",
+                  []
+                ]
+              ]
+            ],
+            "helperResult": [
+              "primitive",
+              "string"
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTsLookupApplied",
+            "arity": 2,
+            "helper": "psTsLookupApplied",
+            "helperParameters": [
+              [
+                "entries",
+                [
+                  "named",
+                  "List$spec$N$Prod$spec$String$String",
+                  []
+                ]
+              ],
+              [
+                "name",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ]
+            ],
+            "helperResult": [
+              "named",
+              "Option$spec$String",
+              []
+            ],
+            "helperBodyLambdas": 0
+          },
+          {
+            "name": "psTsExprUsesNameWithFuelWorker",
+            "arity": 3,
+            "helper": "psTsExprUsesNameWithFuelWorker_$psc0SH_0$worker",
+            "helperParameters": [
+              [
+                "$psc0SH_0",
+                [
+                  "primitive",
+                  "nat"
+                ]
+              ],
+              [
+                "$psc0SH_2",
+                [
+                  "primitive",
+                  "string"
+                ]
+              ],
+              [
+                "__pscWorkerArg$0_________________________________________________________________________________________________________________________________________________________________________________________________________________________",
+                [
+                  "named",
+                  "PsVerifiedIrExpr",
+                  []
+                ]
+              ]
+            ],
+            "helperResult": [
+              "primitive",
+              "bool"
+            ],
+            "helperBodyLambdas": 8
+          }
+        ],
+        "qualification": false,
+        "admission": "not-run; genuine qualification separate"
+      },
+      "nativeCandidateAdmission": "not-run; actual G1/G2/G3 admission remains in genuine workflow",
+      "correctnessRequest": {
+        "branch": "perf/psc1-erasure-applied-workers-20261023",
+        "codeCommit": "0decfd2618d53916824cb9926ef48008732f4066",
+        "sourceCommit": "3ac0455908b085458192d74585c871e665e06675",
+        "requestCommit": "d864d5983525ce0b0f863b7cd87ab5c99a741f89",
+        "runId": 39984419742,
+        "jobId": 120519775807,
+        "status": "in_progress",
+        "nativeProofRunId": 39983383955,
+        "profile": "correctness-1800s",
+        "expectedNativeShapeSourceSha256": "79b9e99209bfd7a6226c96480bad5fa9a118ec41f41078abdbaba90f7bf26452",
+        "expectedNativeShapeClosureDigest": "438eb470fed13d6b81d3762a6e3e0ccab0121fcb29f3e4d29a1b7b27139ec9a2"
       }
     }
   }

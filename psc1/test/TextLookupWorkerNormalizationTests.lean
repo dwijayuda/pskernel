@@ -54,6 +54,46 @@ def psTsLookup (entries : List (String × String)) : String -> Option String :=
       fun (name : String) =>
         match entry with
         | Prod.mk key value => if psStringEq key name then Option.some value else smaller name
+def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => true
+  | Nat.succ remaining =>
+      fun (expr : PsVerifiedIrExpr) (name : String) =>
+        let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
+        let uses : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => smaller value name;
+        let parameterUses : PsVerifiedIrParameter -> Bool :=
+          fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
+        let bindingUses : PsVerifiedIrMatchBinding -> Bool :=
+          fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name name;
+        let fieldUses : (String × PsVerifiedIrExpr) -> Bool :=
+          fun (field : String × PsVerifiedIrExpr) =>
+            match field with
+            | Prod.mk _ value => smaller value name;
+        let alternativeUses : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Bool :=
+          fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
+            match alternative with
+            | Prod.mk _ detail =>
+                match detail with
+                | Prod.mk bindings body =>
+                    if psListAny bindingUses bindings then true else smaller body name;
+        match expr with
+        | .literal _ => false
+        | .var value => psStringEq value name
+        | .intrinsic _ _ arguments => psListAny uses arguments
+        | .lambda parameters _ body =>
+            if psListAny parameterUses parameters then true else smaller body name
+        | .call fn _ arguments => if smaller fn name then true else psListAny uses arguments
+        | .letE localName _ value body =>
+            if psStringEq localName name then true
+            else if smaller value name then true else smaller body name
+        | .ifE condition thenBranch elseBranch =>
+            if smaller condition name then true
+            else if smaller thenBranch name then true else smaller elseBranch name
+        | .record _ _ fields => psListAny fieldUses fields
+        | .projection _ _ target _ => smaller target name
+        | .constructor _ _ _ fields => psListAny fieldUses fields
+        | .matchE _ _ scrutinee alternatives =>
+            if smaller scrutinee name then true else psListAny alternativeUses alternatives
 end PsTextLookupReference
 
 theorem text_insert_applied_eq (levels : List (Option String)) (chunk : String) :
@@ -123,6 +163,25 @@ theorem ts_lookup_public_eq (entries : List (String × String)) :
 #print axioms text_join_applied_eq
 #print axioms ts_lookup_public_eq
 
+
+theorem ts_name_visitor_worker_eq (fuel : Nat) (expr : PsVerifiedIrExpr) (name : String) :
+    psTsExprUsesNameWithFuelWorker fuel expr name =
+      PsTextLookupReference.psTsExprUsesNameWithFuel fuel expr name := by
+  induction fuel generalizing expr name with
+  | zero => rfl
+  | succ remaining ih =>
+      cases expr <;>
+        simp only [psTsExprUsesNameWithFuelWorker,
+          PsTextLookupReference.psTsExprUsesNameWithFuel, ih] <;> rfl
+
+theorem ts_name_visitor_public_eq (fuel : Nat) :
+    psTsExprUsesNameWithFuel fuel =
+      PsTextLookupReference.psTsExprUsesNameWithFuel fuel := by
+  funext expr name
+  exact ts_name_visitor_worker_eq fuel expr name
+
+#print axioms ts_name_visitor_worker_eq
+
 def main : IO Unit := do
   for separator in ["", ",", "λ🙂"] do
     for values in [[], [""], ["a"], ["a","b","λ🙂"], ["","\\","\"","\n"]] do
@@ -145,4 +204,27 @@ def main : IO Unit := do
       throw (IO.userError "lookup first-binding behavior changed")
   unless psTsLookup (("head","value") :: List.replicate 100001 ("tail","later")) "head" == some "value" do
     throw (IO.userError "first lookup changed")
-  IO.println "PSC1_TEXT_LOOKUP_WORKERS: all-input insert/join/lookup and public helper equalities; Unicode/escaping/separators/first-duplicates;100001-entry first-slot exits"
+  let type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+  let value := PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 7)
+  let expressions : List PsVerifiedIrExpr :=
+    [value, .var "variable", .intrinsic .natAdd [] [.var "left",.var "right"],
+     .lambda [PsVerifiedIrParameter.mk "binder" type] type (.var "body"),
+     .call (.var "callee") [] [.var "argument"],
+     .letE "local" type (.var "value") (.var "body"),
+     .ifE (.var "condition") (.var "yes") (.var "no"),
+     .record "Record" [] [("field",.var "fieldValue")],
+     .projection "Record" [] (.var "target") "field",
+     .constructor "Option" "some" [type] [("value",.var "contained")],
+     .matchE "List" [type] (.var "scrutinee")
+       [("cons",[PsVerifiedIrMatchBinding.mk "head" "bound" type],.var "branch")]]
+  for fuel in [0,1,2,4,64] do
+    for expr in expressions do
+      for name in ["variable","binder","body","bound","condition","callee","missing","λ🙂"] do
+        unless psTsExprUsesNameWithFuel fuel expr name ==
+            PsTextLookupReference.psTsExprUsesNameWithFuel fuel expr name do
+          throw (IO.userError "name visitor binder, fuel or short-circuit behavior changed")
+  unless psTsExprUsesNameWithFuel 0 value "absent" do
+    throw (IO.userError "name visitor must remain conservative at zero fuel")
+  if psTsExprUsesNameWithFuel 100001 value "absent" then
+    throw (IO.userError "literal name visitor changed")
+  IO.println "PSC1_TEXT_LOOKUP_WORKERS: all-input insert/join/lookup/name-visitor and public helper equalities; Unicode/escaping/separators/first-duplicates;100001-entry first-slot exits"

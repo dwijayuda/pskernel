@@ -12,46 +12,65 @@ def psTsLookupApplied (entries : List (String × String)) (name : String) :
 def psTsLookup (entries : List (String × String)) : String -> Option String :=
   fun (name : String) => psTsLookupApplied entries name
 
-def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :=
+def psTsExprUsesNameWithFuelWorker (fuel : Nat) (expr : PsVerifiedIrExpr)
+    (name : String) : Bool :=
   match fuel with
-  | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => true
+  | Nat.zero => true
   | Nat.succ remaining =>
-      fun (expr : PsVerifiedIrExpr) (name : String) =>
-        let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
-        let uses : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => smaller value name;
-        let parameterUses : PsVerifiedIrParameter -> Bool :=
-          fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
-        let bindingUses : PsVerifiedIrMatchBinding -> Bool :=
-          fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name name;
-        let fieldUses : (String × PsVerifiedIrExpr) -> Bool :=
-          fun (field : String × PsVerifiedIrExpr) =>
-            match field with
-            | Prod.mk _ value => smaller value name;
-        let alternativeUses : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Bool :=
-          fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
-            match alternative with
-            | Prod.mk _ detail =>
-                match detail with
-                | Prod.mk bindings body =>
-                    if psListAny bindingUses bindings then true else smaller body name;
-        match expr with
-        | .literal _ => false
-        | .var value => psStringEq value name
-        | .intrinsic _ _ arguments => psListAny uses arguments
-        | .lambda parameters _ body =>
-            if psListAny parameterUses parameters then true else smaller body name
-        | .call fn _ arguments => if smaller fn name then true else psListAny uses arguments
-        | .letE localName _ value body =>
-            if psStringEq localName name then true
-            else if smaller value name then true else smaller body name
-        | .ifE condition thenBranch elseBranch =>
-            if smaller condition name then true
-            else if smaller thenBranch name then true else smaller elseBranch name
-        | .record _ _ fields => psListAny fieldUses fields
-        | .projection _ _ target _ => smaller target name
-        | .constructor _ _ _ fields => psListAny fieldUses fields
-        | .matchE _ _ scrutinee alternatives =>
-            if smaller scrutinee name then true else psListAny alternativeUses alternatives
+      match expr with
+      | .literal _ => false
+      | .var value => psStringEq value name
+      | .intrinsic _ _ arguments =>
+          psListAny
+            (fun (value : PsVerifiedIrExpr) => psTsExprUsesNameWithFuelWorker remaining value name)
+            arguments
+      | .lambda parameters _ body =>
+          if psListAny
+              (fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name)
+              parameters then true
+          else psTsExprUsesNameWithFuelWorker remaining body name
+      | .call fn _ arguments =>
+          if psTsExprUsesNameWithFuelWorker remaining fn name then true
+          else psListAny
+            (fun (value : PsVerifiedIrExpr) => psTsExprUsesNameWithFuelWorker remaining value name)
+            arguments
+      | .letE localName _ value body =>
+          if psStringEq localName name then true
+          else if psTsExprUsesNameWithFuelWorker remaining value name then true
+          else psTsExprUsesNameWithFuelWorker remaining body name
+      | .ifE condition thenBranch elseBranch =>
+          if psTsExprUsesNameWithFuelWorker remaining condition name then true
+          else if psTsExprUsesNameWithFuelWorker remaining thenBranch name then true
+          else psTsExprUsesNameWithFuelWorker remaining elseBranch name
+      | .record _ _ fields =>
+          psListAny
+            (fun (field : String × PsVerifiedIrExpr) =>
+              match field with
+              | Prod.mk _ value => psTsExprUsesNameWithFuelWorker remaining value name)
+            fields
+      | .projection _ _ target _ => psTsExprUsesNameWithFuelWorker remaining target name
+      | .constructor _ _ _ fields =>
+          psListAny
+            (fun (field : String × PsVerifiedIrExpr) =>
+              match field with
+              | Prod.mk _ value => psTsExprUsesNameWithFuelWorker remaining value name)
+            fields
+      | .matchE _ _ scrutinee alternatives =>
+          if psTsExprUsesNameWithFuelWorker remaining scrutinee name then true
+          else psListAny
+            (fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
+              match alternative with
+              | Prod.mk _ detail =>
+                  match detail with
+                  | Prod.mk bindings body =>
+                      if psListAny
+                          (fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name name)
+                          bindings then true
+                      else psTsExprUsesNameWithFuelWorker remaining body name)
+            alternatives
+
+def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :=
+  fun (expr : PsVerifiedIrExpr) (name : String) => psTsExprUsesNameWithFuelWorker fuel expr name
 
 def psTsFreshMatchTempWorker
     (expr : PsVerifiedIrExpr) (attempts : Nat) (index : Nat) : String :=

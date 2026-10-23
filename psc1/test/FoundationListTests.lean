@@ -122,7 +122,12 @@ def runFoundationListTests : IO Unit := do
   if psListTake 1000 values != values.take 1000 then throw (IO.userError "list take")
   if psListZip values [5,6] != [(0,5),(1,6)] then throw (IO.userError "list zip truncation/order")
   let refuse : Nat -> Except Nat Nat := fun n => if n == 17 then Except.error n else Except.ok (n+1)
-  if psListMapExcept refuse values != Except.error 17 then throw (IO.userError "first error")
+  match psListMapExcept refuse values with
+  | .error failure => if failure != 17 then throw (IO.userError "first error priority")
+  | .ok _ => throw (IO.userError "expected mapExcept refusal")
   let accept : Nat -> Except Nat Nat := fun n => Except.ok (n+1)
-  if psListMapExcept accept values != Except.ok (values.map Nat.succ) then throw (IO.userError "mapExcept order")
+  match psListMapExcept accept values with
+  | .error _ => throw (IO.userError "expected mapExcept acceptance")
+  | .ok mapped =>
+      if mapped != values.map Nat.succ then throw (IO.userError "mapExcept order")
   IO.println "PSC1_FOUNDATION_LIST: six all-input retained API equalities;100000-element native traversal; ordered mapping/first-error/truncation"

@@ -1,6 +1,6 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/2",
-  "id": "psc1-ts-erasure-workers-correctness-20261023-1792763278654",
+  "id": "ts-ir-encoder-workers-correctness-20261023-1792767226423",
   "action": "qualify-independent-G1-G2-G3",
   "branch": "perf/psc1-erasure-applied-workers-20261023",
   "targets": [
@@ -10,5 +10,5 @@
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "parentCommit": "ba0d5f2916074b6331441b050a38fd0f12347604"
+  "parentCommit": "453659433789ae3c6322f61b956e784891776c71"
 }

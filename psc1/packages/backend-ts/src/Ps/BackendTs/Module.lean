@@ -824,21 +824,22 @@ def psTsViewTokenName (index : Nat) : String := psTsJoin "" ["__ps$viewToken$", 
 
 def psTsViewParameters (parameters : List PsVerifiedIrParameter) : List PsVerifiedIrParameter :=
   match parameters with
-  | [] => []
-  | parameter :: rest =>
+  | List.nil => List.nil
+  | List.cons parameter rest =>
       match parameter.type with
-      | .primitive .string => parameter :: psTsViewParameters rest
+      | .primitive .string => List.cons parameter (psTsViewParameters rest)
       | _ => psTsViewParameters rest
 
 def psTsViewBindings (parameters : List PsVerifiedIrParameter) (index : Nat) : List (String × String) :=
   match parameters with
-  | [] => []
-  | parameter :: rest => (parameter.name, psTsViewName index) :: psTsViewBindings rest (Nat.succ index)
+  | List.nil => List.nil
+  | List.cons parameter rest =>
+      List.cons (Prod.mk parameter.name (psTsViewName index)) (psTsViewBindings rest (Nat.succ index))
 
 def psTsViewPrelude (parameters : List PsVerifiedIrParameter) (index : Nat) : String :=
   match parameters with
-  | [] => ""
-  | parameter :: rest =>
+  | List.nil => ""
+  | List.cons parameter rest =>
       let token := psTsViewTokenName index;
       let getter := psTsViewName index;
       psTsJoin "" ["let ", token, ": symbol | undefined; const ", getter,
@@ -847,9 +848,9 @@ def psTsViewPrelude (parameters : List PsVerifiedIrParameter) (index : Nat) : St
 
 def psTsViewFresh (declaration : PsVerifiedIrDeclaration) (parameters : List PsVerifiedIrParameter) (index : Nat) : Bool :=
   match parameters with
-  | [] => true
-  | _ :: rest =>
-      let uses : String -> Bool := fun name =>
+  | List.nil => true
+  | List.cons _ rest =>
+      let uses : String -> Bool := fun (name : String) =>
         psStringEq name declaration.name ||
         psListAny (fun (parameter : PsVerifiedIrParameter) => psStringEq name parameter.name) declaration.parameters ||
         psTsExprUsesNameWithFuel 4096 declaration.body name;
@@ -858,71 +859,94 @@ def psTsViewFresh (declaration : PsVerifiedIrDeclaration) (parameters : List PsV
 
 def psTsViewWithout (views : List (String × String)) (name : String) : List (String × String) :=
   match views with
-  | [] => []
-  | entry :: rest =>
-      if psStringEq entry.fst name then psTsViewWithout rest name
-      else entry :: psTsViewWithout rest name
+  | List.nil => List.nil
+  | List.cons entry rest =>
+      if psStringEq (Prod.fst entry) name then psTsViewWithout rest name
+      else List.cons entry (psTsViewWithout rest name)
 
 def psTsViewAlias (views : List (String × String)) (name : String) (value : PsVerifiedIrExpr) : List (String × String) :=
   let remaining := psTsViewWithout views name;
   match value with
   | .var original =>
       match psTsLookup views original with
-      | .some getter => (name, getter) :: remaining
-      | .none => remaining
+      | Option.some getter => List.cons (Prod.mk name getter) remaining
+      | Option.none => remaining
   | _ => remaining
 
 def psTsViewInvariant (views : List (String × String))
     (parameters : List PsVerifiedIrParameter) (arguments : List PsVerifiedIrExpr) : Bool :=
-  match parameters, arguments with
-  | [], [] => true
-  | parameter :: rest, argument :: tail =>
-      match psTsLookup views parameter.name with
-      | .none => psTsViewInvariant views rest tail
-      | .some expected =>
-          match argument with
-          | .var name =>
-              match psTsLookup views name with
-              | .some actual => psStringEq expected actual && psTsViewInvariant views rest tail
-              | .none => false
-          | _ => false
-  | _, _ => false
+  match parameters with
+  | List.nil => psListIsEmpty arguments
+  | List.cons parameter rest =>
+      match arguments with
+      | List.nil => false
+      | List.cons argument tail =>
+          match psTsLookup views parameter.name with
+          | Option.none => psTsViewInvariant views rest tail
+          | Option.some expected =>
+              match argument with
+              | .var name =>
+                  match psTsLookup views name with
+                  | Option.some actual => psStringEq expected actual && psTsViewInvariant views rest tail
+                  | Option.none => false
+              | _ => false
 
--- Only pure expressions are admitted by the surrounding tail-loop recognizer.
--- Position arguments are evaluated before lazy view lookup, as in the old calls.
+-- Position expressions are evaluated before lazy view lookup, as in the old calls.
+def psTsViewIntrinsic (views : List (String × String)) (operation : PsVerifiedIrIntrinsic)
+    (arguments : List PsVerifiedIrExpr) (printed : List String) : Except PsTsEmitError String :=
+  let ordinary := psTsEmitIntrinsicFromPrinted operation printed;
+  match arguments with
+  | List.cons (.var name) _ =>
+      match psTsLookup views name with
+      | Option.none => ordinary
+      | Option.some getter =>
+          match printed with
+          | List.nil => ordinary
+          | List.cons _ rest =>
+              match operation with
+              | .stringUtf8ByteSize =>
+                  if psListIsEmpty rest then Except.ok (psTsJoin "" [getter, "().size"]) else ordinary
+              | .stringAtEnd =>
+                  match rest with
+                  | List.cons position List.nil =>
+                      Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps_p >= ", getter, "().size)(", position, ")"])
+                  | _ => ordinary
+              | .stringGet =>
+                  match rest with
+                  | List.cons position List.nil =>
+                      Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringGetView(", getter, "(), __ps_p))(", position, ")"])
+                  | _ => ordinary
+              | .stringNext =>
+                  match rest with
+                  | List.cons position List.nil =>
+                      Except.ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringNextView(", getter, "(), __ps_p))(", position, ")"])
+                  | _ => ordinary
+              | _ => ordinary
+  | _ => ordinary
+
+-- The surrounding recognizer admits only pure expressions. Unhandled shapes use
+-- the original expression printer and therefore cannot introduce a fast path.
 def psTsViewPureWithFuel (brands tags views : List (String × String)) (fuel : Nat) :
     PsVerifiedIrExpr -> Except PsTsEmitError String :=
   match fuel with
-  | .zero => fun _ => .error .fuelExhausted
-  | .succ remaining => fun expr =>
-      let recur := psTsViewPureWithFuel brands tags views remaining;
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => Except.error PsTsEmitError.fuelExhausted
+  | Nat.succ remaining => fun (expr : PsVerifiedIrExpr) =>
+      let recur : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsViewPureWithFuel brands tags views remaining;
       match expr with
       | .intrinsic operation _ arguments =>
           match psListMapExcept recur arguments with
-          | .error error => .error error
-          | .ok printed =>
-              let ordinary := psTsEmitIntrinsicFromPrinted operation printed;
-              match arguments, printed with
-              | .var name :: _, _ :: rest =>
-                  match psTsLookup views name with
-                  | .none => ordinary
-                  | .some getter =>
-                      match operation, rest with
-                      | .stringUtf8ByteSize, [] => .ok (psTsJoin "" [getter, "().size"])
-                      | .stringAtEnd, position :: [] =>
-                          .ok (psTsJoin "" ["((__ps_p: bigint) => __ps_p >= ", getter, "().size)(", position, ")"])
-                      | .stringGet, position :: [] =>
-                          .ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringGetView(", getter, "(), __ps_p))(", position, ")"])
-                      | .stringNext, position :: [] =>
-                          .ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringNextView(", getter, "(), __ps_p))(", position, ")"])
-                      | _, _ => ordinary
-              | _, _ => ordinary
+          | Except.error error => Except.error error
+          | Except.ok printed => psTsViewIntrinsic views operation arguments printed
       | .ifE condition left right =>
-          match recur condition, recur left, recur right with
-          | .ok c, .ok l, .ok r => .ok (psTsJoin "" ["(", c, " ? ", l, " : ", r, ")"])
-          | .error error, _, _ => .error error
-          | _, .error error, _ => .error error
-          | _, _, .error error => .error error
+          match recur condition with
+          | Except.error error => Except.error error
+          | Except.ok c =>
+              match recur left with
+              | Except.error error => Except.error error
+              | Except.ok l =>
+                  match recur right with
+                  | Except.error error => Except.error error
+                  | Except.ok r => Except.ok (psTsJoin "" ["(", c, " ? ", l, " : ", r, ")"])
       | _ => psTsEmitExpr brands tags expr
 
 def psTsViewTailValue (views : List (String × String)) (generated : Bool)
@@ -1011,7 +1035,7 @@ def psTsViewTailContextWithFuel (views : List (String × String)) (brands tags :
                   | Option.some printedScrutinee =>
                       let temporary := psTsFreshMatchTemp declaration.body;
                       let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>
-                        if psTsTailBindingSafe declaration aliases binding.name && (match psTsLookup views binding.name with | .none => true | .some _ => false) then
+                        if psTsTailBindingSafe declaration aliases binding.name && (match psTsLookup views binding.name with | Option.none => true | Option.some _ => false) then
                           match psTsEmitType binding.type with
                           | Except.error _ => Option.none
                           | Except.ok type => Option.some (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temporary, ".", binding.field, ";"])

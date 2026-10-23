@@ -14,7 +14,7 @@ export function runTool(executable,args,options={}) {
   fs.writeFileSync(path.join(options.logDirectory,'tool.stdout.txt'),r.stdout||'');
   fs.writeFileSync(path.join(options.logDirectory,'tool.stderr.txt'),r.stderr||'');
  }
- if(r.error||r.status!==0) throw Error('PSC1_TARGET_TOOL_FAILED:'+JSON.stringify(event)+'\n'+(r.stderr||r.stdout||'').slice(-10000));
+ if(r.error||r.status!==0) throw Error('PSC1_TARGET_TOOL_FAILED:'+JSON.stringify(event)+'\n'+(r.stderr||r.stdout||'').split('\n').slice(0,28).map(line=>line.slice(0,320)).join('\n'));
  return {stdout:r.stdout,event};
 }
 export function verifyArtifact(manifestFile,expectedHash) {
@@ -64,6 +64,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
    'fn main() { '+consumer+' }';
   fs.writeFileSync(path.join(directory,'module.rs'),source);
   fs.writeFileSync(path.join(directory,'main.rs'),source+'\n'+main+'\n');
+  events.push(runTool('rustfmt',['--edition','2021',path.join(directory,'main.rs')],{logDirectory:directory}).event);
   fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n');
   const locked=path.resolve('scripts/fixtures/selfhost-rust.Cargo.lock');
   // The first diagnostic records the exact resolver output. Once checked in,

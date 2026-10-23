@@ -728,8 +728,8 @@ def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (Prod String S
 def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
   match psTsEmitPureDeclaration isPublic brands tags declaration with
-  | some source => .ok source
-  | none =>
+  | Option.some source => Except.ok source
+  | Option.none =>
       match psTsEmitCountLoopWithVisibility isPublic tags declaration with
       | Option.some loop => Except.ok loop
       | Option.none =>

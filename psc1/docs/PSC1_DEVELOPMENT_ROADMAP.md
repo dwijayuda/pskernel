@@ -24,7 +24,17 @@ proves the context visitor equality, then both grammar audits identify native
 open directives in target facades and native do/Option syntax in TS Module.
 The facades now use qualified names; the module helpers use explicit portable
 matches/list helpers. Tests retain old helpers and compare output/runtime choices.
-Artifact/source identity checks and the reviewed Rust lock requirement are tightened. Next: execute the new manual matrix,
+Artifact/source identity checks and the reviewed Rust lock requirement are tightened. Run 39876380647 stopped on a new fixture's Bool constructor, corrected at
+02e2b6c2714e7b5e727816e9f57e23cfb15b2c2d. Run 39876683792 at
+5176635e0656aed9d937ba13783d8d5b82b0e8b1 proves the visitor equality and all
+264 old/new TS module output/runtime comparisons. Rust passes both 92-module
+grammar audits, emits a full compiler candidate and independently admits it;
+Cargo then reaches ENOBUFS (32 MiB diagnostics), so no G1 executes. Preserve
+artifact 12468503739 (sha256 549e18247437786702b88164be9bede201491f3a580529d18e64ed12027b2b32).
+TS audit identifies one shorthand constructor at Module:731:20; normalized.
+Rust now uses the existing rustfmt target formatting before cargo, without
+suppressing warnings or changing the 32 MiB/240000 ms resource bounds.
+Next: execute the new manual matrix,
 fix target/source blockers as classes, capture exact tool/runtime evidence and
 complete fresh normal qualification after compiler changes.
 

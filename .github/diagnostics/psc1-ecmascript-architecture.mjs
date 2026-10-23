@@ -34,6 +34,23 @@ for(const expected of request.attempts){
   invokeSites:count('yield* __ps$invoke('),tailSites:count('yield* __ps$tail(')+count('yield* __ps$tailInvoke('),
   directDriverSites:count('(yield { fn:'),loops:count('while (true)'),lazyGetters:count('})(__ps$utf8Known('),nestedFieldLoads:count('["$ps$fields"]'),selected});
 }
-const receipt={schema:request.schema,testedCommit:process.env.GITHUB_SHA,compilerExecution:false,nativeDelegation:false,qualification:false,comparisonLimits:'Different target closures and source snapshots; shape comparison is not a matched performance benchmark.',results};
+const profileFiles=walk('../input/architecture/profile');
+const profileReceiptFiles=profileFiles.filter(f=>path.basename(f)==='receipt.json');assert.equal(profileReceiptFiles.length,1);
+const profileReceipt=JSON.parse(fs.readFileSync(profileReceiptFiles[0]));
+assert.equal(profileReceipt.testedCommit,request.profiles[0].requestCommit);
+assert.equal(profileReceipt.qualification,false);assert.equal(profileReceipt.nativeDelegation,false);
+assert.equal(profileReceipt.source.sourceClosureDigest,request.attempts[0].sourceClosureDigest);
+const cpu=[];
+for(const file of profileFiles.filter(f=>f.endsWith('.log.txt'))){
+ const text=fs.readFileSync(file,'utf8'),lines=text.split('\\n');
+ const sections={};
+ for(const name of ['Summary','Bottom up (heavy) profile']){
+   const at=lines.findIndex(l=>l.includes('['+name+']'));
+   sections[name]=at<0?[]:lines.slice(at,at+(name==='Summary'?15:85));
+ }
+ cpu.push({file:path.basename(file),sha256:sha(text),sections});
+}
+assert.ok(cpu.length>0,'full retained processed CPU report must be present');
+const receipt={schema:request.schema,testedCommit:process.env.GITHUB_SHA,compilerExecution:false,nativeDelegation:false,qualification:false,comparisonLimits:'Different target closures and source snapshots; shape comparison is not a matched performance benchmark.',results,cpu};
 fs.mkdirSync('dist/ecmascript-architecture',{recursive:true});fs.writeFileSync('dist/ecmascript-architecture/receipt.json',JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_RETAINED_ECMASCRIPT_ARCHITECTURE: '+JSON.stringify(receipt));

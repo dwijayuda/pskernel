@@ -20,5 +20,14 @@
       "artifactDigest": "sha256:21b554aaf2803577727554861ba7fd4800cf90706c6ca6a3c1b665e4c99d8962",
       "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28"
     }
+  ],
+  "profiles": [
+    {
+      "runId": 40031550466,
+      "requestCommit": "5b32dcd43b5af2a8fa382bc95571198cce976939",
+      "sourceCommit": "4035a147e22a3a05bdac08548e7fc1114fd1665d",
+      "artifactId": 12534609434,
+      "artifactDigest": "sha256:78e06d1fab67943acca2bbe17d716c0c8f3b7d944373052832b4ea06efe50af5"
+    }
   ]
 }

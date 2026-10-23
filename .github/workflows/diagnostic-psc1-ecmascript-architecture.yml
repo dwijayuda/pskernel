@@ -26,7 +26,7 @@ jobs:
             const r=await fetch('https://api.github.com/repos/'+process.env.GITHUB_REPOSITORY+route,{headers:{Authorization:'Bearer '+process.env.GH_TOKEN,Accept:'application/vnd.github+json'}});
             assert.equal(r.status,200);return await r.json();
           };
-          for(const e of request.attempts){
+          for(const e of [...request.attempts,...request.profiles]){
             const run=await get('/actions/runs/'+e.runId);
             assert.equal(run.status,'completed');assert.equal(run.head_sha,e.requestCommit);
             const commit=await get('/commits/'+e.requestCommit);
@@ -48,6 +48,12 @@ jobs:
           run-id: '39993829327'
           artifact-ids: '12519304338'
           path: input/architecture/ts
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40031550466'
+          artifact-ids: '12534609434'
+          path: input/architecture/profile
       - name: Compare retained generated compiler source without execution
         working-directory: psc1
         run: node ../.github/diagnostics/psc1-ecmascript-architecture.mjs

@@ -72,15 +72,14 @@ those failed proofs remain preserved and were not bypassed.
 Current TS replay39912539573 samples last30s of a220s G2 request and shows
 generator/thunk work in escape predicates, codec and constructor lookup. A small
 shared-source trial replaces lazy Boolean disjunction with explicit branches.
-Its all-Char proof/native comparisons/regressions/audits pass; actual generations
-are pending in run39913434540. Cache/index hypotheses remain hypotheses; neither
+Its all-Char proof/native comparisons/regressions/audits and G1 pass; G2 times out1800199ms in run39913434540. Cache/index hypotheses remain hypotheses; neither
 the two-entry UTF8 cache nor raw-position semantics have been changed.
 
 Combined TS trial39914906360 then normalizes constructor/height lookups into
 fully applied workers, avoiding eager suffix-closure construction. Existing
 function types remain. Universal list/name/fuel/index/hash equalities, first
-duplicate and100001-entry miss checks pass; actual generations remain pending.
-No index/cache/resource policy changed. Predicate-only trial remains separate.
+duplicate and100001-entry miss checks plus G1 pass; G2 times out1800149ms.
+No index/cache/resource policy changed in that source. Predicate-only trial is a separate terminal control.
 
 Rust late stack39906025465 reaches strict IR checking and nominal-arity lookup.
 A derived bounded index may reduce repeated searches if exact lookup and
@@ -99,3 +98,19 @@ contract and real applications. Promote dependency-coherent validated changes
 with fresh full normal qualification. Keep DirectJS as reference/G1 regression,
 its original G2 heap defect tracked, and ExpressionV2 research separate from
 compiler work and official Lean admission. No merge or publication is authorized.
+
+## Terminal later experiments
+
+The applied-lookup source's actual IR workers are fully applied (two parameters,
+data/scalar result, zero body lambdas). Its current220s replay39918874112 shows
+StringEqual61.8% under psStringEqFromWithFuel. This diagnoses a remaining path,
+not the full1800s tail or a complete workload runtime.
+
+Bounded two-view Map sourceaae4aac4/request9f39ab51/run39920694158 preserves exactly
+two view objects and insertion/eviction order. Strict TS7 differential checks
+pass1458 comparisons across Unicode/surrogates, invalid raw positions and equal
+separately allocated strings. G1 passes ten cases; G2 times out1800169ms at
+1787220KiB. Single synthetic prefix timing establishes no advantage. The extra
+cache index is not selected for promotion. Preserve all experiments, prefer
+applied-lookup baseline0938c895/a10c0162 for measured next work and do not infer
+G2/G3 from native proofs or a lower observed peak on a different censored run.

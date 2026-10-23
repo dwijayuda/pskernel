@@ -5,12 +5,16 @@ import Ps.Foundation.List
 
 -- Ordered, fail-closed concatenation for encoded instruction lists.
 def psListFlatMapExcept {α β ε : Type}
-    (convert : α → Except ε (List β)) : List α → Except ε (List β)
-  | [] => Except.ok []
-  | value :: rest => do
-      let first ← convert value
-      let other ← psListFlatMapExcept convert rest
-      pure (psListAppend first other)
+    (convert : α -> Except ε (List β)) (values : List α) : Except ε (List β) :=
+  match values with
+  | List.nil => Except.ok []
+  | List.cons value rest =>
+      match convert value with
+      | Except.error error => Except.error error
+      | Except.ok first =>
+          match psListFlatMapExcept convert rest with
+          | Except.error error => Except.error error
+          | Except.ok other => Except.ok (psListAppend first other)
 
 def psWasmEncodeByteChunks (chunks : List (List UInt8)) : List UInt8 :=
   match chunks with
@@ -1038,11 +1042,12 @@ def psWasmEncodeGroupedTypeSectionPayload
       (Nat.succ functionTypeCount)
 
 def psWasmEncodeAbiImport (module : PsWasmModule) (index : Nat)
-    (value : PsWasmFunctionImport) : Except PsWasmEncodeError (List UInt8) := do
-  let typeIndex <- psWasmFunctionTypeIndex module.structures module.arrays
-    module.functionTypes index value.function
-  return psWasmEncodeByteChunks [psWasmEncodeName value.moduleName,
-    psWasmEncodeName value.importName, [psWasmByte 0], psWasmEncodeUleb typeIndex]
+    (value : PsWasmFunctionImport) : Except PsWasmEncodeError (List UInt8) :=
+  match psWasmFunctionTypeIndex module.structures module.arrays
+      module.functionTypes index value.function with
+  | Except.error error => Except.error error
+  | Except.ok typeIndex => Except.ok (psWasmEncodeByteChunks [psWasmEncodeName value.moduleName,
+      psWasmEncodeName value.importName, [psWasmByte 0], psWasmEncodeUleb typeIndex])
 
 -- Ordered, fully applied traversal preserves imported function type indices.
 def psWasmEncodeAbiImportsWorker (module : PsWasmModule) (index : Nat)
@@ -1058,139 +1063,143 @@ def psWasmEncodeAbiImportsWorker (module : PsWasmModule) (index : Nat)
           | Except.ok other => Except.ok (psListAppend first other)
 
 def psWasmEncodeAbiImports (module : PsWasmModule) :
-    Except PsWasmEncodeError (List UInt8) := do
-  let encoded <- psWasmEncodeAbiImportsWorker module 0 module.functionImports
-  let memoryImports :=
-    if module.abiMemoryImports then
-      psWasmEncodeByteChunks [psWasmEncodeName "psc1:abi", psWasmEncodeName "memory",
-        [psWasmByte 2, psWasmByte 1], psWasmEncodeUleb 256, psWasmEncodeUleb 256,
-        psWasmEncodeName "psc1:abi", psWasmEncodeName "heap",
-        [psWasmByte 3, psWasmByte 127, psWasmByte 1],
-        psWasmEncodeName "psc1:abi", psWasmEncodeName "busy",
-        [psWasmByte 3, psWasmByte 127, psWasmByte 1]]
-    else []
-  return psWasmEncodeVector (psListAppend encoded memoryImports)
-    (psListLength module.functionImports + (if module.abiMemoryImports then 3 else 0))
+    Except PsWasmEncodeError (List UInt8) :=
+  match psWasmEncodeAbiImportsWorker module 0 module.functionImports with
+  | Except.error error => Except.error error
+  | Except.ok encoded =>
+      t memoryImports :=
+        if module.abiMemoryImports then
+          psWasmEncodeByteChunks [psWasmEncodeName "psc1:abi", psWasmEncodeName "memory",
+            [psWasmByte 2, psWasmByte 1], psWasmEncodeUleb 256, psWasmEncodeUleb 256,
+            psWasmEncodeName "psc1:abi", psWasmEncodeName "heap",
+            [psWasmByte 3, psWasmByte 127, psWasmByte 1],
+            psWasmEncodeName "psc1:abi", psWasmEncodeName "busy",
+            [psWasmByte 3, psWasmByte 127, psWasmByte 1]]
+        else [];
+      Except.ok ( psWasmEncodeVector (psListAppend encoded memoryImports)
+        (psListLength module.functionImports + (if module.abiMemoryImports then 3 else 0)))
 
 def psWasmEncodeModule
     (module : PsWasmModule) :
-    Except PsWasmEncodeError (List UInt8) := do
-  let encodedImports <- psWasmEncodeAbiImports module
-  let allFunctions := psWasmAllFunctions module
-  match
-      psWasmEncodeStructTypes
-        module.structures
-        module.arrays
-        module.structures with
+    Except PsWasmEncodeError (List UInt8) :=
+  match psWasmEncodeAbiImports module with
   | Except.error error => Except.error error
-  | Except.ok encodedStructTypes =>
+  | Except.ok encodedImports =>
+      let allFunctions := psWasmAllFunctions module;
       match
-          psWasmEncodeArrayTypes
+          psWasmEncodeStructTypes
             module.structures
             module.arrays
-            module.arrays with
+            module.structures with
       | Except.error error => Except.error error
-      | Except.ok encodedArrayTypes =>
+      | Except.ok encodedStructTypes =>
           match
-              psWasmEncodeNamedFunctionTypes
+              psWasmEncodeArrayTypes
                 module.structures
                 module.arrays
-                module.functionTypes with
+                module.arrays with
           | Except.error error => Except.error error
-          | Except.ok encodedNamedFunctionTypes =>
+          | Except.ok encodedArrayTypes =>
               match
-                  psWasmEncodeFunctionTypes
+                  psWasmEncodeNamedFunctionTypes
                     module.structures
                     module.arrays
-                    allFunctions with
+                    module.functionTypes with
               | Except.error error => Except.error error
-              | Except.ok encodedFunctionTypes =>
+              | Except.ok encodedNamedFunctionTypes =>
                   match
-                      psWasmEncodeFunctionTypeIndicesLoop
+                      psWasmEncodeFunctionTypes
                         module.structures
                         module.arrays
-                        module.functionTypes
-                        (psListLength module.functionImports)
-                        module.functions with
+                        allFunctions with
                   | Except.error error => Except.error error
-                  | Except.ok encodedFunctionTypeIndices =>
+                  | Except.ok encodedFunctionTypes =>
                       match
-                          psWasmEncodeExports
-                            allFunctions
-                            module.exports with
+                          psWasmEncodeFunctionTypeIndicesLoop
+                            module.structures
+                            module.arrays
+                            module.functionTypes
+                            (psListLength module.functionImports)
+                            module.functions with
                       | Except.error error => Except.error error
-                      | Except.ok encodedExports =>
+                      | Except.ok encodedFunctionTypeIndices =>
                           match
-                              psWasmEncodeDeclarativeFunctionRefs
+                              psWasmEncodeExports
                                 allFunctions
-                                module.functionRefs with
+                                module.exports with
                           | Except.error error => Except.error error
-                          | Except.ok encodedFunctionRefs =>
+                          | Except.ok encodedExports =>
                               match
-                                  psWasmEncodeFunctionBodies
-                                    module.structures
-                                    module.arrays
-                                    module.functionTypes
+                                  psWasmEncodeDeclarativeFunctionRefs
                                     allFunctions
-                                    module.functions with
+                                    module.functionRefs with
                               | Except.error error => Except.error error
-                              | Except.ok encodedBodies =>
-                                  let typePayload : List UInt8 :=
-                                    psWasmEncodeGroupedTypeSectionPayload
-                                      (psListAppend encodedStructTypes encodedArrayTypes)
-                                      (Nat.add
-                                        (psListLength module.structures)
-                                        (psListLength module.arrays))
-                                      (psListAppend encodedNamedFunctionTypes encodedFunctionTypes)
-                                      (Nat.add
-                                        (psListLength module.functionTypes)
-                                        (psListLength allFunctions));
-                                  let functionPayload :=
-                                    psWasmEncodeVector
-                                      encodedFunctionTypeIndices
-                                      (psListLength module.functions);
-                                  let exportPayload :=
-                                    psWasmEncodeVector
-                                      (psWasmEncodeByteChunks [encodedExports,
-                                        (if module.abiMemory then
-                                          psListAppend (psWasmEncodeName "memory") [psWasmByte 2, psWasmByte 0]
-                                        else []), (if module.abiGlobalsExport then
-                                          psWasmEncodeByteChunks [psWasmEncodeName "heap", [psWasmByte 3, psWasmByte 0],
-                                            psWasmEncodeName "busy", [psWasmByte 3, psWasmByte 1]]
-                                        else [])])
-                                      (psListLength module.exports + (if module.abiMemory then 1 else 0) +
-                                        (if module.abiGlobalsExport then 2 else 0));
-                                  let elementSection : List UInt8 :=
-                                    match module.functionRefs with
-                                    | [] => []
-                                    | _ =>
-                                        psWasmEncodeSection
-                                          9
-                                          encodedFunctionRefs;
-                                  let codePayload :=
-                                    psWasmEncodeVector
-                                      encodedBodies
-                                      (psListLength module.functions);
-                                  let importSection :=
-                                    if psListIsEmpty module.functionImports && !module.abiMemoryImports then []
-                                    else psWasmEncodeSection 2 encodedImports
-                                  let memorySection :=
-                                    if module.abiMemory && !module.abiMemoryImports then
-                                      psWasmEncodeSection 5
-                                        (psWasmEncodeByteChunks [[psWasmByte 1, psWasmByte 1], psWasmEncodeUleb 256, psWasmEncodeUleb 256])
-                                    else []
-                                  let globalSection :=
-                                    if module.abiMemory && !module.abiMemoryImports then
-                                      psWasmEncodeSection 6
-                                        [psWasmByte 2, psWasmByte 127, psWasmByte 1,
-                                         psWasmByte 65, psWasmByte 192, psWasmByte 0, psWasmByte 11,
-                                         psWasmByte 127, psWasmByte 1,
-                                         psWasmByte 65, psWasmByte 0, psWasmByte 11]
-                                    else []
-                                  Except.ok
-                                    (psWasmEncodeByteChunks [[psWasmByte 0, psWasmByte 97, psWasmByte 115, psWasmByte 109,
-                                      psWasmByte 1, psWasmByte 0, psWasmByte 0, psWasmByte 0],
-                                     psWasmEncodeSection 1 typePayload, importSection,
-                                     psWasmEncodeSection 3 functionPayload, memorySection, globalSection,
-                                     psWasmEncodeSection 7 exportPayload, elementSection,
-                                     psWasmEncodeSection 10 codePayload])
+                              | Except.ok encodedFunctionRefs =>
+                                  match
+                                      psWasmEncodeFunctionBodies
+                                        module.structures
+                                        module.arrays
+                                        module.functionTypes
+                                        allFunctions
+                                        module.functions with
+                                  | Except.error error => Except.error error
+                                  | Except.ok encodedBodies =>
+                                      let typePayload : List UInt8 :=
+                                        psWasmEncodeGroupedTypeSectionPayload
+                                          (psListAppend encodedStructTypes encodedArrayTypes)
+                                          (Nat.add
+                                            (psListLength module.structures)
+                                            (psListLength module.arrays))
+                                          (psListAppend encodedNamedFunctionTypes encodedFunctionTypes)
+                                          (Nat.add
+                                            (psListLength module.functionTypes)
+                                            (psListLength allFunctions));
+                                      let functionPayload :=
+                                        psWasmEncodeVector
+                                          encodedFunctionTypeIndices
+                                          (psListLength module.functions);
+                                      let exportPayload :=
+                                        psWasmEncodeVector
+                                          (psWasmEncodeByteChunks [encodedExports,
+                                            (if module.abiMemory then
+                                              psListAppend (psWasmEncodeName "memory") [psWasmByte 2, psWasmByte 0]
+                                            else []), (if module.abiGlobalsExport then
+                                              psWasmEncodeByteChunks [psWasmEncodeName "heap", [psWasmByte 3, psWasmByte 0],
+                                                psWasmEncodeName "busy", [psWasmByte 3, psWasmByte 1]]
+                                            else [])])
+                                          (psListLength module.exports + (if module.abiMemory then 1 else 0) +
+                                            (if module.abiGlobalsExport then 2 else 0));
+                                      let elementSection : List UInt8 :=
+                                        match module.functionRefs with
+                                        | [] => []
+                                        | _ =>
+                                            psWasmEncodeSection
+                                              9
+                                              encodedFunctionRefs;
+                                      let codePayload :=
+                                        psWasmEncodeVector
+                                          encodedBodies
+                                          (psListLength module.functions);
+                                      let importSection :=
+                                        if psListIsEmpty module.functionImports && !module.abiMemoryImports then []
+                                        else psWasmEncodeSection 2 encodedImports
+                                      let memorySection :=
+                                        if module.abiMemory && !module.abiMemoryImports then
+                                          psWasmEncodeSection 5
+                                            (psWasmEncodeByteChunks [[psWasmByte 1, psWasmByte 1], psWasmEncodeUleb 256, psWasmEncodeUleb 256])
+                                        else [];
+                                      let globalSection :=
+                                        if module.abiMemory && !module.abiMemoryImports then
+                                          psWasmEncodeSection 6
+                                            [psWasmByte 2, psWasmByte 127, psWasmByte 1,
+                                             psWasmByte 65, psWasmByte 192, psWasmByte 0, psWasmByte 11,
+                                             psWasmByte 127, psWasmByte 1,
+                                             psWasmByte 65, psWasmByte 0, psWasmByte 11]
+                                        else [];
+                                      Except.ok
+                                        (psWasmEncodeByteChunks [[psWasmByte 0, psWasmByte 97, psWasmByte 115, psWasmByte 109,
+                                          psWasmByte 1, psWasmByte 0, psWasmByte 0, psWasmByte 0],
+                                         psWasmEncodeSection 1 typePayload, importSection,
+                                         psWasmEncodeSection 3 functionPayload, memorySection, globalSection,
+                                         psWasmEncodeSection 7 exportPayload, elementSection,
+                                         psWasmEncodeSection 10 codePayload])

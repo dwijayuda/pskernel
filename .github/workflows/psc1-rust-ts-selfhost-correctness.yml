@@ -1,4 +1,4 @@
-name: PSC1 TS cursor cache correctness 1800s
+name: PSC1 applied erasure worker correctness 1800s
 
 on:
   workflow_dispatch:

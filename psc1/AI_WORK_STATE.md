@@ -186,6 +186,9 @@ WeakCollectionSet8025/26866 ticks; most weak-map insertion frames are under
 psErasureTypeValuedWithFuel, with psErasureStringInList also present.
 Source confirms eager recursive prefix construction before returned lambdas.
 Eight classification/membership/lookup helpers now have fully applied workers,
-with public function types retained. All-input equality proofs against retained
-old functions and first-duplicate/fuel/large-list regressions are pending Linux CI.
+with public function types retained. Focused run39963603961 at f9675e05b063df1fb949f97188724d11134b7b26 passes all eight
+all-input equality proofs against retained old definitions, first-duplicate/fuel/
+100001-entry hit/miss regressions, cursor/extraction tests and both85-module source
+audits. Proofs use only standard propext/Quot.sound, with no new axiom or native_decide.
+Actual fresh-source G1/G2/G3/fixed point is next.
 Default fuel4096, whnf behavior, strict IR and every admission/resource policy stay.

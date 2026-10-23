@@ -93,3 +93,17 @@ gates pass. Diagnostic real compiler corpus responses match exactly; latency
 is10680 vs12589ms across20 fresh-process replays. This does not qualify G2.
 Next: genuine fresh-source G1/G2/G3 and fixed point under1800s, then independent
 240s performance and coherent full integration. Preserve qualified Rust reference.
+
+## Current highest-priority erasure normalization
+
+Measured profile39961304634 at the cursor-cache source has StringEqual8/26866
+selected ticks; WeakCollectionSet8025/26866, mainly under
+psErasureTypeValuedWithFuel. Source confirms recursive function-prefix creation
+before returned lambdas. Branch `perf/psc1-erasure-applied-workers-20261023` removes that eager
+construction from eight classification/membership/lookup helpers using fully
+applied workers while retaining public types and default limits. Native official
+Lean run39963603961 proves all-input equality against retained originals and
+passes both85-module source audits plus existing negative/runtime regressions.
+Codef9675e05 is tested; G2/G3/fixed point remain pending. Next: actual long and
+unchanged short profiles; then coherent full integration. No source/compiler
+substitute or new verification/resource exemption is introduced.

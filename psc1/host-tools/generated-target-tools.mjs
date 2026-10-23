@@ -118,7 +118,13 @@ export function observeArtifact(artifact) {
 export async function executeService(manifestFile,expectedHash,requestFile,outputFile,profile=PERFORMANCE_PROFILE) {
  const m=verifyArtifact(manifestFile,expectedHash);assert.equal(m.service,true);
  const input=fs.readFileSync(requestFile);assert.ok(input.length<=128*1024*1024);
- const id=JSON.parse(input.toString('utf8'))[1],limits=compilerRequestLimit(profile,id);
+ // Invalid wire must still reach the generated compiler's existing refusal path.
+ let id;
+ try {
+  const wire=JSON.parse(input.toString('utf8'));
+  if(Array.isArray(wire)&&wire[0]==='psc1-compiler-service/1')id=wire[1];
+ } catch {}
+ const limits=compilerRequestLimit(profile,id);
  const started=Date.now();let maxRssKiB;
  if(m.target==='ts') {
   const api=await import(pathToFileURL(path.join(m.directory,m.executable)).href);

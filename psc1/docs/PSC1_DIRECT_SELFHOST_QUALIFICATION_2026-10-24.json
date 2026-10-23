@@ -1,0 +1,185 @@
+{
+  "schema": "psc1-direct-selfhost-progress/1",
+  "recordedAtUtc": "2026-10-23 20:42:02 UTC",
+  "localDate": "2026-10-24",
+  "status": "genuine-generation-qualification-running",
+  "practicalCoreContract": "unchanged",
+  "preservedReferences": [
+    {
+      "target": "rust",
+      "branch": "fix/psc1-rust-owned-string-moves-20261023",
+      "head": "83e18fe183498f7d8b0fc3e3faa5bdacc41cb23d",
+      "preserved": true
+    },
+    {
+      "target": "ts",
+      "branch": "perf/psc1-erasure-applied-workers-20261023",
+      "head": "84e1e16f61cec3d28d9fdc62d6eaca4f3c0a8577",
+      "preserved": true
+    }
+  ],
+  "checker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "independent": true
+  },
+  "profiles": {
+    "correctnessG2G3Ms": 1800000,
+    "performanceG2G3Ms": 240000,
+    "g1Ms": 240000,
+    "checkerMs": 120000,
+    "otherResourcePolicies": "unchanged",
+    "performanceQualification": "separate"
+  },
+  "sources": {
+    "js": {
+      "sourceModules": 87,
+      "previous": {
+        "runId": 40012562356,
+        "requestCommit": "b9b73a702141901e03563dff36477c6b788c6439",
+        "sourceClosureDigest": "102ddaa2536a7c5b095ce3188a67f64ef0e9183c34c33051f0b552b6aab39707",
+        "g1": {
+          "independentAdmission": "passed",
+          "observations": 10,
+          "sourceSha256": "f6ea612d97032bf94e348820b9233be21b61a71d61d0326dcf5cfe43aca430ae",
+          "artifactSha256": "7cc7bc0b157d0b7ef400a9b1f8541a7b2d7875472d9ad9e0a007e07e609e1529"
+        },
+        "g2": {
+          "status": "hard-deadline",
+          "elapsedMs": 1800208,
+          "maxRssKiB": 3117056,
+          "requestSha256": "34fbc943ac867c321350c0ca554b11e7e4c2ae553c845878ff2e1255135e9e8d"
+        },
+        "g3": "not-run",
+        "fixedPoint": "not-run",
+        "artifact": {
+          "id": 12528946630,
+          "digest": "sha256:d4e8b6d46e65cd90ce1d6ef266bd068a2e66b3d2bc527a93829ffa764fd9e902"
+        }
+      },
+      "cpuDiagnosis": {
+        "runId": 40017280827,
+        "compilerRebuilt": false,
+        "nativeCompilerDelegation": false,
+        "requestIdentity": "same as previous G2",
+        "elapsedMs": 240111,
+        "maxRssKiB": 1336356,
+        "samplingOverhead": true,
+        "qualification": false,
+        "artifact": {
+          "id": 12529008361,
+          "digest": "sha256:5d28ecf3fc62c7bcfb14940170c219c28653816b1b541a22204864269494c63a"
+        }
+      },
+      "retainedProfileInspection": {
+        "runId": 40020380451,
+        "generatorFunctions": 15803,
+        "generatorLetWrappers": 11364,
+        "tailStateLoops": 65,
+        "sourceBytes": 6513509,
+        "gcSamplePercent": 19.6,
+        "compilerExecution": false
+      }
+    },
+    "wasm": {
+      "sourceModules": 98,
+      "originalIrFailure": {
+        "runId": 40015615536,
+        "requestCommit": "afed7c4b2681533b525d7434856a97a78fd3d745",
+        "sourceClosureDigest": "07f9b73f16fbd46fc27e7d1de96e733b775f3067f8c064fb59491cde640d6574",
+        "status": "refused-original-ir",
+        "admittedGenerations": 0,
+        "diagnosisRunId": 40017368933,
+        "traversalComplete": true,
+        "visitedSteps": 1512519,
+        "findingCount": 30,
+        "classes": [
+          "uint32 raw float-bit metadata",
+          "uint64 raw float-bit metadata"
+        ],
+        "artifact": {
+          "id": 12527599858,
+          "digest": "sha256:8cdc274e24aab903f545af4e109785bf3cd0bcd812e6a88504f50d315569d199"
+        }
+      },
+      "executionFailure": {
+        "runId": 40018496394,
+        "requestCommit": "0300717161765ff939a2500d293ca1d985dd6513",
+        "sourceClosureDigest": "ffd66a33dad58930521c072fbbb2e790fbe7bb5af73bed1eb5e1f8c84cf60a22",
+        "bootstrapIndependentAdmission": "passed",
+        "monomorphicDeclarations": 3076,
+        "firstAuthoredCompilation": "G1-lean-modules passed",
+        "completeG1": "not-qualified",
+        "failureRequest": "G1-ps-integer-unicode",
+        "failure": "Maximum call stack size exceeded",
+        "wasmFunctionIndex": 2073,
+        "elapsedMs": 251,
+        "maxRssKiB": 94152,
+        "serviceSha256": "8bafa750a94b1c58e18534c3c8a61e3170dc8b1ea41c9c90fe2dbae26bfdedc5",
+        "g2": "not-run",
+        "g3": "not-run"
+      }
+    }
+  },
+  "focusedGate": {
+    "commit": "82b270632beb1df34b65605877eeec3bf940f232",
+    "runId": 40020188747,
+    "status": "passed",
+    "nativeLean": {
+      "recursiveWorkerEqualities": 48,
+      "byteModulusAndRangeProofs": 2,
+      "allInputJsNameVisitorEquality": true,
+      "containsSorry": false
+    },
+    "actualRuntime": {
+      "jsRetainedRuntimeComparisons": 7540,
+      "jsNativeAndRetainedEmitterComparisons": 780,
+      "nativeReferenceRows": 65,
+      "deepTailCalls": 100000,
+      "deepNonTailCalls": 30000,
+      "valueAndFunctionCaptures": true,
+      "aliasFreshnessFuelRefusals": true,
+      "all96WasmOpcodeComparisons": true,
+      "actualOwnedWasmEngine": true,
+      "arbitraryNatIntGcRoundTrips": true,
+      "importRefusals": true
+    },
+    "sourceCensus": {
+      "lean": {
+        "js": 87,
+        "wasm": 98
+      },
+      "ps": {
+        "js": 87,
+        "wasm": 98
+      },
+      "allAccepted": true
+    }
+  },
+  "currentAttempt": {
+    "runId": 40020523049,
+    "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+    "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
+    "branch": "work/psc1-direct-selfhost-blockers-20261024",
+    "targets": [
+      "js",
+      "wasm-core"
+    ],
+    "jobs": {
+      "js": 120643819553,
+      "wasm": 120643819569
+    },
+    "observedWorkflowStatus": "in_progress",
+    "terminalResult": "not-yet-established",
+    "fixedPoints": "not-yet-established"
+  },
+  "integrationCheckpoint": {
+    "pullRequest": 174,
+    "commit": "afed7c4b2681533b525d7434856a97a78fd3d745",
+    "fullRunId": 40015619975,
+    "observedStatus": "full-gate-in-progress"
+  },
+  "publication": "not-run",
+  "merges": "not-run",
+  "independentCleanBuildReproducibility": "not-qualified"
+}

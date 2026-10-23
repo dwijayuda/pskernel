@@ -295,3 +295,22 @@ definitions; no proof passed through that failed build. Replace those attempted
 proofs with structural induction and function extensionality, reusing previous
 worker equalities for cross-calls. Keep all48 all-input obligations required;
 do not replace them with samples or permit sorry/axiom admission.
+
+## Verified checkpoint and active dual-target qualification
+
+Source82b27063/preflight40020188747 PASSED all48 structural-induction worker
+equalities (no sorry), carrier bounds/modulus, retained JS visitor equality,
+7540 runtime and780 native/reference statement cases,deep stack/capture/
+hygiene/refusal cases,actual owned Wasm engine and both complete87/98-module
+Lean/PS source gates. Actual dual-target run40020523049/request0c0b0be6 is
+executing independent generations; no terminal result or fixed point yet.
+Read-only inspection40020380451 verifies old actual JS G1 source6,513,509 bytes,
+15803 generator functions,11364 generator-let wrappers,65 tail-state loops;
+retained240s profile has19.6% GC samples. These support the measured printer
+allocation fix, not a performance qualification claim.
+
+Machine-readable current attempt/previous failures/proof gates/provenance:
+docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json.
+PR174 integration checkpointafed7c4b/full40015619975 continues separately;
+do not restart it for focused iterations. Preserve both branch histories.
+Fresh reference reads confirm Rust83e18fe1 and TS84e1e16f unchanged.

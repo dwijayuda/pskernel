@@ -74,3 +74,24 @@ service/frontend/elaborator/strict IR and official independent Lean4.35.0 checke
    work/psc1-direct-selfhost-blockers-20261024; preserve both histories and all
    qualified Rust/TS evidence. Finish all-seven-backend/native/application gates
    and independent generation evidence before integrating qualified claims.
+
+### Proved blocker fixes and active generations
+
+Source82b27063/Linux40020188747 PASSED all48 recursive-worker equalities,
+byte bounds/modulus, JS visitor proof,7540 runtime and780 native/reference
+statement comparisons,deep recursion/captures/refusals,actual owned Wasm
+transport and87/98-module .lean/.ps census. No fuel/heap/stack/checking change.
+Wasm G1 at03007171 had admitted bootstrap/3076 closed declarations and executed
+the first real compilation; large integer compilation exposed eager recursive
+prefix construction. Source82b27063 delays that construction in48 workers with
+all-input equality proofs. JS statement loops address measured generator/GC
+allocation; old G2 reached1800s without completing.
+
+Active actual independent G1/G2/G3 and fixed-point run40020523049 at
+request0c0b0be6/source82b27063 runs both targets with one native seed per target.
+Terminal correctness/fixed-point status is pending. Performance240s and
+independent clean builds remain separate. Exact attempts and evidence are in
+PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json. Next order: diagnose any
+actual generation failure, qualify both fixed points, finish current-source
+seven-backend/application gates, then measured performance/reproducibility.
+Preserve PR174 integration checkpoint and qualified Rust/TS references.

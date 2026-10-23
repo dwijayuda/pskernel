@@ -1787,7 +1787,7 @@ def psJsViewAny (values : List (Option Bool)) : Option Bool :=
           | Option.none => Option.none
           | Option.some other => Option.some (used || other)
 
-def psJsViewInspect (self source : String) (index fuel : Nat) :
+def psJsViewInspect (self source : String) (index : Nat) (fuel : Nat) :
     List (String × String) -> PsJsIrExpr -> Option Bool :=
   match fuel with
   | Nat.zero => fun _ _ => Option.none

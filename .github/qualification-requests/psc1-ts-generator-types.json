@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "ts-generic-lexer-tail-arity-20261023",
+  "id": "ts-scalar-closed-workers-20261023",
   "branch": "fix/psc1-ts-generator-result-types-20261023",
-  "parentCommit": "ef47f848938a3d604c4878b56513d6c25dfbaec8",
+  "parentCommit": "eeba9fadcee74bdcd6f98a74db71d81eea03fa56",
   "targets": [
     "ts"
   ],

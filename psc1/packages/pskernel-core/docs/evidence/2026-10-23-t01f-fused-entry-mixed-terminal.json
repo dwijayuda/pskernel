@@ -1,0 +1,6511 @@
+{
+  "schema": "psc1-t01f-fused-entry-mixed-terminal-v1",
+  "observedAt": "2026-10-23T14:17:36.515Z",
+  "sourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+  "treeSha": "a6e55931126673894687c9f1d3e582928940ea68",
+  "runId": "39961234382",
+  "runAttempt": "1",
+  "jobId": 120449895373,
+  "status": "CANCELLED_AT_UNCHANGED_25_MINUTE_CAP",
+  "run": {
+    "id": 39961234382,
+    "name": "PSC1 T01F fused scalar hash entries preflight",
+    "node_id": "WFR_kwLOUlmxxc8AAAAJTeALzg",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "head_sha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+    "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+    "display_title": "fix(pskernel): express fused hash result using portable let syntax",
+    "run_number": 17,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "cancelled",
+    "workflow_id": 393360905,
+    "check_suite_id": 108312315294,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAZN-rFng",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39961234382",
+    "pull_requests": [],
+    "created_at": "2026-10-23T13:26:37Z",
+    "updated_at": "2026-10-23T14:13:48Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-23T13:26:37Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/108312315294",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/393360905",
+    "head_commit": {
+      "id": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "tree_id": "a6e55931126673894687c9f1d3e582928940ea68",
+      "message": "fix(pskernel): express fused hash result using portable let syntax",
+      "timestamp": "2026-10-23T13:26:27Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "jobs": [
+    {
+      "id": 120439450101,
+      "run_id": 39961234382,
+      "workflow_name": "PSC1 T01F fused scalar hash entries preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcCsAp9Q",
+      "head_sha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120439450101",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39961234382/job/120439450101",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T13:26:37Z",
+      "started_at": "2026-10-23T13:26:40Z",
+      "completed_at": "2026-10-23T13:28:58Z",
+      "name": "native-string",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T13:26:41Z",
+          "completed_at": "2026-10-23T13:26:42Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T13:26:42Z",
+          "completed_at": "2026-10-23T13:27:03Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T13:27:03Z",
+          "completed_at": "2026-10-23T13:27:04Z"
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T13:27:04Z",
+          "completed_at": "2026-10-23T13:27:18Z"
+        },
+        {
+          "name": "Build authentic fixture exporter and retained checker",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T13:27:18Z",
+          "completed_at": "2026-10-23T13:28:42Z"
+        },
+        {
+          "name": "Prove exact scalar hash equivalence and run frozen native matrix",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T13:28:42Z",
+          "completed_at": "2026-10-23T13:28:44Z"
+        },
+        {
+          "name": "Independently admit actual String declarations and export untrusted inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T13:28:44Z",
+          "completed_at": "2026-10-23T13:28:52Z"
+        },
+        {
+          "name": "Retain existing minimal String and public DAG controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T13:28:52Z",
+          "completed_at": "2026-10-23T13:28:54Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T13:28:54Z",
+          "completed_at": "2026-10-23T13:28:55Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T13:28:55Z",
+          "completed_at": "2026-10-23T13:28:55Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-23T13:28:55Z",
+          "completed_at": "2026-10-23T13:28:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-23T13:28:56Z",
+          "completed_at": "2026-10-23T13:28:56Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120439450101",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027875,
+      "runner_name": "GitHub Actions 1000027875",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120440559608,
+      "run_id": 39961234382,
+      "workflow_name": "PSC1 T01F fused scalar hash entries preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcCtEX-A",
+      "head_sha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120440559608",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39961234382/job/120440559608",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T13:28:59Z",
+      "started_at": "2026-10-23T13:29:01Z",
+      "completed_at": "2026-10-23T13:48:27Z",
+      "name": "generated-string",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T13:29:02Z",
+          "completed_at": "2026-10-23T13:29:03Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T13:29:03Z",
+          "completed_at": "2026-10-23T13:29:23Z"
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T13:29:23Z",
+          "completed_at": "2026-10-23T13:29:37Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T13:29:37Z",
+          "completed_at": "2026-10-23T13:29:37Z"
+        },
+        {
+          "name": "Build authentic PSC1 for the bounded code-generation gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T13:29:37Z",
+          "completed_at": "2026-10-23T13:30:26Z"
+        },
+        {
+          "name": "Install pinned TypeScript",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T13:30:26Z",
+          "completed_at": "2026-10-23T13:30:28Z"
+        },
+        {
+          "name": "Require data-result scalar hash code generation before full kernel build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T13:30:28Z",
+          "completed_at": "2026-10-23T13:30:29Z"
+        },
+        {
+          "name": "Check complete authentic kernel source after the bounded gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T13:30:29Z",
+          "completed_at": "2026-10-23T13:37:44Z"
+        },
+        {
+          "name": "Compile the complete independent kernel to JavaScript",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T13:37:44Z",
+          "completed_at": "2026-10-23T13:47:25Z"
+        },
+        {
+          "name": "Produce authentic T01F inputs for generated independent replay",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-23T13:47:25Z",
+          "completed_at": "2026-10-23T13:48:23Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T13:48:23Z",
+          "completed_at": "2026-10-23T13:48:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-23T13:48:25Z",
+          "completed_at": "2026-10-23T13:48:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-23T13:48:25Z",
+          "completed_at": "2026-10-23T13:48:25Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-23T13:48:25Z",
+          "completed_at": "2026-10-23T13:48:25Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120440559608",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027877,
+      "runner_name": "GitHub Actions 1000027877",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120449895262,
+      "run_id": 39961234382,
+      "workflow_name": "PSC1 T01F fused scalar hash entries preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcC1-LXg",
+      "head_sha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120449895262",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39961234382/job/120449895262",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T13:48:27Z",
+      "started_at": "2026-10-23T13:48:30Z",
+      "completed_at": "2026-10-23T13:52:16Z",
+      "name": "generated-hash-runtime (controls, 10)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T13:48:31Z",
+          "completed_at": "2026-10-23T13:48:33Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T13:48:33Z",
+          "completed_at": "2026-10-23T13:49:08Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T13:49:08Z",
+          "completed_at": "2026-10-23T13:49:09Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T13:49:09Z",
+          "completed_at": "2026-10-23T13:49:10Z"
+        },
+        {
+          "name": "Authenticate exact same-run producer and detached input bytes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T13:49:10Z",
+          "completed_at": "2026-10-23T13:49:11Z"
+        },
+        {
+          "name": "Retained generated DAG, minimal String, and ownership controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T13:49:11Z",
+          "completed_at": "2026-10-23T13:52:12Z"
+        },
+        {
+          "name": "Independent mixed Unicode sample with full unchanged assertions",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-23T13:52:12Z",
+          "completed_at": "2026-10-23T13:52:12Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T13:52:12Z",
+          "completed_at": "2026-10-23T13:52:14Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-23T13:52:14Z",
+          "completed_at": "2026-10-23T13:52:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-23T13:52:14Z",
+          "completed_at": "2026-10-23T13:52:14Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T13:52:14Z",
+          "completed_at": "2026-10-23T13:52:14Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120449895262",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027879,
+      "runner_name": "GitHub Actions 1000027879",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120449895373,
+      "run_id": 39961234382,
+      "workflow_name": "PSC1 T01F fused scalar hash entries preflight",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39961234382",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcC1-LzQ",
+      "head_sha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120449895373",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39961234382/job/120449895373",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "created_at": "2026-10-23T13:48:27Z",
+      "started_at": "2026-10-23T13:48:30Z",
+      "completed_at": "2026-10-23T14:13:48Z",
+      "name": "generated-hash-runtime (mixed, 25)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T13:48:30Z",
+          "completed_at": "2026-10-23T13:48:31Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T13:48:31Z",
+          "completed_at": "2026-10-23T13:48:52Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T13:48:52Z",
+          "completed_at": "2026-10-23T13:48:53Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T13:48:53Z",
+          "completed_at": "2026-10-23T13:48:53Z"
+        },
+        {
+          "name": "Authenticate exact same-run producer and detached input bytes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T13:48:53Z",
+          "completed_at": "2026-10-23T13:48:54Z"
+        },
+        {
+          "name": "Retained generated DAG, minimal String, and ownership controls",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-23T13:48:54Z",
+          "completed_at": "2026-10-23T13:48:54Z"
+        },
+        {
+          "name": "Independent mixed Unicode sample with full unchanged assertions",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "number": 7,
+          "started_at": "2026-10-23T13:48:54Z",
+          "completed_at": "2026-10-23T14:13:45Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T14:13:45Z",
+          "completed_at": "2026-10-23T14:13:46Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T14:13:46Z",
+          "completed_at": "2026-10-23T14:13:46Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-23T14:13:46Z",
+          "completed_at": "2026-10-23T14:13:47Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T14:13:47Z",
+          "completed_at": "2026-10-23T14:13:47Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120449895373",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000027880,
+      "runner_name": "GitHub Actions 1000027880",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ],
+  "artifactInspection": {
+    "artifactId": 12506609045,
+    "zipBytes": 536516,
+    "zipSha256": "7bbf593dac5568da90fd38adc9ee75f4a877f0c1669659b23d94b4b3d0d768a7",
+    "files": [
+      {
+        "path": "detached/dag-smoke.mjs",
+        "bytes": 244729,
+        "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+      },
+      {
+        "path": "detached/fixture.json",
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      {
+        "path": "detached/kernel.mjs",
+        "bytes": 9959869,
+        "sha256": "b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d"
+      },
+      {
+        "path": "detached/prefix-smoke.mjs",
+        "bytes": 28982,
+        "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+      },
+      {
+        "path": "detached/scalar-hash-smoke.mjs",
+        "bytes": 2546,
+        "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+      },
+      {
+        "path": "detached/string-smoke.mjs",
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      {
+        "path": "mixed.log",
+        "bytes": 124665,
+        "sha256": "cbaa7bb308ca925f724a8a816c36c7637c83728a511a51638c9e93dd543b92d5"
+      },
+      {
+        "path": "mixed.memory",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "reuse-provenance.json",
+        "bytes": 773,
+        "sha256": "939f688ad5152a4709cda66b024ea298797d0d2f810568859fda66d3645e6be5"
+      }
+    ],
+    "provenance": {
+      "schema": "psc1-t01f-same-run-hash-preflight-v1",
+      "harnessSourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "generatedSourceSha": "0fe60cc69e8d7544acb09025944cbfd3d955f992",
+      "runId": "39961234382",
+      "runAttempt": "1",
+      "kernel": {
+        "bytes": 9959869,
+        "sha256": "b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d"
+      },
+      "fixture": {
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      "currentScripts": {
+        "string": {
+          "bytes": 27140,
+          "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+        }
+      },
+      "artifact": {
+        "name": "psc1-t01f-hash-generated-producer",
+        "runId": "39961234382"
+      },
+      "node": "v22.23.3",
+      "mode": "mixed"
+    },
+    "traceBegins": 418,
+    "traceEnds": 417,
+    "interrupted": [
+      {
+        "id": 418,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      }
+    ],
+    "memoryBytes": 0,
+    "completeCase": false,
+    "completeReceipt": false,
+    "markers": [
+      "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":53048.327116}",
+      "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1779.909802999995}",
+      "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\""
+    ],
+    "copiedInputsVerified": true
+  },
+  "trace": {
+    "beginCount": 418,
+    "endCount": 417,
+    "interrupted": [
+      {
+        "id": 418,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      }
+    ],
+    "slowest": [
+      {
+        "id": 333,
+        "stage": "utf8-literal:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 72764.48832399998
+      },
+      {
+        "id": 363,
+        "stage": "utf8-ofList:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 70991.70978700009
+      },
+      {
+        "id": 372,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46590.43700699997
+      },
+      {
+        "id": 346,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46577.49771399994
+      },
+      {
+        "id": 348,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46522.849353000056
+      },
+      {
+        "id": 378,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46497.615818000166
+      },
+      {
+        "id": 376,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46264.764342000126
+      },
+      {
+        "id": 342,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46114.95349599997
+      },
+      {
+        "id": 336,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 39944.37823600002
+      },
+      {
+        "id": 366,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 39223.182941999985
+      },
+      {
+        "id": 373,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 37200.976916000014
+      },
+      {
+        "id": 374,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 36838.3607030001
+      },
+      {
+        "id": 344,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 36677.94146099989
+      },
+      {
+        "id": 343,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 36647.574445999926
+      },
+      {
+        "id": 321,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28854.090981000016
+      },
+      {
+        "id": 331,
+        "stage": "ofList-singleton:whnf",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28369.245681
+      },
+      {
+        "id": 416,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28295.12221099995
+      },
+      {
+        "id": 402,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28265.312905000057
+      },
+      {
+        "id": 327,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28265.012176999997
+      },
+      {
+        "id": 325,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28224.607520999998
+      },
+      {
+        "id": 410,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 28193.14957899996
+      },
+      {
+        "id": 406,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28129.271632000105
+      },
+      {
+        "id": 315,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 27991.357526000007
+      },
+      {
+        "id": 408,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27946.028244999936
+      },
+      {
+        "id": 298,
+        "stage": "string:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27930.821803
+      },
+      {
+        "id": 393,
+        "stage": "validity:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27643.45848400006
+      },
+      {
+        "id": 396,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 27629.91193099995
+      },
+      {
+        "id": 388,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 25791.830335000064
+      },
+      {
+        "id": 357,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 25603.851194999996
+      },
+      {
+        "id": 387,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 25452.526167999953
+      }
+    ],
+    "begins": [
+      {
+        "id": 1,
+        "stage": "admission:List",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 2,
+        "stage": "admission:Nat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 3,
+        "stage": "admission:LT",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 4,
+        "stage": "admission:LT.lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 5,
+        "stage": "admission:Nat.le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 6,
+        "stage": "admission:Nat.lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 7,
+        "stage": "admission:instLTNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 8,
+        "stage": "admission:Fin",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 9,
+        "stage": "admission:outParam",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 10,
+        "stage": "admission:HPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 11,
+        "stage": "admission:HPow.hPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 12,
+        "stage": "admission:Pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 13,
+        "stage": "admission:Pow.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 14,
+        "stage": "admission:instHPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 15,
+        "stage": "admission:NatPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 16,
+        "stage": "admission:NatPow.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 17,
+        "stage": "admission:instPowNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 18,
+        "stage": "admission:PUnit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 19,
+        "stage": "admission:PProd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 20,
+        "stage": "admission:Nat.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 21,
+        "stage": "admission:Nat.brecOn.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 22,
+        "stage": "admission:Nat.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 23,
+        "stage": "admission:Unit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 24,
+        "stage": "admission:OfNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 25,
+        "stage": "admission:OfNat.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 26,
+        "stage": "admission:instOfNatNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 27,
+        "stage": "admission:Nat.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 28,
+        "stage": "admission:Unit.unit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 29,
+        "stage": "admission:Nat.pow.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 30,
+        "stage": "admission:Nat.mul.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 31,
+        "stage": "admission:Nat.add.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 32,
+        "stage": "admission:Nat.add._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 33,
+        "stage": "admission:Nat.add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 34,
+        "stage": "admission:Nat.mul._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 35,
+        "stage": "admission:Nat.mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 36,
+        "stage": "admission:Nat.pow._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 37,
+        "stage": "admission:Nat.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 38,
+        "stage": "admission:instNatPowNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 39,
+        "stage": "admission:BitVec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 40,
+        "stage": "admission:UInt32",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 41,
+        "stage": "admission:Or",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 42,
+        "stage": "admission:And",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 43,
+        "stage": "admission:Nat.isValidChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 44,
+        "stage": "admission:Fin.val",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 45,
+        "stage": "admission:BitVec.toFin",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 46,
+        "stage": "admission:BitVec.toNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 47,
+        "stage": "admission:UInt32.toBitVec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 48,
+        "stage": "admission:UInt32.toNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 49,
+        "stage": "admission:UInt32.isValidChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 50,
+        "stage": "admission:Char",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 51,
+        "stage": "admission:Array",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 52,
+        "stage": "admission:UInt8",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 53,
+        "stage": "admission:ByteArray",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 54,
+        "stage": "admission:Eq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 55,
+        "stage": "admission:List.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 56,
+        "stage": "admission:List.brecOn.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 57,
+        "stage": "admission:List.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 58,
+        "stage": "admission:List.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 59,
+        "stage": "admission:List.toByteArray.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 60,
+        "stage": "admission:ByteArray.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 61,
+        "stage": "admission:ByteArray.push.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 62,
+        "stage": "admission:List.concat.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 63,
+        "stage": "admission:List.concat._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 64,
+        "stage": "admission:List.concat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 65,
+        "stage": "admission:Array.toList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 66,
+        "stage": "admission:Array.push",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 67,
+        "stage": "admission:ByteArray.push",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 68,
+        "stage": "admission:List.toByteArray.loop._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 69,
+        "stage": "admission:List.toByteArray.loop",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 70,
+        "stage": "admission:Array.emptyWithCapacity",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 71,
+        "stage": "admission:Array.empty",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 72,
+        "stage": "admission:ByteArray.emptyWithCapacity",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 73,
+        "stage": "admission:ByteArray.empty",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 74,
+        "stage": "admission:List.toByteArray",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 75,
+        "stage": "admission:List.flatten.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 76,
+        "stage": "admission:List.append.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 77,
+        "stage": "admission:List.append._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 78,
+        "stage": "admission:List.append",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 79,
+        "stage": "admission:List.flatten._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 80,
+        "stage": "admission:List.flatten",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 81,
+        "stage": "admission:instDecidableEqList.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 82,
+        "stage": "admission:List.map._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 83,
+        "stage": "admission:List.map",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 84,
+        "stage": "admission:List.flatMap",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 85,
+        "stage": "admission:Char.val",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 86,
+        "stage": "admission:Bool",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 87,
+        "stage": "admission:Bool.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 88,
+        "stage": "admission:Bool.Reflects.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 89,
+        "stage": "admission:False",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 90,
+        "stage": "admission:Not",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 91,
+        "stage": "admission:Bool.Reflects",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 92,
+        "stage": "admission:Decidable",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 93,
+        "stage": "admission:Decidable.decide",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 94,
+        "stage": "admission:Decidable.reflects_decide",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 95,
+        "stage": "admission:dite",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 96,
+        "stage": "admission:ite",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 97,
+        "stage": "admission:LE",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 98,
+        "stage": "admission:LE.le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 99,
+        "stage": "admission:instLENat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 100,
+        "stage": "admission:Nat.ble.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 101,
+        "stage": "admission:Nat.ble._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 102,
+        "stage": "admission:Nat.ble",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 103,
+        "stage": "admission:Nat.decEq.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 104,
+        "stage": "admission:False.elim",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 105,
+        "stage": "admission:Eq.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 106,
+        "stage": "admission:HEq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 107,
+        "stage": "admission:True",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 108,
+        "stage": "admission:Nat.beq.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 109,
+        "stage": "admission:Nat.beq._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 110,
+        "stage": "admission:Nat.beq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 111,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 112,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 113,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 114,
+        "stage": "admission:rfl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 115,
+        "stage": "admission:congrArg",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 116,
+        "stage": "admission:noConfusion_of_Nat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 117,
+        "stage": "admission:Bool.ctorIdx",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 118,
+        "stage": "admission:_private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 119,
+        "stage": "admission:_private.Init.Prelude.0.Nat.zero_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 120,
+        "stage": "admission:Nat.zero_le._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 121,
+        "stage": "admission:Nat.zero_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 122,
+        "stage": "admission:Nat.le.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 123,
+        "stage": "admission:Nat.le.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 124,
+        "stage": "admission:Nat.le.below.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 125,
+        "stage": "admission:Eq.ndrec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 126,
+        "stage": "admission:Eq.symm",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 127,
+        "stage": "admission:cast",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 128,
+        "stage": "admission:eq_of_heq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 129,
+        "stage": "admission:_private.Init.Prelude.0.Nat.succ_le_succ.match_1_7",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 130,
+        "stage": "admission:HAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 131,
+        "stage": "admission:HAdd.hAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 132,
+        "stage": "admission:Add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 133,
+        "stage": "admission:Add.add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 134,
+        "stage": "admission:instHAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 135,
+        "stage": "admission:instAddNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 136,
+        "stage": "admission:Nat.succ_le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 137,
+        "stage": "admission:Nat.le_of_ble_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 138,
+        "stage": "admission:Nat.le_of_ble_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 139,
+        "stage": "admission:absurd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 140,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 141,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 142,
+        "stage": "admission:Nat.ble_self_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 143,
+        "stage": "admission:Nat.ble_self_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 144,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 145,
+        "stage": "admission:Nat.ble_succ_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 146,
+        "stage": "admission:Nat.ble_succ_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 147,
+        "stage": "admission:Nat.ble_eq_true_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 148,
+        "stage": "admission:Nat.not_le_of_not_ble_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 149,
+        "stage": "admission:Bool.noConfusionType",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 150,
+        "stage": "admission:Bool.noConfusion",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 151,
+        "stage": "admission:Nat.decLe._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 152,
+        "stage": "admission:Nat.decLe",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 153,
+        "stage": "admission:HMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 154,
+        "stage": "admission:HMod.hMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 155,
+        "stage": "admission:Mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 156,
+        "stage": "admission:Mod.mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 157,
+        "stage": "admission:instHMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 158,
+        "stage": "admission:namedPattern",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 159,
+        "stage": "admission:Nat.mod.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 160,
+        "stage": "admission:Nat.decLt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 161,
+        "stage": "admission:Nat.le.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 162,
+        "stage": "admission:Nat.ctorIdx",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 163,
+        "stage": "admission:Nat.div.go.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 164,
+        "stage": "admission:HSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 165,
+        "stage": "admission:HSub.hSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 166,
+        "stage": "admission:Sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 167,
+        "stage": "admission:Sub.sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 168,
+        "stage": "admission:instHSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 169,
+        "stage": "admission:Nat.pred",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 170,
+        "stage": "admission:Nat.sub._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 171,
+        "stage": "admission:Nat.sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 172,
+        "stage": "admission:instSubNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 173,
+        "stage": "admission:_private.Init.Prelude.0.Nat.le_trans.match_1_10",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 174,
+        "stage": "admission:Nat.le_trans",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 175,
+        "stage": "admission:Nat.lt_of_lt_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 176,
+        "stage": "admission:And.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 177,
+        "stage": "admission:_private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 178,
+        "stage": "admission:_private.Init.Prelude.0.Nat.sub_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 179,
+        "stage": "admission:_private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 180,
+        "stage": "admission:Nat.noConfusionType",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 181,
+        "stage": "admission:Nat.noConfusion",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 182,
+        "stage": "admission:Nat.not_succ_le_zero",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 183,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pred_le_pred.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 184,
+        "stage": "admission:Nat.le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 185,
+        "stage": "admission:Nat.pred_le_pred",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 186,
+        "stage": "admission:Nat.le_of_succ_le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 187,
+        "stage": "admission:Nat.not_succ_le_self._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 188,
+        "stage": "admission:Nat.not_succ_le_self",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 189,
+        "stage": "admission:Nat.lt_irrefl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 190,
+        "stage": "admission:Nat.lt_succ_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 191,
+        "stage": "admission:Nat.le_refl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 192,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pred_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 193,
+        "stage": "admission:Nat.pred_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 194,
+        "stage": "admission:Nat.sub_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 195,
+        "stage": "admission:Nat.succ_sub_succ_eq_sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 196,
+        "stage": "admission:Nat.sub_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 197,
+        "stage": "admission:Nat.div_rec_lemma",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 198,
+        "stage": "admission:Nat.le_of_lt_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 199,
+        "stage": "admission:Nat.div_rec_fuel_lemma",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 200,
+        "stage": "admission:Nat.modCore.go._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 201,
+        "stage": "admission:Nat.modCore.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 202,
+        "stage": "admission:Nat.lt_add_one",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 203,
+        "stage": "admission:Nat.lt_succ_self",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 204,
+        "stage": "admission:Nat.modCore",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 205,
+        "stage": "admission:Nat.mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 206,
+        "stage": "admission:Nat.instMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 207,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 208,
+        "stage": "admission:Nat.zero_lt_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 209,
+        "stage": "admission:Decidable.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 210,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 211,
+        "stage": "admission:_private.Init.Prelude.0.Nat.modCore_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 212,
+        "stage": "admission:Nat.not_lt_zero",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 213,
+        "stage": "admission:_private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 214,
+        "stage": "admission:Decidable.isTrue",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 215,
+        "stage": "admission:Or.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 216,
+        "stage": "admission:_private.Init.Prelude.0.Or.elim.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 217,
+        "stage": "admission:Or.elim",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 218,
+        "stage": "admission:id",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 219,
+        "stage": "admission:Or.resolve_right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 220,
+        "stage": "admission:GE.ge",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 221,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_5",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 222,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 223,
+        "stage": "admission:Nat.le_succ_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 224,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 225,
+        "stage": "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 226,
+        "stage": "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 227,
+        "stage": "admission:Nat.eq_or_lt_of_le._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 228,
+        "stage": "admission:Nat.eq_or_lt_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 229,
+        "stage": "admission:Nat.lt_or_ge._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 230,
+        "stage": "admission:Nat.lt_or_ge",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 231,
+        "stage": "admission:Nat.lt_of_not_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 232,
+        "stage": "admission:Decidable.isFalse",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 233,
+        "stage": "admission:Nat.modCoreGo_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 234,
+        "stage": "admission:Nat.modCore_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 235,
+        "stage": "admission:Nat.mod_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 236,
+        "stage": "admission:Fin.Internal.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 237,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pow_pos.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 238,
+        "stage": "admission:HMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 239,
+        "stage": "admission:HMul.hMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 240,
+        "stage": "admission:Mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 241,
+        "stage": "admission:Mul.mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 242,
+        "stage": "admission:instHMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 243,
+        "stage": "admission:instMulNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 244,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mul_pos.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 245,
+        "stage": "admission:_private.Init.Prelude.0.Nat.add_pos_right.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 246,
+        "stage": "admission:Nat.add_pos_right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 247,
+        "stage": "admission:Nat.mul_pos",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 248,
+        "stage": "admission:Nat.pow_pos._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 249,
+        "stage": "admission:Nat.pow_pos",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 250,
+        "stage": "admission:BitVec.ofNat._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 251,
+        "stage": "admission:BitVec.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 252,
+        "stage": "admission:UInt8.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 253,
+        "stage": "admission:HDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 254,
+        "stage": "admission:HDiv.hDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 255,
+        "stage": "admission:Div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 256,
+        "stage": "admission:Div.div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 257,
+        "stage": "admission:instHDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 258,
+        "stage": "admission:Nat.div.go._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 259,
+        "stage": "admission:Nat.div.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 260,
+        "stage": "admission:Nat.div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 261,
+        "stage": "admission:Nat.instDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 262,
+        "stage": "admission:String.utf8EncodeChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 263,
+        "stage": "admission:List.utf8Encode",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 264,
+        "stage": "admission:ByteArray.IsValidUTF8",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 265,
+        "stage": "admission:String",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 266,
+        "stage": "admission:String.ofList._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 267,
+        "stage": "admission:String.ofList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 268,
+        "stage": "admission:String.ofList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 269,
+        "stage": "admission:Bool.or",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 270,
+        "stage": "admission:instDecidableOr.match_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 271,
+        "stage": "admission:instDecidableOr.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 272,
+        "stage": "admission:instDecidableOr._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 273,
+        "stage": "admission:instDecidableOr",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 274,
+        "stage": "admission:Bool.and",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 275,
+        "stage": "admission:instDecidableAnd.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 276,
+        "stage": "admission:And.right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 277,
+        "stage": "admission:And.left",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 278,
+        "stage": "admission:instDecidableAnd._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 279,
+        "stage": "admission:instDecidableAnd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 280,
+        "stage": "admission:BitVec.ofNatLT",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 281,
+        "stage": "admission:UInt32.size",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 282,
+        "stage": "admission:_private.Init.Prelude.0.isValidChar_UInt32.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 283,
+        "stage": "admission:Nat.lt_trans",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 284,
+        "stage": "admission:_private.Init.Prelude.0.of_decide_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 285,
+        "stage": "admission:_private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 286,
+        "stage": "admission:Bool.ne_true_of_eq_false",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 287,
+        "stage": "admission:_private.Init.Prelude.0.decide_eq_false.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 288,
+        "stage": "admission:decide_eq_false",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 289,
+        "stage": "admission:of_decide_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 290,
+        "stage": "admission:_private.Init.Prelude.0.isValidChar_UInt32",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 291,
+        "stage": "admission:Char.ofNatAux._private_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 292,
+        "stage": "admission:Char.ofNatAux",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 293,
+        "stage": "admission:Char.ofNat._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 294,
+        "stage": "admission:Char.ofNat._proof_2",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 295,
+        "stage": "admission:Char.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration"
+      },
+      {
+        "id": 296,
+        "stage": "input-and-owners",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 297,
+        "stage": "input-and-owners",
+        "sample": "Aé€😀",
+        "api": "psKernelDagGeneratedFromSession"
+      },
+      {
+        "id": 298,
+        "stage": "string:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 299,
+        "stage": "string:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel"
+      },
+      {
+        "id": 300,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 301,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 302,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 303,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 304,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 305,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 306,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 307,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 308,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 309,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 310,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 311,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 312,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 313,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 314,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 315,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 316,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 317,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 318,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 319,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 320,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 321,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 322,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 323,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 324,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 325,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 326,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 327,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 328,
+        "stage": "ofList-singleton:check",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 329,
+        "stage": "ofList-singleton:check",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 330,
+        "stage": "ofList-singleton:whnf",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 331,
+        "stage": "ofList-singleton:whnf",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 332,
+        "stage": "ofList-singleton:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 333,
+        "stage": "utf8-literal:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 334,
+        "stage": "utf8-literal:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel"
+      },
+      {
+        "id": 335,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 336,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 337,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 338,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 339,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 340,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 341,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 342,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 343,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 344,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 345,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 346,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 347,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 348,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 349,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 350,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 351,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 352,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 353,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 354,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 355,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 356,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 357,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 358,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 359,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 360,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 361,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 362,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 363,
+        "stage": "utf8-ofList:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 364,
+        "stage": "utf8-ofList:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel"
+      },
+      {
+        "id": 365,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 366,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 367,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 368,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 369,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 370,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 371,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 372,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 373,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 374,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 375,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 376,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 377,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 378,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 379,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 380,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 381,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 382,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 383,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 384,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 385,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 386,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 387,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 388,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 389,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 390,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 391,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 392,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 393,
+        "stage": "validity:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 394,
+        "stage": "validity:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel"
+      },
+      {
+        "id": 395,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 396,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 397,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 398,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 399,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 400,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 401,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 402,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 403,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 404,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 405,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 406,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 407,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 408,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 409,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression"
+      },
+      {
+        "id": 410,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf"
+      },
+      {
+        "id": 411,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel"
+      },
+      {
+        "id": 412,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 413,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 414,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel"
+      },
+      {
+        "id": 415,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked"
+      },
+      {
+        "id": 416,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq"
+      },
+      {
+        "id": 417,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      },
+      {
+        "id": 418,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      }
+    ],
+    "ends": [
+      {
+        "id": 1,
+        "stage": "admission:List",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 274.765175
+      },
+      {
+        "id": 2,
+        "stage": "admission:Nat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 202.48326800000007
+      },
+      {
+        "id": 3,
+        "stage": "admission:LT",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 133.05606999999998
+      },
+      {
+        "id": 4,
+        "stage": "admission:LT.lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 12.525863999999956
+      },
+      {
+        "id": 5,
+        "stage": "admission:Nat.le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 261.38182200000006
+      },
+      {
+        "id": 6,
+        "stage": "admission:Nat.lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.755570999999918
+      },
+      {
+        "id": 7,
+        "stage": "admission:instLTNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.4537279999999555
+      },
+      {
+        "id": 8,
+        "stage": "admission:Fin",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 155.295789
+      },
+      {
+        "id": 9,
+        "stage": "admission:outParam",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.0187700000001314
+      },
+      {
+        "id": 10,
+        "stage": "admission:HPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 198.5934749999999
+      },
+      {
+        "id": 11,
+        "stage": "admission:HPow.hPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 33.80511300000012
+      },
+      {
+        "id": 12,
+        "stage": "admission:Pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 121.27466200000003
+      },
+      {
+        "id": 13,
+        "stage": "admission:Pow.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.935606000000007
+      },
+      {
+        "id": 14,
+        "stage": "admission:instHPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.25523599999997
+      },
+      {
+        "id": 15,
+        "stage": "admission:NatPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 104.98873900000012
+      },
+      {
+        "id": 16,
+        "stage": "admission:NatPow.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 18.40994099999989
+      },
+      {
+        "id": 17,
+        "stage": "admission:instPowNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 67.57784199999992
+      },
+      {
+        "id": 18,
+        "stage": "admission:PUnit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 84.78183600000011
+      },
+      {
+        "id": 19,
+        "stage": "admission:PProd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 128.83729599999992
+      },
+      {
+        "id": 20,
+        "stage": "admission:Nat.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.167754999999943
+      },
+      {
+        "id": 21,
+        "stage": "admission:Nat.brecOn.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 231.32677999999987
+      },
+      {
+        "id": 22,
+        "stage": "admission:Nat.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.442909999999756
+      },
+      {
+        "id": 23,
+        "stage": "admission:Unit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2.0346949999998287
+      },
+      {
+        "id": 24,
+        "stage": "admission:OfNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 102.42112499999985
+      },
+      {
+        "id": 25,
+        "stage": "admission:OfNat.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 19.400521000000026
+      },
+      {
+        "id": 26,
+        "stage": "admission:instOfNatNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.548847000000023
+      },
+      {
+        "id": 27,
+        "stage": "admission:Nat.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.18360500000017
+      },
+      {
+        "id": 28,
+        "stage": "admission:Unit.unit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.474264999999832
+      },
+      {
+        "id": 29,
+        "stage": "admission:Nat.pow.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 51.90806199999997
+      },
+      {
+        "id": 30,
+        "stage": "admission:Nat.mul.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 66.56294800000023
+      },
+      {
+        "id": 31,
+        "stage": "admission:Nat.add.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 48.13668999999982
+      },
+      {
+        "id": 32,
+        "stage": "admission:Nat.add._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 62.438836000000265
+      },
+      {
+        "id": 33,
+        "stage": "admission:Nat.add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.605713999999807
+      },
+      {
+        "id": 34,
+        "stage": "admission:Nat.mul._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 104.4511809999999
+      },
+      {
+        "id": 35,
+        "stage": "admission:Nat.mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.374721999999565
+      },
+      {
+        "id": 36,
+        "stage": "admission:Nat.pow._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 67.91631900000039
+      },
+      {
+        "id": 37,
+        "stage": "admission:Nat.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 8.787834000000203
+      },
+      {
+        "id": 38,
+        "stage": "admission:instNatPowNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.239348000000064
+      },
+      {
+        "id": 39,
+        "stage": "admission:BitVec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 200.0667709999998
+      },
+      {
+        "id": 40,
+        "stage": "admission:UInt32",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 193.10586299999977
+      },
+      {
+        "id": 41,
+        "stage": "admission:Or",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 174.08365000000003
+      },
+      {
+        "id": 42,
+        "stage": "admission:And",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 149.12678800000003
+      },
+      {
+        "id": 43,
+        "stage": "admission:Nat.isValidChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.35940299999993
+      },
+      {
+        "id": 44,
+        "stage": "admission:Fin.val",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.425817999999708
+      },
+      {
+        "id": 45,
+        "stage": "admission:BitVec.toFin",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 35.37522399999989
+      },
+      {
+        "id": 46,
+        "stage": "admission:BitVec.toNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 32.97200100000009
+      },
+      {
+        "id": 47,
+        "stage": "admission:UInt32.toBitVec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.68353900000011
+      },
+      {
+        "id": 48,
+        "stage": "admission:UInt32.toNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 12.446465999999873
+      },
+      {
+        "id": 49,
+        "stage": "admission:UInt32.isValidChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.860028000000057
+      },
+      {
+        "id": 50,
+        "stage": "admission:Char",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 481.0224589999998
+      },
+      {
+        "id": 51,
+        "stage": "admission:Array",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 91.52741400000014
+      },
+      {
+        "id": 52,
+        "stage": "admission:UInt8",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 104.25885199999993
+      },
+      {
+        "id": 53,
+        "stage": "admission:ByteArray",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 88.59481199999937
+      },
+      {
+        "id": 54,
+        "stage": "admission:Eq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 207.23497599999973
+      },
+      {
+        "id": 55,
+        "stage": "admission:List.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 29.657812999999805
+      },
+      {
+        "id": 56,
+        "stage": "admission:List.brecOn.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 272.3514380000006
+      },
+      {
+        "id": 57,
+        "stage": "admission:List.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 44.34943699999985
+      },
+      {
+        "id": 58,
+        "stage": "admission:List.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 48.062841999999364
+      },
+      {
+        "id": 59,
+        "stage": "admission:List.toByteArray.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 75.50751200000013
+      },
+      {
+        "id": 60,
+        "stage": "admission:ByteArray.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 17.961209000000053
+      },
+      {
+        "id": 61,
+        "stage": "admission:ByteArray.push.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 44.25379800000064
+      },
+      {
+        "id": 62,
+        "stage": "admission:List.concat.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 74.74553999999989
+      },
+      {
+        "id": 63,
+        "stage": "admission:List.concat._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 134.48044899999968
+      },
+      {
+        "id": 64,
+        "stage": "admission:List.concat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 18.459992000000057
+      },
+      {
+        "id": 65,
+        "stage": "admission:Array.toList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 14.59065499999997
+      },
+      {
+        "id": 66,
+        "stage": "admission:Array.push",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.895545000000311
+      },
+      {
+        "id": 67,
+        "stage": "admission:ByteArray.push",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 22.90450299999975
+      },
+      {
+        "id": 68,
+        "stage": "admission:List.toByteArray.loop._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 132.09025900000051
+      },
+      {
+        "id": 69,
+        "stage": "admission:List.toByteArray.loop",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 22.56076199999916
+      },
+      {
+        "id": 70,
+        "stage": "admission:Array.emptyWithCapacity",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.94752299999982
+      },
+      {
+        "id": 71,
+        "stage": "admission:Array.empty",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 8.69618199999968
+      },
+      {
+        "id": 72,
+        "stage": "admission:ByteArray.emptyWithCapacity",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.533769000000575
+      },
+      {
+        "id": 73,
+        "stage": "admission:ByteArray.empty",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 12.237514999999803
+      },
+      {
+        "id": 74,
+        "stage": "admission:List.toByteArray",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.464317999999366
+      },
+      {
+        "id": 75,
+        "stage": "admission:List.flatten.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 71.0688339999997
+      },
+      {
+        "id": 76,
+        "stage": "admission:List.append.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 103.03807899999993
+      },
+      {
+        "id": 77,
+        "stage": "admission:List.append._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 118.83946900000046
+      },
+      {
+        "id": 78,
+        "stage": "admission:List.append",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.25360599999931
+      },
+      {
+        "id": 79,
+        "stage": "admission:List.flatten._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 197.8538920000001
+      },
+      {
+        "id": 80,
+        "stage": "admission:List.flatten",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 30.656279000000723
+      },
+      {
+        "id": 81,
+        "stage": "admission:instDecidableEqList.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 64.58267500000056
+      },
+      {
+        "id": 82,
+        "stage": "admission:List.map._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 139.05573300000015
+      },
+      {
+        "id": 83,
+        "stage": "admission:List.map",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 37.113444999999956
+      },
+      {
+        "id": 84,
+        "stage": "admission:List.flatMap",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.724154999999882
+      },
+      {
+        "id": 85,
+        "stage": "admission:Char.val",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.437748999999712
+      },
+      {
+        "id": 86,
+        "stage": "admission:Bool",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 121.70675099999971
+      },
+      {
+        "id": 87,
+        "stage": "admission:Bool.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.10796399999981
+      },
+      {
+        "id": 88,
+        "stage": "admission:Bool.Reflects.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 43.485921999999846
+      },
+      {
+        "id": 89,
+        "stage": "admission:False",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 25.585597000000234
+      },
+      {
+        "id": 90,
+        "stage": "admission:Not",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2.466793999999936
+      },
+      {
+        "id": 91,
+        "stage": "admission:Bool.Reflects",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.391171999999642
+      },
+      {
+        "id": 92,
+        "stage": "admission:Decidable",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 135.88959400000022
+      },
+      {
+        "id": 93,
+        "stage": "admission:Decidable.decide",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.558414999999513
+      },
+      {
+        "id": 94,
+        "stage": "admission:Decidable.reflects_decide",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 63.4755839999998
+      },
+      {
+        "id": 95,
+        "stage": "admission:dite",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 57.76779299999998
+      },
+      {
+        "id": 96,
+        "stage": "admission:ite",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.756575999999768
+      },
+      {
+        "id": 97,
+        "stage": "admission:LE",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 130.76378899999963
+      },
+      {
+        "id": 98,
+        "stage": "admission:LE.le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.524390999999923
+      },
+      {
+        "id": 99,
+        "stage": "admission:instLENat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.9164639999999054
+      },
+      {
+        "id": 100,
+        "stage": "admission:Nat.ble.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 86.81883500000004
+      },
+      {
+        "id": 101,
+        "stage": "admission:Nat.ble._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 79.62484499999937
+      },
+      {
+        "id": 102,
+        "stage": "admission:Nat.ble",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.564986999999746
+      },
+      {
+        "id": 103,
+        "stage": "admission:Nat.decEq.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 50.03027099999963
+      },
+      {
+        "id": 104,
+        "stage": "admission:False.elim",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.58212900000035
+      },
+      {
+        "id": 105,
+        "stage": "admission:Eq.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 42.21093800000017
+      },
+      {
+        "id": 106,
+        "stage": "admission:HEq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 152.50776099999985
+      },
+      {
+        "id": 107,
+        "stage": "admission:True",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 172.74855500000012
+      },
+      {
+        "id": 108,
+        "stage": "admission:Nat.beq.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 121.86063899999954
+      },
+      {
+        "id": 109,
+        "stage": "admission:Nat.beq._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 113.83863699999984
+      },
+      {
+        "id": 110,
+        "stage": "admission:Nat.beq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.553345999999692
+      },
+      {
+        "id": 111,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.4958400000005
+      },
+      {
+        "id": 112,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 625.9118889999991
+      },
+      {
+        "id": 113,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 95.98544399999992
+      },
+      {
+        "id": 114,
+        "stage": "admission:rfl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.1672639999997045
+      },
+      {
+        "id": 115,
+        "stage": "admission:congrArg",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 58.01510000000053
+      },
+      {
+        "id": 116,
+        "stage": "admission:noConfusion_of_Nat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 177.17404400000123
+      },
+      {
+        "id": 117,
+        "stage": "admission:Bool.ctorIdx",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.508592000000135
+      },
+      {
+        "id": 118,
+        "stage": "admission:_private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 515.1999130000004
+      },
+      {
+        "id": 119,
+        "stage": "admission:_private.Init.Prelude.0.Nat.zero_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 31.390913000001092
+      },
+      {
+        "id": 120,
+        "stage": "admission:Nat.zero_le._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 220.43798199999947
+      },
+      {
+        "id": 121,
+        "stage": "admission:Nat.zero_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.2864840000002
+      },
+      {
+        "id": 122,
+        "stage": "admission:Nat.le.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 494.0866839999999
+      },
+      {
+        "id": 123,
+        "stage": "admission:Nat.le.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 79.06050999999934
+      },
+      {
+        "id": 124,
+        "stage": "admission:Nat.le.below.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 257.993566000001
+      },
+      {
+        "id": 125,
+        "stage": "admission:Eq.ndrec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 39.424527999999555
+      },
+      {
+        "id": 126,
+        "stage": "admission:Eq.symm",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 41.34690899999987
+      },
+      {
+        "id": 127,
+        "stage": "admission:cast",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 22.224458999999115
+      },
+      {
+        "id": 128,
+        "stage": "admission:eq_of_heq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 181.01622900000075
+      },
+      {
+        "id": 129,
+        "stage": "admission:_private.Init.Prelude.0.Nat.succ_le_succ.match_1_7",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2725.020403999999
+      },
+      {
+        "id": 130,
+        "stage": "admission:HAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 152.43520800000078
+      },
+      {
+        "id": 131,
+        "stage": "admission:HAdd.hAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.64558399999987
+      },
+      {
+        "id": 132,
+        "stage": "admission:Add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 88.34799900000144
+      },
+      {
+        "id": 133,
+        "stage": "admission:Add.add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.295170000001235
+      },
+      {
+        "id": 134,
+        "stage": "admission:instHAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 24.616823999998815
+      },
+      {
+        "id": 135,
+        "stage": "admission:instAddNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.004852000000028
+      },
+      {
+        "id": 136,
+        "stage": "admission:Nat.succ_le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 607.8931199999988
+      },
+      {
+        "id": 137,
+        "stage": "admission:Nat.le_of_ble_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 480.55513099999916
+      },
+      {
+        "id": 138,
+        "stage": "admission:Nat.le_of_ble_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 49.695128999999724
+      },
+      {
+        "id": 139,
+        "stage": "admission:absurd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.46059299999979
+      },
+      {
+        "id": 140,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2592.3325320000004
+      },
+      {
+        "id": 141,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 59.21832699999868
+      },
+      {
+        "id": 142,
+        "stage": "admission:Nat.ble_self_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 405.60319000000163
+      },
+      {
+        "id": 143,
+        "stage": "admission:Nat.ble_self_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 33.7400009999983
+      },
+      {
+        "id": 144,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 469.78337699999975
+      },
+      {
+        "id": 145,
+        "stage": "admission:Nat.ble_succ_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 776.9889279999989
+      },
+      {
+        "id": 146,
+        "stage": "admission:Nat.ble_succ_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 57.6881280000016
+      },
+      {
+        "id": 147,
+        "stage": "admission:Nat.ble_eq_true_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 248.77571400000306
+      },
+      {
+        "id": 148,
+        "stage": "admission:Nat.not_le_of_not_ble_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 62.628638000001956
+      },
+      {
+        "id": 149,
+        "stage": "admission:Bool.noConfusionType",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.18680499999755
+      },
+      {
+        "id": 150,
+        "stage": "admission:Bool.noConfusion",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 66.1776469999968
+      },
+      {
+        "id": 151,
+        "stage": "admission:Nat.decLe._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 149.98428299999796
+      },
+      {
+        "id": 152,
+        "stage": "admission:Nat.decLe",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 19.59310600000026
+      },
+      {
+        "id": 153,
+        "stage": "admission:HMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 141.17712199999733
+      },
+      {
+        "id": 154,
+        "stage": "admission:HMod.hMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 27.714280000000144
+      },
+      {
+        "id": 155,
+        "stage": "admission:Mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 98.23330200000055
+      },
+      {
+        "id": 156,
+        "stage": "admission:Mod.mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 77.97870300000068
+      },
+      {
+        "id": 157,
+        "stage": "admission:instHMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 18.903041000001394
+      },
+      {
+        "id": 158,
+        "stage": "admission:namedPattern",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.962897999997949
+      },
+      {
+        "id": 159,
+        "stage": "admission:Nat.mod.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 117.59923499999786
+      },
+      {
+        "id": 160,
+        "stage": "admission:Nat.decLt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.22549000000072
+      },
+      {
+        "id": 161,
+        "stage": "admission:Nat.le.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 58.93641200000275
+      },
+      {
+        "id": 162,
+        "stage": "admission:Nat.ctorIdx",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.8448470000003
+      },
+      {
+        "id": 163,
+        "stage": "admission:Nat.div.go.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 304.1496210000005
+      },
+      {
+        "id": 164,
+        "stage": "admission:HSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 149.38348399999813
+      },
+      {
+        "id": 165,
+        "stage": "admission:HSub.hSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 24.17087200000242
+      },
+      {
+        "id": 166,
+        "stage": "admission:Sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 79.0609489999988
+      },
+      {
+        "id": 167,
+        "stage": "admission:Sub.sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.921825000001263
+      },
+      {
+        "id": 168,
+        "stage": "admission:instHSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 17.127363999999943
+      },
+      {
+        "id": 169,
+        "stage": "admission:Nat.pred",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.586536999999225
+      },
+      {
+        "id": 170,
+        "stage": "admission:Nat.sub._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 90.4872460000006
+      },
+      {
+        "id": 171,
+        "stage": "admission:Nat.sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.341415999999299
+      },
+      {
+        "id": 172,
+        "stage": "admission:instSubNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.109501999999338
+      },
+      {
+        "id": 173,
+        "stage": "admission:_private.Init.Prelude.0.Nat.le_trans.match_1_10",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3493.2499930000013
+      },
+      {
+        "id": 174,
+        "stage": "admission:Nat.le_trans",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 400.31605500000296
+      },
+      {
+        "id": 175,
+        "stage": "admission:Nat.lt_of_lt_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 57.55700900000011
+      },
+      {
+        "id": 176,
+        "stage": "admission:And.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.68221300000005
+      },
+      {
+        "id": 177,
+        "stage": "admission:_private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 192.0115769999975
+      },
+      {
+        "id": 178,
+        "stage": "admission:_private.Init.Prelude.0.Nat.sub_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 551.5562650000029
+      },
+      {
+        "id": 179,
+        "stage": "admission:_private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 55.877473000000464
+      },
+      {
+        "id": 180,
+        "stage": "admission:Nat.noConfusionType",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.935547999997652
+      },
+      {
+        "id": 181,
+        "stage": "admission:Nat.noConfusion",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 86.37523499999952
+      },
+      {
+        "id": 182,
+        "stage": "admission:Nat.not_succ_le_zero",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 187.63261399999828
+      },
+      {
+        "id": 183,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pred_le_pred.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 867.3532630000009
+      },
+      {
+        "id": 184,
+        "stage": "admission:Nat.le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 25.85232200000246
+      },
+      {
+        "id": 185,
+        "stage": "admission:Nat.pred_le_pred",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 327.49906700000065
+      },
+      {
+        "id": 186,
+        "stage": "admission:Nat.le_of_succ_le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 69.42030700000032
+      },
+      {
+        "id": 187,
+        "stage": "admission:Nat.not_succ_le_self._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 438.66703100000086
+      },
+      {
+        "id": 188,
+        "stage": "admission:Nat.not_succ_le_self",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 27.49367799999891
+      },
+      {
+        "id": 189,
+        "stage": "admission:Nat.lt_irrefl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 29.711867000001803
+      },
+      {
+        "id": 190,
+        "stage": "admission:Nat.lt_succ_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.242465999999695
+      },
+      {
+        "id": 191,
+        "stage": "admission:Nat.le_refl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.55907699999807
+      },
+      {
+        "id": 192,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pred_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 42.53670399999828
+      },
+      {
+        "id": 193,
+        "stage": "admission:Nat.pred_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 139.229086000003
+      },
+      {
+        "id": 194,
+        "stage": "admission:Nat.sub_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 473.0722519999981
+      },
+      {
+        "id": 195,
+        "stage": "admission:Nat.succ_sub_succ_eq_sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1318.4365130000006
+      },
+      {
+        "id": 196,
+        "stage": "admission:Nat.sub_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 533.0822200000002
+      },
+      {
+        "id": 197,
+        "stage": "admission:Nat.div_rec_lemma",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 141.1181429999997
+      },
+      {
+        "id": 198,
+        "stage": "admission:Nat.le_of_lt_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 43.47841800000242
+      },
+      {
+        "id": 199,
+        "stage": "admission:Nat.div_rec_fuel_lemma",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 295.363655000001
+      },
+      {
+        "id": 200,
+        "stage": "admission:Nat.modCore.go._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 404.407564000001
+      },
+      {
+        "id": 201,
+        "stage": "admission:Nat.modCore.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 52.64402300000074
+      },
+      {
+        "id": 202,
+        "stage": "admission:Nat.lt_add_one",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 170.1305680000005
+      },
+      {
+        "id": 203,
+        "stage": "admission:Nat.lt_succ_self",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 173.81767300000138
+      },
+      {
+        "id": 204,
+        "stage": "admission:Nat.modCore",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 41.459884999996575
+      },
+      {
+        "id": 205,
+        "stage": "admission:Nat.mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 38.99036200000046
+      },
+      {
+        "id": 206,
+        "stage": "admission:Nat.instMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.447416999999405
+      },
+      {
+        "id": 207,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 544.8666930000036
+      },
+      {
+        "id": 208,
+        "stage": "admission:Nat.zero_lt_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.74536100000114
+      },
+      {
+        "id": 209,
+        "stage": "admission:Decidable.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 49.94548500000383
+      },
+      {
+        "id": 210,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 345.0705720000042
+      },
+      {
+        "id": 211,
+        "stage": "admission:_private.Init.Prelude.0.Nat.modCore_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 372.9836340000038
+      },
+      {
+        "id": 212,
+        "stage": "admission:Nat.not_lt_zero",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.67542799999501
+      },
+      {
+        "id": 213,
+        "stage": "admission:_private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 284.555382999999
+      },
+      {
+        "id": 214,
+        "stage": "admission:Decidable.isTrue",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.946693000005325
+      },
+      {
+        "id": 215,
+        "stage": "admission:Or.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.22428299999592
+      },
+      {
+        "id": 216,
+        "stage": "admission:_private.Init.Prelude.0.Or.elim.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 67.87052200000471
+      },
+      {
+        "id": 217,
+        "stage": "admission:Or.elim",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 27.77663699999539
+      },
+      {
+        "id": 218,
+        "stage": "admission:id",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2.916388999998162
+      },
+      {
+        "id": 219,
+        "stage": "admission:Or.resolve_right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 14.969435999999405
+      },
+      {
+        "id": 220,
+        "stage": "admission:GE.ge",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.492839999998978
+      },
+      {
+        "id": 221,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_5",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 31.67315999999846
+      },
+      {
+        "id": 222,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 166.99150100000406
+      },
+      {
+        "id": 223,
+        "stage": "admission:Nat.le_succ_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.554366999997
+      },
+      {
+        "id": 224,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 205.82574000000022
+      },
+      {
+        "id": 225,
+        "stage": "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 256.41646000000037
+      },
+      {
+        "id": 226,
+        "stage": "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 143.97887300000002
+      },
+      {
+        "id": 227,
+        "stage": "admission:Nat.eq_or_lt_of_le._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 938.581309000001
+      },
+      {
+        "id": 228,
+        "stage": "admission:Nat.eq_or_lt_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 112.64643299999443
+      },
+      {
+        "id": 229,
+        "stage": "admission:Nat.lt_or_ge._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 474.1108170000007
+      },
+      {
+        "id": 230,
+        "stage": "admission:Nat.lt_or_ge",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 35.81703500000003
+      },
+      {
+        "id": 231,
+        "stage": "admission:Nat.lt_of_not_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 58.995592999999644
+      },
+      {
+        "id": 232,
+        "stage": "admission:Decidable.isFalse",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 22.93381199999567
+      },
+      {
+        "id": 233,
+        "stage": "admission:Nat.modCoreGo_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1732.5286489999999
+      },
+      {
+        "id": 234,
+        "stage": "admission:Nat.modCore_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1448.2935560000042
+      },
+      {
+        "id": 235,
+        "stage": "admission:Nat.mod_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 913.0936250000013
+      },
+      {
+        "id": 236,
+        "stage": "admission:Fin.Internal.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 49.616672000003746
+      },
+      {
+        "id": 237,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pow_pos.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 130.34218199999304
+      },
+      {
+        "id": 238,
+        "stage": "admission:HMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 153.6858429999993
+      },
+      {
+        "id": 239,
+        "stage": "admission:HMul.hMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 35.421313999999256
+      },
+      {
+        "id": 240,
+        "stage": "admission:Mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 83.19419600000401
+      },
+      {
+        "id": 241,
+        "stage": "admission:Mul.mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.64530399999785
+      },
+      {
+        "id": 242,
+        "stage": "admission:instHMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 18.286855000005744
+      },
+      {
+        "id": 243,
+        "stage": "admission:instMulNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.872590999999375
+      },
+      {
+        "id": 244,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mul_pos.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 258.5092749999967
+      },
+      {
+        "id": 245,
+        "stage": "admission:_private.Init.Prelude.0.Nat.add_pos_right.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 142.81060399999842
+      },
+      {
+        "id": 246,
+        "stage": "admission:Nat.add_pos_right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 553.0420139999987
+      },
+      {
+        "id": 247,
+        "stage": "admission:Nat.mul_pos",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 534.5013739999995
+      },
+      {
+        "id": 248,
+        "stage": "admission:Nat.pow_pos._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 904.848702999996
+      },
+      {
+        "id": 249,
+        "stage": "admission:Nat.pow_pos",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 114.59081700000388
+      },
+      {
+        "id": 250,
+        "stage": "admission:BitVec.ofNat._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 124.40394700000616
+      },
+      {
+        "id": 251,
+        "stage": "admission:BitVec.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.97909500000242
+      },
+      {
+        "id": 252,
+        "stage": "admission:UInt8.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.0876550000029965
+      },
+      {
+        "id": 253,
+        "stage": "admission:HDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 154.82106499999645
+      },
+      {
+        "id": 254,
+        "stage": "admission:HDiv.hDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 25.94474199999968
+      },
+      {
+        "id": 255,
+        "stage": "admission:Div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 91.48238599999604
+      },
+      {
+        "id": 256,
+        "stage": "admission:Div.div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.894717999995919
+      },
+      {
+        "id": 257,
+        "stage": "admission:instHDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 23.578667000001587
+      },
+      {
+        "id": 258,
+        "stage": "admission:Nat.div.go._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 349.49746000000596
+      },
+      {
+        "id": 259,
+        "stage": "admission:Nat.div.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 44.952097999994294
+      },
+      {
+        "id": 260,
+        "stage": "admission:Nat.div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.857278000003134
+      },
+      {
+        "id": 261,
+        "stage": "admission:Nat.instDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.202576000003319
+      },
+      {
+        "id": 262,
+        "stage": "admission:String.utf8EncodeChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 352.1416029999964
+      },
+      {
+        "id": 263,
+        "stage": "admission:List.utf8Encode",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 14.794934000005014
+      },
+      {
+        "id": 264,
+        "stage": "admission:ByteArray.IsValidUTF8",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 176.01651500000298
+      },
+      {
+        "id": 265,
+        "stage": "admission:String",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 104.00902700000006
+      },
+      {
+        "id": 266,
+        "stage": "admission:String.ofList._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 12.557959999998275
+      },
+      {
+        "id": 267,
+        "stage": "admission:String.ofList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.15364899999986
+      },
+      {
+        "id": 268,
+        "stage": "admission:String.ofList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 8.920176999999967
+      },
+      {
+        "id": 269,
+        "stage": "admission:Bool.or",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.053452000000107
+      },
+      {
+        "id": 270,
+        "stage": "admission:instDecidableOr.match_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 477.7409440000047
+      },
+      {
+        "id": 271,
+        "stage": "admission:instDecidableOr.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 48.52947899999708
+      },
+      {
+        "id": 272,
+        "stage": "admission:instDecidableOr._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 278.43224799999734
+      },
+      {
+        "id": 273,
+        "stage": "admission:instDecidableOr",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 101.84299399999873
+      },
+      {
+        "id": 274,
+        "stage": "admission:Bool.and",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.375630999995337
+      },
+      {
+        "id": 275,
+        "stage": "admission:instDecidableAnd.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 456.78300599999784
+      },
+      {
+        "id": 276,
+        "stage": "admission:And.right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.256624999994528
+      },
+      {
+        "id": 277,
+        "stage": "admission:And.left",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 14.859214000003703
+      },
+      {
+        "id": 278,
+        "stage": "admission:instDecidableAnd._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 236.032057000004
+      },
+      {
+        "id": 279,
+        "stage": "admission:instDecidableAnd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 23.690926000002946
+      },
+      {
+        "id": 280,
+        "stage": "admission:BitVec.ofNatLT",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 75.69288000000233
+      },
+      {
+        "id": 281,
+        "stage": "admission:UInt32.size",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.154203999998572
+      },
+      {
+        "id": 282,
+        "stage": "admission:_private.Init.Prelude.0.isValidChar_UInt32.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 491.394432999994
+      },
+      {
+        "id": 283,
+        "stage": "admission:Nat.lt_trans",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 155.0818900000013
+      },
+      {
+        "id": 284,
+        "stage": "admission:_private.Init.Prelude.0.of_decide_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 169.07934999999998
+      },
+      {
+        "id": 285,
+        "stage": "admission:_private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 66.11313399999926
+      },
+      {
+        "id": 286,
+        "stage": "admission:Bool.ne_true_of_eq_false",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 122.73197099999379
+      },
+      {
+        "id": 287,
+        "stage": "admission:_private.Init.Prelude.0.decide_eq_false.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 201.92328400000406
+      },
+      {
+        "id": 288,
+        "stage": "admission:decide_eq_false",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 130.3055749999985
+      },
+      {
+        "id": 289,
+        "stage": "admission:of_decide_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 51.48649800000567
+      },
+      {
+        "id": 290,
+        "stage": "admission:_private.Init.Prelude.0.isValidChar_UInt32",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 361.98810900000535
+      },
+      {
+        "id": 291,
+        "stage": "admission:Char.ofNatAux._private_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.988976000000548
+      },
+      {
+        "id": 292,
+        "stage": "admission:Char.ofNatAux",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 389.4043810000003
+      },
+      {
+        "id": 293,
+        "stage": "admission:Char.ofNat._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 317.850225999995
+      },
+      {
+        "id": 294,
+        "stage": "admission:Char.ofNat._proof_2",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3251.6339000000007
+      },
+      {
+        "id": 295,
+        "stage": "admission:Char.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 452.0241429999951
+      },
+      {
+        "id": 296,
+        "stage": "input-and-owners",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 38.14123600000312
+      },
+      {
+        "id": 297,
+        "stage": "input-and-owners",
+        "sample": "Aé€😀",
+        "api": "psKernelDagGeneratedFromSession",
+        "milliseconds": 7147.2716599999985
+      },
+      {
+        "id": 298,
+        "stage": "string:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27930.821803
+      },
+      {
+        "id": 299,
+        "stage": "string:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 8011.921847000005
+      },
+      {
+        "id": 300,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 0.6125410000095144
+      },
+      {
+        "id": 301,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 1.3738480000029085
+      },
+      {
+        "id": 302,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 0.7647940000024391
+      },
+      {
+        "id": 303,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 866.3261139999959
+      },
+      {
+        "id": 304,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.0910429999930784
+      },
+      {
+        "id": 305,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 0.40883100000792183
+      },
+      {
+        "id": 306,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 856.0915900000109
+      },
+      {
+        "id": 307,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.5714259999949718
+      },
+      {
+        "id": 308,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 15181.471525
+      },
+      {
+        "id": 309,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 15210.041763000001
+      },
+      {
+        "id": 310,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.041338999988511
+      },
+      {
+        "id": 311,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.4287180000101216
+      },
+      {
+        "id": 312,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.2440260000003036
+      },
+      {
+        "id": 313,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.6311549999954877
+      },
+      {
+        "id": 314,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 8.793321999997715
+      },
+      {
+        "id": 315,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 27991.357526000007
+      },
+      {
+        "id": 316,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 34.01893900000141
+      },
+      {
+        "id": 317,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 788.7973530000017
+      },
+      {
+        "id": 318,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 7.466962999984389
+      },
+      {
+        "id": 319,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 7585.102207000018
+      },
+      {
+        "id": 320,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2272.4527919999964
+      },
+      {
+        "id": 321,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28854.090981000016
+      },
+      {
+        "id": 322,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 23419.43106099998
+      },
+      {
+        "id": 323,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 23204.625857999985
+      },
+      {
+        "id": 324,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.4781650000077207
+      },
+      {
+        "id": 325,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28224.607520999998
+      },
+      {
+        "id": 326,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.1126010000007227
+      },
+      {
+        "id": 327,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28265.012176999997
+      },
+      {
+        "id": 328,
+        "stage": "ofList-singleton:check",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 7181.997532999958
+      },
+      {
+        "id": 329,
+        "stage": "ofList-singleton:check",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.963493000017479
+      },
+      {
+        "id": 330,
+        "stage": "ofList-singleton:whnf",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 16066.563021999958
+      },
+      {
+        "id": 331,
+        "stage": "ofList-singleton:whnf",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28369.245681
+      },
+      {
+        "id": 332,
+        "stage": "ofList-singleton:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 15103.061769000022
+      },
+      {
+        "id": 333,
+        "stage": "utf8-literal:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 72764.48832399998
+      },
+      {
+        "id": 334,
+        "stage": "utf8-literal:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 18202.212532999984
+      },
+      {
+        "id": 335,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 11.911915000004228
+      },
+      {
+        "id": 336,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 39944.37823600002
+      },
+      {
+        "id": 337,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 43.218975999974646
+      },
+      {
+        "id": 338,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 875.1892660000012
+      },
+      {
+        "id": 339,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 4.655986999976449
+      },
+      {
+        "id": 340,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 9989.672628999979
+      },
+      {
+        "id": 341,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2870.9313049999764
+      },
+      {
+        "id": 342,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46114.95349599997
+      },
+      {
+        "id": 343,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 36647.574445999926
+      },
+      {
+        "id": 344,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 36677.94146099989
+      },
+      {
+        "id": 345,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.032215000013821
+      },
+      {
+        "id": 346,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46577.49771399994
+      },
+      {
+        "id": 347,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.214604999986477
+      },
+      {
+        "id": 348,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46522.849353000056
+      },
+      {
+        "id": 349,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 14.608076000004075
+      },
+      {
+        "id": 350,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 32.458204000024125
+      },
+      {
+        "id": 351,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 53.82736799994018
+      },
+      {
+        "id": 352,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 799.3505949999671
+      },
+      {
+        "id": 353,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.475014999974519
+      },
+      {
+        "id": 354,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 1.6082519999472424
+      },
+      {
+        "id": 355,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 852.9848840000341
+      },
+      {
+        "id": 356,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 59.99303100001998
+      },
+      {
+        "id": 357,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 25603.851194999996
+      },
+      {
+        "id": 358,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 25388.478802999947
+      },
+      {
+        "id": 359,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 13.56491499999538
+      },
+      {
+        "id": 360,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 43.432970000081696
+      },
+      {
+        "id": 361,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.756389999995008
+      },
+      {
+        "id": 362,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 54.632402000017464
+      },
+      {
+        "id": 363,
+        "stage": "utf8-ofList:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 70991.70978700009
+      },
+      {
+        "id": 364,
+        "stage": "utf8-ofList:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 18089.660002000048
+      },
+      {
+        "id": 365,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 32.81122899998445
+      },
+      {
+        "id": 366,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 39223.182941999985
+      },
+      {
+        "id": 367,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 74.69301200006157
+      },
+      {
+        "id": 368,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 804.4206580000464
+      },
+      {
+        "id": 369,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.5629540000809357
+      },
+      {
+        "id": 370,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 9722.839129999978
+      },
+      {
+        "id": 371,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2831.65697599994
+      },
+      {
+        "id": 372,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46590.43700699997
+      },
+      {
+        "id": 373,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 37200.976916000014
+      },
+      {
+        "id": 374,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 36838.3607030001
+      },
+      {
+        "id": 375,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.0366439999779686
+      },
+      {
+        "id": 376,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46264.764342000126
+      },
+      {
+        "id": 377,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 6.2672200000379235
+      },
+      {
+        "id": 378,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46497.615818000166
+      },
+      {
+        "id": 379,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 21.645385999931023
+      },
+      {
+        "id": 380,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 15.709703000029549
+      },
+      {
+        "id": 381,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 45.8562090001069
+      },
+      {
+        "id": 382,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 884.6488040001132
+      },
+      {
+        "id": 383,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.8488580000121146
+      },
+      {
+        "id": 384,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 1.9882920000236481
+      },
+      {
+        "id": 385,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 725.0472059999593
+      },
+      {
+        "id": 386,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 101.15968000004068
+      },
+      {
+        "id": 387,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 25452.526167999953
+      },
+      {
+        "id": 388,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 25791.830335000064
+      },
+      {
+        "id": 389,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.449383999919519
+      },
+      {
+        "id": 390,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 49.507752999896184
+      },
+      {
+        "id": 391,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.9895579998847097
+      },
+      {
+        "id": 392,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 46.998788999859244
+      },
+      {
+        "id": 393,
+        "stage": "validity:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27643.45848400006
+      },
+      {
+        "id": 394,
+        "stage": "validity:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 7683.803208000027
+      },
+      {
+        "id": 395,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 10.971153999911621
+      },
+      {
+        "id": 396,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 27629.91193099995
+      },
+      {
+        "id": 397,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 18.668439999921247
+      },
+      {
+        "id": 398,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 756.2474479998928
+      },
+      {
+        "id": 399,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 12.642657000105828
+      },
+      {
+        "id": 400,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 7640.629281000001
+      },
+      {
+        "id": 401,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2177.927417000057
+      },
+      {
+        "id": 402,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28265.312905000057
+      },
+      {
+        "id": 403,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 22986.949599999934
+      },
+      {
+        "id": 404,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 23496.558567999862
+      },
+      {
+        "id": 405,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 11.893166000023484
+      },
+      {
+        "id": 406,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28129.271632000105
+      },
+      {
+        "id": 407,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 11.853135999990627
+      },
+      {
+        "id": 408,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27946.028244999936
+      },
+      {
+        "id": 409,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 22.971100999973714
+      },
+      {
+        "id": 410,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 28193.14957899996
+      },
+      {
+        "id": 411,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 48.034283000044525
+      },
+      {
+        "id": 412,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 765.1059230000246
+      },
+      {
+        "id": 413,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 38.48619999992661
+      },
+      {
+        "id": 414,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 7734.388394000009
+      },
+      {
+        "id": 415,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2301.3759139999747
+      },
+      {
+        "id": 416,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28295.12221099995
+      },
+      {
+        "id": 417,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 23751.334124000045
+      }
+    ],
+    "markers": [
+      "PSC1_T01F_HASH_PREFLIGHT_INPUTS {\"schema\": \"psc1-t01f-same-run-hash-preflight-v1\", \"harnessSourceSha\": \"0fe60cc69e8d7544acb09025944cbfd3d955f992\", \"generatedSourceSha\": \"0fe60cc69e8d7544acb09025944cbfd3d955f992\", \"runId\": \"39961234382\", \"runAttempt\": \"1\", \"kernel\": {\"bytes\": 9959869, \"sha256\": \"b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d\"}, \"fixture\": {\"bytes\": 2791525, \"sha256\": \"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\"}, \"currentScripts\": {\"string\": {\"bytes\": 27140, \"sha256\": \"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\"}}, \"artifact\": {\"name\": \"psc1-t01f-hash-generated-producer\", \"runId\": \"39961234382\"}, \"node\": \"v22.23.3\", \"mode\": \"mixed\"}",
+      "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":53048.327116}",
+      "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1779.909802999995}",
+      "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\""
+    ]
+  },
+  "completeCase": false,
+  "completeAssertionReceipt": false,
+  "completedAssertions": null,
+  "peakRssKiB": null,
+  "wallSeconds": null,
+  "retainedPasses": [
+    "native83/9hash permitted standard axioms",
+    "bounded2730/8190/13665+long3",
+    "authentic complete producer PSC1/TS7.0.2",
+    "retained DAG/prefix/session controls"
+  ],
+  "qualification": {
+    "T01F": "OPEN",
+    "currentA": "OPEN",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN"
+  },
+  "interpretation": "Entry fusion and LevelList specialization preserve native equivalence and pass bounded/full emitted shape checks, but do not complete the full mixed runtime under the unchanged cap. Empty mixed.memory means completed wall time/RSS remain UNKNOWN. Current trace phase timings are measurements, not a general speedup claim. All five full workflows stay paused. Do not combine prior-source passes.",
+  "nextTask": "Run one authenticated diagnostic of the current source's measured expensive UTF8 V1 DefEq call after full unchanged 294 admission/377 metadata prefix, using this exact successful producer artifact. Diagnostic only; no rebuild, qualification claim or limit weakening."
+}

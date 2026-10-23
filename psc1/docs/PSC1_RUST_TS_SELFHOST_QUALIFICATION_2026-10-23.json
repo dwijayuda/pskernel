@@ -10,7 +10,7 @@
   "base": "1fad9ed53cda9b23ac30be9cea85e7857437564e",
   "acceptance": {
     "rust": "incomplete-G1-only",
-    "typescript": "incomplete-no-executing-G1",
+    "typescript": "incomplete-G1-qualified-on-annotated-source-normal-qualification-pending",
     "fixedPoint": "neither-qualified",
     "publication": "not-authorized-not-run",
     "merge": "not-authorized-not-run",
@@ -4933,14 +4933,55 @@
       "commit": "23626b21cada65ea6f78ac6db8dd0e3ffa6dff29",
       "runId": 39886224622,
       "scope": "inspect actual checker descendant process under bounded diagnostic",
-      "status": "in-progress-at-recording"
+      "status": "completed-success-diagnostic-only",
+      "finding": "Actual native checker contextual return/yield/conditional inference stack"
+    },
+    {
+      "commit": "17f6bc370abab2d630de3f9cb1194e229d677e51",
+      "runId": 39886925277,
+      "status": "completed-success-diagnostic-only",
+      "finding": "180-second GDB replay remains in String::clone/psJsonStringToChars; did not reproduce abort before deadline; no destruction diagnosis claimed",
+      "sample": {
+        "seconds": 180,
+        "elapsedMs": 180081,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "executableSha256": "477c978d235b708141a3b1c8f819f967e79420661059729627c14b1b4978bf83",
+        "sourceSha256": "4fb3f3fd4d4db5325379aac2fcc5c4361f4b796bd60c3bb67271dc3deac29650",
+        "requestSha256": "4e8807fa2c2f07bf298a480046c76b689b9594bc04537d2e7720fd73e9879381",
+        "report": [
+          "[Thread debugging using libthread_db enabled]",
+          "Using host libthread_db library \"/lib/x86_64-linux-gnu/libthread_db.so.1\".",
+          "",
+          "Program received signal SIGINT, Interrupt.",
+          "__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:541",
+          "",
+          "Thread 1 (Thread 0x7fbc47771bc0 (LWP 2895) \"service.bin\"):",
+          "#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:541",
+          "#1  0x000055c5b11d326f in <alloc::string::String as core::clone::Clone>::clone ()",
+          "#2  0x000055c5b07f8ba5 in psc1_generated_target::psJsonStringToChars ()",
+          "#3  0x000055c5b0d7eb4a in psc1_generated_target::Ps_Internal_CompilerService_candidate ()",
+          "#4  0x000055c5b10f47e8 in psc1_generated_target::main ()",
+          "#5  0x000055c5b10f7eb3 in std::sys::backtrace::__rust_begin_short_backtrace ()",
+          "#6  0x000055c5b10f7ea9 in std::rt::lang_start::{{closure}} ()",
+          "#7  0x000055c5b11b3890 in std::rt::lang_start_internal ()",
+          "#8  0x000055c5b10f7e25 in main ()",
+          ""
+        ],
+        "stderr": "warning: 541\t../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory\n",
+        "responseProduced": false,
+        "qualification": false,
+        "adoption": "not-run",
+        "admission": "not-run"
+      }
     }
   ],
   "isolatedPrototype": {
     "branch": "fix/psc1-rust-owned-string-moves-20261023",
     "head": "f037377574124cf7a374d627f0c57e4a855e09e5",
     "runId": 39886083977,
-    "status": "in-progress-at-recording",
+    "status": "failed-after-G1",
     "integratedIntoQualifiedBranch": false,
     "priorRun": {
       "head": "335960bd5bb678b2f41944e0b533bbae6c6b4c55",
@@ -4956,6 +4997,196 @@
         "scope": "mechanism fixture only; not compiler throughput"
       },
       "failure": "dropping redundant clone also removed grouping required around Rust struct expression; corrected in 9052b59fe7bafc000a2fa8ec24f0ead266276682"
+    },
+    "generations": [
+      1
+    ],
+    "g2": {
+      "status": "stack-overflow",
+      "elapsedMs": 103782,
+      "requestSha256": "4e8807fa2c2f07bf298a480046c76b689b9594bc04537d2e7720fd73e9879381"
+    },
+    "artifact": {
+      "id": 12472902085,
+      "name": "psc1-rust-selfhost-f037377574124cf7a374d627f0c57e4a855e09e5-attempt-1",
+      "size_in_bytes": 11309891,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12472902085",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12472902085/zip",
+      "expired": false,
+      "created_at": "2026-10-23T01:54:42Z",
+      "expires_at": "2027-01-21T01:48:36Z",
+      "updated_at": "2026-10-23T01:54:42Z",
+      "digest": "sha256:7f0e6e3f12c103b36290c0c5cec12aa5e8c5293a01f5f8e77888dda5b019341e",
+      "workflow_run": {
+        "id": 39886083977,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-rust-owned-string-moves-20261023",
+        "head_sha": "f037377574124cf7a374d627f0c57e4a855e09e5"
+      }
+    },
+    "receipt": {
+      "bootstrap": {
+        "sourceClosureDigest": "c8657feaaa4f1ec2fab09ab3029dbbe41c392acda0874e6d674e5be42b7e581b",
+        "sourceSha256": "4fb3f3fd4d4db5325379aac2fcc5c4361f4b796bd60c3bb67271dc3deac29650",
+        "admissionsSha256": "30fecceeb9d2bfa95bcd62d132a506b9dc1028d495bd369680cb1da443fa7432",
+        "originalIrSha256": "8a86c4545f8a582e2ee9f4d0857d0ca8c0fa413d6459f2f240e3138029901f1d",
+        "specializedIrSha256": "5290681283e7f0e4041d429592b4913e1c011078e84dd1e00bf92627b2f0920b",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerRustServiceCandidate"
+        ]
+      },
+      "serviceArtifact": {
+        "file": "/home/runner/work/pskernel/pskernel/psc1/dist/generated-rust-compiler/G1-service/artifact.json",
+        "sha256": "ec0b0e6b3ddd90f8bc237e65f581a3e64f850b0d9de00b74a09580bbeee8a8fd",
+        "sourceSha256": "4fb3f3fd4d4db5325379aac2fcc5c4361f4b796bd60c3bb67271dc3deac29650"
+      },
+      "generations": [
+        {
+          "generation": 1,
+          "sourceClosureDigest": "c8657feaaa4f1ec2fab09ab3029dbbe41c392acda0874e6d674e5be42b7e581b",
+          "sourceSha256": "4fb3f3fd4d4db5325379aac2fcc5c4361f4b796bd60c3bb67271dc3deac29650",
+          "admissionsSha256": "30fecceeb9d2bfa95bcd62d132a506b9dc1028d495bd369680cb1da443fa7432",
+          "originalIrSha256": "8a86c4545f8a582e2ee9f4d0857d0ca8c0fa413d6459f2f240e3138029901f1d",
+          "specializedIrSha256": "5290681283e7f0e4041d429592b4913e1c011078e84dd1e00bf92627b2f0920b",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerRustServiceCandidate"
+          ],
+          "artifactSha256": "ec0b0e6b3ddd90f8bc237e65f581a3e64f850b0d9de00b74a09580bbeee8a8fd",
+          "observations": [
+            {
+              "id": "lean-modules",
+              "sourceClosureDigest": "d91254b72ec79ad17b12ac02e47974f13e4ac9d88e6f50360aabfa0a7d53e721",
+              "sourceSha256": "8ca5fed37c8f794719734bd977d586d03f47706a07d23e818fee6e0ef21c0e95",
+              "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+              "originalIrSha256": "2091e6d53ef774abf0d8079eb1d0a3c103fa71c2c21a9118da215305b3f0cb32",
+              "specializedIrSha256": "2091e6d53ef774abf0d8079eb1d0a3c103fa71c2c21a9118da215305b3f0cb32",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "answer"
+              ],
+              "observation": {
+                "answer": "42",
+                "exports": [
+                  "answer"
+                ]
+              }
+            },
+            {
+              "id": "ps-integer-unicode",
+              "sourceClosureDigest": "f470e37c5106f4e234081214923402f6a2e82fc0475f307cc1c7ccc66d8c78f3",
+              "sourceSha256": "91a9e43615d4bdaaae1b033b41354645dd3b2d1f36a903ceb5d7a98f36b44215",
+              "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+              "originalIrSha256": "84840e7f4044261f34acfd46fdbd1d811dbefe7ef24af6525a1e031d2576e737",
+              "specializedIrSha256": "84840e7f4044261f34acfd46fdbd1d811dbefe7ef24af6525a1e031d2576e737",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "huge",
+                "text"
+              ],
+              "observation": {
+                "huge": "-9007199254740993123456789",
+                "text": "λ🙂"
+              }
+            },
+            {
+              "id": "ps-list-literal",
+              "sourceClosureDigest": "990ff8089cfb7a59868ba553ca480ad8f5cb0d52ae240bb09589cdbb80a686f5",
+              "sourceSha256": "083776ef0c7af12ed15d600e78a3c0d3f960561b513cedab6d9d933b64e740d9",
+              "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+              "originalIrSha256": "ee47e989dd251b44bb52a785ba80f0a3e56817cd9f6cc774802661227d59967e",
+              "specializedIrSha256": "ee47e989dd251b44bb52a785ba80f0a3e56817cd9f6cc774802661227d59967e",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "answer"
+              ],
+              "observation": {
+                "empty": "0",
+                "first": "7"
+              }
+            },
+            {
+              "id": "lean-handler-pattern",
+              "sourceClosureDigest": "438be06e48d3df4602ce227da6da664b0065bd3c33fcf23b264ac5550b08297e",
+              "sourceSha256": "cda8671e206e44babe86d1d7940ae5e74efb1c53c52cc506334e1c479af7131d",
+              "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+              "originalIrSha256": "4532b90dfe27f82a21db957553b5137bdd2b2baad79075f07fa555732730b852",
+              "specializedIrSha256": "4532b90dfe27f82a21db957553b5137bdd2b2baad79075f07fa555732730b852",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "observe"
+              ],
+              "observation": {
+                "normal": "3",
+                "caught": "8"
+              }
+            },
+            {
+              "id": "lean-ordinary-loop",
+              "sourceClosureDigest": "4c4044a6d864b40eca4dea995e3534a9b55ee319515f7b58aaca7a781cbe8ee6",
+              "sourceSha256": "4c698660fd78dc05a9d57f5528178ce7540531bf18e32717ff51c82b8f475415",
+              "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+              "originalIrSha256": "10f63beb16f8b618119fa0873d9103f92f4f65d5cacb43b33d1005576afde009",
+              "specializedIrSha256": "10f63beb16f8b618119fa0873d9103f92f4f65d5cacb43b33d1005576afde009",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "answer"
+              ],
+              "observation": {
+                "zero": "0",
+                "five": "5"
+              }
+            },
+            {
+              "id": "malformed-list",
+              "refused": true,
+              "phase": "parse",
+              "code": "source-refused"
+            },
+            {
+              "id": "wrong-body",
+              "refused": true,
+              "phase": "elaboration",
+              "code": "source-refused"
+            },
+            {
+              "id": "missing-import",
+              "refused": true,
+              "phase": "capture",
+              "code": "import-order-or-missing"
+            },
+            {
+              "id": "checked-partial",
+              "refused": true,
+              "phase": "preparation",
+              "code": "checked-preparation-refused"
+            },
+            {
+              "id": "verified",
+              "refused": true,
+              "phase": "wire",
+              "code": "assurance-unavailable"
+            }
+          ]
+        }
+      ],
+      "attempts": [
+        {
+          "generation": 2,
+          "producer": "ec0b0e6b3ddd90f8bc237e65f581a3e64f850b0d9de00b74a09580bbeee8a8fd",
+          "status": "running"
+        }
+      ],
+      "sourceClosureDigest": "c8657feaaa4f1ec2fab09ab3029dbbe41c392acda0874e6d674e5be42b7e581b"
     }
   },
   "next": [
@@ -4963,5 +5194,178 @@
     "Inspect actual TypeScript checker process; fix measured generated-source class without weakening strict checking; execute full independent G1/G2/G3.",
     "Record exact fixed-point source/admission/original-IR/transformed-IR/corpus evidence per target; no completion claim before actual passes.",
     "Keep DirectJS G1 and all seven Practical Core targets qualified; retain diagnosed DirectJS G2 heap issue."
-  ]
+  ],
+  "integrationCandidate": {
+    "parent": "36505edc4ef1b313097bedb29e05dcf02138a135",
+    "sourcePrototype": "535f1c3927622c4ed1a23bde67f2bb96cbc2c226",
+    "changes": [
+      "checked TypeScript generator result annotations",
+      "retain all-input legacy context equality",
+      "terminal failed generation attempts marked failed"
+    ],
+    "normalQualification": "pending-new-source"
+  },
+  "typeScriptG1Checkpoint": {
+    "branch": "fix/psc1-ts-generator-result-types-20261023",
+    "head": "a0a0a92f39deb7ff3c9336f41dc6ebcb681ae1d1",
+    "runId": 39887064597,
+    "jobId": 120197600047,
+    "sourceClosureDigest": "ad3fcf93d92ddef8a55b7ac87567ade022c7cd6cbe89fec43fcf4afbe261d017",
+    "generations": [
+      1
+    ],
+    "allFrozenCases": 10,
+    "strictCompilation": "passed",
+    "legacyEquality": "all-input-proved",
+    "oldCurrentComparisons": 264,
+    "g2": {
+      "status": "timed-out",
+      "elapsedMs": 240091,
+      "signal": "SIGKILL",
+      "requestSha256": "5373da197f242582478a55863abb9f15a01154b7775c02ff6b3fde8e38d237e6"
+    },
+    "g3": "not-run",
+    "fixedPoint": "not-run",
+    "artifact": {
+      "id": 12473571856,
+      "name": "psc1-ts-selfhost-a0a0a92f39deb7ff3c9336f41dc6ebcb681ae1d1-attempt-1",
+      "size_in_bytes": 4179662,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12473571856",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12473571856/zip",
+      "expired": false,
+      "created_at": "2026-10-23T02:05:56Z",
+      "expires_at": "2027-01-21T01:59:17Z",
+      "updated_at": "2026-10-23T02:05:56Z",
+      "digest": "sha256:0c5fc53de729edd9d8af10bd189344d0aa85a36b9e22fa1eabdd4573d014f83e",
+      "workflow_run": {
+        "id": 39887064597,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-ts-generator-result-types-20261023",
+        "head_sha": "a0a0a92f39deb7ff3c9336f41dc6ebcb681ae1d1"
+      }
+    },
+    "workloads": [
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-lean-modules",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "c0a0920a43fb71cdf2f006813d3ebc0c50d091d156f62424446e3c328cb65ff3",
+        "elapsedMs": 907,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 207436
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-ps-integer-unicode",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "47e31bdc66d4380ed3b3939293d4aa0045c46c02d0baf68a5da47717956669a4",
+        "elapsedMs": 747,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 197292
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-ps-list-literal",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "9b1466c350a2a2af47d9db665b4341bef46106952f28285f932719bc5448484e",
+        "elapsedMs": 1251,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 265536
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-lean-handler-pattern",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "45175f688dd4b323951f678643a8eb75073b6bd9ab866a4b660c636c0d79df35",
+        "elapsedMs": 3189,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 413404
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-lean-ordinary-loop",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "d60cf7444c33338c97cb0cebc856ab89b9e8626c5394ad3251ad8f332e340a29",
+        "elapsedMs": 2974,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 321236
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-malformed-list",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "6a46dc557e813d10ba048d24f1a23c9274523a99bf73fd69ffce2b160246346c",
+        "elapsedMs": 259,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 105308
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-wrong-body",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "0267a6213fdb56705b08d94b13da7e6a768d8ec8ab25df7979aa56e278a78df9",
+        "elapsedMs": 257,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 104108
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-missing-import",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "e66945b488063298034f3eaf3b2fcf08dd11f1b708e6e0d17780dc0253e59ecb",
+        "elapsedMs": 254,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 103388
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-checked-partial",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "4d8600058dcb70f06636672a29cdc5ae3203d63ee2fb67ab23c2ed0dfd830573",
+        "elapsedMs": 274,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 107816
+      },
+      {
+        "role": "generated-compiler",
+        "target": "ts",
+        "id": "G1-verified",
+        "serviceSha256": "42e9b9e4d66267c419a9ceaa6d67bc652823b87496214c41b0b3a06ea551aa4e",
+        "requestSha256": "2c65cd68e4e4b35e9d8cc5c5656e9724233677da68fcfdffd1d0262843035aea",
+        "elapsedMs": 242,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 102084
+      }
+    ]
+  }
 }

@@ -301,7 +301,7 @@ def psTsEmitDeclarationGeneralWithVisibility (isPublic : Bool)
   match psTsEmitType declaration.resultType with
   | Except.error error => Except.error error
   | Except.ok resultType =>
-      match psTsEmitTailExpr brands tags (psTsInlineEtaApplication declaration.body) with
+      match psTsEmitTypedTailExpr brands tags declaration.resultType (psTsInlineEtaApplication declaration.body) with
       | Except.error error => Except.error error
       | Except.ok body =>
           if psListIsEmpty declaration.parameters then

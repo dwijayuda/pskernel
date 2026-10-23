@@ -186,13 +186,19 @@ def legacyContext
 
 
 -- Ordinary expression consumers preserve their surrounding continuation.
-theorem context_eq (brands tags : List (String × String)) (fuel : Nat) :
-    legacyContext brands tags fuel = psTsEmitExprContextWithFuel brands tags fuel := by
+theorem typed_disabled_eq (brands tags : List (String × String)) (fuel : Nat) :
+    legacyContext brands tags fuel =
+      psTsEmitTypedExprContextWithFuel brands tags false fuel Option.none := by
   induction fuel with
   | zero => rfl
   | succ remaining ih =>
-      simp only [legacyContext, psTsEmitExprContextWithFuel, ih]
+      simp only [legacyContext, psTsEmitTypedExprContextWithFuel,
+        psTsGeneratorResultAnnotation, ih]
       rfl
+
+theorem context_eq (brands tags : List (String × String)) (fuel : Nat) :
+    legacyContext brands tags fuel = psTsEmitExprContextWithFuel brands tags fuel := by
+  exact typed_disabled_eq brands tags fuel
 end PsTsServiceReference
 
 

@@ -1,34 +1,47 @@
-## Exact6bed4d6c native prerequisite PASS; generated preflight RUNNING
+## Exact6bed4d6c native+complete generated+controls PASS; mixed RUNNING
 
 ExecutableANDharness6bed4d6c613861c052f98dc4d7e66c3fc275bc9d
-(treef3ccee1708cfc6c04f270d3f202c1d2520237c5f) has ONE existing run:
-https://github.com/dwijayuda/pskernel/actions/runs/39951009269
-native120405170256 terminalPASS:85proofreports including11hashlemmas,
-onlypropext/Classical.choice/Quot.sound,zero forbidden proof axioms.
-Frozen native2730cases12strings/long3,all294authenticrequests/377metadata/
-sixStringcases+singletons,retained publicDAG/minimalString/prefix controls PASS.
-Nativeartifact12499733686 ZIP105587bytes SHA256
-b75c002cbc3e51ccd9315f3a4b92a0270d6621248818991f4403d8d04ffc0f7c.
-All85proofrows/markers/fiveartifactfilehashes:
-docs/evidence/2026-10-23-t01f-octet-native-gates.json.
-This is a narrow prerequisite ONLY; source6bed/fullT01F/currentA not qualified.
+(treef3ccee1708cfc6c04f270d3f202c1d2520237c5f).
+Existing run https://github.com/dwijayuda/pskernel/actions/runs/39951009269:
+native120405170256 PASS85proofs/11hash/onlyallowedaxioms/allnativeString;
+completeproducer120406128102 PASS authenticSelfHostcheck/realPSC1/
+TS7.0.2/Node22.23.3/nativefixture. Bounded2730cases8190stages13665assertions/
+long3 PASS. Independent static audit of COMPLETE generated kernel confirms
+four DATA-result helpers,oneanonymousstructuralblock each,no resultstaging/
+Step/Mixdispatch,eightprimitive transitions per octet recursive descent,
+exactpair+odd remainderrouting. No generator-free loop/globalbackend theorem.
+Kernel9961568bytes SHA256
+dbc0a47d8aa2ad6757425c5e7796148f7c1e8acba547e809041fde8f9c051e89.
+Producerartifact12502115716 ZIP1135365bytes SHA256
+410bfc3066f1cd1a6a3f6ef73a553f3a7513651c6fcb482f8be16e4173776d02.
 
-Generatedproducer120406128102 alreadyRUNNING realPSC1 build; bounded strict
-eight-transition/data-result shape,completeSelfHostcheck/build/TS7.0.2 and
-unchanged JS2730cases8190stages13665assertions/long3 must pass. Retained controls
-and complete mixed1400assertions/440calls follow runtime-only without recompiling.
-All five full work-branch pushes remainPAUSED,narrowonlyACTIVE. Do notduplicate.
-One next task: finish THIS run. If entire narrowPASS, restore fivefulltriggers,
-make narrowmanual-only,qualify ONE coherent NEWsource through BOTH strictsix-
-shardaggregates/allnative/official/provider24CLI+8API/research/measurements/
-unchangedowner32workers384calls/full193/profile. No prior-source pass inheritance.
+Controls120415938000 PASS frozenhashmatrix/long3,DAG/minimalString,
+prefix605assertions,session8kinds/direct7/privateIDs5/forks2.
+Artifact12502440268 ZIP664280bytes SHA256
+4b554aa349cec5fef3c48e0e0aa24cfb671bc595859915af701af0b63e724a03.
+DAG134.24s/808872KiBpeakRSS;prefix30.86s/399768KiB.
+Preserve higher DAG peakRSS vs9d558752(+250120KiB) and61d555992(+252880KiB).
+Prior9d145.47s/35.25s and61d141.62s/32.35s plus allprefixRSS remain recorded.
+Cross-runhostCPU/GCvariation prevents causal speedup claim; DOPEN.
+2048MiB oldspace is not a hardRSS cap. No performancequalification.
+Allmarkers,15producerfilehashes,13controlfilehashes,completehelperbodies,
+provenance/verifieddetachedcopies/staticunchangedworker-theorem-test audit:
+docs/evidence/2026-10-23-t01f-octet-generated-preflight.json.
+All85nativeproofrows remain in octet-native-gates.json.
 
-Final2c9bothmixed/aggregatesFAIL withall12shardZIPs/tencomplete1400assertion
-receipts independentlyverified. No completed mixedRSS/timing invented.
+ONE next task: finish ALREADY RUNNING mixed120415937943,actualstart12:33:41Z,
+unchanged25minute jobcap (~12:58:41Z),fuel4096/2048MiB/emptyPATH,
+all294independentrequests/377metadata/full1400assertions/singleton/negatives/
+session/owner/firstandsecondpubliccalls and440diagnostictracecalls unchanged.
+Terminal result UNKNOWN. Neverduplicate. This docschild is unqualified.
+AllFIVE fullworkbranchpushes PAUSED,narrowonlyACTIVE. If whole narrowPASS,
+restorefivefulltriggers/makenarrowmanual-only,qualify ONE coherent NEWsource
+with BOTH strict6shardaggregates/allretainednative/official/proof/provider
+24CLI+8API/research/measurements/unchanged32worker384callowner/full193/profile.
+No pass inheritance acrosssource/run/attempt. Prior2c9bothmixed/aggregatesFAIL.
 T01F/currentA/B/DOPEN,CFAIL,historicalA9c87qualified; noT05/integration.
-This containing documentationchild is unqualified. Fresh integrationlast123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
-ActionsLinuxONLY execution,expected_sha/nonforce,preservehistory,unchanged
-fuel4096/2048MiB/emptyPATH/25mincap; no main/npm.
+Integrationlast123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
+ActionsLinuxONLY execution,freshexpected_sha/nonforce,preservehistory,no main/npm.
 
 ---
 

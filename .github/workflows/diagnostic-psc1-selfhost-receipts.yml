@@ -41,9 +41,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39913434540'
-          artifact-ids: '12484868683'
-          path: input/ts-direct-predicate-correctness-1800s
+          run-id: '39914906360'
+          artifact-ids: '12485169920'
+          path: input/ts-applied-lookups-correctness-1800s
       - name: Audit recorded byte identities without compiler execution
         run: node .github/diagnostics/psc1-selfhost-receipts.mjs
       - uses: actions/upload-artifact@v4

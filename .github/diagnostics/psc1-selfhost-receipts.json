@@ -2,16 +2,15 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "ts-direct-predicate-correctness-1800s",
+      "id": "ts-applied-lookups-correctness-1800s",
       "target": "ts",
       "profile": "correctness-1800s",
-      "sourceCommit": "083f900a60f6df3ad32f2d4e1c4afac2c53cf12a",
-      "requestCommit": "ecd53ad3f7ea96e07b53c7ece405b0f97c67dbf1",
-      "runId": 39913434540,
-      "artifactId": 12484868683,
-      "artifactDigest": "sha256:3fdbf9984ea5f0937212359d239de50cc973670dca7daf9bf2ba7445539df218",
-      "artifactExpiresAt": "2027-01-21T06:45:17Z"
+      "sourceCommit": "0938c895a9ff007a36df72dc49c836dc7443cef3",
+      "requestCommit": "10ac556f28782c4efeaa72c168f3969aba68ccca",
+      "runId": 39914906360,
+      "artifactId": 12485169920,
+      "artifactDigest": "sha256:2dd1dc8d8614ec346f53da1d693ef0ddb86410861c3e8f822ea527bf3af5acdf",
+      "artifactExpiresAt": "2027-01-21T06:59:33Z"
     }
-  ],
-  "auditRevision": 2
+  ]
 }

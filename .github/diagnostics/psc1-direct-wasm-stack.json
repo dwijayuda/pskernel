@@ -12,6 +12,9 @@
   "serviceSha256": "38cf11fd0fdf7a48d7a3dc9a926b5970e2ddf14e3ad852a5fa6fe682680724cb",
   "requestSha256": "154f995001505a8f1415f1b407616fec2ba349e344b775bb17b97c5bea710ff6",
   "closure": "85c03806bb5c045a8d5c48a73ddd1fbe7f5be568ea3c92a599d7b19ac0e5f317",
-  "purpose": "Replay exact retained G2 only to capture full stack after720754ms failure; execution stack/heap/semantic policies unchanged; existing1800s correctness profile; no qualification.",
-  "traceProfile": "correctness-1800s"
+  "purpose": "Read-only exact owned code-section local inventory to distinguish giant function frames from Nat operand depth; not a performance or stack-size proof.",
+  "resolveOnly": [
+    11,
+    2286
+  ]
 }

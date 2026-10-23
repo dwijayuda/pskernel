@@ -27,8 +27,15 @@ assert.equal(runtime.length,50);
 const wasm=fs.readFileSync(path.join(path.dirname(artifact),'module.wasm'));
 assert.deepEqual(WebAssembly.Module.imports(new WebAssembly.Module(wasm)),[]);
 let at=8;function leb(){let n=0,shift=0;for(let i=0;i<5;i++){const b=wasm[at++];assert.ok(b!==undefined);n+=(b&127)*2**shift;if(!(b&128))return n;shift+=7;}throw Error('invalid uint32 LEB');}
-const exports=[];while(at<wasm.length){const id=wasm[at++],size=leb(),end=at+size;assert.ok(end<=wasm.length);
+const exports=[],codeLocals=[];while(at<wasm.length){const id=wasm[at++],size=leb(),end=at+size;assert.ok(end<=wasm.length);
  if(id===7){const count=leb();for(let i=0;i<count;i++){const size=leb(),name=wasm.subarray(at,at+size).toString('utf8');at+=size;const kind=wasm[at++],index=leb();exports.push({name,kind,index});}}
+ if(id===10){const count=leb();for(let index=0;index<count;index++){
+  const size=leb(),bodyEnd=at+size;assert.ok(bodyEnd<=end);const groups=leb();let locals=0;
+  for(let group=0;group<groups;group++){locals+=leb();const kind=wasm[at++];
+   if(kind===0x63||kind===0x64)leb();else assert.ok([0x7f,0x7e,0x7d,0x7c,0x7b,0x70,0x6f].includes(kind),'owned local value type '+kind);
+  }
+  codeLocals.push({index,locals,bodyBytes:size});at=bodyEnd;
+ }assert.equal(at,end);}
  at=end;
 }
 assert.equal(exports.find(e=>e.name==='__psc1_service_nat_half').index,1);
@@ -74,7 +81,8 @@ if(request.resolveOnly){
     listParameters:listIndices.map(([p])=>p),nonTailSelfSites:calls.length,calls,bodyBytes:JSON.stringify(decl[4]).length});
   }
  }
- const receipt={schema:'psc1-retained-wasm-function-map/1',testedCommit:process.env.GITHUB_SHA,
+ const localsInventory={scope:'Decoded owned binary local counts/code bytes are frame-size proxies, not a JIT stack-byte measurement.',largest:codeLocals.toSorted((a,b)=>b.locals-a.locals).slice(0,25).map(r=>({...r,name:resolve(r.index)})),selected:codeLocals.filter(r=>request.resolveOnly.includes(r.index)).map(r=>({...r,name:resolve(r.index)}))};
+ const receipt={localsInventory,schema:'psc1-retained-wasm-function-map/1',testedCommit:process.env.GITHUB_SHA,
   source:request,sourceSha256:m.sourceSha256,binarySha256:sha(wasm),exportAnchorsVerified:true,
   runtimeFunctions:runtime.length,sourceFunctions:names.length,compilerExecution:false,qualification:false,resolved,recursiveListSpines,
   inventoryScope:'heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof'};

@@ -1,114 +1,95 @@
-# Rust and TypeScript self-hosting
+# Rust and TypeScript self-host architecture
 
-Active priority from 2026-10-23: Rust native execution, TypeScript readable
-npm-compatible generated distribution. DirectJS remains a regression/reference.
-No package publication or merge is authorized.
+Current evidence and queue live in [AI_WORK_STATE.md](../AI_WORK_STATE.md),
+[the roadmap](PSC1_DEVELOPMENT_ROADMAP.md) and
+[the canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
+[Earlier architecture analysis](https://github.com/dwijayuda/pskernel/blob/2cf71d1b0cccbd7f8e3991c99ac9f2b377ed4cce/psc1/docs/PSC1_RUST_TS_SELFHOST_ARCHITECTURE.md)
+and every previous experiment remain preserved in Git and historical receipts.
 
-## One compiler source
+## One compiler and a fixed verification boundary
 
-Ps.Compiler.Service owns the existing request decoder, exact source capture,
-frontend preparation, elaboration, original strict IR validation, admissions,
-source origin identities and provisional response. Thin target modules provide
-only existing production emission. There is no handwritten target compiler.
+Ps.Compiler.Service owns the existing source/frontend/elaborator, original
+checked IR, closed target planning, canonical admissions and origins. Thin Rust
+and TS service facades use existing emitters. There is no separate handwritten
+compiler, native semantic delegation after the one seed, or replacement checker.
 
-Integrated Rust and TypeScript use their existing generic emitters with rechecked
-shared worker fusion. The isolated scalar-interface experiment first reuses the
-existing checked closed specialization/fusion plan for nongeneric primitive-only
-public signatures, including the compiler's String -> String interface. Other
-interfaces, or planning refusal, retain the existing generic route. Original and
-post-plan public API checks and strict IR remain. DirectJS retains its closed
-plan. These are existing compiler mechanisms, with no handwritten target compiler
-or new language semantics. Later isolated changes need fresh integrated qualification.
+Read registered owned source closures, pin source/tool/request identities, call
+one native seed, then remove native compiler executables. Each generated compiler
+actually produces the next candidate. A separate host verifies wire/source/
+artifact identities and independently admits canonical graphs with official
+Lean4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Original and transformed strict IR checks, public API validation, negatives,
+unsupported ABI refusals, semantic fuel and memory/stack policies remain.
 
-Both expose String -> String candidates; these cannot authorize admission.
-The host separately admits the exact canonical graph with official Lean 4.35.0
-at eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Target tools compile only emitted
-source. Rust's appended main and TypeScript's Node runner perform file transport
-only. Neither substitutes compiler source semantics.
+## Profiles and demonstrated qualification
 
-## Executable qualification
+[Profile machinery](PSC1_SELFHOST_QUALIFICATION_PROFILES.md) changes scheduling
+and wall clock only. Default performance-240s retains240000ms requests/builds and
+15-minute jobs. correctness-1800s extends only actual G2-self/G3-self requests
+to1800000ms, with120-minute jobs,110-minute execution steps and5s cleanup guards.
+G1/corpus/builds retain240000ms; independent admission retains120000ms;
+streams32MiB and wire128MiB remain. Nested process trees, including new sessions,
+are killed on deadline. Malformed wire reaches existing generated refusals.
 
-Manual workflow psc1-rust-ts-selfhost-qualification.yml has independent Rust/TS
-jobs, fail-fast false, 15-minute job bounds and 240000 ms child bounds. Its
-committed-request fallback binds exact parent/event/branch and permits only
-the request file in the trigger commit. Normal development does not run G2/G3.
+Rust source5e0b548e/request7d8865a0/run39908529181 genuinely passes G1/G2/G3,
+independent admission, ten cases per generation and exact source/closure/
+admission/original/transformed IR/observations. G2/G3 complete692788/660042ms.
+All three executable hashes also match within this pipeline. This is correctness
+qualification for that isolated source;240s and separate clean build repeats
+remain independent requirements.
 
-Each job captures every registered transitive source import, hashes exact bytes,
-seeds once, checks the candidate graph independently, then builds actual emitted
-target code. Native compiler binaries are removed after the sole seed call.
-Each executing generated compiler must pass all ten existing positive/refusal
-cases across both grammars. G2 and G3 must compile that exact compiler closure,
-match source/admission/original IR/transformed IR identities, independently
-admit, compile and execute the same corpus. Generated artifacts and compiler
-transport inputs are hash-bound before/after execution. Artifact mutation,
-symlinks and mismatched host target identities have negative tests.
+TypeScript shared-codec source29e871ea/requestb5ba1452/run39908439190 passes G1
+and ten cases, then times out at1800240ms. No G2 admission, G3 or fixed point.
+Original240s attempts fail separately. Native proof, diagnostic success,
+G1, G2/G3 and publication are distinct claims.
 
-Measured wall time and peak RSS use actual generated requests; Rust uses the
-child's /usr/bin/time RSS rather than Node's parent RSS. Target compilation time,
-tool failures and generated source size are separate from service execution.
-Integrated Rust release optimization level 1 is an explicit build profile.
-The isolated closed-plan experiment records level 0 to separate build optimization
-cost from actual compiler execution. Same-closure/request comparisons total 5853 ms (level 0) versus 2303 ms
-(level 1) for the five positive G1 workloads, across separate hosted runs and
-including startup. Neither full G2 completes, so these measurements establish
-no full-workload performance ranking.
-Compare both profiles on the same real workload before promotion. Type/borrow
-checking, locked dependencies and all runtime qualification remain.
-The source, toolchain and profile are recorded. Level 3 build performance and
-whole-file formatting are measured defects, not grounds for larger limits.
-The exact reviewed Cargo lock is committed (SHA256
-4d375c97eebc30fce378df900dd76bdd2cb9d82ce7619f50fb7ab3161f8e576d). Historical DirectJS evidence
-is retained; no Rust-vs-TS performance conclusion is assumed before measurement.
+The active main source5ce2fc74 passes normal run39909569028, all47 full steps and
+37 finite Practical Core criteria. Both grammars/all7 backends and installed
+native distribution remain qualified. Later source/backend candidates have not
+been promoted merely because Rust self-host qualification passes.
 
-## Acceptance and boundary
+## Measured implementation mechanisms
 
-Rust and TypeScript G1 now genuinely execute and pass the frozen ten-case
-corpus. Exact current sources/runs and the fully qualified seven-backend
-baseline are in PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json.
-A green build or native source closure alone is not G1 execution or self-hosting.
-A ten-case G1 pass is not G2/G3. Exact generations and fixed-point evidence are
-required independently for each target; neither substitutes for the other.
-Retain all seven Practical Core backends and frozen 37-criterion qualification.
-Do not relax fuel, stack/heap limits, strict IR, unsupported ABI refusals,
-negative tests or independent admission to make a generation pass.
+Preserve checked scalar closed specialization/fusion with generic fallback and
+strict pre/post checks. Earlier source-wrapper changes did not alter synthesized
+generic workers; do not remove the generic guard without correct instantiation
+of type parameters, call spines and captures.
 
-Linux process-tree supervision retains the 240000 ms child deadline and 32 MiB
-per-stream cap, with SIGKILL for descendants and negative OS-level tests. The
-245000 ms outer supervisor guard is cleanup only. Incremental candidate/case
-checkpoints survive job interruption; each manual target job remains 15 minutes.
+Rust uses checked last-use String transfers and safe iterative destruction only
+for private regular last-field linear inductives with an empty sentinel. Preserve
+shared-tail/order/public ABI guards and500000-node regression. Shared cursor/
+lexer accumulation has official all-input equality proofs and100001-token cases.
+TypeScript result annotations derive from checked IR and retain strict native
+checking; structured generator output retains old/current equality/refusal tests.
 
-Source/graph/IR fixed points and native build-product bit equality are distinct.
-The current controller asserts source, admission, IR and observation identities;
-record repeated clean Rust executable and TS emitted-product identities before
-claiming binary reproducibility. No G2/G3 or final reproducibility claim currently
-passes. Later backend/shared cursor/lexer/scalar-plan candidates remain isolated
-until reviewed and normally qualified on the integrated source.
+Current canonical codec schemas remove temporary field lists and share fixed
+key/tag quote values with definitionally equal source definitions. Official
+all-input Name/Level/List/Expr equality against retained encoders passes.
+TS emits zero-argument values once; Rust functions do not imply identical cache
+behavior. Early literal-quote reductions failed on opaque String primitives;
+those failed proofs remain preserved and were not bypassed.
 
-## Exact current lowering findings
+Current TS replay39912539573 samples last30s of a220s G2 request and shows
+generator/thunk work in escape predicates, codec and constructor lookup. A small
+shared-source trial replaces lazy Boolean disjunction with explicit branches.
+Its all-Char proof/native comparisons/regressions/audits pass; actual generations
+are pending in run39913434540. Cache/index hypotheses remain hypotheses; neither
+the two-entry UTF8 cache nor raw-position semantics have been changed.
 
-Inventory/replay 39896155384 finds fourteen recursive polymorphic curried helpers
-unchanged in the generic plan. Source wrapper arity does not change synthesized
-recursive helper arity. Closed worker fusion deliberately excludes generic
-declarations. Removing that guard alone would leave uninstantiated type variables
-in companion/capture/call types. Reuse existing closed specialization for scalar
-interfaces before adding coherent generic instantiation machinery.
+Rust late stack39906025465 reaches strict IR checking and nominal-arity lookup.
+A derived bounded index may reduce repeated searches if exact lookup and
+resource/report behavior are proved. A single stack is not total CPU attribution.
 
-Actual closed compiler inventories are Rust 2691 and TypeScript 2604 declarations,
-zero open generics. Both emitted compilers build and pass all ten G1 cases.
-Rust G2 then stacks at 36175 ms; TypeScript G2 times out at 240162 ms. Exact
-closed Rust replay 39898770508 identifies repeated psLexAllWorker$worker frames,
-separate from the formerly generic length helper. Both grammar token-list workers
-are now being normalized with accumulators, original inputBound/fuel/error/order
-semantics and all-input equality gates. All-input worker equalities, 320 finite comparisons and 100001-token cases per
-grammar pass on both targets. Latest G1 remains qualified; normalized Rust
-level 1 G2 times out at 240038 ms, TS at 240106 ms. G3/fixed points remain unrun.
-Current TS late profile 39900956833 shows codec/JSON/text-builder operations and
-generator dispatch, with substantial shared Node samples; inspect inclusive
-cost before selecting another optimization.
+## Acceptance and integration
 
-Rust iterative destruction is private linear-only and preserves public pattern
-ABI and observed field order; it does not claim general nonlinear stack-safe
-memory management. Structured TypeScript generators preserve legacy rendering
-and ordinary fuel/error preflight. Neither engineering mechanism substitutes for
-full independently admitted compiler generations. Keep exact source/tool/profile/
-request/graph identities, failed evidence and the frozen seven-backend contract.
+Require actual emitted generations and exact fixed points for each target.
+Compare complete real compiler requests, wall time/RSS, target tool build time
+and source sizes separately; censored timeouts are not complete-workload speed
+rankings. Same-run identical executable bytes are not independent clean-build
+reproducibility. No formal backend preservation theorem is claimed.
+
+Preserve all seven backend mappings, both grammars, the frozen Practical Core
+contract and real applications. Promote dependency-coherent validated changes
+with fresh full normal qualification. Keep DirectJS as reference/G1 regression,
+its original G2 heap defect tracked, and ExpressionV2 research separate from
+compiler work and official Lean admission. No merge or publication is authorized.

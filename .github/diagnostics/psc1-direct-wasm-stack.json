@@ -1,0 +1,15 @@
+{
+  "schema": "psc1-retained-wasm-stack-diagnosis/1",
+  "attempts": [
+    {
+      "runId": 40020523049,
+      "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
+      "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
+      "artifactId": 12530402614,
+      "artifactDigest": "sha256:0b48449adc24ae9430654698650769418116e1aeea3a649a08e361c11cf48d0e"
+    }
+  ],
+  "serviceSha256": "8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5",
+  "requestSha256": "ba9cf85f7f5fa252e18d4b9053a4b6eed2686fbb50314b6c7d1a8ebdda753fe1",
+  "closure": "cf1fbeba006442a10b687b56cd4be48c73d56a7574758126e337806b0e7568c3"
+}

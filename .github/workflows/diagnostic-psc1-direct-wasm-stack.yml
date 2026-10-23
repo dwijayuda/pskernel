@@ -1,0 +1,52 @@
+name: PSC1 retained Wasm actual G2 stack diagnosis
+on:
+  push:
+    branches: [diagnostic/psc1-direct-selfhost-profile-20261024]
+    paths: [.github/diagnostics/psc1-direct-wasm-stack.json]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Verify immutable artifact and source provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          const request=JSON.parse(fs.readFileSync('.github/diagnostics/psc1-direct-wasm-stack.json'));
+          const get=async route=>{
+            const r=await fetch('https://api.github.com/repos/'+process.env.GITHUB_REPOSITORY+route,{headers:{Authorization:'Bearer '+process.env.GH_TOKEN,Accept:'application/vnd.github+json'}});
+            assert.equal(r.status,200);return await r.json();
+          };
+          for(const e of request.attempts){
+            const run=await get('/actions/runs/'+e.runId);
+            assert.equal(run.head_sha,e.requestCommit);
+            const commit=await get('/commits/'+e.requestCommit);
+            assert.equal(commit.parents[0].sha,e.sourceCommit);
+            const artifact=await get('/actions/artifacts/'+e.artifactId);
+            assert.equal(artifact.workflow_run.id,e.runId);assert.equal(artifact.digest,e.artifactDigest);
+            assert.equal(artifact.expired,false);assert.equal(artifact.workflow_run.head_sha,e.requestCommit);
+          }
+          JS
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40020523049'
+          artifact-ids: '12530402614'
+          path: input/wasm-stack
+      - name: Capture actual retained G2 call chain with unchanged execution stack
+        working-directory: psc1
+        run: node ../.github/diagnostics/psc1-direct-wasm-stack.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-direct-wasm-stack-${{ github.sha }}
+          path: psc1/dist/direct-wasm-stack/
+          retention-days: 90

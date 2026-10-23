@@ -6,7 +6,10 @@ import {compilerSourceClosureDigest} from '../../psc1/host-tools/compiler-host-p
 import {compilerRequestLimit} from '../../psc1/scripts/selfhost-qualification-profiles.mjs';
 const expected=JSON.parse(fs.readFileSync('../.github/diagnostics/psc1-direct-js-profile.json'));
 assert.equal(expected.schema,'psc1-direct-generated-profile-request/1');assert.equal(process.version,'v22.23.3');
-const root=path.resolve('../input/direct-js/generated-js-compiler'),out=path.resolve('dist/direct-js-profile');
+const inputRoot=path.resolve('../input/direct-js'),out=path.resolve('dist/direct-js-profile');
+function walk(root){return fs.readdirSync(root,{withFileTypes:true}).flatMap(e=>{const f=path.join(root,e.name);assert.equal(e.isSymbolicLink(),false);return e.isDirectory()?walk(f):[f];});}
+const reports=walk(inputRoot).filter(f=>path.basename(f)==='qualification.json');assert.equal(reports.length,1);
+const root=path.dirname(reports[0]);
 fs.mkdirSync(out,{recursive:true});
 const report=JSON.parse(fs.readFileSync(path.join(root,'qualification.json')));
 assert.equal(report.target,'js');assert.equal(report.testedCommit,expected.requestCommit);

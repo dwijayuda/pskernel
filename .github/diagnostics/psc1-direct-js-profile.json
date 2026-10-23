@@ -10,5 +10,7 @@
   "sourceClosureDigest": "102ddaa2536a7c5b095ce3188a67f64ef0e9183c34c33051f0b552b6aab39707",
   "serviceSha256": "7cc7bc0b157d0b7ef400a9b1f8541a7b2d7875472d9ad9e0a007e07e609e1529",
   "requestSha256": "34fbc943ac867c321350c0ca554b11e7e4c2ae553c845878ff2e1255135e9e8d",
-  "purpose": "Actual retained generated compiler CPU diagnosis only; no qualification or timeout-policy change."
+  "purpose": "Actual retained generated compiler CPU diagnosis only; no qualification or timeout-policy change.",
+  "attempt": 2,
+  "note": "Locate the single report beneath GitHub artifact-id extraction directory; prior attempt did not execute compiler code."
 }

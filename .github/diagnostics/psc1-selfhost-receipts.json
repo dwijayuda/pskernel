@@ -2,18 +2,19 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "ts-cursor-cache-correctness-1800s",
+      "id": "ts-erasure-workers-performance-240s",
       "target": "ts",
-      "profile": "correctness-1800s",
-      "sourceCommit": "edc3e17ba2195649428f9ce020789404a9406beb",
-      "requestCommit": "3dd9152a675468980c1d603aa707287ff1c9b4ac",
-      "runId": 39959835622,
-      "jobId": 120434766232,
-      "artifactId": 12506755130,
-      "artifactDigest": "sha256:eed47fbb3aaced564ec05fde862a1e820146d4a3dd9e24c50b0fd9044d62b96c",
-      "artifactExpiresAt": "2027-01-21T13:16:28Z",
+      "profile": "performance-240s",
+      "sourceCommit": "09f41833d1c2d5c62de8bc55a25e58076055cc06",
+      "requestCommit": "9a0a9e6f5b6b8c6546c1833b243115f97888c561",
+      "runId": 39965349252,
+      "jobId": 120453647159,
+      "artifactId": 12506727938,
+      "artifactDigest": "sha256:d1090e31f9c534f40c2821d3581c90b250be7fabe8cda99cdd956cae7d3071bf",
+      "artifactExpiresAt": "2027-01-21T13:56:11Z",
       "inspectUtf8TokenWorker": true,
-      "inspectCursorCacheHelpers": true
+      "inspectCursorCacheHelpers": true,
+      "inspectErasureWorkers": true
     }
   ]
 }

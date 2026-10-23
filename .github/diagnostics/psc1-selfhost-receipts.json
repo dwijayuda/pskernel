@@ -1,0 +1,16 @@
+{
+  "schema": "psc1-selfhost-receipt-audit-request/1",
+  "attempts": [
+    {
+      "id": "rust-performance-240s",
+      "target": "rust",
+      "profile": "performance-240s",
+      "sourceCommit": "69bb7d0268a8f3ff2d2282d8b037d89de06db424",
+      "requestCommit": "26faa27edc537d55c2d3622d8046f6140c74bc61",
+      "runId": 39908086775,
+      "artifactId": 12481404904,
+      "artifactDigest": "sha256:a82d94eeb905ddef6721b9b24248a3224d1d3e09b4301026dd8213138f27cd34",
+      "artifactExpiresAt": "2027-01-21T05:51:32Z"
+    }
+  ]
+}

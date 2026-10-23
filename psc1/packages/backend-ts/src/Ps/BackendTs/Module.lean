@@ -978,13 +978,13 @@ def psTsViewUnbound (views : List (String × String)) (name : String) : Bool :=
   | Option.none => true
   | Option.some _ => false
 
-def psTsViewTailContextWithFuel (views : List (String × String)) (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
-    (generated : Bool) (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+def psTsViewTailContextWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (generated : Bool) (fuel : Nat) : List (String × String) -> List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
   match fuel with
-  | Nat.zero => fun (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
+  | Nat.zero => fun (_views : List (String × String)) (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
   | Nat.succ remaining =>
-      fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
-        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsViewTailContextWithFuel views brands tags declaration generated remaining;
+      fun (views : List (String × String)) (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
+        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsViewTailContextWithFuel brands tags declaration generated remaining views;
         let emitPure : PsVerifiedIrExpr -> Option String := psTsViewTailValue views generated brands tags aliases Option.none false;
         match expr with
         | PsVerifiedIrExpr.call fn types arguments =>
@@ -1020,7 +1020,7 @@ def psTsViewTailContextWithFuel (views : List (String × String)) (brands tags :
                       match psTsEmitType type with
                       | Except.error _ => Option.none
                       | Except.ok printedType =>
-                          match psTsViewTailContextWithFuel (psTsViewAlias views name value) brands tags declaration generated remaining aliases body with
+                          match psTsViewTailContextWithFuel brands tags declaration generated remaining (psTsViewAlias views name value) aliases body with
                           | Option.none => Option.none
                           | Option.some printedBody => Option.some (psTsJoin "" ["{ const ", name, ": ", printedType,
                               " = ", printedValue, "; ", printedBody, " }"])
@@ -1079,7 +1079,7 @@ def psTsEmitViewTailLoopWithVisibility (isPublic : Bool) (brands tags : List (St
     if psListIsEmpty declaration.typeParameters && psTsViewFresh declaration parameters 0 then
       let views := psTsViewBindings parameters 0;
       let body := psTsInlineEtaApplication declaration.body;
-      match psTsViewTailContextWithFuel views brands tags declaration false 4096 [] body with
+      match psTsViewTailContextWithFuel brands tags declaration false 4096 views [] body with
       | Option.none => Option.none
       | Option.some printedBody =>
           match psTsTailMap psTsEmitPureParameter declaration.parameters with

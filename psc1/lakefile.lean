@@ -471,3 +471,8 @@ lean_exe psc1_erasure_worker_normalization_tests where
 lean_exe psc1_ir_encoder_worker_normalization_tests where
   srcDir := "test"
   root := `IrEncoderWorkerNormalizationTests
+
+
+lean_exe psc1_text_lookup_worker_normalization_tests where
+  srcDir := "test"
+  root := `TextLookupWorkerNormalizationTests

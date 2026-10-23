@@ -1,13 +1,16 @@
 import Ps.BackendTs.Type
 
-def psTsLookup (entries : List (String × String)) : String -> Option String :=
+def psTsLookupApplied (entries : List (String × String)) (name : String) :
+    Option String :=
   match entries with
-  | List.nil => fun (_name : String) => Option.none
+  | List.nil => Option.none
   | List.cons entry rest =>
-      let smaller : String -> Option String := psTsLookup rest;
-      fun (name : String) =>
-        match entry with
-        | Prod.mk key value => if psStringEq key name then Option.some value else smaller name
+      match entry with
+      | Prod.mk key value =>
+          if psStringEq key name then Option.some value else psTsLookupApplied rest name
+
+def psTsLookup (entries : List (String × String)) : String -> Option String :=
+  fun (name : String) => psTsLookupApplied entries name
 
 def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :=
   match fuel with

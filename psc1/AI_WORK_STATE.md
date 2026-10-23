@@ -135,3 +135,8 @@ encoder trial is already audited and failed; no unchanged duplicate. Keep240s
 separate after correctness. Integrate coherent validated source only with fresh full seven-backend/
 application CI. GitHub/Linux Actions exclusively, fresh HEAD/expected-HEAD
 non-force updates, preserve history. No merge/npm publication.
+
+
+## Shared text/lookup follow-up under validation
+
+Progressive phase600 artifact12512812701, read39980608508/job120506596742, measures current exact G2 source after encoder normalization: WeakCollectionSet2575/27178 (9.5%); WeakMap insertion callers include psTextInsert, while TS lookup and JSON/text generation occupy the sample. Fully applied psTextInsertApplied/psTextJoinApplied/psTsLookupApplied now remove recursive function construction before supplied chunk/first-builder/name. Public wrappers, first-hit precedence, exact builder carry/order/separators and all resource policies stay. Retained originals, all-input proofs,100001-entry first-slot tests, existing gates, both source audits and actual saturated native G1 IR shape assertions must pass before another genuine generation request. Current progressive replay remains immutable/unadopted and is not cancelled or modified by this source candidate. Qualified Rust remains untouched.

@@ -6,23 +6,19 @@ structure PsTextBuilder where
 def psTextBuilderEmpty : PsTextBuilder :=
   PsTextBuilder.mk List.nil
 
-def psTextInsert
-    (levels : List (Option String)) :
-    String -> List (Option String) :=
+def psTextInsertApplied (levels : List (Option String)) (chunk : String) :
+    List (Option String) :=
   match levels with
-  | List.nil =>
-      fun (chunk : String) =>
-        List.cons (Option.some chunk) List.nil
+  | List.nil => List.cons (Option.some chunk) List.nil
   | List.cons level rest =>
-      let smaller : String -> List (Option String) :=
-        psTextInsert rest;
-      fun (chunk : String) =>
-        match level with
-        | Option.none =>
-            List.cons (Option.some chunk) rest
-        | Option.some older =>
-            List.cons Option.none
-              (smaller (String.Internal.append older chunk))
+      match level with
+      | Option.none => List.cons (Option.some chunk) rest
+      | Option.some older =>
+          List.cons Option.none
+            (psTextInsertApplied rest (String.Internal.append older chunk))
+
+def psTextInsert (levels : List (Option String)) : String -> List (Option String) :=
+  fun (chunk : String) => psTextInsertApplied levels chunk
 
 def psTextBuilderAppend
     (builder : PsTextBuilder)
@@ -43,21 +39,19 @@ def psTextBuilderFinish
     (builder : PsTextBuilder) : String :=
   psTextFinish builder.levels
 
-def psTextJoinWorker
-    (separator : String)
-    (values : List String) :
-    Bool -> PsTextBuilder -> String :=
+def psTextJoinApplied (separator : String) (values : List String)
+    (first : Bool) (builder : PsTextBuilder) : String :=
   match values with
-  | List.nil =>
-      fun (_first : Bool) (builder : PsTextBuilder) =>
-        psTextBuilderFinish builder
+  | List.nil => psTextBuilderFinish builder
   | List.cons value rest =>
-      let smaller : Bool -> PsTextBuilder -> String :=
-        psTextJoinWorker separator rest;
-      fun (first : Bool) (builder : PsTextBuilder) =>
-        let separated : PsTextBuilder :=
-          if first then builder else psTextBuilderAppend builder separator;
-        smaller false (psTextBuilderAppend separated value)
+      let separated : PsTextBuilder :=
+        if first then builder else psTextBuilderAppend builder separator;
+      psTextJoinApplied separator rest false (psTextBuilderAppend separated value)
+
+def psTextJoinWorker (separator : String) (values : List String) :
+    Bool -> PsTextBuilder -> String :=
+  fun (first : Bool) (builder : PsTextBuilder) =>
+    psTextJoinApplied separator values first builder
 
 def psTextJoin
     (separator : String)

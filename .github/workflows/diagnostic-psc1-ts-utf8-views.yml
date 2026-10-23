@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [perf/psc1-erasure-applied-workers-20261023]
-    paths: ['psc1/packages/compiler-ir/src/Ps/CompilerIr/Encode.lean', 'psc1/test/IrEncoderWorkerNormalizationTests.lean', 'psc1/packages/erasure/**', 'psc1/test/ErasureWorkerNormalizationTests.lean', 'psc1/packages/backend-ts/**', 'psc1/test/TsUtf8ViewTests.lean', 'psc1/scripts/ts-utf8-view-runtime-tests.mjs', '.github/workflows/diagnostic-psc1-ts-utf8-views.yml']
+    paths: ['psc1/packages/foundation/src/Ps/Foundation/Text.lean', 'psc1/test/TextLookupWorkerNormalizationTests.lean', 'psc1/scripts/text-lookup-worker-shape-audit.mjs', 'psc1/packages/compiler-ir/src/Ps/CompilerIr/Encode.lean', 'psc1/test/IrEncoderWorkerNormalizationTests.lean', 'psc1/packages/erasure/**', 'psc1/test/ErasureWorkerNormalizationTests.lean', 'psc1/packages/backend-ts/**', 'psc1/test/TsUtf8ViewTests.lean', 'psc1/scripts/ts-utf8-view-runtime-tests.mjs', '.github/workflows/diagnostic-psc1-ts-utf8-views.yml']
 
 permissions:
   contents: read
@@ -65,9 +65,10 @@ jobs:
       - name: Build the common source facades and separate official checker
         run: |
           set -euo pipefail
-          lake build psc1_ir_encoder_worker_normalization_tests psc1_erasure_worker_normalization_tests psc1_ts_utf8_view_tests psc1_bridge_lookup_normalization_tests psc1_json_escape_predicate_tests psc1_json_quote_tests psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+          lake build psc1_text_lookup_worker_normalization_tests psc1_ir_encoder_worker_normalization_tests psc1_erasure_worker_normalization_tests psc1_ts_utf8_view_tests psc1_bridge_lookup_normalization_tests psc1_json_escape_predicate_tests psc1_json_quote_tests psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
       - name: Preserve exact visitor behavior and DirectJS scalar functionality
         run: |
+          .lake/build/bin/psc1_text_lookup_worker_normalization_tests
           .lake/build/bin/psc1_ir_encoder_worker_normalization_tests
           .lake/build/bin/psc1_erasure_worker_normalization_tests
           .lake/build/bin/psc1_ts_utf8_view_tests
@@ -81,11 +82,15 @@ jobs:
           .lake/build/bin/psc1_cursor_normalization_tests
           .lake/build/bin/psc1_ts_service_normalization_tests
           .lake/build/bin/psc1_js_service_tests
+      - name: Inspect actual fully saturated text and lookup data workers
+        run: node scripts/text-lookup-worker-shape-audit.mjs
       - name: Audit both grammar inputs
         run: node scripts/generated-target-source-audit.mjs ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-ts-utf8-view-tests-${{ github.sha }}
-          path: psc1/dist/ts-utf8-views/
+          path: |
+            psc1/dist/ts-utf8-views/
+            psc1/dist/text-lookup-workers/
           retention-days: 90

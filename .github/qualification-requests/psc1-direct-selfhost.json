@@ -1,7 +1,7 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
-  "branch": "feat/psc1-direct-js-wasm-selfhost-20261024",
-  "parentCommit": "88f5b3aa7c51ad805bcfe463bce91a4d86a4fd69",
+  "branch": "work/psc1-direct-selfhost-blockers-20261024",
+  "parentCommit": "c8ccd7776bd139a3864fa4f1a6ca93ef9601ff7e",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
@@ -10,5 +10,5 @@
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "88f5b3aa source closure passes both grammars; actual Wasm transport and portable encoder proofs/reference tests passed40015318305; execute genuine independent generations."
+  "reason": "c8ccd777 normalizes all30 diagnosed unqualified bit-metadata findings; complete proof/runtime/source gate40017933708 passed; preserve scalar/float refusals and execute actual generations."
 }

@@ -2,17 +2,18 @@
   "schema": "psc1-selfhost-receipt-audit-request/1",
   "attempts": [
     {
-      "id": "ts-utf8-token-correctness-1800s",
+      "id": "ts-cursor-cache-performance-240s",
       "target": "ts",
-      "profile": "correctness-1800s",
-      "sourceCommit": "d520a49e400be14edd26c098054722cd82b7bca8",
-      "requestCommit": "27f2a2164560089d530d6b6b9d8cdbc4754d162a",
-      "runId": 39952593596,
-      "jobId": 120410456529,
-      "artifactId": 12502712284,
-      "artifactDigest": "sha256:a6cfd7aae9431831e65c131e70c0998f7b4912c4ac7681d983a63e5ae4f5cf4f",
-      "artifactExpiresAt": "2027-01-21T12:20:36Z",
-      "inspectUtf8TokenWorker": true
+      "profile": "performance-240s",
+      "sourceCommit": "3dd9152a675468980c1d603aa707287ff1c9b4ac",
+      "requestCommit": "55fcd9d9683f44c5de14412e38d32c641b81ef34",
+      "runId": 39960115125,
+      "jobId": 120435706739,
+      "artifactId": 12504238250,
+      "artifactDigest": "sha256:bea376424749990d60324d833ab0a06b3b4899a7128170292d1b1799f4259f81",
+      "artifactExpiresAt": "2027-01-21T13:18:31Z",
+      "inspectUtf8TokenWorker": true,
+      "inspectCursorCacheHelpers": true
     }
   ]
 }

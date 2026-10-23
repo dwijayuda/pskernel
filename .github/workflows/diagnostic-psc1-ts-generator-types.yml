@@ -1,0 +1,107 @@
+name: PSC1 isolated typed TypeScript generator qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/psc1-ts-generator-result-types-20261023]
+    paths: [.github/qualification-requests/psc1-ts-generator-types.json]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-ts-generator-types-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ts]
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Verify explicit request and immutable source parent
+        if: github.event_name == 'push'
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import {spawnSync} from 'node:child_process';
+          const r=JSON.parse(fs.readFileSync('../.github/qualification-requests/psc1-ts-generator-types.json','utf8'));
+          const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+          assert.equal(r.schema,'psc1-rust-ts-selfhost-request/1');
+          assert.equal(r.action,'qualify-independent-G1-G2-G3');
+          assert.equal(r.branch,'fix/psc1-ts-generator-result-types-20261023');
+          assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
+          assert.deepEqual(r.targets,['ts']);assert.equal(r.resourcePolicy,'unchanged');
+          assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
+          const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});
+          assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);
+          const d=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});
+          assert.equal(d.status,0);
+          assert.deepEqual(d.stdout.split('\0').filter(Boolean),['.github/qualification-requests/psc1-ts-generator-types.json']);
+          console.log('PSC1_RUST_TS_EXPLICIT_REQUEST: '+JSON.stringify({...r,testedCommit:process.env.GITHUB_SHA,event:'push-explicit-request'}));
+          JS
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-rust-ts-service-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+      - name: Install pinned target tools and official Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          rustup default 1.90.0
+          npm ci --prefix .. --ignore-scripts
+      - name: Validate host syntax and unchanged generation boundaries
+        run: |
+          set -euo pipefail
+          node --check scripts/generated-target-qualification.mjs
+          node --check scripts/generated-target-corpus.mjs
+          node --check scripts/generated-target-runner.mjs
+          node --check host-tools/generated-target-tools.mjs
+          node scripts/generated-target-contract-tests.mjs
+          node scripts/bounded-process-contract-tests.mjs
+          node scripts/js-generation-manifest-contract-tests.mjs
+          node packages/pskernel-lean/host/check-pin.mjs
+      - name: Build the common source facades and separate official checker
+        run: |
+          set -euo pipefail
+          lake build psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+      - name: Preserve exact visitor behavior and DirectJS scalar functionality
+        run: |
+          .lake/build/bin/psc1_ts_service_normalization_tests
+          .lake/build/bin/psc1_js_service_tests
+      - name: Audit both grammar inputs before expensive generation
+        run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
+      - name: Execute independent actual target generations and fixed point
+        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host
+      - name: Retain exact sources, graphs, target tool errors and execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-${{ matrix.target }}-selfhost-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          path: |
+            psc1/dist/generated-${{ matrix.target }}-compiler/
+            psc1/dist/generated-service-native/
+          if-no-files-found: warn
+          retention-days: 90

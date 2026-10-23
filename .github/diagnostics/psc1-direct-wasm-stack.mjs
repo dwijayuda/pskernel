@@ -94,9 +94,10 @@ if(request.resolveOnly){
 
 const preload=path.join(out,'trace-limit.mjs');fs.writeFileSync(preload,'Error.stackTraceLimit=16384;\n');
 assert.equal(fs.existsSync('.lake/build/bin/psc1_target_service_seed'),false);
-const limits=compilerRequestLimit('performance-240s','G2-self');
+const traceProfile=request.traceProfile??'performance-240s';assert.ok(['performance-240s','correctness-1800s'].includes(traceProfile));
+const limits=compilerRequestLimit(traceProfile,'G2-self');
 const result=boundedRun(process.execPath,['--import',preload,path.resolve('scripts/generated-target-runner.mjs'),
- artifact,request.serviceSha256,input,path.join(out,'G2-self.candidate.json'),'performance-240s'],
+ artifact,request.serviceSha256,input,path.join(out,'G2-self.candidate.json'),traceProfile],
  {...limits,logDirectory:path.join(out,'process')});
 verifyArtifact(artifact,request.serviceSha256);assert.equal(sha(fs.readFileSync(input)),request.requestSha256);
 const frames=[...result.stderr.matchAll(/wasm-function\[(\d+)\]/g)].map(m=>({index:Number(m[1]),name:resolve(Number(m[1]))}));

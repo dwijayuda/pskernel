@@ -1,3 +1,77 @@
+## 2026-10-24 complete closed-cache narrow PASS; exact final qualification activated
+
+Exact source `a069080c35df3d5a19b06e133f9fa33ffabbb35b` completed
+[run 40000313458](https://github.com/dwijayuda/pskernel/actions/runs/40000313458),
+attempt 1, SUCCESS. All four jobs and all 51 files across their four artifacts
+were independently checked against terminal logs, source/run/attempt bindings,
+ZIP digests, copied repository inputs, and producer provenance.
+
+- Native `120574391043` PASS: 92 proof reports (60 scope + 14 session +
+  11 unchanged scalar-hash + seven new universal cache-analysis equivalences),
+  permitted standard axioms only; frozen scalar controls, 294 ordered
+  independent admissions, 377 metadata comparisons, all six native String
+  samples/singletons, and retained DAG/session/owner controls.
+- Producer `120575437160` PASS: bounded authentic PSC1 -> TypeScript 7.0.2
+  -> JavaScript, exact 20-expression/two-state/1,884-assertion matrix, frozen
+  2,730 cases / 8,190 stages / 13,665 assertions / three long cases and
+  19-case / 38-assertion short controls. Strict generated-body gates executed
+  before complete SelfHost source checking and complete kernel production.
+  The new bounded worker has one export, 11 recursive scheduler sites, no
+  old ExprHash/HasFVar calls, recurry or result wrapper. Independent static
+  inspection also verified the full-kernel worker; this is not a claim that
+  its separate full-body workflow guard executed.
+- Retained controls `120585878049` PASS: full-kernel 1,884 matrix, frozen
+  scalar checks, DAG/minimal String, generated-prefix and session-owner
+  controls. DAG 136.86 s / 559,496 KiB peak RSS; prefix 31.35 s /
+  405,572 KiB. These are observations, not a general speedup qualification.
+- Mixed `120585878070` PASS: the complete `Aé€😀` sample, exactly 1,400
+  executed assertions, 440/440 ordered matching calls, 294 independent
+  admissions, 377 metadata comparisons, singleton and all original negatives.
+  Timed process 1,470.54 s / 1,105,892 KiB peak RSS / exit 0. Whole job
+  1,498 s, only two seconds inside the unchanged 25-minute cap. Preserve
+  this narrow margin; do not claim robust performance qualification.
+
+Complete kernel: 9,986,116 bytes, SHA-256
+`7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528`.
+Fixture: 2,791,525 bytes, SHA-256
+`563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d`.
+The String harness and fixture producer remain unchanged. Lean 4.35.0 commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, TypeScript 7.0.2,
+Node 22, fuel 4096, old-space 2048 MiB and empty PATH are preserved.
+Old-space is not a hard RSS limit.
+
+Durable evidence:
+- `docs/evidence/2026-10-23-t01f-closed-cache-analysis-option-native-gates.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-analysis-generated.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-analysis-controls.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-analysis-mixed.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-analysis-narrow.json`
+
+This containing commit activates ONE new exact final source: restore the work
+branch push on the integration, correctness, research, full-193 Arena, and
+Arena-profile workflows; make the narrow workflow manual-only. Other diagnostics
+remain manual-only. Fresh-read all five workflows and both branch heads before
+this activation. The saved integration draft is synchronized. The shard gate
+now requires exactly 1,400 assertions per selected sample and 8,400 executed
+assertions per route, explicitly including repeated prefixes.
+
+Follow this containing commit's five runs, attempt-bound; do not dispatch
+duplicates or transfer a069's narrow results to the new final source. Require
+BOTH strict six-shard `PSC1_T01F_FULL_STRING_SHARDED_JS: PASS` aggregates,
+complete independent admission/metadata/original negatives, 24 CLI + eight API
+provider controls per route, frozen 32-worker/384-call owner controls, and all
+retained native/official/proof/research/measurement/Arena/profile results.
+Keep C and D outcomes separate. T01F/current A/B/D remain OPEN; C remains FAIL
+while final qualification is pending. No integration or T05 advance is claimed.
+
+After exact scoped qualification, fresh-read integration and preserve concurrent
+history with a non-force expected-SHA update to the exact qualified source,
+not an untested documentation child. Then continue T05 ordinary DAG inductive
+admission. Integration was last verified at
+`123c41197950b6761be965fd21c57142ee2b0d1c`; fetch it again before writing.
+
+---
+
 ## 2026-10-24 correct generated Option representation in the 1,884-assertion matrix
 
 Exact source `cfed23ce187f170b10b0f0e9822b231da5dfe7b8`, run

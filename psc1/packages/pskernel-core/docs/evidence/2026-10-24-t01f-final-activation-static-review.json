@@ -1,0 +1,144 @@
+{
+  "schema": "psc1-t01f-final-activation-static-review-v1",
+  "sourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+  "integrationSha": "123c41197950b6761be965fd21c57142ee2b0d1c",
+  "scope": "Static review only. No local Lean/compiler/JavaScript/kernel execution and no GitHub mutation or workflow launch.",
+  "prerequisite": "Root must independently verify the complete a069 narrow pass before committing these activation changes.",
+  "files": [
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      "changed": true,
+      "before": {
+        "bytes": 96954,
+        "sha256": "bb5174b7c171d0199fb9a16679e57ea1d1dc98b6d199fe619dc41d724c0f7d3b",
+        "gitBlobSha": "5aa621cf8766ea73f3a60b92a2f00ed94c93c780"
+      },
+      "after": {
+        "bytes": 97002,
+        "sha256": "8c98b6704976f43a78bcce4a116a0885b934ece31924cd11e7fbf1f97fce8fae",
+        "gitBlobSha": "07d6dfdb7fbebd7801363a8e05664880ca29d717"
+      }
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "changed": true,
+      "before": {
+        "bytes": 45286,
+        "sha256": "17a3b8c0b21020659d77ca76018fdf2448fba984214740f3de2f815ca43f0d58",
+        "gitBlobSha": "a45831f9ab01dc44cbe8043138b5f0780e3a4272"
+      },
+      "after": {
+        "bytes": 45334,
+        "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3",
+        "gitBlobSha": "3f13a4dc52b63bd4d49606bdd75ff21b8d101d00"
+      }
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2.yml",
+      "changed": true,
+      "before": {
+        "bytes": 21240,
+        "sha256": "b4df3e32ee0e65068bcbad9c65f19619884b45044063898d04c393d61db22da3",
+        "gitBlobSha": "1396f9a0858e3a7e5067001655126c1ca64532a7"
+      },
+      "after": {
+        "bytes": 21288,
+        "sha256": "abe65e87956c7b2858c669891c8d2467f902755c2a8c4dcab2da9988c3709659",
+        "gitBlobSha": "b10b2c210670d68c29ddfd6f8c6dd61345698713"
+      }
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435.yml",
+      "changed": true,
+      "before": {
+        "bytes": 10362,
+        "sha256": "0df1368d000956ef184dd71675bf805fa0bda714bdf40796eff45c088135281d",
+        "gitBlobSha": "44565f46ee542a04d9aa73d6448dcfb573b744c3"
+      },
+      "after": {
+        "bytes": 10410,
+        "sha256": "8567539f6cdbf1b2c73638cd7a794731fbc1bdb3b7863fee2778ac470f5577b5",
+        "gitBlobSha": "17bd8e8deb9ea26a6038569bba2a361e0eaa5abf"
+      }
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+      "changed": true,
+      "before": {
+        "bytes": 6814,
+        "sha256": "02869622c2105db0c2f9cb022c1f7c7c111ec3db5080baa4a5c92f6fe0e19540",
+        "gitBlobSha": "d33940085c832a672754e0b12865f35b2b95d3f9"
+      },
+      "after": {
+        "bytes": 6862,
+        "sha256": "48dcb19fe56889d2a3ce77a4f09ce8cebdbd5069789d10d96170ee2e1a6d7a59",
+        "gitBlobSha": "78805ed316ac76af71974ffa96aeec9498621e78"
+      }
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+      "changed": true,
+      "before": {
+        "bytes": 35343,
+        "sha256": "15bb0ebaa7287f5019a76e78aca19fc259f73b89bee8ce7ecbe811cfe6b1487a",
+        "gitBlobSha": "33540c5c2eb9545fe965f7eff7c49efe07bc13ff"
+      },
+      "after": {
+        "bytes": 34950,
+        "sha256": "0eb627d75bfccfab09fad2a1f5c41ad7de07c6f8f55044b8e338f57b7d74d7ae",
+        "gitBlobSha": "7bc185f2ed1237721b190ff1c690768cba78a585"
+      }
+    },
+    {
+      "path": "psc1/scripts/pskernel-t01f-shards.mjs",
+      "changed": true,
+      "before": {
+        "bytes": 15203,
+        "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287",
+        "gitBlobSha": "0e273926b242596706e483b33d01098f1adea0d1"
+      },
+      "after": {
+        "bytes": 15637,
+        "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10",
+        "gitBlobSha": "91f9d140dd339092fe675a634ed112242442f985"
+      }
+    },
+    {
+      "path": "psc1/packages/pskernel-core/docs/drafts/t01f-final-shards/psc1-pskernel-expr-v2-integration.yml",
+      "changed": false,
+      "before": {
+        "bytes": 97002,
+        "sha256": "8c98b6704976f43a78bcce4a116a0885b934ece31924cd11e7fbf1f97fce8fae",
+        "gitBlobSha": "07d6dfdb7fbebd7801363a8e05664880ca29d717"
+      },
+      "after": {
+        "bytes": 97002,
+        "sha256": "8c98b6704976f43a78bcce4a116a0885b934ece31924cd11e7fbf1f97fce8fae",
+        "gitBlobSha": "07d6dfdb7fbebd7801363a8e05664880ca29d717"
+      }
+    }
+  ],
+  "changedFiles": 7,
+  "retainedChecks": {
+    "allEightSourceGitBlobHashesVerified": true,
+    "fiveFullWorkflowJobsByteIdentical": true,
+    "narrowPermissionsAndJobsByteIdentical": true,
+    "onlyT01fBranchAddedToExistingFullPushBranches": true,
+    "narrowManualOnly": true,
+    "integrationSavedDraftAlreadyMatchesExactActivatedWorkflow": true,
+    "bothRoutesSixUniqueSamples": true,
+    "bothRoutes25MinuteShardsFailFastFalseMaxParallel2": true,
+    "bothRoutesReauthenticateSourceRunAttemptInputAndProviderDigests": true,
+    "bothRoutesRequireAllProducerAndShardJobsSuccess": true,
+    "bothRoutesProvider24CLI8API": true,
+    "bothRoutesActualGenerated1884Matrix": true,
+    "integrationSevenUniversalProofsAndForbiddenAxiomGate": true,
+    "frozenOwnerDriverSourceHash32Workers384CallsRetained": true,
+    "lean435ExactNode22TS702Fuel4096OldSpace2048EmptyPathRetained": true,
+    "originalAllNegativesAndHarnessUntouched": true,
+    "exact1400PerSampleAnd8400ExecutedAggregate": true,
+    "repeatedPrefixExecutionsExplicit": true,
+    "noPerformanceQualificationClaim": true
+  },
+  "runtimeQualification": "Pending on the single new final source. This static review does not transfer a069 results to that source."
+}

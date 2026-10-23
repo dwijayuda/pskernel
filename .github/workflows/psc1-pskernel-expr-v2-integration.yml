@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - integration/psc1-pskernel-expr-v2-lean435-20261021
+      - work/psc1-pskernel-t01f-string-20261022
       - work/psc1-pskernel-t03b-session-20261022
       - research/psc1-pskernel-v2-staged-20261021
       - research/psc1-pskernel-v2-carrier-20261021

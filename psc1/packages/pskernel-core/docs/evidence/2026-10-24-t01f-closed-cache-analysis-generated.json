@@ -1,0 +1,312 @@
+{
+  "schema": "psc1-t01f-cache-analysis-generated-preflight-v1",
+  "sourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+  "runId": 40000313458,
+  "runAttempt": 1,
+  "jobId": 120575437160,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40000313458",
+  "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40000313458/job/120575437160",
+  "producerConclusion": "success",
+  "scope": "Exact-source narrow bounded code-generation gates and complete authentic generated producer only. Mixed runtime and full T01F qualification are separate.",
+  "boundedCompilation": {
+    "success": true,
+    "typescript": "7.0.2",
+    "nativeCompilerBuilt": true
+  },
+  "cacheAnalysisMatrix": {
+    "workflowExecuted": true,
+    "expressions": 20,
+    "states": 2,
+    "mapQueries": 40,
+    "pairQueries": 800,
+    "inferQueries": 80,
+    "assertions": 1884,
+    "smallAndIndexed": true,
+    "openEntriesSeeded": true
+  },
+  "frozenHashMatrix": {
+    "cases": 2730,
+    "strings": 12,
+    "stages": 8190,
+    "assertions": 13665,
+    "longCases": 3,
+    "shortEntryCases": 19,
+    "shortEntryAssertions": 38
+  },
+  "strictGeneratedBodyWorkflowGateExecuted": true,
+  "fullSourceCheckPassed": true,
+  "fullKernelBuildPassed": true,
+  "generatedFixtureProductionPassed": true,
+  "artifactId": 12523411098,
+  "artifactZipBytes": 1174733,
+  "artifactZipSha256": "db88ebb0f2d483ff9ed507c2c6a5a9b7e921b355bca35bb0089b69efddacfbc2",
+  "sourceFileBlobs": {
+    "workflow.yml": "33540c5c2eb9545fe965f7eff7c49efe07bc13ff",
+    "CacheAnalysis.lean": "4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b",
+    "closed-cache-analysis-smoke.mjs": "494647393a3e4b3bdb7ac11115dac470cef6061a",
+    "string-environment-smoke.mjs": "68acf28a8b355105e021eb547a4d0b835c40a876",
+    "StringEnvironmentRegression.lean": "154bec1f4350cd948b1451fe6689b9809f05cd11"
+  },
+  "wholeMixedQualification": false,
+  "fullT01FQualification": false,
+  "localInspection": "Static ZIP/hash/metadata/source/generated-body inspection only; no local compiler, Lean, JavaScript, or kernel execution.",
+  "producerProvenance": {
+    "schema": "psc1-t01f-source-provenance-v1",
+    "sourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+    "runId": "40000313458",
+    "runAttempt": "1",
+    "job": "generated-string",
+    "route": "generated",
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "v22.23.3",
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "kernel": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "generatedRunner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    }
+  },
+  "artifactFileDigests": {
+    "_temp/psc1-t01f-generated/fixture.json": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "_temp/psc1-t01f-generated/lean-githash.txt": {
+      "bytes": 41,
+      "sha256": "3210a17608d78e1841a0a504c21167150e6a388cf44a077f06e3fcd3a823fe31"
+    },
+    "_temp/psc1-t01f-generated/fixture.sha256": {
+      "bytes": 123,
+      "sha256": "d976a1e153065a032dcba986bbefb2b3c262a816811960f6d1541f5ecb44e28a"
+    },
+    "_temp/psc1-t01f-generated/lean-version.txt": {
+      "bytes": 106,
+      "sha256": "eb22144228dd41cd51a0c84af4f976cd0cef473102dcf99b60be756b11f2b95a"
+    },
+    "_temp/psc1-t01f-generated/native.log": {
+      "bytes": 25860,
+      "sha256": "8218c1988126cc4930d4f71cb619c5badafe5dab18e6a0e946c9d1813d2dbe82"
+    },
+    "_temp/psc1-t01f-generated/provenance.json": {
+      "bytes": 1199,
+      "sha256": "9b3af668435294c93e5019ddee8d2d0c47fa0176b2c573f025a13fc32bf93ff2"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.ts": {
+      "bytes": 9167333,
+      "sha256": "87315bf86765b780566b2b9cb3a943bf22744a5e4cb867a490653b4749f0f9b3"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.d.ts": {
+      "bytes": 369264,
+      "sha256": "c669e86e85078536129cfc2785846d9b67470fdd2c894d3eee99b3751266df58"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js.map": {
+      "bytes": 8134536,
+      "sha256": "4d409cdf0f0de3426fa22895c5961f59109a08be0724917c7f4dd3cb04a3562e"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.d.ts": {
+      "bytes": 24593,
+      "sha256": "90fac28f079e89c571a7d9a770a8d6400e5c88b0b62504a9a206c662797f3ef5"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js": {
+      "bytes": 360259,
+      "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js.map": {
+      "bytes": 377223,
+      "sha256": "d433c339b01d90c773520567e53fcd3f7f80943c081f6bd3d3730c687a8696e2"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.ts": {
+      "bytes": 352956,
+      "sha256": "83a7c48a77c29478924d2c4ed43afa3c5aaac6eb960ddca7bcc9e7cb1749f0dc"
+    },
+    "_temp/psc1-scalar-hash-probe.log": {
+      "bytes": 284,
+      "sha256": "94f64394529107ff19b73f0b605673426d523a7f2514b3a525d17c2b84d76553"
+    },
+    "_temp/psc1-closed-cache-analysis-probe.log": {
+      "bytes": 184,
+      "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+    },
+    "_temp/psc1-closed-cache-analysis-codegen.log": {
+      "bytes": 20081,
+      "sha256": "3490e3672b4ba5a67d9176fef54a4ef329c8785b9d0dee604681361d2bb20172"
+    }
+  },
+  "workerBodyInspections": {
+    "bounded": {
+      "inspection": "independent static full-body inspection",
+      "workflowBodyGateExecuted": true,
+      "exportCount": 1,
+      "recursiveSchedulerSites": 11,
+      "oldExprHashCalls": 0,
+      "oldHasFVarCalls": 0,
+      "recurry": false,
+      "resultWrap": false,
+      "body": {
+        "bytes": 6635,
+        "sha256": "39bd34bb1bb5da17cc1d95986a6978862510d8546338d2f4fb1c70abd0ea509a",
+        "text": "function* __ps$impl$psKernelExprClosedCacheAnalysis(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$10]) {\n    case \"bvar\": {\n        const index = __ps$match$0.index;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 21n, index)), snd: false });\n    }\n    case \"fvar\": {\n        const name$1 = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: 0n, snd: true });\n    }\n    case \"mvar\": {\n        const name = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 23n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), snd: false });\n    }\n    case \"sort\": {\n        const level = __ps$match$0.level;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 24n, (yield* __ps$invoke(psKernelCacheLevelHash, level)))), snd: false });\n    }\n    case \"const\": {\n        const name = __ps$match$0.name;\n        const levels = __ps$match$0.levels;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 25n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), (yield* __ps$invoke(psKernelCacheLevelListHash, levels)))), snd: false });\n    }\n    case \"app\": {\n        const fn = __ps$match$0.fn;\n        const arg = __ps$match$0.arg;\n        return (yield* (function* () { {\n            const fnAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, fn));\n            return (fnAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const argAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, arg));\n                return (argAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 26n, fnAnalysis.fst)), argAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"lam\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 27n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"forallE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 28n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"letE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const value = __ps$match$0.value;\n        const body = __ps$match$0.body;\n        const nondep = __ps$match$0.nondep;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const valueAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, value));\n                return (valueAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                    const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                    return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                        const flag = (nondep ? 1n : 0n);\n                        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 29n, typeAnalysis.fst)), valueAnalysis.fst)), bodyAnalysis.fst)), flag)), snd: false });\n                    } })()));\n                } })()));\n            } })()));\n        } })());\n    }\n    case \"lit\": {\n        const literal = __ps$match$0.value;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 30n, (yield* __ps$invoke(psKernelCacheLiteralHash, literal)))), snd: false });\n    }\n    case \"mdata\": {\n        const metadata = __ps$match$0.metadata;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 31n, metadata)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n    case \"proj\": {\n        const typeName = __ps$match$0.typeName;\n        const index = __ps$match$0.index;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 32n, (yield* __ps$invoke(psKernelCacheNameHash, typeName)))), index)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n} throw new Error(\"invalid ProofScript constructor tag\"); })()); }\n__ps$implementations.set(psKernelExprClosedCacheAnalysis, __ps$impl$psKernelExprClosedCacheAnalysis);"
+      },
+      "kernel": {
+        "bytes": 360259,
+        "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+      }
+    },
+    "full": {
+      "inspection": "independent static full-body inspection",
+      "workflowBodyGateExecuted": false,
+      "exportCount": 1,
+      "recursiveSchedulerSites": 11,
+      "oldExprHashCalls": 0,
+      "oldHasFVarCalls": 0,
+      "recurry": false,
+      "resultWrap": false,
+      "body": {
+        "bytes": 6635,
+        "sha256": "acf1ee331fe66a9eedc96f310a92a219068a04f450f9cfdaabc0d06bb7a48f98",
+        "text": "function* __ps$impl$psKernelExprClosedCacheAnalysis(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\n    case \"bvar\": {\n        const index = __ps$match$0.index;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 21n, index)), snd: false });\n    }\n    case \"fvar\": {\n        const name$1 = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: 0n, snd: true });\n    }\n    case \"mvar\": {\n        const name = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 23n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), snd: false });\n    }\n    case \"sort\": {\n        const level = __ps$match$0.level;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 24n, (yield* __ps$invoke(psKernelCacheLevelHash, level)))), snd: false });\n    }\n    case \"const\": {\n        const name = __ps$match$0.name;\n        const levels = __ps$match$0.levels;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 25n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), (yield* __ps$invoke(psKernelCacheLevelListHash, levels)))), snd: false });\n    }\n    case \"app\": {\n        const fn = __ps$match$0.fn;\n        const arg = __ps$match$0.arg;\n        return (yield* (function* () { {\n            const fnAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, fn));\n            return (fnAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const argAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, arg));\n                return (argAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 26n, fnAnalysis.fst)), argAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"lam\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 27n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"forallE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 28n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"letE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const value = __ps$match$0.value;\n        const body = __ps$match$0.body;\n        const nondep = __ps$match$0.nondep;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const valueAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, value));\n                return (valueAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                    const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                    return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                        const flag = (nondep ? 1n : 0n);\n                        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 29n, typeAnalysis.fst)), valueAnalysis.fst)), bodyAnalysis.fst)), flag)), snd: false });\n                    } })()));\n                } })()));\n            } })()));\n        } })());\n    }\n    case \"lit\": {\n        const literal = __ps$match$0.value;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 30n, (yield* __ps$invoke(psKernelCacheLiteralHash, literal)))), snd: false });\n    }\n    case \"mdata\": {\n        const metadata = __ps$match$0.metadata;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 31n, metadata)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n    case \"proj\": {\n        const typeName = __ps$match$0.typeName;\n        const index = __ps$match$0.index;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 32n, (yield* __ps$invoke(psKernelCacheNameHash, typeName)))), index)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n} throw new Error(\"invalid ProofScript constructor tag\"); })()); }\n__ps$implementations.set(psKernelExprClosedCacheAnalysis, __ps$impl$psKernelExprClosedCacheAnalysis);"
+      },
+      "kernel": {
+        "bytes": 9986116,
+        "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+      }
+    }
+  },
+  "retainedScalarLoggedBodies": {
+    "psKernelCacheStringHashPairsWithFuel": {
+      "bytes": 1312,
+      "sha256": "185994d7bc4b6d75b02acab0d2f63a10a03eb9b5e665876ed7a3e29bf918ebc2",
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheStringHashStateWithFuel": {
+      "bytes": 878,
+      "sha256": "a701430a16d257e4ce0f50e8f785d3bf490d969dcce886928b7b913b35cd74be",
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheStringHash": {
+      "bytes": 1194,
+      "sha256": "d7aae0ab9aca304954890265ad96bf602d3d4f27eb9bbf96f4f42e12cdbe6a29",
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheStringHashShortPairs": {
+      "bytes": 6045,
+      "sha256": "78b97b9e5b286b570b7f79e58e40c4976ef4656781eb40a08f5cb8da295770f3",
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheLevelListHash": {
+      "bytes": 2762,
+      "sha256": "ccbb215ce9e8f114d4d50f1ef2870da4415e0fd784da099eaf3b780a1cd69a18",
+      "loggedBodyEqualsArtifact": true
+    }
+  },
+  "exactCodegenMarkers": [
+    "PSC1_CLOSED_CACHE_ANALYSIS_CODEGEN: PASS dataResult=true recursiveSites=11 oldHashCalls=0 oldHasFVarCalls=0 recurry=false",
+    "PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false",
+    "PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=2",
+    "PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairFallbackSites=1 shortLeafSites=1 exclusiveBranches=true primitiveRemainder=1 structuralGeneratorBlocks=1",
+    "PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true",
+    "PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false"
+  ],
+  "newMatrixHarnessDigest": {
+    "bytes": 7826,
+    "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+  },
+  "evidenceFileDigests": {
+    "CacheAnalysis.lean": {
+      "bytes": 9629,
+      "sha256": "fe26126cae9c7757d29b3b2193d9530a2de0dc7d5e76a591abb6f2a4b35421bf"
+    },
+    "StringEnvironmentRegression.lean": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "artifacts.json": {
+      "bytes": 1607,
+      "sha256": "66b7c530697c8651614b78011cd3b237bdf594bfba8fab55dd30caad57dbdaea"
+    },
+    "bounded-closed-cache-worker.txt": {
+      "bytes": 6635,
+      "sha256": "39bd34bb1bb5da17cc1d95986a6978862510d8546338d2f4fb1c70abd0ea509a"
+    },
+    "closed-cache-analysis-smoke.mjs": {
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+    },
+    "full-closed-cache-worker.txt": {
+      "bytes": 6635,
+      "sha256": "acf1ee331fe66a9eedc96f310a92a219068a04f450f9cfdaabc0d06bb7a48f98"
+    },
+    "generated-job-120575437160.log": {
+      "bytes": 254559,
+      "sha256": "fa98068f55bac3b3421cad918c293e4ab8be384c99631b2757fb6bb4ecac0a7e"
+    },
+    "jobs.json": {
+      "bytes": 16974,
+      "sha256": "1a6f82500b36a209811888c31656e616ea4f336d599ad4cf3ab8a3c39595205a"
+    },
+    "run.json": {
+      "bytes": 13993,
+      "sha256": "ff29cfcab6e15eb959d3f7f726428a942cc401b26df277488b460ab0c897d8b7"
+    },
+    "string-environment-smoke.mjs": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    },
+    "workflow.yml": {
+      "bytes": 35343,
+      "sha256": "15bb0ebaa7287f5019a76e78aca19fc259f73b89bee8ce7ecbe811cfe6b1487a"
+    }
+  },
+  "verification": {
+    "sourceRunAttemptJob": true,
+    "sourceGitBlobHashes": true,
+    "artifactApiSourceBinding": true,
+    "zipApiAndUploadLogDigest": true,
+    "all17ZipFilesIndependentlyRehashed": true,
+    "producerProvenanceHashes": true,
+    "all294Requests377MetadataSixNativeSamples": true,
+    "exact1884ExecutedMarker": true,
+    "frozenExactMarkers": true,
+    "boundedWorkflowStrictMarkersAndPrintedBodies": true,
+    "fullKernelIndependentStrictWorkerBody": true
+  },
+  "workerBodyContextComparison": {
+    "exactBodyEqual": false,
+    "privateTagIndexNormalizedBodyEqual": true,
+    "boundedPrivateTags": [
+      "__ps$tag$10"
+    ],
+    "fullPrivateTags": [
+      "__ps$tag$13"
+    ],
+    "scope": "Static text comparison only; original body hashes and whole bodies retained separately."
+  }
+}

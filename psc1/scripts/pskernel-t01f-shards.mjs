@@ -129,7 +129,8 @@ function validateShardLog(path,index,identity){
     kernelSha256:identity.hashes.kernel.sha256,fixtureSha256:identity.hashes.fixture.sha256,
     harnessSha256:identity.hashes.generatedRunner.sha256};
   for(const[key,value]of Object.entries(expected))must(result[key]===value,'shard result '+key);
-  must(Number.isSafeInteger(result.assertions)&&result.assertions>0,'positive assertion count');
+  must(Number.isSafeInteger(result.assertions)&&result.assertions===1400,
+    'exactly 1400 executed assertions for the selected sample, including repeated prefixes');
   must(Array.isArray(result.measurements)&&result.measurements.length===1,'one complete sample measurement');
   must(result.diagnosticTracing===false,'uninstrumented final shard');
   for(const field of['constructionMs','admissionMs','metadataMs','totalMs'])
@@ -198,11 +199,15 @@ function aggregate(route,artifactDirectory,shardsDirectory,outputDirectory){
       /^peak_rss_kib=[0-9]+ wall_seconds=[0-9]+(?:\.[0-9]+)? exit_status=0$/u.test(value.measurement),'successful shard memory record');
     must(same(value.runtime,validateShardLog(logPath,index,auth.identity)),'rechecked complete shard markers');
   }
+  // Shared prefixes intentionally execute in every sample and contribute to this total.
+  const executedAssertions=receipts.reduce((total,{value})=>total+value.runtime.assertions,0);
+  must(executedAssertions===8400,'exactly 8400 executed assertions across the six selected samples');
   const out=resolve(outputDirectory);must(!existsSync(out),'fresh aggregate output');mkdirSync(out,{recursive:true});
   const result={schema:'psc1-t01f-sharded-qualification-v1',status:'pass',identity:auth.identity,
     job:process.env.GITHUB_JOB,node:process.version,shards:6,samples,requestsPerShard:294,
     metadataPerShard:377,independentAdmissionPerShard:true,completeNegativesPerSample:true,
-    singletonSequences:6,performanceQualified:false,
+    singletonSequences:6,assertionsPerSample:1400,executedAssertions,includesRepeatedPrefix:true,
+    performanceQualified:false,
     receipts:receipts.map(({path,value})=>({sampleIndex:value.sampleIndex,sample:value.sample,
       receipt:digest(path),measurement:value.measurement,runtime:value.runtime}))};
   writeFileSync(join(out,'qualification.json'),JSON.stringify(result,null,2)+'\n');

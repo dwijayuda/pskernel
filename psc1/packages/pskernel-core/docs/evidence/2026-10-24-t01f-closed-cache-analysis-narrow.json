@@ -1,0 +1,85 @@
+{
+  "schema": "psc1-t01f-closed-cache-analysis-complete-narrow-v1",
+  "status": "PASS",
+  "sourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+  "runId": 40000313458,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40000313458",
+  "jobs": [
+    {
+      "id": 120574391043,
+      "scope": "native",
+      "conclusion": "success",
+      "artifactId": 12522675090,
+      "artifactFiles": 8
+    },
+    {
+      "id": 120575437160,
+      "scope": "bounded-and-full-generated-producer",
+      "conclusion": "success",
+      "artifactId": 12523411098,
+      "artifactFiles": 17
+    },
+    {
+      "id": 120585878049,
+      "scope": "retained-controls",
+      "conclusion": "success",
+      "artifactId": 12523117969,
+      "artifactFiles": 15
+    },
+    {
+      "id": 120585878070,
+      "scope": "complete-selected-mixed-sample",
+      "conclusion": "success",
+      "artifactId": 12523839739,
+      "artifactFiles": 11
+    }
+  ],
+  "all51ArtifactFilesIndependentlyVerified": true,
+  "proofReports": 92,
+  "newUniversalEquivalenceReports": 7,
+  "frozenScalarHashProofReports": 11,
+  "closedCacheMatrixAssertions": 1884,
+  "selectedMixedAssertions": 1400,
+  "selectedMixedTraceBegins": 440,
+  "selectedMixedTraceEnds": 440,
+  "selectedMixedIndependentAdmissions": 294,
+  "selectedMixedMetadataComparisons": 377,
+  "selectedMixedSample": "Aé€😀",
+  "selectedMixedWallSeconds": 1470.54,
+  "selectedMixedPeakRssKiB": 1105892,
+  "selectedMixedWholeJobSeconds": 1498,
+  "unchangedMixedJobCapMinutes": 25,
+  "kernel": {
+    "bytes": 9986116,
+    "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+  },
+  "fixture": {
+    "bytes": 2791525,
+    "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+  },
+  "evidence": [
+    {
+      "path": "docs/evidence/2026-10-23-t01f-closed-cache-analysis-option-native-gates.json",
+      "bytes": 45902,
+      "sha256": "ff4e14e118eb34135669efa222f6044089eddb58eb71587cc2eb891e481f38df"
+    },
+    {
+      "path": "docs/evidence/2026-10-24-t01f-closed-cache-analysis-generated.json",
+      "bytes": 25414,
+      "sha256": "7474654ceec74e01c91ec34428d652f625d795f9e54d01df71b8b37d8bf00167"
+    },
+    {
+      "path": "docs/evidence/2026-10-24-t01f-closed-cache-analysis-controls.json",
+      "bytes": 11123,
+      "sha256": "b7e6c0a60b860e2044bca0cca5fe03633eeb61d76986ec627e3169c68e793836"
+    },
+    {
+      "path": "docs/evidence/2026-10-24-t01f-closed-cache-analysis-mixed.json",
+      "bytes": 58218,
+      "sha256": "9a047e25b67bcec9aad530691db00ec56411cac59683b858ca5edc9004186bd5"
+    }
+  ],
+  "qualificationBoundary": "This complete narrow pass authorizes activating one new exact final source. It does not establish either six-shard final route, full T01F/current A acceptance, integration, complete V2, Lean compatibility, performance qualification, backend preservation or kernel soundness. T01F/current A/B/D remain OPEN and C remains FAIL pending separate exact-source results. The whole mixed job had only two seconds of cap margin.",
+  "localWork": "Static source/log/ZIP/hash inspection only; all runtime/proof/build execution occurred on GitHub Actions Linux."
+}

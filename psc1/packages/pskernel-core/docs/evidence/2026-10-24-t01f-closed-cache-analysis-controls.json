@@ -1,0 +1,292 @@
+{
+  "schema": "psc1-t01f-cache-analysis-retained-controls-v1",
+  "sourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+  "runId": 40000313458,
+  "runAttempt": 1,
+  "jobId": 120585878049,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40000313458",
+  "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40000313458/job/120585878049",
+  "conclusion": "success",
+  "artifactId": 12523117969,
+  "artifactName": "psc1-t01f-hash-runtime-controls",
+  "artifactZipBytes": 669564,
+  "artifactZipSha256": "04a3d70e9f8f151ab21729ade1c5174fd7a124fe0a692b8b25d843d88426d05c",
+  "artifactFiles": 15,
+  "artifactFileDigests": {
+    "closed-cache-analysis.log": {
+      "bytes": 184,
+      "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+    },
+    "controls-receipt.txt": {
+      "bytes": 47,
+      "sha256": "6db516af0f7f629d9176addc578896212b40860388b49541b14a02084a63858e"
+    },
+    "dag.log": {
+      "bytes": 2287877,
+      "sha256": "6ea03ae78a2f61acac2b71abd41b2dc90e6ed19f60b56e59e590f5361ef1397b"
+    },
+    "dag.memory": {
+      "bytes": 54,
+      "sha256": "e4fa33165e1da53817f6ede8ad8cc1251232e732898e25d32160273753130900"
+    },
+    "detached/closed-cache-analysis-smoke.mjs": {
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+    },
+    "detached/dag-smoke.mjs": {
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+    },
+    "detached/fixture.json": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "detached/kernel.mjs": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "detached/prefix-smoke.mjs": {
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+    },
+    "detached/scalar-hash-smoke.mjs": {
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+    },
+    "detached/string-smoke.mjs": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    },
+    "prefix.log": {
+      "bytes": 225,
+      "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+    },
+    "prefix.memory": {
+      "bytes": 53,
+      "sha256": "d2ec241e5177977d117a13a66984f547c0baee93c8c72e410d0586293fcc1990"
+    },
+    "reuse-provenance.json": {
+      "bytes": 916,
+      "sha256": "538b39fa093ebead1140e7e08265273a027a2fb59aa2307f4f2136a37f625b84"
+    },
+    "scalar-hash.log": {
+      "bytes": 176,
+      "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+    }
+  },
+  "reuseProvenance": {
+    "schema": "psc1-t01f-same-run-hash-preflight-v1",
+    "harnessSourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+    "generatedSourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+    "runId": "40000313458",
+    "runAttempt": "1",
+    "kernel": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "currentScripts": {
+      "string": {
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      "closedCacheAnalysis": {
+        "bytes": 7826,
+        "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+      }
+    },
+    "artifact": {
+      "name": "psc1-t01f-hash-generated-producer",
+      "runId": "40000313458"
+    },
+    "node": "v22.23.3",
+    "mode": "controls"
+  },
+  "sourceFileDigests": {
+    "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+      "gitBlobSha": "68acf28a8b355105e021eb547a4d0b835c40a876"
+    },
+    "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs": {
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0",
+      "gitBlobSha": "065ed4d1de1bdded148a2774de9f13bb8b1a406a"
+    },
+    "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs": {
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db",
+      "gitBlobSha": "529a05c4345983eb96420d17e10415538d645f54"
+    },
+    "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs": {
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c",
+      "gitBlobSha": "59fa82e0575b4119aebcf15fe39ed691346f1d06"
+    },
+    "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs": {
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736",
+      "gitBlobSha": "494647393a3e4b3bdb7ac11115dac470cef6061a"
+    },
+    "psc1/test/PsKernelExprV2StringEnvironmentRegression.lean": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663",
+      "gitBlobSha": "154bec1f4350cd948b1451fe6689b9809f05cd11"
+    },
+    ".github/workflows/psc1-pskernel-t01f-hash.yml": {
+      "bytes": 35343,
+      "sha256": "15bb0ebaa7287f5019a76e78aca19fc259f73b89bee8ce7ecbe811cfe6b1487a",
+      "gitBlobSha": "33540c5c2eb9545fe965f7eff7c49efe07bc13ff"
+    }
+  },
+  "cacheAnalysisMatrix": {
+    "expressions": 20,
+    "states": 2,
+    "mapQueries": 40,
+    "pairQueries": 800,
+    "inferQueries": 80,
+    "assertions": 1884,
+    "smallAndIndexed": true,
+    "openEntriesSeeded": true
+  },
+  "frozenScalarMatrix": {
+    "cases": 2730,
+    "strings": 12,
+    "stages": 8190,
+    "assertions": 13665,
+    "modulus": "65521",
+    "algorithmChanged": false
+  },
+  "frozenLongCases": 3,
+  "dagRequiredMarkers": [
+    "PSC1_V2_DAG_JS: PASS",
+    "PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6",
+    "PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64",
+    "PSC1_V2_TRANSFORM_JS: PASS",
+    "PSC1_V2_DAG_JS_ZETA: PASS",
+    "PSC1_V2_DAG_JS_BETA: PASS",
+    "PSC1_V2_DAG_JS_WHNF_STATE: PASS",
+    "PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS",
+    "PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_JS_NAT_PROJECTION: PASS",
+    "PSC1_V2_DAG_JS_NESTED_OUTCOMES: PASS",
+    "PSC1_V2_DAG_JS_BINDER: PASS",
+    "PSC1_V2_DAG_JS_CHECK_APP: PASS",
+    "PSC1_V2_DAG_JS_DELTA: PASS",
+    "PSC1_V2_DAG_JS_CONSTANT_INDEX: PASS",
+    "PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS",
+    "PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_JS_CHECK_LET: PASS",
+    "PSC1_V2_DAG_JS_LET_CACHE_SCOPE: PASS",
+    "PSC1_V2_DAG_JS_LET_LOCAL_WHNF: PASS",
+    "PSC1_V2_DAG_JS_STATEFUL_DEFEQ: PASS",
+    "PSC1_V2_DAG_JS_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_JS_APP_CONVERSION_CACHE: PASS",
+    "PSC1_V2_DAG_JS_APP_EAGER_CONTEXT: PASS",
+    "PSC1_V2_DAG_JS_SIMPLE_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS",
+    "PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS",
+    "PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS",
+    "PSC1_V2_DAG_JS_THEOREM_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS",
+    "PSC1_V2_DAG_JS_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_JS_UNSAFE_FRESH_BODY: PASS",
+    "PSC1_V2_DAG_JS_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS",
+    "PSC1_V2_DAG_JS_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_JS_CHEAP_CORE_POLICY: PASS",
+    "PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS",
+    "PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS",
+    "PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS"
+  ],
+  "dagPassLines": 40223,
+  "dagRuntimeSummary": {
+    "node": "v22.23.3",
+    "source_bytes": 9986116,
+    "peak_rss_kib": 559496,
+    "post_gc_heap_bytes": 92759408,
+    "semantics": "complete KernelContract-v1 via one checked DAG input boundary",
+    "checker_representation": "DAG checked binders, lets, admitted constants, applications and projections; typed local-value WHNF; scope-owned DefEq with binder spines, Bool reflection, cheap core and repeated quick comparison; direct axiom/definition/opaque/theorem, unsafe and mutual-definition admission; proof irrelevance, lazy delta, external types, iota and inductive admission fallback remain; incomplete"
+  },
+  "prefixOwnerMarkers": [
+    "PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3",
+    "PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=605",
+    "PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2"
+  ],
+  "prefixControls": {
+    "positive": 6,
+    "negative": 7,
+    "assertions": 605
+  },
+  "controlsReceipt": "PSC1_T01F_HASH_CONTROLS: PASS exactSource=true",
+  "measurements": {
+    "dag": {
+      "peakRssKiB": 559496,
+      "wallSeconds": 136.86,
+      "exitStatus": 0
+    },
+    "prefix": {
+      "peakRssKiB": 405572,
+      "wallSeconds": 31.35,
+      "exitStatus": 0
+    }
+  },
+  "runtimeConstraints": {
+    "execution": "GitHub Actions Linux",
+    "node": "v22.23.3",
+    "emptyPATH": true,
+    "nodeOldSpaceLimitMiB": 2048,
+    "jobTimeoutMinutes": 10,
+    "oldSpaceIsHardRssLimit": false
+  },
+  "producerBinding": {
+    "artifactId": 12523411098,
+    "artifactZipSha256": "db88ebb0f2d483ff9ed507c2c6a5a9b7e921b355bca35bb0089b69efddacfbc2",
+    "sourceSha": "a069080c35df3d5a19b06e133f9fa33ffabbb35b",
+    "runId": 40000313458,
+    "runAttempt": 1,
+    "fixtureRequests": 294,
+    "fixtureMetadata": 377,
+    "fixtureSamples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "fixtureKernelFuel": 4096
+  },
+  "jobStartedAt": "2026-10-23T18:29:01Z",
+  "jobCompletedAt": "2026-10-23T18:32:25Z",
+  "jobLogDigest": {
+    "bytes": 42514,
+    "sha256": "48d41634c94fb3aefc14675d9c0bb1b03d5c180d494f8d0f762b63475a0bbc58"
+  },
+  "verification": {
+    "apiSourceRunAttempt": true,
+    "terminalJobSuccess": true,
+    "zipMatchesApiAndUploadLog": true,
+    "all15FilesIndependentlyHashedAndRead": true,
+    "allFiveDetachedScriptsMatchExactGitBlobs": true,
+    "kernelFixtureMatchSameRunProducer": true,
+    "allRequiredOutputMarkersMatchTerminalJobLog": true,
+    "exact1884ExecutedMatrix": true,
+    "frozenScalarAndLongControls": true,
+    "all43RequiredDagMarkers": true,
+    "prefixNegativesAndSessionOwners": true,
+    "bothTimedCommandsExit0": true,
+    "emptyPathOldSpace2048AllControls": true
+  },
+  "scope": "Retained controls at this exact narrow source and attempt only. This is not the mixed-sample receipt, either six-shard final route, complete T01F qualification, a soundness proof, or a general speedup result.",
+  "inspection": "Local Python used only for static JSON, ZIP, text, source, and cryptographic digest inspection. No local Lean, compiler, JavaScript, or kernel execution."
+}

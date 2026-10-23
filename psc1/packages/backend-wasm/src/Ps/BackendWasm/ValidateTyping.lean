@@ -283,7 +283,7 @@ def psWasmTypingLocalSet
 def psWasmTypingCall
     (module : PsWasmModule) (function : PsWasmFunction) (name : String)
     (tail : Bool) (state : PsWasmTypingState) : Option PsWasmTypingState :=
-  match psWasmIrFindFunction module.functions name with
+  match psWasmIrFindFunction (psWasmAllFunctions module) name with
   | Option.none => Option.none
   | Option.some callee =>
       if tail then
@@ -343,7 +343,7 @@ def psWasmTypingReference
   match instruction with
   | PsWasmInstruction.refFunc name =>
       if psWasmIrStringIn name module.functionRefs then
-        match psWasmIrFindFunction module.functions name with
+        match psWasmIrFindFunction (psWasmAllFunctions module) name with
         | Option.none => Option.none
         | Option.some function =>
             match function.typeName with
@@ -499,6 +499,22 @@ def psWasmTypingInstruction
     (instruction : PsWasmInstruction) (state : PsWasmTypingState) :
     Option PsWasmTypingState :=
   match instruction with
+  | PsWasmInstruction.i32Load _ =>
+      psWasmTypingApply module [PsWasmValueType.i32] [PsWasmValueType.i32] state
+  | PsWasmInstruction.i32Load8U =>
+      psWasmTypingApply module [PsWasmValueType.i32] [PsWasmValueType.i32] state
+  | PsWasmInstruction.i32Store _ =>
+      psWasmTypingApply module [PsWasmValueType.i32, PsWasmValueType.i32] [] state
+  | PsWasmInstruction.i32Store8 =>
+      psWasmTypingApply module [PsWasmValueType.i32, PsWasmValueType.i32] [] state
+  | PsWasmInstruction.abiHeapGet =>
+      psWasmTypingApply module [] [PsWasmValueType.i32] state
+  | PsWasmInstruction.abiBusyGet =>
+      psWasmTypingApply module [] [PsWasmValueType.i32] state
+  | PsWasmInstruction.abiHeapSet =>
+      psWasmTypingApply module [PsWasmValueType.i32] [] state
+  | PsWasmInstruction.abiBusySet =>
+      psWasmTypingApply module [PsWasmValueType.i32] [] state
   | PsWasmInstruction.localGet index => psWasmTypingLocalGet function locals index state
   | PsWasmInstruction.localSet index => psWasmTypingLocalSet module locals index state
   | PsWasmInstruction.drop =>

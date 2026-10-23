@@ -57,8 +57,8 @@ def psNameEq (left : PsName) : PsName -> Bool :=
         | PsName.anonymous => true
         | _ => false
   | PsName.str leftPrefix leftValue =>
-      let smaller : PsName -> Bool := psNameEq leftPrefix;
       fun (right : PsName) =>
+        let smaller : PsName -> Bool := psNameEq leftPrefix;
         match right with
         | PsName.str rightPrefix rightValue =>
             if smaller rightPrefix then
@@ -67,8 +67,8 @@ def psNameEq (left : PsName) : PsName -> Bool :=
               false
         | _ => false
   | PsName.num leftPrefix leftValue =>
-      let smaller : PsName -> Bool := psNameEq leftPrefix;
       fun (right : PsName) =>
+        let smaller : PsName -> Bool := psNameEq leftPrefix;
         match right with
         | PsName.num rightPrefix rightValue =>
             if smaller rightPrefix then
@@ -76,7 +76,6 @@ def psNameEq (left : PsName) : PsName -> Bool :=
             else
               false
         | _ => false
-
 def psNameAppendStr (parent : PsName) (value : String) : PsName :=
   PsName.str parent value
 

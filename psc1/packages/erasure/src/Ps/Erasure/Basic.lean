@@ -283,11 +283,29 @@ def psErasureIsProp
 
 -- Type/proposition-valued constants are checked declarations without a
 -- runtime value. Keep them in the environment for definitional equality.
+-- A checked type-valued declaration stays in the Core environment but has no
+-- executable value, including aliases with type/runtime parameters. Open the
+-- full telescope before classifying its result; runtime polymorphic values still
+-- end in a data type and retain their executable declarations.
+def psErasureTypeValuedWithFuel
+    (environment : PsEnvironment) (fuel : Nat) :
+    PsLocalContext -> PsExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_locals : PsLocalContext) (_type : PsExpr) => false
+  | Nat.succ remaining =>
+      let smaller := psErasureTypeValuedWithFuel environment remaining;
+      fun (locals : PsLocalContext) (type : PsExpr) =>
+        match psWhnf environment psMetaEmpty locals type with
+        | PsExpr.sortE _ => true
+        | PsExpr.forallE name domain body binder =>
+            let pushed := psLocalPushBinding locals name domain binder;
+            smaller pushed.context (psExprInstantiate1 body (PsExpr.fvar pushed.id))
+        | _ => false
+
 def psErasureDefinitionIsErased
     (environment : PsEnvironment) (type : PsExpr) : Bool :=
-  match psWhnf environment psMetaEmpty psLocalEmpty type with
-  | PsExpr.sortE _ => true
-  | _ => psErasureIsProp environment psLocalEmpty type
+  if psErasureTypeValuedWithFuel environment 4096 psLocalEmpty type then true
+  else psErasureIsProp environment psLocalEmpty type
 
 def psErasureClassifyBinder
     (environment : PsEnvironment)

@@ -1,0 +1,242 @@
+name: PSC1 focused CompilerM source and owned callback regressions
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+concurrency:
+  group: psc1-practical-compiler-m-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  focused:
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [core, applications]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PSC1_FOCUSED_FAIL_FAST: '1'
+      PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PSC1_COMPILERM_TARGETS: js,ts,rust
+      PSC1_COMPILERM_EVIDENCE: compiler-m-focused
+      PSC1_COLLECTION_TARGETS: js,ts,rust
+      PSC1_COLLECTION_EVIDENCE: stdlib-collections-focused
+      PSC1_JSON_TARGETS: js,ts,rust
+      PSC1_JSON_EVIDENCE: json-application-focused
+      PSC1_IO_SEQUENCING_TARGETS: js,ts,rust
+      PSC1_IO_SEQUENCING_EVIDENCE: typed-io-sequencing-focused
+      PSC1_IO_PROTOCOL_TARGETS: js,ts,rust
+      PSC1_IO_PROTOCOL_EVIDENCE: typed-io-protocol-focused
+      PSC1_INFERENCE_TARGETS: js,ts,rust
+      PSC1_COMPILER_APPLICATION_TARGETS: js,ts,rust,wasm-core,wasm-component
+      PSC1_COMPILER_APPLICATION_EVIDENCE: compiler-application-focused
+      PSC1_LIBRARY_TARGETS: js,ts,rust
+      PSC1_LIBRARY_EVIDENCE: library-application-focused
+      PSC1_APPLICATION_TARGETS: js,ts,rust,wasm-core,wasm-component
+      PSC1_APPLICATION_EVIDENCE: practical-applications-focused
+      PSC1_ORDER_TARGETS: js,ts,rust
+      PSC1_ORDER_EVIDENCE: checked-order-focused
+      PSC1_INFERENCE_EVIDENCE: inference-control-focused
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        id: native_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Rust and locked host dependencies
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          rustup default 1.90.0
+          npm --prefix host-tools --workspaces=false ci --ignore-scripts --no-audit --no-fund
+      - name: Qualify standalone Rust capability policy
+        run: |
+          set -euo pipefail
+          cargo build --locked --manifest-path host-tools/typed-io-rust/Cargo.toml --bin psc1-io-policy-server
+          export PSC1_STANDALONE_IO_COMMAND="[\"$PWD/host-tools/typed-io-rust/target/debug/psc1-io-policy-server\"]"
+          export PSC1_STANDALONE_IO_ABI=psc1-rust-linux-string-io/1
+          python3 scripts/standalone-io-policy-tests.py
+      - name: Install isolated pinned TypeScript consumer checker
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-ts7"
+          echo '{"name":"psc1-ts7-consumer-tests","version":"0.0.0","private":true}' > "$RUNNER_TEMP/psc1-ts7/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-ts7" --ignore-scripts --no-save --no-audit --no-fund typescript@7.0.2
+          echo "PSC1_TSC=$RUNNER_TEMP/psc1-ts7/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Install pinned focused Wasm String consumers
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-wasm-bin" "$RUNNER_TEMP/psc1-wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/psc1-wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/psc1-wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/psc1-wasm-tools.tar.gz" -C "$RUNNER_TEMP/psc1-wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/psc1-wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-wasm-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-wasm-bin" >> "$GITHUB_PATH"
+          python3 -m venv "$RUNNER_TEMP/psc1-wasm-python"
+          "$RUNNER_TEMP/psc1-wasm-python/bin/python" -m pip install --only-binary=:all: --no-deps wasmtime==49.0.0
+          echo "PSC1_WASMTIME_PY=$RUNNER_TEMP/psc1-wasm-python/bin/python" >> "$GITHUB_ENV"
+      - name: Build production compiler and independent checker
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1 psc1_ts_continuation_tests psc1_independent_checker psc1_wasm_string_abi_tests
+          .lake/build/bin/psc1_wasm_string_abi_tests
+      - name: Save successful compilation before running regressions
+        if: steps.native_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Execute focused core and component String and IO boundaries
+        if: matrix.lane == 'core'
+        run: |
+          set -euo pipefail
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-core.wasm
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-component.wasm
+          node scripts/wasm-string-tests.mjs
+      - name: Execute typed continuation and bounded tail-driver regressions
+        if: matrix.lane == 'core'
+        run: node scripts/ts-continuation-tests.mjs
+      - name: Execute authored inputs with native references and focused consumers
+        if: matrix.lane == 'core'
+        run: |
+          set -euo pipefail
+          node --check scripts/compiler-m-conformance-tests.mjs
+          node scripts/language-backend-parity-contract-tests.mjs
+          node scripts/while-execution-contract-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --checked-order
+          node scripts/compiler-m-conformance-tests.mjs --inference-control
+          node scripts/compiler-m-conformance-tests.mjs --library-application
+          node scripts/compiler-m-conformance-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
+          node scripts/compiler-m-conformance-tests.mjs --json-application
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
+          node scripts/typed-io-policy-tests.mjs
+          node scripts/typed-io-application-tests.mjs
+          node scripts/typed-io-dispatcher-tests.mjs
+      - name: Execute unchanged five-target compiler and CLI applications
+        if: matrix.lane == 'applications'
+        run: |
+          set -euo pipefail
+          node scripts/practical-application-tests.mjs --compiler-application
+          node scripts/practical-application-tests.mjs
+      - name: Retain exact sources oracle artifacts and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-practical-compiler-m-${{ matrix.lane }}-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          path: |
+            psc1/dist/scoped-correctness/wasm-string/
+            psc1/dist/scoped-correctness/wasm-string-native/
+            psc1/dist/scoped-correctness/typed-io-standalone/
+            psc1/dist/scoped-correctness/typed-io-dispatcher/
+            psc1/dist/scoped-correctness/typed-io-sequencing-focused/
+            psc1/dist/scoped-correctness/typed-io-protocol-focused/
+            psc1/dist/scoped-correctness/typed-io/
+            psc1/dist/scoped-correctness/inference-control-focused/
+            psc1/dist/scoped-correctness/checked-order-focused/
+            psc1/dist/scoped-correctness/practical-applications-focused/
+            psc1/dist/scoped-correctness/library-application-focused/
+            psc1/dist/scoped-correctness/compiler-application-focused/
+            psc1/dist/scoped-correctness/ts-continuations/
+            psc1/dist/scoped-correctness/json-application-focused/
+            psc1/dist/scoped-correctness/compiler-m-focused/
+            psc1/dist/scoped-correctness/stdlib-collections-focused/
+          retention-days: 14
+          if-no-files-found: warn
+
+  php-application:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PSC1_COMPILER_APPLICATION_TARGETS: php
+      PSC1_COMPILER_APPLICATION_EVIDENCE: compiler-application-php-focused
+      PSC1_APPLICATION_TARGETS: php
+      PSC1_APPLICATION_EVIDENCE: practical-applications-php-focused
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install the qualified PHP integer and standalone IO profile
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.11'
+          extensions: gmp, ffi
+          tools: none
+          coverage: none
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        id: native_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+      - name: Install repository-pinned Lean and locked host dependencies
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm --prefix host-tools --workspaces=false ci --ignore-scripts --no-audit --no-fund
+      - name: Build production compiler and UTF8 boundary regression
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1 psc1_independent_checker psc1_php_utf8_tests
+      - name: Save successful compilation before execution
+        if: steps.native_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Execute scalar boundaries and repeated large-String lookups
+        run: node scripts/php-utf8-tests.mjs
+      - name: Execute both authored compiler and CLI applications with actual PHP IO
+        run: |
+          set -euo pipefail
+          node scripts/practical-application-tests.mjs --compiler-application
+          node scripts/practical-application-tests.mjs
+      - name: Retain PHP source and actual process evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-php-applications-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          path: |
+            psc1/dist/scoped-correctness/php-utf8/
+            psc1/dist/scoped-correctness/compiler-application-php-focused/
+            psc1/dist/scoped-correctness/practical-applications-php-focused/
+          retention-days: 14
+          if-no-files-found: warn

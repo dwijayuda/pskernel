@@ -40,48 +40,18 @@ def psRustSharedStorageType
   psRustConcat3 "std::rc::Rc<" printedType ">"
 
 def psRustEmitStructureFieldList
-    (fields : List PsVerifiedIrStructureField) :
-    Except PsRustEmitError (List String) :=
+    (fields : List PsVerifiedIrStructureField) : Except PsRustEmitError (List String) :=
   match fields with
-  | List.nil =>
-      Except.ok List.nil
+  | List.nil => Except.ok List.nil
   | List.cons field rest =>
-      if psRustTypeContainsFunction field.type then
-        if psRustFunctionTypeIsFirstOrder field.type then
-          match psRustEmitType field.type with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedType =>
-              let rendered :=
-                psRustConcat4
-                  "pub "
-                  (psRustIdentifier field.name)
-                  ": "
-                  (psRustSharedStorageType printedType);
-              match psRustEmitStructureFieldList rest with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok printedRest =>
-                  Except.ok (List.cons rendered printedRest)
-        else
-          Except.error
-            (PsRustEmitError.functionStorageUnsupported field.name)
-      else
-        match psRustEmitType field.type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok printedType =>
-            let rendered :=
-              psRustConcat4
-                "pub "
-                (psRustIdentifier field.name)
-                ": "
-                (psRustSharedStorageType printedType);
-            match psRustEmitStructureFieldList rest with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedRest =>
-                Except.ok (List.cons rendered printedRest)
+      match psRustEmitType field.type with
+      | Except.error error => Except.error error
+      | Except.ok printedType =>
+          let rendered := psRustConcat4 "pub "
+            (psRustIdentifier field.name) ": " (psRustSharedStorageType printedType);
+          match psRustEmitStructureFieldList rest with
+          | Except.error error => Except.error error
+          | Except.ok printedRest => Except.ok (List.cons rendered printedRest)
 
 def psRustEmitStructureWithVisibility (isPublic : Bool)
     (structureInfo : PsVerifiedIrStructure) :
@@ -107,46 +77,18 @@ def psRustEmitStructure (value : PsVerifiedIrStructure) : Except PsRustEmitError
   psRustEmitStructureWithVisibility true value
 
 def psRustEmitConstructorFieldList
-    (fields : List PsVerifiedIrConstructorField) :
-    Except PsRustEmitError (List String) :=
+    (fields : List PsVerifiedIrConstructorField) : Except PsRustEmitError (List String) :=
   match fields with
-  | List.nil =>
-      Except.ok List.nil
+  | List.nil => Except.ok List.nil
   | List.cons field rest =>
-      if psRustTypeContainsFunction field.type then
-        if psRustFunctionTypeIsFirstOrder field.type then
-          match psRustEmitType field.type with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedType =>
-              let rendered :=
-                psRustConcat3
-                  (psRustIdentifier field.name)
-                  ": "
-                  (psRustSharedStorageType printedType);
-              match psRustEmitConstructorFieldList rest with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok printedRest =>
-                  Except.ok (List.cons rendered printedRest)
-        else
-          Except.error
-            (PsRustEmitError.functionStorageUnsupported field.name)
-      else
-        match psRustEmitType field.type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok printedType =>
-            let rendered :=
-              psRustConcat3
-                (psRustIdentifier field.name)
-                ": "
-                (psRustSharedStorageType printedType);
-            match psRustEmitConstructorFieldList rest with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedRest =>
-                Except.ok (List.cons rendered printedRest)
+      match psRustEmitType field.type with
+      | Except.error error => Except.error error
+      | Except.ok printedType =>
+          let rendered := psRustConcat4 ""
+            (psRustIdentifier field.name) ": " (psRustSharedStorageType printedType);
+          match psRustEmitConstructorFieldList rest with
+          | Except.error error => Except.error error
+          | Except.ok printedRest => Except.ok (List.cons rendered printedRest)
 
 def psRustEmitConstructor
     (constructorInfo : PsVerifiedIrConstructor) :
@@ -410,59 +352,66 @@ def psRustEmitFunctionResultExpr
 -- Internal continuation helpers use recursively typed Rc closure values. Public
 -- declaration signatures keep the existing, narrower ABI checks above.
 def psRustEmitPrivateDeclarationParameter
-    (parameter : PsVerifiedIrParameter) : Except PsRustEmitError String := do
+    (parameter : PsVerifiedIrParameter) : Except PsRustEmitError String :=
   if !psRustDirectClosureTypeSupported parameter.type then
-    throw (PsRustEmitError.nestedFunctionParameterUnsupported parameter.name)
-  let printed <- psRustEmitHigherOrderParameterType parameter.type
-  pure (psRustConcat3 (psRustIdentifier parameter.name) ": " printed)
+    Except.error (PsRustEmitError.nestedFunctionParameterUnsupported parameter.name)
+  else
+    match psRustEmitHigherOrderParameterType parameter.type with
+    | Except.error error => Except.error error
+    | Except.ok printed =>
+        Except.ok (psRustConcat3 (psRustIdentifier parameter.name) ": " printed)
 
 def psRustEmitPrivateDeclarationParameterList
-    (parameters : List PsVerifiedIrParameter) :
-    Except PsRustEmitError (List String) :=
+    (parameters : List PsVerifiedIrParameter) : Except PsRustEmitError (List String) :=
   match parameters with
-  | [] => .ok []
-  | parameter :: rest => do
-      let printed <- psRustEmitPrivateDeclarationParameter parameter
-      let others <- psRustEmitPrivateDeclarationParameterList rest
-      pure (printed :: others)
+  | List.nil => Except.ok []
+  | List.cons parameter rest =>
+      match psRustEmitPrivateDeclarationParameter parameter with
+      | Except.error error => Except.error error
+      | Except.ok printed =>
+          match psRustEmitPrivateDeclarationParameterList rest with
+          | Except.error error => Except.error error
+          | Except.ok others => Except.ok (List.cons printed others)
 
--- The ordinary emitter has typed closure lets and return blocks for these
--- forms. Direct extraction of a stored function remains outside this path.
+-- Private closure results retain the exact existing supported forms.
 def psRustPrivateFunctionResultExprSupportedWithFuel
     (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
   match fuel with
-  | Nat.zero => fun _ => false
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => false
   | Nat.succ remaining =>
-      let smaller := psRustPrivateFunctionResultExprSupportedWithFuel remaining
-      fun expr =>
+      let smaller : PsVerifiedIrExpr -> Bool :=
+        psRustPrivateFunctionResultExprSupportedWithFuel remaining;
+      fun (expr : PsVerifiedIrExpr) =>
         match expr with
-        | .lambda _ result body =>
+        | PsVerifiedIrExpr.lambda _ result body =>
             if psRustTypeContainsFunction result then
               psRustDirectClosureTypeSupported result && smaller body
             else true
-        | .var _ => true
-        | .call _ _ _ => true
-        | .intrinsic operation _ _ =>
+        | PsVerifiedIrExpr.var _ => true
+        | PsVerifiedIrExpr.call _ _ _ => true
+        | PsVerifiedIrExpr.intrinsic operation _ _ =>
             match operation with
-            | .arrayFoldl => true
+            | PsVerifiedIrIntrinsic.arrayFoldl => true
             | _ => false
-        | .letE _ type value body =>
+        | PsVerifiedIrExpr.letE _ type value body =>
             if psRustTypeContainsFunction type then
               psRustDirectClosureTypeSupported type && smaller value && smaller body
             else smaller body
-        | .ifE _ yes no => smaller yes && smaller no
-        | .matchE _ _ _ alternatives =>
-            !psListAny (fun alternative => !smaller (Prod.snd (Prod.snd alternative))) alternatives
+        | PsVerifiedIrExpr.ifE _ yes no => smaller yes && smaller no
+        | PsVerifiedIrExpr.matchE _ _ _ alternatives =>
+            !psListAny
+              (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                !smaller alternative.snd.snd) alternatives
         | _ => false
 
 def psRustEmitPrivateDeclarationResultType
     (declaration : PsVerifiedIrDeclaration) : Except PsRustEmitError String :=
   match declaration.resultType with
-  | .function _ _ =>
+  | PsVerifiedIrType.function _ _ =>
       if psRustDirectClosureTypeSupported declaration.resultType &&
           psRustPrivateFunctionResultExprSupportedWithFuel 4096 declaration.body then
         psRustEmitClosureValueType declaration.resultType
-      else .error (PsRustEmitError.functionResultUnsupported declaration.name)
+      else Except.error (PsRustEmitError.functionResultUnsupported declaration.name)
   | _ => psRustEmitType declaration.resultType
 
 def psRustEmitDeclarationWithVisibility (isPublic : Bool)
@@ -796,125 +745,59 @@ def psRustValidateAlternativeListWith
       | Except.ok _ =>
           psRustValidateAlternativeListWith validate rest
 
+-- Strict IR has checked complete field/expression types. Owned callback
+-- storage accepts locals and computed closures; still inspect every body.
 def psRustValidateStorageFieldListWith
     (staticFunctionNames : List String)
     (locals : List String)
     (definitionFields : List PsVerifiedIrStructureField)
-    (validateNested :
-      PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool)
-    (fields : List (Prod String PsVerifiedIrExpr)) :
-    Except PsRustEmitError Bool :=
+    (validateNested : PsVerifiedIrExpr -> Except PsRustEmitError Bool)
+    (fields : List (Prod String PsVerifiedIrExpr)) : Except PsRustEmitError Bool :=
   match fields with
-  | List.nil =>
-      Except.ok true
+  | List.nil => Except.ok true
   | List.cons field rest =>
       let fieldName := Prod.fst field;
-      let value := Prod.snd field;
       match psRustFindStructureFieldType fieldName definitionFields with
       | Option.none =>
-          match validateNested value with
-          | Except.error error =>
-              Except.error error
-          | Except.ok _ =>
-              psRustValidateStorageFieldListWith
-                staticFunctionNames
-                locals
-                definitionFields
-                validateNested
-                rest
+          match validateNested (Prod.snd field) with
+          | Except.error error => Except.error error
+          | Except.ok _ => psRustValidateStorageFieldListWith staticFunctionNames locals
+              definitionFields validateNested rest
       | Option.some fieldType =>
-          if psRustTypeContainsFunction fieldType then
-            if psRustFunctionTypeIsFirstOrder fieldType then
-              match
-                  psRustValidateStaticStoredFunction
-                    staticFunctionNames
-                    locals
-                    fieldName
-                    value with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok _ =>
-                  psRustValidateStorageFieldListWith
-                    staticFunctionNames
-                    locals
-                    definitionFields
-                    validateNested
-                    rest
-            else
-              Except.error
-                (PsRustEmitError.functionStorageUnsupported fieldName)
+          if !psRustDirectClosureTypeSupported fieldType then
+            Except.error (PsRustEmitError.functionStorageUnsupported fieldName)
           else
-            match validateNested value with
-            | Except.error error =>
-                Except.error error
-            | Except.ok _ =>
-                psRustValidateStorageFieldListWith
-                  staticFunctionNames
-                  locals
-                  definitionFields
-                  validateNested
-                  rest
+            match validateNested (Prod.snd field) with
+            | Except.error error => Except.error error
+            | Except.ok _ => psRustValidateStorageFieldListWith staticFunctionNames locals
+                definitionFields validateNested rest
 
+-- Strict IR has checked complete field/expression types. Owned callback
+-- storage accepts locals and computed closures; still inspect every body.
 def psRustValidateConstructorStorageFieldListWith
     (staticFunctionNames : List String)
     (locals : List String)
     (definitionFields : List PsVerifiedIrConstructorField)
-    (validateNested :
-      PsVerifiedIrExpr ->
-      Except PsRustEmitError Bool)
-    (fields : List (Prod String PsVerifiedIrExpr)) :
-    Except PsRustEmitError Bool :=
+    (validateNested : PsVerifiedIrExpr -> Except PsRustEmitError Bool)
+    (fields : List (Prod String PsVerifiedIrExpr)) : Except PsRustEmitError Bool :=
   match fields with
-  | List.nil =>
-      Except.ok true
+  | List.nil => Except.ok true
   | List.cons field rest =>
       let fieldName := Prod.fst field;
-      let value := Prod.snd field;
       match psRustFindConstructorFieldType fieldName definitionFields with
       | Option.none =>
-          match validateNested value with
-          | Except.error error =>
-              Except.error error
-          | Except.ok _ =>
-              psRustValidateConstructorStorageFieldListWith
-                staticFunctionNames
-                locals
-                definitionFields
-                validateNested
-                rest
+          match validateNested (Prod.snd field) with
+          | Except.error error => Except.error error
+          | Except.ok _ => psRustValidateConstructorStorageFieldListWith staticFunctionNames locals
+              definitionFields validateNested rest
       | Option.some fieldType =>
-          if psRustTypeContainsFunction fieldType then
-            if psRustFunctionTypeIsFirstOrder fieldType then
-              match
-                  psRustValidateStaticStoredFunction
-                    staticFunctionNames
-                    locals
-                    fieldName
-                    value with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok _ =>
-                  psRustValidateConstructorStorageFieldListWith
-                    staticFunctionNames
-                    locals
-                    definitionFields
-                    validateNested
-                    rest
-            else
-              Except.error
-                (PsRustEmitError.functionStorageUnsupported fieldName)
+          if !psRustDirectClosureTypeSupported fieldType then
+            Except.error (PsRustEmitError.functionStorageUnsupported fieldName)
           else
-            match validateNested value with
-            | Except.error error =>
-                Except.error error
-            | Except.ok _ =>
-                psRustValidateConstructorStorageFieldListWith
-                  staticFunctionNames
-                  locals
-                  definitionFields
-                  validateNested
-                  rest
+            match validateNested (Prod.snd field) with
+            | Except.error error => Except.error error
+            | Except.ok _ => psRustValidateConstructorStorageFieldListWith staticFunctionNames locals
+                definitionFields validateNested rest
 
 def psRustValidateStorageAlternativeListWith
     (validateBody :
@@ -1341,47 +1224,74 @@ def psRustEmitValidatedModule
 
 /-- Public ownership is selected before printing, including derived aggregate
 type visibility. No text rewriting decides which declarations are exported. -/
-def psRustEmitFailureReason : PsRustEmitError -> String
-  | .fuelExhausted => "fuel-exhausted"
-  | .intrinsicArity => "intrinsic-arity"
-  | .externalImportUnsupported => "external-import"
-  | .genericValueUnsupported name => "generic-value:" ++ name
-  | .functionResultUnsupported name => "function-result:" ++ name
-  | .functionStorageUnsupported name => "function-storage:" ++ name
-  | .nestedFunctionParameterUnsupported name => "nested-function-parameter:" ++ name
-  | .lambdaFunctionParameterUnsupported name => "lambda-function-parameter:" ++ name
-  | .lambdaFunctionResultUnsupported => "lambda-function-result"
-  | .unknownStructure name => "unknown-structure:" ++ name
-  | .unknownInductive name => "unknown-inductive:" ++ name
-  | .namedTypeArity name => "named-type-arity:" ++ name
-  | .unknownRuntimeType => "unknown-runtime-type"
+def psRustEmitFailureReason (error : PsRustEmitError) : String :=
+  match error with
+  | PsRustEmitError.fuelExhausted => "fuel-exhausted"
+  | PsRustEmitError.intrinsicArity => "intrinsic-arity"
+  | PsRustEmitError.externalImportUnsupported => "external-import"
+  | PsRustEmitError.genericValueUnsupported name => psRustConcat2 "generic-value:" name
+  | PsRustEmitError.functionResultUnsupported name => psRustConcat2 "function-result:" name
+  | PsRustEmitError.functionStorageUnsupported name => psRustConcat2 "function-storage:" name
+  | PsRustEmitError.nestedFunctionParameterUnsupported name => psRustConcat2 "nested-function-parameter:" name
+  | PsRustEmitError.lambdaFunctionParameterUnsupported name => psRustConcat2 "lambda-function-parameter:" name
+  | PsRustEmitError.lambdaFunctionResultUnsupported => "lambda-function-result"
+  | PsRustEmitError.unknownStructure name => psRustConcat2 "unknown-structure:" name
+  | PsRustEmitError.unknownInductive name => psRustConcat2 "unknown-inductive:" name
+  | PsRustEmitError.namedTypeArity name => psRustConcat2 "named-type-arity:" name
+  | PsRustEmitError.unknownRuntimeType => "unknown-runtime-type"
 
-def psRustWithFailureLocation {α : Type} (location : String)
-    (result : Except PsRustEmitError α) : Except String α :=
+def psRustWithFailureLocation {alpha : Type} (location : String)
+    (result : Except PsRustEmitError alpha) : Except String alpha :=
   match result with
-  | .ok value => .ok value
-  | .error error => .error ("PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering location=" ++
-      location ++ " reason=" ++ psRustEmitFailureReason error)
+  | Except.ok value => Except.ok value
+  | Except.error error =>
+      Except.error (psRustConcat4 "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering location="
+        location " reason=" (psRustEmitFailureReason error))
 
 def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
-    (publicValues publicTypes : List String) : Except String String := do
-  let module ← match psStrictValidateModule source.raw with
-    | .ok value => pure value.raw
-    | .error _ => throw "PSC1_RUST_INPUT_IR_INVALID"
-  if psRustModuleHasImports module.imports then throw "PSC1_RUST_EXTERNAL_IMPORT_UNSUPPORTED"
-  let valueNames := psRustValueDeclarationNames module.declarations
-  let _ ← psRustWithFailureLocation "names" (psRustValidateModuleNames module)
-  let _ ← psRustWithFailureLocation "function-storage" (psRustValidateModuleFunctionStorage module)
-  let structures ← module.structures.mapM fun value =>
-    psRustWithFailureLocation ("structure:" ++ value.name)
-      (psRustEmitStructureWithVisibility (publicTypes.contains value.name) value)
-  let inductives ← module.inductives.mapM fun value =>
-    psRustWithFailureLocation ("inductive:" ++ value.name)
-      (psRustEmitInductiveWithVisibility (publicTypes.contains value.name) value)
-  let declarations ← module.declarations.mapM fun value =>
-    psRustWithFailureLocation ("declaration:" ++ value.name)
-      (psRustEmitDeclarationWithVisibility (publicValues.contains value.name)
-        module.declarations valueNames value)
-  let runtime := psRustPlanRuntime module
-  return String.intercalate "\n"
-    (["#![forbid(unsafe_code)]", runtime.source] ++ structures ++ inductives ++ declarations) ++ "\n"
+    (publicValues publicTypes : List String) : Except String String :=
+  match psStrictValidateModule source.raw with
+  | Except.error _ => Except.error "PSC1_RUST_INPUT_IR_INVALID"
+  | Except.ok validated =>
+      let module : PsVerifiedIrModule := validated.raw;
+      if psRustModuleHasImports module.imports then
+        Except.error "PSC1_RUST_EXTERNAL_IMPORT_UNSUPPORTED"
+      else
+        let valueNames : List String := psRustValueDeclarationNames module.declarations;
+        match psRustWithFailureLocation "names" (psRustValidateModuleNames module) with
+        | Except.error error => Except.error error
+        | Except.ok _ =>
+            match psRustWithFailureLocation "function-storage" (psRustValidateModuleFunctionStorage module) with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                match psListMapExcept
+                    (fun (value : PsVerifiedIrStructure) =>
+                      psRustWithFailureLocation (psRustConcat2 "structure:" value.name)
+                        (psRustEmitStructureWithVisibility
+                          (psRustStringListContains publicTypes value.name) value))
+                    module.structures with
+                | Except.error error => Except.error error
+                | Except.ok structures =>
+                    match psListMapExcept
+                        (fun (value : PsVerifiedIrInductive) =>
+                          psRustWithFailureLocation (psRustConcat2 "inductive:" value.name)
+                            (psRustEmitInductiveWithVisibility
+                              (psRustStringListContains publicTypes value.name) value))
+                        module.inductives with
+                    | Except.error error => Except.error error
+                    | Except.ok inductives =>
+                        match psListMapExcept
+                            (fun (value : PsVerifiedIrDeclaration) =>
+                              psRustWithFailureLocation (psRustConcat2 "declaration:" value.name)
+                                (psRustEmitDeclarationWithVisibility
+                                  (psRustStringListContains publicValues value.name)
+                                  module.declarations valueNames value))
+                            module.declarations with
+                        | Except.error error => Except.error error
+                        | Except.ok declarations =>
+                            let runtime : PsRustRuntimePlan := psRustPlanRuntime module;
+                            Except.ok (psRustConcat2
+                              (psRustJoin "\n"
+                                (psListAppend ["#![forbid(unsafe_code)]", runtime.source]
+                                  (psListAppend structures (psListAppend inductives declarations))))
+                              "\n")

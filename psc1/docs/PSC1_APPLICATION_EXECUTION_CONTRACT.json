@@ -1,0 +1,137 @@
+{
+  "schema": "psc1-practical-application-contract/1",
+  "id": "practical-cli-json-v1",
+  "applications": [
+    "cli",
+    "json-files"
+  ],
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "scope": {
+    "cli": "UTF8 argv; --help or transform INPUT OUTPUT; source Bool success maps to process exit 0/2; denied required capability exits 78 before guest invocation/load.",
+    "json": "Bounded JSON array of records with String text and integer count. Prefix each text, preserve count, deterministically encode sorted keys. Extra fields are dropped. Strict malformed Unicode/JSON refusal; host size, UTF8, path and permission errors stay typed.",
+    "limits": "Existing compiler, JSON and host limits unchanged; qualification config uses a 512-byte file bound."
+  },
+  "cases": [
+    {
+      "id": "help",
+      "exitCode": 0,
+      "stdout": "usage: transform INPUT OUTPUT\n"
+    },
+    {
+      "id": "invalid-command",
+      "exitCode": 2,
+      "stdout": "usage: transform INPUT OUTPUT\n"
+    },
+    {
+      "id": "invalid-arity",
+      "exitCode": 2,
+      "stdout": "usage: transform INPUT OUTPUT\n"
+    },
+    {
+      "id": "invalid-help-arity",
+      "exitCode": 2,
+      "stdout": "usage: transform INPUT OUTPUT\n"
+    },
+    {
+      "id": "unicode-records",
+      "exitCode": 0,
+      "stdout": "ok\n",
+      "output": "[{\"count\":2,\"text\":\"processed:A\"},{\"count\":-4,\"text\":\"processed:😀\"}]"
+    },
+    {
+      "id": "argv-unicode-quote",
+      "exitCode": 0,
+      "stdout": "ok\n",
+      "output": "[{\"count\":2,\"text\":\"processed:A\"},{\"count\":-4,\"text\":\"processed:😀\"}]"
+    },
+    {
+      "id": "bounded-output",
+      "exitCode": 2,
+      "stdout": "error:tooLarge\n"
+    },
+    {
+      "id": "empty-records",
+      "exitCode": 0,
+      "stdout": "ok\n",
+      "output": "[]"
+    },
+    {
+      "id": "array-trailing-comma",
+      "exitCode": 2,
+      "stdout": "invalid-json\n"
+    },
+    {
+      "id": "object-trailing-comma",
+      "exitCode": 2,
+      "stdout": "invalid-json\n"
+    },
+    {
+      "id": "malformed-json",
+      "exitCode": 2,
+      "stdout": "invalid-json\n"
+    },
+    {
+      "id": "isolated-surrogate",
+      "exitCode": 2,
+      "stdout": "invalid-unicode\n"
+    },
+    {
+      "id": "duplicate-key",
+      "exitCode": 2,
+      "stdout": "invalid-json\n"
+    },
+    {
+      "id": "wrong-shape",
+      "exitCode": 2,
+      "stdout": "invalid-json\n"
+    },
+    {
+      "id": "missing-input",
+      "exitCode": 2,
+      "stdout": "error:notFound\n"
+    },
+    {
+      "id": "path-denied",
+      "exitCode": 2,
+      "stdout": "error:pathDenied\n"
+    },
+    {
+      "id": "read-permission",
+      "exitCode": 2,
+      "stdout": "error:ioFailure\n"
+    },
+    {
+      "id": "invalid-utf8",
+      "exitCode": 2,
+      "stdout": "error:invalidUtf8\n"
+    },
+    {
+      "id": "bounded-file",
+      "exitCode": 2,
+      "stdout": "error:tooLarge\n"
+    },
+    {
+      "id": "write-permission",
+      "exitCode": 2,
+      "stdout": "error:ioFailure\n"
+    },
+    {
+      "id": "denied-capability",
+      "exitCode": 78,
+      "stdout": ""
+    }
+  ]
+}

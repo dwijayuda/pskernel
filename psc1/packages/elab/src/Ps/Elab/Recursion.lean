@@ -9,7 +9,7 @@ structure PsElabRecursionPlan where
   explicitIds : List Nat
   majorId : Nat
   generalizedIds : List Nat
-  currentNamespace : PsName := PsName.anonymous
+  currentNamespace : PsName
 
 structure PsElabRecursionWalkResult where
   term : PsSyntaxTerm
@@ -71,15 +71,21 @@ def psElabRecursionPushNames
       fun (context : PsLocalContext) =>
         smaller (psElabRecursionPushName context name)
 
+def psElabRecursionBindingPatternWorker (pattern : PsSyntaxBindingPattern) :
+    PsLocalContext -> PsLocalContext :=
+  match pattern with
+  | PsSyntaxBindingPattern.name name =>
+      fun (context : PsLocalContext) => psElabRecursionPushName context name
+  | PsSyntaxBindingPattern.wildcard _ => fun (context : PsLocalContext) => context
+  | PsSyntaxBindingPattern.unit _ => fun (context : PsLocalContext) => context
+  | PsSyntaxBindingPattern.pair first second _ =>
+      let left : PsLocalContext -> PsLocalContext := psElabRecursionBindingPatternWorker first;
+      let right : PsLocalContext -> PsLocalContext := psElabRecursionBindingPatternWorker second;
+      fun (context : PsLocalContext) => right (left context)
+
 def psElabRecursionBindingPatternContext
     (context : PsLocalContext) (pattern : PsSyntaxBindingPattern) : PsLocalContext :=
-  match pattern with
-  | .name name => psElabRecursionPushName context name
-  | .wildcard _ => context
-  | .unit _ => context
-  | .pair first second _ =>
-      psElabRecursionBindingPatternContext
-        (psElabRecursionBindingPatternContext context first) second
+  psElabRecursionBindingPatternWorker pattern context
 
 def psElabRecursionPatternContext
     (context : PsLocalContext) (pattern : PsSyntaxPattern) : PsLocalContext :=
@@ -276,6 +282,36 @@ def psElabRecursionRewriteCall
         Except.ok (PsElabRecursionWalkResult.mk
           (PsSyntaxTerm.app (PsSyntaxTerm.app fn fixed span) state span) changed)
 
+def psElabRecursionTwoTerms (terms : List PsSyntaxTerm)
+    (next : PsSyntaxTerm -> PsSyntaxTerm -> Except PsElabError PsElabRecursionWalkResult) :
+    Except PsElabError PsElabRecursionWalkResult :=
+  match terms with
+  | List.nil => Except.error PsElabError.structuralRecursionInternal
+  | List.cons first rest =>
+      match rest with
+      | List.nil => Except.error PsElabError.structuralRecursionInternal
+      | List.cons second tail =>
+          match tail with
+          | List.nil => next first second
+          | _ => Except.error PsElabError.structuralRecursionInternal
+
+def psElabRecursionThreeTerms (terms : List PsSyntaxTerm)
+    (next : PsSyntaxTerm -> PsSyntaxTerm -> PsSyntaxTerm ->
+      Except PsElabError PsElabRecursionWalkResult) :
+    Except PsElabError PsElabRecursionWalkResult :=
+  match terms with
+  | List.nil => Except.error PsElabError.structuralRecursionInternal
+  | List.cons first rest =>
+      match rest with
+      | List.nil => Except.error PsElabError.structuralRecursionInternal
+      | List.cons second tail =>
+          match tail with
+          | List.nil => Except.error PsElabError.structuralRecursionInternal
+          | List.cons third final =>
+              match final with
+              | List.nil => next first second third
+              | _ => Except.error PsElabError.structuralRecursionInternal
+
 def psElabRecursionWalkWithFuel
     (fuel : Nat) (plan : PsElabRecursionPlan) (environment : PsEnvironment) :
     PsLocalContext -> PsSyntaxTerm ->
@@ -449,40 +485,41 @@ def psElabRecursionWalkWithFuel
                 match smaller (psElabRecursionPushName context name) loopBody with
                 | Except.error error => Except.error error
                 | Except.ok bodyResult =>
-                    match outerResult.fst with
-                    | [nextLower, nextUpper, nextRest] =>
+                    psElabRecursionThreeTerms outerResult.fst
+                      (fun (nextLower : PsSyntaxTerm) (nextUpper : PsSyntaxTerm) (nextRest : PsSyntaxTerm) =>
                         Except.ok (PsElabRecursionWalkResult.mk
-                          (PsSyntaxTerm.doForRangeE name nextLower nextUpper
-                            bodyResult.term nextRest span)
-                          (psListAppend outerResult.snd bodyResult.changedIds))
-                    | _ => Except.error PsElabError.structuralRecursionInternal
-        | PsSyntaxTerm.doTryE action name recovery rest span => do
-            let actionResult <- smaller context action
-            let recoveryResult <- smaller (psElabRecursionPushName context name) recovery
-            let restResult <- smaller context rest
-            pure (PsElabRecursionWalkResult.mk
-              (.doTryE actionResult.term name recoveryResult.term restResult.term span)
-              (psListAppend actionResult.changedIds
-                (psListAppend recoveryResult.changedIds restResult.changedIds)))
+                          (PsSyntaxTerm.doForRangeE name nextLower nextUpper bodyResult.term nextRest span)
+                          (psListAppend outerResult.snd bodyResult.changedIds)))
+        | PsSyntaxTerm.doTryE action name recovery rest span =>
+            match smaller context action with
+            | Except.error error => Except.error error
+            | Except.ok actionResult =>
+                match smaller (psElabRecursionPushName context name) recovery with
+                | Except.error error => Except.error error
+                | Except.ok recoveryResult =>
+                    match smaller context rest with
+                    | Except.error error => Except.error error
+                    | Except.ok restResult =>
+                        Except.ok (PsElabRecursionWalkResult.mk
+                          (PsSyntaxTerm.doTryE actionResult.term name recoveryResult.term restResult.term span)
+                          (psListAppend actionResult.changedIds
+                            (psListAppend recoveryResult.changedIds restResult.changedIds)))
         | PsSyntaxTerm.doWhileE condition loopBody rest span =>
             match psElabRecursionWalkTerms smaller [condition, loopBody, rest] context with
             | Except.error error => Except.error error
             | Except.ok result =>
-                match result.fst with
-                | [nextCondition, nextBody, nextRest] =>
+                psElabRecursionThreeTerms result.fst
+                  (fun (nextCondition : PsSyntaxTerm) (nextBody : PsSyntaxTerm) (nextRest : PsSyntaxTerm) =>
                     Except.ok (PsElabRecursionWalkResult.mk
-                      (PsSyntaxTerm.doWhileE nextCondition nextBody nextRest span)
-                      result.snd)
-                | _ => Except.error PsElabError.structuralRecursionInternal
+                      (PsSyntaxTerm.doWhileE nextCondition nextBody nextRest span) result.snd))
         | PsSyntaxTerm.arrayGetOptionE array index span =>
             match psElabRecursionWalkTerms smaller [array, index] context with
             | Except.error error => Except.error error
             | Except.ok result =>
-                match result.fst with
-                | [nextArray, nextIndex] =>
+                psElabRecursionTwoTerms result.fst
+                  (fun (nextArray : PsSyntaxTerm) (nextIndex : PsSyntaxTerm) =>
                     Except.ok (PsElabRecursionWalkResult.mk
-                      (PsSyntaxTerm.arrayGetOptionE nextArray nextIndex span) result.snd)
-                | _ => Except.error PsElabError.structuralRecursionInternal
+                      (PsSyntaxTerm.arrayGetOptionE nextArray nextIndex span) result.snd))
         | PsSyntaxTerm.record fields span =>
             match psElabRecursionWalkFields smaller fields context with
             | Except.error error => Except.error error

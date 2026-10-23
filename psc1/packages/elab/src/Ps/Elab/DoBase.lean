@@ -48,6 +48,46 @@ def psElabDoView (fuel : Nat) (context : PsElabContext) :
                       else core
         | _ => core
 
+def psElabDoSelectIdentity (arguments : List PsExpr) :
+    Except PsElabError (Prod PsElabDoOps PsExpr) :=
+  match arguments with
+  | List.nil => Except.error PsElabError.doUnsupportedEffect
+  | List.cons value rest =>
+      match rest with
+      | List.nil => Except.ok (Prod.mk (PsElabDoOps.identity PsLevel.zero) value)
+      | _ => Except.error PsElabError.doUnsupportedEffect
+
+def psElabDoSelectExcept (arguments : List PsExpr) :
+    Except PsElabError (Prod PsElabDoOps PsExpr) :=
+  match arguments with
+  | List.nil => Except.error PsElabError.doUnsupportedEffect
+  | List.cons error rest =>
+      match rest with
+      | List.nil => Except.error PsElabError.doUnsupportedEffect
+      | List.cons value tail =>
+          match tail with
+          | List.nil => Except.ok (Prod.mk (PsElabDoOps.except error) value)
+          | _ => Except.error PsElabError.doUnsupportedEffect
+
+def psElabDoSelectCompiler (arguments : List PsExpr) :
+    Except PsElabError (Prod PsElabDoOps PsExpr) :=
+  match arguments with
+  | List.nil => Except.error PsElabError.doUnsupportedEffect
+  | List.cons reader rest =>
+      match rest with
+      | List.nil => Except.error PsElabError.doUnsupportedEffect
+      | List.cons state tail =>
+          match tail with
+          | List.nil => Except.error PsElabError.doUnsupportedEffect
+          | List.cons error values =>
+              match values with
+              | List.nil => Except.error PsElabError.doUnsupportedEffect
+              | List.cons value final =>
+                  match final with
+                  | List.nil =>
+                      Except.ok (Prod.mk (PsElabDoOps.compiler reader state error) value)
+                  | _ => Except.error PsElabError.doUnsupportedEffect
+
 def psElabDoSelect
     (context : PsElabContext) (expected : Option PsExpr) :
     Except PsElabError (Prod PsElabDoOps PsExpr) :=
@@ -57,20 +97,13 @@ def psElabDoSelect
       let view := psExprAppView (psElabDoView 256 context expectedType);
       match view.head with
       | PsExpr.constE name levels =>
-          if psNameEq name (psRootName "Id") then
-            match levels, view.args with
-            | [], [value] => Except.ok (Prod.mk (PsElabDoOps.identity PsLevel.zero) value)
-            | _, _ => Except.error PsElabError.doUnsupportedEffect
-          else if psNameEq name psSelfHostExceptName then
-            match levels, view.args with
-            | [], [error, value] => Except.ok (Prod.mk (PsElabDoOps.except error) value)
-            | _, _ => Except.error PsElabError.doUnsupportedEffect
-          else if psNameEq name (psRootName "CompilerM") then
-            match levels, view.args with
-            | [], [reader, state, error, value] =>
-                Except.ok (Prod.mk (PsElabDoOps.compiler reader state error) value)
-            | _, _ => Except.error PsElabError.doUnsupportedEffect
-          else Except.error PsElabError.doUnsupportedEffect
+          match levels with
+          | List.nil =>
+              if psNameEq name (psRootName "Id") then psElabDoSelectIdentity view.args
+              else if psNameEq name psSelfHostExceptName then psElabDoSelectExcept view.args
+              else if psNameEq name (psRootName "CompilerM") then psElabDoSelectCompiler view.args
+              else Except.error PsElabError.doUnsupportedEffect
+          | _ => Except.error PsElabError.doUnsupportedEffect
       | _ => Except.error PsElabError.doUnsupportedEffect
 
 def psElabDoType (ops : PsElabDoOps) (type : PsExpr) : PsExpr :=
@@ -91,7 +124,7 @@ def psElabDoValueSort (ops : PsElabDoOps) : PsExpr :=
 def psElabDoPure
     (ops : PsElabDoOps) (context : PsElabContext) (type value : PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let term :=
+  let term : PsExpr :=
     match ops with
     | PsElabDoOps.identity _ => value
     | PsElabDoOps.except error => psSelfHostExceptOkOf error type value
@@ -106,37 +139,55 @@ def psElabDoPure
 -- The selected do effect gives bare pure its result type. Ordinary
 -- local and global bindings retain precedence over this contextual spelling.
 def psElabDoBuiltinArgument
-    (context : PsElabContext) (builtin : String) : PsSyntaxTerm -> Option PsSyntaxTerm
-  | .app (.reference sourceName) [value] _ =>
-      match sourceName.segments with
-      | [segment] =>
-          if psStringEq segment builtin then
-            let name := psRootName builtin
-            match psResolveNameInNamespace context.localContext context.environment
-                context.currentNamespace name with
-            | some _ => none
-            | none => some value
-          else none
-      | _ => none
-  | _ => none
+    (context : PsElabContext) (builtin : String) (action : PsSyntaxTerm) :
+    Option PsSyntaxTerm :=
+  match action with
+  | PsSyntaxTerm.app fn arguments _ =>
+      match fn with
+      | PsSyntaxTerm.reference sourceName =>
+          match arguments with
+          | List.nil => Option.none
+          | List.cons value rest =>
+              match rest with
+              | List.nil =>
+                  match sourceName.segments with
+                  | List.nil => Option.none
+                  | List.cons segment tail =>
+                      match tail with
+                      | List.nil =>
+                          if psStringEq segment builtin then
+                            let name := psRootName builtin;
+                            match psResolveNameInNamespace context.localContext context.environment
+                                context.currentNamespace name with
+                            | Option.some _ => Option.none
+                            | Option.none => Option.some value
+                          else Option.none
+                      | _ => Option.none
+              | _ => Option.none
+      | _ => Option.none
+  | _ => Option.none
 
 def psElabDoPureArgument (context : PsElabContext) : PsSyntaxTerm -> Option PsSyntaxTerm :=
   psElabDoBuiltinArgument context "pure"
 
-def psElabDoErrorType : PsElabDoOps -> Except PsElabError PsExpr
-  | .except error => .ok error
-  | .compiler _ _ error => .ok error
-  | .identity _ => .error PsElabError.doUnsupportedEffect
+def psElabDoErrorType (ops : PsElabDoOps) : Except PsElabError PsExpr :=
+  match ops with
+  | PsElabDoOps.except error => Except.ok error
+  | PsElabDoOps.compiler _ _ error => Except.ok error
+  | PsElabDoOps.identity _ => Except.error PsElabError.doUnsupportedEffect
 
 def psElabDoRaise (ops : PsElabDoOps) (context : PsElabContext)
-    (type value : PsExpr) : Except PsElabError PsElabTermResult := do
-  let term <- match ops with
-    | .identity _ => throw PsElabError.doUnsupportedEffect
-    | .except error => pure (psSelfHostExceptErrorOf error type value)
-    | .compiler reader state error =>
-        pure (psExprApplyMany (PsExpr.constE (psRootName "compilerThrow") [])
-          [reader, state, error, type, value])
-  psElabResolvedTerm context term (some (psElabDoType ops type))
+    (type value : PsExpr) : Except PsElabError PsElabTermResult :=
+  let term : Except PsElabError PsExpr :=
+    match ops with
+    | PsElabDoOps.identity _ => Except.error PsElabError.doUnsupportedEffect
+    | PsElabDoOps.except error => Except.ok (psSelfHostExceptErrorOf error type value)
+    | PsElabDoOps.compiler reader state error =>
+        Except.ok (psExprApplyMany (PsExpr.constE (psRootName "compilerThrow") [])
+          [reader, state, error, type, value]);
+  match term with
+  | Except.error error => Except.error error
+  | Except.ok value => psElabResolvedTerm context value (Option.some (psElabDoType ops type))
 
 def psElabDoEffectTerm
     (elaborate :
@@ -144,20 +195,26 @@ def psElabDoEffectTerm
       Except PsElabError PsElabTermResult)
     (ops : PsElabDoOps) (context : PsElabContext)
     (type : PsExpr) (action : PsSyntaxTerm) :
-    Except PsElabError PsElabTermResult := do
+    Except PsElabError PsElabTermResult :=
   match psElabDoPureArgument context action with
-  | some value =>
-      let checked <- elaborate context value (some type)
-      psElabDoPure ops checked.context
-        (psMetaInstantiate checked.context.metaContext type) checked.term
-  | none =>
-      match psElabDoBuiltinArgument context "throw" action with
-      | none => elaborate context action (some (psElabDoType ops type))
-      | some value =>
-          let errorType <- psElabDoErrorType ops
-          let checked <- elaborate context value (some errorType)
-          psElabDoRaise ops checked.context
+  | Option.some value =>
+      match elaborate context value (Option.some type) with
+      | Except.error error => Except.error error
+      | Except.ok checked =>
+          psElabDoPure ops checked.context
             (psMetaInstantiate checked.context.metaContext type) checked.term
+  | Option.none =>
+      match psElabDoBuiltinArgument context "throw" action with
+      | Option.none => elaborate context action (Option.some (psElabDoType ops type))
+      | Option.some value =>
+          match psElabDoErrorType ops with
+          | Except.error error => Except.error error
+          | Except.ok errorType =>
+              match elaborate context value (Option.some errorType) with
+              | Except.error error => Except.error error
+              | Except.ok checked =>
+                  psElabDoRaise ops checked.context
+                    (psMetaInstantiate checked.context.metaContext type) checked.term
 
 def psElabDoBind
     (ops : PsElabDoOps) (context : PsElabContext)
@@ -177,7 +234,7 @@ def psElabDoBind
               context.environment context.metaContext context.localContext resultSort with
           | Except.error error => Except.error (PsElabError.infer error)
           | Except.ok level =>
-              let term :=
+              let term : PsExpr :=
                 match ops with
                 | PsElabDoOps.identity _ =>
                     -- Generated continuations are lambdas. Preserve strict
@@ -289,44 +346,51 @@ structure PsElabDoMutable where
   type : PsExpr
 
 def psElabDoMutableFindCurrent
-    (id : Nat) : List PsElabDoMutable -> Option PsElabDoMutable
-  | [] => none
-  | entry :: rest =>
-      if Nat.beq id entry.currentId then some entry
+    (id : Nat) (entries : List PsElabDoMutable) : Option PsElabDoMutable :=
+  match entries with
+  | List.nil => Option.none
+  | List.cons entry rest =>
+      if Nat.beq id entry.currentId then Option.some entry
       else psElabDoMutableFindCurrent id rest
 
 def psElabDoMutableFindBinding
-    (id : Nat) : List PsElabDoMutable -> Option PsElabDoMutable
-  | [] => none
-  | entry :: rest =>
-      if Nat.beq id entry.bindingId then some entry
+    (id : Nat) (entries : List PsElabDoMutable) : Option PsElabDoMutable :=
+  match entries with
+  | List.nil => Option.none
+  | List.cons entry rest =>
+      if Nat.beq id entry.bindingId then Option.some entry
       else psElabDoMutableFindBinding id rest
 
 def psElabDoMutableUpdate
-    (bindingId currentId : Nat) : List PsElabDoMutable -> List PsElabDoMutable
-  | [] => []
-  | entry :: rest =>
-      let next :=
+    (bindingId currentId : Nat) (entries : List PsElabDoMutable) :
+    List PsElabDoMutable :=
+  match entries with
+  | List.nil => []
+  | List.cons entry rest =>
+      let next : PsElabDoMutable :=
         if Nat.beq bindingId entry.bindingId then
           PsElabDoMutable.mk entry.bindingId currentId entry.userName entry.type
-        else entry
-      next :: psElabDoMutableUpdate bindingId currentId rest
+        else entry;
+      List.cons next (psElabDoMutableUpdate bindingId currentId rest)
 
 def psElabDoMutableVisible
-    (context : PsElabContext) : List PsElabDoMutable -> List PsElabDoMutable
-  | [] => []
-  | entry :: rest =>
-      let tail := psElabDoMutableVisible context rest
+    (context : PsElabContext) (entries : List PsElabDoMutable) :
+    List PsElabDoMutable :=
+  match entries with
+  | List.nil => []
+  | List.cons entry rest =>
+      let tail := psElabDoMutableVisible context rest;
       match psLocalFindUser context.localContext entry.userName with
-      | none => tail
-      | some declaration =>
-          if Nat.beq (psLocalDeclId declaration) entry.currentId then entry :: tail
+      | Option.none => tail
+      | Option.some declaration =>
+          if Nat.beq (psLocalDeclId declaration) entry.currentId then List.cons entry tail
           else tail
 
 def psElabDoMutableHasName
-    (name : PsName) : List PsElabDoMutable -> Bool
-  | [] => false
-  | entry :: rest =>
+    (name : PsName) (entries : List PsElabDoMutable) : Bool :=
+  match entries with
+  | List.nil => false
+  | List.cons entry rest =>
       if psNameEq name entry.userName then true
       else psElabDoMutableHasName name rest
 
@@ -338,66 +402,78 @@ def psElabDoWithLocal
     (outerContext : PsElabContext) (name : PsName) (type : PsExpr)
     (value : PsElabTermResult) (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let pushed := psLocalPushLet value.context.localContext name type value.term
-  let bodyContext := psElabContextWithLocal value.context pushed.context
+  let pushed := psLocalPushLet value.context.localContext name type value.term;
+  let bodyContext := psElabContextWithLocal value.context pushed.context;
   match next bodyContext pushed.id with
-  | .error error => .error error
-  | .ok body =>
-      let metas := body.context.metaContext
-      let term :=
+  | Except.error error => Except.error error
+  | Except.ok body =>
+      let metas := body.context.metaContext;
+      let term : PsExpr :=
         PsExpr.letE name (psMetaInstantiate metas type)
           (psMetaInstantiate metas value.term)
-          (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
+          (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term));
       psElabResolvedTerm (psElabContextWithMeta outerContext metas) term expected
 
 -- A continuation is elaborated once in its original lexical scope. Only the
 -- visible mutable values are parameters. Branch-local declarations therefore
 -- cannot leak, and captured functions keep the value present when created.
 -- The final Unit parameter delays the continuation even with no mutable locals.
+def psElabDoJoinWorker
+    (finish :
+      PsElabContext -> List PsElabDoMutable ->
+      Except PsElabError PsElabTermResult)
+    (carried : List PsElabDoMutable) :
+    PsElabContext -> List PsElabDoMutable -> Except PsElabError PsElabTermResult :=
+  match carried with
+  | List.nil =>
+      fun (context : PsElabContext) (state : List PsElabDoMutable) =>
+        let unitType := PsExpr.constE psUnitName [];
+        let name := psElabDoInternalName "_psc1DoContinue" context;
+        let pushed := psLocalPushBinding context.localContext name unitType PsBinderInfo.explicit;
+        match finish (psElabContextWithLocal context pushed.context) state with
+        | Except.error error => Except.error error
+        | Except.ok body =>
+            let metas := body.context.metaContext;
+            let term : PsExpr := PsExpr.lam name unitType
+              (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
+              PsBinderInfo.explicit;
+            psElabResolvedTerm (psElabContextWithMeta context metas) term Option.none
+  | List.cons entry rest =>
+      fun (context : PsElabContext) (state : List PsElabDoMutable) =>
+        let smaller : PsElabContext -> List PsElabDoMutable ->
+            Except PsElabError PsElabTermResult := psElabDoJoinWorker finish rest;
+        let type := psMetaInstantiate context.metaContext entry.type;
+        let pushed := psLocalPushBinding context.localContext entry.userName type PsBinderInfo.explicit;
+        let nextState := psElabDoMutableUpdate entry.bindingId pushed.id state;
+        match smaller (psElabContextWithLocal context pushed.context) nextState with
+        | Except.error error => Except.error error
+        | Except.ok body =>
+            let metas := body.context.metaContext;
+            let term : PsExpr := PsExpr.lam entry.userName (psMetaInstantiate metas type)
+              (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
+              PsBinderInfo.explicit;
+            psElabResolvedTerm (psElabContextWithMeta context metas) term Option.none
+
 def psElabDoJoin
     (finish :
       PsElabContext -> List PsElabDoMutable ->
       Except PsElabError PsElabTermResult)
     (carried : List PsElabDoMutable) (context : PsElabContext)
     (state : List PsElabDoMutable) : Except PsElabError PsElabTermResult :=
-  match carried with
-  | [] =>
-      let unitType := PsExpr.constE psUnitName []
-      let name := psElabDoInternalName "_psc1DoContinue" context
-      let pushed := psLocalPushBinding context.localContext name unitType PsBinderInfo.explicit
-      match finish (psElabContextWithLocal context pushed.context) state with
-      | .error error => .error error
-      | .ok body =>
-          let metas := body.context.metaContext
-          let term := PsExpr.lam name unitType
-            (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
-            PsBinderInfo.explicit
-          psElabResolvedTerm (psElabContextWithMeta context metas) term none
-  | entry :: rest =>
-      let type := psMetaInstantiate context.metaContext entry.type
-      let pushed := psLocalPushBinding context.localContext entry.userName type PsBinderInfo.explicit
-      let nextState := psElabDoMutableUpdate entry.bindingId pushed.id state
-      match psElabDoJoin finish rest
-          (psElabContextWithLocal context pushed.context) nextState with
-      | .error error => .error error
-      | .ok body =>
-          let metas := body.context.metaContext
-          let term := PsExpr.lam entry.userName (psMetaInstantiate metas type)
-            (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
-            PsBinderInfo.explicit
-          psElabResolvedTerm (psElabContextWithMeta context metas) term none
+  psElabDoJoinWorker finish carried context state
 
 def psElabDoJoinArguments
-    (state : List PsElabDoMutable) :
-    List PsElabDoMutable -> Except PsElabError (List PsExpr)
-  | [] => .ok [PsExpr.constE psUnitUnitName []]
-  | entry :: rest =>
+    (state : List PsElabDoMutable) (carried : List PsElabDoMutable) :
+    Except PsElabError (List PsExpr) :=
+  match carried with
+  | List.nil => Except.ok [PsExpr.constE psUnitUnitName []]
+  | List.cons entry rest =>
       match psElabDoMutableFindBinding entry.bindingId state with
-      | none => .error PsElabError.unsupportedTerm
-      | some current =>
+      | Option.none => Except.error PsElabError.unsupportedTerm
+      | Option.some current =>
           match psElabDoJoinArguments state rest with
-          | .error error => .error error
-          | .ok arguments => .ok (PsExpr.fvar current.currentId :: arguments)
+          | Except.error error => Except.error error
+          | Except.ok arguments => Except.ok (List.cons (PsExpr.fvar current.currentId) arguments)
 
 def psElabDoJoinCall
     (ops : PsElabDoOps) (result : PsExpr)
@@ -405,11 +481,11 @@ def psElabDoJoinCall
     (context : PsElabContext) (state : List PsElabDoMutable) :
     Except PsElabError PsElabTermResult :=
   match psElabDoJoinArguments state carried with
-  | .error error => .error error
-  | .ok arguments =>
+  | Except.error error => Except.error error
+  | Except.ok arguments =>
       psElabResolvedTerm context
         (psExprApplyMany (PsExpr.fvar joinId) arguments)
-        (some (psElabDoType ops result))
+        (Option.some (psElabDoType ops result))
 
 -- Conditions are bound once before construction of the ordinary checked ite.
 -- Its proposition and Decidable argument are the existing Bool decision path.
@@ -417,26 +493,26 @@ def psElabDoCoreIf
     (ops : PsElabDoOps) (result : PsExpr) (context : PsElabContext)
     (condition thenValue elseValue : PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let metas := context.metaContext
-  let type := psMetaInstantiate metas (psElabDoType ops result)
+  let metas := context.metaContext;
+  let type := psMetaInstantiate metas (psElabDoType ops result);
   match psInferType context.environment metas context.localContext type with
-  | .error error => .error (PsElabError.infer error)
-  | .ok typeType =>
+  | Except.error error => Except.error (PsElabError.infer error)
+  | Except.ok typeType =>
       match psInferEnsureSort context.environment metas context.localContext typeType with
-      | .error error => .error (PsElabError.infer error)
-      | .ok level =>
-          let boolType := PsExpr.constE psBoolName []
-          let trueValue := PsExpr.constE psBoolTrueName []
-          let condition := psMetaInstantiate metas condition
+      | Except.error error => Except.error (PsElabError.infer error)
+      | Except.ok level =>
+          let boolType := PsExpr.constE psBoolName [];
+          let trueValue := PsExpr.constE psBoolTrueName [];
+          let condition := psMetaInstantiate metas condition;
           let proposition := psExprApplyMany
             (PsExpr.constE psEqName [PsLevel.succ PsLevel.zero])
-            [boolType, condition, trueValue]
+            [boolType, condition, trueValue];
           let decision := psExprApplyMany (PsExpr.constE psBoolDecEqName [])
-            [condition, trueValue]
-          let term := psExprApplyMany (PsExpr.constE psIteName [level])
+            [condition, trueValue];
+          let term : PsExpr := psExprApplyMany (PsExpr.constE psIteName [level])
             [type, proposition, decision,
-              psMetaInstantiate metas thenValue, psMetaInstantiate metas elseValue]
-          psElabResolvedTerm context term (some type)
+              psMetaInstantiate metas thenValue, psMetaInstantiate metas elseValue];
+          psElabResolvedTerm context term (Option.some type)
 
 def psElabDoBranches
     (next :
@@ -446,11 +522,11 @@ def psElabDoBranches
     (condition : PsExpr) (thenBranch elseBranch : PsSyntaxTerm) :
     Except PsElabError PsElabTermResult :=
   match next context thenBranch with
-  | .error error => .error error
-  | .ok thenResult =>
+  | Except.error error => Except.error error
+  | Except.ok thenResult =>
       match next (psElabContextWithMeta context thenResult.context.metaContext) elseBranch with
-      | .error error => .error error
-      | .ok elseResult =>
+      | Except.error error => Except.error error
+      | Except.ok elseResult =>
           psElabDoCoreIf ops result
             (psElabContextWithMeta context elseResult.context.metaContext)
             condition thenResult.term elseResult.term

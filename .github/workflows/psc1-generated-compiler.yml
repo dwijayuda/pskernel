@@ -1,0 +1,162 @@
+name: PSC1 G1 compiler functionality and host regressions
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-generated-compiler-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  generated-js:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check the generated service controller and manifest reader syntax
+        run: |
+          set -euo pipefail
+          node --check scripts/generated-compiler-diagnostic.mjs
+          node --check host-tools/js-generation-manifest.mjs
+          node scripts/js-generation-manifest-contract-tests.mjs
+      - name: Build native seed and separate independent checker
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if lean --version; then break; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep 5
+          done
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_source_census_probe psc1_js_service_tests psc1_js_service_seed psc1_independent_checker psc1_worker_fusion_tests
+      - name: Exercise the production scalar facade and exact complete source
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_worker_fusion_tests
+          node scripts/worker-fusion-runtime-tests.mjs
+          .lake/build/bin/psc1_js_service_tests
+          node scripts/compiler-source-census-contract-tests.mjs
+          node scripts/compiler-closure-contract-tests.mjs
+          node scripts/compiler-source-census.mjs --strict-phase directjs-compiler
+          node scripts/compiler-closure-qualification.mjs --phase directjs-compiler --assurance ordinary-checked
+      - name: Seed once and execute actual generated compiler semantics
+        id: generated_execution
+        run: |
+          set -euo pipefail
+          node scripts/generated-compiler-diagnostic.mjs --g1-only
+      - name: Summarize retained failed sessions without discarding stderr
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root='dist/generated-compiler';
+          function scan(dir) {
+            if (!fs.existsSync(dir)) return;
+            for (const entry of fs.readdirSync(dir,{withFileTypes:true})) {
+              const file=path.join(dir,entry.name);
+              if (entry.isDirectory()) scan(file);
+              else if (entry.isFile() && entry.name==='failure.json') {
+                const value=JSON.parse(fs.readFileSync(file,'utf8'));
+                console.log('PSC1_RETAINED_SESSION_FAILURE: '+JSON.stringify({
+                  requestId:value.request?.requestId,state:value.state,failure:value.failure,
+                  events:value.events,publication:value.publication}));
+                const stderr=path.join(dir,'generated-compiler.stderr.txt');
+                if(fs.existsSync(stderr))
+                  console.log('PSC1_RETAINED_GENERATED_STDERR: '+fs.readFileSync(stderr,'utf8').slice(-6000));
+              }
+            }
+          }
+          scan(root);
+          JS
+      - name: Sample a failed normal generated process without changing its gate
+        if: ${{ failure() && steps.generated_execution.outcome == 'failure' }}
+        run: node scripts/profile-g1-failure.mjs
+      - name: Retain candidate graphs, executable identities and process evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-generated-compiler-${{ github.sha }}
+          path: |
+            psc1/dist/generated-compiler/
+            psc1/dist/generated-service-native/
+            psc1/dist/worker-fusion/
+            psc1/dist/scoped-correctness/compiler-source-census/
+            psc1/dist/scoped-correctness/compiler-closure/
+          if-no-files-found: warn
+          retention-days: 90
+
+  host-session-boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build separate native fixture preparer and official checker
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_js_service_seed psc1_independent_checker
+      - name: Test real host state and publication with native-prepared replay fixtures
+        run: |
+          set -euo pipefail
+          node --check host-tools/generated-compiler-session.mjs
+          node --check scripts/generated-session-boundary-tests.mjs
+          node scripts/generated-session-boundary-tests.mjs
+      - name: Retain boundary fixtures and immutable generation manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-generated-session-boundary-${{ github.sha }}
+          path: psc1/dist/generated-session-boundary/
+          if-no-files-found: warn
+          retention-days: 90

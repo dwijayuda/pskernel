@@ -1,6 +1,6 @@
-structure Prod (α : Type) (β : Type) where
-  fst : α
-  snd : β
+-- Prod, its constructor and projections belong to the checked Essential Core
+-- prelude. This module extends that identity; redeclaring it would conflict
+-- when imported by ordinary PSC1 projects.
 
 def product {α : Type} {β : Type}
     (first : α) (second : β) : Prod α β :=

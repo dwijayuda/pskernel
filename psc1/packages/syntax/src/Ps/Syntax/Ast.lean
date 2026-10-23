@@ -1,4 +1,5 @@
 import Ps.Foundation.Source
+import Ps.Foundation.Name
 
 structure PsSyntaxName where
   segments : List String
@@ -224,3 +225,33 @@ def psSyntaxDeclarationSpan (source : PsSyntaxDeclaration) : PsSourceSpan :=
   | .inductiveDecl _ _ _ _ span => span
   | .structureDecl _ _ _ span => span
   | .scopedDecl _ declaration => psSyntaxDeclarationSpan declaration
+
+-- Stable compiler implementation ownership is shared by native/generated hosts.
+def psSyntaxDeclarationQualifiedName (source : PsSyntaxDeclaration) : Option PsSyntaxName :=
+  match psSyntaxDeclarationQualify [] source with
+  | PsSyntaxDeclaration.definition name _ _ _ _ => Option.some name
+  | PsSyntaxDeclaration.partialDefinition name _ _ _ _ => Option.some name
+  | PsSyntaxDeclaration.theoremDecl name _ _ _ _ => Option.some name
+  | PsSyntaxDeclaration.inductiveDecl name _ _ _ _ => Option.some name
+  | PsSyntaxDeclaration.structureDecl name _ _ _ => Option.some name
+  | PsSyntaxDeclaration.scopedDecl _ _ => Option.none
+
+def psSyntaxNameIsCompilerImplementation (name : PsSyntaxName) : Bool :=
+  match name.segments with
+  | List.nil => false
+  | List.cons first rest =>
+      if psStringEq first "Ps" then
+        match rest with
+        | List.nil => false
+        | List.cons second tail =>
+            if psStringEq second "Internal" then
+              match tail with
+              | List.nil => false
+              | List.cons _ _ => true
+            else false
+      else false
+
+def psSyntaxDeclarationIsCompilerImplementation (source : PsSyntaxDeclaration) : Bool :=
+  match psSyntaxDeclarationQualifiedName source with
+  | Option.none => false
+  | Option.some name => psSyntaxNameIsCompilerImplementation name

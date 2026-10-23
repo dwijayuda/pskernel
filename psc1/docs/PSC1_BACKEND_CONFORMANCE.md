@@ -1,6 +1,51 @@
 # PSC1 backend conformance
 
-## Immutable tuple bindings and semantic namespaces
+## Current frozen Practical Core v1 qualification
+
+Compiler source 9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde, tested merge
+00decc7fb81fc4023f68cdcdbf8cff1fdd028b12, passes every selected gate in
+[Linux run 39829564386](https://github.com/dwijayuda/pskernel/actions/runs/39829564386).
+The [immutable receipt](PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json)
+records all jobs/steps, artifacts, runtime versions, actual observations and
+source/IR/admission identities. All 47 full-job steps pass. G1 and complete
+semantic/JS/Rust compiler-source closures pass separately in the same run.
+
+The frozen [contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json) has 14 families,
+37 qualified criteria, both grammars, all seven targets and four application
+categories. [Current status](PSC1_PRACTICAL_CORE_STATUS.json) is a data-only
+projection of that exact checkpoint. It supplies no admission or publication
+authority and does not transfer qualification to changed compiler code.
+
+The full matrix includes 252 control, 56 collection, 98 ordering and 28 library
+obligations, 168 compiler-like and 294 CLI/JSON actual process cases, seven
+typed IO adapters and separate minimum-Python counterparts. The 100000-item
+workloads, divergence deadlines, resource ceilings, negative checks and
+prior-output preservation remain. Default component exports remain Bool-only;
+explicit Bool/String and IO dispatcher profiles have their own checked ABI,
+actual execution and refusal evidence. See [typed IO](PSC1_TYPED_IO_V1.md)
+and [Wasm ABI](PSC1_WASM_STRING_ABI_V1.md).
+
+The current unpublished Linux x64/glibc package contains a 124537496-byte native
+compiler. Its tested tarball is 37798419 bytes, SHA-256
+c70a7e8965f4ddef4c48f14f9e645da3dc0389e23a841f372c2ff80f670f1956.
+[The full artifact](https://github.com/dwijayuda/pskernel/actions/runs/39829564386/artifacts/12451785253)
+expires 2026-11-05T19:03:04Z. Committed receipts do not extend artifact retention.
+Use [the release candidate guide](PSC1_RELEASE_CANDIDATE.md) for provenance and
+installation. No registry publication or release upload has occurred.
+
+Finite v1 qualification does not claim unrestricted Lean, general public
+aggregate marshalling, formal backend preservation or G2/G3/fixed-point success.
+Official Lean 4.35.0 remains the independent admission provider. G2/G3 remain
+separate manual qualification; non-Linux packages are outside this milestone.
+
+## Historical checkpoints
+
+The sections below retain their original observations, limitations and counts.
+Statements about incomplete families, missing features, Bool-only interfaces
+or package sizes describe those dated checkpoints, not the current finite v1
+candidate. Broader v7.2-family completeness is distinct from frozen v1 acceptance.
+
+## Historical immutable tuple bindings and semantic namespaces
 
 Implementation head `7e1158875cdf236a677448598bd5f677c11d4daf` passed all **34/34** steps in
 [focused Linux run 39467579973](https://github.com/dwijayuda/pskernel/actions/runs/39467579973).

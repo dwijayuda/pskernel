@@ -139,9 +139,9 @@ def jsonUnicodeScalarValid (value : Nat) : Bool :=
   else
     Nat.blt value 1114112
 
-def jsonReadUnicode4
+def jsonReadCodeUnit4
     (source : String)
-    (position : Nat) : Result (Prod Char Nat) JsonError :=
+    (position : Nat) : Result (Prod Nat Nat) JsonError :=
   match jsonReadHexDigit source position with
   | Result.error error => Result.error error
   | Result.ok a =>
@@ -162,10 +162,66 @@ def jsonReadUnicode4
                         (Nat.add
                           (Nat.mul c.fst 16)
                           d.fst));
-                  if jsonUnicodeScalarValid value then
-                    Result.ok (Prod.mk (Char.ofNat value) d.snd)
-                  else
-                    Result.error JsonError.invalidUnicode
+                  Result.ok (Prod.mk value d.snd)
+
+
+-- Preserve the public four-digit scalar decoder: isolated surrogate code units
+-- still refuse. JSON string escapes use the pair-aware decoder below.
+def jsonReadUnicode4
+    (source : String)
+    (position : Nat) : Result (Prod Char Nat) JsonError :=
+  match jsonReadCodeUnit4 source position with
+  | Result.error error => Result.error error
+  | Result.ok decoded =>
+      if jsonUnicodeScalarValid decoded.fst then
+        Result.ok (Prod.mk (Char.ofNat decoded.fst) decoded.snd)
+      else
+        Result.error JsonError.invalidUnicode
+
+def jsonReadSurrogateTail
+    (source : String)
+    (position : Nat)
+    (high : Nat) : Result (Prod Char Nat) JsonError :=
+  if String.Internal.atEnd source position then
+    Result.error JsonError.invalidUnicode
+  else if jsonCharCodeEq (String.Internal.get source position) 92 then
+    let afterSlash : Nat := String.Internal.next source position;
+    if String.Internal.atEnd source afterSlash then
+      Result.error JsonError.invalidUnicode
+    else if jsonCharCodeEq (String.Internal.get source afterSlash) 117 then
+      match jsonReadCodeUnit4 source (String.Internal.next source afterSlash) with
+      | Result.error error => Result.error JsonError.invalidUnicode
+      | Result.ok low =>
+          if Nat.blt low.fst 56320 then
+            Result.error JsonError.invalidUnicode
+          else if Nat.blt low.fst 57344 then
+            let scalar : Nat :=
+              Nat.add 65536
+                (Nat.add
+                  (Nat.mul (Nat.sub high 55296) 1024)
+                  (Nat.sub low.fst 56320));
+            Result.ok (Prod.mk (Char.ofNat scalar) low.snd)
+          else
+            Result.error JsonError.invalidUnicode
+    else
+      Result.error JsonError.invalidUnicode
+  else
+    Result.error JsonError.invalidUnicode
+
+def jsonReadUnicodeEscape
+    (source : String)
+    (position : Nat) : Result (Prod Char Nat) JsonError :=
+  match jsonReadCodeUnit4 source position with
+  | Result.error error => Result.error error
+  | Result.ok first =>
+      if Nat.blt first.fst 55296 then
+        Result.ok (Prod.mk (Char.ofNat first.fst) first.snd)
+      else if Nat.blt first.fst 56320 then
+        jsonReadSurrogateTail source first.snd first.fst
+      else if Nat.blt first.fst 57344 then
+        Result.error JsonError.invalidUnicode
+      else
+        Result.ok (Prod.mk (Char.ofNat first.fst) first.snd)
 
 partial def jsonParseStringBody
     (source : String)
@@ -225,7 +281,7 @@ partial def jsonParseStringBody
             afterEscape
             (String.push acc (Char.ofNat 9))
         else if jsonCharCodeEq escaped 117 then
-          match jsonReadUnicode4 source afterEscape with
+          match jsonReadUnicodeEscape source afterEscape with
           | Result.error error => Result.error error
           | Result.ok decoded =>
               jsonParseStringBody
@@ -391,6 +447,13 @@ def jsonObjectFind
       | Ordering.gt => jsonObjectFind tail key
   | _ => Option.none
 
+-- Comma and closing-delimiter states are distinct in strict JSON. The empty
+-- container branch is legal only before the first element, never after a comma.
+def jsonCommaBeforeClose (source : String) (position close : Nat) : Bool :=
+  let next : Nat := jsonSkipWhitespace source position;
+  if String.Internal.atEnd source next then false
+  else jsonCharCodeEq (String.Internal.get source next) close
+
 partial def jsonParseArrayWith
     (parseValue :
       Nat -> String -> Nat -> Result JsonParseResult JsonError)
@@ -430,12 +493,15 @@ partial def jsonParseArrayWith
                   let next : Nat :=
                     String.Internal.next source afterValue;
                   if jsonCharCodeEq separator 44 then
-                    jsonParseArrayWith
-                      parseValue
-                      remaining
-                      source
-                      next
-                      nextValues
+                    if jsonCommaBeforeClose source next 93 then
+                      Result.error (JsonError.expected "array value after comma")
+                    else
+                      jsonParseArrayWith
+                        parseValue
+                        remaining
+                        source
+                        next
+                        nextValues
                   else if jsonCharCodeEq separator 93 then
                     Result.ok
                       (JsonParseResult.mk nextValues next)
@@ -504,12 +570,15 @@ partial def jsonParseObjectWith
                           let next : Nat :=
                             String.Internal.next source afterValue;
                           if jsonCharCodeEq separator 44 then
-                            jsonParseObjectWith
-                              parseValue
-                              remaining
-                              source
-                              next
-                              nextFields
+                            if jsonCommaBeforeClose source next 125 then
+                              Result.error (JsonError.expected "object key after comma")
+                            else
+                              jsonParseObjectWith
+                                parseValue
+                                remaining
+                                source
+                                next
+                                nextFields
                           else if jsonCharCodeEq separator 125 then
                             Result.ok
                               (JsonParseResult.mk

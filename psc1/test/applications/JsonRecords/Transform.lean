@@ -1,0 +1,35 @@
+import ProofScript.Data.Json
+
+def recordCode (source : String) : Result Nat JsonError :=
+  match jsonParse source with
+  | Result.error error => Result.error error
+  | Result.ok object =>
+      match jsonObjectFind object "text" with
+      | Option.none => Result.error JsonError.invalidShape
+      | Option.some value =>
+          match value with
+          | JsonValue.string text =>
+              if String.Internal.atEnd text 0 then
+                Result.error JsonError.invalidShape
+              else
+                Result.ok (Char.toNat (String.Internal.get text 0))
+          | _ => Result.error JsonError.invalidShape
+
+def sumRecordCodes (sources : List String) : Result Nat JsonError :=
+  match sources with
+  | List.nil => Result.ok 0
+  | List.cons source tail =>
+      match recordCode source with
+      | Result.error error => Result.error error
+      | Result.ok code =>
+          match sumRecordCodes tail with
+          | Result.error error => Result.error error
+          | Result.ok rest => Result.ok (code + rest)
+
+def recordObservation (sources : List String) : Nat :=
+  match sumRecordCodes sources with
+  | Result.ok value => value
+  | Result.error error =>
+      match error with
+      | JsonError.invalidUnicode => 1
+      | _ => 2

@@ -38,30 +38,35 @@ def psHostWitArgument (parameter : PsVerifiedIrParameter) : Except String String
 def psHostWitSelectedExport (ir : PsValidatedIrModule) (name : String) : Except String String := do
   psWasmComponentWit (<- psWasmComponentMakePlan ir [name])
 
-def psHostDirectEmitWasmComponent
-    (session : PsHostDirectPrepared) (exportName outputPath : String) : IO Unit := do
+def psHostDirectEmitWasmComponents
+    (session : PsHostDirectPrepared) (exportNames : List String) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".wasm" then throw (IO.userError "PSC1_COMPONENT_OUTPUT_EXTENSION")
-  if !session.publicNames.contains exportName then
-    throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_IN_ENTRY_SOURCE")
-  let componentPlan <- match psWasmComponentMakePlan session.validated [exportName] with
+  if exportNames.isEmpty then throw (IO.userError "PSC1_COMPONENT_EXPORT_SET_EMPTY")
+  if exportNames.eraseDups.length != exportNames.length then
+    throw (IO.userError "PSC1_COMPONENT_EXPORT_DUPLICATE")
+  for name in exportNames do
+    if !session.publicNames.contains name then
+      throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_IN_ENTRY_SOURCE")
+  let componentPlan <- match psWasmComponentMakePlan session.validated exportNames with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
-  let plan <- match psBackendClosedPlan session.validated [exportName] with
+  let plan <- match psBackendClosedPlan session.validated exportNames with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
   let lowered <- match psWasmLowerSpecializedModule { wordSize := PsWasmWordSize.wasm32 } plan.raw with
     | .ok value => pure value
     | .error error => throw (IO.userError ("PSC1_COMPONENT_LOWER_UNSUPPORTED: " ++ psHostWasmLowerErrorText error))
-  if !lowered.exports.any (fun item => item.1 == exportName) then
-    throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_LOWERED")
-  let selected := psWasmSelectRuntime { lowered with exports := lowered.exports.filter (fun item => item.1 == exportName) }
+  for name in exportNames do
+    if !lowered.exports.any (fun item => item.1 == name) then
+      throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_LOWERED")
+  let selected := psWasmSelectRuntime { lowered with exports := lowered.exports.filter (fun item => exportNames.contains item.1) }
   let emitted <- match psWasmComponentEmit componentPlan selected with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
   let name := psHostArtifactFileName outputPath "module.wasm"
   let stem := (name.dropEnd 5).toString
   psHostWithArtifactStage outputPath fun stage => do
-    psHostDirectWriteSelectedProvenance session stage [exportName]
+    psHostDirectWriteSelectedProvenance session stage exportNames
     let core := stage / (stem ++ ".core.wasm")
     let witPath := stage / (stem ++ ".wit")
     let component := stage / name
@@ -85,6 +90,10 @@ def psHostDirectEmitWasmComponent
         runtime (psWasmRuntimeRequirements selected) [] "psc-wasm-ir-json/1:functions"]
     psHostPublishArtifactStage stage outputPath "wasm-component"
   IO.println ("PSC1_COMPONENT_WASM: " ++ outputPath)
+
+def psHostDirectEmitWasmComponent
+    (session : PsHostDirectPrepared) (exportName outputPath : String) : IO Unit :=
+  psHostDirectEmitWasmComponents session [exportName] outputPath
 
 def psHostDirectWasmComponent
     (inputPath exportName outputPath : String) : IO Unit := do

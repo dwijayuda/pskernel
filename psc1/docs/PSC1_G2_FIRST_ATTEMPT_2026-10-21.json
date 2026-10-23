@@ -1,0 +1,58 @@
+{
+  "schema": "psc1-js-g2-attempt/4.35.0-v1",
+  "head": "3b189f589b0a4ad06eb1bcc666014220e72268df",
+  "run": 39545154962,
+  "job": 119041551702,
+  "status": "G1-complete-G2-aborted-before-publication",
+  "summary": {
+    "status": "failed",
+    "generatedCompilerExecution": "passed-G1-selected-corpus",
+    "selfCompilation": "attempting-G2",
+    "fixedPoint": "not-run",
+    "failure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler",
+    "service": {
+      "generation": 1,
+      "sha256": "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "e4b2904530be5ed81f7b678c345e0d634aa29ae4153a6b9122e822c16f44a3fb",
+      "sourceModules": 83,
+      "candidateAdmission": "1bbdfa80eb942ce1930b0889f77ff9c2bbe4115c6b22cdd83ce36bd7ab6e2d76",
+      "canonicalOriginalIr": "1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888",
+      "canonicalSpecializedIr": "fd46ee97e13e06002abf33719e97c521036408333bcb3be87f5ed308669bb969"
+    },
+    "cases": 8,
+    "completedCorpusGenerations": [
+      1
+    ],
+    "generationAttempts": [
+      {
+        "generation": 2,
+        "producer": "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d",
+        "sourceClosureDigest": "e4b2904530be5ed81f7b678c345e0d634aa29ae4153a6b9122e822c16f44a3fb",
+        "requestSha256": "1353995b84b1e33f3c0942a758e94a41c68dcb8f8b5fbc74d8f19fc6db73b331",
+        "status": "failed-before-publication",
+        "events": [
+          {
+            "role": "generated-compiler",
+            "executable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+            "args": [
+              "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-compiler-runner.mjs",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs",
+              "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-O1QBcC/request.json",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-O1QBcC/candidate.json"
+            ],
+            "status": null,
+            "signal": "SIGABRT",
+            "elapsedMs": 131880,
+            "error": null
+          }
+        ]
+      }
+    ]
+  },
+  "stderr": "not-retained-by-original-session; diagnostic enhancement pending",
+  "G3": "not-run",
+  "nativeDelegation": "none after G1 seed",
+  "next": "exact executable/request CPU replay; retain real failure stderr; correct reached mechanism without raised heap/stack/time limits"
+}

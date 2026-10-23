@@ -1,5 +1,6 @@
 import Ps.CompilerIr.Validate
 import Ps.BackendPhp.Runtime
+import Ps.BackendCommon.Plan
 
 structure PsPhpPrintedModule where
   source : String
@@ -137,12 +138,15 @@ private def phpCapture (context : PhpContext) : String :=
   let captures := refs ++ values
   if captures.isEmpty then "" else " use (" ++ String.intercalate ", " captures ++ ")"
 
-private def phpGuard (name : String) (type : PsVerifiedIrType) : PhpEmit Unit := do
+private def phpGuard (context : PhpContext) (name : String) (type : PsVerifiedIrType) : PhpEmit Unit := do
   let condition := match type with
     | .primitive .nat => "!(" ++ name ++ " instanceof \\GMP) || gmp_cmp(" ++ name ++ ", 0) < 0"
     | .primitive .int => "!(" ++ name ++ " instanceof \\GMP)"
     | .primitive .bool => "!is_bool(" ++ name ++ ")"
-    | .primitive .string => "!is_string(" ++ name ++ ") || preg_match('//u', " ++ name ++ ") !== 1"
+    | .primitive .string =>
+        if context.helpers.contains "$__ps_utf8Valid" then
+          "!is_string(" ++ name ++ ") || !$__ps_utf8Valid(" ++ name ++ ")"
+        else "!is_string(" ++ name ++ ") || preg_match('//u', " ++ name ++ ") !== 1"
     | .primitive .char => "!is_string(" ++ name ++ ") || preg_match('/\\A.\\z/us', " ++ name ++ ") !== 1"
     | .primitive .unit => name ++ " !== null"
     | .function _ _ => "!(" ++ name ++ " instanceof \\Closure)"
@@ -310,7 +314,7 @@ private def phpEmitExpr : Nat → PhpContext → PsVerifiedIrExpr → PhpEmit St
         phpIndent 1
         phpLine ("if (func_num_args() !== " ++ toString parameters.length ++ ") { throw new \\ArgumentCountError('PSC1_PHP_ARITY'); }")
         if context.scheduled then phpLine "if (false) { yield; }"
-        for p in printedParameters do phpGuard p.2.1 p.2.2.2
+        for p in printedParameters do phpGuard context p.2.1 p.2.2.2
         let locals := printedParameters.map (fun p => (p.1, p.2.1))
         let value ← phpEmitExpr fuel { context with locals := locals ++ context.locals } body
         phpLine ("return " ++ value ++ ";")
@@ -479,7 +483,7 @@ private def phpEmitDeclaration (context : PhpContext)
   if hasTail then
     phpLine "while (true) {"
     phpIndent 1
-  for parameter in parameters do phpGuard parameter.2.1 parameter.2.2.2
+  for parameter in parameters do phpGuard context parameter.2.1 parameter.2.2.2
   if hasTail then
     phpEmitDirectSelfTail declaration (parameters.map (fun parameter => parameter.2.1))
       4096 { context with locals } declaration.body
@@ -500,7 +504,7 @@ private def phpPublicScalar : PsVerifiedIrType → Bool
   | _ => false
 
 def psPhpEmitValidatedModule
-    (irModule : PsValidatedIrModule) (publicNames : List String) :
+    (irModule : PsValidatedIrModule) (publicNames : List String) (ioAbi : Bool := false) :
     Except String PsPhpPrintedModule := do
   let _ ← (psStrictValidateModule irModule.raw).mapError (fun _ => "PSC1_PHP_IR_VALIDATION_FAILED")
   let raw := irModule.raw
@@ -526,7 +530,7 @@ def psPhpEmitValidatedModule
     match raw.declarations.find? (fun d => d.name == name) with
     | none => throw ("PSC1_PHP_UNKNOWN_PUBLIC_DECLARATION: " ++ name)
     | some d =>
-        if !phpPublicScalar d.resultType || !d.parameters.all (fun p => phpPublicScalar p.type) then
+        if !phpPublicScalar d.resultType || !d.parameters.all (fun p => phpPublicScalar p.type || (ioAbi && psBackendIoDispatcherType p.type)) then
           throw ("PSC1_PHP_PUBLIC_ABI_UNSUPPORTED: " ++ name)
   let valueNames := (raw.declarations.filter (fun d => d.parameters.isEmpty)).map (fun d => d.name)
   let requested := raw.declarations.flatMap fun declaration =>

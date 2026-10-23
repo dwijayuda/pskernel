@@ -1,11 +1,13 @@
 import Ps.BackendWasm.Lower
 import Ps.BackendWasm.Encode
+import Ps.BackendWasm.StringAbi
 
 /-- Runtime calls are selected from the lowered instruction graph. Keep all user
 functions and their closure references, and close only the backend helper set. -/
 private def runtimeNames : List String :=
   (psWasmNatRuntimeFunctions ++ psWasmIntRuntimeFunctions ++
-    psWasmStringRuntimeFunctions ++ psWasmIntReprRuntimeFunctions).map (fun f => f.name)
+    psWasmStringRuntimeFunctions ++ psWasmIntReprRuntimeFunctions ++
+    psWasmStringAbiFunctions).map (fun f => f.name)
 
 private def calls (function : PsWasmFunction) : List String :=
   function.body.filterMap fun instruction => match instruction with

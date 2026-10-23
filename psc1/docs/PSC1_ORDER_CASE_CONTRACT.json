@@ -1,0 +1,112 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "checked-nat-int-order-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "natOrderCase",
+      "features": [
+        "true",
+        "false",
+        "equal",
+        "zero",
+        "unicode",
+        "lt-le-gt-ge"
+      ]
+    },
+    {
+      "id": "intOrderCase",
+      "features": [
+        "negative",
+        "zero",
+        "positive",
+        "reversed-negative-magnitudes"
+      ]
+    },
+    {
+      "id": "largeOrderCase",
+      "features": [
+        "beyond-64-bit",
+        "no-unary-runtime-recursion"
+      ]
+    },
+    {
+      "id": "controlOrderCase",
+      "features": [
+        "stored-proposition",
+        "do-branch",
+        "loop-condition"
+      ]
+    },
+    {
+      "id": "numericCase",
+      "features": [
+        "arbitrary-precision-nat",
+        "saturating-subtraction",
+        "zero-divisor",
+        "nat-remainder",
+        "signed-arithmetic",
+        "precedence",
+        "left-association"
+      ]
+    },
+    {
+      "id": "shortCircuitCase",
+      "features": [
+        "dynamic-and",
+        "dynamic-or",
+        "skipped-divergence",
+        "typed-bool-equality",
+        "unary-not-precedence"
+      ]
+    },
+    {
+      "id": "intEqualityCase",
+      "features": [
+        "checked-signed-Boolean-equality",
+        "opposite-signs",
+        "zero",
+        "equal-negative-magnitudes",
+        "unequal-negative-magnitudes",
+        "beyond-64-bit",
+        "strict-left-before-right-operand-lets"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "mixed-domain",
+    "bool-order",
+    "prop-as-bool",
+    "chained",
+    "duplicate-prelude",
+    "verified",
+    "mixed-arithmetic",
+    "mixed-equality",
+    "bool-arithmetic"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array"
+  ]
+}

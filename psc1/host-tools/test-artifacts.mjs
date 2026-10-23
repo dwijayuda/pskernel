@@ -45,6 +45,16 @@ await test('formatting preserves TS declarations and types', async () => {
   const result = await formatEcma(input, 'ts');
   assert.deepEqual(exportedNames(result.program), ['identity']);
 });
+await test('TS zero single and multiple variants retain exact canonical type trees', async () => {
+  const input = 'type Empty = never; type Single = {readonly tag:"one";readonly left:bigint;readonly right:bigint}; type Multiple = {readonly tag:"left"} | {readonly tag:"right"};';
+  const result = await formatEcma(input, 'ts');
+  assert.deepEqual(result.program.body.map(node=>node.typeAnnotation.type),
+    ['TSNeverKeyword','TSTypeLiteral','TSUnionType']);
+  assert.equal((await formatEcma(result.text, 'ts')).text,result.text);
+  // The host does not normalize away changed type syntax to excuse the emitter.
+  await assert.rejects(formatEcma('type Single = | {readonly tag:"one";readonly left:bigint;readonly right:bigint};','ts'),
+    /PSC1_FORMATTING_CHANGED_SYNTAX_TREE/);
+});
 await test('negative source-map VLQ values', () => {
   assert.equal(vlq(-1), 'D');
   assert.equal(vlq(-10), 'V');
@@ -74,6 +84,21 @@ await test('WIT comparison is structural, complete and trivia-independent', () =
   assert.throws(() => scalarWitApi(first.replace(' }', ' export identity: func(x: u64) -> u64; }')), /DUPLICATE_EXPORT/);
   assert.throws(() => scalarWitApi(first + ' world extra {}'), /TRAILING_SYNTAX/);
   assert.throws(() => scalarWitApi(first.replace('identity:', 'identity-:')), /UNRECOGNIZED_TOKEN/);
+});
+
+await test('opt-in String WIT compares complete imports exports and scalar types', () => {
+ const io='package proofscript:psc1; world app { import dispatch: func(request: string) -> string; export run: func() -> bool; }';
+ const pure='world app { export echo: func(text: string) -> string; }';
+ assert.deepEqual(scalarWitApi(pure,'wasm-string').exports[0].result,'string');
+ assert.equal(scalarWitApi(io,'wasm-io-dispatcher').imports[0].name,'dispatch');
+ assert.throws(()=>scalarWitApi(pure),/WIT_SCALAR/);
+ assert.throws(()=>scalarWitApi(io,'wasm-string'),/IMPORT_UNSUPPORTED/);
+ for(const source of [io.replace('dispatch:','other:'),io.replace('request: string','request: bool'),
+  io.replace('import dispatch: func(request: string) -> string;',''),
+  io.replace('export run:', 'import run:'),io+' world extra {}'])
+  assert.throws(()=>scalarWitApi(source,'wasm-io-dispatcher'));
+ assert.notDeepEqual(scalarWitApi(pure,'wasm-string'),
+  scalarWitApi(pure.replace(') -> string',') -> bool'),'wasm-string'));
 });
 
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-publication-unit-'));

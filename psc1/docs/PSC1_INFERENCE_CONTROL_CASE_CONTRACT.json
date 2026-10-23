@@ -1,0 +1,224 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "bounded-inference-control-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "contextsCase",
+      "features": [
+        "numeric-context",
+        "empty-array",
+        "tuple",
+        "lambda-expectation",
+        "nested-generic-call"
+      ]
+    },
+    {
+      "id": "telescopeCase",
+      "features": [
+        "dependent-explicit-type",
+        "intervening-implicit",
+        "expected-result"
+      ]
+    },
+    {
+      "id": "ownerCase",
+      "features": [
+        "nested-do-owner",
+        "loop-return",
+        "skipped-continuation"
+      ]
+    },
+    {
+      "id": "loopCase",
+      "features": [
+        "list",
+        "array",
+        "range",
+        "empty",
+        "reversed",
+        "mutation"
+      ]
+    },
+    {
+      "id": "scopeCase",
+      "features": [
+        "typed-handler",
+        "lexical-rollback",
+        "old-value-capture",
+        "continuation"
+      ]
+    },
+    {
+      "id": "rollbackCase",
+      "features": [
+        "failed-Bool-context",
+        "generic-numeric-operands",
+        "recognized-order-Prop-fallback",
+        "fresh-Int-and-Array-contexts"
+      ]
+    },
+    {
+      "id": "callCase",
+      "features": [
+        "sequential-telescope",
+        "explicit-Unit-call",
+        "native-and-comma-surfaces",
+        "arity-and-ambiguity-refusal"
+      ]
+    },
+    {
+      "id": "ownerLambdaCase",
+      "features": [
+        "lambda-owned-do",
+        "nested-loop-return",
+        "skipped-outer-continuation",
+        "independent-grouped-owner"
+      ]
+    },
+    {
+      "id": "joinsCase",
+      "features": [
+        "branch-and-loop-joins",
+        "mutable-shadows-immutable",
+        "original-RHS-scope",
+        "old-value-capture"
+      ]
+    },
+    {
+      "id": "handlerScopeCase",
+      "features": [
+        "nested-handler",
+        "typed-rethrow",
+        "lexical-rollback",
+        "return-bypasses-catch",
+        "handler-binder-scope"
+      ]
+    },
+    {
+      "id": "collectionControllerCase",
+      "features": [
+        "ordered-list-and-array",
+        "empty-collection",
+        "CompilerM-state",
+        "typed-error-skips-continuation"
+      ]
+    },
+    {
+      "id": "rangeControllerCase",
+      "features": [
+        "lower-inclusive-upper-exclusive",
+        "empty-and-reversed",
+        "Nat-endpoints"
+      ]
+    },
+    {
+      "id": "streamingControllerCase",
+      "features": [
+        "100000-complete-actions",
+        "huge-range-immediate-return",
+        "first-action-before-all-continuations"
+      ]
+    },
+    {
+      "id": "directRecursionCase",
+      "features": [
+        "100000-tail-calls",
+        "exact-ordinary-runtime-graph"
+      ]
+    },
+    {
+      "id": "nonTailRecursionCase",
+      "features": [
+        "non-tail-continuations",
+        "checked-ordinary-pairing"
+      ]
+    },
+    {
+      "id": "higherOrderRecursionCase",
+      "features": [
+        "owned-function-argument",
+        "old-closure-capture",
+        "private-ABI"
+      ]
+    },
+    {
+      "id": "tupleProductsCase",
+      "features": [
+        "Unit",
+        "grouped-binder",
+        "right-associated-products",
+        "nested-wildcard",
+        "original-RHS-scope",
+        "old-closure-identity"
+      ]
+    },
+    {
+      "id": "namespaceCoreCase",
+      "features": [
+        "nested",
+        "reopened",
+        "dotted",
+        "current-enclosing-root-lookup",
+        "local-precedence",
+        "early-bound-full-identity"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-context",
+    "ambiguous-array",
+    "dependent-type",
+    "unresolved-lambda",
+    "escaping-local",
+    "type-changing",
+    "duplicate-prelude",
+    "verified",
+    "wrong-arity",
+    "ambiguous-call",
+    "wrong-unit",
+    "empty-required-call",
+    "wrong-state",
+    "wrong-error",
+    "wrong-return",
+    "shadow-mutable",
+    "nested-assignment",
+    "escaping-handler",
+    "wrong-handler-result",
+    "malformed-handler",
+    "for-noniterable",
+    "for-range-type",
+    "for-immutable",
+    "for-escape",
+    "tuple-duplicate",
+    "tuple-shape",
+    "namespace-duplicate",
+    "namespace-unknown",
+    "namespace-end"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array"
+  ]
+}

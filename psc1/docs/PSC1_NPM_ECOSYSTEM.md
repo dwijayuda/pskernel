@@ -1,5 +1,11 @@
 # PSC1 native npm toolchain and source packages
 
+Current finite v1 compiler source and installed-package qualification:
+`9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde`,
+[Linux run 39829564386](https://github.com/dwijayuda/pskernel/actions/runs/39829564386).
+See [the candidate guide](PSC1_RELEASE_CANDIDATE.md) for the exact tarball,
+SHA-256, retained artifact and ABI choices. Package publication remains separate.
+
 ## Current implementation
 
 The compiler is the checked native Lean 4.35.0 executable. The npm launcher verifies

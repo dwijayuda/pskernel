@@ -1,0 +1,136 @@
+{
+  "schema": "psc1-lexer-meta-g2-failure/1",
+  "sourceCommit": "4cc36fc8aa3ee707a669973b5c65b8474bf5be69",
+  "runId": 39858945154,
+  "jobId": 120104321493,
+  "status": "failed",
+  "diagnostic": {
+    "status": "failed",
+    "generatedCompilerExecution": "passed-G1-selected-corpus",
+    "selfCompilation": "attempting-G2",
+    "fixedPoint": "not-run",
+    "failure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler:ETIMEDOUT",
+    "service": {
+      "generation": 1,
+      "sha256": "719b9697f6a22fb16755d2249d6d998644c21aff3661b9045a83bb5ea527eabc",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "098702a21a7d495579b6706a3f1eec661944af21a15e4dbdc3b4d1709eb544e4",
+      "sourceModules": 86,
+      "candidateAdmission": "244c3f3418076d9e6a3b77b4f4fc3559a7c60b8266f443bfafd362d3c7a84a97",
+      "canonicalOriginalIr": "924cfa5472b9922923059ba9511374ce64c50e957f401c58b26eeabb5666d3e8",
+      "canonicalSpecializedIr": "68ab4f299350d5510496f444abc827b5f86c8b03bfed9a6a6b063086dba82521"
+    },
+    "cases": 10,
+    "completedCorpusGenerations": [
+      1
+    ],
+    "generationAttempts": [
+      {
+        "generation": 2,
+        "producer": "719b9697f6a22fb16755d2249d6d998644c21aff3661b9045a83bb5ea527eabc",
+        "sourceClosureDigest": "098702a21a7d495579b6706a3f1eec661944af21a15e4dbdc3b4d1709eb544e4",
+        "requestSha256": "27ef703343ca90dc29ba97cdbfb5848d8a405d7b97fb83259dc723b9793ce8a2",
+        "status": "failed-before-publication",
+        "events": [
+          {
+            "role": "generated-compiler",
+            "executable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+            "args": [
+              "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-compiler-runner.mjs",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs",
+              "719b9697f6a22fb16755d2249d6d998644c21aff3661b9045a83bb5ea527eabc",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-SLU84A/request.json",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-SLU84A/candidate.json"
+            ],
+            "status": null,
+            "signal": "SIGTERM",
+            "elapsedMs": 240171,
+            "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT"
+          }
+        ],
+        "failureDirectory": "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/failed-ec5ed99b-ea93-4042-8146-941e3fbbc7fd"
+      }
+    ]
+  },
+  "profile": {
+    "schema": "psc1-selfhost-failure-cpu-profile/1",
+    "testedCommit": "4cc36fc8aa3ee707a669973b5c65b8474bf5be69",
+    "branchHeadCommit": "4cc36fc8aa3ee707a669973b5c65b8474bf5be69",
+    "requestId": "G2-self",
+    "serviceSha256": "719b9697f6a22fb16755d2249d6d998644c21aff3661b9045a83bb5ea527eabc",
+    "requestSha256": "27ef703343ca90dc29ba97cdbfb5848d8a405d7b97fb83259dc723b9793ce8a2",
+    "runnerSha256": "bbcda77cb0942484146fc23bd299ac821bfb13e9780cfdace5742d8c6725187e",
+    "nodeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+    "status": null,
+    "signal": "SIGTERM",
+    "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT",
+    "elapsedMs": 240221,
+    "timeoutMs": 240000,
+    "originalFailure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler:ETIMEDOUT",
+    "logs": [
+      {
+        "name": "isolate-0x33883000-4114-v8.log",
+        "bytes": 53226594
+      }
+    ],
+    "nativeCompilerDelegation": false,
+    "admission": "not-run",
+    "publication": "not-run",
+    "G2Qualification": false,
+    "scope": "Exact failed generated G2/G3 request; no native frontend/emitter, response adoption, admission or publication; original qualification remains failed."
+  },
+  "artifact": {
+    "id": 12460934656,
+    "name": "psc1-manual-selfhost-4cc36fc8aa3ee707a669973b5c65b8474bf5be69-attempt-1",
+    "size_in_bytes": 13313045,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12460934656",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12460934656/zip",
+    "expired": false,
+    "created_at": "2026-10-22T21:50:43Z",
+    "expires_at": "2027-01-20T21:38:54Z",
+    "updated_at": "2026-10-22T21:50:43Z",
+    "digest": "sha256:14735f632e1ae7495d6d8c7ec684e40db0e4891b1d68421433793a99bbe1661c",
+    "workflow_run": {
+      "id": 39858945154,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "fix/psc1-closure-normalization-20261021",
+      "head_sha": "4cc36fc8aa3ee707a669973b5c65b8474bf5be69"
+    }
+  },
+  "reader": {
+    "commit": "337988c08f4ba4f72191a64780f9d69b783595c1",
+    "runId": 39860611583,
+    "jobId": 120110043265
+  },
+  "G3": "not-run",
+  "resourcePolicy": "unchanged",
+  "publication": "not-committed",
+  "sampleAttribution": {
+    "gcTicks": 43337,
+    "gcPercent": 21.5,
+    "leadingNestedNodeCallers": [
+      {
+        "name": "psExprInstantiateAtWorker anonymous",
+        "ticks": 3406
+      },
+      {
+        "name": "psMetaExprHasAssignedVarScan anonymous",
+        "ticks": 3343
+      },
+      {
+        "name": "psMetaExprHasAssignedVarScan",
+        "ticks": 3025
+      },
+      {
+        "name": "psExprInstantiateAtWorker",
+        "ticks": 2963
+      },
+      {
+        "name": "psStringEq",
+        "ticks": 2253
+      }
+    ],
+    "note": "Sampled attribution only; lexer length and empty-level rebuilding are absent from the leading excerpt. No G2 completion or allocation bound follows."
+  }
+}

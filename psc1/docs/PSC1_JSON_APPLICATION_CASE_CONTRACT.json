@@ -1,0 +1,101 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "json-record-application-core-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "pairCase",
+      "features": [
+        "pair",
+        "multi-module-json-record-processing"
+      ]
+    },
+    {
+      "id": "scalarCase",
+      "features": [
+        "scalar",
+        "multi-module-json-record-processing"
+      ]
+    },
+    {
+      "id": "loneCase",
+      "features": [
+        "lone",
+        "multi-module-json-record-processing"
+      ]
+    },
+    {
+      "id": "badPairCase",
+      "features": [
+        "badPair",
+        "multi-module-json-record-processing"
+      ]
+    },
+    {
+      "id": "truncatedCase",
+      "features": [
+        "truncated",
+        "multi-module-json-record-processing"
+      ]
+    },
+    {
+      "id": "mixedCase",
+      "features": [
+        "mixed",
+        "multi-module-json-record-processing"
+      ]
+    },
+    {
+      "id": "scalarDecoderCase",
+      "features": [
+        "scalarDecoder",
+        "multi-module-json-record-processing"
+      ]
+    },
+    {
+      "id": "separatorCase",
+      "features": [
+        "strict-array-separator",
+        "strict-object-separator",
+        "whitespace-after-comma",
+        "malformed-json-refusal"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-record-type",
+    "wrong-record-list",
+    "duplicate-prelude",
+    "verified"
+  ],
+  "oracleLibraries": [
+    "json",
+    "ordering",
+    "option",
+    "prod",
+    "result"
+  ],
+  "requiredModules": [
+    "JsonRecords/Input",
+    "JsonRecords/Transform"
+  ],
+  "applicationBoundary": "Pure JSON record processing core only; typed console/file capabilities, resource measurements and portable public aggregate ABI remain unqualified.",
+  "unicodePolicy": "Valid escaped pairs agree with official native Lean JSON parsing. Malformed/unpaired surrogates retain PSC1 invalidUnicode refusal; Lean replacement behavior is intentionally not imported."
+}

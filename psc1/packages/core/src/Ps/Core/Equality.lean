@@ -38,19 +38,19 @@ def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
         | .zero => true
         | _ => false
   | .succ leftValue =>
-      let smaller : PsLevel -> Bool :=
-        psLevelStructuralEq leftValue;
       fun (right : PsLevel) =>
+        let smaller : PsLevel -> Bool :=
+          psLevelStructuralEq leftValue;
         match right with
         | .succ rightValue =>
             smaller rightValue
         | _ => false
   | .max leftA leftB =>
-      let leftEq : PsLevel -> Bool :=
-        psLevelStructuralEq leftA;
-      let rightEq : PsLevel -> Bool :=
-        psLevelStructuralEq leftB;
       fun (right : PsLevel) =>
+        let leftEq : PsLevel -> Bool :=
+          psLevelStructuralEq leftA;
+        let rightEq : PsLevel -> Bool :=
+          psLevelStructuralEq leftB;
         match right with
         | .max rightA rightB =>
             if leftEq rightA then
@@ -59,11 +59,11 @@ def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
               false
         | _ => false
   | .imax leftA leftB =>
-      let leftEq : PsLevel -> Bool :=
-        psLevelStructuralEq leftA;
-      let rightEq : PsLevel -> Bool :=
-        psLevelStructuralEq leftB;
       fun (right : PsLevel) =>
+        let leftEq : PsLevel -> Bool :=
+          psLevelStructuralEq leftA;
+        let rightEq : PsLevel -> Bool :=
+          psLevelStructuralEq leftB;
         match right with
         | .imax rightA rightB =>
             if leftEq rightA then
@@ -81,7 +81,6 @@ def psLevelStructuralEq (left : PsLevel) : PsLevel -> Bool :=
         match right with
         | .mvar rightId => Nat.beq leftId rightId
         | _ => false
-
 def psLevelListEq
     (left : List PsLevel) : List PsLevel -> Bool :=
   match left with
@@ -91,9 +90,9 @@ def psLevelListEq
         | [] => true
         | _ => false
   | leftValue :: leftRest =>
-      let smaller : List PsLevel -> Bool :=
-        psLevelListEq leftRest;
       fun (right : List PsLevel) =>
+        let smaller : List PsLevel -> Bool :=
+          psLevelListEq leftRest;
         match right with
         | rightValue :: rightRest =>
             if psLevelStructuralEq leftValue rightValue then
@@ -101,7 +100,6 @@ def psLevelListEq
             else
               false
         | _ => false
-
 def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
   match left with
   | .bvar leftIndex =>
@@ -135,11 +133,11 @@ def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
               false
         | _ => false
   | .app leftFn leftArg =>
-      let fnEq : PsExpr -> Bool :=
-        psExprAlphaEq leftFn;
-      let argEq : PsExpr -> Bool :=
-        psExprAlphaEq leftArg;
       fun (right : PsExpr) =>
+        let fnEq : PsExpr -> Bool :=
+          psExprAlphaEq leftFn;
+        let argEq : PsExpr -> Bool :=
+          psExprAlphaEq leftArg;
         match right with
         | .app rightFn rightArg =>
             if fnEq rightFn then
@@ -148,11 +146,11 @@ def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
               false
         | _ => false
   | .lam _ leftType leftBody leftBinder =>
-      let typeEq : PsExpr -> Bool :=
-        psExprAlphaEq leftType;
-      let bodyEq : PsExpr -> Bool :=
-        psExprAlphaEq leftBody;
       fun (right : PsExpr) =>
+        let typeEq : PsExpr -> Bool :=
+          psExprAlphaEq leftType;
+        let bodyEq : PsExpr -> Bool :=
+          psExprAlphaEq leftBody;
         match right with
         | .lam _ rightType rightBody rightBinder =>
             if psBinderInfoEq leftBinder rightBinder then
@@ -164,11 +162,11 @@ def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
               false
         | _ => false
   | .forallE _ leftType leftBody leftBinder =>
-      let typeEq : PsExpr -> Bool :=
-        psExprAlphaEq leftType;
-      let bodyEq : PsExpr -> Bool :=
-        psExprAlphaEq leftBody;
       fun (right : PsExpr) =>
+        let typeEq : PsExpr -> Bool :=
+          psExprAlphaEq leftType;
+        let bodyEq : PsExpr -> Bool :=
+          psExprAlphaEq leftBody;
         match right with
         | .forallE _ rightType rightBody rightBinder =>
             if psBinderInfoEq leftBinder rightBinder then
@@ -180,13 +178,13 @@ def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
               false
         | _ => false
   | .letE _ leftType leftValue leftBody =>
-      let typeEq : PsExpr -> Bool :=
-        psExprAlphaEq leftType;
-      let valueEq : PsExpr -> Bool :=
-        psExprAlphaEq leftValue;
-      let bodyEq : PsExpr -> Bool :=
-        psExprAlphaEq leftBody;
       fun (right : PsExpr) =>
+        let typeEq : PsExpr -> Bool :=
+          psExprAlphaEq leftType;
+        let valueEq : PsExpr -> Bool :=
+          psExprAlphaEq leftValue;
+        let bodyEq : PsExpr -> Bool :=
+          psExprAlphaEq leftBody;
         match right with
         | .letE _ rightType rightValue rightBody =>
             if typeEq rightType then
@@ -203,9 +201,9 @@ def psExprAlphaEq (left : PsExpr) : PsExpr -> Bool :=
         | .lit rightValue => psLiteralEq leftValue rightValue
         | _ => false
   | .proj leftType leftIndex leftValue =>
-      let valueEq : PsExpr -> Bool :=
-        psExprAlphaEq leftValue;
       fun (right : PsExpr) =>
+        let valueEq : PsExpr -> Bool :=
+          psExprAlphaEq leftValue;
         match right with
         | .proj rightType rightIndex rightValue =>
             if psNameEq leftType rightType then

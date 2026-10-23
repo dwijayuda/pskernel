@@ -1,0 +1,423 @@
+{
+  "schema": "psc1-core-visitor-g2-failure/1",
+  "sourceCommit": "7de601f57ccc9e5dca2ab717fc726efab02acd8e",
+  "runId": 39861084058,
+  "jobId": 120111640762,
+  "status": "failed",
+  "diagnostic": {
+    "status": "failed",
+    "generatedCompilerExecution": "passed-G1-selected-corpus",
+    "selfCompilation": "attempting-G2",
+    "fixedPoint": "not-run",
+    "failure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler:ETIMEDOUT",
+    "service": {
+      "generation": 1,
+      "sha256": "d23b9965b0308648a74cace2a1a3d290803f03569b6e4030f40ff90e21227079",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "e6d449541d6bee8e8735f4d0125757d89f3dc839ad65f9ea8d1b494864180ea2",
+      "sourceModules": 86,
+      "candidateAdmission": "0846ba9754423bacc27f8727bb4d8dce2c5eda47cb9789a25914346863d0e2f6",
+      "canonicalOriginalIr": "0c2015ed875ae773b25d05d2804f6baf14d83f08b0b379f12c9636bfb94c8313",
+      "canonicalSpecializedIr": "c42ba934370d0b37c64bd260ebbab5576377c60cff08dc0c19ee8fad7e4d50f5"
+    },
+    "cases": 10,
+    "completedCorpusGenerations": [
+      1
+    ],
+    "generationAttempts": [
+      {
+        "generation": 2,
+        "producer": "d23b9965b0308648a74cace2a1a3d290803f03569b6e4030f40ff90e21227079",
+        "sourceClosureDigest": "e6d449541d6bee8e8735f4d0125757d89f3dc839ad65f9ea8d1b494864180ea2",
+        "requestSha256": "2d2ba2eb8e684cb745bcac2f9f96c07d565afec51b754c19e810917d68c76385",
+        "status": "failed-before-publication",
+        "events": [
+          {
+            "role": "generated-compiler",
+            "executable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+            "args": [
+              "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-compiler-runner.mjs",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs",
+              "d23b9965b0308648a74cace2a1a3d290803f03569b6e4030f40ff90e21227079",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-uTS8Sx/request.json",
+              "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-uTS8Sx/candidate.json"
+            ],
+            "status": null,
+            "signal": "SIGTERM",
+            "elapsedMs": 240151,
+            "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT"
+          }
+        ],
+        "failureDirectory": "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/failed-8ab7b464-1950-40ac-9268-78685fa6c737"
+      }
+    ]
+  },
+  "profile": {
+    "schema": "psc1-selfhost-failure-cpu-profile/1",
+    "testedCommit": "7de601f57ccc9e5dca2ab717fc726efab02acd8e",
+    "branchHeadCommit": "7de601f57ccc9e5dca2ab717fc726efab02acd8e",
+    "requestId": "G2-self",
+    "serviceSha256": "d23b9965b0308648a74cace2a1a3d290803f03569b6e4030f40ff90e21227079",
+    "requestSha256": "2d2ba2eb8e684cb745bcac2f9f96c07d565afec51b754c19e810917d68c76385",
+    "runnerSha256": "bbcda77cb0942484146fc23bd299ac821bfb13e9780cfdace5742d8c6725187e",
+    "nodeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+    "status": null,
+    "signal": "SIGTERM",
+    "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT",
+    "elapsedMs": 240306,
+    "timeoutMs": 240000,
+    "originalFailure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler:ETIMEDOUT",
+    "logs": [
+      {
+        "name": "isolate-0xb4bf000-4272-v8.log",
+        "bytes": 51673311
+      }
+    ],
+    "nativeCompilerDelegation": false,
+    "admission": "not-run",
+    "publication": "not-run",
+    "G2Qualification": false,
+    "scope": "Exact failed generated G2/G3 request; no native frontend/emitter, response adoption, admission or publication; original qualification remains failed."
+  },
+  "artifact": {
+    "id": 12462063500,
+    "name": "psc1-manual-selfhost-7de601f57ccc9e5dca2ab717fc726efab02acd8e-attempt-1",
+    "size_in_bytes": 12066624,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12462063500",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12462063500/zip",
+    "expired": false,
+    "created_at": "2026-10-22T22:08:18Z",
+    "expires_at": "2027-01-20T21:55:31Z",
+    "updated_at": "2026-10-22T22:08:18Z",
+    "digest": "sha256:b9f12e6b8fa84647ce96f76cef1c534214bfb1ac27dce8aaab8e0918e0b03bee",
+    "workflow_run": {
+      "id": 39861084058,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "fix/psc1-closure-normalization-20261021",
+      "head_sha": "7de601f57ccc9e5dca2ab717fc726efab02acd8e"
+    }
+  },
+  "reader": {
+    "commit": "4e408eca114370dac0404b37d5bb8faa2d57e685",
+    "runId": 39863014327,
+    "jobId": 120118179696
+  },
+  "nativeProofEvidence": {
+    "sourceCommit": "ba027ada3d7bb0be1c69cbfd015bf930e034a7c2",
+    "runId": 39861839336,
+    "jobId": 120117453281,
+    "status": "success",
+    "scope": "All seven visitor reference equalities plus count/lexer/empty-substitution proofs and existing native regressions; same compiler bytes as manual candidate. Not full candidate qualification."
+  },
+  "sampleAttribution": {
+    "ticks": 206145,
+    "gcTicks": 46290,
+    "timeWindows": [
+      {
+        "quarter": 1,
+        "low": 417,
+        "high": 60013656,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "    823    1.6%    5.8%  Builtin: LoadIC_Megamorphic",
+          "    754    1.5%    5.3%  Builtin: FindOrderedHashMapEntry",
+          "    727    1.4%    5.2%  Builtin: MapPrototypeSet",
+          "    540    1.1%    3.8%  Builtin: InterpreterEntryTrampoline",
+          "    536    1.0%    3.8%  Builtin: CompileLazy",
+          "    499    1.0%    3.5%  Builtin: ResumeGeneratorTrampoline",
+          "    491    1.0%    3.5%  Builtin: GeneratorPrototypeNext",
+          "    481    0.9%    3.4%  Builtin: GetProperty",
+          "    443    0.9%    3.1%  Builtin: LoadIC_NoFeedback",
+          "    373    0.7%    2.6%  JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6417:871",
+          "    318    0.6%    2.3%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    283    0.6%    2.0%  JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:7292",
+          "    249    0.5%    1.8%  Builtin: LoadIC",
+          "    235    0.5%    1.7%  Builtin: CallFunction_ReceiverIsAny",
+          "    220    0.4%    1.6%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:781",
+          "    212    0.4%    1.5%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    209    0.4%    1.5%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    202    0.4%    1.4%  Builtin: CreateIterResultObject",
+          "    192    0.4%    1.4%  JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6417:816",
+          "    180    0.4%    1.3%  Builtin: CreateGeneratorObject"
+        ]
+      },
+      {
+        "quarter": 1,
+        "low": 417,
+        "high": 60013656,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  12997   25.4%   92.2%  JavaScript",
+          "    777    1.5%    5.5%  C++",
+          "  12254   24.0%   86.9%  GC",
+          "  37042   72.4%          Shared libraries",
+          "    329    0.6%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 1,
+        "low": 417,
+        "high": 60013656,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  34939   68.3%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  24983   71.5%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   1742    7.0%      JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:7292",
+          "   1095   62.9%        Builtin: GeneratorPrototypeNext",
+          "   1044   95.3%          JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:1363",
+          "   1044  100.0%            Builtin: GeneratorPrototypeNext",
+          "     51    4.7%          JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:1363",
+          "     51  100.0%            Builtin: GeneratorPrototypeNext",
+          "    622   35.7%        JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:1363",
+          "    622  100.0%          Builtin: GeneratorPrototypeNext",
+          "    622  100.0%            JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:1119",
+          "     24    1.4%        JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:1363",
+          "     24  100.0%          Builtin: GeneratorPrototypeNext",
+          "     20   83.3%            JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:1119",
+          "      4   16.7%            JS: ^<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6430:1119",
+          "   1740    7.0%      JS: ~<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6417:871"
+        ]
+      },
+      {
+        "quarter": 2,
+        "low": 60013656,
+        "high": 120026895,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "   1251    2.4%    9.1%  Builtin: LoadIC_Megamorphic",
+          "   1002    1.9%    7.3%  Builtin: CompileLazy",
+          "    663    1.3%    4.8%  Builtin: GeneratorPrototypeNext",
+          "    595    1.2%    4.3%  Builtin: ResumeGeneratorTrampoline",
+          "    568    1.1%    4.1%  Builtin: LoadIC",
+          "    351    0.7%    2.5%  JS: *psLexListLengthAcc$spec$Char$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6831:45",
+          "    266    0.5%    1.9%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    257    0.5%    1.9%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:205",
+          "    242    0.5%    1.8%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    230    0.4%    1.7%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    226    0.4%    1.6%  Builtin: FindOrderedHashMapEntry",
+          "    213    0.4%    1.5%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    207    0.4%    1.5%  JS: *psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6249:39",
+          "    169    0.3%    1.2%  Builtin: SuspendGeneratorBaseline",
+          "    166    0.3%    1.2%  JS: *psEnvironmentIndexFindWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6481:45",
+          "    163    0.3%    1.2%  Builtin: CallFunction_ReceiverIsAny",
+          "    156    0.3%    1.1%  Builtin: MapPrototypeSet",
+          "    154    0.3%    1.1%  Builtin: WeakMapLookupHashIndex",
+          "    150    0.3%    1.1%  Builtin: LoadICTrampoline_Megamorphic",
+          "    142    0.3%    1.0%  Builtin: CreateIterResultObject"
+        ]
+      },
+      {
+        "quarter": 2,
+        "low": 60013656,
+        "high": 120026895,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  12809   24.8%   93.0%  JavaScript",
+          "    651    1.3%    4.7%  C++",
+          "  10958   21.2%   79.6%  GC",
+          "  37880   73.3%          Shared libraries",
+          "    312    0.6%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 2,
+        "low": 60013656,
+        "high": 120026895,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  35945   69.6%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  26651   74.1%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   1409    5.3%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:205",
+          "    822   58.3%        Builtin: GeneratorPrototypeNext",
+          "    822  100.0%          JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:53",
+          "    822  100.0%            Builtin: GeneratorPrototypeNext",
+          "    587   41.7%        JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:53",
+          "    587  100.0%          Builtin: GeneratorPrototypeNext",
+          "    587  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "   1187    4.5%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    738   62.2%        JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    738  100.0%          Builtin: GeneratorPrototypeNext",
+          "    738  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    449   37.8%        Builtin: GeneratorPrototypeNext",
+          "    449  100.0%          JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    449  100.0%            Builtin: GeneratorPrototypeNext"
+        ]
+      },
+      {
+        "quarter": 3,
+        "low": 120026895,
+        "high": 180040134,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "   1164    2.3%    8.2%  Builtin: LoadIC_Megamorphic",
+          "   1000    1.9%    7.1%  JS: *psLexListLengthAcc$spec$Char$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6831:45",
+          "    986    1.9%    7.0%  Builtin: CompileLazy",
+          "    738    1.4%    5.2%  Builtin: GeneratorPrototypeNext",
+          "    570    1.1%    4.0%  Builtin: ResumeGeneratorTrampoline",
+          "    456    0.9%    3.2%  Builtin: LoadIC",
+          "    258    0.5%    1.8%  Builtin: FindOrderedHashMapEntry",
+          "    235    0.5%    1.7%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    228    0.4%    1.6%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    217    0.4%    1.5%  JS: *psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6249:39",
+          "    213    0.4%    1.5%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    212    0.4%    1.5%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:205",
+          "    188    0.4%    1.3%  Builtin: SuspendGeneratorBaseline",
+          "    180    0.3%    1.3%  Builtin: WeakMapLookupHashIndex",
+          "    174    0.3%    1.2%  Builtin: CallFunction_ReceiverIsAny",
+          "    173    0.3%    1.2%  Builtin: MapPrototypeSet",
+          "    169    0.3%    1.2%  JS: *__ps$impl$psStringEq file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:156:31",
+          "    161    0.3%    1.1%  JS: *psEnvironmentIndexFindWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6481:45",
+          "    158    0.3%    1.1%  Builtin: CreateIterResultObject",
+          "    157    0.3%    1.1%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92"
+        ]
+      },
+      {
+        "quarter": 3,
+        "low": 120026895,
+        "high": 180040134,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  13235   25.6%   93.4%  JavaScript",
+          "    685    1.3%    4.8%  C++",
+          "  11504   22.3%   81.2%  GC",
+          "  37471   72.6%          Shared libraries",
+          "    243    0.5%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 3,
+        "low": 120026895,
+        "high": 180040134,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  35718   69.2%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  25731   72.0%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   1064    4.1%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:205",
+          "    667   62.7%        Builtin: GeneratorPrototypeNext",
+          "    667  100.0%          JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:53",
+          "    667  100.0%            Builtin: GeneratorPrototypeNext",
+          "    397   37.3%        JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:53",
+          "    397  100.0%          Builtin: GeneratorPrototypeNext",
+          "    397  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "   1000    3.9%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    587   58.7%        JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    587  100.0%          Builtin: GeneratorPrototypeNext",
+          "    587  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    413   41.3%        Builtin: GeneratorPrototypeNext",
+          "    413  100.0%          JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    413  100.0%            Builtin: GeneratorPrototypeNext"
+        ]
+      },
+      {
+        "quarter": 4,
+        "low": 180040134,
+        "high": 240053373,
+        "section": "[JavaScript]",
+        "excerpt": [
+          "[JavaScript]:",
+          "   ticks  total  nonlib   name",
+          "   1303    2.5%    9.9%  Builtin: LoadIC_Megamorphic",
+          "   1053    2.0%    8.0%  Builtin: CompileLazy",
+          "    583    1.1%    4.4%  Builtin: GeneratorPrototypeNext",
+          "    540    1.0%    4.1%  Builtin: ResumeGeneratorTrampoline",
+          "    376    0.7%    2.9%  Builtin: LoadIC",
+          "    279    0.5%    2.1%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:205",
+          "    264    0.5%    2.0%  JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    244    0.5%    1.9%  JS: *__ps$invoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:7:22",
+          "    239    0.5%    1.8%  JS: *psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6249:39",
+          "    220    0.4%    1.7%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "    217    0.4%    1.6%  Builtin: FindOrderedHashMapEntry",
+          "    212    0.4%    1.6%  Builtin: WeakMapLookupHashIndex",
+          "    171    0.3%    1.3%  JS: *psEnvironmentIndexFindWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6481:45",
+          "    169    0.3%    1.3%  Builtin: CallFunction_ReceiverIsAny",
+          "    168    0.3%    1.3%  JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    160    0.3%    1.2%  Builtin: CreateIterResultObject",
+          "    152    0.3%    1.2%  JS: *psLexListLengthAcc$spec$Char$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6831:45",
+          "    150    0.3%    1.1%  Builtin: LoadICTrampoline_Megamorphic",
+          "    126    0.2%    1.0%  JS: *__ps$tailInvoke file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:8:26",
+          "    120    0.2%    0.9%  Builtin: RecordWriteSaveFP"
+        ]
+      },
+      {
+        "quarter": 4,
+        "low": 180040134,
+        "high": 240053373,
+        "section": "[Summary]",
+        "excerpt": [
+          "[Summary]:",
+          "   ticks  total  nonlib   name",
+          "  12173   23.5%   92.6%  JavaScript",
+          "    719    1.4%    5.5%  C++",
+          "  11574   22.4%   88.0%  GC",
+          "  38562   74.6%          Shared libraries",
+          "    260    0.5%          Unaccounted"
+        ]
+      },
+      {
+        "quarter": 4,
+        "low": 180040134,
+        "high": 240053373,
+        "section": "[Bottom up",
+        "excerpt": [
+          "[Bottom up (heavy) profile]:",
+          "  Note: percentage shows a share of a particular caller in the total",
+          "  amount of its parent calls.",
+          "  Callers occupying less than 1.0% are not shown.",
+          "",
+          "   ticks parent  name",
+          "  36722   71.0%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "  26705   72.7%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+          "   1555    5.8%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:205",
+          "    920   59.2%        Builtin: GeneratorPrototypeNext",
+          "    920  100.0%          JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:53",
+          "    920  100.0%            Builtin: GeneratorPrototypeNext",
+          "    635   40.8%        JS: *__ps$impl$psExprInstantiateAtWorker$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:6469:53",
+          "    635  100.0%          Builtin: GeneratorPrototypeNext",
+          "    635  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "   1290    4.8%      JS: *<anonymous> file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:92",
+          "    778   60.3%        JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    778  100.0%          Builtin: GeneratorPrototypeNext",
+          "    778  100.0%            JS: *__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:5:18",
+          "    512   39.7%        Builtin: GeneratorPrototypeNext",
+          "    512  100.0%          JS: *__ps$impl$psMetaExprHasAssignedVarScan file:///home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs:2024:49",
+          "    512  100.0%            Builtin: GeneratorPrototypeNext"
+        ]
+      }
+    ],
+    "interpretation": "First timestamp quartile dominated by JSON decode; later windows contain lexer/elaboration/substitution/name activity. Stable capture let wrappers remain in fused visitor output. Sampling is not a total cost or allocation proof."
+  },
+  "G3": "not-run",
+  "resourcePolicy": "unchanged",
+  "publication": "not-committed"
+}

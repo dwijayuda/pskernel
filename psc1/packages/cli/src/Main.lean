@@ -1,4 +1,5 @@
 import Ps.Host.WasmComponent
+import Ps.Host.WasmString
 import Ps.Host.ScriptBackend
 
 -- Native and npm launchers use this one command model. There is no implicit
@@ -6,8 +7,10 @@ import Ps.Host.ScriptBackend
 def psCliUsage : String :=
   "ProofScript PSC1 checked native compiler (Lean 4.35.0)\n" ++
   "usage:\n" ++
+  "  Add --abi io-dispatcher for the explicit String dispatcher input ABI.\n" ++
   "  Add --assurance ordinary for checked partial execution; --assurance verified is unavailable and rejects.\n" ++
   "  psc1 check <input.lean|input.ps>\n" ++
+  "  wasm-component: --export <name> or --exports <comma-separated-names>\n" ++
   "  psc1 build <input.lean|input.ps> --out <output.js|output.ts>\n" ++
   "  psc1 build <input.lean|input.ps> --target <js|ts|rust|wasm-core|python|php> --out <output>\n" ++
   "  psc1 build <input.lean|input.ps> --targets ts,js --out-dir <directory>\n" ++
@@ -79,6 +82,10 @@ private def psCliExecution
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSourceFor inputPath assurance)
   | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
       buildTargetsFor inputPath outputDir targets assurance
+  | ["build", inputPath, "--target", "wasm-component", "--exports", exportsText, "--out", outputPath]
+  | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--exports", exportsText] =>
+      psHostDirectEmitWasmComponents (← psHostDirectPrepareFor inputPath assurance)
+        (exportsText.splitOn ",") outputPath
   | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath]
   | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--export", exportName] =>
       psHostDirectEmitWasmComponent (← psHostDirectPrepareFor inputPath assurance) exportName outputPath
@@ -109,6 +116,10 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
       buildFor inputPath outputPath target .checked
   | ["build", inputPath, "--targets", targets, "--out-dir", outputDir] =>
       buildTargetsFor inputPath outputDir targets .checked
+  | ["build", inputPath, "--target", "wasm-component", "--exports", exportsText, "--out", outputPath]
+  | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--exports", exportsText] =>
+      psHostDirectEmitWasmComponents (← psHostDirectPrepareFor inputPath .checked)
+        (exportsText.splitOn ",") outputPath
   | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath]
   | ["build", inputPath, "--target", "wasm-component", "--out", outputPath, "--export", exportName] =>
       psHostDirectWasmComponent inputPath exportName outputPath
@@ -117,11 +128,60 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
   | ["wat", binaryPath, "--out", watPath] => psHostWasmBinaryToWat binaryPath watPath
   | _ => throw (IO.userError psCliUsage)
 
+
+private def psCliAbiArgs : List String → Option String → List String →
+    Except String (String × List String)
+  | [], abi, reversed => .ok (abi.getD "scalar", reversed.reverse)
+  | "--abi" :: value :: rest, none, reversed =>
+      if value == "scalar" || value == "io-dispatcher" || value == "wasm-string" then
+        psCliAbiArgs rest (some value) reversed
+      else .error ("PSC1_ABI_UNKNOWN: " ++ value)
+  | "--abi" :: _, some _, _ => .error "PSC1_ABI_DUPLICATE"
+  | ["--abi"], none, _ => .error "PSC1_ABI_VALUE_REQUIRED"
+  | argument :: rest, abi, reversed => psCliAbiArgs rest abi (argument :: reversed)
+
+private def psCliIoExecution (args : List String) (assurance : PsHostAssurance) : IO Unit := do
+  if assurance == .verified then throw (IO.userError "PSC1_VERIFIED_EXECUTION_UNAVAILABLE")
+  match args with
+  | ["build", inputPath, "--target", target, "--out", outputPath] =>
+      let some kind := psBackendTargetFromName target
+        | throw (IO.userError "PSC1_TARGET_UNKNOWN")
+      if kind == .wasmCore || kind == .wasmComponent then
+        return (← psHostDirectEmitWasmString (← psHostDirectPrepareWasmFor inputPath assurance true)
+          outputPath (kind == .wasmComponent))
+      let session ← psHostDirectPrepareIoFor inputPath assurance
+      match psHostDirectCheckPublicApi kind session with
+      | .error reason => throw (IO.userError reason)
+      | .ok _ => pure ()
+      match kind with
+      | .js => psHostDirectEmitJavaScript session outputPath
+      | .ts => psHostDirectEmitTypeScript session outputPath
+      | .rust => psHostDirectEmitRust session outputPath
+      | .python => psHostDirectEmitPython session outputPath
+      | .php => psHostDirectEmitPhp session outputPath
+      | _ => throw (IO.userError "PSC1_IO_DISPATCHER_ABI_TARGET_UNSUPPORTED")
+  | _ => throw (IO.userError "PSC1_IO_ABI_REQUIRES_EXPLICIT_BUILD_TARGET")
+
+private def psCliWasmStringExecution (args : List String) (assurance : PsHostAssurance) : IO Unit := do
+  if assurance == .verified then throw (IO.userError "PSC1_VERIFIED_EXECUTION_UNAVAILABLE")
+  match args with
+  | ["build", inputPath, "--target", target, "--out", outputPath] =>
+      if target != "wasm-core" && target != "wasm-component" then
+        throw (IO.userError "PSC1_WASM_STRING_ABI_TARGET_UNSUPPORTED")
+      psHostDirectEmitWasmString (← psHostDirectPrepareWasmFor inputPath assurance false)
+        outputPath (target == "wasm-component")
+  | _ => throw (IO.userError "PSC1_WASM_STRING_REQUIRES_EXPLICIT_BUILD_TARGET")
+
 def main (args : List String) : IO Unit := do
   if Lean.versionString != PsKernelLean.providerVersion || Lean.githash != PsKernelLean.providerCommit then
     throw (IO.userError "PSC1_NATIVE_LEAN_PIN_MISMATCH: compiler runtime does not match the native source pin")
   let (assurance, command) ← match psCliAssuranceArgs args none [] with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
-  if assurance == .checked then psCliCheckedExecution command
+  let (abi, command) ← match psCliAbiArgs command none [] with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  if abi == "wasm-string" then psCliWasmStringExecution command assurance
+  else if abi == "io-dispatcher" then psCliIoExecution command assurance
+  else if assurance == .checked then psCliCheckedExecution command
   else psCliExecution assurance command

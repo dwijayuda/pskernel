@@ -1,0 +1,49 @@
+{
+  "schema": "psc1-selfhost-open-defects/1",
+  "releaseContractUnchanged": true,
+  "defects": [
+    {
+      "id": "directjs-g2-heap",
+      "target": "js",
+      "status": "open-deprioritized-reference-backend",
+      "evidence": "PSC1_G2_PERFORMANCE_DEFECT_2026-10-21.md"
+    },
+    {
+      "id": "rust-full-compiler-stack",
+      "target": "rust",
+      "status": "open-after-qualified-G1",
+      "latestRun": 39893147337,
+      "latestElapsedMs": 14116,
+      "requestSha256": "ae10e4daf7ed47e76ff30caca7c26a961a4746e3458336a52b4a598e16754681",
+      "correctedClasses": [
+        "redundant owned String copies",
+        "last-use worker String aliases",
+        "private regular linear Rc destruction",
+        "bounded String-to-list cursor recursion"
+      ],
+      "next": "inspect exact post-cursor crash diagnosis before another correction; do not raise stack/fuel/resources"
+    },
+    {
+      "id": "typescript-full-compiler-deadline",
+      "target": "ts",
+      "status": "open-after-qualified-G1",
+      "latestRun": 39893184640,
+      "latestElapsedMs": 240086,
+      "correctedClasses": [
+        "strict native checker contextual inference",
+        "structured generator overhead",
+        "bounded String-to-list cursor recursion"
+      ],
+      "next": "measured late frontend/elaboration and runtime dispatch engineering; preserve strict checking and fixed resource limits"
+    },
+    {
+      "id": "generated-build-product-repeatability",
+      "targets": [
+        "rust",
+        "ts"
+      ],
+      "status": "not-yet-qualified",
+      "next": "after actual G2/G3 source/graph/IR fixed points, record repeated clean executable/emitted-product identities without skipping generations"
+    }
+  ]
+}

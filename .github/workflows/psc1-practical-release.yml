@@ -1,0 +1,23 @@
+name: PSC1 Practical Core release qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-practical-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native:
+    uses: ./.github/workflows/psc1-architecture-native.yml
+  closures:
+    uses: ./.github/workflows/psc1-compiler-closure.yml
+  g1:
+    uses: ./.github/workflows/psc1-generated-compiler.yml
+  full-release-contract:
+    uses: ./.github/workflows/psc1-scoped-correctness.yml
+    with:
+      require_release_ready: true

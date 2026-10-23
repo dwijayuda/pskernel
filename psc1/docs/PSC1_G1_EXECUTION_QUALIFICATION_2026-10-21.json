@@ -1,0 +1,694 @@
+{
+  "schema": "psc1-real-g1-execution/4.35.0-v1",
+  "head": "921eb1d7b8a5dc539d192ccda5a4ceb14c21ac52",
+  "testedMerge": "ece4925682d426509868564f663c26c482f91a2a",
+  "run": 39543944316,
+  "final": "success",
+  "generatedJob": 119037751335,
+  "hostBoundaryJob": 119037751024,
+  "nativeRun": 39543944344,
+  "wholeClosureRun": 39543944319,
+  "wholeClosureFinal": "success",
+  "fullScopedRun": 39543944381,
+  "fullScopedFinal": "in-progress-at-receipt",
+  "summary": {
+    "status": "passed-diagnostic",
+    "generatedCompilerExecution": "passed-selected-corpus",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "service": {
+      "generation": 1,
+      "sha256": "7a1efe8d3e03e5c507d00e034651b81fa7d4062c5a459e9a356c9753aaaa531d",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "e4b2904530be5ed81f7b678c345e0d634aa29ae4153a6b9122e822c16f44a3fb",
+      "sourceModules": 83,
+      "candidateAdmission": "1bbdfa80eb942ce1930b0889f77ff9c2bbe4115c6b22cdd83ce36bd7ab6e2d76",
+      "canonicalOriginalIr": "1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888",
+      "canonicalSpecializedIr": "fd46ee97e13e06002abf33719e97c521036408333bcb3be87f5ed308669bb969"
+    },
+    "cases": 8
+  },
+  "positiveCases": [
+    {
+      "id": "lean-modules",
+      "elapsedMs": 1546,
+      "maxRssKiB": 564428,
+      "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+      "generation": "8e8c90fddfd4d2202538795c453b001240163991aecc89b4b222fbcebdebce50"
+    },
+    {
+      "id": "ps-integer-unicode",
+      "elapsedMs": 1055,
+      "maxRssKiB": 391292,
+      "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+      "generation": "e2da46d38860ca312e5fa085f552d349501c55bc41529961039a582f986db5eb"
+    },
+    {
+      "id": "lean-handler-pattern",
+      "elapsedMs": 3593,
+      "maxRssKiB": 387964,
+      "sourceSha256": "c019318148de8d6272aa06d2a957af3c53fb9acdd4fbf56a7188df6bcf92efbe",
+      "generation": "cada6aae29f7744ec7b79e3904195a8e8902c4ef5480a37107c9bfe36dab3d0b"
+    },
+    {
+      "id": "lean-ordinary-loop",
+      "elapsedMs": 4732,
+      "maxRssKiB": 409288,
+      "sourceSha256": "32c4ad0012a20682d28f65327da8a98cf9c68902a19d97d9366ae4c7a368dba2",
+      "generation": "9c2d0571f88e89f20ca3796859498aa6e86f536a8117c13ca94a86025bda75ba"
+    }
+  ],
+  "negativeAssertions": [
+    {
+      "case": "wrong-body",
+      "grammar": "lean",
+      "phase": "elaboration"
+    },
+    {
+      "case": "missing-import",
+      "grammar": "ps",
+      "phase": "capture"
+    },
+    {
+      "case": "checked-partial",
+      "grammar": "lean",
+      "phase": "preparation"
+    },
+    {
+      "case": "verified",
+      "grammar": "ps",
+      "phase": "wire"
+    }
+  ],
+  "negativeEvidence": "all four assertions executed before passed-diagnostic; complete per-process records retained in artifact diagnostic.json",
+  "artifacts": [
+    {
+      "id": 12320976187,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyMDk3NjE4Nw==",
+      "name": "psc1-generated-session-boundary-ece4925682d426509868564f663c26c482f91a2a",
+      "size_in_bytes": 59547,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320976187",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320976187/zip",
+      "expired": false,
+      "digest": "sha256:31465e729e975797c71493b3bf48ce15cf16fd94c7f001e45bd05d9636ada64d",
+      "created_at": "2026-10-21T04:27:03Z",
+      "updated_at": "2026-10-21T04:27:03Z",
+      "expires_at": "2026-11-04T04:27:03Z",
+      "workflow_run": {
+        "id": 39543944316,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "921eb1d7b8a5dc539d192ccda5a4ceb14c21ac52"
+      }
+    },
+    {
+      "id": 12320558486,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyMDU1ODQ4Ng==",
+      "name": "psc1-generated-compiler-ece4925682d426509868564f663c26c482f91a2a",
+      "size_in_bytes": 4407011,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320558486",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12320558486/zip",
+      "expired": false,
+      "digest": "sha256:6678627d98f798f9c6a5053d0c1ad1e1277a89a12893ae58ef6cc3ff86df0f23",
+      "created_at": "2026-10-21T04:27:53Z",
+      "updated_at": "2026-10-21T04:27:53Z",
+      "expires_at": "2026-11-04T04:27:51Z",
+      "workflow_run": {
+        "id": 39543944316,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "921eb1d7b8a5dc539d192ccda5a4ceb14c21ac52"
+      }
+    }
+  ],
+  "closurePhases": [
+    {
+      "phase": "rust-compiler",
+      "modules": 86,
+      "passed": true,
+      "canonicalAdmissionBytesParity": "accepted",
+      "canonicalIrBytesParity": "accepted",
+      "binarySha256": "6144452bad2ecee940812492a1615c79315ae4a4a1af005ebab2e46c7618cfdf",
+      "lanes": {
+        "lean": {
+          "passed": true,
+          "coreDeclarations": 3033,
+          "admissions": {
+            "path": "lean/admissions.json",
+            "utf8Bytes": 19099199,
+            "sha256": "890e04185b8e0b37bfc7ca4985f95a555c17150ee2b889be3564d05fe29b6960"
+          },
+          "ir": {
+            "path": "lean/admissions.json.ir.json",
+            "utf8Bytes": 4968632,
+            "sha256": "9355e1489309bbd59d4e9dee4198b551f33f412183626a82198ef5b077c52047",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringExtract"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          }
+        },
+        "ps": {
+          "passed": true,
+          "coreDeclarations": 3033,
+          "admissions": {
+            "path": "ps/admissions.json",
+            "utf8Bytes": 19099199,
+            "sha256": "890e04185b8e0b37bfc7ca4985f95a555c17150ee2b889be3564d05fe29b6960"
+          },
+          "ir": {
+            "path": "ps/admissions.json.ir.json",
+            "utf8Bytes": 4968632,
+            "sha256": "9355e1489309bbd59d4e9dee4198b551f33f412183626a82198ef5b077c52047",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringExtract"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          }
+        }
+      },
+      "generatedExecution": "not-run",
+      "fixedPoint": "not-run"
+    },
+    {
+      "phase": "directjs-compiler",
+      "modules": 83,
+      "passed": true,
+      "canonicalAdmissionBytesParity": "accepted",
+      "canonicalIrBytesParity": "accepted",
+      "binarySha256": "6144452bad2ecee940812492a1615c79315ae4a4a1af005ebab2e46c7618cfdf",
+      "lanes": {
+        "lean": {
+          "passed": true,
+          "coreDeclarations": 3254,
+          "admissions": {
+            "path": "lean/admissions.json",
+            "utf8Bytes": 19350987,
+            "sha256": "1bbdfa80eb942ce1930b0889f77ff9c2bbe4115c6b22cdd83ce36bd7ab6e2d76"
+          },
+          "ir": {
+            "path": "lean/admissions.json.ir.json",
+            "utf8Bytes": 4991206,
+            "sha256": "1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringExtract"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          }
+        },
+        "ps": {
+          "passed": true,
+          "coreDeclarations": 3254,
+          "admissions": {
+            "path": "ps/admissions.json",
+            "utf8Bytes": 19350987,
+            "sha256": "1bbdfa80eb942ce1930b0889f77ff9c2bbe4115c6b22cdd83ce36bd7ab6e2d76"
+          },
+          "ir": {
+            "path": "ps/admissions.json.ir.json",
+            "utf8Bytes": 4991206,
+            "sha256": "1b92f8a5a779211d187a3e70273d5e7337a8c096a650bc885d97124d3a5ce888",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringExtract"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          }
+        }
+      },
+      "generatedExecution": "not-run",
+      "fixedPoint": "not-run"
+    },
+    {
+      "phase": "semantic-compiler",
+      "modules": 68,
+      "passed": true,
+      "canonicalAdmissionBytesParity": "accepted",
+      "canonicalIrBytesParity": "accepted",
+      "binarySha256": "6144452bad2ecee940812492a1615c79315ae4a4a1af005ebab2e46c7618cfdf",
+      "lanes": {
+        "lean": {
+          "passed": true,
+          "coreDeclarations": 2439,
+          "admissions": {
+            "path": "lean/admissions.json",
+            "utf8Bytes": 15534236,
+            "sha256": "2d0aaca9710d62533828b6925a735af56d6d28dcc1f4801f195ffde8cc9d80eb"
+          },
+          "ir": {
+            "path": "lean/admissions.json.ir.json",
+            "utf8Bytes": 3944966,
+            "sha256": "55d96c7e23cbb14b78d3d96e2ede9f44f538962e9ffe8e893306636863a1fbeb",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringExtract"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          }
+        },
+        "ps": {
+          "passed": true,
+          "coreDeclarations": 2439,
+          "admissions": {
+            "path": "ps/admissions.json",
+            "utf8Bytes": 15534236,
+            "sha256": "2d0aaca9710d62533828b6925a735af56d6d28dcc1f4801f195ffde8cc9d80eb"
+          },
+          "ir": {
+            "path": "ps/admissions.json.ir.json",
+            "utf8Bytes": 3944966,
+            "sha256": "55d96c7e23cbb14b78d3d96e2ede9f44f538962e9ffe8e893306636863a1fbeb",
+            "inventoryScope": "all expressions and types in the actual original validated IR",
+            "intrinsics": [
+              [
+                "charOfNat"
+              ],
+              [
+                "charToNat"
+              ],
+              [
+                "intOfNat"
+              ],
+              [
+                "intRepr"
+              ],
+              [
+                "natAdd"
+              ],
+              [
+                "natDiv"
+              ],
+              [
+                "natEq"
+              ],
+              [
+                "natLe"
+              ],
+              [
+                "natLt"
+              ],
+              [
+                "natMod"
+              ],
+              [
+                "natMul"
+              ],
+              [
+                "natSub"
+              ],
+              [
+                "stringAppend"
+              ],
+              [
+                "stringAtEnd"
+              ],
+              [
+                "stringExtract"
+              ],
+              [
+                "stringGet"
+              ],
+              [
+                "stringLength"
+              ],
+              [
+                "stringNext"
+              ],
+              [
+                "stringPush"
+              ],
+              [
+                "stringSingleton"
+              ],
+              [
+                "stringUtf8ByteSize"
+              ]
+            ],
+            "primitiveTypes": [
+              "bool",
+              "char",
+              "int",
+              "nat",
+              "string",
+              "unit"
+            ]
+          }
+        }
+      },
+      "generatedExecution": "not-run",
+      "fixedPoint": "not-run"
+    }
+  ],
+  "nativeDelegation": "one seed, then native tools removed/role denied; exact independent checker retained",
+  "claim": "actual G1 compiler executes selected corpus and host-only atomic CI publication; G2/G3 not yet run, no formal preservation or general conformance"
+}

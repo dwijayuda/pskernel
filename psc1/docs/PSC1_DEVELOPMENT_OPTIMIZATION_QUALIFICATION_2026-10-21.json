@@ -1,0 +1,104 @@
+{
+  "schema": "psc1-development-optimization-qualification/1",
+  "implementationCommit": "219ad102a0c0b846a941f64e97ea071570a6e32c",
+  "testedCommit": "f7fa6aaec0c9772f410bc458e6677e8b7b0a8e55",
+  "runId": 39567037483,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39567037483",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "id": 119111675132,
+      "name": "static",
+      "conclusion": "success",
+      "seconds": 38
+    },
+    {
+      "id": 119111960066,
+      "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+      "conclusion": "success",
+      "seconds": 231
+    },
+    {
+      "id": 119111960106,
+      "name": "full / linux-scoped",
+      "conclusion": "success",
+      "seconds": 853
+    },
+    {
+      "id": 119111960171,
+      "name": "g1 / host-session-boundary",
+      "conclusion": "success",
+      "seconds": 150
+    },
+    {
+      "id": 119111960221,
+      "name": "g1 / generated-js",
+      "conclusion": "success",
+      "seconds": 198
+    },
+    {
+      "id": 119111960242,
+      "name": "native / native",
+      "conclusion": "success",
+      "seconds": 162
+    },
+    {
+      "id": 119111960264,
+      "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+      "conclusion": "success",
+      "seconds": 172
+    },
+    {
+      "id": 119111960266,
+      "name": "closures / selected-closure (semantic-compiler, checked)",
+      "conclusion": "success",
+      "seconds": 149
+    },
+    {
+      "id": 119111960437,
+      "name": "focused / focused",
+      "conclusion": "success",
+      "seconds": 159
+    },
+    {
+      "id": 119111961684,
+      "name": "benchmark",
+      "conclusion": "skipped",
+      "seconds": 0
+    },
+    {
+      "id": 119117837166,
+      "name": "gate",
+      "conclusion": "success",
+      "seconds": 4
+    }
+  ],
+  "measured": {
+    "selectedHeavyJobs": 8,
+    "skippedUnrelatedBenchmarks": 1,
+    "heavyJobSeconds": 2074,
+    "staticSeconds": 38,
+    "fullScopedSeconds": 853
+  },
+  "readiness": {
+    "qualifiedCriteria": 11,
+    "blockedCriteria": 26,
+    "releaseReady": false,
+    "completeFamilies": 0
+  },
+  "schedulingContract": {
+    "documentationHeavyJobs": 0,
+    "authoredFixtureHeavyJobs": 2,
+    "compilerSourceHeavyJobs": 7,
+    "fullHeavyJobs": 8,
+    "comparison": "Prior cumulative PR triggers started9 heavy jobs for each update. Scheduling predictions are regression tested; a later documentation-only run must confirm the actual skip."
+  },
+  "compilerMObligations": 126,
+  "collectionObligations": 42,
+  "minimumPythonObligations": {
+    "compilerM": 18,
+    "collections": 6
+  },
+  "selfHosting": "G1 only; G2/G3 deferred",
+  "notAProofCertificate": true
+}

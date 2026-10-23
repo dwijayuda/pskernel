@@ -1,0 +1,657 @@
+{
+  "schema": "psc1-practical-core-release-contract/1",
+  "id": "practical-core-v1",
+  "scopeFrozen": true,
+  "authority": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "provider": "independent-official-Lean",
+    "expressionV2Required": false
+  },
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "policy": {
+    "retainWorkingFeatures": true,
+    "portableSemantics": true,
+    "strictOriginalAndTransformedIr": true,
+    "negativeTests": true,
+    "unsupportedAbiRefusal": true,
+    "limitsUnchanged": true,
+    "qualification": "Exact-commit complete matrix and successful Linux full qualification; subset evidence never grants family or release readiness.",
+    "selfHosting": "G2/G3 deferred until stable feature freeze; preserved G1 is an integration regression, not a release-completeness proof.",
+    "publicAbi": "Internal Bool observation wrappers do not qualify aggregate public marshalling."
+  },
+  "suites": {
+    "compiler-m": {
+      "contract": "docs/PSC1_COMPILERM_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/compiler-m/results.json",
+      "fixture": "test/CompilerMFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "stdlib-collections": {
+      "contract": "docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/stdlib-collections/results.json",
+      "fixture": "test/StdlibCollectionFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "json-application": {
+      "contract": "docs/PSC1_JSON_APPLICATION_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/json-application/results.json",
+      "fixture": "test/JsonRecordApplication",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "inference-control": {
+      "contract": "docs/PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/inference-control/results.json",
+      "fixture": "test/InferenceControlFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "typed-io-protocol": {
+      "contract": "docs/PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/typed-io-protocol/results.json",
+      "fixture": "test/TypedIoProtocolFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "typed-io-sequencing": {
+      "contract": "docs/PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/typed-io-sequencing/results.json",
+      "fixture": "test/TypedIoSequencingFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "checked-order": {
+      "contract": "docs/PSC1_ORDER_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/checked-order/results.json",
+      "fixture": "test/OrderFixtures",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    },
+    "library-application": {
+      "contract": "docs/PSC1_LIBRARY_APPLICATION_CASE_CONTRACT.json",
+      "receipt": "dist/scoped-correctness/library-application/results.json",
+      "fixture": "test/LibraryApplication",
+      "runner": "scripts/compiler-m-conformance-tests.mjs"
+    }
+  },
+  "families": [
+    {
+      "id": "operators",
+      "dependsOn": [],
+      "acceptance": [
+        {
+          "id": "numeric",
+          "meaning": "Exact Nat arithmetic, saturation and zero divisors; Int add/sub/mul; mixed numeric refusal.",
+          "execution": {
+            "suite": "checked-order",
+            "case": "numericCase"
+          }
+        },
+        {
+          "id": "order",
+          "meaning": "Nat/Int proposition-valued order with independently admitted decisions; false/true and equal boundaries.",
+          "execution": {
+            "suite": "checked-order",
+            "case": "natOrderCase"
+          }
+        },
+        {
+          "id": "short-circuit",
+          "meaning": "Fixed precedence/associativity; Bool short circuit skips divergence/error; typed equality rejects mismatches.",
+          "execution": {
+            "suite": "checked-order",
+            "case": "shortCircuitCase"
+          },
+          "requiredIoChecks": [
+            "short-circuit-skips-foreign-error",
+            "short-circuit-error-control-traps"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "local-inference",
+      "dependsOn": [
+        "operators"
+      ],
+      "acceptance": [
+        {
+          "id": "contexts",
+          "meaning": "Expected types resolve numeric/empty-array/tuple/lambda contexts in both syntaxes.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "contextsCase"
+          }
+        },
+        {
+          "id": "rollback",
+          "meaning": "Failed speculative alternatives restore meta state; ambiguous and unresolved terms refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "rollbackCase"
+          }
+        }
+      ]
+    },
+    {
+      "id": "typed-do",
+      "dependsOn": [
+        "local-inference"
+      ],
+      "acceptance": [
+        {
+          "id": "state",
+          "meaning": "Reader/state/modify and old-value capture match the checked CompilerM library.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "stateCase"
+          }
+        },
+        {
+          "id": "patterns",
+          "meaning": "Unit/nested-product bindings compose with bind, once-only evaluation and scopes.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "unitCase"
+          }
+        },
+        {
+          "id": "ownership",
+          "meaning": "Nested do/lambda owns return; wrong state/error/result types refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "ownerLambdaCase"
+          }
+        }
+      ]
+    },
+    {
+      "id": "for-loops",
+      "dependsOn": [
+        "typed-do"
+      ],
+      "acceptance": [
+        {
+          "id": "collections",
+          "meaning": "List/Array traversal order, once-only source, empty collections and state/error propagation.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "collectionControllerCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_do_tests"
+          ],
+          "requiredSourceEvaluationOnce": [
+            "evaluationItems"
+          ]
+        },
+        {
+          "id": "ranges",
+          "meaning": "Lower-inclusive upper-exclusive Nat range; endpoint order/once-only evaluation; reversed range is empty.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "rangeControllerCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_do_tests"
+          ],
+          "requiredSourceEvaluationOnce": [
+            "evaluationLower",
+            "evaluationUpper"
+          ]
+        },
+        {
+          "id": "streaming",
+          "meaning": "First action occurs without materializing all continuations; retained 100000-step bounded-memory application measurement.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "streamingControllerCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_do_tests"
+          ],
+          "requiredCompilerApplication": true
+        }
+      ]
+    },
+    {
+      "id": "while-loops",
+      "dependsOn": [
+        "typed-do"
+      ],
+      "acceptance": [
+        {
+          "id": "controller",
+          "meaning": "Reevaluation, sequential/nested loops, mutation, return and typed catch use the current state.",
+          "actualWhile": "controller"
+        },
+        {
+          "id": "divergence",
+          "meaning": "Ordinary divergent loop is externally timed out; no injected runtime fuel; checked total owner refuses unproved loop.",
+          "actualWhile": "divergence"
+        }
+      ]
+    },
+    {
+      "id": "mutation",
+      "dependsOn": [
+        "local-inference"
+      ],
+      "acceptance": [
+        {
+          "id": "capture",
+          "meaning": "Owned returned callbacks preserve old values through product/Array/Option storage.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "callbackCase"
+          }
+        },
+        {
+          "id": "joins",
+          "meaning": "Fixed types across branch/loop joins; shadowing/escaping-name/type-change policy enforced.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "joinsCase"
+          }
+        },
+        {
+          "id": "rollback",
+          "meaning": "Handler restores lexical and effect state and continues outside the handler.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "handlerCase"
+          }
+        }
+      ]
+    },
+    {
+      "id": "early-return",
+      "dependsOn": [
+        "typed-do"
+      ],
+      "acceptance": [
+        {
+          "id": "loop",
+          "meaning": "CompilerM finite range return skips continuation and preserves specified state.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "earlyCase"
+          }
+        },
+        {
+          "id": "handler",
+          "meaning": "Source return bypasses catch and skips remaining continuation.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "handlerEarlyCase"
+          }
+        },
+        {
+          "id": "owners",
+          "meaning": "Returns in nested branches/loops exit only their owner; grouped do/lambda has independent owner.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "ownerLambdaCase"
+          }
+        }
+      ]
+    },
+    {
+      "id": "partial-definitions",
+      "dependsOn": [],
+      "acceptance": [
+        {
+          "id": "pairing",
+          "meaning": "Ordinary constructive opaque witness exactly paired with checked executable graph; forged companion/axiom/uninhabited results refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "directRecursionCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_ordinary_tests"
+          ]
+        },
+        {
+          "id": "recursion",
+          "meaning": "Direct, non-tail and higher-order recursion execute under unchanged limits; verified mode refuses without certificate.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "higherOrderRecursionCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_ordinary_tests"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tuples-patterns",
+      "dependsOn": [
+        "local-inference"
+      ],
+      "acceptance": [
+        {
+          "id": "products",
+          "meaning": "Unit/grouping/right-associated products and nested named/wildcard patterns; RHS once in original scope.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "tupleProductsCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_data_tests"
+          ]
+        },
+        {
+          "id": "identity",
+          "meaning": "Duplicate binders refuse; closures preserve original binding identity; strictness observes divergent RHS.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "tupleProductsCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_data_tests"
+          ],
+          "requiredPatternStrictness": true
+        }
+      ]
+    },
+    {
+      "id": "arrays-indexing",
+      "dependsOn": [
+        "local-inference"
+      ],
+      "acceptance": [
+        {
+          "id": "lookup",
+          "meaning": "Persistent alias unchanged after set; optional empty/huge/OOB Nat lookup requires no element inhabitant.",
+          "execution": {
+            "suite": "stdlib-collections",
+            "case": "arrayCase"
+          }
+        },
+        {
+          "id": "operations",
+          "meaning": "Empty/literal/push/set/map/fold and receiver/index order evaluated once; wrong index/element types refuse.",
+          "execution": {
+            "suite": "stdlib-collections",
+            "case": "arrayOperationsCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_data_tests",
+            "psc1_do_tests"
+          ],
+          "requiredSourceEvaluationOnce": [
+            "evaluationArray",
+            "evaluationIndex"
+          ]
+        },
+        {
+          "id": "lists",
+          "meaning": "Canonical List literals, length/append/reverse and empty case agree with Lean standard operations.",
+          "execution": {
+            "suite": "stdlib-collections",
+            "case": "listCase"
+          }
+        }
+      ]
+    },
+    {
+      "id": "typed-errors",
+      "dependsOn": [
+        "typed-do"
+      ],
+      "acceptance": [
+        {
+          "id": "except",
+          "meaning": "Canonical Except propagates typed errors and successful values.",
+          "execution": {
+            "suite": "stdlib-collections",
+            "case": "exceptCase"
+          }
+        },
+        {
+          "id": "recovery",
+          "meaning": "Checked CompilerM recovery restores state.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "recoveryCase"
+          }
+        },
+        {
+          "id": "failure",
+          "meaning": "Throw skips continuation; host/compiler failures never become source values.",
+          "execution": {
+            "suite": "compiler-m",
+            "case": "failureCase"
+          }
+        },
+        {
+          "id": "scope",
+          "meaning": "Rethrow/nested binder/continuation scope and return bypass; malformed/mistyped handlers refuse.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "handlerScopeCase"
+          }
+        }
+      ]
+    },
+    {
+      "id": "call-inference",
+      "dependsOn": [
+        "local-inference"
+      ],
+      "acceptance": [
+        {
+          "id": "telescopes",
+          "meaning": "Sequential dependent/intervening implicit telescopes; transactional nondependent expected-result constraints.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "telescopeCase"
+          }
+        },
+        {
+          "id": "refusals",
+          "meaning": "Ambiguity, arity and unresolved metas refuse; adjacent comma/native calls and explicit f(()) retained.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "callCase"
+          }
+        }
+      ]
+    },
+    {
+      "id": "namespaces",
+      "dependsOn": [],
+      "acceptance": [
+        {
+          "id": "identity",
+          "meaning": "Nested/reopened/dotted declarations, current/enclosing/root lookup and local precedence preserve full identity.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "namespaceCoreCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_namespace_tests"
+          ],
+          "requiredNamespacePrivacy": true
+        },
+        {
+          "id": "ownership",
+          "meaning": "Translation hygiene, duplicate/refusal tests; imports stay private and only entry declarations export.",
+          "execution": {
+            "suite": "inference-control",
+            "case": "namespaceCoreCase"
+          },
+          "requiredNativeSuites": [
+            "psc1_namespace_tests"
+          ],
+          "requiredNamespacePrivacy": true
+        }
+      ]
+    },
+    {
+      "id": "typed-io",
+      "dependsOn": [
+        "typed-errors",
+        "arrays-indexing"
+      ],
+      "acceptance": [
+        {
+          "id": "console",
+          "meaning": "Explicit typed capability: UTF-8 line read/write, EOF and newline; denied capability refuses before publication.",
+          "actualIo": "console"
+        },
+        {
+          "id": "files",
+          "meaning": "Root-confined bounded UTF-8 file read/write, exact size/encoding/path policy and typed failures.",
+          "actualIo": "files"
+        },
+        {
+          "id": "adapters",
+          "meaning": "All seven target adapters preserve portable semantics; unsupported ABI/configuration refuses before publication.",
+          "actualIo": "adapters"
+        }
+      ]
+    }
+  ],
+  "applications": [
+    {
+      "id": "cli",
+      "acceptance": [
+        "Parse valid/invalid arguments; deterministic exit status; typed console IO; denied capability refusal."
+      ]
+    },
+    {
+      "id": "json-files",
+      "acceptance": [
+        "Read bounded UTF-8 JSON records; transform and write deterministic output; Unicode escape pairs, malformed JSON, permission and size failures."
+      ],
+      "coreExecution": {
+        "suite": "json-application",
+        "scope": "multi-module pure JSON record processing; typed file/console capabilities pending"
+      }
+    },
+    {
+      "id": "multi-module-library",
+      "acceptance": [
+        "Resolve multiple authored modules; preserve private imports and entry exports; persistent collection transform; duplicate/missing module refusal."
+      ],
+      "coreExecution": {
+        "suite": "library-application",
+        "scope": "Complete finite multi-module library application, persistent collections, private imports and entry exports, duplicate/missing refusals; Bool observation ABI only."
+      },
+      "completeExecutionSuite": "library-application"
+    },
+    {
+      "id": "compiler-like",
+      "acceptance": [
+        "Tokenize/parse/transform/render a finite source corpus with typed diagnostics and locations; deterministic cross-target results; 100000-item measured input within existing limits."
+      ]
+    }
+  ],
+  "requiredQualification": [
+    "all-finite-family-cases",
+    "four-actual-applications",
+    "both-authored-grammars",
+    "all-seven-backends",
+    "independent-official-admission",
+    "strict-ir",
+    "negative-and-publication-regressions",
+    "minimum-supported-runtimes",
+    "installed-packages",
+    "complete-compiler-closures",
+    "G1-regression"
+  ],
+  "deferred": [
+    "G2/G3/fixed-point until feature freeze",
+    "arbitrary user Monad/iterator instances",
+    "heap references/concurrency",
+    "user tactics/macros/metaprogramming",
+    "general dependent patterns/indexed inductive source",
+    "floating/fixed-width scalars",
+    "Int division/modulo",
+    "implicit empty f() Unit completion",
+    "nonportable ABI extensions"
+  ],
+  "workQueue": [
+    {
+      "id": "collection-reference",
+      "dependsOn": [],
+      "acceptance": "Compare helpers with independent native List/Array/Except operations; both grammars and all targets."
+    },
+    {
+      "id": "json-application",
+      "dependsOn": [
+        "collection-reference"
+      ],
+      "acceptance": "Actual JSON/file application exposes and fixes valid Unicode escape handling; IO gaps remain explicit."
+    },
+    {
+      "id": "inference-control",
+      "dependsOn": [
+        "collection-reference"
+      ],
+      "acceptance": "Fill finite local/call inference and control interaction cases; reuse shared semantics."
+    },
+    {
+      "id": "typed-io",
+      "dependsOn": [
+        "inference-control",
+        "json-application"
+      ],
+      "acceptance": "Freeze and implement selected capability contract and seven adapters; CLI/JSON applications execute."
+    },
+    {
+      "id": "checked-order",
+      "dependsOn": [
+        "inference-control"
+      ],
+      "acceptance": "Constructive admitted Nat/Int decisions; no unchecked logical axioms or Bool-as-Prop replacement."
+    },
+    {
+      "id": "application-performance",
+      "dependsOn": [
+        "checked-order",
+        "typed-io"
+      ],
+      "acceptance": "Complete library/compiler-like applications and measured collection/loop traversal under unchanged limits."
+    },
+    {
+      "id": "feature-freeze",
+      "dependsOn": [
+        "application-performance"
+      ],
+      "acceptance": "All finite cases and applications qualified at exact release candidate; full release qualification, then manual self-hosting."
+    }
+  ],
+  "actualIo": {
+    "contract": "docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json",
+    "receipt": "dist/scoped-correctness/typed-io-execution/results.json",
+    "runner": "scripts/typed-io-execution-evidence.mjs"
+  },
+  "actualApplications": {
+    "contract": "docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json",
+    "runner": "scripts/practical-application-tests.mjs",
+    "receipt": "dist/scoped-correctness/practical-applications/results.json"
+  },
+  "actualCompilerApplication": {
+    "contract": "docs/PSC1_COMPILER_APPLICATION_CONTRACT.json",
+    "runner": "scripts/practical-application-tests.mjs",
+    "argument": "--compiler-application",
+    "receipt": "dist/scoped-correctness/compiler-application/results.json"
+  },
+  "actualWhile": {
+    "runner": "scripts/ordinary-while-conformance-tests.mjs",
+    "receipt": "dist/scoped-correctness/ordinary-while-conformance/results.json",
+    "minimumReceipt": "dist/scoped-correctness/ordinary-while-conformance-python314/results.json"
+  },
+  "requireReadyOnFullQualification": true
+}

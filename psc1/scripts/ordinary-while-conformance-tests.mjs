@@ -224,7 +224,10 @@ function build(input, target, syntax, kind, publicNames) {
   const generation = path.dirname(fs.realpathSync(output + '.bundle.json'));
   assert.match(read(path.join(generation, 'admissions.json')), /_psc1WhileBody/);
   fs.cpSync(generation, path.join(evidence, syntax + '-' + target + '-' + kind), { recursive: true });
-  return { output, folder, manifest, artifactSha256: hash(output), manifestSha256: hash(output + '.bundle.json') };
+  const identity={sourceSha256:hash(input),sourceClosureSha256:manifest.sourceClosureSha256,
+    kernelAdmissionSha256:manifest.kernelAdmissionSha256,checkerCommit:manifest.logicalCheckerCommit,
+    admission:'independent-official-Lean',strictIr:'required-by-production-publication'};
+  return {output,folder,manifest,identity,artifactSha256:hash(output),manifestSha256:hash(output+'.bundle.json')};
 }
 function ecmaModule(artifact, target) {
   if (target === 'js') return artifact.output;
@@ -435,7 +438,7 @@ try {
           assert.deepEqual([hash(finite.output), hash(finite.output + '.bundle.json')], prior,
             'failed assurance requests changed a published artifact');
         }
-        records.push({ syntax, target, passed: true, checks: values,
+        records.push({ syntax, target, passed: true, ...finite.identity, checks: values,
           assurance: finite.manifest.assurance, behaviorallyVerified: false,
           publicNames: finite.manifest.publicNames,
           partialDeclarations: finite.manifest.partialDeclarations,
@@ -447,7 +450,7 @@ try {
       try {
         const infinite = build(spin, target, syntax, 'divergence', ['spin']);
         const deadline = executeDivergence(infinite, target);
-        divergence.push({ syntax, target, passed: true, ...deadline,
+        divergence.push({ syntax, target, passed: true, ...infinite.identity, ...deadline,
           earlyReturnPreflight: true, unusedNonvalueCallEvaluated: true,
           publicNames: infinite.manifest.publicNames,
           artifactSha256: infinite.artifactSha256, manifestSha256: infinite.manifestSha256 });
@@ -458,7 +461,7 @@ try {
       try {
         const strict = build(patternSpin, target, syntax, 'pattern-divergence', ['spin']);
         const deadline = executeDivergence(strict, target);
-        patternStrictness.push({ syntax, target, passed: true, ...deadline,
+        patternStrictness.push({ syntax, target, passed: true, ...strict.identity, ...deadline,
           earlyReturnPreflight: true, unusedPatternRhsEvaluated: true,
           publicNames: strict.manifest.publicNames,
           artifactSha256: strict.artifactSha256, manifestSha256: strict.manifestSha256 });

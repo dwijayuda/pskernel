@@ -1,0 +1,113 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "compiler-m-selected-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "stateCase",
+      "features": [
+        "reader",
+        "state",
+        "modify",
+        "old-value-capture"
+      ]
+    },
+    {
+      "id": "earlyCase",
+      "features": [
+        "finite-range",
+        "state",
+        "mutation",
+        "early-return"
+      ]
+    },
+    {
+      "id": "failureCase",
+      "features": [
+        "typed-error",
+        "skipped-continuation"
+      ]
+    },
+    {
+      "id": "recoveryCase",
+      "features": [
+        "typed-recovery",
+        "state-rollback"
+      ]
+    },
+    {
+      "id": "readerCase",
+      "features": [
+        "reader-local-scope",
+        "state"
+      ]
+    },
+    {
+      "id": "unitCase",
+      "features": [
+        "unit-pattern",
+        "nested-product-pattern",
+        "do"
+      ]
+    },
+    {
+      "id": "callbackCase",
+      "features": [
+        "returned-owned-callback",
+        "old-value-capture",
+        "generic-product-field",
+        "array-callback-storage",
+        "option-callback-storage",
+        "optional-index"
+      ]
+    },
+    {
+      "id": "handlerCase",
+      "features": [
+        "typed-do-handler",
+        "lexical-mutation-rollback",
+        "effect-state-rollback",
+        "continuation-after-handler"
+      ]
+    },
+    {
+      "id": "handlerEarlyCase",
+      "features": [
+        "handler-return-bypass",
+        "effect-state",
+        "skipped-continuation"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-state",
+    "wrong-error",
+    "verified",
+    "duplicate-prelude"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "result",
+    "effect",
+    "list",
+    "array"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema": "psc1-language-backend-case-contract/1",
+  "id": "multi-module-library-application-v1",
+  "completeFamily": false,
+  "grammars": [
+    "lean",
+    "ps"
+  ],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component",
+    "python",
+    "php"
+  ],
+  "cases": [
+    {
+      "id": "persistentLibraryCase",
+      "features": [
+        "authored-module-imports",
+        "private-imports-entry-only-exports",
+        "persistent-set-map-fold",
+        "preserved-alias",
+        "empty-input"
+      ]
+    },
+    {
+      "id": "optionalLibraryCase",
+      "features": [
+        "push",
+        "optional-large-index",
+        "out-of-bounds-set-preserves",
+        "native-standard-reference"
+      ]
+    }
+  ],
+  "flags": [
+    false,
+    true
+  ],
+  "requiredRefusals": [
+    "wrong-input",
+    "missing-module",
+    "duplicate-module",
+    "duplicate-prelude",
+    "verified"
+  ],
+  "oracleLibraries": [
+    "option",
+    "prod",
+    "list",
+    "array",
+    "result",
+    "effect"
+  ],
+  "requiredModules": [
+    "PracticalLibrary/Input",
+    "PracticalLibrary/Transform"
+  ],
+  "publicAbi": "Bool observation wrappers; no public aggregate marshalling qualification",
+  "independentStandardReference": true,
+  "applicationBoundaryChecks": [
+    "entry-only-exports",
+    "private-imports",
+    "missing-module-refusal",
+    "duplicate-module-refusal"
+  ]
+}

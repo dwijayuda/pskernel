@@ -1,0 +1,78 @@
+{
+  "schema": "psc1-development-priority-pivot/1",
+  "implementationCommit": "d5a1d66d9f0a1e6934656d330e5ad18db19cd409",
+  "testedMergeCommit": "d331ff43895c656e1dfb1ef31cd3bc60f841e308",
+  "runId": 39554231389,
+  "generatedJob": 119070128490,
+  "conclusion": "success",
+  "generatedExecution": "passed-G1-selected-corpus",
+  "positiveCases": 4,
+  "negativeCases": 4,
+  "selfCompilation": "deferred-manual-qualification",
+  "fixedPoint": "deferred-feature-freeze",
+  "sourceServiceSha256": "5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f",
+  "sameQualifiedG1Source": true,
+  "nativeDelegation": "disabled after one seed",
+  "hostBoundary": "passed",
+  "artifacts": [
+    {
+      "id": 12325240640,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyNTI0MDY0MA==",
+      "name": "psc1-generated-compiler-d331ff43895c656e1dfb1ef31cd3bc60f841e308",
+      "size_in_bytes": 4790945,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12325240640",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12325240640/zip",
+      "expired": false,
+      "digest": "sha256:6ea2851624eaec8288433d79a948508d07114c9926ef3265f76f9a51a57f2155",
+      "created_at": "2026-10-21T06:18:44Z",
+      "updated_at": "2026-10-21T06:18:44Z",
+      "expires_at": "2027-01-19T06:14:45Z",
+      "workflow_run": {
+        "id": 39554231389,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "d5a1d66d9f0a1e6934656d330e5ad18db19cd409"
+      }
+    },
+    {
+      "id": 12324594397,
+      "node_id": "MDg6QXJ0aWZhY3QxMjMyNDU5NDM5Nw==",
+      "name": "psc1-generated-session-boundary-d331ff43895c656e1dfb1ef31cd3bc60f841e308",
+      "size_in_bytes": 156215,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12324594397",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12324594397/zip",
+      "expired": false,
+      "digest": "sha256:7209c6628d7037e5de1983daefa37138d6e539e45e7bfd6be84cf62b45a254d7",
+      "created_at": "2026-10-21T06:17:04Z",
+      "updated_at": "2026-10-21T06:17:04Z",
+      "expires_at": "2027-01-19T06:14:45Z",
+      "workflow_run": {
+        "id": 39554231389,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "fix/psc1-closure-normalization-20261021",
+        "head_sha": "d5a1d66d9f0a1e6934656d330e5ad18db19cd409"
+      }
+    }
+  ],
+  "normalWorkflowsPreserved": [
+    "scoped-correctness",
+    "architecture-native",
+    "compiler-closure",
+    "generated-compiler-G1",
+    "specialization-queue"
+  ],
+  "manualWorkflows": [
+    "psc1-selfhost-qualification",
+    "psc1-g2-profile",
+    "psc1-compiler-profile"
+  ],
+  "practicalCoreDevelopment": "CompilerM authored grammar and seven-target obligations in progress; not qualified by this receipt",
+  "limitations": [
+    "G2/G3 unqualified",
+    "heap defect remains open",
+    "G1 corpus selected",
+    "no preservation theorem"
+  ]
+}

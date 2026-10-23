@@ -6,7 +6,7 @@ import Ps.BackendPhp.Module
 Their public scalar ABI does not silently widen when a host runtime has extra types. -/
 private def scriptPlan (target : PsBackendTarget) (session : PsHostDirectPrepared) :
     IO PsValidatedIrModule := do
-  match psBackendCheckPublicApi target session.validated session.publicNames with
+  match psHostDirectCheckPublicApi target session with
   | .ok _ => pure ()
   | .error reason => throw (IO.userError reason)
   match psBackendClosedPlan session.validated session.publicNames with
@@ -16,7 +16,7 @@ private def scriptPlan (target : PsBackendTarget) (session : PsHostDirectPrepare
 def psHostDirectEmitPython (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".py" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .py")
   let plan ← scriptPlan .python session
-  let printed ← match psPythonEmitModule plan session.publicNames with
+  let printed ← match psPythonEmitModule plan session.publicNames session.ioDispatcherAbi with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_PYTHON_TARGET_UNSUPPORTED: " ++ reason))
   let name := psHostArtifactFileName outputPath "module.py"
@@ -34,7 +34,7 @@ def psHostDirectEmitPython (session : PsHostDirectPrepared) (outputPath : String
 def psHostDirectEmitPhp (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".php" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .php")
   let plan ← scriptPlan .php session
-  let printed ← match psPhpEmitValidatedModule plan session.publicNames with
+  let printed ← match psPhpEmitValidatedModule plan session.publicNames session.ioDispatcherAbi with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_PHP_TARGET_UNSUPPORTED: " ++ reason))
   let name := psHostArtifactFileName outputPath "module.php"

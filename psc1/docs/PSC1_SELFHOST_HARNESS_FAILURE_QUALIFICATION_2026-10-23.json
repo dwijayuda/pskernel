@@ -1,0 +1,34 @@
+{
+  "schema": "psc1-selfhost-harness-observation-failure/1",
+  "sourceCommit": "b8bbabd9ec47fe78e341bbd4ae77251ae30f4631",
+  "runId": 39851140073,
+  "jobId": 120077318443,
+  "status": "failed-before-G2",
+  "diagnostic": {
+    "status": "failed",
+    "generatedCompilerExecution": "not-run",
+    "selfCompilation": "not-run",
+    "fixedPoint": "not-run",
+    "failure": "\"undefined\" is not valid JSON",
+    "service": {
+      "generation": 1,
+      "sha256": "dfc250eb30486b1897cb0acfd8ae3c1abb14fa5f873588292b670b504d99d4c4",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "8155a3c7beb8014c93c6897cd4b75eaebf9608af031c21f2aa196ce4d776447d",
+      "sourceModules": 86,
+      "candidateAdmission": "f84265e6aa98e9a9df4da75aa7e31122c9b46bfa6a036bc6f794cc9d6d461d69",
+      "canonicalOriginalIr": "b5d4623a6ccb4f3c744bba5757d728271e84120b029a17727ee2b6b56b9456a8",
+      "canonicalSpecializedIr": "e00f1e941102ad9598ec0245f86c219ab3f662dc0ea1035cf35a329273dc60cb"
+    },
+    "cases": 0
+  },
+  "reason": "New positive corpus id had no observation-expression or expected-value entry; consumer assertion passed, but the controller printed JSON.stringify(undefined).",
+  "correction": "Add both explicit observation-map entries and require their exact key sets to match the positive corpus before any exercise.",
+  "G2": "not-run",
+  "G3": "not-run",
+  "resourceLimitsChanged": false,
+  "regressionWorkload": {
+    "privateSuffixDeclarations": 256,
+    "preserved": true
+  }
+}

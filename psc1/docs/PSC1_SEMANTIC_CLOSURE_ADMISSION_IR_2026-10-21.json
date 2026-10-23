@@ -1,0 +1,56 @@
+{
+  "schema": "psc1-exact-semantic-closure-receipt/1",
+  "authoritative": false,
+  "date": "2026-10-21",
+  "pullRequest": 172,
+  "head": "b412fb2335605cad2423fec29bf91b4f3b602ccb",
+  "testedMergeCommit": "3488a870288f87bdfb96b7072fe6da0e57797869",
+  "workflowRunId": 39520368282,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39520368282",
+  "conclusion": "success",
+  "phase": "semantic-compiler",
+  "modules": 67,
+  "logicalChecker": {
+    "implementation": "official Lean kernel through existing PsKernelLean provider",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "freshProviderPrelude": true
+  },
+  "lanes": [
+    {
+      "grammar": "lean",
+      "preparation": "accepted",
+      "independentAdmission": "accepted",
+      "strictIR": "accepted",
+      "coreDeclarations": 2423,
+      "sameImmutablePreparedValue": true,
+      "sourceAndActualCoreOriginCoverage": "validated-by-driver"
+    },
+    {
+      "grammar": "ps",
+      "preparation": "accepted",
+      "independentAdmission": "accepted",
+      "strictIR": "accepted",
+      "coreDeclarations": 2423,
+      "sameImmutablePreparedValue": true,
+      "sourceAndActualCoreOriginCoverage": "validated-by-driver"
+    }
+  ],
+  "psSourceDerivation": "owned-canonical-translation-from-lean",
+  "independentlyAuthoredPsCompiler": false,
+  "canonicalAdmissionBytesParity": "accepted",
+  "exactInputsAndAdmissions": "retained in workflow artifact",
+  "artifact": {
+    "id": 12309984018,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/39520368282/artifacts/12309984018",
+    "digest": "sha256:a71399ab08b4fa05f3cda0e66aa87c9265ceb623caa3021c3a9a12c55c2f37be",
+    "bytes": 1296615,
+    "expiresAtUtc": "2026-11-04T00:20:03Z"
+  },
+  "generatedCompilerExecution": "not-run",
+  "selfCompilation": "not-run",
+  "fixedPoint": "not-run",
+  "formalPreservation": "not-provided",
+  "fullPracticalCoreFamilies": "incomplete",
+  "qualificationBoundary": "exact semantic compiler closure only; DirectJS/Rust source phases remain incomplete"
+}

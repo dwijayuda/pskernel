@@ -59,9 +59,11 @@ def psDefEqReadOnly
     (localContext : PsLocalContext)
     (left : PsExpr)
     (right : PsExpr) : Bool :=
-  let leftValue := psWhnfCore metaContext localContext left;
-  let rightValue := psWhnfCore metaContext localContext right;
-  psExprAlphaEq leftValue rightValue
+  if psExprAlphaEq left right then true
+  else
+    let leftValue := psWhnfCore metaContext localContext left;
+    let rightValue := psWhnfCore metaContext localContext right;
+    psExprAlphaEq leftValue rightValue
 
 def psWhnfWithFuel
     (environment : PsEnvironment)
@@ -122,50 +124,52 @@ def psDefEqReadOnlyWithEnvFuel
       fun (left : PsExpr) (right : PsExpr) =>
         let smaller : PsExpr -> PsExpr -> Bool :=
           psDefEqReadOnlyWithEnvFuel environment metaContext localContext remaining;
-        let leftValue :=
-          psWhnf environment metaContext localContext left;
-        let rightValue :=
-          psWhnf environment metaContext localContext right;
-        if psExprAlphaEq leftValue rightValue then
-          true
+        if psExprAlphaEq left right then true
         else
-          match leftValue with
-          | .app leftFn leftArg =>
-              match rightValue with
-              | .app rightFn rightArg =>
-                  if smaller leftFn rightFn then
-                    smaller leftArg rightArg
-                  else
-                    false
-              | _ => false
-          | .lam _ leftType leftBody _ =>
-              match rightValue with
-              | .lam _ rightType rightBody _ =>
-                  if smaller leftType rightType then
-                    smaller leftBody rightBody
-                  else
-                    false
-              | _ => false
-          | .forallE _ leftType leftBody _ =>
-              match rightValue with
-              | .forallE _ rightType rightBody _ =>
-                  if smaller leftType rightType then
-                    smaller leftBody rightBody
-                  else
-                    false
-              | _ => false
-          | .proj leftType leftIndex leftValue =>
-              match rightValue with
-              | .proj rightType rightIndex rightValue =>
-                  if psNameEq leftType rightType then
-                    if Nat.beq leftIndex rightIndex then
-                      smaller leftValue rightValue
+          let leftValue :=
+            psWhnf environment metaContext localContext left;
+          let rightValue :=
+            psWhnf environment metaContext localContext right;
+          if psExprAlphaEq leftValue rightValue then
+            true
+          else
+            match leftValue with
+            | .app leftFn leftArg =>
+                match rightValue with
+                | .app rightFn rightArg =>
+                    if smaller leftFn rightFn then
+                      smaller leftArg rightArg
                     else
                       false
-                  else
-                    false
-              | _ => false
-          | _ => false
+                | _ => false
+            | .lam _ leftType leftBody _ =>
+                match rightValue with
+                | .lam _ rightType rightBody _ =>
+                    if smaller leftType rightType then
+                      smaller leftBody rightBody
+                    else
+                      false
+                | _ => false
+            | .forallE _ leftType leftBody _ =>
+                match rightValue with
+                | .forallE _ rightType rightBody _ =>
+                    if smaller leftType rightType then
+                      smaller leftBody rightBody
+                    else
+                      false
+                | _ => false
+            | .proj leftType leftIndex leftValue =>
+                match rightValue with
+                | .proj rightType rightIndex rightValue =>
+                    if psNameEq leftType rightType then
+                      if Nat.beq leftIndex rightIndex then
+                        smaller leftValue rightValue
+                      else
+                        false
+                    else
+                      false
+                | _ => false
+            | _ => false
 
 def psDefEqReadOnlyWithEnv
     (environment : PsEnvironment)

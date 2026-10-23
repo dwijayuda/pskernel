@@ -1,0 +1,132 @@
+name: PSC1 incremental development gates
+run-name: PSC1 gates base ${{ github.event.pull_request.base.sha || github.sha }}
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-*.yml
+      - .github/actions/**
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run all existing final qualification tests
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc1-development-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      focused: ${{ steps.select.outputs.focused }}
+      integration: ${{ steps.select.outputs.integration }}
+      release: ${{ steps.select.outputs.release }}
+      benchmark: ${{ steps.select.outputs.benchmark }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Select dependencies from exact new commit interval
+        id: select
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node psc1/scripts/select-development-tests.mjs
+      - name: Check static contracts and source syntax
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/development-selection-tests.mjs
+          node scripts/practical-core-readiness-tests.mjs
+          node scripts/while-execution-contract-tests.mjs
+          node scripts/language-backend-parity-contract-tests.mjs
+          node scripts/js-generation-manifest-contract-tests.mjs
+          node scripts/practical-core-readiness.mjs
+          python3 scripts/standalone-io-policy-tests.py
+          node scripts/typed-io-execution-contract-tests.mjs
+          node scripts/practical-application-contract-tests.mjs
+          node scripts/compiler-application-contract-tests.mjs
+          node scripts/typed-io-policy-tests.mjs
+          node --input-type=module <<'JS'
+          import {spawnSync} from 'node:child_process';
+          import assert from 'node:assert/strict';
+          const files=spawnSync('git',['ls-files','-z','.'],{encoding:'utf8'});
+          assert.equal(files.status,0);
+          for(const file of files.stdout.split('\0').filter(f=>f.endsWith('.mjs')&&!f.startsWith('legacy/'))){
+            const result=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});
+            assert.equal(result.status,0,file+'\n'+result.stderr);
+          }
+          JS
+      - name: Retain selection and evidence-derived readiness
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-development-${{ github.sha }}
+          path: psc1/dist/development/
+          retention-days: 30
+
+  native:
+    needs: static
+    if: needs.static.outputs.focused == 'true'
+    uses: ./.github/workflows/psc1-architecture-native.yml
+
+  focused:
+    needs: static
+    if: needs.static.outputs.focused == 'true'
+    uses: ./.github/workflows/psc1-practical-compiler-m.yml
+
+  closures:
+    needs: [static, native, focused]
+    if: needs.static.outputs.integration == 'true'
+    uses: ./.github/workflows/psc1-compiler-closure.yml
+
+  g1:
+    needs: [static, native, focused]
+    if: needs.static.outputs.integration == 'true'
+    uses: ./.github/workflows/psc1-generated-compiler.yml
+
+  full:
+    needs: [static, native, focused, closures, g1]
+    if: >-
+      ${{ !cancelled() && needs.static.outputs.release == 'true' &&
+          needs.native.result == 'success' && needs.focused.result == 'success' &&
+          (needs.static.outputs.integration != 'true' ||
+            (needs.closures.result == 'success' && needs.g1.result == 'success')) }}
+    uses: ./.github/workflows/psc1-scoped-correctness.yml
+
+  benchmark:
+    needs: static
+    if: needs.static.outputs.benchmark == 'true'
+    uses: ./.github/workflows/psc1-specialization-queue.yml
+
+  gate:
+    if: always()
+    needs: [static, native, focused, closures, g1, full, benchmark]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require every selected dependency
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const jobs=JSON.parse(process.env.RESULTS);
+          assert.equal(jobs.static.result,'success');
+          const selection=jobs.static.outputs;
+          for(const [job,tier] of Object.entries({native:'focused',focused:'focused',closures:'integration',g1:'integration',full:'release',benchmark:'benchmark'}))
+            assert.equal(jobs[job].result,selection[tier]==='true'?'success':'skipped',job);
+          console.log('Every selected PSC1 dependency passed. Release readiness is reported separately.');
+          JS

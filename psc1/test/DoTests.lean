@@ -613,12 +613,155 @@ private def testLegacyDo : IO Unit := do
     (match wrongConversion with | .error _ => true | .ok _ => false)
   pure ()
 
+private def testInlineElseIf (natType : PsExpr) : IO Unit := do
+  let nested := "def select (outer first second : Bool) : Id Nat := do\n  let mut value : Nat := 0\n  if outer then\n    if first then value := 1\n    else if second then value := 2\n    else value := 3\n  else value := 4\n  value := value + 10\n  return value\ndef result : Nat :=\n  select false false false + select false false true +\n  select false true false + select false true true +\n  select true false false + select true false true +\n  select true true false + select true true true\n"
+  checkExecutedSource "native inline else-if keeps nested layout owner and continuation"
+    .lean nested natType (PsExpr.lit (PsLiteral.natural 103))
+  roundTrip "inline else-if translates to owned PS branches"
+    .lean .proofScript nested
+  checkExecutedSource "braced native else-if retains following statement outside chain"
+    .lean "def result : Id Nat := do {\n  let mut value : Nat := 0;\n  if false then { value := 1 }\n  else if false then { value := 2 }\n  else if true then { value := 3 }\n  else { value := 4 };\n  value := value + 10;\n  return value\n}\n" natType (PsExpr.lit (PsLiteral.natural 13))
+  reject "PS else still requires an owned brace"
+    .proofScript
+    "def result : Id(Nat) := do { if (true) { return 1 } else if (false) { return 2 } else { return 3 } }\n"
+
+
+private def evaluationCallCount (name : PsName) (term : PsExpr) : Nat :=
+  match term with
+  | .constE other _ => if psNameEq name other then 1 else 0
+  | .app fn arg => evaluationCallCount name fn + evaluationCallCount name arg
+  | .lam _ type body _ => evaluationCallCount name type + evaluationCallCount name body
+  | .forallE _ type body _ => evaluationCallCount name type + evaluationCallCount name body
+  | .letE _ type value body =>
+      evaluationCallCount name type + evaluationCallCount name value + evaluationCallCount name body
+  | .proj _ _ value => evaluationCallCount name value
+  | _ => 0
+
+private def testDeferredDefinitions (natType : PsExpr) : IO Unit := do
+  require "deferred type does not capture caller free variables"
+    (match psControlDeferredType (PsExpr.fvar 20) with
+     | .forallE _ _ (.fvar 20) _ => true
+     | _ => false)
+  require "iterator definitions introduce no axiom"
+    (!psControlLoopDeclarations.any (fun d => match d with | .axiomDecl _ _ _ => true | _ => false))
+  let unitType := PsExpr.constE psUnitName []
+  let unit := PsExpr.constE psUnitUnitName []
+  let restType := psControlDeferredType natType
+  let next := psControlClose true
+    [PsControlBinder.mk 0 (psRootName "index") natType,
+      PsControlBinder.mk 1 (psRootName "rest") restType]
+    (PsExpr.app (PsExpr.constE psNatSuccName []) (PsExpr.app (PsExpr.fvar 1) unit))
+  let immediate := psControlClose true
+    [PsControlBinder.mk 0 (psRootName "index") natType,
+      PsControlBinder.mk 1 (psRootName "rest") restType]
+    (PsExpr.lit (PsLiteral.natural 17))
+  for (count, step, expected) in [
+      ((0 : Nat), next, (7 : Nat)), (3, next, 10),
+      (1000000000000000000, immediate, 17)] do
+    let actual := psControlApply (PsExpr.constE psControlLazyNatFoldName [])
+      [natType, PsExpr.lit (PsLiteral.natural 7), step, PsExpr.lit (PsLiteral.natural count)]
+    let prepared := PsCompilerAdmissionReadyModule.mk
+      [PsDeclaration.definitionDecl (psRootName "result") [] natType actual]
+    checkReduced "deferred Nat iteration independent kernel conversion" prepared natType
+      (PsExpr.lit (PsLiteral.natural expected))
+
+-- Corrupt only the well-typed operational body. The retained theorem must
+-- make independent admission refuse, rather than relying on malformed types.
+private def omitFiniteIterations (term : PsExpr) : Option PsExpr :=
+  match term with
+  | .lam name type body binder =>
+      match omitFiniteIterations body with
+      | none => none
+      | some changed => some (.lam name type changed binder)
+  | _ =>
+      let view := psExprAppView term
+      match view.head, view.args with
+      | .constE name _, [_motive, base, _minor, _major] =>
+          if psNameEq name psNatRecName then some base else none
+      | _, _ => none
+
+private def checkFiniteEquivalence (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
+  let some helper := prepared.declarations.find? (fun declaration =>
+    match declaration with
+    | .definitionDecl name _ _ _ => psElabDoForIsLiftedName name
+    | _ => false)
+    | throw (IO.userError "finite Nat helper missing")
+  let helperName := psDeclarationName helper
+  require "finite helper has an erased equivalence theorem"
+    (prepared.declarations.any (fun declaration =>
+      match declaration with
+      | .theoremDecl name _ _ _ => psNameEq name (PsName.str helperName "_psc1ForEquivalence")
+      | _ => false))
+  let .definitionDecl name levels type value := helper
+    | throw (IO.userError "finite helper is not total")
+  let some changed := omitFiniteIterations value
+    | throw (IO.userError "finite helper has no checked Nat recursor")
+  let environment ← match psAddDeclarationList psSelfHostProdPreludeEnvironment prepared.declarations with
+    | .error _ => throw (IO.userError "finite helper native environment refused")
+    | .ok value => pure value
+  match psElabDoLoopCheck environment psLocalEmpty changed type with
+  | .error _ => throw (IO.userError "corrupted finite helper is not well-typed")
+  | .ok _ => pure ()
+  let declarations := prepared.declarations.map (fun declaration =>
+    if psNameEq (psDeclarationName declaration) name then
+      PsDeclaration.definitionDecl name levels type changed else declaration)
+  match ← psHostLeanCheckPrepared (.mk declarations) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "kernel accepted changed loop behavior against its equivalence theorem")
+  IO.println "PSC1_FINITE_HELPER_EQUIVALENCE: PASS total helper, erased theorem, well-typed changed behavior refused"
+
+private def testEvaluationOnce (natType : PsExpr) : IO Unit := do
+  let lean :=
+    "def evaluationItems (flag : Bool) : List Nat := [if flag then 1 else 2]\n" ++
+    "def evaluationLower (flag : Bool) : Nat := if flag then 0 else 2\n" ++
+    "def evaluationUpper (flag : Bool) : Nat := if flag then 2 else 0\n" ++
+    "def evaluationArray (flag : Bool) : Array Nat := #[if flag then 3 else 5]\n" ++
+    "def evaluationIndex (flag : Bool) : Nat := if flag then 0 else 9007199254740993123456789\n" ++
+    "def evaluationCase (flag : Bool) : Id Nat := do\n" ++
+    "  let mut total : Nat := 0\n" ++
+    "  for value in evaluationItems flag do\n    total := total + value\n" ++
+    "  for value in [evaluationLower flag:evaluationUpper flag] do\n    total := total + value\n" ++
+    "  let picked : Option Nat := (evaluationArray flag)[evaluationIndex flag]?\n" ++
+    "  let extra : Nat := match picked with\n    | Option.none => 0\n    | Option.some value => value\n" ++
+    "  return total + extra\n" ++
+    "def result : Nat := Id.run (evaluationCase false) * 100 + Id.run (evaluationCase true)\n"
+  let ps :=
+    "def evaluationItems(flag : Bool) : List(Nat) := [if (flag) { 1 } else { 2 }]\n" ++
+    "def evaluationLower(flag : Bool) : Nat := if (flag) { 0 } else { 2 }\n" ++
+    "def evaluationUpper(flag : Bool) : Nat := if (flag) { 2 } else { 0 }\n" ++
+    "def evaluationArray(flag : Bool) : Array(Nat) := #[if (flag) { 3 } else { 5 }]\n" ++
+    "def evaluationIndex(flag : Bool) : Nat := if (flag) { 0 } else { 9007199254740993123456789 }\n" ++
+    "def evaluationCase(flag : Bool) : Id(Nat) := do {\n" ++
+    "  let mut total : Nat := 0\n" ++
+    "  for value in evaluationItems(flag) { total := total + value }\n" ++
+    "  for value in [evaluationLower(flag):evaluationUpper(flag)] { total := total + value }\n" ++
+    "  let picked : Option(Nat) := (evaluationArray(flag))[evaluationIndex(flag)]?\n" ++
+    "  let extra : Nat := match picked with {\n    | Option.none => 0\n    | Option.some value => value\n  }\n" ++
+    "  return (total + extra)\n}\n" ++
+    "def result : Nat := Id.run(evaluationCase(false)) * 100 + Id.run(evaluationCase(true))\n"
+  for (kind, source) in [(PsCompilerSourceKind.lean, lean), (.proofScript, ps)] do
+    let prepared ← prepare "source iterator/range/Array evaluation ownership" kind source
+    let some declaration := prepared.declarations.find? (fun d =>
+      psNameEq (psDeclarationName d) (psRootName "evaluationCase"))
+      | throw (IO.userError "evaluation controller missing")
+    let some body := psDeclarationValue declaration
+      | throw (IO.userError "evaluation controller body missing")
+    for name in ["evaluationItems", "evaluationLower", "evaluationUpper", "evaluationArray", "evaluationIndex"] do
+      require ("strict source call occurs once: " ++ name)
+        (evaluationCallCount (psRootName name) body == 1)
+    psPracticalCheckExecuted "source iterator/range/Array calls and observed values"
+      prepared natType (PsExpr.lit (PsLiteral.natural 205))
+    checkFiniteEquivalence prepared
+
 def main : IO Unit := do
   let natType := PsExpr.constE psNatName []
   let groups : List (String × IO Unit) := [
     ("legacy", testLegacyDo),
     ("CompilerM", testCompilerM natType),
     ("control-flow", testControlFlow natType),
+    ("evaluation-once", testEvaluationOnce natType),
+    ("deferred-definitions", testDeferredDefinitions natType),
+    ("inline-else-if", testInlineElseIf natType),
     ("finite-loops", testFiniteLoops natType),
     ("contextual-pure", testContextualPure natType)]
   let mut failures : List String := []

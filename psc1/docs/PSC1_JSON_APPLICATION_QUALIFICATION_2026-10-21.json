@@ -1,0 +1,240 @@
+{
+  "schema": "psc1-practical-core-checkpoint/1",
+  "implementationCommit": "a282ce74b23d6809b12a2894e4f025116bc84cc0",
+  "testedCommit": "79b280a59704430d7c375c019e8a3d49b385bb18",
+  "branch": "fix/psc1-closure-normalization-20261021",
+  "baseCommit": "1fad9ed53cda9b23ac30be9cea85e7857437564e",
+  "runId": 39575345130,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39575345130",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "id": 119139923756,
+      "name": "static",
+      "conclusion": "success",
+      "seconds": 39
+    },
+    {
+      "id": 119140239816,
+      "name": "focused / focused",
+      "conclusion": "success",
+      "seconds": 171
+    },
+    {
+      "id": 119140239836,
+      "name": "g1 / generated-js",
+      "conclusion": "success",
+      "seconds": 185
+    },
+    {
+      "id": 119140239899,
+      "name": "g1 / host-session-boundary",
+      "conclusion": "success",
+      "seconds": 94
+    },
+    {
+      "id": 119140239914,
+      "name": "native / native",
+      "conclusion": "success",
+      "seconds": 95
+    },
+    {
+      "id": 119140239917,
+      "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+      "conclusion": "success",
+      "seconds": 177
+    },
+    {
+      "id": 119140240018,
+      "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+      "conclusion": "success",
+      "seconds": 115
+    },
+    {
+      "id": 119140240090,
+      "name": "closures / selected-closure (semantic-compiler, checked)",
+      "conclusion": "success",
+      "seconds": 92
+    },
+    {
+      "id": 119140241239,
+      "name": "benchmark",
+      "conclusion": "skipped",
+      "seconds": 0
+    },
+    {
+      "id": 119141479624,
+      "name": "full / linux-scoped",
+      "conclusion": "success",
+      "seconds": 881
+    },
+    {
+      "id": 119147906038,
+      "name": "gate",
+      "conclusion": "success",
+      "seconds": 4
+    }
+  ],
+  "tools": {
+    "logicalChecker": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "versions": {
+      "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "typescriptConsumer": "Version 7.0.2",
+      "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+      "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+      "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+      "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+      "python": "Python 3.15.0",
+      "pythonMinimum": "Python 3.14.8",
+      "php": "PHP 8.5.11 (cli) (built: Sep 23 2026 12:33:37) (NTS)"
+    },
+    "runtimeContract": "psc1-runtime-semantics/1"
+  },
+  "suites": {
+    "compilerM": {
+      "cases": 9,
+      "grammars": 2,
+      "targets": 7,
+      "obligations": 126,
+      "minimumPython": 18
+    },
+    "collections": {
+      "cases": 3,
+      "grammars": 2,
+      "targets": 7,
+      "obligations": 42,
+      "minimumPython": 6,
+      "independentNativeStandardComparisons": 6
+    },
+    "jsonCore": {
+      "cases": 7,
+      "grammars": 2,
+      "targets": 7,
+      "obligations": 98,
+      "minimumPython": 14,
+      "authoredModulesPerGrammar": 3,
+      "nativeReference": "official Lean JSON parsing for valid inputs; retained strict PSC1 scalar refusal policy for malformed/unpaired surrogates",
+      "publicAbi": "separate Bool-to-Bool observations; no aggregate ABI qualification",
+      "completeFileApplication": false
+    }
+  },
+  "ordinaryWitness": {
+    "constructive": true,
+    "nonindexedInductives": true,
+    "sharedBudget": 128,
+    "bodyConsulted": false,
+    "checkedTests": [
+      "enum",
+      "parameterized-product-field",
+      "failed-alternative",
+      "recursive-only-refusal",
+      "original-exponential-budget",
+      "original-forged-pairing-and-source",
+      "original-uninhabited-result"
+    ]
+  },
+  "g1": {
+    "status": "passed-diagnostic",
+    "generatedCompilerExecution": "passed-G1-selected-corpus",
+    "selfCompilation": "deferred-manual-qualification",
+    "fixedPoint": "deferred-feature-freeze",
+    "service": {
+      "generation": 1,
+      "sha256": "9fee036b0ee9e2bdd9617bf2df0811409a4893ad8c7f59ab2ab478c0ea1be757",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "e11f98ce06d2ff3934ce711e8928b96766f45e0d7caca929094de7ef3ac59c7b",
+      "sourceModules": 84,
+      "candidateAdmission": "a6d980839b987170347560ce500c98a424081cb19421843854910ef46cb1eb02",
+      "canonicalOriginalIr": "76dced94deb6e64c678e6fec7a1d91ac12eebe0c5e25312e50c0b97ec2f53faa",
+      "canonicalSpecializedIr": "66884ae281293f1e522bdb83972a371a473453b796b7dfb99aea93d6e90e2897"
+    },
+    "cases": 10,
+    "completedCorpusGenerations": [
+      1
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 12334618997,
+      "name": "psc1-scoped-correctness-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:c1422ee951bfaeb6d7a680ff0b4e5b814b8682d25b9f7efd35f0ce6124a6f0e6",
+      "sizeInBytes": 46976026,
+      "expiresAt": "2026-11-04T09:33:27Z"
+    },
+    {
+      "id": 12334566255,
+      "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:b6ba4ee7e7555ca4afbd1239f1a882a3b793106bc5792a0c103b494190e185cf",
+      "sizeInBytes": 2529516,
+      "expiresAt": "2026-11-04T09:18:53Z"
+    },
+    {
+      "id": 12334481058,
+      "name": "psc1-development-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:6cdc6add13f558d79c58b99a53b515074fb517957499ad7e01e4a602b6dbae92",
+      "sizeInBytes": 1924,
+      "expiresAt": "2026-11-20T09:15:55Z"
+    },
+    {
+      "id": 12334173154,
+      "name": "psc1-practical-compiler-m-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:7b6d836df9f74ad50a08ad67e5d97a9899db00d457dee55ecf1b7ace1ecf5ca9",
+      "sizeInBytes": 568832,
+      "expiresAt": "2026-11-04T09:18:47Z"
+    },
+    {
+      "id": 12333927885,
+      "name": "psc1-generated-session-boundary-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:f10850862a827f2059f47369c1c84468f245b99de1eec2be316ba612178be35f",
+      "sizeInBytes": 156200,
+      "expiresAt": "2027-01-19T09:13:58Z"
+    },
+    {
+      "id": 12333713515,
+      "name": "psc1-generated-compiler-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:88e06607c4a82cf21ea7a7f321b2eb466ea2e2e325ed7c49364552b58e122176",
+      "sizeInBytes": 4827146,
+      "expiresAt": "2027-01-19T09:13:58Z"
+    },
+    {
+      "id": 12333543515,
+      "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:9f4d42c09e8ad9abe578c0e96e581fcba85eda6d43431680b87e4c9213f88b33",
+      "sizeInBytes": 2283730,
+      "expiresAt": "2026-11-04T09:17:51Z"
+    },
+    {
+      "id": 12333523479,
+      "name": "psc1-compiler-closure-semantic-compiler-checked-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:ce010d6bc67f3209567125dd570297f50805ec6396df307baa3024993ecda01c",
+      "sizeInBytes": 1848599,
+      "expiresAt": "2026-11-04T09:17:29Z"
+    },
+    {
+      "id": 12333253507,
+      "name": "psc1-architecture-native-79b280a59704430d7c375c019e8a3d49b385bb18",
+      "digest": "sha256:9fd49e2c22da5341b2cf8826bb7771fbfee87bb70055a192df97ea2808f33b7e",
+      "sizeInBytes": 292770,
+      "expiresAt": "2026-11-04T09:17:32Z"
+    }
+  ],
+  "readiness": {
+    "finiteCriteria": 37,
+    "qualified": 11,
+    "blocked": 26,
+    "completeFamilies": 0,
+    "completeApplications": 0,
+    "releaseReady": false,
+    "collectionReferenceTask": "qualified",
+    "jsonApplicationCoreTask": "qualified-subset"
+  },
+  "historicalOptimization": "docs/PSC1_DEVELOPMENT_OPTIMIZATION_QUALIFICATION_2026-10-21.json",
+  "next": "Follow contract workQueue: inference/control, checked ordering, typed IO and full application/performance acceptance.",
+  "deferred": "G2/G3 until stable feature freeze; original performance defect remains open",
+  "scope": "Exact historical source checkpoint, not a proof certificate or later-HEAD qualification."
+}

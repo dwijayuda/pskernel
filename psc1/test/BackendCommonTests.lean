@@ -7,6 +7,12 @@ private def require (name : String) (condition : Bool) : IO Unit := do
   IO.println ("PSC1_BACKEND_COMMON_PASS: " ++ name)
 
 def main : IO Unit := do
+  for left in psBackendTargets do
+    require ("portable target name round trip: " ++ psBackendTargetName left)
+      (psBackendTargetFromName (psBackendTargetName left) == some left)
+    for right in psBackendTargets do
+      require ("portable/native target equality: " ++ psBackendTargetName left ++ "/" ++ psBackendTargetName right)
+        (psBackendTargetEq left right == (left == right))
   require "workspace import package BackendCommon"
     (psHostPackageDirectory ["Ps", "BackendCommon", "Module"] == some "backend-common")
   require "workspace import package BackendJs"
@@ -43,6 +49,17 @@ def main : IO Unit := do
   let output <- match psBackendClosedPlan source ["answer"] with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
+  require "detailed plan retains forged-wrapper refusal and legacy error text"
+    (match psBackendClosedPlanDetailed forged ["answer"], psBackendClosedPlan forged ["answer"] with
+      | .error detail, .error text =>
+          detail.phase == "input-ir" && detail.code == text && text == "PSC1_BACKEND_INPUT_IR_INVALID"
+      | _, _ => false)
+  require "detailed plan identifies missing public coverage after valid transformation"
+    (match psBackendClosedPlanDetailed source ["missing"], psBackendClosedPlan source ["missing"] with
+      | .error detail, .error text =>
+          detail.phase == "public-coverage" && detail.code == text &&
+            text == "PSC1_PUBLIC_DECLARATION_LOST: missing"
+      | _, _ => false)
   require "shared closed plan retains public declaration"
     (output.raw.declarations.any (fun d => d.name == "answer"))
   require "missing public export rejects"

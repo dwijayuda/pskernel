@@ -1,3 +1,5 @@
+import Ps.Foundation.Text
+
 def psJsonConcat2
     (left right : String) : String :=
   String.Internal.append left right
@@ -34,9 +36,9 @@ def psJsonReverseCharsAcc
   | List.nil =>
       fun (acc : List Char) => acc
   | List.cons head tail =>
-      let smaller : List Char -> List Char :=
-        psJsonReverseCharsAcc tail;
       fun (acc : List Char) =>
+        let smaller : List Char -> List Char :=
+          psJsonReverseCharsAcc tail;
         smaller (List.cons head acc)
 
 def psJsonReverseChars (values : List Char) : List Char :=
@@ -73,9 +75,9 @@ def psJsonStringOfCharsAcc
   | List.nil =>
       fun (acc : String) => acc
   | List.cons head tail =>
-      let smaller : String -> String :=
-        psJsonStringOfCharsAcc tail;
       fun (acc : String) =>
+        let smaller : String -> String :=
+          psJsonStringOfCharsAcc tail;
         smaller (String.push acc head)
 
 def psJsonStringOfChars (chars : List Char) : String :=
@@ -90,9 +92,9 @@ def psJsonCharListEq
         | List.nil => true
         | List.cons _ _ => false
   | List.cons leftHead leftTail =>
-      let smaller : List Char -> Bool :=
-        psJsonCharListEq leftTail;
       fun (right : List Char) =>
+        let smaller : List Char -> Bool :=
+          psJsonCharListEq leftTail;
         match right with
         | List.nil => false
         | List.cons rightHead rightTail =>
@@ -156,15 +158,53 @@ def psJsonEscapeChar (char : Char) : String :=
   else
     psJsonStringOfChars (List.cons char List.nil)
 
-def psJsonEscapeChars (chars : List Char) : String :=
+-- Balanced immutable chunks preserve exact quoting bytes without copying the
+-- complete suffix once per character. This helper retains the list API.
+def psJsonEscapeCharsWorker (chars : List Char) : PsTextBuilder -> String :=
   match chars with
-  | List.nil =>
-      ""
+  | List.nil => fun (builder : PsTextBuilder) => psTextBuilderFinish builder
   | List.cons char rest =>
-      psJsonConcat2 (psJsonEscapeChar char) (psJsonEscapeChars rest)
+      fun (builder : PsTextBuilder) =>
+        let smaller : PsTextBuilder -> String := psJsonEscapeCharsWorker rest;
+        smaller (psTextBuilderAppend builder (psJsonEscapeChar char))
+
+def psJsonEscapeChars (chars : List Char) : String :=
+  psJsonEscapeCharsWorker chars psTextBuilderEmpty
+
+def psJsonCharNeedsEscape (char : Char) : Bool :=
+  let code : Nat := Char.toNat char;
+  Nat.blt code 32 || Nat.beq code 34 || Nat.beq code 92
+
+-- Copy unchanged UTF-8 spans in one chunk. Positions come only from the owned
+-- string cursor. The input-derived byte bound is the same as StringToChars;
+-- it is traversal capacity, not generated execution fuel.
+def psJsonEscapeStringWithFuel (fuel : Nat) :
+    String -> Nat -> Nat -> PsTextBuilder -> String :=
+  match fuel with
+  | Nat.zero =>
+      fun (value : String) (position : Nat) (runStart : Nat) (builder : PsTextBuilder) =>
+        psTextBuilderFinish (psTextBuilderAppend builder
+          (String.Internal.extract value (String.Pos.Raw.mk runStart) (String.Pos.Raw.mk position)))
+  | Nat.succ remaining =>
+      fun (value : String) (position : Nat) (runStart : Nat) (builder : PsTextBuilder) =>
+        let smaller : String -> Nat -> Nat -> PsTextBuilder -> String :=
+          psJsonEscapeStringWithFuel remaining;
+        if psJsonStringAtEnd value position then
+          psTextBuilderFinish (psTextBuilderAppend builder
+            (String.Internal.extract value (String.Pos.Raw.mk runStart) (String.Pos.Raw.mk position)))
+        else
+          let char : Char := psJsonStringGet value position;
+          let next : Nat := psJsonStringNext value position;
+          if psJsonCharNeedsEscape char then
+            let runText : String := String.Internal.extract value
+              (String.Pos.Raw.mk runStart) (String.Pos.Raw.mk position);
+            let flushed : PsTextBuilder := psTextBuilderAppend builder runText;
+            smaller value next next (psTextBuilderAppend flushed (psJsonEscapeChar char))
+          else smaller value next runStart builder
 
 def psJsonQuote (value : String) : String :=
-  psJsonConcat3 "\"" (psJsonEscapeChars (psJsonStringToChars value)) "\""
+  psJsonConcat3 "\"" (psJsonEscapeStringWithFuel
+    (Nat.succ (String.utf8ByteSize value)) value 0 0 psTextBuilderEmpty) "\""
 
 def psJsonJoin
     (separator : String)
@@ -384,9 +424,9 @@ def psJsonTakeDigits
       fun (digitsRev : List Char) =>
         Prod.mk (psJsonReverseChars digitsRev) List.nil
   | List.cons char rest =>
-      let smaller : List Char -> List Char × List Char :=
-        psJsonTakeDigits rest;
       fun (digitsRev : List Char) =>
+        let smaller : List Char -> List Char × List Char :=
+          psJsonTakeDigits rest;
         if psJsonDigit char then
           smaller (List.cons char digitsRev)
         else
@@ -448,9 +488,9 @@ def psJsonConsumeLiteral
       fun (chars : List Char) =>
         Option.some chars
   | List.cons expectedChar expectedRest =>
-      let smaller : List Char -> Option (List Char) :=
-        psJsonConsumeLiteral expectedRest;
       fun (chars : List Char) =>
+        let smaller : List Char -> Option (List Char) :=
+          psJsonConsumeLiteral expectedRest;
         match chars with
         | List.nil =>
             Option.none
@@ -467,9 +507,9 @@ def psJsonReverseValuesAcc
   | List.nil =>
       fun (acc : List PsJsonValue) => acc
   | List.cons head tail =>
-      let smaller : List PsJsonValue -> List PsJsonValue :=
-        psJsonReverseValuesAcc tail;
       fun (acc : List PsJsonValue) =>
+        let smaller : List PsJsonValue -> List PsJsonValue :=
+          psJsonReverseValuesAcc tail;
         smaller (List.cons head acc)
 
 def psJsonReverseValues
@@ -561,11 +601,11 @@ def psJsonReverseFieldsAcc
   | List.nil =>
       fun (acc : List (String × PsJsonValue)) => acc
   | List.cons head tail =>
-      let smaller :
-          List (String × PsJsonValue) ->
-            List (String × PsJsonValue) :=
-        psJsonReverseFieldsAcc tail;
       fun (acc : List (String × PsJsonValue)) =>
+        let smaller :
+            List (String × PsJsonValue) ->
+              List (String × PsJsonValue) :=
+          psJsonReverseFieldsAcc tail;
         smaller (List.cons head acc)
 
 def psJsonReverseFields
@@ -735,8 +775,8 @@ def psJsonCharListLengthAcc (chars : List Char) : Nat -> Nat :=
   | List.nil =>
       fun (count : Nat) => count
   | List.cons _ rest =>
-      let smaller : Nat -> Nat := psJsonCharListLengthAcc rest;
-      fun (count : Nat) => smaller (Nat.succ count)
+      fun (count : Nat) =>
+        let smaller : Nat -> Nat := psJsonCharListLengthAcc rest; smaller (Nat.succ count)
 
 def psJsonCharListLength (chars : List Char) : Nat :=
   psJsonCharListLengthAcc chars 0
@@ -765,9 +805,9 @@ def psJsonObjectFind
   | List.nil =>
       fun (_key : String) => Option.none
   | List.cons field rest =>
-      let smaller : String -> Option PsJsonValue :=
-        psJsonObjectFind rest;
       fun (key : String) =>
+        let smaller : String -> Option PsJsonValue :=
+          psJsonObjectFind rest;
         if psJsonStringEq (Prod.fst field) key then
           Option.some (Prod.snd field)
         else
@@ -822,9 +862,9 @@ def psJsonCompareCharLists
         | List.nil => PsJsonKeyOrder.eq
         | List.cons _ _ => PsJsonKeyOrder.lt
   | List.cons left leftRest =>
-      let smaller : List Char -> PsJsonKeyOrder :=
-        psJsonCompareCharLists leftRest;
       fun (rightChars : List Char) =>
+        let smaller : List Char -> PsJsonKeyOrder :=
+          psJsonCompareCharLists leftRest;
         match rightChars with
         | List.nil =>
             PsJsonKeyOrder.gt
@@ -851,12 +891,12 @@ def psJsonInsertObjectFieldInto
       fun (field : String × PsJsonValue) =>
         Except.ok (List.cons field List.nil)
   | List.cons current rest =>
-      let smaller :
-          (String × PsJsonValue) ->
-            Except PsJsonEncodeError
-              (List (String × PsJsonValue)) :=
-        psJsonInsertObjectFieldInto rest;
       fun (field : String × PsJsonValue) =>
+        let smaller :
+            (String × PsJsonValue) ->
+              Except PsJsonEncodeError
+                (List (String × PsJsonValue)) :=
+          psJsonInsertObjectFieldInto rest;
         match
             psJsonCompareKeys
               (Prod.fst field)

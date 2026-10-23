@@ -1,9 +1,15 @@
 // Consolidate successful scoped CI evidence. This is not a proof certificate.
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import {checkWhileExecution} from './check-while-execution.mjs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { checkLanguageBackendParity } from './check-language-backend-parity.mjs';
+import {checkCompilerApplication} from './check-compiler-application.mjs';
+import {checkPracticalApplications} from './check-practical-applications.mjs';
+import {checkTypedIoExecution} from './check-typed-io-execution.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist/scoped-correctness');
 const read = relative => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
@@ -20,12 +26,171 @@ const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
 
+
+const applicationContract=read('docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json');
+const practicalApplications=read('dist/scoped-correctness/practical-applications/results.json');
+const minimumApplications=read('dist/scoped-correctness/practical-applications-python314/results.json');
+for(const [data,selected] of [[practicalApplications,targets],[minimumApplications,['python']]]){
+ checkPracticalApplications(applicationContract,data,{commit:process.env.GITHUB_SHA,targets:selected});
+ assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+}
+
+const compilerApplicationContract=read('docs/PSC1_COMPILER_APPLICATION_CONTRACT.json');
+const compilerApplication=read('dist/scoped-correctness/compiler-application/results.json');
+const minimumCompilerApplication=read('dist/scoped-correctness/compiler-application-python314/results.json');
+for(const [data,selected] of [[compilerApplication,targets],[minimumCompilerApplication,['python']]]){
+ checkCompilerApplication(compilerApplicationContract,data,{commit:process.env.GITHUB_SHA,targets:selected});
+ assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+}
+const extraProtocols={};
+for(const [id,file]of [['library-application','PSC1_LIBRARY_APPLICATION_CASE_CONTRACT.json'],['checked-order','PSC1_ORDER_CASE_CONTRACT.json'],['inference-control','PSC1_INFERENCE_CONTROL_CASE_CONTRACT.json'],
+ ['typed-io-protocol','PSC1_TYPED_IO_PROTOCOL_CASE_CONTRACT.json'],
+ ['typed-io-sequencing','PSC1_TYPED_IO_SEQUENCING_CASE_CONTRACT.json']]){
+ const contract=read('docs/'+file),receipt=read('dist/scoped-correctness/'+id+'/results.json'),
+  minimum=read('dist/scoped-correctness/'+id+'-python314/results.json');
+ for(const [data,selected]of [[receipt,targets],[minimum,['python']]]){
+  assert.equal(data.schema,'psc1-language-backend-execution/1');
+  assert.equal(data.contract,contract.id);
+  assert.equal(data.testedCommit,process.env.GITHUB_SHA);
+  assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+  assert.equal(data.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+  assert.equal(data.passed,true);assert.deepEqual(data.failures,[]);
+  assert.deepEqual(data.targets,selected);
+  checkLanguageBackendParity(contract,data.records,{targets:selected});
+ }
+ extraProtocols[id]={contract:contract.id,obligations:receipt.records.length,
+  minimumPythonObligations:minimum.records.length,evidence:id+'/results.json',completeFamily:false};
+}
+const phpUtf8=read('dist/scoped-correctness/php-utf8/results.json');
+assert.equal(phpUtf8.schema,'psc1-php-utf8-runtime/1');
+assert.equal(phpUtf8.testedCommit,process.env.GITHUB_SHA);
+assert.equal(phpUtf8.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(phpUtf8.passed,true);assert.equal(phpUtf8.strictInputIr,true);
+assert.equal(phpUtf8.iterations,100000);assert.equal(phpUtf8.inputBytes,500000);
+assert.ok(Number.isFinite(phpUtf8.elapsedSeconds)&&phpUtf8.elapsedSeconds>=0&&phpUtf8.elapsedSeconds<=5);
+for(const key of ['nativeFixtureSha256','consumerSha256','moduleSha256','runtimeSha256','echoSha256'])
+ assert.match(phpUtf8[key]||'',/^[a-f0-9]{64}$/);
+for(const name of ['UTF8 scalar byte boundaries','middle-byte and empty defaults','exact huge next',
+ 'extract policy unchanged','persistent String values','same-length content and eviction',
+ 'copy-on-write cache safety','malformed UTF8 public guard','malformed UTF8 helper even out of range',
+ 'Nat argument type refusal','two large immutable Strings cache','runtime-free echo retained'])
+ assert.ok(phpUtf8.checks.includes(name));
+const tsContinuations=read('dist/scoped-correctness/ts-continuations/results.json');
+assert.equal(tsContinuations.schema,'psc1-ts-continuation-runtime/1');
+assert.equal(tsContinuations.testedCommit,process.env.GITHUB_SHA);
+assert.equal(tsContinuations.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(tsContinuations.passed,true);assert.equal(tsContinuations.independentTypeCheck,true);
+assert.equal(tsContinuations.strictInputIr,true);assert.equal(tsContinuations.mutualTailCalls,1000001);
+assert.equal(tsContinuations.nonTailDepth,5000);assert.equal(tsContinuations.strictDivergenceDeadlineMs,2000);
+assert.equal(tsContinuations.maxRssBoundKiB,262144);
+assert.ok(tsContinuations.maxRssKiB>0&&tsContinuations.maxRssKiB<=262144);
+for(const key of ['nativeFixtureSha256','rawSha256','formattedSha256','executableSha256'])
+ assert.match(tsContinuations[key]||'',/^[a-f0-9]{64}$/);
+for(const name of ['mutual tail results','non-tail arithmetic continuation','local value continuation','local tail result',
+ 'condition continuation','escaping lambda owner','old captured value','callee and operands exact-once left-to-right',
+ 'tail foreign trap escapes','non-tail foreign trap escapes'])assert.ok(tsContinuations.checks.includes(name));
+const typedIoExecution=read('dist/scoped-correctness/typed-io-execution/results.json');
+checkTypedIoExecution(read('docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json'),typedIoExecution,{
+ commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
+ checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'});
+const minimumIoDispatcher=read('dist/scoped-correctness/typed-io-dispatcher-python314/results.json');
+assert.equal(minimumIoDispatcher.schema,'psc1-io-dispatcher-execution/1');
+assert.equal(minimumIoDispatcher.testedCommit,process.env.GITHUB_SHA);
+assert.equal(minimumIoDispatcher.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(minimumIoDispatcher.passed,true);assert.deepEqual(minimumIoDispatcher.failures,[]);
+checkTypedIoExecution(read('docs/PSC1_TYPED_IO_EXECUTION_CONTRACT.json'),{
+ schema:'psc1-typed-io-execution/1',contract:'typed-io-execution-v1',
+ testedCommit:minimumIoDispatcher.testedCommit,branchHeadCommit:minimumIoDispatcher.branchHeadCommit,
+ checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
+ passed:true,failures:[],completeApplications:false,targets:['python'],records:minimumIoDispatcher.records,
+ policies:{python:typedIoExecution.policies.python}
+},{commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
+ checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',targets:['python']});
+const ioPolicy=read('dist/scoped-correctness/typed-io/policy.json');
+const ioApplication=read('dist/scoped-correctness/typed-io/application.json');
+for(const data of [ioPolicy,ioApplication]){
+ assert.equal(data.testedCommit,process.env.GITHUB_SHA);
+ assert.equal(data.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+ assert.equal(data.passed,true);
+}
+assert.equal(ioPolicy.schema,'psc1-typed-io-policy-tests/1');assert.equal(ioPolicy.platform,'linux');
+assert.ok(ioPolicy.checks.length>=20);
+assert.equal(ioApplication.schema,'psc1-typed-io-application-execution/1');
+assert.equal(ioApplication.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+assert.deepEqual(ioApplication.failures,[]);
+assert.deepEqual(ioApplication.records.map(r=>r.syntax+'/'+r.target).sort(),
+ ['lean','ps'].flatMap(s=>['js','ts','rust','python','php'].map(t=>s+'/'+t)).sort());
+for(const row of ioApplication.records){
+ assert.equal(row.passed,true);assert.equal(row.runtime,'executed');
+ assert.equal(row.admission,'independent-official-Lean');
+ assert.equal(row.strictIr,'required-by-production-publication');
+ for(const key of ['sourceSha256','librarySha256','artifactSha256','manifestSha256','oracleSha256'])
+  assert.match(row[key],/^[a-f0-9]{64}$/);
+ assert.ok(row.checks.includes('actual-json-file-read-transform-atomic-write'));
+ assert.ok(row.checks.includes('actual-console-unicode-crlf-empty-eof'));
+}
+
+const minimumIoApplication=read('dist/scoped-correctness/typed-io-python314/application.json');
+assert.equal(minimumIoApplication.schema,'psc1-typed-io-application-execution/1');
+assert.equal(minimumIoApplication.testedCommit,process.env.GITHUB_SHA);
+assert.equal(minimumIoApplication.branchHeadCommit,process.env.PSC1_HEAD_SHA);
+assert.equal(minimumIoApplication.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+assert.equal(minimumIoApplication.passed,true);assert.deepEqual(minimumIoApplication.failures,[]);
+assert.deepEqual(minimumIoApplication.targets,['python']);
+assert.deepEqual(minimumIoApplication.records.map(r=>r.syntax+'/'+r.target).sort(),['lean/python','ps/python']);
+assert.ok(minimumIoApplication.records.every(r=>r.passed&&r.runtime==='executed'&&r.checks.includes('actual-json-file-read-transform-atomic-write')));
+
+assert.equal(ioApplication.completeFamily,false);assert.equal(ioApplication.sevenHostAdapters,false);
+
+const jsonApplicationContract=read('docs/PSC1_JSON_APPLICATION_CASE_CONTRACT.json');
+const jsonApplication=read('dist/scoped-correctness/json-application/results.json');
+const minimumJsonApplication=read('dist/scoped-correctness/json-application-python314/results.json');
+for(const [data,selectedTargets] of [[jsonApplication,targets],[minimumJsonApplication,['python']]]){
+ assert.equal(data.schema,'psc1-language-backend-execution/1');
+ assert.equal(data.contract,jsonApplicationContract.id);
+ assert.equal(data.testedCommit,process.env.GITHUB_SHA);
+ assert.equal(data.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+ assert.equal(data.passed,true);assert.deepEqual(data.failures,[]);
+ checkLanguageBackendParity(jsonApplicationContract,data.records,{targets:selectedTargets});
+}
+const compilerMContract = read('docs/PSC1_COMPILERM_CASE_CONTRACT.json');
+const compilerM = read('dist/scoped-correctness/compiler-m/results.json');
+const minimumCompilerM = read('dist/scoped-correctness/compiler-m-python314/results.json');
+for (const [data, selectedTargets] of [[compilerM, targets], [minimumCompilerM, ['python']]]) {
+  assert.equal(data.schema, 'psc1-language-backend-execution/1');
+  assert.equal(data.contract, compilerMContract.id);
+  assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
+  assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
+  assert.equal(data.checkerCommit, runtime.nativeLean.commit);
+  assert.equal(data.passed, true);
+  assert.deepEqual(data.failures, []);
+  assert.deepEqual(data.targets, selectedTargets);
+  checkLanguageBackendParity(compilerMContract, data.records, { targets: selectedTargets });
+}
+
+const collectionsContract = read('docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json');
+const collections = read('dist/scoped-correctness/stdlib-collections/results.json');
+const minimumCollections = read('dist/scoped-correctness/stdlib-collections-python314/results.json');
+for (const [data, selectedTargets] of [[collections, targets], [minimumCollections, ['python']]]) {
+  assert.equal(data.schema, 'psc1-language-backend-execution/1');
+  assert.equal(data.contract, collectionsContract.id);
+  assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
+  assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
+  assert.equal(data.checkerCommit, runtime.nativeLean.commit);
+  assert.equal(data.passed, true);
+  assert.deepEqual(data.failures, []);
+  assert.deepEqual(data.targets, selectedTargets);
+  checkLanguageBackendParity(collectionsContract, data.records, { targets: selectedTargets });
+}
+
 const typedErrors = read('dist/scoped-correctness/typed-errors/results.json');
 const minimumErrors = read('dist/scoped-correctness/typed-errors-python314/results.json');
 const components = read('dist/scoped-correctness/wasm-component-direct.json');
 const compilerProtocol = read('dist/scoped-correctness/compiler-host-protocol/results.json');
 const compilerCensus = read('dist/scoped-correctness/compiler-source-census/inventory.json');
 const compilerStages = read('dist/scoped-correctness/compiler-source-census/stages.json');
+const compilerPsStages = read('dist/scoped-correctness/compiler-source-census/stages-ps.json');
+const compilerStrict = read('dist/scoped-correctness/compiler-source-census/strict-semantic.json');
 for (const [data, expectedTargets] of [[typedErrors, targets], [minimumErrors, ['python']]]) {
   assert.equal(data.testedCommit, process.env.GITHUB_SHA || null);
   assert.equal(data.branchHeadCommit, process.env.PSC1_HEAD_SHA || null);
@@ -61,6 +226,28 @@ assert.equal(compilerStages.admission, 'not-run');
 assert.equal(compilerStages.ir, 'not-run');
 assert.equal(compilerStages.generatedExecution, 'not-run');
 assert.equal(compilerStages.fixedPoint, 'not-run');
+for (const [grammar, stages] of [['lean', compilerStages], ['ps', compilerPsStages]]) {
+  const lane = compilerCensus.lanes[grammar];
+  assert.equal(lane.probe.completed, true);
+  assert.equal(lane.probe.status, 0);
+  assert.equal(lane.probe.integrityError, null);
+  assert.equal(stages.grammar, grammar);
+  assert.equal(stages.records.length, compilerCensus.modules.length);
+  assert.equal(stages.sourceDerivation, lane.sourceDerivation);
+  assert.equal(stages.admission, 'not-run');
+  assert.equal(stages.ir, 'not-run');
+  assert.equal(stages.generatedExecution, 'not-run');
+  assert.equal(stages.fixedPoint, 'not-run');
+}
+for (const row of compilerPsStages.records.filter(row => row.translation === 'accepted')) {
+  assert.ok(row.inputArtifact.startsWith('translated-ps/'));
+  assert.match(row.inputSha256, /^[0-9a-f]{64}$/);
+}
+assert.equal(compilerStrict.commit, process.env.GITHUB_SHA || null);
+assert.equal(compilerStrict.passed, true);
+assert.equal(compilerStrict.phase, 'semantic-compiler');
+assert.equal(compilerStrict.expectedAcceptance, compilerStrict.measured.lean && compilerStrict.measured.ps);
+assert.equal(compilerStrict.status === 0, compilerStrict.expectedAcceptance);
 for (const syntax of ['lean', 'ps']) {
   for (const group of ['runtime-intrinsic-hygiene', 'prototype-property-hygiene']) {
     assert.ok(architecture.records.some(row => row.group === syntax + '-' + group && row.passed),
@@ -90,6 +277,8 @@ for (const [data, expectedTargets] of [[scripts, ['python', 'php']], [minimumScr
   }
 }
 for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, ['python']]]) {
+  checkWhileExecution(data,{commit:process.env.GITHUB_SHA,head:process.env.PSC1_HEAD_SHA,
+    checkerCommit:runtime.nativeLean.commit,targets:expectedTargets});
   assert.equal(data.records.length, expectedTargets.length * 2);
   assert.equal(data.divergence.length, expectedTargets.length * 2);
   assert.deepEqual([...new Set(data.records.map(x => x.target))].sort(), [...expectedTargets].sort());
@@ -112,6 +301,10 @@ for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, [
     x.externalTimeoutMs === 2000 && x.earlyReturnPreflight && x.unusedPatternRhsEvaluated));
 }
 assert.equal(distribution.qualification, 'passed');
+assert.deepEqual(distribution.installedTypedIo.map(r=>r.syntax).sort(),['lean','ps']);
+assert.ok(distribution.installedTypedIo.every(r=>r.passed&&r.target==='js'));
+assert.equal(distribution.adapterResources.length,9);
+assert.ok(distribution.adapterResources.every(r=>/^[a-f0-9]{64}$/.test(r.sha256)));
 assert.equal(library.independentlyAdmitted, true);
 assert.deepEqual(library.checkedControlFlow, ['Id', 'let-mut', 'assignment', 'conditional', 'early-return']);
 assert.equal(runtime.controlFlowOracle, 'pinned-native-Lean');
@@ -157,15 +350,24 @@ for (const record of runtime.rustPrivateClosures) {
 }
 
 const practicalNative = [
-  ['psc1_do_tests', 'PSC1_DO_TESTS: PASS'],
-  ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS'],
-  ['psc1_while_tests', 'PSC1_WHILE_TESTS: PASS'],
-  ['psc1_namespace_tests', 'PSC1_NAMESPACE_TESTS: PASS']
-].map(([suite, marker]) => {
+  ['psc1_do_tests', 'PSC1_DO_TESTS: PASS','test/DoTests.lean'],
+  ['psc1_data_tests', 'PSC1_DATA_TESTS: PASS','test/DataTests.lean'],
+  ['psc1_while_tests', 'PSC1_WHILE_TESTS: PASS','test/WhileTests.lean'],
+  ['psc1_namespace_tests', 'PSC1_NAMESPACE_TESTS: PASS','test/NamespaceTests.lean'],
+  ['psc1_ordinary_tests', 'PSC1_ORDINARY_BOUNDARY_TESTS: passed; no runtime divergence executed in kernel','test/OrdinaryExecutionTests.lean'],
+  ['psc1_operator_tests','PSC1_INT_EQUALITY_KERNEL_BOUNDARIES: PASS 50 true/false conversion checks and strict operand lets','test/OperatorTests.lean'],
+  ['contextual_inference_tests','PSC1_CONTEXTUAL_INFERENCE_PASS: PS zero arguments do not invent a Unit argument','test/ContextualInferenceTests.lean']
+].map(([suite, marker, source]) => {
   const evidence = 'practical-core/' + suite + '.log';
   const log = fs.readFileSync(path.join(output, evidence), 'utf8');
   assert.ok(log.includes(marker), 'missing native suite success: ' + suite);
-  return { suite, passed: true, evidence };
+  const sourceEvaluationCallsExactlyOnce=suite==='psc1_do_tests'?
+    ['evaluationItems','evaluationLower','evaluationUpper','evaluationArray','evaluationIndex']:[];
+  for(const name of sourceEvaluationCallsExactlyOnce)
+    assert.ok(log.includes('PSC1_DO_PASS: strict source call occurs once: '+name));
+  return {suite,passed:true,evidence,source,sourceEvaluationCallsExactlyOnce,
+    logSha256:createHash('sha256').update(log).digest('hex'),
+    testSha256:createHash('sha256').update(fs.readFileSync(path.join(root,source))).digest('hex')};
 });
 function version(command, args) {
   const result = spawnSync(command, args, { cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
@@ -260,6 +462,25 @@ const receipt = {
     runtimeBytes: x.runtime.runtimeBytes, runtimeSha256: x.runtime.runtimeSha256
   })),
   architectureFoundation: {
+    phpUtf8:phpUtf8,
+    typescriptContinuations:tsContinuations,
+    boundedProtocols:extraProtocols,
+    compilerApplication:{contract:compilerApplicationContract.id,actualConsumers:compilerApplication.records.length,casesPerConsumer:compilerApplicationContract.cases.length,minimumPythonConsumers:minimumCompilerApplication.records.length,evidence:'compiler-application/results.json',performance:compilerApplication.records.map(r=>({syntax:r.syntax,target:r.target,...r.cases.find(c=>c.id==='100000-statements').metrics})),completePracticalCore:false},
+    practicalApplications:{contract:applicationContract.id,applications:applicationContract.applications,actualConsumers:practicalApplications.records.length,casesPerConsumer:applicationContract.cases.length,minimumPythonConsumers:minimumApplications.records.length,evidence:'practical-applications/results.json',completePracticalCore:false},
+    actualTypedIoExecution:{contract:typedIoExecution.contract,actualConsumers:typedIoExecution.records.length,targets:typedIoExecution.targets,policyProviders:Object.keys(typedIoExecution.policies),evidence:'typed-io-execution/results.json',completePracticalCore:false},
+    typedIo:{scope:'retained Node-host application subset; see actualTypedIoExecution for the seven-adapter matrix',hostProvider:'Linux Node',policyChecks:ioPolicy.checks.length,applicationBundles:ioApplication.records.length,minimumPythonBundles:minimumIoApplication.records.length,sevenHostAdapters:false,completeFamily:false,evidence:'typed-io/application.json'},
+    jsonRecordApplicationCore:{contract:jsonApplicationContract.id,obligations:jsonApplication.records.length,
+      minimumPythonObligations:minimumJsonApplication.records.length,
+      evidence:'json-application/results.json',typedFileIo:false,completeApplication:false},
+    standardCollections: { contract: collectionsContract.id,
+      caseGrammarTargetObligations: collections.records.length,
+      minimumPythonObligations: minimumCollections.records.length,
+      evidence: 'stdlib-collections/results.json', completeFamily: false },
+    compilerM: { contract: compilerMContract.id, cases: compilerMContract.cases.map(row => row.id),
+      authoredGrammars: compilerMContract.grammars, caseGrammarTargetObligations: compilerM.records.length,
+      observationsPerObligation: 2, minimumPythonObligations: minimumCompilerM.records.length,
+      publicAbi: 'Bool-to-Bool observation wrappers', completeFamily: false,
+      evidence: 'compiler-m/results.json', minimumEvidence: 'compiler-m-python314/results.json' },
     typedErrors: { nativeObservations: typedErrors.nativeObservations,
       targetSourceBundles: typedErrors.records.length,
       refusalChecks: typedErrors.records.reduce((n, row) => n + row.refusals, 0),
@@ -269,7 +490,11 @@ const receipt = {
       evidence: 'wasm-component-direct.json', publicAbi: 'Bool-only' },
     generatedCompilerProtocol: { targets: ['js', 'rust'], transportExecuted: true,
       selfHosting: false, fixedPoint: false, evidence: 'compiler-host-protocol/results.json' },
-    compilerSourceCensus: { diagnosticCompleted: true, grammar: 'lean',
+    compilerSourceCensus: { diagnosticCompleted: true, grammar: 'lean', grammars: ['lean', 'ps'],
+      psSourceDerivation: 'owned-canonical-translation-from-lean',
+      independentlyAuthoredPsCompiler: false,
+      strictSemantic: { policyCheckPassed: compilerStrict.passed,
+        closureAccepted: compilerStrict.expectedAcceptance, status: compilerStrict.status },
       phases: compilerCensus.phases.map(phase => {
         const rows = compilerStages.records.filter(row => phase.modules.includes(row.module));
         return { name: phase.name, modules: rows.length,
@@ -282,7 +507,19 @@ const receipt = {
       }),
       admission: 'not-run', ir: 'not-run', generatedExecution: 'not-run',
       selfCompilation: 'not-run', fixedPoint: 'not-run',
-      inventory: 'compiler-source-census/inventory.json', stages: 'compiler-source-census/stages.json' }
+      psPhases: compilerCensus.phases.map(phase => {
+        const rows = compilerPsStages.records.filter(row => phase.modules.includes(row.module));
+        return { name: phase.name, modules: rows.length,
+          translationAccepted: rows.filter(row => row.translation === 'accepted').length,
+          parseAccepted: rows.filter(row => row.parse === 'accepted').length,
+          elaborationAccepted: rows.filter(row => row.elaboration === 'accepted').length,
+          firstRefusals: ['translation', 'parse', 'elaboration'].map(stage => {
+            const first = rows.find(row => row[stage] === 'refused');
+            return first ? { stage, module: first.module, detail: first.detail } : null;
+          }).filter(Boolean) };
+      }),
+      inventory: 'compiler-source-census/inventory.json', stages: 'compiler-source-census/stages.json',
+      psStages: 'compiler-source-census/stages-ps.json' }
   },
   npm: distribution,
   optionalLibrary: library,
@@ -297,7 +534,7 @@ const receipt = {
   exclusions: [
     'full Practical Core feature families', 'unrestricted Lean',
     'Int division/modulo', 'fixed-width/floating runtime scalars',
-    'Python/PHP public compound ABI', 'non-Bool component public ABI',
+    'Python/PHP public compound ABI', 'component public ABI outside explicit Bool/String dispatcher profiles',
     'formal backend preservation', 'full self-host/fixed-point qualification',
     'npm registry publication', 'non-Linux native package qualification'
   ]

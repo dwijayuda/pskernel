@@ -8,6 +8,7 @@ lean_lib PsFoundation where
   roots := #[
     `Ps.Foundation.List,
     `Ps.Foundation.Name,
+    `Ps.Foundation.StringSet,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic,
     `Ps.Foundation.Text
@@ -57,7 +58,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.SelfHostProd,
-    `Ps.Environment.Control
+    `Ps.Environment.Control,
+    `Ps.Environment.Order
   ]
 
 lean_lib PsBridge where
@@ -74,12 +76,14 @@ lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
     `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Encode,
     `Ps.CompilerIr.Construct,
     `Ps.CompilerIr.CheckTypes,
     `Ps.CompilerIr.CheckSize,
     `Ps.CompilerIr.Check,
     `Ps.CompilerIr.Specialize,
-    `Ps.CompilerIr.Validate
+    `Ps.CompilerIr.Validate,
+    `Ps.CompilerIr.WorkerFusion
   ]
 
 lean_lib PsBackendCommon where
@@ -99,7 +103,7 @@ lean_lib PsErasure where
 
 lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
-  roots := #[`Ps.Compiler, `Ps.Compiler.Api, `Ps.Compiler.Ordinary, `Ps.Compiler.Sh1]
+  roots := #[`Ps.Compiler, `Ps.Compiler.Api, `Ps.Compiler.Ordinary, `Ps.Compiler.Sh1, `Ps.Compiler.Service]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
@@ -110,7 +114,8 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Checked,
     `Ps.BackendTs.Sh1Target,
     `Ps.BackendTs.Sh1,
-    `Ps.BackendTs.Compiler
+    `Ps.BackendTs.Compiler,
+    `Ps.BackendTs.CompilerService
   ]
 
 -- Target libraries remain outside the portable bootstrap import closure.
@@ -122,7 +127,8 @@ lean_lib PsBackendJs where
     `Ps.BackendJs.Encode,
     `Ps.BackendJs.Lower,
     `Ps.BackendJs.Validate,
-    `Ps.BackendJs.Print
+    `Ps.BackendJs.Print,
+    `Ps.BackendJs.CompilerService
   ]
 
 lean_lib PsBackendRust where
@@ -137,7 +143,8 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Tail,
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.RuntimePlan,
-    `Ps.BackendRust.Module
+    `Ps.BackendRust.Module,
+    `Ps.BackendRust.CompilerService
   ]
 
 lean_lib PsBackendWasm where
@@ -160,7 +167,9 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.ValidateStructure,
     `Ps.BackendWasm.ValidateTyping,
     `Ps.BackendWasm.ValidateIr,
-    `Ps.BackendWasm.Component
+    `Ps.BackendWasm.Component,
+    `Ps.BackendWasm.StringAbi,
+    `Ps.BackendWasm.StringComponent
   ]
 
 lean_lib PsBackendPython where
@@ -185,6 +194,7 @@ lean_lib PsBootstrap where
 lean_lib PsHost where
   srcDir := "host/src"
   roots := #[
+    `Ps.Host.BackendNativeInstances,
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
     `Ps.Host.SourceSnapshot,
@@ -194,7 +204,8 @@ lean_lib PsHost where
     `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend,
     `Ps.Host.ScriptBackend,
-    `Ps.Host.WasmComponent
+    `Ps.Host.WasmComponent,
+    `Ps.Host.WasmString
   ]
 
 -- Preserve existing regression and historical bootstrap targets. The scoped
@@ -223,6 +234,7 @@ lean_lib PsElab where
     `Ps.Elab.Data,
     `Ps.Elab.DoLoop,
     `Ps.Elab.DoLoopLift,
+    `Ps.Elab.DoForLift,
     `Ps.Elab.DoBase,
     `Ps.Elab.DoFor,
     `Ps.Elab.DoWhile,
@@ -370,3 +382,55 @@ lean_exe psc1_independent_checker where
 lean_exe psc1_census_normalization_tests where
   srcDir := "test"
   root := `CensusNormalizationTests
+
+lean_exe psc1_backend_normalization_tests where
+  srcDir := "test"
+  root := `BackendNormalizationTests
+
+lean_exe psc1_ir_encoding_tests where
+  srcDir := "test"
+  root := `IrEncodingTests
+
+lean_exe psc1_js_service_seed where
+  srcDir := "scripts"
+  root := `JsServiceSeed
+
+lean_exe psc1_js_service_tests where
+  srcDir := "test"
+  root := `JsServiceTests
+
+lean_exe psc1_specialize_queue_benchmark where
+  srcDir := "scripts"
+  root := `SpecializeQueueBenchmark
+
+lean_exe psc1_compiler_profile where
+  srcDir := "scripts"
+  root := `CompilerStageProfile
+
+lean_exe psc1_json_quote_tests where
+  srcDir := "test"
+  root := `JsonQuoteTests
+
+lean_exe psc1_worker_fusion_tests where
+  srcDir := "test"
+  root := `WorkerFusionTests
+
+lean_exe psc1_wasm_string_abi_tests where
+  srcDir := "test"
+  root := `WasmStringAbiTests
+
+lean_exe psc1_ts_continuation_tests where
+  srcDir := "test"
+  root := `TsContinuationTests
+
+lean_exe psc1_php_utf8_tests where
+  srcDir := "test"
+  root := `PhpUtf8Tests
+
+lean_exe psc1_target_service_seed where
+  srcDir := "scripts"
+  root := `TargetServiceSeed
+
+lean_exe psc1_ts_service_normalization_tests where
+  srcDir := "test"
+  root := `TsServiceNormalizationTests

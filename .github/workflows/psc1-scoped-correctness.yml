@@ -2,28 +2,26 @@ name: PSC1 scoped correctness and readable artifacts
 
 on:
   workflow_dispatch:
+    inputs:
+      require_release_ready:
+        description: Enforce the complete Practical Core release contract
+        type: boolean
+        default: false
   workflow_call:
-  push:
-    branches:
-      - fix/psc1-scoped-correctness-20261020
-    paths:
-      - psc1/**
-      - .github/workflows/psc1-scoped-correctness.yml
-  pull_request:
-    paths:
-      - psc1/**
-      - .github/workflows/psc1-scoped-correctness.yml
-      - .github/workflows/psc1-direct-backends.yml
+    inputs:
+      require_release_ready:
+        type: boolean
+        default: false
 
-concurrency:
-  group: psc1-scoped-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 env:
   PSC1_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
-permissions:
-  contents: read
+concurrency:
+  group: psc1-scoped-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
   linux-scoped:
@@ -51,7 +49,7 @@ jobs:
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: '8.5.11'
-          extensions: gmp
+          extensions: gmp, ffi
           tools: none
           coverage: none
       - name: Record scripting target runtimes
@@ -59,6 +57,17 @@ jobs:
           python3 --version
           php --version
           php -r 'echo "gmp=" . (extension_loaded("gmp") ? "enabled" : "missing") . PHP_EOL;'
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        id: native_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
@@ -92,6 +101,13 @@ jobs:
           tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
           install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
           echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Install isolated pinned component String consumer
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/psc1-wasmtime-python"
+          "$RUNNER_TEMP/psc1-wasmtime-python/bin/python" -m pip install --only-binary=:all: --no-deps wasmtime==49.0.0
+          "$RUNNER_TEMP/psc1-wasmtime-python/bin/python" -c 'import importlib.metadata; assert importlib.metadata.version("wasmtime")=="49.0.0"'
+          echo "PSC1_WASMTIME_PY=$RUNNER_TEMP/psc1-wasmtime-python/bin/python" >> "$GITHUB_ENV"
       - name: Install isolated pinned TypeScript consumer checker
         run: |
           set -euo pipefail
@@ -109,11 +125,20 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
+          lake build psc1 psc1_php_utf8_tests psc1_ts_continuation_tests psc1_wasm_string_abi_tests psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
+      - name: Save successful compilation before running regressions
+        if: steps.native_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
           set -euo pipefail
+          .lake/build/bin/psc1_wasm_string_abi_tests
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-core.wasm
+          wasm-tools validate dist/scoped-correctness/wasm-string-native/echo-component.wasm
           .lake/build/bin/psc1_backend_common_tests
           .lake/build/bin/psc1_ir_specialize_tests
           .lake/build/bin/psc1_direct_map_tests
@@ -179,6 +204,46 @@ jobs:
           if ! .lake/build/bin/psc1_typed_error_tests 2>&1 | tee dist/scoped-correctness/typed-errors/native-tests.log; then result=1; fi
           if ! node scripts/typed-error-conformance-tests.mjs; then result=1; fi
           exit "$result"
+      - name: Execute PHP scalar UTF8 and bounded lookup regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: node scripts/php-utf8-tests.mjs
+      - name: Execute typed continuation and bounded tail-driver regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: node scripts/ts-continuation-tests.mjs
+      - name: Execute authored CompilerM cases across seven targets
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node --check scripts/compiler-m-conformance-tests.mjs
+          node scripts/language-backend-parity-contract-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --checked-order
+          node scripts/practical-application-tests.mjs --compiler-application
+          node scripts/practical-application-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --library-application
+          node scripts/compiler-m-conformance-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
+          node scripts/compiler-m-conformance-tests.mjs --json-application
+          node scripts/compiler-m-conformance-tests.mjs --inference-control
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
+          python3 scripts/standalone-io-policy-tests.py
+          export PSC1_STANDALONE_IO_COMMAND="[\"php\",\"-d\",\"ffi.enable=1\",\"$PWD/scripts/standalone-io-server.php\"]"
+          export PSC1_STANDALONE_IO_ABI=psc1-php-linux-ffi-string-io/1
+          python3 scripts/standalone-io-policy-tests.py
+          unset PSC1_STANDALONE_IO_COMMAND PSC1_STANDALONE_IO_ABI
+          cargo build --locked --manifest-path host-tools/typed-io-rust/Cargo.toml --bin psc1-io-policy-server
+          export PSC1_STANDALONE_IO_COMMAND="[\"$PWD/host-tools/typed-io-rust/target/debug/psc1-io-policy-server\"]"
+          export PSC1_STANDALONE_IO_ABI=psc1-rust-linux-string-io/1
+          python3 scripts/standalone-io-policy-tests.py
+          unset PSC1_STANDALONE_IO_COMMAND PSC1_STANDALONE_IO_ABI
+          node scripts/typed-io-policy-tests.mjs
+          PSC1_IO_APPLICATION_TARGETS=js,ts,rust,python,php node scripts/typed-io-application-tests.mjs
+          PSC1_IO_DISPATCHER_TARGETS=js,ts,rust,python,php node scripts/typed-io-dispatcher-tests.mjs
+          node scripts/check-language-backend-parity.mjs docs/PSC1_STDLIB_COLLECTION_CASE_CONTRACT.json dist/scoped-correctness/stdlib-collections/results.json
+          node scripts/check-language-backend-parity.mjs docs/PSC1_COMPILERM_CASE_CONTRACT.json dist/scoped-correctness/compiler-m/results.json
       - name: Execute owned component binary encoder with external encoding disabled
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
@@ -188,7 +253,9 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          node scripts/compiler-source-census-contract-tests.mjs
           node scripts/compiler-source-census.mjs
+          node scripts/compiler-source-census-strict-tests.mjs
           node scripts/compiler-host-protocol-tests.mjs
       - name: Execute runtime contract against pinned Lean reference results
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
@@ -202,6 +269,12 @@ jobs:
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
         run: node scripts/script-backend-tests.mjs
+      - name: Execute core and component String ABI and actual typed IO
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/wasm-string-tests.mjs
+          node scripts/typed-io-execution-evidence.mjs
       - name: Execute full scripting and runtime corpus on minimum Python
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         working-directory: psc1
@@ -215,6 +288,38 @@ jobs:
           export PSC1_WHILE_EVIDENCE=ordinary-while-conformance-python314
           export PSC1_ERROR_TARGETS=python
           export PSC1_ERROR_EVIDENCE=typed-errors-python314
+          export PSC1_COMPILERM_TARGETS=python
+          export PSC1_COMPILERM_EVIDENCE=compiler-m-python314
+          export PSC1_COLLECTION_TARGETS=python
+          export PSC1_COLLECTION_EVIDENCE=stdlib-collections-python314
+          export PSC1_JSON_TARGETS=python
+          export PSC1_JSON_EVIDENCE=json-application-python314
+          export PSC1_COMPILER_APPLICATION_TARGETS=python
+          export PSC1_COMPILER_APPLICATION_EVIDENCE=compiler-application-python314
+          export PSC1_LIBRARY_TARGETS=python
+          export PSC1_LIBRARY_EVIDENCE=library-application-python314
+          export PSC1_APPLICATION_TARGETS=python
+          export PSC1_APPLICATION_EVIDENCE=practical-applications-python314
+          export PSC1_ORDER_TARGETS=python
+          export PSC1_ORDER_EVIDENCE=checked-order-python314
+          export PSC1_INFERENCE_TARGETS=python
+          export PSC1_INFERENCE_EVIDENCE=inference-control-python314
+          export PSC1_IO_SEQUENCING_TARGETS=python
+          export PSC1_IO_SEQUENCING_EVIDENCE=typed-io-sequencing-python314
+          export PSC1_IO_PROTOCOL_TARGETS=python
+          export PSC1_IO_PROTOCOL_EVIDENCE=typed-io-protocol-python314
+          node scripts/compiler-m-conformance-tests.mjs --checked-order
+          node scripts/practical-application-tests.mjs --compiler-application
+          node scripts/practical-application-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --library-application
+          node scripts/compiler-m-conformance-tests.mjs
+          node scripts/compiler-m-conformance-tests.mjs --stdlib-collections
+          node scripts/compiler-m-conformance-tests.mjs --json-application
+          node scripts/compiler-m-conformance-tests.mjs --inference-control
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-protocol
+          node scripts/compiler-m-conformance-tests.mjs --typed-io-sequencing
+          PSC1_IO_APPLICATION_TARGETS=python PSC1_IO_APPLICATION_EVIDENCE=typed-io-python314 node scripts/typed-io-application-tests.mjs
+          PSC1_IO_DISPATCHER_TARGETS=python PSC1_IO_DISPATCHER_EVIDENCE=typed-io-dispatcher-python314 node scripts/typed-io-dispatcher-tests.mjs
           node scripts/typed-error-conformance-tests.mjs
           node scripts/runtime-conformance-tests.mjs
           node scripts/ordinary-while-conformance-tests.mjs
@@ -226,12 +331,16 @@ jobs:
       - name: Consolidate exact-commit seven-target and package qualification
         working-directory: psc1
         run: node scripts/seven-backend-qualification.mjs
+      - name: Derive exact-commit Practical Core readiness
+        working-directory: psc1
+        run: node scripts/practical-core-readiness.mjs --full-qualification ${{ inputs.require_release_ready && '--require-ready' || '' }}
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: psc1-scoped-correctness-${{ github.sha }}
           path: |
+            psc1/dist/development/
             psc1/host-tools/package-lock.json
             psc1/dist/scoped-correctness/
           if-no-files-found: warn

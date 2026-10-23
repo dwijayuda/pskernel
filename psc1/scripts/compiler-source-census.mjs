@@ -5,6 +5,9 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
+import { censusOptions, validateCensusLane, requireStrictCensus } from './compiler-source-census-contract.mjs';
+const options = censusOptions(process.argv.slice(2));
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lake = fs.readFileSync(path.join(root, 'lakefile.lean'), 'utf8');
 const index = new Map();
@@ -21,9 +24,8 @@ for (const match of lake.matchAll(/lean_lib\s+(\w+)\s+where\n([\s\S]*?)(?=\n(?:l
 }
 const phases = [
   { name: 'semantic-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary'] },
-  { name: 'directjs-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan',
-    'Ps.BackendJs.Lower', 'Ps.BackendJs.Validate', 'Ps.BackendJs.Print'] },
-  { name: 'rust-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan', 'Ps.BackendRust.Module'] }
+  { name: 'directjs-compiler', roots: ['Ps.BackendJs.CompilerService'] },
+  { name: 'rust-compiler', roots: ['Ps.Compiler.Api', 'Ps.Compiler.Ordinary', 'Ps.BackendCommon.Plan', 'Ps.CompilerIr.Encode', 'Ps.BackendRust.Module'] }
 ];
 const all = new Set();
 for (const phase of phases) {
@@ -50,49 +52,146 @@ function visit(name) {
 for (const name of all) visit(name);
 const evidence = path.join(root, 'dist/scoped-correctness/compiler-source-census');
 fs.mkdirSync(evidence, { recursive: true });
-const output = path.join(evidence, 'stages.json');
 const binary = process.env.PSC1_CENSUS_PROBE || path.join(root, '.lake/build/bin/psc1_source_census_probe');
-const run = spawnSync(binary, ['--out', output, '--modules', ...ordered.flatMap(m => [m.name, m.path])], {
-  cwd: root, encoding: 'utf8', timeout: 240000, maxBuffer: 32 * 1024 * 1024
-});
-const observed = fs.existsSync(output) ? JSON.parse(fs.readFileSync(output, 'utf8')) : null;
+const lanes = {};
+for (const grammar of ['lean', 'ps']) {
+  const filename = grammar === 'lean' ? 'stages.json' : 'stages-ps.json';
+  const output = path.join(evidence, filename);
+  // Remove only our exact previous output, before spawning; partial output cannot reuse stale acceptance.
+  fs.rmSync(output, { force: true });
+  const run = spawnSync(binary, ['--grammar', grammar, '--out', output, '--modules',
+    ...ordered.flatMap(m => [m.name, m.path])], {
+    cwd: root, encoding: 'utf8', timeout: 240000, maxBuffer: 32 * 1024 * 1024
+  });
+  let observed = null, integrityError = null;
+  try {
+    observed = JSON.parse(fs.readFileSync(output, 'utf8'));
+    validateCensusLane(observed, ordered, grammar);
+  } catch (error) { integrityError = error.message; }
+  const probe = { status: run.status, signal: run.signal, error: run.error?.message || null,
+    stdout: run.stdout, stderr: run.stderr,
+    completed: !integrityError && observed?.records?.length === ordered.length,
+    integrityError };
+  lanes[grammar] = { probe, observed, stages: filename,
+    sourceDerivation: grammar === 'lean' ? 'repository-lean-source' : 'owned-canonical-translation-from-lean' };
+}
+for (const entry of ordered) {
+  const current = fs.readFileSync(path.join(root, entry.path));
+  if (current.length !== entry.utf8Bytes ||
+      crypto.createHash('sha256').update(current).digest('hex') !== entry.sha256)
+    throw new Error('PSC1_CENSUS_SOURCE_CHANGED: ' + entry.name);
+}
+const psDirectory = path.join(evidence, 'translated-ps');
+fs.mkdirSync(psDirectory, { recursive: true });
+const ownedNames = new Set(ordered.map(m => m.name + '.ps'));
+for (const filename of fs.readdirSync(psDirectory)) {
+  if (!ownedNames.has(filename) || !fs.lstatSync(path.join(psDirectory, filename)).isFile())
+    throw new Error('PSC1_CENSUS_UNEXPECTED_TRANSLATED_FILE: ' + filename);
+  fs.rmSync(path.join(psDirectory, filename));
+}
+if (lanes.ps.probe.completed) {
+  for (const row of lanes.ps.observed.records) {
+    if (row.translation !== 'accepted') continue;
+    if (!/^Ps(?:\.[A-Za-z0-9_]+)+$/.test(row.module))
+      throw new Error('PSC1_CENSUS_UNSAFE_MODULE: ' + row.module);
+    const input = Buffer.from(row.inputSource, 'utf8');
+    row.inputSha256 = crypto.createHash('sha256').update(input).digest('hex');
+    row.inputArtifact = 'translated-ps/' + row.module + '.ps';
+    fs.writeFileSync(path.join(evidence, row.inputArtifact), input);
+    delete row.inputSource;
+  }
+  fs.writeFileSync(path.join(evidence, lanes.ps.stages), JSON.stringify(lanes.ps.observed, null, 2) + '\n');
+}
+const observed = lanes.lean.observed;
 const report = { schema: 'psc1-compiler-source-census/1', commit: process.env.GITHUB_SHA || null,
-  explicitImportGraphOnly: true, implicitPreludeCensus: 'not-run',
-  phases, modules: ordered, probe: { status: run.status, signal: run.signal,
-    error: run.error?.message || null, stdout: run.stdout, stderr: run.stderr,
-    completed: observed?.records?.length === ordered.length },
+  explicitImportGraphOnly: true, implicitPreludeCensus: 'not-run', phases, modules: ordered,
+  probe: lanes.lean.probe,
+  lanes: Object.fromEntries(Object.entries(lanes).map(([grammar, lane]) => [grammar,
+    { probe: lane.probe, stages: lane.stages, sourceDerivation: lane.sourceDerivation }])),
+  selectedStrictPhase: options.strictPhase,
   generatedExecution: 'not-run', selfCompilation: 'not-run', fixedPoint: 'not-run' };
 fs.writeFileSync(path.join(evidence, 'inventory.json'), JSON.stringify(report, null, 2) + '\n');
-if (run.error || run.status !== 0 || !report.probe.completed) {
-  throw new Error('PSC1_CENSUS_PROBE_FAILED: ' + (run.error?.message || run.stderr));
-}
-for (const phase of phases) {
-  const rows = observed.records.filter(row => phase.modules.includes(row.module));
-  console.log('PSC1_COMPILER_CENSUS: ' + phase.name + ' ' + rows.length + ' modules; parse accepted=' +
-    rows.filter(row => row.parse === 'accepted').length + '; elaboration accepted=' +
-    rows.filter(row => row.elaboration === 'accepted').length);
-  for (const stage of ['parse', 'elaboration']) {
-    const first = rows.find(row => row[stage] === 'refused');
-    if (first) console.log('PSC1_COMPILER_CENSUS_FIRST_REFUSAL: ' +
-      JSON.stringify({ phase: phase.name, stage, module: first.module, path: first.path, detail: first.detail,
-        sourceDeclaration: first.sourceDeclaration, sourceIndex: first.sourceIndex,
-        line: first.line, column: first.column }));
+for (const [grammar, lane] of Object.entries(lanes)) {
+  if (lane.probe.error || lane.probe.status !== 0 || !lane.probe.completed)
+    throw new Error('PSC1_CENSUS_PROBE_FAILED: ' + grammar + ': ' +
+      (lane.probe.error || lane.probe.integrityError || lane.probe.stderr));
+  for (const phase of phases) {
+    const rows = lane.observed.records.filter(row => phase.modules.includes(row.module));
+    console.log('PSC1_COMPILER_CENSUS: ' + grammar + '/' + phase.name + ' ' + rows.length +
+      ' modules; parse accepted=' + rows.filter(row => row.parse === 'accepted').length +
+      '; elaboration accepted=' + rows.filter(row => row.elaboration === 'accepted').length);
+    for (const stage of ['translation', 'parse', 'elaboration']) {
+      const first = rows.find(row => row[stage] === 'refused');
+      if (first) console.log('PSC1_COMPILER_CENSUS_FIRST_REFUSAL: ' +
+        JSON.stringify({ grammar, phase: phase.name, stage, module: first.module,
+          path: first.path, detail: first.detail, sourceDeclaration: first.sourceDeclaration,
+          sourceIndex: first.sourceIndex, line: first.line, column: first.column }));
+    }
   }
 }
-// Only inventory/probe integrity fails; source refusals remain explicit blockers.
+for (const [grammar, lane] of Object.entries(lanes)) {
+  for (const row of lane.observed.records) {
+    if (['translation', 'parse', 'elaboration'].some(stage => row[stage] === 'refused'))
+      console.log('PSC1_COMPILER_CENSUS_MODULE_REFUSAL: ' + JSON.stringify({
+        grammar, module: row.module, translation: row.translation, parse: row.parse,
+        elaboration: row.elaboration, detail: row.detail, sourceDeclaration: row.sourceDeclaration,
+        sourceIndex: row.sourceIndex, line: row.line, column: row.column
+      }));
+  }
+}
+requireStrictCensus(phases, lanes, options.strictPhase);
+// Diagnostic mode retains all source refusals; strict mode requires both complete lanes.
 
 // These normalized compiler modules are maintained regressions, not a waiver for
 // any other refusal. The full inventory above still reports every module.
 for (const [module, stage] of [
+  ['Ps.Bridge.Json', 'parse'], ['Ps.Bridge.Json', 'elaboration'],
+  ['Ps.Foundation.StringSet', 'parse'], ['Ps.Foundation.StringSet', 'elaboration'],
   ['Ps.Syntax.Ast', 'parse'], ['Ps.Syntax.Ast', 'elaboration'],
   ['Ps.Erasure.Definition', 'elaboration'],
   ['Ps.Syntax.ParseCommon', 'parse'], ['Ps.Syntax.ParseCommon', 'elaboration'],
   ['Ps.Syntax.ParseBinding', 'parse'], ['Ps.Syntax.ParseBinding', 'elaboration'],
-  ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration']
+  ['Ps.Syntax.Operators', 'parse'], ['Ps.Syntax.Operators', 'elaboration'],
+  ['Ps.Environment.Control', 'parse'], ['Ps.Environment.Control', 'elaboration'],
+  ['Ps.Environment.SelfHostProd', 'parse'], ['Ps.Environment.SelfHostProd', 'elaboration'],
+  ['Ps.Environment.Resolve', 'parse'], ['Ps.Environment.Resolve', 'elaboration'],
+  ['Ps.CompilerIr.Encode', 'parse'], ['Ps.CompilerIr.Encode', 'elaboration'],
+  ['Ps.CompilerIr.WorkerFusion', 'parse'], ['Ps.CompilerIr.WorkerFusion', 'elaboration'],
+  ['Ps.CompilerIr.Validate', 'parse'], ['Ps.CompilerIr.Validate', 'elaboration'],
+  ['Ps.BackendCommon.Plan', 'parse'], ['Ps.BackendCommon.Plan', 'elaboration'],
+  ['Ps.BackendRust.RuntimePlan', 'parse'], ['Ps.BackendRust.RuntimePlan', 'elaboration'],
+  ['Ps.BackendRust.Expr', 'parse'], ['Ps.BackendRust.Expr', 'elaboration'],
+  ['Ps.BackendRust.Module', 'parse'], ['Ps.BackendRust.Module', 'elaboration'],
+  ['Ps.BackendRust.Type', 'parse'], ['Ps.BackendRust.Type', 'elaboration'],
+  ['Ps.BackendJs.CompilerService', 'parse'], ['Ps.BackendJs.CompilerService', 'elaboration'],
+  ['Ps.BackendJs.Print', 'parse'], ['Ps.BackendJs.Print', 'elaboration'],
+  ['Ps.CompilerIr.Specialize', 'parse'], ['Ps.CompilerIr.Specialize', 'elaboration'],
+  ['Ps.Compiler.Ordinary', 'parse'], ['Ps.Compiler.Ordinary', 'elaboration'],
+  ['Ps.Elab.Declaration', 'parse'], ['Ps.Elab.Declaration', 'elaboration'],
+  ['Ps.Elab.DoLoopLift', 'parse'], ['Ps.Elab.DoLoopLift', 'elaboration'],
+  ['Ps.Elab.Term', 'parse'], ['Ps.Elab.Term', 'elaboration'],
+  ['Ps.Elab.Recursion', 'parse'], ['Ps.Elab.Recursion', 'elaboration'],
+  ['Ps.Elab.Do', 'parse'], ['Ps.Elab.Do', 'elaboration'],
+  ['Ps.Elab.Data', 'parse'], ['Ps.Elab.Data', 'elaboration'],
+  ['Ps.Elab.Operators', 'parse'], ['Ps.Elab.Operators', 'elaboration'],
+  ['Ps.Elab.DoBase', 'parse'], ['Ps.Elab.DoBase', 'elaboration'],
+  ['Ps.Elab.DoFor', 'parse'], ['Ps.Elab.DoFor', 'elaboration'],
+  ['Ps.Elab.DoWhile', 'parse'], ['Ps.Elab.DoWhile', 'elaboration'],
+  ['Ps.Elab.DoTry', 'parse'], ['Ps.Elab.DoTry', 'elaboration'],
+  ['Ps.Elab.Context', 'parse'], ['Ps.Elab.Context', 'elaboration'],
+  ['Ps.Syntax.ParseProofScript', 'parse'], ['Ps.Syntax.ParseProofScript', 'elaboration'],
+  ['Ps.Syntax.PrintLean', 'parse'], ['Ps.Syntax.PrintLean', 'elaboration'],
+  ['Ps.Syntax.PrintProofScript', 'parse'], ['Ps.Syntax.PrintProofScript', 'elaboration'],
+  ['Ps.Syntax.PrintCommon', 'parse'], ['Ps.Syntax.PrintCommon', 'elaboration'],
+  ['Ps.Syntax.ParseLean', 'parse'], ['Ps.Syntax.ParseLean', 'elaboration'],
+  ['Ps.Syntax.ParseData', 'parse'], ['Ps.Syntax.ParseData', 'elaboration'],
+  ['Ps.Syntax.ParseDo', 'parse'], ['Ps.Syntax.ParseDo', 'elaboration']
 ]) {
-  const row = observed.records.find(row => row.module === module);
-  if (!row || row[stage] !== 'accepted') {
-    throw new Error('PSC1_CENSUS_NORMALIZATION_REGRESSION: ' +
-      JSON.stringify({ module, stage, observed: row || null }));
+  for (const grammar of ['lean', 'ps']) {
+    const row = lanes[grammar].observed.records.find(row => row.module === module);
+    if (!row || row[stage] !== 'accepted') {
+      throw new Error('PSC1_CENSUS_NORMALIZATION_REGRESSION: ' +
+        JSON.stringify({ grammar, module, stage, observed: row || null }));
+    }
   }
 }

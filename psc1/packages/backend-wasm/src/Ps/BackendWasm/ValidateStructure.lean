@@ -3,6 +3,8 @@ import Ps.Foundation.List
 import Ps.Foundation.Name
 
 inductive PsWasmIrValidationError where
+  | invalidAbiMemory
+  | invalidAbiImport
   | duplicateTypeName (name : String)
   | duplicateFunctionName (name : String)
   | duplicateExportName (name : String)
@@ -344,6 +346,30 @@ def psWasmIrValidateInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmIrValidationError Unit :=
   match instruction with
+  | PsWasmInstruction.i32Load offset =>
+      if module.abiMemory && Nat.ble offset 4294967295 then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
+  | PsWasmInstruction.i32Store offset =>
+      if module.abiMemory && Nat.ble offset 4294967295 then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
+  | PsWasmInstruction.i32Load8U =>
+      if module.abiMemory then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
+  | PsWasmInstruction.i32Store8 =>
+      if module.abiMemory then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
+  | PsWasmInstruction.abiHeapGet =>
+      if module.abiMemory then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
+  | PsWasmInstruction.abiHeapSet =>
+      if module.abiMemory then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
+  | PsWasmInstruction.abiBusyGet =>
+      if module.abiMemory then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
+  | PsWasmInstruction.abiBusySet =>
+      if module.abiMemory then Except.ok Unit.unit
+      else Except.error PsWasmIrValidationError.invalidAbiMemory
   | PsWasmInstruction.localGet index =>
       if Nat.blt index localCount then
         Except.ok Unit.unit
@@ -361,14 +387,14 @@ def psWasmIrValidateInstruction
             functionName
             index)
   | PsWasmInstruction.call name =>
-      match psWasmIrFindFunction module.functions name with
+      match psWasmIrFindFunction (psWasmAllFunctions module) name with
       | Option.none =>
           Except.error
             (PsWasmIrValidationError.unknownFunction name)
       | Option.some _ =>
           Except.ok Unit.unit
   | PsWasmInstruction.returnCall name =>
-      match psWasmIrFindFunction module.functions name with
+      match psWasmIrFindFunction (psWasmAllFunctions module) name with
       | Option.none =>
           Except.error
             (PsWasmIrValidationError.unknownFunction name)
@@ -501,7 +527,7 @@ def psWasmIrValidateInstruction
       | Option.some _ =>
           Except.ok Unit.unit
   | PsWasmInstruction.refFunc name =>
-      match psWasmIrFindFunction module.functions name with
+      match psWasmIrFindFunction (psWasmAllFunctions module) name with
       | Option.none =>
           Except.error
             (PsWasmIrValidationError.unknownFunction name)
@@ -702,7 +728,7 @@ def psWasmIrValidateFunctionRefs
   | List.nil =>
       Except.ok Unit.unit
   | List.cons value rest =>
-      match psWasmIrFindFunction module.functions value with
+      match psWasmIrFindFunction (psWasmAllFunctions module) value with
       | Option.none =>
           Except.error
             (PsWasmIrValidationError.unknownFunction value)
@@ -728,7 +754,7 @@ def psWasmIrValidateExports
       | Option.some _ =>
           psWasmIrValidateExports module rest
 
-def psWasmIrValidateModuleStructure
+def psWasmIrValidateModuleStructureBase
     (module : PsWasmModule) :
     Except PsWasmIrValidationError Unit :=
   let typeNames : List String :=
@@ -739,7 +765,7 @@ def psWasmIrValidateModuleStructure
         (psWasmIrFunctionTypeNames
           module.functionTypes));
   let functionNames : List String :=
-    psWasmIrFunctionNames module.functions;
+    psWasmIrFunctionNames (psWasmAllFunctions module);
   let exportNames : List String :=
     psWasmIrExportNames module.exports;
   if psWasmIrUnique typeNames then
@@ -770,7 +796,7 @@ def psWasmIrValidateModuleStructure
                       match
                           psWasmIrValidateFunctions
                             module
-                            module.functions with
+                            (psWasmAllFunctions module) with
                       | Except.error error =>
                           Except.error error
                       | Except.ok _ =>
@@ -796,3 +822,28 @@ def psWasmIrValidateModuleStructure
   else
     Except.error
       (PsWasmIrValidationError.duplicateTypeName "")
+
+def psWasmIrAbiImportValid (value : PsWasmFunctionImport) : Bool :=
+  psStringEq value.moduleName "psc1:io" &&
+  psStringEq value.importName "dispatch" &&
+  psWasmIrValueTypeListsEq value.function.parameters
+    [PsWasmValueType.i32, PsWasmValueType.i32, PsWasmValueType.i32] &&
+  psListIsEmpty value.function.results &&
+  psListIsEmpty value.function.locals && psListIsEmpty value.function.body
+
+def psWasmIrValidateModuleStructure (module : PsWasmModule) :
+    Except PsWasmIrValidationError Unit :=
+  if !module.abiMemory && (module.abiMemoryImports || module.abiGlobalsExport) then
+    Except.error PsWasmIrValidationError.invalidAbiMemory
+  else if module.abiMemory then
+    if module.abiGlobalsExport && module.abiMemoryImports then
+      Except.error PsWasmIrValidationError.invalidAbiMemory
+    else if psListAny (fun (item : PsWasmFunctionImport) => !psWasmIrAbiImportValid item)
+        module.functionImports then Except.error PsWasmIrValidationError.invalidAbiImport
+    else if Nat.ble (psListLength module.functionImports) 1 then
+      if psWasmIrStringIn "memory" (psWasmIrExportNames module.exports) then
+        Except.error PsWasmIrValidationError.invalidAbiMemory
+      else psWasmIrValidateModuleStructureBase module
+    else Except.error PsWasmIrValidationError.invalidAbiImport
+  else if psListIsEmpty module.functionImports then psWasmIrValidateModuleStructureBase module
+  else Except.error PsWasmIrValidationError.invalidAbiImport

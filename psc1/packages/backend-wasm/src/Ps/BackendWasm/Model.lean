@@ -26,6 +26,14 @@ structure PsWasmLoweredType where
   storageType : PsWasmStorageType
 
 inductive PsWasmInstruction where
+  | i32Load (offset : Nat)
+  | i32Store (offset : Nat)
+  | i32Load8U
+  | i32Store8
+  | abiHeapGet
+  | abiHeapSet
+  | abiBusyGet
+  | abiBusySet
   | localGet (index : Nat)
   | localSet (index : Nat)
   | drop
@@ -143,6 +151,11 @@ structure PsWasmFunction where
   locals : List PsWasmValueType
   body : List PsWasmInstruction
 
+structure PsWasmFunctionImport where
+  moduleName : String
+  importName : String
+  function : PsWasmFunction
+
 structure PsWasmModule where
   structures : List PsWasmStructType
   arrays : List PsWasmArrayType
@@ -150,6 +163,10 @@ structure PsWasmModule where
   functions : List PsWasmFunction
   functionRefs : List String
   exports : List (String × String)
+  abiMemory : Bool := false
+  abiMemoryImports : Bool := false
+  abiGlobalsExport : Bool := false
+  functionImports : List PsWasmFunctionImport := []
 
 def psWasmModuleEmpty : PsWasmModule :=
   {
@@ -160,3 +177,6 @@ def psWasmModuleEmpty : PsWasmModule :=
     functionRefs := []
     exports := []
   }
+
+def psWasmAllFunctions (module : PsWasmModule) : List PsWasmFunction :=
+  (module.functionImports.map (fun item => item.function)) ++ module.functions

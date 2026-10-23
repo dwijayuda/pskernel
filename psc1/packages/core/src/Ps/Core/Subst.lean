@@ -19,44 +19,44 @@ def psExprLiftBVarsWorker
   | .constE name levels =>
       fun (cutoff : Nat) => PsExpr.constE name levels
   | .app fn arg =>
-      let liftedFn : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount fn;
-      let liftedArg : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount arg;
       fun (cutoff : Nat) =>
+        let liftedFn : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount fn;
+        let liftedArg : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount arg;
         PsExpr.app
           (liftedFn cutoff)
           (liftedArg cutoff)
   | .lam name type body binder =>
-      let liftedType : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount type;
-      let liftedBody : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount body;
       fun (cutoff : Nat) =>
+        let liftedType : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount type;
+        let liftedBody : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount body;
         PsExpr.lam
           name
           (liftedType cutoff)
           (liftedBody (Nat.succ cutoff))
           binder
   | .forallE name type body binder =>
-      let liftedType : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount type;
-      let liftedBody : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount body;
       fun (cutoff : Nat) =>
+        let liftedType : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount type;
+        let liftedBody : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount body;
         PsExpr.forallE
           name
           (liftedType cutoff)
           (liftedBody (Nat.succ cutoff))
           binder
   | .letE name type value body =>
-      let liftedType : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount type;
-      let liftedValue : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount value;
-      let liftedBody : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount body;
       fun (cutoff : Nat) =>
+        let liftedType : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount type;
+        let liftedValue : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount value;
+        let liftedBody : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount body;
         PsExpr.letE
           name
           (liftedType cutoff)
@@ -65,11 +65,10 @@ def psExprLiftBVarsWorker
   | .lit value =>
       fun (cutoff : Nat) => PsExpr.lit value
   | .proj typeName index value =>
-      let liftedValue : Nat -> PsExpr :=
-        psExprLiftBVarsWorker amount value;
       fun (cutoff : Nat) =>
+        let liftedValue : Nat -> PsExpr :=
+          psExprLiftBVarsWorker amount value;
         PsExpr.proj typeName index (liftedValue cutoff)
-
 def psExprLiftBVars
     (amount : Nat)
     (cutoff : Nat)
@@ -99,44 +98,44 @@ def psExprInstantiateAtWorker
   | .constE name levels =>
       fun (depth : Nat) => PsExpr.constE name levels
   | .app fn arg =>
-      let instantiatedFn : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement fn;
-      let instantiatedArg : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement arg;
       fun (depth : Nat) =>
+        let instantiatedFn : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement fn;
+        let instantiatedArg : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement arg;
         PsExpr.app
           (instantiatedFn depth)
           (instantiatedArg depth)
   | .lam name type body binder =>
-      let instantiatedType : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement type;
-      let instantiatedBody : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement body;
       fun (depth : Nat) =>
+        let instantiatedType : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement type;
+        let instantiatedBody : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement body;
         PsExpr.lam
           name
           (instantiatedType depth)
           (instantiatedBody (Nat.succ depth))
           binder
   | .forallE name type body binder =>
-      let instantiatedType : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement type;
-      let instantiatedBody : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement body;
       fun (depth : Nat) =>
+        let instantiatedType : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement type;
+        let instantiatedBody : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement body;
         PsExpr.forallE
           name
           (instantiatedType depth)
           (instantiatedBody (Nat.succ depth))
           binder
   | .letE name type value body =>
-      let instantiatedType : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement type;
-      let instantiatedValue : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement value;
-      let instantiatedBody : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement body;
       fun (depth : Nat) =>
+        let instantiatedType : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement type;
+        let instantiatedValue : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement value;
+        let instantiatedBody : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement body;
         PsExpr.letE
           name
           (instantiatedType depth)
@@ -145,11 +144,10 @@ def psExprInstantiateAtWorker
   | .lit value =>
       fun (depth : Nat) => PsExpr.lit value
   | .proj typeName index value =>
-      let instantiatedValue : Nat -> PsExpr :=
-        psExprInstantiateAtWorker replacement value;
       fun (depth : Nat) =>
+        let instantiatedValue : Nat -> PsExpr :=
+          psExprInstantiateAtWorker replacement value;
         PsExpr.proj typeName index (instantiatedValue depth)
-
 def psExprInstantiateAt
     (replacement : PsExpr)
     (depth : Nat)

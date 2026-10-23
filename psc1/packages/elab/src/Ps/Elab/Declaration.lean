@@ -2,6 +2,7 @@ import Ps.Core.Declaration
 import Ps.Core.Equality
 import Ps.Elab.Recursion
 import Ps.Elab.DoLoopLift
+import Ps.Elab.DoForLift
 
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
@@ -81,7 +82,7 @@ def psElabOriginSource
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.structureDecl name _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.scopedDecl path declaration =>
-      let origin := psElabOriginSource declaration
+      let origin := psElabOriginSource declaration;
       Prod.mk (psSyntaxNamespaceName path (Prod.fst origin)) (Prod.snd origin)
 
 def psElabOriginErrorAt
@@ -100,37 +101,50 @@ def psElabBatchOriginAt
     (Prod.fst sourceOrigin) (Prod.snd sourceOrigin) members normalization
 
 def psElabStableMemberRole (declaration : PsDeclaration) : PsElabOriginRole :=
-  match declaration with
-  | PsDeclaration.inductiveDecl info =>
-      if info.isStructure then PsElabOriginRole.structureType
-      else PsElabOriginRole.inductiveType
-  | PsDeclaration.constructorDecl _ => PsElabOriginRole.constructor
-  | PsDeclaration.recursorDecl _ => PsElabOriginRole.recursor
-  | _ => PsElabOriginRole.sourceDeclaration
+  if psElabDoForIsLiftedName (psDeclarationName declaration) then PsElabOriginRole.normalizedWorker
+  else
+    match declaration with
+    | PsDeclaration.inductiveDecl info =>
+        if info.isStructure then PsElabOriginRole.structureType
+        else PsElabOriginRole.inductiveType
+    | PsDeclaration.constructorDecl _ => PsElabOriginRole.constructor
+    | PsDeclaration.recursorDecl _ => PsElabOriginRole.recursor
+    | _ => PsElabOriginRole.sourceDeclaration
+
+def psElabStableMemberOriginsFold (declarations : List PsDeclaration) :
+    Nat -> List PsElabMemberOrigin :=
+  match declarations with
+  | List.nil => fun (index : Nat) => List.nil
+  | List.cons declaration rest =>
+      let smaller : Nat -> List PsElabMemberOrigin := psElabStableMemberOriginsFold rest;
+      fun (index : Nat) =>
+        List.cons
+          (PsElabMemberOrigin.mk index (psDeclarationName declaration)
+            (psElabStableMemberRole declaration))
+          (smaller (Nat.succ index))
 
 def psElabStableMemberOrigins
     (declarations : List PsDeclaration) (index : Nat) : List PsElabMemberOrigin :=
+  psElabStableMemberOriginsFold declarations index
+
+def psElabWhileMemberOriginsFold (owner : PsName) (declarations : List PsDeclaration) :
+    Nat -> List PsElabMemberOrigin :=
   match declarations with
-  | List.nil => List.nil
+  | List.nil => fun (index : Nat) => List.nil
   | List.cons declaration rest =>
-      List.cons
-        (PsElabMemberOrigin.mk index (psDeclarationName declaration)
-          (psElabStableMemberRole declaration))
-        (psElabStableMemberOrigins rest (Nat.succ index))
+      let smaller : Nat -> List PsElabMemberOrigin := psElabWhileMemberOriginsFold owner rest;
+      fun (index : Nat) =>
+        let name := psDeclarationName declaration;
+        let role : PsElabOriginRole :=
+          if psElabDoLoopIsLiftedName owner name then PsElabOriginRole.normalizedWorker
+          else if psNameEq owner name then PsElabOriginRole.publicWrapper
+          else psElabStableMemberRole declaration;
+        List.cons (PsElabMemberOrigin.mk index name role) (smaller (Nat.succ index))
 
 def psElabWhileMemberOrigins
     (owner : PsName) (declarations : List PsDeclaration)
     (index : Nat) : List PsElabMemberOrigin :=
-  match declarations with
-  | [] => []
-  | declaration :: rest =>
-      let name := psDeclarationName declaration;
-      let role :=
-        if psElabDoLoopIsLiftedName owner name then PsElabOriginRole.normalizedWorker
-        else if psNameEq owner name then PsElabOriginRole.publicWrapper
-        else psElabStableMemberRole declaration;
-      PsElabMemberOrigin.mk index name role ::
-        psElabWhileMemberOrigins owner rest (Nat.succ index)
+  psElabWhileMemberOriginsFold owner declarations index
 
 def psElabExplicitParameterIds
     (binders : List PsElabTypedBinder) : List Nat :=
@@ -176,9 +190,9 @@ def psElabStructuralRecursionFromSource
     (resultType : PsExpr) :
     Option PsElabStructuralRecursion :=
   match body with
-  | .matchE scrutinee _ _ =>
+  | PsSyntaxTerm.matchE scrutinee _ _ =>
       match scrutinee with
-      | .reference scrutineeName =>
+      | PsSyntaxTerm.reference scrutineeName =>
           match psSyntaxNameToName scrutineeName with
           | none =>
               Option.none
@@ -191,7 +205,7 @@ def psElabStructuralRecursionFromSource
                     sourceName with
               | some resolution =>
                   match resolution with
-                  | .local scrutineeId =>
+                  | PsResolvedName.local scrutineeId =>
                       let explicitParameterIds :=
                         psElabExplicitParameterIds
                           (psElabTypedBinderListReverse bindersRev);
@@ -232,7 +246,7 @@ def psElabDeclarationTermCallback
 def psElabDeclarationParts
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
-    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (typeSyntax : PsSyntaxTerm)
     (valueSyntax : PsSyntaxTerm)
     (isTheorem : Bool) :
@@ -298,7 +312,7 @@ def psElabDeclarationParts
                         psMetaInstantiate
                           metaContext
                           typeResult.term;
-                      let closed : PsExpr × PsExpr :=
+                      let closed : Prod PsExpr PsExpr :=
                         psCloseElabTypedBinders
                           metaContext
                           binderResult.bindersRev
@@ -465,7 +479,7 @@ def psElabIsDirectRecursiveField
       type;
   let view := psExprAppView reduced;
   match view.head with
-  | .constE name _ =>
+  | PsExpr.constE name _ =>
       if psNameEq name inductiveName then
         if Nat.beq
             (psElabListLength view.args)
@@ -497,7 +511,7 @@ def psElabNestedRecursiveFieldTypeSupportedWithFuel
         if psExprHasConst inductiveName type then
           let view := psExprAppView type;
           match view.head with
-          | .constE name _ =>
+          | PsExpr.constE name _ =>
               if psNameEq name inductiveName then
                 true
               else if psElabContainerRecursiveName name then
@@ -677,7 +691,7 @@ def psSetConstructorIndex
     (index : Nat)
     (declaration : PsDeclaration) : PsDeclaration :=
   match declaration with
-  | .constructorDecl info =>
+  | PsDeclaration.constructorDecl info =>
       PsDeclaration.constructorDecl
         (PsConstructorInfo.mk
           info.name
@@ -771,25 +785,18 @@ def psEnvironmentAddOwnedBootstrapDeclaration
   else
     psEnvironmentAdd environment declaration
 
-def psAddDeclarationListWorker
-    (declarations : List PsDeclaration)
-    (environment : PsEnvironment) :
-    Except PsElabError PsEnvironment :=
+def psAddDeclarationListWorker (declarations : List PsDeclaration) :
+    PsEnvironment -> Except PsElabError PsEnvironment :=
   match declarations with
-  | List.nil =>
-      Except.ok environment
+  | List.nil => fun (environment : PsEnvironment) => Except.ok environment
   | List.cons declaration rest =>
-      let name := psDeclarationName declaration;
-      let nextResult :=
-        psEnvironmentAddOwnedBootstrapDeclaration
-          environment
-          declaration;
-      match nextResult with
-      | none =>
-          Except.error
-            (PsElabError.duplicateDeclaration name)
-      | some next =>
-          psAddDeclarationListWorker rest next
+      let smaller : PsEnvironment -> Except PsElabError PsEnvironment :=
+        psAddDeclarationListWorker rest;
+      fun (environment : PsEnvironment) =>
+        let name := psDeclarationName declaration;
+        match psEnvironmentAddOwnedBootstrapDeclaration environment declaration with
+        | Option.none => Except.error (PsElabError.duplicateDeclaration name)
+        | Option.some next => smaller next
 
 def psAddDeclarationList
     (environment : PsEnvironment)
@@ -938,7 +945,7 @@ def psBuildInductiveMinorType
     (declaration : PsDeclaration) :
     Except PsElabError PsExpr :=
   match declaration with
-  | .constructorDecl info =>
+  | PsDeclaration.constructorDecl info =>
       match psElabMatchApplyParameters
           context
           parameterArgs
@@ -1154,7 +1161,7 @@ def psBuildInductiveRecursor
 def psElabInductiveDeclaration
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
-    (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (params : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (resultType : Option PsSyntaxTerm)
     (constructors : List PsSyntaxInductiveConstructor)
     (isStructure : Bool) :
@@ -1296,8 +1303,8 @@ def psElabInductiveDeclaration
 def psElabStructureDeclaration
     (environment : PsEnvironment)
     (name : PsSyntaxName)
-    (params : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (fields : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (params : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (fields : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (span : PsSourceSpan) :
     Except PsElabError PsElabDeclarationBatchResult :=
   let constructorName : PsSyntaxName :=
@@ -1320,7 +1327,7 @@ def psElabStructureDeclaration
 def psElabPartialDeclaration
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
-    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (typeSyntax : PsSyntaxTerm)
     (valueSyntax : PsSyntaxTerm) :
     Except PsElabError PsElabDeclarationResult :=
@@ -1377,7 +1384,7 @@ def psElabPartialDeclaration
                         -- ordinary expansion admits each opaque witness and exact body independently.
                         let helperHeader :=
                           PsDeclaration.axiomDecl helperName [] psElabDoLoopType;
-                        let valueContextResult :=
+                        let valueContextResult : Except PsElabError PsElabContext :=
                           match psEnvironmentAdd withSelf helperHeader with
                           | Option.none =>
                               Except.error (PsElabError.duplicateDeclaration helperName)
@@ -1385,7 +1392,7 @@ def psElabPartialDeclaration
                               Except.ok (psElabContextWithWhileHelper
                                 (psElabContextWithEnvironment typeResult.context withHelper)
                                 helperName);
-                        let valueResult :=
+                        let valueResult : Except PsElabError PsElabTermResult :=
                           match valueContextResult with
                           | Except.error error => Except.error error
                           | Except.ok valueContext =>
@@ -1435,7 +1442,7 @@ def psElabDeclaration
     Except PsElabError PsElabDeclarationResult :=
   let source := psSyntaxDeclarationQualify [] source;
   match source with
-  | .definition name binders type value _ =>
+  | PsSyntaxDeclaration.definition name binders type value _ =>
       psElabDeclarationParts
         environment
         name
@@ -1443,14 +1450,14 @@ def psElabDeclaration
         type
         value
         false
-  | .partialDefinition name binders type value _ =>
+  | PsSyntaxDeclaration.partialDefinition name binders type value _ =>
       psElabPartialDeclaration
         environment
         name
         binders
         type
         value
-  | .theoremDecl name binders type value _ =>
+  | PsSyntaxDeclaration.theoremDecl name binders type value _ =>
       psElabDeclarationParts
         environment
         name
@@ -1458,11 +1465,11 @@ def psElabDeclaration
         type
         value
         true
-  | .inductiveDecl _ _ _ _ _ =>
+  | PsSyntaxDeclaration.inductiveDecl _ _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
-  | .structureDecl _ _ _ _ =>
+  | PsSyntaxDeclaration.structureDecl _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
-  | .scopedDecl _ _ =>
+  | PsSyntaxDeclaration.scopedDecl _ _ =>
       Except.error PsElabError.unsupportedTerm
 
 -- Elaborate the canonical worker with the original source self name, then give
@@ -1537,13 +1544,19 @@ def psElabNormalizedDefinition
   | Except.error failure => Except.error failure.error
   | Except.ok result => Except.ok (psElabNormalizedDefinitionBatch result)
 
+def psElabDoForBatch (environment : PsEnvironment) (declarations : List PsDeclaration) :
+    Except PsElabError PsElabDeclarationBatchResult :=
+  match psElabDoForLiftDeclarations environment declarations with
+  | Except.error error => Except.error error
+  | Except.ok lifted => Except.ok (PsElabDeclarationBatchResult.mk lifted)
+
 def psElabDeclarationBatchStable
     (environment : PsEnvironment)
     (source : PsSyntaxDeclaration) :
     Except PsElabError PsElabDeclarationBatchResult :=
   let source := psSyntaxDeclarationQualify [] source;
   match source with
-  | .inductiveDecl name params resultType constructors _ =>
+  | PsSyntaxDeclaration.inductiveDecl name params resultType constructors _ =>
       psElabInductiveDeclaration
         environment
         name
@@ -1551,7 +1564,7 @@ def psElabDeclarationBatchStable
         resultType
         constructors
         false
-  | .structureDecl name params fields span =>
+  | PsSyntaxDeclaration.structureDecl name params fields span =>
       psElabStructureDeclaration
         environment
         name
@@ -1563,12 +1576,12 @@ def psElabDeclarationBatchStable
       | Except.error error => Except.error error
       | Except.ok result =>
           match result.declaration with
-          | .partialDecl name levels type value =>
+          | PsDeclaration.partialDecl name levels type value =>
               match psElabDoLoopLiftDeclaration environment name levels type value with
               | Except.error error => Except.error error
               | Except.ok declarations =>
-                  Except.ok (PsElabDeclarationBatchResult.mk declarations)
-          | _ => Except.ok (PsElabDeclarationBatchResult.mk [result.declaration])
+                  psElabDoForBatch environment declarations
+          | _ => psElabDoForBatch environment [result.declaration]
 
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same
@@ -1581,12 +1594,18 @@ def psElabDeclarationBatchWithOrigins
   match psElabDeclarationBatchStable environment source with
   | Except.ok result =>
       let members : List PsElabMemberOrigin :=
-        match source, result.declarations with
-        | .partialDefinition sourceName _ _ _ _, _ :: _ :: _ =>
-            match psSyntaxNameToName sourceName with
-            | some owner => psElabWhileMemberOrigins owner result.declarations 0
-            | none => psElabStableMemberOrigins result.declarations 0
-        | _, _ => psElabStableMemberOrigins result.declarations 0;
+        match source with
+        | PsSyntaxDeclaration.partialDefinition sourceName _ _ _ _ =>
+            match result.declarations with
+            | List.nil => psElabStableMemberOrigins result.declarations 0
+            | List.cons first tail =>
+                match tail with
+                | List.nil => psElabStableMemberOrigins result.declarations 0
+                | List.cons second rest =>
+                    match psSyntaxNameToName sourceName with
+                    | Option.some owner => psElabWhileMemberOrigins owner result.declarations 0
+                    | Option.none => psElabStableMemberOrigins result.declarations 0
+        | _ => psElabStableMemberOrigins result.declarations 0;
       Except.ok
         (PsElabDeclarationBatchWithOriginsResult.mk result
           (psElabBatchOriginAt sourceIndex source members Option.none))
@@ -1653,6 +1672,34 @@ def psPrependBatchReverse
     (psElabReverseDeclarations declarations)
     declarationsRev
 
+def psElabDeclarationsWithOriginsFold (sources : List PsSyntaxDeclaration) :
+    PsEnvironment -> List PsDeclaration -> List PsElabBatchOrigin -> Nat ->
+    Except PsElabOriginError PsElabModuleWithOriginsResult :=
+  match sources with
+  | List.nil =>
+      fun (environment : PsEnvironment) (declarationsRev : List PsDeclaration)
+          (originsRev : List PsElabBatchOrigin) (sourceIndex : Nat) =>
+        Except.ok
+          (PsElabModuleWithOriginsResult.mk
+            (PsElabModuleResult.mk environment (psElabReverseDeclarations declarationsRev))
+            (psListReverse originsRev))
+  | List.cons source rest =>
+      let smaller : PsEnvironment -> List PsDeclaration -> List PsElabBatchOrigin -> Nat ->
+          Except PsElabOriginError PsElabModuleWithOriginsResult :=
+        psElabDeclarationsWithOriginsFold rest;
+      fun (environment : PsEnvironment) (declarationsRev : List PsDeclaration)
+          (originsRev : List PsElabBatchOrigin) (sourceIndex : Nat) =>
+        match psElabDeclarationBatchWithOrigins environment sourceIndex source with
+        | Except.error error => Except.error error
+        | Except.ok batch =>
+            match psAddDeclarationList environment batch.result.declarations with
+            | Except.error error =>
+                Except.error (PsElabOriginError.mk error batch.origin.sourceIndex
+                  batch.origin.sourceName batch.origin.span PsElabOriginPhase.declarationInsertion)
+            | Except.ok nextEnvironment =>
+                smaller nextEnvironment (psPrependBatchReverse batch.result.declarations declarationsRev)
+                  (List.cons batch.origin originsRev) (Nat.succ sourceIndex)
+
 def psElabDeclarationsWithOriginsWorker
     (sources : List PsSyntaxDeclaration)
     (environment : PsEnvironment)
@@ -1660,36 +1707,7 @@ def psElabDeclarationsWithOriginsWorker
     (originsRev : List PsElabBatchOrigin)
     (sourceIndex : Nat) :
     Except PsElabOriginError PsElabModuleWithOriginsResult :=
-  match sources with
-  | List.nil =>
-      Except.ok
-        (PsElabModuleWithOriginsResult.mk
-          (PsElabModuleResult.mk
-            environment
-            (psElabReverseDeclarations declarationsRev))
-          (psListReverse originsRev))
-  | List.cons source rest =>
-      match psElabDeclarationBatchWithOrigins environment sourceIndex source with
-      | Except.error error => Except.error error
-      | Except.ok batch =>
-          match
-              psAddDeclarationList
-                environment
-                batch.result.declarations with
-          | Except.error error =>
-              Except.error
-                (PsElabOriginError.mk error batch.origin.sourceIndex
-                  batch.origin.sourceName batch.origin.span
-                  PsElabOriginPhase.declarationInsertion)
-          | Except.ok nextEnvironment =>
-              psElabDeclarationsWithOriginsWorker
-                rest
-                nextEnvironment
-                (psPrependBatchReverse
-                  batch.result.declarations
-                  declarationsRev)
-                (List.cons batch.origin originsRev)
-                (Nat.succ sourceIndex)
+  psElabDeclarationsWithOriginsFold sources environment declarationsRev originsRev sourceIndex
 
 -- Existing raw APIs project the same actual declarations, environment and error.
 -- A raw worker's incoming declaration prefix receives no invented origins.

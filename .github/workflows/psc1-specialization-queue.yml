@@ -1,0 +1,63 @@
+name: PSC1 specialization queue before and after
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-specialization-queue-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: a37a4ce61139db229f86d50645c65a0597119035
+          path: baseline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install repository-pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build the identical authored fixture against both implementations
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp candidate/psc1/scripts/SpecializeQueueBenchmark.lean baseline/psc1/scripts/SpecializeQueueBenchmark.lean
+          cat >> baseline/psc1/lakefile.lean <<'LEAN'
+
+          lean_exe psc1_specialize_queue_benchmark where
+            srcDir := "scripts"
+            root := `SpecializeQueueBenchmark
+          LEAN
+          for source in baseline candidate; do
+            (cd "$source/psc1" &&
+              node packages/pskernel-lean/host/check-pin.mjs &&
+              lake build psc1_specialize_queue_benchmark)
+          done
+      - name: Compare unchanged input, limits, declaration retention and process work
+        shell: bash
+        run: |
+          set -euo pipefail
+          node candidate/psc1/scripts/specialize-queue-comparison.mjs baseline/psc1 candidate/psc1 evidence
+      - name: Retain exact input and output IR with timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-specialization-queue-${{ github.sha }}
+          path: evidence/
+          retention-days: 14
+          if-no-files-found: warn

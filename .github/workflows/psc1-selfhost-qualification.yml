@@ -1,0 +1,165 @@
+name: PSC1 manual release self-host qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      parser_scale:
+        description: Also execute the separate 256-declaration frontend performance probe
+        type: boolean
+        default: false
+  # Explicit committed request: ordinary source/docs pushes never start G2/G3.
+  push:
+    branches:
+      - fix/psc1-closure-normalization-20261021
+    paths:
+      - .github/qualification-requests/psc1-selfhost.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-selfhost-qualification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generated-js:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Verify explicit branch qualification request
+        id: qualification_request
+        if: github.event_name == 'push'
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import {spawnSync} from 'node:child_process';
+          const request=JSON.parse(fs.readFileSync('../.github/qualification-requests/psc1-selfhost.json','utf8'));
+          const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+          assert.equal(request.schema,'psc1-manual-selfhost-request/1');
+          assert.equal(request.action,'qualify-G1-G2-G3');
+          assert.equal(request.branch,'fix/psc1-closure-normalization-20261021');
+          assert.equal(process.env.GITHUB_REF,'refs/heads/'+request.branch);
+          assert.equal(request.parentCommit,event.before);
+          assert.equal(event.after,process.env.GITHUB_SHA);
+          const parent=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});
+          assert.equal(parent.status,0);assert.equal(parent.stdout.trim(),request.parentCommit);
+          const diff=spawnSync('git',['diff','--name-only','-z',request.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});
+          assert.equal(diff.status,0);
+          const paths=diff.stdout.split('\0').filter(Boolean);
+          assert.ok(paths.includes('.github/qualification-requests/psc1-selfhost.json'));
+          const allowed=['.github/qualification-requests/psc1-selfhost.json',
+            '.github/workflows/psc1-selfhost-qualification.yml',
+            'psc1/scripts/profile-generated-selfhost-failure.mjs',
+            'psc1/AI_WORK_STATE.md','psc1/docs/PSC1_DEVELOPMENT_ROADMAP.md'];
+          assert.ok(paths.every(p=>allowed.includes(p)),'request must not silently change compiler bytes');
+          assert.equal(request.resourcePolicy,'unchanged');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'parser_scale='+(request.parserScale===true)+'\n');
+          fs.mkdirSync('dist/generated-compiler',{recursive:true});
+          fs.writeFileSync('dist/generated-compiler/qualification-request.json',JSON.stringify({
+            ...request,event:'push-explicit-request',testedCommit:process.env.GITHUB_SHA,paths},null,2)+'\n');
+          console.log('PSC1_MANUAL_SELFHOST_REQUEST: '+JSON.stringify({id:request.id,parent:request.parentCommit,testedCommit:process.env.GITHUB_SHA,event:'push-explicit-request'}));
+          JS
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check the generated service controller and manifest reader syntax
+        run: |
+          set -euo pipefail
+          node --check scripts/generated-compiler-diagnostic.mjs
+          node --check host-tools/js-generation-manifest.mjs
+          node scripts/js-generation-manifest-contract-tests.mjs
+      - name: Build native seed and separate independent checker
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if lean --version; then break; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep 5
+          done
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_source_census_probe psc1_js_service_tests psc1_js_service_seed psc1_independent_checker psc1_worker_fusion_tests
+      - name: Exercise the production scalar facade and exact complete source
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_worker_fusion_tests
+          node scripts/worker-fusion-runtime-tests.mjs
+          .lake/build/bin/psc1_js_service_tests
+          node scripts/compiler-source-census-contract-tests.mjs
+          node scripts/compiler-closure-contract-tests.mjs
+          node scripts/compiler-source-census.mjs --strict-phase directjs-compiler
+          node scripts/compiler-closure-qualification.mjs --phase directjs-compiler --assurance ordinary-checked
+      - name: Seed once and execute actual generated compiler semantics
+        id: generated_execution
+        run: |
+          set -euo pipefail
+          node scripts/generated-compiler-diagnostic.mjs --self-host
+      - name: Summarize retained failed sessions without discarding stderr
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root='dist/generated-compiler';
+          function scan(dir) {
+            if (!fs.existsSync(dir)) return;
+            for (const entry of fs.readdirSync(dir,{withFileTypes:true})) {
+              const file=path.join(dir,entry.name);
+              if (entry.isDirectory()) scan(file);
+              else if (entry.isFile() && entry.name==='failure.json') {
+                const value=JSON.parse(fs.readFileSync(file,'utf8'));
+                console.log('PSC1_RETAINED_SESSION_FAILURE: '+JSON.stringify({
+                  requestId:value.request?.requestId,state:value.state,failure:value.failure,
+                  events:value.events,publication:value.publication}));
+                const stderr=path.join(dir,'generated-compiler.stderr.txt');
+                if(fs.existsSync(stderr))
+                  console.log('PSC1_RETAINED_GENERATED_STDERR: '+fs.readFileSync(stderr,'utf8').slice(-6000));
+              }
+            }
+          }
+          scan(root);
+          JS
+      - name: Sample a failed generated process without changing qualification
+        if: ${{ failure() && steps.generated_execution.outcome == 'failure' }}
+        run: node scripts/profile-generated-selfhost-failure.mjs
+      - name: Execute separately requested frontend scale probe
+        if: ${{ !cancelled() && (inputs.parser_scale || steps.qualification_request.outputs.parser_scale == 'true') }}
+        run: node scripts/generated-parser-scale-tests.mjs
+      - name: Retain candidate graphs, executable identities and process evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-manual-selfhost-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          path: |
+            psc1/dist/generated-compiler/
+            psc1/dist/generated-parser-scale/
+            psc1/dist/generated-service-native/
+            psc1/dist/worker-fusion/
+            psc1/dist/scoped-correctness/compiler-source-census/
+            psc1/dist/scoped-correctness/compiler-closure/
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,0 +1,41 @@
+{
+  "schema": "psc1-selfhost-source-census-refusal/1",
+  "sourceCommit": "5fe1ff5f28c591db9a2e0a74bdaf6cabc37291c1",
+  "runId": 39858476122,
+  "jobId": 120102709250,
+  "status": "failed-before-generation",
+  "refusals": [
+    {
+      "grammar": "lean",
+      "module": "Ps.Syntax.Lexer",
+      "translation": "not-applicable",
+      "parse": "accepted",
+      "elaboration": "refused",
+      "detail": "structuralRecursionArity",
+      "sourceDeclaration": "psLexListLengthAcc",
+      "sourceIndex": 6,
+      "line": 35,
+      "column": 1
+    },
+    {
+      "grammar": "ps",
+      "module": "Ps.Syntax.Lexer",
+      "translation": "accepted",
+      "parse": "accepted",
+      "elaboration": "refused",
+      "detail": "structuralRecursionArity",
+      "sourceDeclaration": "psLexListLengthAcc",
+      "sourceIndex": 6,
+      "line": 29,
+      "column": 1
+    }
+  ],
+  "artifact": {
+    "id": 12460467320,
+    "sha256": "2049e324c216ff59d9906ea64645185d20624801f35360b3ee3577e58190ecbe"
+  },
+  "correction": "Bind the structurally recursive one-argument worker locally, then apply its accumulator; retain strict recursion arity.",
+  "G1": "not-run",
+  "G2": "not-run",
+  "G3": "not-run"
+}

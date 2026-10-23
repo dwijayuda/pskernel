@@ -1,0 +1,4703 @@
+{
+  "schema": "psc1-selfhost-resumption-checkpoint/1",
+  "status": "normal-compiler-qualified-selfhost-incomplete",
+  "sourceCommit": "7732e9786d09d11c1130da4b315c985e9978f23b",
+  "testedMergeCommit": "055ba9833567d3cb166341ec1da794eb725b0414",
+  "baseCommit": "1fad9ed53cda9b23ac30be9cea85e7857437564e",
+  "finiteContract": "practical-core-v1",
+  "contractGitBlob": "1e49d4399d67b87097894047dd7924db04ffed99",
+  "finiteScope": {
+    "families": 14,
+    "criteria": 37,
+    "applicationCategories": 4,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "scopeFrozen": true
+  },
+  "normalQualification": {
+    "runId": 39867567126,
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39867567126",
+    "status": "success",
+    "allSelectedJobsPassed": true,
+    "jobs": [
+      {
+        "id": 120133658105,
+        "name": "static",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Select dependencies from exact new commit interval",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check static contracts and source syntax",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain selection and evidence-derived readiness",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120133933097,
+        "name": "native / native",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build checked native control regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute all independent native control groups",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute census normalization behavior and source acceptance",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain focused diagnostic evidence",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120133933110,
+        "name": "focused / php-application",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install the qualified PHP integer and standalone IO profile",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean and locked host dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build production compiler and UTF8 boundary regression",
+            "conclusion": "success"
+          },
+          {
+            "name": "Save successful compilation before execution",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute scalar boundaries and repeated large-String lookups",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute both authored compiler and CLI applications with actual PHP IO",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain PHP source and actual process evidence",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120133933166,
+        "name": "focused / focused (core)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned Rust and locked host dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Qualify standalone Rust capability policy",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install isolated pinned TypeScript consumer checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned focused Wasm String consumers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build production compiler and independent checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Save successful compilation before running regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute focused core and component String and IO boundaries",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute typed continuation and bounded tail-driver regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute authored inputs with native references and focused consumers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute unchanged five-target compiler and CLI applications",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Retain exact sources oracle artifacts and failures",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120133933228,
+        "name": "focused / focused (applications)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned Rust and locked host dependencies",
+            "conclusion": "success"
+          },
+          {
+            "name": "Qualify standalone Rust capability policy",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install isolated pinned TypeScript consumer checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned focused Wasm String consumers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build production compiler and independent checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Save successful compilation before running regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute focused core and component String and IO boundaries",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Execute typed continuation and bounded tail-driver regressions",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Execute authored inputs with native references and focused consumers",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Execute unchanged five-target compiler and CLI applications",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain exact sources oracle artifacts and failures",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120133933745,
+        "name": "benchmark",
+        "conclusion": "skipped",
+        "steps": []
+      },
+      {
+        "id": 120137606421,
+        "name": "g1 / generated-js",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check the generated service controller and manifest reader syntax",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build native seed and separate independent checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Exercise the production scalar facade and exact complete source",
+            "conclusion": "success"
+          },
+          {
+            "name": "Seed once and execute actual generated compiler semantics",
+            "conclusion": "success"
+          },
+          {
+            "name": "Summarize retained failed sessions without discarding stderr",
+            "conclusion": "success"
+          },
+          {
+            "name": "Sample a failed normal generated process without changing its gate",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Retain candidate graphs, executable identities and process evidence",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120137606497,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build owned source probe with independent checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check both exact source lanes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Enforce the live checked-only partial-source boundary",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Independently admit and strictly validate the whole selected closure",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain exact inputs, admission bytes and stage diagnostics",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120137606526,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build owned source probe with independent checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check both exact source lanes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Enforce the live checked-only partial-source boundary",
+            "conclusion": "success"
+          },
+          {
+            "name": "Independently admit and strictly validate the whole selected closure",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain exact inputs, admission bytes and stage diagnostics",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120137606633,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build owned source probe with independent checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check both exact source lanes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Enforce the live checked-only partial-source boundary",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Independently admit and strictly validate the whole selected closure",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain exact inputs, admission bytes and stage diagnostics",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120137606657,
+        "name": "g1 / host-session-boundary",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build separate native fixture preparer and official checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Test real host state and publication with native-prepared replay fixtures",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain boundary fixtures and immutable generation manifests",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120138984733,
+        "name": "full / linux-scoped",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install minimum supported Python for compatibility checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Record minimum Python interpreter",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install current Python for target validation and execution",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install PHP and selected exact-integer extension",
+            "conclusion": "success"
+          },
+          {
+            "name": "Record scripting target runtimes",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Cache exact-source native build objects",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install repository-pinned Lean",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install locked host formatting dependencies and run host regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install pinned Rust target tools",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install SHA-256-pinned Wasm tools and component runtime",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install isolated pinned component String consumer",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install isolated pinned TypeScript consumer checker",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute npm source metadata boundary regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Compile native compiler and focused regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Save successful compilation before running regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute IR, map, independent provider and host-boundary regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute scripting IR rejection and compound closure consumers",
+            "conclusion": "success"
+          },
+          {
+            "name": "Compile and test corrected PSKernel-Core natively only",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute readable direct backend and artifact-publication matrix",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute small generic, symbol-identity and recursion source regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute shared target planning, independent TS JS and publication regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute Practical Core admission, IR and real target regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute typed-error admission and seven-target reference comparisons",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute PHP scalar UTF8 and bounded lookup regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute typed continuation and bounded tail-driver regressions",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute authored CompilerM cases across seven targets",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute owned component binary encoder with external encoding disabled",
+            "conclusion": "success"
+          },
+          {
+            "name": "Census real compiler source phases and generated JS Rust host transport",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute runtime contract against pinned Lean reference results",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute ordinary while against pinned Lean and external divergence deadlines",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute Python and PHP ABI, recursion and failure boundaries",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute core and component String ABI and actual typed IO",
+            "conclusion": "success"
+          },
+          {
+            "name": "Execute full scripting and runtime corpus on minimum Python",
+            "conclusion": "success"
+          },
+          {
+            "name": "Pack and qualify installed native npm toolchain and real source libraries",
+            "conclusion": "success"
+          },
+          {
+            "name": "Consolidate exact-commit seven-target and package qualification",
+            "conclusion": "success"
+          },
+          {
+            "name": "Derive exact-commit Practical Core readiness",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain lockfile, evidence and readable example bundles",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Cache pinned Lean installation",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Install current Python for target validation and execution",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Install minimum supported Python for compatibility checks",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 120150415749,
+        "name": "gate",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "conclusion": "success"
+          },
+          {
+            "name": "Require every selected dependency",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ],
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "qualification": {
+      "schema": "psc1-seven-backend-qualification/1",
+      "qualification": "passed-scoped-execution",
+      "testedCommit": "055ba9833567d3cb166341ec1da794eb725b0414",
+      "branchHeadCommit": "7732e9786d09d11c1130da4b315c985e9978f23b",
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/39867567126",
+      "logicalChecker": {
+        "version": "4.35.0",
+        "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      "runtimeContract": "psc1-runtime-semantics/1",
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      },
+      "versions": {
+        "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+        "node": "v22.23.3",
+        "npm": "10.9.9",
+        "typescriptConsumer": "Version 7.0.2",
+        "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+        "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+        "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+        "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+        "python": "Python 3.15.0",
+        "pythonMinimum": "Python 3.14.8",
+        "php": "PHP 8.5.12 (cli) (built: Oct 19 2026 17:51:02) (NTS)"
+      },
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "targetExecutionBundles": 14,
+      "scriptingRegressionGroups": 28,
+      "scriptingArtifactBundles": 24,
+      "architectureRegressionGroups": 11,
+      "minimumPython": {
+        "targetExecutionBundles": 2,
+        "scriptingRegressionGroups": 14,
+        "artifactBundles": 12,
+        "runtimeEvidence": "runtime-conformance-python314/results.json",
+        "scriptingEvidence": "script-backends-python314/results.json"
+      },
+      "practicalCore": {
+        "nativeSuites": [
+          {
+            "suite": "psc1_do_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_do_tests.log",
+            "source": "test/DoTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [
+              "evaluationItems",
+              "evaluationLower",
+              "evaluationUpper",
+              "evaluationArray",
+              "evaluationIndex"
+            ],
+            "logSha256": "2fa1011e1b9e87a6d54db70e29cf82d577a80277d6c490fb3eb0f125f86f82fe",
+            "testSha256": "3a33d4dd3385d9e6bf114567188db9da5bd15cccdd7683d1299f061c00d0da98"
+          },
+          {
+            "suite": "psc1_data_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_data_tests.log",
+            "source": "test/DataTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "3b52303d31fa4a1c791a12453f371f0734155f8d585c4395a4f2b1609e00f083",
+            "testSha256": "8b60ca947e00bc694e4b130efb80b2051895422e96981d71fbaa0d8365f31751"
+          },
+          {
+            "suite": "psc1_while_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_while_tests.log",
+            "source": "test/WhileTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "ffb2a3b98dc1016817f1b49392322aee9353728ea3125fc8ff5a35f503033a55",
+            "testSha256": "0b45570e7f49372707b34bf80c10f34fd40c524ae94033133dbee988d46b1cce"
+          },
+          {
+            "suite": "psc1_namespace_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_namespace_tests.log",
+            "source": "test/NamespaceTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "740f2ba28cfb81d22f81cd6ce74f1090c84480b6f0f9e30e58a4b2ea02776980",
+            "testSha256": "01c3439c1ab981ea8cb6d56ce4f63b2ddd559bf3b98f95229801e1d74083df6a"
+          },
+          {
+            "suite": "psc1_ordinary_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_ordinary_tests.log",
+            "source": "test/OrdinaryExecutionTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "7d20784b8b82a9c15d9de822e8e5e6ae26c4e0f99c302c034295af730bc0d15f",
+            "testSha256": "72cebd54c7ed9860abc4640438b24c1a889f1449b9f3fb233a9ca1274c4791a3"
+          },
+          {
+            "suite": "psc1_operator_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_operator_tests.log",
+            "source": "test/OperatorTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "1edea8e1f1b946eaea45a4b398dc4b3f7fac8926aa899f67a94d2d9c95b1a457",
+            "testSha256": "597fe649a978217c4d0324399cfac297acb1616c689ad3f0e9972aef2e6812e0"
+          },
+          {
+            "suite": "contextual_inference_tests",
+            "passed": true,
+            "evidence": "practical-core/contextual_inference_tests.log",
+            "source": "test/ContextualInferenceTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "0533743561feabfd501761e7f620c14536afcefdc80ad6fa265de49a311485ce",
+            "testSha256": "7fbb65a37546a5f014e6e8f77c7b15d23c2014508d2edf85ab7218f6353e1c01"
+          }
+        ],
+        "controlFlowChecks": [
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck"
+        ],
+        "referenceOracle": "pinned-native-Lean",
+        "handwrittenLiteralSyntaxes": [
+          "lean",
+          "ps"
+        ],
+        "handwrittenOptionalIndexSyntaxes": [
+          "lean",
+          "ps"
+        ],
+        "tuplePatterns": {
+          "checks": [
+            "tuplepatterncheck",
+            "tuplepatterndocheck"
+          ],
+          "handwrittenSyntaxes": [
+            "lean",
+            "ps"
+          ],
+          "referenceFields": [
+            "tuplePatternFalse",
+            "tuplePatternTrue",
+            "tuplePatternDoFalse",
+            "tuplePatternDoTrue"
+          ],
+          "strictRhsEvaluation": {
+            "targetSourceBundles": 14,
+            "minimumPythonBundles": 2,
+            "externalDeadlineMs": 2000,
+            "earlyReturnPreflight": true,
+            "evidence": "ordinary-while-conformance/results.json:patternStrictness",
+            "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json:patternStrictness"
+          }
+        },
+        "namespaces": {
+          "nativeSuite": "psc1_namespace_tests",
+          "checks": [
+            "namespacecheck"
+          ],
+          "handwrittenSyntaxes": [
+            "lean",
+            "ps"
+          ],
+          "referenceFields": [
+            "namespaceFalse",
+            "namespaceTrue"
+          ],
+          "importedHelpersPrivate": true,
+          "entryNamespaceExported": true,
+          "boundaryChecks": [
+            {
+              "syntax": "lean",
+              "passed": true,
+              "refusalChecks": 6,
+              "previousArtifactPreservationChecks": 5,
+              "evidence": "namespace-boundaries/lean.json"
+            },
+            {
+              "syntax": "ps",
+              "passed": true,
+              "refusalChecks": 6,
+              "previousArtifactPreservationChecks": 5,
+              "evidence": "namespace-boundaries/ps.json"
+            }
+          ]
+        },
+        "rustPrivateClosures": [
+          {
+            "syntax": "lean",
+            "target": "rust",
+            "passed": true,
+            "privateExecution": true,
+            "publicRefusal": true,
+            "oracleFields": [
+              "rustPrivateFalse",
+              "rustPrivateTrue"
+            ],
+            "publicNames": [
+              "privatehighercheck"
+            ],
+            "checks": [
+              [
+                "privatehighercheck",
+                true,
+                true
+              ]
+            ],
+            "refusalReason": "nested-function-parameter:f"
+          },
+          {
+            "syntax": "ps",
+            "target": "rust",
+            "passed": true,
+            "privateExecution": true,
+            "publicRefusal": true,
+            "oracleFields": [
+              "rustPrivateFalse",
+              "rustPrivateTrue"
+            ],
+            "publicNames": [
+              "privatehighercheck"
+            ],
+            "checks": [
+              [
+                "privatehighercheck",
+                true,
+                true
+              ]
+            ],
+            "refusalReason": "nested-function-parameter:f"
+          }
+        ],
+        "ordinaryWhile": {
+          "targetExecutionBundles": 14,
+          "externalDivergenceDeadlines": 14,
+          "refusalChecks": 16,
+          "loopChecks": [
+            "whilefalsecheck",
+            "whilecountcheck",
+            "whileearlycheck",
+            "whilecapturecheck",
+            "whilesequentialcheck",
+            "whileforcheck",
+            "whileselfcheck",
+            "whileexceptcheck"
+          ],
+          "longLoopIterations": 100000,
+          "referenceFields": [
+            "whileCaptureFalse",
+            "whileCaptureTrue",
+            "whileCountFalse",
+            "whileCountTrue",
+            "whileEarlyFalse",
+            "whileEarlyTrue",
+            "whileExceptFalseTag",
+            "whileExceptFalseValue",
+            "whileExceptTrueTag",
+            "whileExceptTrueValue",
+            "whileFalseFalse",
+            "whileFalseTrue",
+            "whileForFalse",
+            "whileForTrue",
+            "whileSelfFalse",
+            "whileSelfTrue",
+            "whileSequentialFalse",
+            "whileSequentialTrue"
+          ],
+          "minimumPythonBundles": 2,
+          "minimumPythonDeadlines": 2,
+          "evidence": "ordinary-while-conformance/results.json",
+          "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json"
+        },
+        "completeFamilies": false
+      },
+      "programs": [
+        {
+          "target": "js",
+          "syntax": "lean",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 90139,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-js-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 1528,
+          "runtimeSha256": "6b994a2a7f479aa801c285a686680a211652582832aef630c6e7d4f2065844f2",
+          "runtimeRequirements": [
+            "generator-stack",
+            "utf8-byte-index"
+          ]
+        },
+        {
+          "target": "ts",
+          "syntax": "lean",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 148017,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-ts-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 3007,
+          "runtimeSha256": "ea9b5ee20b7fec67ae870f626b603ff8a60a390edaf074c0283a00522d4ed03a",
+          "runtimeRequirements": [
+            "generator-stack",
+            "utf8-byte-index"
+          ]
+        },
+        {
+          "target": "rust",
+          "syntax": "lean",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 168925,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-rust-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 3746,
+          "runtimeSha256": "34d190d1a76e02e212348ab73d87ea3e7ba1ba30b3f05ad19f3da70b8f6cc47e",
+          "runtimeRequirements": [
+            "num-bigint@0.4.6",
+            "num-traits@0.2.19",
+            "__ps_nat_lit",
+            "__ps_nat_add",
+            "__ps_nat_sub",
+            "__ps_nat_mul",
+            "__ps_nat_div",
+            "__ps_nat_mod",
+            "__ps_int_of_nat",
+            "__ps_int_neg",
+            "__ps_int_add",
+            "__ps_int_mul",
+            "__ps_char_of_nat",
+            "__ps_char_to_nat",
+            "__ps_string_length",
+            "__ps_string_utf8_byte_size",
+            "__ps_string_next",
+            "__ps_string_get",
+            "__ps_string_extract",
+            "__ps_array_empty_with_capacity",
+            "__ps_array_size",
+            "__ps_array_push",
+            "__ps_array_get_d",
+            "__ps_array_set_if_in_bounds",
+            "__ps_array_map",
+            "__ps_array_foldl"
+          ]
+        },
+        {
+          "target": "wasm-core",
+          "syntax": "lean",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 22912,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-wasm-runtime/1",
+          "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+          "runtimeBytes": 25617,
+          "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+          "runtimeRequirements": [
+            "__ps_wasm_nat_zero",
+            "__ps_wasm_nat_half",
+            "__ps_wasm_nat_low",
+            "__ps_wasm_nat_mk_bit0",
+            "__ps_wasm_nat_bit1",
+            "__ps_wasm_nat_succ",
+            "__ps_wasm_nat_cmp",
+            "__ps_wasm_nat_add",
+            "__ps_wasm_nat_sub_ge",
+            "__ps_wasm_nat_sub",
+            "__ps_wasm_nat_mul",
+            "__ps_wasm_nat_divmod",
+            "__ps_wasm_nat_div",
+            "__ps_wasm_nat_mod",
+            "__ps_wasm_nat_fits_bits",
+            "__ps_wasm_nat_fits_u32",
+            "__ps_wasm_nat_to_u32",
+            "__ps_wasm_nat_of_u32",
+            "__ps_wasm_int_of_nat",
+            "__ps_wasm_int_neg",
+            "__ps_wasm_int_add",
+            "__ps_wasm_int_mul",
+            "__ps_wasm_string_size_add",
+            "__ps_wasm_char_utf8_width",
+            "__ps_wasm_string_byte_width",
+            "__ps_wasm_string_write_scalar",
+            "__ps_wasm_string_singleton",
+            "__ps_wasm_string_length",
+            "__ps_wasm_string_utf8_byte_size",
+            "__ps_wasm_string_append",
+            "__ps_wasm_string_push",
+            "__ps_wasm_string_has_position",
+            "__ps_wasm_string_read_scalar",
+            "__ps_wasm_string_get",
+            "__ps_wasm_string_next",
+            "__ps_wasm_string_count_from",
+            "__ps_wasm_string_extract",
+            "__ps_wasm_nat_ten",
+            "__ps_wasm_nat_repr_positive",
+            "__ps_wasm_nat_repr",
+            "__ps_wasm_int_repr"
+          ]
+        },
+        {
+          "target": "wasm-component",
+          "syntax": "lean",
+          "publicNames": [
+            "semantic"
+          ],
+          "artifactBytes": 22699,
+          "executedChecks": [
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-wasm-runtime/1",
+          "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+          "runtimeBytes": 25617,
+          "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+          "runtimeRequirements": [
+            "__ps_wasm_nat_zero",
+            "__ps_wasm_nat_half",
+            "__ps_wasm_nat_low",
+            "__ps_wasm_nat_mk_bit0",
+            "__ps_wasm_nat_bit1",
+            "__ps_wasm_nat_succ",
+            "__ps_wasm_nat_cmp",
+            "__ps_wasm_nat_add",
+            "__ps_wasm_nat_sub_ge",
+            "__ps_wasm_nat_sub",
+            "__ps_wasm_nat_mul",
+            "__ps_wasm_nat_divmod",
+            "__ps_wasm_nat_div",
+            "__ps_wasm_nat_mod",
+            "__ps_wasm_nat_fits_bits",
+            "__ps_wasm_nat_fits_u32",
+            "__ps_wasm_nat_to_u32",
+            "__ps_wasm_nat_of_u32",
+            "__ps_wasm_int_of_nat",
+            "__ps_wasm_int_neg",
+            "__ps_wasm_int_add",
+            "__ps_wasm_int_mul",
+            "__ps_wasm_string_size_add",
+            "__ps_wasm_char_utf8_width",
+            "__ps_wasm_string_byte_width",
+            "__ps_wasm_string_write_scalar",
+            "__ps_wasm_string_singleton",
+            "__ps_wasm_string_length",
+            "__ps_wasm_string_utf8_byte_size",
+            "__ps_wasm_string_append",
+            "__ps_wasm_string_push",
+            "__ps_wasm_string_has_position",
+            "__ps_wasm_string_read_scalar",
+            "__ps_wasm_string_get",
+            "__ps_wasm_string_next",
+            "__ps_wasm_string_count_from",
+            "__ps_wasm_string_extract",
+            "__ps_wasm_nat_ten",
+            "__ps_wasm_nat_repr_positive",
+            "__ps_wasm_nat_repr",
+            "__ps_wasm_int_repr"
+          ]
+        },
+        {
+          "target": "python",
+          "syntax": "lean",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 120065,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-python-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 3287,
+          "runtimeSha256": "932c1e762b0042525d7d2fba0a5a8f2b20d3a8fd6790ebe7aa935336fca80258",
+          "runtimeRequirements": [
+            "builtins",
+            "calls",
+            "int-repr",
+            "string-get",
+            "string-next",
+            "string-extract",
+            "char-of-nat",
+            "array-set-if",
+            "array-map",
+            "array-get-d",
+            "array-foldl"
+          ]
+        },
+        {
+          "target": "php",
+          "syntax": "lean",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 349635,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-php-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 5169,
+          "runtimeSha256": "737e3d271fc37d17dad20c31104997928b1972cccb0cee5841bd96a413b0afd1",
+          "runtimeRequirements": [
+            "gmp",
+            "calls",
+            "unicodeChars",
+            "utf8Valid",
+            "charOfNat",
+            "charToNat",
+            "stringGet",
+            "stringNext",
+            "stringExtract"
+          ]
+        },
+        {
+          "target": "js",
+          "syntax": "ps",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 90139,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-js-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 1528,
+          "runtimeSha256": "6b994a2a7f479aa801c285a686680a211652582832aef630c6e7d4f2065844f2",
+          "runtimeRequirements": [
+            "generator-stack",
+            "utf8-byte-index"
+          ]
+        },
+        {
+          "target": "ts",
+          "syntax": "ps",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 148017,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-ts-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 3007,
+          "runtimeSha256": "ea9b5ee20b7fec67ae870f626b603ff8a60a390edaf074c0283a00522d4ed03a",
+          "runtimeRequirements": [
+            "generator-stack",
+            "utf8-byte-index"
+          ]
+        },
+        {
+          "target": "rust",
+          "syntax": "ps",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 168925,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-rust-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 3746,
+          "runtimeSha256": "34d190d1a76e02e212348ab73d87ea3e7ba1ba30b3f05ad19f3da70b8f6cc47e",
+          "runtimeRequirements": [
+            "num-bigint@0.4.6",
+            "num-traits@0.2.19",
+            "__ps_nat_lit",
+            "__ps_nat_add",
+            "__ps_nat_sub",
+            "__ps_nat_mul",
+            "__ps_nat_div",
+            "__ps_nat_mod",
+            "__ps_int_of_nat",
+            "__ps_int_neg",
+            "__ps_int_add",
+            "__ps_int_mul",
+            "__ps_char_of_nat",
+            "__ps_char_to_nat",
+            "__ps_string_length",
+            "__ps_string_utf8_byte_size",
+            "__ps_string_next",
+            "__ps_string_get",
+            "__ps_string_extract",
+            "__ps_array_empty_with_capacity",
+            "__ps_array_size",
+            "__ps_array_push",
+            "__ps_array_get_d",
+            "__ps_array_set_if_in_bounds",
+            "__ps_array_map",
+            "__ps_array_foldl"
+          ]
+        },
+        {
+          "target": "wasm-core",
+          "syntax": "ps",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 22912,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-wasm-runtime/1",
+          "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+          "runtimeBytes": 25617,
+          "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+          "runtimeRequirements": [
+            "__ps_wasm_nat_zero",
+            "__ps_wasm_nat_half",
+            "__ps_wasm_nat_low",
+            "__ps_wasm_nat_mk_bit0",
+            "__ps_wasm_nat_bit1",
+            "__ps_wasm_nat_succ",
+            "__ps_wasm_nat_cmp",
+            "__ps_wasm_nat_add",
+            "__ps_wasm_nat_sub_ge",
+            "__ps_wasm_nat_sub",
+            "__ps_wasm_nat_mul",
+            "__ps_wasm_nat_divmod",
+            "__ps_wasm_nat_div",
+            "__ps_wasm_nat_mod",
+            "__ps_wasm_nat_fits_bits",
+            "__ps_wasm_nat_fits_u32",
+            "__ps_wasm_nat_to_u32",
+            "__ps_wasm_nat_of_u32",
+            "__ps_wasm_int_of_nat",
+            "__ps_wasm_int_neg",
+            "__ps_wasm_int_add",
+            "__ps_wasm_int_mul",
+            "__ps_wasm_string_size_add",
+            "__ps_wasm_char_utf8_width",
+            "__ps_wasm_string_byte_width",
+            "__ps_wasm_string_write_scalar",
+            "__ps_wasm_string_singleton",
+            "__ps_wasm_string_length",
+            "__ps_wasm_string_utf8_byte_size",
+            "__ps_wasm_string_append",
+            "__ps_wasm_string_push",
+            "__ps_wasm_string_has_position",
+            "__ps_wasm_string_read_scalar",
+            "__ps_wasm_string_get",
+            "__ps_wasm_string_next",
+            "__ps_wasm_string_count_from",
+            "__ps_wasm_string_extract",
+            "__ps_wasm_nat_ten",
+            "__ps_wasm_nat_repr_positive",
+            "__ps_wasm_nat_repr",
+            "__ps_wasm_int_repr"
+          ]
+        },
+        {
+          "target": "wasm-component",
+          "syntax": "ps",
+          "publicNames": [
+            "semantic"
+          ],
+          "artifactBytes": 22699,
+          "executedChecks": [
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-wasm-runtime/1",
+          "runtimeEncoding": "psc-wasm-ir-json/1:functions",
+          "runtimeBytes": 25617,
+          "runtimeSha256": "3e0657950adc1da4a3aa321574353ade76eb434cbeb775e83e9c16f3e441d9f1",
+          "runtimeRequirements": [
+            "__ps_wasm_nat_zero",
+            "__ps_wasm_nat_half",
+            "__ps_wasm_nat_low",
+            "__ps_wasm_nat_mk_bit0",
+            "__ps_wasm_nat_bit1",
+            "__ps_wasm_nat_succ",
+            "__ps_wasm_nat_cmp",
+            "__ps_wasm_nat_add",
+            "__ps_wasm_nat_sub_ge",
+            "__ps_wasm_nat_sub",
+            "__ps_wasm_nat_mul",
+            "__ps_wasm_nat_divmod",
+            "__ps_wasm_nat_div",
+            "__ps_wasm_nat_mod",
+            "__ps_wasm_nat_fits_bits",
+            "__ps_wasm_nat_fits_u32",
+            "__ps_wasm_nat_to_u32",
+            "__ps_wasm_nat_of_u32",
+            "__ps_wasm_int_of_nat",
+            "__ps_wasm_int_neg",
+            "__ps_wasm_int_add",
+            "__ps_wasm_int_mul",
+            "__ps_wasm_string_size_add",
+            "__ps_wasm_char_utf8_width",
+            "__ps_wasm_string_byte_width",
+            "__ps_wasm_string_write_scalar",
+            "__ps_wasm_string_singleton",
+            "__ps_wasm_string_length",
+            "__ps_wasm_string_utf8_byte_size",
+            "__ps_wasm_string_append",
+            "__ps_wasm_string_push",
+            "__ps_wasm_string_has_position",
+            "__ps_wasm_string_read_scalar",
+            "__ps_wasm_string_get",
+            "__ps_wasm_string_next",
+            "__ps_wasm_string_count_from",
+            "__ps_wasm_string_extract",
+            "__ps_wasm_nat_ten",
+            "__ps_wasm_nat_repr_positive",
+            "__ps_wasm_nat_repr",
+            "__ps_wasm_int_repr"
+          ]
+        },
+        {
+          "target": "python",
+          "syntax": "ps",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 120065,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-python-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 3287,
+          "runtimeSha256": "932c1e762b0042525d7d2fba0a5a8f2b20d3a8fd6790ebe7aa935336fca80258",
+          "runtimeRequirements": [
+            "builtins",
+            "calls",
+            "int-repr",
+            "string-get",
+            "string-next",
+            "string-extract",
+            "char-of-nat",
+            "array-set-if",
+            "array-map",
+            "array-get-d",
+            "array-foldl"
+          ]
+        },
+        {
+          "target": "php",
+          "syntax": "ps",
+          "publicNames": [
+            "natcheck",
+            "intcheck",
+            "unicodecheck",
+            "arraycheck",
+            "mutationcheck",
+            "capturecheck",
+            "earlycheck",
+            "shadowcheck",
+            "danglingcheck",
+            "errorcheck",
+            "forlistcheck",
+            "forarraycheck",
+            "forrangecheck",
+            "dataliteralcheck",
+            "optionalindexcheck",
+            "tuplepatterncheck",
+            "tuplepatterndocheck",
+            "namespacecheck",
+            "semantic"
+          ],
+          "artifactBytes": 349635,
+          "executedChecks": [
+            [
+              "natcheck",
+              true,
+              true
+            ],
+            [
+              "intcheck",
+              true,
+              true
+            ],
+            [
+              "unicodecheck",
+              true,
+              true
+            ],
+            [
+              "arraycheck",
+              true,
+              true
+            ],
+            [
+              "mutationcheck",
+              true,
+              true
+            ],
+            [
+              "capturecheck",
+              true,
+              true
+            ],
+            [
+              "earlycheck",
+              true,
+              true
+            ],
+            [
+              "shadowcheck",
+              true,
+              true
+            ],
+            [
+              "danglingcheck",
+              true,
+              true
+            ],
+            [
+              "errorcheck",
+              true,
+              true
+            ],
+            [
+              "forlistcheck",
+              true,
+              true
+            ],
+            [
+              "forarraycheck",
+              true,
+              true
+            ],
+            [
+              "forrangecheck",
+              true,
+              true
+            ],
+            [
+              "dataliteralcheck",
+              true,
+              true
+            ],
+            [
+              "optionalindexcheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterncheck",
+              true,
+              true
+            ],
+            [
+              "tuplepatterndocheck",
+              true,
+              true
+            ],
+            [
+              "namespacecheck",
+              true,
+              true
+            ],
+            [
+              "semantic",
+              true,
+              true
+            ]
+          ],
+          "runtimeVersion": "psc1-php-runtime/1",
+          "runtimeEncoding": "utf8-source",
+          "runtimeBytes": 5169,
+          "runtimeSha256": "737e3d271fc37d17dad20c31104997928b1972cccb0cee5841bd96a413b0afd1",
+          "runtimeRequirements": [
+            "gmp",
+            "calls",
+            "unicodeChars",
+            "utf8Valid",
+            "charOfNat",
+            "charToNat",
+            "stringGet",
+            "stringNext",
+            "stringExtract"
+          ]
+        }
+      ],
+      "runtimeFreeScriptingExamples": [
+        {
+          "group": "python-constant-lean",
+          "artifactBytes": 270,
+          "runtimeBytes": 0,
+          "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "group": "python-constant-ps",
+          "artifactBytes": 270,
+          "runtimeBytes": 0,
+          "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "group": "python-empty-entry",
+          "artifactBytes": 233,
+          "runtimeBytes": 0,
+          "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "group": "php-constant-lean",
+          "artifactBytes": 472,
+          "runtimeBytes": 0,
+          "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "group": "php-constant-ps",
+          "artifactBytes": 472,
+          "runtimeBytes": 0,
+          "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "group": "php-empty-entry",
+          "artifactBytes": 438,
+          "runtimeBytes": 0,
+          "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "group": "php-symbol-identity",
+          "artifactBytes": 968,
+          "runtimeBytes": 0,
+          "runtimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "architectureFoundation": {
+        "phpUtf8": {
+          "schema": "psc1-php-utf8-runtime/1",
+          "testedCommit": "055ba9833567d3cb166341ec1da794eb725b0414",
+          "branchHeadCommit": "7732e9786d09d11c1130da4b315c985e9978f23b",
+          "passed": true,
+          "strictInputIr": true,
+          "phpVersion": "8.5.12",
+          "nativeFixtureSha256": "7439584b0044d4b1563efe672c4e19621bc3f729f99e42be051af9ded2748f89",
+          "consumerSha256": "8c34a45719bacb86012f5e25fbeea867c92285cd2c25d6594cb05cc8cefddb2d",
+          "moduleSha256": "e5623218a582d4f3371433986ddd7ce28f35d390b4a1e2fec68aff9ba3cc4e70",
+          "runtimeSha256": "576847aec517d8ed4e8ce69aa549485a659d26b093bef33df9f405d797560aa1",
+          "echoSha256": "d333501ae373a5ecbeaaa96a5cb4078eba5889b98e69ebce09d2a38fd338e2b9",
+          "requirements": [
+            "gmp",
+            "unicodeChars",
+            "utf8Valid",
+            "stringGet",
+            "stringNext",
+            "stringExtract"
+          ],
+          "iterations": 100000,
+          "inputBytes": 500000,
+          "elapsedSeconds": 0.221678814,
+          "checks": [
+            "UTF8 scalar byte boundaries",
+            "middle-byte and empty defaults",
+            "exact huge next",
+            "extract policy unchanged",
+            "persistent String values",
+            "same-length content and eviction",
+            "copy-on-write cache safety",
+            "malformed UTF8 public guard",
+            "malformed UTF8 helper even out of range",
+            "Nat argument type refusal",
+            "two large immutable Strings cache",
+            "runtime-free echo retained"
+          ],
+          "scope": "Backend runtime test; actual independently checked application remains required."
+        },
+        "typescriptContinuations": {
+          "schema": "psc1-ts-continuation-runtime/1",
+          "testedCommit": "055ba9833567d3cb166341ec1da794eb725b0414",
+          "branchHeadCommit": "7732e9786d09d11c1130da4b315c985e9978f23b",
+          "passed": true,
+          "independentTypeCheck": true,
+          "strictInputIr": true,
+          "nativeFixtureSha256": "4fb8548abc9b28a7a09d6dab3abb0d5aaab0348fe5decf646107491790402af4",
+          "rawSha256": "9ac17c2b332ddf06d56c21684ac7f3097d134a12362b1956eb52e4e3719fe0b1",
+          "formattedSha256": "85ba4c555deb41634ba101b72130b460523815adcd674f611b0e2ad317831698",
+          "executableSha256": "4bfc829c86589972e3d8b29c60411c48f6779ffde1ec90c03ed0ee928a305ba8",
+          "mutualTailCalls": 1000001,
+          "nonTailDepth": 5000,
+          "maxRssKiB": 59696,
+          "checks": [
+            "mutual tail results",
+            "non-tail arithmetic continuation",
+            "local value continuation",
+            "local tail result",
+            "condition continuation",
+            "escaping lambda owner",
+            "old captured value",
+            "callee and operands exact-once left-to-right",
+            "tail foreign trap escapes",
+            "non-tail foreign trap escapes",
+            "escaping call-free closures retain independent lexical captures"
+          ],
+          "strictDivergenceDeadlineMs": 2000,
+          "maxRssBoundKiB": 262144,
+          "scope": "Backend IR regression; independently admitted real compiler application supplies source evidence."
+        },
+        "boundedProtocols": {
+          "library-application": {
+            "contract": "multi-module-library-application-v1",
+            "obligations": 28,
+            "minimumPythonObligations": 4,
+            "evidence": "library-application/results.json",
+            "completeFamily": false
+          },
+          "checked-order": {
+            "contract": "checked-nat-int-order-v1",
+            "obligations": 98,
+            "minimumPythonObligations": 14,
+            "evidence": "checked-order/results.json",
+            "completeFamily": false
+          },
+          "inference-control": {
+            "contract": "bounded-inference-control-v1",
+            "obligations": 252,
+            "minimumPythonObligations": 36,
+            "evidence": "inference-control/results.json",
+            "completeFamily": false
+          },
+          "typed-io-protocol": {
+            "contract": "typed-io-protocol-v1",
+            "obligations": 56,
+            "minimumPythonObligations": 8,
+            "evidence": "typed-io-protocol/results.json",
+            "completeFamily": false
+          },
+          "typed-io-sequencing": {
+            "contract": "typed-io-sequencing-v1",
+            "obligations": 28,
+            "minimumPythonObligations": 4,
+            "evidence": "typed-io-sequencing/results.json",
+            "completeFamily": false
+          }
+        },
+        "compilerApplication": {
+          "contract": "streaming-compiler-application-v1",
+          "actualConsumers": 14,
+          "casesPerConsumer": 12,
+          "minimumPythonConsumers": 2,
+          "evidence": "compiler-application/results.json",
+          "performance": [
+            {
+              "syntax": "lean",
+              "target": "js",
+              "elapsedSeconds": 21.86,
+              "maxRssKiB": 718260
+            },
+            {
+              "syntax": "lean",
+              "target": "ts",
+              "elapsedSeconds": 23.51,
+              "maxRssKiB": 232636
+            },
+            {
+              "syntax": "lean",
+              "target": "rust",
+              "elapsedSeconds": 40.9,
+              "maxRssKiB": 13148
+            },
+            {
+              "syntax": "lean",
+              "target": "wasm-core",
+              "elapsedSeconds": 74.09,
+              "maxRssKiB": 140204
+            },
+            {
+              "syntax": "lean",
+              "target": "wasm-component",
+              "elapsedSeconds": 28.15,
+              "maxRssKiB": 69008
+            },
+            {
+              "syntax": "lean",
+              "target": "python",
+              "elapsedSeconds": 57.84,
+              "maxRssKiB": 19640
+            },
+            {
+              "syntax": "lean",
+              "target": "php",
+              "elapsedSeconds": 55.03,
+              "maxRssKiB": 82548
+            },
+            {
+              "syntax": "ps",
+              "target": "js",
+              "elapsedSeconds": 20.6,
+              "maxRssKiB": 734596
+            },
+            {
+              "syntax": "ps",
+              "target": "ts",
+              "elapsedSeconds": 22.96,
+              "maxRssKiB": 230208
+            },
+            {
+              "syntax": "ps",
+              "target": "rust",
+              "elapsedSeconds": 40.89,
+              "maxRssKiB": 13124
+            },
+            {
+              "syntax": "ps",
+              "target": "wasm-core",
+              "elapsedSeconds": 67.73,
+              "maxRssKiB": 139968
+            },
+            {
+              "syntax": "ps",
+              "target": "wasm-component",
+              "elapsedSeconds": 28.29,
+              "maxRssKiB": 69104
+            },
+            {
+              "syntax": "ps",
+              "target": "python",
+              "elapsedSeconds": 57.91,
+              "maxRssKiB": 19712
+            },
+            {
+              "syntax": "ps",
+              "target": "php",
+              "elapsedSeconds": 55.47,
+              "maxRssKiB": 82644
+            }
+          ],
+          "completePracticalCore": false
+        },
+        "practicalApplications": {
+          "contract": "practical-cli-json-v1",
+          "applications": [
+            "cli",
+            "json-files"
+          ],
+          "actualConsumers": 14,
+          "casesPerConsumer": 21,
+          "minimumPythonConsumers": 2,
+          "evidence": "practical-applications/results.json",
+          "completePracticalCore": false
+        },
+        "actualTypedIoExecution": {
+          "contract": "typed-io-execution-v1",
+          "actualConsumers": 14,
+          "targets": [
+            "js",
+            "ts",
+            "rust",
+            "wasm-core",
+            "wasm-component",
+            "python",
+            "php"
+          ],
+          "policyProviders": [
+            "node",
+            "rust",
+            "python",
+            "php"
+          ],
+          "evidence": "typed-io-execution/results.json",
+          "completePracticalCore": false
+        },
+        "typedIo": {
+          "scope": "retained Node-host application subset; see actualTypedIoExecution for the seven-adapter matrix",
+          "hostProvider": "Linux Node",
+          "policyChecks": 20,
+          "applicationBundles": 10,
+          "minimumPythonBundles": 2,
+          "sevenHostAdapters": false,
+          "completeFamily": false,
+          "evidence": "typed-io/application.json"
+        },
+        "jsonRecordApplicationCore": {
+          "contract": "json-record-application-core-v1",
+          "obligations": 112,
+          "minimumPythonObligations": 16,
+          "evidence": "json-application/results.json",
+          "typedFileIo": false,
+          "completeApplication": false
+        },
+        "standardCollections": {
+          "contract": "stdlib-collections-selected-v1",
+          "caseGrammarTargetObligations": 56,
+          "minimumPythonObligations": 8,
+          "evidence": "stdlib-collections/results.json",
+          "completeFamily": false
+        },
+        "compilerM": {
+          "contract": "compiler-m-selected-v1",
+          "cases": [
+            "stateCase",
+            "earlyCase",
+            "failureCase",
+            "recoveryCase",
+            "readerCase",
+            "unitCase",
+            "callbackCase",
+            "handlerCase",
+            "handlerEarlyCase"
+          ],
+          "authoredGrammars": [
+            "lean",
+            "ps"
+          ],
+          "caseGrammarTargetObligations": 126,
+          "observationsPerObligation": 2,
+          "minimumPythonObligations": 18,
+          "publicAbi": "Bool-to-Bool observation wrappers",
+          "completeFamily": false,
+          "evidence": "compiler-m/results.json",
+          "minimumEvidence": "compiler-m-python314/results.json"
+        },
+        "typedErrors": {
+          "nativeObservations": 34,
+          "targetSourceBundles": 28,
+          "refusalChecks": 70,
+          "minimumPythonBundles": 4,
+          "evidence": "typed-errors/results.json",
+          "minimumEvidence": "typed-errors-python314/results.json"
+        },
+        "directComponents": {
+          "grammars": [
+            "lean",
+            "ps"
+          ],
+          "evidence": "wasm-component-direct.json",
+          "publicAbi": "Bool-only"
+        },
+        "generatedCompilerProtocol": {
+          "targets": [
+            "js",
+            "rust"
+          ],
+          "transportExecuted": true,
+          "selfHosting": false,
+          "fixedPoint": false,
+          "evidence": "compiler-host-protocol/results.json"
+        },
+        "compilerSourceCensus": {
+          "diagnosticCompleted": true,
+          "grammar": "lean",
+          "grammars": [
+            "lean",
+            "ps"
+          ],
+          "psSourceDerivation": "owned-canonical-translation-from-lean",
+          "independentlyAuthoredPsCompiler": false,
+          "strictSemantic": {
+            "policyCheckPassed": true,
+            "closureAccepted": true,
+            "status": 0
+          },
+          "phases": [
+            {
+              "name": "semantic-compiler",
+              "modules": 70,
+              "parseAccepted": 70,
+              "elaborationAccepted": 70,
+              "firstRefusals": []
+            },
+            {
+              "name": "directjs-compiler",
+              "modules": 86,
+              "parseAccepted": 86,
+              "elaborationAccepted": 86,
+              "firstRefusals": []
+            },
+            {
+              "name": "rust-compiler",
+              "modules": 89,
+              "parseAccepted": 89,
+              "elaborationAccepted": 89,
+              "firstRefusals": []
+            }
+          ],
+          "admission": "not-run",
+          "ir": "not-run",
+          "generatedExecution": "not-run",
+          "selfCompilation": "not-run",
+          "fixedPoint": "not-run",
+          "psPhases": [
+            {
+              "name": "semantic-compiler",
+              "modules": 70,
+              "translationAccepted": 70,
+              "parseAccepted": 70,
+              "elaborationAccepted": 70,
+              "firstRefusals": []
+            },
+            {
+              "name": "directjs-compiler",
+              "modules": 86,
+              "translationAccepted": 86,
+              "parseAccepted": 86,
+              "elaborationAccepted": 86,
+              "firstRefusals": []
+            },
+            {
+              "name": "rust-compiler",
+              "modules": 89,
+              "translationAccepted": 89,
+              "parseAccepted": 89,
+              "elaborationAccepted": 89,
+              "firstRefusals": []
+            }
+          ],
+          "inventory": "compiler-source-census/inventory.json",
+          "stages": "compiler-source-census/stages.json",
+          "psStages": "compiler-source-census/stages-ps.json"
+        }
+      },
+      "npm": {
+        "schemaVersion": 1,
+        "sourceCommit": "055ba9833567d3cb166341ec1da794eb725b0414",
+        "branchHeadCommit": "7732e9786d09d11c1130da4b315c985e9978f23b",
+        "compilerIdentity": {
+          "protocol": "psc1-native/1",
+          "profile": "psc1-checked-direct/1",
+          "lean": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "targets": [
+            "js",
+            "ts",
+            "rust",
+            "wasm-core",
+            "wasm-component",
+            "python",
+            "php"
+          ]
+        },
+        "nativeSha256": "d80bd31f05ce8d54cc784ae2a03d1053d466c6843a907e59e1c82dd07740c8f2",
+        "nativeBytes": 124546760,
+        "platform": {
+          "os": "linux",
+          "cpu": "x64",
+          "libc": "glibc",
+          "qualifiedGlibc": "2.39"
+        },
+        "hostDependencyLockSha256": "7d8f3f53689b0ae639a2c1b6dccc26955016b026a3578a0b3d9b343fe3411345",
+        "bundledNpmDependencies": {
+          "@babel/parser": "7.28.0",
+          "prettier": "3.6.2"
+        },
+        "bundledNativeLibraries": [],
+        "logicalAdmission": "official Lean 4.35.0",
+        "noSelfHostQualification": true,
+        "publicationStatus": "unpublished",
+        "packageQualification": "receipt written only after install and execution tests",
+        "qualification": "passed",
+        "adapterResources": [
+          {
+            "file": "typed-io.mjs",
+            "sha256": "a4bdabb80b8b76dd7dbbb1f547a8ce5bf8cc3bd081e43df168307dd4beff7dfe"
+          },
+          {
+            "file": "typed-io-wasm.mjs",
+            "sha256": "25b63a011635d273c17e71f7815a49c77e1119a3db9b9e7bdf03ccc2b87cace4"
+          },
+          {
+            "file": "typed_io.py",
+            "sha256": "445f19dd5e7271d96ea5e3b24c385cfe851e54038a45cfe2ea9510296f4d8d8d"
+          },
+          {
+            "file": "typed_io_component.py",
+            "sha256": "e94c4788ef64dc3e7f2bd998016d0a14c5d197f00dbd03d86fb9010491964329"
+          },
+          {
+            "file": "typed-io.php",
+            "sha256": "f066cf3f6254ac3df5c5aef92c952c9133ce368046e9180cf05e1680e766a546"
+          },
+          {
+            "file": "typed-io-rust/Cargo.toml",
+            "sha256": "d28a3e016a9066f90c97dbaf7b080e87f11f8b14be59f101008d82ffcc6b553d"
+          },
+          {
+            "file": "typed-io-rust/Cargo.lock",
+            "sha256": "da0b94a30c54d1275a0e59b85b622cf2215d561d8a9257209b1913bc1057b42a"
+          },
+          {
+            "file": "typed-io-rust/src/lib.rs",
+            "sha256": "15d3a2939f276e9831924ae3494393c75a02ff5a18bff47c95700a2afe4c72b2"
+          },
+          {
+            "file": "typed-io-rust/src/policy_server.rs",
+            "sha256": "19f426587494dd772b8627792c9ac996fa2166f8733968458b8f97b22b17ce2e"
+          }
+        ],
+        "installedTypedIo": [
+          {
+            "syntax": "lean",
+            "target": "js",
+            "passed": true,
+            "sourceClosureSha256": "6a51b53bc28031eed4960f19baec7874b73ec5598da1b913131a0916ca84e905",
+            "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+            "artifactSha256": "7c03226106acebeedf3896c555ef4a78a71e3b44552508aae594d53734f77cc7"
+          },
+          {
+            "syntax": "ps",
+            "target": "js",
+            "passed": true,
+            "sourceClosureSha256": "c2fa76dcdcf7eab579d43ac15ed4719b295f67327286543a76647a781dfe0960",
+            "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+            "artifactSha256": "7c03226106acebeedf3896c555ef4a78a71e3b44552508aae594d53734f77cc7"
+          }
+        ],
+        "tarball": "dist/scoped-correctness/npm-native/run-xmzscF/tarballs/proofscript-0.1.0-psc1.2.tgz",
+        "tarballSha256": "7e3e7d929b8aab1f09fda94de525d4343461b79afce4c05717f58d4fc694486b",
+        "tarballBytes": 37801162,
+        "offlineLocalInstall": true,
+        "offlineGlobalInstall": true,
+        "nativeNpmIdentityAgreement": true,
+        "nativeDirectBuild": true,
+        "generatedJavaScriptExecuted": true,
+        "typeScriptInstalled": false,
+        "optionalLibraryReceipt": "dist/scoped-correctness/npm-native/run-xmzscF/library/qualification.json",
+        "nodeVersion": "v22.23.3",
+        "npmVersion": "10.9.9"
+      },
+      "optionalLibrary": {
+        "schemaVersion": 1,
+        "sourceCommit": "055ba9833567d3cb166341ec1da794eb725b0414",
+        "branchHeadCommit": "7732e9786d09d11c1130da4b315c985e9978f23b",
+        "compilerIdentity": {
+          "schemaVersion": 1,
+          "scope": "psc1-current-native-source",
+          "toolchain": "leanprover/lean4:v4.35.0",
+          "version": "4.35.0",
+          "tag": "v4.35.0",
+          "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "compilerProtocol": "psc1-native/1",
+          "compilerProfile": "psc1-checked-direct/1",
+          "providerProtocol": "pskernel-lean/1",
+          "providerProfile": "lean4.35-core",
+          "historicalBundles": {
+            "status": "archived-4.34-assets; not current native compiler/provider evidence",
+            "nativePin": "packages/pskernel-lean/LEAN_SOURCE_PIN.json",
+            "nativeManifest": "packages/pskernel-lean/PREBUILT_MANIFEST.json",
+            "wasmPin": "packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json",
+            "wasmManifest": "packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json"
+          },
+          "qualificationPolicy": "exact-commit Linux CI required; archive qualification is not inherited"
+        },
+        "installedPackages": [
+          "@psc1-demo/seed@0.0.1",
+          "@psc1-demo/naturals@0.0.1"
+        ],
+        "target": "js",
+        "result": "42",
+        "capturedSources": 4,
+        "independentlyAdmitted": true,
+        "sourceOnly": true,
+        "publicExports": [
+          "answer"
+        ],
+        "checkedControlFlow": [
+          "Id",
+          "let-mut",
+          "assignment",
+          "conditional",
+          "early-return"
+        ],
+        "transitivePackageDependency": true,
+        "privateModuleRefused": true,
+        "incompatibleProfileRefused": true,
+        "illTypedDependencyRefused": true,
+        "failedBuildPreservedPrevious": true,
+        "sourceClosureSha256": "c3c6b461e9c668fe24d90fe233bc663aa4bea796ac6bac3a3182488f1c4e8956",
+        "outputSha256": "df6e3a3193c95742d843e372fbacb5e58d74e2f756563787f4fbc2da7d36b085",
+        "libraryTarballs": [
+          {
+            "file": "psc1-demo-seed-0.0.1.tgz",
+            "sha256": "cf3f7a7dc433289a0604d6233f2352cf5e48796bb57098f3783bd2da0f2f09f0"
+          },
+          {
+            "file": "psc1-demo-naturals-0.0.1.tgz",
+            "sha256": "aac62326095acd9e51b305be3f62d02bb65bdfe7ff9a122b889a067aa6dc108e"
+          }
+        ],
+        "checkOutput": "PSC1_KERNEL_CHECK: PASS (4 declarations; Lean 4.35.0)\n",
+        "buildOutput": "PSC1_BUNDLE: {\n  \"generation\": \"cdca809126f92f3cbb6870e8e973cdb415778d918d89a928337c5aa59adee820\",\n  \"bundle\": \"/home/runner/work/pskernel/pskernel/psc1/dist/scoped-correctness/npm-native/run-xmzscF/library/consumer/dist/.Main.js.psc1/generations/cdca809126f92f3cbb6870e8e973cdb415778d918d89a928337c5aa59adee820\",\n  \"manifest\": \"/home/runner/work/pskernel/pskernel/psc1/dist/scoped-correctness/npm-native/run-xmzscF/library/consumer/dist/.Main.js.psc1/generations/cdca809126f92f3cbb6870e8e973cdb415778d918d89a928337c5aa59adee820/manifest.json\"\n}\nPSC1_DIRECT_JS: /home/runner/work/pskernel/pskernel/psc1/dist/scoped-correctness/npm-native/run-xmzscF/library/consumer/dist/Main.js\n"
+      },
+      "evidence": {
+        "runtime": "runtime-conformance/results.json",
+        "nativeOracle": "runtime-conformance/lean-runtime-oracle.json",
+        "scripting": "script-backends/results.json",
+        "directIr": "script-ir/",
+        "combinedPublication": "backend-architecture/results.json",
+        "npm": "npm-native/qualification.json"
+      },
+      "exclusions": [
+        "full Practical Core feature families",
+        "unrestricted Lean",
+        "Int division/modulo",
+        "fixed-width/floating runtime scalars",
+        "Python/PHP public compound ABI",
+        "component public ABI outside explicit Bool/String dispatcher profiles",
+        "formal backend preservation",
+        "full self-host/fixed-point qualification",
+        "npm registry publication",
+        "non-Linux native package qualification"
+      ]
+    },
+    "artifacts": [
+      {
+        "id": 12466857720,
+        "name": "psc1-scoped-correctness-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 50271172,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12466857720",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12466857720/zip",
+        "expired": false,
+        "created_at": "2026-10-22T23:33:45Z",
+        "expires_at": "2026-11-05T23:33:39Z",
+        "updated_at": "2026-10-22T23:33:45Z",
+        "digest": "sha256:8cfbb6be840ae9c604d1aceb1c16343019d89edb8e65717e960a56872c290d56",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12465661587,
+        "name": "psc1-generated-session-boundary-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 156195,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465661587",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465661587/zip",
+        "expired": false,
+        "created_at": "2026-10-22T23:01:27Z",
+        "expires_at": "2027-01-20T22:48:23Z",
+        "updated_at": "2026-10-22T23:01:27Z",
+        "digest": "sha256:201699615a7c3f36288a0440903c64913edceb249f3abc044525c0995717fae4",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12465527215,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 2410182,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465527215",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465527215/zip",
+        "expired": false,
+        "created_at": "2026-10-22T23:01:45Z",
+        "expires_at": "2026-11-05T23:01:44Z",
+        "updated_at": "2026-10-22T23:01:45Z",
+        "digest": "sha256:f03c20c5029c422341d762a24d64df873437419c80a6905b5fc1d34cfe1bf118",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12465356043,
+        "name": "psc1-php-applications-055ba9833567d3cb166341ec1da794eb725b0414-attempt-1",
+        "size_in_bytes": 371187,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465356043",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465356043/zip",
+        "expired": false,
+        "created_at": "2026-10-22T22:52:35Z",
+        "expires_at": "2026-11-05T22:52:34Z",
+        "updated_at": "2026-10-22T22:52:35Z",
+        "digest": "sha256:982bcc5cb86ef9ff52907c3f14e7a2da8ffad8c237903aedc0dfccb39bf105cd",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12465086304,
+        "name": "psc1-architecture-native-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 310382,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465086304",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465086304/zip",
+        "expired": false,
+        "created_at": "2026-10-22T22:51:29Z",
+        "expires_at": "2026-11-05T22:51:28Z",
+        "updated_at": "2026-10-22T22:51:29Z",
+        "digest": "sha256:6272753a8beb38ad7bb154c8f8ab021015b20cd82a1be8ee165f798eb63b8224",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12465005849,
+        "name": "psc1-development-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 3271,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465005849",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12465005849/zip",
+        "expired": false,
+        "created_at": "2026-10-22T22:49:28Z",
+        "expires_at": "2026-11-21T22:49:27Z",
+        "updated_at": "2026-10-22T22:49:28Z",
+        "digest": "sha256:90c44e9c71af039c01a6eb0790eaa11acf9fbd8a9c1b2beaf612762ad4d373db",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12464822978,
+        "name": "psc1-generated-compiler-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 5198867,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464822978",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464822978/zip",
+        "expired": false,
+        "created_at": "2026-10-22T23:02:49Z",
+        "expires_at": "2027-01-20T22:48:23Z",
+        "updated_at": "2026-10-22T23:02:49Z",
+        "digest": "sha256:1d854af6a418596d1288be37baf65ac26362000b9f356a09db5bbfb833634cbb",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12464637510,
+        "name": "psc1-practical-compiler-m-core-055ba9833567d3cb166341ec1da794eb725b0414-attempt-1",
+        "size_in_bytes": 2936674,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464637510",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464637510/zip",
+        "expired": false,
+        "created_at": "2026-10-22T22:55:02Z",
+        "expires_at": "2026-11-05T22:55:00Z",
+        "updated_at": "2026-10-22T22:55:02Z",
+        "digest": "sha256:cf5f0b8789efda5e437acb6607f96269c7eb0b3abc7362857729ffbfb512dd74",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12464289374,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 2669475,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464289374",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464289374/zip",
+        "expired": false,
+        "created_at": "2026-10-22T23:01:15Z",
+        "expires_at": "2026-11-05T23:01:14Z",
+        "updated_at": "2026-10-22T23:01:15Z",
+        "digest": "sha256:aef916d344a0d9997f150a7bc1c4db36f4b10dbb992ac8d35bf243ae480a1b69",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12464259538,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-055ba9833567d3cb166341ec1da794eb725b0414",
+        "size_in_bytes": 1958341,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464259538",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12464259538/zip",
+        "expired": false,
+        "created_at": "2026-10-22T23:01:20Z",
+        "expires_at": "2026-11-05T23:01:19Z",
+        "updated_at": "2026-10-22T23:01:20Z",
+        "digest": "sha256:2587129f180b0064af0f8c9ff4d32cad21924fcad134ffa52cacec8cc7ac109e",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      },
+      {
+        "id": 12463989929,
+        "name": "psc1-practical-compiler-m-applications-055ba9833567d3cb166341ec1da794eb725b0414-attempt-1",
+        "size_in_bytes": 1720043,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12463989929",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12463989929/zip",
+        "expired": false,
+        "created_at": "2026-10-22T22:59:15Z",
+        "expires_at": "2026-11-05T22:59:13Z",
+        "updated_at": "2026-10-22T22:59:15Z",
+        "digest": "sha256:acdaf0b0c339d569957547ce3b50e2fc1594b5b6c5a06be1534f9825efe521dd",
+        "workflow_run": {
+          "id": 39867567126,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "7732e9786d09d11c1130da4b315c985e9978f23b"
+        }
+      }
+    ]
+  },
+  "g1": {
+    "jobId": 120137606421,
+    "diagnostic": {
+      "status": "passed-diagnostic",
+      "generatedCompilerExecution": "passed-G1-selected-corpus",
+      "selfCompilation": "deferred-manual-qualification",
+      "fixedPoint": "deferred-feature-freeze",
+      "service": {
+        "generation": 1,
+        "sha256": "d2093ee1d08c561ae62efb259fc834a4873b49684fc8516ac6e82a96783c8efb",
+        "export": "psCompilerJsServiceCandidate",
+        "sourceClosureDigest": "7c87bfc922a4d8dabae343c47f470bff5d5ad11166d18125f14232fdb785edea",
+        "sourceModules": 86,
+        "candidateAdmission": "c7ebe5d5ed7c6f86014524538829ea246d596c195fddc18f46cdadd59943a6bc",
+        "canonicalOriginalIr": "d0996f6c804d1805b02afc9330328c8f31c02aa299664034650f1608d8594abd",
+        "canonicalSpecializedIr": "98d221bc26a88375250537ee3b745a9cceb4b5aa6d8b12cf138573778b4365aa"
+      },
+      "cases": 10,
+      "completedCorpusGenerations": [
+        1
+      ]
+    },
+    "positiveExecutionCases": [
+      {
+        "generation": "G1",
+        "id": "lean-modules",
+        "elapsedMs": 1704,
+        "maxRssKiB": 313448,
+        "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+        "publicationGeneration": "84d6361602567d79b96c28268eaecff8272892dfb428d9d42409005cbed5de5d"
+      },
+      {
+        "generation": "G1",
+        "id": "ps-integer-unicode",
+        "elapsedMs": 1351,
+        "maxRssKiB": 396248,
+        "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+        "publicationGeneration": "b5e0ba91a8b94bcfbec961a284e20804d84a4b55efaf3d3c53e17e327e456ca3"
+      },
+      {
+        "generation": "G1",
+        "id": "ps-list-literal",
+        "elapsedMs": 1574,
+        "maxRssKiB": 328992,
+        "sourceSha256": "4224fc5d51d086d4875dea3715a7704e233c0f1d3e111f3f7dc1f54ed29fb828",
+        "publicationGeneration": "8987d89e662531649e4c9a458401493eb0cd58e84a5950e18f2ac59584bd13bf"
+      },
+      {
+        "generation": "G1",
+        "id": "lean-handler-pattern",
+        "elapsedMs": 3734,
+        "maxRssKiB": 414196,
+        "sourceSha256": "c5b41db80a581041f5b7e59da18f1b0b203769fd0648977ec036f76a54f20e22",
+        "publicationGeneration": "90cfced5cfecc1340c09a85838d5c7eb0d86824553115c6b0379a501ba88fc43"
+      },
+      {
+        "generation": "G1",
+        "id": "lean-ordinary-loop",
+        "elapsedMs": 4131,
+        "maxRssKiB": 613184,
+        "sourceSha256": "faf13a5e62423a889ff333685c22937d0849b4398c820b05a4610dac91c692b7",
+        "publicationGeneration": "213e7ae591aa707bd681d9b94f6da4edeb8009405dd130dc4ff4e37ab40cc190"
+      }
+    ],
+    "corpusScope": "Five actual positive executions plus five actual generated refusal cases; exact frozen manifest corpus remains ten."
+  },
+  "closures": [
+    {
+      "jobId": 120137606497,
+      "name": "closures / selected-closure (semantic-compiler, checked)",
+      "result": {
+        "phase": "semantic-compiler",
+        "modules": 70,
+        "passed": true,
+        "canonicalAdmissionBytesParity": "accepted",
+        "canonicalIrBytesParity": "accepted",
+        "binarySha256": "f3f10957cb1bd89294b021320ead2e262f01968c409a13c5aef6f7e77626e7a1",
+        "lanes": {
+          "lean": {
+            "passed": true,
+            "coreDeclarations": 2552,
+            "admissions": {
+              "path": "lean/admissions.json",
+              "utf8Bytes": 15779044,
+              "sha256": "dcd4df56bf542c4e5802ce5c0f9575895a944cc8aed142ff05ccf322a69d3afd"
+            },
+            "ir": {
+              "path": "lean/admissions.json.ir.json",
+              "utf8Bytes": 4375874,
+              "sha256": "2eeade3e0f63241011c7eecdb97bb05a72fa4662fb540e8fb7840d84df018b79",
+              "inventoryScope": "all expressions and types in the actual original validated IR",
+              "intrinsics": [
+                [
+                  "charOfNat"
+                ],
+                [
+                  "charToNat"
+                ],
+                [
+                  "intOfNat"
+                ],
+                [
+                  "intRepr"
+                ],
+                [
+                  "natAdd"
+                ],
+                [
+                  "natDiv"
+                ],
+                [
+                  "natEq"
+                ],
+                [
+                  "natLe"
+                ],
+                [
+                  "natLt"
+                ],
+                [
+                  "natMod"
+                ],
+                [
+                  "natMul"
+                ],
+                [
+                  "natSub"
+                ],
+                [
+                  "stringAppend"
+                ],
+                [
+                  "stringAtEnd"
+                ],
+                [
+                  "stringExtract"
+                ],
+                [
+                  "stringGet"
+                ],
+                [
+                  "stringLength"
+                ],
+                [
+                  "stringNext"
+                ],
+                [
+                  "stringPush"
+                ],
+                [
+                  "stringSingleton"
+                ],
+                [
+                  "stringUtf8ByteSize"
+                ]
+              ],
+              "primitiveTypes": [
+                "bool",
+                "char",
+                "int",
+                "nat",
+                "string",
+                "unit"
+              ]
+            }
+          },
+          "ps": {
+            "passed": true,
+            "coreDeclarations": 2552,
+            "admissions": {
+              "path": "ps/admissions.json",
+              "utf8Bytes": 15779044,
+              "sha256": "dcd4df56bf542c4e5802ce5c0f9575895a944cc8aed142ff05ccf322a69d3afd"
+            },
+            "ir": {
+              "path": "ps/admissions.json.ir.json",
+              "utf8Bytes": 4375874,
+              "sha256": "2eeade3e0f63241011c7eecdb97bb05a72fa4662fb540e8fb7840d84df018b79",
+              "inventoryScope": "all expressions and types in the actual original validated IR",
+              "intrinsics": [
+                [
+                  "charOfNat"
+                ],
+                [
+                  "charToNat"
+                ],
+                [
+                  "intOfNat"
+                ],
+                [
+                  "intRepr"
+                ],
+                [
+                  "natAdd"
+                ],
+                [
+                  "natDiv"
+                ],
+                [
+                  "natEq"
+                ],
+                [
+                  "natLe"
+                ],
+                [
+                  "natLt"
+                ],
+                [
+                  "natMod"
+                ],
+                [
+                  "natMul"
+                ],
+                [
+                  "natSub"
+                ],
+                [
+                  "stringAppend"
+                ],
+                [
+                  "stringAtEnd"
+                ],
+                [
+                  "stringExtract"
+                ],
+                [
+                  "stringGet"
+                ],
+                [
+                  "stringLength"
+                ],
+                [
+                  "stringNext"
+                ],
+                [
+                  "stringPush"
+                ],
+                [
+                  "stringSingleton"
+                ],
+                [
+                  "stringUtf8ByteSize"
+                ]
+              ],
+              "primitiveTypes": [
+                "bool",
+                "char",
+                "int",
+                "nat",
+                "string",
+                "unit"
+              ]
+            }
+          }
+        },
+        "generatedExecution": "not-run",
+        "fixedPoint": "not-run"
+      }
+    },
+    {
+      "jobId": 120137606526,
+      "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+      "result": {
+        "phase": "directjs-compiler",
+        "modules": 86,
+        "passed": true,
+        "canonicalAdmissionBytesParity": "accepted",
+        "canonicalIrBytesParity": "accepted",
+        "binarySha256": "f3f10957cb1bd89294b021320ead2e262f01968c409a13c5aef6f7e77626e7a1",
+        "lanes": {
+          "lean": {
+            "passed": true,
+            "coreDeclarations": 3456,
+            "admissions": {
+              "path": "lean/admissions.json",
+              "utf8Bytes": 20139804,
+              "sha256": "c7ebe5d5ed7c6f86014524538829ea246d596c195fddc18f46cdadd59943a6bc"
+            },
+            "ir": {
+              "path": "lean/admissions.json.ir.json",
+              "utf8Bytes": 5624738,
+              "sha256": "d0996f6c804d1805b02afc9330328c8f31c02aa299664034650f1608d8594abd",
+              "inventoryScope": "all expressions and types in the actual original validated IR",
+              "intrinsics": [
+                [
+                  "charOfNat"
+                ],
+                [
+                  "charToNat"
+                ],
+                [
+                  "intOfNat"
+                ],
+                [
+                  "intRepr"
+                ],
+                [
+                  "natAdd"
+                ],
+                [
+                  "natDiv"
+                ],
+                [
+                  "natEq"
+                ],
+                [
+                  "natLe"
+                ],
+                [
+                  "natLt"
+                ],
+                [
+                  "natMod"
+                ],
+                [
+                  "natMul"
+                ],
+                [
+                  "natSub"
+                ],
+                [
+                  "stringAppend"
+                ],
+                [
+                  "stringAtEnd"
+                ],
+                [
+                  "stringExtract"
+                ],
+                [
+                  "stringGet"
+                ],
+                [
+                  "stringLength"
+                ],
+                [
+                  "stringNext"
+                ],
+                [
+                  "stringPush"
+                ],
+                [
+                  "stringSingleton"
+                ],
+                [
+                  "stringUtf8ByteSize"
+                ]
+              ],
+              "primitiveTypes": [
+                "bool",
+                "char",
+                "int",
+                "nat",
+                "string",
+                "unit"
+              ]
+            }
+          },
+          "ps": {
+            "passed": true,
+            "coreDeclarations": 3456,
+            "admissions": {
+              "path": "ps/admissions.json",
+              "utf8Bytes": 20139804,
+              "sha256": "c7ebe5d5ed7c6f86014524538829ea246d596c195fddc18f46cdadd59943a6bc"
+            },
+            "ir": {
+              "path": "ps/admissions.json.ir.json",
+              "utf8Bytes": 5624738,
+              "sha256": "d0996f6c804d1805b02afc9330328c8f31c02aa299664034650f1608d8594abd",
+              "inventoryScope": "all expressions and types in the actual original validated IR",
+              "intrinsics": [
+                [
+                  "charOfNat"
+                ],
+                [
+                  "charToNat"
+                ],
+                [
+                  "intOfNat"
+                ],
+                [
+                  "intRepr"
+                ],
+                [
+                  "natAdd"
+                ],
+                [
+                  "natDiv"
+                ],
+                [
+                  "natEq"
+                ],
+                [
+                  "natLe"
+                ],
+                [
+                  "natLt"
+                ],
+                [
+                  "natMod"
+                ],
+                [
+                  "natMul"
+                ],
+                [
+                  "natSub"
+                ],
+                [
+                  "stringAppend"
+                ],
+                [
+                  "stringAtEnd"
+                ],
+                [
+                  "stringExtract"
+                ],
+                [
+                  "stringGet"
+                ],
+                [
+                  "stringLength"
+                ],
+                [
+                  "stringNext"
+                ],
+                [
+                  "stringPush"
+                ],
+                [
+                  "stringSingleton"
+                ],
+                [
+                  "stringUtf8ByteSize"
+                ]
+              ],
+              "primitiveTypes": [
+                "bool",
+                "char",
+                "int",
+                "nat",
+                "string",
+                "unit"
+              ]
+            }
+          }
+        },
+        "generatedExecution": "not-run",
+        "fixedPoint": "not-run"
+      }
+    },
+    {
+      "jobId": 120137606633,
+      "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+      "result": {
+        "phase": "rust-compiler",
+        "modules": 89,
+        "passed": true,
+        "canonicalAdmissionBytesParity": "accepted",
+        "canonicalIrBytesParity": "accepted",
+        "binarySha256": "f3f10957cb1bd89294b021320ead2e262f01968c409a13c5aef6f7e77626e7a1",
+        "lanes": {
+          "lean": {
+            "passed": true,
+            "coreDeclarations": 3232,
+            "admissions": {
+              "path": "lean/admissions.json",
+              "utf8Bytes": 19828035,
+              "sha256": "0f40888a97e9012f622266d0e4c001ddada1fc3f24430f7dde223db7642ec9f9"
+            },
+            "ir": {
+              "path": "lean/admissions.json.ir.json",
+              "utf8Bytes": 5573505,
+              "sha256": "893e985463e35e1d81105ab30030cbb47be6142c2ceb3c988b571aebf9dea81e",
+              "inventoryScope": "all expressions and types in the actual original validated IR",
+              "intrinsics": [
+                [
+                  "charOfNat"
+                ],
+                [
+                  "charToNat"
+                ],
+                [
+                  "intOfNat"
+                ],
+                [
+                  "intRepr"
+                ],
+                [
+                  "natAdd"
+                ],
+                [
+                  "natDiv"
+                ],
+                [
+                  "natEq"
+                ],
+                [
+                  "natLe"
+                ],
+                [
+                  "natLt"
+                ],
+                [
+                  "natMod"
+                ],
+                [
+                  "natMul"
+                ],
+                [
+                  "natSub"
+                ],
+                [
+                  "stringAppend"
+                ],
+                [
+                  "stringAtEnd"
+                ],
+                [
+                  "stringExtract"
+                ],
+                [
+                  "stringGet"
+                ],
+                [
+                  "stringLength"
+                ],
+                [
+                  "stringNext"
+                ],
+                [
+                  "stringPush"
+                ],
+                [
+                  "stringSingleton"
+                ],
+                [
+                  "stringUtf8ByteSize"
+                ]
+              ],
+              "primitiveTypes": [
+                "bool",
+                "char",
+                "int",
+                "nat",
+                "string",
+                "unit"
+              ]
+            }
+          },
+          "ps": {
+            "passed": true,
+            "coreDeclarations": 3232,
+            "admissions": {
+              "path": "ps/admissions.json",
+              "utf8Bytes": 19828035,
+              "sha256": "0f40888a97e9012f622266d0e4c001ddada1fc3f24430f7dde223db7642ec9f9"
+            },
+            "ir": {
+              "path": "ps/admissions.json.ir.json",
+              "utf8Bytes": 5573505,
+              "sha256": "893e985463e35e1d81105ab30030cbb47be6142c2ceb3c988b571aebf9dea81e",
+              "inventoryScope": "all expressions and types in the actual original validated IR",
+              "intrinsics": [
+                [
+                  "charOfNat"
+                ],
+                [
+                  "charToNat"
+                ],
+                [
+                  "intOfNat"
+                ],
+                [
+                  "intRepr"
+                ],
+                [
+                  "natAdd"
+                ],
+                [
+                  "natDiv"
+                ],
+                [
+                  "natEq"
+                ],
+                [
+                  "natLe"
+                ],
+                [
+                  "natLt"
+                ],
+                [
+                  "natMod"
+                ],
+                [
+                  "natMul"
+                ],
+                [
+                  "natSub"
+                ],
+                [
+                  "stringAppend"
+                ],
+                [
+                  "stringAtEnd"
+                ],
+                [
+                  "stringExtract"
+                ],
+                [
+                  "stringGet"
+                ],
+                [
+                  "stringLength"
+                ],
+                [
+                  "stringNext"
+                ],
+                [
+                  "stringPush"
+                ],
+                [
+                  "stringSingleton"
+                ],
+                [
+                  "stringUtf8ByteSize"
+                ]
+              ],
+              "primitiveTypes": [
+                "bool",
+                "char",
+                "int",
+                "nat",
+                "string",
+                "unit"
+              ]
+            }
+          }
+        },
+        "generatedExecution": "not-run",
+        "fixedPoint": "not-run"
+      }
+    }
+  ],
+  "hostBoundary": {
+    "checks": 24,
+    "status": "passed",
+    "actualGeneratedCompilerSemantics": "separate-diagnostic"
+  },
+  "nativeSourceEquivalence": {
+    "jobId": 120133933097,
+    "status": "passed",
+    "sourceProofs": [
+      "all-input canonical token counts/advancement and lexer accumulator length",
+      "empty assigned-term scan equals original scan; unresolved metas remain visible",
+      "empty universe expression substitution equals original walk",
+      "all seven normalized total visitor functions equal retained original definitions"
+    ],
+    "workerRuntime": {
+      "schema": "psc1-typed-worker-fusion-runtime/1",
+      "commit": "055ba9833567d3cb166341ec1da794eb725b0414",
+      "processTimeoutMs": 240000,
+      "divergenceDeadlineMs": 2000,
+      "records": [
+        {
+          "label": "baseline",
+          "elapsedMs": 945,
+          "moduleSha256": "54f3c960c723ec1416cd00133d8cd18805f6bbe57f16a138b1f1e1447e822017",
+          "early": "0",
+          "full": "0",
+          "escaped": "3",
+          "captured": "0",
+          "stableAlias": "0",
+          "literalAlias": "0",
+          "captureSelf": "0",
+          "captureLambda": "0",
+          "captureMatch": "0",
+          "shadow": "9",
+          "ordered": "3",
+          "arithmetic": "100007",
+          "continuation": "100010",
+          "evaluated": "100007",
+          "marks": [
+            "2",
+            "5"
+          ],
+          "earlyMs": 0.14644000000000013,
+          "maxRssKiB": 125380
+        },
+        {
+          "label": "fused",
+          "elapsedMs": 557,
+          "moduleSha256": "99f6a71db21b4b48c43c156909f859ee1d82935fde0bb7370252d91526d327f5",
+          "early": "0",
+          "full": "0",
+          "escaped": "3",
+          "captured": "0",
+          "stableAlias": "0",
+          "literalAlias": "0",
+          "captureSelf": "0",
+          "captureLambda": "0",
+          "captureMatch": "0",
+          "shadow": "9",
+          "ordered": "3",
+          "arithmetic": "100007",
+          "continuation": "100010",
+          "evaluated": "100007",
+          "marks": [
+            "2",
+            "5"
+          ],
+          "earlyMs": 0.10501800000000117,
+          "maxRssKiB": 124888
+        }
+      ],
+      "preserved": [
+        "exact observations",
+        "escaping partial functions",
+        "old captured values",
+        "lexical shadowing",
+        "stable variable and literal aliases",
+        "self, lambda and constructor-match shadow capture",
+        "forward-global read traps before later divergence",
+        "left-to-right exact-once operands",
+        "strict divergent prefix",
+        "total Nat arithmetic prefix and 100000 traversal steps",
+        "unknown curried application order",
+        "evaluated local continuation and 100000 traversal steps"
+      ],
+      "formalPreservation": "not-provided"
+    },
+    "forwardGlobalTiming": "Both independently emitted baseline/fused imports raise ReferenceError before later divergence.",
+    "formalCompilerPreservation": false
+  },
+  "selfhost": {
+    "resumed": true,
+    "latestActualManualSource": "573bf48533cb196450a8d1df4f454de20c47b08f",
+    "runId": 39864113546,
+    "jobId": 120121869892,
+    "status": "G1-passed-G2-timeout-G3-not-run",
+    "failureReceipt": "PSC1_G2_STABLE_CAPTURE_FAILURE_QUALIFICATION_2026-10-23.json",
+    "currentCompilerG2": "not-executed-after-final-local-binding-correctness-guard",
+    "fixedPointQualified": false,
+    "resourcePolicy": "unchanged",
+    "next": "General frontend/elaboration throughput and lifetime, measured on exact and practical large-source requests before another manual generation attempt."
+  },
+  "preservedBaseline": {
+    "sourceCommit": "9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde",
+    "runId": 39829564386,
+    "receipt": "PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json",
+    "qualificationInherited": false
+  },
+  "mergeOrPublishPerformed": false
+}

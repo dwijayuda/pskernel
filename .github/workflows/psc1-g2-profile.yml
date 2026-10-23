@@ -1,0 +1,67 @@
+name: PSC1 qualified G1 failed self-compilation CPU profile
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc1-g2-profile-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  profile-qualified-g1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39557245225'
+          name: psc1-generated-compiler-574d481a3c0f0f1259d73f929a04d9dc2217fad0
+          path: work/qualified-g1
+      - name: CPU-profile exact qualified G1 and exact failed G2 request
+        run: |
+          set -euo pipefail
+          node scripts/profile-generated-compiler.mjs ../work/qualified-g1 dist/g2-cpu-profile
+      - name: Retain sampled code, failure stderr and exact identities
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-g2-cpu-profile-${{ github.sha }}
+          path: psc1/dist/g2-cpu-profile/
+          retention-days: 14
+          if-no-files-found: warn
+
+  inspect-qualified-worker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39557245225'
+          name: psc1-generated-compiler-574d481a3c0f0f1259d73f929a04d9dc2217fad0
+          path: work/qualified-g1
+      - name: Inspect exact admitted IR and emitted scanner without executing it
+        run: |
+          set -euo pipefail
+          node scripts/profile-generated-compiler.mjs ../work/qualified-g1 dist/g2-worker-context --inspect-only

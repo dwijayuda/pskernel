@@ -1,0 +1,60 @@
+import ProofScript.System.IO
+
+def sequenceHost(flag : Bool, source : String) : String :=
+  match jsonParse(source) with {
+    | Result.error _ => "{\"kind\":\"error\",\"error\":\"protocolError\"}"
+    | Result.ok request =>
+        match ioJsonStringField(request, "op") with {
+          | Option.none => "{\"kind\":\"error\",\"error\":\"protocolError\"}"
+          | Option.some operation =>
+              if (ioTextEq(operation, "readUtf8")) {
+                if (flag) { "{\"kind\":\"text\",\"text\":\"😀\"}" } else { "{\"kind\":\"text\",\"text\":\"A\"}" }
+              } else {
+                if (ioTextEq(operation, "readLine")) {
+                  if (flag) { "{\"kind\":\"line\",\"text\":null}" } else { "{\"kind\":\"line\",\"text\":\"line\"}" }
+                } else { "{\"kind\":\"unit\"}" }
+              }
+        }
+  }
+
+def sequenceProgram : Io(Nat) := do {
+  let text : String <- ioReadUtf8("input")
+  ioWriteUtf8("output", text)
+  let line : Option(String) <- ioReadLine(())
+  let mut count : Nat := 0
+  for value in [1, 2, 3] {
+    ioWriteLine("tick")
+    count := count + value
+  }
+  let ending : Nat := match line with {
+    | Option.none => 1
+    | Option.some _ => 2
+  }
+  return (Char.toNat(String.Internal.get(text, 0)) + count + ending)
+}
+
+def sequenceCase(flag : Bool) : Nat :=
+  match ioRun(sequenceProgram, sequenceHost(flag)) with {
+    | Result.error _ => 0
+    | Result.ok value => value
+  }
+
+def recoveryHost(flag : Bool, source : String) : String :=
+  if (flag) { "{\"kind\":\"error\",\"error\":\"notFound\"}" } else { sequenceHost(false, source) }
+
+def recoveryProgram : Io(Nat) := do {
+  let mut value : Nat := 3
+  try {
+    let text : String <- ioReadUtf8("missing")
+    value := 7
+  } catch error => {
+    value := value + 2
+  }
+  return value
+}
+
+def recoveryCase(flag : Bool) : Nat :=
+  match ioRun(recoveryProgram, recoveryHost(flag)) with {
+    | Result.error _ => 0
+    | Result.ok value => value
+  }

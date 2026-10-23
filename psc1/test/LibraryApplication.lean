@@ -1,0 +1,17 @@
+import PracticalLibrary.Input
+import PracticalLibrary.Transform
+
+def persistentLibraryCase (flag : Bool) : Nat :=
+  let original : Array Nat := libraryInput flag;
+  let alias : Array Nat := original;
+  let changed : Array Nat := libraryTransform original;
+  librarySum changed * 100 + arrayGetD alias 0 0 * 10 + arraySize changed
+
+def optionalLibraryCase (flag : Bool) : Nat :=
+  let original : Array Nat := libraryInput flag;
+  let extended : Array Nat := arrayPush original 9;
+  let unchanged : Array Nat := arraySet extended 9007199254740993123456789 999;
+  let found : Nat := match arrayGetOption unchanged 9007199254740993123456789 with
+    | Option.none => 7
+    | Option.some value => value;
+  librarySum unchanged * 100 + arraySize original * 10 + found

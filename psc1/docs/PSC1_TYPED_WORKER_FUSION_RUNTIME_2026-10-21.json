@@ -1,0 +1,155 @@
+{
+  "schema": "psc1-typed-worker-fusion-checkpoint/1",
+  "head": "b08988d91314125bc4680501035513a23ec7677c",
+  "testedMerge": "dca03b89987c3e137841c24ee89249804fe7ef3a",
+  "nativeRun": 39551686977,
+  "wholeClosureRun": 39551686969,
+  "sourceAndOriginalIr": "passed-both-grammars-all-three-closures",
+  "runtime": {
+    "schema": "psc1-typed-worker-fusion-runtime/1",
+    "commit": "dca03b89987c3e137841c24ee89249804fe7ef3a",
+    "processTimeoutMs": 240000,
+    "divergenceDeadlineMs": 2000,
+    "records": [
+      {
+        "label": "baseline",
+        "elapsedMs": 351,
+        "moduleSha256": "4784a6b943daba33c4845e0c743996b7f14a6f6cd732358ef7a1eb62070b06ba",
+        "early": "0",
+        "full": "0",
+        "escaped": "3",
+        "captured": "0",
+        "shadow": "9",
+        "ordered": "3",
+        "marks": [
+          "2",
+          "5"
+        ],
+        "earlyMs": 0.2157630000000026,
+        "maxRssKiB": 149076
+      },
+      {
+        "label": "fused",
+        "elapsedMs": 45,
+        "moduleSha256": "a99eebafa5e4ceec0b6ef27dee1f3743ff9048a3cf8ab83591cf18ffabefbcbe",
+        "early": "0",
+        "full": "0",
+        "escaped": "3",
+        "captured": "0",
+        "shadow": "9",
+        "ordered": "3",
+        "marks": [
+          "2",
+          "5"
+        ],
+        "earlyMs": 0.07907800000000265,
+        "maxRssKiB": 52220
+      }
+    ],
+    "preserved": [
+      "exact observations",
+      "escaping partial functions",
+      "old captured values",
+      "lexical shadowing",
+      "left-to-right exact-once operands",
+      "strict divergent prefix"
+    ],
+    "formalPreservation": "not-provided"
+  },
+  "generated": {
+    "run": 39551686967,
+    "report": {
+      "status": "failed",
+      "generatedCompilerExecution": "passed-G1-selected-corpus",
+      "selfCompilation": "attempting-G2",
+      "fixedPoint": "not-run",
+      "failure": "PSC1_SERVICE_PROCESS_FAILED:generated-compiler:ETIMEDOUT",
+      "service": {
+        "generation": 1,
+        "sha256": "5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f",
+        "export": "psCompilerJsServiceCandidate",
+        "sourceClosureDigest": "feef9c744743a4a1c34c46424491826c13823ff3ef537473fb26ce4b2fe97443",
+        "sourceModules": 84,
+        "candidateAdmission": "8fda2dc6aebcfc8739a33ab331c30522b432e2183f418fd32e561d7cef6145a6",
+        "canonicalOriginalIr": "ac8baeda7e847bb77edff590e6951730f7113740552f48b3a777ed12dabf1e23",
+        "canonicalSpecializedIr": "71e18f6dce4476b44cd1e9c5e6e13801409425a6673ed2a0751b0c67a143ce14"
+      },
+      "cases": 8,
+      "completedCorpusGenerations": [
+        1
+      ],
+      "generationAttempts": [
+        {
+          "generation": 2,
+          "producer": "5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f",
+          "sourceClosureDigest": "feef9c744743a4a1c34c46424491826c13823ff3ef537473fb26ce4b2fe97443",
+          "requestSha256": "4c61b3c17d8ef2591eb473f69afca9a6748c6d1b7d8bd999de9d3e8e841e345f",
+          "status": "failed-before-publication",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "executable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "args": [
+                "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-compiler-runner.mjs",
+                "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/G1.mjs",
+                "5d30b5552896fbe4f90eadc7cc71564a61bec7f586a6ef4f38deedfeb8456f6f",
+                "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-1LyCn1/request.json",
+                "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/.stage-1LyCn1/candidate.json"
+              ],
+              "status": null,
+              "signal": "SIGTERM",
+              "elapsedMs": 240213,
+              "error": "spawnSync /opt/hostedtoolcache/node/22.23.3/x64/bin/node ETIMEDOUT"
+            }
+          ],
+          "failureDirectory": "/home/runner/work/pskernel/pskernel/psc1/dist/generated-compiler/compiler-generations/generations/failed-82181932-8913-49c9-adf7-459b874f958e"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": 12324336359,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMyNDMzNjM1OQ==",
+        "name": "psc1-generated-compiler-dca03b89987c3e137841c24ee89249804fe7ef3a",
+        "size_in_bytes": 5021250,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12324336359",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12324336359/zip",
+        "expired": false,
+        "digest": "sha256:0e307e367801278d050a153d98c2310388e35aa9410b22afb553e415505c3b87",
+        "created_at": "2026-10-21T05:56:27Z",
+        "updated_at": "2026-10-21T05:56:27Z",
+        "expires_at": "2026-11-04T05:56:25Z",
+        "workflow_run": {
+          "id": 39551686967,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "b08988d91314125bc4680501035513a23ec7677c"
+        }
+      },
+      {
+        "id": 12323767924,
+        "node_id": "MDg6QXJ0aWZhY3QxMjMyMzc2NzkyNA==",
+        "name": "psc1-generated-session-boundary-dca03b89987c3e137841c24ee89249804fe7ef3a",
+        "size_in_bytes": 156165,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12323767924",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12323767924/zip",
+        "expired": false,
+        "digest": "sha256:24e5ba218d5d49c91769190b3975408f02932e0622bc71406796c111300434b4",
+        "created_at": "2026-10-21T05:50:57Z",
+        "updated_at": "2026-10-21T05:50:57Z",
+        "expires_at": "2026-11-04T05:50:56Z",
+        "workflow_run": {
+          "id": 39551686967,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "fix/psc1-closure-normalization-20261021",
+          "head_sha": "b08988d91314125bc4680501035513a23ec7677c"
+        }
+      }
+    ]
+  },
+  "next": "G1 selected corpus passed; real G2 timed out240s before publication; profile new exact executable/request",
+  "fixedPoint": "not-run",
+  "formalPreservation": false
+}

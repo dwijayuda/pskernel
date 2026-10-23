@@ -1,6 +1,9 @@
 # PSC1 Practical Core v1 decisions
 
-Baseline: `da880d864ca5f9e35729255fd7e4f8a17953cd39` (PR #166). Semantic authority: official Lean 4.35.0, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The baseline records selected cases in 13 families; typed IO is missing. All fourteen full families remain incomplete. These decisions define a finite prospective v1 contract; they do not relabel historical partial evidence as completion.
+Authoritative finite release scope: [PSC1_PRACTICAL_CORE_V1_CONTRACT.json](PSC1_PRACTICAL_CORE_V1_CONTRACT.json).
+This document explains the semantics and rationale; the JSON contract owns case inventory and remaining-work order.
+
+Baseline: `da880d864ca5f9e35729255fd7e4f8a17953cd39` (PR #166). Semantic authority: official Lean 4.35.0, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The baseline records selected cases in 13 families; typed IO is missing. All fourteen full families remain incomplete. This is the historical baseline, not the current implementation status. The frozen finite v1 contract is now qualified at `9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde` in [Linux run 39829564386](https://github.com/dwijayuda/pskernel/actions/runs/39829564386). See [current status](PSC1_PRACTICAL_CORE_STATUS.json) and [the exact receipt](PSC1_PRACTICAL_CORE_V1_QUALIFICATION_2026-10-23.json). The table records selected semantics; earlier prospective wording does not create new scope or relabel old partial evidence.
 
 ## Selection and rationale
 
@@ -43,4 +46,4 @@ A family becomes selected-v1 complete only after its explicit finite case list p
 
 Generate per-case CI receipts and validate their full required cross product. Proof/type-only cases explicitly use admission/erasure evidence instead of artificial runtime tests. Preserve exact source hashes, commit/tested-merge/run/tool identities and historical receipts. No percentage or broad complete label substitutes for executable coverage.
 
-Priorities: repair compositional typed handlers; census the actual compiler closure; close required efficient collection/control and Rust owned-closure gaps; implement typed host boundary; complete JS then Rust generated compiler execution and generation comparison. Optional syntax, broad interop and automatic refactoring must not delay first compiler-only self-host without a dependency demonstrated by the census.
+Priorities (2026-10-21 user pivot): complete the finite Practical Core contract, both authored input grammars, seven backend mappings, compiler architecture, runtime performance and practical application compilation. Retain lightweight qualified G1 regressions. Defer G2/G3 and fixed-point runs to manual/release qualification after a stable feature freeze. See PSC1_DEVELOPMENT_ROADMAP.md; older self-host-first ordering is superseded.

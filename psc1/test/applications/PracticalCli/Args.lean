@@ -1,0 +1,42 @@
+import ProofScript.System.IO
+
+inductive CliCommand where
+  | help
+  | transform (input output : String)
+
+def cliFileArguments (values : JsonValue) : Option CliCommand :=
+  match values with
+  | JsonValue.arrayCons first tail =>
+      match first with
+      | JsonValue.string input =>
+          match tail with
+          | JsonValue.arrayCons last rest =>
+              match last with
+              | JsonValue.string output =>
+                  match rest with
+                  | JsonValue.arrayNil => Option.some (CliCommand.transform input output)
+                  | _ => Option.none
+              | _ => Option.none
+          | _ => Option.none
+      | _ => Option.none
+  | _ => Option.none
+
+def cliCommandValue (value : JsonValue) : Option CliCommand :=
+  match value with
+  | JsonValue.arrayCons first tail =>
+      match first with
+      | JsonValue.string name =>
+          if ioTextEq name "--help" then
+            match tail with
+            | JsonValue.arrayNil => Option.some CliCommand.help
+            | _ => Option.none
+          else if ioTextEq name "transform" then
+            cliFileArguments tail
+          else Option.none
+      | _ => Option.none
+  | _ => Option.none
+
+def cliArguments (source : String) : Option CliCommand :=
+  match jsonParse source with
+  | Result.error _ => Option.none
+  | Result.ok value => cliCommandValue value

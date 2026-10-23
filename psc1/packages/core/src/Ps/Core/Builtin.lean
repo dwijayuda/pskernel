@@ -236,3 +236,46 @@ def psStringAtEndName : PsName :=
 
 def psStringExtractName : PsName :=
   psNameAppendStr psStringInternalName "extract"
+
+def psNatLeName : PsName :=
+  psNameAppendStr (psRootName "Nat") "le"
+
+def psNatLtName : PsName :=
+  psNameAppendStr (psRootName "Nat") "lt"
+
+def psNatDecLeName : PsName :=
+  psNameAppendStr (psRootName "Nat") "decLe"
+
+def psNatDecLtName : PsName :=
+  psNameAppendStr (psRootName "Nat") "decLt"
+
+def psIntLeName : PsName :=
+  psNameAppendStr (psRootName "Int") "le"
+
+def psIntLtName : PsName :=
+  psNameAppendStr (psRootName "Int") "lt"
+
+def psIntDecLeName : PsName :=
+  psNameAppendStr (psRootName "Int") "decLe"
+
+def psIntDecLtName : PsName :=
+  psNameAppendStr (psRootName "Int") "decLt"
+
+def psIntRecName : PsName :=
+  psNameAppendStr (psRootName "Int") "rec"
+
+def psNatGtName : PsName := psNameAppendStr psNatName "gt"
+
+def psNatDecGtName : PsName := psNameAppendStr psNatName "decGt"
+
+def psNatGeName : PsName := psNameAppendStr psNatName "ge"
+
+def psNatDecGeName : PsName := psNameAppendStr psNatName "decGe"
+
+def psIntGtName : PsName := psNameAppendStr psIntName "gt"
+
+def psIntDecGtName : PsName := psNameAppendStr psIntName "decGt"
+
+def psIntGeName : PsName := psNameAppendStr psIntName "ge"
+
+def psIntDecGeName : PsName := psNameAppendStr psIntName "decGe"

@@ -1,13 +1,18 @@
 # PSC1 checked native compiler
 
-PSC1 is a Lean-native compiler for the retained ProofScript subset and the qualified
-slice of **PSC1 Practical Core — v7.2 subset**. The built-in backends emit JavaScript,
+PSC1 is a Lean-native compiler for the retained ProofScript subset and the frozen
+**PSC1 Practical Core v1** scope. The built-in backends emit JavaScript,
 TypeScript, Rust, core WebAssembly, component WebAssembly, Python and PHP directly
 from checked compiler IR. The independent admission provider is official
 **Lean 4.35.0**, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 
-This branch continues Practical Core control/data, tuple bindings and namespaces in draft PR #166,
-stacked on the preserved seven-backend PR #165.
+Draft [PR #172](https://github.com/dwijayuda/pskernel/pull/172) qualifies the finite v1
+contract: fourteen families, 37 criteria, both `.lean`/`.ps` grammars, seven targets
+and four practical application categories. Qualified compiler source
+`9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde` passes
+[all selected Linux gates](https://github.com/dwijayuda/pskernel/actions/runs/39829564386).
+Start with [the release candidate guide](docs/PSC1_RELEASE_CANDIDATE.md) for exact
+evidence, installable artifacts, ABI selection and remaining release actions.
 Consult [backend conformance](docs/PSC1_BACKEND_CONFORMANCE.md) for exact commits,
 executed coverage, target tools and remaining limitations. The presence of an emitter
 does not qualify every language feature.
@@ -50,7 +55,7 @@ workflow are described in [the npm guide](docs/PSC1_NPM_ECOSYSTEM.md).
 | `ts` | Direct `.ts`, `.d.ts`, `.ts.map` | Locked host parser/formatter; independent TypeScript consumer checking in CI |
 | `rust` | `.rs`, Cargo crate and lockfile | Rustfmt and Cargo; numeric dependencies selected by the native runtime plan |
 | `wasm-core` | Core `.wasm` and readable `.wat` | wasm-tools; qualified Wasm runtime |
-| `wasm-component` | Component/core `.wasm`, both `.wat`, exact `.wit` | wasm-tools and Wasmtime; public ABI remains Bool-only |
+| `wasm-component` | Component/core `.wasm`, both `.wat`, exact `.wit` | wasm-tools and Wasmtime; default Bool ABI, explicit Bool/String and IO dispatcher profiles |
 | `python` | `.py`, `.pyi`, `.py.origins.json` | Python >=3.14; standard-library helpers selected as needed |
 | `php` | `.php`, `.composer.json`, `.php.origins.json` | PHP >=8.5; ext-gmp required when exact Nat/Int values are used |
 
@@ -113,12 +118,19 @@ nested, reopened and dotted names with local/current/enclosing/root resolution,
 preserving imported-helper privacy and entry-module exports. Reference-only
 `_root_.Name` protects generated notation through source translation.
 
-The fourteen Practical Core feature families remain incomplete. Mutable/monadic
-binding patterns, broader namespace commands, throw/try/catch handlers,
-Prop-valued ordering and bounded typed IO still require work. Unrestricted Lean, full type-class syntax, Int division/modulo and
-fixed-width/floating runtime scalars are outside the currently qualified direct profile. Python/PHP initially expose scalar public signatures; aggregate
-values can be internal. Rust retains its existing checked generic public path. Component
-Wasm retains its bounded Bool ABI.
+The fourteen frozen v1 families are qualified at the source above. The selected
+profile includes one typed throw/catch binder, constructive proposition-valued
+Nat/Int ordering and [bounded typed IO](docs/PSC1_TYPED_IO_V1.md) through all seven
+explicit capability adapters. The [Wasm String/IO ABI](docs/PSC1_WASM_STRING_ABI_V1.md)
+requires `--abi wasm-string` or `--abi io-dispatcher`; default component exports
+remain Bool-only. Standalone PHP IO requires its explicit Linux CLI FFI profile.
+
+Mutable/monadic binding patterns, broader namespace commands, unrestricted Lean,
+full type-class syntax, Int division/modulo and fixed-width/floating runtime
+scalars remain outside frozen v1. Python/PHP public signatures are scalar;
+aggregate values can be internal. Rust retains its checked generic public path.
+Unsupported compound public ABIs are refused. Finite v1 completion does not
+claim unrestricted completion of every broader v7.2 language family.
 
 See [the selected language reference](PSC1_LANGUAGE_REFERENCE_v7.2.md),
 [Practical Core status](docs/PSC1_PRACTICAL_CORE_STATUS.json),

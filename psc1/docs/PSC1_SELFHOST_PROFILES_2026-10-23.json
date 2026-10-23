@@ -1,0 +1,107 @@
+{
+  "schema": "psc1-selfhost-profiles-receipt/1",
+  "updatedAt": "2026-10-23",
+  "baseline": {
+    "checkpointCommit": "2cf71d1b0cccbd7f8e3991c99ac9f2b377ed4cce",
+    "qualifiedSource": "78fe34b8d08d3f01dcc06ca9592668c958526849",
+    "qualificationRun": 39894605462,
+    "pr": 172
+  },
+  "profiles": {
+    "performance-240s": {
+      "g1TimeoutMs": 240000,
+      "g2g3TimeoutMs": 240000,
+      "corpusTimeoutMs": 240000,
+      "toolTimeoutMs": 240000,
+      "jobMinutes": 15,
+      "status": "G1-qualified;G2-performance-blocked",
+      "previousRust": {
+        "runId": 39900513422,
+        "elapsedMs": 240038
+      },
+      "previousTs": {
+        "runId": 39899843170,
+        "elapsedMs": 240106
+      }
+    },
+    "correctness-1800s": {
+      "g1TimeoutMs": 240000,
+      "g2g3TimeoutMs": 1800000,
+      "corpusTimeoutMs": 240000,
+      "toolTimeoutMs": 240000,
+      "jobMinutes": 120,
+      "qualificationStepMinutes": 110,
+      "supervisorCleanupMs": 5000,
+      "status": "running-no-G2-G3-success-claimed"
+    }
+  },
+  "preserved": [
+    "official Lean 4.35.0 independent admission",
+    "strict original and transformed IR",
+    "all negative cases",
+    "source and tool identities",
+    "exact fixed-point requirements",
+    "semantic fuel",
+    "memory and stack policies",
+    "32 MiB per output stream",
+    "128 MiB request/response",
+    "non-force history",
+    "no merge or package publication"
+  ],
+  "attempts": [
+    {
+      "target": "rust",
+      "branch": "fix/psc1-rust-owned-string-moves-20261023",
+      "sourceCommit": "5e0b548e6cb3606ee0d3c129e0a829d830e407e4",
+      "requestCommit": "7d8865a08427a28432e427592dfc4263718c9a2f",
+      "runId": 39908529181,
+      "request": {
+        "schema": "psc1-rust-ts-selfhost-request/2",
+        "action": "qualify-independent-G1-G2-G3",
+        "id": "rust-correctness-1800s-20261023",
+        "branch": "fix/psc1-rust-owned-string-moves-20261023",
+        "parentCommit": "5e0b548e6cb3606ee0d3c129e0a829d830e407e4",
+        "targets": [
+          "rust"
+        ],
+        "profile": "correctness-1800s",
+        "g2g3TimeoutMs": 1800000,
+        "g1TimeoutMs": 240000,
+        "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged"
+      },
+      "status": "running",
+      "g1": "pending-this-run",
+      "g2": "pending",
+      "g3": "not-run",
+      "fixedPoint": "not-run",
+      "evidence": "Pinned full inventory, tool hashes, requests, candidates, admission graphs, manifests, stdout/stderr, elapsed time and memory in per-run qualification.json artifacts"
+    },
+    {
+      "target": "ts",
+      "branch": "fix/psc1-ts-generator-result-types-20261023",
+      "sourceCommit": "29e871eae0df41a2f782a501fc4110b928fafa2e",
+      "requestCommit": "b5ba1452196c2a64932310f0bc828beb617650ae",
+      "runId": 39908439190,
+      "request": {
+        "schema": "psc1-rust-ts-selfhost-request/2",
+        "action": "qualify-independent-G1-G2-G3",
+        "id": "ts-correctness-1800s-20261023",
+        "branch": "fix/psc1-ts-generator-result-types-20261023",
+        "parentCommit": "29e871eae0df41a2f782a501fc4110b928fafa2e",
+        "targets": [
+          "ts"
+        ],
+        "profile": "correctness-1800s",
+        "g2g3TimeoutMs": 1800000,
+        "g1TimeoutMs": 240000,
+        "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged"
+      },
+      "status": "running",
+      "g1": "pending-this-run",
+      "g2": "pending",
+      "g3": "not-run",
+      "fixedPoint": "not-run",
+      "evidence": "Pinned full inventory, tool hashes, requests, candidates, admission graphs, manifests, stdout/stderr, elapsed time and memory in per-run qualification.json artifacts"
+    }
+  ]
+}

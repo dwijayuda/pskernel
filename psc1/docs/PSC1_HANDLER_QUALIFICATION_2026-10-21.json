@@ -1,0 +1,24 @@
+{
+  "schema": "psc1-historical-ci-checkpoint/1",
+  "implementationCommit": "30c2cd9e857e043bb4f5c34ab0d19d0af8b62762",
+  "runs": {
+    "full": 39564584025,
+    "focused": 39564583962,
+    "native": 39564584113,
+    "closures": 39564584036,
+    "g1": 39564584032
+  },
+  "conclusion": "success",
+  "compilerMCases": 9,
+  "compilerMObligations": 126,
+  "collectionObligations": 42,
+  "minimumPythonObligations": {
+    "compilerM": 18,
+    "collections": 6
+  },
+  "g1Cases": 10,
+  "completeFamilies": false,
+  "releaseReady": false,
+  "selfHosting": "G1-only; G2/G3 not attempted",
+  "evidenceBoundary": "Exact historical checkpoint; not qualification of later optimization commits."
+}

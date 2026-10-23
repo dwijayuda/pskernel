@@ -43,10 +43,7 @@ def arraySome {α : Type}
 
 def arrayGetOption {α : Type}
     (xs : Array α) (index : Nat) : Option α :=
-  Array.getD
-    (Array.map arraySome xs)
-    index
-    Option.none
+  xs[index]?
 
 def arraySet {α : Type}
     (xs : Array α) (index : Nat) (value : α) : Array α :=

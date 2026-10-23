@@ -175,11 +175,19 @@ def psTsEmitInductiveWithVisibility (isPublic : Bool)
           | Except.ok constructorValues =>
               let generic :=
                 psTsGenericNames inductiveInfo.typeParameters;
-              let typeLine :=
-                if psListIsEmpty variants then
-                  psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic, " = never;"]
-                else
-                  psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
+              let declarationPrefix :=
+                psTsJoin "" [(if isPublic then "export type " else "type "), inductiveInfo.name, generic];
+              -- A leading union separator on a single variant creates a
+              -- one-member TSUnionType which formatters collapse to its member.
+              -- Emit the canonical type shape before the exact AST guard.
+              let typeLine : String :=
+                match variants with
+                | List.nil => psTsJoin "" [declarationPrefix, " = never;"]
+                | List.cons first rest =>
+                    match rest with
+                    | List.nil => psTsJoin "" [declarationPrefix, " = ", first, ";"]
+                    | List.cons _ _ =>
+                        psTsJoin "" [declarationPrefix, " =\n  | ", psTsJoin "\n  | " variants, ";"];
               let tagLine := psTsJoin "" ["const ", tag, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", inductiveInfo.name, ".tag"]), ");"];
               let exportLine := psTsJoin "" [(if isPublic then "export const " else "const "), inductiveInfo.name, " = {"];
               Except.ok (psTsAppendLines [tagLine, typeLine, exportLine] (psTsAppendLines constructorValues ["} as const;"]))
@@ -195,8 +203,10 @@ def psTsEmitImport (item : PsVerifiedIrExternalImport) : String :=
 
 -- Each recursive call suspends its generator; the host loop owns the work stack.
 -- Public functions remain synchronous and retain their ordinary TypeScript types.
+-- Tail requests replace only a complete logical function result; non-tail
+-- requests retain the existing continuation. Generated owners have no JS finally.
 def psTsStackRuntimeSupport : String :=
-  "type __ps$Request = { readonly fn: Function; readonly args: unknown[] };\ntype __ps$Computation<R> = Generator<__ps$Request, R, unknown>;\nconst __ps$implementations = new WeakMap<Function, Function>();\nfunction __ps$run<R>(root: __ps$Computation<R>): R {\n  const pending: __ps$Computation<unknown>[] = [root];\n  let value: unknown = undefined;\n  while (pending.length !== 0) {\n    const next = pending[pending.length - 1].next(value);\n    if (next.done) { pending.pop(); value = next.value; }\n    else {\n      const { fn, args } = next.value;\n      const implementation = __ps$implementations.get(fn);\n      if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; }\n      else value = Reflect.apply(fn, undefined, args);\n    }\n  }\n  return value as R;\n}\nfunction __ps$wrap<A extends unknown[], R>(implementation: (...args: A) => __ps$Computation<R>): (...args: A) => R {\n  const fn = (...args: A): R => __ps$run(implementation(...args));\n  __ps$implementations.set(fn, implementation);\n  return fn;\n}\nfunction* __ps$invoke<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args }) as R;\n}"
+  "type __ps$Request = { readonly fn: Function; readonly args: unknown[]; readonly tail: boolean };\ntype __ps$Computation<R> = Generator<__ps$Request, R, unknown>;\nconst __ps$implementations = new WeakMap<Function, Function>();\nfunction __ps$run<R>(root: __ps$Computation<R>): R {\n  const pending: __ps$Computation<unknown>[] = [root];\n  let value: unknown = undefined;\n  while (pending.length !== 0) {\n    const next = pending[pending.length - 1].next(value);\n    if (next.done) { pending.pop(); value = next.value; }\n    else {\n      const { fn, args, tail } = next.value;\n      const implementation = __ps$implementations.get(fn);\n      if (tail) pending.pop();\n      if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; }\n      else value = Reflect.apply(fn, undefined, args);\n    }\n  }\n  return value as R;\n}\nfunction __ps$wrap<A extends unknown[], R>(implementation: (...args: A) => __ps$Computation<R>): (...args: A) => R {\n  const fn = (...args: A): R => __ps$run(implementation(...args));\n  __ps$implementations.set(fn, implementation);\n  return fn;\n}\nfunction* __ps$invoke<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args, tail: false }) as R;\n}\nfunction* __ps$tail<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args, tail: true }) as R;\n}"
 
 -- Cache two immutable strings so pairwise comparisons reuse both byte indexes.
 -- Retention is bounded; character access remains exact at UTF-8 boundaries.
@@ -291,7 +301,7 @@ def psTsEmitDeclarationGeneralWithVisibility (isPublic : Bool)
   match psTsEmitType declaration.resultType with
   | Except.error error => Except.error error
   | Except.ok resultType =>
-      match psTsEmitExpr brands tags (psTsInlineEtaApplication declaration.body) with
+      match psTsEmitTypedTailExpr brands tags declaration.resultType (psTsInlineEtaApplication declaration.body) with
       | Except.error error => Except.error error
       | Except.ok body =>
           if psListIsEmpty declaration.parameters then
@@ -688,26 +698,38 @@ def psTsEmitTailLoop (brands tags : List (Prod String String)) (value : PsVerifi
 /-- Call-free expressions need neither generators nor a synthetic loop.
 The existing pure-expression recognizer excludes calls, closures, let/match
 suspensions and higher-order array operations. -/
-def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (String × String))
-    (declaration : PsVerifiedIrDeclaration) : Option String := do
-  if declaration.parameters.isEmpty && !declaration.typeParameters.isEmpty then none else do
-    let body ← psTsTailPrintPure brands tags [] (psTsInlineEtaApplication declaration.body)
-    let result ← (psTsEmitType declaration.resultType).toOption
-    let exportPrefix := if isPublic then "export " else ""
-    if declaration.parameters.isEmpty then
-      return exportPrefix ++ "const " ++ declaration.name ++ ": " ++ result ++ " = " ++ body ++ ";"
-    else
-      let parameters ← declaration.parameters.mapM fun parameter => do
-        let type ← (psTsEmitType parameter.type).toOption
-        return parameter.name ++ ": " ++ type
-      return exportPrefix ++ "function " ++ declaration.name ++ psTsGenericNames declaration.typeParameters ++
-        "(" ++ String.intercalate ", " parameters ++ "): " ++ result ++ " { return " ++ body ++ "; }"
+def psTsEmitPureParameter (parameter : PsVerifiedIrParameter) : Option String :=
+  match psTsEmitType parameter.type with
+  | Except.error _ => Option.none
+  | Except.ok type =>
+      Option.some (psTsJoin "" [parameter.name, ": ", type])
+
+def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) : Option String :=
+  if psListIsEmpty declaration.parameters && !psListIsEmpty declaration.typeParameters then Option.none
+  else
+    match psTsTailPrintPure brands tags [] (psTsInlineEtaApplication declaration.body) with
+    | Option.none => Option.none
+    | Option.some body =>
+        match psTsEmitType declaration.resultType with
+        | Except.error _ => Option.none
+        | Except.ok result =>
+            let exportPrefix : String := if isPublic then "export " else "";
+            if psListIsEmpty declaration.parameters then
+              Option.some (psTsJoin "" [exportPrefix, "const ", declaration.name, ": ", result, " = ", body, ";"])
+            else
+              match psTsTailMap psTsEmitPureParameter declaration.parameters with
+              | Option.none => Option.none
+              | Option.some parameters =>
+                  Option.some (psTsJoin "" [exportPrefix, "function ", declaration.name,
+                    psTsGenericNames declaration.typeParameters, "(", psTsJoin ", " parameters,
+                    "): ", result, " { return ", body, "; }"])
 
 def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
   match psTsEmitPureDeclaration isPublic brands tags declaration with
-  | some source => .ok source
-  | none =>
+  | Option.some source => Except.ok source
+  | Option.none =>
       match psTsEmitCountLoopWithVisibility isPublic tags declaration with
       | Option.some loop => Except.ok loop
       | Option.none =>
@@ -741,34 +763,60 @@ def psTsEmitModule
               let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
               Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
 
-partial def psTsNeedsUtf8Runtime : PsVerifiedIrExpr → Bool
-  | .literal _ | .var _ => false
-  | .intrinsic operation _ arguments =>
-      (match operation with
-        | .stringUtf8ByteSize | .stringNext | .stringGet | .stringAtEnd => true
-        | _ => false) || arguments.any psTsNeedsUtf8Runtime
-  | .lambda _ _ body => psTsNeedsUtf8Runtime body
-  | .call fn _ arguments => psTsNeedsUtf8Runtime fn || arguments.any psTsNeedsUtf8Runtime
-  | .letE _ _ value body => psTsNeedsUtf8Runtime value || psTsNeedsUtf8Runtime body
-  | .ifE condition left right => psTsNeedsUtf8Runtime condition || psTsNeedsUtf8Runtime left || psTsNeedsUtf8Runtime right
-  | .record _ _ fields | .constructor _ _ _ fields => fields.any (fun f => psTsNeedsUtf8Runtime f.2)
-  | .projection _ _ target _ => psTsNeedsUtf8Runtime target
-  | .matchE _ _ scrutinee alternatives => psTsNeedsUtf8Runtime scrutinee || alternatives.any (fun a => psTsNeedsUtf8Runtime a.2.2)
+partial def psTsNeedsUtf8Runtime (expr : PsVerifiedIrExpr) : Bool :=
+  match expr with
+  | PsVerifiedIrExpr.literal _ => false
+  | PsVerifiedIrExpr.var _ => false
+  | PsVerifiedIrExpr.intrinsic operation _ arguments =>
+      let direct : Bool :=
+        match operation with
+        | PsVerifiedIrIntrinsic.stringUtf8ByteSize => true
+        | PsVerifiedIrIntrinsic.stringNext => true
+        | PsVerifiedIrIntrinsic.stringGet => true
+        | PsVerifiedIrIntrinsic.stringAtEnd => true
+        | _ => false;
+      direct || psListAny psTsNeedsUtf8Runtime arguments
+  | PsVerifiedIrExpr.lambda _ _ body => psTsNeedsUtf8Runtime body
+  | PsVerifiedIrExpr.call fn _ arguments =>
+      psTsNeedsUtf8Runtime fn || psListAny psTsNeedsUtf8Runtime arguments
+  | PsVerifiedIrExpr.letE _ _ value body => psTsNeedsUtf8Runtime value || psTsNeedsUtf8Runtime body
+  | PsVerifiedIrExpr.ifE condition left right =>
+      psTsNeedsUtf8Runtime condition || psTsNeedsUtf8Runtime left || psTsNeedsUtf8Runtime right
+  | PsVerifiedIrExpr.record _ _ fields =>
+      psListAny (fun (field : Prod String PsVerifiedIrExpr) => psTsNeedsUtf8Runtime field.snd) fields
+  | PsVerifiedIrExpr.constructor _ _ _ fields =>
+      psListAny (fun (field : Prod String PsVerifiedIrExpr) => psTsNeedsUtf8Runtime field.snd) fields
+  | PsVerifiedIrExpr.projection _ _ target _ => psTsNeedsUtf8Runtime target
+  | PsVerifiedIrExpr.matchE _ _ scrutinee alternatives =>
+      psTsNeedsUtf8Runtime scrutinee ||
+        psListAny
+          (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+            psTsNeedsUtf8Runtime alternative.snd.snd) alternatives
 
-def psTsNeedsStackRuntime (brands tags : List (String × String))
+def psTsOptionIsNone {alpha : Type} (value : Option alpha) : Bool :=
+  match value with
+  | Option.none => true
+  | Option.some _ => false
+
+def psTsNeedsStackRuntime (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Bool :=
-  (psTsEmitPureDeclaration false brands tags declaration).isNone &&
-    (psTsEmitCountLoop tags declaration).isNone &&
-    (psTsEmitTailLoop brands tags declaration).isNone
+  psTsOptionIsNone (psTsEmitPureDeclaration false brands tags declaration) &&
+    psTsOptionIsNone (psTsEmitCountLoop tags declaration) &&
+    psTsOptionIsNone (psTsEmitTailLoop brands tags declaration)
 
 def psTsSelectedRuntimeRequirements (module : PsVerifiedIrModule) : List String :=
-  let brands := psTsBuildBrandMap module
-  let tags := psTsBuildTagMap module
-  (if module.declarations.any (psTsNeedsStackRuntime brands tags) then ["generator-stack"] else []) ++
-  (if module.declarations.any (fun d => psTsNeedsUtf8Runtime d.body) then ["utf8-byte-index"] else [])
+  let brands : List (Prod String String) := psTsBuildBrandMap module;
+  let tags : List (Prod String String) := psTsBuildTagMap module;
+  psListAppend
+    (if psListAny (psTsNeedsStackRuntime brands tags) module.declarations then ["generator-stack"] else [])
+    (if psListAny
+      (fun (declaration : PsVerifiedIrDeclaration) => psTsNeedsUtf8Runtime declaration.body)
+      module.declarations then ["utf8-byte-index"] else [])
 
 def psTsSelectedRuntimeSource (module : PsVerifiedIrModule) : String :=
-  let needs := psTsSelectedRuntimeRequirements module
-  String.intercalate "\n" (
-    (if needs.contains "generator-stack" then [psTsStackRuntimeSupport] else []) ++
-    (if needs.contains "utf8-byte-index" then [psTsUtf8RuntimeSupport] else []))
+  let needs : List String := psTsSelectedRuntimeRequirements module;
+  psTsJoin "\n" (psListAppend
+    (if psListAny (fun (name : String) => psStringEq name "generator-stack") needs then
+      [psTsStackRuntimeSupport] else [])
+    (if psListAny (fun (name : String) => psStringEq name "utf8-byte-index") needs then
+      [psTsUtf8RuntimeSupport] else []))

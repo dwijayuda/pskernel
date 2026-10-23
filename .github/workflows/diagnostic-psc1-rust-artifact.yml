@@ -1,0 +1,25 @@
+name: PSC1 read-only Rust generated artifact diagnosis
+on:
+  push:
+    branches: [diagnostic/psc1-selfhost-profile-20261023]
+    paths: [.github/diagnostics/psc1-rust-artifact-reader.mjs]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39876683792'
+          artifact-ids: '12468503739'
+          path: input
+      - name: Summarize exact retained Rust build diagnostics without execution
+        run: node .github/diagnostics/psc1-rust-artifact-reader.mjs

@@ -335,6 +335,27 @@ theorem prefix_psWasmEncodeFunctionTypeIndicesAcc_eq : @Ps.Internal.WasmBinaryBy
   | nil => rfl
   | cons head rest ih =>
       simp only [Ps.Internal.WasmBinaryBytes.psWasmEncodeFunctionTypeIndicesAcc, WasmPrefixReference.psWasmEncodeFunctionTypeIndicesAcc, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq, prefix_psWasmEncodeSlebWithFuel_eq, prefix_psWasmStringToListFromWithFuel_eq, prefix_psWasmFindStructureIndexWorker_eq, prefix_psWasmFindArrayIndexWorker_eq, prefix_psWasmFindFunctionTypeIndexWorker_eq, prefix_psWasmFindFunctionIndexWorker_eq] <;> rfl
+theorem prefix_psWasmIntDecimalMagnitudeWithFuel_eq : @psWasmIntDecimalMagnitudeWithFuel = @WasmPrefixReference.psWasmIntDecimalMagnitudeWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmIntDecimalMagnitudeWithFuel, WasmPrefixReference.psWasmIntDecimalMagnitudeWithFuel, ih] <;> rfl
+
+theorem prefix_psWasmTailCallsWorker_eq : @psWasmTailCallsWorker = @WasmPrefixReference.psWasmTailCallsWorker := by
+  funext reversed
+  induction reversed with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTailCallsWorker, WasmPrefixReference.psWasmTailCallsWorker, ih] <;> rfl
+
+theorem prefix_psWasmDiscardUnitWorker_eq : @psWasmDiscardUnitWorker = @WasmPrefixReference.psWasmDiscardUnitWorker := by
+  funext reversed
+  induction reversed with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmDiscardUnitWorker, WasmPrefixReference.psWasmDiscardUnitWorker, ih] <;> rfl
+
 #print axioms prefix_psWasmNatLiteralInstructionsWithFuel_eq
 #print axioms prefix_psWasmStringLiteralChunksWithFuel_eq
 
@@ -350,4 +371,4 @@ def testWasmPrefixDelay : IO Unit := do
   if (psWasmStringLiteralChunksWithFuel huge "" 0 0 0 false []).length !=
       (psWasmStringLiteralChunksWithFuel 1 "" 0 0 0 false []).length then
     throw (IO.userError "String literal early end changed")
-  IO.println "PSC1_WASM_PREFIX_DELAY: 48 all-input worker equalities; huge fuel/zero,2001-bit literal,primitive type and empty String early results"
+  IO.println "PSC1_WASM_PREFIX_DELAY: 51 all-input worker equalities; huge fuel/zero,2001-bit literal,primitive type and empty String early results"

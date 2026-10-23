@@ -8,9 +8,9 @@ def psWasmIntDecimalMagnitudeWithFuel
       fun (_text : String) (_position : Nat) (acc : Nat) =>
         acc
   | fuel + 1 =>
-      let smaller : String -> Nat -> Nat -> Nat :=
-        psWasmIntDecimalMagnitudeWithFuel fuel;
       fun (text : String) (position : Nat) (acc : Nat) =>
+        let smaller : String -> Nat -> Nat -> Nat :=
+          psWasmIntDecimalMagnitudeWithFuel fuel;
         if String.Internal.atEnd text (String.Pos.Raw.mk position) then
           acc
         else

@@ -157,8 +157,9 @@ def psWasmTypingPushValues (types : List PsWasmValueType) :
   match types with
   | List.nil => fun (state : PsWasmTypingState) => state
   | List.cons type rest =>
-                                         let smaller : PsWasmTypingState -> PsWasmTypingState := psWasmTypingPushValues rest;
-      fun (state : PsWasmTypingState) => smaller (psWasmTypingPush (PsWasmOperandType.value type) state)
+      fun (state : PsWasmTypingState) =>
+        let smaller : PsWasmTypingState -> PsWasmTypingState := psWasmTypingPushValues rest;
+        smaller (psWasmTypingPush (PsWasmOperandType.value type) state)
 
 def psWasmTypingPop (state : PsWasmTypingState) :
     Option (Prod PsWasmOperandType PsWasmTypingState) :=

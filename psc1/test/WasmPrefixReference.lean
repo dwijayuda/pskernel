@@ -2235,4 +2235,102 @@ def psWasmEncodeFunctionTypeIndicesAcc
                 (psListReverseAcc (Ps.Internal.WasmBinaryBytes.psWasmEncodeUleb typeIndex) reversed)
 
 
+def psWasmIntDecimalMagnitudeWithFuel
+    (remainingFuel : Nat) :
+    String -> Nat -> Nat -> Nat :=
+  match remainingFuel with
+  | 0 =>
+      fun (_text : String) (_position : Nat) (acc : Nat) =>
+        acc
+  | fuel + 1 =>
+      let smaller : String -> Nat -> Nat -> Nat :=
+        psWasmIntDecimalMagnitudeWithFuel fuel;
+      fun (text : String) (position : Nat) (acc : Nat) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk position) then
+          acc
+        else
+          let char : Char :=
+            String.Internal.get text (String.Pos.Raw.mk position);
+          let digit : Nat :=
+            Nat.sub (Char.toNat char) 48;
+          let nextPosition : Nat :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                text
+                (String.Pos.Raw.mk position));
+          smaller
+            text
+            nextPosition
+            (Nat.add (Nat.mul acc 10) digit)
+
+
+def psWasmTailCallsWorker (reversed : List PsWasmInstruction) :
+    Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+  match reversed with
+  | List.nil =>
+      fun (_tail : Bool) (_joins : List Bool) (output : List PsWasmInstruction) => output
+  | List.cons instruction rest =>
+      let smaller : Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+        psWasmTailCallsWorker rest;
+      fun (tail : Bool) (joins : List Bool) (output : List PsWasmInstruction) =>
+        match instruction with
+        | PsWasmInstruction.end_ =>
+            smaller tail (List.cons tail joins) (List.cons instruction output)
+        | PsWasmInstruction.else_ =>
+            match joins with
+            | List.nil => smaller false joins (List.cons instruction output)
+            | List.cons join _ => smaller join joins (List.cons instruction output)
+        | PsWasmInstruction.ifStart _ =>
+            match joins with
+            | List.nil => smaller false List.nil (List.cons instruction output)
+            | List.cons _ outer => smaller false outer (List.cons instruction output)
+        | PsWasmInstruction.return_ =>
+            smaller true joins (List.cons instruction output)
+        | PsWasmInstruction.call name =>
+            if tail then
+              smaller false joins (List.cons (PsWasmInstruction.returnCall name) output)
+            else smaller false joins (List.cons instruction output)
+        | PsWasmInstruction.callRef name =>
+            if tail then
+              smaller false joins (List.cons (PsWasmInstruction.returnCallRef name) output)
+            else smaller false joins (List.cons instruction output)
+        | _ => smaller false joins (List.cons instruction output)
+
+
+def psWasmDiscardUnitWorker (reversed : List PsWasmInstruction) :
+    Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+  match reversed with
+  | List.nil =>
+      fun (_discard : Bool) (_joins : List Bool) (output : List PsWasmInstruction) => output
+  | List.cons instruction rest =>
+      let smaller : Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+        psWasmDiscardUnitWorker rest;
+      fun (discard : Bool) (joins : List Bool) (output : List PsWasmInstruction) =>
+        match instruction with
+        | PsWasmInstruction.end_ =>
+            smaller discard (List.cons discard joins) (List.cons instruction output)
+        | PsWasmInstruction.else_ =>
+            match joins with
+            | List.nil => smaller false joins (List.cons instruction output)
+            | List.cons join _ => smaller join joins (List.cons instruction output)
+        | PsWasmInstruction.ifStart result =>
+            match joins with
+            | List.nil => smaller false List.nil (List.cons instruction output)
+            | List.cons join outer =>
+                if join then
+                  smaller false outer (List.cons (PsWasmInstruction.ifStart Option.none) output)
+                else
+                  smaller false outer (List.cons (PsWasmInstruction.ifStart result) output)
+        | PsWasmInstruction.i32Const _ =>
+            if discard then
+              smaller false joins output
+            else
+              smaller false joins (List.cons instruction output)
+        | _ =>
+            if discard then
+              smaller false joins (List.cons instruction (List.cons PsWasmInstruction.drop output))
+            else
+              smaller false joins (List.cons instruction output)
+
+
 end WasmPrefixReference

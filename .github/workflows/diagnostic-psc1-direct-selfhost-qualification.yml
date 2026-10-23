@@ -101,6 +101,7 @@ jobs:
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
           node --check scripts/js-statement-tests.mjs
+          node scripts/check-wasm-applied-prefixes.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests

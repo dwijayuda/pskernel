@@ -40,22 +40,21 @@ def psKernelCacheStringHashStateWithFuel
   match fuel with
   | Nat.zero => initial
   | Nat.succ remaining =>
-      /- Inline the pure transition before the tail call. Keeping the result in
-      data space lets the checked backend eliminate per-byte scheduler calls. -/
-      let position := Prod.fst initial;
-      let nextState :=
-        if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
-          initial
-        else
-          Prod.mk
-            (String.Pos.Raw.byteIdx
-              (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
-            (Nat.mod
-              (Nat.add
-                (Nat.mul (Prod.snd initial) 31)
-                (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
-              psKernelCacheHashModulus);
-      psKernelCacheStringHashStateWithFuel remaining value nextState
+      /- Keep the data motive and inline the transition after recursion.
+      No inner char/next bindings: generated code needs only its recursive block. -/
+      let state := psKernelCacheStringHashStateWithFuel remaining value initial;
+      let position := Prod.fst state;
+      if String.Pos.Raw.atEnd value (String.Pos.Raw.mk position) then
+        state
+      else
+        Prod.mk
+          (String.Pos.Raw.byteIdx
+            (String.Pos.Raw.next value (String.Pos.Raw.mk position)))
+          (Nat.mod
+            (Nat.add
+              (Nat.mul (Prod.snd state) 31)
+              (Char.toNat (String.Internal.get value (String.Pos.Raw.mk position))))
+            psKernelCacheHashModulus)
 
 def psKernelCacheStringHashScan
     (fuel : Nat)

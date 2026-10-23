@@ -1,4 +1,4 @@
-name: PSC1 T01F tail data-accumulator hash preflight
+name: PSC1 T01F fused primitive data-transition preflight
 on:
   workflow_dispatch:
   push:
@@ -114,19 +114,25 @@ jobs:
           import pathlib, re
           text = pathlib.Path('dist/expr-v2/scalar-hash/kernel.js').read_text()
           names = re.findall(r'^export function (psKernelCacheStringHashStateWithFuel[A-Za-z0-9_$]*)\(', text, re.M)
+          bodies = []
+          for name in names:
+              marker = 'function* __ps$impl$' + name + '('
+              if marker not in text: marker = 'export function ' + name + '('
+              start = text.index(marker)
+              end = text.find('\nexport ', start + len(marker))
+              body = text[start:] if end < 0 else text[start:end]
+              bodies.append(body)
+              print('PSC1_HASH_ITERATOR_BODY ' + name + ' ' + repr(body))
           if names != ['psKernelCacheStringHashStateWithFuel']:
               raise RuntimeError('Iterator was recurried into staged helpers: ' + repr(names))
-          marker = 'export function psKernelCacheStringHashStateWithFuel('
-          start = text.index(marker)
-          end = text.find('\nexport ', start + len(marker))
-          body = text[start:] if end < 0 else text[start:end]
-          print('PSC1_HASH_ITERATOR_BODY ' + repr(body))
-          for machinery in ('function*', '__ps$run', '__ps$invoke', '__ps$wrap',
-                            'psKernelCacheStringHashStep', 'psKernelCacheMix'):
+          body = bodies[0]
+          for machinery in ('__ps$wrap', 'psKernelCacheStringHashStep', 'psKernelCacheMix'):
               if machinery in body:
-                  raise RuntimeError('Tail data iterator still uses per-byte machinery: ' + machinery)
-          if not re.search(r'while\s*\(\s*true\s*\)', body) or not re.search(r'\bcontinue\b', body):
-              raise RuntimeError('Tail data iterator is not a generated loop')
+                  raise RuntimeError('Fused data iterator still has staged results or byte dispatch: ' + machinery)
+          if body.count('__ps$invoke(') != 1 or '__ps$invoke(psKernelCacheStringHashStateWithFuel,' not in body:
+              raise RuntimeError('Expected only one recursive scheduler call in the data iterator')
+          if len(re.findall(r'function\s*\*\s*\(', body)) != 1:
+              raise RuntimeError('Expected one structural generator block and no nested byte generator')
           marker = 'export function psKernelCacheStringHashStep('
           start = text.index(marker)
           end = text.find('\nexport ', start + len(marker))
@@ -142,7 +148,7 @@ jobs:
               raise RuntimeError('Full hash still dispatches through the staged public worker')
           print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
           print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
-          print('PSC1_HASH_TAIL_DATA_CODEGEN: PASS generators=0 resultStaging=0 byteStepDispatch=false loop=true')
+          print('PSC1_HASH_FUSED_TRANSITION_CODEGEN: PASS resultStaging=0 byteStepDispatch=false recursiveDispatches=1 structuralGeneratorBlocks=1')
           PY
       - name: Check complete authentic kernel source after the bounded gate
         working-directory: psc1

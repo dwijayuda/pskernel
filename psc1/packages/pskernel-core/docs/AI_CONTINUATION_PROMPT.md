@@ -1,3 +1,62 @@
+## Current: tail-data pure-loop hypothesis REJECTED; primitive fusion probe next
+
+Exact338bb5a115290b43e11c4e6acf4b1f9f3c418dad,run39887910080:
+native120200336990 PASS79proofs (5unchanged hash statements),2730cases,long3,
+all294requests377metadata and6native String cases/singletons.
+Generated120201041155 passed2730/8190/13665 values/staged ABI andlong3,
+then bounded codegen gate FAILED: varying accumulator was recurried into
+psKernelCacheStringHashStateWithFuel_$psc0SH_0 plus the public function.
+The promised pure loop did NOT exist. No complete kernel source check,
+fullkernel compilation or mixed/runtime jobs ran. Artifacts12473478282/
+12473403064 and all79 proof rows are bound in
+evidence/2026-10-23-t01f-tail-data-codegen-rejected.json.
+Do not suppress or reinterpret this failure as an optimization success.
+
+This NEW candidate returns to the non-tail DATA recurrence of16aac/fe4aa and
+inlines the primitive transition after recursion,with no char/next bindings
+inside its else branch. The five proof STATEMENTS,original proofs,frozen19fb
+reference,matrix/long cases,publicStep helper and staged publicWorker are unchanged.
+Its distinct code-shape hypothesis is narrower: ONE data iterator,ONE recursive
+scheduler invoke,ONE structural anonymous-generator block,ZERO separate
+Step/Mix dispatch and ZERO staged result wrappers. It does NOT claim to remove
+all generators or be a pure loop. Require PSC1_HASH_FUSED_TRANSITION_CODEGEN:
+PASS before fullsource checking/build or complete unchanged mixed replay.
+Printed candidate bodies must match these exact counts; reject actual failure.
+Native/generated value tests and exact proofs must rerun at this NEW source.
+No compiler/frontend/backend source change is introduced.
+
+The narrow native-first workflow remains active. The five full work-branch
+pushes remain paused ONLY for this evidenced bounded optimization; job bodies,
+other branches and already-running fe4aa full suite are unchanged. Fetch the
+existing current-source preflight before doing anything; never duplicate CI.
+After COMPLETE narrow mixed PASS,restore the work-branch trigger in all5full
+workflows,retain fe4aa's corrected exact live-owner gate,disable narrow hash
+push and qualify ONE new coherent final source with both6-shard aggregates,
+allnative/official/proof/provider24CLI+8API/research/measurements/unchanged32/384
+ownerABBA and unchanged193Arena/profile. No limits/assertions may be weakened.
+
+Existing full sourcefe4aa456fb8d9e488a98dfed836cc7c991a00591 is distinct.
+Native integration120188654676/native correctness120188654332,generated
+producer120188654193,all6research and actual corrected owner120198520655
+PASS32workers384calls. Canonical producer120188653998 PASSED; both full String
+matrices are still running at fe4aa. Full193120189299590 FAILED with the same
+173semantic matches/2separate safety-contract agreements/17timeouts/1Church
+resource exhaustion/0unsupported;193unchanged bodies retained. Profile
+collection120188654360 PASS is not corpus acceptance. Keep fe4aa receipts and
+all finite/generic proof boundaries separate from this candidate. Never inherit.
+
+One next task: evaluate the current primitive-fusion narrow gate; if it passes
+shape+full unchanged mixed,activate exact-source fullqualification,otherwise fix
+its concrete evidenced bottleneck. The tail-loop rejection stays preserved.
+T01F/currentA/B/C/D OPEN; historicalscopedA9c87. Integration123c411 unchanged.
+No T05 until full T01F acceptance;thenT05,T06/T07,T04a;T04b separate.
+Actions Linux ONLY for builds/tests/kernel execution. Use fresh expected_sha,
+non-force branch updates,preserve concurrent changes/history,no main/npm.
+Earlier entries contain exact old canonical6PASS/generatedmixed25mTIMEOUT
+and all resource/ownership/session/privateID policies; retain them.
+
+---
+
 ## Current: ae916 generated mixed TIMEOUT; bounded tail-data hash candidate
 
 Source ae916be40ec30a8a0caf5dd683eb7d1d54966849 ended with canonical

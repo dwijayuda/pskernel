@@ -1,4 +1,4 @@
-name: PSC1 TS cached StringExtract actual workload comparison
+name: PSC1 TS non-admitting size and cached extraction comparison
 on:
   push:
     branches: [diagnostic/psc1-selfhost-profile-20261023]
@@ -21,7 +21,7 @@ jobs:
           run-id: '39952866650'
           artifact-ids: '12501172293'
           path: input/ts
-      - name: Compare cached extraction on actual compiler requests without adoption
+      - name: Compare size-only cache policy and cached extraction without adoption
         run: node .github/diagnostics/psc1-target-execution-profile.mjs
       - uses: actions/upload-artifact@v4
         if: always()

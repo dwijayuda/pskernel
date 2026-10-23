@@ -36,8 +36,20 @@ const legacy=spans[0].body;
 for(const span of spans)assert.equal(span.body.replace(/\s/g,''),legacy.replace(/\s/g,''));
 let modified=original;
 for(const span of spans.toReversed())modified=modified.slice(0,span.start)+'__ps$stringExtract'+modified.slice(span.end);
+
+let sizeSites=0;
+modified=modified.replace(/__ps\$utf8\(([A-Za-z_$][A-Za-z0-9_$]*)\)\.size/g,(match,name)=>{
+ if(name==='__ps_s')return match;sizeSites++;return '__ps$stringUtf8Size('+name+')';
+});
 const helper=[
-'const diagnosticExtractStats={calls:0,cacheHits:0,fastHits:0,prefixUtf16Skipped:0,fallbacks:0};',
+'const diagnosticExtractStats={calls:0,cacheHits:0,fastHits:0,prefixUtf16Skipped:0,fallbacks:0,sizeCalls:0,sizeMisses:0,sizeInputUtf16:0};',
+'function __ps$stringUtf8Size(text){',
+' diagnosticExtractStats.sizeCalls++;',
+' if(__ps$lastUtf8?.text===text)return __ps$lastUtf8.size;',
+' if(__ps$previousUtf8?.text===text)return __ps$previousUtf8.size;',
+' diagnosticExtractStats.sizeMisses++;diagnosticExtractStats.sizeInputUtf16+=text.length;',
+' let size=0;for(const char of text)size+=__ps$utf8Width(char.codePointAt(0)??0);return BigInt(size);',
+'}',
 'function __ps$stringExtract(text,start,end){',
 ' const stats=diagnosticExtractStats;stats.calls++;if(start>=end)return "";',
 ' const view=__ps$lastUtf8?.text===text?__ps$lastUtf8:__ps$previousUtf8?.text===text?__ps$previousUtf8:undefined;',
@@ -49,8 +61,8 @@ const helper=[
 'export {diagnosticExtractStats};'
 ].join('\n');
 modified=helper+'\n'+modified;
-console.log('PSC1_EXTRACT_REPLACEMENTS: '+JSON.stringify({callsites:spans.length,legacyBytes:legacy.length,scope:'derived copy only; cache hit and two valid boundaries; exact legacy fallback; no new cache entry'}));
-const candidate=path.resolve(ts.directory,'diagnostic-string-extract.js');fs.writeFileSync(candidate,modified);
+console.log('PSC1_EXTRACT_REPLACEMENTS: '+JSON.stringify({callsites:spans.length,sizeSites,legacyBytes:legacy.length,scope:'derived copy only; cache hit and two valid boundaries; exact legacy fallback; no new cache entry'}));
+const candidate=path.resolve(ts.directory,'diagnostic-size-and-extract.js');fs.writeFileSync(candidate,modified);
 const runner=path.resolve('diagnosis/replay.mjs');
 fs.writeFileSync(runner,[
 "import fs from 'node:fs';import{pathToFileURL}from'node:url';",
@@ -65,7 +77,7 @@ const results=[];
 for(let round=0;round<2;round++){
  for(const input of requests){
   const id=path.basename(input,'.request.json'),row={round,id};
-  for(const mode of (round===0?['original','indexedExtract']:['indexedExtract','original'])){
+  for(const mode of (round===0?['original','sizeAndExtract']:['sizeAndExtract','original'])){
    const directory=path.resolve('diagnosis',String(round),id,mode),output=path.join(directory,'response.json');
    const r=spawnSync('python3',['.github/diagnostics/bounded-process.py',JSON.stringify({
     command:[process.execPath,runner,mode==='original'?originalFile:candidate,path.resolve(input),output],
@@ -74,17 +86,17 @@ for(let round=0;round<2;round++){
    assert.equal(execution.status,0,JSON.stringify(execution));assert.equal(execution.error,null);
    row[mode]={...execution,responseSha256:sha(fs.readFileSync(output))};
   }
-  assert.equal(row.original.responseSha256,row.indexedExtract.responseSha256);
-  console.log('PSC1_STRING_EXTRACT_REPLAY: '+JSON.stringify(row));results.push(row);
+  assert.equal(row.original.responseSha256,row.sizeAndExtract.responseSha256);
+  console.log('PSC1_SIZE_EXTRACT_REPLAY: '+JSON.stringify(row));results.push(row);
  }
 }
 ts.verify();
-const receipt={schema:'psc1-ts-cached-extract-diagnostic/1',originalManifestSha256:sha(fs.readFileSync(path.join(ts.directory,'artifact.json'))),
+const receipt={schema:'psc1-ts-size-extract-diagnostic/1',originalManifestSha256:sha(fs.readFileSync(path.join(ts.directory,'artifact.json'))),
  originalExecutableSha256:sha(original),derivedExecutableSha256:sha(modified),workload:'ten actual stored G1 compiler corpus requests; each twice; alternating fresh-process order',
- originalElapsedMs:results.reduce((s,r)=>s+r.original.elapsedMs,0),candidateElapsedMs:results.reduce((s,r)=>s+r.indexedExtract.elapsedMs,0),
+ originalElapsedMs:results.reduce((s,r)=>s+r.original.elapsedMs,0),candidateElapsedMs:results.reduce((s,r)=>s+r.sizeAndExtract.elapsedMs,0),
  results,qualification:false,adoption:'not-run',admission:'not-run',scope:'unadopted runtime hypothesis only; no G2 performance claim'};
-fs.writeFileSync('diagnosis/string-extract-receipt.json',JSON.stringify(receipt,null,2)+'\n');
-console.log('PSC1_STRING_EXTRACT_DIAGNOSTIC: '+JSON.stringify(receipt));
+fs.writeFileSync('diagnosis/size-extract-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+console.log('PSC1_SIZE_EXTRACT_DIAGNOSTIC: '+JSON.stringify(receipt));
 
 const directory=path.resolve('diagnosis/self-request'),output=path.join(directory,'response.json');
 const started=Date.now();
@@ -105,6 +117,6 @@ if(produced){
   assert.equal(identity.specializedIrSha256,qualification.bootstrap.specializedIrSha256);
  }
 }
-console.log('PSC1_INDEXED_EXTRACT_G2_DIAGNOSTIC: '+JSON.stringify({execution,identity,produced,wallMs:Date.now()-started,
+console.log('PSC1_SIZE_EXTRACT_G2_DIAGNOSTIC: '+JSON.stringify({execution,identity,produced,wallMs:Date.now()-started,
  stderr:fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8').slice(-4000),qualification:false,adoption:'not-run',admission:'not-run'}));
 ts.verify();

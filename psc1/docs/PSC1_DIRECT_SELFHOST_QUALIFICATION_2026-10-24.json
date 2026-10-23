@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 22:39:00 UTC",
+  "recordedAtUtc": "2026-10-23 22:44:00 UTC",
   "localDate": "2026-10-24",
-  "status": "wasm-lower-expression-prefix-proof-runtime-census-passed-ready-generated-execution",
+  "status": "both-direct-generation-chains-running-after-proved-mechanism-fixes",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -276,12 +276,12 @@
     }
   },
   "currentAttempt": {
-    "target": "js",
-    "sourceCommit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
-    "requestParent": "844f8c3b765b6cc1378f164ac4cfcc39b02364a6",
-    "requestCommit": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
-    "runId": 40033515365,
-    "jobId": 120687475727,
+    "target": "wasm-core",
+    "sourceCommit": "c115c65732ea1bf78aba263658e9ab804e116822",
+    "requestParent": "699f84948ff70273e5ab9a7c5c0273316df23e66",
+    "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
+    "runId": 40035031327,
+    "jobId": 120692435799,
     "status": "in_progress",
     "fixedPoint": "not-yet-established"
   },
@@ -1637,6 +1637,16 @@
       "jobId": 120687475727,
       "status": "in_progress",
       "fixedPoint": "not-yet-established"
+    },
+    {
+      "target": "wasm-core",
+      "sourceCommit": "c115c65732ea1bf78aba263658e9ab804e116822",
+      "requestParent": "699f84948ff70273e5ab9a7c5c0273316df23e66",
+      "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
+      "runId": 40035031327,
+      "jobId": 120692435799,
+      "status": "in_progress",
+      "fixedPoint": "not-yet-established"
     }
   ],
   "diagnosticSpineInventory": {
@@ -1754,5 +1764,316 @@
     },
     "scope": "85433830 tree only; subsequent child source needs full CI"
   },
-  "pendingFocusedGate": null
+  "pendingFocusedGate": null,
+  "ecmascriptArchitectureComparison": {
+    "runId": 40035257537,
+    "jobId": 120693033144,
+    "status": "passed",
+    "receipt": {
+      "schema": "psc1-retained-ecmascript-architecture/1",
+      "testedCommit": "a8f2bccac53cf58615cd157fe1730ede45099bfc",
+      "compilerExecution": false,
+      "nativeDelegation": false,
+      "qualification": false,
+      "comparisonLimits": "Different target closures and source snapshots; shape comparison is not a matched performance benchmark.",
+      "results": [
+        {
+          "target": "js",
+          "runId": 40027650302,
+          "sourceModules": 87,
+          "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31",
+          "artifactSha256": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
+          "sourceSha256": "741e2d2c5e36136f1363a15a6966fa606344c1c59e9afcd7049657abb1d70b60",
+          "executableSha256": "741e2d2c5e36136f1363a15a6966fa606344c1c59e9afcd7049657abb1d70b60",
+          "executableBytes": 7257030,
+          "generators": 8429,
+          "generatorIifes": 3889,
+          "invokeSites": 12171,
+          "tailSites": 3693,
+          "directDriverSites": 0,
+          "loops": 2273,
+          "lazyGetters": 6,
+          "nestedFieldLoads": 23473,
+          "selected": [
+            {
+              "name": "psStringEqFromWithFuel",
+              "bytes": 99,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psStringEqFromWithFuel(fuel) { return __ps$run(__ps$impl$psStringEqFromWithFuel(fuel)); }\n"
+            },
+            {
+              "name": "__ps$impl$psStringEqFromWithFuel",
+              "bytes": 1536,
+              "generators": 10,
+              "delegated": 6,
+              "loop": true,
+              "snippet": "function* __ps$impl$psStringEqFromWithFuel(fuel) { let __ps$tail$state = [fuel]; while (true) { const [fuel] = __ps$tail$state; if ((fuel === 0n)) { return ((_left) => ((_right) => ((_leftPos) => ((_rightPos) => false)))); } else { { const __ps$tail$value$4094 = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n); { const remaining = __ps$tail$value$4094; return __ps$wrap(function*(left) { return __ps$wrap(function*(right) { return __ps$wrap(function*(leftPos) { return __ps$wrap(function*(rightPos) { return (yield* (function*(_psc1Condition_8) { return (_psc1Condition_8 ? ((__ps_s, __ps_p) => __ps_p >= __ps$stringUtf8Size(__ps_s))(right, rightPos) : (yield* (function*(_psc1Condition_9) { return (_psc1Condition_9 ? false : (yield* (function*(leftChar) { return (yield* (function*(rightChar) { return (yield* (function*(_psc1Condition_12) { return (_psc1Condition_12 ? (yield* __ps$tailInvoke(psStringEqFromWithFuel$worker, remaining, left, right, __ps$stringNext(left, leftPos), __ps$stringNext(right, rightPos))) : false); })((((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(leftChar) === ((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(rightChar)))); })(__ps$stringGet(right, rightPos))); })(__ps$stringGet(left, leftPos)))); })(((__ps_s, __ps_p) => __ps_p >= __ps$stringUtf8Size(__ps_s))(right, rightPos)))); })(((__ps_s, __ps_p) => __ps_p >= __ps$stringUtf8Size(__ps_s))(left, leftPos))); }); }); }); }); } } } } }\n__ps$implementations.set(psStringEqFromWithFuel, __ps$impl$psStringEqFromWithFuel);\n"
+            },
+            {
+              "name": "psStringEq",
+              "bytes": 89,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psStringEq(left, right) { return __ps$run(__ps$impl$psStringEq(left, right)); }\n"
+            },
+            {
+              "name": "__ps$impl$psStringEq",
+              "bytes": 464,
+              "generators": 1,
+              "delegated": 1,
+              "loop": true,
+              "snippet": "function* __ps$impl$psStringEq(left, right) { let __ps$tail$state = [left, right]; while (true) { const [left, right] = __ps$tail$state; { const __ps$tail$value$4095 = (__ps$stringUtf8Size(left) === __ps$stringUtf8Size(right)); { const _psc1Condition_2 = __ps$tail$value$4095; if (_psc1Condition_2) { return (yield* __ps$tailInvoke(psStringEqFrom, left, right, 0n, 0n)); } else { return false; } } } } }\n__ps$implementations.set(psStringEq, __ps$impl$psStringEq);\n"
+            },
+            {
+              "name": "psNameEq",
+              "bytes": 71,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psNameEq(left) { return __ps$run(__ps$impl$psNameEq(left)); }\n"
+            },
+            {
+              "name": "__ps$impl$psNameEq",
+              "bytes": 2441,
+              "generators": 7,
+              "delegated": 7,
+              "loop": true,
+              "snippet": "function* __ps$impl$psNameEq(left) { let __ps$tail$state = [left]; while (true) { const [left] = __ps$tail$state; const __ps$tail$match$0 = left; switch (__ps$tail$match$0[\"$ps$tag\"]) { case \"anonymous\": { return ((right) => ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"anonymous\": { return true; } case \"str\": { const _wild0 = __ps$match$0[\"$ps$fields\"][\"parent\"]; const _wild1 = __ps$match$0[\"$ps$fields\"][\"value\"]; return false; } case \"num\": { const _wild0 = __ps$match$0[\"$ps$fields\"][\"parent\"]; const _wild1 = __ps$match$0[\"$ps$fields\"][\"value\"]; return false; } } throw new Error(\"invalid ProofScript constructor tag\"); })(right)); } case \"str\": { const leftPrefix = __ps$tail$match$0[\"$ps$fields\"][\"parent\"]; const leftValue = __ps$tail$match$0[\"$ps$fields\"][\"value\"]; return __ps$wrap(function*(right) { return (yield* (function*() { const __ps$match$0 = right; switch (__ps$match$0[\"$ps$tag\"]) { case \"anonymous\": { return false; } case \"str\": { const rightPrefix = __ps$match$0[\"$ps$fields\"][\"parent\"]; const rightValue = __ps$match$0[\"$ps$fields\"][\"value\"]; return (yield* (function*(_psc1Condition_9) { return (_psc1Condition_9 ? (yield* __ps$tailInvoke(psStringEq, leftValue, rightValue)) : false); })((yield* __ps$invoke(psNameEq$worker, leftPrefix, rightPrefix)))); } case \"num\": { const _wild0 = __ps$match$0[\"$ps$fields\"][\"parent\"]; const _wild1 = __ps$match$0[\"$ps$fields\"][\"value\"]; return false; } } throw new Error(\"invalid ProofScript constructor tag\"); })()); }); } case \"num\": { const leftPrefix = __ps$tail$match$0[\"$ps$fields\"][\"parent\"]; const leftValue = __ps$tail$match$0[\"$ps$fields\"][\"value\"]; return __ps$wrap(function*(right) { return (yield* (function*() { const __ps$match$0 = right; switch (__ps$match$0[\"$ps$tag\"]) { case \"anonymous\": { return f"
+            },
+            {
+              "name": "psExprInstantiateAtWorker",
+              "bytes": 131,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psExprInstantiateAtWorker(replacement, expr) { return __ps$run(__ps$impl$psExprInstantiateAtWorker(replacement, expr)); }\n"
+            },
+            {
+              "name": "__ps$impl$psExprInstantiateAtWorker",
+              "bytes": 4324,
+              "generators": 9,
+              "delegated": 13,
+              "loop": true,
+              "snippet": "function* __ps$impl$psExprInstantiateAtWorker(replacement, expr) { let __ps$tail$state = [replacement, expr]; while (true) { const [replacement, expr] = __ps$tail$state; const __ps$tail$match$0 = expr; switch (__ps$tail$match$0[\"$ps$tag\"]) { case \"bvar\": { const index = __ps$tail$match$0[\"$ps$fields\"][\"index\"]; return __ps$wrap(function*(depth) { return (yield* (function*(_psc1Condition_4) { return (_psc1Condition_4 ? (yield* __ps$tailInvoke(psExprLiftBVars, depth, 0n, replacement)) : (yield* (function*(_psc1Condition_5) { return (_psc1Condition_5 ? ({ \"$ps$tag\": \"bvar\", \"$ps$fields\": { [\"index\"]: ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(index, 1n) } }) : ({ \"$ps$tag\": \"bvar\", \"$ps$fields\": { [\"index\"]: index } })); })((depth < index)))); })((index === depth))); }); } case \"fvar\": { const id = __ps$tail$match$0[\"$ps$fields\"][\"id\"]; return ((depth) => ({ \"$ps$tag\": \"fvar\", \"$ps$fields\": { [\"id\"]: id } })); } case \"mvar\": { const id = __ps$tail$match$0[\"$ps$fields\"][\"id\"]; return ((depth) => ({ \"$ps$tag\": \"mvar\", \"$ps$fields\": { [\"id\"]: id } })); } case \"sortE\": { const level = __ps$tail$match$0[\"$ps$fields\"][\"level\"]; return ((depth) => ({ \"$ps$tag\": \"sortE\", \"$ps$fields\": { [\"level\"]: level } })); } case \"constE\": { const name = __ps$tail$match$0[\"$ps$fields\"][\"name\"]; const levels = __ps$tail$match$0[\"$ps$fields\"][\"levels\"]; return ((depth) => ({ \"$ps$tag\": \"constE\", \"$ps$fields\": { [\"name\"]: name, [\"levels\"]: levels } })); } case \"app\": { const fn = __ps$tail$match$0[\"$ps$fields\"][\"fn\"]; const arg = __ps$tail$match$0[\"$ps$fields\"][\"arg\"]; return __ps$wrap(function*(depth) { return ({ \"$ps$tag\": \"app\", \"$ps$fields\": { [\"fn\"]: (yield* __ps$invoke(psExprInstantiateAtWorker$worker, replacement, fn, depth)), [\"arg\"]: (yield* __ps$invoke(psExprInstant"
+            },
+            {
+              "name": "psEnvironmentIndexFindWorker",
+              "bytes": 111,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psEnvironmentIndexFindWorker(fuel) { return __ps$run(__ps$impl$psEnvironmentIndexFindWorker(fuel)); }\n"
+            },
+            {
+              "name": "__ps$impl$psEnvironmentIndexFindWorker",
+              "bytes": 1949,
+              "generators": 5,
+              "delegated": 4,
+              "loop": true,
+              "snippet": "function* __ps$impl$psEnvironmentIndexFindWorker(fuel) { let __ps$tail$state = [fuel]; while (true) { const [fuel] = __ps$tail$state; if ((fuel === 0n)) { return ((index) => ((_hash) => ((__ps$match$0) => { switch (__ps$match$0[\"$ps$tag\"]) { case \"empty\": { return ({ \"$ps$tag\": \"nil\", \"$ps$fields\": {  } }); } case \"bucket\": { const declarations = __ps$match$0[\"$ps$fields\"][\"declarations\"]; return declarations; } case \"branch\": { const _wild0 = __ps$match$0[\"$ps$fields\"][\"left\"]; const _wild1 = __ps$match$0[\"$ps$fields\"][\"right\"]; return ({ \"$ps$tag\": \"nil\", \"$ps$fields\": {  } }); } } throw new Error(\"invalid ProofScript constructor tag\"); })(index))); } else { { const __ps$tail$value$4094 = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n); { const remaining = __ps$tail$value$4094; return __ps$wrap(function*(index) { return __ps$wrap(function*(hash) { return (yield* (function*() { const __ps$match$0 = index; switch (__ps$match$0[\"$ps$tag\"]) { case \"empty\": { return ({ \"$ps$tag\": \"nil\", \"$ps$fields\": {  } }); } case \"bucket\": { const _wild0 = __ps$match$0[\"$ps$fields\"][\"declarations\"]; return ({ \"$ps$tag\": \"nil\", \"$ps$fields\": {  } }); } case \"branch\": { const left = __ps$match$0[\"$ps$fields\"][\"left\"]; const right = __ps$match$0[\"$ps$fields\"][\"right\"]; return (yield* (function*(_psc1Condition_10) { return (_psc1Condition_10 ? (yield* __ps$tailInvoke(psEnvironmentIndexFindWorker$worker, remaining, left, ((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(hash, 2n))) : (yield* __ps$tailInvoke(psEnvironmentIndexFindWorker$worker, remaining, right, ((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(hash, 2n)))); })((((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(hash, 2n) === 0n))); } } throw new Error(\"invalid Pro"
+            },
+            {
+              "name": "psStringEqFromWithFuel$worker",
+              "bytes": 3088,
+              "generators": 0,
+              "delegated": 0,
+              "loop": true,
+              "snippet": "function psStringEqFromWithFuel$worker(fuel, __pscWorkerArg$0__________, __pscWorkerArg$1_________, __pscWorkerArg$2___, __pscWorkerArg$3__) { let __ps$viewToken$0; const __ps$view$0 = () => ((view) => { __ps$viewToken$0 = view.token; return view; })(__ps$utf8Known(__pscWorkerArg$0__________, __ps$viewToken$0)); let __ps$viewToken$1; const __ps$view$1 = () => ((view) => { __ps$viewToken$1 = view.token; return view; })(__ps$utf8Known(__pscWorkerArg$1_________, __ps$viewToken$1)); let __ps$tail$state = [fuel, __pscWorkerArg$0__________, __pscWorkerArg$1_________, __pscWorkerArg$2___, __pscWorkerArg$3__]; while (true) { const [fuel, __pscWorkerArg$0__________, __pscWorkerArg$1_________, __pscWorkerArg$2___, __pscWorkerArg$3__] = __ps$tail$state; if ((fuel === 0n)) { { const __ps$tail$value$4094 = __pscWorkerArg$0__________; { const _left = __ps$tail$value$4094; { const __ps$tail$value$4093 = __pscWorkerArg$1_________; { const _right = __ps$tail$value$4093; { const __ps$tail$value$4092 = __pscWorkerArg$2___; { const _leftPos = __ps$tail$value$4092; { const __ps$tail$value$4091 = __pscWorkerArg$3__; { const _rightPos = __ps$tail$value$4091; return false; } } } } } } } } } else { { const __ps$tail$value$4094 = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n); { const remaining = __ps$tail$value$4094; { const __ps$tail$value$4093 = __pscWorkerArg$0__________; { const left = __ps$tail$value$4093; { const __ps$tail$value$4092 = __pscWorkerArg$1_________; { const right = __ps$tail$value$4092; { const __ps$tail$value$4091 = __pscWorkerArg$2___; { const leftPos = __ps$tail$value$4091; { const __ps$tail$value$4090 = __pscWorkerArg$3__; { const rightPos = __ps$tail$value$4090; { const __ps$tail$value$4089 = ((__ps$view$position) => ((__ps$view$0())[\"size\"] <="
+            },
+            {
+              "name": "psNameEq$worker",
+              "bytes": 143,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psNameEq$worker(left, __pscWorkerArg$0___________) { return __ps$run(__ps$impl$psNameEq$worker(left, __pscWorkerArg$0___________)); }\n"
+            },
+            {
+              "name": "__ps$impl$psNameEq$worker",
+              "bytes": 2873,
+              "generators": 1,
+              "delegated": 3,
+              "loop": true,
+              "snippet": "function* __ps$impl$psNameEq$worker(left, __pscWorkerArg$0___________) { let __ps$tail$state = [left, __pscWorkerArg$0___________]; while (true) { const [left, __pscWorkerArg$0___________] = __ps$tail$state; const __ps$tail$match$0 = left; switch (__ps$tail$match$0[\"$ps$tag\"]) { case \"anonymous\": { { const __ps$tail$value$4094 = __pscWorkerArg$0___________; { const right = __ps$tail$value$4094; const __ps$tail$match$1 = right; switch (__ps$tail$match$1[\"$ps$tag\"]) { case \"anonymous\": { return true; } case \"str\": { const _wild0 = __ps$tail$match$1[\"$ps$fields\"][\"parent\"]; const _wild1 = __ps$tail$match$1[\"$ps$fields\"][\"value\"]; return false; } case \"num\": { const _wild0 = __ps$tail$match$1[\"$ps$fields\"][\"parent\"]; const _wild1 = __ps$tail$match$1[\"$ps$fields\"][\"value\"]; return false; } } throw new Error(\"invalid ProofScript constructor tag\"); } } } case \"str\": { const leftPrefix = __ps$tail$match$0[\"$ps$fields\"][\"parent\"]; const leftValue = __ps$tail$match$0[\"$ps$fields\"][\"value\"]; { const __ps$tail$value$4094 = __pscWorkerArg$0___________; { const right = __ps$tail$value$4094; const __ps$tail$match$1 = right; switch (__ps$tail$match$1[\"$ps$tag\"]) { case \"anonymous\": { return false; } case \"str\": { const rightPrefix = __ps$tail$match$1[\"$ps$fields\"][\"parent\"]; const rightValue = __ps$tail$match$1[\"$ps$fields\"][\"value\"]; { const __ps$tail$value$4092 = (yield* __ps$invoke(psNameEq$worker, leftPrefix, rightPrefix)); { const _psc1Condition_9 = __ps$tail$value$4092; if (_psc1Condition_9) { return (yield* __ps$tailInvoke(psStringEq, leftValue, rightValue)); } else { return false; } } } } case \"num\": { const _wild0 = __ps$tail$match$1[\"$ps$fields\"][\"parent\"]; const _wild1 = __ps$tail$match$1[\"$ps$fields\"][\"value\"]; return false; } } throw new Error(\"invalid ProofScript construc"
+            },
+            {
+              "name": "psExprInstantiateAtWorker$worker",
+              "bytes": 359,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psExprInstantiateAtWorker$worker(replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________) { return __ps$run(__ps$impl$psExprInstantiateAtWorker$worker(replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________)); }\n"
+            },
+            {
+              "name": "__ps$impl$psExprInstantiateAtWorker$worker",
+              "bytes": 6447,
+              "generators": 1,
+              "delegated": 11,
+              "loop": true,
+              "snippet": "function* __ps$impl$psExprInstantiateAtWorker$worker(replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________) { let __ps$tail$state = [replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________]; while (true) { const [replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________] = __ps$tail$state; const __ps$tail$match$0 = expr; switch (__ps$tail$match$0[\"$ps$tag\"]) { case \"bvar\": { const index = __ps$tail$match$0[\"$ps$fields\"][\"index\"]; { const __ps$tail$value$4094 = __pscWorkerArg$0_________________________________________________________________________________________; { const depth = __ps$tail$value$4094; { const __ps$tail$value$4093 = (index === depth); { const _psc1Condition_4 = __ps$tail$value$4093; if (_psc1Condition_4) { return (yield* __ps$tailInvoke(psExprLiftBVars, depth, 0n, replacement)); } else { { const __ps$tail$value$4091 = (depth < index); { const _psc1Condition_5 = __ps$tail$value$4091; if (_psc1Condition_5) { return ({ \"$ps$tag\": \"bvar\", \"$ps$fields\": { [\"index\"]: ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(index, 1n) } }); } else { return ({ \"$ps$tag\": \"bvar\", \"$ps$fields\": { [\"index\"]: index } }); } } } } } } } } } case \"fvar\": { const id = __ps$tail$match$0[\"$ps$fields\"][\"id\"]; { const __ps$tail$value$4094 = __pscWorkerArg$0_________________________________________________________________________________________; { const depth = __ps$tail$value$4094; return ({ \"$ps$tag\": \"fvar\", \"$ps$fields\": { [\"id\"]: id } }); } } } case \"mvar\": { const id = __ps$tail$match$0[\"$ps$fields\"][\"id\"]; { const __ps$tail$value$4094 = __pscWorkerArg$0___"
+            },
+            {
+              "name": "psEnvironmentIndexFindWorker$worker",
+              "bytes": 2955,
+              "generators": 0,
+              "delegated": 0,
+              "loop": true,
+              "snippet": "function psEnvironmentIndexFindWorker$worker(fuel, __pscWorkerArg$0______________________________________________________________________________________________, __pscWorkerArg$1___________________________________________________________) { let __ps$tail$state = [fuel, __pscWorkerArg$0______________________________________________________________________________________________, __pscWorkerArg$1___________________________________________________________]; while (true) { const [fuel, __pscWorkerArg$0______________________________________________________________________________________________, __pscWorkerArg$1___________________________________________________________] = __ps$tail$state; if ((fuel === 0n)) { { const __ps$tail$value$4094 = __pscWorkerArg$0______________________________________________________________________________________________; { const index = __ps$tail$value$4094; { const __ps$tail$value$4093 = __pscWorkerArg$1___________________________________________________________; { const _hash = __ps$tail$value$4093; const __ps$tail$match$0 = index; switch (__ps$tail$match$0[\"$ps$tag\"]) { case \"empty\": { return ({ \"$ps$tag\": \"nil\", \"$ps$fields\": {  } }); } case \"bucket\": { const declarations = __ps$tail$match$0[\"$ps$fields\"][\"declarations\"]; return declarations; } case \"branch\": { const _wild0 = __ps$tail$match$0[\"$ps$fields\"][\"left\"]; const _wild1 = __ps$tail$match$0[\"$ps$fields\"][\"right\"]; return ({ \"$ps$tag\": \"nil\", \"$ps$fields\": {  } }); } } throw new Error(\"invalid ProofScript constructor tag\"); } } } } } else { { const __ps$tail$value$4094 = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n); { const remaining = __ps$tail$value$4094; { const __ps$tail$value$4093 = __pscWorkerArg$0__________________________________________________"
+            }
+          ]
+        },
+        {
+          "target": "ts",
+          "runId": 39993829327,
+          "sourceModules": 85,
+          "sourceClosureDigest": "18974a044859075ab16165cfecd3d05a817074806d9c091ab3a26b9cf30faa28",
+          "artifactSha256": "ded61a930d23c4188123262fceb91ccb8722fcaaacc71a6cd93c1754debba1a8",
+          "sourceSha256": "1b20d433f3d6ac0536f8abdd7abe701b4787972c7bf6f48a685bd452fe0010d9",
+          "executableSha256": "0f749f57420d8be2353ef53f30fe48e222367a369c1159d70c8b5d2dca748fb2",
+          "executableBytes": 11120678,
+          "generators": 9404,
+          "generatorIifes": 4286,
+          "invokeSites": 12153,
+          "tailSites": 3613,
+          "directDriverSites": 0,
+          "loops": 2163,
+          "lazyGetters": 6,
+          "nestedFieldLoads": 0,
+          "selected": [
+            {
+              "name": "psStringEqFromWithFuel",
+              "bytes": 99,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psStringEqFromWithFuel(fuel) { return __ps$run(__ps$impl$psStringEqFromWithFuel(fuel)); }\n"
+            },
+            {
+              "name": "__ps$impl$psStringEqFromWithFuel",
+              "bytes": 2004,
+              "generators": 12,
+              "delegated": 4,
+              "loop": true,
+              "snippet": "function* __ps$impl$psStringEqFromWithFuel(fuel) { let __ps$loop$args$0 = [fuel]; while (true) {\n    const [fuel] = __ps$loop$args$0;\n    if (((fuel) === (0n))) {\n        return __ps$wrap(function* (_left) { return __ps$wrap(function* (_right) { return __ps$wrap(function* (_leftPos) { return __ps$wrap(function* (_rightPos) { return false; }); }); }); });\n    }\n    else {\n        {\n            const remaining = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n);\n            return __ps$wrap(function* (left) { return __ps$wrap(function* (right) { return __ps$wrap(function* (leftPos) { return __ps$wrap(function* (rightPos) { return (yield* (function* () { {\n                const _psc1Condition_8 = ((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(left, leftPos);\n                return (_psc1Condition_8 ? ((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(right, rightPos) : (yield* (function* () { {\n                    const _psc1Condition_9 = ((__ps_s, __ps_p) => (__ps_p >= __ps$utf8(__ps_s).size))(right, rightPos);\n                    return (_psc1Condition_9 ? false : (yield* (function* () { {\n                        const leftChar = __ps$stringGet(left, leftPos);\n                        {\n                            const rightChar = __ps$stringGet(right, rightPos);\n                            {\n                                const _psc1Condition_12 = ((((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(leftChar)) === (((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(rightChar)));\n                                return (_psc1Condition_12 ? (yield* __ps$tail(psStringEqFromWithFuel$worker, remaining, left, right, __ps$stringNext(left, leftPos), __ps$stringNext(right, rightPos))) : false);\n                            }\n                   "
+            },
+            {
+              "name": "psStringEq",
+              "bytes": 89,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psStringEq(left, right) { return __ps$run(__ps$impl$psStringEq(left, right)); }\n"
+            },
+            {
+              "name": "__ps$impl$psStringEq",
+              "bytes": 485,
+              "generators": 1,
+              "delegated": 1,
+              "loop": true,
+              "snippet": "function* __ps$impl$psStringEq(left, right) { let __ps$loop$args$0 = [left, right]; while (true) {\n    const [left, right] = __ps$loop$args$0;\n    {\n        const _psc1Condition_2 = ((__ps$stringUtf8Size(left)) === (__ps$stringUtf8Size(right)));\n        if (_psc1Condition_2) {\n            return (yield* __ps$tail(psStringEqFrom, left, right, 0n, 0n));\n        }\n        else {\n            return false;\n        }\n    }\n} }\n__ps$implementations.set(psStringEq, __ps$impl$psStringEq);\n"
+            },
+            {
+              "name": "psNameEq",
+              "bytes": 71,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psNameEq(left) { return __ps$run(__ps$impl$psNameEq(left)); }\n"
+            },
+            {
+              "name": "__ps$impl$psNameEq",
+              "bytes": 3394,
+              "generators": 9,
+              "delegated": 8,
+              "loop": true,
+              "snippet": "function* __ps$impl$psNameEq(left) { let __ps$loop$args$0 = [left]; while (true) {\n    const [left] = __ps$loop$args$0;\n    {\n        const __ps$match$0 = left;\n        switch (__ps$match$0[__ps$tag$2]) {\n            case \"anonymous\": {\n                return __ps$wrap(function* (right) { return (yield* (function* () { const __ps$match$0 = right; switch (__ps$match$0[__ps$tag$2]) {\n                    case \"anonymous\": return true;\n                    case \"str\": {\n                        const _wild0 = __ps$match$0.parent;\n                        const _wild1 = __ps$match$0.value;\n                        return false;\n                    }\n                    case \"num\": {\n                        const _wild0 = __ps$match$0.parent;\n                        const _wild1 = __ps$match$0.value;\n                        return false;\n                    }\n                } throw new Error(\"invalid ProofScript constructor tag\"); })()); });\n            }\n            case \"str\": {\n                const leftPrefix = __ps$match$0.parent;\n                const leftValue = __ps$match$0.value;\n                return __ps$wrap(function* (right) { return (yield* (function* () { const __ps$match$0 = right; switch (__ps$match$0[__ps$tag$2]) {\n                    case \"anonymous\": return false;\n                    case \"str\": {\n                        const rightPrefix = __ps$match$0.parent;\n                        const rightValue = __ps$match$0.value;\n                        return (yield* (function* () { {\n                            const _psc1Condition_9 = (yield* __ps$invoke(psNameEq$worker, leftPrefix, rightPrefix));\n                            return (_psc1Condition_9 ? (yield* __ps$tail(psStringEq, leftValue, rightValue)) : false);\n                        } })());\n               "
+            },
+            {
+              "name": "psExprInstantiateAtWorker",
+              "bytes": 131,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psExprInstantiateAtWorker(replacement, expr) { return __ps$run(__ps$impl$psExprInstantiateAtWorker(replacement, expr)); }\n"
+            },
+            {
+              "name": "__ps$impl$psExprInstantiateAtWorker",
+              "bytes": 4378,
+              "generators": 14,
+              "delegated": 13,
+              "loop": true,
+              "snippet": "function* __ps$impl$psExprInstantiateAtWorker(replacement, expr) { let __ps$loop$args$0 = [replacement, expr]; while (true) {\n    const [replacement, expr] = __ps$loop$args$0;\n    {\n        const __ps$match$0 = expr;\n        switch (__ps$match$0[__ps$tag$21]) {\n            case \"bvar\": {\n                const index = __ps$match$0.index;\n                return __ps$wrap(function* (depth) { return (yield* (function* () { {\n                    const _psc1Condition_4 = ((index) === (depth));\n                    return (_psc1Condition_4 ? (yield* __ps$tail(psExprLiftBVars, depth, 0n, replacement)) : (yield* (function* () { {\n                        const _psc1Condition_5 = (depth < index);\n                        return (_psc1Condition_5 ? PsExpr[\"bvar\"](((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(index, 1n)) : PsExpr[\"bvar\"](index));\n                    } })()));\n                } })()); });\n            }\n            case \"fvar\": {\n                const id = __ps$match$0.id;\n                return __ps$wrap(function* (depth) { return PsExpr[\"fvar\"](id); });\n            }\n            case \"mvar\": {\n                const id = __ps$match$0.id;\n                return __ps$wrap(function* (depth) { return PsExpr[\"mvar\"](id); });\n            }\n            case \"sortE\": {\n                const level = __ps$match$0.level;\n                return __ps$wrap(function* (depth) { return PsExpr[\"sortE\"](level); });\n            }\n            case \"constE\": {\n                const name = __ps$match$0.name;\n                const levels = __ps$match$0.levels;\n                return __ps$wrap(function* (depth) { return PsExpr[\"constE\"](name, levels); });\n            }\n            case \"app\": {\n                const fn = __ps$match$0.fn;\n                const arg = __ps$match"
+            },
+            {
+              "name": "psEnvironmentIndexFindWorker",
+              "bytes": 111,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psEnvironmentIndexFindWorker(fuel) { return __ps$run(__ps$impl$psEnvironmentIndexFindWorker(fuel)); }\n"
+            },
+            {
+              "name": "__ps$impl$psEnvironmentIndexFindWorker",
+              "bytes": 2324,
+              "generators": 8,
+              "delegated": 5,
+              "loop": true,
+              "snippet": "function* __ps$impl$psEnvironmentIndexFindWorker(fuel) { let __ps$loop$args$0 = [fuel]; while (true) {\n    const [fuel] = __ps$loop$args$0;\n    if (((fuel) === (0n))) {\n        return __ps$wrap(function* (index) { return __ps$wrap(function* (_hash) { return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$23]) {\n            case \"empty\": return List$spec$N$PsDeclaration[\"nil\"];\n            case \"bucket\": {\n                const declarations = __ps$match$0.declarations;\n                return declarations;\n            }\n            case \"branch\": {\n                const _wild0 = __ps$match$0.left;\n                const _wild1 = __ps$match$0.right;\n                return List$spec$N$PsDeclaration[\"nil\"];\n            }\n        } throw new Error(\"invalid ProofScript constructor tag\"); })()); }); });\n    }\n    else {\n        {\n            const remaining = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n);\n            return __ps$wrap(function* (index) { return __ps$wrap(function* (hash) { return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$23]) {\n                case \"empty\": return List$spec$N$PsDeclaration[\"nil\"];\n                case \"bucket\": {\n                    const _wild0 = __ps$match$0.declarations;\n                    return List$spec$N$PsDeclaration[\"nil\"];\n                }\n                case \"branch\": {\n                    const left = __ps$match$0.left;\n                    const right = __ps$match$0.right;\n                    return (yield* (function* () { {\n                        const _psc1Condition_10 = ((((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(hash, 2n)) === (0n));\n                        return (_psc1Condition_10 ? (yield* __ps$tail(p"
+            },
+            {
+              "name": "psStringEqFromWithFuel$worker",
+              "bytes": 3870,
+              "generators": 0,
+              "delegated": 0,
+              "loop": true,
+              "snippet": "function psStringEqFromWithFuel$worker(fuel, __pscWorkerArg$0__________, __pscWorkerArg$1_________, __pscWorkerArg$2___, __pscWorkerArg$3__) { let __ps$viewToken$0; const __ps$view$0 = () => ((view) => { __ps$viewToken$0 = view.token; return view; })(__ps$utf8Known(__pscWorkerArg$0__________, __ps$viewToken$0)); let __ps$viewToken$1; const __ps$view$1 = () => ((view) => { __ps$viewToken$1 = view.token; return view; })(__ps$utf8Known(__pscWorkerArg$1_________, __ps$viewToken$1)); while (true) {\n    if (((fuel) === (0n))) {\n        {\n            const _left = __pscWorkerArg$0__________;\n            {\n                const _right = __pscWorkerArg$1_________;\n                {\n                    const _leftPos = __pscWorkerArg$2___;\n                    {\n                        const _rightPos = __pscWorkerArg$3__;\n                        return false;\n                    }\n                }\n            }\n        }\n    }\n    else {\n        {\n            const remaining = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n);\n            {\n                const left = __pscWorkerArg$0__________;\n                {\n                    const right = __pscWorkerArg$1_________;\n                    {\n                        const leftPos = __pscWorkerArg$2___;\n                        {\n                            const rightPos = __pscWorkerArg$3__;\n                            {\n                                const _psc1Condition_8 = ((__ps_p) => __ps_p >= __ps$view$0().size)(leftPos);\n                                if (_psc1Condition_8) {\n                                    return ((__ps_p) => __ps_p >= __ps$view$1().size)(rightPos);\n                                }\n                                else {\n                                    {\n              "
+            },
+            {
+              "name": "psNameEq$worker",
+              "bytes": 143,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psNameEq$worker(left, __pscWorkerArg$0___________) { return __ps$run(__ps$impl$psNameEq$worker(left, __pscWorkerArg$0___________)); }\n"
+            },
+            {
+              "name": "__ps$impl$psNameEq$worker",
+              "bytes": 4730,
+              "generators": 1,
+              "delegated": 3,
+              "loop": true,
+              "snippet": "function* __ps$impl$psNameEq$worker(left, __pscWorkerArg$0___________) { let __ps$loop$args$0 = [left, __pscWorkerArg$0___________]; while (true) {\n    const [left, __pscWorkerArg$0___________] = __ps$loop$args$0;\n    {\n        const __ps$match$0 = left;\n        switch (__ps$match$0[__ps$tag$2]) {\n            case \"anonymous\": {\n                {\n                    const right = __pscWorkerArg$0___________;\n                    {\n                        const __ps$match$0 = right;\n                        switch (__ps$match$0[__ps$tag$2]) {\n                            case \"anonymous\": {\n                                return true;\n                            }\n                            case \"str\": {\n                                const _wild0 = __ps$match$0.parent;\n                                const _wild1 = __ps$match$0.value;\n                                return false;\n                            }\n                            case \"num\": {\n                                const _wild0 = __ps$match$0.parent;\n                                const _wild1 = __ps$match$0.value;\n                                return false;\n                            }\n                        }\n                        throw new Error(\"invalid ProofScript constructor tag\");\n                    }\n                }\n            }\n            case \"str\": {\n                const leftPrefix = __ps$match$0.parent;\n                const leftValue = __ps$match$0.value;\n                {\n                    const right = __pscWorkerArg$0___________;\n                    {\n                        const __ps$match$0 = right;\n                        switch (__ps$match$0[__ps$tag$2]) {\n                            case \"anonymous\": {\n                                return false;\n                    "
+            },
+            {
+              "name": "psExprInstantiateAtWorker$worker",
+              "bytes": 359,
+              "generators": 0,
+              "delegated": 0,
+              "loop": false,
+              "snippet": "function psExprInstantiateAtWorker$worker(replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________) { return __ps$run(__ps$impl$psExprInstantiateAtWorker$worker(replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________)); }\n"
+            },
+            {
+              "name": "__ps$impl$psExprInstantiateAtWorker$worker",
+              "bytes": 6556,
+              "generators": 1,
+              "delegated": 11,
+              "loop": true,
+              "snippet": "function* __ps$impl$psExprInstantiateAtWorker$worker(replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________) { let __ps$loop$args$0 = [replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________]; while (true) {\n    const [replacement, expr, __pscWorkerArg$0_________________________________________________________________________________________] = __ps$loop$args$0;\n    {\n        const __ps$match$0 = expr;\n        switch (__ps$match$0[__ps$tag$21]) {\n            case \"bvar\": {\n                const index = __ps$match$0.index;\n                {\n                    const depth = __pscWorkerArg$0_________________________________________________________________________________________;\n                    {\n                        const _psc1Condition_4 = ((index) === (depth));\n                        if (_psc1Condition_4) {\n                            return (yield* __ps$tail(psExprLiftBVars, depth, 0n, replacement));\n                        }\n                        else {\n                            {\n                                const _psc1Condition_5 = (depth < index);\n                                if (_psc1Condition_5) {\n                                    return PsExpr[\"bvar\"](((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(index, 1n));\n                                }\n                                else {\n                                    return PsExpr[\"bvar\"](index);\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n            case \"fvar\": {\n                const id = __ps$match$0.id;\n                {\n            "
+            },
+            {
+              "name": "psEnvironmentIndexFindWorker$worker",
+              "bytes": 3869,
+              "generators": 0,
+              "delegated": 0,
+              "loop": true,
+              "snippet": "function psEnvironmentIndexFindWorker$worker(fuel, __pscWorkerArg$0______________________________________________________________________________________________, __pscWorkerArg$1___________________________________________________________) { while (true) {\n    if (((fuel) === (0n))) {\n        {\n            const index = __pscWorkerArg$0______________________________________________________________________________________________;\n            {\n                const _hash = __pscWorkerArg$1___________________________________________________________;\n                {\n                    const __ps$match$0 = index;\n                    switch (__ps$match$0[__ps$tag$23]) {\n                        case \"empty\": {\n                            return List$spec$N$PsDeclaration[\"nil\"];\n                        }\n                        case \"bucket\": {\n                            const declarations = __ps$match$0.declarations;\n                            return declarations;\n                        }\n                        case \"branch\": {\n                            const _wild0 = __ps$match$0.left;\n                            const _wild1 = __ps$match$0.right;\n                            return List$spec$N$PsDeclaration[\"nil\"];\n                        }\n                    }\n                    throw new Error(\"invalid ProofScript constructor tag\");\n                }\n            }\n        }\n    }\n    else {\n        {\n            const remaining = ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(fuel, 1n);\n            {\n                const index = __pscWorkerArg$0______________________________________________________________________________________________;\n                {\n                    const hash = __pscWorkerArg$1_______________________________________"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }

@@ -38,6 +38,23 @@ the native UInt8 surface is a carrier adapter. Internal raw float-bit metadata
 is bounded Nat with explicit32/64-bit target validation. This does not admit
 floating source operations or previously refused machine-scalar source IR.
 
+## Retained artifact comparison boundary
+
+Read-only Linux40035257537 validates exact archived JS40027650302 and qualified
+TS39993829327 source/artifact/closure identities. No compiler executes in this
+audit. JS has8,429 generator functions/3,889 generator IIFEs; qualified TS has
+9,404/4,286. Common generated instantiate/name/equality workers have broadly
+similar loop/driver shapes. Fewer generator sites alone is therefore not a
+performance qualification or a sufficient diagnosis of the JS deadline.
+
+The older JS executable is7,257,030 bytes with23,473 nested constructor-field
+loads; TS executable is11,120,678 bytes with flat, type-tagged constructor fields.
+These are different target closures and source snapshots, not a matched speed
+benchmark. Retain the current representation and existing ABI pending measured
+causality. Actual CPU evidence—not counts or file size—justifies the bounded
+UTF8 views and direct driver dispatch already under execution. Avoid a second
+compiler implementation or speculative representation rewrite.
+
 ## Patterns learned from actual generated compiler workloads
 
 | Defect class | Mechanism and evidence | Required safeguard |

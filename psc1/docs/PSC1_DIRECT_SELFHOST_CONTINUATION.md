@@ -16,7 +16,7 @@ The preserved review branch is work/psc1-direct-selfhost-blockers-20261024,
 draft PR175, based on draft PR174/integrationafed7c4b. Do not cancel existing
 qualifications or infer success from elapsed job time.
 
-Snapshot as of2026-10-23 22:39UTC (re-query before acting):
+Snapshot as of2026-10-23 22:44UTC (re-query before acting):
 - Childc115c65732ea1bf78aba263658e9ab804e116822 fixes the main Wasm
   lower-expression prefix. Focused40034701526/job120691199253 PASSED:
   52 all-input prefix equalities;464 owned Wasm definitions scanned with no
@@ -42,8 +42,13 @@ Snapshot as of2026-10-23 22:39UTC (re-query before acting):
 - Preserved parent85433830/full40027662328 PASSED37/37,all seven/both
   grammars/apps/packages,tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
   Changed compiler source requires its own full qualification.
-- Next request selects onlyWasm on the latest child after this passing gate.
-  Check the remote manifest/run first: it may already have been dispatched.
+- Actual Wasm requeste5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24,
+  parent699f84948ff70273e5ab9a7c5c0273316df23e66, run40035031327,
+  job120692435799 is executing generations. Request and all source/runtime
+  gates passed. Do not duplicate this or JS40033515365.
+- Read-only40035257537 compares retained JS and qualified TS compiler artifacts:
+  TS has more generator/IIFE sites despite qualifying. Counts are not a speed
+  benchmark; preserve representation pending measured evidence.
 - Neither direct target has a terminal qualifiedG2/G3 fixed point yet.
 
 1. Re-query the actual JS run, latest child Wasm request/run and review full CI. If still active, continue waiting without

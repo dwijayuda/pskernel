@@ -984,7 +984,8 @@ def psTsViewTailContextWithFuel (brands tags : List (Prod String String)) (decla
   | Nat.zero => fun (_views : List (String × String)) (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
   | Nat.succ remaining =>
       fun (views : List (String × String)) (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
-        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsViewTailContextWithFuel brands tags declaration generated remaining views;
+        let recurse : List (String × String) -> List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsViewTailContextWithFuel brands tags declaration generated remaining;
+        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := recurse views;
         let emitPure : PsVerifiedIrExpr -> Option String := psTsViewTailValue views generated brands tags aliases Option.none false;
         match expr with
         | PsVerifiedIrExpr.call fn types arguments =>
@@ -1020,7 +1021,7 @@ def psTsViewTailContextWithFuel (brands tags : List (Prod String String)) (decla
                       match psTsEmitType type with
                       | Except.error _ => Option.none
                       | Except.ok printedType =>
-                          match psTsViewTailContextWithFuel brands tags declaration generated remaining (psTsViewAlias views name value) aliases body with
+                          match recurse (psTsViewAlias views name value) aliases body with
                           | Option.none => Option.none
                           | Option.some printedBody => Option.some (psTsJoin "" ["{ const ", name, ": ", printedType,
                               " = ", printedValue, "; ", printedBody, " }"])

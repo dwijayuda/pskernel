@@ -91,6 +91,7 @@ jobs:
           .lake/build/bin/psc1_js_statement_tests
           node scripts/js-statement-tests.mjs
       - name: Census both complete owned backend closures in both grammars
+        if: always()
         run: |
           set +e
           node scripts/generated-target-source-audit.mjs js

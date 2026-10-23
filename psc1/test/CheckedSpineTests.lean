@@ -63,10 +63,10 @@ private theorem normalize_acc_eq (wrappers : List (Prod PsName PsDeclaration)) (
         simp only [psCheckedNestedNormalizeAcc, CheckedSpineReference.psCheckedNestedNormalize,
           checked_find_eq]
       all_goals
-        simp only [ih, List.reverse_cons, List.append_assoc, List.singleton_append]
-        first
-        | rfl
-        | (split <;> simp_all [ih, List.reverse_cons, List.append_assoc])
+        simp only [ih, List.reverse_cons, List.append_assoc, List.singleton_append] <;>
+          first
+          | rfl
+          | (split <;> simp_all [ih, List.reverse_cons, List.append_assoc])
 
 theorem checked_normalize_eq (wrappers : List (Prod PsName PsDeclaration)) (declarations : List PsDeclaration) :
     psCheckedNestedNormalize wrappers declarations =

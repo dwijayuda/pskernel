@@ -1,0 +1,27 @@
+{
+  "schema": "psc1-t01f-two-transition-native-elaboration-failure-v1",
+  "source": "b4d6b6825fb06ded08a6dffab8c74985ccf4545c",
+  "tree": "5efde33239bc247426ab234d08ed8c799d8b8c4f",
+  "runId": 39894299060,
+  "jobId": 120221028037,
+  "conclusion": "failure",
+  "errors": [
+    "test/PsKernelScalarHashWorkerRegression.lean:59:8: error: failed to elaborate eliminator, expected type is not available",
+    "test/PsKernelScalarHashWorkerRegression.lean:60:8: error: No goals to be solved",
+    "'PsKernelScalarHashWorkerRegression.state_eq_before' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]",
+    "'PsKernelScalarHashWorkerRegression.state_succ' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]",
+    " sorryAx,",
+    "'PsKernelScalarHashWorkerRegression.state_fixed' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]",
+    "'PsKernelScalarHashWorkerRegression.scan_eq_before' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]",
+    " sorryAx,",
+    "'PsKernelScalarHashWorkerRegression.hash_eq_before' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]"
+  ],
+  "generated": "skipped",
+  "qualification": false,
+  "artifact": {
+    "id": 12475199710,
+    "bytes": 405,
+    "sha256": "2c31e5a0cbe905b4c1d7ffee94b53d0bef8929f2a7de4d306a60b0a478eb9698"
+  },
+  "correction": "Supply explicit Nat.strongRecOn motive; production recurrence/statements/matrix/limits unchanged. Re-run native first. No theorem from failed elaboration is qualified."
+}

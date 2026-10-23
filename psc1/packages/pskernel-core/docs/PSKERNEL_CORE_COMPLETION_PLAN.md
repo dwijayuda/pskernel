@@ -1,3 +1,28 @@
+## Native proof elaboration correction afterb4d6
+
+Candidateb4d6b6825fb06ded08a6dffab8c74985ccf4545c/run39894299060:
+native120221028037 FAIL at new state_eq_before induction elaboration
+(failed to elaborate eliminator,expected type unavailable,then no goals).
+Consequent sorryAx reports are FAILED elaboration artifacts and are NOT
+accepted proofs. Native-first dependency correctly SKIPPED generated build
+and all runtime jobs. Source checker/retained controls built,but no new
+equivalence,finite-matrix or fullString qualification exists.
+Artifact12475199710/405bytes/SHA256
+2c31e5a0cbe905b4c1d7ffee94b53d0bef8929f2a7de4d306a60b0a478eb9698.
+Evidence:2026-10-23-t01f-two-transition-native-elaboration-failure.json.
+
+This source adds the explicit Nat.strongRecOn motive in that proof.
+Production implementation,the seven theorem statements,frozen19fb worker,
+all matrices/negatives/owners/sessions/resource limits and bounded-codegen
+criterion are unchanged. Run the native-first narrow workflow at this exact
+new source; never inheritb4d6 or61deda results. No full trigger activation.
+One next task: obtain new-source native proof success,then exact bounded
+generated shape/value gate,then whole mixed preflight. If a gate fails,fix it
+before expensive downstream work. Allfullqualification requirements below
+remain; noT05 yet,integration123c411 unchanged.
+
+---
+
 ## Current candidate: two transitions per data-iterator descent; unqualified
 
 Exact61deda whole mixed TIMEOUT is preserved below and in

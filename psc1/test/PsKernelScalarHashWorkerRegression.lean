@@ -56,7 +56,11 @@ def stringHashStateBefore (fuel : Nat) (value : String)
 theorem state_eq_before (fuel : Nat) (value : String) (initial : Prod Nat Nat) :
     psKernelCacheStringHashStateWithFuel fuel value initial =
       stringHashStateBefore fuel value initial := by
-  apply Nat.strongRecOn fuel
+  refine Nat.strongRecOn
+    (motive := fun count =>
+      psKernelCacheStringHashStateWithFuel count value initial =
+        stringHashStateBefore count value initial)
+    fuel ?_
   intro count ih
   cases count with
   | zero => rfl

@@ -1,6 +1,6 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/2",
-  "id": "ts-text-lookup-visitor-correctness-20261023-1792771740065",
+  "id": "ts-immutable-generator-captures-correctness-20261023-1792775824896",
   "action": "qualify-independent-G1-G2-G3",
   "branch": "perf/psc1-erasure-applied-workers-20261023",
   "targets": [
@@ -10,5 +10,5 @@
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "parentCommit": "3ac0455908b085458192d74585c871e665e06675"
+  "parentCommit": "748fd5fdbd019fda7993ce0303d966f4c3ddcc64"
 }

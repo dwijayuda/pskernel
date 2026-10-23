@@ -1,11 +1,11 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
-  "id": "psc1-ts-utf8-token-performance-20261023-1792758160024",
+  "id": "psc1-ts-size-extract-performance-20261023-1792761491090",
   "action": "qualify-independent-G1-G2-G3",
-  "branch": "perf/psc1-ts-utf8-view-tokens-20261023",
+  "branch": "perf/psc1-ts-utf8-size-extract-20261023",
   "targets": [
     "ts"
   ],
   "resourcePolicy": "unchanged",
-  "parentCommit": "27f2a2164560089d530d6b6b9d8cdbc4754d162a"
+  "parentCommit": "3dd9152a675468980c1d603aa707287ff1c9b4ac"
 }

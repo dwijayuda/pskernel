@@ -86,8 +86,26 @@ for(const expected of request.attempts) {
   ['psJsonCharNeedsEscape','psBridgeFindConstructor','psBridgeFindRegularHeightInBucket','psBridgeHeightBucket'].some(n=>
    r.text.includes('const __ps$impl$'+n+' ')||r.text.includes('function '+n+'(')||r.text.includes('function* '+n+'(')))
   .slice(0,24).map(r=>({...r,text:r.text.slice(0,4000)}));
- const runtimeReceipts=files.filter(f=>f.endsWith('/ts-utf8-cache/receipt.json')).map(f=>JSON.parse(fs.readFileSync(f)));
- const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
+ const runtimeReceipts=files.filter(f=>f.endsWith('/ts-utf8-cache/receipt.json')||f.endsWith('/ts-utf8-views/receipt.json')).map(f=>JSON.parse(fs.readFileSync(f)));
+ const tokenWorkers=[];
+ if(expected.inspectUtf8TokenWorker){
+  assert.equal(expected.target,'ts');
+  for(const generation of report.generations){
+   const file=path.join(directory,'G'+generation.generation+'-service','module.js');
+   const source=fs.readFileSync(file,'utf8'),start=source.indexOf('function psStringEqFromWithFuel$worker(');
+   assert.ok(start>=0);
+   const next=source.indexOf('\nfunction ',start+10);
+   const body=source.slice(start,next<0?source.length:next);
+   assert.ok(body.includes('__ps$utf8Known('));
+   assert.ok(body.includes('__ps$stringGetView(')&&body.includes('__ps$stringNextView('));
+   assert.equal(body.includes('__ps$utf8('),false);
+   const tokens=(body.match(/let __ps\$viewToken\$/g)||[]).length;
+   assert.equal(tokens,2);
+   tokenWorkers.push({generation:generation.generation,tokens,directCacheKeyLookups:0,
+    startLine:source.slice(0,start).split('\n').length,sourceSha256:sha(body),body});
+  }
+ }
+ const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);
  console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));

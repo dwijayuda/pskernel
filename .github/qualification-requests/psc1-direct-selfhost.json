@@ -1,14 +1,15 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
   "branch": "work/psc1-direct-selfhost-blockers-20261024",
-  "parentCommit": "c8ccd7776bd139a3864fa4f1a6ca93ef9601ff7e",
+  "parentCommit": "82b270632beb1df34b65605877eeec3bf940f232",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
+    "js",
     "wasm-core"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "c8ccd777 normalizes all30 diagnosed unqualified bit-metadata findings; complete proof/runtime/source gate40017933708 passed; preserve scalar/float refusals and execute actual generations."
+  "reason": "82b27063 Linux gate40020188747 passed48 all-input recursive-prefix equalities, huge-fuel cases,780 native/reference JS statement comparisons,7540 runtime cases, owned Wasm engine/carrier tests and87/98-module census in both grammars; execute independent target generations and fixed points."
 }

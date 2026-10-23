@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 21:54:00 UTC",
+  "recordedAtUtc": "2026-10-23 22:10:00 UTC",
   "localDate": "2026-10-24",
-  "status": "actual-direct-generations-and-parent-full-ci-running",
+  "status": "foundation-proofs-runtime-source-passed-actual-fixed-points-blocked",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -148,6 +148,27 @@
           ]
         },
         "stringEqualAllTicksPercent": 33.9
+      },
+      "latestCpuDiagnosis": {
+        "runId": 40031550466,
+        "status": "in_progress",
+        "qualification": false,
+        "source": {
+          "schema": "psc1-direct-generated-profile-request/1",
+          "runId": 40027650302,
+          "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
+          "sourceCommit": "949d687b8977bb1fec3697293818f6d9d07f92a4",
+          "artifactId": 12535705338,
+          "artifactDigest": "sha256:d4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e",
+          "target": "js",
+          "requestId": "G2-self",
+          "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31",
+          "serviceSha256": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
+          "requestSha256": "b76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d",
+          "purpose": "Profile exact retained lazy-view G1 compiler on its real failed G2 request; verify actual emitted optimization shape; no qualification/resource changes.",
+          "attempt": 4
+        },
+        "emissionShapeAudit": true
       }
     },
     "wasm": {
@@ -191,20 +212,19 @@
     }
   },
   "focusedGate": {
-    "commit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
-    "branch": "work/psc1-direct-selfhost-spines2-20261024",
-    "runId": 40028430603,
-    "jobId": 120670363952,
+    "commit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5",
+    "productionCommit": "9530b5ee47d85a7d40a54a1b9b999d91080406d8",
+    "runId": 40031387906,
+    "jobId": 120680537575,
     "status": "passed",
-    "genericRightFoldEquality": true,
-    "completeErasureIndexApiEqualities": 3,
-    "prefixEqualities": 51,
+    "foundationApiEqualities": 6,
+    "foundationSmokeSize": 100000,
+    "erasureIndexApiEqualities": 3,
+    "genericErasureFoldEquality": true,
     "checkedSpineEqualities": 3,
     "ordinaryWorkerEquality": true,
+    "prefixEqualities": 51,
     "containsSorry": false,
-    "largeDeclarationSmoke": 10000,
-    "jsLazyViewComparisons": 10584,
-    "nativeStringPairs": 49,
     "sourceCensus": {
       "js": 87,
       "wasm": 98,
@@ -214,17 +234,12 @@
       ],
       "refused": []
     },
-    "ownedWasmEngine": true,
-    "allPriorRegressionGates": "passed"
+    "allPriorRuntimeAndRefusalGates": "passed"
   },
   "currentAttempt": {
-    "target": "js",
-    "sourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
-    "requestParent": "949d687b8977bb1fec3697293818f6d9d07f92a4",
-    "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
-    "runId": 40027650302,
-    "status": "in_progress",
-    "fixedPoint": "not-yet-established"
+    "status": "no-active-generation-request-after-terminal-failures",
+    "nextTarget": "wasm-core",
+    "nextSourceCommit": "472f8def90a98c55b130e81d5700be9c2f2ccbe5"
   },
   "integrationCheckpoint": {
     "pullRequest": 174,
@@ -551,6 +566,92 @@
           "digest": "sha256:a5c8d1a582b5a85b8583183b2174805f072b1e9eb7a595e5d6ee96e773e92d6e"
         }
       ]
+    },
+    {
+      "runId": 40027650302,
+      "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
+      "target": "js",
+      "status": "failed",
+      "report": {
+        "target": "js",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20\",\"requestSha256\":\"b76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":3132516,\"peakTreeRssKiB\":3132516,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800227,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
+            "startedAt": "2026-10-23T21:35:50.217Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20\",\"requestSha256\":\"b76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":3132516,\"peakTreeRssKiB\":3132516,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800227,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+            "completedAt": "2026-10-23T22:05:51.220Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12535705338,
+          "digest": "sha256:d4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e"
+        }
+      ]
+    },
+    {
+      "runId": 40028857732,
+      "requestCommit": "bef0e260a062f89981af514480d9bd7414047d97",
+      "target": "wasm-core",
+      "status": "failed",
+      "report": {
+        "target": "wasm-core",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 98,
+        "sourceClosureDigest": "362daf0af085908865d09a74276431b010c9f60e914370a65382e79031315f1f",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"97ffc3e636393abff03ae218c118e44fb5678ec2dc0828eecc31881f542c0ae6\",\"requestSha256\":\"788666f9adc7fafd1b476b729dc65c9cffac93cb3fd42b5502d0ffe441ccb18e\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1023424,\"peakTreeRssKiB\":1020592,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":829660,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/00614a0e:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6a8\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n\nNode.js v22.23.3\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "97ffc3e636393abff03ae218c118e44fb5678ec2dc0828eecc31881f542c0ae6",
+            "startedAt": "2026-10-23T21:46:17.742Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"97ffc3e636393abff03ae218c118e44fb5678ec2dc0828eecc31881f542c0ae6\",\"requestSha256\":\"788666f9adc7fafd1b476b729dc65c9cffac93cb3fd42b5502d0ffe441ccb18e\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1023424,\"peakTreeRssKiB\":1020592,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":829660,\"status\":1,\"signal\":null,\"error\":null}\nwasm://wasm/00614a0e:1\n\n\nRangeError: Maximum call stack size exceeded\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6a8\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n    at wasm://wasm/00614a0e:wasm-function[2712]:0xbd6e2\n\nNode.js v22.23.3\n",
+            "completedAt": "2026-10-23T22:00:08.224Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12534143433,
+          "digest": "sha256:fc447bc8aea156bd8f44e43559ff50ec7d61351bfe1a46dde8829cef0e9a1761"
+        }
+      ]
     }
   ],
   "checkedSpineDiagnosis": {
@@ -767,6 +868,33 @@
         "refused": []
       },
       "ownedWasmEngine": true
+    },
+    {
+      "commit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
+      "branch": "work/psc1-direct-selfhost-spines2-20261024",
+      "runId": 40028430603,
+      "jobId": 120670363952,
+      "status": "passed",
+      "genericRightFoldEquality": true,
+      "completeErasureIndexApiEqualities": 3,
+      "prefixEqualities": 51,
+      "checkedSpineEqualities": 3,
+      "ordinaryWorkerEquality": true,
+      "containsSorry": false,
+      "largeDeclarationSmoke": 10000,
+      "jsLazyViewComparisons": 10584,
+      "nativeStringPairs": 49,
+      "sourceCensus": {
+        "js": 87,
+        "wasm": 98,
+        "grammars": [
+          "lean",
+          "ps"
+        ],
+        "refused": []
+      },
+      "ownedWasmEngine": true,
+      "allPriorRegressionGates": "passed"
     }
   ],
   "nextRequestedTarget": "wasm-core",
@@ -1361,40 +1489,30 @@
     "pullRequest": 175,
     "head": "85433830522dc0cc52541b985510122b67dea364",
     "runId": 40027662328,
-    "status": "full-linux-in-progress",
     "jobId": 120672846738,
-    "completed": [
-      "static",
-      "native",
-      "focused-core",
-      "focused-applications",
-      "php-application",
-      "selected-closures",
-      "G1"
-    ]
+    "gateJobId": 120680396390,
+    "status": "passed",
+    "testedMerge": "34d29e215ea568466dcbc96b14b5e10b2dddb438",
+    "identicalTree": "1382a67a7af0975fda2ecb855a1ee011d035af8f",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "allSevenBackends": true,
+    "bothGrammars": true,
+    "artifact": {
+      "id": 12534827970,
+      "digest": "sha256:b54bfd96377fd53d7e9bfaeec94a2242fbd7ef3434f805e0540193baad6ab039"
+    },
+    "scope": "85433830 tree only; subsequent child source needs full CI"
   },
   "nextWasmSourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
-  "activeAttempts": [
-    {
-      "target": "js",
-      "sourceCommit": "fcea1326b6abf02d151a8e0a248d95a70c9e0faf",
-      "requestParent": "949d687b8977bb1fec3697293818f6d9d07f92a4",
-      "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
-      "runId": 40027650302,
-      "status": "in_progress",
-      "fixedPoint": "not-yet-established"
-    },
-    {
-      "target": "wasm-core",
-      "sourceCommit": "52cff17196b71481e3cb8ced1c4d3fee2d1280d0",
-      "requestParent": "4f88fac688408adb7a4c059539746719c39c0170",
-      "requestCommit": "bef0e260a062f89981af514480d9bd7414047d97",
-      "runId": 40028857732,
-      "jobId": 120671963814,
-      "status": "in_progress",
-      "fixedPoint": "not-yet-established"
-    }
-  ],
+  "activeAttempts": [],
   "diagnosticSpineInventory": {
     "runId": 40029584741,
     "compilerExecution": false,
@@ -1402,5 +1520,43 @@
     "candidates": 300,
     "scope": "heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof",
     "note": "Heuristic review queue, not300 proven defects or additional release blockers; optimize only relevant measured paths."
+  },
+  "foundationStackMap": {
+    "schema": "psc1-retained-wasm-function-map/1",
+    "testedCommit": "4035a147e22a3a05bdac08548e7fc1114fd1665d",
+    "source": {
+      "schema": "psc1-retained-wasm-stack-diagnosis/1",
+      "attempts": [
+        {
+          "runId": 40028857732,
+          "requestCommit": "bef0e260a062f89981af514480d9bd7414047d97",
+          "sourceCommit": "4f88fac688408adb7a4c059539746719c39c0170",
+          "artifactId": 12534143433,
+          "artifactDigest": "sha256:fc447bc8aea156bd8f44e43559ff50ec7d61351bfe1a46dde8829cef0e9a1761"
+        }
+      ],
+      "serviceSha256": "97ffc3e636393abff03ae218c118e44fb5678ec2dc0828eecc31881f542c0ae6",
+      "requestSha256": "788666f9adc7fafd1b476b729dc65c9cffac93cb3fd42b5502d0ffe441ccb18e",
+      "closure": "362daf0af085908865d09a74276431b010c9f60e914370a65382e79031315f1f",
+      "resolveOnly": [
+        2712
+      ],
+      "purpose": "Map exact829.7-second G2 terminal stack using immutable generated binary and candidate IR, without repeating compiler execution."
+    },
+    "sourceSha256": "b98afd1bf620c8256189d35a26d46866927a11ad7ec9f48b232490622fb733ee",
+    "binarySha256": "1c2d4cf1c3437672622e1c4c2d5fc7e6cbcc23d79bfead5f62abe8f88d3cbac6",
+    "exportAnchorsVerified": true,
+    "compilerExecution": false,
+    "qualification": false,
+    "resolved": [
+      {
+        "index": 2712,
+        "name": "psListLength$spec$N$PsWasmStructType"
+      }
+    ],
+    "totalCandidates": 0,
+    "inventoryScope": "heuristic flattened saturated non-tail self calls with changed List parameters outside nested lambdas; no reachability, stack-failure or performance proof",
+    "declarationSpines": [],
+    "otherFirst60": []
   }
 }

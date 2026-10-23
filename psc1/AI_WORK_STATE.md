@@ -9,7 +9,53 @@ Frozen Practical Core v1 remains14 families/37 criteria.
 binds the exact Git blob of the complete17-attempt
 [canonical receipt](docs/PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
 
-## Active continuation — erasure declaration spines
+## Active foundation checkpoint — 2026-10-24 Asia/Jakarta
+
+Active child work/psc1-direct-selfhost-spines2-20261024, implementation9530b5ee
+plus proof/test fixes215c3c9c and472f8def90a98c55b130e81d5700be9c2f2ccbe5.
+Full focused40031387906/job120680537575 PASSED six all-input retained foundation
+API equalities (length/append/map/mapExcept/take/zip),100000-element runtime
+tests including exact first error/truncation/order, every prior erasure/ordinary/
+checked/prefix/byte/JS proof and regression, actual GC Wasm, and complete87/98
+module Lean/PS censuses. Original APIs/fuel/limits/refusals are preserved.
+Ordinary's append proof now uses the retained foundation API equality; no proof
+or regression was dropped. The next actual request is Wasm on this checkpoint.
+
+Terminal independent attempts:
+- JS85433830/run40027650302 completes G1/ten cases but G2 deadline1800227ms,
+ 3132516KiB; no G3/fixedpoint. Closure0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31;
+  service006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20;
+  G2 requestb76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d.
+  Artifact12535705338 digestd4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e.
+  Exact retained CPU/emission-shape diagnosis40031550466 is running; wait for it.
+- Wasmbef0e260/run40028857732 completes G1/ten cases but G2 stack829660ms,
+ 1023424KiB maxRSS/1020592KiB sampled tree peak; no G3/fixedpoint.
+  Closure362daf0af085908865d09a74276431b010c9f60e914370a65382e79031315f1f;
+  service97ffc3e636393abff03ae218c118e44fb5678ec2dc0828eecc31881f542c0ae6;
+  G2 request788666f9adc7fafd1b476b729dc65c9cffac93cb3fd42b5502d0ffe441ccb18e.
+  Artifact12534143433 digestfc447bc8aea156bd8f44e43559ff50ec7d61351bfe1a46dde8829cef0e9a1761.
+  Read-only map40030902621 resolves function2712 to psListLength specialized on
+  PsWasmStructType. The current foundation accumulator class fix addresses it.
+
+Parent draft175/head85433830 full40027662328 PASSED, including final gate
+120680396390 and full Linux120672846738:37/37 qualified,0 blocked,
+releaseReady=true,all seven backends,both grammars,all application categories,
+minimum Python and installed native npm/IO/library tests. Tested merge34d29e21
+and head85433830 have identical tree1382a67a7af0975fda2ecb855a1ee011d035af8f.
+Full artifact12534827970 digestb54bfd96377fd53d7e9bfaeec94a2242fbd7ef3434f805e0540193baad6ab039.
+This preserves the parent source checkpoint; newer erasure/foundation changes
+still require their own final full CI. Keep175's branch unchanged during focused
+child development, then make an expected-HEAD non-force fast-forward when stable.
+No PR merge or npm release is authorized. Qualified Rust/TS refs are unchanged.
+
+Use docs/PSC1_DIRECT_SELFHOST_CONTINUATION.md and the machine-readable receipt
+for exact request rules and artifact identities. Re-query all live runs.
+Actual current-source G1→G2→G3/fixed points remain required for both targets;
+native proofs/source census and37/37 Practical Core are distinct evidence.
+The original performance240s, correctness1800s,G1/tool240s,checking120s and
+all heap/stack/semantic/resource/security boundaries remain unchanged.
+
+## Preserved erasure declaration-spine checkpoint
 
 Active branch work/psc1-direct-selfhost-spines2-20261024, based on preserved
 PR175/head85433830522dc0cc52541b985510122b67dea364. Implementation52cff17196b71481e3cb8ced1c4d3fee2d1280d0

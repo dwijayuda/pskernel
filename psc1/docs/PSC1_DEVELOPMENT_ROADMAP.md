@@ -8,32 +8,19 @@ including17 completed actual attempts, preserved failures and immutable artifact
 
 ## Current remaining queue — DirectJS and DirectWasm
 
-Active child work/psc1-direct-selfhost-spines2-20261024 at52cff171:
-generic reverse fold for three erasure index spines; full proof/runtime/source
-gate40028430603 PASSED, including generic fold + all three complete-index
-API equalities,10000 declarations/precedence cases and87/98-module Lean/PS census.
-Next run actual Wasm generations on this verified source; no G2/G3 claim.
-Previous Wasm6c82fcb4/run40026947549 completedG1 but G2 stack252550ms/1027508KiB;
-read-only map40027922448 identifies psErasureDeclarationEntryIndex. Complete
-index structure/insertion order/first-entry/count/error priority must match.
-Parent PR175/full40027662328 and JS85433830/run40027650302 continue unchanged;
-preserve their terminal evidence while child fixes proceed. This update
-supersedes older running-Wasm descriptions in the table below.
-
-
-| Order | Work | Acceptance / current evidence |
+| Order | Work | Evidence / acceptance |
 | --- | --- | --- |
-|1|Execute real generations with the proved/measured fixes.|fcea1326/Linux40027270768 passes all proofs/runtime/negative/capture/owned-Wasm checks and complete87/98-module Lean/PS censuses. Actual retained JS G2 profile40024746671 identifies33.9% StringEqual ticks; lazy-view fixture40000→2 cache-key calls with10584 comparisons. Actual Wasm6c82fcb4/run40026947549 is executing proved checked-admission spine fixes; next request is JS on the same common source.|
-|2|Qualify genuine independent G1→G2→G3 and fixed points for each target.|Previous0c/40020523049: both completeG1; JS G2 deadline1800162ms/1862136KiB, Wasm stack123237ms/536280KiB. Next Wasm8b/40024688133 G2 stack78817ms/538864KiB diagnosed as psCheckedNestedCollect; collector/lookup/normalization now have all-input proofs, including exact rightmost-error priority. Neither direct target has a qualified G2/G3 fixed point yet.|
-|3|Run full latest-source seven-backend/application CI in a stacked work PR.|Preserved draft174/afed7c4b full40015619975 passes37/37, identical-tree merge. Later source requires a separate full CI run; retain independent Lean4.35, strict original/transformed IR and every refusal/regression gate.|
-|4|Qualify performance and independent reproducibility separately.|Retain original240s and1800s correctness profiles, all G1/checker/memory/stack/fuel limits. Same-run fixed points do not imply independent clean builds or package publication authorization.|
+|1|Execute Wasm with proved foundational list accumulators; use actual JS CPU/shape diagnosis to fix its next measured blocker.|Current child472f8def/full focused40031387906 PASSES six old/new foundation API equalities,100000 elements, all earlier proofs/regressions and complete87/98-module Lean/PS censuses. Wasmbef/40028857732 G2 stack829660ms/1023424KiB maps to psListLength$spec$PsWasmStructType. JS854/40027650302 G2 deadline1800227ms/3132516KiB; exact retained profile40031550466 is running.|
+|2|Qualify actual current-source G1→G2→G3/fixed points independently for JS and owned Wasm.|Both last attempts complete independently admitted G1 and all ten cases; neither has G2/G3/fixedpoint. Preserve exact source/admission/original+transformed IR/observations/target bytes, including owned binary identity. No timeout/heap/stack/fuel/verification relaxation.|
+|3|Qualify final current-source seven-backend/application CI.|Parent PR175 head85433830/full40027662328 PASSED37/37,0 blocked,releaseReady=true,all seven targets,both grammars,real apps,minimum Python and installed native packages. Merge34d29e21 has identical tree1382a67a. Later child source needs its own final full CI; fast-forward the review branch only after a stable verified checkpoint and fresh expected HEAD. No PR merge or publication.|
+|4|Optimize original240s performance and verify independent clean builds separately.|Correctness1800s does not qualify240s; same-run fixed points do not prove independent clean-build repeatability. Preserve qualified Rust83e18fe1 and TS84e1e16f.|
 
-[AI work state](../AI_WORK_STATE.md) owns exact continuation and
-[direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
-records immutable attempts. [Architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md)
-explains shared semantics, host authority and measured defect classes.
-Preserve Rust83e18fe1 and TS84e1e16f. This queue supersedes older pending
-descriptions below, which retain their historical checkpoint scope.
+[AI work state](../AI_WORK_STATE.md) owns continuation. The
+[receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json) preserves immutable
+failures/measurements/checkpoints. The [architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md)
+documents the measured patterns. The [execution prompt](PSC1_DIRECT_SELFHOST_CONTINUATION.md)
+contains exact GitHub-only resumption rules; re-query its dated live snapshot.
+Earlier pending descriptions below are historical and superseded by this queue.
 
 Corrected TS source748fd5fd/request079b26b9/run39993829327 independently qualifies
 genuine G1/G2/G3 and exact source/admissions/IR/ten-case fixed points under1800s.

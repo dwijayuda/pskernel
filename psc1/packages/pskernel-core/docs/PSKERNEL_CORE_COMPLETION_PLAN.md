@@ -1,3 +1,73 @@
+## Exact2c9bf2d2 BOTH producers/providers/owner/research PASS; C FAIL; shards pending
+
+Qualification source2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298,
+treeea5d79f5927f61a98ad704b09b1ab495ea3701a3; allresults source-specific.
+Nativeintegration120242036517 andnativecorrectness120242037072 PASS,
+222proofreports/27axiomfree/eighthash/onlypermittedstandardaxioms.
+Generatedproducer120242036204 in39900914731 PASS allretainedsemanticgates,
+128wholechecker/24admission/36wholeprogram/6profileobservations COMPLETE,
+24CLI+8APIprovider PASS. Kernel9956609bytes SHA256
+546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04.
+Artifact12480106667 ZIP3512034bytes SHA256
+a86ac9c68ca414493b6d6246b368f9b2db3e2ab944e69b5b4816ac4779443822.
+Canonicalproducer120242036927 in39900914918 PASS genuine .psreconstruction/
+realPSC1check/TS7.0.2/retainedsemanticgates/24CLI+8APIprovider.
+Kernel9956616bytes SHA256
+ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe.
+Artifact12479809515 ZIP2039580bytes SHA256
+d0fdd3dd3abca43ba65f06405dd9ac507a6f25989b02d4a8834af183d26d389a.
+FullkernelDirectJS explicitlyUNSUPPORTED by actualemitter; no alternate
+fullkernelDirectJS qualification is claimed. Research39900914848 ALL6PASS.
+
+Actualfullworkflowowner120251078372 PASS32workers/384validatedcalls using
+unchangedfrozen4ebfd97 driverSHA7c8a82758b90958d973623d26e4c4dfbd900126cd737c190adffb76cb1563221,
+baseline9c87/kernel f1ac31f...,candidate2c9/kernel546a144...
+60seconds/worker/2048MiB/emptyPATH/allsource-artifact-run-attemptbindingstrue.
+Artifact12480435019 ZIP8650641bytes SHA256
+a175528f479f477018c05cf4cf269b4eafafdd58a8dcf5eff89087edab052586.
+ReportSHA7f3d0de491ccfa8ad27c75606aac6d9c09a239f8392fa6691355820bc1814b7b.
+Preserve actualregressions:32owner illtypedcold1.377148772x;128owner
+ownedconstant peakRSS+8192KiB. All8rows includingcold/warmmeans/medians,
+retainedheap and RSS are preserved; no generalcausalspeedup/threshold/RSSlimit
+claim. Cold means first second-batch call AFTER checked setup/V1control,
+not first kerneloperation. Prior-source regressions remain separatelyretained.
+
+Full193Arena39900914747/independent120242716137 terminalFAIL:
+173semanticmatches(105accept/60kernelreject/1metadatareject/7transportreject),
+2separateunsafe-or-partialsafetyagreements,17timeouts,1resourceexhaustion,
+zero unsupported. All193bodies individually verified original=adapted and
+matchofficialinputdiagnostic hashes,indices0-192unique,noexclusions/reexport,
+allcasesrecorded,replayedCases0,fuel4096/60secpercase/2workers/2048MiB/
+emptyPATH unchanged. ReportSHA
+24c2b496a7c67680845c5905794baca0bfe4c6659fead9303a686390c2bc30f0.
+Artifact12480241433 ZIP1081157bytes SHA256
+ec30236bcba135326b6c1cbc2807bfea00729d4533241c487b67401f0fabde65.
+Authenticprofile39900914830/job120242037123 PASS COLLECTION ONLY:
+repeatedsubproblemaccepted;Churchresourceexhausted;Preludetimeout;
+stuckprojectionrejected in BOTH unprofiled/profiled;allkernelQualifiedfalse.
+Artifact12478933687 SHA256
+b298aa1ab71edd91fe787c9bf0a78e395bdf760f521e6672346e8c8b0a5c9272.
+These C/D failures do not invalidate historicalscopedA or future scopedT01F.
+
+Complete fresh receipts/measurementmarkers/all193verifiedbodyhashes/all8owner
+rows/4diagnostics/provenance+artifacthashes:
+evidence/2026-10-23-t01f-pair-counter-final-source-completed-gates.json.
+Native222proofrows remain in final-source-native-gates.json.
+ONE next task: finish BOTH existing6shardmatrices and theirstrictaggregates.
+Generated39900914731:0/1/2PASS,3/4RUNNING,5QUEUED atthissnapshot.
+Canonical39900914918:0/1PASS,2/3RUNNING,4/5QUEUED.
+Fetch livejobs; doNOTduplicate or rerunpartialattempts.
+Require BOTH PSC1_T01F_FULL_STRING_SHARDED_JS: PASS at exact2c9 before T01F/
+currentA acceptance. Every selectedsample must execute full1400assertions,
+294independentadmissions/377metadata/singleton/negatives and unchanged
+4096/2048MiB/emptyPATH/25mincap. Sixroutejobs maxparallel2/failfastfalse.
+T01F/currentA/B/DOPEN,CFAIL,historicalscopedA9c87qualified; noT05yet.
+No integrationwriteyet;fresh targetintegration last123c41197950b6761be965fd21c57142ee2b0d1c.
+ActionsLinuxONLY for builds/tests/kernel execution, fresh expected_sha,
+nonforce history-preservingupdates,no main/npm. Docschildunqualified.
+
+---
+
 ## Exact2c9bf2d2 native/official gates PASS; both route qualification pending
 
 Qualification source2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298

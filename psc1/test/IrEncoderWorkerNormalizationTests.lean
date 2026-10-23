@@ -181,8 +181,9 @@ theorem ir_encode_type_worker_eq (fuel : Nat) (value : PsVerifiedIrType) :
   | succ remaining ih =>
       have recEq : (fun (item : PsVerifiedIrType) => psIrEncodeTypeWithFuelWorker remaining item) =
           PsIrEncoderReference.psIrEncodeTypeWithFuel remaining := funext ih
-      simpa only [psIrEncodeTypeWithFuelWorker, PsIrEncoderReference.psIrEncodeTypeWithFuel,
-        recEq]
+      cases value <;>
+        simp only [psIrEncodeTypeWithFuelWorker, PsIrEncoderReference.psIrEncodeTypeWithFuel,
+          recEq] <;> rfl
 
 theorem ir_encode_type_with_fuel_eq (fuel : Nat) :
     psIrEncodeTypeWithFuel fuel = PsIrEncoderReference.psIrEncodeTypeWithFuel fuel := by
@@ -196,11 +197,13 @@ theorem ir_encode_type_eq : psIrEncodeType = PsIrEncoderReference.psIrEncodeType
 theorem ir_encode_parameter_eq : psIrEncodeParameter = PsIrEncoderReference.psIrEncodeParameter := by
   funext value
   simp only [psIrEncodeParameter, PsIrEncoderReference.psIrEncodeParameter, ir_encode_type_eq]
+  rfl
 
 theorem ir_encode_match_binding_eq :
     psIrEncodeMatchBinding = PsIrEncoderReference.psIrEncodeMatchBinding := by
   funext value
   simp only [psIrEncodeMatchBinding, PsIrEncoderReference.psIrEncodeMatchBinding, ir_encode_type_eq]
+  rfl
 
 theorem ir_encode_expr_worker_eq (fuel : Nat) (value : PsVerifiedIrExpr) :
     psIrEncodeExprWithFuelWorker fuel value =
@@ -210,8 +213,9 @@ theorem ir_encode_expr_worker_eq (fuel : Nat) (value : PsVerifiedIrExpr) :
   | succ remaining ih =>
       have recEq : (fun (item : PsVerifiedIrExpr) => psIrEncodeExprWithFuelWorker remaining item) =
           PsIrEncoderReference.psIrEncodeExprWithFuel remaining := funext ih
-      simpa only [psIrEncodeExprWithFuelWorker, PsIrEncoderReference.psIrEncodeExprWithFuel,
-        recEq, ir_encode_type_eq, ir_encode_parameter_eq, ir_encode_match_binding_eq]
+      cases value <;>
+        simp only [psIrEncodeExprWithFuelWorker, PsIrEncoderReference.psIrEncodeExprWithFuel,
+          recEq, ir_encode_type_eq, ir_encode_parameter_eq, ir_encode_match_binding_eq] <;> rfl
 
 theorem ir_encode_expr_with_fuel_eq (fuel : Nat) :
     psIrEncodeExprWithFuel fuel = PsIrEncoderReference.psIrEncodeExprWithFuel fuel := by

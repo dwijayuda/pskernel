@@ -289,3 +289,9 @@ capture safety. APIs, recursion/fuel and all leaf results remain unchanged.
 2001-bit literal,primitive type and empty String smoke cases are required in
 the Linux gate. These tests and the DirectJS generator statement regressions
 are pending; no fixed point claim or resource-policy extension.
+
+The first native prefix gate rejected bare reflexivity for the recursive
+definitions; no proof passed through that failed build. Replace those attempted
+proofs with structural induction and function extensionality, reusing previous
+worker equalities for cross-calls. Keep all48 all-input obligations required;
+do not replace them with samples or permit sorry/axiom admission.

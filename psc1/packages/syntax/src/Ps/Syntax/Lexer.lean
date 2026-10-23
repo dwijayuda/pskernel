@@ -32,13 +32,12 @@ def psLexAdvanceTwo
   psLexAdvanceChar (psLexAdvanceChar position first) second
 
 
-def psLexListLengthAcc {α : Type} (xs : List α) : Nat -> Nat :=
+-- Keep the accumulator in the explicit runtime arity: a polymorphic returned
+-- closure otherwise hides this tail recursion from native backend loop emission.
+def psLexListLengthAcc {α : Type} (xs : List α) (acc : Nat) : Nat :=
   match xs with
-  | List.nil => fun (acc : Nat) => acc
-  | List.cons _ rest =>
-      fun (acc : Nat) =>
-        let smaller : Nat -> Nat := psLexListLengthAcc rest;
-        smaller (Nat.succ acc)
+  | List.nil => acc
+  | List.cons _ rest => psLexListLengthAcc rest (Nat.succ acc)
 
 def psLexListLength {α : Type} (xs : List α) : Nat :=
   psLexListLengthAcc xs 0

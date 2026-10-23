@@ -1,6 +1,15 @@
-import Ps.Syntax.Cursor
+import Ps.Syntax.Lexer
 
 namespace PsCursorNormalizationReference
+def legacyLengthAcc {α : Type} (xs : List α) : Nat -> Nat :=
+  match xs with
+  | List.nil => fun (acc : Nat) => acc
+  | List.cons _ rest =>
+      fun (acc : Nat) =>
+        let smaller : Nat -> Nat := legacyLengthAcc rest;
+        smaller (Nat.succ acc)
+
+
 def legacy (fuel : Nat) : String -> Nat -> List Char :=
   match fuel with
   | Nat.zero => fun (_source : String) (_position : Nat) => List.nil
@@ -74,6 +83,15 @@ theorem normalized_eq (fuel : Nat) (source : String) (position : Nat) :
   unfold psLexStringToListFromWithFuel
   rw [accumulator_eq]
   all_goals rfl
+
+theorem length_acc_eq {alpha : Type} (values : List alpha) :
+    legacyLengthAcc values = psLexListLengthAcc values := by
+  induction values with
+  | nil => rfl
+  | cons head tail ih =>
+      funext count
+      simp only [legacyLengthAcc, psLexListLengthAcc, ih]
+      all_goals rfl
 end PsCursorNormalizationReference
 
 def main : IO Unit := do
@@ -89,5 +107,7 @@ def main : IO Unit := do
   let chars := psLexStringToList source
   if chars.length != 100000 then
     throw (IO.userError "PSC1_CURSOR_NORMALIZATION_LARGE_INPUT")
+  if psLexListLengthAcc chars 7 != 100007 then
+    throw (IO.userError "PSC1_CURSOR_GENERIC_LENGTH_LARGE_INPUT")
   IO.println ("PSC1_CURSOR_NORMALIZATION: all-input fuel/source/offset equality proved; UTF8 offset/fuel cases=" ++
-    toString count ++ "; large input chars=100000")
+    toString count ++ "; large input chars=100000; all-input generic length equality and 100007 result passed")

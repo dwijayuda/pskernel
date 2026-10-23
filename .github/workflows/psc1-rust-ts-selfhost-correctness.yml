@@ -116,5 +116,6 @@ jobs:
           path: |
             psc1/dist/generated-${{ matrix.target }}-compiler/
             psc1/dist/generated-service-native/
+            psc1/dist/ts-utf8-views/
           if-no-files-found: warn
           retention-days: 90

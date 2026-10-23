@@ -64,3 +64,13 @@ semantic delegation after the one seed. Preserve qualified G1, DirectJS referenc
 and its G2 defect. ExpressionV2 research proceeds independently.
 Avoid speculative redesign, unchanged full CI and duplicate audits. Passive
 history stays frozen; compact evidence is derived, not a new acceptance contract.
+
+## Active measured TS correction
+
+Branch `perf/psc1-ts-utf8-view-tokens-20261023`, code d976ff0b, passes focused Linux39952202237.
+Token identities avoid repeated structural equality of cached text while retaining
+only the original two views, original eviction, invalid raw offsets and fuel-zero
+laziness. Existing source equality and character comparisons remain unchanged.
+16000 emitted-runtime comparisons and both85-module source audits pass. G2/G3
+and exact fixed point remain pending; the separate240s criterion is unchanged.
+Rust qualified reference83e18fe1/source5e0b548e/request7d8865a0 is preserved.

@@ -148,5 +148,8 @@ Lazy per-loop tokens reference only the existing two global UTF8 view identities
 no extra arrays or string data are retained. Invariant parameters and simple aliases
 are checked; changed arguments, shadowed bindings and internal-name collisions
 fall back. Source string equality, raw offsets and semantic fuel remain unchanged.
-Focused Linux differential validation and actual G2/G3 qualification are pending.
+Focused run39952202237 at code d976ff0b2e97c352c59b1684e6c121edb0bd38bf passes native build,
+existing proof/negative gates, 16000 emitted-runtime comparisons, exact cache state,
+and all85 modules in both .lean/.ps source audits. Actual G2/G3 qualification is next.
+Four earlier source-normalization refusals are preserved; none ran G2.
 Rust qualified reference and integrated main remain unchanged.

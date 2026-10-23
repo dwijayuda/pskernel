@@ -458,3 +458,7 @@ lean_exe psc1_json_escape_predicate_tests where
 lean_exe psc1_bridge_lookup_normalization_tests where
   srcDir := "test"
   root := `BridgeLookupNormalizationTests
+
+lean_exe psc1_ts_utf8_cache_fixture where
+  srcDir := "test"
+  root := `TsUtf8CacheFixture

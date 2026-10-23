@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "rust-scalar-closed-release0-20261023",
+  "id": "rust-closed-lexer-token-accumulator-20261023",
   "branch": "fix/psc1-rust-owned-string-moves-20261023",
-  "parentCommit": "734f01ea364c543547eb3755697a651329502a07",
+  "parentCommit": "542603e3a286069c6099e6c0705c9174d7be04e0",
   "targets": [
     "rust"
   ],

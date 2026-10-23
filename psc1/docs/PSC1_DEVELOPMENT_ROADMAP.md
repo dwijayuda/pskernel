@@ -18,7 +18,13 @@ builds both facades and passes all host negatives/DirectJS scalar tests. No G1:
 Rust facade parse refusal; TS Expr context visitor elaboration refusal at 522:1.
 Corrections bind the Rust runtime plan before projection and retain TS recursive
 arity through a single named worker; an all-input native equality is added.
-Both-grammar exact closure audit now precedes generation. Next: execute the new manual matrix,
+Both-grammar exact closure audit now precedes generation.
+Run 39875554029 stopped at the added proof; no generation ran. Run 39875938564
+proves the context visitor equality, then both grammar audits identify native
+open directives in target facades and native do/Option syntax in TS Module.
+The facades now use qualified names; the module helpers use explicit portable
+matches/list helpers. Tests retain old helpers and compare output/runtime choices.
+Artifact/source identity checks and the reviewed Rust lock requirement are tightened. Next: execute the new manual matrix,
 fix target/source blockers as classes, capture exact tool/runtime evidence and
 complete fresh normal qualification after compiler changes.
 

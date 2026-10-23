@@ -20,8 +20,10 @@ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-target-boundary-'));
 try{
  const source=path.join(dir,'module.js'),manifestFile=path.join(dir,'artifact.json');
  fs.writeFileSync(source,'export {};\n');
- const m={schema:'psc1-generated-target-artifact/1',target:'ts',executable:'module.js',
-  files:[{path:'module.js',bytes:11,sha256:sha(fs.readFileSync(source))}]};
+ fs.writeFileSync(path.join(dir,'module.ts'),'export {};\n');
+ const m={schema:'psc1-generated-target-artifact/1',target:'ts',executable:'module.js',service:true,publicNames:[],
+  sourceSha256:sha(fs.readFileSync(source)),
+  files:['module.js','module.ts'].map(p=>({path:p,bytes:11,sha256:sha(fs.readFileSync(path.join(dir,p)))}))};
  fs.writeFileSync(manifestFile,JSON.stringify(m));const hash=sha(fs.readFileSync(manifestFile));
  assert.equal(verifyArtifact(manifestFile,hash).target,'ts');
  fs.writeFileSync(source,'export {x};\n');assert.throws(()=>verifyArtifact(manifestFile,hash));

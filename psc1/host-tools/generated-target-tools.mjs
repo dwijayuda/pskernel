@@ -31,6 +31,11 @@ export function verifyArtifact(manifestFile,expectedHash) {
   assert.equal(stat.size,f.bytes);assert.equal(sha(fs.readFileSync(file)),f.sha256,'PSC1_TARGET_FILE_CHANGED');
  }
  assert.ok(m.files.some(f=>f.path===m.executable));
+ assert.equal(typeof m.service,'boolean');
+ assert.ok(Array.isArray(m.publicNames)&&new Set(m.publicNames).size===m.publicNames.length);
+ const source=m.files.find(f=>f.path===(m.target==='ts'?'module.ts':'module.rs'));
+ assert.ok(source);assert.equal(source.sha256,m.sourceSha256,'PSC1_TARGET_SOURCE_IDENTITY');
+ assert.equal(m.executable,m.target==='ts'?'module.js':'service.bin');
  return {...m,directory};
 }
 export function buildTarget({target,source,directory,service=false,consumer='',publicNames=[]}) {

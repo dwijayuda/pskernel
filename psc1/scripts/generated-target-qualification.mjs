@@ -25,7 +25,13 @@ const events=[],report={schema:'psc1-generated-target-qualification/1',target,mo
  testedCommit:process.env.GITHUB_SHA,branchHead:process.env.PSC1_BRANCH_HEAD,
  nativeSeedSha256:seedHash,tools,events,status:'running',generations:[],attempts:[],
  fixedPoint:'not-run',productionPublication:'not-run',formalPreservation:'not-provided'};
-const pinned=()=>tools.forEach(t=>assert.equal(sha(fs.readFileSync(t.file)),t.sha256,'PSC1_QUALIFICATION_TOOL_CHANGED'));
+const pinned=()=>{
+ tools.forEach(t=>assert.equal(sha(fs.readFileSync(t.file)),t.sha256,'PSC1_QUALIFICATION_TOOL_CHANGED'));
+ for(const row of report.sourceInventory||[]){
+  const bytes=fs.readFileSync(row.path);assert.equal(bytes.length,row.bytes);
+  assert.equal(sha(bytes),row.sha256,'PSC1_COMPILER_SOURCE_CHANGED');
+ }
+};
 const entry='Ps.Backend'+(target==='rust'?'Rust':'Ts')+'.CompilerService';
 const exportName='psCompiler'+(target==='rust'?'Rust':'Ts')+'ServiceCandidate';
 function request(id,grammar,assurance,entry,sources) {
@@ -114,8 +120,10 @@ try {
  const bootstrap=request('G1-bootstrap','lean','ordinary-checked',entry,sources);
  report.sourceClosureDigest=bootstrap.digest;
  const input=path.join(directory,'G1-bootstrap.request.json'),output=path.join(directory,'G1-bootstrap.candidate.json');
- fs.writeFileSync(input,bootstrap.text);assert.equal(seedCalls,0);seedCalls++;
+ fs.writeFileSync(input,bootstrap.text);assert.equal(seedCalls,0);
+ assert.equal(sha(fs.readFileSync(seed)),seedHash);seedCalls++;
  const seedRun=runTool(seed,[target,input,output],{logDirectory:directory});events.push({role:'stage0-seed',...seedRun.event});
+ assert.equal(sha(fs.readFileSync(seed)),seedHash);assert.equal(sha(fs.readFileSync(input)),sha(bootstrap.text));
  const initial=candidateFile(output),baseline=checkCandidate(initial,bootstrap);
  assert.deepEqual(initial.value.publicNames,[exportName]);
  report.bootstrap=baseline;
@@ -140,7 +148,9 @@ try {
   report.generations.push({generation,...identity,artifactSha256:next.sha256,observations:actual});
   attempt.status='passed';artifact=next;
  }
- assert.equal(seedCalls,1);
+ assert.equal(seedCalls,1);pinned();
+ if(target==='rust')assert.ok(fs.existsSync('scripts/fixtures/selfhost-rust.Cargo.lock'),
+  'PSC1_REPRODUCIBILITY_REQUIRES_REVIEWED_RUST_LOCK');
  report.fixedPoint=mode==='--self-host'?'passed-G1-G2-G3-exact-source-admission-IR-and-ten-case-observations':'not-requested';
  report.status='passed';
 } catch(error){report.status='failed';report.failure=error.message;throw error;}

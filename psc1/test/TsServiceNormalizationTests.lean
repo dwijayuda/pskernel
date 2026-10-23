@@ -1,4 +1,4 @@
-import Ps.BackendTs.Expr
+import Ps.BackendTs.Module
 
 -- Preserve the exact pre-normalization visitor for all-input native equality.
 namespace PsTsServiceReference
@@ -195,5 +195,87 @@ theorem context_eq (brands tags : List (String × String)) (fuel : Nat) :
       rfl
 end PsTsServiceReference
 
-def main : IO Unit :=
+
+namespace PsTsModuleReference
+def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (String × String))
+    (declaration : PsVerifiedIrDeclaration) : Option String := do
+  if declaration.parameters.isEmpty && !declaration.typeParameters.isEmpty then none else do
+    let body ← psTsTailPrintPure brands tags [] (psTsInlineEtaApplication declaration.body)
+    let result ← (psTsEmitType declaration.resultType).toOption
+    let exportPrefix := if isPublic then "export " else ""
+    if declaration.parameters.isEmpty then
+      return exportPrefix ++ "const " ++ declaration.name ++ ": " ++ result ++ " = " ++ body ++ ";"
+    else
+      let parameters ← declaration.parameters.mapM fun parameter => do
+        let type ← (psTsEmitType parameter.type).toOption
+        return parameter.name ++ ": " ++ type
+      return exportPrefix ++ "function " ++ declaration.name ++ psTsGenericNames declaration.typeParameters ++
+        "(" ++ String.intercalate ", " parameters ++ "): " ++ result ++ " { return " ++ body ++ "; }"
+
+
+partial def psTsNeedsUtf8Runtime : PsVerifiedIrExpr → Bool
+  | .literal _ | .var _ => false
+  | .intrinsic operation _ arguments =>
+      (match operation with
+        | .stringUtf8ByteSize | .stringNext | .stringGet | .stringAtEnd => true
+        | _ => false) || arguments.any psTsNeedsUtf8Runtime
+  | .lambda _ _ body => psTsNeedsUtf8Runtime body
+  | .call fn _ arguments => psTsNeedsUtf8Runtime fn || arguments.any psTsNeedsUtf8Runtime
+  | .letE _ _ value body => psTsNeedsUtf8Runtime value || psTsNeedsUtf8Runtime body
+  | .ifE condition left right => psTsNeedsUtf8Runtime condition || psTsNeedsUtf8Runtime left || psTsNeedsUtf8Runtime right
+  | .record _ _ fields | .constructor _ _ _ fields => fields.any (fun f => psTsNeedsUtf8Runtime f.2)
+  | .projection _ _ target _ => psTsNeedsUtf8Runtime target
+  | .matchE _ _ scrutinee alternatives => psTsNeedsUtf8Runtime scrutinee || alternatives.any (fun a => psTsNeedsUtf8Runtime a.2.2)
+
+def psTsNeedsStackRuntime (brands tags : List (String × String))
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  (psTsEmitPureDeclaration false brands tags declaration).isNone &&
+    (psTsEmitCountLoop tags declaration).isNone &&
+    (psTsEmitTailLoop brands tags declaration).isNone
+
+def psTsSelectedRuntimeRequirements (module : PsVerifiedIrModule) : List String :=
+  let brands := psTsBuildBrandMap module
+  let tags := psTsBuildTagMap module
+  (if module.declarations.any (psTsNeedsStackRuntime brands tags) then ["generator-stack"] else []) ++
+  (if module.declarations.any (fun d => psTsNeedsUtf8Runtime d.body) then ["utf8-byte-index"] else [])
+
+def psTsSelectedRuntimeSource (module : PsVerifiedIrModule) : String :=
+  let needs := psTsSelectedRuntimeRequirements module
+  String.intercalate "\n" (
+    (if needs.contains "generator-stack" then [psTsStackRuntimeSupport] else []) ++
+    (if needs.contains "utf8-byte-index" then [psTsUtf8RuntimeSupport] else []))
+
+end PsTsModuleReference
+
+def main : IO Unit := do
   IO.println "PSC1_TS_SERVICE_NORMALIZATION: all-input context equality proved"
+  let natT : PsVerifiedIrType := .primitive .nat
+  let stringT : PsVerifiedIrType := .primitive .string
+  let expressions : List PsVerifiedIrExpr := [
+    .literal (.natural 42), .literal (.string "λ🙂"), .var "x",
+    .intrinsic .stringUtf8ByteSize [] [.literal (.string "λ🙂")],
+    .call (.var "f") [] [.literal (.natural 0)],
+    .letE "x" natT (.literal (.natural 1)) (.var "x"),
+    .ifE (.literal (.boolean true)) (.literal (.natural 1)) (.literal (.natural 2)),
+    .lambda [.mk "x" natT] natT (.var "x"),
+    .record "R" [] [("value", .intrinsic .stringAtEnd [] [.literal (.string ""),.literal (.natural 0)])],
+    .constructor "I" "C" [] [("value", .intrinsic .stringGet [] [.literal (.string "λ"),.literal (.natural 0)])],
+    .matchE "I" [] (.var "value") [("C",[],.intrinsic .stringNext [] [.literal (.string "λ"),.literal (.natural 0)])]]
+  let mut count := 0
+  for expression in expressions do
+    if psTsNeedsUtf8Runtime expression != PsTsModuleReference.psTsNeedsUtf8Runtime expression then
+      throw (IO.userError "PSC1_TS_RUNTIME_SCAN_NORMALIZATION")
+    for publicFlag in [false,true] do
+      for parameters in [[],[PsVerifiedIrParameter.mk "x" natT]] do
+        for typeParameters in [[],[PsVerifiedIrTypeParameter.mk "T"]] do
+          for result in [natT,stringT,PsVerifiedIrType.unknown] do
+            let declaration : PsVerifiedIrDeclaration := .mk "fixture" typeParameters parameters result expression
+            if psTsEmitPureDeclaration publicFlag [] [] declaration !=
+                PsTsModuleReference.psTsEmitPureDeclaration publicFlag [] [] declaration then
+              throw (IO.userError "PSC1_TS_PURE_PRINT_NORMALIZATION")
+            let module : PsVerifiedIrModule := .mk [] [] [] [declaration]
+            if psTsSelectedRuntimeRequirements module != PsTsModuleReference.psTsSelectedRuntimeRequirements module ||
+                psTsSelectedRuntimeSource module != PsTsModuleReference.psTsSelectedRuntimeSource module then
+              throw (IO.userError "PSC1_TS_RUNTIME_SELECTION_NORMALIZATION")
+            count := count + 1
+  IO.println ("PSC1_TS_MODULE_NORMALIZATION: exact old/new output and runtime choices; cases=" ++ toString count)

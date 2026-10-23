@@ -1133,10 +1133,10 @@ def psRustEmitExprWorkerWithBorrowed
       fun (_locals : List String) (_expr : PsVerifiedIrExpr) =>
         Except.error PsRustEmitError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          List String -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
-        psRustEmitExprWorkerWithBorrowed declarations wrappers remaining;
       fun (locals : List String) (expr : PsVerifiedIrExpr) =>
+        let smaller :
+            List String -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
+          psRustEmitExprWorkerWithBorrowed declarations wrappers remaining;
         let emitNested : PsVerifiedIrExpr -> Except PsRustEmitError String :=
           smaller locals;
         let emitStored : PsVerifiedIrExpr -> Except PsRustEmitError String :=
@@ -1213,7 +1213,7 @@ def psRustEmitExprWorkerWithBorrowed
                           (psRustConcat2
                             (psRustJoin ", " printedArguments)
                             ")"))
-            | PsVerifiedIrExpr.letE name type value body =>
+        | PsVerifiedIrExpr.letE name type value body =>
           match emitNested value with
           | Except.error error => Except.error error
           | Except.ok printedValue =>

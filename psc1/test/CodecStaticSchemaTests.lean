@@ -232,101 +232,164 @@ end PsCodecStaticReference
 
 namespace PsCodecStaticProof
 
-theorem quote_0 : psJsonQuote "a" = "\"a\"" := by rfl
+theorem quote_0 : psJsonQuote "a" = "\"a\"" := by decide
 
-theorem quote_1 : psJsonQuote "s" = "\"s\"" := by rfl
+theorem quote_1 : psJsonQuote "s" = "\"s\"" := by decide
 
-theorem quote_2 : psJsonQuote "n" = "\"n\"" := by rfl
+theorem quote_2 : psJsonQuote "n" = "\"n\"" := by decide
 
-theorem quote_3 : psJsonQuote "z" = "\"z\"" := by rfl
+theorem quote_3 : psJsonQuote "z" = "\"z\"" := by decide
 
-theorem quote_4 : psJsonQuote "max" = "\"max\"" := by rfl
+theorem quote_4 : psJsonQuote "max" = "\"max\"" := by decide
 
-theorem quote_5 : psJsonQuote "imax" = "\"imax\"" := by rfl
+theorem quote_5 : psJsonQuote "imax" = "\"imax\"" := by decide
 
-theorem quote_6 : psJsonQuote "p" = "\"p\"" := by rfl
+theorem quote_6 : psJsonQuote "p" = "\"p\"" := by decide
 
-theorem quote_7 : psJsonQuote "b" = "\"b\"" := by rfl
+theorem quote_7 : psJsonQuote "b" = "\"b\"" := by decide
 
-theorem quote_8 : psJsonQuote "sort" = "\"sort\"" := by rfl
+theorem quote_8 : psJsonQuote "sort" = "\"sort\"" := by decide
 
-theorem quote_9 : psJsonQuote "const" = "\"const\"" := by rfl
+theorem quote_9 : psJsonQuote "const" = "\"const\"" := by decide
 
-theorem quote_10 : psJsonQuote "app" = "\"app\"" := by rfl
+theorem quote_10 : psJsonQuote "app" = "\"app\"" := by decide
 
-theorem quote_11 : psJsonQuote "lam" = "\"lam\"" := by rfl
+theorem quote_11 : psJsonQuote "lam" = "\"lam\"" := by decide
 
-theorem quote_12 : psJsonQuote "forall" = "\"forall\"" := by rfl
+theorem quote_12 : psJsonQuote "forall" = "\"forall\"" := by decide
 
-theorem quote_13 : psJsonQuote "let" = "\"let\"" := by rfl
+theorem quote_13 : psJsonQuote "let" = "\"let\"" := by decide
 
-theorem quote_14 : psJsonQuote "nat" = "\"nat\"" := by rfl
+theorem quote_14 : psJsonQuote "nat" = "\"nat\"" := by decide
 
-theorem quote_15 : psJsonQuote "str" = "\"str\"" := by rfl
+theorem quote_15 : psJsonQuote "str" = "\"str\"" := by decide
 
-theorem quote_16 : psJsonQuote "proj" = "\"proj\"" := by rfl
+theorem quote_16 : psJsonQuote "proj" = "\"proj\"" := by decide
+
+theorem quote_17 : psJsonQuote "e" = "\"e\"" := by decide
+
+theorem quote_18 : psJsonQuote "i" = "\"i\"" := by decide
+
+theorem quote_19 : psJsonQuote "k" = "\"k\"" := by decide
+
+theorem quote_20 : psJsonQuote "v" = "\"v\"" := by decide
+
+theorem quote_21 : psJsonQuote "t" = "\"t\"" := by decide
+
+theorem quote_22 : psJsonQuote "bi" = "\"bi\"" := by decide
+
+theorem quote_23 : psJsonQuote "f" = "\"f\"" := by decide
+
+theorem quote_24 : psJsonQuote "ls" = "\"ls\"" := by decide
+
+theorem quote_25 : psJsonQuote "l" = "\"l\"" := by decide
+
+theorem quote_26 : psJsonQuote "r" = "\"r\"" := by decide
+
+theorem quote_27 : psJsonQuote "o" = "\"o\"" := by decide
 
 theorem schema_0 (v0 v1 v2 v3 : String) :
     psJsonObject [Prod.mk "e" v0, Prod.mk "i" v1, Prod.mk "k" v2, Prod.mk "n" v3] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"e\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"i\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v2))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") (v3))))))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"e\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"i\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v2))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") (v3))))))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_1 (v0 v1 : String) :
     psJsonObject [Prod.mk "k" v0, Prod.mk "v" v1] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") (v1))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") (v1))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_2 (v0 v1 v2 v3 v4 : String) :
     psJsonObject [Prod.mk "b" v0, Prod.mk "k" v1, Prod.mk "n" v2, Prod.mk "t" v3, Prod.mk "v" v4] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"b\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"n\"") (String.Internal.append (":") (v2))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"t\"") (String.Internal.append (":") (v3))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") (v4))))))))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"b\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"n\"") (String.Internal.append (":") (v2))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"t\"") (String.Internal.append (":") (v3))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") (v4))))))))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_3 (v0 v1 v2 v3 v4 : String) :
     psJsonObject [Prod.mk "b" v0, Prod.mk "bi" v1, Prod.mk "k" v2, Prod.mk "n" v3, Prod.mk "t" v4] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"b\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"bi\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v2))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"n\"") (String.Internal.append (":") (v3))) (String.Internal.append (",") (String.Internal.append ("\"t\"") (String.Internal.append (":") (v4))))))))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"b\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"bi\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v2))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"n\"") (String.Internal.append (":") (v3))) (String.Internal.append (",") (String.Internal.append ("\"t\"") (String.Internal.append (":") (v4))))))))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_4 (v0 v1 v2 : String) :
     psJsonObject [Prod.mk "a" v0, Prod.mk "f" v1, Prod.mk "k" v2] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"a\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"f\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"k\"") (String.Internal.append (":") (v2))))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"a\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"f\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"k\"") (String.Internal.append (":") (v2))))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_5 (v0 v1 v2 : String) :
     psJsonObject [Prod.mk "k" v0, Prod.mk "ls" v1, Prod.mk "n" v2] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"ls\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") (v2))))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"ls\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") (v2))))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_6 (v0 v1 : String) :
     psJsonObject [Prod.mk "k" v0, Prod.mk "l" v1] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"l\"") (String.Internal.append (":") (v1))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"l\"") (String.Internal.append (":") (v1))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_7 (v0 v1 : String) :
     psJsonObject [Prod.mk "i" v0, Prod.mk "k" v1] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"i\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"k\"") (String.Internal.append (":") (v1))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"i\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"k\"") (String.Internal.append (":") (v1))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_8 (v0 v1 : String) :
     psJsonObject [Prod.mk "k" v0, Prod.mk "n" v1] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") (v1))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"n\"") (String.Internal.append (":") (v1))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_9 (v0 v1 v2 : String) :
     psJsonObject [Prod.mk "k" v0, Prod.mk "l" v1, Prod.mk "r" v2] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"l\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"r\"") (String.Internal.append (":") (v2))))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"l\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"r\"") (String.Internal.append (":") (v2))))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_10 (v0 v1 : String) :
     psJsonObject [Prod.mk "k" v0, Prod.mk "o" v1] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"o\"") (String.Internal.append (":") (v1))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append ("\"o\"") (String.Internal.append (":") (v1))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_11 (v0 : String) :
     psJsonObject [Prod.mk "k" v0] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem schema_12 (v0 v1 v2 : String) :
     psJsonObject [Prod.mk "k" v0, Prod.mk "p" v1, Prod.mk "v" v2] =
-      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"p\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") (v2))))))) ("}")) := by rfl
+      String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append ("\"k\"") (String.Internal.append (":") (v0))) (String.Internal.append (",") (String.Internal.append (String.Internal.append ("\"p\"") (String.Internal.append (":") (v1))) (String.Internal.append (",") (String.Internal.append ("\"v\"") (String.Internal.append (":") (v2))))))) ("}")) := by
+  simp only [psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+    psJsonConcat3, psJsonConcat2, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27]
+  <;> rfl
 
 theorem name_eq (value : PsName) :
     PsCodecStaticReference.psEncodeCodecName value = psEncodeCodecName value := by
   induction value <;>
-    simp_all only [PsCodecStaticReference.psEncodeCodecName, psEncodeCodecName] <;> rfl
+    simp_all only [PsCodecStaticReference.psEncodeCodecName, psEncodeCodecName, psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+      psJsonConcat3, psJsonConcat2, psCheckedAdmissionJsonField, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27] <;> rfl
 
 theorem level_eq (value : PsLevel) :
     PsCodecStaticReference.psEncodeCodecLevel value = psEncodeCodecLevel value := by
   induction value <;>
-    simp_all only [PsCodecStaticReference.psEncodeCodecLevel, psEncodeCodecLevel, name_eq] <;> rfl
+    simp_all only [PsCodecStaticReference.psEncodeCodecLevel, psEncodeCodecLevel, name_eq, psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+      psJsonConcat3, psJsonConcat2, psCheckedAdmissionJsonField, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27] <;> rfl
 
 theorem level_list_eq (values : List PsLevel) :
     PsCodecStaticReference.psEncodeCodecLevelList values = psEncodeCodecLevelList values := by
@@ -336,13 +399,15 @@ theorem level_list_eq (values : List PsLevel) :
 theorem levels_eq (values : List PsLevel) :
     PsCodecStaticReference.psEncodeCodecLevels values = psEncodeCodecLevels values := by
   simp only [PsCodecStaticReference.psEncodeCodecLevels, psEncodeCodecLevels, level_list_eq]
+  <;> rfl
 
 theorem expr_eq (value : PsExpr) :
     PsCodecStaticReference.psEncodeCodecExpr value = psEncodeCodecExpr value := by
   induction value <;>
     simp_all only [PsCodecStaticReference.psEncodeCodecExpr, psEncodeCodecExpr,
       name_eq, level_eq, levels_eq, PsCodecStaticReference.psEncodeCodecBinderInfo,
-      psEncodeCodecBinderInfo] <;> rfl
+      psEncodeCodecBinderInfo, psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
+      psJsonConcat3, psJsonConcat2, psCheckedAdmissionJsonField, quote_0, quote_1, quote_2, quote_3, quote_4, quote_5, quote_6, quote_7, quote_8, quote_9, quote_10, quote_11, quote_12, quote_13, quote_14, quote_15, quote_16, quote_17, quote_18, quote_19, quote_20, quote_21, quote_22, quote_23, quote_24, quote_25, quote_26, quote_27] <;> rfl
 
 #print axioms name_eq
 #print axioms level_eq

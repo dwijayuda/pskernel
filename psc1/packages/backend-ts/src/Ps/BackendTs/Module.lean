@@ -211,7 +211,7 @@ def psTsStackRuntimeSupport : String :=
 -- Cache two immutable strings so pairwise comparisons reuse both byte indexes.
 -- Retention is bounded; character access remains exact at UTF-8 boundaries.
 def psTsUtf8RuntimeSupport : String :=
-  "type __ps$Utf8View = { readonly text: string; readonly size: bigint; readonly positions: Uint32Array };\nlet __ps$lastUtf8: __ps$Utf8View | undefined;\nlet __ps$previousUtf8: __ps$Utf8View | undefined;\nfunction __ps$utf8Width(code: number): number { return code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4; }\nfunction __ps$utf8(text: string): __ps$Utf8View {\n  if (__ps$lastUtf8?.text === text) return __ps$lastUtf8;\n  if (__ps$previousUtf8?.text === text) return __ps$previousUtf8;\n  let size = 0;\n  for (const char of text) size += __ps$utf8Width(char.codePointAt(0) ?? 0);\n  const positions = new Uint32Array(size + 1);\n  let byte = 0, index = 0;\n  for (const char of text) {\n    positions[byte] = index + 1;\n    const __ps_w = __ps$utf8Width(char.codePointAt(0) ?? 0);\n    byte += __ps_w; index += char.length;\n  }\n  positions[size] = text.length + 1;\n  __ps$previousUtf8 = __ps$lastUtf8;\n  return __ps$lastUtf8 = { text, size: BigInt(size), positions };\n}\nfunction __ps$stringGet(text: string, position: bigint): string {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNext(text: string, position: bigint): bigint {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(text.codePointAt(index - 1) ?? 0));\n}"
+  "type __ps$Utf8View = { readonly token: symbol; readonly text: string; readonly size: bigint; readonly positions: Uint32Array };\nlet __ps$lastUtf8: __ps$Utf8View | undefined;\nlet __ps$previousUtf8: __ps$Utf8View | undefined;\nfunction __ps$utf8Width(code: number): number { return code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4; }\nfunction __ps$utf8(text: string): __ps$Utf8View {\n  if (__ps$lastUtf8?.text === text) return __ps$lastUtf8;\n  if (__ps$previousUtf8?.text === text) return __ps$previousUtf8;\n  let size = 0;\n  for (const char of text) size += __ps$utf8Width(char.codePointAt(0) ?? 0);\n  const positions = new Uint32Array(size + 1);\n  let byte = 0, index = 0;\n  for (const char of text) {\n    positions[byte] = index + 1;\n    const __ps_w = __ps$utf8Width(char.codePointAt(0) ?? 0);\n    byte += __ps_w; index += char.length;\n  }\n  positions[size] = text.length + 1;\n  __ps$previousUtf8 = __ps$lastUtf8;\n  return __ps$lastUtf8 = { token: Symbol(), text, size: BigInt(size), positions };\n}\nfunction __ps$stringGet(text: string, position: bigint): string {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNext(text: string, position: bigint): bigint {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(text.codePointAt(index - 1) ?? 0));\n}\nfunction __ps$utf8Known(text: string, token: symbol | undefined): __ps$Utf8View {\n  if (token !== undefined) {\n    if (__ps$lastUtf8?.token === token) return __ps$lastUtf8;\n    if (__ps$previousUtf8?.token === token) return __ps$previousUtf8;\n  }\n  return __ps$utf8(text);\n}\nfunction __ps$stringGetView(view: __ps$Utf8View, position: bigint): string {\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(view.text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNextView(view: __ps$Utf8View, position: bigint): bigint {\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(view.text.codePointAt(index - 1) ?? 0));\n}\n"
 
 def psTsRuntimeSupport : String :=
   psTsJoin "\n" [psTsStackRuntimeSupport, psTsUtf8RuntimeSupport]
@@ -785,46 +785,6 @@ def psTsEmitGeneratorLoopWithVisibility (isPublic : Bool)
                       "> { while (true) { ", statements, " } }\n__ps$implementations.set(",
                       declaration.name, ", ", implementation, ");"])
 
-def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))
-    (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
-  match psTsEmitPureDeclaration isPublic brands tags declaration with
-  | Option.some source => Except.ok source
-  | Option.none =>
-      match psTsEmitCountLoopWithVisibility isPublic tags declaration with
-      | Option.some loop => Except.ok loop
-      | Option.none =>
-          match psTsEmitTailLoopWithVisibility isPublic brands tags declaration with
-          | Option.some loop => Except.ok loop
-          | Option.none =>
-              match psTsEmitGeneratorLoopWithVisibility isPublic brands tags declaration with
-              | Option.some loop => Except.ok loop
-              | Option.none => psTsEmitDeclarationGeneralWithVisibility isPublic brands tags declaration
-
-def psTsEmitDeclaration (brands tags : List (Prod String String)) (value : PsVerifiedIrDeclaration) :
-    Except PsTsEmitError String := psTsEmitDeclarationWithVisibility true brands tags value
-
-def psTsFlattenLines (groups : List (List String)) : List String :=
-  match groups with
-  | List.nil => List.nil
-  | List.cons lines rest => psTsAppendLines lines (psTsFlattenLines rest)
-
-def psTsEmitModule
-    (module : PsVerifiedIrModule) :
-    Except PsTsEmitError String :=
-  let brands := psTsBuildBrandMap module;
-  let tags := psTsBuildTagMap module;
-  match psListMapExcept (psTsEmitStructure brands) module.structures with
-  | Except.error error => Except.error error
-  | Except.ok structures =>
-      match psListMapExcept (psTsEmitInductive tags) module.inductives with
-      | Except.error error => Except.error error
-      | Except.ok inductives =>
-          match psListMapExcept (psTsEmitDeclaration brands tags) module.declarations with
-          | Except.error error => Except.error error
-          | Except.ok declarations =>
-              let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];
-              let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
-              Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
 
 partial def psTsNeedsUtf8Runtime (expr : PsVerifiedIrExpr) : Bool :=
   match expr with
@@ -855,6 +815,295 @@ partial def psTsNeedsUtf8Runtime (expr : PsVerifiedIrExpr) : Bool :=
         psListAny
           (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
             psTsNeedsUtf8Runtime alternative.snd.snd) alternatives
+
+
+-- Tokens identify only the two existing runtime views. A token never retains a
+-- String or positions array; an evicted token falls back to the original lookup.
+def psTsViewName (index : Nat) : String := psTsJoin "" ["__ps$view$", psNatToString index]
+def psTsViewTokenName (index : Nat) : String := psTsJoin "" ["__ps$viewToken$", psNatToString index]
+
+def psTsViewParameters (parameters : List PsVerifiedIrParameter) : List PsVerifiedIrParameter :=
+  match parameters with
+  | [] => []
+  | parameter :: rest =>
+      match parameter.type with
+      | .primitive .string => parameter :: psTsViewParameters rest
+      | _ => psTsViewParameters rest
+
+def psTsViewBindings (parameters : List PsVerifiedIrParameter) (index : Nat) : List (String × String) :=
+  match parameters with
+  | [] => []
+  | parameter :: rest => (parameter.name, psTsViewName index) :: psTsViewBindings rest (Nat.succ index)
+
+def psTsViewPrelude (parameters : List PsVerifiedIrParameter) (index : Nat) : String :=
+  match parameters with
+  | [] => ""
+  | parameter :: rest =>
+      let token := psTsViewTokenName index;
+      let getter := psTsViewName index;
+      psTsJoin "" ["let ", token, ": symbol | undefined; const ", getter,
+        " = (): __ps$Utf8View => ((view: __ps$Utf8View) => { ", token,
+        " = view.token; return view; })(__ps$utf8Known(", parameter.name, ", ", token, ")); ", psTsViewPrelude rest (Nat.succ index)]
+
+def psTsViewFresh (declaration : PsVerifiedIrDeclaration) (parameters : List PsVerifiedIrParameter) (index : Nat) : Bool :=
+  match parameters with
+  | [] => true
+  | _ :: rest =>
+      let uses : String -> Bool := fun name =>
+        psStringEq name declaration.name ||
+        psListAny (fun (parameter : PsVerifiedIrParameter) => psStringEq name parameter.name) declaration.parameters ||
+        psTsExprUsesNameWithFuel 4096 declaration.body name;
+      if uses (psTsViewName index) || uses (psTsViewTokenName index) then false
+      else psTsViewFresh declaration rest (Nat.succ index)
+
+def psTsViewWithout (views : List (String × String)) (name : String) : List (String × String) :=
+  match views with
+  | [] => []
+  | entry :: rest =>
+      if psStringEq entry.fst name then psTsViewWithout rest name
+      else entry :: psTsViewWithout rest name
+
+def psTsViewAlias (views : List (String × String)) (name : String) (value : PsVerifiedIrExpr) : List (String × String) :=
+  let remaining := psTsViewWithout views name;
+  match value with
+  | .var original =>
+      match psTsLookup views original with
+      | .some getter => (name, getter) :: remaining
+      | .none => remaining
+  | _ => remaining
+
+def psTsViewInvariant (views : List (String × String))
+    (parameters : List PsVerifiedIrParameter) (arguments : List PsVerifiedIrExpr) : Bool :=
+  match parameters, arguments with
+  | [], [] => true
+  | parameter :: rest, argument :: tail =>
+      match psTsLookup views parameter.name with
+      | .none => psTsViewInvariant views rest tail
+      | .some expected =>
+          match argument with
+          | .var name =>
+              match psTsLookup views name with
+              | .some actual => psStringEq expected actual && psTsViewInvariant views rest tail
+              | .none => false
+          | _ => false
+  | _, _ => false
+
+-- Only pure expressions are admitted by the surrounding tail-loop recognizer.
+-- Position arguments are evaluated before lazy view lookup, as in the old calls.
+def psTsViewPureWithFuel (brands tags views : List (String × String)) (fuel : Nat) :
+    PsVerifiedIrExpr -> Except PsTsEmitError String :=
+  match fuel with
+  | .zero => fun _ => .error .fuelExhausted
+  | .succ remaining => fun expr =>
+      let recur := psTsViewPureWithFuel brands tags views remaining;
+      match expr with
+      | .intrinsic operation _ arguments =>
+          match psListMapExcept recur arguments with
+          | .error error => .error error
+          | .ok printed =>
+              let ordinary := psTsEmitIntrinsicFromPrinted operation printed;
+              match arguments, printed with
+              | .var name :: _, _ :: rest =>
+                  match psTsLookup views name with
+                  | .none => ordinary
+                  | .some getter =>
+                      match operation, rest with
+                      | .stringUtf8ByteSize, [] => .ok (psTsJoin "" [getter, "().size"])
+                      | .stringAtEnd, position :: [] =>
+                          .ok (psTsJoin "" ["((__ps_p: bigint) => __ps_p >= ", getter, "().size)(", position, ")"])
+                      | .stringGet, position :: [] =>
+                          .ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringGetView(", getter, "(), __ps_p))(", position, ")"])
+                      | .stringNext, position :: [] =>
+                          .ok (psTsJoin "" ["((__ps_p: bigint) => __ps$stringNextView(", getter, "(), __ps_p))(", position, ")"])
+                      | _, _ => ordinary
+              | _, _ => ordinary
+      | .ifE condition left right =>
+          match recur condition, recur left, recur right with
+          | .ok c, .ok l, .ok r => .ok (psTsJoin "" ["(", c, " ? ", l, " : ", r, ")"])
+          | .error error, _, _ => .error error
+          | _, .error error, _ => .error error
+          | _, _, .error error => .error error
+      | _ => psTsEmitExpr brands tags expr
+
+def psTsViewTailValue (views : List (String × String)) (generated : Bool)
+    (brands tags : List (String × String)) (aliases : List PsTsTailAlias)
+    (expected : Option PsVerifiedIrType) (tail : Bool) (expr : PsVerifiedIrExpr) : Option String :=
+  if generated then psTsTailEmitValue true brands tags aliases expected tail expr
+  else if psTsTailPureWithFuel aliases 4096 expr then
+    match psTsViewPureWithFuel brands tags views 4096 expr with
+    | .error _ => .none
+    | .ok printed => .some printed
+  else .none
+
+def psTsViewTailReturn (views : List (String × String)) (generated : Bool)
+    (brands tags : List (String × String)) (declaration : PsVerifiedIrDeclaration)
+    (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) : Option String :=
+  match psTsViewTailValue views generated brands tags aliases (.some declaration.resultType) true expr with
+  | .none => .none
+  | .some printed => .some (psTsJoin "" ["return ", printed, ";"])
+
+def psTsViewTailContextWithFuel (views : List (String × String)) (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (generated : Bool) (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+  match fuel with
+  | Nat.zero => fun (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining =>
+      fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
+        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsViewTailContextWithFuel views brands tags declaration generated remaining;
+        let emitPure : PsVerifiedIrExpr -> Option String := psTsViewTailValue views generated brands tags aliases Option.none false;
+        match expr with
+        | PsVerifiedIrExpr.call fn types arguments =>
+            if psListIsEmpty types then
+              match psTsTailCallArguments declaration.name aliases fn arguments with
+              | Option.none =>
+                  if generated then psTsViewTailReturn views true brands tags declaration aliases expr
+                  else Option.none
+              | Option.some actual =>
+                  if Nat.beq (psListLength actual) (psListLength declaration.parameters) && psTsViewInvariant views declaration.parameters actual then
+                    match psTsTailMap emitPure actual with
+                    | Option.none => Option.none
+                    | Option.some printed =>
+                        let parameterName : PsVerifiedIrParameter -> String := fun (parameter : PsVerifiedIrParameter) => parameter.name;
+                        Option.some (psTsJoin "" ["[", psTsJoin ", " (psListMap parameterName declaration.parameters),
+                          "] = [", psTsJoin ", " printed, "]; continue;"])
+                  else Option.none
+            else if generated then psTsViewTailReturn views true brands tags declaration aliases expr
+            else Option.none
+        | PsVerifiedIrExpr.letE name type value body =>
+            if psTsExprUsesNameWithFuel 4096 value name then Option.none
+            else if psTsTailBindingSafe declaration aliases name then
+              match psTsTailAliasValue declaration.name name value with
+              | Option.some alias =>
+                  let capturedAlias : PsVerifiedIrExpr -> Bool := fun (argument : PsVerifiedIrExpr) =>
+                    if psTsTailPureWithFuel aliases 4096 argument then false else true;
+                  if psListAny capturedAlias alias.captured then Option.none
+                  else smaller (List.cons alias aliases) body
+              | Option.none =>
+                  match psTsViewTailValue views generated brands tags aliases (Option.some type) false value with
+                  | Option.none => Option.none
+                  | Option.some printedValue =>
+                      match psTsEmitType type with
+                      | Except.error _ => Option.none
+                      | Except.ok printedType =>
+                          match psTsViewTailContextWithFuel (psTsViewAlias views name value) brands tags declaration generated remaining aliases body with
+                          | Option.none => Option.none
+                          | Option.some printedBody => Option.some (psTsJoin "" ["{ const ", name, ": ", printedType,
+                              " = ", printedValue, "; ", printedBody, " }"])
+            else Option.none
+        | PsVerifiedIrExpr.ifE condition left right =>
+            match emitPure condition with
+            | Option.none => Option.none
+            | Option.some printedCondition =>
+                match smaller aliases left with
+                | Option.none => Option.none
+                | Option.some printedLeft =>
+                    match smaller aliases right with
+                    | Option.none => Option.none
+                    | Option.some printedRight => Option.some (psTsJoin "" ["if (", printedCondition, ") { ",
+                        printedLeft, " } else { ", printedRight, " }"])
+        | PsVerifiedIrExpr.matchE name _ scrutinee alternatives =>
+            if psListIsEmpty alternatives then Option.none
+            else
+              match psTsLookup tags name with
+              | Option.none => Option.none
+              | Option.some tag =>
+                  match emitPure scrutinee with
+                  | Option.none => Option.none
+                  | Option.some printedScrutinee =>
+                      let temporary := psTsFreshMatchTemp declaration.body;
+                      let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>
+                        if psTsTailBindingSafe declaration aliases binding.name && (match psTsLookup views binding.name with | .none => true | .some _ => false) then
+                          match psTsEmitType binding.type with
+                          | Except.error _ => Option.none
+                          | Except.ok type => Option.some (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temporary, ".", binding.field, ";"])
+                        else Option.none;
+                      let printAlternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Option String :=
+                        fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                          match psTsTailMap printBinding (Prod.fst (Prod.snd alternative)) with
+                          | Option.none => Option.none
+                          | Option.some bindings =>
+                              match smaller aliases (Prod.snd (Prod.snd alternative)) with
+                              | Option.none => Option.none
+                              | Option.some body => Option.some (psTsJoin "" ["case ", psJsonQuote (Prod.fst alternative), ": { ",
+                                  psTsJoin " " bindings, " ", body, " }"]);
+                      if psTsTailBindingSafe declaration aliases temporary then
+                        match psTsTailMap printAlternative alternatives with
+                        | Option.none => Option.none
+                        | Option.some cases => Option.some (psTsJoin "" ["{ const ", temporary, " = ", printedScrutinee,
+                            "; switch (", temporary, "[", tag, "]) { ", psTsJoin " " cases,
+                            " } throw new Error(\"invalid ProofScript constructor tag\"); }"])
+                      else Option.none
+        | _ => psTsViewTailReturn views generated brands tags declaration aliases expr
+
+
+def psTsEmitViewTailLoopWithVisibility (isPublic : Bool) (brands tags : List (String × String))
+    (declaration : PsVerifiedIrDeclaration) : Option String :=
+  let parameters := psTsViewParameters declaration.parameters;
+  if psListIsEmpty parameters || Nat.blt 2 (psListLength parameters) then .none
+  else if psTsNeedsUtf8Runtime declaration.body then
+    if psListIsEmpty declaration.typeParameters && psTsViewFresh declaration parameters 0 then
+      let views := psTsViewBindings parameters 0;
+      let body := psTsInlineEtaApplication declaration.body;
+      match psTsViewTailContextWithFuel views brands tags declaration false 4096 [] body with
+      | .none => .none
+      | .some printedBody =>
+          match psTsTailMap psTsEmitPureParameter declaration.parameters with
+          | .none => .none
+          | .some printedParameters =>
+              match psTsEmitType declaration.resultType with
+              | .error _ => .none
+              | .ok resultType =>
+                  .some (psTsJoin "" [(if isPublic then "export function " else "function "), declaration.name,
+                    "(", psTsJoin ", " printedParameters, "): ", resultType, " { ",
+                    psTsViewPrelude parameters 0, "while (true) { ", printedBody, " } }"])
+    else .none
+
+
+  else .none
+
+def psTsEmitDeclarationWithVisibility (isPublic : Bool) (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
+  match psTsEmitPureDeclaration isPublic brands tags declaration with
+  | Option.some source => Except.ok source
+  | Option.none =>
+      match psTsEmitCountLoopWithVisibility isPublic tags declaration with
+      | Option.some loop => Except.ok loop
+      | Option.none =>
+          match psTsEmitViewTailLoopWithVisibility isPublic brands tags declaration with
+          | Option.some loop => Except.ok loop
+          | Option.none =>
+              match psTsEmitTailLoopWithVisibility isPublic brands tags declaration with
+              | Option.some loop => Except.ok loop
+              | Option.none =>
+                  match psTsEmitGeneratorLoopWithVisibility isPublic brands tags declaration with
+                  | Option.some loop => Except.ok loop
+                  | Option.none => psTsEmitDeclarationGeneralWithVisibility isPublic brands tags declaration
+    
+def psTsEmitDeclaration (brands tags : List (Prod String String)) (value : PsVerifiedIrDeclaration) :
+    Except PsTsEmitError String := psTsEmitDeclarationWithVisibility true brands tags value
+
+def psTsFlattenLines (groups : List (List String)) : List String :=
+  match groups with
+  | List.nil => List.nil
+  | List.cons lines rest => psTsAppendLines lines (psTsFlattenLines rest)
+
+def psTsEmitModule
+    (module : PsVerifiedIrModule) :
+    Except PsTsEmitError String :=
+  let brands := psTsBuildBrandMap module;
+  let tags := psTsBuildTagMap module;
+  match psListMapExcept (psTsEmitStructure brands) module.structures with
+  | Except.error error => Except.error error
+  | Except.ok structures =>
+      match psListMapExcept (psTsEmitInductive tags) module.inductives with
+      | Except.error error => Except.error error
+      | Except.ok inductives =>
+          match psListMapExcept (psTsEmitDeclaration brands tags) module.declarations with
+          | Except.error error => Except.error error
+          | Except.ok declarations =>
+              let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];
+              let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
+              Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
+
 
 def psTsOptionIsNone {alpha : Type} (value : Option alpha) : Bool :=
   match value with

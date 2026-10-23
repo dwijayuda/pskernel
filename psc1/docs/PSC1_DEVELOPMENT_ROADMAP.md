@@ -1,81 +1,66 @@
 # PSC1 development roadmap
 
-Updated 2026-10-23. The frozen [Practical Core v1 contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json)
-owns the 14 feature families, 37 finite criteria, both grammars, seven targets and
-four application categories. [AI_WORK_STATE.md](../AI_WORK_STATE.md) owns current
-continuation; [the canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json)
-owns exact source/tool identities, runs, timings, memory, failures and artifacts.
+Updated2026-10-23. The frozen [Practical Core v1 contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json)
+owns14 families,37 finite criteria, both grammars, seven targets and four
+application categories. [AI_WORK_STATE.md](../AI_WORK_STATE.md) owns continuation.
+[Compact results](PSC1_SELFHOST_PROFILES_QUALIFICATION_2026-10-23.json) derive from
+[the canonical receipt](PSC1_RUST_TS_SELFHOST_QUALIFICATION_2026-10-23.json).
 
-## Qualified baseline and profile outcomes
+## Verified state
 
-Integrated source 5ce2fc74b9f01682832ddc10ec9ef27f26458564, tested merge
-a61eecf46ded19eedcdefcb320aa33118cd8f2ad,
-[run 39909569028](https://github.com/dwijayuda/pskernel/actions/runs/39909569028):
-all selected jobs, 47 full-job steps and 37/37 criteria pass. Benchmark is
-dependency-skipped. Both grammars, seven mappings, applications, official
-admission, strict IR, negatives and unpublished installed native package remain
-qualified. PSC1 Lean source is unchanged from qualified 78fe34b8.
+Integrated5ce2fc74 / mergea61eecf4 / run39909569028 passes all selected jobs,
+47 full steps and37/37 criteria; benchmark dependency-skipped. Both grammars,
+all7 backends, practical applications, official admission, strict IR, negatives,
+minimum Python and unpublished native package remain qualified.
 
-Rust isolated source 5e0b548e6cb3606ee0d3c129e0a829d830e407e4 / request
-7d8865a08427a28432e427592dfc4263718c9a2f qualifies actual G1/G2/G3 and the exact
-fixed point in [run 39908529181](https://github.com/dwijayuda/pskernel/actions/runs/39908529181).
-G2/G3 requests complete in 692788/660042 ms at 668192/668184 KiB maxRSS.
-Source/admission/original-IR/transformed-IR/corpus and executable bytes match
-across the three generations. Independent clean-build repeats remain distinct.
+Isolated Rust source5e0b548e/request7d8865a0/run39908529181 genuinely passes
+G1/G2/G3 and exact fixed point under correctness-1800s. G2/G3 take692788/660042ms,
+maxRSS668192/668184KiB; all three executable hashes match within this pipeline.
+The original240s profile remains failed and independent clean repeats unqualified.
 
-TypeScript shared-codec source passes G1 and ten cases, then times out at
-1800240 ms / 2995304 KiB in run39908439190; G3/fixed point are not run.
-Original performance-240s runs still fail G2: Rust240034 ms and TS240141 ms.
-A long correctness pass never grants a performance badge.
-[Profile policy and commands](PSC1_SELFHOST_QUALIFICATION_PROFILES.md).
+Every TS trial passes G1 and ten cases, then times out at1800s. Shared codec,
+direct predicate, applied lookup and two-view Map results are separately recorded.
+G3/fixed point are not run. The Map passes1458 runtime comparisons and preserves
+two views/order but establishes no synthetic or completed-compiler advantage;
+it is not selected for promotion. Preserve it as an experiment.
 
-## Dependency-ordered remaining queue
+## Dependency-ordered queue
 
-| Order | Work | Current evidence | Finite acceptance |
+| Order | Work | Evidence | Acceptance |
 | --- | --- | --- | --- |
-| 1 | Finish TS predicate and applied-lookup corrections | Predicate run39913434540 and combined source0938c895/request10ac556f/run39914906360; all-Char and all-list/name/fuel/index/hash proofs, native regressions and audits pass; actual generations running | Independently admit/build/execute G2/G3 and exact source/closure/admission/original/transformed IR/ten-case fixed points under correctness-1800s |
-| 2 | Optimize both targets toward 240s | Rust correctness qualified but G2/G3 take about11min; TS remains blocked; actual current profiles retained | Actual performance-240s G1/G2/G3 and unchanged fixed-point/negative/identity requirements |
-| 3 | Promote coherent validated sources | Main profile/host machinery is qualified; compiler/backend/codec candidates stay isolated | Fetch latest HEAD, reconcile by dependency-coherent files, preserve TS result annotations/all targets, non-force integration and fresh full seven-backend/application qualification |
-| 4 | Qualify separate clean-build reproducibility | Rust executable bytes match G1/G2/G3 within one pipeline and pinned tool/lock identities | Repeated clean target builds in independent directories/environments; readable code, TS declarations/maps |
-| 5 | Finish practical distribution | Native package and target artifacts remain unpublished | Required final qualification and explicit authorization before any merge or publication |
+| 1 | Diagnose remaining TS string-comparison cost on preferred applied-lookup baseline | Source0938c895/request10ac556f; proof/native/audit/G1 pass, G2 timeout1800149ms. Saved current profile39918874112 has StringEqual61.8% under psStringEqFromWithFuel | Same-input generated-code/caller/argument-size evidence, then an all-input-equivalent targeted change and actual G2/G3/fixed point under1800s |
+| 2 | Optimize toward the unchanged240s target | Rust correctness qualified at about11min/request; TS still blocked | Actual performance-240s G1/G2/G3 with original identity, checking and negative requirements |
+| 3 | Promote coherent validated sources | Main integrates host profiles only; later compiler/backend changes stay isolated | Fresh HEAD/non-force updates, preserve TS annotations/all targets, fresh full seven-backend/application qualification |
+| 4 | Separate clean-build reproducibility | Rust executable bytes match G1/G2/G3 in one pipeline | Independent clean builds and readable code/TS declarations/maps |
+| 5 | Final distribution | Native package and artifacts remain unpublished | Required final qualification and explicit merge/publication authorization |
 
-## Measured engineering direction
+For TS continue from workflow/docs descendanta10c0162, with compiler code identical
+to tested0938c895. Create a fresh experiment branch; do not reset later history.
+Do not promote unproven-benefit cache changes or retry unchanged full workloads.
 
-Use the same existing Ps.Compiler.Service source, frontend, elaborator, checked
-IR, verifier and emitters. Rust leads native execution; TypeScript leads readable
-npm-compatible distribution. DirectJS remains the qualified G1 reference; its
-tracked G2 heap defect and all previous evidence are retained.
+## Mechanisms and limits
 
-Current TS replay39912539573 covers the final30s of a bounded220s G2 run, not the
-end of the 1800s request. It still exposes generator/thunk overhead around the
-escape predicate, codec and constructor lookup. The current small correction
-replaces lazy Boolean disjunction with explicit branches and retains an official
-all-input equality theorem. The combined trial normalizes eager curried constructor/height lookup recursion into fully applied workers, with universal equality proofs and a 100001-entry native miss test. Existing function types and first-binding/fuel behavior remain. Measure actual compiler requests before declaring a gain.
-UTF-8 size/index cache-thrashing and prefix-scanning hypotheses remain unmeasured;
-do not expand the two-entry cache or alter raw-offset/Unicode behavior casually.
+All-input proofs preserve codec schemas, the direct escape predicate and fully
+applied constructor/height lookup workers. Actual specialized IR confirms the
+latter no longer return functions. Source-wrapper fixes that do not change the
+actual helper remain insufficient; inspect IR/calls, not source appearance alone.
+General lambda floating must preserve effect/trap/evaluation/fuel behavior;
+do not simply remove worker guards or replace String equality without proof.
 
-Rust late stack39906025465 reaches strict transformed-IR checking and nominal
-arity lookup. A bounded derived index is a possible measured-class correction,
-provided all-input lookup equality preserves first binding, duplicate names,
-structure/inductive priority, Array override, misses and report/resource behavior.
-Do not skip strict validation or remove generic worker guards. Checked scalar
-closed planning already removes open generics from these actual compiler plans.
+Rust late stack39906025465 reaches strict IR checking and nominal-arity lookup.
+Any derived index must prove lookup equality for first binding, duplicates,
+Array and structure/inductive priority and preserve report/resource behavior.
+Keep existing checked closed planning and generic fallback.
 
-## Invariants and workstreams
+performance-240s retains15-minute jobs/240000ms requests and builds.
+correctness-1800s is separate manual/release:120-minute jobs/110-minute step;
+only G2-self/G3-self get1800000ms. G1/corpus/builds stay240000ms and independent
+checker120000ms. Cleanup5s, streams32MiB, wire128MiB; fuel/heap/stack, strict IR,
+negatives, source identities and unsupported ABI refusals stay unchanged.
 
-performance-240s retains the existing 15-minute jobs and 240000ms process-tree
-deadline. correctness-1800s is a separate manual/release workflow with120-minute
-jobs and110-minute execution steps; only G2-self/G3-self receive1800000ms.
-G1/corpus/builds remain240000ms, independent checking120000ms, streams32MiB,
-wire128MiB and cleanup5s. Fuel, heap/stack, negatives, strict IR, official Lean
-4.35.0 admission and unsupported ABI refusals remain unchanged.
-
-Keep all-input lexer/cursor/codec proofs, Rust ownership/private linear Drop,
-checked TS generator results and generic ABI fallback. Preserve both grammars
-and all seven backend mappings. PSKernel Expression V2 research remains
-independent; it cannot block compiler work or replace official Lean admission.
-
-Avoid architectural duplication, unchanged full reruns and repeated audits.
-Evidence-only changes belong in the recognized canonical receipt and active
-Markdown. Passive historical JSON, including the initial profile-declaration
-snapshot, stays historical. No force pushes, merges or registry publication.
+Use the same compiler/frontend/elaborator/IR/verifier and all7 existing emitters.
+Official Lean4.35.0 remains authoritative; no handwritten compiler or native
+semantic delegation after the one seed. Preserve qualified G1, DirectJS reference
+and its G2 defect. ExpressionV2 research proceeds independently.
+Avoid speculative redesign, unchanged full CI and duplicate audits. Passive
+history stays frozen; compact evidence is derived, not a new acceptance contract.

@@ -3,7 +3,7 @@ name: PSC1 TS bridge lookup performance 240s
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-bridge-lookup-workers-20261023]
+    branches: [perf/psc1-ts-utf8-view-tokens-20261023]
     paths: [.github/qualification-requests/psc1-ts-generator-types.json]
 
 permissions:
@@ -45,7 +45,7 @@ jobs:
           const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
           assert.equal(r.schema,'psc1-rust-ts-selfhost-request/1');
           assert.equal(r.action,'qualify-independent-G1-G2-G3');
-          assert.equal(r.branch,'perf/psc1-bridge-lookup-workers-20261023');
+          assert.equal(r.branch,'perf/psc1-ts-utf8-view-tokens-20261023');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.deepEqual(r.targets,['ts']);assert.equal(r.resourcePolicy,'unchanged');
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);

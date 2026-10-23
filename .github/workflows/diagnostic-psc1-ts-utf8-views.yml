@@ -1,0 +1,89 @@
+name: PSC1 TS UTF8 view focused validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/psc1-ts-utf8-view-tokens-20261023]
+    paths: ['psc1/packages/backend-ts/**', 'psc1/test/TsUtf8ViewTests.lean', 'psc1/scripts/ts-utf8-view-runtime-tests.mjs', '.github/workflows/diagnostic-psc1-ts-utf8-views.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc1-ts-utf8-view-focused-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ts]
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-lake-rust-ts-service-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+      - name: Install pinned target tools and official Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          rustup default 1.90.0
+          npm ci --prefix .. --ignore-scripts
+      - name: Validate host syntax and unchanged generation boundaries
+        run: |
+          set -euo pipefail
+          node --check scripts/generated-target-qualification.mjs
+          node --check scripts/generated-target-corpus.mjs
+          node --check scripts/generated-target-runner.mjs
+          node --check host-tools/generated-target-tools.mjs
+          node scripts/generated-target-contract-tests.mjs
+          node --check scripts/selfhost-qualification-profiles.mjs
+          node scripts/bounded-process-contract-tests.mjs
+          node scripts/js-generation-manifest-contract-tests.mjs
+          node packages/pskernel-lean/host/check-pin.mjs
+      - name: Build the common source facades and separate official checker
+        run: |
+          set -euo pipefail
+          lake build psc1_ts_utf8_view_tests psc1_bridge_lookup_normalization_tests psc1_json_escape_predicate_tests psc1_json_quote_tests psc1_codec_static_schema_tests psc1_lexer_normalization_tests psc1_target_plan_profile_tests psc1_cursor_normalization_tests psc1_target_service_seed psc1_independent_checker psc1_js_service_tests psc1_source_census_probe psc1_ts_service_normalization_tests
+      - name: Preserve exact visitor behavior and DirectJS scalar functionality
+        run: |
+          .lake/build/bin/psc1_ts_utf8_view_tests
+          node scripts/ts-utf8-view-runtime-tests.mjs
+          .lake/build/bin/psc1_bridge_lookup_normalization_tests
+          .lake/build/bin/psc1_json_escape_predicate_tests
+          .lake/build/bin/psc1_json_quote_tests
+          .lake/build/bin/psc1_codec_static_schema_tests
+          .lake/build/bin/psc1_lexer_normalization_tests
+          .lake/build/bin/psc1_target_plan_profile_tests
+          .lake/build/bin/psc1_cursor_normalization_tests
+          .lake/build/bin/psc1_ts_service_normalization_tests
+          .lake/build/bin/psc1_js_service_tests
+      - name: Audit both grammar inputs
+        run: node scripts/generated-target-source-audit.mjs ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-ts-utf8-view-tests-${{ github.sha }}
+          path: psc1/dist/ts-utf8-views/
+          retention-days: 90

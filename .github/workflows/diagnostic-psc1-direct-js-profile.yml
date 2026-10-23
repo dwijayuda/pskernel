@@ -39,8 +39,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '40020523049'
-          artifact-ids: '12531877337'
+          run-id: '40027650302'
+          artifact-ids: '12535705338'
           path: input/direct-js
       - name: Profile exact retained generated compiler and captured G2 request
         working-directory: psc1

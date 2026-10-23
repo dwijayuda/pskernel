@@ -1,15 +1,15 @@
 {
   "schema": "psc1-direct-generated-profile-request/1",
-  "runId": 40020523049,
-  "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
-  "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
-  "artifactId": 12531877337,
-  "artifactDigest": "sha256:695440e0d7c763d6e0356e8448a5c1d93d8c4ce21a6070e13a735d3ca11a30c6",
+  "runId": 40027650302,
+  "requestCommit": "85433830522dc0cc52541b985510122b67dea364",
+  "sourceCommit": "949d687b8977bb1fec3697293818f6d9d07f92a4",
+  "artifactId": 12535705338,
+  "artifactDigest": "sha256:d4b496389441b85148d9bd2a9f3bd939fd784f3adc63ca8cbb30ca49d04cec4e",
   "target": "js",
   "requestId": "G2-self",
-  "sourceClosureDigest": "0d7371b426f06361a39bf68e3c16baac0766d635aac5d01a4435d0747f3ca114",
-  "serviceSha256": "df6c13f330c81ba16ac7083706e2ff5c3e580be58ea996ad5301f1a6aca0ba84",
-  "requestSha256": "3e84765b085b41fc916e4dd1e81b56b1a9b2bfa46ee0e95760bcdccc0ea7a8a7",
-  "purpose": "Measure actual generated statement-loop compiler on its exact retained G2 request; diagnostic only, no qualification or policy change.",
-  "attempt": 3
+  "sourceClosureDigest": "0ef7bebb4f808a1627eacded0275ae2ac0cf7eb09dc9e814c6f3610488f39b31",
+  "serviceSha256": "006c2251443402f9f1fc03939894e1884c770a359a78aded0a748684b58e3d20",
+  "requestSha256": "b76ce67791ae41b8aab588028b1e04f3f23b48e9c89db087bcb0e7c9770ae68d",
+  "purpose": "Profile exact retained lazy-view G1 compiler on its real failed G2 request; verify actual emitted optimization shape; no qualification/resource changes.",
+  "attempt": 4
 }

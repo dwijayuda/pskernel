@@ -31,6 +31,16 @@ for(const file of ['scripts/generated-target-runner.mjs','scripts/selfhost-quali
 }
 const artifact=path.join(root,'G1-service/artifact.json'),m=verifyArtifact(artifact,expected.serviceSha256);
 assert.equal(m.target,'js');assert.equal(m.service,true);
+
+const source=fs.readFileSync(path.join(root,'G1-service/module.js'),'utf8');assert.equal(sha(source),m.sourceSha256);
+const sourceShape={bytes:Buffer.byteLength(source),generators:(source.match(/function\*/g)||[]).length,
+ generatorLetWrappers:(source.match(/yield\* \(function\*/g)||[]).length,
+ lazyViewGetters:source.split('})(__ps$utf8Known(').length-1,
+ invokeSites:source.split('yield* __ps$invoke(').length-1,tailInvokeSites:source.split('yield* __ps$tailInvoke(').length-1};
+console.log('PSC1_ACTUAL_JS_EMISSION_SHAPE: '+JSON.stringify(sourceShape));
+const selected=source.split('\n').map((text,index)=>({text,line:index+1})).filter(r=>/^function(?:\*)? (?:__ps\$impl\$)?psStringEqFromWithFuel/.test(r.text));
+console.log('PSC1_ACTUAL_STRING_EQUAL_WORKER: '+JSON.stringify(selected.map(r=>({...r,text:r.text.slice(0,14000)}))));
+fs.writeFileSync(path.join(out,'emission-shape.json'),JSON.stringify({sourceShape,selected},null,2)+'\n');
 const request=path.join(root,'G2-self.request.json');assert.equal(sha(fs.readFileSync(request)),expected.requestSha256);
 assert.equal(JSON.parse(fs.readFileSync(request))[1],'G2-self');assert.equal(fs.existsSync('.lake/build/bin/psc1_target_service_seed'),false);
 const limits=compilerRequestLimit('performance-240s','G2-self');assert.equal(limits.timeoutMs,240000);

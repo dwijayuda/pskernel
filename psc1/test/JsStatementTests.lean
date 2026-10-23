@@ -31,6 +31,58 @@ private def matchBody : PsVerifiedIrExpr :=
       .letE "answer" nat (invoke "identity" [varExpr "element"])
         (add (varExpr "answer") (number 3)))]
 
+private def stringType : PsVerifiedIrType := .primitive .string
+private def intrinsic (op : PsVerifiedIrIntrinsic) (args : List PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  .intrinsic op [] args
+
+private def viewEqualBody : PsVerifiedIrExpr :=
+  .ifE zero (.literal (.bool false))
+    (.letE "left" stringType (varExpr "left0")
+      (.letE "right" stringType (varExpr "right0")
+        (.ifE (intrinsic .stringAtEnd [varExpr "left",varExpr "lp"])
+          (intrinsic .stringAtEnd [varExpr "right",varExpr "rp"])
+          (.ifE (intrinsic .stringAtEnd [varExpr "right",varExpr "rp"]) (.literal (.bool false))
+            (.ifE (intrinsic .natEq [
+                intrinsic .charToNat [intrinsic .stringGet [varExpr "left",varExpr "lp"]],
+                intrinsic .charToNat [intrinsic .stringGet [varExpr "right",varExpr "rp"]]])
+              (invoke "viewEqual" [previous,varExpr "left",varExpr "right",
+                intrinsic .stringNext [varExpr "left",varExpr "lp"],
+                intrinsic .stringNext [varExpr "right",varExpr "rp"]])
+              (.literal (.bool false)))))))
+
+private def viewChecksumBody (name : String) (extra : Bool) : PsVerifiedIrExpr :=
+  .ifE zero (varExpr "acc")
+    (.letE "text" stringType (varExpr "text0")
+      (.ifE (intrinsic .stringAtEnd [varExpr "text",varExpr "pos"]) (varExpr "acc")
+        (invoke name ([previous,varExpr "text",
+          intrinsic .stringNext [varExpr "text",varExpr "pos"],
+          add (varExpr "acc") (intrinsic .charToNat [intrinsic .stringGet [varExpr "text",varExpr "pos"]])] ++
+          if extra then [varExpr "__ps$viewToken$0"] else []))))
+
+private def viewDeclarations : List PsVerifiedIrDeclaration :=
+  let checksumParameters : List PsVerifiedIrParameter :=
+    [.mk "n" nat,.mk "text0" stringType,.mk "pos" nat,.mk "acc" nat];
+  [
+    .mk "viewEqual" [] [.mk "n" nat,.mk "left0" stringType,.mk "right0" stringType,.mk "lp" nat,.mk "rp" nat]
+      boolean viewEqualBody,
+    .mk "viewChecksum" [] checksumParameters nat (viewChecksumBody "viewChecksum" false),
+    .mk "viewFresh" [] (checksumParameters ++ [.mk "__ps$viewToken$0" nat]) nat (viewChecksumBody "viewFresh" true),
+    .mk "movingSource" [] [.mk "n" nat,.mk "text0" stringType,.mk "pos" nat] nat
+      (.ifE zero (intrinsic .stringUtf8ByteSize [varExpr "text0"])
+        (add (intrinsic .charToNat [intrinsic .stringGet [varExpr "text0",varExpr "pos"]])
+          (invoke "movingSource" [previous,
+            intrinsic .stringAppend [varExpr "text0",.literal (.string "x")],varExpr "pos"]))),
+    .mk "shadowSource" [] [.mk "n" nat,.mk "text0" stringType,.mk "pos" nat] nat
+      (.ifE zero (number 0)
+        (.letE "text0" stringType (intrinsic .stringAppend [varExpr "text0",.literal (.string "x")])
+          (add (intrinsic .charToNat [intrinsic .stringGet [varExpr "text0",varExpr "pos"]])
+            (invoke "shadowSource" [previous,varExpr "text0",varExpr "pos"])))),
+    .mk "viewSizeOnly" [] [.mk "n" nat,.mk "text0" stringType,.mk "acc" nat] nat
+      (.ifE zero (varExpr "acc")
+        (invoke "viewSizeOnly" [previous,varExpr "text0",
+          add (varExpr "acc") (intrinsic .stringUtf8ByteSize [varExpr "text0"])]))
+  ]
+
 private def fixture : PsVerifiedIrModule :=
   let declarations : List PsVerifiedIrDeclaration := [
     single "identity" (varExpr "n"),
@@ -67,7 +119,7 @@ private def fixture : PsVerifiedIrModule :=
     .mk "pureCount" [] [.mk "n" nat,.mk "acc" nat] nat
       (.ifE zero (varExpr "acc") (invoke "pureCount" [previous,add (varExpr "acc") (number 1)]))
   ];
-  .mk [] [] [.mk "Maybe" [] [.mk "Maybe.none" [],.mk "Maybe.some" [.mk "value" nat]]] declarations
+  .mk [] [] [.mk "Maybe" [] [.mk "Maybe.none" [],.mk "Maybe.some" [.mk "value" nat]]] (declarations ++ viewDeclarations)
 
 private def referenceValues (n : Nat) : List Nat :=
   [0,n,if n == 0 then 0 else 1,n,n+1,0,n,n+3,n,n,n+3,n]
@@ -95,6 +147,20 @@ def main : IO Unit := do
     throw (IO.userError "zero fuel fast path accepted")
   if (psJsGeneratorTailEmitWithFuel empty (fun _ => true) 1 0 empty.body).isSome then
     throw (IO.userError "callee zero fuel fast path accepted")
+  for declaration in lowered.declarations do
+    if ["viewChecksum","viewEqual","viewFresh","movingSource","shadowSource","viewSizeOnly"].contains declaration.name then
+      let available := fun name =>
+        !(psStringEq declaration.name name) &&
+        !(psListAny (fun (p : PsJsIrParameter) => psStringEq p.name name) declaration.parameters) &&
+        !(psJsExprUsesNameWithFuel 4096 declaration.body name)
+      let fast := psJsViewLoopBody declaration available declaration.body
+      let expected := ["viewChecksum","viewEqual"].contains declaration.name
+      if fast.isSome != expected then
+        throw (IO.userError ("view path wrong acceptance: " ++ declaration.name))
+  if (psJsViewInspect "f" "s" 0 0 [("s","getter")] (.var "s")).isSome then
+    throw (IO.userError "zero view inspection fuel accepted")
+  if (psJsViewRewrite 0 [("s","getter")] (.var "s")).isSome then
+    throw (IO.userError "zero view rewrite fuel accepted")
   let current <- match psJsPrintModuleStackSafe lowered with
     | .error _ => throw (IO.userError "current statement emitter refused")
     | .ok value => pure value
@@ -107,5 +173,9 @@ def main : IO Unit := do
   let rows := (List.range 65).map fun n =>
     psJsonArray (List.map (fun value => psNatToString value) (referenceValues n))
   IO.FS.writeFile "dist/js-statement-tests/native-values.json" (psJsonArray rows)
+  let samples := ["","abc","λ🙂","A\0é𝄞Z","𝄞","equal λ🙂 end","different"]
+  let pairs := samples.flatMap fun left => samples.map fun right =>
+    psJsonArray [psJsonQuote left,psJsonQuote right,if psStringEq left right then "true" else "false"]
+  IO.FS.writeFile "dist/js-statement-tests/native-strings.json" (psJsonArray pairs)
   IO.println "PSC1_JS_STATEMENT_NATIVE: original/target strict IR; immutable value/function captures; shadowing; aliases; helper/mutual/non-tail recursion; fuel/freshness refusals; unchanged pure output"
 

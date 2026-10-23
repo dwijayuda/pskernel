@@ -29,3 +29,66 @@ const receipt={schema:'psc1-js-generator-statements-regression/1',testedCommit:p
  checks:['strict original/target IR','native reference plus retained emitter','value/function captures and shadowing','tail/non-tail/mutual stack safety','alias/freshness/fuel refusals','legacy pure source identity'],selfHostQualification:false};
 fs.writeFileSync(path.join(root,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_JS_STATEMENT_REGRESSION: '+JSON.stringify(receipt));
+
+// Differential view-loop execution includes invalid/interior byte offsets and
+// cold/evicted cache states; valid full equality also has native Lean evidence.
+const nativeStrings=JSON.parse(fs.readFileSync(path.join(root,'native-strings.json')));
+let stringComparisons=0;
+for(const [left,right,wanted] of nativeStrings){
+ assert.equal(current.viewEqual(10000n,left,right,0n,0n),wanted);
+ assert.equal(legacy.viewEqual(10000n,left,right,0n,0n),wanted);
+ for(const fuel of [0n,1n,2n,8n]){
+  for(const lp of [0n,1n,2n,4n,9n,99n]){
+   for(const rp of [0n,1n,3n,5n,99n]){
+    assert.equal(current.viewEqual(fuel,left,right,lp,rp),legacy.viewEqual(fuel,left,right,lp,rp));
+    stringComparisons++;
+   }
+  }
+ }
+}
+for(const [value] of nativeStrings){
+ for(const fuel of [0n,1n,3n,20n]){
+  for(const pos of [0n,1n,2n,3n,4n,99n]){
+   assert.equal(current.viewChecksum(fuel,value,pos,0n),legacy.viewChecksum(fuel,value,pos,0n));
+   assert.equal(current.viewFresh(fuel,value,pos,0n,99n),legacy.viewFresh(fuel,value,pos,0n,99n));
+   assert.equal(current.movingSource(fuel,value,pos),legacy.movingSource(fuel,value,pos));
+   assert.equal(current.shadowSource(fuel,value,pos),legacy.shadowSource(fuel,value,pos));
+   stringComparisons+=4;
+  }
+ }
+}
+const debug=String.raw`
+let __testLookups=0; const __testOriginalUtf8=__ps$utf8;
+__ps$utf8=(text)=>{__testLookups++;return __testOriginalUtf8(text);};
+export function __testReset(){__testLookups=0;__ps$lastUtf8=undefined;__ps$previousUtf8=undefined;}
+export function __testState(){return {lookups:__testLookups,views:[__ps$lastUtf8,__ps$previousUtf8].filter(Boolean).length};}
+`;
+for(const [name,source] of [['debug-current',text],['debug-legacy',old]])
+ fs.writeFileSync(path.join(root,name+'.mjs'),source+debug);
+const debugCurrent=await import(pathToFileURL(path.join(root,'debug-current.mjs')));
+const debugLegacy=await import(pathToFileURL(path.join(root,'debug-legacy.mjs')));
+const large='abcλ🙂'.repeat(2000),equalCopy=Array.from(large).join('');
+const events={};
+for(const [name,module] of [['current',debugCurrent],['legacy',debugLegacy]]){
+ module.__testReset();assert.equal(module.viewEqual(100000n,large,equalCopy,0n,0n),true);
+ events[name]=module.__testState();
+ assert.ok(events[name].views<=2);
+ module.__testReset();
+ for(let i=0;i<100;i++)module.viewSizeOnly(3n,'size-only-'+i,0n);
+ assert.deepEqual(module.__testState(),{lookups:0,views:0});
+ for(const s of ['cold λ','other 🙂','third 𝄞','cold λ']){
+  assert.equal(module.viewChecksum(100n,s,0n,0n),current.viewChecksum(100n,s,0n,0n));
+  assert.ok(module.__testState().views<=2);
+ }
+}
+assert.equal(events.current.lookups,2);
+assert.ok(events.legacy.lookups>10000);
+assert.ok(text.includes('__ps$viewToken$0'));
+const viewReceipt={schema:'psc1-js-lazy-utf8-loop-regression/1',testedCommit:process.env.GITHUB_SHA,
+ sourceSha256:sha(text),legacySourceSha256:sha(old),stringComparisons,nativeStringPairs:nativeStrings.length,
+ cacheKeyLookups:events,checks:['unchanged source String equality','native equality/reference emitter',
+ 'alias-aware invariant recursive arguments','cold and evicted caches; at most two views',
+ 'interior/out-of-range/fuel offsets','size-only non-admission','freshness and changing/shadowed source fallback'],
+ selfHostQualification:false};
+fs.writeFileSync(path.join(root,'view-receipt.json'),JSON.stringify(viewReceipt,null,2)+'\n');
+console.log('PSC1_JS_VIEW_REGRESSION: '+JSON.stringify(viewReceipt));

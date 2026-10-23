@@ -446,3 +446,7 @@ lean_exe psc1_target_plan_profile_tests where
 lean_exe psc1_lexer_normalization_tests where
   srcDir := "test"
   root := `LexerNormalizationTests
+
+lean_exe psc1_codec_static_schema_tests where
+  root := `CodecStaticSchemaTests
+  srcDir := "test"

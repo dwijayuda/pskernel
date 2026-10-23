@@ -5,37 +5,37 @@ private def nat : PsVerifiedIrType := .primitive .nat
 private def boolean : PsVerifiedIrType := .primitive .bool
 private def callback : PsVerifiedIrType := .function [nat] nat
 private def number (n : Nat) : PsVerifiedIrExpr := .literal (.natural n)
-private def variable (name : String) : PsVerifiedIrExpr := .var name
+private def varExpr (name : String) : PsVerifiedIrExpr := .var name
 private def invoke (name : String) (args : List PsVerifiedIrExpr) : PsVerifiedIrExpr :=
   .call (.var name) [] args
 private def add (a b : PsVerifiedIrExpr) : PsVerifiedIrExpr := .intrinsic .natAdd [] [a,b]
-private def previous : PsVerifiedIrExpr := .intrinsic .natSub [] [variable "n",number 1]
-private def zero : PsVerifiedIrExpr := .intrinsic .natEq [] [variable "n",number 0]
+private def previous : PsVerifiedIrExpr := .intrinsic .natSub [] [varExpr "n",number 1]
+private def zero : PsVerifiedIrExpr := .intrinsic .natEq [] [varExpr "n",number 0]
 private def single (name : String) (body : PsVerifiedIrExpr) : PsVerifiedIrDeclaration :=
   .mk name [] [.mk "n" nat] nat body
 private def alias (name : String) : PsVerifiedIrExpr :=
-  .lambda [.mk "x" nat] nat (invoke name [variable "x"])
+  .lambda [.mk "x" nat] nat (invoke name [varExpr "x"])
 
 private def captureBody (name : String) (changeFunction : Bool) : PsVerifiedIrExpr :=
-  .ifE zero (.call (variable "fn") [] [number 0])
+  .ifE zero (.call (varExpr "fn") [] [number 0])
     (.letE "next" callback
       (.lambda [.mk "x" nat] nat
-        (if changeFunction then add (.call (variable "fn") [] [variable "x"]) (number 1)
-         else add (variable "n") (variable "x")))
-      (invoke name [previous,variable "next"]))
+        (if changeFunction then add (.call (varExpr "fn") [] [varExpr "x"]) (number 1)
+         else add (varExpr "n") (varExpr "x")))
+      (invoke name [previous,varExpr "next"]))
 
 private def matchBody : PsVerifiedIrExpr :=
-  .matchE "Maybe" [] (invoke "makeMaybe" [variable "n"]) [
+  .matchE "Maybe" [] (invoke "makeMaybe" [varExpr "n"]) [
     ("Maybe.none",[],number 0),
     ("Maybe.some",[.mk "value" "element" nat],
-      .letE "answer" nat (invoke "identity" [variable "element"])
-        (add (variable "answer") (number 3)))]
+      .letE "answer" nat (invoke "identity" [varExpr "element"])
+        (add (varExpr "answer") (number 3)))]
 
 private def fixture : PsVerifiedIrModule :=
   let declarations : List PsVerifiedIrDeclaration := [
-    single "identity" (variable "n"),
-    single "helperLoop" (.letE "checked" nat (invoke "identity" [variable "n"])
-      (.ifE (.intrinsic .natEq [] [variable "checked",number 0]) (number 0)
+    single "identity" (varExpr "n"),
+    single "helperLoop" (.letE "checked" nat (invoke "identity" [varExpr "n"])
+      (.ifE (.intrinsic .natEq [] [varExpr "checked",number 0]) (number 0)
         (invoke "helperLoop" [previous]))),
     single "nonTail" (.ifE zero (number 0) (add (invoke "nonTail" [previous]) (number 1))),
     .mk "evenLoop" [] [.mk "n" nat] boolean
@@ -44,28 +44,28 @@ private def fixture : PsVerifiedIrModule :=
       (.ifE zero (.literal (.bool false)) (invoke "evenLoop" [previous])),
     .mk "captureValue" [] [.mk "n" nat,.mk "fn" callback] nat (captureBody "captureValue" false),
     .mk "captureFunction" [] [.mk "n" nat,.mk "fn" callback] nat (captureBody "captureFunction" true),
-    single "runCaptureValue" (invoke "captureValue" [variable "n",variable "identity"]),
-    single "runCaptureFunction" (invoke "captureFunction" [variable "n",variable "identity"]),
-    single "shadowHelper" (.letE "n" nat (invoke "identity" [add (variable "n") (number 1)])
-      (invoke "identity" [variable "n"])),
+    single "runCaptureValue" (invoke "captureValue" [varExpr "n",varExpr "identity"]),
+    single "runCaptureFunction" (invoke "captureFunction" [varExpr "n",varExpr "identity"]),
+    single "shadowHelper" (.letE "n" nat (invoke "identity" [add (varExpr "n") (number 1)])
+      (invoke "identity" [varExpr "n"])),
     single "tailAlias" (.letE "forward" callback (alias "tailAlias")
-      (.letE "checked" nat (invoke "identity" [variable "n"])
-        (.ifE (.intrinsic .natEq [] [variable "checked",number 0]) (number 0)
-          (.call (variable "forward") [] [previous])))),
+      (.letE "checked" nat (invoke "identity" [varExpr "n"])
+        (.ifE (.intrinsic .natEq [] [varExpr "checked",number 0]) (number 0)
+          (.call (varExpr "forward") [] [previous])))),
     single "escapingAlias" (.letE "forward" callback (alias "escapingAlias")
       (.ifE zero (number 0)
-        (.letE "result" nat (.call (variable "forward") [] [previous])
-          (add (variable "result") (number 1))))),
+        (.letE "result" nat (.call (varExpr "forward") [] [previous])
+          (add (varExpr "result") (number 1))))),
     .mk "makeMaybe" [] [.mk "n" nat] (.named "Maybe" [])
-      (.constructor "Maybe" "Maybe.some" [] [("value",variable "n")]),
+      (.constructor "Maybe" "Maybe.some" [] [("value",varExpr "n")]),
     single "matchHelper" matchBody,
     .mk "stateCollision" [] [.mk "n" nat,.mk "__ps$tail$state" nat] nat
-      (.letE "value" nat (invoke "identity" [variable "n"]) (variable "value")),
+      (.letE "value" nat (invoke "identity" [varExpr "n"]) (varExpr "value")),
     .mk "letCollision" [] [.mk "n" nat,.mk "__ps$tail$value$4095" nat] nat
-      (.letE "value" nat (invoke "identity" [variable "n"]) (variable "value")),
+      (.letE "value" nat (invoke "identity" [varExpr "n"]) (varExpr "value")),
     .mk "matchCollision" [] [.mk "n" nat,.mk "__ps$tail$match$0" nat] nat matchBody,
     .mk "pureCount" [] [.mk "n" nat,.mk "acc" nat] nat
-      (.ifE zero (variable "acc") (invoke "pureCount" [previous,add (variable "acc") (number 1)]))
+      (.ifE zero (varExpr "acc") (invoke "pureCount" [previous,add (varExpr "acc") (number 1)]))
   ];
   .mk [] [] [.mk "Maybe" [] [.mk "Maybe.none" [],.mk "Maybe.some" [.mk "value" nat]]] declarations
 

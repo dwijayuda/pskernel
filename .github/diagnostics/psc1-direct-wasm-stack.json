@@ -2,14 +2,14 @@
   "schema": "psc1-retained-wasm-stack-diagnosis/1",
   "attempts": [
     {
-      "runId": 40020523049,
-      "requestCommit": "0c0b0be64a362e0a16e3c19c8cd057e25e934b6b",
-      "sourceCommit": "82b270632beb1df34b65605877eeec3bf940f232",
-      "artifactId": 12530402614,
-      "artifactDigest": "sha256:0b48449adc24ae9430654698650769418116e1aeea3a649a08e361c11cf48d0e"
+      "runId": 40024688133,
+      "requestCommit": "8b01ac30d9e5e03ed394746148bb20a7cebddb2b",
+      "sourceCommit": "e2743316170f800b8ad84533c1da1834773acccd",
+      "artifactId": 12531604458,
+      "artifactDigest": "sha256:6ee8f6ca50c47e6f1184057c64b9a39421b2eb5a2a3a18c1a2561e3092cfb972"
     }
   ],
-  "serviceSha256": "8a86249fa8190bdc74c39baf4bf0f183416751ce79193a233d39637ebeba74e5",
-  "requestSha256": "ba9cf85f7f5fa252e18d4b9053a4b6eed2686fbb50314b6c7d1a8ebdda753fe1",
-  "closure": "cf1fbeba006442a10b687b56cd4be48c73d56a7574758126e337806b0e7568c3"
+  "serviceSha256": "3a71c8b28be13c1160a7acc644ba8d5cc2088d49a6e64b1a3fc28382bace90f9",
+  "requestSha256": "42f05cddda4fe3a44e467d40f0313049c2e02b74e7666a0892918613d62f8a76",
+  "closure": "64b63a7b7ee0d50f609c2ca2e59d7eba6984bde541ab43b99b4f81e67e67747e"
 }

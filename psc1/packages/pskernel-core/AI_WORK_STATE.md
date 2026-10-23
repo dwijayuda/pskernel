@@ -1,3 +1,30 @@
+## Corrected octet source6bed4d6c: one narrow run ACTIVE
+
+ExecutableANDharness6bed4d6c613861c052f98dc4d7e66c3fc275bc9d
+(treef3ccee1708cfc6c04f270d3f202c1d2520237c5f) has ONE existing run:
+https://github.com/dwijayuda/pskernel/actions/runs/39951009269
+native120405170256 RUNNING; producer/runtime follow after native PASS.
+Do not duplicate. Fetch live status. This containing docs child is unqualified.
+
+Final2c9 failure evidence now preserves independently authenticated ALL12
+shard ZIPs, source/run/attempt/kernel/fixture/harness/provider identities,
+raw log-memory digests and TEN complete1400assertion receipts (samples0–4
+each route). Mixed5 both incomplete, no receipt/complete case marker, memory
+files empty. Both strict aggregates FAIL. No source2c9 T01F acceptance.
+Evidence: docs/evidence/2026-10-23-t01f-pair-counter-final-shards-terminal.json.
+
+Source6bed only corrects the failed final count proof through congrArg.
+Native11hash reports/all294/377/retained controls, realPSC1/TS7.0.2 bounded+
+complete codegen and mixed1400assertions/440calls still must execute.
+Full five work-branch pushes PAUSED; narrowonlyACTIVE; no new fullruns yet.
+All limits/assertions/independence unchanged. After narrowPASS, qualify ONE new
+coherent finalsource with BOTH strictsixshardaggregates/allretainedgates.
+T01F/currentA/B/D OPEN,C FAIL,historicalA9c87 qualified; noT05/integration.
+Fresh integrationhead123c41197950b6761be965fd21c57142ee2b0d1c unchanged.
+ActionsLinuxONLY execution,expected_sha/nonforce,preservehistory,no main/npm.
+
+---
+
 ## Eight-transition native proof rewrite corrected; narrow check required
 
 Candidate86d72010e4c283b0e8385e2a1df666c4bfbefd1f/run39911503673/native120275329788

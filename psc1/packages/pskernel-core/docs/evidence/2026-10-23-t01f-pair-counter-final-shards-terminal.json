@@ -2427,5 +2427,2239 @@
     "assertionsChanged": false
   },
   "retainedGates": "222native proofs/27axiomfree, both producers+providers24CLI8API, frozen32worker384callownerABBA and all6research PASS at2c9. Full193C remains173semanticmatches+2separateSafetyAgreements+17timeouts+1resourceExhausted=FAIL; DOPEN. FullkernelDirectJS UNSUPPORTED.",
-  "nextHypothesis": "Eight immutable primitive transitions per structural scheduler descent instead of two, exact fuel quotient/remainder. Measured earlier hash phase21.84%CPU. This is an unqualified optimization hypothesis, not a speedup claim."
+  "nextHypothesis": "Eight immutable primitive transitions per structural scheduler descent instead of two, exact fuel quotient/remainder. Measured earlier hash phase21.84%CPU. This is an unqualified optimization hypothesis, not a speedup claim.",
+  "allTwelveShardArtifactsVerified": [
+    {
+      "artifactId": 12481850927,
+      "zipBytes": 3501,
+      "zipSha256": "1d5ec9a42ff9fad8a2809ad67db439b4038acf80d7f37527d1224eeb2f1e9253",
+      "files": [
+        {
+          "path": "generated.log",
+          "bytes": 13683,
+          "sha256": "ed10b30ad2e34d949e69d09e298b08f81425aa3591291bc5e691e48b01a3ae25"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1664,
+          "sha256": "368a3ef5ddf899ca0dfba76863f73be9877da07270e47e6a405f767bf34346c2"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914731",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956609,
+            "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1208,
+            "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 93833,
+            "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+          },
+          "providerManifest": {
+            "bytes": 2204,
+            "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":51941.540811}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1666.9603019999995}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\""
+      ],
+      "memory": "",
+      "receipt": null
+    },
+    {
+      "artifactId": 12480845851,
+      "zipBytes": 5632,
+      "zipSha256": "861fb559d15013283ba7439678d4ea125cb2bcd5abb62255d143eb88d6f63242",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3462,
+          "sha256": "cc7fa80600bc36ff880b1f9554dd6c2c64175ed1713bda94b97cc1f8e0ffc4ba"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1664,
+          "sha256": "368a3ef5ddf899ca0dfba76863f73be9877da07270e47e6a405f767bf34346c2"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14605,
+          "sha256": "83af39aab81e62c7ad939d74f213fb2dced807db113e9eb536d67bf0c43958f7"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "9da0245bda6d3d74aaf09f901bd5d3f50237aa9ac323bd7468a03b758bb351c3"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914731",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956609,
+            "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1208,
+            "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 93833,
+            "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+          },
+          "providerManifest": {
+            "bytes": 2204,
+            "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":56506.599415}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1850.4208510000026}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"€\"",
+        "PSC1_T01F_JS_CASE_PASS \"€\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":56.066283,\"admissionMs\":56506.599415,\"metadataMs\":1850.4208510000026,\"totalMs\":666564.9418949999,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"€\",\"utf8Bytes\":3,\"owners\":224,\"ownerAndConstructionMs\":7764.134656000002,\"totalMs\":607972.140999,\"arenaNodes\":\"104\",\"ownedArenaNodes\":\"10292\",\"memory\":{\"rss\":931561472,\"heapTotal\":547762176,\"heapUsed\":350708976,\"external\":4806833,\"arrayBuffers\":2809684}}],\"sampleIndex\":3,\"sample\":\"€\"}"
+      ],
+      "memory": "peak_rss_kib=910616 wall_seconds=666.70 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914731",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+          "route": "generated",
+          "producerJob": "generated-dag-integration",
+          "producerArtifact": "psc1-v2-dag-generated-js",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956609,
+              "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1208,
+              "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 93833,
+              "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+            },
+            "providerManifest": {
+              "bytes": 2204,
+              "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+            }
+          }
+        },
+        "job": "t01f-generated-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 3,
+        "sample": "€",
+        "elapsedMs": 666734.776615,
+        "measurement": "peak_rss_kib=910616 wall_seconds=666.70 exit_status=0",
+        "runtime": {
+          "kernelSha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 56.066283,
+          "admissionMs": 56506.599415,
+          "metadataMs": 1850.4208510000026,
+          "totalMs": 666564.9418949999,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "€",
+              "utf8Bytes": 3,
+              "owners": 224,
+              "ownerAndConstructionMs": 7764.134656000002,
+              "totalMs": 607972.140999,
+              "arenaNodes": "104",
+              "ownedArenaNodes": "10292",
+              "memory": {
+                "rss": 931561472,
+                "heapTotal": 547762176,
+                "heapUsed": 350708976,
+                "external": 4806833,
+                "arrayBuffers": 2809684
+              }
+            }
+          ],
+          "sampleIndex": 3,
+          "sample": "€"
+        },
+        "log": {
+          "bytes": 14605,
+          "sha256": "83af39aab81e62c7ad939d74f213fb2dced807db113e9eb536d67bf0c43958f7"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "9da0245bda6d3d74aaf09f901bd5d3f50237aa9ac323bd7468a03b758bb351c3"
+        }
+      }
+    },
+    {
+      "artifactId": 12480670435,
+      "zipBytes": 5629,
+      "zipSha256": "0ff4b194991b10a6e91923604d2dc49702bb432fdd922a4446993aab962fc0ea",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3464,
+          "sha256": "789bd366b796f533b188f573e8e1ecdd39a59d78bce1b079db086edd82abb6f1"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14611,
+          "sha256": "4b83e90537cd3f4dfeabb76fda5e1af51fdf2964deec8319187dd15762149c14"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1664,
+          "sha256": "368a3ef5ddf899ca0dfba76863f73be9877da07270e47e6a405f767bf34346c2"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "8317914fad923a7a67583136f9124cae5adbcb990cf9681fa0456c056521785c"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914731",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956609,
+            "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1208,
+            "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 93833,
+            "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+          },
+          "providerManifest": {
+            "bytes": 2204,
+            "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":55886.724990999995}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1840.2709319999994}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"a\"",
+        "PSC1_T01F_JS_CASE_PASS \"a\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":54.13145899999998,\"admissionMs\":55886.724990999995,\"metadataMs\":1840.2709319999994,\"totalMs\":489779.473827,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"a\",\"utf8Bytes\":1,\"owners\":224,\"ownerAndConstructionMs\":6881.288507999998,\"totalMs\":431815.34939,\"arenaNodes\":\"72\",\"ownedArenaNodes\":\"10260\",\"memory\":{\"rss\":834342912,\"heapTotal\":500051968,\"heapUsed\":136990256,\"external\":4807197,\"arrayBuffers\":2810048}}],\"sampleIndex\":1,\"sample\":\"a\"}"
+      ],
+      "memory": "peak_rss_kib=815548 wall_seconds=489.91 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914731",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+          "route": "generated",
+          "producerJob": "generated-dag-integration",
+          "producerArtifact": "psc1-v2-dag-generated-js",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956609,
+              "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1208,
+              "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 93833,
+              "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+            },
+            "providerManifest": {
+              "bytes": 2204,
+              "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+            }
+          }
+        },
+        "job": "t01f-generated-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 1,
+        "sample": "a",
+        "elapsedMs": 489944.923613,
+        "measurement": "peak_rss_kib=815548 wall_seconds=489.91 exit_status=0",
+        "runtime": {
+          "kernelSha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 54.13145899999998,
+          "admissionMs": 55886.724990999995,
+          "metadataMs": 1840.2709319999994,
+          "totalMs": 489779.473827,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "a",
+              "utf8Bytes": 1,
+              "owners": 224,
+              "ownerAndConstructionMs": 6881.288507999998,
+              "totalMs": 431815.34939,
+              "arenaNodes": "72",
+              "ownedArenaNodes": "10260",
+              "memory": {
+                "rss": 834342912,
+                "heapTotal": 500051968,
+                "heapUsed": 136990256,
+                "external": 4807197,
+                "arrayBuffers": 2810048
+              }
+            }
+          ],
+          "sampleIndex": 1,
+          "sample": "a"
+        },
+        "log": {
+          "bytes": 14611,
+          "sha256": "4b83e90537cd3f4dfeabb76fda5e1af51fdf2964deec8319187dd15762149c14"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "8317914fad923a7a67583136f9124cae5adbcb990cf9681fa0456c056521785c"
+        }
+      }
+    },
+    {
+      "artifactId": 12480581758,
+      "zipBytes": 5626,
+      "zipSha256": "07d34395af2a323bfc13745d19b70ad0ab02bfaa4c20116fc81c81cadb3fc4a6",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3461,
+          "sha256": "48a7176d995d37b1a6d33e53638c272d02af46969b8707c6718f9b88d0142f71"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1664,
+          "sha256": "368a3ef5ddf899ca0dfba76863f73be9877da07270e47e6a405f767bf34346c2"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14602,
+          "sha256": "23abdc83b15ab0841bd8744cb1181eb5a7f7f0e039e8fc117dac9e3f9eb439cf"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "30f1ccc910043e80484a44a14bf24c90ca7ce16dc07ed20cfe7900e3b1515e33"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914731",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956609,
+            "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1208,
+            "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 93833,
+            "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+          },
+          "providerManifest": {
+            "bytes": 2204,
+            "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":48324.099536}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1571.630634000001}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"é\"",
+        "PSC1_T01F_JS_CASE_PASS \"é\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":48.94783400000003,\"admissionMs\":48324.099536,\"metadataMs\":1571.630634000001,\"totalMs\":500329.061757,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"é\",\"utf8Bytes\":2,\"owners\":224,\"ownerAndConstructionMs\":6213.383065000002,\"totalMs\":450211.637496,\"arenaNodes\":\"88\",\"ownedArenaNodes\":\"10276\",\"memory\":{\"rss\":944680960,\"heapTotal\":519188480,\"heapUsed\":431007256,\"external\":4808085,\"arrayBuffers\":2810936}}],\"sampleIndex\":2,\"sample\":\"é\"}"
+      ],
+      "memory": "peak_rss_kib=923972 wall_seconds=500.45 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914731",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+          "route": "generated",
+          "producerJob": "generated-dag-integration",
+          "producerArtifact": "psc1-v2-dag-generated-js",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956609,
+              "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1208,
+              "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 93833,
+              "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+            },
+            "providerManifest": {
+              "bytes": 2204,
+              "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+            }
+          }
+        },
+        "job": "t01f-generated-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 2,
+        "sample": "é",
+        "elapsedMs": 500477.279065,
+        "measurement": "peak_rss_kib=923972 wall_seconds=500.45 exit_status=0",
+        "runtime": {
+          "kernelSha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 48.94783400000003,
+          "admissionMs": 48324.099536,
+          "metadataMs": 1571.630634000001,
+          "totalMs": 500329.061757,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "é",
+              "utf8Bytes": 2,
+              "owners": 224,
+              "ownerAndConstructionMs": 6213.383065000002,
+              "totalMs": 450211.637496,
+              "arenaNodes": "88",
+              "ownedArenaNodes": "10276",
+              "memory": {
+                "rss": 944680960,
+                "heapTotal": 519188480,
+                "heapUsed": 431007256,
+                "external": 4808085,
+                "arrayBuffers": 2810936
+              }
+            }
+          ],
+          "sampleIndex": 2,
+          "sample": "é"
+        },
+        "log": {
+          "bytes": 14602,
+          "sha256": "23abdc83b15ab0841bd8744cb1181eb5a7f7f0e039e8fc117dac9e3f9eb439cf"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "30f1ccc910043e80484a44a14bf24c90ca7ce16dc07ed20cfe7900e3b1515e33"
+        }
+      }
+    },
+    {
+      "artifactId": 12480228527,
+      "zipBytes": 5644,
+      "zipSha256": "53514dc24aa62a0843a64a506acb8f0a3ce35e6684d3a3600ef7da55dd3aba28",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3471,
+          "sha256": "a9940523864e20a8be008bd76ec960b6512f6d42204a11636344c302248203b9"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1664,
+          "sha256": "368a3ef5ddf899ca0dfba76863f73be9877da07270e47e6a405f767bf34346c2"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14614,
+          "sha256": "dadb2e41a1b90deebb8c2e43427c74e969707f8761982c03cc07465b37caf4f7"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 55,
+          "sha256": "f389468eed1e38449938f15c264694e59a01968349e6a01adacd4672bee9bce2"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914731",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956609,
+            "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1208,
+            "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 93833,
+            "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+          },
+          "providerManifest": {
+            "bytes": 2204,
+            "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":48708.601671}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1665.6915700000027}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"😀\"",
+        "PSC1_T01F_JS_CASE_PASS \"😀\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":42.26913499999998,\"admissionMs\":48708.601671,\"metadataMs\":1665.6915700000027,\"totalMs\":632347.548663,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"😀\",\"utf8Bytes\":4,\"owners\":224,\"ownerAndConstructionMs\":6446.118215999995,\"totalMs\":581783.107477,\"arenaNodes\":\"120\",\"ownedArenaNodes\":\"10308\",\"memory\":{\"rss\":1042944000,\"heapTotal\":568090624,\"heapUsed\":209033768,\"external\":4805733,\"arrayBuffers\":2808584}}],\"sampleIndex\":4,\"sample\":\"😀\"}"
+      ],
+      "memory": "peak_rss_kib=1025080 wall_seconds=632.47 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914731",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+          "route": "generated",
+          "producerJob": "generated-dag-integration",
+          "producerArtifact": "psc1-v2-dag-generated-js",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956609,
+              "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1208,
+              "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 93833,
+              "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+            },
+            "providerManifest": {
+              "bytes": 2204,
+              "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+            }
+          }
+        },
+        "job": "t01f-generated-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 4,
+        "sample": "😀",
+        "elapsedMs": 632502.111776,
+        "measurement": "peak_rss_kib=1025080 wall_seconds=632.47 exit_status=0",
+        "runtime": {
+          "kernelSha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 42.26913499999998,
+          "admissionMs": 48708.601671,
+          "metadataMs": 1665.6915700000027,
+          "totalMs": 632347.548663,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "😀",
+              "utf8Bytes": 4,
+              "owners": 224,
+              "ownerAndConstructionMs": 6446.118215999995,
+              "totalMs": 581783.107477,
+              "arenaNodes": "120",
+              "ownedArenaNodes": "10308",
+              "memory": {
+                "rss": 1042944000,
+                "heapTotal": 568090624,
+                "heapUsed": 209033768,
+                "external": 4805733,
+                "arrayBuffers": 2808584
+              }
+            }
+          ],
+          "sampleIndex": 4,
+          "sample": "😀"
+        },
+        "log": {
+          "bytes": 14614,
+          "sha256": "dadb2e41a1b90deebb8c2e43427c74e969707f8761982c03cc07465b37caf4f7"
+        },
+        "memory": {
+          "bytes": 55,
+          "sha256": "f389468eed1e38449938f15c264694e59a01968349e6a01adacd4672bee9bce2"
+        }
+      }
+    },
+    {
+      "artifactId": 12479903361,
+      "zipBytes": 5633,
+      "zipSha256": "a8ed7e326e3cdb2ac44e1afeb019c6a5e068c2f01591206cea4cb3d2775dd3c8",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3467,
+          "sha256": "a375536115948cb5beffc11c34f6a3e3f11f9e6e3b6cc4536b7e8c2dd7a23b0a"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14613,
+          "sha256": "dad8cb959ae0758f4027b4fd201a3e1b1a72ef99c3abac6edd357ba9fb7d8afe"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1664,
+          "sha256": "368a3ef5ddf899ca0dfba76863f73be9877da07270e47e6a405f767bf34346c2"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "630f5f6155a2a2a25d8bcd35576d9d886da96d29aac1a25f42d35d421d78889d"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914731",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956609,
+            "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1208,
+            "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 93833,
+            "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+          },
+          "providerManifest": {
+            "bytes": 2204,
+            "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":46174.918303000006}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1534.5235670000038}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"\"",
+        "PSC1_T01F_JS_CASE_PASS \"\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":42.35587000000001,\"admissionMs\":46174.918303000006,\"metadataMs\":1534.5235670000038,\"totalMs\":270730.496344,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"\",\"utf8Bytes\":0,\"owners\":224,\"ownerAndConstructionMs\":5804.369923999999,\"totalMs\":222837.05280900002,\"arenaNodes\":\"32\",\"ownedArenaNodes\":\"10220\",\"memory\":{\"rss\":809463808,\"heapTotal\":494809088,\"heapUsed\":189967552,\"external\":4809321,\"arrayBuffers\":2808220}}],\"sampleIndex\":0,\"sample\":\"\"}"
+      ],
+      "memory": "peak_rss_kib=790748 wall_seconds=270.83 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914731",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+          "route": "generated",
+          "producerJob": "generated-dag-integration",
+          "producerArtifact": "psc1-v2-dag-generated-js",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956609,
+              "sha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1208,
+              "sha256": "716a9dc1a93d3522dcbab47a6e062f6396514b8832f921f50f0f20b8f0e8f89d"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 93833,
+              "sha256": "544183c608c2c6573d78a8834c7d1c175ee136aa41d09a6cfc88410c29a08f02"
+            },
+            "providerManifest": {
+              "bytes": 2204,
+              "sha256": "8012c1bfad3d306f86a6add88945c5a1b1183e3a4d7d6f6c682c2e77957bc9ab"
+            }
+          }
+        },
+        "job": "t01f-generated-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 0,
+        "sample": "",
+        "elapsedMs": 270899.613411,
+        "measurement": "peak_rss_kib=790748 wall_seconds=270.83 exit_status=0",
+        "runtime": {
+          "kernelSha256": "546a14414bd0d97698153e75dd7c580dc8252f50a5a290389e7100ae5da03b04",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 42.35587000000001,
+          "admissionMs": 46174.918303000006,
+          "metadataMs": 1534.5235670000038,
+          "totalMs": 270730.496344,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "",
+              "utf8Bytes": 0,
+              "owners": 224,
+              "ownerAndConstructionMs": 5804.369923999999,
+              "totalMs": 222837.05280900002,
+              "arenaNodes": "32",
+              "ownedArenaNodes": "10220",
+              "memory": {
+                "rss": 809463808,
+                "heapTotal": 494809088,
+                "heapUsed": 189967552,
+                "external": 4809321,
+                "arrayBuffers": 2808220
+              }
+            }
+          ],
+          "sampleIndex": 0,
+          "sample": ""
+        },
+        "log": {
+          "bytes": 14613,
+          "sha256": "dad8cb959ae0758f4027b4fd201a3e1b1a72ef99c3abac6edd357ba9fb7d8afe"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "630f5f6155a2a2a25d8bcd35576d9d886da96d29aac1a25f42d35d421d78889d"
+        }
+      }
+    },
+    {
+      "artifactId": 12482340395,
+      "zipBytes": 3510,
+      "zipSha256": "579e3449a12ddabb6449a737d0a1ea88b5c07f362c9b0663c8b402846dd792d1",
+      "files": [
+        {
+          "path": "generated.log",
+          "bytes": 13689,
+          "sha256": "df69795d055d2a139caa8f5b95d8188fc02e8a657781611b834f5798a5814457"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1663,
+          "sha256": "ca3c931332ea03a89a037191eade18e43550107a81f61461e7d7ebf99b8e4b37"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914918",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956616,
+            "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 43948,
+            "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":62217.082841999996}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1942.0717440000008}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\""
+      ],
+      "memory": "",
+      "receipt": null
+    },
+    {
+      "artifactId": 12481306322,
+      "zipBytes": 5652,
+      "zipSha256": "9aba5b494e4dfbbf3392536f4ab632e5ae12c08b9931e78a793b0731fde676e9",
+      "files": [
+        {
+          "path": "inputs.json",
+          "bytes": 1663,
+          "sha256": "ca3c931332ea03a89a037191eade18e43550107a81f61461e7d7ebf99b8e4b37"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14604,
+          "sha256": "b4ba41640ee3cff03fc3aa70ed8d64340ee971437db9549c3c21902902a817a9"
+        },
+        {
+          "path": "receipt.json",
+          "bytes": 3460,
+          "sha256": "8c1299fc76a0e021dc9fb9ceaf174b5c5225b1afca75e55851910ec7d4170240"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "c8b0bcf38bd97f87eab1dc4b4e268b00a54235b86c261985d1b7aaa548caa706"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914918",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956616,
+            "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 43948,
+            "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":54685.827128}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1781.801919000005}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"😀\"",
+        "PSC1_T01F_JS_CASE_PASS \"😀\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":242.560874,\"admissionMs\":54685.827128,\"metadataMs\":1781.801919000005,\"totalMs\":755547.944317,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"😀\",\"utf8Bytes\":4,\"owners\":224,\"ownerAndConstructionMs\":7111.686303000002,\"totalMs\":698650.534261,\"arenaNodes\":\"120\",\"ownedArenaNodes\":\"10308\",\"memory\":{\"rss\":805498880,\"heapTotal\":517615616,\"heapUsed\":375092592,\"external\":4809261,\"arrayBuffers\":2812112}}],\"sampleIndex\":4,\"sample\":\"😀\"}"
+      ],
+      "memory": "peak_rss_kib=787700 wall_seconds=755.71 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914918",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956616,
+              "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 43948,
+              "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 4,
+        "sample": "😀",
+        "elapsedMs": 755782.218773,
+        "measurement": "peak_rss_kib=787700 wall_seconds=755.71 exit_status=0",
+        "runtime": {
+          "kernelSha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 242.560874,
+          "admissionMs": 54685.827128,
+          "metadataMs": 1781.801919000005,
+          "totalMs": 755547.944317,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "😀",
+              "utf8Bytes": 4,
+              "owners": 224,
+              "ownerAndConstructionMs": 7111.686303000002,
+              "totalMs": 698650.534261,
+              "arenaNodes": "120",
+              "ownedArenaNodes": "10308",
+              "memory": {
+                "rss": 805498880,
+                "heapTotal": 517615616,
+                "heapUsed": 375092592,
+                "external": 4809261,
+                "arrayBuffers": 2812112
+              }
+            }
+          ],
+          "sampleIndex": 4,
+          "sample": "😀"
+        },
+        "log": {
+          "bytes": 14604,
+          "sha256": "b4ba41640ee3cff03fc3aa70ed8d64340ee971437db9549c3c21902902a817a9"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "c8b0bcf38bd97f87eab1dc4b4e268b00a54235b86c261985d1b7aaa548caa706"
+        }
+      }
+    },
+    {
+      "artifactId": 12481116007,
+      "zipBytes": 5654,
+      "zipSha256": "c319aa0db295bc7947483a496ba8a0ea30e676fc558a19e7972096929b95a4db",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3466,
+          "sha256": "7e2b2f7c8b5fd7b8321e9cbffce1a0be9c0dfa324f07cf39ee22e94dd8c5af90"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14609,
+          "sha256": "b0a7838f04b1a1e38268cc62b94894e8fef114db81f1aa4a8c65641ae070abe8"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1663,
+          "sha256": "ca3c931332ea03a89a037191eade18e43550107a81f61461e7d7ebf99b8e4b37"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "54238947bdef448dbd6b2787f9a445ffc9ac555fbadacb608b62884a7b2258c5"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914918",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956616,
+            "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 43948,
+            "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":47559.770528}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1660.4265540000051}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"é\"",
+        "PSC1_T01F_JS_CASE_PASS \"é\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":50.91472599999997,\"admissionMs\":47559.770528,\"metadataMs\":1660.4265540000051,\"totalMs\":479695.47719500004,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"é\",\"utf8Bytes\":2,\"owners\":224,\"ownerAndConstructionMs\":6223.910049999999,\"totalMs\":430275.469155,\"arenaNodes\":\"88\",\"ownedArenaNodes\":\"10276\",\"memory\":{\"rss\":874676224,\"heapTotal\":513421312,\"heapUsed\":126918664,\"external\":4809469,\"arrayBuffers\":2812320}}],\"sampleIndex\":2,\"sample\":\"é\"}"
+      ],
+      "memory": "peak_rss_kib=855312 wall_seconds=479.80 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914918",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956616,
+              "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 43948,
+              "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 2,
+        "sample": "é",
+        "elapsedMs": 479847.475463,
+        "measurement": "peak_rss_kib=855312 wall_seconds=479.80 exit_status=0",
+        "runtime": {
+          "kernelSha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 50.91472599999997,
+          "admissionMs": 47559.770528,
+          "metadataMs": 1660.4265540000051,
+          "totalMs": 479695.47719500004,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "é",
+              "utf8Bytes": 2,
+              "owners": 224,
+              "ownerAndConstructionMs": 6223.910049999999,
+              "totalMs": 430275.469155,
+              "arenaNodes": "88",
+              "ownedArenaNodes": "10276",
+              "memory": {
+                "rss": 874676224,
+                "heapTotal": 513421312,
+                "heapUsed": 126918664,
+                "external": 4809469,
+                "arrayBuffers": 2812320
+              }
+            }
+          ],
+          "sampleIndex": 2,
+          "sample": "é"
+        },
+        "log": {
+          "bytes": 14609,
+          "sha256": "b0a7838f04b1a1e38268cc62b94894e8fef114db81f1aa4a8c65641ae070abe8"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "54238947bdef448dbd6b2787f9a445ffc9ac555fbadacb608b62884a7b2258c5"
+        }
+      }
+    },
+    {
+      "artifactId": 12480708200,
+      "zipBytes": 5655,
+      "zipSha256": "2ec30debc4a2644397657a9189bd7bb7a81f0d979376b59f99bf9113c9714ab8",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3463,
+          "sha256": "87b3473cb85992d86b933022af3ad99bb2449b825f9ef238c7f1185b9f304441"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1663,
+          "sha256": "ca3c931332ea03a89a037191eade18e43550107a81f61461e7d7ebf99b8e4b37"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14606,
+          "sha256": "6f9360db3385dc3f65fc34ab81e40019db2327456eb7bab9914817c25abcf9a9"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "34dcf3308994bb8d76df6a8a29d50d7d96dffd393a8c5b71ce8d97c8951d7db9"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914918",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956616,
+            "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 43948,
+            "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":43386.459405}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1445.416999000001}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"€\"",
+        "PSC1_T01F_JS_CASE_PASS \"€\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":42.35334899999998,\"admissionMs\":43386.459405,\"metadataMs\":1445.416999000001,\"totalMs\":539260.542954,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"€\",\"utf8Bytes\":3,\"owners\":224,\"ownerAndConstructionMs\":5527.727699999996,\"totalMs\":494244.74812,\"arenaNodes\":\"104\",\"ownedArenaNodes\":\"10292\",\"memory\":{\"rss\":934715392,\"heapTotal\":537419776,\"heapUsed\":473047096,\"external\":4806037,\"arrayBuffers\":2808888}}],\"sampleIndex\":3,\"sample\":\"€\"}"
+      ],
+      "memory": "peak_rss_kib=914272 wall_seconds=539.42 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914918",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956616,
+              "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 43948,
+              "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 3,
+        "sample": "€",
+        "elapsedMs": 539433.850141,
+        "measurement": "peak_rss_kib=914272 wall_seconds=539.42 exit_status=0",
+        "runtime": {
+          "kernelSha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 42.35334899999998,
+          "admissionMs": 43386.459405,
+          "metadataMs": 1445.416999000001,
+          "totalMs": 539260.542954,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "€",
+              "utf8Bytes": 3,
+              "owners": 224,
+              "ownerAndConstructionMs": 5527.727699999996,
+              "totalMs": 494244.74812,
+              "arenaNodes": "104",
+              "ownedArenaNodes": "10292",
+              "memory": {
+                "rss": 934715392,
+                "heapTotal": 537419776,
+                "heapUsed": 473047096,
+                "external": 4806037,
+                "arrayBuffers": 2808888
+              }
+            }
+          ],
+          "sampleIndex": 3,
+          "sample": "€"
+        },
+        "log": {
+          "bytes": 14606,
+          "sha256": "6f9360db3385dc3f65fc34ab81e40019db2327456eb7bab9914817c25abcf9a9"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "34dcf3308994bb8d76df6a8a29d50d7d96dffd393a8c5b71ce8d97c8951d7db9"
+        }
+      }
+    },
+    {
+      "artifactId": 12480700478,
+      "zipBytes": 5651,
+      "zipSha256": "d4f2f5246234dc2f653cd59639185e53e91a127b53adf64e29efcd2147051fc9",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3454,
+          "sha256": "af146a947fc59e432d02af34f7aeaa2bfb21fbd2c8202607dbcc7b3b9edb6b05"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1663,
+          "sha256": "ca3c931332ea03a89a037191eade18e43550107a81f61461e7d7ebf99b8e4b37"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14596,
+          "sha256": "a3bbca14ea51e4dad9c35ba3d2390c61f50b47f01a6b6d88c6074dbb0534b6d9"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "ef14907f3fa10bd9a56ff1fff634bfa698ba657734a5fd144732bec0a30104b2"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914918",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956616,
+            "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 43948,
+            "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":41094.724876}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1331.7197469999956}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"\"",
+        "PSC1_T01F_JS_CASE_PASS \"\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":69.47226599999999,\"admissionMs\":41094.724876,\"metadataMs\":1331.7197469999956,\"totalMs\":229018.692928,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"\",\"utf8Bytes\":0,\"owners\":224,\"ownerAndConstructionMs\":5179.749500999998,\"totalMs\":186410.763446,\"arenaNodes\":\"32\",\"ownedArenaNodes\":\"10220\",\"memory\":{\"rss\":789536768,\"heapTotal\":503459840,\"heapUsed\":178133832,\"external\":4811429,\"arrayBuffers\":2810328}}],\"sampleIndex\":0,\"sample\":\"\"}"
+      ],
+      "memory": "peak_rss_kib=771744 wall_seconds=229.11 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914918",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956616,
+              "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 43948,
+              "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 0,
+        "sample": "",
+        "elapsedMs": 229160.40053,
+        "measurement": "peak_rss_kib=771744 wall_seconds=229.11 exit_status=0",
+        "runtime": {
+          "kernelSha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 69.47226599999999,
+          "admissionMs": 41094.724876,
+          "metadataMs": 1331.7197469999956,
+          "totalMs": 229018.692928,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "",
+              "utf8Bytes": 0,
+              "owners": 224,
+              "ownerAndConstructionMs": 5179.749500999998,
+              "totalMs": 186410.763446,
+              "arenaNodes": "32",
+              "ownedArenaNodes": "10220",
+              "memory": {
+                "rss": 789536768,
+                "heapTotal": 503459840,
+                "heapUsed": 178133832,
+                "external": 4811429,
+                "arrayBuffers": 2810328
+              }
+            }
+          ],
+          "sampleIndex": 0,
+          "sample": ""
+        },
+        "log": {
+          "bytes": 14596,
+          "sha256": "a3bbca14ea51e4dad9c35ba3d2390c61f50b47f01a6b6d88c6074dbb0534b6d9"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "ef14907f3fa10bd9a56ff1fff634bfa698ba657734a5fd144732bec0a30104b2"
+        }
+      }
+    },
+    {
+      "artifactId": 12480029949,
+      "zipBytes": 5645,
+      "zipSha256": "f015ec8826dfc6a036ebeae5f2a4afbf349b64f92418ff27ed6752a4935c1300",
+      "files": [
+        {
+          "path": "receipt.json",
+          "bytes": 3457,
+          "sha256": "e21d4765c3ab7b0e0a3440cc96f4650747aa93e40a2fea7a8851ceffc56f9ac3"
+        },
+        {
+          "path": "generated.log",
+          "bytes": 14598,
+          "sha256": "ee296a698be43424c55e02d51d706fd23e45c6df5d3a5833585d1c350a1fcb54"
+        },
+        {
+          "path": "inputs.json",
+          "bytes": 1663,
+          "sha256": "ca3c931332ea03a89a037191eade18e43550107a81f61461e7d7ebf99b8e4b37"
+        },
+        {
+          "path": "generated.memory",
+          "bytes": 54,
+          "sha256": "67f928aa7759465e94217cfaf876e672182ff2f2aa67c72f10d0070c64cbb106"
+        }
+      ],
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+        "runId": "39900914918",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9956616,
+            "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+          },
+          "orchestrator": {
+            "bytes": 15203,
+            "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+          },
+          "workflow": {
+            "bytes": 43948,
+            "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+          }
+        }
+      },
+      "markers": [
+        "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":52568.663273}",
+        "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1749.414026999999}",
+        "PSC1_T01F_JS_SINGLETON_PASS \"a\"",
+        "PSC1_T01F_JS_CASE_PASS \"a\"",
+        "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":53.18979399999998,\"admissionMs\":52568.663273,\"metadataMs\":1749.414026999999,\"totalMs\":454851.557304,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"a\",\"utf8Bytes\":1,\"owners\":224,\"ownerAndConstructionMs\":6655.566079999997,\"totalMs\":400300.261551,\"arenaNodes\":\"72\",\"ownedArenaNodes\":\"10260\",\"memory\":{\"rss\":893169664,\"heapTotal\":514994176,\"heapUsed\":148274424,\"external\":4807637,\"arrayBuffers\":2810488}}],\"sampleIndex\":1,\"sample\":\"a\"}"
+      ],
+      "memory": "peak_rss_kib=873352 wall_seconds=454.98 exit_status=0\n",
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "2c9bf2d2bf7e7cfa9fb5c58585a0671cbf661298",
+          "runId": "39900914918",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9956616,
+              "sha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "89b77bf7bbec723a5d3164556763b581c5bbf8bea2626cb52f8820dffc669b91"
+            },
+            "orchestrator": {
+              "bytes": 15203,
+              "sha256": "daf5be033561cc87653ffbb08c1d9dad28d8d129f919dadaede97b46bd480287"
+            },
+            "workflow": {
+              "bytes": 43948,
+              "sha256": "793b39acd102b86cfe0a3a132ea710d31339b7f7ba69e373794c8f8ed49154ff"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "dc196d6095304a4d13bd32947a753b89e53157e2f5365cdf396fee6c15cef3be"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 1,
+        "sample": "a",
+        "elapsedMs": 455026.908236,
+        "measurement": "peak_rss_kib=873352 wall_seconds=454.98 exit_status=0",
+        "runtime": {
+          "kernelSha256": "ecc6854836e2c5ddd754093a67087b708e74cf6f56bcb3b11374e145042b45fe",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 53.18979399999998,
+          "admissionMs": 52568.663273,
+          "metadataMs": 1749.414026999999,
+          "totalMs": 454851.557304,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "a",
+              "utf8Bytes": 1,
+              "owners": 224,
+              "ownerAndConstructionMs": 6655.566079999997,
+              "totalMs": 400300.261551,
+              "arenaNodes": "72",
+              "ownedArenaNodes": "10260",
+              "memory": {
+                "rss": 893169664,
+                "heapTotal": 514994176,
+                "heapUsed": 148274424,
+                "external": 4807637,
+                "arrayBuffers": 2810488
+              }
+            }
+          ],
+          "sampleIndex": 1,
+          "sample": "a"
+        },
+        "log": {
+          "bytes": 14598,
+          "sha256": "ee296a698be43424c55e02d51d706fd23e45c6df5d3a5833585d1c350a1fcb54"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "67f928aa7759465e94217cfaf876e672182ff2f2aa67c72f10d0070c64cbb106"
+        }
+      }
+    }
+  ]
 }

@@ -67,14 +67,27 @@ def psErasureIndexInsert (Value : Type) (index : PsErasureNameIndex Value) (name
   let hash := psEnvironmentNameHash name;
   psErasureIndexSet Value 16 index hash (List.cons (Prod.mk name value) (psErasureIndexBucket Value 16 index hash))
 
-def psErasureIndexPrepend (Value : Type) (entries : List (Prod PsName Value)) : PsErasureNameIndex Value -> PsErasureNameIndex Value :=
-  match entries with
-  | List.nil => fun (tail : PsErasureNameIndex Value) => tail
-  | List.cons entry rest =>
-      let smaller : PsErasureNameIndex Value -> PsErasureNameIndex Value := psErasureIndexPrepend Value rest;
-      fun (tail : PsErasureNameIndex Value) =>
-        match entry with
-        | Prod.mk name value => psErasureIndexInsert Value (smaller tail) name value
+-- Right folds over large declaration spines use an explicit reversed work list.
+-- The complete state preserves original insertion order and refusal precedence.
+def psErasureFoldReverseWorker {Input State : Type} (step : Input -> State -> State)
+    (values : List Input) (state : State) : State :=
+  match values with
+  | List.nil => state
+  | List.cons value rest => psErasureFoldReverseWorker step rest (step value state)
+
+def psErasureFoldRight {Input State : Type} (step : Input -> State -> State)
+    (values : List Input) (state : State) : State :=
+  psErasureFoldReverseWorker step (psListReverse values) state
+
+def psErasureIndexPrependStep (Value : Type) (entry : Prod PsName Value)
+    (tail : PsErasureNameIndex Value) : PsErasureNameIndex Value :=
+  match entry with
+  | Prod.mk name value => psErasureIndexInsert Value tail name value
+
+def psErasureIndexPrepend (Value : Type) (entries : List (Prod PsName Value)) :
+    PsErasureNameIndex Value -> PsErasureNameIndex Value :=
+  fun (tail : PsErasureNameIndex Value) =>
+    psErasureFoldRight (psErasureIndexPrependStep Value) entries tail
 
 inductive PsErasedBinderKind where
   | type
@@ -94,17 +107,18 @@ structure PsErasureDeclarationNames where
   count : Nat
   entries : PsErasureNameIndex PsErasureEntryInfo
 
+def psErasureDeclarationNameStep (entry : Prod PsName String)
+    (tail : PsErasureDeclarationNames) : PsErasureDeclarationNames :=
+  match entry with
+  | Prod.mk name value => PsErasureDeclarationNames.mk
+      (psErasureIndexInsert String tail.byCore name value)
+      (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)
+      (Nat.succ tail.count)
+      tail.entries
+
 def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
-  match entries with
-  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0 PsErasureNameIndex.empty
-  | List.cons entry rest =>
-      let tail := psErasureDeclarationNameIndex rest;
-      match entry with
-      | Prod.mk name value => PsErasureDeclarationNames.mk
-          (psErasureIndexInsert String tail.byCore name value)
-          (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)
-          (Nat.succ tail.count)
-          tail.entries
+  psErasureFoldRight psErasureDeclarationNameStep entries
+    (PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0 PsErasureNameIndex.empty)
 
 inductive PsErasureError where
   | fuelExhausted
@@ -391,21 +405,24 @@ def psErasureAddDeclarationEntry
     | Except.ok info =>
         Except.ok (psErasureIndexInsert PsErasureEntryInfo entries name info)
 
+def psErasureDeclarationEntryStep (environment : PsEnvironment) (declaration : PsDeclaration)
+    (state : Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo)) :
+    Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=
+  match state with
+  | Except.error error => Except.error error
+  | Except.ok tail =>
+      match declaration with
+      | PsDeclaration.definitionDecl name _ type value =>
+          psErasureAddDeclarationEntry environment name type value tail
+      | PsDeclaration.partialDecl name _ type value =>
+          psErasureAddDeclarationEntry environment name type value tail
+      | _ => Except.ok tail
+
 def psErasureDeclarationEntryIndex
     (environment : PsEnvironment) (declarations : List PsDeclaration) :
     Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=
-  match declarations with
-  | List.nil => Except.ok PsErasureNameIndex.empty
-  | List.cons declaration rest =>
-      match psErasureDeclarationEntryIndex environment rest with
-      | Except.error error => Except.error error
-      | Except.ok tail =>
-          match declaration with
-          | PsDeclaration.definitionDecl name _ type value =>
-              psErasureAddDeclarationEntry environment name type value tail
-          | PsDeclaration.partialDecl name _ type value =>
-              psErasureAddDeclarationEntry environment name type value tail
-          | _ => Except.ok tail
+  psErasureFoldRight (psErasureDeclarationEntryStep environment) declarations
+    (Except.ok PsErasureNameIndex.empty)
 
 def psErasurePrepareDeclarationEntries
     (environment : PsEnvironment) (declarations : List PsDeclaration)

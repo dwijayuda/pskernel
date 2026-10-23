@@ -1,12 +1,13 @@
 name: PSC1 direct self-host source preflight
 on:
   push:
-    branches: [feat/psc1-direct-js-wasm-selfhost-20261024, work/psc1-direct-selfhost-blockers-20261024]
+    branches: [feat/psc1-direct-js-wasm-selfhost-20261024, work/psc1-direct-selfhost-blockers-20261024, work/psc1-direct-selfhost-spines2-20261024]
     paths:
       - psc1/packages/backend-js/**
       - psc1/packages/backend-wasm/**
       - psc1/packages/compiler/**
       - psc1/packages/bridge/**
+      - psc1/packages/erasure/**
       - psc1/scripts/TargetServiceSeed.lean
       - psc1/scripts/generated-target-source-audit.mjs
       - psc1/host-tools/generated-target-profiles.mjs
@@ -15,6 +16,8 @@ on:
       - psc1/test/WasmPrefix*.lean
       - psc1/test/OrdinaryExpansion*.lean
       - psc1/test/CheckedSpine*.lean
+      - psc1/test/ErasureSpine*.lean
+      - psc1/scripts/check-erasure-declaration-spines.mjs
       - psc1/test/JsStatement*.lean
       - psc1/scripts/js-statement-tests.mjs
       - psc1/scripts/check-wasm-applied-prefixes.mjs
@@ -74,6 +77,7 @@ jobs:
           node --check scripts/generated-target-qualification.mjs
           node --check scripts/js-statement-tests.mjs
           node scripts/check-wasm-applied-prefixes.mjs
+          node scripts/check-erasure-declaration-spines.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests

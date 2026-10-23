@@ -507,3 +507,7 @@ lean_lib PsOrdinaryExpansionReference where
 lean_lib PsCheckedSpineReference where
   srcDir := "test"
   roots := #[`CheckedSpineReference, `CheckedSpineTests]
+
+lean_lib PsErasureSpineReference where
+  srcDir := "test"
+  roots := #[`ErasureSpineReference, `ErasureSpineTests]

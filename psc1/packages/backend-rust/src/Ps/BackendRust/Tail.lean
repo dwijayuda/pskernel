@@ -110,7 +110,7 @@ def psRustTailMoveArguments
                         (List.cons (psRustIdentifier parameter.name) tail.values)
                         (List.cons original tail.original) true)
                     else
-                      match psRustEmitHigherOrderParameterType parameter.type with
+                      match psRustEmitClosureValueType parameter.type with
                       | Except.error error => Except.error error
                       | Except.ok type =>
                           let temporary : String := psRustConcat2 "__ps_internal_tail_next_" (psNatToString index);

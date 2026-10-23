@@ -1,73 +1,74 @@
-## Exact b0 native, bounded, complete producer and controls PASS; mixed RUNNING
+## Primitive short-pair mixed runtime TIMED OUT; current-source phase diagnostic next
 
-Executable AND harness source:
-b0d560cfbbfd976a9d8338dbd2bd26a4d5614418
+Execution source:b0d560cfbbfd976a9d8338dbd2bd26a4d5614418
 (tree e77103a138b818e286ffe7da00b9c12a58bbc63a).
-ONE existing run: https://github.com/dwijayuda/pskernel/actions/runs/39972883672.
+Run https://github.com/dwijayuda/pskernel/actions/runs/39972883672 completed
+CANCELLED. Mixed120488960255 ran15:07:20–15:32:41UTC on2026-10-23 and hit
+the unchanged25-minute job cap. Actual trace418begins/417ends; interrupted
+id418 / validity-right / Aé€😀 / psKernelV1RunDag, the same call as prior0fe.
+All294 independent admissions,377 metadata comparisons and mixedsingleton
+PASS. No complete mixedcase/1,400-assertion receipt. mixed.memory empty:
+completed wholewalltime and peakRSS remain UNKNOWN.
 
-Native120479881827 PASS85 reports/11 hash reports, only permitted standard
-axioms; all frozen2730 native cases/long3 and genuine294requests377metadata/
-six String cases/singletons/retained controls PASS. Native evidence/all5
-artifact file hashes:
+Mixedartifact12511879421 ZIP536942bytes SHA256
+906d176cb44968b2ffe1ae64e8ded409364ba97fe963d5f3eb4d30e52d4c0816.
+All9filehashes/source/run/attempt/kernel/fixture/harness verified. Complete
+trace/partialtimings/exactmetadata:
+docs/evidence/2026-10-23-t01f-primitive-short-pairs-mixed-terminal.json.
+
+Native85/hash11 with permittedstandardaxioms, frozen2730/8190/13665/long3,
+new19/38, strictpurehelper shapes, authentic complete PSC1/TS7.0.2 producer
+and retainedcontrols allPASS forsourceb0, but wholemixed FAILED. Do not promote
+these toT01F acceptance or combine older-source results.
+Native/all5filehashes:
 docs/evidence/2026-10-23-t01f-primitive-short-pairs-native-gates.json.
-
-Complete producer120481013892 PASS,14:51:30–15:07:16UTC on2026-10-23.
-Authentic complete PSC1 SelfHost sourcecheck and TS7.0.2 build, pinned Lean
-4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Node22.23.3.
-Frozen bounded2730/8190/13665/long3 plus new19case38assertion values PASS.
-Actual strict codegen markers PASS: new ShortPairs has ZERO generators,
-scheduler calls,staging,Step/Mix dispatch and exactly8 inlined primitive
-get/next transitions. Full entry has mutually exclusive ShortLeaf/Pair sites
-selected by paircount<=4 (one actual dispatch), one structural generator
-block and one primitive odd transition. Generic Pair/State/LevelList guards
-remain intact. All15 artifact files and SIX actual complete emitted helper
-bodies independently verified against source/run/attempt/provenance.
-Kernel9,966,120 bytes SHA256
-a9c8ff256b1a0e2cd342eee96f4a50f25603ba5e3d648269068fec9f16b4d944.
-Producer artifact12509764996 ZIP1,137,528bytes SHA256
-2fafee80d664a5e9793b5baaef8f37e5dd29cd56bb0f10d526b68d029e639df9.
-
-Retained generated controls120488960287 terminalPASS15:10:04UTC.
-Frozen scalar matrix/long3, public DAG/minimalString,605prefix assertions,
-session8kinds/7direct/5privateIDs/2forks PASS. All13 artifact files and detached
-kernel/fixture/harness bytes verified. Controls artifact12511312063
-ZIP664631bytes SHA256
-a84eb652d9220bf7e5ad18b3c85307bf1dddc5b94dcd71b4bd6a74e286fca2aa.
-DAG107.96s/694,292KiB peak RSS; prefix23.63s/483,284KiB.
-Compared with0fe, observed wall times lower38.02s/11.05s but peak RSS HIGHER
-135,408KiB/86,480KiB. Preserve both memory regressions. Cross-run host/GC
-variation prevents causal/general speedup claims; D remains OPEN.
-2048MiB old-space is not a hardRSS cap.
-
-Mixed120488960255 RUNNING, actualstart15:07:20UTC, unchanged25-minute job
-cap (~15:32:20UTC). Complete1400 assertions,440completed traces,receipt,
-wholewalltime and peakRSS remain UNKNOWN. Preserve all294independent
-admissions/377metadata/singleton/negatives/private/session owners/repeated
-publiccalls,fuel4096,2048MiB,emptyPATH. Do not duplicate or inherit earlier
-source passes. Producer and controls evidence/all15+13 file hashes/all6
-complete helper bodies/markers:
+Producer/control actualmarkers/all15+13filehashes/SIX completehelperbodies:
 docs/evidence/2026-10-23-t01f-primitive-short-pairs-generated-preflight.json.
+Completekernel9,966,120bytes SHA256
+a9c8ff256b1a0e2cd342eee96f4a50f25603ba5e3d648269068fec9f16b4d944.
+Controls DAG107.96s/694292KiB andprefix23.63s/483284KiB: observedtimes lower
+but peakRSS higher135408KiB/86480KiB vs0fe; preserve memoryregressions.
+No causal/general speedup claim; DOPEN,2048MiB is not a hardRSS cap.
 
-Implementation: pure nonrecursive ShortPairs selects0/2/4/6/8 immutable
-transitions for selectedpaircounts0..4; larger fullinputs retain unchanged
-genericPair. All11 theorem statements/proof bodies unchanged from9dd and
-freshlypassed here; originalgeneralState/Scan/stagedWorker/partialABI,
-algorithms/modulus/rawcursorsemantics,LevelListfallback and frozen tests
-remainunchanged. Earlier9ddStep-dispatch codegen rejection and e996proof
-failure are archived, not accepted or suppressed. The current source is
-native/codegen qualified ONLY; wholemixed/T01F qualification is stillOPEN.
+The primitive ShortPairs helper genuinely emits ZERO internal generators,
+scheduler calls,staging,Step/Mix dispatch and8 primitive transitions. The full
+entry selects one of mutually exclusive ShortLeaf/unchangedPair branches at
+paircount<=4. Native bounded/entry equalities are genuine; originalgeneral
+State/Scan/stagedWorker/partialABI/hashalgorithm/rawcursorsemantics and
+LevelListfallback remainunchanged. This verified local optimization has NOT
+made the fullmixed workload fit the unchanged resource budget.
 
-All five full work-branch pushes remainPAUSED; profilemanual-only;
-narrowhashonlyACTIVE. After whole narrowPASS, fetchFRESHfullworkflowfiles
-(hashguard11),restoreall5,makenarrowmanual-only,apply exact1400/shard and
-8400executed/route aggregate guards (repeatedprefixincluded), qualifyONE
-coherent NEWsource throughBOTH strictsixshardaggregates and allretained
-native/official/provider24CLI+8API/research/measurements/frozen32worker384call
-owner/full193Arena/profile. Both full routes include new19/38 matrix.
-T01F/currentA/B/DOPEN,CFAIL; historicalscopedA9c87qualified. NoT05/integration.
-DefaultV1/fullkernelDirectJSUNSUPPORTED. Integrationlast123c41197950b6761be965fd21c57142ee2b0d1c.
-This documentation child is unqualified; sourceb0 is executionidentity.
-Fresh expectedSHA/nonforce,preservehistory,ActionsLinux execution,no main/npm.
+THIS containing commit activates ONE current-source V1 UTF8 DefEq phase
+diagnostic on the profile workflow's work-branch push. Authenticate sourceb0,
+treee771,run39972883672,producer120481013892,artifact12509764996
+ZIP1137528bytes/SHA2fafee80d664a5e9793b5baaef8f37e5dd29cd56bb0f10d526b68d029e639df9,
+compilerworkflowblob2b72da1028c0e26acd99df333f44d89a3fabca15 and kernela9c8.
+Independently admit ALL294 and compare377metadata, then profile the genuine
+mixed UTF8-literal V1 DefEq operation under fixed180-second diagnostic
+deadline/fuel4096/2048MiB/emptyPATH/Node22. This call measured65,505.647941ms
+in the actual failed mixed run; its ofList counterpart63,881.177151ms.
+No complete rebuild, fullmixed rerun, qualification or provider promotion.
+Follow the ONE new profile run. Inspect current phase frames before choosing
+another source-proved optimization; restore profilemanual-only in the next
+implementation commit. Other T01F diagnostic workflows remain manual-only.
+
+All FIVE full qualification work-branch pushes stayPAUSED. Narrowhash push
+remainsACTIVE for futureimplementation source/proof/workflow changes; this
+profile-only commit should trigger ONLY the phase diagnostic. Prepared full
+activation buffers were NOT pushed because narrowmixedFAILED.
+After a future complete narrowPASS, fetchfreshfullworkflows(hashguard11),
+restoreall5,makenarrowmanual-only, enforceexact1400/shard8400executed/route
+(repeatedprefixincluded) and qualifyONEnewcoherentsource throughBOTH strict
+sixshardaggregates and allretainednative/official/provider24CLI+8API/research/
+measurements/frozen32worker384owner/full193Arena/profile. Both full routes
+include the separate19case38assertion boundary matrix. Saved integrationdraft
+matches actualpausedworkflow after removingits workbranchline; guard11.
+
+T01F/currentA/B/DOPEN,CFAIL; historicalscopedA9c87 remainsqualified.
+NoT05/integration. DefaultV1/fullkernelDirectJSUNSUPPORTED.
+Integrationlast123c41197950b6761be965fd21c57142ee2b0d1c.
+ActionsLinux executionONLY; fresh expectedSHA/nonforce,preservehistory,
+no main merge/npm publication. Currentprofileharnesschild is unqualified.
 
 ---
 

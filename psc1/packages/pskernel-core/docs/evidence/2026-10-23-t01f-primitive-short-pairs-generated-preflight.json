@@ -1,6 +1,6 @@
 {
   "schema": "psc1-t01f-primitive-short-pairs-generated-preflight-v1",
-  "observedAt": "2026-10-23T15:14:03.530Z",
+  "observedAt": "2026-10-23T15:35:49.306Z",
   "sourceSha": "b0d560cfbbfd976a9d8338dbd2bd26a4d5614418",
   "treeSha": "e77103a138b818e286ffe7da00b9c12a58bbc63a",
   "runId": "39972883672",
@@ -10,7 +10,7 @@
     "bounded": "PASS",
     "completeProducer": "PASS",
     "retainedControls": "PASS",
-    "mixed": "RUNNING",
+    "mixed": "CANCELLED_AT_25_MINUTE_CAP",
     "T01F": "OPEN",
     "currentA": "OPEN",
     "B": "OPEN",
@@ -293,11 +293,11 @@
       "head_sha": "b0d560cfbbfd976a9d8338dbd2bd26a4d5614418",
       "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120488960255",
       "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/39972883672/job/120488960255",
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "cancelled",
       "created_at": "2026-10-23T15:07:16Z",
       "started_at": "2026-10-23T15:07:20Z",
-      "completed_at": null,
+      "completed_at": "2026-10-23T15:32:41Z",
       "name": "generated-hash-runtime (mixed, 25)",
       "steps": [
         {
@@ -350,35 +350,43 @@
         },
         {
           "name": "Independent mixed Unicode sample with full unchanged assertions",
-          "status": "in_progress",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "cancelled",
           "number": 7,
           "started_at": "2026-10-23T15:07:51Z",
-          "completed_at": null
+          "completed_at": "2026-10-23T15:32:36Z"
         },
         {
           "name": "Run actions/upload-artifact@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 8,
-          "started_at": null,
-          "completed_at": null
+          "started_at": "2026-10-23T15:32:36Z",
+          "completed_at": "2026-10-23T15:32:38Z"
         },
         {
           "name": "Post Run actions/setup-node@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "skipped",
           "number": 15,
-          "started_at": null,
-          "completed_at": null
+          "started_at": "2026-10-23T15:32:38Z",
+          "completed_at": "2026-10-23T15:32:38Z"
         },
         {
           "name": "Post Run actions/checkout@v4",
-          "status": "pending",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "number": 16,
-          "started_at": null,
-          "completed_at": null
+          "started_at": "2026-10-23T15:32:38Z",
+          "completed_at": "2026-10-23T15:32:38Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-23T15:32:38Z",
+          "completed_at": "2026-10-23T15:32:39Z"
         }
       ],
       "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120488960255",
@@ -1475,7 +1483,19 @@
     "completedAssertions": null,
     "wallSeconds": null,
     "peakRssKiB": null,
-    "terminalResult": "UNKNOWN"
+    "terminalResult": "CANCELLED",
+    "endedAt": "2026-10-23T15:32:41Z",
+    "traceBegins": 418,
+    "traceEnds": 417,
+    "interrupted": [
+      {
+        "id": 418,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag"
+      }
+    ],
+    "terminalEvidence": "2026-10-23-t01f-primitive-short-pairs-mixed-terminal.json"
   },
   "measurements": {
     "dag": {
@@ -1508,5 +1528,5 @@
     },
     "interpretation": "Lower observed wall times but HIGHER peak RSS for both controls than source0fe. Preserve memory regressions. Cross-run host/GC variability prevents causal or general performance qualification. D OPEN;2048MiB old-space is not a hardRSS cap."
   },
-  "nextTask": "Follow existing mixed120488960255 without duplication. After full narrowPASS authenticate all1400 assertions/all440 completed tracecalls/receipt/time/RSS/artifact then fetch freshfull workflows,restoreall5,makenarrowmanual-only,apply exact1400/shard8400executed/route guards and qualifyONE new coherent source throughBOTH final strict six-shard aggregates plus allretainedgates. No T05/integration before scopedT01F acceptance."
+  "nextTask": "ONE authenticated b0-source phase profile of the actual expensive UTF8-literal V1 DefEq after unchanged full294/377 prefix. Reuse exact successful producer artifact12509764996 fromrun39972883672/job120481013892; no rebuild or whole-mixed rerun. Diagnose current remaining allocations before another source-proved optimization."
 }

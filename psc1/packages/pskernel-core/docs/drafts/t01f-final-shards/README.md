@@ -1,55 +1,74 @@
-## Primitive short-pair preflight: mixed runtime pending
+## Primitive short-pair mixed runtime TIMED OUT; current-source phase diagnostic next
 
-Execution and harness source: `b0d560cfbbfd976a9d8338dbd2bd26a4d5614418`.
-Follow the single [narrow run](https://github.com/dwijayuda/pskernel/actions/runs/39972883672).
+Execution source:b0d560cfbbfd976a9d8338dbd2bd26a4d5614418
+(tree e77103a138b818e286ffe7da00b9c12a58bbc63a).
+Run https://github.com/dwijayuda/pskernel/actions/runs/39972883672 completed
+CANCELLED. Mixed120488960255 ran15:07:20–15:32:41UTC on2026-10-23 and hit
+the unchanged25-minute job cap. Actual trace418begins/417ends; interrupted
+id418 / validity-right / Aé€😀 / psKernelV1RunDag, the same call as prior0fe.
+All294 independent admissions,377 metadata comparisons and mixedsingleton
+PASS. No complete mixedcase/1,400-assertion receipt. mixed.memory empty:
+completed wholewalltime and peakRSS remain UNKNOWN.
 
-Native job 120479881827 passed 85 proof reports, including 11 hash reports,
-with only the permitted standard axioms. The bounded compiler gate passed
-the frozen 2,730 cases, 8,190 partial stages, 13,665 assertions and three long
-cases, plus the separate 19-case/38-assertion boundary matrix.
+Mixedartifact12511879421 ZIP536942bytes SHA256
+906d176cb44968b2ffe1ae64e8ded409364ba97fe963d5f3eb4d30e52d4c0816.
+All9filehashes/source/run/attempt/kernel/fixture/harness verified. Complete
+trace/partialtimings/exactmetadata:
+docs/evidence/2026-10-23-t01f-primitive-short-pairs-mixed-terminal.json.
 
-Complete producer 120481013892 passed authentic PSC1 source checking and
-the full TypeScript 7.0.2 build. All 15 artifact files and six complete emitted
-helper bodies were independently verified. The new short helper contains
-eight primitive transitions and no generators, scheduler calls, staged
-machinery, or Step/Mix dispatch. The full entry selects exactly one of the
-short helper and unchanged pair fallback through the exact four-pair bound.
+Native85/hash11 with permittedstandardaxioms, frozen2730/8190/13665/long3,
+new19/38, strictpurehelper shapes, authentic complete PSC1/TS7.0.2 producer
+and retainedcontrols allPASS forsourceb0, but wholemixed FAILED. Do not promote
+these toT01F acceptance or combine older-source results.
+Native/all5filehashes:
+docs/evidence/2026-10-23-t01f-primitive-short-pairs-native-gates.json.
+Producer/control actualmarkers/all15+13filehashes/SIX completehelperbodies:
+docs/evidence/2026-10-23-t01f-primitive-short-pairs-generated-preflight.json.
+Completekernel9,966,120bytes SHA256
+a9c8ff256b1a0e2cd342eee96f4a50f25603ba5e3d648269068fec9f16b4d944.
+Controls DAG107.96s/694292KiB andprefix23.63s/483284KiB: observedtimes lower
+but peakRSS higher135408KiB/86480KiB vs0fe; preserve memoryregressions.
+No causal/general speedup claim; DOPEN,2048MiB is not a hardRSS cap.
 
-Generated controls 120488960287 passed, including 605 prefix assertions
-and the retained private-ID/session checks. DAG measured 107.96 seconds and
-694,292 KiB peak RSS; prefix measured 23.63 seconds and 483,284 KiB.
-Both observed peak RSS values exceed the prior 0fe control run; preserve those
-memory regressions. Cross-run timings do not establish a general speedup.
+The primitive ShortPairs helper genuinely emits ZERO internal generators,
+scheduler calls,staging,Step/Mix dispatch and8 primitive transitions. The full
+entry selects one of mutually exclusive ShortLeaf/unchangedPair branches at
+paircount<=4. Native bounded/entry equalities are genuine; originalgeneral
+State/Scan/stagedWorker/partialABI/hashalgorithm/rawcursorsemantics and
+LevelListfallback remainunchanged. This verified local optimization has NOT
+made the fullmixed workload fit the unchanged resource budget.
 
-Mixed job 120488960255 started at 15:07:20 UTC on 2026-10-23 and remains
-running. Its unchanged 25-minute job cap is approximately 15:32:20 UTC.
-The complete 1,400-assertion receipt, 440 completed trace calls, whole runtime
-and peak RSS remain unknown. Do not duplicate this run or combine sources.
+THIS containing commit activates ONE current-source V1 UTF8 DefEq phase
+diagnostic on the profile workflow's work-branch push. Authenticate sourceb0,
+treee771,run39972883672,producer120481013892,artifact12509764996
+ZIP1137528bytes/SHA2fafee80d664a5e9793b5baaef8f37e5dd29cd56bb0f10d526b68d029e639df9,
+compilerworkflowblob2b72da1028c0e26acd99df333f44d89a3fabca15 and kernela9c8.
+Independently admit ALL294 and compare377metadata, then profile the genuine
+mixed UTF8-literal V1 DefEq operation under fixed180-second diagnostic
+deadline/fuel4096/2048MiB/emptyPATH/Node22. This call measured65,505.647941ms
+in the actual failed mixed run; its ofList counterpart63,881.177151ms.
+No complete rebuild, fullmixed rerun, qualification or provider promotion.
+Follow the ONE new profile run. Inspect current phase frames before choosing
+another source-proved optimization; restore profilemanual-only in the next
+implementation commit. Other T01F diagnostic workflows remain manual-only.
 
-Evidence is in:
+All FIVE full qualification work-branch pushes stayPAUSED. Narrowhash push
+remainsACTIVE for futureimplementation source/proof/workflow changes; this
+profile-only commit should trigger ONLY the phase diagnostic. Prepared full
+activation buffers were NOT pushed because narrowmixedFAILED.
+After a future complete narrowPASS, fetchfreshfullworkflows(hashguard11),
+restoreall5,makenarrowmanual-only, enforceexact1400/shard8400executed/route
+(repeatedprefixincluded) and qualifyONEnewcoherentsource throughBOTH strict
+sixshardaggregates and allretainednative/official/provider24CLI+8API/research/
+measurements/frozen32worker384owner/full193Arena/profile. Both full routes
+include the separate19case38assertion boundary matrix. Saved integrationdraft
+matches actualpausedworkflow after removingits workbranchline; guard11.
 
-- ../../evidence/2026-10-23-t01f-primitive-short-pairs-native-gates.json
-- ../../evidence/2026-10-23-t01f-primitive-short-pairs-generated-preflight.json
-
-The saved integration draft requires 11 hash proof reports and the additional
-19-case boundary matrix. All five full work-branch pushes remain paused;
-narrow hash alone is active and T01F diagnostics are manual-only.
-
-Only after complete narrow PASS, authenticate its receipt and artifact, fetch
-fresh full workflows, restore all five full triggers and make narrow hash
-manual-only. Require exactly 1,400 assertions per shard and 8,400 executed
-assertions per route, including repeated admission prefixes. Qualify one new
-coherent source through both strict six-shard aggregates and every retained
-native, official, provider 24 CLI + 8 API, research, frozen 32-worker/384-call
-owner, full 193-case Arena and profile gate. Each route compiles once; each
-shard independently admits all 294 requests and compares 377 metadata entries.
-Require both PSC1_T01F_FULL_STRING_SHARDED_JS: PASS markers at that exact source.
-
-T01F/current A/B/D remain OPEN; C remains FAIL. Historical scoped A9c87 stays
-qualified. No T05 or integration yet. Keep fuel 4096, 2048 MiB old space,
-empty PATH and the 25-minute cap. Actions Linux execution only; fresh expected
-SHA and non-force updates; preserve history; no main merge or npm publication.
-Default provider is V1; full-kernel DirectJS remains UNSUPPORTED.
+T01F/currentA/B/DOPEN,CFAIL; historicalscopedA9c87 remainsqualified.
+NoT05/integration. DefaultV1/fullkernelDirectJSUNSUPPORTED.
+Integrationlast123c41197950b6761be965fd21c57142ee2b0d1c.
+ActionsLinux executionONLY; fresh expectedSHA/nonforce,preservehistory,
+no main merge/npm publication. Currentprofileharnesschild is unqualified.
 
 ---
 

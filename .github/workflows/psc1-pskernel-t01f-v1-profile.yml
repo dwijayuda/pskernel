@@ -1,6 +1,11 @@
-name: PSC1 T01F fused-entry V1 UTF8 DefEq diagnostic
+name: PSC1 T01F primitive short-pair V1 UTF8 DefEq diagnostic
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - work/psc1-pskernel-t01f-string-20261022
+    paths:
+      - .github/workflows/psc1-pskernel-t01f-v1-profile.yml
 permissions:
   contents: read
   actions: read
@@ -35,17 +40,17 @@ jobs:
           import base64, hashlib, io, json, os, pathlib, re, subprocess, urllib.parse, urllib.request, zipfile
 
           repo = 'dwijayuda/pskernel'
-          source = '0fe60cc69e8d7544acb09025944cbfd3d955f992'
-          source_tree = 'a6e55931126673894687c9f1d3e582928940ea68'
-          producer_run = 39961234382
-          producer_job = 120440559608
-          artifact_id = 12506595313
-          artifact_size = 1134942
-          artifact_digest = '9121de89238f6f1e5a9109387e7e78ffa86435b0057005dbba1be2412b4bc7d8'
+          source = 'b0d560cfbbfd976a9d8338dbd2bd26a4d5614418'
+          source_tree = 'e77103a138b818e286ffe7da00b9c12a58bbc63a'
+          producer_run = 39972883672
+          producer_job = 120481013892
+          artifact_id = 12509764996
+          artifact_size = 1137528
+          artifact_digest = '2fafee80d664a5e9793b5baaef8f37e5dd29cd56bb0f10d526b68d029e639df9'
           lean_commit = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
           samples = ['', 'a', 'é', '€', '😀', 'Aé€😀']
           expected = {
-              'kernel': {'bytes': 9959869, 'sha256': 'b3a3cd169b2453ea3d7026f9443a85057b93282c6433436e6832c9387e3b696d'},
+              'kernel': {'bytes': 9966120, 'sha256': 'a9c8ff256b1a0e2cd342eee96f4a50f25603ba5e3d648269068fec9f16b4d944'},
               'fixture': {'bytes': 2791525, 'sha256': '563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d'},
               'fixtureProducer': {'bytes': 39734, 'sha256': '63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663'},
               'generatedRunner': {'bytes': 27140, 'sha256': 'd3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2'},
@@ -189,7 +194,7 @@ jobs:
               if name == 'leanToolchain':
                   require(data.decode().strip() == 'leanprover/lean4:v4.35.0', 'source Lean toolchain pin')
               if name == 'workflow':
-                  require(blob_sha == 'c5074a5ed996b5e33134345b2960714b9728916d', 'reviewed original compiler workflow')
+                  require(blob_sha == '2b72da1028c0e26acd99df333f44d89a3fabca15', 'reviewed original compiler workflow')
                   require('typescript@7.0.2' in data.decode() and
                           'lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean' in data.decode(),
                           'original TypeScript pin and complete SelfHost source-check command')
@@ -212,7 +217,7 @@ jobs:
 
           report = {
               'schema': 'psc1-t01f-authenticated-reuse-diagnostic-v1',
-              'authority': 'Diagnostic only. The 0fe60cc6 mixed runtime was cancelled at the unchanged 25-minute cap; no final-source qualification or provider promotion.',
+              'authority': 'Diagnostic only. The b0d560cf primitive short-pair mixed runtime was cancelled at the unchanged 25-minute cap; no final-source qualification or provider promotion.',
               'inputAuthority': 'Raw requests only. This generated process must independently admit all 294 requests from empty before querying.',
               'repository': repo, 'harnessSourceSha': harness_sha, 'generatedSourceSha': source,
               'generatedSourceTree': source_tree, 'runId': os.environ['GITHUB_RUN_ID'],
@@ -252,7 +257,7 @@ jobs:
           derived = (prefix + tail).encode()
           (root / 'detached/v1-defeq-profile.mjs').write_bytes(derived)
           report = {'schema':'psc1-t01f-derived-operation-diagnostic-v1', 'diagnosticOnly':True, 'qualification':False,
-                    'generatedSourceSha':'0fe60cc69e8d7544acb09025944cbfd3d955f992', 'harnessSourceSha':os.environ['GITHUB_SHA'],
+                    'generatedSourceSha':'b0d560cfbbfd976a9d8338dbd2bd26a4d5614418', 'harnessSourceSha':os.environ['GITHUB_SHA'],
                     'fullRunnerSha256':hashlib.sha256(source.encode()).hexdigest(),
                     'derivedDriverSha256':hashlib.sha256(derived).hexdigest(),
                     'phaseExclusiveProfile':True, 'samplingIntervalMicroseconds':1000,

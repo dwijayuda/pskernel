@@ -21,6 +21,10 @@ for steps in [0u32, 1u32, 7u32] {
  assert_eq!(baseline_shadow(text.clone(),PsNat::from(steps)),PsNat::from(1u8));
  assert_eq!(moved_shadow(text.clone(),PsNat::from(steps)),PsNat::from(1u8));
  assert_eq!(baseline_reserved(text.clone(),PsNat::from(steps)),moved_reserved(text.clone(),PsNat::from(steps)));
+ assert_eq!(baseline_renamed(text.clone(),PsNat::from(steps)),moved_renamed(text.clone(),PsNat::from(steps)));
+ assert_eq!(moved_renamed(text.clone(),PsNat::from(steps)),PsNat::from(text.len()));
+ assert_eq!(baseline_retained(text.clone(),PsNat::from(steps)),moved_retained(text.clone(),PsNat::from(steps)));
+ assert_eq!(moved_retained(text.clone(),PsNat::from(steps)),PsNat::from(2*text.len()));
 }
 println!("{{\\\"bytes\\\":{},\\\"steps\\\":100000,\\\"baselineNs\\\":{},\\\"movedNs\\\":{},\\\"guards\\\":\\\"passed\\\"}}",text.len(),baseline_ns,moved_ns);
 `;

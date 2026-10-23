@@ -159,7 +159,13 @@ try {
   'PSC1_REPRODUCIBILITY_REQUIRES_REVIEWED_RUST_LOCK');
  report.fixedPoint=mode==='--self-host'?'passed-G1-G2-G3-exact-source-admission-IR-and-ten-case-observations':'not-requested';
  report.status='passed';
-} catch(error){report.status='failed';report.failure=error.message;throw error;}
+} catch(error){
+ report.status='failed';report.failure=error.message;
+ for(const attempt of report.attempts)if(attempt.status==='running'){
+  attempt.status='failed';attempt.failure=error.message;attempt.completedAt=new Date().toISOString();
+ }
+ throw error;
+}
 finally{
  report.completedAt=new Date().toISOString();
  fs.writeFileSync(path.join(directory,'qualification.json'),JSON.stringify(report,null,2)+'\n');

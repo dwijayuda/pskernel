@@ -1447,7 +1447,14 @@ private def fixture (label name : String) : PsVerifiedIrDeclaration :=
     else [v "text",next counter]
   let result := if label == "duplicate" then size "other" else if label == "order" then v "acc" else size "text"
   let core : PsVerifiedIrExpr := .ifE (.intrinsic .natEq [] [v counter,n 0]) result (.call (v name) [] arguments)
-  .mk name [] params natT (if label == "shadow" then .letE "text" strT (.literal (.string "z")) core else core)
+  let renamed : PsVerifiedIrExpr :=
+    .letE "alias" strT (v "text")
+      (.ifE (.intrinsic .natEq [] [v counter,n 0])
+        (if label == "retained" then .intrinsic .natAdd [] [size "alias",size "text"] else size "alias")
+        (.call (v name) [] [v "alias",next counter]))
+  .mk name [] params natT
+    (if label == "renamed" || label == "retained" then renamed
+      else if label == "shadow" then .letE "text" strT (.literal (.string "z")) core else core)
 
 private def get {alpha : Type} (value : Except PsRustEmitError alpha) : IO alpha :=
   match value with
@@ -1457,13 +1464,13 @@ private def get {alpha : Type} (value : Except PsRustEmitError alpha) : IO alpha
 def main : IO Unit := do
   let text : PsVerifiedIrParameter := .mk "text" strT
   require "initialized local String qualifies"
-    (psRustTailInvariantString ["text","n"] text (v "text"))
+    (psRustTailOwnedString ["text","n"] ["text","n"] text (v "text") == .some "text")
   require "let/match shadow names refuse movement"
-    (!psRustTailInvariantString ["text","text","n"] text (v "text"))
+    (psRustTailOwnedString ["text","text","n"] ["text","n"] text (v "text") == .none)
   require "nonlocal String refuses movement"
-    (!psRustTailInvariantString [] text (v "text"))
+    (psRustTailOwnedString [] ["text"] text (v "text") == .none)
   require "computed String refuses movement"
-    (!psRustTailInvariantString ["text"] text (.intrinsic .stringAppend [] [v "text",.literal (.string "")]))
+    (psRustTailOwnedString ["text"] [] text (.intrinsic .stringAppend [] [v "text",.literal (.string "")]) == .none)
   require "ordinary operand errors remain"
     (match psRustTailNextState (fun _ => .error .fuelExhausted) (fixture "scan" "scan")
       ["text","n"] [] [v "text",v "n"] with
@@ -1486,7 +1493,24 @@ def main : IO Unit := do
   require "inlined operands retain original fuel refusal"
     (match psRustEmitExprWorker [forward] 1 ["text"] (.call (v "forwardLength") [] [v "text"]) with
       | .error .fuelExhausted => true | _ => false)
-  let labels := ["scan","order","duplicate","shadow","reserved"]
+  require "renamed initialized String qualifies"
+    (psRustTailOwnedString ["alias","text"] ["alias","n"] text (v "alias") == .some "alias")
+  require "duplicate String argument roots refuse movement"
+    (psRustTailOwnedString ["text"] ["text","text"] text (v "text") == .none)
+  require "last-use let transfer qualifies"
+    (psRustTailMoveLetValue ["text"] "alias" strT (v "text") (v "alias") == .some "text")
+  require "live original let binding refuses transfer"
+    (psRustTailMoveLetValue ["text"] "alias" strT (v "text")
+      (.intrinsic .stringAppend [] [v "alias",v "text"]) == .none)
+  require "shadowed let source refuses transfer"
+    (psRustTailMoveLetValue ["text","text"] "alias" strT (v "text") (v "alias") == .none)
+  require "lambda captures keep original let binding alive"
+    (psRustTailMoveLetValue ["text"] "alias" strT (v "text")
+      (.lambda [] strT (v "text")) == .none)
+  require "inner shadow is not an outer use"
+    (psRustTailMoveLetValue ["text"] "alias" strT (v "text")
+      (.letE "text" strT (.literal (.string "z")) (v "text")) == .some "text")
+  let labels := ["scan","order","duplicate","shadow","reserved","renamed","retained"]
   let declarations := forward :: (labels.flatMap fun label =>
     [fixture label ("baseline_" ++ label),fixture label ("moved_" ++ label)])
   let raw : PsVerifiedIrModule := .mk [] [] [] declarations

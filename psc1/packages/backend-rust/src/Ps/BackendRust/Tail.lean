@@ -73,12 +73,15 @@ def psRustTailArgumentRoots (arguments : List PsVerifiedIrExpr) : List String :=
 def psRustTailOwnedString (locals roots : List String)
     (parameter : PsVerifiedIrParameter) (argument : PsVerifiedIrExpr) : Option String :=
   match parameter.type with
-  | PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string =>
-      match argument with
-      | PsVerifiedIrExpr.var name =>
-          if psRustTailSingleLocal locals name && psRustTailSingleLocal roots name then
-            Option.some name
-          else Option.none
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.string =>
+          match argument with
+          | PsVerifiedIrExpr.var name =>
+              if psRustTailSingleLocal locals name && psRustTailSingleLocal roots name then
+                Option.some name
+              else Option.none
+          | _ => Option.none
       | _ => Option.none
   | _ => Option.none
 
@@ -87,13 +90,16 @@ def psRustTailOwnedString (locals roots : List String)
 def psRustTailMoveLetValue (locals : List String) (name : String)
     (type : PsVerifiedIrType) (value body : PsVerifiedIrExpr) : Option String :=
   match type with
-  | PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string =>
-      match value with
-      | PsVerifiedIrExpr.var source =>
-          if psRustTailSingleLocal locals source &&
-              psListIsEmpty (psRustCollectCapturesWorker [source] 4096 [name] body []) then
-            Option.some (psRustIdentifier source)
-          else Option.none
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.string =>
+          match value with
+          | PsVerifiedIrExpr.var source =>
+              if psRustTailSingleLocal locals source &&
+                  psListIsEmpty (psRustCollectCapturesWorker [source] 4096 [name] body []) then
+                Option.some (psRustIdentifier source)
+              else Option.none
+          | _ => Option.none
       | _ => Option.none
   | _ => Option.none
 

@@ -268,12 +268,39 @@ def planFailure (diagnostic : PsBackendClosedPlanDiagnostic) : Error :=
     | Option.some detail => detail.owner;
   Error.mk diagnostic.phase (psBackendClosedPlanDiagnosticText diagnostic) "" owner 0 0
 
+-- Public scalar interfaces need no open nominal/generic ABI. Reuse the
+-- existing checked closed plan to expose polymorphic structural workers.
+-- Other interfaces keep their existing generic route and ABI/refusal rules.
+def scalarType (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.primitive _ => true
+  | _ => false
+
+def scalarInterface (selected : List String) (declarations : List PsVerifiedIrDeclaration) : Bool :=
+  if psListIsEmpty selected then false
+  else
+    !psListAny
+      (fun (declaration : PsVerifiedIrDeclaration) =>
+        if psListAny (fun (name : String) => psStringEq name declaration.name) selected then
+          !psListIsEmpty declaration.typeParameters ||
+            !scalarType declaration.resultType ||
+            psListAny (fun (parameter : PsVerifiedIrParameter) => !scalarType parameter.type) declaration.parameters
+        else false)
+      declarations
+
+def genericTargetPlan (source : PsValidatedIrModule) : Except Error PsValidatedIrModule :=
+  match psFuseClosedWorkers source with
+  | Except.error code => Except.error (failure "worker-fusion" code)
+  | Except.ok result => Except.ok result
+
 def targetPlan (target : PsBackendTarget) (source : PsValidatedIrModule)
     (selected : List String) : Except Error PsValidatedIrModule :=
   if psBackendTargetEq target PsBackendTarget.rust || psBackendTargetEq target PsBackendTarget.ts then
-    match psFuseClosedWorkers source with
-    | Except.error code => Except.error (failure "worker-fusion" code)
-    | Except.ok result => Except.ok result
+    if scalarInterface selected source.raw.declarations then
+      match psBackendClosedPlanDetailed source selected with
+      | Except.error _ => genericTargetPlan source
+      | Except.ok result => Except.ok result
+    else genericTargetPlan source
   else
     match psBackendClosedPlanDetailed source selected with
     | Except.error diagnostic => Except.error (planFailure diagnostic)

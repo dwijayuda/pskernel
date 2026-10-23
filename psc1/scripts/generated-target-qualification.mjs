@@ -63,6 +63,13 @@ function checkCandidate(c,r) {
  });
  validateClosureCounts({assurance:r.assurance,sourceCoreDeclarations:v.sourceDeclarations,coreDeclarations:v.logicalDeclarations,partialNames:v.partialNames},sourceCount,r.assurance);
  for(const graph of [v.originalIr,v.specializedIr]){assert.equal(graph.length,5);assert.equal(graph[0],'psc1-ir/1');assert.ok(graph.slice(1).every(Array.isArray));}
+ if(r.id==='G1-bootstrap'||r.id.endsWith('-self')){
+  const declarations=v.specializedIr[4],stats={request:r.id,declarations:declarations.length,
+   genericDeclarations:declarations.filter(d=>d[1].length>0).length,
+   genericCurried:declarations.filter(d=>d[1].length>0&&d[3][0]==='function').length};
+  (report.targetPlans||=[]).push(stats);checkpoint();
+  console.log('PSC1_TARGET_PLAN_PROFILE: '+JSON.stringify(stats));
+ }
  pinned();
  const session=createCompilerHostSession({requestId:r.id,target,sources:r.sources,
   canonicalAdmissions:v.admissionRequest.admissions,checkerExecutable:checker});

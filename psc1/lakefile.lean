@@ -442,3 +442,7 @@ lean_exe psc1_rust_invariant_tail_tests where
 lean_exe psc1_cursor_normalization_tests where
   srcDir := "test"
   root := `CursorNormalizationTests
+
+lean_exe psc1_target_plan_profile_tests where
+  srcDir := "test"
+  root := `TargetPlanProfileTests

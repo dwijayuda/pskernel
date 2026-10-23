@@ -18,14 +18,16 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39890802847'
-          artifact-ids: '12475186302'
+          run-id: '39893147337'
+          artifact-ids: '12475414282'
           path: input
       - name: Ensure native debugger is available
         run: |
           if ! command -v gdb >/dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y gdb
+            if ! sudo apt-get install -y --no-install-recommends gdb; then
+              sudo apt-get update
+              sudo apt-get install -y --no-install-recommends gdb
+            fi
           fi
       - name: Sample exact failed generated workload without adoption
         run: node .github/diagnostics/psc1-rust-g2-stack.mjs

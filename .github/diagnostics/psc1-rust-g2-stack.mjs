@@ -3,23 +3,23 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import path fro
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const files=[];function scan(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())scan(p);else if(e.isFile())files.push(p);}}scan('input');
 const artifactFile=files.find(p=>p.endsWith('/G1-service/artifact.json'));assert.ok(artifactFile);
-assert.equal(sha(fs.readFileSync(artifactFile)),'725f51021439e524b7cba2ba77cd391bf779255efc288ffdd70d9f7ca840782f');
+assert.equal(sha(fs.readFileSync(artifactFile)),'9c6e5a7b5e230288baa48ffc3265113f54ddd23743a73688d0d2b774df28d130');
 const directory=path.dirname(artifactFile),m=JSON.parse(fs.readFileSync(artifactFile,'utf8'));
 const qualification=JSON.parse(fs.readFileSync(files.find(p=>p.endsWith('/qualification.json')),'utf8'));
 console.log('PSC1_RUST_PROTOTYPE_RECEIPT: '+JSON.stringify({bootstrap:qualification.bootstrap,serviceArtifact:qualification.serviceArtifact,generations:qualification.generations,attempts:qualification.attempts,sourceClosureDigest:qualification.sourceClosureDigest}));
 assert.equal(m.target,'rust');assert.equal(m.service,true);assert.deepEqual(m.publicNames,['psCompilerRustServiceCandidate']);
 function verify(){for(const f of m.files){assert.match(f.path,/^[a-zA-Z0-9_.-]+$/);const p=path.join(directory,f.path);assert.ok(fs.lstatSync(p).isFile()&&!fs.lstatSync(p).isSymbolicLink());const b=fs.readFileSync(p);assert.equal(b.length,f.bytes);assert.equal(sha(b),f.sha256);}}
 verify();const request=files.find(p=>path.basename(p)==='G2-self.request.json');assert.ok(request);
-assert.equal(sha(fs.readFileSync(request)),'643d48853d6b1730b44402e1f16b4a909855eb9bd0e137db4f615af4c5dd04d2');
+assert.equal(sha(fs.readFileSync(request)),'ae10e4daf7ed47e76ff30caca7c26a961a4746e3458336a52b4a598e16754681');
 const binary=path.resolve(directory,m.executable);fs.chmodSync(binary,0o700);fs.mkdirSync('diagnosis',{recursive:true});
-for(const seconds of [230]){
+for(const seconds of [60]){
  const output=path.resolve('diagnosis/response-'+seconds+'.json');
  const args=['--preserve-status','--signal=INT','--kill-after=3s',seconds+'s','gdb','--batch',
   '-ex','set pagination off','-ex','set confirm off','-ex','set print frame-arguments none',
   '-ex','set disable-randomization off','-ex','handle SIGSEGV stop print nopass','-ex','run','-ex','thread apply all bt 44','--args',binary,path.resolve(request),output];
  const start=Date.now(),r=spawnSync('timeout',args,{encoding:'utf8',timeout:(seconds+5)*1000,killSignal:'SIGKILL',maxBuffer:1024*1024});
  fs.writeFileSync('diagnosis/gdb-'+seconds+'.txt',(r.stdout||'')+'\n'+(r.stderr||''));
- verify();assert.equal(sha(fs.readFileSync(request)),'643d48853d6b1730b44402e1f16b4a909855eb9bd0e137db4f615af4c5dd04d2');
+ verify();assert.equal(sha(fs.readFileSync(request)),'ae10e4daf7ed47e76ff30caca7c26a961a4746e3458336a52b4a598e16754681');
  console.log('PSC1_RUST_G2_NATIVE_STACK: '+JSON.stringify({seconds,elapsedMs:Date.now()-start,status:r.status,signal:r.signal,error:r.error?.message||null,
   executableSha256:sha(fs.readFileSync(binary)),sourceSha256:m.sourceSha256,requestSha256:sha(fs.readFileSync(request)),
   report:(r.stdout||'').split('\n').map(l=>l.slice(0,500)).slice(-80),stderr:(r.stderr||'').slice(-1500),

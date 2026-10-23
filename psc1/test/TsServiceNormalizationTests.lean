@@ -256,7 +256,7 @@ def main : IO Unit := do
     .intrinsic .stringUtf8ByteSize [] [.literal (.string "λ🙂")],
     .call (.var "f") [] [.literal (.natural 0)],
     .letE "x" natT (.literal (.natural 1)) (.var "x"),
-    .ifE (.literal (.boolean true)) (.literal (.natural 1)) (.literal (.natural 2)),
+    .ifE (.literal (.bool true)) (.literal (.natural 1)) (.literal (.natural 2)),
     .lambda [.mk "x" natT] natT (.var "x"),
     .record "R" [] [("value", .intrinsic .stringAtEnd [] [.literal (.string ""),.literal (.natural 0)])],
     .constructor "I" "C" [] [("value", .intrinsic .stringGet [] [.literal (.string "λ"),.literal (.natural 0)])],

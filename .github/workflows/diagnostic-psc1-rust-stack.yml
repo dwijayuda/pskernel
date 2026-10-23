@@ -1,0 +1,39 @@
+name: PSC1 exact generated Rust G2 stack diagnosis
+on:
+  push:
+    branches: [diagnostic/psc1-selfhost-profile-20261023]
+    paths: [.github/diagnostics/psc1-rust-g2-stack.mjs]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39898205150'
+          artifact-ids: '12478265373'
+          path: input
+      - name: Ensure native debugger is available
+        run: |
+          if ! command -v gdb >/dev/null; then
+            if ! sudo apt-get install -y --no-install-recommends gdb; then
+              sudo apt-get update
+              sudo apt-get install -y --no-install-recommends gdb
+            fi
+          fi
+      - name: Sample exact failed generated workload without adoption
+        run: node .github/diagnostics/psc1-rust-g2-stack.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-rust-g2-stack-${{ github.sha }}
+          path: diagnosis/
+          retention-days: 90

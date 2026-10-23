@@ -1,9 +1,9 @@
 {
   "schema": "psc1-rust-ts-selfhost-request/1",
   "action": "qualify-independent-G1-G2-G3",
-  "id": "rust-static-codec-kernel-reduction-20261023",
+  "id": "rust-shared-codec-fragments-20261023",
   "branch": "fix/psc1-rust-owned-string-moves-20261023",
-  "parentCommit": "f4665ac6c42c376c1ad75ad7f7a86d7857152dc0",
+  "parentCommit": "69bb7d0268a8f3ff2d2282d8b037d89de06db424",
   "targets": [
     "rust"
   ],

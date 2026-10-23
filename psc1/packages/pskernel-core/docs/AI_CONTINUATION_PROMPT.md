@@ -1,4 +1,29 @@
-## Primitive short-pair leaf candidate: all gates PENDING
+## Exact b0 primitive short-pair native85 AND bounded gates PASS; complete check RUNNING
+
+Exact executable AND harness source:
+b0d560cfbbfd976a9d8338dbd2bd26a4d5614418
+(tree e77103a138b818e286ffe7da00b9c12a58bbc63a).
+ONE existing run: https://github.com/dwijayuda/pskernel/actions/runs/39972883672.
+
+Native120479881827 terminalPASS85 reports/11 hash reports, only permitted
+standard axioms; frozen2730cases/long3,294 requests377metadata/all6 native
+String cases/singletons and retained controls PASS.
+Artifact12510480920 ZIP105603bytes SHA256
+e39d26b748b06935f688e1ed5b6f5636c967836363e194c7c8134f0acd5d94dd.
+All5file hashes verified; exactnative evidence:
+docs/evidence/2026-10-23-t01f-primitive-short-pairs-native-gates.json.
+
+Producer120481013892 bounded step7 terminalSUCCESS at14:53:20UTC.
+This step enforces all frozen2730/8190/13665/long3 and new19/38 values plus
+strict pure ShortPairs0generators0scheduler0staging0Step/Mix/eightprimitive
+transitions, exclusiveShort/Pairbranches, unchangedPair/State and LevelList
+code-shape guards. It is NOW checking complete authentic SelfHost source.
+Terminal producer logs/complete emitted bodies still pending inspection.
+Complete build and whole mixed runtime remain UNKNOWN. No T01F acceptance.
+
+Follow THIS existing run without duplication. Preserve all resource limits
+and complete1400assertion/440trace mixed runtime. This documentation child
+is unqualified; sourceb0 remains the execution identity.
 
 Prior9dd75e270f3c9eeb918a262c5f6e43e91b7b14da/run39971478026:
 native120475007169 PASSED85 proof reports/11 hash reports, all permitted

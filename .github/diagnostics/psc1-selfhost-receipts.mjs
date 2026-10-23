@@ -22,7 +22,8 @@ for(const expected of request.attempts) {
  const reports=files.filter(f=>path.basename(f)==='qualification.json');assert.equal(reports.length,1);
  const file=reports[0],directory=path.dirname(file),report=JSON.parse(fs.readFileSync(file));
  assert.equal(report.schema,'psc1-generated-target-qualification/1');
- assert.equal(report.target,expected.target);assert.equal(report.testedCommit,expected.requestCommit);
+ assert.equal(report.target,expected.target);
+ if(expected.expectedG1SourceSha256)assert.equal(report.bootstrap.sourceSha256,expected.expectedG1SourceSha256);assert.equal(report.testedCommit,expected.requestCommit);
  assert.equal(report.profile?.name||'performance-240s',expected.profile);
  const bootstrap=JSON.parse(fs.readFileSync(path.join(directory,'G1-bootstrap.request.json'),'utf8'));
  assert.equal(bootstrap[0],'psc1-compiler-service/1');
@@ -139,7 +140,40 @@ for(const expected of request.attempts) {
   }
  }
 
- const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,cursorCacheHelpers,erasureWorkers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
+
+ const encoderWorkers={};
+ if(expected.inspectEncoderWorkers){
+  const names=['psIrEncodeTypeWithFuelWorker','psIrEncodeExprWithFuelWorker'];
+  function selfCalls(value,name,depth=0,out=[]){
+   if(!Array.isArray(value))return out;
+   if(value[0]==='call'&&Array.isArray(value[1])&&value[1][0]==='var'&&value[1][1]===name)
+    out.push({lambdaDepth:depth,arguments:value[3]?.length});
+   for(const child of value)if(Array.isArray(child))selfCalls(child,name,depth+(value[0]==='lambda'?1:0),out);
+   return out;
+  }
+  for(const graph of ['originalIr','specializedIr']){
+   encoderWorkers[graph]=bootstrapCandidate[graph][4].filter(d=>names.some(n=>d[0]===n||d[0].startsWith(n+'$')||d[0].startsWith(n+'_')))
+    .map(d=>({name:d[0],parameters:d[2],resultType:d[3],body:d[4],selfCalls:selfCalls(d[4],d[0])}));
+   for(const name of names)if(graph==='originalIr'){
+    const worker=encoderWorkers[graph].find(w=>w.name===name);assert.ok(worker,'missing source encoder worker');
+    assert.equal(worker.parameters.length,2);assert.notEqual(worker.resultType[0],'function');
+    for(const call of worker.selfCalls){assert.equal(call.arguments,2);assert.ok(call.lambdaDepth>0,'eager recursive fuel prefix');}
+   }
+  }
+  for(const name of names){
+   const primary=encoderWorkers.specializedIr.find(w=>w.name===name);assert.ok(primary);
+   assert.equal(primary.parameters.length,2);assert.notEqual(primary.resultType[0],'function');
+   assert.equal(primary.body[0],'call');assert.equal(primary.body[1][0],'var');
+   const helper=encoderWorkers.specializedIr.find(w=>w.name===primary.body[1][1]);assert.ok(helper);
+   assert.ok(helper.name.startsWith(name+'_'));assert.equal(helper.parameters.length,2);
+   assert.notEqual(helper.resultType[0],'function');assert.equal(primary.body[3].length,2);
+   assert.ok(helper.selfCalls.length>0);
+   for(const call of helper.selfCalls){assert.equal(call.arguments,2);assert.ok(call.lambdaDepth>0,'eager helper fuel prefix');}
+  }
+  console.log('PSC1_ENCODER_WORKER_SHAPES: '+JSON.stringify(Object.fromEntries(Object.entries(encoderWorkers).map(([graph,rows])=>[graph,rows.map(({body,...rest})=>rest)]))));
+ }
+
+ const row={...expected,candidates,selectedIr,selectedSource,runtimeReceipts,tokenWorkers,cursorCacheHelpers,erasureWorkers,encoderWorkers,artifactReceiptSha256:sha(fs.readFileSync(file)),audit:'source inventory, requests and target manifest bytes verified; no new compiler execution',
   report:{...report,tools:report.tools.map(t=>({file:path.basename(t.file),sha256:t.sha256}))},manifests};
  rows.push(row);
  console.log('PSC1_SELFHOST_RECEIPT_AUDIT: '+JSON.stringify(row));

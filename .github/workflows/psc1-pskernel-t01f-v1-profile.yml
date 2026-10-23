@@ -1,11 +1,6 @@
 name: PSC1 T01F data-result measured V1 UTF8 WHNF diagnostic
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - work/psc1-pskernel-t01f-string-20261022
-    paths:
-      - '.github/workflows/psc1-pskernel-t01f-v1-profile.yml'
 permissions:
   contents: read
   actions: read

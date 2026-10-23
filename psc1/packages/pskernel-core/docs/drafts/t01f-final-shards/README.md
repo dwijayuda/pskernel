@@ -1,3 +1,11 @@
+# T01F final qualification preparations — activated
+
+The saved bytes were installed by the containing activation commit after exact
+16aac complete mixed preflight passed in run39873570107 (1400 assertions,
+440/440 calls,1455.04s,1165840KiB peakRSS). New-source qualification is pending.
+All following inactive/pending wording is historical preparation context;
+the authoritative current status is AI_WORK_STATE.md and the continuation.
+
 # T01F final qualification drafts — inactive
 
 These are saved preparations, not installed workflows or qualification evidence.

@@ -1,3 +1,69 @@
+## Current: complete16aac preflight PASS; final same-source qualification activated
+
+Executable/harness `16aac21740fa7870e502fdf712eff76e5c33e1a2`,
+tree `1eaa8663b61bbd95dfca42bf26e7e62ebef70f21`, completed
+[run39873570107](https://github.com/dwijayuda/pskernel/actions/runs/39873570107)
+SUCCESS: native120153577616, authentic producer120154391391,
+retained generated controls120161280951 and complete mixed120161280846.
+Mixed replay passed all1400 assertions,294 requests,377 metadata,
+the complete Aé€😀 case/singleton/negatives,440/440 traced calls.
+Wall1455.04s,peakRSS1165840KiB,exit0 under unchanged25minute cap;
+runtime admission46780.885661ms and metadata1400.629080ms.
+Only one of six generated samples was replayed here; diagnosticTracing=true.
+All79 native proof reports,5 exact hash equations,2730 matrix cases,
+8190 staged generated calls,13665 matrix assertions and3 long cases passed.
+The byte transition is a normal pure function with no generator/staging/Mix
+dispatch; immutable DATA recursion still calls that helper per byte.
+FullHash avoids staging internally; exported curried worker ABI is preserved.
+No controlled performance or global soundness/backend preservation claim.
+
+Exact receipts:
+- evidence/2026-10-23-t01f-pure-byte-step-native.json
+- evidence/2026-10-23-t01f-pure-byte-step-generated-preflight.json
+- evidence/2026-10-23-t01f-pure-byte-step-mixed-terminal.json
+
+This activation installs the saved complete generated/canonical workflows and
+same-run shard helper without production or acceptance-harness changes.
+Both routes compile once then execute exactly six whole runtime-only samples,
+fail-fast:false,max-parallel2,25minutes/job,emptyPATH,fuel4096,2048MiB.
+Each process independently admits294 requests and compares377 metadata.
+Require PSC1_T01F_FULL_STRING_SHARDED_JS: PASS from BOTH routes at this NEW
+activation source, with exact source/run/attempt/route/provider/input digests.
+16aac's narrow PASS does not qualify this containing activation commit.
+Research, full193 Arena and timeout profile receive only the work-branch
+trigger; all job bodies,case hashes,budgets and controls remain unchanged.
+Focused/hash/V1-profile diagnostics are manual-only to avoid duplicate pushes.
+All old native/official/proof/provider24CLI+8API/research/complete measurements
+and unchanged32worker384call ABBA jobs remain required at the new source.
+
+Fetch live work HEAD and its existing Actions runs before doing anything;
+do not duplicate CI. Record the actual activation SHA and run IDs in the next
+documentation-only checkpoint. Follow every current-source gate and all six
+shards per route. Preserve failed/skipped/timeout results and source bindings.
+Do not raise caps, weaken assertions, replace genuine declarations, or reuse
+a parent's qualification. No local builds/tests/kernel execution; Actions Linux.
+Only consider integration after required scoped qualification is complete,
+using fresh expected_sha/non-force and preserving concurrent branch changes.
+Never merge main or publish npm. Integration remains123c41197950b6761be965fd21c57142ee2b0d1c.
+
+T01F/current-source A OPEN pending final gates. Historical scoped A remains
+9c87f631758862285273ddb0ea0a3987c671022e. B OPEN (V1 inductive admission,
+recursive metadata,eager decode,four whole-operation fallbacks).
+Historical C FAIL:173 semantic matches (105accepted,60kernelRejected,
+1metadataRejected,7transportRejected),2 separate safety-contract agreements,
+17timeouts,1Church resource exhaustion,0unsupported; official122/71/0.
+New-source full193 results are pending; collection success is not corpus PASS.
+D OPEN: controlled performance, cold/heap/Name/warm regressions and broader
+soundness/refinement/backend proofs. Full-kernel DirectJS remains unsupported.
+One next task: complete and evaluate this activation source's full T01F suite.
+Do not start T05 until full T01F acceptance; then T05 ordinary DAG inductive
+admission precedes T06/T07 and T04a ingress removal; T04b remains separate.
+
+Earlier chronological entries below are historical and superseded by this
+current checkpoint. Preserve their rejected/failed/incomplete evidence.
+
+---
+
 ## Exact16aac pure byte-step native PASS; generated pure-leaf gate pending
 
 Executable `16aac21740fa7870e502fdf712eff76e5c33e1a2` passed its native

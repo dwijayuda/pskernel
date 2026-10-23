@@ -1,0 +1,3243 @@
+{
+  "schema": "psc1-t01f-pure-byte-step-mixed-terminal-v1",
+  "recordedAt": "2026-10-23T00:37:03.580Z",
+  "sourceSha": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
+  "sourceTree": "1eaa8663b61bbd95dfca42bf26e7e62ebef70f21",
+  "runId": 39873570107,
+  "runAttempt": 1,
+  "jobId": 120161280846,
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/39873570107/job/120161280846",
+  "conclusion": "success",
+  "scope": "Complete unchanged mixed sample only; final both-route six-sample qualification pending.",
+  "artifact": {
+    "id": 12469810769,
+    "name": "psc1-t01f-hash-runtime-mixed",
+    "size_in_bytes": 538274,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12469810769",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12469810769/zip",
+    "expired": false,
+    "created_at": "2026-10-23T00:29:35Z",
+    "expires_at": "2027-01-20T23:42:39Z",
+    "updated_at": "2026-10-23T00:29:35Z",
+    "digest": "sha256:fe2fddc15ce0935c752f9e1c141c9a6fae56f839cba678a0478a56cc36eebc55",
+    "workflow_run": {
+      "id": 39873570107,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "head_sha": "16aac21740fa7870e502fdf712eff76e5c33e1a2"
+    }
+  },
+  "producerArtifact": {
+    "id": 12467807687,
+    "name": "psc1-t01f-hash-generated-producer",
+    "size_in_bytes": 1132522,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12467807687",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12467807687/zip",
+    "expired": false,
+    "created_at": "2026-10-23T00:04:48Z",
+    "expires_at": "2027-01-20T23:42:39Z",
+    "updated_at": "2026-10-23T00:04:48Z",
+    "digest": "sha256:ac2457b930aa6d48fe3ba6ef0c3ca9ec6860a4d4a38f8754c25567e6beb04aa0",
+    "workflow_run": {
+      "id": 39873570107,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "head_sha": "16aac21740fa7870e502fdf712eff76e5c33e1a2"
+    }
+  },
+  "provenance": {
+    "schema": "psc1-t01f-source-provenance-v1",
+    "sourceSha": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
+    "runId": "39873570107",
+    "runAttempt": "1",
+    "job": "generated-string",
+    "route": "generated",
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "v22.23.3",
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "kernel": {
+      "bytes": 9954771,
+      "sha256": "4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "generatedRunner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    }
+  },
+  "receipt": {
+    "schema": "psc1-t01f-reused-mixed-diagnostic-receipt-v1",
+    "diagnosticOnly": true,
+    "harnessSourceSha": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
+    "generatedSourceSha": "16aac21740fa7870e502fdf712eff76e5c33e1a2",
+    "artifact": {
+      "name": "psc1-t01f-hash-generated-producer",
+      "runId": "39873570107"
+    },
+    "node": "v22.23.3",
+    "jobMinutes": 25,
+    "fuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "emptyPATH": true,
+    "result": {
+      "kernelSha256": "4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa",
+      "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+      "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+      "requests": 294,
+      "metadata": 377,
+      "declarations": "377",
+      "samples": 1,
+      "availableSamples": 6,
+      "executedSamples": 1,
+      "fuel": 4096,
+      "independentAdmission": true,
+      "assertions": 1400,
+      "constructionMs": 44.87161900000001,
+      "admissionMs": 46780.885661,
+      "metadataMs": 1400.629080000006,
+      "totalMs": 1454896.440396,
+      "diagnosticTracing": true,
+      "measurements": [
+        {
+          "sample": "Aé€😀",
+          "utf8Bytes": 10,
+          "owners": 224,
+          "ownerAndConstructionMs": 5689.612014999999,
+          "totalMs": 1406548.7389739999,
+          "arenaNodes": "288",
+          "ownedArenaNodes": "10476",
+          "memory": {
+            "rss": 1192255488,
+            "heapTotal": 567300096,
+            "heapUsed": 367042960,
+            "external": 4808025,
+            "arrayBuffers": 2810876
+          }
+        }
+      ],
+      "sampleIndex": 5,
+      "sample": "Aé€😀"
+    },
+    "time": "peak_rss_kib=1165840 wall_seconds=1455.04 exit_status=0"
+  },
+  "markers": [
+    "PSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":46780.885661}",
+    "PSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1400.629080000006}",
+    "PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\"",
+    "PSC1_T01F_JS_CASE_PASS \"Aé€😀\"",
+    "PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"4d530ea1b3c037bd84d862d3b80d5f1615ac361414d9be4228f22dedcc0a42fa\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":44.87161900000001,\"admissionMs\":46780.885661,\"metadataMs\":1400.629080000006,\"totalMs\":1454896.440396,\"diagnosticTracing\":true,\"measurements\":[{\"sample\":\"Aé€😀\",\"utf8Bytes\":10,\"owners\":224,\"ownerAndConstructionMs\":5689.612014999999,\"totalMs\":1406548.7389739999,\"arenaNodes\":\"288\",\"ownedArenaNodes\":\"10476\",\"memory\":{\"rss\":1192255488,\"heapTotal\":567300096,\"heapUsed\":367042960,\"external\":4808025,\"arrayBuffers\":2810876}}],\"sampleIndex\":5,\"sample\":\"Aé€😀\"}"
+  ],
+  "trace": {
+    "begun": 440,
+    "completed": [
+      {
+        "id": 1,
+        "stage": "admission:List",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 209.535589
+      },
+      {
+        "id": 2,
+        "stage": "admission:Nat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 167.107863
+      },
+      {
+        "id": 3,
+        "stage": "admission:LT",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 92.14035799999999
+      },
+      {
+        "id": 4,
+        "stage": "admission:LT.lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 17.878424999999993
+      },
+      {
+        "id": 5,
+        "stage": "admission:Nat.le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 215.2073089999999
+      },
+      {
+        "id": 6,
+        "stage": "admission:Nat.lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.549658000000022
+      },
+      {
+        "id": 7,
+        "stage": "admission:instLTNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.236484999999902
+      },
+      {
+        "id": 8,
+        "stage": "admission:Fin",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 155.918855
+      },
+      {
+        "id": 9,
+        "stage": "admission:outParam",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.0776760000001104
+      },
+      {
+        "id": 10,
+        "stage": "admission:HPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 156.26724999999988
+      },
+      {
+        "id": 11,
+        "stage": "admission:HPow.hPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.717071999999916
+      },
+      {
+        "id": 12,
+        "stage": "admission:Pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 196.27847600000018
+      },
+      {
+        "id": 13,
+        "stage": "admission:Pow.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.850446999999804
+      },
+      {
+        "id": 14,
+        "stage": "admission:instHPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 27.430496000000176
+      },
+      {
+        "id": 15,
+        "stage": "admission:NatPow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 97.5702080000001
+      },
+      {
+        "id": 16,
+        "stage": "admission:NatPow.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.667611999999963
+      },
+      {
+        "id": 17,
+        "stage": "admission:instPowNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 17.235626999999795
+      },
+      {
+        "id": 18,
+        "stage": "admission:PUnit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 72.38820900000019
+      },
+      {
+        "id": 19,
+        "stage": "admission:PProd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 116.43127299999992
+      },
+      {
+        "id": 20,
+        "stage": "admission:Nat.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.720377000000099
+      },
+      {
+        "id": 21,
+        "stage": "admission:Nat.brecOn.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 183.70471700000007
+      },
+      {
+        "id": 22,
+        "stage": "admission:Nat.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 18.180315000000064
+      },
+      {
+        "id": 23,
+        "stage": "admission:Unit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1.481422000000066
+      },
+      {
+        "id": 24,
+        "stage": "admission:OfNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 140.95512900000017
+      },
+      {
+        "id": 25,
+        "stage": "admission:OfNat.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.034966999999597
+      },
+      {
+        "id": 26,
+        "stage": "admission:instOfNatNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.315379000000121
+      },
+      {
+        "id": 27,
+        "stage": "admission:Nat.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.868548999999803
+      },
+      {
+        "id": 28,
+        "stage": "admission:Unit.unit",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.18858900000032
+      },
+      {
+        "id": 29,
+        "stage": "admission:Nat.pow.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 43.60752400000001
+      },
+      {
+        "id": 30,
+        "stage": "admission:Nat.mul.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 57.92415399999982
+      },
+      {
+        "id": 31,
+        "stage": "admission:Nat.add.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 42.36354900000015
+      },
+      {
+        "id": 32,
+        "stage": "admission:Nat.add._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 62.39453900000035
+      },
+      {
+        "id": 33,
+        "stage": "admission:Nat.add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.121123999999782
+      },
+      {
+        "id": 34,
+        "stage": "admission:Nat.mul._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 62.56781900000033
+      },
+      {
+        "id": 35,
+        "stage": "admission:Nat.mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.416108999999778
+      },
+      {
+        "id": 36,
+        "stage": "admission:Nat.pow._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 116.78138199999967
+      },
+      {
+        "id": 37,
+        "stage": "admission:Nat.pow",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.407112999999754
+      },
+      {
+        "id": 38,
+        "stage": "admission:instNatPowNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.745046000000002
+      },
+      {
+        "id": 39,
+        "stage": "admission:BitVec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 188.3816579999998
+      },
+      {
+        "id": 40,
+        "stage": "admission:UInt32",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 86.69791400000031
+      },
+      {
+        "id": 41,
+        "stage": "admission:Or",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 156.37553400000024
+      },
+      {
+        "id": 42,
+        "stage": "admission:And",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 123.197948
+      },
+      {
+        "id": 43,
+        "stage": "admission:Nat.isValidChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 10.926049000000148
+      },
+      {
+        "id": 44,
+        "stage": "admission:Fin.val",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.311763000000155
+      },
+      {
+        "id": 45,
+        "stage": "admission:BitVec.toFin",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 27.32953899999984
+      },
+      {
+        "id": 46,
+        "stage": "admission:BitVec.toNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 29.045944999999847
+      },
+      {
+        "id": 47,
+        "stage": "admission:UInt32.toBitVec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.252149999999801
+      },
+      {
+        "id": 48,
+        "stage": "admission:UInt32.toNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.436811000000034
+      },
+      {
+        "id": 49,
+        "stage": "admission:UInt32.isValidChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.5110990000002857
+      },
+      {
+        "id": 50,
+        "stage": "admission:Char",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 462.5519949999998
+      },
+      {
+        "id": 51,
+        "stage": "admission:Array",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 92.93924199999992
+      },
+      {
+        "id": 52,
+        "stage": "admission:UInt8",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 99.04367400000001
+      },
+      {
+        "id": 53,
+        "stage": "admission:ByteArray",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 79.07960600000024
+      },
+      {
+        "id": 54,
+        "stage": "admission:Eq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 116.73000900000034
+      },
+      {
+        "id": 55,
+        "stage": "admission:List.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 19.836131000000023
+      },
+      {
+        "id": 56,
+        "stage": "admission:List.brecOn.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 191.40040099999987
+      },
+      {
+        "id": 57,
+        "stage": "admission:List.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 106.48130700000002
+      },
+      {
+        "id": 58,
+        "stage": "admission:List.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 35.08158300000014
+      },
+      {
+        "id": 59,
+        "stage": "admission:List.toByteArray.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 58.01144899999963
+      },
+      {
+        "id": 60,
+        "stage": "admission:ByteArray.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.659638999999515
+      },
+      {
+        "id": 61,
+        "stage": "admission:ByteArray.push.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 34.94637000000057
+      },
+      {
+        "id": 62,
+        "stage": "admission:List.concat.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 63.54759800000011
+      },
+      {
+        "id": 63,
+        "stage": "admission:List.concat._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 98.4183750000002
+      },
+      {
+        "id": 64,
+        "stage": "admission:List.concat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.104976000000534
+      },
+      {
+        "id": 65,
+        "stage": "admission:Array.toList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.478605000000243
+      },
+      {
+        "id": 66,
+        "stage": "admission:Array.push",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.051335000000108
+      },
+      {
+        "id": 67,
+        "stage": "admission:ByteArray.push",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.577194000000418
+      },
+      {
+        "id": 68,
+        "stage": "admission:List.toByteArray.loop._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 177.24222099999952
+      },
+      {
+        "id": 69,
+        "stage": "admission:List.toByteArray.loop",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 24.77309200000036
+      },
+      {
+        "id": 70,
+        "stage": "admission:Array.emptyWithCapacity",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 8.037083000000166
+      },
+      {
+        "id": 71,
+        "stage": "admission:Array.empty",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.6885080000001835
+      },
+      {
+        "id": 72,
+        "stage": "admission:ByteArray.emptyWithCapacity",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.518157000000429
+      },
+      {
+        "id": 73,
+        "stage": "admission:ByteArray.empty",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 8.042881000000307
+      },
+      {
+        "id": 74,
+        "stage": "admission:List.toByteArray",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.402548000000024
+      },
+      {
+        "id": 75,
+        "stage": "admission:List.flatten.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 129.4775980000004
+      },
+      {
+        "id": 76,
+        "stage": "admission:List.append.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 72.28445600000032
+      },
+      {
+        "id": 77,
+        "stage": "admission:List.append._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 105.16774499999974
+      },
+      {
+        "id": 78,
+        "stage": "admission:List.append",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 23.293871999999283
+      },
+      {
+        "id": 79,
+        "stage": "admission:List.flatten._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 119.95276600000034
+      },
+      {
+        "id": 80,
+        "stage": "admission:List.flatten",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 24.55811900000026
+      },
+      {
+        "id": 81,
+        "stage": "admission:instDecidableEqList.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 58.09496399999989
+      },
+      {
+        "id": 82,
+        "stage": "admission:List.map._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 123.04985399999987
+      },
+      {
+        "id": 83,
+        "stage": "admission:List.map",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 25.375004999999874
+      },
+      {
+        "id": 84,
+        "stage": "admission:List.flatMap",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 19.320357999999942
+      },
+      {
+        "id": 85,
+        "stage": "admission:Char.val",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.54864600000019
+      },
+      {
+        "id": 86,
+        "stage": "admission:Bool",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 103.78673299999991
+      },
+      {
+        "id": 87,
+        "stage": "admission:Bool.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.967231999999967
+      },
+      {
+        "id": 88,
+        "stage": "admission:Bool.Reflects.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 34.248343000000204
+      },
+      {
+        "id": 89,
+        "stage": "admission:False",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 23.54970500000036
+      },
+      {
+        "id": 90,
+        "stage": "admission:Not",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1.8100869999998395
+      },
+      {
+        "id": 91,
+        "stage": "admission:Bool.Reflects",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 17.625895000000128
+      },
+      {
+        "id": 92,
+        "stage": "admission:Decidable",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 122.67215699999997
+      },
+      {
+        "id": 93,
+        "stage": "admission:Decidable.decide",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.45916699999998
+      },
+      {
+        "id": 94,
+        "stage": "admission:Decidable.reflects_decide",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 61.74001500000031
+      },
+      {
+        "id": 95,
+        "stage": "admission:dite",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.85382699999991
+      },
+      {
+        "id": 96,
+        "stage": "admission:ite",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.24081600000045
+      },
+      {
+        "id": 97,
+        "stage": "admission:LE",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 81.14897099999962
+      },
+      {
+        "id": 98,
+        "stage": "admission:LE.le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.695686999999452
+      },
+      {
+        "id": 99,
+        "stage": "admission:instLENat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.4490569999998115
+      },
+      {
+        "id": 100,
+        "stage": "admission:Nat.ble.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 125.96662300000025
+      },
+      {
+        "id": 101,
+        "stage": "admission:Nat.ble._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 163.62639000000036
+      },
+      {
+        "id": 102,
+        "stage": "admission:Nat.ble",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 25.036205999999765
+      },
+      {
+        "id": 103,
+        "stage": "admission:Nat.decEq.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 37.76930799999991
+      },
+      {
+        "id": 104,
+        "stage": "admission:False.elim",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.221215999999913
+      },
+      {
+        "id": 105,
+        "stage": "admission:Eq.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 45.677387000000635
+      },
+      {
+        "id": 106,
+        "stage": "admission:HEq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 132.63692400000036
+      },
+      {
+        "id": 107,
+        "stage": "admission:True",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 80.23310200000014
+      },
+      {
+        "id": 108,
+        "stage": "admission:Nat.beq.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 93.6953969999995
+      },
+      {
+        "id": 109,
+        "stage": "admission:Nat.beq._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 120.2050650000001
+      },
+      {
+        "id": 110,
+        "stage": "admission:Nat.beq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 8.46586699999989
+      },
+      {
+        "id": 111,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 28.712924999999814
+      },
+      {
+        "id": 112,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 508.493203
+      },
+      {
+        "id": 113,
+        "stage": "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 78.46834299999955
+      },
+      {
+        "id": 114,
+        "stage": "admission:rfl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.331070999999611
+      },
+      {
+        "id": 115,
+        "stage": "admission:congrArg",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 116.57537700000012
+      },
+      {
+        "id": 116,
+        "stage": "admission:noConfusion_of_Nat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 130.65720199999942
+      },
+      {
+        "id": 117,
+        "stage": "admission:Bool.ctorIdx",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.4380419999997684
+      },
+      {
+        "id": 118,
+        "stage": "admission:_private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 381.28332500000033
+      },
+      {
+        "id": 119,
+        "stage": "admission:_private.Init.Prelude.0.Nat.zero_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.382596999999805
+      },
+      {
+        "id": 120,
+        "stage": "admission:Nat.zero_le._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 193.35389399999985
+      },
+      {
+        "id": 121,
+        "stage": "admission:Nat.zero_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 45.951287999998385
+      },
+      {
+        "id": 122,
+        "stage": "admission:Nat.le.below",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 455.7979189999987
+      },
+      {
+        "id": 123,
+        "stage": "admission:Nat.le.brecOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 74.0055140000004
+      },
+      {
+        "id": 124,
+        "stage": "admission:Nat.le.below.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 154.5306040000014
+      },
+      {
+        "id": 125,
+        "stage": "admission:Eq.ndrec",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 30.7238440000001
+      },
+      {
+        "id": 126,
+        "stage": "admission:Eq.symm",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 29.66341199999988
+      },
+      {
+        "id": 127,
+        "stage": "admission:cast",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 27.58108600000014
+      },
+      {
+        "id": 128,
+        "stage": "admission:eq_of_heq",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 149.33829100000003
+      },
+      {
+        "id": 129,
+        "stage": "admission:_private.Init.Prelude.0.Nat.succ_le_succ.match_1_7",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2421.0128349999995
+      },
+      {
+        "id": 130,
+        "stage": "admission:HAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 134.8483019999985
+      },
+      {
+        "id": 131,
+        "stage": "admission:HAdd.hAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 22.855774999999994
+      },
+      {
+        "id": 132,
+        "stage": "admission:Add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 78.9515420000007
+      },
+      {
+        "id": 133,
+        "stage": "admission:Add.add",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.988781000000017
+      },
+      {
+        "id": 134,
+        "stage": "admission:instHAdd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.019970999999714
+      },
+      {
+        "id": 135,
+        "stage": "admission:instAddNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.1406889999998384
+      },
+      {
+        "id": 136,
+        "stage": "admission:Nat.succ_le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 579.5168670000003
+      },
+      {
+        "id": 137,
+        "stage": "admission:Nat.le_of_ble_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 443.01708599999984
+      },
+      {
+        "id": 138,
+        "stage": "admission:Nat.le_of_ble_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 44.400299000000814
+      },
+      {
+        "id": 139,
+        "stage": "admission:absurd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 8.64864000000125
+      },
+      {
+        "id": 140,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2375.6152599999987
+      },
+      {
+        "id": 141,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.05266399999891
+      },
+      {
+        "id": 142,
+        "stage": "admission:Nat.ble_self_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 327.78169699999853
+      },
+      {
+        "id": 143,
+        "stage": "admission:Nat.ble_self_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.972404000000097
+      },
+      {
+        "id": 144,
+        "stage": "admission:_private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 414.73224700000173
+      },
+      {
+        "id": 145,
+        "stage": "admission:Nat.ble_succ_eq_true._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 651.6875309999996
+      },
+      {
+        "id": 146,
+        "stage": "admission:Nat.ble_succ_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 41.32858400000259
+      },
+      {
+        "id": 147,
+        "stage": "admission:Nat.ble_eq_true_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 238.85373900000195
+      },
+      {
+        "id": 148,
+        "stage": "admission:Nat.not_le_of_not_ble_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 37.49206300000151
+      },
+      {
+        "id": 149,
+        "stage": "admission:Bool.noConfusionType",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.132911000000604
+      },
+      {
+        "id": 150,
+        "stage": "admission:Bool.noConfusion",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 55.67981499999951
+      },
+      {
+        "id": 151,
+        "stage": "admission:Nat.decLe._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 141.7966669999987
+      },
+      {
+        "id": 152,
+        "stage": "admission:Nat.decLe",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.22828600000139
+      },
+      {
+        "id": 153,
+        "stage": "admission:HMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 130.36373199999798
+      },
+      {
+        "id": 154,
+        "stage": "admission:HMod.hMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 27.884218999999575
+      },
+      {
+        "id": 155,
+        "stage": "admission:Mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 166.1486810000024
+      },
+      {
+        "id": 156,
+        "stage": "admission:Mod.mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.566624999999476
+      },
+      {
+        "id": 157,
+        "stage": "admission:instHMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 22.306252999998833
+      },
+      {
+        "id": 158,
+        "stage": "admission:namedPattern",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.035800000001473
+      },
+      {
+        "id": 159,
+        "stage": "admission:Nat.mod.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 96.23053000000073
+      },
+      {
+        "id": 160,
+        "stage": "admission:Nat.decLt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 28.717970999998215
+      },
+      {
+        "id": 161,
+        "stage": "admission:Nat.le.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 54.19023600000219
+      },
+      {
+        "id": 162,
+        "stage": "admission:Nat.ctorIdx",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 12.840903000000253
+      },
+      {
+        "id": 163,
+        "stage": "admission:Nat.div.go.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 284.97841000000335
+      },
+      {
+        "id": 164,
+        "stage": "admission:HSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 124.1986309999993
+      },
+      {
+        "id": 165,
+        "stage": "admission:HSub.hSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.419896000003064
+      },
+      {
+        "id": 166,
+        "stage": "admission:Sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 77.51408299999821
+      },
+      {
+        "id": 167,
+        "stage": "admission:Sub.sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 14.111847000000125
+      },
+      {
+        "id": 168,
+        "stage": "admission:instHSub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 14.414717999999993
+      },
+      {
+        "id": 169,
+        "stage": "admission:Nat.pred",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 15.095233000000007
+      },
+      {
+        "id": 170,
+        "stage": "admission:Nat.sub._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 55.190426000001025
+      },
+      {
+        "id": 171,
+        "stage": "admission:Nat.sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.285545999999158
+      },
+      {
+        "id": 172,
+        "stage": "admission:instSubNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.112206999998307
+      },
+      {
+        "id": 173,
+        "stage": "admission:_private.Init.Prelude.0.Nat.le_trans.match_1_10",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3120.3841840000023
+      },
+      {
+        "id": 174,
+        "stage": "admission:Nat.le_trans",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 361.81459800000084
+      },
+      {
+        "id": 175,
+        "stage": "admission:Nat.lt_of_lt_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 52.44991300000038
+      },
+      {
+        "id": 176,
+        "stage": "admission:And.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.80850199999986
+      },
+      {
+        "id": 177,
+        "stage": "admission:_private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 175.08316900000136
+      },
+      {
+        "id": 178,
+        "stage": "admission:_private.Init.Prelude.0.Nat.sub_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 573.7422810000025
+      },
+      {
+        "id": 179,
+        "stage": "admission:_private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 52.7495110000018
+      },
+      {
+        "id": 180,
+        "stage": "admission:Nat.noConfusionType",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.081528999999136
+      },
+      {
+        "id": 181,
+        "stage": "admission:Nat.noConfusion",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 72.12352499999906
+      },
+      {
+        "id": 182,
+        "stage": "admission:Nat.not_succ_le_zero",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 173.3172279999999
+      },
+      {
+        "id": 183,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pred_le_pred.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 845.9771969999965
+      },
+      {
+        "id": 184,
+        "stage": "admission:Nat.le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 24.713791000001947
+      },
+      {
+        "id": 185,
+        "stage": "admission:Nat.pred_le_pred",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 205.67755899999975
+      },
+      {
+        "id": 186,
+        "stage": "admission:Nat.le_of_succ_le_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 61.54694799999925
+      },
+      {
+        "id": 187,
+        "stage": "admission:Nat.not_succ_le_self._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 378.7034820000008
+      },
+      {
+        "id": 188,
+        "stage": "admission:Nat.not_succ_le_self",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.816780000001017
+      },
+      {
+        "id": 189,
+        "stage": "admission:Nat.lt_irrefl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.271100999998453
+      },
+      {
+        "id": 190,
+        "stage": "admission:Nat.lt_succ_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 38.48860199999763
+      },
+      {
+        "id": 191,
+        "stage": "admission:Nat.le_refl",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.66678800000227
+      },
+      {
+        "id": 192,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pred_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 48.74852699999974
+      },
+      {
+        "id": 193,
+        "stage": "admission:Nat.pred_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 120.14072900000247
+      },
+      {
+        "id": 194,
+        "stage": "admission:Nat.sub_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 413.971416999997
+      },
+      {
+        "id": 195,
+        "stage": "admission:Nat.succ_sub_succ_eq_sub",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1196.080039999997
+      },
+      {
+        "id": 196,
+        "stage": "admission:Nat.sub_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 415.97069399999964
+      },
+      {
+        "id": 197,
+        "stage": "admission:Nat.div_rec_lemma",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 102.72617299999911
+      },
+      {
+        "id": 198,
+        "stage": "admission:Nat.le_of_lt_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 58.25725500000044
+      },
+      {
+        "id": 199,
+        "stage": "admission:Nat.div_rec_fuel_lemma",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 294.098833
+      },
+      {
+        "id": 200,
+        "stage": "admission:Nat.modCore.go._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 289.3321309999992
+      },
+      {
+        "id": 201,
+        "stage": "admission:Nat.modCore.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 31.286543999998685
+      },
+      {
+        "id": 202,
+        "stage": "admission:Nat.lt_add_one",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 217.94186099999934
+      },
+      {
+        "id": 203,
+        "stage": "admission:Nat.lt_succ_self",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 146.43152800000098
+      },
+      {
+        "id": 204,
+        "stage": "admission:Nat.modCore",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 39.81217399999878
+      },
+      {
+        "id": 205,
+        "stage": "admission:Nat.mod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 30.886516000002302
+      },
+      {
+        "id": 206,
+        "stage": "admission:Nat.instMod",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.366573999999673
+      },
+      {
+        "id": 207,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 481.8416649999999
+      },
+      {
+        "id": 208,
+        "stage": "admission:Nat.zero_lt_succ",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 31.50938799999858
+      },
+      {
+        "id": 209,
+        "stage": "admission:Decidable.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 25.95916799999759
+      },
+      {
+        "id": 210,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 269.7724260000032
+      },
+      {
+        "id": 211,
+        "stage": "admission:_private.Init.Prelude.0.Nat.modCore_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 387.33685700000206
+      },
+      {
+        "id": 212,
+        "stage": "admission:Nat.not_lt_zero",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.98964200000046
+      },
+      {
+        "id": 213,
+        "stage": "admission:_private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 266.9278230000018
+      },
+      {
+        "id": 214,
+        "stage": "admission:Decidable.isTrue",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.816758000000846
+      },
+      {
+        "id": 215,
+        "stage": "admission:Or.casesOn",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 29.289859000000433
+      },
+      {
+        "id": 216,
+        "stage": "admission:_private.Init.Prelude.0.Or.elim.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 60.35485200000039
+      },
+      {
+        "id": 217,
+        "stage": "admission:Or.elim",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 23.888612000002468
+      },
+      {
+        "id": 218,
+        "stage": "admission:id",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2.2068300000028103
+      },
+      {
+        "id": 219,
+        "stage": "admission:Or.resolve_right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.159207000000606
+      },
+      {
+        "id": 220,
+        "stage": "admission:GE.ge",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 11.899654000000737
+      },
+      {
+        "id": 221,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_5",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.911842000001343
+      },
+      {
+        "id": 222,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 143.37007000000085
+      },
+      {
+        "id": 223,
+        "stage": "admission:Nat.le_succ_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 31.977308000001358
+      },
+      {
+        "id": 224,
+        "stage": "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 106.66906899999958
+      },
+      {
+        "id": 225,
+        "stage": "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 275.0054119999986
+      },
+      {
+        "id": 226,
+        "stage": "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 115.38900699999795
+      },
+      {
+        "id": 227,
+        "stage": "admission:Nat.eq_or_lt_of_le._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 829.2638420000003
+      },
+      {
+        "id": 228,
+        "stage": "admission:Nat.eq_or_lt_of_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 83.28342899999916
+      },
+      {
+        "id": 229,
+        "stage": "admission:Nat.lt_or_ge._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 449.2876660000002
+      },
+      {
+        "id": 230,
+        "stage": "admission:Nat.lt_or_ge",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 40.14650299999994
+      },
+      {
+        "id": 231,
+        "stage": "admission:Nat.lt_of_not_le",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 45.53646300000037
+      },
+      {
+        "id": 232,
+        "stage": "admission:Decidable.isFalse",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 22.362369000002218
+      },
+      {
+        "id": 233,
+        "stage": "admission:Nat.modCoreGo_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1490.6973949999956
+      },
+      {
+        "id": 234,
+        "stage": "admission:Nat.modCore_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 1295.5421820000047
+      },
+      {
+        "id": 235,
+        "stage": "admission:Nat.mod_lt",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 785.562754999999
+      },
+      {
+        "id": 236,
+        "stage": "admission:Fin.Internal.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 32.64097399999446
+      },
+      {
+        "id": 237,
+        "stage": "admission:_private.Init.Prelude.0.Nat.pow_pos.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 103.73507500000414
+      },
+      {
+        "id": 238,
+        "stage": "admission:HMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 153.4884849999944
+      },
+      {
+        "id": 239,
+        "stage": "admission:HMul.hMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 26.778052999994543
+      },
+      {
+        "id": 240,
+        "stage": "admission:Mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 81.63672700000461
+      },
+      {
+        "id": 241,
+        "stage": "admission:Mul.mul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 16.144503999996232
+      },
+      {
+        "id": 242,
+        "stage": "admission:instHMul",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.44681799999671
+      },
+      {
+        "id": 243,
+        "stage": "admission:instMulNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 9.364991000002192
+      },
+      {
+        "id": 244,
+        "stage": "admission:_private.Init.Prelude.0.Nat.mul_pos.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 225.08271800000512
+      },
+      {
+        "id": 245,
+        "stage": "admission:_private.Init.Prelude.0.Nat.add_pos_right.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 153.23873200000526
+      },
+      {
+        "id": 246,
+        "stage": "admission:Nat.add_pos_right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 393.94115800000145
+      },
+      {
+        "id": 247,
+        "stage": "admission:Nat.mul_pos",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 528.5075480000014
+      },
+      {
+        "id": 248,
+        "stage": "admission:Nat.pow_pos._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 767.2638389999993
+      },
+      {
+        "id": 249,
+        "stage": "admission:Nat.pow_pos",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 152.14253100000496
+      },
+      {
+        "id": 250,
+        "stage": "admission:BitVec.ofNat._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 131.2862679999962
+      },
+      {
+        "id": 251,
+        "stage": "admission:BitVec.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 28.839888000002247
+      },
+      {
+        "id": 252,
+        "stage": "admission:UInt8.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.835471000005782
+      },
+      {
+        "id": 253,
+        "stage": "admission:HDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 130.824827000004
+      },
+      {
+        "id": 254,
+        "stage": "admission:HDiv.hDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.447318000005907
+      },
+      {
+        "id": 255,
+        "stage": "admission:Div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 83.92256699999416
+      },
+      {
+        "id": 256,
+        "stage": "admission:Div.div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.659428999999363
+      },
+      {
+        "id": 257,
+        "stage": "admission:instHDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 23.072148999999627
+      },
+      {
+        "id": 258,
+        "stage": "admission:Nat.div.go._f",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 320.6771929999959
+      },
+      {
+        "id": 259,
+        "stage": "admission:Nat.div.go",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 35.63314099999843
+      },
+      {
+        "id": 260,
+        "stage": "admission:Nat.div",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 36.96995099999913
+      },
+      {
+        "id": 261,
+        "stage": "admission:Nat.instDiv",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.1845939999984694
+      },
+      {
+        "id": 262,
+        "stage": "admission:String.utf8EncodeChar",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 261.27957199999946
+      },
+      {
+        "id": 263,
+        "stage": "admission:List.utf8Encode",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.812443000002531
+      },
+      {
+        "id": 264,
+        "stage": "admission:ByteArray.IsValidUTF8",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 236.3634549999988
+      },
+      {
+        "id": 265,
+        "stage": "admission:String",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 106.84391000000323
+      },
+      {
+        "id": 266,
+        "stage": "admission:String.ofList._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 17.875613999996858
+      },
+      {
+        "id": 267,
+        "stage": "admission:String.ofList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 4.475365999998758
+      },
+      {
+        "id": 268,
+        "stage": "admission:String.ofList",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.491025000002992
+      },
+      {
+        "id": 269,
+        "stage": "admission:Bool.or",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 13.68792800000665
+      },
+      {
+        "id": 270,
+        "stage": "admission:instDecidableOr.match_3",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 437.35779499999626
+      },
+      {
+        "id": 271,
+        "stage": "admission:instDecidableOr.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 44.76151799999934
+      },
+      {
+        "id": 272,
+        "stage": "admission:instDecidableOr._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 213.61238700000104
+      },
+      {
+        "id": 273,
+        "stage": "admission:instDecidableOr",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.810343999997713
+      },
+      {
+        "id": 274,
+        "stage": "admission:Bool.and",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 5.4726579999987734
+      },
+      {
+        "id": 275,
+        "stage": "admission:instDecidableAnd.match_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 434.43895200000406
+      },
+      {
+        "id": 276,
+        "stage": "admission:And.right",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 21.07766399999673
+      },
+      {
+        "id": 277,
+        "stage": "admission:And.left",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 7.443566000001738
+      },
+      {
+        "id": 278,
+        "stage": "admission:instDecidableAnd._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 184.34575100000075
+      },
+      {
+        "id": 279,
+        "stage": "admission:instDecidableAnd",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 20.047231999997166
+      },
+      {
+        "id": 280,
+        "stage": "admission:BitVec.ofNatLT",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 64.73717400000169
+      },
+      {
+        "id": 281,
+        "stage": "admission:UInt32.size",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 3.40819900000497
+      },
+      {
+        "id": 282,
+        "stage": "admission:_private.Init.Prelude.0.isValidChar_UInt32.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 402.27245199999743
+      },
+      {
+        "id": 283,
+        "stage": "admission:Nat.lt_trans",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 58.671729000001505
+      },
+      {
+        "id": 284,
+        "stage": "admission:_private.Init.Prelude.0.of_decide_eq_true.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 150.68381700000464
+      },
+      {
+        "id": 285,
+        "stage": "admission:_private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 51.545845000000554
+      },
+      {
+        "id": 286,
+        "stage": "admission:Bool.ne_true_of_eq_false",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 75.32641200000216
+      },
+      {
+        "id": 287,
+        "stage": "admission:_private.Init.Prelude.0.decide_eq_false.match_1_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 297.716204999997
+      },
+      {
+        "id": 288,
+        "stage": "admission:decide_eq_false",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 121.9131269999998
+      },
+      {
+        "id": 289,
+        "stage": "admission:of_decide_eq_true",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 45.55200799999875
+      },
+      {
+        "id": 290,
+        "stage": "admission:_private.Init.Prelude.0.isValidChar_UInt32",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 304.72643300000345
+      },
+      {
+        "id": 291,
+        "stage": "admission:Char.ofNatAux._private_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 6.317540999996709
+      },
+      {
+        "id": 292,
+        "stage": "admission:Char.ofNatAux",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 278.4373029999988
+      },
+      {
+        "id": 293,
+        "stage": "admission:Char.ofNat._proof_1",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 381.88633599999594
+      },
+      {
+        "id": 294,
+        "stage": "admission:Char.ofNat._proof_2",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 2838.550500999998
+      },
+      {
+        "id": 295,
+        "stage": "admission:Char.ofNat",
+        "sample": null,
+        "api": "psKernelV1AdmitDeclaration",
+        "milliseconds": 355.79398200000287
+      },
+      {
+        "id": 296,
+        "stage": "input-and-owners",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 22.327163000001747
+      },
+      {
+        "id": 297,
+        "stage": "input-and-owners",
+        "sample": "Aé€😀",
+        "api": "psKernelDagGeneratedFromSession",
+        "milliseconds": 5656.945755000001
+      },
+      {
+        "id": 298,
+        "stage": "string:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27636.096490999997
+      },
+      {
+        "id": 299,
+        "stage": "string:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 5516.8347090000025
+      },
+      {
+        "id": 300,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 0.5825009999971371
+      },
+      {
+        "id": 301,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 0.6201080000028014
+      },
+      {
+        "id": 302,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 0.45453899999847636
+      },
+      {
+        "id": 303,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 682.7704720000038
+      },
+      {
+        "id": 304,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.7561959999875398
+      },
+      {
+        "id": 305,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 0.386077999995905
+      },
+      {
+        "id": 306,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 614.5608300000022
+      },
+      {
+        "id": 307,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.5319310000049882
+      },
+      {
+        "id": 308,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 11692.606612999996
+      },
+      {
+        "id": 309,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 10788.358682999999
+      },
+      {
+        "id": 310,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.6594909999985248
+      },
+      {
+        "id": 311,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 5.602689000006649
+      },
+      {
+        "id": 312,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.1118219999916619
+      },
+      {
+        "id": 313,
+        "stage": "string-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 0.9770209999987856
+      },
+      {
+        "id": 314,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 6.349675999997999
+      },
+      {
+        "id": 315,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 23634.116702000014
+      },
+      {
+        "id": 316,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 25.38441299999249
+      },
+      {
+        "id": 317,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 606.5279140000057
+      },
+      {
+        "id": 318,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 7.755678000015905
+      },
+      {
+        "id": 319,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 5162.3703969999915
+      },
+      {
+        "id": 320,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 1683.7993389999901
+      },
+      {
+        "id": 321,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 26098.402709999995
+      },
+      {
+        "id": 322,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 18017.553828000004
+      },
+      {
+        "id": 323,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 17738.674293999997
+      },
+      {
+        "id": 324,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.3927670000120997
+      },
+      {
+        "id": 325,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27643.054246999993
+      },
+      {
+        "id": 326,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.1884769999887794
+      },
+      {
+        "id": 327,
+        "stage": "string-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27544.45848
+      },
+      {
+        "id": 328,
+        "stage": "ofList-singleton:check",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 6012.458185999974
+      },
+      {
+        "id": 329,
+        "stage": "ofList-singleton:check",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.3798740000347607
+      },
+      {
+        "id": 330,
+        "stage": "ofList-singleton:whnf",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 12896.371344999992
+      },
+      {
+        "id": 331,
+        "stage": "ofList-singleton:whnf",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 25660.15256800002
+      },
+      {
+        "id": 332,
+        "stage": "ofList-singleton:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 11846.060933
+      },
+      {
+        "id": 333,
+        "stage": "utf8-literal:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 70619.72832300002
+      },
+      {
+        "id": 334,
+        "stage": "utf8-literal:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 13875.970391000039
+      },
+      {
+        "id": 335,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 8.911976000003051
+      },
+      {
+        "id": 336,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 38624.87803099997
+      },
+      {
+        "id": 337,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 36.08257400000002
+      },
+      {
+        "id": 338,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 649.5972569999867
+      },
+      {
+        "id": 339,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 10.310721999965608
+      },
+      {
+        "id": 340,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 8742.938051000005
+      },
+      {
+        "id": 341,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2409.1033260000404
+      },
+      {
+        "id": 342,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 45162.11784399999
+      },
+      {
+        "id": 343,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 29857.728789000015
+      },
+      {
+        "id": 344,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 32329.406940999907
+      },
+      {
+        "id": 345,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.273909999988973
+      },
+      {
+        "id": 346,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 44945.94309399999
+      },
+      {
+        "id": 347,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.2781810000305995
+      },
+      {
+        "id": 348,
+        "stage": "utf8-literal-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 45709.850046999985
+      },
+      {
+        "id": 349,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 19.42288099997677
+      },
+      {
+        "id": 350,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 13.060016999952495
+      },
+      {
+        "id": 351,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 45.25452499999665
+      },
+      {
+        "id": 352,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 693.9776640000055
+      },
+      {
+        "id": 353,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.254711000015959
+      },
+      {
+        "id": 354,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 1.3911999999545515
+      },
+      {
+        "id": 355,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 764.0302720000036
+      },
+      {
+        "id": 356,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 60.75110600003973
+      },
+      {
+        "id": 357,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 21384.88981100009
+      },
+      {
+        "id": 358,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 19567.62183999992
+      },
+      {
+        "id": 359,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.047952000051737
+      },
+      {
+        "id": 360,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 31.69048400002066
+      },
+      {
+        "id": 361,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 3.1637200000695884
+      },
+      {
+        "id": 362,
+        "stage": "utf8-literal-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 40.73273300006986
+      },
+      {
+        "id": 363,
+        "stage": "utf8-ofList:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 68307.92312399996
+      },
+      {
+        "id": 364,
+        "stage": "utf8-ofList:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 13592.427107000025
+      },
+      {
+        "id": 365,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 20.29969799995888
+      },
+      {
+        "id": 366,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 39058.23583699996
+      },
+      {
+        "id": 367,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 59.400582000031136
+      },
+      {
+        "id": 368,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 661.4309420000063
+      },
+      {
+        "id": 369,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.6500430000014603
+      },
+      {
+        "id": 370,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 8472.378484999994
+      },
+      {
+        "id": 371,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2463.9202619999414
+      },
+      {
+        "id": 372,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 45659.84161600005
+      },
+      {
+        "id": 373,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 32426.80218800006
+      },
+      {
+        "id": 374,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 32069.558076999965
+      },
+      {
+        "id": 375,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.2444170000962913
+      },
+      {
+        "id": 376,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 43703.352343000006
+      },
+      {
+        "id": 377,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.2557939999969676
+      },
+      {
+        "id": 378,
+        "stage": "utf8-ofList-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 44580.76838600007
+      },
+      {
+        "id": 379,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 13.674566000001505
+      },
+      {
+        "id": 380,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 22.04745399998501
+      },
+      {
+        "id": 381,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 55.337968999985605
+      },
+      {
+        "id": 382,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 611.007188999909
+      },
+      {
+        "id": 383,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.269031999981962
+      },
+      {
+        "id": 384,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 1.294395000091754
+      },
+      {
+        "id": 385,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 644.2310279998928
+      },
+      {
+        "id": 386,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 54.177533999900334
+      },
+      {
+        "id": 387,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 19703.23693299992
+      },
+      {
+        "id": 388,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 18679.994873000076
+      },
+      {
+        "id": 389,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 2.0644549999851733
+      },
+      {
+        "id": 390,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 41.540176999988034
+      },
+      {
+        "id": 391,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 1.8044359998311847
+      },
+      {
+        "id": 392,
+        "stage": "utf8-ofList-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 124.33012700011022
+      },
+      {
+        "id": 393,
+        "stage": "validity:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 25047.59925500001
+      },
+      {
+        "id": 394,
+        "stage": "validity:defeq",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryDefEqWithDeclarationsFuel",
+        "milliseconds": 5420.143665000098
+      },
+      {
+        "id": 395,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 2.256544000003487
+      },
+      {
+        "id": 396,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 24860.646451000124
+      },
+      {
+        "id": 397,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 6.9008300001733005
+      },
+      {
+        "id": 398,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 678.7449880000204
+      },
+      {
+        "id": 399,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 6.471538000041619
+      },
+      {
+        "id": 400,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 5538.7648789999075
+      },
+      {
+        "id": 401,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 1726.935729000019
+      },
+      {
+        "id": 402,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 26230.653615999967
+      },
+      {
+        "id": 403,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 18575.39054400008
+      },
+      {
+        "id": 404,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 18608.884151000064
+      },
+      {
+        "id": 405,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 4.99529999983497
+      },
+      {
+        "id": 406,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 26820.858629999915
+      },
+      {
+        "id": 407,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 9.413245999952778
+      },
+      {
+        "id": 408,
+        "stage": "validity-left",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 27379.938342000125
+      },
+      {
+        "id": 409,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 16.521604999899864
+      },
+      {
+        "id": 410,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1Whnf",
+        "milliseconds": 27894.22011399991
+      },
+      {
+        "id": 411,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryCheckWithDeclarationsFuel",
+        "milliseconds": 122.3956059999764
+      },
+      {
+        "id": 412,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 667.4098400000948
+      },
+      {
+        "id": 413,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 21.684466999955475
+      },
+      {
+        "id": 414,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2TryWhnfOwnedWithDeclarationsFuel",
+        "milliseconds": 6752.194275000133
+      },
+      {
+        "id": 415,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelExprV2DecodeChecked",
+        "milliseconds": 2010.1564169998746
+      },
+      {
+        "id": 416,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 28259.206419999944
+      },
+      {
+        "id": 417,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 20029.922705000034
+      },
+      {
+        "id": 418,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 17480.92211299995
+      },
+      {
+        "id": 419,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 23.12925700005144
+      },
+      {
+        "id": 420,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 25225.065784000093
+      },
+      {
+        "id": 421,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 35.54136399994604
+      },
+      {
+        "id": 422,
+        "stage": "validity-right",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 24216.163418999873
+      },
+      {
+        "id": 423,
+        "stage": "negative:projection-index",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 3.5629169999156147
+      },
+      {
+        "id": 424,
+        "stage": "negative:projection-index",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4665.803670000052
+      },
+      {
+        "id": 425,
+        "stage": "negative:projection-index",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4567.828968000133
+      },
+      {
+        "id": 426,
+        "stage": "negative:projection-index",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4946.665072999895
+      },
+      {
+        "id": 427,
+        "stage": "negative:ofList-argument",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 9.601915000006557
+      },
+      {
+        "id": 428,
+        "stage": "negative:ofList-argument",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 3578.3608389999717
+      },
+      {
+        "id": 429,
+        "stage": "negative:ofList-argument",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 3457.9200730000157
+      },
+      {
+        "id": 430,
+        "stage": "negative:ofList-argument",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 3695.4860479999334
+      },
+      {
+        "id": 431,
+        "stage": "negative:constructor-proof",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 5.903998000081629
+      },
+      {
+        "id": 432,
+        "stage": "negative:constructor-proof",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4757.38187599997
+      },
+      {
+        "id": 433,
+        "stage": "negative:constructor-proof",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 5229.388936999952
+      },
+      {
+        "id": 434,
+        "stage": "negative:constructor-proof",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 5202.787404000061
+      },
+      {
+        "id": 435,
+        "stage": "negative:ofList-universe",
+        "sample": "Aé€😀",
+        "api": "psKernelV1CheckExpression",
+        "milliseconds": 1.1215709999669343
+      },
+      {
+        "id": 436,
+        "stage": "negative:ofList-universe",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4514.059863000177
+      },
+      {
+        "id": 437,
+        "stage": "negative:ofList-universe",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4381.882763000205
+      },
+      {
+        "id": 438,
+        "stage": "negative:ofList-universe",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4339.151918000076
+      },
+      {
+        "id": 439,
+        "stage": "distinct-strings",
+        "sample": "Aé€😀",
+        "api": "psKernelV1IsDefEq",
+        "milliseconds": 0.8901910001877695
+      },
+      {
+        "id": 440,
+        "stage": "distinct-strings",
+        "sample": "Aé€😀",
+        "api": "psKernelV1RunDag",
+        "milliseconds": 4812.165683000116
+      }
+    ]
+  },
+  "interpretation": {
+    "nativeOraclesAreNotGeneratedQualification": true,
+    "earlierTimeoutsRetained": true,
+    "noControlledSpeedupClaim": true,
+    "fullMatrixQualified": false
+  }
+}

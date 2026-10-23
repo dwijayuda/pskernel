@@ -7,6 +7,7 @@ on:
       - research/psc1-pskernel-expr-v2-lean435-20261020
       - integration/psc1-pskernel-expr-v2-lean435-20261021
       - work/psc1-pskernel-t03b-session-20261022
+      - work/psc1-pskernel-t01f-string-20261022
       - research/psc1-pskernel-v2-staged-20261021
       - research/psc1-pskernel-v2-carrier-20261021
     paths:
@@ -41,6 +42,11 @@ on:
       - psc1/scripts/pskernel-expr-v2-admission-guard-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-quot-smoke.mjs
       - psc1/scripts/pskernel-expr-v2-recursor-smoke.mjs
+      - psc1/test/PsKernelExprV2StringEnvironmentRegression.lean
+      - psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs
+      - psc1/scripts/pskernel-t01f-shards.mjs
+      - psc1/test/PsKernelScalarHashWorkerRegression.lean
+      - psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs
       - psc1/test/PsKernelExprV2GeneratedPrefixRegression.lean
       - psc1/test/PsKernelExprV2SessionProofs.lean
       - psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs
@@ -59,6 +65,7 @@ on:
       - psc1/scripts/pskernel-expr-v2-owned-state-smoke.mjs
       - psc1/scripts/pskernel-nat-runtime-smoke.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
+      - .github/workflows/psc1-pskernel-expr-v2-integration.yml
 
 permissions:
   contents: read
@@ -236,6 +243,49 @@ jobs:
           env PATH="" "$PSC1_NODE_BIN" smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-canonical-js-smoke.log"
           echo 'PSC1_GENERATED_JS_KERNEL: PASS'
+      - name: Produce authentic T01F inputs for canonical independent replay
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_T01F_DIR="$RUNNER_TEMP/psc1-t01f-canonical"
+          mkdir -p "$PSC1_T01F_DIR"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
+          lake -f kernel-lakefile.lean build psc1_kernel_expr_v2_string_environment_regression
+          lean --version > "$PSC1_T01F_DIR/lean-version.txt"
+          lean --githash > "$PSC1_T01F_DIR/lean-githash.txt"
+          lake -f kernel-lakefile.lean env .lake/build/bin/psc1_kernel_expr_v2_string_environment_regression \
+            "$PSC1_T01F_DIR/fixture.json" 2>&1 | tee "$PSC1_T01F_DIR/native.log"
+          grep -Fqx 'PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096' "$PSC1_T01F_DIR/native.log"
+          test "$(grep -c '^PSC1_T01F_CASE_PASS ' "$PSC1_T01F_DIR/native.log")" -eq 6
+          test "$(grep -c '^PSC1_T01F_SINGLETON_PASS ' "$PSC1_T01F_DIR/native.log")" -eq 6
+          grep -Fq 'PSC1_T01F_FIXTURE_WRITTEN ' "$PSC1_T01F_DIR/native.log"
+          test -s "$PSC1_T01F_DIR/fixture.json"
+          sha256sum "$PSC1_T01F_DIR/fixture.json" | tee "$PSC1_T01F_DIR/fixture.sha256"
+          node --input-type=module - "$PSC1_T01F_DIR" "dist/pskernel-selfhost/pskernel-core.js" "canonical" <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const [dir,kernel,route]=process.argv.slice(2);
+          const digest=path=>{const bytes=readFileSync(path);return {bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};};
+          const fixture=JSON.parse(readFileSync(dir+'/fixture.json','utf8'));
+          const leanCommit=readFileSync(dir+'/lean-githash.txt','utf8').trim();
+          if(leanCommit!=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc' || fixture.leanCommit!==leanCommit ||
+              fixture.leanVersion!=='4.35.0' || fixture.format!=='psc1-authentic-string435-v1')
+            throw Error('PSC1_T01F_SOURCE_PROVENANCE_MISMATCH');
+          if(!/^[0-9a-f]{40}$/.test(process.env.GITHUB_SHA??''))throw Error('PSC1_T01F_MISSING_SOURCE_SHA');
+          const report={schema:'psc1-t01f-source-provenance-v1',sourceSha:process.env.GITHUB_SHA,
+            runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,job:process.env.GITHUB_JOB,route,
+            leanVersion:readFileSync(dir+'/lean-version.txt','utf8').trim(),leanCommit,node:process.version,
+            requests:fixture.declarations.length,metadata:fixture.metadata.length,samples:fixture.samples,
+            kernelFuel:4096,nodeOldSpaceLimitMiB:route==='native'?null:2048,
+            authority:'Raw declaration requests only; generated consumers independently admit from empty.',
+            fixture:digest(dir+'/fixture.json'),kernel:digest(kernel),
+            fixtureProducer:digest('test/PsKernelExprV2StringEnvironmentRegression.lean'),generatedRunner:digest('scripts/pskernel-expr-v2-string-environment-smoke.mjs')};
+          writeFileSync(dir+'/provenance.json',JSON.stringify(report,null,2)+'\n');
+          console.log('PSC1_T01F_SOURCE_PROVENANCE '+JSON.stringify(report));
+          NODE
       - name: Run checked DAG semantics from the canonical ProofScript bundle
         working-directory: psc1
         shell: bash
@@ -469,7 +519,12 @@ jobs:
           PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
           test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
           cp scripts/pskernel-name-worker-smoke.mjs "$PSC1_PS_RUN_DIR/name-worker-smoke.mjs"
+          cp scripts/pskernel-scalar-hash-worker-smoke.mjs "$PSC1_PS_RUN_DIR/scalar-hash-smoke.mjs"
           cd "$PSC1_PS_RUN_DIR"
+          env PATH="" "$PSC1_NODE_BIN" --max-old-space-size=2048 scalar-hash-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_WORKER_JS: PASS {"cases":2730,"strings":12,"stages":8190,"assertions":13665,"modulus":"65521","algorithmChanged":false}' "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
+          grep -Fqx 'PSC1_SCALAR_HASH_LONG_JS: PASS cases=3' "$RUNNER_TEMP/psc1-scalar-hash-canonical.log"
           env PATH="" "$PSC1_NODE_BIN" name-worker-smoke.mjs kernel.mjs \
             | tee "$RUNNER_TEMP/psc1-name-worker-canonical.log"
           grep -Fqx 'PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24' "$RUNNER_TEMP/psc1-name-worker-canonical.log"
@@ -557,6 +612,7 @@ jobs:
           name: psc1-canonical-kernel-qualification
           include-hidden-files: true
           path: |
+            ${{ runner.temp }}/psc1-t01f-canonical/
             ${{ runner.temp }}/psc1-canonical-provider.log
             ${{ runner.temp }}/psc1-proof-irrelevance-canonical.log
             ${{ runner.temp }}/psc1-lazy-nat-canonical.log
@@ -570,6 +626,7 @@ jobs:
             ${{ runner.temp }}/psc1-generated-prefix-canonical.log
             ${{ runner.temp }}/psc1-quot-owner-canonical.log
             ${{ runner.temp }}/psc1-name-worker-canonical.log
+            ${{ runner.temp }}/psc1-scalar-hash-canonical.log
             ${{ runner.temp }}/psc1-recursor-k-canonical.log
             ${{ runner.temp }}/psc1-owned-state-canonical.log
             psc1/dist/pskernel-selfhost/provider/
@@ -583,3 +640,100 @@ jobs:
             ${{ runner.temp }}/psc1-canonical-infer-only.log
             ${{ runner.temp }}/psc1-direct-capability.log
           retention-days: 30
+
+  # Reuse this run's checked producer. Each fresh process readmits the complete
+  # authentic closure and executes one unchanged sample, including its negatives.
+  t01f-canonical-shards:
+    needs: [psc1-portability]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        sample: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-canonical-kernel-qualification
+          path: ${{ runner.temp }}/psc1-t01f-canonical-producer
+      - name: Authenticate inputs and execute the complete selected String sample
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/pskernel-t01f-shards.mjs
+          node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
+          node scripts/pskernel-t01f-shards.mjs run canonical \
+            "$RUNNER_TEMP/psc1-t01f-canonical-producer" \
+            "$RUNNER_TEMP/psc1-t01f-canonical-${{ matrix.sample }}" "${{ matrix.sample }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-canonical-shard-${{ matrix.sample }}-attempt-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/psc1-t01f-canonical-${{ matrix.sample }}/receipt.json
+            ${{ runner.temp }}/psc1-t01f-canonical-${{ matrix.sample }}/inputs.json
+            ${{ runner.temp }}/psc1-t01f-canonical-${{ matrix.sample }}/generated.log
+            ${{ runner.temp }}/psc1-t01f-canonical-${{ matrix.sample }}/generated.memory
+          if-no-files-found: error
+          retention-days: 30
+
+  t01f-canonical-complete:
+    if: ${{ always() }}
+    needs: [psc1-portability, t01f-canonical-shards]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Require every producer and shard job to succeed
+        env:
+          PSC1_T01F_PRODUCER_RESULT: ${{ needs.psc1-portability.result }}
+          PSC1_T01F_SHARDS_RESULT: ${{ needs.t01f-canonical-shards.result }}
+        run: |
+          set -euo pipefail
+          test "$PSC1_T01F_PRODUCER_RESULT" = success
+          test "$PSC1_T01F_SHARDS_RESULT" = success
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-canonical-kernel-qualification
+          path: ${{ runner.temp }}/psc1-t01f-canonical-producer
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psc1-t01f-canonical-shard-*-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/psc1-t01f-canonical-receipts
+          merge-multiple: false
+      - name: Reauthenticate and require all six complete String samples
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/pskernel-t01f-shards.mjs aggregate canonical \
+            "$RUNNER_TEMP/psc1-t01f-canonical-producer" \
+            "$RUNNER_TEMP/psc1-t01f-canonical-receipts" \
+            "$RUNNER_TEMP/psc1-t01f-canonical-complete"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-t01f-canonical-complete-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/psc1-t01f-canonical-complete/
+          if-no-files-found: error
+          retention-days: 30
+

@@ -1,7 +1,6 @@
 name: PSC1 T01F authenticated generated artifact diagnostic
 on:
   workflow_dispatch:
-# Full-suite qualification owns push execution; keep this diagnostic manual.
 permissions:
   contents: read
   actions: read

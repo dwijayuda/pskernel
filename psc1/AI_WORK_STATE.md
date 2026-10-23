@@ -153,3 +153,20 @@ existing proof/negative gates, 16000 emitted-runtime comparisons, exact cache st
 and all85 modules in both .lean/.ps source audits. Actual G2/G3 qualification is next.
 Four earlier source-normalization refusals are preserved; none ran G2.
 Rust qualified reference and integrated main remain unchanged.
+
+## Follow-up cursor-cache candidate
+
+Branch `perf/psc1-ts-utf8-size-extract-20261023` preserves the verified token candidate.
+Token source d520a49e/request27f2a216/run39952593596 passes G1/ten cases but G2
+still times out1800195ms/3050788KiB; G3/fixed point not run. Separate240s run
+39952866650 also times out240202ms/2281004KiB. Audits39953924361/39957038006
+confirm the real worker has2 lazy tokens and zero direct cache-key lookups.
+Profile39953992821 no longer ranks StringEqual among its first65 entries;
+generator/helper work dominates that bounded220s sample. Native-call and iterator
+hypotheses remain diagnostic only; their small corpus gains do not qualify G2.
+
+Current candidate keeps only cursor-demanded UTF8 views: cold size queries count
+bytes without inserting a view; extraction uses existing valid boundary indices
+and keeps the exact old scan for cold/invalid/interior/out-of-range positions.
+No extra view/capacity or fuel/heap/stack/stream/wire/checking limit is added.
+Focused Linux tests and actual generated workload comparisons are pending.

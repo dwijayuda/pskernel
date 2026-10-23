@@ -405,7 +405,7 @@ def psTsEmitIntrinsicFromPrinted
       let emit : String -> Except PsTsEmitError String :=
         fun (value : String) =>
           Except.ok
-            (psTsJoin "" ["__ps$utf8(", value, ").size"]);
+            (psTsJoin "" ["__ps$stringUtf8Size(", value, ")"]);
       psTsPrinted1 emit arguments
   | .stringNext =>
       let emit : String -> String -> Except PsTsEmitError String :=
@@ -428,8 +428,7 @@ def psTsEmitIntrinsicFromPrinted
   | .stringExtract =>
       let emit : String -> String -> String -> Except PsTsEmitError String :=
         fun (value : String) (start : String) (stop : String) =>
-          Except.ok
-            (psTsJoin "" ["((__ps_s: string, __ps_b: bigint, __ps_e: bigint) => { ", "if (__ps_b >= __ps_e) return \"\"; let __ps_i = 0n; ", "let __ps_started = false; let __ps_out = \"\"; ", "for (const __ps_c of __ps_s) { ", "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ", "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : ", "__ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ", "if (!__ps_started) { if (__ps_i === __ps_b) __ps_started = true; ", "else { __ps_i += __ps_w; continue; } } ", "if (__ps_i === __ps_e) return __ps_out; ", "__ps_out += __ps_c; __ps_i += __ps_w; } return __ps_out; })(", value, ", ", start, ", ", stop, ")"]);
+          Except.ok (psTsJoin "" ["__ps$stringExtract(", value, ", ", start, ", ", stop, ")"]);
       psTsPrinted3 emit arguments
   | .stringEq =>
       let emit : String -> String -> Except PsTsEmitError String :=

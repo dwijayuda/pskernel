@@ -3,7 +3,7 @@ name: PSC1 TS bounded UTF8 token correctness 1800s
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-ts-utf8-view-tokens-20261023]
+    branches: [perf/psc1-ts-utf8-size-extract-20261023]
     paths: [.github/qualification-requests/psc1-rust-ts-selfhost-correctness.json]
 
 permissions:
@@ -47,7 +47,7 @@ jobs:
           assert.equal(r.profile,'correctness-1800s');
           assert.equal(r.g2g3TimeoutMs,1800000);assert.equal(r.g1TimeoutMs,240000);
           assert.equal(r.action,'qualify-independent-G1-G2-G3');
-          assert.equal(r.branch,'perf/psc1-ts-utf8-view-tokens-20261023');
+          assert.equal(r.branch,'perf/psc1-ts-utf8-size-extract-20261023');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.deepEqual(r.targets,['ts']);assert.equal(r.resourcePolicy,'only-G2-G3-wall-clock-extended;all-other-policies-unchanged');
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);

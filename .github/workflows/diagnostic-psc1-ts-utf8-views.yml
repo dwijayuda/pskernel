@@ -3,7 +3,7 @@ name: PSC1 TS UTF8 view focused validation
 on:
   workflow_dispatch:
   push:
-    branches: [perf/psc1-ts-utf8-view-tokens-20261023]
+    branches: [perf/psc1-ts-utf8-size-extract-20261023]
     paths: ['psc1/packages/backend-ts/**', 'psc1/test/TsUtf8ViewTests.lean', 'psc1/scripts/ts-utf8-view-runtime-tests.mjs', '.github/workflows/diagnostic-psc1-ts-utf8-views.yml']
 
 permissions:

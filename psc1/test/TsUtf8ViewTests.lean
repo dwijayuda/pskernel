@@ -48,7 +48,18 @@ def main : IO Unit := do
   if psTsViewInvariant views [.mk "left0" strT] [.literal (.string "other")] then
     throw (IO.userError "changed argument admitted")
   IO.FS.createDirAll "dist/ts-utf8-views"
-  let probe := "\nexport const probe = {view:__ps$utf8,known:__ps$utf8Known,get:__ps$stringGet,next:__ps$stringNext,getView:__ps$stringGetView,nextView:__ps$stringNextView,state:()=>[__ps$lastUtf8,__ps$previousUtf8].map(v=>v?({text:v.text,size:v.size,positions:Array.from(v.positions)}):null),clear:()=>{__ps$lastUtf8=undefined;__ps$previousUtf8=undefined;}};\n"
+  let probe := "\nexport const probe = {view:__ps$utf8,known:__ps$utf8Known,get:__ps$stringGet,next:__ps$stringNext,size:__ps$stringUtf8Size,extract:__ps$stringExtract,getView:__ps$stringGetView,nextView:__ps$stringNextView,state:()=>[__ps$lastUtf8,__ps$previousUtf8].map(v=>v?({text:v.text,size:v.size,positions:Array.from(v.positions)}):null),clear:()=>{__ps$lastUtf8=undefined;__ps$previousUtf8=undefined;}};\n"
   IO.FS.writeFile "dist/ts-utf8-views/current.ts"
     (psTsJoin "\n" [psTsUtf8RuntimeSupport,current,legacy,probe])
+  let extractOnly : PsVerifiedIrDeclaration := .mk "onlyExtract" []
+    [.mk "text" strT,.mk "start" natT,.mk "stop" natT] strT
+    (op .stringExtract [v "text",v "start",v "stop"])
+  let extractModule : PsVerifiedIrModule := .mk [] [] [] [extractOnly]
+  if psTsNeedsUtf8Runtime extractOnly.body != true then
+    throw (IO.userError "extract-only runtime missing")
+  let emitted ← match psTsEmitModule extractModule with
+    | Except.ok text => pure text
+    | Except.error _ => throw (IO.userError "extract-only emission")
+  IO.FS.writeFile "dist/ts-utf8-views/extract-only.ts"
+    (String.Internal.append (psTsSelectedRuntimeSource extractModule) emitted)
   IO.println "PSC1_TS_UTF8_VIEW_GUARDS: invariant alias, changing argument, shadowing, collision pass"

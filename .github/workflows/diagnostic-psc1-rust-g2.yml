@@ -18,9 +18,15 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: '39898205150'
-          artifact-ids: '12478265373'
-          path: input
+          run-id: '39900513422'
+          artifact-ids: '12478079568'
+          path: input/rust
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '39900956833'
+          artifact-ids: '12479210391'
+          path: input/ts-profile
       - name: Ensure native debugger is available
         run: |
           if ! command -v gdb >/dev/null; then

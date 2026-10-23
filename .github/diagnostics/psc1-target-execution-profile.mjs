@@ -1,34 +1,22 @@
-// Inspect actual generated code and cache argument sizes: final 30 seconds of a 220-second G2 replay, not the end of the 1800-second request.
+// Profile the current bounded-token compiler: final 30 seconds of a 220-second G2 replay, not the end of the 1800-second request.
 import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {spawnSync} from 'node:child_process';
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const files=[];function scan(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())scan(p);else if(e.isFile())files.push(p);}}scan('input');
 fs.mkdirSync('diagnosis',{recursive:true});
-console.log('PSC1_PROFILE_SOURCE: current applied-lookup TS artifact; final 30 seconds of bounded 220s replay; diagnostic only');
+console.log('PSC1_PROFILE_SOURCE: current bounded-token TS artifact; final 30 seconds of bounded 220s replay; diagnostic only');
 function artifact(target,expected){
  const file=files.find(p=>p.endsWith('/G1-service/artifact.json')&&JSON.parse(fs.readFileSync(p,'utf8')).target===target);
  assert.ok(file);assert.equal(sha(fs.readFileSync(file)),expected);const m=JSON.parse(fs.readFileSync(file,'utf8')),directory=path.dirname(file);
  const verify=()=>{assert.equal(sha(fs.readFileSync(file)),expected);for(const f of m.files){assert.match(f.path,/^[a-zA-Z0-9_.-]+$/);const p=path.join(directory,f.path);assert.ok(fs.lstatSync(p).isFile()&&!fs.lstatSync(p).isSymbolicLink());const b=fs.readFileSync(p);assert.equal(b.length,f.bytes);assert.equal(sha(b),f.sha256);}};
  verify();return{m,directory,verify};
 }
-const ts=artifact('ts','e3e93fc46e47ad6036769b6d98655e1a426cb3917bd6417a58254b65d0f9e29f');
+const ts=artifact('ts','3d491fac102424409c9359f702b1b61354bc3acd9aacbe00668200e941c4ca65');
 const request=files.find(p=>p.endsWith('/G2-self.request.json')&&p.includes('generated-ts-compiler'));assert.ok(request);
-assert.equal(sha(fs.readFileSync(request)),'cffb8230e123e8e9411de5e02133b0b8191dd2c8110f2e2c6a3c0c7651836c2f');
+assert.equal(sha(fs.readFileSync(request)),'50cedd8dd842d2d64723696097fff3c200b560ff1996cba7f929d1ddc227cf08');
 const qualification=JSON.parse(fs.readFileSync(path.join(path.dirname(ts.directory),'qualification.json'),'utf8'));
-assert.equal(qualification.sourceClosureDigest,'8a875f219d60c3cb7b266569b5533dd96c4e891adbac7fbb02b1215f6fbdbccf');
+assert.equal(qualification.sourceClosureDigest,'b5e496cc6734849116a7dd113257853d755271b20a44f419750993cd99069217');
 assert.equal(ts.m.sourceSha256,qualification.bootstrap.sourceSha256);
 console.log('PSC1_TS_EXECUTING_RECEIPT: '+JSON.stringify({bootstrap:qualification.bootstrap,serviceArtifact:qualification.serviceArtifact,generations:qualification.generations.map(g=>({generation:g.generation,observations:g.observations})),sourceClosureDigest:qualification.sourceClosureDigest,events:qualification.events,targetPlans:qualification.targetPlans}));
-
-const modulePath=path.resolve(ts.directory,ts.m.executable),original=fs.readFileSync(modulePath,'utf8');
-for(const name of ['function psStringEqFromWithFuel$worker','function psStringEqFrom','function* __ps$impl$psStringEq','function __ps$utf8']) {
- const start=original.indexOf(name);console.log('PSC1_STRINGEQ_SOURCE: '+JSON.stringify({name,start,source:original.slice(start,start+9000)}));
-}
-const modified=original.replace(/if \(__ps\$lastUtf8\?\.text === text\)/g,'if (__ps$cacheEq(__ps$lastUtf8?.text, text))').replace(/if \(__ps\$previousUtf8\?\.text === text\)/g,'if (__ps$cacheEq(__ps$previousUtf8?.text, text))');
-assert.notEqual(modified,original);
-const prefix=[
-'const __ps$cacheStats={calls:0,equal:0,largeEqual:0,largeUnequal:0,lengthMismatch:0,max:0,buckets:{}};',
-'function __ps$cacheEq(a,b){ const r=a===b; const s=__ps$cacheStats;s.calls++;if(r)s.equal++;if(a?.length!==b.length)s.lengthMismatch++;if(b.length>4096){if(r)s.largeEqual++;else s.largeUnequal++;}s.max=Math.max(s.max,b.length);const k=(r?"equal:":"unequal:")+(b.length<64?"small":b.length<4096?"medium":"large");s.buckets[k]=(s.buckets[k]??0)+1;if(s.calls%1000000===0)console.error("PSC1_CACHE_COUNTERS: "+JSON.stringify(s));return r;}',
-].join('\n');
-const diagnosticModule=path.resolve(ts.directory,'diagnostic.mjs');fs.writeFileSync(diagnosticModule,prefix+'\n'+modified);
 const runner=path.resolve('diagnosis/runner.mjs');
 fs.writeFileSync(runner,[
 "import fs from 'node:fs';import{pathToFileURL}from'node:url';",
@@ -39,10 +27,20 @@ fs.writeFileSync(runner,[
 "fs.writeFileSync(process.argv[4],response);"].join('\n'));
 const directory=path.resolve('diagnosis/execution'),output=path.resolve('diagnosis/unadopted-response.json');
 const r=spawnSync('python3',['.github/diagnostics/bounded-process.py',JSON.stringify({
- command:[process.execPath,'--prof','--logfile='+path.resolve('diagnosis/ts-g2-v8.log'),runner,diagnosticModule,path.resolve(request),output],
- directory,timeoutMs:60000,maxBuffer:32*1024*1024})],{encoding:'utf8',timeout:65000,killSignal:'SIGKILL',maxBuffer:1024*1024});
+ command:[process.execPath,'--prof','--logfile='+path.resolve('diagnosis/ts-g2-v8.log'),runner,path.resolve(ts.directory,ts.m.executable),path.resolve(request),output],
+ directory,timeoutMs:220000,maxBuffer:32*1024*1024})],{encoding:'utf8',timeout:225000,killSignal:'SIGKILL',maxBuffer:1024*1024});
 assert.equal(r.status,0,r.stderr);ts.verify();
-assert.equal(sha(fs.readFileSync(request)),'cffb8230e123e8e9411de5e02133b0b8191dd2c8110f2e2c6a3c0c7651836c2f');
+assert.equal(sha(fs.readFileSync(request)),'50cedd8dd842d2d64723696097fff3c200b560ff1996cba7f929d1ddc227cf08');
 console.log('PSC1_TS_EXECUTION_SAMPLE: '+JSON.stringify({result:JSON.parse(r.stdout),responseProduced:fs.existsSync(output),qualification:false,adoption:'not-run',admission:'not-run'}));
-
-console.log('PSC1_CACHE_LOG: '+JSON.stringify(fs.readdirSync(directory).map(name=>({name,text:fs.readFileSync(path.join(directory,name),'utf8').slice(-24000)}))));
+for(const name of fs.readdirSync('diagnosis').filter(n=>n.endsWith('.log'))){
+ const original=path.resolve('diagnosis',name),lines=fs.readFileSync(original,'utf8').split('\n');
+ const ticks=lines.filter(l=>l.startsWith('tick,')).map(l=>l.split(','));
+ const first=Number(ticks[0]?.[2]),last=Number(ticks.at(-1)?.[2]);
+ assert.ok(last-first>150000000&&last-first<300000000,'tick timestamps must match bounded replay');
+ const selected=lines.filter(l=>!l.startsWith('tick,')||Number(l.split(',')[2])>=last-30000000);
+ const p=original+'.late.log';fs.writeFileSync(p,selected.join('\n'));
+ console.log('PSC1_TS_LATE_TICKS: '+JSON.stringify({first,last,total:ticks.length,selected:selected.filter(l=>l.startsWith('tick,')).length,windowMicros:30000000,qualification:false}));
+ const profile=spawnSync(process.execPath,['--prof-process',p],{encoding:'utf8',timeout:30000,killSignal:'SIGKILL',maxBuffer:32*1024*1024});
+ fs.writeFileSync(p+'.txt',profile.stdout||'');
+ console.log('PSC1_TS_EXECUTION_CPU: '+JSON.stringify({file:name,status:profile.status,summary:(profile.stdout||'').split('\n').slice(0,65),bottomUp:(profile.stdout||'').split('\n').slice((profile.stdout||'').split('\n').findIndex(l=>l.includes('[Bottom up')), (profile.stdout||'').split('\n').findIndex(l=>l.includes('[Bottom up'))+240)}));
+}

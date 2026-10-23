@@ -1,0 +1,14 @@
+{
+  "schema": "psc1-rust-ts-selfhost-request/2",
+  "action": "qualify-independent-G1-G2-G3",
+  "id": "rust-correctness-1800s-20261023",
+  "branch": "fix/psc1-rust-owned-string-moves-20261023",
+  "parentCommit": "5e0b548e6cb3606ee0d3c129e0a829d830e407e4",
+  "targets": [
+    "rust"
+  ],
+  "profile": "correctness-1800s",
+  "g2g3TimeoutMs": 1800000,
+  "g1TimeoutMs": 240000,
+  "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged"
+}

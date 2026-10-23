@@ -127,3 +127,20 @@ GitHub/Linux Actions only, fresh HEAD/expected-HEAD non-force history. No merge/
 ## Genuine TypeScript correctness qualified
 
 Run39984419742/job120519775807 at requestd864d5983525ce0b0f863b7cd87ab5c99a741f89 (source3ac0455908b085458192d74585c871e665e06675) is SUCCESS: genuinely executing G1/G2/G3, independently admitted exact source/closure/canonical admissions/original/transformed IR and10-case fixed points. G2-self641519ms, maxRSS3004104KiB (sampled tree3004104); G3-self616135ms, maxRSS3013064KiB (sampled tree2964036). Full artifact12516855369 digeste92065e83fe52d701f4342d7c63f3a85895ccad9094034f8bc552fbb21a39423 expires2027-01-21T16:09:31Z. Read-only audit verifies actual bytes and all new worker mechanisms; original240s is separate and still requires its own run. Qualified Rust remains untouched83e18fe1. No integration, independent clean-build or package-publication claim follows from this isolated correctness qualification.
+
+
+## Integration regression correction in progress — 2026-10-24
+Draft PR #173 normal integration run 39990180405 exposed a generator-tail-loop
+closure capture defect in the unchanged higher-order recursion inference/control
+regression (lean-ts, existing 120-second limit). Tail assignment mutated parameter
+bindings captured by callbacks. Preserve successful self-host checkpoint
+39984419742 at compiler 0decfd2618d53916824cb9926ef48008732f4066 as source-specific
+evidence; it does not qualify this correction. The 240-second profile run
+39988689772 failed G2 at 240170ms and never reached G3; correctness and performance
+remain separate. This correction gives each generator-loop iteration immutable
+parameter snapshots and a typed fresh tuple for next arguments, retaining legacy
+pure-loop equality, all freshness/refusal guards, strict IR and independent Lean.
+Focused runtime tests compare generated function/primitive captures against native
+Lean recursion and exercise unused parameter/brand/tag collisions and zero fuel.
+Run the existing full Practical Core regressions unchanged and requalify genuine
+G1/G2/G3 on the corrected source. Rust branch 83e18fe remains untouched.

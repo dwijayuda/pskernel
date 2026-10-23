@@ -5,7 +5,7 @@ const dir=path.resolve('dist/ts-utf8-views');
 fs.writeFileSync(path.join(dir,'package.json'),JSON.stringify({type:'module',private:true}));
 fs.writeFileSync(path.join(dir,'tsconfig.json'),JSON.stringify({compilerOptions:{
  target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',strict:true,noEmitOnError:true,
- declaration:true,sourceMap:true,skipLibCheck:false,types:[],lib:['ES2022','DOM'],outDir:'build'},files:['current.ts','extract-only.ts']}));
+ declaration:true,sourceMap:true,skipLibCheck:false,types:[],lib:['ES2022','DOM'],outDir:'build'},files:['current.ts','extract-only.ts','captures.ts']}));
 const compiled=runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--project',path.join(dir,'tsconfig.json')],{logDirectory:dir});
 const {probe:p,equalCurrent:current,equalLegacy:legacy}=await import(pathToFileURL(path.join(dir,'build/current.js')).href);
 const strings=['','A','ASCII','雪😀','a\u0301','\ufeff\0','"\\\t','\ud800','\udfff','x'.repeat(31)+'a','x'.repeat(31)+'b'];
@@ -96,3 +96,22 @@ console.log('PSC1_TS_SIZE_EXTRACT_RUNTIME: '+JSON.stringify({schema:'psc1-ts-siz
  'no index admission or promotion by extraction','size matches independent UTF8 encoding','cold size retains no views',
  'size-only chunks do not evict cursor','extract-only module runtime','all previous token/proof regressions'],
  syntheticOnly:{characters:source.length,spans:256,legacyNs,cachedNs,checksum:newChecksum},qualification:false}));
+
+const {spawnSync}=await import('node:child_process');
+const captureSource=fs.readFileSync(path.join(dir,'captures.ts'),'utf8');
+assert.ok(captureSource.includes('const [step, count, __ps$loop$args$0] = __ps$loop$args$1;'));
+const captureRunner=path.join(dir,'capture-runner.mjs');
+fs.writeFileSync(captureRunner,`import * as generated from './build/captures.js';
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const cases=JSON.parse(fs.readFileSync(new URL('./capture-reference.json',import.meta.url),'utf8'));
+for(const [name,count,expected] of cases)
+ assert.equal(String(generated[name](value=>value*2n,BigInt(count),7n)),expected);
+console.log(JSON.stringify({comparisons:cases.length,reference:'independently executed native Lean recursion'}));
+`);
+const captureRun=spawnSync(process.execPath,[captureRunner],{encoding:'utf8',timeout:30000});
+assert.equal(captureRun.status,0,JSON.stringify({status:captureRun.status,error:captureRun.error?.message,stderr:captureRun.stderr}));
+const captureReceipt={schema:'psc1-ts-generator-iteration-capture/1',testedCommit:process.env.GITHUB_SHA,
+ sourceSha256:sha(captureSource),...JSON.parse(captureRun.stdout),strictIr:true,strictTypeScript:true,
+ checks:['function and changing Nat captures','unused parameter collision','brand/tag collision','freshness fuel-zero refusal','actual optimized generator loop']};
+fs.writeFileSync(path.join(dir,'capture-receipt.json'),JSON.stringify(captureReceipt,null,2)+'\n');
+console.log('PSC1_TS_GENERATOR_CAPTURE_RUNTIME: '+JSON.stringify(captureReceipt));

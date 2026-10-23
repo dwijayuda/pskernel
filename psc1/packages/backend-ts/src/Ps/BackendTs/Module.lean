@@ -600,13 +600,13 @@ def psTsTailReturnValue (generated : Bool) (brands tags : List (Prod String Stri
   | Option.none => Option.none
   | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
 
-def psTsTailEmitContextWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
-    (generated : Bool) (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+def psTsTailEmitTargetContextWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (generated : Bool) (loopTarget : Option String) (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
   match fuel with
   | Nat.zero => fun (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
   | Nat.succ remaining =>
       fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
-        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitContextWithFuel brands tags declaration generated remaining;
+        let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitTargetContextWithFuel brands tags declaration generated loopTarget remaining;
         let emitPure : PsVerifiedIrExpr -> Option String := psTsTailEmitValue generated brands tags aliases Option.none false;
         match expr with
         | PsVerifiedIrExpr.call fn types arguments =>
@@ -621,8 +621,12 @@ def psTsTailEmitContextWithFuel (brands tags : List (Prod String String)) (decla
                     | Option.none => Option.none
                     | Option.some printed =>
                         let parameterName : PsVerifiedIrParameter -> String := fun (parameter : PsVerifiedIrParameter) => parameter.name;
-                        Option.some (psTsJoin "" ["[", psTsJoin ", " (psListMap parameterName declaration.parameters),
-                          "] = [", psTsJoin ", " printed, "]; continue;"])
+                        match loopTarget with
+                        | Option.none =>
+                            Option.some (psTsJoin "" ["[", psTsJoin ", " (psListMap parameterName declaration.parameters),
+                              "] = [", psTsJoin ", " printed, "]; continue;"])
+                        | Option.some target =>
+                            Option.some (psTsJoin "" [target, " = [", psTsJoin ", " printed, "]; continue;"])
                   else Option.none
             else if generated then psTsTailReturnValue true brands tags declaration aliases expr
             else Option.none
@@ -692,6 +696,10 @@ def psTsTailEmitContextWithFuel (brands tags : List (Prod String String)) (decla
                       else Option.none
         | _ => psTsTailReturnValue generated brands tags declaration aliases expr
 
+def psTsTailEmitContextWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (generated : Bool) (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+  psTsTailEmitTargetContextWithFuel brands tags declaration generated Option.none fuel
+
 def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
     (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
   psTsTailEmitContextWithFuel brands tags declaration false fuel
@@ -753,6 +761,27 @@ def psTsEmitPureDeclaration (isPublic : Bool) (brands tags : List (Prod String S
 
 -- Flatten structured tail statements inside the existing generator protocol.
 -- Ordinary expression preflight preserves its original fuel/error boundary.
+def psTsGeneratorSlotNameWorker (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) (attempts : Nat) (index : Nat) : Option String :=
+  match attempts with
+  | Nat.zero => Option.none
+  | Nat.succ remaining =>
+      let candidate := String.Internal.append "__ps$loop$args$" (psNatToString index);
+      let labelUses : Prod String String -> Bool :=
+        fun (entry : Prod String String) =>
+          if psStringEq entry.fst candidate then true else psStringEq entry.snd candidate;
+      if psTsTailBindingSafe declaration List.nil candidate then
+        if psTsExprUsesNameWithFuel 4096 declaration.body candidate then
+          psTsGeneratorSlotNameWorker brands tags declaration remaining (Nat.succ index)
+        else if psListAny labelUses brands || psListAny labelUses tags then
+          psTsGeneratorSlotNameWorker brands tags declaration remaining (Nat.succ index)
+        else Option.some candidate
+      else psTsGeneratorSlotNameWorker brands tags declaration remaining (Nat.succ index)
+
+def psTsGeneratorSlotName (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) : Option String :=
+  psTsGeneratorSlotNameWorker brands tags declaration 4096 0
+
 def psTsEmitGeneratorLoopWithVisibility (isPublic : Bool)
     (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
   let shadowsSelf : PsVerifiedIrParameter -> Bool :=
@@ -763,28 +792,40 @@ def psTsEmitGeneratorLoopWithVisibility (isPublic : Bool)
     match psTsEmitTypedTailExpr brands tags declaration.resultType body with
     | Except.error _ => Option.none
     | Except.ok _ =>
-        match psTsTailEmitContextWithFuel brands tags declaration true 4096 List.nil body with
+        match psTsGeneratorSlotName brands tags declaration with
         | Option.none => Option.none
-        | Option.some statements =>
-            match psTsTailMap psTsEmitPureParameter declaration.parameters with
+        | Option.some slot =>
+            match psTsTailEmitTargetContextWithFuel brands tags declaration true (Option.some slot) 4096 List.nil body with
             | Option.none => Option.none
-            | Option.some parameters =>
-                match psTsEmitType declaration.resultType with
-                | Except.error _ => Option.none
-                | Except.ok result =>
-                    let parameterName : PsVerifiedIrParameter -> String :=
-                      fun (parameter : PsVerifiedIrParameter) => parameter.name;
-                    let arguments := psTsJoin ", " (psListMap parameterName declaration.parameters);
-                    let generic := psTsGenericNames declaration.typeParameters;
-                    let implementation := String.Internal.append "__ps$impl$" declaration.name;
-                    Option.some (psTsJoin "" [
-                      (if isPublic then "export function " else "function "), declaration.name, generic,
-                      "(", psTsJoin ", " parameters, "): ", result, " { return __ps$run(",
-                      implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic,
-                      "(", psTsJoin ", " parameters, "): __ps$Computation<", result,
-                      "> { while (true) { ", statements, " } }\n__ps$implementations.set(",
-                      declaration.name, ", ", implementation, ");"])
-
+            | Option.some statements =>
+                match psTsTailMap psTsEmitPureParameter declaration.parameters with
+                | Option.none => Option.none
+                | Option.some parameters =>
+                    let parameterType : PsVerifiedIrParameter -> Option String :=
+                      fun (parameter : PsVerifiedIrParameter) =>
+                        match psTsEmitType parameter.type with
+                        | Except.error _ => Option.none
+                        | Except.ok type => Option.some type;
+                    match psTsTailMap parameterType declaration.parameters with
+                    | Option.none => Option.none
+                    | Option.some types =>
+                        match psTsEmitType declaration.resultType with
+                        | Except.error _ => Option.none
+                        | Except.ok result =>
+                            let parameterName : PsVerifiedIrParameter -> String :=
+                              fun (parameter : PsVerifiedIrParameter) => parameter.name;
+                            let arguments := psTsJoin ", " (psListMap parameterName declaration.parameters);
+                            let generic := psTsGenericNames declaration.typeParameters;
+                            let implementation := String.Internal.append "__ps$impl$" declaration.name;
+                            Option.some (psTsJoin "" [
+                              (if isPublic then "export function " else "function "), declaration.name, generic,
+                              "(", psTsJoin ", " parameters, "): ", result, " { return __ps$run(",
+                              implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic,
+                              "(", psTsJoin ", " parameters, "): __ps$Computation<", result,
+                              "> { let ", slot, ": [", psTsJoin ", " types, "] = [", arguments,
+                              "]; while (true) { const [", arguments, "] = ", slot, "; ",
+                              statements, " } }\n__ps$implementations.set(",
+                              declaration.name, ", ", implementation, ");"])
 
 partial def psTsNeedsUtf8Runtime (expr : PsVerifiedIrExpr) : Bool :=
   match expr with

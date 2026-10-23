@@ -1,4 +1,5 @@
 import Ps.BackendTs.Module
+import Ps.CompilerIr.Check
 
 private def natT : PsVerifiedIrType := .primitive .nat
 private def strT : PsVerifiedIrType := .primitive .string
@@ -27,6 +28,57 @@ private def requireSome (value : Option String) : IO String :=
   match value with
   | .some text => pure text
   | .none => throw (IO.userError "expected view loop")
+
+
+-- A tail iteration must preserve the environment captured by functions created
+-- before its next argument assignment, including unused-name collisions.
+private def captureWorker (name : String) (captureCount : Bool) : PsVerifiedIrDeclaration :=
+  let functionT := PsVerifiedIrType.function [natT] natT;
+  let delta := if captureCount then v "count" else n 1;
+  let callback := PsVerifiedIrExpr.lambda [.mk "value" natT] natT
+    (.call (v "step") [] [op .natAdd [v "value",delta]]);
+  .mk name [] [.mk "step" functionT,.mk "count" natT,.mk "__ps$loop$args$0" natT] natT
+    (.ifE (op .natEq [v "count",n 0])
+      (.call (v "step") [] [n 3])
+      (.call (v name) [] [callback,op .natSub [v "count",n 1],n 99]))
+
+private def captureReference (captureCount : Bool) (count : Nat) (step : Nat -> Nat) : Nat :=
+  match count with
+  | 0 => step 3
+  | count + 1 =>
+      captureReference captureCount count
+        (fun value => step (value + if captureCount then count + 1 else 1))
+
+private def emitCaptureTests : IO Unit := do
+  let declarations := [captureWorker "captureStep" false,captureWorker "captureCount" true]
+  let module : PsVerifiedIrModule := .mk [] [] [] declarations
+  if (psCheckVerifiedIrModule psIrCheckDefaultOptions module).accepted != true then
+    throw (IO.userError "capture fixture rejected by strict IR checker")
+  let mut outputs : List String := []
+  for declaration in declarations do
+    if psTsGeneratorSlotNameWorker [] [] declaration 0 0 != .none then
+      throw (IO.userError "slot freshness fuel exhaustion must refuse")
+    if psTsGeneratorSlotName [] [] declaration != .some "__ps$loop$args$1" then
+      throw (IO.userError "unused parameter slot collision")
+    if psTsGeneratorSlotName [("unused","__ps$loop$args$1")] [] declaration !=
+        .some "__ps$loop$args$2" then
+      throw (IO.userError "brand slot collision")
+    if psTsGeneratorSlotName [] [("__ps$loop$args$1","tag")] declaration !=
+        .some "__ps$loop$args$2" then
+      throw (IO.userError "tag slot collision")
+    let output ← requireSome (psTsEmitGeneratorLoopWithVisibility true [] [] declaration)
+    outputs := outputs ++ [output]
+  IO.FS.writeFile "dist/ts-utf8-views/captures.ts"
+    (psTsJoin "\n" (psTsStackRuntimeSupport :: outputs))
+  let mut rows : List String := []
+  for count in [0,1,2,10,30] do
+    for capturesCount in [false,true] do
+      let name := if capturesCount then "captureCount" else "captureStep"
+      let result := captureReference capturesCount count (fun value => value * 2)
+      rows := rows ++ [psTsJoin "" ["[",psJsonQuote name,",",toString count,",",psJsonQuote (toString result),"]"]]
+  IO.FS.writeFile "dist/ts-utf8-views/capture-reference.json"
+    (psTsJoin "" ["[",psTsJoin "," rows,"]\n"])
+  IO.println "PSC1_TS_GENERATOR_CAPTURE_GUARDS: strict IR, immutable iteration scopes, function/primitive captures, unused/brand/tag collisions, bounded freshness"
 
 def main : IO Unit := do
   let current ← requireSome (psTsEmitViewTailLoopWithVisibility true [] [] (worker "equalCurrent"))
@@ -63,3 +115,5 @@ def main : IO Unit := do
   IO.FS.writeFile "dist/ts-utf8-views/extract-only.ts"
     emitted
   IO.println "PSC1_TS_UTF8_VIEW_GUARDS: invariant alias, changing argument, shadowing, collision pass"
+
+  emitCaptureTests

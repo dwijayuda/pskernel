@@ -386,16 +386,21 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
             | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
 
 
-theorem disabled_eq (brands tags : List (Prod String String))
+theorem target_none_eq (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
     psTsTailEmitWithFuel brands tags declaration fuel =
-      _root_.psTsTailEmitContextWithFuel brands tags declaration false fuel := by
+      _root_.psTsTailEmitTargetContextWithFuel brands tags declaration false Option.none fuel := by
   induction fuel with
   | zero => rfl
   | succ remaining ih =>
-      simp only [psTsTailEmitWithFuel, _root_.psTsTailEmitContextWithFuel,
+      simp only [psTsTailEmitWithFuel, _root_.psTsTailEmitTargetContextWithFuel,
         _root_.psTsTailEmitValue, _root_.psTsTailReturnValue, ih]
       rfl
+theorem disabled_eq (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
+    psTsTailEmitWithFuel brands tags declaration fuel =
+      _root_.psTsTailEmitContextWithFuel brands tags declaration false fuel :=
+  target_none_eq brands tags declaration fuel
 end PsTsLegacyTailReference
 
 def main : IO Unit := do

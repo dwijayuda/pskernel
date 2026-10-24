@@ -19,6 +19,9 @@ on:
       - psc1/scripts/php-node-runtime-tests.php
       - psc1/test/PhpCaptureScopeTests.lean
       - psc1/test/PhpPackedLayoutTests.lean
+      - psc1/test/PhpNodeReference.lean
+      - psc1/scripts/php-node-access-token-comparison.php
+      - psc1/scripts/php-direct-call-token-tests.php
       - psc1/test/PythonUtf8*.lean
       - psc1/test/PythonTailLoopTests.lean
       - psc1/scripts/python-tail-loop-tests.py

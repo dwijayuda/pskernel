@@ -1,4 +1,5 @@
 import Ps.BackendPhp.Module
+import PhpNodeReference
 
 private def natT : PsVerifiedIrType := .primitive .nat
 private def strT : PsVerifiedIrType := .primitive .string
@@ -86,6 +87,19 @@ def main : IO Unit := do
   | .ok _ => throw (IO.userError "noncanonical constructor field order admitted")
   let legacy <- requireOk (psPhpEmitModuleWithIoAndPolicies validated ["run", "empty", "one", "three"] false true false)
   let packed <- requireOk (psPhpEmitModuleWithIo validated ["run", "empty", "one", "three"] false)
+  let indexed <- requireOk (psPhpEmitModuleWithIoAndOptimizations validated
+    ["run", "empty", "one", "three"] false true true true false)
+  unless indexed.runtimeSource == packed.runtimeSource &&
+      indexed.runtimeRequirements == packed.runtimeRequirements &&
+      indexed.declarations == packed.declarations &&
+      indexed.declarationLines == packed.declarationLines &&
+      indexed.composer == packed.composer do
+    throw (IO.userError "direct node slots changed unrelated metadata")
+  let restoredNode := ["string $tag", "int $count", "mixed $first", "mixed $second", "array $rest"].foldl
+    (fun source field => source.replace ("public private(set) " ++ field ++ ";") ("private " ++ field ++ ";"))
+    (psPhpRuntimePart "nodes")
+  unless restoredNode == psPhpNodeReferenceRuntime do
+    throw (IO.userError "node runtime changed beyond five readonly property declarations")
   let runtimeNeutral := packed.runtimeSource.replace (psPhpRuntimePart "nodes") ""
   let addedLines := (packed.runtimeSource.splitOn "\n").length - (legacy.runtimeSource.splitOn "\n").length
   unless legacy.runtimeSource == runtimeNeutral &&
@@ -97,11 +111,19 @@ def main : IO Unit := do
   IO.FS.createDirAll "dist/php-packed"
   IO.FS.writeFile "dist/php-packed/legacy.php" legacy.source
   IO.FS.writeFile "dist/php-packed/packed.php" packed.source
+  IO.FS.writeFile "dist/php-packed/indexed.php" indexed.source
+  let tokens <- IO.Process.output {
+    cmd := "php", args := #["scripts/php-node-access-token-comparison.php",
+      "dist/php-packed/packed.php", "dist/php-packed/indexed.php"] }
+  unless tokens.exitCode == 0 do throw (IO.userError (tokens.stdout ++ tokens.stderr))
+  IO.print tokens.stdout
   IO.FS.writeFile "dist/php-packed/consumer.php"
     "<?php $api=require $argv[1]; echo json_encode([gmp_strval($api['run'](gmp_init($argv[2]))),gmp_strval($api['empty']),gmp_strval($api['one']),gmp_strval($api['three'])],JSON_THROW_ON_ERROR);"
   for size in [0, 1, 2, 31, 1000, 5000] do
     let old <- execute "dist/php-packed/legacy.php" size
     let actual <- execute "dist/php-packed/packed.php" size
+    let retained <- execute "dist/php-packed/indexed.php" size
+    unless actual == retained do throw (IO.userError "readonly slots differ from retained indexed nodes")
     unless old == actual && actual == s!"[\"{size}\",\"3\",\"7\",\"20\"]" do
       throw (IO.userError "packed/legacy observations differ")
   let large <- execute "dist/php-packed/packed.php" 2000000
@@ -111,16 +133,18 @@ def main : IO Unit := do
   let other : PsVerifiedIrInductive := {
     name := "Other", typeParameters := [],
     constructors := [{name := "one", fields := [{name := "different", type := strT}]}] }
-  let context : PsPhp.Context := .mk [] [] [] [] false true true [choice, other] PsStringSet.empty
+  let context : PsPhp.Context := .mk [] [] [] [] false true true [choice, other] PsStringSet.empty true
   let first <- requireOk (PsPhp.constructorFields context "Choice" "one")
   let second <- requireOk (PsPhp.constructorFields context "Other" "one")
   unless first == ["value"] && second == ["different"] do
     throw (IO.userError "owner-qualified constructor layout mismatch")
   IO.FS.writeFile "dist/php-packed/node-runtime.php"
     ("<?php\n" ++ psPhpRuntimePart "nodes" ++ "\nreturn $__ps_nodes;\n")
+  IO.FS.writeFile "dist/php-packed/retained-node-runtime.php"
+    ("<?php\n" ++ psPhpNodeReferenceRuntime ++ "\nreturn $__ps_nodes;\n")
   let runtime <- IO.Process.output {
     cmd := "php"
-    args := #["-d", "memory_limit=1G", "scripts/php-node-runtime-tests.php", "dist/php-packed/node-runtime.php"]
+    args := #["-d", "memory_limit=1G", "scripts/php-node-runtime-tests.php", "dist/php-packed/node-runtime.php", "dist/php-packed/retained-node-runtime.php"]
   }
   unless runtime.exitCode == 0 do throw (IO.userError (runtime.stdout ++ runtime.stderr))
   IO.print runtime.stdout

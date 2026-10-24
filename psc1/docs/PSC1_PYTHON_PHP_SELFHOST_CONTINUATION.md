@@ -5,6 +5,14 @@ feat/psc1-python-php-selfhost-20261024 and draft PR176 before expected-HEAD,
 non-force updates. Read AI_WORK_STATE.md, the single roadmap and exact
 Python/PHP qualification receipt. No local checkout/build/tests, merge or publish.
 
+Current retry source: Pythonb56da50567ac4051b6bea311c1b960ced1c97869, PHP13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d; Linux gates pending.
+First3600s run40085445958 is terminal FAILURE: both G1s pass independent
+admission/strictIR/ten cases; Python/PHP G2 deadline3600060/3600056ms.
+Neither reached G3/fixed point. Readbacks40089881019/40089760678 pass.
+Read AI/JSON for immutable artifacts, exact identities and current source gates.
+Validate hot-pair cache and readonly-slot/static-call fixes before a new request.
+The historical baseline below stays preserved; active status is superseded.
+
 1. Compiler source e20a11549cdb1d656c05912089730bf2ebeaf933 passed focused
    40079503171 and full40080321500:37/37,all7 backends,both grammars/apps.
    Reviewb8406ab3 and merge609ff880 have identical Git tree
@@ -15,12 +23,23 @@ Python/PHP qualification receipt. No local checkout/build/tests, merge or publis
    job120842917046 PASSED process-tree deadline/escaped-session/output-bound/
    profile-refusal tests, transport/poisoned-bytecode guards, all source proofs/
    runtime guards and87-module censuses for each target in both grammars.
+   Full40083940157 also PASSED37/37 for supervision/profile source451aef05:
+   Linux120845118090/gate120850001657; tested003a85ce has identical tree
+   854147ae65853c0c26612f0c48424c9083e33a46.
 3. Read actual3600s run/job IDs from AI state/JSON receipt. Each independently
    requires seed once, removal of native compiler executables, executing
    G1→G2→G3, independent Lean admission, strict original/transformed IR,
    source pairing, all ten positive/refusal observations and exact compiler
    source/admission/IR/observation/raw executable fixed points. An active request,
    source census or resource heartbeat never qualifies a generation.
+   Current run40085445958/requesta6a399c6 is on isolated qualification/
+   psc1-python-php-3600s-20261024, Python120847425035/PHP120847425075.
+   Compiler and critical tools exactly match451aef05; only workflow branch guard/
+   request differ. Readback helper177d3837 on diagnostic/psc1-python-php-artifacts-20261024
+   reads immutable completed artifacts without running a compiler. Fill its
+   .github/diagnostics/psc1-python-php-receipt-request.json with schema
+   psc1-python-php-3600s-readback-request/1 and rows containing target,branch,
+   run,job,commit,artifact,digest,conclusion from GitHub metadata.
 4. Latest1800s terminal attempts are preserved: Python e6327cdd/run40079719620,
    job120830635451 G2 deadline1800057ms/tree786232KiB; PHP1174300d/
    run40078954006/job120828380302 G2 deadline1800042ms/tree1179544KiB.

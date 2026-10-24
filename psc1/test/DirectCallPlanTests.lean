@@ -98,6 +98,11 @@ def main : IO Unit := do
         throw (IO.userError "PHP dynamic or recursive declaration lost scheduler")
   IO.FS.writeFile "dist/python-direct/actual.php" phpActual.source
   IO.FS.writeFile "dist/python-direct/legacy.php" phpLegacy.source
+  let phpTokens <- IO.Process.output {
+    cmd := "php", args := #["scripts/php-direct-call-token-tests.php",
+      "dist/python-direct/actual.php", "dist/python-direct/legacy.php"] }
+  unless phpTokens.exitCode == 0 do throw (IO.userError (phpTokens.stdout ++ phpTokens.stderr))
+  IO.print phpTokens.stdout
   IO.FS.writeFile "dist/python-direct/consumer.php"
     "<?php $api=require $argv[1]; echo gmp_strval($api['run'](gmp_init($argv[2])));"
   for value in [0,1,7,1000,200000] do

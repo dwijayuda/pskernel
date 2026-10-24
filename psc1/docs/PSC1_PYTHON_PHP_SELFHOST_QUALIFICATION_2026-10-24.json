@@ -1,11 +1,11 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24T10:23:00Z",
-  "status": "genuine3600s-Python-and-PHP-qualification-in-progress-not-qualified",
+  "recordedAtUtc": "2026-10-24T11:38:27.291Z",
+  "status": "3600s-attempts-failed-targeted-backend-optimizations-in-progress",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
-  "sourceCommit": "e20a11549cdb1d656c05912089730bf2ebeaf933",
+  "sourceCommit": "13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d",
   "targets": [
     "python",
     "php"
@@ -146,7 +146,7 @@
     ],
     "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
   },
-  "nextAction": "Read terminal run40085445958 Python120847425035/PHP120847425075 without cancelling; require G1/G2/G3 and exact fixed points independently. Primary full regression40083940157 continues at451aef05. On failure inspect exact artifact, implement measured correctness-preserving optimization and retry.",
+  "nextAction": "Pass fresh Linux source/retained/admitted runtime and seven-backend regression gates for b56da505/13c5d4a6, preserve current3600s profile and every other limit; advance isolated qualification branch with exact validated compiler/tools snapshot and request BOTH targets again. No G2/G3/fixed-point success yet.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -802,28 +802,32 @@
     "compilerSourceChanged": false
   },
   "currentSourceGate": {
-    "runId": 40079503171,
-    "jobId": 120829903883,
-    "status": "success",
-    "modulesPerTarget": 87,
-    "grammars": [
-      "lean",
-      "ps"
-    ],
-    "retainedComparisons": 43,
-    "deepTailSteps": 2000000,
-    "deepEscapingClosureFallback": 200000,
-    "typedIoOrderAndFirstFailure": true,
-    "parallelArgumentSwap": true,
-    "lexicalShadowRefusal": true,
-    "recursionLimit": "unchanged",
-    "artifacts": [
-      {
-        "id": 12553794512,
-        "digest": "sha256:d333a53cc5f2b22f0ab2f3d13b695fff49f602ec076abb4d2aa10d2b42690fca"
-      }
-    ],
-    "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
+    "commit": "13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d",
+    "status": "pending-new-Linux-gate",
+    "baseline": {
+      "runId": 40079503171,
+      "jobId": 120829903883,
+      "status": "success",
+      "modulesPerTarget": 87,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "retainedComparisons": 43,
+      "deepTailSteps": 2000000,
+      "deepEscapingClosureFallback": 200000,
+      "typedIoOrderAndFirstFailure": true,
+      "parallelArgumentSwap": true,
+      "lexicalShadowRefusal": true,
+      "recursionLimit": "unchanged",
+      "artifacts": [
+        {
+          "id": 12553794512,
+          "digest": "sha256:d333a53cc5f2b22f0ab2f3d13b695fff49f602ec076abb4d2aa10d2b42690fca"
+        }
+      ],
+      "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
+    }
   },
   "phpNodeQualification": {
     "requestCommit": "75f04cfdcafc1fbeea08f66f595f40ff6b777d04",
@@ -1684,7 +1688,7 @@
     "coverage": "closed240/1800/3600 profile boundaries; actual process-tree escaped-session/deadline/output tests; transport/poisoned-cache guards; retained/admitted runtime guards;87 modules/target/both grammars"
   },
   "longCorrectnessQualification": {
-    "status": "in-progress-not-qualified",
+    "status": "both-G1-pass-both-G2-3600s-deadline-fail-no-G3-no-fixed-point",
     "sourceAndToolsCommit": "451aef056de343b8423a9a2e544d2c3d0d6b1fb4",
     "branch": "qualification/psc1-python-php-3600s-20261024",
     "controlCommit": "2b3467f10741e49c4fa1bb3cf371a44828227975",
@@ -1709,6 +1713,2299 @@
     "jobs": {
       "python": 120847425035,
       "php": 120847425075
+    },
+    "php": {
+      "job": 120847425075,
+      "conclusion": "failure",
+      "event": {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G2-self",
+        "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+        "requestSha256": "164437d102ccd97290a41af09d551867d047bcbe713310ff181284564ce888bb",
+        "timeoutMs": 3600000,
+        "timeoutPolicy": "g2g3-correctness-3600s",
+        "maxRssKiB": 74256,
+        "peakTreeRssKiB": 1180260,
+        "sampledCpuSeconds": 3742.79,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 3600056,
+        "status": null,
+        "signal": "SIGKILL",
+        "error": "process tree exceeded hard deadline"
+      },
+      "artifactId": 12558950449,
+      "artifactDigest": "sha256:42516399119bb175b540f59efcc8461c106bbea3f290accd61945a69acdd4f1f",
+      "g3": "not-run",
+      "fixedPoint": "not-run"
+    },
+    "python": {
+      "job": 120847425035,
+      "conclusion": "failure",
+      "event": {
+        "role": "generated-compiler",
+        "target": "python",
+        "id": "G2-self",
+        "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+        "requestSha256": "065657d720858113c1d7219cd5d575420ba36a0ca0b4b7d78a1c7c9760ed6af5",
+        "timeoutMs": 3600000,
+        "timeoutPolicy": "g2g3-correctness-3600s",
+        "maxRssKiB": 67688,
+        "peakTreeRssKiB": 781180,
+        "sampledCpuSeconds": 3837.66,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 3600060,
+        "status": null,
+        "signal": "SIGKILL",
+        "error": "process tree exceeded hard deadline"
+      },
+      "artifactId": 12558152936,
+      "artifactDigest": "sha256:a32295c72c7fcfb7f1013fc6ffe5ddb81aa293d1a4fd0075f2f4dc40234d4286",
+      "g3": "not-run",
+      "fixedPoint": "not-run"
+    },
+    "readback": {
+      "php": {
+        "run": 40089760678,
+        "job": 120859958525,
+        "conclusion": "success",
+        "receipt": {
+          "schema": "psc1-python-php-3600s-artifact-readback/1",
+          "producer": {
+            "target": "php",
+            "branch": "qualification/psc1-python-php-3600s-20261024",
+            "run": 40085445958,
+            "job": 120847425075,
+            "commit": "a6a399c604e29f62cec1f74d2db49d9c45873ea0",
+            "artifact": 12558950449,
+            "digest": "sha256:42516399119bb175b540f59efcc8461c106bbea3f290accd61945a69acdd4f1f",
+            "conclusion": "failure"
+          },
+          "qualificationSha256": "abac87df51affc82fb6397e814659b7352d638842b6e13796e90a97254795175",
+          "status": "failed",
+          "target": "php",
+          "profile": {
+            "name": "correctness-3600s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 3600000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "correctnessQualification": "not-qualified",
+          "performanceQualification": "not-qualified",
+          "sourceClosureDigest": "06a9a142162fffbef3e332a95e5d85a0d4ad2876c0b321001c391729337f2974",
+          "bootstrap": {
+            "sourceClosureDigest": "06a9a142162fffbef3e332a95e5d85a0d4ad2876c0b321001c391729337f2974",
+            "sourceSha256": "5c55eeee69ded03bf98939be1b447a5b92f9e23c6509bbdf32aa95ee1f3ab95d",
+            "admissionsSha256": "b98eb523daf3e9ee7c3ff7e2cb6d602c0eff2c77e8cad2b8b6e66042c8d347a5",
+            "originalIrSha256": "cf3c8974ec47cfb1e146faf0f5c23eef6ecefa0a4b184ddb4a991b084882cf4b",
+            "specializedIrSha256": "2b987b037e5a9d791d8a51999e4369b8f9f650705c31b6e7d146f614f519561b",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerPhpServiceCandidate"
+            ]
+          },
+          "serviceArtifact": {
+            "file": "/home/runner/work/pskernel/pskernel/psc1/dist/generated-php-compiler/G1-service/artifact.json",
+            "sha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+            "sourceSha256": "5c55eeee69ded03bf98939be1b447a5b92f9e23c6509bbdf32aa95ee1f3ab95d"
+          },
+          "sourceChecks": [
+            {
+              "generation": 1,
+              "bytes": 18936874,
+              "sha256": "5c55eeee69ded03bf98939be1b447a5b92f9e23c6509bbdf32aa95ee1f3ab95d"
+            }
+          ],
+          "sourceInventory": [
+            {
+              "module": "Ps.Foundation.Source",
+              "path": "packages/foundation/src/Ps/Foundation/Source.lean",
+              "bytes": 148,
+              "sha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736"
+            },
+            {
+              "module": "Ps.Foundation.List",
+              "path": "packages/foundation/src/Ps/Foundation/List.lean",
+              "bytes": 3160,
+              "sha256": "fded5488ec5b23135838048541792d71c6f3aae0040a558a05c68c05d1e01f1f"
+            },
+            {
+              "module": "Ps.Syntax.Cursor",
+              "path": "packages/syntax/src/Ps/Syntax/Cursor.lean",
+              "bytes": 3143,
+              "sha256": "4ac4015847fb67d5232e700afa8ddc6f20ff343e25aef4a6a50cfac298830093"
+            },
+            {
+              "module": "Ps.Syntax.Token",
+              "path": "packages/syntax/src/Ps/Syntax/Token.lean",
+              "bytes": 959,
+              "sha256": "a690a4bc7c7138f732346155cd985bd5412d9e60e1d04d67c2fd3f46d42c77df"
+            },
+            {
+              "module": "Ps.Syntax.Lexer",
+              "path": "packages/syntax/src/Ps/Syntax/Lexer.lean",
+              "bytes": 37252,
+              "sha256": "be54e6d4e152ccbdfec650394ce173551a6ce10d987bc3a11f5a81dcc5326d65"
+            },
+            {
+              "module": "Ps.Foundation.Name",
+              "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+              "bytes": 3987,
+              "sha256": "2e663eb4d3af85ef70cd3b0dec148b9303d0e994c7c3157d4f81494c9f999f15"
+            },
+            {
+              "module": "Ps.Syntax.Ast",
+              "path": "packages/syntax/src/Ps/Syntax/Ast.lean",
+              "bytes": 10072,
+              "sha256": "64b0da9ee2c11411420a5c88287fcd32c3756cdf3809203cc5fd1862d7f09370"
+            },
+            {
+              "module": "Ps.Syntax.ParserState",
+              "path": "packages/syntax/src/Ps/Syntax/ParserState.lean",
+              "bytes": 2955,
+              "sha256": "f2118ed8b87f1778d307de671bbabf1d0b1481c53cb39917db06f59fbb01c299"
+            },
+            {
+              "module": "Ps.Syntax.ParseCommon",
+              "path": "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+              "bytes": 32182,
+              "sha256": "3641ab8128619521bf3565c3d5872a6e1aeb3052dcb70944b5746214259f891e"
+            },
+            {
+              "module": "Ps.Syntax.ParseBinding",
+              "path": "packages/syntax/src/Ps/Syntax/ParseBinding.lean",
+              "bytes": 8309,
+              "sha256": "0df0910283f07f463839858f4a9eeb8aa931052cd972e161e5358588438f70cc"
+            },
+            {
+              "module": "Ps.Syntax.ParseDo",
+              "path": "packages/syntax/src/Ps/Syntax/ParseDo.lean",
+              "bytes": 46570,
+              "sha256": "bb25b9508155883a47de714008f3aabcb8d733f33a7ffa55ca6164bbdd927bee"
+            },
+            {
+              "module": "Ps.Syntax.ParseData",
+              "path": "packages/syntax/src/Ps/Syntax/ParseData.lean",
+              "bytes": 10172,
+              "sha256": "d093909fa66c9bad5ac237233cf5b021310f066adb9f6019b83dfc9a2f6b556f"
+            },
+            {
+              "module": "Ps.Syntax.Operators",
+              "path": "packages/syntax/src/Ps/Syntax/Operators.lean",
+              "bytes": 5448,
+              "sha256": "04cd2e5a27ec87bd227f6263622c01dd4ac95ce39420848f123bc1cce1f330c8"
+            },
+            {
+              "module": "Ps.Syntax.ParseLean",
+              "path": "packages/syntax/src/Ps/Syntax/ParseLean.lean",
+              "bytes": 100990,
+              "sha256": "68ea2dab5dd849e8bf32fdbe62937d95eb0ed9d86ee6a7c7dea8ff549a7e0a89"
+            },
+            {
+              "module": "Ps.Syntax.ParseProofScript",
+              "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+              "bytes": 77810,
+              "sha256": "bc1f552ff86826d16a6338d5a9634eb035da8f2da69d13879645cf4e34f086c4"
+            },
+            {
+              "module": "Ps.Syntax.PrintCommon",
+              "path": "packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+              "bytes": 17164,
+              "sha256": "b061d70495dcd9d76cb0873664d2ac0c8c43c182a75304f2dfd4cbe2150715cb"
+            },
+            {
+              "module": "Ps.Syntax.PrintLean",
+              "path": "packages/syntax/src/Ps/Syntax/PrintLean.lean",
+              "bytes": 32614,
+              "sha256": "b97a2c7bb62dbbaf1339134cdc94a684b28d8bdb4e90c6c7556b26f142970b41"
+            },
+            {
+              "module": "Ps.Syntax.PrintProofScript",
+              "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+              "bytes": 35158,
+              "sha256": "ee86ae95052d9575374587230a215023b98f4a1484e7f6b1ccef60429747e49b"
+            },
+            {
+              "module": "Ps.Syntax.Translate",
+              "path": "packages/syntax/src/Ps/Syntax/Translate.lean",
+              "bytes": 2074,
+              "sha256": "c73ef5027b5108bc81b555fc4fcf2f0547e32a7a03aa8db0f136b155099a0c9c"
+            },
+            {
+              "module": "Ps.Foundation.Text",
+              "path": "packages/foundation/src/Ps/Foundation/Text.lean",
+              "bytes": 2173,
+              "sha256": "06acc3ec85b1c61926958e8d90e235f6eab206914a291b3d5ceeeee6229ee6b0"
+            },
+            {
+              "module": "Ps.Bridge.Json",
+              "path": "packages/bridge/src/Ps/Bridge/Json.lean",
+              "bytes": 37731,
+              "sha256": "b593490086045c235d59fda060f9000d50f415769d103998a6cf5234976f02bb"
+            },
+            {
+              "module": "Ps.Core.Level",
+              "path": "packages/core/src/Ps/Core/Level.lean",
+              "bytes": 286,
+              "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4"
+            },
+            {
+              "module": "Ps.Core.Expr",
+              "path": "packages/core/src/Ps/Core/Expr.lean",
+              "bytes": 753,
+              "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6"
+            },
+            {
+              "module": "Ps.Core.Declaration",
+              "path": "packages/core/src/Ps/Core/Declaration.lean",
+              "bytes": 1349,
+              "sha256": "1e08932d0251abc18ee8f3b1175fbbe5acd5a1d1db158204ba4dfa285609b3c6"
+            },
+            {
+              "module": "Ps.Core.Abstract",
+              "path": "packages/core/src/Ps/Core/Abstract.lean",
+              "bytes": 2657,
+              "sha256": "40abf6fef51f7d3e2bffae82a30faed6aa11b89bda9479c43c7db583c76de829"
+            },
+            {
+              "module": "Ps.Core.Subst",
+              "path": "packages/core/src/Ps/Core/Subst.lean",
+              "bytes": 5375,
+              "sha256": "092d57ccec3eeab60e3a279e9992b4786abf47bf7f079736ca893eb26deee0e4"
+            },
+            {
+              "module": "Ps.Core.Equality",
+              "path": "packages/core/src/Ps/Core/Equality.lean",
+              "bytes": 6529,
+              "sha256": "6738050d09abb42607c43a70668f34b909b4ccd3153fe62fbde1a345a4b68b6f"
+            },
+            {
+              "module": "Ps.Environment.Basic",
+              "path": "packages/environment/src/Ps/Environment/Basic.lean",
+              "bytes": 9108,
+              "sha256": "5ccb3e39b755baa43a554b7549870b864d4f874c619a92af7e6fcfad8da88ce5"
+            },
+            {
+              "module": "Ps.Bridge.CheckedAdmissions",
+              "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+              "bytes": 53028,
+              "sha256": "37b51a95804c9a0d8ac27508b00b2eec94333637592030dcc08b1b1eb971108b"
+            },
+            {
+              "module": "Ps.Core.Builtin",
+              "path": "packages/core/src/Ps/Core/Builtin.lean",
+              "bytes": 6370,
+              "sha256": "0dcdf8d8b71b340bdcf090377036a2806564f7a73b6bd97ad501f0c9fabc841d"
+            },
+            {
+              "module": "Ps.Environment.Prelude",
+              "path": "packages/environment/src/Ps/Environment/Prelude.lean",
+              "bytes": 24854,
+              "sha256": "36635f57451dcf2409c5658ee698bf989c0b8e4a86079de601e0387263d13ef4"
+            },
+            {
+              "module": "Ps.Environment.SelfHostPrelude",
+              "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+              "bytes": 18920,
+              "sha256": "ba884faa533e58f9a45032392664d194ce31155232c94fa72f290ddea64dab8d"
+            },
+            {
+              "module": "Ps.Environment.Control",
+              "path": "packages/environment/src/Ps/Environment/Control.lean",
+              "bytes": 11018,
+              "sha256": "11d2fa5087f4e851297d9e9b73c22ac7f9001c66be9b276c05ba37e0774c7b50"
+            },
+            {
+              "module": "Ps.Environment.Order",
+              "path": "packages/environment/src/Ps/Environment/Order.lean",
+              "bytes": 25836,
+              "sha256": "4fe02aab3c3d36ca3248e324516d3ed848bcb94806f9b7e22138d4a12a625a83"
+            },
+            {
+              "module": "Ps.Environment.SelfHostProd",
+              "path": "packages/environment/src/Ps/Environment/SelfHostProd.lean",
+              "bytes": 4785,
+              "sha256": "f5c05b09463f348748c91e6f8cbf4db17058d009a4b2ad8619fbebde2928f390"
+            },
+            {
+              "module": "Ps.Environment.LocalContext",
+              "path": "packages/environment/src/Ps/Environment/LocalContext.lean",
+              "bytes": 2690,
+              "sha256": "06c5a03d73c26083ec313017120bb509df33e80e5c51d887ffca13942382bdb9"
+            },
+            {
+              "module": "Ps.Environment.Resolve",
+              "path": "packages/environment/src/Ps/Environment/Resolve.lean",
+              "bytes": 5080,
+              "sha256": "96be5fdde51ca7711a7f40a4a9510edb72192e53e0f5814c84e0864e57d161b7"
+            },
+            {
+              "module": "Ps.Core.LevelSubst",
+              "path": "packages/core/src/Ps/Core/LevelSubst.lean",
+              "bytes": 3613,
+              "sha256": "1393726ff7b45bb3adfcfb5e12ab79c3e344803e44777c9c67c4560af5373698"
+            },
+            {
+              "module": "Ps.Meta.LevelContext",
+              "path": "packages/meta/src/Ps/Meta/LevelContext.lean",
+              "bytes": 9033,
+              "sha256": "6f21ca62d389eff74f8151b1e00f0c6e0f3312bc9461a9f6f2e78975c0ce47dc"
+            },
+            {
+              "module": "Ps.Meta.Context",
+              "path": "packages/meta/src/Ps/Meta/Context.lean",
+              "bytes": 9427,
+              "sha256": "19390da2795f90ebda0864bd89b2e398beb917c259d395393630bea5291355b7"
+            },
+            {
+              "module": "Ps.Meta.Reduce",
+              "path": "packages/meta/src/Ps/Meta/Reduce.lean",
+              "bytes": 6430,
+              "sha256": "4f8e6180f0e0a7a046fe070ec21fabed73636815208244a08cb64b67e86d4f6e"
+            },
+            {
+              "module": "Ps.Meta.Infer",
+              "path": "packages/meta/src/Ps/Meta/Infer.lean",
+              "bytes": 21965,
+              "sha256": "2f170a38e591b42ad3a7493c4738f313a76b02085fbc0f9d71a9c01f7f956609"
+            },
+            {
+              "module": "Ps.Environment.Instances",
+              "path": "packages/environment/src/Ps/Environment/Instances.lean",
+              "bytes": 1616,
+              "sha256": "63a0fabc0e88e90b647074379e62d4ff2ebd7252676e3703ed06a9cfaefad2bc"
+            },
+            {
+              "module": "Ps.Meta.Unify",
+              "path": "packages/meta/src/Ps/Meta/Unify.lean",
+              "bytes": 11760,
+              "sha256": "1580c8126e6d91c80d298a565ad93ffe599eb91de1c91b42d5eaada41980b400"
+            },
+            {
+              "module": "Ps.Meta.SynthInstance",
+              "path": "packages/meta/src/Ps/Meta/SynthInstance.lean",
+              "bytes": 12794,
+              "sha256": "ea73668c788e16d4fb65b41b1b97ae58dc585027234d5185514e8194baf166b6"
+            },
+            {
+              "module": "Ps.Elab.Context",
+              "path": "packages/elab/src/Ps/Elab/Context.lean",
+              "bytes": 4027,
+              "sha256": "2829bfd570f246931047700abc5d12a68cfa3da27cbb51c5cac85fb9d248e42f"
+            },
+            {
+              "module": "Ps.Elab.Literal",
+              "path": "packages/elab/src/Ps/Elab/Literal.lean",
+              "bytes": 10490,
+              "sha256": "0369cd23303d3133b92b40aaf7ece65df86e864596adb85556d994e846258b71"
+            },
+            {
+              "module": "Ps.Elab.Basic",
+              "path": "packages/elab/src/Ps/Elab/Basic.lean",
+              "bytes": 7853,
+              "sha256": "cf6e30a15e4beee6a6ff3b6b0c0de34937d51302b744bbe74705a816bf379bdf"
+            },
+            {
+              "module": "Ps.Elab.DoBase",
+              "path": "packages/elab/src/Ps/Elab/DoBase.lean",
+              "bytes": 24998,
+              "sha256": "f5218650499ba5e959a4c308e59cc99a4ff5e90c41292e828b958fa05739cd26"
+            },
+            {
+              "module": "Ps.Elab.DoFor",
+              "path": "packages/elab/src/Ps/Elab/DoFor.lean",
+              "bytes": 14143,
+              "sha256": "870dc009feef7860aaa813b639fd6e912e770dbd2d1ad8cbb75878936aa01d41"
+            },
+            {
+              "module": "Ps.Elab.DoLoop",
+              "path": "packages/elab/src/Ps/Elab/DoLoop.lean",
+              "bytes": 3166,
+              "sha256": "120f5224fcc7c81c39a724a6da29fce930537803a5f4f61f8dfe8d4b45a74a76"
+            },
+            {
+              "module": "Ps.Elab.DoWhile",
+              "path": "packages/elab/src/Ps/Elab/DoWhile.lean",
+              "bytes": 11210,
+              "sha256": "ae603abc91aa5917b1693527657cafda774678b064de65b9daa2acc771f49430"
+            },
+            {
+              "module": "Ps.Elab.DoTry",
+              "path": "packages/elab/src/Ps/Elab/DoTry.lean",
+              "bytes": 11553,
+              "sha256": "a0343d2f97dde8bb64cd1cba0aee2cadf872b716ee05fa16f8c3f95428d62b20"
+            },
+            {
+              "module": "Ps.Elab.Data",
+              "path": "packages/elab/src/Ps/Elab/Data.lean",
+              "bytes": 14585,
+              "sha256": "f93e7783c943f4e5da98265690736542413cadc509863b3661d3ee971956a712"
+            },
+            {
+              "module": "Ps.Elab.Do",
+              "path": "packages/elab/src/Ps/Elab/Do.lean",
+              "bytes": 12623,
+              "sha256": "89ffd485d37f297b3a5ac0eb48613d4e792b0248aab05c498b419d1f44d0cb31"
+            },
+            {
+              "module": "Ps.Elab.Operators",
+              "path": "packages/elab/src/Ps/Elab/Operators.lean",
+              "bytes": 15686,
+              "sha256": "20699ff3b4e35b58c1219466ab197062c745074cfccc3e6086b1a275f552dc9c"
+            },
+            {
+              "module": "Ps.Elab.Term",
+              "path": "packages/elab/src/Ps/Elab/Term.lean",
+              "bytes": 114603,
+              "sha256": "b9c0cbcb5af11906b682172d01d91394e78f7e2de4863c1448d91d9b8bdc4c11"
+            },
+            {
+              "module": "Ps.Elab.Recursion",
+              "path": "packages/elab/src/Ps/Elab/Recursion.lean",
+              "bytes": 48758,
+              "sha256": "1e081d8f97f0b70e1ed9c342d109c6ee9a9a91bbd97624171187dccbfea7b66b"
+            },
+            {
+              "module": "Ps.Elab.DoLoopLift",
+              "path": "packages/elab/src/Ps/Elab/DoLoopLift.lean",
+              "bytes": 25468,
+              "sha256": "6ab5e82df49175699e13dee2ba4b32f51cfa00741ae0f0049c6029c234467aa8"
+            },
+            {
+              "module": "Ps.Elab.DoForLift",
+              "path": "packages/elab/src/Ps/Elab/DoForLift.lean",
+              "bytes": 16741,
+              "sha256": "b007f2c4664dfbd873fc13dc417dd4ab629a7f7b4ef2ae1d114867017960ef42"
+            },
+            {
+              "module": "Ps.Elab.Declaration",
+              "path": "packages/elab/src/Ps/Elab/Declaration.lean",
+              "bytes": 65521,
+              "sha256": "664553ce3559b1f591ae8226e37c09f8f94880ce876652a6a3e73a6c637ed7e2"
+            },
+            {
+              "module": "Ps.CompilerIr.Model",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+              "bytes": 5888,
+              "sha256": "0f0dba3dac8f24c8af239513e3c6ac93620f2933f1dc36163a3cf873d474c8ab"
+            },
+            {
+              "module": "Ps.Erasure.Basic",
+              "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+              "bytes": 34105,
+              "sha256": "4258961bd35b37049334afc960799fa5256745980a8d085dad6d11f7e459c6f9"
+            },
+            {
+              "module": "Ps.Erasure.Expr",
+              "path": "packages/erasure/src/Ps/Erasure/Expr.lean",
+              "bytes": 146263,
+              "sha256": "8ff3ebf94c74e5746ca99991a5c256363f615a6090af1888219011745ac2fe20"
+            },
+            {
+              "module": "Ps.Erasure.Inductive",
+              "path": "packages/erasure/src/Ps/Erasure/Inductive.lean",
+              "bytes": 17656,
+              "sha256": "53dfea95bc7e0610ce1eaf09cc67516990a5c1334c78a881d74471419cac85dd"
+            },
+            {
+              "module": "Ps.Erasure.Structure",
+              "path": "packages/erasure/src/Ps/Erasure/Structure.lean",
+              "bytes": 6731,
+              "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af"
+            },
+            {
+              "module": "Ps.Erasure.StructureRecursor",
+              "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+              "bytes": 10378,
+              "sha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b"
+            },
+            {
+              "module": "Ps.Erasure.Definition",
+              "path": "packages/erasure/src/Ps/Erasure/Definition.lean",
+              "bytes": 26235,
+              "sha256": "187612067bb713bfe59c70895a22ce23ca4b3a8c369afbcba6e48e58967f7735"
+            },
+            {
+              "module": "Ps.Compiler.Api",
+              "path": "packages/compiler/src/Ps/Compiler/Api.lean",
+              "bytes": 12189,
+              "sha256": "5d28f057f52ea735f48d3dd6067c582dcb7fe112d4b7fb50ca1c19b204c6e53f"
+            },
+            {
+              "module": "Ps.Compiler.Ordinary",
+              "path": "packages/compiler/src/Ps/Compiler/Ordinary.lean",
+              "bytes": 17754,
+              "sha256": "8a3e96566c2a47fbacb17922e76bcd25a5165d7acb7eee467d66db62ea380ffc"
+            },
+            {
+              "module": "Ps.CompilerIr.Encode",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+              "bytes": 22342,
+              "sha256": "5b50f585366224b5f2757a988aa8fb8963d2a701cd0f5dbf634e5acf179cea8d"
+            },
+            {
+              "module": "Ps.Bridge.CompilerHost",
+              "path": "packages/bridge/src/Ps/Bridge/CompilerHost.lean",
+              "bytes": 1301,
+              "sha256": "6ced675ef39b2ebfc7db8edfe920ea08b2b6fd1f19ca4fcfa46bedc02e5e5332"
+            },
+            {
+              "module": "Ps.CompilerIr.CheckTypes",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+              "bytes": 26018,
+              "sha256": "3ccce22596959fa12d084bb25279c686a4d534ec627a2067c4c9da13e29f9cad"
+            },
+            {
+              "module": "Ps.CompilerIr.CheckSize",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+              "bytes": 18919,
+              "sha256": "50c24e57441c028ca0768fac83c966cb5d8b534a68f2f55ca8384983b32fae7d"
+            },
+            {
+              "module": "Ps.CompilerIr.Check",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+              "bytes": 46479,
+              "sha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef"
+            },
+            {
+              "module": "Ps.Foundation.StringSet",
+              "path": "packages/foundation/src/Ps/Foundation/StringSet.lean",
+              "bytes": 4774,
+              "sha256": "e1ae76af1780513da61bf8625edb99beae42f0849a45b4fd52f9706c69af701a"
+            },
+            {
+              "module": "Ps.CompilerIr.Specialize",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+              "bytes": 74101,
+              "sha256": "3130b29e611e7fe2c46875d8cd010c9febc6b9dcd334fb81b782685463b9f6ff"
+            },
+            {
+              "module": "Ps.CompilerIr.Validate",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+              "bytes": 1286,
+              "sha256": "7c53f220f55cde4bffac3a7ffdda00eb4efe22e5c94a039658158aa97f32ab30"
+            },
+            {
+              "module": "Ps.CompilerIr.WorkerFusion",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.lean",
+              "bytes": 33176,
+              "sha256": "df43de21a504f491b3f166988a3f38ed43be6f7832f4a7c94f90be839966fc85"
+            },
+            {
+              "module": "Ps.BackendCommon.Plan",
+              "path": "packages/backend-common/src/Ps/BackendCommon/Plan.lean",
+              "bytes": 11531,
+              "sha256": "761f61f3c26f166057ae344959041ea473eeb4037dba791289fceb341ce316dc"
+            },
+            {
+              "module": "Ps.Compiler.Service",
+              "path": "packages/compiler/src/Ps/Compiler/Service.lean",
+              "bytes": 20209,
+              "sha256": "312b4cadda0599aca13ca6aa88903ceb74076dd0a30e4642bf135cdb9e3ddd3c"
+            },
+            {
+              "module": "Ps.BackendPhp.Runtime",
+              "path": "packages/backend-php/src/Ps/BackendPhp/Runtime.lean",
+              "bytes": 13165,
+              "sha256": "f07127a55350bee4578438cd13cbdc4e8e676aa3a914e4157027ec24e4cfcdc7"
+            },
+            {
+              "module": "Ps.BackendCommon.StateExcept",
+              "path": "packages/backend-common/src/Ps/BackendCommon/StateExcept.lean",
+              "bytes": 1624,
+              "sha256": "b2029de37886606cca2fcc81f5aae69821dace6d42378d79dd752d3008d621ff"
+            },
+            {
+              "module": "Ps.BackendCommon.Source",
+              "path": "packages/backend-common/src/Ps/BackendCommon/Source.lean",
+              "bytes": 4760,
+              "sha256": "1baed2d716c85b7d38cb3fcb31906614cd7db1baec65352aa5facfe469f367bc"
+            },
+            {
+              "module": "Ps.BackendCommon.DirectCalls",
+              "path": "packages/backend-common/src/Ps/BackendCommon/DirectCalls.lean",
+              "bytes": 6502,
+              "sha256": "96300a74f023661a4d4c18fdd593b164dd76af890c57af97cd57cf5159c6d8da"
+            },
+            {
+              "module": "Ps.BackendPhp.Portable",
+              "path": "packages/backend-php/src/Ps/BackendPhp/Portable.lean",
+              "bytes": 66371,
+              "sha256": "15cddc6a1cc416a62d2e7808b03183b900764d6f244e3db2c5e1c94bef3aff2f"
+            },
+            {
+              "module": "Ps.BackendPhp.CompilerService",
+              "path": "packages/backend-php/src/Ps/BackendPhp/CompilerService.lean",
+              "bytes": 777,
+              "sha256": "4d899128bf86219e64588873ca070e3fd0e4a3d79f6e4e45fa4a068d15057ffc"
+            }
+          ],
+          "tools": [
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_independent_checker",
+              "sha256": "2cc6f346a2e72ef325d0db36b2a51b58ad5cb08a1186ca7e6cf131d7f35ec0e6"
+            },
+            {
+              "file": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "sha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-target-qualification.mjs",
+              "sha256": "989e2960dd5d1aa7af93b5df4fb87c0ed9aa0bffad8483b9a4cb2f9bfee8d479"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-target-runner.mjs",
+              "sha256": "06a7f75d05d728d3464ef8336d6280b9c7f56a5efcc1cab9d0677c96c49c39ed"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/selfhost-qualification-profiles.mjs",
+              "sha256": "fc82c374cd0bcbad8cc0a69ad41da120b01abecac42091b851b06ccb98ede6a9"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-target-corpus.mjs",
+              "sha256": "c76a18b8c9c3ada8f2b947c7c6298f59b94b0d8670aa16e366c3303f4afb0d8d"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-target-tools.mjs",
+              "sha256": "fdbdaa290d104df75e0a51b3a76948a36fb87729a7ace2592abbef78ca9a8f1c"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/compiler-host-protocol.mjs",
+              "sha256": "def328a4a74c51ce71ae7365b2573ece27964da8f78ef2391310e4f97f1c962f"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/compiler-source-inputs.mjs",
+              "sha256": "8f4741289718d274c7e969e6a47ca6a1303b99918644f0681b4c02db7681b816"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-target-profiles.mjs",
+              "sha256": "de5cf46b0ee608a3c6df5cdc31f2f66a3e469cd6c1695354f28796877d1ba61f"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-wasm-transport.mjs",
+              "sha256": "c1c870ff75140ad4e74427dc94f7d46de9230502d1f737033f28914391376c06"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-python-transport.py",
+              "sha256": "8c56de21ab5850b30f78edceb5f20225aee7725539fcd7425f63f70f3f2b4237"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-php-transport.php",
+              "sha256": "45c4525af5a9cfd26bc1678a45be8a4183fb84c14e83a99a68baf5a6c20c233a"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/bounded-process.py",
+              "sha256": "bd540fd5f84398492c8dbe1ba69d5a2150f243d46aaa06247d5e179fe82e09c2"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/compiler-closure-contract.mjs",
+              "sha256": "2a2c1244ab18a85777feef29bfc8802939c21db966c7fe95246939524fe5ad8d"
+            },
+            {
+              "file": "/usr/bin/php8.5",
+              "sha256": "2cd42a78dfe79492ccbc0685f522f6ccdde1078e29d34acb115c7624710cfe37",
+              "role": "php-interpreter"
+            }
+          ],
+          "events": [
+            {
+              "role": "stage0-seed",
+              "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_target_service_seed",
+              "args": [
+                "php",
+                "/home/runner/work/pskernel/pskernel/psc1/dist/generated-php-compiler/G1-bootstrap.request.json",
+                "/home/runner/work/pskernel/pskernel/psc1/dist/generated-php-compiler/G1-bootstrap.candidate.json"
+              ],
+              "status": 0,
+              "signal": null,
+              "elapsedMs": 17924,
+              "maxRssKiB": 380916,
+              "peakTreeRssKiB": 302080,
+              "error": null
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-lean-modules",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "c0a0920a43fb71cdf2f006813d3ebc0c50d091d156f62424446e3c328cb65ff3",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210288,
+              "peakTreeRssKiB": 259052,
+              "sampledCpuSeconds": 0.85,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 963,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210288
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-ps-integer-unicode",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "47e31bdc66d4380ed3b3939293d4aa0045c46c02d0baf68a5da47717956669a4",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210448,
+              "peakTreeRssKiB": 259112,
+              "sampledCpuSeconds": 0.85,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 918,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210448
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-ps-list-literal",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "9b1466c350a2a2af47d9db665b4341bef46106952f28285f932719bc5448484e",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210388,
+              "peakTreeRssKiB": 259120,
+              "sampledCpuSeconds": 0.96,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1056,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210388
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-lean-handler-pattern",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "45175f688dd4b323951f678643a8eb75073b6bd9ab866a4b660c636c0d79df35",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210076,
+              "peakTreeRssKiB": 258844,
+              "sampledCpuSeconds": 1.17,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1295,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210076
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-lean-ordinary-loop",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "d60cf7444c33338c97cb0cebc856ab89b9e8626c5394ad3251ad8f332e340a29",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210220,
+              "peakTreeRssKiB": 259068,
+              "sampledCpuSeconds": 1.5,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1560,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210220
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-malformed-list",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "6a46dc557e813d10ba048d24f1a23c9274523a99bf73fd69ffce2b160246346c",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210324,
+              "peakTreeRssKiB": 258696,
+              "sampledCpuSeconds": 0.32,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 417,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210324
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-wrong-body",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "0267a6213fdb56705b08d94b13da7e6a768d8ec8ab25df7979aa56e278a78df9",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210232,
+              "peakTreeRssKiB": 258720,
+              "sampledCpuSeconds": 0.32,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 409,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210232
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-missing-import",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "e66945b488063298034f3eaf3b2fcf08dd11f1b708e6e0d17780dc0253e59ecb",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210184,
+              "peakTreeRssKiB": 258676,
+              "sampledCpuSeconds": 0.31,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 404,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210184
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-checked-partial",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "4d8600058dcb70f06636672a29cdc5ae3203d63ee2fb67ab23c2ed0dfd830573",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210212,
+              "peakTreeRssKiB": 258528,
+              "sampledCpuSeconds": 0.3,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 419,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210212
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G1-verified",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "2c65cd68e4e4b35e9d8cc5c5656e9724233677da68fcfdffd1d0262843035aea",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 210152,
+              "peakTreeRssKiB": 244796,
+              "sampledCpuSeconds": 0.33,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 379,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 210152
+            },
+            {
+              "role": "generated-compiler",
+              "target": "php",
+              "id": "G2-self",
+              "serviceSha256": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "requestSha256": "164437d102ccd97290a41af09d551867d047bcbe713310ff181284564ce888bb",
+              "timeoutMs": 3600000,
+              "timeoutPolicy": "g2g3-correctness-3600s",
+              "maxRssKiB": 74256,
+              "peakTreeRssKiB": 1180260,
+              "sampledCpuSeconds": 3742.79,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 3600056,
+              "status": null,
+              "signal": "SIGKILL",
+              "error": "process tree exceeded hard deadline"
+            }
+          ],
+          "attempts": [
+            {
+              "generation": 2,
+              "producer": "0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df",
+              "startedAt": "2026-10-24T10:23:04.226Z",
+              "status": "failed",
+              "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"php\",\"id\":\"G2-self\",\"serviceSha256\":\"0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df\",\"requestSha256\":\"164437d102ccd97290a41af09d551867d047bcbe713310ff181284564ce888bb\",\"timeoutMs\":3600000,\"timeoutPolicy\":\"g2g3-correctness-3600s\",\"maxRssKiB\":74256,\"peakTreeRssKiB\":1180260,\"sampledCpuSeconds\":3742.79,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":3600056,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\neRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2582130, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2581.77, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2642146, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2641.78, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2702193, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2701.82, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2762260, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2761.88, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2822354, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2821.96, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2882362, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2881.96, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2942403, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2941.99, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3002468, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3002.04, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3062471, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3062.04, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3122527, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3122.08, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3182577, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3182.13, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3242669, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3242.22, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3302700, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3302.24, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3362724, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3362.25, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3422813, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3422.33, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3482883, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3482.39, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3542926, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3542.42, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\n",
+              "completedAt": "2026-10-24T11:23:04.908Z"
+            }
+          ],
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "06a9a142162fffbef3e332a95e5d85a0d4ad2876c0b321001c391729337f2974",
+              "sourceSha256": "5c55eeee69ded03bf98939be1b447a5b92f9e23c6509bbdf32aa95ee1f3ab95d",
+              "admissionsSha256": "b98eb523daf3e9ee7c3ff7e2cb6d602c0eff2c77e8cad2b8b6e66042c8d347a5",
+              "originalIrSha256": "cf3c8974ec47cfb1e146faf0f5c23eef6ecefa0a4b184ddb4a991b084882cf4b",
+              "specializedIrSha256": "2b987b037e5a9d791d8a51999e4369b8f9f650705c31b6e7d146f614f519561b",
+              "logicalAdmission": "accepted",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "observations": [
+                {
+                  "id": "lean-modules",
+                  "sourceClosureDigest": "d91254b72ec79ad17b12ac02e47974f13e4ac9d88e6f50360aabfa0a7d53e721",
+                  "sourceSha256": "3297f90e1b6f6eb0c3e677ac47d98e8ba9369054c88d2f11b3d7537aa6eb8e5c",
+                  "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+                  "originalIrSha256": "2091e6d53ef774abf0d8079eb1d0a3c103fa71c2c21a9118da215305b3f0cb32",
+                  "specializedIrSha256": "0063a063676ab946e8512ba7f930842e64e70fa94a102f62959f892b8d412292",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "answer"
+                  ],
+                  "observation": {
+                    "answer": "42",
+                    "exports": [
+                      "answer"
+                    ]
+                  }
+                },
+                {
+                  "id": "ps-integer-unicode",
+                  "sourceClosureDigest": "f470e37c5106f4e234081214923402f6a2e82fc0475f307cc1c7ccc66d8c78f3",
+                  "sourceSha256": "62505b4b5d7bf77aa05d44e6da6572279d21cd2b58724104dd99e562f04e2145",
+                  "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+                  "originalIrSha256": "84840e7f4044261f34acfd46fdbd1d811dbefe7ef24af6525a1e031d2576e737",
+                  "specializedIrSha256": "3fe93b7666b548e3084c7c61ec24cc95b5f37e605f789dc482604f77ead69bbc",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "huge",
+                    "text"
+                  ],
+                  "observation": {
+                    "huge": "-9007199254740993123456789",
+                    "text": "λ🙂"
+                  }
+                },
+                {
+                  "id": "ps-list-literal",
+                  "sourceClosureDigest": "990ff8089cfb7a59868ba553ca480ad8f5cb0d52ae240bb09589cdbb80a686f5",
+                  "sourceSha256": "574a1bbebb983e62576f7d1cf398bb6226c14d63513e6a48a53be464e2c9436f",
+                  "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+                  "originalIrSha256": "ee47e989dd251b44bb52a785ba80f0a3e56817cd9f6cc774802661227d59967e",
+                  "specializedIrSha256": "1e25559ef8984659a4e3cf5879fb8b84cb6f71e7901a05a1155d9b996769d7c8",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "answer"
+                  ],
+                  "observation": {
+                    "empty": "0",
+                    "first": "7"
+                  }
+                },
+                {
+                  "id": "lean-handler-pattern",
+                  "sourceClosureDigest": "438be06e48d3df4602ce227da6da664b0065bd3c33fcf23b264ac5550b08297e",
+                  "sourceSha256": "6d085dc0d2485c3627b051b101c75a1db5bf3c07566afb2ed924bc50aef4ce79",
+                  "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+                  "originalIrSha256": "4532b90dfe27f82a21db957553b5137bdd2b2baad79075f07fa555732730b852",
+                  "specializedIrSha256": "c534af59337f556207c8f6ac15fa3a769a832f6c15749881bac5d36d142ecd12",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "observe"
+                  ],
+                  "observation": {
+                    "normal": "3",
+                    "caught": "8"
+                  }
+                },
+                {
+                  "id": "lean-ordinary-loop",
+                  "sourceClosureDigest": "4c4044a6d864b40eca4dea995e3534a9b55ee319515f7b58aaca7a781cbe8ee6",
+                  "sourceSha256": "562f6831888573534d4daa0ae4171bfbec91a143a8413ce420c92eb88c5a39c3",
+                  "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+                  "originalIrSha256": "10f63beb16f8b618119fa0873d9103f92f4f65d5cacb43b33d1005576afde009",
+                  "specializedIrSha256": "cf99a791acf40195ce3cae0550d6c3575213a5e84cf416671a513f8483ddefaf",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "answer"
+                  ],
+                  "observation": {
+                    "zero": "0",
+                    "five": "5"
+                  }
+                },
+                {
+                  "id": "malformed-list",
+                  "refused": true,
+                  "phase": "parse",
+                  "code": "source-refused"
+                },
+                {
+                  "id": "wrong-body",
+                  "refused": true,
+                  "phase": "elaboration",
+                  "code": "source-refused"
+                },
+                {
+                  "id": "missing-import",
+                  "refused": true,
+                  "phase": "capture",
+                  "code": "import-order-or-missing"
+                },
+                {
+                  "id": "checked-partial",
+                  "refused": true,
+                  "phase": "preparation",
+                  "code": "checked-preparation-refused"
+                },
+                {
+                  "id": "verified",
+                  "refused": true,
+                  "phase": "wire",
+                  "code": "assurance-unavailable"
+                }
+              ]
+            }
+          ],
+          "fixedPoint": "not-run",
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"php\",\"id\":\"G2-self\",\"serviceSha256\":\"0ab8151a5a63fa83c9026723312641053ec9b93559d8c5341f254b21c53bf8df\",\"requestSha256\":\"164437d102ccd97290a41af09d551867d047bcbe713310ff181284564ce888bb\",\"timeoutMs\":3600000,\"timeoutPolicy\":\"g2g3-correctness-3600s\",\"maxRssKiB\":74256,\"peakTreeRssKiB\":1180260,\"sampledCpuSeconds\":3742.79,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":3600056,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\neRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2582130, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2581.77, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2642146, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2641.78, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2702193, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2701.82, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2762260, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2761.88, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2822354, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2821.96, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2882362, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2881.96, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 2942403, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2941.99, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3002468, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3002.04, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3062471, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3062.04, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3122527, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3122.08, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3182577, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3182.13, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3242669, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3242.22, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3302700, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3302.24, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3362724, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3362.25, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3422813, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3422.33, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3482883, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3482.39, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5446, \"childPid\": 5447, \"elapsedMs\": 3542926, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3542.42, \"currentTreeRssKiB\": 845396, \"peakTreeRssKiB\": 1107280, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\n",
+          "completedAt": "2026-10-24T11:23:04.908Z",
+          "candidates": [
+            {
+              "file": "G1-bootstrap.candidate.json",
+              "bytes": 60263168,
+              "sha256": "8404d3e146574585388820e9c1ff8094056d56823a20efdf92635af6b53f80ea",
+              "status": "candidate",
+              "requestId": "G1-bootstrap",
+              "sourceClosureDigest": "06a9a142162fffbef3e332a95e5d85a0d4ad2876c0b321001c391729337f2974",
+              "sourceSha256": "5c55eeee69ded03bf98939be1b447a5b92f9e23c6509bbdf32aa95ee1f3ab95d",
+              "originalIrSha256": "cf3c8974ec47cfb1e146faf0f5c23eef6ecefa0a4b184ddb4a991b084882cf4b",
+              "specializedIrSha256": "2b987b037e5a9d791d8a51999e4369b8f9f650705c31b6e7d146f614f519561b",
+              "admission": "not-run"
+            }
+          ],
+          "heartbeats": [
+            {
+              "file": "G2-self-process/resource-heartbeats.jsonl",
+              "count": 60,
+              "first": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5438,
+                "childPid": 5439,
+                "elapsedMs": 5,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 0,
+                "currentTreeRssKiB": 25980,
+                "peakTreeRssKiB": 25980,
+                "liveProcesses": 1,
+                "stdoutBytes": 0,
+                "stderrBytes": 0
+              },
+              "last": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5438,
+                "childPid": 5439,
+                "elapsedMs": 3542901,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 3683.42,
+                "currentTreeRssKiB": 918376,
+                "peakTreeRssKiB": 1180260,
+                "liveProcesses": 4,
+                "stdoutBytes": 0,
+                "stderrBytes": 20416
+              }
+            },
+            {
+              "file": "resource-heartbeats.jsonl",
+              "count": 60,
+              "first": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5446,
+                "childPid": 5447,
+                "elapsedMs": 5,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 0,
+                "currentTreeRssKiB": 1528,
+                "peakTreeRssKiB": 1528,
+                "liveProcesses": 1,
+                "stdoutBytes": 0,
+                "stderrBytes": 0
+              },
+              "last": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5446,
+                "childPid": 5447,
+                "elapsedMs": 3542926,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 3542.42,
+                "currentTreeRssKiB": 845396,
+                "peakTreeRssKiB": 1107280,
+                "liveProcesses": 2,
+                "stdoutBytes": 0,
+                "stderrBytes": 0
+              }
+            }
+          ]
+        }
+      },
+      "python": {
+        "run": 40089881019,
+        "conclusion": "success",
+        "receipt": {
+          "schema": "psc1-python-php-3600s-artifact-readback/1",
+          "producer": {
+            "target": "python",
+            "branch": "qualification/psc1-python-php-3600s-20261024",
+            "run": 40085445958,
+            "job": 120847425035,
+            "commit": "a6a399c604e29f62cec1f74d2db49d9c45873ea0",
+            "artifact": 12558152936,
+            "digest": "sha256:a32295c72c7fcfb7f1013fc6ffe5ddb81aa293d1a4fd0075f2f4dc40234d4286",
+            "conclusion": "failure"
+          },
+          "qualificationSha256": "645cdf65bdd4b0bf5f9576ab906553ecc25206608313ba0c1ac8813c85707a56",
+          "status": "failed",
+          "target": "python",
+          "profile": {
+            "name": "correctness-3600s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 3600000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "correctnessQualification": "not-qualified",
+          "performanceQualification": "not-qualified",
+          "sourceClosureDigest": "9313bf6be070fb447d463afb6bf72e3932ba9ebdb24c070783d74effbd514008",
+          "bootstrap": {
+            "sourceClosureDigest": "9313bf6be070fb447d463afb6bf72e3932ba9ebdb24c070783d74effbd514008",
+            "sourceSha256": "6170b904c3da1c717689e10f70eb5e99899572776f011b60b21119bec95c00ab",
+            "admissionsSha256": "404c61a8c82f79256648b5188cdff07f523e566eb874dff9ee09cd02765dedff",
+            "originalIrSha256": "44a67a054ee9775a9283280e3772412059ed995b385b1ac08b1951fc8e0c0601",
+            "specializedIrSha256": "22a0be3e7d79820ca45b78990ff566b7987fb6740e9b92e0fa08decedd91af06",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerPythonServiceCandidate"
+            ]
+          },
+          "serviceArtifact": {
+            "file": "/home/runner/work/pskernel/pskernel/psc1/dist/generated-python-compiler/G1-service/artifact.json",
+            "sha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+            "sourceSha256": "6170b904c3da1c717689e10f70eb5e99899572776f011b60b21119bec95c00ab"
+          },
+          "sourceChecks": [
+            {
+              "generation": 1,
+              "bytes": 12479408,
+              "sha256": "6170b904c3da1c717689e10f70eb5e99899572776f011b60b21119bec95c00ab"
+            }
+          ],
+          "sourceInventory": [
+            {
+              "module": "Ps.Foundation.Source",
+              "path": "packages/foundation/src/Ps/Foundation/Source.lean",
+              "bytes": 148,
+              "sha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736"
+            },
+            {
+              "module": "Ps.Foundation.List",
+              "path": "packages/foundation/src/Ps/Foundation/List.lean",
+              "bytes": 3160,
+              "sha256": "fded5488ec5b23135838048541792d71c6f3aae0040a558a05c68c05d1e01f1f"
+            },
+            {
+              "module": "Ps.Syntax.Cursor",
+              "path": "packages/syntax/src/Ps/Syntax/Cursor.lean",
+              "bytes": 3143,
+              "sha256": "4ac4015847fb67d5232e700afa8ddc6f20ff343e25aef4a6a50cfac298830093"
+            },
+            {
+              "module": "Ps.Syntax.Token",
+              "path": "packages/syntax/src/Ps/Syntax/Token.lean",
+              "bytes": 959,
+              "sha256": "a690a4bc7c7138f732346155cd985bd5412d9e60e1d04d67c2fd3f46d42c77df"
+            },
+            {
+              "module": "Ps.Syntax.Lexer",
+              "path": "packages/syntax/src/Ps/Syntax/Lexer.lean",
+              "bytes": 37252,
+              "sha256": "be54e6d4e152ccbdfec650394ce173551a6ce10d987bc3a11f5a81dcc5326d65"
+            },
+            {
+              "module": "Ps.Foundation.Name",
+              "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+              "bytes": 3987,
+              "sha256": "2e663eb4d3af85ef70cd3b0dec148b9303d0e994c7c3157d4f81494c9f999f15"
+            },
+            {
+              "module": "Ps.Syntax.Ast",
+              "path": "packages/syntax/src/Ps/Syntax/Ast.lean",
+              "bytes": 10072,
+              "sha256": "64b0da9ee2c11411420a5c88287fcd32c3756cdf3809203cc5fd1862d7f09370"
+            },
+            {
+              "module": "Ps.Syntax.ParserState",
+              "path": "packages/syntax/src/Ps/Syntax/ParserState.lean",
+              "bytes": 2955,
+              "sha256": "f2118ed8b87f1778d307de671bbabf1d0b1481c53cb39917db06f59fbb01c299"
+            },
+            {
+              "module": "Ps.Syntax.ParseCommon",
+              "path": "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+              "bytes": 32182,
+              "sha256": "3641ab8128619521bf3565c3d5872a6e1aeb3052dcb70944b5746214259f891e"
+            },
+            {
+              "module": "Ps.Syntax.ParseBinding",
+              "path": "packages/syntax/src/Ps/Syntax/ParseBinding.lean",
+              "bytes": 8309,
+              "sha256": "0df0910283f07f463839858f4a9eeb8aa931052cd972e161e5358588438f70cc"
+            },
+            {
+              "module": "Ps.Syntax.ParseDo",
+              "path": "packages/syntax/src/Ps/Syntax/ParseDo.lean",
+              "bytes": 46570,
+              "sha256": "bb25b9508155883a47de714008f3aabcb8d733f33a7ffa55ca6164bbdd927bee"
+            },
+            {
+              "module": "Ps.Syntax.ParseData",
+              "path": "packages/syntax/src/Ps/Syntax/ParseData.lean",
+              "bytes": 10172,
+              "sha256": "d093909fa66c9bad5ac237233cf5b021310f066adb9f6019b83dfc9a2f6b556f"
+            },
+            {
+              "module": "Ps.Syntax.Operators",
+              "path": "packages/syntax/src/Ps/Syntax/Operators.lean",
+              "bytes": 5448,
+              "sha256": "04cd2e5a27ec87bd227f6263622c01dd4ac95ce39420848f123bc1cce1f330c8"
+            },
+            {
+              "module": "Ps.Syntax.ParseLean",
+              "path": "packages/syntax/src/Ps/Syntax/ParseLean.lean",
+              "bytes": 100990,
+              "sha256": "68ea2dab5dd849e8bf32fdbe62937d95eb0ed9d86ee6a7c7dea8ff549a7e0a89"
+            },
+            {
+              "module": "Ps.Syntax.ParseProofScript",
+              "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+              "bytes": 77810,
+              "sha256": "bc1f552ff86826d16a6338d5a9634eb035da8f2da69d13879645cf4e34f086c4"
+            },
+            {
+              "module": "Ps.Syntax.PrintCommon",
+              "path": "packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+              "bytes": 17164,
+              "sha256": "b061d70495dcd9d76cb0873664d2ac0c8c43c182a75304f2dfd4cbe2150715cb"
+            },
+            {
+              "module": "Ps.Syntax.PrintLean",
+              "path": "packages/syntax/src/Ps/Syntax/PrintLean.lean",
+              "bytes": 32614,
+              "sha256": "b97a2c7bb62dbbaf1339134cdc94a684b28d8bdb4e90c6c7556b26f142970b41"
+            },
+            {
+              "module": "Ps.Syntax.PrintProofScript",
+              "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+              "bytes": 35158,
+              "sha256": "ee86ae95052d9575374587230a215023b98f4a1484e7f6b1ccef60429747e49b"
+            },
+            {
+              "module": "Ps.Syntax.Translate",
+              "path": "packages/syntax/src/Ps/Syntax/Translate.lean",
+              "bytes": 2074,
+              "sha256": "c73ef5027b5108bc81b555fc4fcf2f0547e32a7a03aa8db0f136b155099a0c9c"
+            },
+            {
+              "module": "Ps.Foundation.Text",
+              "path": "packages/foundation/src/Ps/Foundation/Text.lean",
+              "bytes": 2173,
+              "sha256": "06acc3ec85b1c61926958e8d90e235f6eab206914a291b3d5ceeeee6229ee6b0"
+            },
+            {
+              "module": "Ps.Bridge.Json",
+              "path": "packages/bridge/src/Ps/Bridge/Json.lean",
+              "bytes": 37731,
+              "sha256": "b593490086045c235d59fda060f9000d50f415769d103998a6cf5234976f02bb"
+            },
+            {
+              "module": "Ps.Core.Level",
+              "path": "packages/core/src/Ps/Core/Level.lean",
+              "bytes": 286,
+              "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4"
+            },
+            {
+              "module": "Ps.Core.Expr",
+              "path": "packages/core/src/Ps/Core/Expr.lean",
+              "bytes": 753,
+              "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6"
+            },
+            {
+              "module": "Ps.Core.Declaration",
+              "path": "packages/core/src/Ps/Core/Declaration.lean",
+              "bytes": 1349,
+              "sha256": "1e08932d0251abc18ee8f3b1175fbbe5acd5a1d1db158204ba4dfa285609b3c6"
+            },
+            {
+              "module": "Ps.Core.Abstract",
+              "path": "packages/core/src/Ps/Core/Abstract.lean",
+              "bytes": 2657,
+              "sha256": "40abf6fef51f7d3e2bffae82a30faed6aa11b89bda9479c43c7db583c76de829"
+            },
+            {
+              "module": "Ps.Core.Subst",
+              "path": "packages/core/src/Ps/Core/Subst.lean",
+              "bytes": 5375,
+              "sha256": "092d57ccec3eeab60e3a279e9992b4786abf47bf7f079736ca893eb26deee0e4"
+            },
+            {
+              "module": "Ps.Core.Equality",
+              "path": "packages/core/src/Ps/Core/Equality.lean",
+              "bytes": 6529,
+              "sha256": "6738050d09abb42607c43a70668f34b909b4ccd3153fe62fbde1a345a4b68b6f"
+            },
+            {
+              "module": "Ps.Environment.Basic",
+              "path": "packages/environment/src/Ps/Environment/Basic.lean",
+              "bytes": 9108,
+              "sha256": "5ccb3e39b755baa43a554b7549870b864d4f874c619a92af7e6fcfad8da88ce5"
+            },
+            {
+              "module": "Ps.Bridge.CheckedAdmissions",
+              "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+              "bytes": 53028,
+              "sha256": "37b51a95804c9a0d8ac27508b00b2eec94333637592030dcc08b1b1eb971108b"
+            },
+            {
+              "module": "Ps.Core.Builtin",
+              "path": "packages/core/src/Ps/Core/Builtin.lean",
+              "bytes": 6370,
+              "sha256": "0dcdf8d8b71b340bdcf090377036a2806564f7a73b6bd97ad501f0c9fabc841d"
+            },
+            {
+              "module": "Ps.Environment.Prelude",
+              "path": "packages/environment/src/Ps/Environment/Prelude.lean",
+              "bytes": 24854,
+              "sha256": "36635f57451dcf2409c5658ee698bf989c0b8e4a86079de601e0387263d13ef4"
+            },
+            {
+              "module": "Ps.Environment.SelfHostPrelude",
+              "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+              "bytes": 18920,
+              "sha256": "ba884faa533e58f9a45032392664d194ce31155232c94fa72f290ddea64dab8d"
+            },
+            {
+              "module": "Ps.Environment.Control",
+              "path": "packages/environment/src/Ps/Environment/Control.lean",
+              "bytes": 11018,
+              "sha256": "11d2fa5087f4e851297d9e9b73c22ac7f9001c66be9b276c05ba37e0774c7b50"
+            },
+            {
+              "module": "Ps.Environment.Order",
+              "path": "packages/environment/src/Ps/Environment/Order.lean",
+              "bytes": 25836,
+              "sha256": "4fe02aab3c3d36ca3248e324516d3ed848bcb94806f9b7e22138d4a12a625a83"
+            },
+            {
+              "module": "Ps.Environment.SelfHostProd",
+              "path": "packages/environment/src/Ps/Environment/SelfHostProd.lean",
+              "bytes": 4785,
+              "sha256": "f5c05b09463f348748c91e6f8cbf4db17058d009a4b2ad8619fbebde2928f390"
+            },
+            {
+              "module": "Ps.Environment.LocalContext",
+              "path": "packages/environment/src/Ps/Environment/LocalContext.lean",
+              "bytes": 2690,
+              "sha256": "06c5a03d73c26083ec313017120bb509df33e80e5c51d887ffca13942382bdb9"
+            },
+            {
+              "module": "Ps.Environment.Resolve",
+              "path": "packages/environment/src/Ps/Environment/Resolve.lean",
+              "bytes": 5080,
+              "sha256": "96be5fdde51ca7711a7f40a4a9510edb72192e53e0f5814c84e0864e57d161b7"
+            },
+            {
+              "module": "Ps.Core.LevelSubst",
+              "path": "packages/core/src/Ps/Core/LevelSubst.lean",
+              "bytes": 3613,
+              "sha256": "1393726ff7b45bb3adfcfb5e12ab79c3e344803e44777c9c67c4560af5373698"
+            },
+            {
+              "module": "Ps.Meta.LevelContext",
+              "path": "packages/meta/src/Ps/Meta/LevelContext.lean",
+              "bytes": 9033,
+              "sha256": "6f21ca62d389eff74f8151b1e00f0c6e0f3312bc9461a9f6f2e78975c0ce47dc"
+            },
+            {
+              "module": "Ps.Meta.Context",
+              "path": "packages/meta/src/Ps/Meta/Context.lean",
+              "bytes": 9427,
+              "sha256": "19390da2795f90ebda0864bd89b2e398beb917c259d395393630bea5291355b7"
+            },
+            {
+              "module": "Ps.Meta.Reduce",
+              "path": "packages/meta/src/Ps/Meta/Reduce.lean",
+              "bytes": 6430,
+              "sha256": "4f8e6180f0e0a7a046fe070ec21fabed73636815208244a08cb64b67e86d4f6e"
+            },
+            {
+              "module": "Ps.Meta.Infer",
+              "path": "packages/meta/src/Ps/Meta/Infer.lean",
+              "bytes": 21965,
+              "sha256": "2f170a38e591b42ad3a7493c4738f313a76b02085fbc0f9d71a9c01f7f956609"
+            },
+            {
+              "module": "Ps.Environment.Instances",
+              "path": "packages/environment/src/Ps/Environment/Instances.lean",
+              "bytes": 1616,
+              "sha256": "63a0fabc0e88e90b647074379e62d4ff2ebd7252676e3703ed06a9cfaefad2bc"
+            },
+            {
+              "module": "Ps.Meta.Unify",
+              "path": "packages/meta/src/Ps/Meta/Unify.lean",
+              "bytes": 11760,
+              "sha256": "1580c8126e6d91c80d298a565ad93ffe599eb91de1c91b42d5eaada41980b400"
+            },
+            {
+              "module": "Ps.Meta.SynthInstance",
+              "path": "packages/meta/src/Ps/Meta/SynthInstance.lean",
+              "bytes": 12794,
+              "sha256": "ea73668c788e16d4fb65b41b1b97ae58dc585027234d5185514e8194baf166b6"
+            },
+            {
+              "module": "Ps.Elab.Context",
+              "path": "packages/elab/src/Ps/Elab/Context.lean",
+              "bytes": 4027,
+              "sha256": "2829bfd570f246931047700abc5d12a68cfa3da27cbb51c5cac85fb9d248e42f"
+            },
+            {
+              "module": "Ps.Elab.Literal",
+              "path": "packages/elab/src/Ps/Elab/Literal.lean",
+              "bytes": 10490,
+              "sha256": "0369cd23303d3133b92b40aaf7ece65df86e864596adb85556d994e846258b71"
+            },
+            {
+              "module": "Ps.Elab.Basic",
+              "path": "packages/elab/src/Ps/Elab/Basic.lean",
+              "bytes": 7853,
+              "sha256": "cf6e30a15e4beee6a6ff3b6b0c0de34937d51302b744bbe74705a816bf379bdf"
+            },
+            {
+              "module": "Ps.Elab.DoBase",
+              "path": "packages/elab/src/Ps/Elab/DoBase.lean",
+              "bytes": 24998,
+              "sha256": "f5218650499ba5e959a4c308e59cc99a4ff5e90c41292e828b958fa05739cd26"
+            },
+            {
+              "module": "Ps.Elab.DoFor",
+              "path": "packages/elab/src/Ps/Elab/DoFor.lean",
+              "bytes": 14143,
+              "sha256": "870dc009feef7860aaa813b639fd6e912e770dbd2d1ad8cbb75878936aa01d41"
+            },
+            {
+              "module": "Ps.Elab.DoLoop",
+              "path": "packages/elab/src/Ps/Elab/DoLoop.lean",
+              "bytes": 3166,
+              "sha256": "120f5224fcc7c81c39a724a6da29fce930537803a5f4f61f8dfe8d4b45a74a76"
+            },
+            {
+              "module": "Ps.Elab.DoWhile",
+              "path": "packages/elab/src/Ps/Elab/DoWhile.lean",
+              "bytes": 11210,
+              "sha256": "ae603abc91aa5917b1693527657cafda774678b064de65b9daa2acc771f49430"
+            },
+            {
+              "module": "Ps.Elab.DoTry",
+              "path": "packages/elab/src/Ps/Elab/DoTry.lean",
+              "bytes": 11553,
+              "sha256": "a0343d2f97dde8bb64cd1cba0aee2cadf872b716ee05fa16f8c3f95428d62b20"
+            },
+            {
+              "module": "Ps.Elab.Data",
+              "path": "packages/elab/src/Ps/Elab/Data.lean",
+              "bytes": 14585,
+              "sha256": "f93e7783c943f4e5da98265690736542413cadc509863b3661d3ee971956a712"
+            },
+            {
+              "module": "Ps.Elab.Do",
+              "path": "packages/elab/src/Ps/Elab/Do.lean",
+              "bytes": 12623,
+              "sha256": "89ffd485d37f297b3a5ac0eb48613d4e792b0248aab05c498b419d1f44d0cb31"
+            },
+            {
+              "module": "Ps.Elab.Operators",
+              "path": "packages/elab/src/Ps/Elab/Operators.lean",
+              "bytes": 15686,
+              "sha256": "20699ff3b4e35b58c1219466ab197062c745074cfccc3e6086b1a275f552dc9c"
+            },
+            {
+              "module": "Ps.Elab.Term",
+              "path": "packages/elab/src/Ps/Elab/Term.lean",
+              "bytes": 114603,
+              "sha256": "b9c0cbcb5af11906b682172d01d91394e78f7e2de4863c1448d91d9b8bdc4c11"
+            },
+            {
+              "module": "Ps.Elab.Recursion",
+              "path": "packages/elab/src/Ps/Elab/Recursion.lean",
+              "bytes": 48758,
+              "sha256": "1e081d8f97f0b70e1ed9c342d109c6ee9a9a91bbd97624171187dccbfea7b66b"
+            },
+            {
+              "module": "Ps.Elab.DoLoopLift",
+              "path": "packages/elab/src/Ps/Elab/DoLoopLift.lean",
+              "bytes": 25468,
+              "sha256": "6ab5e82df49175699e13dee2ba4b32f51cfa00741ae0f0049c6029c234467aa8"
+            },
+            {
+              "module": "Ps.Elab.DoForLift",
+              "path": "packages/elab/src/Ps/Elab/DoForLift.lean",
+              "bytes": 16741,
+              "sha256": "b007f2c4664dfbd873fc13dc417dd4ab629a7f7b4ef2ae1d114867017960ef42"
+            },
+            {
+              "module": "Ps.Elab.Declaration",
+              "path": "packages/elab/src/Ps/Elab/Declaration.lean",
+              "bytes": 65521,
+              "sha256": "664553ce3559b1f591ae8226e37c09f8f94880ce876652a6a3e73a6c637ed7e2"
+            },
+            {
+              "module": "Ps.CompilerIr.Model",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+              "bytes": 5888,
+              "sha256": "0f0dba3dac8f24c8af239513e3c6ac93620f2933f1dc36163a3cf873d474c8ab"
+            },
+            {
+              "module": "Ps.Erasure.Basic",
+              "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+              "bytes": 34105,
+              "sha256": "4258961bd35b37049334afc960799fa5256745980a8d085dad6d11f7e459c6f9"
+            },
+            {
+              "module": "Ps.Erasure.Expr",
+              "path": "packages/erasure/src/Ps/Erasure/Expr.lean",
+              "bytes": 146263,
+              "sha256": "8ff3ebf94c74e5746ca99991a5c256363f615a6090af1888219011745ac2fe20"
+            },
+            {
+              "module": "Ps.Erasure.Inductive",
+              "path": "packages/erasure/src/Ps/Erasure/Inductive.lean",
+              "bytes": 17656,
+              "sha256": "53dfea95bc7e0610ce1eaf09cc67516990a5c1334c78a881d74471419cac85dd"
+            },
+            {
+              "module": "Ps.Erasure.Structure",
+              "path": "packages/erasure/src/Ps/Erasure/Structure.lean",
+              "bytes": 6731,
+              "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af"
+            },
+            {
+              "module": "Ps.Erasure.StructureRecursor",
+              "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+              "bytes": 10378,
+              "sha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b"
+            },
+            {
+              "module": "Ps.Erasure.Definition",
+              "path": "packages/erasure/src/Ps/Erasure/Definition.lean",
+              "bytes": 26235,
+              "sha256": "187612067bb713bfe59c70895a22ce23ca4b3a8c369afbcba6e48e58967f7735"
+            },
+            {
+              "module": "Ps.Compiler.Api",
+              "path": "packages/compiler/src/Ps/Compiler/Api.lean",
+              "bytes": 12189,
+              "sha256": "5d28f057f52ea735f48d3dd6067c582dcb7fe112d4b7fb50ca1c19b204c6e53f"
+            },
+            {
+              "module": "Ps.Compiler.Ordinary",
+              "path": "packages/compiler/src/Ps/Compiler/Ordinary.lean",
+              "bytes": 17754,
+              "sha256": "8a3e96566c2a47fbacb17922e76bcd25a5165d7acb7eee467d66db62ea380ffc"
+            },
+            {
+              "module": "Ps.CompilerIr.Encode",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+              "bytes": 22342,
+              "sha256": "5b50f585366224b5f2757a988aa8fb8963d2a701cd0f5dbf634e5acf179cea8d"
+            },
+            {
+              "module": "Ps.Bridge.CompilerHost",
+              "path": "packages/bridge/src/Ps/Bridge/CompilerHost.lean",
+              "bytes": 1301,
+              "sha256": "6ced675ef39b2ebfc7db8edfe920ea08b2b6fd1f19ca4fcfa46bedc02e5e5332"
+            },
+            {
+              "module": "Ps.CompilerIr.CheckTypes",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+              "bytes": 26018,
+              "sha256": "3ccce22596959fa12d084bb25279c686a4d534ec627a2067c4c9da13e29f9cad"
+            },
+            {
+              "module": "Ps.CompilerIr.CheckSize",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+              "bytes": 18919,
+              "sha256": "50c24e57441c028ca0768fac83c966cb5d8b534a68f2f55ca8384983b32fae7d"
+            },
+            {
+              "module": "Ps.CompilerIr.Check",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+              "bytes": 46479,
+              "sha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef"
+            },
+            {
+              "module": "Ps.Foundation.StringSet",
+              "path": "packages/foundation/src/Ps/Foundation/StringSet.lean",
+              "bytes": 4774,
+              "sha256": "e1ae76af1780513da61bf8625edb99beae42f0849a45b4fd52f9706c69af701a"
+            },
+            {
+              "module": "Ps.CompilerIr.Specialize",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+              "bytes": 74101,
+              "sha256": "3130b29e611e7fe2c46875d8cd010c9febc6b9dcd334fb81b782685463b9f6ff"
+            },
+            {
+              "module": "Ps.CompilerIr.Validate",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+              "bytes": 1286,
+              "sha256": "7c53f220f55cde4bffac3a7ffdda00eb4efe22e5c94a039658158aa97f32ab30"
+            },
+            {
+              "module": "Ps.CompilerIr.WorkerFusion",
+              "path": "packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.lean",
+              "bytes": 33176,
+              "sha256": "df43de21a504f491b3f166988a3f38ed43be6f7832f4a7c94f90be839966fc85"
+            },
+            {
+              "module": "Ps.BackendCommon.Plan",
+              "path": "packages/backend-common/src/Ps/BackendCommon/Plan.lean",
+              "bytes": 11531,
+              "sha256": "761f61f3c26f166057ae344959041ea473eeb4037dba791289fceb341ce316dc"
+            },
+            {
+              "module": "Ps.Compiler.Service",
+              "path": "packages/compiler/src/Ps/Compiler/Service.lean",
+              "bytes": 20209,
+              "sha256": "312b4cadda0599aca13ca6aa88903ceb74076dd0a30e4642bf135cdb9e3ddd3c"
+            },
+            {
+              "module": "Ps.BackendPython.Runtime",
+              "path": "packages/backend-python/src/Ps/BackendPython/Runtime.lean",
+              "bytes": 7665,
+              "sha256": "d73a8b451131d9d1b6428f1d1bb280d9fec5dc9c51586a05dc6bbc1db07288da"
+            },
+            {
+              "module": "Ps.BackendCommon.StateExcept",
+              "path": "packages/backend-common/src/Ps/BackendCommon/StateExcept.lean",
+              "bytes": 1624,
+              "sha256": "b2029de37886606cca2fcc81f5aae69821dace6d42378d79dd752d3008d621ff"
+            },
+            {
+              "module": "Ps.BackendCommon.Source",
+              "path": "packages/backend-common/src/Ps/BackendCommon/Source.lean",
+              "bytes": 4760,
+              "sha256": "1baed2d716c85b7d38cb3fcb31906614cd7db1baec65352aa5facfe469f367bc"
+            },
+            {
+              "module": "Ps.BackendCommon.DirectCalls",
+              "path": "packages/backend-common/src/Ps/BackendCommon/DirectCalls.lean",
+              "bytes": 6502,
+              "sha256": "96300a74f023661a4d4c18fdd593b164dd76af890c57af97cd57cf5159c6d8da"
+            },
+            {
+              "module": "Ps.BackendPython.Portable",
+              "path": "packages/backend-python/src/Ps/BackendPython/Portable.lean",
+              "bytes": 47185,
+              "sha256": "067acf13251417cc052fe5b94198d43711162ae98da0811c4bb2024600057f05"
+            },
+            {
+              "module": "Ps.BackendPython.CompilerService",
+              "path": "packages/backend-python/src/Ps/BackendPython/CompilerService.lean",
+              "bytes": 796,
+              "sha256": "507321474207491d2838b6be4b55ea84d0738e3812ba946ecc13a9ce4b085836"
+            }
+          ],
+          "tools": [
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_independent_checker",
+              "sha256": "2cc6f346a2e72ef325d0db36b2a51b58ad5cb08a1186ca7e6cf131d7f35ec0e6"
+            },
+            {
+              "file": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "sha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-target-qualification.mjs",
+              "sha256": "989e2960dd5d1aa7af93b5df4fb87c0ed9aa0bffad8483b9a4cb2f9bfee8d479"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-target-runner.mjs",
+              "sha256": "06a7f75d05d728d3464ef8336d6280b9c7f56a5efcc1cab9d0677c96c49c39ed"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/selfhost-qualification-profiles.mjs",
+              "sha256": "fc82c374cd0bcbad8cc0a69ad41da120b01abecac42091b851b06ccb98ede6a9"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/generated-target-corpus.mjs",
+              "sha256": "c76a18b8c9c3ada8f2b947c7c6298f59b94b0d8670aa16e366c3303f4afb0d8d"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-target-tools.mjs",
+              "sha256": "fdbdaa290d104df75e0a51b3a76948a36fb87729a7ace2592abbef78ca9a8f1c"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/compiler-host-protocol.mjs",
+              "sha256": "def328a4a74c51ce71ae7365b2573ece27964da8f78ef2391310e4f97f1c962f"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/compiler-source-inputs.mjs",
+              "sha256": "8f4741289718d274c7e969e6a47ca6a1303b99918644f0681b4c02db7681b816"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-target-profiles.mjs",
+              "sha256": "de5cf46b0ee608a3c6df5cdc31f2f66a3e469cd6c1695354f28796877d1ba61f"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-wasm-transport.mjs",
+              "sha256": "c1c870ff75140ad4e74427dc94f7d46de9230502d1f737033f28914391376c06"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-python-transport.py",
+              "sha256": "8c56de21ab5850b30f78edceb5f20225aee7725539fcd7425f63f70f3f2b4237"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/host-tools/generated-php-transport.php",
+              "sha256": "45c4525af5a9cfd26bc1678a45be8a4183fb84c14e83a99a68baf5a6c20c233a"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/bounded-process.py",
+              "sha256": "bd540fd5f84398492c8dbe1ba69d5a2150f243d46aaa06247d5e179fe82e09c2"
+            },
+            {
+              "file": "/home/runner/work/pskernel/pskernel/psc1/scripts/compiler-closure-contract.mjs",
+              "sha256": "2a2c1244ab18a85777feef29bfc8802939c21db966c7fe95246939524fe5ad8d"
+            },
+            {
+              "file": "/opt/hostedtoolcache/Python/3.14.8/x64/bin/python3.14",
+              "sha256": "a5230d8adbd26c2185d77fb003597c4ee9c44c2369fc179122ff7c3a3a58ae59",
+              "role": "python-interpreter"
+            }
+          ],
+          "events": [
+            {
+              "role": "stage0-seed",
+              "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_target_service_seed",
+              "args": [
+                "python",
+                "/home/runner/work/pskernel/pskernel/psc1/dist/generated-python-compiler/G1-bootstrap.request.json",
+                "/home/runner/work/pskernel/pskernel/psc1/dist/generated-python-compiler/G1-bootstrap.candidate.json"
+              ],
+              "status": 0,
+              "signal": null,
+              "elapsedMs": 28123,
+              "maxRssKiB": 336984,
+              "peakTreeRssKiB": 336984,
+              "error": null
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-lean-modules",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "c0a0920a43fb71cdf2f006813d3ebc0c50d091d156f62424446e3c328cb65ff3",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625640,
+              "peakTreeRssKiB": 663052,
+              "sampledCpuSeconds": 2.96,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2944,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625640
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-ps-integer-unicode",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "47e31bdc66d4380ed3b3939293d4aa0045c46c02d0baf68a5da47717956669a4",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 627676,
+              "peakTreeRssKiB": 693112,
+              "sampledCpuSeconds": 2.94,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2907,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 627676
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-ps-list-literal",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "9b1466c350a2a2af47d9db665b4341bef46106952f28285f932719bc5448484e",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625592,
+              "peakTreeRssKiB": 665548,
+              "sampledCpuSeconds": 3.04,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2991,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625592
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-lean-handler-pattern",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "45175f688dd4b323951f678643a8eb75073b6bd9ab866a4b660c636c0d79df35",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625728,
+              "peakTreeRssKiB": 686896,
+              "sampledCpuSeconds": 3.27,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 3253,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625728
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-lean-ordinary-loop",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "d60cf7444c33338c97cb0cebc856ab89b9e8626c5394ad3251ad8f332e340a29",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625700,
+              "peakTreeRssKiB": 690156,
+              "sampledCpuSeconds": 3.48,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 3460,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625700
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-malformed-list",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "6a46dc557e813d10ba048d24f1a23c9274523a99bf73fd69ffce2b160246346c",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625832,
+              "peakTreeRssKiB": 691128,
+              "sampledCpuSeconds": 2.6,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2543,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625832
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-wrong-body",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "0267a6213fdb56705b08d94b13da7e6a768d8ec8ab25df7979aa56e278a78df9",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625812,
+              "peakTreeRssKiB": 665684,
+              "sampledCpuSeconds": 2.5,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2523,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625812
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-missing-import",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "e66945b488063298034f3eaf3b2fcf08dd11f1b708e6e0d17780dc0253e59ecb",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625700,
+              "peakTreeRssKiB": 691328,
+              "sampledCpuSeconds": 2.6,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2547,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625700
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-checked-partial",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "4d8600058dcb70f06636672a29cdc5ae3203d63ee2fb67ab23c2ed0dfd830573",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625768,
+              "peakTreeRssKiB": 688636,
+              "sampledCpuSeconds": 2.67,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2611,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625768
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G1-verified",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "2c65cd68e4e4b35e9d8cc5c5656e9724233677da68fcfdffd1d0262843035aea",
+              "timeoutMs": 240000,
+              "timeoutPolicy": "standard-240s",
+              "maxRssKiB": 625812,
+              "peakTreeRssKiB": 690852,
+              "sampledCpuSeconds": 2.48,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 2514,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 625812
+            },
+            {
+              "role": "generated-compiler",
+              "target": "python",
+              "id": "G2-self",
+              "serviceSha256": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "requestSha256": "065657d720858113c1d7219cd5d575420ba36a0ca0b4b7d78a1c7c9760ed6af5",
+              "timeoutMs": 3600000,
+              "timeoutPolicy": "g2g3-correctness-3600s",
+              "maxRssKiB": 67688,
+              "peakTreeRssKiB": 781180,
+              "sampledCpuSeconds": 3837.66,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 3600060,
+              "status": null,
+              "signal": "SIGKILL",
+              "error": "process tree exceeded hard deadline"
+            }
+          ],
+          "attempts": [
+            {
+              "generation": 2,
+              "producer": "3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd",
+              "startedAt": "2026-10-24T10:24:34.811Z",
+              "status": "failed",
+              "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"python\",\"id\":\"G2-self\",\"serviceSha256\":\"3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd\",\"requestSha256\":\"065657d720858113c1d7219cd5d575420ba36a0ca0b4b7d78a1c7c9760ed6af5\",\"timeoutMs\":3600000,\"timeoutPolicy\":\"g2g3-correctness-3600s\",\"maxRssKiB\":67688,\"peakTreeRssKiB\":781180,\"sampledCpuSeconds\":3837.66,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":3600060,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n522.03, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2582352, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2582.06, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2642356, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2642.05, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2702380, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2702.07, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2762405, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2762.09, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2822462, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2822.14, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2882539, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2882.22, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2942565, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2942.24, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3002593, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3002.25, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3062594, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3062.24, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3122688, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3122.34, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3182715, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3182.36, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3242753, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3242.39, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3302805, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3302.44, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3362898, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3362.52, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3422913, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3422.53, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3482987, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3482.6, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3543047, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3542.65, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\n",
+              "completedAt": "2026-10-24T11:24:35.666Z"
+            }
+          ],
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "9313bf6be070fb447d463afb6bf72e3932ba9ebdb24c070783d74effbd514008",
+              "sourceSha256": "6170b904c3da1c717689e10f70eb5e99899572776f011b60b21119bec95c00ab",
+              "admissionsSha256": "404c61a8c82f79256648b5188cdff07f523e566eb874dff9ee09cd02765dedff",
+              "originalIrSha256": "44a67a054ee9775a9283280e3772412059ed995b385b1ac08b1951fc8e0c0601",
+              "specializedIrSha256": "22a0be3e7d79820ca45b78990ff566b7987fb6740e9b92e0fa08decedd91af06",
+              "logicalAdmission": "accepted",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "observations": [
+                {
+                  "id": "lean-modules",
+                  "sourceClosureDigest": "d91254b72ec79ad17b12ac02e47974f13e4ac9d88e6f50360aabfa0a7d53e721",
+                  "sourceSha256": "c6ca3589ad392052536b42d75317047353b0dc84c2c436006a131b3a9589d153",
+                  "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+                  "originalIrSha256": "2091e6d53ef774abf0d8079eb1d0a3c103fa71c2c21a9118da215305b3f0cb32",
+                  "specializedIrSha256": "0063a063676ab946e8512ba7f930842e64e70fa94a102f62959f892b8d412292",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "answer"
+                  ],
+                  "observation": {
+                    "answer": "42",
+                    "exports": [
+                      "answer"
+                    ]
+                  }
+                },
+                {
+                  "id": "ps-integer-unicode",
+                  "sourceClosureDigest": "f470e37c5106f4e234081214923402f6a2e82fc0475f307cc1c7ccc66d8c78f3",
+                  "sourceSha256": "e33716a2e14a827607900f76037cd3b61eaf62ef531eabbb26702857638fa098",
+                  "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+                  "originalIrSha256": "84840e7f4044261f34acfd46fdbd1d811dbefe7ef24af6525a1e031d2576e737",
+                  "specializedIrSha256": "3fe93b7666b548e3084c7c61ec24cc95b5f37e605f789dc482604f77ead69bbc",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "huge",
+                    "text"
+                  ],
+                  "observation": {
+                    "huge": "-9007199254740993123456789",
+                    "text": "λ🙂"
+                  }
+                },
+                {
+                  "id": "ps-list-literal",
+                  "sourceClosureDigest": "990ff8089cfb7a59868ba553ca480ad8f5cb0d52ae240bb09589cdbb80a686f5",
+                  "sourceSha256": "57b547a9d6396014ea2bc5efaf0b63876a6cf62a66fb750719b5cb09b34b48e3",
+                  "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+                  "originalIrSha256": "ee47e989dd251b44bb52a785ba80f0a3e56817cd9f6cc774802661227d59967e",
+                  "specializedIrSha256": "1e25559ef8984659a4e3cf5879fb8b84cb6f71e7901a05a1155d9b996769d7c8",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "answer"
+                  ],
+                  "observation": {
+                    "empty": "0",
+                    "first": "7"
+                  }
+                },
+                {
+                  "id": "lean-handler-pattern",
+                  "sourceClosureDigest": "438be06e48d3df4602ce227da6da664b0065bd3c33fcf23b264ac5550b08297e",
+                  "sourceSha256": "b1fd068daf3e6eabcab2aa6659e235a1c97a345503bc43dc6e480459281c7ee6",
+                  "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+                  "originalIrSha256": "4532b90dfe27f82a21db957553b5137bdd2b2baad79075f07fa555732730b852",
+                  "specializedIrSha256": "c534af59337f556207c8f6ac15fa3a769a832f6c15749881bac5d36d142ecd12",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "observe"
+                  ],
+                  "observation": {
+                    "normal": "3",
+                    "caught": "8"
+                  }
+                },
+                {
+                  "id": "lean-ordinary-loop",
+                  "sourceClosureDigest": "4c4044a6d864b40eca4dea995e3534a9b55ee319515f7b58aaca7a781cbe8ee6",
+                  "sourceSha256": "678f73f4c064b623108df69e2988f91bc9392924110029c9727800a37f97d28d",
+                  "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+                  "originalIrSha256": "10f63beb16f8b618119fa0873d9103f92f4f65d5cacb43b33d1005576afde009",
+                  "specializedIrSha256": "cf99a791acf40195ce3cae0550d6c3575213a5e84cf416671a513f8483ddefaf",
+                  "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                  "logicalAdmission": "accepted",
+                  "publicNames": [
+                    "answer"
+                  ],
+                  "observation": {
+                    "zero": "0",
+                    "five": "5"
+                  }
+                },
+                {
+                  "id": "malformed-list",
+                  "refused": true,
+                  "phase": "parse",
+                  "code": "source-refused"
+                },
+                {
+                  "id": "wrong-body",
+                  "refused": true,
+                  "phase": "elaboration",
+                  "code": "source-refused"
+                },
+                {
+                  "id": "missing-import",
+                  "refused": true,
+                  "phase": "capture",
+                  "code": "import-order-or-missing"
+                },
+                {
+                  "id": "checked-partial",
+                  "refused": true,
+                  "phase": "preparation",
+                  "code": "checked-preparation-refused"
+                },
+                {
+                  "id": "verified",
+                  "refused": true,
+                  "phase": "wire",
+                  "code": "assurance-unavailable"
+                }
+              ]
+            }
+          ],
+          "fixedPoint": "not-run",
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"python\",\"id\":\"G2-self\",\"serviceSha256\":\"3672dbc726f84a92a8fbc0f15b8d64b77dd2bf7e1d29a653a21aba333436d5bd\",\"requestSha256\":\"065657d720858113c1d7219cd5d575420ba36a0ca0b4b7d78a1c7c9760ed6af5\",\"timeoutMs\":3600000,\"timeoutPolicy\":\"g2g3-correctness-3600s\",\"maxRssKiB\":67688,\"peakTreeRssKiB\":781180,\"sampledCpuSeconds\":3837.66,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":3600060,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n522.03, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2582352, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2582.06, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2642356, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2642.05, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2702380, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2702.07, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2762405, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2762.09, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2822462, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2822.14, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2882539, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2882.22, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 2942565, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 2942.24, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3002593, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3002.25, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3062594, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3062.24, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3122688, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3122.34, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3182715, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3182.36, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3242753, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3242.39, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3302805, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3302.44, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3362898, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3362.52, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3422913, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3422.53, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3482987, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3482.6, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-3600s\", \"supervisorPid\": 5724, \"childPid\": 5725, \"elapsedMs\": 3543047, \"timeoutMs\": 3600000, \"sampledCpuSeconds\": 3542.65, \"currentTreeRssKiB\": 537500, \"peakTreeRssKiB\": 708964, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\n",
+          "completedAt": "2026-10-24T11:24:35.666Z",
+          "candidates": [
+            {
+              "file": "G1-bootstrap.candidate.json",
+              "bytes": 52749055,
+              "sha256": "2972bcf61909f06a4252683574fb7b6616aaf6f3d75053a95cd256679b6e7a2c",
+              "status": "candidate",
+              "requestId": "G1-bootstrap",
+              "sourceClosureDigest": "9313bf6be070fb447d463afb6bf72e3932ba9ebdb24c070783d74effbd514008",
+              "sourceSha256": "6170b904c3da1c717689e10f70eb5e99899572776f011b60b21119bec95c00ab",
+              "originalIrSha256": "44a67a054ee9775a9283280e3772412059ed995b385b1ac08b1951fc8e0c0601",
+              "specializedIrSha256": "22a0be3e7d79820ca45b78990ff566b7987fb6740e9b92e0fa08decedd91af06",
+              "admission": "not-run"
+            }
+          ],
+          "heartbeats": [
+            {
+              "file": "G2-self-process/resource-heartbeats.jsonl",
+              "count": 60,
+              "first": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5716,
+                "childPid": 5717,
+                "elapsedMs": 8,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 0,
+                "currentTreeRssKiB": 28968,
+                "peakTreeRssKiB": 28968,
+                "liveProcesses": 1,
+                "stdoutBytes": 0,
+                "stderrBytes": 0
+              },
+              "last": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5716,
+                "childPid": 5717,
+                "elapsedMs": 3543077,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 3776.72,
+                "currentTreeRssKiB": 610228,
+                "peakTreeRssKiB": 781180,
+                "liveProcesses": 4,
+                "stdoutBytes": 0,
+                "stderrBytes": 20362
+              }
+            },
+            {
+              "file": "resource-heartbeats.jsonl",
+              "count": 60,
+              "first": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5724,
+                "childPid": 5725,
+                "elapsedMs": 7,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 0,
+                "currentTreeRssKiB": 1464,
+                "peakTreeRssKiB": 1464,
+                "liveProcesses": 1,
+                "stdoutBytes": 0,
+                "stderrBytes": 0
+              },
+              "last": {
+                "kind": "resource-heartbeat-not-semantic-progress",
+                "timeoutPolicy": "g2g3-correctness-3600s",
+                "supervisorPid": 5724,
+                "childPid": 5725,
+                "elapsedMs": 3543047,
+                "timeoutMs": 3600000,
+                "sampledCpuSeconds": 3542.65,
+                "currentTreeRssKiB": 537500,
+                "peakTreeRssKiB": 708964,
+                "liveProcesses": 2,
+                "stdoutBytes": 0,
+                "stderrBytes": 0
+              }
+            }
+          ]
+        }
+      }
     }
+  },
+  "profileFullRegression": {
+    "runId": 40083940157,
+    "reviewHead": "451aef056de343b8423a9a2e544d2c3d0d6b1fb4",
+    "testedMerge": "003a85cef05cf894771b67b2dbc648e681e3ca59",
+    "identicalGitTree": "854147ae65853c0c26612f0c48424c9083e33a46",
+    "linuxJob": 120845118090,
+    "gateJob": 120850001657,
+    "status": "success",
+    "qualifiedCriteria": 37,
+    "blockedCriteria": 0,
+    "releaseReady": true,
+    "targetExecutionBundles": 14,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "scriptingRegressionGroups": 28,
+    "scriptingArtifactBundles": 24,
+    "architectureRegressionGroups": 11,
+    "artifactId": 12556184945,
+    "artifactDigest": "sha256:da19bedfa3a895b406eb344d3f840652a15fed672173323fe9be9a21b24f02b7",
+    "scope": "current supervision/profile and unchanged compiler source; seven backend regressions, not Python/PHP G2/G3 qualification"
+  },
+  "performanceRetry": {
+    "python": {
+      "commit": "b56da50567ac4051b6bea311c1b960ced1c97869",
+      "status": "implemented-awaiting-CI",
+      "mechanism": "Two hottest immutable UTF8 identity entries return without enumerate/promotion/allocation;8 entries/32MiB unchanged",
+      "guards": "20000 alternating identity hits preserve exact snapshot; existing234895 helper/public/error/eviction/oversize/concurrency comparisons and exact cache-block allowlist retained"
+    },
+    "php": {
+      "commit": "13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d",
+      "status": "implemented-awaiting-CI",
+      "mechanisms": [
+        "canonical checked node slots use externally readonly public private(set) fields",
+        "known2layer nonzero pure globals bypass yield at scheduled call sites after identical callee/argument snapshots"
+      ],
+      "guards": [
+        "same emitter retains indexed-node access flag; original wrapper arities/default native legacy policy preserved",
+        "token comparison restores only canonical slots; every other token/runtime prefix exact",
+        "frozen old node helper allows only five property visibility declarations; offsets/readonly/shared/weak/cycle/2M tests",
+        "static-call token checks preserve saved callee, arguments/errors, dynamic aliases/shadows; existing200k recursion retained"
+      ],
+      "resourceChanges": "none"
+    }
+  },
+  "previousCurrentSourceGate": {
+    "runId": 40079503171,
+    "jobId": 120829903883,
+    "status": "success",
+    "modulesPerTarget": 87,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "retainedComparisons": 43,
+    "deepTailSteps": 2000000,
+    "deepEscapingClosureFallback": 200000,
+    "typedIoOrderAndFirstFailure": true,
+    "parallelArgumentSwap": true,
+    "lexicalShadowRefusal": true,
+    "recursionLimit": "unchanged",
+    "artifacts": [
+      {
+        "id": 12553794512,
+        "digest": "sha256:d333a53cc5f2b22f0ab2f3d13b695fff49f602ec076abb4d2aa10d2b42690fca"
+      }
+    ],
+    "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
   }
 }

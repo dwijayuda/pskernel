@@ -179,6 +179,7 @@ structure Context where
   flatConstructors : Bool
   inductives : List PsVerifiedIrInductive
   directNames : PsStringSet
+  directSlots : Bool
 
 structure EmitState where
   linesRev : List String
@@ -189,11 +190,11 @@ structure EmitState where
 def Emit (Value : Type) : Type := PsBackendStateExcept EmitState String Value
 
 def withLocals (context : Context) (locals : List (Prod String String)) : Context :=
-  Context.mk context.globals context.valueNames locals context.helpers context.scheduled context.preciseCaptures context.flatConstructors context.inductives context.directNames
+  Context.mk context.globals context.valueNames locals context.helpers context.scheduled context.preciseCaptures context.flatConstructors context.inductives context.directNames context.directSlots
 
 def withScheduling (context : Context) (scheduled : Bool) : Context :=
   Context.mk context.globals context.valueNames context.locals context.helpers scheduled
-    context.preciseCaptures context.flatConstructors context.inductives context.directNames
+    context.preciseCaptures context.flatConstructors context.inductives context.directNames context.directSlots
 
 def padding (count : Nat) (builder : PsTextBuilder) : String :=
   match count with
@@ -308,7 +309,7 @@ def captureForWithFuel (fuel : Nat) (context : Context)
     | Except.error _ => capture context
     | Except.ok names =>
         capture (Context.mk (selectedGlobalsAcc names context.globals List.nil)
-          context.valueNames context.locals context.helpers context.scheduled context.preciseCaptures context.flatConstructors context.inductives context.directNames)
+          context.valueNames context.locals context.helpers context.scheduled context.preciseCaptures context.flatConstructors context.inductives context.directNames context.directSlots)
 
 def captureFor (context : Context) (parameters : List PsVerifiedIrParameter)
     (body : PsVerifiedIrExpr) : String :=
@@ -664,6 +665,13 @@ def constructorFields (context : Context) (owner constructorName : String) : Exc
     | Option.some layout => Except.ok layout
   Except.ok (psListMap (fun (field : PsVerifiedIrConstructorField) => field.name) layout.fields)
 
+-- Canonical logical flat slots; the strict IR owner/constructor layout supplies the index.
+def flatFieldAccess (index : Nat) : String :=
+  if Nat.beq index 0 then "->tag"
+  else if Nat.beq index 1 then "->first"
+  else if Nat.beq index 2 then "->second"
+  else cat ["->rest[", decimal (Nat.sub index 3), "]"]
+
 def fieldIndex (field : String) (fields : List String) (index : Nat) : Except String Nat :=
   match fields with
   | List.nil => Except.error "PSC1_PHP_INTERNAL_CONSTRUCTOR_FIELD"
@@ -683,7 +691,8 @@ def emitBindings (context : Context) (owner constructorName target : String) (bi
         let access <- if context.flatConstructors then do
           let fields <- constructorFields context owner constructorName
           let index <- fieldIndex binding.field fields 1
-          Except.ok (cat ["[", decimal index, "]"])
+          if context.directSlots then Except.ok (flatFieldAccess index)
+          else Except.ok (cat ["[", decimal index, "]"])
         else Except.ok (cat ["[1][", quote binding.field, "]"])
         let _psc_step_41 <- line (cat [name, " = ", target, access, ";"]) state
         let state := _psc_step_41.snd
@@ -709,7 +718,7 @@ def emitAlternatives
           line "}" state
     | List.cons alternative rest => do
         let _psc_step_46 <- line (cat [if first then "if (" else "} elseif (",
-          target, "[0] === ", quote alternative.fst, ") {"]) state
+          target, (if context.flatConstructors && context.directSlots then "->tag" else "[0]"), " === ", quote alternative.fst, ") {"]) state
         let state := _psc_step_46.snd
         let _psc_step_47 <- indent true state
         let state := _psc_step_47.snd
@@ -804,7 +813,12 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
             let _psc_step_54 <- psBackendSourceMapState emit arguments state
             let printed := _psc_step_54.fst
             let state := _psc_step_54.snd
-            bindValue (invoke context target printed) state
+            let callContext : Context :=
+              if psBackendDirectGlobalCall context.directNames
+                  (psListMap (fun (entry : Prod String String) => entry.fst) context.locals) fn then
+                withScheduling context false
+              else context
+            bindValue (invoke callContext target printed) state
         | PsVerifiedIrExpr.letE name type value body => do
             let _ <- typeText 4096 type
             let _psc_step_55 <- emit value state
@@ -1200,8 +1214,8 @@ def withoutNodeRequirements (requirements : List String) : List String :=
 
 end PsPhp
 
-def psPhpEmitModuleWithIoAndPoliciesAndDirectCalls (validated : PsValidatedIrModule) (publicNames : List String)
-    (ioAbi preciseCaptures flatConstructors directCalls : Bool) : Except String PsPhpPortableModule := do
+def psPhpEmitModuleWithIoAndOptimizations (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi preciseCaptures flatConstructors directCalls directSlots : Bool) : Except String PsPhpPortableModule := do
   match psStrictValidateModule validated.raw with
   | Except.error _ => Except.error "PSC1_PHP_IR_VALIDATION_FAILED"
   | Except.ok _ => Except.ok Unit.unit
@@ -1229,6 +1243,7 @@ def psPhpEmitModuleWithIoAndPoliciesAndDirectCalls (validated : PsValidatedIrMod
     PsPhp.Context.mk globals valueNames List.nil (psPhpRuntimeVariables requirements)
       (psBackendNameSeen "calls" requirements) preciseCaptures flatConstructors module.inductives
       (if flatConstructors && directCalls then psBackendDirectCallNames module.declarations else PsStringSet.empty)
+      directSlots
   let sourcePrefix : String := PsPhp.cat ["<?php\n",
     "// Generated by ProofScript PSC1 DirectPHP. Public API: return value of require.\n",
     "declare(strict_types=1);\n\nreturn (static function (): array {\n", runtimeSource]
@@ -1242,6 +1257,11 @@ def psPhpEmitModuleWithIoAndPoliciesAndDirectCalls (validated : PsValidatedIrMod
   Except.ok (PsPhpPortableModule.mk
     (PsPhp.cat [sourcePrefix, psTextJoin "\n" (psListReverse state.linesRev), "\n"])
     composer runtimeSource psPhpRuntimeVersion requirements globals positions)
+
+-- Retained indexed-node access remains a policy of this same emitter.
+def psPhpEmitModuleWithIoAndPoliciesAndDirectCalls (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi preciseCaptures flatConstructors directCalls : Bool) : Except String PsPhpPortableModule :=
+  psPhpEmitModuleWithIoAndOptimizations validated publicNames ioAbi preciseCaptures flatConstructors directCalls true
 
 -- Independent retained scheduler policy supports exact differential tests.
 def psPhpEmitModuleWithIoAndPolicies (validated : PsValidatedIrModule) (publicNames : List String)

@@ -1,0 +1,26 @@
+{
+  "testedSource": "f24d5a0bf70a1e27feeeb8041f7156da2efdb1a5",
+  "runId": 40086833892,
+  "attempt": 1,
+  "jobId": 120851395196,
+  "status": "focused-proof-repair-staged-uncompiled",
+  "theoremStatementsPreserved": 20,
+  "modelAndDefinitionsPreserved": 6,
+  "auditReportsPreserved": 15,
+  "changedProofs": [
+    "uniform_arguments_correspondence",
+    "uniform_occurrence_with_fuel_correspondence",
+    "uniform_occurrence_structural_adequacy",
+    "uniform_occurrences_correspondence",
+    "annotation_step",
+    "app_args_worker_depth"
+  ],
+  "beforeSha256": "67c4f8a5bfe970de35a5e8918ff7880bb55b9013ff25bcc5586224a48ac8e03c",
+  "afterSha256": "461d938b691f904ed4c48adff9254d8f13b859e7bca88129f5b9fad238017498",
+  "afterBytes": 28689,
+  "productionChanges": false,
+  "testMatrixChanges": false,
+  "localProjectExecution": false,
+  "forbiddenTrustTokens": [],
+  "actualDiagnosticCount": 35
+}

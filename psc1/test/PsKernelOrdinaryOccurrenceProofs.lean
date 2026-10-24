@@ -160,6 +160,7 @@ theorem uniform_arguments_correspondence
         simp [psKernelExprV2OrdinaryUniformParamArgs, psKernelExprV2PagedRequire,
           lookup, node, List.map_cons, psKernelSimpleUniformParamArgsMatch,
           psKernelSimpleUniformParamArgsMatchWorker, shape, nodeExpr, ih restValid]
+      all_goals split <;> simp_all
 
 theorem declared_names_correspondence (target : PsKernelName) (values : List PsKernelName) :
     psKernelExprV2OrdinaryDeclaredNameMember target values = psKernelNameMember target values := by
@@ -226,19 +227,19 @@ theorem uniform_occurrence_with_fuel_correspondence
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
                   have argValid := children arg
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
-                  simp only [nodeExpr, node, ih fn fnValid, ih arg argValid]
+                  simp only [nodeExpr, node, ih fn fnValid, ih arg argValid] <;> rfl
               case lam name type body info =>
                   have typeValid := children type
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
                   have bodyValid := children body
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
-                  simp only [nodeExpr, node, ih type typeValid, ih body bodyValid]
+                  simp only [nodeExpr, node, ih type typeValid, ih body bodyValid] <;> rfl
               case forallE name type body info =>
                   have typeValid := children type
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
                   have bodyValid := children body
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
-                  simp only [nodeExpr, node, ih type typeValid, ih body bodyValid]
+                  simp only [nodeExpr, node, ih type typeValid, ih body bodyValid] <;> rfl
               case letE name type value body nondep =>
                   have typeValid := children type
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
@@ -247,7 +248,7 @@ theorem uniform_occurrence_with_fuel_correspondence
                   have bodyValid := children body
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
                   simp only [nodeExpr, node, ih type typeValid, ih value valueValid,
-                    ih body bodyValid]
+                    ih body bodyValid] <;> rfl
               case mdata tag body =>
                   have bodyValid := children body
                     (by simp [childIds, node, psKernelExprV2TransformChildren])
@@ -297,7 +298,10 @@ theorem uniform_occurrence_structural_adequacy
   case proj.succ.succ name index body ihBody first second =>
     have bodyEqual := ihBody first second firstBound secondBound offset
     simp only [psKernelSimpleCheckUniformOccurrenceWithFuel, bodyEqual]
-  all_goals rfl
+  all_goals
+    first
+    | omega
+    | rfl
 
 theorem uniform_occurrence_on_canonical_correspondence
     (arena : PsKernelExprV2PagedArena) (decode : Nat -> PsKernelExpr)
@@ -338,7 +342,7 @@ theorem uniform_occurrences_correspondence
       simp only [psKernelExprV2OrdinaryUniformOccurrences, List.map_cons,
         psKernelSimpleCheckUniformOccurrencesWorker,
         uniform_occurrence_on_canonical_correspondence
-          arena decode model first firstValid, ih restValid]
+          arena decode model first firstValid, ih restValid] <;> rfl
 
 /- The native proof target records exactly the next V1 annotation argument.
    It is not imported by production and never replaces the actual worker. -/
@@ -378,10 +382,12 @@ theorem annotation_step (fuel : Nat) (expr : PsKernelExpr) :
     | nil => rfl
     | cons first rest =>
         cases rest with
-        | nil => split <;> rfl
+        | nil =>
+            simp only [args] <;> (split <;> simp_all)
         | cons second tail =>
             cases tail with
-            | nil => split <;> rfl
+            | nil =>
+                simp only [args] <;> (split <;> simp_all)
             | cons third tail => rfl
 
 theorem app_args_worker_depth
@@ -401,10 +407,8 @@ theorem app_args_worker_depth
         exact Nat.lt_succ_of_le (Nat.le_max_right _ _)
       · exact Or.inl old
     · right
-      have upper := Nat.le_max_left
-        (psKernelExprV2LegacyDepth fn) (psKernelExprV2LegacyDepth arg)
       simp only [psKernelExprV2LegacyDepth]
-      omega
+      exact Nat.lt_trans smaller (Nat.lt_succ_of_le (Nat.le_max_left _ _))
   all_goals
     exact Or.inl (by simpa only [psKernelExprGetAppArgsWorker] using member)
 

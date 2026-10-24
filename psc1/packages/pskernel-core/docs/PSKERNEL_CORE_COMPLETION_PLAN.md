@@ -1,3 +1,43 @@
+## 2026-10-24 T05 state proofs pass; structural proof corrections remain untested
+
+Exact source `f24d5a0bf70a1e27feeeb8041f7156da2efdb1a5`, run
+[`40086833892`](https://github.com/dwijayuda/pskernel/actions/runs/40086833892),
+attempt 1, compiled production and **kernel-checked all 49 state/header
+equations**. Independent inspection matched every report to its source and
+permitted standard axioms. The workflow correctly ran both new proof modules
+and recorded `stateCount=0 stateLean=0 occurrenceCount=0 occurrenceLean=1`.
+The overall native gate failed; native runtime, retained audit and generated
+routes remained blocked.
+
+The occurrence module produced 35 diagnostics across six proof bodies: a
+Boolean guard, reflexive recursive/list match expressions, 24 impossible
+zero-fuel branches, annotation argument-list reduction and a maximum-depth
+inequality. This candidate repairs those proof bodies only. All 20 theorem
+statements, six model/helper definitions and 15 audited report names remain
+unchanged. No production implementation, regression, workflow gate, resource
+limit or model assumption changes. The repairs still require their own Actions
+run; the previously failing module and its nine reports depending on `sorryAx`
+are not counted as qualified proofs.
+
+The corrected archive is complete for its stated inventory: all 40 files were
+inspected and all 32 copied source files matched their exact Git blobs, including
+the previously omitted copied workflow. Evidence is in
+`docs/evidence/2026-10-24-t05-header-f24d-native-failure.json` and the independent
+`2026-10-24-t05-f24-state-native.json`; the focused repair preservation record is
+`2026-10-24-t05-f24d-occurrence-repair-static.json`.
+
+Follow one new source-bound push run. Require all 64 new plus 108 retained
+native reports, the official/native controls, strict bounded generation and
+1,884 cache assertions, then exactly 1,992 direct header assertions on each
+complete authentic route. Do not transfer the 49 passing reports from f24d to
+the next source or weaken the structural-model boundary. All five full work
+qualification triggers remain paused. T05/B/D remain OPEN and C remains FAIL;
+the recorded T01F/scoped A qualification is only at integrated 0d9, with its
+separate later cancellation observations preserved below. Future constructor
+and paged-model drafts remain separate, uncommitted and untested.
+
+---
+
 ## 2026-10-24 T05 first native run failed; proof-body and evidence corrections
 
 Exact source `4439fa78fe7d04acfdc4f9b28c719bb5458daeda`, run

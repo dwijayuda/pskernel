@@ -74,6 +74,24 @@ CONFIG = json.loads(pathlib.Path(sys.argv[1]).read_text())
 SHA = CONFIG["sourceSha"]
 RUN = CONFIG["runId"]
 ATTEMPT = CONFIG["runAttempt"]
+PROFILE = CONFIG.get("profile", "helpers")
+FIELDS = PROFILE in ("fields", "analysis", "loop")
+ANALYSIS = PROFILE in ("analysis", "loop")
+LOOP = PROFILE == "loop"
+SOURCE_INPUT_COUNT = 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
+NATIVE_PROOF_TOTAL = 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
+FIELDS_SECTIONS = {"harness":1,"fields":147,"recursive":105,"boundaries":8,"recursorGuard":7}
+ANALYSIS_SECTIONS = {"harness":1,"matrix":84,"protocol":8}
+LOOP_SECTIONS = {"harness":1,"matrix":56,"protocol":12}
+ANALYSIS_ORACLE_PATH = "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean"
+ANALYSIS_ORACLE_SHA256 = "16cce0a367dfa144a56770f76bcb0605d3a370b360175c4f26583387cf2a1723"
+ANALYSIS_ORACLE_GIT_BLOB = "cd3b659ad1e597b95a4ac7b69a1ebf126cab4a17"
+if FIELDS:
+    SCRIPT_NAMES.append("pskernel-ordinary-constructor-fields-smoke.mjs")
+if ANALYSIS:
+    SCRIPT_NAMES.append("pskernel-ordinary-constructor-analysis-smoke.mjs")
+if LOOP:
+    SCRIPT_NAMES.append("pskernel-ordinary-constructor-loop-smoke.mjs")
 BLOBS = {}
 REPORT = {
     "schema":"psc1-t05-artifact-audit-v1",
@@ -327,7 +345,7 @@ def source_inventory(e, expected_paths, frozen):
     same(inv.get("leanCommit"),LEAN,"source inventory Lean commit")
     records = inv["files"]
     same([r["path"] for r in records],expected_paths,"copied source path inventory")
-    same(len(records),43,"source input count")
+    same(len(records),SOURCE_INPUT_COUNT,"source input count")
     expected_members = {"sources/" + p for p in expected_paths}
     same(sorted(k for k in e.files if k.startswith("sources/")),
          sorted(expected_members),"copied-source artifact membership")
@@ -734,7 +752,10 @@ def route_audit(e, closure):
     for key,expected in measurement(e,"header.memory").items():
         same(header.get(key),expected,"header measurement " + key)
     top_logs = {k for k in e.files if "/" not in k and k.endswith(".log")}
-    e.log_digests(header["logs"],top_logs - {"constructor-params.log","constructor-result.log"})
+    later_logs = ({"constructor-fields.log"} if FIELDS else set()) | (
+        {"constructor-analysis.log"} if ANALYSIS else set()) | (
+        {"constructor-loop.log"} if LOOP else set())
+    e.log_digests(header["logs"],top_logs - {"constructor-params.log","constructor-result.log"} - later_logs)
     logged_json(e.terminal,"PSC1_T05_HEADER_ROUTE: PASS ",header)
     constructor = e.json("constructor-receipt.json")
     same(constructor.get("schema"),"psc1-t05-constructor-route-receipt-v1","constructor receipt schema")
@@ -781,7 +802,7 @@ def route_audit(e, closure):
                        result["harness"])
         for key,value in measurement(e,"constructor-" + name + ".memory").items():
             same(result.get(key),value,"constructor measurement " + name + "." + key)
-    e.log_digests(constructor["logs"],top_logs)
+    e.log_digests(constructor["logs"],top_logs - later_logs)
     logged_json(e.terminal,"PSC1_T05_CONSTRUCTOR_ROUTE: PASS ",constructor)
     controls = route_controls(e)
     strict = bounded_codegen(e)
@@ -793,6 +814,262 @@ def route_audit(e, closure):
             "resultMeasurement":measurement(e,"constructor-result.memory"),
             "allReceiptLogDigestsMatched":True,
             "allPrintedReceiptsMatched":True}
+
+
+def fields_native_audit(e):
+    r=e.json("fields-native-receipt.json")
+    inv=e.json("fields-native-inventory.json")
+    e.identity(r); e.identity(inv,job=False)
+    wanted={"schema":"psc1-t05-fields-native-receipt-v1","status":"pass",
+        "retainedProofs":230,"newProofs":47,"totalProofs":277,
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "nativeAssertions":268,"constructorHelpersOnly":True,"fieldsAndPositivity":True,
+        "fullAdmission":False,"publicRoutingChanged":False,"replayArenaModelBridgeEstablished":False}
+    for k,v in wanted.items(): same(r.get(k),v,"fields native receipt "+k)
+    specs=[("PsKernelOrdinaryRecursiveArgumentProofs",24,"recursive-argument-proofs.log"),
+           ("PsKernelOrdinaryConstructorFieldsProofs",23,"constructor-fields-proofs.log")]
+    audits=[]
+    for module,count,name in specs:
+        source=git_bytes("psc1/test/"+module+".lean"); raw=e.raw(name)
+        names=proof_reports(source,raw,module,count)
+        audits.append({"module":module,"proofs":count,"names":names,
+                       "source":digest(source),"log":digest(raw)})
+    same(r["proofs"],audits,"fields47 exact ordered reports")
+    same(e.text("fields-proof-status.log").splitlines(),[
+        "PSC1_T05_FIELDS_PROOF_STATUS module="+m+" count="+str(n)+" countStatus=0 leanStatus=0"
+        for m,n,_ in specs],"fields proof command statuses")
+    for path,key in [("constructor-native-receipt.json","retainedConstructorReceipt"),
+                     ("fields-native-inventory.json","nativeInventory"),
+                     ("constructor-fields-native.log","nativeLog")]:
+        e.check_digest(path,r[key])
+    wanted={"schema":"psc1-t05-fields-native-inventory-v1","assertions":268,
+        "sectionAssertions":FIELDS_SECTIONS,"fieldRows":21,"recursiveRows":15,
+        "fuelValues":6,"fullAdmission":False,"publicRoutingChanged":False}
+    for k,v in wanted.items(): same(inv.get(k),v,"fields native inventory "+k)
+    lines=e.text("constructor-fields-native.log").splitlines()
+    prefix="PSC1_CONSTRUCTOR_FIELDS_ASSERT "
+    labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+    require(len(labels)==len(set(labels))==268 and all(labels),"268 unique fields assertions")
+    same(inv["assertionLabels"],labels,"native fields labels")
+    same(inv["logSha256"],digest(e.raw("constructor-fields-native.log"))["sha256"],
+         "native fields inventory log digest")
+    previous=-1
+    for group,count in FIELDS_SECTIONS.items():
+        marker="PSC1_CONSTRUCTOR_FIELDS_SECTION "+group+"="+str(count)
+        require(lines.count(marker)==1,"Native fields section "+group)
+        end=lines.index(marker)
+        group_labels=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+        require(end>previous and len(group_labels)==count and
+                all(label.startswith(group+"/") for label in group_labels),"Ordered fields section "+group)
+        previous=end
+    for marker in [
+        "PSC1_ORDINARY_CONSTRUCTOR_FIELDS_NATIVE: PASS assertions=268 fieldRows=21 recursiveRows=15 fuelValues=6 fullAdmission=false",
+        "PSC1_ORDINARY_CONSTRUCTOR_FIELDS_NATIVE_SECTIONS: PASS harness=1 fields=147 recursive=105 boundaries=8 recursorGuard=7"]:
+        require(lines.count(marker)==1 and lines.index(marker)>previous,"Native fields final marker")
+    line_marker(e.terminal,"PSC1_T05_FIELDS_NATIVE_INVENTORY: PASS assertions=268 groups=5")
+    logged_json(e.terminal,"PSC1_T05_FIELDS_NATIVE_PROOFS: PASS ",r)
+    return {"newReports":47,"retainedReports":230,"totalReports":277,
+            "nativeFieldsAssertions":268,"sections":FIELDS_SECTIONS,
+            "receipt":digest(e.raw("fields-native-receipt.json"))}
+
+
+def fields_route_audit(e):
+    r=e.json("fields-receipt.json"); prov=e.json("provenance.json")
+    same(r.get("identity"),prov,"fields route provenance")
+    e.identity(r["identity"])
+    for k,v in {"schema":"psc1-t05-fields-route-receipt-v1","status":"pass",
+        "constructorHelpersOnly":True,"fieldsAndPositivity":True,"fullAdmission":False,
+        "publicRoutingChanged":False,"performanceQualified":False}.items():
+        same(r.get(k),v,"fields route receipt "+k)
+    e.check_digest("constructor-receipt.json",r["retainedConstructorReceipt"])
+    e.check_digest("constructor-fields.log",r["log"])
+    e.check_digest("detached/pskernel-ordinary-constructor-fields-smoke.mjs",r["harness"])
+    expected={"schema":"psc1-ordinary-constructor-fields-v1",
+        "kernel":"/home/runner/work/_temp/psc1-t05-"+e.route+"/detached/kernel.mjs",
+        "assertions":268,"sectionAssertions":FIELDS_SECTIONS,
+        "fieldRows":21,"recursiveRows":15,"fuelValues":6,
+        "positiveFields":16,"negativeFields":5,"positiveRecursive":10,"negativeRecursive":5,
+        "fullAdmission":False,"publicRoutingChanged":False}
+    log=e.text("constructor-fields.log")
+    line_marker(log,"PSC1_ORDINARY_CONSTRUCTOR_FIELDS_JS: PASS assertions=268 fullAdmission=false")
+    same([json.loads(line) for line in log.splitlines() if line.startswith("{")],
+         [expected],"executed fields268 exact matrix")
+    same(r["result"],expected,"fields receipt matrix")
+    timing=measurement(e,"constructor-fields.memory")
+    for k,v in timing.items(): same(r.get(k),v,"fields measurement "+k)
+    top_logs={k for k in e.files if "/" not in k and k.endswith(".log")}
+    later_logs = ({"constructor-analysis.log"} if ANALYSIS else set()) | (
+        {"constructor-loop.log"} if LOOP else set())
+    e.log_digests(r["logs"],top_logs-later_logs)
+    logged_json(e.terminal,"PSC1_T05_FIELDS_ROUTE: PASS ",r)
+    return {"fieldsAssertions":268,"sections":FIELDS_SECTIONS,"measurement":timing,
+            "receipt":digest(e.raw("fields-receipt.json")),
+            "allFieldsReceiptLogDigestsMatched":True}
+
+
+def analysis_native_audit(e):
+    r=e.json("analysis-native-receipt.json")
+    inv=e.json("analysis-native-inventory.json")
+    e.identity(r); e.identity(inv,job=False)
+    wanted={"schema":"psc1-t05-analysis-native-receipt-v1","status":"pass",
+        "retainedProofs":277,"newProofs":19,"totalProofs":296,
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "nativeAssertions":93,"constructorHelpersOnly":True,"singleConstructorAnalysis":True,
+        "fullAdmission":False,"publicRoutingChanged":False,"replayArenaModelBridgeEstablished":False}
+    for k,v in wanted.items(): same(r.get(k),v,"analysis native receipt "+k)
+    module="PsKernelOrdinaryConstructorAnalysisProofs"
+    source=git_bytes("psc1/test/"+module+".lean")
+    raw=e.raw("constructor-analysis-proofs.log")
+    names=proof_reports(source,raw,module,19)
+    same(r["proofs"],[{"module":module,"proofs":19,"names":names,
+         "source":digest(source),"log":digest(raw)}],"analysis19 exact ordered reports")
+    same(e.text("analysis-proof-status.log").splitlines(),[
+        "PSC1_T05_ANALYSIS_PROOF_STATUS module="+module+" count=19 countStatus=0 leanStatus=0"
+    ],"analysis proof command status")
+    for path,key in [("fields-native-receipt.json","retainedFieldsReceipt"),
+                     ("analysis-native-inventory.json","nativeInventory"),
+                     ("constructor-analysis-native.log","nativeLog")]:
+        e.check_digest(path,r[key])
+    wanted={"schema":"psc1-t05-analysis-native-inventory-v1","assertions":93,
+        "sectionAssertions":ANALYSIS_SECTIONS,"rows":12,"fuelValues":6,
+        "fullAdmission":False,"publicRoutingChanged":False}
+    for k,v in wanted.items(): same(inv.get(k),v,"analysis native inventory "+k)
+    lines=e.text("constructor-analysis-native.log").splitlines()
+    prefix="PSC1_CONSTRUCTOR_ANALYSIS_ASSERT "
+    labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+    require(len(labels)==len(set(labels))==93 and all(labels),"93 unique analysis assertions")
+    same(inv["assertionLabels"],labels,"native analysis labels")
+    same(inv["logSha256"],digest(e.raw("constructor-analysis-native.log"))["sha256"],
+         "native analysis inventory log digest")
+    previous=-1
+    for group,count in ANALYSIS_SECTIONS.items():
+        marker="PSC1_CONSTRUCTOR_ANALYSIS_SECTION "+group+"="+str(count)
+        require(lines.count(marker)==1,"Native analysis section "+group)
+        end=lines.index(marker)
+        group_labels=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+        require(end>previous and len(group_labels)==count and
+                all(label.startswith(group+"/") for label in group_labels),"Ordered analysis section "+group)
+        previous=end
+    marker="PSC1_ORDINARY_CONSTRUCTOR_ANALYSIS_NATIVE: PASS assertions=93 rows=12 fuelValues=6 fullAdmission=false"
+    require(lines.count(marker)==1 and lines.index(marker)>previous,"Native analysis final marker")
+    line_marker(e.terminal,"PSC1_T05_ANALYSIS_NATIVE_INVENTORY: PASS assertions=93 groups=3")
+    logged_json(e.terminal,"PSC1_T05_ANALYSIS_NATIVE_PROOFS: PASS ",r)
+    return {"newReports":19,"retainedReports":277,"totalReports":296,
+            "nativeAnalysisAssertions":93,"sections":ANALYSIS_SECTIONS,
+            "receipt":digest(e.raw("analysis-native-receipt.json"))}
+
+
+def analysis_route_audit(e):
+    r=e.json("analysis-receipt.json"); prov=e.json("provenance.json")
+    same(r.get("identity"),prov,"analysis route provenance")
+    e.identity(r["identity"])
+    for k,v in {"schema":"psc1-t05-analysis-route-receipt-v1","status":"pass",
+        "constructorHelpersOnly":True,"singleConstructorAnalysis":True,"fullAdmission":False,
+        "publicRoutingChanged":False,"performanceQualified":False}.items():
+        same(r.get(k),v,"analysis route receipt "+k)
+    e.check_digest("fields-receipt.json",r["retainedFieldsReceipt"])
+    e.check_digest("constructor-analysis.log",r["log"])
+    e.check_digest("detached/pskernel-ordinary-constructor-analysis-smoke.mjs",r["harness"])
+    expected={"schema":"psc1-ordinary-constructor-analysis-v1",
+        "kernel":"/home/runner/work/_temp/psc1-t05-"+e.route+"/detached/kernel.mjs",
+        "assertions":93,"sectionAssertions":ANALYSIS_SECTIONS,
+        "rows":12,"fuelValues":6,"positive":6,"negative":6,
+        "fullAdmission":False,"publicRoutingChanged":False}
+    log=e.text("constructor-analysis.log")
+    line_marker(log,"PSC1_ORDINARY_CONSTRUCTOR_ANALYSIS_JS: PASS assertions=93 fullAdmission=false")
+    same([json.loads(line) for line in log.splitlines() if line.startswith("{")],
+         [expected],"executed analysis93 exact matrix")
+    same(r["result"],expected,"analysis receipt matrix")
+    timing=measurement(e,"constructor-analysis.memory")
+    for k,v in timing.items(): same(r.get(k),v,"analysis measurement "+k)
+    top_logs={k for k in e.files if "/" not in k and k.endswith(".log")}
+    e.log_digests(r["logs"],top_logs-({"constructor-loop.log"} if LOOP else set()))
+    logged_json(e.terminal,"PSC1_T05_ANALYSIS_ROUTE: PASS ",r)
+    return {"analysisAssertions":93,"sections":ANALYSIS_SECTIONS,"measurement":timing,
+            "receipt":digest(e.raw("analysis-receipt.json")),
+            "allAnalysisReceiptLogDigestsMatched":True}
+
+
+def loop_native_audit(e):
+    r=e.json("loop-native-receipt.json")
+    inv=e.json("loop-native-inventory.json")
+    e.identity(r); e.identity(inv,job=False)
+    wanted={"schema":"psc1-t05-loop-native-receipt-v1","status":"pass",
+        "retainedProofs":296,"newProofs":14,"totalProofs":310,
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "nativeAssertions":69,"constructorHelpersOnly":True,"constructorLoopOnly":True,
+        "fullAdmission":False,"publicRoutingChanged":False,"replayArenaModelBridgeEstablished":False}
+    for k,v in wanted.items(): same(r.get(k),v,"loop native receipt "+k)
+    module="PsKernelExprV2OrdinaryConstructorLoopProofs"
+    source=git_bytes("psc1/test/"+module+".lean")
+    raw=e.raw("constructor-loop-proofs.log")
+    names=proof_reports(source,raw,module,14)
+    same(r["proofs"],[{"module":module,"proofs":14,"names":names,
+         "source":digest(source),"log":digest(raw)}],"loop14 exact ordered reports")
+    same(e.text("loop-proof-status.log").splitlines(),[
+        "PSC1_T05_LOOP_PROOF_STATUS module="+module+" count=14 countStatus=0 leanStatus=0"
+    ],"loop proof command status")
+    for path,key in [("analysis-native-receipt.json","retainedAnalysisReceipt"),
+                     ("loop-native-inventory.json","nativeInventory"),
+                     ("constructor-loop-native.log","nativeLog")]:
+        e.check_digest(path,r[key])
+    wanted={"schema":"psc1-t05-loop-native-inventory-v1","assertions":69,
+        "sectionAssertions":LOOP_SECTIONS,"rows":8,"fuelValues":6,
+        "fullAdmission":False,"publicRoutingChanged":False}
+    for k,v in wanted.items(): same(inv.get(k),v,"loop native inventory "+k)
+    lines=e.text("constructor-loop-native.log").splitlines()
+    prefix="PSC1_CONSTRUCTOR_LOOP_ASSERT "
+    labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+    require(len(labels)==len(set(labels))==69 and all(labels),"69 unique loop assertions")
+    same(inv["assertionLabels"],labels,"native loop labels")
+    same(inv["logSha256"],digest(e.raw("constructor-loop-native.log"))["sha256"],
+         "native loop inventory log digest")
+    previous=-1
+    for group,count in LOOP_SECTIONS.items():
+        marker="PSC1_CONSTRUCTOR_LOOP_SECTION "+group+"="+str(count)
+        require(lines.count(marker)==1,"Native loop section "+group)
+        end=lines.index(marker)
+        group_labels=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+        require(end>previous and len(group_labels)==count and
+                all(label.startswith(group+"/") for label in group_labels),"Ordered loop section "+group)
+        previous=end
+    marker="PSC1_ORDINARY_CONSTRUCTOR_LOOP_NATIVE: PASS assertions=69 rows=8 fuelValues=6 fullAdmission=false"
+    require(lines.count(marker)==1 and lines.index(marker)>previous,"Native loop final marker")
+    line_marker(e.terminal,"PSC1_T05_LOOP_NATIVE_INVENTORY: PASS assertions=69 groups=3")
+    logged_json(e.terminal,"PSC1_T05_LOOP_NATIVE_PROOFS: PASS ",r)
+    return {"newReports":14,"retainedReports":296,"totalReports":310,
+            "nativeLoopAssertions":69,"sections":LOOP_SECTIONS,
+            "receipt":digest(e.raw("loop-native-receipt.json"))}
+
+
+def loop_route_audit(e):
+    r=e.json("loop-receipt.json"); prov=e.json("provenance.json")
+    same(r.get("identity"),prov,"loop route provenance")
+    e.identity(r["identity"])
+    for k,v in {"schema":"psc1-t05-loop-route-receipt-v1","status":"pass",
+        "constructorHelpersOnly":True,"constructorLoopOnly":True,"fullAdmission":False,
+        "publicRoutingChanged":False,"performanceQualified":False}.items():
+        same(r.get(k),v,"loop route receipt "+k)
+    e.check_digest("analysis-receipt.json",r["retainedAnalysisReceipt"])
+    e.check_digest("constructor-loop.log",r["log"])
+    e.check_digest("detached/pskernel-ordinary-constructor-loop-smoke.mjs",r["harness"])
+    expected={"schema":"psc1-ordinary-constructor-loop-v1",
+        "kernel":"/home/runner/work/_temp/psc1-t05-"+e.route+"/detached/kernel.mjs",
+        "assertions":69,"sectionAssertions":LOOP_SECTIONS,
+        "rows":8,"fuelValues":6,"positive":5,"negative":3,
+        "fullAdmission":False,"publicRoutingChanged":False}
+    log=e.text("constructor-loop.log")
+    line_marker(log,"PSC1_ORDINARY_CONSTRUCTOR_LOOP_JS: PASS assertions=69 fullAdmission=false")
+    same([json.loads(line) for line in log.splitlines() if line.startswith("{")],
+         [expected],"executed loop69 exact matrix")
+    same(r["result"],expected,"loop receipt matrix")
+    timing=measurement(e,"constructor-loop.memory")
+    for k,v in timing.items(): same(r.get(k),v,"loop measurement "+k)
+    e.log_digests(r["logs"],{k for k in e.files if "/" not in k and k.endswith(".log")})
+    logged_json(e.terminal,"PSC1_T05_LOOP_ROUTE: PASS ",r)
+    return {"loopAssertions":69,"sections":LOOP_SECTIONS,"measurement":timing,
+            "receipt":digest(e.raw("loop-receipt.json")),
+            "allLoopReceiptLogDigestsMatched":True}
 
 
 def wait_for_cohort():
@@ -818,6 +1095,7 @@ def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
+    require(PROFILE in ("helpers","fields","analysis","loop"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
             "Exact numeric run and attempt required")
@@ -831,13 +1109,19 @@ def main():
     require(len(path_lists) == 2 and path_lists[0] == path_lists[1],
             "Native and route source inventory definitions agree")
     expected_paths = path_lists[0]
-    require(len(expected_paths) == 43 and len(set(expected_paths)) == 43,
-            "Expected exact43 source inputs")
+    require(len(expected_paths) == SOURCE_INPUT_COUNT and len(set(expected_paths)) == SOURCE_INPUT_COUNT,
+            "Expected exact configured source input count")
     frozen_lists = [ast.literal_eval(x) for x in
                     re.findall(r"^\s*frozen = (\{.*\})$",source_workflow,re.M)]
     require(len(frozen_lists) == 2 and frozen_lists[0] == frozen_lists[1],
             "Frozen-reference definitions agree")
     frozen = frozen_lists[0]
+    same(len(frozen),7 if ANALYSIS else 6,"frozen reference count")
+    if ANALYSIS:
+        require(ANALYSIS_ORACLE_PATH in expected_paths,"Analysis V1 oracle source inventory")
+        same(frozen.get(ANALYSIS_ORACLE_PATH),ANALYSIS_ORACLE_SHA256,"frozen analysis V1 oracle hash")
+        same(git_blob_sha(git_bytes(ANALYSIS_ORACLE_PATH)),ANALYSIS_ORACLE_GIT_BLOB,
+             "frozen analysis V1 oracle Git blob")
     closure = lean_closure()
     REPORT["actualLeanClosureCount"] = len(closure)
     REPORT["targetWorkflowSource"] = digest(git_bytes(WORKFLOW))
@@ -888,6 +1172,12 @@ def main():
             evidence = Evidence(files,route,terminal)
             result["sourceInventory"] = source_inventory(evidence,expected_paths,frozen)
             result["qualification"] = native_audit(evidence) if route == "native" else route_audit(evidence,closure)
+            if FIELDS:
+                result["fieldsQualification"] = fields_native_audit(evidence) if route == "native" else fields_route_audit(evidence)
+            if ANALYSIS:
+                result["analysisQualification"] = analysis_native_audit(evidence) if route == "native" else analysis_route_audit(evidence)
+            if LOOP:
+                result["loopQualification"] = loop_native_audit(evidence) if route == "native" else loop_route_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -904,9 +1194,15 @@ def main():
     REPORT["scope"] = {
         "constructorHelpersQualified":True,"fullT05AdmissionQualified":False,
         "projectB":"OPEN","projectC":"FAIL","projectD":"OPEN",
-        "nativeProofReports":230,
-        "nativeAssertions":{"params":284,"result":432},
-        "eachGeneratedRouteAssertions":{"header":1992,"cache":1884,"params":268,"result":432},
+        "nativeProofReports":NATIVE_PROOF_TOTAL,
+        "nativeAssertions":{"params":284,"result":432,
+            **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
+            **({"loop":69} if LOOP else {})},
+        "eachGeneratedRouteAssertions":{"header":1992,"cache":1884,"params":268,"result":432,
+            **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
+            **({"loop":69} if LOOP else {})},
+        "constructorFieldsQualified":FIELDS,"singleConstructorAnalysisQualified":ANALYSIS,
+        "constructorLoopQualified":LOOP,"profile":PROFILE,
     }
 
 
@@ -931,7 +1227,8 @@ if __name__ == "__main__":
             "routes":{r:{"status":v["status"],"artifactId":v.get("artifactId"),
                         "files":v.get("fileCount"),"error":v.get("error")}
                       for r,v in REPORT["routes"].items()},
-            "nativeReports":230 if REPORT["status"] == "pass" else None,
+            "nativeReports":NATIVE_PROOF_TOTAL if REPORT["status"] == "pass" else None,
+            "profile":PROFILE,
             "report":digest(payload.encode()),
             "errors":REPORT["errors"],
             "fullAdmission":False,"performanceQualified":False,

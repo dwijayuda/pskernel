@@ -34,7 +34,7 @@ theorem codec_admissions_loop_worker_eq (all declarations : List PsDeclaration)
   | cons declaration rest ih =>
       cases declaration <;>
         simp only [psEncodeCheckedAdmissionsLoopWorker,
-          PsCodecSpineReference.psEncodeCheckedAdmissionsLoop, ih]
+          PsCodecSpineReference.psEncodeCheckedAdmissionsLoop, ih] <;> rfl
 
 theorem codec_admissions_loop_eq (all declarations : List PsDeclaration) :
     psEncodeCheckedAdmissionsLoop all declarations =

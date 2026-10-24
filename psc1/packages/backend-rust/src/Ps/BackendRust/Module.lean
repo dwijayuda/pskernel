@@ -165,8 +165,8 @@ def psRustDropStatements (empty : String) (fields : List String) : String :=
   match fields with
   | List.nil => ""
   | List.cons field rest =>
-      psRustJoin "" ["__ps_internal_drop_shared(std::mem::replace(", field,
-        ", std::rc::Rc::new(Self::", psRustIdentifier empty, " {}))); ",
+      psRustJoin "" ["__ps_internal_drop_shared(::std::mem::replace(", field,
+        ", ::std::rc::Rc::new(Self::", psRustIdentifier empty, " {}))); ",
         psRustDropStatements empty rest]
 
 def psRustDropArms (value : PsVerifiedIrInductive) (empty : String)
@@ -192,13 +192,13 @@ def psRustEmitPrivateInductiveDrop (value : PsVerifiedIrInductive) : String :=
     match psRustDropEmptyConstructor value.constructors with
     | Option.none => ""
     | Option.some empty =>
-        psRustJoin "" ["\nimpl", psRustGenericNames value.typeParameters, " Drop for ",
+        psRustJoin "" ["\nimpl", psRustGenericNames value.typeParameters, " ::std::ops::Drop for ",
           psRustIdentifier value.name, psRustDropTypeArguments value.typeParameters,
           " { fn drop(&mut self) { match self { ",
           psRustJoin ", " (psRustDropArms value empty value.constructors), " } } }"]
 
 def psRustSharedDropRuntime : String :=
-  "fn __ps_internal_drop_shared<T: 'static>(value: std::rc::Rc<T>) {\n    if std::rc::Rc::strong_count(&value) != 1 { return; }\n    // Private generated immutable carriers only. Drain outside the RefCell borrow:\n    // nested final owners append work instead of extending the native call stack.\n    std::thread_local! {\n        static STATE: std::cell::RefCell<(bool, Vec<Box<dyn FnOnce()>>)> =\n            std::cell::RefCell::new((false, Vec::new()));\n    }\n    STATE.with(|state| {\n        let nested = {\n            let mut pending = state.borrow_mut();\n            pending.1.push(Box::new(move || drop(value)));\n            let nested = pending.0;\n            pending.0 = true;\n            nested\n        };\n        if nested { return; }\n        loop {\n            let next = { state.borrow_mut().1.pop() };\n            match next { Some(reclaim) => reclaim(), None => break }\n        }\n        state.borrow_mut().0 = false;\n    });\n}\n"
+  "fn __ps_internal_drop_shared<T: 'static>(value: ::std::rc::Rc<T>) {\n    if ::std::rc::Rc::strong_count(&value) != 1 { return; }\n    // Private generated immutable carriers only. Drain outside the RefCell borrow:\n    // nested final owners append work instead of extending the native call stack.\n    ::std::thread_local! {\n        static STATE: ::std::cell::RefCell<(bool, ::std::vec::Vec<::std::boxed::Box<dyn ::std::ops::FnOnce()>>)> =\n            ::std::cell::RefCell::new((false, ::std::vec::Vec::new()));\n    }\n    STATE.with(|state| {\n        let nested = {\n            let mut pending = state.borrow_mut();\n            pending.1.push(::std::boxed::Box::new(move || ::std::mem::drop(value)));\n            let nested = pending.0;\n            pending.0 = true;\n            nested\n        };\n        if nested { return; }\n        loop {\n            let next = { state.borrow_mut().1.pop() };\n            match next { ::std::option::Option::Some(reclaim) => reclaim(), ::std::option::Option::None => break }\n        }\n        state.borrow_mut().0 = false;\n    });\n}\n"
 
 def psRustPrivateDropRuntimeNeeded (publicTypes : List String)
     (inductives : List PsVerifiedIrInductive) : Bool :=

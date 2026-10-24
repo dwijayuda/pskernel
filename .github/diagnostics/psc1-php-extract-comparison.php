@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-$reports=glob('baseline/*/qualification.json');if(count($reports)!==1)throw new RuntimeException('REPORT_INVENTORY');
+$reports=[];foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator('baseline',FilesystemIterator::SKIP_DOTS)) as $entry){if($entry->isFile()&&$entry->getFilename()==='qualification.json')$reports[]=$entry->getPathname();}if(count($reports)!==1)throw new RuntimeException('REPORT_INVENTORY');
 $report=json_decode(file_get_contents($reports[0]),true,512,JSON_THROW_ON_ERROR);
 if($report['testedCommit']!=='75f04cfdcafc1fbeea08f66f595f40ff6b777d04')throw new RuntimeException('COMMIT');
 $module=dirname($reports[0]).'/G1-service/module.php';

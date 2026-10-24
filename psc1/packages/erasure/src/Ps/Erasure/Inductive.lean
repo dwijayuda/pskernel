@@ -191,8 +191,8 @@ def psFindConstructorDeclaration (declarations : List PsDeclaration) : PsName ->
   match declarations with
   | List.nil => fun (_target : PsName) => Option.none
   | List.cons declaration rest =>
-      let smaller : PsName -> Option PsConstructorInfo := psFindConstructorDeclaration rest;
       fun (target : PsName) =>
+        let smaller : PsName -> Option PsConstructorInfo := psFindConstructorDeclaration rest;
         match declaration with
         | PsDeclaration.constructorDecl info =>
             if psNameEq info.name target then Option.some info else smaller target
@@ -203,8 +203,8 @@ def psFindRecursorDeclaration (declarations : List PsDeclaration) : PsName -> Op
   match declarations with
   | List.nil => fun (_target : PsName) => Option.none
   | List.cons declaration rest =>
-      let smaller : PsName -> Option PsRecursorInfo := psFindRecursorDeclaration rest;
       fun (target : PsName) =>
+        let smaller : PsName -> Option PsRecursorInfo := psFindRecursorDeclaration rest;
         match declaration with
         | PsDeclaration.recursorDecl info =>
             if psNameEq info.name target then Option.some info else smaller target

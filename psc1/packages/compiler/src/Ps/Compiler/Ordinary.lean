@@ -258,52 +258,51 @@ def psOrdinaryAdd
         (psNameToString (psDeclarationName declaration)))
   | Option.some result => Except.ok result
 
+-- Ordered tail traversal: retain the same witness checks and incrementally
+-- extended environment, and accumulate only output lists in reverse order.
+def psOrdinaryExpandAcc (declarations : List PsDeclaration)
+    (environment : PsEnvironment) (logicalRev : List PsDeclaration)
+    (partialRev : List PsName) :
+    Except String (Prod (List PsDeclaration) (List PsName)) :=
+  match declarations with
+  | List.nil => Except.ok (Prod.mk (psListReverse logicalRev) (psListReverse partialRev))
+  | List.cons declaration rest =>
+    match declaration with
+    | PsDeclaration.axiomDecl _ _ _ => Except.error "PSC1_SOURCE_AXIOM_FORBIDDEN"
+    | PsDeclaration.opaqueDecl _ _ _ _ => Except.error "PSC1_SOURCE_OPAQUE_NOT_SELECTED"
+    | PsDeclaration.partialDecl name levels type body =>
+        match psWhnf environment psMetaEmpty psLocalEmpty type with
+        | PsExpr.forallE _ _ _ _ =>
+            match psOrdinaryWitnessWithFuel 128 environment psLocalEmpty type with
+            | Option.none =>
+                Except.error (String.Internal.append
+                  "PSC1_PARTIAL_NO_CHECKED_INHABITANT: " (psNameToString name))
+            | Option.some witness =>
+                let logical := PsDeclaration.opaqueDecl name levels type witness;
+                match psOrdinaryAdd environment logical with
+                | Except.error error => Except.error error
+                | Except.ok withLogical =>
+                    let implementation := PsDeclaration.definitionDecl
+                      (psOrdinaryBodyName name) levels type body;
+                    match psOrdinaryAdd withLogical implementation with
+                    | Except.error error => Except.error error
+                    | Except.ok withBody =>
+                        psOrdinaryExpandAcc rest withBody
+                          (List.cons implementation (List.cons logical logicalRev))
+                          (List.cons name partialRev)
+        | _ =>
+            Except.error (String.Internal.append
+              "PSC1_PARTIAL_EXPECTED_FUNCTION: " (psNameToString name))
+    | _ =>
+        match psOrdinaryAdd environment declaration with
+        | Except.error error => Except.error error
+        | Except.ok next =>
+            psOrdinaryExpandAcc rest next (List.cons declaration logicalRev) partialRev
+
+
 def psOrdinaryExpandWorker (declarations : List PsDeclaration) :
     PsEnvironment -> Except String (Prod (List PsDeclaration) (List PsName)) :=
-  match declarations with
-  | List.nil =>
-      fun (environment : PsEnvironment) => Except.ok (Prod.mk List.nil List.nil)
-  | List.cons declaration rest =>
-      let smaller : PsEnvironment -> Except String (Prod (List PsDeclaration) (List PsName)) :=
-        psOrdinaryExpandWorker rest;
-      fun (environment : PsEnvironment) =>
-        match declaration with
-        | PsDeclaration.axiomDecl _ _ _ => Except.error "PSC1_SOURCE_AXIOM_FORBIDDEN"
-        | PsDeclaration.opaqueDecl _ _ _ _ => Except.error "PSC1_SOURCE_OPAQUE_NOT_SELECTED"
-        | PsDeclaration.partialDecl name levels type body =>
-            match psWhnf environment psMetaEmpty psLocalEmpty type with
-            | PsExpr.forallE _ _ _ _ =>
-                match psOrdinaryWitnessWithFuel 128 environment psLocalEmpty type with
-                | Option.none =>
-                    Except.error (String.Internal.append
-                      "PSC1_PARTIAL_NO_CHECKED_INHABITANT: " (psNameToString name))
-                | Option.some witness =>
-                    let logical := PsDeclaration.opaqueDecl name levels type witness;
-                    match psOrdinaryAdd environment logical with
-                    | Except.error error => Except.error error
-                    | Except.ok withLogical =>
-                        let implementation := PsDeclaration.definitionDecl
-                          (psOrdinaryBodyName name) levels type body;
-                        match psOrdinaryAdd withLogical implementation with
-                        | Except.error error => Except.error error
-                        | Except.ok withBody =>
-                            match smaller withBody with
-                            | Except.error error => Except.error error
-                            | Except.ok expanded =>
-                                Except.ok (Prod.mk
-                                  (List.cons logical (List.cons implementation expanded.fst))
-                                  (List.cons name expanded.snd))
-            | _ =>
-                Except.error (String.Internal.append
-                  "PSC1_PARTIAL_EXPECTED_FUNCTION: " (psNameToString name))
-        | _ =>
-            match psOrdinaryAdd environment declaration with
-            | Except.error error => Except.error error
-            | Except.ok next =>
-                match smaller next with
-                | Except.error error => Except.error error
-                | Except.ok expanded =>
-                    Except.ok (Prod.mk (List.cons declaration expanded.fst) expanded.snd)
+  fun (environment : PsEnvironment) => psOrdinaryExpandAcc declarations environment [] []
 
 def psOrdinaryExpand
     (declarations : List PsDeclaration) (environment : PsEnvironment) :

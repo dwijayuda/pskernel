@@ -107,9 +107,9 @@ def psWasmIrAppend
   | List.nil =>
       fun (right : List String) => right
   | List.cons value rest =>
-      let smaller : List String -> List String :=
-        psWasmIrAppend rest;
       fun (right : List String) =>
+        let smaller : List String -> List String :=
+          psWasmIrAppend rest;
         List.cons value (smaller right)
 
 def psWasmIrFindStructure
@@ -207,10 +207,10 @@ def psWasmIrValueTypeListsEq
         | List.nil => true
         | List.cons _ _ => false
   | List.cons value rest =>
-      let smaller :
-          List PsWasmValueType -> Bool :=
-        psWasmIrValueTypeListsEq rest;
       fun (right : List PsWasmValueType) =>
+        let smaller :
+            List PsWasmValueType -> Bool :=
+          psWasmIrValueTypeListsEq rest;
         match right with
         | List.nil => false
         | List.cons other otherRest =>
@@ -597,13 +597,13 @@ def psWasmIrValidateControl
               (PsWasmIrValidationError.invalidControlFlow
                 functionName)
   | List.cons instruction rest =>
-      let smaller :
-          List Bool ->
-          Except PsWasmIrValidationError Unit :=
-        psWasmIrValidateControl
-          functionName
-          rest;
       fun (stack : List Bool) =>
+        let smaller :
+            List Bool ->
+            Except PsWasmIrValidationError Unit :=
+          psWasmIrValidateControl
+            functionName
+            rest;
         match instruction with
         | PsWasmInstruction.ifStart _ =>
             smaller (List.cons false stack)

@@ -11,9 +11,9 @@ def psWasmTailCallsWorker (reversed : List PsWasmInstruction) :
   | List.nil =>
       fun (_tail : Bool) (_joins : List Bool) (output : List PsWasmInstruction) => output
   | List.cons instruction rest =>
-      let smaller : Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
-        psWasmTailCallsWorker rest;
       fun (tail : Bool) (joins : List Bool) (output : List PsWasmInstruction) =>
+        let smaller : Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+          psWasmTailCallsWorker rest;
         match instruction with
         | PsWasmInstruction.end_ =>
             smaller tail (List.cons tail joins) (List.cons instruction output)
@@ -57,9 +57,9 @@ def psWasmDiscardUnitWorker (reversed : List PsWasmInstruction) :
   | List.nil =>
       fun (_discard : Bool) (_joins : List Bool) (output : List PsWasmInstruction) => output
   | List.cons instruction rest =>
-      let smaller : Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
-        psWasmDiscardUnitWorker rest;
       fun (discard : Bool) (joins : List Bool) (output : List PsWasmInstruction) =>
+        let smaller : Bool -> List Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+          psWasmDiscardUnitWorker rest;
         match instruction with
         | PsWasmInstruction.end_ =>
             smaller discard (List.cons discard joins) (List.cons instruction output)

@@ -169,9 +169,9 @@ def psWasmListFoldlWorker {Value State : Type}
   | List.nil =>
       fun (state : State) => state
   | List.cons value rest =>
-      let smaller : State -> State :=
-        psWasmListFoldlWorker step rest;
       fun (state : State) =>
+        let smaller : State -> State :=
+          psWasmListFoldlWorker step rest;
         smaller (step state value)
 
 def psWasmListFoldl {Value State : Type}
@@ -251,13 +251,13 @@ def psWasmCollectFunctionTypesFromTypeWithFuel
         fun (types : List PsVerifiedIrType) =>
           types
   | fuel + 1 =>
-      let smaller :
-          PsVerifiedIrType ->
-          List PsVerifiedIrType ->
-          List PsVerifiedIrType :=
-        psWasmCollectFunctionTypesFromTypeWithFuel fuel;
       fun (type : PsVerifiedIrType) =>
         fun (types : List PsVerifiedIrType) =>
+          let smaller :
+              PsVerifiedIrType ->
+              List PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            psWasmCollectFunctionTypesFromTypeWithFuel fuel;
           match type with
           | .function parameters result =>
               let withSelf :=
@@ -336,13 +336,13 @@ def psWasmCollectFunctionTypesFromExprWithFuel
         fun (types : List PsVerifiedIrType) =>
           types
   | fuel + 1 =>
-      let smaller :
-          PsVerifiedIrExpr ->
-          List PsVerifiedIrType ->
-          List PsVerifiedIrType :=
-        psWasmCollectFunctionTypesFromExprWithFuel fuel;
       fun (expr : PsVerifiedIrExpr) =>
         fun (types : List PsVerifiedIrType) =>
+          let smaller :
+              PsVerifiedIrExpr ->
+              List PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            psWasmCollectFunctionTypesFromExprWithFuel fuel;
           let collect :
               PsVerifiedIrExpr ->
               List PsVerifiedIrType ->
@@ -682,13 +682,13 @@ def psWasmCollectArrayTypesFromTypeWithFuel
         fun (types : List PsVerifiedIrType) =>
           types
   | fuel + 1 =>
-      let smaller :
-          PsVerifiedIrType ->
-          List PsVerifiedIrType ->
-          List PsVerifiedIrType :=
-        psWasmCollectArrayTypesFromTypeWithFuel fuel;
       fun (type : PsVerifiedIrType) =>
         fun (types : List PsVerifiedIrType) =>
+          let smaller :
+              PsVerifiedIrType ->
+              List PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            psWasmCollectArrayTypesFromTypeWithFuel fuel;
           match type with
           | .function parameters result =>
               let collectParameter :
@@ -853,13 +853,13 @@ def psWasmCollectArrayTypesFromExprWithFuel
         fun (types : List PsVerifiedIrType) =>
           types
   | fuel + 1 =>
-      let smaller :
-          PsVerifiedIrExpr ->
-          List PsVerifiedIrType ->
-          List PsVerifiedIrType :=
-        psWasmCollectArrayTypesFromExprWithFuel fuel;
       fun (expr : PsVerifiedIrExpr) =>
         fun (types : List PsVerifiedIrType) =>
+          let smaller :
+              PsVerifiedIrExpr ->
+              List PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            psWasmCollectArrayTypesFromExprWithFuel fuel;
           let collect :
               PsVerifiedIrExpr ->
               List PsVerifiedIrType ->
@@ -1285,10 +1285,10 @@ def psWasmFindStructureFieldWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons field rest =>
-      let smaller :
-          Nat -> Option (Nat × PsVerifiedIrStructureField) :=
-        psWasmFindStructureFieldWorker fieldName rest;
       fun (index : Nat) =>
+        let smaller :
+            Nat -> Option (Nat × PsVerifiedIrStructureField) :=
+          psWasmFindStructureFieldWorker fieldName rest;
         if psStringEq field.name fieldName then
           Option.some (Prod.mk index field)
         else
@@ -1438,10 +1438,10 @@ def psWasmFindConstructorFieldWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons field rest =>
-      let smaller :
-          Nat -> Option (Nat × PsVerifiedIrConstructorField) :=
-        psWasmFindConstructorFieldWorker fieldName rest;
       fun (index : Nat) =>
+        let smaller :
+            Nat -> Option (Nat × PsVerifiedIrConstructorField) :=
+          psWasmFindConstructorFieldWorker fieldName rest;
         if psStringEq field.name fieldName then
           Option.some (Prod.mk index field)
         else
@@ -1572,9 +1572,9 @@ def psWasmParameterBindingsWorker
   | List.nil =>
       fun (_index : Nat) => List.nil
   | List.cons parameter rest =>
-      let smaller : Nat -> List PsWasmBinding :=
-        psWasmParameterBindingsWorker rest;
       fun (index : Nat) =>
+        let smaller : Nat -> List PsWasmBinding :=
+          psWasmParameterBindingsWorker rest;
         List.cons
           (PsWasmBinding.mk
             parameter.name
@@ -1678,17 +1678,17 @@ def psWasmCollectCapturesWorker
           fun (captures : List PsWasmBinding) =>
             captures
   | fuel + 1 =>
-      let smaller :
-          List String ->
-          PsVerifiedIrExpr ->
-          List PsWasmBinding ->
-          List PsWasmBinding :=
-        psWasmCollectCapturesWorker
-          outerBindings
-          fuel;
       fun (boundNames : List String) =>
         fun (expr : PsVerifiedIrExpr) =>
           fun (captures : List PsWasmBinding) =>
+            let smaller :
+                List String ->
+                PsVerifiedIrExpr ->
+                List PsWasmBinding ->
+                List PsWasmBinding :=
+              psWasmCollectCapturesWorker
+                outerBindings
+                fuel;
             let collect :
                 PsVerifiedIrExpr ->
                 List PsWasmBinding ->
@@ -1823,9 +1823,9 @@ def psWasmParameterBindingsFromWorker
   | List.nil =>
       fun (_firstIndex : Nat) => List.nil
   | List.cons parameter rest =>
-      let smaller : Nat -> List PsWasmBinding :=
-        psWasmParameterBindingsFromWorker rest;
       fun (firstIndex : Nat) =>
+        let smaller : Nat -> List PsWasmBinding :=
+          psWasmParameterBindingsFromWorker rest;
         List.cons
           (PsWasmBinding.mk
             parameter.name
@@ -1892,9 +1892,9 @@ def psWasmLocalGetsForTypesWorker
   | List.nil =>
       fun (_index : Nat) => List.nil
   | List.cons _ rest =>
-      let smaller : Nat -> List PsWasmInstruction :=
-        psWasmLocalGetsForTypesWorker rest;
       fun (index : Nat) =>
+        let smaller : Nat -> List PsWasmInstruction :=
+          psWasmLocalGetsForTypesWorker rest;
         List.cons
           (PsWasmInstruction.localGet index)
           (smaller (Nat.add index 1))
@@ -2061,11 +2061,11 @@ def psWasmLowerExprListWorker
           state := state
         }
   | List.cons expr rest =>
-      let smaller :
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredExpr :=
-        psWasmLowerExprListWorker lower expected rest;
       fun (state : PsWasmLowerState) =>
+        let smaller :
+            PsWasmLowerState ->
+            Except PsWasmLowerError PsWasmLoweredExpr :=
+          psWasmLowerExprListWorker lower expected rest;
         match lower expected state expr with
         | Except.error error => Except.error error
         | Except.ok lowered =>
@@ -2112,16 +2112,16 @@ def psWasmLowerRecordFieldsWorker
           state := state
         }
   | List.cons field rest =>
-      let smaller :
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredExpr :=
-        psWasmLowerRecordFieldsWorker
-          profile
-          lower
-          structInfo
-          fields
-          rest;
       fun (state : PsWasmLowerState) =>
+        let smaller :
+            PsWasmLowerState ->
+            Except PsWasmLowerError PsWasmLoweredExpr :=
+          psWasmLowerRecordFieldsWorker
+            profile
+            lower
+            structInfo
+            fields
+            rest;
         match psWasmFindRecordField fields field.name with
         | Option.none =>
             Except.error
@@ -2182,17 +2182,17 @@ def psWasmLowerConstructorValuesWorker
           state := state
         }
   | List.cons field rest =>
-      let smaller :
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredExpr :=
-        psWasmLowerConstructorValuesWorker
-          profile
-          lower
-          inductiveName
-          constructorInfo
-          fields
-          rest;
       fun (state : PsWasmLowerState) =>
+        let smaller :
+            PsWasmLowerState ->
+            Except PsWasmLowerError PsWasmLoweredExpr :=
+          psWasmLowerConstructorValuesWorker
+            profile
+            lower
+            inductiveName
+            constructorInfo
+            fields
+            rest;
         match psWasmFindRecordField fields field.name with
         | Option.none =>
             Except.error
@@ -4268,16 +4268,16 @@ def psWasmLowerTypedArgumentsWorker
           | List.cons _ _ =>
               Except.error PsWasmLowerError.invalidCallArity
   | List.cons type restTypes =>
-      let smaller :
-          List PsVerifiedIrExpr ->
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredExpr :=
-        psWasmLowerTypedArgumentsWorker
-          profile
-          lower
-          restTypes;
       fun (arguments : List PsVerifiedIrExpr) =>
         fun (state : PsWasmLowerState) =>
+          let smaller :
+              List PsVerifiedIrExpr ->
+              PsWasmLowerState ->
+              Except PsWasmLowerError PsWasmLoweredExpr :=
+            psWasmLowerTypedArgumentsWorker
+              profile
+              lower
+              restTypes;
           match arguments with
           | List.nil =>
               Except.error PsWasmLowerError.invalidCallArity
@@ -4574,18 +4574,18 @@ def psWasmLowerMatchBindingsWorker
             state := state
           }
   | List.cons binding rest =>
-      let smaller :
-          List PsWasmBinding ->
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredBindings :=
-        psWasmLowerMatchBindingsWorker
-          profile
-          inductiveName
-          constructorInfo
-          scrutineeLocal
-          rest;
       fun (baseBindings : List PsWasmBinding) =>
         fun (state : PsWasmLowerState) =>
+          let smaller :
+              List PsWasmBinding ->
+              PsWasmLowerState ->
+              Except PsWasmLowerError PsWasmLoweredBindings :=
+            psWasmLowerMatchBindingsWorker
+              profile
+              inductiveName
+              constructorInfo
+              scrutineeLocal
+              rest;
           match
               psWasmFindConstructorField
                 constructorInfo
@@ -4684,18 +4684,18 @@ def psWasmLowerMatchAlternativesWorker
             state.currentDefinition
             "empty-match")
   | List.cons alternative rest =>
-      let smaller :
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredExpr :=
-        psWasmLowerMatchAlternativesWorker
-          profile
-          inductiveInfo
-          scrutineeLocal
-          lowerWithBindings
-          baseBindings
-          expected
-          rest;
       fun (state : PsWasmLowerState) =>
+        let smaller :
+            PsWasmLowerState ->
+            Except PsWasmLowerError PsWasmLoweredExpr :=
+          psWasmLowerMatchAlternativesWorker
+            profile
+            inductiveInfo
+            scrutineeLocal
+            lowerWithBindings
+            baseBindings
+            expected
+            rest;
         let constructorName := Prod.fst alternative;
         let matchBindings :=
           Prod.fst (Prod.snd alternative);
@@ -4875,16 +4875,16 @@ def psWasmPrepareCaptureBindingsWorker
             state := state
           }
   | List.cons capture rest =>
-      let smaller :
-          Nat ->
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredBindings :=
-        psWasmPrepareCaptureBindingsWorker
-          profile
-          subtypeName
-          rest;
       fun (fieldIndex : Nat) =>
         fun (state : PsWasmLowerState) =>
+          let smaller :
+              Nat ->
+              PsWasmLowerState ->
+              Except PsWasmLowerError PsWasmLoweredBindings :=
+            psWasmPrepareCaptureBindingsWorker
+              profile
+              subtypeName
+              rest;
           match psWasmValueTypeOfIrType? profile capture.type with
           | Option.none =>
               Except.error PsWasmLowerError.unsupportedType
@@ -5117,9 +5117,9 @@ def psWasmGlobalFunctionParameters
   match parameters with
   | List.nil => fun (_index : Nat) => List.nil
   | List.cons parameter rest =>
-      let smaller : Nat -> List PsVerifiedIrParameter :=
-        psWasmGlobalFunctionParameters name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> List PsVerifiedIrParameter :=
+          psWasmGlobalFunctionParameters name rest;
         List.cons
           (PsVerifiedIrParameter.mk
             (String.Internal.append name
@@ -5157,22 +5157,22 @@ def psWasmLowerExprWorker
                   state.currentDefinition
                   "fuel-exhausted")
   | fuel + 1 =>
-      let smaller :
-          List PsWasmBinding ->
-          Option PsWasmValueType ->
-          PsWasmLowerState ->
-          PsVerifiedIrExpr ->
-          Except PsWasmLowerError PsWasmLoweredExpr :=
-        psWasmLowerExprWorker
-          profile
-          allDeclarations
-          structures
-          inductives
-          fuel;
       fun (bindings : List PsWasmBinding) =>
         fun (expected : Option PsWasmValueType) =>
           fun (state : PsWasmLowerState) =>
             fun (expr : PsVerifiedIrExpr) =>
+              let smaller :
+                  List PsWasmBinding ->
+                  Option PsWasmValueType ->
+                  PsWasmLowerState ->
+                  PsVerifiedIrExpr ->
+                  Except PsWasmLowerError PsWasmLoweredExpr :=
+                psWasmLowerExprWorker
+                  profile
+                  allDeclarations
+                  structures
+                  inductives
+                  fuel;
               let lowerWithBindings :
                   List PsWasmBinding ->
                   Option PsWasmValueType ->
@@ -5604,16 +5604,16 @@ def psWasmLowerDeclarationsWorker
           state := state
         }
   | List.cons declaration rest =>
-      let smaller :
-          PsWasmLowerState ->
-          Except PsWasmLowerError PsWasmLoweredFunctions :=
-        psWasmLowerDeclarationsWorker
-          profile
-          allDeclarations
-          structures
-          inductives
-          rest;
       fun (state : PsWasmLowerState) =>
+        let smaller :
+            PsWasmLowerState ->
+            Except PsWasmLowerError PsWasmLoweredFunctions :=
+          psWasmLowerDeclarationsWorker
+            profile
+            allDeclarations
+            structures
+            inductives
+            rest;
         match
             psWasmLowerDeclaration
               profile
@@ -5658,9 +5658,9 @@ def psWasmTypeUsesNatWithFuel
   | 0 =>
       fun (_type : PsVerifiedIrType) => false
   | fuel + 1 =>
-      let smaller : PsVerifiedIrType -> Bool :=
-        psWasmTypeUsesNatWithFuel fuel;
       fun (type : PsVerifiedIrType) =>
+        let smaller : PsVerifiedIrType -> Bool :=
+          psWasmTypeUsesNatWithFuel fuel;
         let usesType :
             PsVerifiedIrType -> Bool :=
           fun (value : PsVerifiedIrType) =>
@@ -5722,9 +5722,9 @@ def psWasmExprUsesNatWithFuel
   | 0 =>
       fun (_expr : PsVerifiedIrExpr) => false
   | fuel + 1 =>
-      let smaller : PsVerifiedIrExpr -> Bool :=
-        psWasmExprUsesNatWithFuel fuel;
       fun (expr : PsVerifiedIrExpr) =>
+        let smaller : PsVerifiedIrExpr -> Bool :=
+          psWasmExprUsesNatWithFuel fuel;
         let uses :
             PsVerifiedIrExpr -> Bool :=
           fun (nested : PsVerifiedIrExpr) =>
@@ -5832,9 +5832,9 @@ def psWasmTypeUsesIntWithFuel
   | 0 =>
       fun (_type : PsVerifiedIrType) => false
   | fuel + 1 =>
-      let smaller : PsVerifiedIrType -> Bool :=
-        psWasmTypeUsesIntWithFuel fuel;
       fun (type : PsVerifiedIrType) =>
+        let smaller : PsVerifiedIrType -> Bool :=
+          psWasmTypeUsesIntWithFuel fuel;
         let usesType :
             PsVerifiedIrType -> Bool :=
           fun (value : PsVerifiedIrType) =>
@@ -5878,9 +5878,9 @@ def psWasmExprUsesIntWithFuel
   | 0 =>
       fun (_expr : PsVerifiedIrExpr) => false
   | fuel + 1 =>
-      let smaller : PsVerifiedIrExpr -> Bool :=
-        psWasmExprUsesIntWithFuel fuel;
       fun (expr : PsVerifiedIrExpr) =>
+        let smaller : PsVerifiedIrExpr -> Bool :=
+          psWasmExprUsesIntWithFuel fuel;
         let uses :
             PsVerifiedIrExpr -> Bool :=
           fun (nested : PsVerifiedIrExpr) =>
@@ -5988,9 +5988,9 @@ def psWasmTypeUsesStringWithFuel
   | 0 =>
       fun (_type : PsVerifiedIrType) => false
   | fuel + 1 =>
-      let smaller : PsVerifiedIrType -> Bool :=
-        psWasmTypeUsesStringWithFuel fuel;
       fun (type : PsVerifiedIrType) =>
+        let smaller : PsVerifiedIrType -> Bool :=
+          psWasmTypeUsesStringWithFuel fuel;
         let usesType :
             PsVerifiedIrType -> Bool :=
           fun (value : PsVerifiedIrType) =>
@@ -6036,9 +6036,9 @@ def psWasmExprUsesStringWithFuel
   | 0 =>
       fun (_expr : PsVerifiedIrExpr) => false
   | fuel + 1 =>
-      let smaller : PsVerifiedIrExpr -> Bool :=
-        psWasmExprUsesStringWithFuel fuel;
       fun (expr : PsVerifiedIrExpr) =>
+        let smaller : PsVerifiedIrExpr -> Bool :=
+          psWasmExprUsesStringWithFuel fuel;
         let uses :
             PsVerifiedIrExpr -> Bool :=
           fun (nested : PsVerifiedIrExpr) =>

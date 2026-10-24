@@ -487,3 +487,47 @@ lean_lib PsWasmBinaryCarrierReference where
 lean_exe psc1_direct_selfhost_preflight_tests where
   srcDir := "test"
   root := `DirectSelfHostPreflightTests
+
+lean_lib PsJsStatementReference where
+  srcDir := "test"
+  roots := #[`JsStatementReference]
+
+lean_exe psc1_js_statement_tests where
+  srcDir := "test"
+  root := `JsStatementTests
+
+lean_lib PsWasmPrefixReference where
+  srcDir := "test"
+  roots := #[`WasmPrefixReference, `WasmPrefixTests]
+
+lean_lib PsOrdinaryExpansionReference where
+  srcDir := "test"
+  roots := #[`OrdinaryExpansionReference, `OrdinaryExpansionTests]
+
+lean_lib PsCheckedSpineReference where
+  srcDir := "test"
+  roots := #[`CheckedSpineReference, `CheckedSpineTests]
+
+lean_lib PsErasureSpineReference where
+  srcDir := "test"
+  roots := #[`ErasureSpineReference, `ErasureSpineTests]
+
+lean_lib PsFoundationListReference where
+  srcDir := "test"
+  roots := #[`FoundationListReference, `FoundationListTests]
+
+lean_lib PsWasmLowerExprPrefixReference where
+  srcDir := "test"
+  roots := #[`WasmLowerExprPrefixReference, `WasmLowerExprPrefixTests]
+
+lean_lib PsSharedLookupPrefixReference where
+  srcDir := "test"
+  roots := #[`SharedLookupPrefixReference, `SharedLookupPrefixTests]
+
+lean_lib PsWasmEncodingSpineReference where
+  srcDir := "test"
+  roots := #[`WasmEncodingSpineReference, `WasmEncodingSpineTests]
+
+lean_lib PsJsAppliedPrefixReference where
+  srcDir := "test"
+  roots := #[`JsAppliedPrefixReference, `JsAppliedPrefixTests]

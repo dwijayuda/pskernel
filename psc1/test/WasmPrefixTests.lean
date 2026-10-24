@@ -1,0 +1,374 @@
+import WasmPrefixReference
+
+theorem prefix_psWasmNatLiteralInstructionsWithFuel_eq : @psWasmNatLiteralInstructionsWithFuel = @WasmPrefixReference.psWasmNatLiteralInstructionsWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmNatLiteralInstructionsWithFuel, WasmPrefixReference.psWasmNatLiteralInstructionsWithFuel, ih] <;> rfl
+
+theorem prefix_psWasmStringLiteralChunksWithFuel_eq : @psWasmStringLiteralChunksWithFuel = @WasmPrefixReference.psWasmStringLiteralChunksWithFuel := by
+  funext fuel
+  induction fuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmStringLiteralChunksWithFuel, WasmPrefixReference.psWasmStringLiteralChunksWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmIrTypeKeyWithFuel_eq : @psWasmIrTypeKeyWithFuel = @WasmPrefixReference.psWasmIrTypeKeyWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmIrTypeKeyWithFuel, WasmPrefixReference.psWasmIrTypeKeyWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmIrAppend_eq : @psWasmIrAppend = @WasmPrefixReference.psWasmIrAppend := by
+  funext left
+  induction left with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmIrAppend, WasmPrefixReference.psWasmIrAppend, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmIrValueTypeListsEq_eq : @psWasmIrValueTypeListsEq = @WasmPrefixReference.psWasmIrValueTypeListsEq := by
+  funext left
+  induction left with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmIrValueTypeListsEq, WasmPrefixReference.psWasmIrValueTypeListsEq, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq] <;> rfl
+
+theorem prefix_psWasmIrValidateControl_eq : @psWasmIrValidateControl = @WasmPrefixReference.psWasmIrValidateControl := by
+  funext functionName instructions
+  induction instructions with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmIrValidateControl, WasmPrefixReference.psWasmIrValidateControl, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq] <;> rfl
+
+theorem prefix_psWasmTypingHeapSubtypeWithFuel_eq : @psWasmTypingHeapSubtypeWithFuel = @WasmPrefixReference.psWasmTypingHeapSubtypeWithFuel := by
+  funext module remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmTypingHeapSubtypeWithFuel, WasmPrefixReference.psWasmTypingHeapSubtypeWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq] <;> rfl
+
+theorem prefix_psWasmTypingFieldsMatch_eq : @psWasmTypingFieldsMatch = @WasmPrefixReference.psWasmTypingFieldsMatch := by
+  funext module parents
+  induction parents with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTypingFieldsMatch, WasmPrefixReference.psWasmTypingFieldsMatch, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmTypingValidateParents_eq : @psWasmTypingValidateParents = @WasmPrefixReference.psWasmTypingValidateParents := by
+  funext module structures
+  induction structures with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTypingValidateParents, WasmPrefixReference.psWasmTypingValidateParents, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq] <;> rfl
+
+theorem prefix_psWasmTypingNth_eq : @psWasmTypingNth = @WasmPrefixReference.psWasmTypingNth := by
+  funext alpha values
+  induction values with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTypingNth, WasmPrefixReference.psWasmTypingNth, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq] <;> rfl
+
+theorem prefix_psWasmTypingPushValues_eq : @psWasmTypingPushValues = @WasmPrefixReference.psWasmTypingPushValues := by
+  funext types
+  induction types with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTypingPushValues, WasmPrefixReference.psWasmTypingPushValues, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq] <;> rfl
+
+theorem prefix_psWasmTypingPopReversed_eq : @psWasmTypingPopReversed = @WasmPrefixReference.psWasmTypingPopReversed := by
+  funext module types
+  induction types with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTypingPopReversed, WasmPrefixReference.psWasmTypingPopReversed, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq] <;> rfl
+
+theorem prefix_psWasmTypingRepeatPop_eq : @psWasmTypingRepeatPop = @WasmPrefixReference.psWasmTypingRepeatPop := by
+  funext module type count
+  induction count with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmTypingRepeatPop, WasmPrefixReference.psWasmTypingRepeatPop, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq] <;> rfl
+
+theorem prefix_psWasmTypingInstructions_eq : @psWasmTypingInstructions = @WasmPrefixReference.psWasmTypingInstructions := by
+  funext module function locals instructions
+  induction instructions with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTypingInstructions, WasmPrefixReference.psWasmTypingInstructions, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq] <;> rfl
+
+theorem prefix_psWasmListFoldlWorker_eq : @psWasmListFoldlWorker = @WasmPrefixReference.psWasmListFoldlWorker := by
+  funext Value State step values
+  induction values with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmListFoldlWorker, WasmPrefixReference.psWasmListFoldlWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq] <;> rfl
+
+theorem prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq : @psWasmCollectFunctionTypesFromTypeWithFuel = @WasmPrefixReference.psWasmCollectFunctionTypesFromTypeWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmCollectFunctionTypesFromTypeWithFuel, WasmPrefixReference.psWasmCollectFunctionTypesFromTypeWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq] <;> rfl
+
+theorem prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq : @psWasmCollectFunctionTypesFromExprWithFuel = @WasmPrefixReference.psWasmCollectFunctionTypesFromExprWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmCollectFunctionTypesFromExprWithFuel, WasmPrefixReference.psWasmCollectFunctionTypesFromExprWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq : @psWasmCollectArrayTypesFromTypeWithFuel = @WasmPrefixReference.psWasmCollectArrayTypesFromTypeWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmCollectArrayTypesFromTypeWithFuel, WasmPrefixReference.psWasmCollectArrayTypesFromTypeWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmCollectArrayTypesFromExprWithFuel_eq : @psWasmCollectArrayTypesFromExprWithFuel = @WasmPrefixReference.psWasmCollectArrayTypesFromExprWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmCollectArrayTypesFromExprWithFuel, WasmPrefixReference.psWasmCollectArrayTypesFromExprWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmFindStructureFieldWorker_eq : @psWasmFindStructureFieldWorker = @WasmPrefixReference.psWasmFindStructureFieldWorker := by
+  funext fieldName fields
+  induction fields with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmFindStructureFieldWorker, WasmPrefixReference.psWasmFindStructureFieldWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmFindConstructorFieldWorker_eq : @psWasmFindConstructorFieldWorker = @WasmPrefixReference.psWasmFindConstructorFieldWorker := by
+  funext fieldName fields
+  induction fields with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmFindConstructorFieldWorker, WasmPrefixReference.psWasmFindConstructorFieldWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq] <;> rfl
+
+theorem prefix_psWasmParameterBindingsWorker_eq : @psWasmParameterBindingsWorker = @WasmPrefixReference.psWasmParameterBindingsWorker := by
+  funext parameters
+  induction parameters with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmParameterBindingsWorker, WasmPrefixReference.psWasmParameterBindingsWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq] <;> rfl
+
+theorem prefix_psWasmCollectCapturesWorker_eq : @psWasmCollectCapturesWorker = @WasmPrefixReference.psWasmCollectCapturesWorker := by
+  funext outerBindings remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmCollectCapturesWorker, WasmPrefixReference.psWasmCollectCapturesWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq] <;> rfl
+
+theorem prefix_psWasmParameterBindingsFromWorker_eq : @psWasmParameterBindingsFromWorker = @WasmPrefixReference.psWasmParameterBindingsFromWorker := by
+  funext parameters
+  induction parameters with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmParameterBindingsFromWorker, WasmPrefixReference.psWasmParameterBindingsFromWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq] <;> rfl
+
+theorem prefix_psWasmLocalGetsForTypesWorker_eq : @psWasmLocalGetsForTypesWorker = @WasmPrefixReference.psWasmLocalGetsForTypesWorker := by
+  funext types
+  induction types with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLocalGetsForTypesWorker, WasmPrefixReference.psWasmLocalGetsForTypesWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq] <;> rfl
+
+theorem prefix_psWasmLowerExprListWorker_eq : @psWasmLowerExprListWorker = @WasmPrefixReference.psWasmLowerExprListWorker := by
+  funext lower expected expressions
+  induction expressions with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLowerExprListWorker, WasmPrefixReference.psWasmLowerExprListWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq] <;> rfl
+
+theorem prefix_psWasmLowerRecordFieldsWorker_eq : @psWasmLowerRecordFieldsWorker = @WasmPrefixReference.psWasmLowerRecordFieldsWorker := by
+  funext profile lower structInfo fields structureFields
+  induction structureFields with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLowerRecordFieldsWorker, WasmPrefixReference.psWasmLowerRecordFieldsWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq] <;> rfl
+
+theorem prefix_psWasmLowerConstructorValuesWorker_eq : @psWasmLowerConstructorValuesWorker = @WasmPrefixReference.psWasmLowerConstructorValuesWorker := by
+  funext profile lower inductiveName constructorInfo fields constructorFields
+  induction constructorFields with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLowerConstructorValuesWorker, WasmPrefixReference.psWasmLowerConstructorValuesWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq] <;> rfl
+
+theorem prefix_psWasmLowerTypedArgumentsWorker_eq : @psWasmLowerTypedArgumentsWorker = @WasmPrefixReference.psWasmLowerTypedArgumentsWorker := by
+  funext profile lower types
+  induction types with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLowerTypedArgumentsWorker, WasmPrefixReference.psWasmLowerTypedArgumentsWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq] <;> rfl
+
+theorem prefix_psWasmLowerMatchBindingsWorker_eq : @psWasmLowerMatchBindingsWorker = @WasmPrefixReference.psWasmLowerMatchBindingsWorker := by
+  funext profile inductiveName constructorInfo scrutineeLocal matchBindings
+  induction matchBindings with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLowerMatchBindingsWorker, WasmPrefixReference.psWasmLowerMatchBindingsWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq] <;> rfl
+
+theorem prefix_psWasmLowerMatchAlternativesWorker_eq : @psWasmLowerMatchAlternativesWorker = @WasmPrefixReference.psWasmLowerMatchAlternativesWorker := by
+  funext profile inductiveInfo scrutineeLocal lowerWithBindings baseBindings expected alternatives
+  induction alternatives with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLowerMatchAlternativesWorker, WasmPrefixReference.psWasmLowerMatchAlternativesWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq] <;> rfl
+
+theorem prefix_psWasmPrepareCaptureBindingsWorker_eq : @psWasmPrepareCaptureBindingsWorker = @WasmPrefixReference.psWasmPrepareCaptureBindingsWorker := by
+  funext profile subtypeName captures
+  induction captures with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmPrepareCaptureBindingsWorker, WasmPrefixReference.psWasmPrepareCaptureBindingsWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq] <;> rfl
+
+theorem prefix_psWasmGlobalFunctionParameters_eq : @psWasmGlobalFunctionParameters = @WasmPrefixReference.psWasmGlobalFunctionParameters := by
+  funext name parameters
+  induction parameters with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmGlobalFunctionParameters, WasmPrefixReference.psWasmGlobalFunctionParameters, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq] <;> rfl
+
+theorem prefix_psWasmLowerDeclarationsWorker_eq : @psWasmLowerDeclarationsWorker = @WasmPrefixReference.psWasmLowerDeclarationsWorker := by
+  funext profile allDeclarations structures inductives declarations
+  induction declarations with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmLowerDeclarationsWorker, WasmPrefixReference.psWasmLowerDeclarationsWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq] <;> rfl
+
+theorem prefix_psWasmTypeUsesNatWithFuel_eq : @psWasmTypeUsesNatWithFuel = @WasmPrefixReference.psWasmTypeUsesNatWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmTypeUsesNatWithFuel, WasmPrefixReference.psWasmTypeUsesNatWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq] <;> rfl
+
+theorem prefix_psWasmExprUsesNatWithFuel_eq : @psWasmExprUsesNatWithFuel = @WasmPrefixReference.psWasmExprUsesNatWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmExprUsesNatWithFuel, WasmPrefixReference.psWasmExprUsesNatWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmTypeUsesIntWithFuel_eq : @psWasmTypeUsesIntWithFuel = @WasmPrefixReference.psWasmTypeUsesIntWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmTypeUsesIntWithFuel, WasmPrefixReference.psWasmTypeUsesIntWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmExprUsesIntWithFuel_eq : @psWasmExprUsesIntWithFuel = @WasmPrefixReference.psWasmExprUsesIntWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmExprUsesIntWithFuel, WasmPrefixReference.psWasmExprUsesIntWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmTypeUsesStringWithFuel_eq : @psWasmTypeUsesStringWithFuel = @WasmPrefixReference.psWasmTypeUsesStringWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmTypeUsesStringWithFuel, WasmPrefixReference.psWasmTypeUsesStringWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmExprUsesStringWithFuel_eq : @psWasmExprUsesStringWithFuel = @WasmPrefixReference.psWasmExprUsesStringWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmExprUsesStringWithFuel, WasmPrefixReference.psWasmExprUsesStringWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmEncodeUlebWithFuel_eq : @Ps.Internal.WasmBinaryBytes.psWasmEncodeUlebWithFuel = @WasmPrefixReference.psWasmEncodeUlebWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmEncodeUlebWithFuel, WasmPrefixReference.psWasmEncodeUlebWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmEncodeSlebWithFuel_eq : @Ps.Internal.WasmBinaryBytes.psWasmEncodeSlebWithFuel = @WasmPrefixReference.psWasmEncodeSlebWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmEncodeSlebWithFuel, WasmPrefixReference.psWasmEncodeSlebWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmStringToListFromWithFuel_eq : @Ps.Internal.WasmBinaryBytes.psWasmStringToListFromWithFuel = @WasmPrefixReference.psWasmStringToListFromWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmStringToListFromWithFuel, WasmPrefixReference.psWasmStringToListFromWithFuel, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq, prefix_psWasmEncodeSlebWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmFindStructureIndexWorker_eq : @Ps.Internal.WasmBinaryBytes.psWasmFindStructureIndexWorker = @WasmPrefixReference.psWasmFindStructureIndexWorker := by
+  funext name structures
+  induction structures with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmFindStructureIndexWorker, WasmPrefixReference.psWasmFindStructureIndexWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq, prefix_psWasmEncodeSlebWithFuel_eq, prefix_psWasmStringToListFromWithFuel_eq] <;> rfl
+
+theorem prefix_psWasmFindArrayIndexWorker_eq : @Ps.Internal.WasmBinaryBytes.psWasmFindArrayIndexWorker = @WasmPrefixReference.psWasmFindArrayIndexWorker := by
+  funext name arrays
+  induction arrays with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmFindArrayIndexWorker, WasmPrefixReference.psWasmFindArrayIndexWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq, prefix_psWasmEncodeSlebWithFuel_eq, prefix_psWasmStringToListFromWithFuel_eq, prefix_psWasmFindStructureIndexWorker_eq] <;> rfl
+
+theorem prefix_psWasmFindFunctionTypeIndexWorker_eq : @Ps.Internal.WasmBinaryBytes.psWasmFindFunctionTypeIndexWorker = @WasmPrefixReference.psWasmFindFunctionTypeIndexWorker := by
+  funext name functionTypes
+  induction functionTypes with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmFindFunctionTypeIndexWorker, WasmPrefixReference.psWasmFindFunctionTypeIndexWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq, prefix_psWasmEncodeSlebWithFuel_eq, prefix_psWasmStringToListFromWithFuel_eq, prefix_psWasmFindStructureIndexWorker_eq, prefix_psWasmFindArrayIndexWorker_eq] <;> rfl
+
+theorem prefix_psWasmFindFunctionIndexWorker_eq : @Ps.Internal.WasmBinaryBytes.psWasmFindFunctionIndexWorker = @WasmPrefixReference.psWasmFindFunctionIndexWorker := by
+  funext name functions
+  induction functions with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmFindFunctionIndexWorker, WasmPrefixReference.psWasmFindFunctionIndexWorker, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq, prefix_psWasmEncodeSlebWithFuel_eq, prefix_psWasmStringToListFromWithFuel_eq, prefix_psWasmFindStructureIndexWorker_eq, prefix_psWasmFindArrayIndexWorker_eq, prefix_psWasmFindFunctionTypeIndexWorker_eq] <;> rfl
+
+theorem prefix_psWasmEncodeFunctionTypeIndicesAcc_eq : @Ps.Internal.WasmBinaryBytes.psWasmEncodeFunctionTypeIndicesAcc = @WasmPrefixReference.psWasmEncodeFunctionTypeIndicesAcc := by
+  funext structures arrays functionTypes functions
+  induction functions with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [Ps.Internal.WasmBinaryBytes.psWasmEncodeFunctionTypeIndicesAcc, WasmPrefixReference.psWasmEncodeFunctionTypeIndicesAcc, ih, prefix_psWasmNatLiteralInstructionsWithFuel_eq, prefix_psWasmStringLiteralChunksWithFuel_eq, prefix_psWasmIrTypeKeyWithFuel_eq, prefix_psWasmIrAppend_eq, prefix_psWasmIrValueTypeListsEq_eq, prefix_psWasmIrValidateControl_eq, prefix_psWasmTypingHeapSubtypeWithFuel_eq, prefix_psWasmTypingFieldsMatch_eq, prefix_psWasmTypingValidateParents_eq, prefix_psWasmTypingNth_eq, prefix_psWasmTypingPushValues_eq, prefix_psWasmTypingPopReversed_eq, prefix_psWasmTypingRepeatPop_eq, prefix_psWasmTypingInstructions_eq, prefix_psWasmListFoldlWorker_eq, prefix_psWasmCollectFunctionTypesFromTypeWithFuel_eq, prefix_psWasmCollectFunctionTypesFromExprWithFuel_eq, prefix_psWasmCollectArrayTypesFromTypeWithFuel_eq, prefix_psWasmCollectArrayTypesFromExprWithFuel_eq, prefix_psWasmFindStructureFieldWorker_eq, prefix_psWasmFindConstructorFieldWorker_eq, prefix_psWasmParameterBindingsWorker_eq, prefix_psWasmCollectCapturesWorker_eq, prefix_psWasmParameterBindingsFromWorker_eq, prefix_psWasmLocalGetsForTypesWorker_eq, prefix_psWasmLowerExprListWorker_eq, prefix_psWasmLowerRecordFieldsWorker_eq, prefix_psWasmLowerConstructorValuesWorker_eq, prefix_psWasmLowerTypedArgumentsWorker_eq, prefix_psWasmLowerMatchBindingsWorker_eq, prefix_psWasmLowerMatchAlternativesWorker_eq, prefix_psWasmPrepareCaptureBindingsWorker_eq, prefix_psWasmGlobalFunctionParameters_eq, prefix_psWasmLowerDeclarationsWorker_eq, prefix_psWasmTypeUsesNatWithFuel_eq, prefix_psWasmExprUsesNatWithFuel_eq, prefix_psWasmTypeUsesIntWithFuel_eq, prefix_psWasmExprUsesIntWithFuel_eq, prefix_psWasmTypeUsesStringWithFuel_eq, prefix_psWasmExprUsesStringWithFuel_eq, prefix_psWasmEncodeUlebWithFuel_eq, prefix_psWasmEncodeSlebWithFuel_eq, prefix_psWasmStringToListFromWithFuel_eq, prefix_psWasmFindStructureIndexWorker_eq, prefix_psWasmFindArrayIndexWorker_eq, prefix_psWasmFindFunctionTypeIndexWorker_eq, prefix_psWasmFindFunctionIndexWorker_eq] <;> rfl
+theorem prefix_psWasmIntDecimalMagnitudeWithFuel_eq : @psWasmIntDecimalMagnitudeWithFuel = @WasmPrefixReference.psWasmIntDecimalMagnitudeWithFuel := by
+  funext remainingFuel
+  induction remainingFuel with
+  | zero => rfl
+  | succ remaining ih =>
+      simp only [psWasmIntDecimalMagnitudeWithFuel, WasmPrefixReference.psWasmIntDecimalMagnitudeWithFuel, ih] <;> rfl
+
+theorem prefix_psWasmTailCallsWorker_eq : @psWasmTailCallsWorker = @WasmPrefixReference.psWasmTailCallsWorker := by
+  funext reversed
+  induction reversed with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmTailCallsWorker, WasmPrefixReference.psWasmTailCallsWorker, ih] <;> rfl
+
+theorem prefix_psWasmDiscardUnitWorker_eq : @psWasmDiscardUnitWorker = @WasmPrefixReference.psWasmDiscardUnitWorker := by
+  funext reversed
+  induction reversed with
+  | nil => rfl
+  | cons head rest ih =>
+      simp only [psWasmDiscardUnitWorker, WasmPrefixReference.psWasmDiscardUnitWorker, ih] <;> rfl
+
+#print axioms prefix_psWasmNatLiteralInstructionsWithFuel_eq
+#print axioms prefix_psWasmStringLiteralChunksWithFuel_eq
+
+def testWasmPrefixDelay : IO Unit := do
+  -- Huge unused fuel must not be materialized as an eager chain of closures.
+  let huge := 2^2000
+  if (psWasmNatLiteralInstructionsWithFuel huge 0).length != 1 then
+    throw (IO.userError "Nat literal early-zero semantics changed")
+  if (psWasmNatLiteralInstructions huge).length != 2002 then
+    throw (IO.userError "arbitrary Nat literal bit encoding changed")
+  if psWasmIrTypeKeyWithFuel huge (.primitive .nat) != some "Nat" then
+    throw (IO.userError "type-key early result changed")
+  if (psWasmStringLiteralChunksWithFuel huge "" 0 0 0 false []).length !=
+      (psWasmStringLiteralChunksWithFuel 1 "" 0 0 0 false []).length then
+    throw (IO.userError "String literal early end changed")
+  IO.println "PSC1_WASM_PREFIX_DELAY: 51 all-input worker equalities; huge fuel/zero,2001-bit literal,primitive type and empty String early results"

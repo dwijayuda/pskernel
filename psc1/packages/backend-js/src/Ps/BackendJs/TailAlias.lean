@@ -38,8 +38,8 @@ def psJsTailDrop (count : Nat) : List PsJsIrExpr -> List PsJsIrExpr :=
   match count with
   | Nat.zero => fun (values : List PsJsIrExpr) => values
   | Nat.succ remaining =>
-      let smaller : List PsJsIrExpr -> List PsJsIrExpr := psJsTailDrop remaining;
       fun (values : List PsJsIrExpr) =>
+        let smaller : List PsJsIrExpr -> List PsJsIrExpr := psJsTailDrop remaining;
         match values with
         | List.nil => List.nil
         | List.cons _ rest => smaller rest
@@ -48,8 +48,8 @@ def psJsTailEtaSuffix (parameters : List String) : List PsJsIrExpr -> Bool :=
   match parameters with
   | List.nil => fun (arguments : List PsJsIrExpr) => psListIsEmpty arguments
   | List.cons parameter rest =>
-      let smaller : List PsJsIrExpr -> Bool := psJsTailEtaSuffix rest;
       fun (arguments : List PsJsIrExpr) =>
+        let smaller : List PsJsIrExpr -> Bool := psJsTailEtaSuffix rest;
         match arguments with
         | List.nil => false
         | List.cons argument others =>
@@ -77,8 +77,8 @@ def psJsTailCaptureBindings (available : String -> Bool) (scope : Nat)
   match names with
   | List.nil => fun (_index : Nat) => Option.some List.nil
   | List.cons name rest =>
-      let smaller : Nat -> Option (List (Prod String String)) := psJsTailCaptureBindings available scope rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option (List (Prod String String)) := psJsTailCaptureBindings available scope rest;
         let fresh := String.Internal.append "__ps$tail$capture$"
           (String.Internal.append (psNatToString scope) (String.Internal.append "$" (psNatToString index)));
         if available fresh then
@@ -156,9 +156,9 @@ def psJsTailRewriteWithFuel (declaration : PsJsIrDeclaration)
   match fuel with
   | Nat.zero => fun (_locals : List String) (_aliases : List PsJsTailAlias) (_expr : PsJsIrExpr) => Option.none
   | Nat.succ remaining =>
-      let smaller : List String -> List PsJsTailAlias -> PsJsIrExpr -> Option PsJsIrExpr :=
-        psJsTailRewriteWithFuel declaration uses available remaining;
       fun (locals : List String) (aliases : List PsJsTailAlias) (expr : PsJsIrExpr) =>
+        let smaller : List String -> List PsJsTailAlias -> PsJsIrExpr -> Option PsJsIrExpr :=
+          psJsTailRewriteWithFuel declaration uses available remaining;
         if psJsTailContains locals declaration.name then Option.none
         else
           match expr with

@@ -121,9 +121,9 @@ def psEnvironmentFindInListWorker
   | List.nil =>
       fun (_name : PsName) => Option.none
   | List.cons declaration rest =>
-      let smaller : PsName -> Option PsDeclaration :=
-        psEnvironmentFindInListWorker rest;
       fun (name : PsName) =>
+        let smaller : PsName -> Option PsDeclaration :=
+          psEnvironmentFindInListWorker rest;
         if psNameEq name (psDeclarationName declaration) then
           Option.some declaration
         else

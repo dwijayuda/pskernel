@@ -1,10 +1,158 @@
-# PSC1 compiler-only self-host architecture
+# PSC1 compiler self-host architecture
 
-> Priority update 2026-10-21: this design is retained for later qualification.
-> G2/G3 and Rust repeat generations are deferred until Practical Core/backend
-> feature freeze. Follow PSC1_DEVELOPMENT_ROADMAP.md for current work; normal CI
-> retains G1 functionality and all correctness gates. Historical blockers below
-> describe their dated checkpoints, not the current normalized closure.
+Current direction: genuine DirectJS and import-free DirectWasm generations after
+Practical Core v1 feature freeze. [Roadmap](PSC1_DEVELOPMENT_ROADMAP.md) orders the
+work; [AI work state](../AI_WORK_STATE.md) and the
+[direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json) bind
+live status to immutable source/CI identities. Qualified Rust and TypeScript
+remain preserved reference implementations generated from the same compiler.
+
+## Current qualified evidence — 2026-10-24
+
+Executable source133e5892, request2d1f8244, Linux40062120079 PASSED actual
+independently admittedG1→G2→G3 and exact fixed points for BOTH DirectJS and
+owned import-free DirectWasm. Native compiler tools are disabled after one seed.
+All generations pass strict original/transformed IR and ten positive/negative
+observations. JS G2/G3824066/832426ms, maxRSS3076776/3179880KiB;
+Wasm876840/888398ms, maxRSS1508096/1816228KiB. Different closures87/98modules
+prevent interpreting these as a matched backend speed comparison.
+
+Fresh clean audit40064496804, control36d917b0, restores no .lake cache. Its
+independently checkedG1 reproduces exact source inventories, admissions, IR,
+observations and raw target source/executable bytes of each qualifiedG1/G2/G3.
+JS module.js SHA8dad2e7fb1e3eb834bed9fc7581b8f2cce36f834c5e7842f19b6f8bb904b871a;
+owned module.wasm SHAaddc90b9cfff0dcbb8ea8d8f1d7824187750b5250514915608cda5607f170b72.
+Operational manifests include events/timings/paths, so raw code equality is
+recorded separately from service-manifest hashes. This audit is not a second
+fullG2/G3 replay, DDC or formal compiler-preservation proof.
+
+The final successful mechanism fixes address source classes: eleven owned JS
+recursive-prefix bindings moved beneath all dynamic arguments; three Wasm
+encoder list helpers use fully applied ordered reverse accumulators; shared
+lookup prefixes defer work until their dynamic lookup name arrives. Complete
+retained-original API equalities and class scans accompany actual generated
+qualification. Earlier measured lazyUTF8/direct-dispatch and ordered collector
+fixes remain. No representation rewrite, alternate compiler or resource-limit
+increase was required. Original performance240s remains unqualified.
+
+[Full40062210987](https://github.com/dwijayuda/pskernel/actions/runs/40062210987)
+PASSED: Linux120780825013 and final gate120786364196;37/37 qualified,0 blocked,
+releaseReady=true, all seven backends, both grammars, applications, minimum
+Python and installed native package/IO/library regressions. Tested review HEAD
+06186537cf9339fc3f24a7d13387c2ad55ee0749 and merge
+980d096ca3e85b9ad2970f16602ad1d14a089d69 have identical Git tree
+cbf312e1f4bca9e7085719c12b627be5c16099a7, verified through GitHub APIs and checkout log.
+Artifact12549325904, digest
+sha256:6ad48b109e2e995c344a6855a85de44380f6ee628b67f4033990a152598a7bf9.
+This qualifies the tested compiler source; the final receipt update edits docs only.
+
+Earlier diagnoses, old-source pending statements and architecture milestones
+below are retained as dated history. The roadmap and current receipt govern
+live status; later actual qualification supersedes those pending statements.
+
+## Shared semantics and authority
+
+All targets execute Ps.Internal.CompilerService.candidate, the same frontend,
+elaborator, ordinary source/logical graph pairing, erasure, checked IR and
+backend-neutral planning. Only target planning/emission and runtime carriers
+differ. The host transports requests, invokes official independent Lean4.35.0,
+validates tools/ABIs/artifacts and supervises resource limits. It does not parse,
+elaborate, lower or print on behalf of a generated compiler.
+
+A qualification uses a native seed once, then removes native compiler tools.
+G1 must execute all positive and negative cases. Its actual emitted service
+compiles the captured compiler closure to G2; G2 does the same to G3. Each
+generation requires independent admission and strict original/transformed IR,
+then the same executable observations. Fixed points compare exact captured
+source closure, canonical admissions/IR/observations and target source bytes;
+owned Wasm additionally binds decoded binary bytes. Same-run equality is
+distinct from independent clean-build reproducibility or semantic preservation.
+
+DirectJS uses a generator driver for ordinary/non-tail calls and conservative
+statement loops for recognized self tails. Immutable parameter snapshots per
+iteration preserve escaping value/function captures. Unsupported aliases,
+fresh-name collisions and exhausted analysis fuel fall back to the old printer.
+
+DirectWasm uses the existing owned GC binary emitter. The generated compiler
+has no native imports. Its small host adapter copies scalar GC String/Nat/Int/
+Bool/Unit values; it rejects unknown ABI/binary inputs. It cannot delegate
+compiler semantics. BinaryBytes is the single bounded-Nat byte algorithm;
+the native UInt8 surface is a carrier adapter. Internal raw float-bit metadata
+is bounded Nat with explicit32/64-bit target validation. This does not admit
+floating source operations or previously refused machine-scalar source IR.
+
+## Retained artifact comparison boundary
+
+Read-only Linux40035257537 validates exact archived JS40027650302 and qualified
+TS39993829327 source/artifact/closure identities. No compiler executes in this
+audit. JS has8,429 generator functions/3,889 generator IIFEs; qualified TS has
+9,404/4,286. Common generated instantiate/name/equality workers have broadly
+similar loop/driver shapes. Fewer generator sites alone is therefore not a
+performance qualification or a sufficient diagnosis of the JS deadline.
+
+The older JS executable is7,257,030 bytes with23,473 nested constructor-field
+loads; TS executable is11,120,678 bytes with flat, type-tagged constructor fields.
+These are different target closures and source snapshots, not a matched speed
+benchmark. Retain the current representation and existing ABI pending measured
+causality. Actual CPU evidence—not counts or file size—justifies the bounded
+UTF8 views and direct driver dispatch already under execution. Avoid a second
+compiler implementation or speculative representation rewrite.
+
+## Patterns learned from actual generated compiler workloads
+
+| Defect class | Mechanism and evidence | Required safeguard |
+| --- | --- | --- |
+|Recursive-prefix construction|A recursive worker bound before remaining dynamic input binders constructs unused closure chains eagerly. Large literal fuel made this catastrophic in Wasm.51 workers passed all-input equality. The next retained G2 map identifies a 52nd, the main lower-expression worker: its 335-character type exceeded the old regex bound. Its new patch defers the prefix under all four inputs and scans the actual owned Wasm closure without annotation-length bounds. A retained-original negative guard prevents that blind spot from recurring.|Keep original fuel/errors/APIs; verify actual generated execution as equality alone does not establish space behavior.|
+|Declaration-spine reconstruction|Wasm G2 traces identify ordinary expansion, then psCheckedNestedCollect. An explicit ordered accumulator fixes ordinary expansion. The checked collector uses reversed declarations plus a complete Except-state fold to preserve its original rightmost-error priority; normalization preserves declaration/wrapper order.|Prove complete old/new API equality, exercise refusal priority and10000 declarations. Do not bypass canonical source/logical graph checks.|
+|Generator allocation and captures|An actual retained JS G2 profile exposed generator/GC overhead. Statement loops remove per-let generator IIFEs while retaining the established driver for non-tail work.|Immutable iteration snapshots, alias/capture/hygiene/fuel negatives, native and retained-emitter comparisons, deep tail/non-tail execution.|
+|UTF8 cache-key StringEqual|After statement loops, actual retained G2 profiling40024746671 attributes33.9% of ticks to V8 StringEqual. Port the qualified TS lazy-token pattern to eligible invariant JS self-tail loops. The fixture measures40000→2 cache-key lookups with identical results over10584 comparisons.|At most two indexed views; tokens retain no String/index arrays. Verify lexical aliases and recursive arguments, preserve position evaluation before lookup, reject shadowing/changing sources/freshness collisions, retain size-only non-admission and exact extraction fallback. Never replace source String equality.|
+
+Erasure's subsequent actual G2 failure maps to psErasureDeclarationEntryIndex
+via retained-binary/IR audit40027922448. The same source scan finds right-fold
+reconstruction in index prepending and declaration-name indexing. A shared
+fully applied reverse fold now handles all three. Full gate40028430603 at
+52cff171 proves the generic fold and all three old/new APIs, preserving complete
+index structures, duplicate first-entry precedence, insertion/count semantics,
+exact error states,4096 entry-analysis fuel and16-bit index policy. Both full
+source grammars and all earlier runtime/refusal gates pass; actual generations
+must still qualify this changed common compiler source.
+
+Subsequent Wasm G2 ran829660ms before a psListLength specialization on
+PsWasmStructType exhausted the stack. The six non-tail foundation list APIs
+(length/append/map/mapExcept/take/zip) now use fully applied accumulators with
+all-input retained API proofs and100000-element ordering/error/truncation tests.
+Full focused40031387906 passes all prior gates and both source grammars.
+
+Actual retained JS profile40031550466 verifies the real String-equality worker
+uses lazy tokens: StringEqual is0.1% of sampled ticks in that240s diagnostic.
+The compiler still timed out in standard1800s G2. It contains12171 invoke and3693
+tail-invoke sites; the helper and driver both perform a dispatch lookup for
+registered functions. Direct emission now yields the existing driver packet,
+preserving callee/argument order and tail semantics while removing the helper
+generator. Full gate40032762325 passes64 foreign-function order/trap cases and
+deep existing regressions; registered lookups40→20 and delegated fixture sites35→0.
+These measurements motivate actual new G1/G2/G3 execution, not a timing or
+fixed-point claim. The driver, private map and fallback helpers remain compatible.
+
+Source normalization follows the supported grammars deliberately: explicit
+constructor matches, typed callbacks, and fully applied structural workers with
+deferred callbacks. Do not broaden the language or weaken recursion validation
+to make a backend helper compile itself.
+
+Native proofs and fixtures do not qualify self-hosting. Current attempts,
+failures and immutable artifact identities remain in the receipt. Both direct
+targets have executed independently admitted G1 with all ten cases; G2/G3 and
+fixed points require successful actual generation chains after the fixes.
+PR174 afed7c4b full CI passed37/37/all seven backends/both grammars/applications;
+later compiler changes require their own full integration run.
+
+G1/tool/corpus limits remain240s, independent checking120s, with unchanged
+memory/stack, semantic fuel and negative/refusal policies. Manual G2/G3
+correctness1800s is separate from the original performance240s profile. No
+correctness receipt implies the shorter performance target or publication
+authorization. The historical design below is preserved as dated evidence.
+
+## Historical compiler-only design baseline
 
 Decision date: 2026-10-21. This design concerns the compiler, not the owned kernel.
 The source census baseline is immutable commit
@@ -44,7 +192,7 @@ owned kernel in the generated compiler source closure. Historical
 Ps.Bootstrap.SelfHost only imports the TS composition root; its outdated
 4.34-Wasm comment is not qualification for current DirectJS/Rust self-hosting.
 
-## Concrete current blockers
+## Historical source-census blockers (2026-10-21)
 
 The source was inspected, but inspection is distinct from running the new probe.
 
@@ -190,3 +338,21 @@ add per-declaration tracing and qualify the actual normalization before claiming
 The finalized continuation prompt specifies dual-grammar strict census, whole-closure
 admission/IR and actual generated compiler/fixed-point gates. Historical
 checked-selfhost.mjs still uses lean434/PSC2 receipt profiles and is not current evidence.
+
+## Current class-complete owned backend fixes — 2026-10-24
+
+Focused40061782715 at133e5892 proves complete retained function equality for all
+eleven remaining eager recursive prefixes in the owned JS backend. The scanner
+covers233 actual owned definitions and rejects every retained original. This
+includes the backend's own high-fuel lower/type/validate/alias/observed-print
+workers, rather than only emitted application loops. Million-fuel early-result
+and refusal tests pass; actual generated qualification remains required.
+
+The retained Wasm trace40036672078 reaches private binary encoder flatMap on
+function/value-type lists. The confirmed source uses non-tail list reconstruction.
+The private flatMap, byte-chunk and UTF8-char helpers now use fully applied
+reverse accumulators. Focused40061544936 and40061782715 prove all three complete
+old/new APIs, exact output bytes/order and first-error priority, with100000-element
+cases and the retained96-opcode/native/owned-GC comparisons. The top Nat division
+frame is insufficient evidence for a separate arithmetic defect; no limit was
+raised. This fixes encoding as a class rather than modifying individual inputs.

@@ -123,9 +123,9 @@ def psJsValidationAppendNames
   | List.nil =>
       fun (right : List String) => right
   | List.cons value rest =>
-      let smaller : List String -> List String :=
-        psJsValidationAppendNames rest;
       fun (right : List String) =>
+        let smaller : List String -> List String :=
+          psJsValidationAppendNames rest;
         List.cons value (smaller right)
 
 def psJsValidationMachineType
@@ -249,9 +249,9 @@ def psJsValidationAddBindings
   | List.nil =>
       fun (locals : List String) => locals
   | List.cons binding rest =>
-      let smaller : List String -> List String :=
-        psJsValidationAddBindings rest;
       fun (locals : List String) =>
+        let smaller : List String -> List String :=
+          psJsValidationAddBindings rest;
         smaller
           (List.cons binding.name locals)
 
@@ -364,16 +364,16 @@ def psJsValidateExprWithFuel
         Except.error
           PsJsIrValidationError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          List String ->
-          PsJsIrExpr ->
-            Except PsJsIrValidationError Unit :=
-        psJsValidateExprWithFuel
-          globals
-          remaining;
       fun
         (locals : List String)
         (expr : PsJsIrExpr) =>
+        let smaller :
+            List String ->
+            PsJsIrExpr ->
+              Except PsJsIrValidationError Unit :=
+          psJsValidateExprWithFuel
+            globals
+            remaining;
         let validateCurrent :
             PsJsIrExpr ->
               Except PsJsIrValidationError Unit :=

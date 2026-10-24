@@ -17,22 +17,30 @@ inductive PsWasmEncodeError where
 -- is normalized modulo 256. Native UInt8 conversion is a separate boundary.
 namespace Ps.Internal.WasmBinaryBytes
 
-def psListFlatMapExcept {α β ε : Type}
-    (convert : α -> Except ε (List β)) (values : List α) : Except ε (List β) :=
+def psListFlatMapExceptAcc {α β ε : Type}
+    (convert : α -> Except ε (List β)) (values : List α)
+    (reversed : List β) : Except ε (List β) :=
   match values with
-  | List.nil => Except.ok []
+  | List.nil => Except.ok (psListReverse reversed)
   | List.cons value rest =>
       match convert value with
       | Except.error error => Except.error error
       | Except.ok first =>
-          match psListFlatMapExcept convert rest with
-          | Except.error error => Except.error error
-          | Except.ok other => Except.ok (psListAppend first other)
+          psListFlatMapExceptAcc convert rest (psListReverseAcc first reversed)
+
+def psListFlatMapExcept {α β ε : Type}
+    (convert : α -> Except ε (List β)) (values : List α) : Except ε (List β) :=
+  psListFlatMapExceptAcc convert values List.nil
+
+def psWasmEncodeByteChunksAcc
+    (chunks : List (List Nat)) (reversed : List Nat) : List Nat :=
+  match chunks with
+  | List.nil => psListReverse reversed
+  | List.cons chunk rest =>
+      psWasmEncodeByteChunksAcc rest (psListReverseAcc chunk reversed)
 
 def psWasmEncodeByteChunks (chunks : List (List Nat)) : List Nat :=
-  match chunks with
-  | List.nil => []
-  | List.cons chunk rest => psListAppend chunk (psWasmEncodeByteChunks rest)
+  psWasmEncodeByteChunksAcc chunks List.nil
 
 def psWasmByte (value : Nat) : Nat :=
   Nat.mod value 256
@@ -43,9 +51,9 @@ def psWasmEncodeUlebWithFuel
   | 0 =>
       fun (_value : Nat) => List.nil
   | fuel + 1 =>
-      let smaller : Nat -> List Nat :=
-        psWasmEncodeUlebWithFuel fuel;
       fun (value : Nat) =>
+        let smaller : Nat -> List Nat :=
+          psWasmEncodeUlebWithFuel fuel;
         let low := Nat.mod value 128;
         let rest := Nat.div value 128;
         if Nat.beq rest 0 then
@@ -64,9 +72,9 @@ def psWasmEncodeSlebWithFuel
   | 0 =>
       fun (_value : Int) => List.nil
   | fuel + 1 =>
-      let smaller : Int -> List Nat :=
-        psWasmEncodeSlebWithFuel fuel;
       fun (value : Int) =>
+        let smaller : Int -> List Nat :=
+          psWasmEncodeSlebWithFuel fuel;
         let lowInt := psWasmIntEModNat value 128;
         let low := psWasmIntToNat lowInt;
         let rest := psWasmIntEDivNat value 128;
@@ -118,10 +126,10 @@ def psWasmStringToListFromWithFuel
         fun (_position : Nat) =>
           List.nil
   | Nat.succ fuel =>
-      let smaller : String -> Nat -> List Char :=
-        psWasmStringToListFromWithFuel fuel;
       fun (source : String) =>
         fun (position : Nat) =>
+          let smaller : String -> Nat -> List Char :=
+            psWasmStringToListFromWithFuel fuel;
           if
               String.Internal.atEnd
                 source
@@ -176,15 +184,17 @@ def psWasmEncodeUtf8Char (char : Char) : List Nat :=
       psWasmByte (Nat.add 128 (Nat.mod value 64))
     ]
 
-def psWasmEncodeUtf8Chars
-    (chars : List Char) :
-    List Nat :=
+def psWasmEncodeUtf8CharsAcc
+    (chars : List Char) (reversed : List Nat) : List Nat :=
   match chars with
-  | List.nil => []
+  | List.nil => psListReverse reversed
   | List.cons char rest =>
-      psListAppend
-        (psWasmEncodeUtf8Char char)
-        (psWasmEncodeUtf8Chars rest)
+      psWasmEncodeUtf8CharsAcc rest
+        (psListReverseAcc (psWasmEncodeUtf8Char char) reversed)
+
+def psWasmEncodeUtf8Chars
+    (chars : List Char) : List Nat :=
+  psWasmEncodeUtf8CharsAcc chars List.nil
 
 def psWasmEncodeName (name : String) : List Nat :=
   let bytes := psWasmEncodeUtf8Chars (psWasmStringToList name);
@@ -200,9 +210,9 @@ def psWasmFindStructureIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons structType rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindStructureIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindStructureIndexWorker name rest;
         if psStringEq structType.name name then
           Option.some index
         else
@@ -227,9 +237,9 @@ def psWasmFindArrayIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons arrayType rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindArrayIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindArrayIndexWorker name rest;
         if psStringEq arrayType.name name then
           Option.some index
         else
@@ -302,9 +312,9 @@ def psWasmFindFunctionTypeIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons functionType rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindFunctionTypeIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindFunctionTypeIndexWorker name rest;
         if psStringEq functionType.name name then
           Option.some index
         else
@@ -389,9 +399,9 @@ def psWasmFindFunctionIndexWorker
   | List.nil =>
       fun (_index : Nat) => Option.none
   | List.cons function rest =>
-      let smaller : Nat -> Option Nat :=
-        psWasmFindFunctionIndexWorker name rest;
       fun (index : Nat) =>
+        let smaller : Nat -> Option Nat :=
+          psWasmFindFunctionIndexWorker name rest;
         if psStringEq function.name name then
           Option.some index
         else
@@ -907,10 +917,10 @@ def psWasmEncodeFunctionTypeIndicesAcc
       fun (_functionIndex : Nat) =>
         fun (reversed : List Nat) => Except.ok (psListReverse reversed)
   | List.cons function rest =>
-      let smaller : Nat -> List Nat -> Except PsWasmEncodeError (List Nat) :=
-        psWasmEncodeFunctionTypeIndicesAcc structures arrays functionTypes rest;
       fun (functionIndex : Nat) =>
         fun (reversed : List Nat) =>
+          let smaller : Nat -> List Nat -> Except PsWasmEncodeError (List Nat) :=
+            psWasmEncodeFunctionTypeIndicesAcc structures arrays functionTypes rest;
           match psWasmFunctionTypeIndex structures arrays functionTypes functionIndex function with
           | Except.error error => Except.error error
           | Except.ok typeIndex =>

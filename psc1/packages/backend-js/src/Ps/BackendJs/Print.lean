@@ -853,22 +853,14 @@ def psJsPrintExprWithPositionAndFuel
                 | Except.error error => Except.error error
                 | Except.ok printedArguments =>
                     if stackContext then
-                      let suffix : String :=
-                        if psListIsEmpty printedArguments then
-                          ""
-                        else
-                          psJsConcat2
-                            ", "
-                            (psJsJoin ", " printedArguments);
+                      -- The existing driver owns the single dispatch lookup.
+                      -- Object fields preserve callee then left-to-right operands.
                       Except.ok
-                        (psJsJoin
-                          ""
-                          [
-                            (if tailPosition then "(yield* __ps$tailInvoke(" else "(yield* __ps$invoke("),
-                            printedFn,
-                            suffix,
-                            "))"
-                          ])
+                        (psJsJoin "" [
+                          "(yield { fn: ", printedFn, ", args: [",
+                          psJsJoin ", " printedArguments, "], tail: ",
+                          (if tailPosition then "true" else "false"), " })"
+                        ])
                     else
                       Except.ok
                         (psJsConcat4
@@ -1202,12 +1194,12 @@ def psJsPrintDeclarationsObservedWith
         Except.ok
           (PsJsPrintedModule.mk (psTextBuilderFinish builder) (psListReverse spansRev))
   | List.cons declaration rest =>
-      let smaller :
-          Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
-          List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
-        psJsPrintDeclarationsObservedWith print rest;
       fun (observe : Bool) (builder : PsTextBuilder)
           (position : PsJsGeneratedPosition) (spansRev : List PsJsGeneratedDeclarationSpan) =>
+        let smaller :
+            Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
+            List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
+          psJsPrintDeclarationsObservedWith print rest;
         match print declaration with
         | Except.error error => Except.error error
         | Except.ok printed =>
@@ -1536,6 +1528,466 @@ def psJsTailEmitWithFuel
                     printed
                     ";")
 
+-- Generator statements reuse the existing driver for every non-tail call.
+-- Tail iterations snapshot every parameter immutably, preserving escaped closures.
+def psJsGeneratorTailValue (name : String) (tail : Bool) (fuel : Nat)
+    (expr : PsJsIrExpr) : Option String :=
+  match psJsPrintExprWithPositionAndFuel (Option.some name) tail fuel expr with
+  | Except.error _ => Option.none
+  | Except.ok printed => Option.some printed
+
+def psJsGeneratorTailArguments (name : String) (fuel : Nat)
+    (arguments : List PsJsIrExpr) : Option (List String) :=
+  match arguments with
+  | List.nil => Option.some []
+  | List.cons value rest =>
+      match psJsGeneratorTailValue name false fuel value with
+      | Option.none => Option.none
+      | Option.some printed =>
+          match psJsGeneratorTailArguments name fuel rest with
+          | Option.none => Option.none
+          | Option.some others => Option.some (List.cons printed others)
+
+def psJsGeneratorTailEmitWithFuel
+    (declaration : PsJsIrDeclaration)
+    (available : String -> Bool)
+    (fuel : Nat) :
+    Nat -> PsJsIrExpr -> Option String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_matchDepth : Nat) (_expr : PsJsIrExpr) =>
+        Option.none
+  | Nat.succ remaining =>
+      fun (matchDepth : Nat) (expr : PsJsIrExpr) =>
+        let smaller :
+            Nat -> PsJsIrExpr -> Option String :=
+          psJsGeneratorTailEmitWithFuel
+            declaration
+            available
+            remaining;
+        let sameDepth : PsJsIrExpr -> Option String :=
+          smaller matchDepth;
+        let nested : PsJsIrExpr -> Option String :=
+          smaller (Nat.succ matchDepth);
+        match expr with
+        | PsJsIrExpr.call fn arguments =>
+            match fn with
+            | PsJsIrExpr.var name =>
+                if psStringEq name declaration.name then
+                  if Nat.beq remaining 0 then Option.none else
+                  if
+                      Nat.beq
+                        (psListLength declaration.parameters)
+                        (psListLength arguments) then
+                    match
+                        psJsGeneratorTailArguments declaration.name remaining arguments with
+                    | Option.none => Option.none
+                    | Option.some printedArguments =>
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "__ps$tail$state = [",
+                              psJsJoin ", " printedArguments,
+                              "]; continue;"
+                            ])
+                  else
+                    Option.none
+                else
+                  match
+                      psJsGeneratorTailValue declaration.name true fuel expr with
+                  | Option.none => Option.none
+                  | Option.some printed =>
+                      Option.some
+                        (psJsConcat3
+                          "return "
+                          printed
+                          ";")
+            | _ =>
+                match
+                    psJsGeneratorTailValue declaration.name true fuel expr with
+                | Option.none => Option.none
+                | Option.some printed =>
+                    Option.some
+                      (psJsConcat3
+                        "return "
+                        printed
+                        ";")
+        | PsJsIrExpr.letE name value body =>
+            if psStringEq name declaration.name then
+              Option.none
+            else
+              match
+                  psJsGeneratorTailValue declaration.name false remaining value with
+              | Option.none => Option.none
+              | Option.some printedValue =>
+                  match sameDepth body with
+                  | Option.none => Option.none
+                  | Option.some printedBody =>
+                      let temp := String.Internal.append "__ps$tail$value$" (psNatToString remaining);
+                      if available temp then
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "{ const ", temp, " = ", printedValue,
+                              "; { const ", name, " = ", temp, "; ", printedBody, " } }"
+                            ])
+                      else Option.none
+        | PsJsIrExpr.ifE condition thenBranch elseBranch =>
+            match
+                psJsGeneratorTailValue declaration.name false remaining condition with
+            | Option.none => Option.none
+            | Option.some printedCondition =>
+                match sameDepth thenBranch with
+                | Option.none => Option.none
+                | Option.some printedThen =>
+                    match sameDepth elseBranch with
+                    | Option.none => Option.none
+                    | Option.some printedElse =>
+                        Option.some
+                          (psJsJoin
+                            ""
+                            [
+                              "if (",
+                              printedCondition,
+                              ") { ",
+                              printedThen,
+                              " } else { ",
+                              printedElse,
+                              " }"
+                            ])
+        | PsJsIrExpr.matchE scrutinee alternatives =>
+            match
+                psJsGeneratorTailValue declaration.name false remaining scrutinee with
+            | Option.none => Option.none
+            | Option.some printedScrutinee =>
+                let temp : String :=
+                  psJsFreshTailMatchTemp
+                    expr
+                    matchDepth;
+                if available temp then
+                  match
+                      psJsTailPrintAlternativesWith
+                        nested
+                        declaration.name
+                        temp
+                        alternatives with
+                  | Option.none => Option.none
+                  | Option.some printedAlternatives =>
+                      Option.some
+                        (psJsJoin
+                          ""
+                          [
+                            "const ",
+                            temp,
+                            " = ",
+                            printedScrutinee,
+                            "; switch (",
+                            temp,
+                            "[\"$ps$tag\"]) { ",
+                            psJsJoin " " printedAlternatives,
+                            " } throw new Error(\"invalid ProofScript constructor tag\");"
+                          ])
+                else Option.none
+        | _ =>
+            match
+                psJsGeneratorTailValue declaration.name true fuel expr with
+            | Option.none => Option.none
+            | Option.some printed =>
+                Option.some
+                  (psJsConcat3
+                    "return "
+                    printed
+                    ";")
+
+
+def psJsPrintGeneratorTailLoopWithVisibility (isPublic : Bool)
+    (declaration : PsJsIrDeclaration) : Option String :=
+  match declaration.parameters with
+  | List.nil => Option.none
+  | List.cons _ _ =>
+      if psJsNeedsCallDriver declaration.body then
+        let names := psJsTailParameterNames declaration.parameters;
+        let uses : PsJsIrExpr -> String -> Bool := psJsExprUsesNameWithFuel 4096;
+        let available : String -> Bool := fun (name : String) =>
+          if psStringEq name declaration.name then false
+          else if psJsTailContains names name then false
+          else if uses declaration.body name then false else true;
+        if available "__ps$tail$state" then
+          match psJsTailRewriteWithFuel declaration uses available 4096 names [] declaration.body with
+          | Option.none => Option.none
+          | Option.some rewritten =>
+              match psJsGeneratorTailEmitWithFuel declaration available 4096 0 rewritten with
+              | Option.none => Option.none
+              | Option.some body =>
+                  let parameters := psJsJoin ", " names;
+                  let implementation := psJsImplementationName declaration.name;
+                  Option.some (psJsJoin "" [
+                    (if isPublic then "export function " else "function "), declaration.name,
+                    "(", parameters, ") { return __ps$run(", implementation, "(", parameters, ")); }\n",
+                    "function* ", implementation, "(", parameters, ") { let __ps$tail$state = [",
+                    parameters, "]; while (true) { const [", parameters, "] = __ps$tail$state; ",
+                    body, " } }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");\n"])
+        else Option.none
+      else Option.none
+
+-- Lazy view tokens never retain String/index arrays. This path is restricted to
+-- pure self-tail loops whose indexed source parameters remain invariant.
+def psJsViewLookup (views : List (String × String)) (name : String) : Option String :=
+  match views with
+  | List.nil => Option.none
+  | List.cons entry rest =>
+      if psStringEq entry.fst name then Option.some entry.snd else psJsViewLookup rest name
+
+def psJsViewWithout (views : List (String × String)) (name : String) : List (String × String) :=
+  match views with
+  | List.nil => []
+  | List.cons entry rest =>
+      if psStringEq entry.fst name then psJsViewWithout rest name
+      else List.cons entry (psJsViewWithout rest name)
+
+def psJsViewAlias (views : List (String × String)) (name : String) (value : PsJsIrExpr) :
+    List (String × String) :=
+  let remaining := psJsViewWithout views name;
+  match value with
+  | PsJsIrExpr.var original =>
+      match psJsViewLookup views original with
+      | Option.some getter => List.cons (Prod.mk name getter) remaining
+      | Option.none => remaining
+  | _ => remaining
+
+def psJsViewMap {alpha beta : Type} (f : alpha -> Option beta) (values : List alpha) : Option (List beta) :=
+  match values with
+  | List.nil => Option.some []
+  | List.cons value rest =>
+      match f value with
+      | Option.none => Option.none
+      | Option.some mapped =>
+          match psJsViewMap f rest with
+          | Option.none => Option.none
+          | Option.some others => Option.some (List.cons mapped others)
+
+def psJsViewAny (values : List (Option Bool)) : Option Bool :=
+  match values with
+  | List.nil => Option.some false
+  | List.cons value rest =>
+      match value with
+      | Option.none => Option.none
+      | Option.some used =>
+          match psJsViewAny rest with
+          | Option.none => Option.none
+          | Option.some other => Option.some (used || other)
+
+def psJsViewInspectWorker (self source : String) (index : Nat) (fuel : Nat)
+    (aliases : List (String × String)) (expr : PsJsIrExpr) : Option Bool :=
+  match fuel with
+  | Nat.zero => Option.none
+  | Nat.succ remaining =>
+      let recur : PsJsIrExpr -> Option Bool := fun (value : PsJsIrExpr) =>
+        psJsViewInspectWorker self source index remaining aliases value;
+      let known : String -> Bool := fun (name : String) =>
+        match psJsViewLookup aliases name with
+        | Option.some _ => true
+        | Option.none => false;
+      match expr with
+      | PsJsIrExpr.literal _ => Option.some false
+      | PsJsIrExpr.var _ => Option.some false
+      | PsJsIrExpr.unary _ value => recur value
+      | PsJsIrExpr.projection value _ => recur value
+      | PsJsIrExpr.binary _ left right => psJsViewAny [recur left,recur right]
+      | PsJsIrExpr.runtime operation arguments =>
+          let indexed : Bool :=
+            match operation with
+            | PsJsIrRuntimeOp.stringGet => true
+            | PsJsIrRuntimeOp.stringNext => true
+            | _ => false;
+          let uses : Bool :=
+            match arguments with
+            | List.cons first _ =>
+                match first with
+                | PsJsIrExpr.var name => indexed && known name
+                | _ => false
+            | _ => false;
+          psJsViewAny (List.cons (Option.some uses) (psListMap recur arguments))
+      | PsJsIrExpr.lambda _ _ => Option.none
+      | PsJsIrExpr.call fn arguments =>
+          match fn with
+          | PsJsIrExpr.var called =>
+              if psStringEq called self then
+                match psJsTailDrop index arguments with
+                | List.cons first _ =>
+                    match first with
+                    | PsJsIrExpr.var name =>
+                        if known name then psJsViewAny (psListMap recur arguments) else Option.none
+                    | _ => Option.none
+                | _ => Option.none
+              else Option.none
+          | _ => Option.none
+      | PsJsIrExpr.letE name value body =>
+          if psStringEq name source then Option.none
+          else psJsViewAny [recur value,
+            psJsViewInspectWorker self source index remaining (psJsViewAlias aliases name value) body]
+      | PsJsIrExpr.ifE condition left right => psJsViewAny [recur condition,recur left,recur right]
+      | PsJsIrExpr.record fields => psJsViewAny (psListMap (fun (field : Prod String PsJsIrExpr) => recur field.snd) fields)
+      | PsJsIrExpr.constructor _ fields => psJsViewAny (psListMap (fun (field : Prod String PsJsIrExpr) => recur field.snd) fields)
+      | PsJsIrExpr.matchE scrutinee alternatives =>
+          let alternative : Prod String (Prod (List PsJsIrMatchBinding) PsJsIrExpr) -> Option Bool :=
+            fun (entry : String × List PsJsIrMatchBinding × PsJsIrExpr) =>
+            if psListAny (fun (binding : PsJsIrMatchBinding) => known binding.name || psStringEq binding.name source) entry.snd.fst then Option.none
+            else recur entry.snd.snd;
+          psJsViewAny (List.cons (recur scrutinee) (psListMap alternative alternatives))
+
+def psJsViewInspect (self source : String) (index : Nat) (fuel : Nat) :
+    List (String × String) -> PsJsIrExpr -> Option Bool :=
+  fun (aliases : List (String × String)) (expr : PsJsIrExpr) =>
+    psJsViewInspectWorker self source index fuel aliases expr
+
+def psJsViewName (index : Nat) : String := psJsJoin "" ["__ps$view$",psNatToString index]
+def psJsViewTokenName (index : Nat) : String := psJsJoin "" ["__ps$viewToken$",psNatToString index]
+def psJsViewPositionName : String := "__ps$view$position"
+
+def psJsViewSelect (declaration : PsJsIrDeclaration) (body : PsJsIrExpr)
+    (parameters : List PsJsIrParameter) (index : Nat) (count : Nat) : Option (List (String × String)) :=
+  match parameters with
+  | List.nil => Option.some List.nil
+  | List.cons parameter rest =>
+      match psJsViewInspect declaration.name parameter.name index 4096 [Prod.mk parameter.name "view"] body with
+      | Option.some used =>
+          if used then
+            if Nat.blt count 2 then
+              match psJsViewSelect declaration body rest (Nat.succ index) (Nat.succ count) with
+              | Option.none => Option.none
+              | Option.some others => Option.some (List.cons (Prod.mk parameter.name (psJsViewName count)) others)
+            else Option.none
+          else psJsViewSelect declaration body rest (Nat.succ index) count
+      | Option.none => psJsViewSelect declaration body rest (Nat.succ index) count
+
+def psJsViewIntrinsic (views : List (String × String)) (operation : PsJsIrRuntimeOp)
+    (arguments : List PsJsIrExpr) : PsJsIrExpr :=
+  let ordinary := PsJsIrExpr.runtime operation arguments;
+  match arguments with
+  | List.cons first rest =>
+      match first with
+      | PsJsIrExpr.var name =>
+          match psJsViewLookup views name with
+          | Option.none => ordinary
+          | Option.some getter =>
+              let view := PsJsIrExpr.call (PsJsIrExpr.var getter) [];
+              match operation with
+              | PsJsIrRuntimeOp.stringUtf8ByteSize =>
+                  if psListIsEmpty rest then PsJsIrExpr.projection view "size" else ordinary
+              | _ =>
+                  match rest with
+                  | List.cons position tail =>
+                      if psListIsEmpty tail then
+                        let p := PsJsIrExpr.var psJsViewPositionName;
+                        let value : Option PsJsIrExpr :=
+                          match operation with
+                          | PsJsIrRuntimeOp.stringGet => Option.some (PsJsIrExpr.call (PsJsIrExpr.var "__ps$stringGetView") [view,p])
+                          | PsJsIrRuntimeOp.stringNext => Option.some (PsJsIrExpr.call (PsJsIrExpr.var "__ps$stringNextView") [view,p])
+                          | PsJsIrRuntimeOp.stringAtEnd => Option.some (PsJsIrExpr.binary PsJsIrBinaryOp.bigintLe (PsJsIrExpr.projection view "size") p)
+                          | _ => Option.none;
+                        match value with
+                        | Option.none => ordinary
+                        | Option.some body =>
+                            -- Preserve position evaluation before the lazy cache lookup.
+                            PsJsIrExpr.call (PsJsIrExpr.lambda [psJsViewPositionName] body) [position]
+                      else ordinary
+                  | _ => ordinary
+      | _ => ordinary
+  | _ => ordinary
+
+def psJsViewMapOne {alpha beta : Type} (convert : alpha -> beta) (value : Option alpha) : Option beta :=
+  match value with
+  | Option.none => Option.none
+  | Option.some x => Option.some (convert x)
+
+def psJsViewMapTwo {alpha beta gamma : Type} (convert : alpha -> beta -> gamma)
+    (left : Option alpha) (right : Option beta) : Option gamma :=
+  match left with
+  | Option.none => Option.none
+  | Option.some a =>
+      match right with
+      | Option.none => Option.none
+      | Option.some b => Option.some (convert a b)
+
+def psJsViewRewriteWorker (fuel : Nat) (views : List (String × String))
+    (expr : PsJsIrExpr) : Option PsJsIrExpr :=
+  match fuel with
+  | Nat.zero => Option.none
+  | Nat.succ remaining =>
+      let recur : PsJsIrExpr -> Option PsJsIrExpr := fun (value : PsJsIrExpr) =>
+        psJsViewRewriteWorker remaining views value;
+      match expr with
+      | PsJsIrExpr.literal _ => Option.some expr
+      | PsJsIrExpr.var _ => Option.some expr
+      | PsJsIrExpr.unary operation value => psJsViewMapOne (PsJsIrExpr.unary operation) (recur value)
+      | PsJsIrExpr.projection value field => psJsViewMapOne (fun (target : PsJsIrExpr) => PsJsIrExpr.projection target field) (recur value)
+      | PsJsIrExpr.binary operation left right => psJsViewMapTwo (PsJsIrExpr.binary operation) (recur left) (recur right)
+      | PsJsIrExpr.runtime operation arguments =>
+          psJsViewMapOne (psJsViewIntrinsic views operation) (psJsViewMap recur arguments)
+      | PsJsIrExpr.lambda _ _ => Option.none
+      | PsJsIrExpr.call fn arguments =>
+          psJsViewMapTwo PsJsIrExpr.call (recur fn) (psJsViewMap recur arguments)
+      | PsJsIrExpr.letE name value body =>
+          psJsViewMapTwo (PsJsIrExpr.letE name) (recur value)
+            (psJsViewRewriteWorker remaining (psJsViewAlias views name value) body)
+      | PsJsIrExpr.ifE condition left right =>
+          match recur condition with
+          | Option.none => Option.none
+          | Option.some c => psJsViewMapTwo (PsJsIrExpr.ifE c) (recur left) (recur right)
+      | PsJsIrExpr.record fields =>
+          let field : Prod String PsJsIrExpr -> Option (Prod String PsJsIrExpr) :=
+            fun (entry : String × PsJsIrExpr) =>
+            psJsViewMapOne (fun (value : PsJsIrExpr) => Prod.mk entry.fst value) (recur entry.snd);
+          psJsViewMapOne PsJsIrExpr.record (psJsViewMap field fields)
+      | PsJsIrExpr.constructor name fields =>
+          let field : Prod String PsJsIrExpr -> Option (Prod String PsJsIrExpr) :=
+            fun (entry : String × PsJsIrExpr) =>
+            psJsViewMapOne (fun (value : PsJsIrExpr) => Prod.mk entry.fst value) (recur entry.snd);
+          psJsViewMapOne (PsJsIrExpr.constructor name) (psJsViewMap field fields)
+      | PsJsIrExpr.matchE scrutinee alternatives =>
+          let alternative : Prod String (Prod (List PsJsIrMatchBinding) PsJsIrExpr) ->
+              Option (Prod String (Prod (List PsJsIrMatchBinding) PsJsIrExpr)) :=
+            fun (entry : String × List PsJsIrMatchBinding × PsJsIrExpr) =>
+            psJsViewMapOne (fun (body : PsJsIrExpr) => Prod.mk entry.fst (Prod.mk entry.snd.fst body)) (recur entry.snd.snd);
+          psJsViewMapTwo PsJsIrExpr.matchE (recur scrutinee) (psJsViewMap alternative alternatives)
+
+def psJsViewRewrite (fuel : Nat) : List (String × String) -> PsJsIrExpr -> Option PsJsIrExpr :=
+  fun (views : List (String × String)) (expr : PsJsIrExpr) => psJsViewRewriteWorker fuel views expr
+
+def psJsViewFresh (available : String -> Bool) (count : Nat) : Bool :=
+  match count with
+  | Nat.zero => available psJsViewPositionName
+  | Nat.succ remaining =>
+      available (psJsViewName remaining) && available (psJsViewTokenName remaining) &&
+        psJsViewFresh available remaining
+
+def psJsViewPrelude (views : List (String × String)) (index : Nat) : String :=
+  match views with
+  | List.nil => ""
+  | List.cons entry rest =>
+      let token := psJsViewTokenName index;
+      psJsJoin "" ["let ",token,"; const ",entry.snd,
+        " = () => ((view) => { ",token," = view.token; return view; })(__ps$utf8Known(",
+        entry.fst,", ",token,")); ",psJsViewPrelude rest (Nat.succ index)]
+
+def psJsViewLoopBody (declaration : PsJsIrDeclaration) (available : String -> Bool)
+    (body : PsJsIrExpr) : Option (String × String) :=
+  match psJsViewSelect declaration body declaration.parameters 0 0 with
+  | Option.none => Option.none
+  | Option.some views =>
+      if psListIsEmpty views then Option.none
+      else if psJsViewFresh available (psListLength views) then
+        match psJsViewRewrite 4096 views body with
+        | Option.none => Option.none
+        | Option.some rewritten =>
+            match psJsTailEmitWithFuel declaration available 4096 0 rewritten with
+            | Option.none => Option.none
+            | Option.some printed => Option.some (Prod.mk (psJsViewPrelude views 0) printed)
+      else Option.none
+
 def psJsPrintTailLoopWithVisibility (isPublic : Bool)
     (declaration : PsJsIrDeclaration) : Option String :=
   match declaration.parameters with
@@ -1553,16 +2005,24 @@ def psJsPrintTailLoopWithVisibility (isPublic : Bool)
           match psJsTailRewriteWithFuel declaration uses available 4096 names List.nil declaration.body with
           | Option.none => Option.none
           | Option.some rewritten =>
-              match psJsTailEmitWithFuel declaration available 4096 0 rewritten with
+              let viewBody := psJsViewLoopBody declaration available rewritten;
+              let emitted : Option (Prod String String) :=
+                match viewBody with
+                | Option.some pair => Option.some pair
+                | Option.none =>
+                    match psJsTailEmitWithFuel declaration available 4096 0 rewritten with
+                    | Option.none => Option.none
+                    | Option.some printed => Option.some (Prod.mk "" printed);
+              match emitted with
               | Option.none => Option.none
-              | Option.some printedBody =>
+              | Option.some pair =>
                   let parameters := psJsJoin ", " names;
                   Option.some
                     (psJsJoin "" [
                       (if isPublic then "export function " else "function "), declaration.name, "(", parameters,
-                      ") { let __ps$tail$state = [", parameters,
+                      ") { ",pair.fst,"let __ps$tail$state = [", parameters,
                       "]; while (true) { const [", parameters,
-                      "] = __ps$tail$state; ", printedBody, " } }\n"
+                      "] = __ps$tail$state; ",pair.snd," } }\n"
                     ])
         else Option.none
       else Option.none
@@ -1577,62 +2037,65 @@ def psJsPrintDeclarationStackSafeWithVisibility (isPublic : Bool)
   | Option.some printed =>
       Except.ok printed
   | Option.none =>
-      if psJsNeedsCallDriver declaration.body then
-        match
-            psJsPrintExprStackSafe
-              declaration.name
-              declaration.body with
-        | Except.error error => Except.error error
-        | Except.ok body =>
-            match declaration.parameters with
-            | List.nil =>
-                Except.ok
-                  (psJsJoin
-                    ""
-                    [
-                      (if isPublic then "export const " else "const "),
-                      declaration.name,
-                      " = __ps$run((function*() { return ",
-                      body,
-                      "; })());\n"
-                    ])
-            | List.cons _ _ =>
-                let parameters :=
-                  psListMap
-                    psJsParameterName
-                    declaration.parameters;
-                let joinedParameters : String :=
-                  psJsJoin ", " parameters;
-                let implementation : String :=
-                  psJsImplementationName declaration.name;
-                Except.ok
-                  (psJsJoin
-                    ""
-                    [
-                      (if isPublic then "export function " else "function "),
-                      declaration.name,
-                      "(",
-                      joinedParameters,
-                      ") { return __ps$run(",
-                      implementation,
-                      "(",
-                      joinedParameters,
-                      ")); }\n",
-                      "function* ",
-                      implementation,
-                      "(",
-                      joinedParameters,
-                      ") { return ",
-                      body,
-                      "; }\n",
-                      "__ps$implementations.set(",
-                      declaration.name,
-                      ", ",
-                      implementation,
-                      ");\n"
-                    ])
-      else
-        psJsPrintDeclarationWithVisibility isPublic declaration
+      match psJsPrintGeneratorTailLoopWithVisibility isPublic declaration with
+      | Option.some printed => Except.ok printed
+      | Option.none =>
+          if psJsNeedsCallDriver declaration.body then
+            match
+                psJsPrintExprStackSafe
+                  declaration.name
+                  declaration.body with
+            | Except.error error => Except.error error
+            | Except.ok body =>
+                match declaration.parameters with
+                | List.nil =>
+                    Except.ok
+                      (psJsJoin
+                        ""
+                        [
+                          (if isPublic then "export const " else "const "),
+                          declaration.name,
+                          " = __ps$run((function*() { return ",
+                          body,
+                          "; })());\n"
+                        ])
+                | List.cons _ _ =>
+                    let parameters :=
+                      psListMap
+                        psJsParameterName
+                        declaration.parameters;
+                    let joinedParameters : String :=
+                      psJsJoin ", " parameters;
+                    let implementation : String :=
+                      psJsImplementationName declaration.name;
+                    Except.ok
+                      (psJsJoin
+                        ""
+                        [
+                          (if isPublic then "export function " else "function "),
+                          declaration.name,
+                          "(",
+                          joinedParameters,
+                          ") { return __ps$run(",
+                          implementation,
+                          "(",
+                          joinedParameters,
+                          ")); }\n",
+                          "function* ",
+                          implementation,
+                          "(",
+                          joinedParameters,
+                          ") { return ",
+                          body,
+                          "; }\n",
+                          "__ps$implementations.set(",
+                          declaration.name,
+                          ", ",
+                          implementation,
+                          ");\n"
+                        ])
+          else
+            psJsPrintDeclarationWithVisibility isPublic declaration
 
 def psJsPrintDeclarationStackSafe (declaration : PsJsIrDeclaration) : Except PsJsEmitError String :=
   psJsPrintDeclarationStackSafeWithVisibility true declaration

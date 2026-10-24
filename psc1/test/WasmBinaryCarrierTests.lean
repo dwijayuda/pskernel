@@ -39,7 +39,33 @@ private def checkModule (module : PsWasmModule) : IO Unit := do
       if bytes.any (fun value => Nat.ble 256 value) then
         throw (IO.userError "portable encoded byte exceeded 255")
 
+private def checkFloatBitMetadata (type : PsWasmValueType)
+    (instruction : PsWasmInstruction) (expected : Bool) : IO Unit := do
+  let function := PsWasmFunction.mk "bits" Option.none [] [type] [] [instruction]
+  let module := { psWasmModuleEmpty with functions := [function] }
+  let accepted := match psWasmIrValidateModule module with
+    | .ok _ => true
+    | .error _ => false
+  if accepted != expected then
+    throw (IO.userError "raw bit metadata width validation changed")
+  match psWasmEncodeModule module with
+  | .error .unsupportedInstruction => pure ()
+  | _ => throw (IO.userError "unqualified floating encoding was enabled")
+
 def testWasmBinaryCarrier (module : PsWasmModule) : IO Unit := do
+  -- Representation metadata must not qualify machine/float source capabilities.
+  for type in [PsVerifiedIrPrimitiveType.uint8, .uint32, .uint64, .float, .float32] do
+    match psIrCheckPrimitive type with
+    | .error issue =>
+        if issue.code != "scalar-capability-unqualified" then
+          throw (IO.userError "machine/float refusal code changed")
+    | .ok _ => throw (IO.userError "unqualified scalar capability was enabled")
+  checkFloatBitMetadata .f32 (.f32ConstBits 0) true
+  checkFloatBitMetadata .f32 (.f32ConstBits 4294967295) true
+  checkFloatBitMetadata .f32 (.f32ConstBits 4294967296) false
+  checkFloatBitMetadata .f64 (.f64ConstBits 0) true
+  checkFloatBitMetadata .f64 (.f64ConstBits 18446744073709551615) true
+  checkFloatBitMetadata .f64 (.f64ConstBits 18446744073709551616) false
   for value in [0,1,127,128,255,256,257,65535,65536,2^63,2^64,2^2000] do
     if PsWasmBinaryReference.psWasmByte value != psWasmByte value then
       throw (IO.userError "byte modulus changed")

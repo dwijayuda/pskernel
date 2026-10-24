@@ -901,34 +901,48 @@ def psCheckedNestedWrapper (all : List PsDeclaration) (info : PsInductiveInfo) (
     else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
   else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
 
-def psCheckedNestedCollect (all : List PsDeclaration) (declarations : List PsDeclaration) : Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration)) :=
-  match declarations with
-  | List.nil => Except.ok List.nil
-  | List.cons declaration rest =>
-      match psCheckedNestedCollect all rest with
-      | Except.error error => Except.error error
-      | Except.ok tail =>
-          match declaration with
-          | PsDeclaration.inductiveDecl info =>
-              match psCheckedNestedRoots all info.name info.constructors List.nil with
-              | Except.error error => Except.error error
-              | Except.ok roots =>
-                  if psListIsEmpty roots then Except.ok tail
-                  else
-                    match psCheckedNestedExpand info.name (Nat.succ (psCheckedNestedSizes roots)) roots List.nil with
+-- The retained collector visits the tail first. Reverse the declaration spine
+-- and thread its complete Except state to preserve exact rightmost-error order.
+def psCheckedNestedCollectStep (all : List PsDeclaration) (declaration : PsDeclaration)
+    (state : Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration))) :
+    Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration)) :=
+  match state with
+  | Except.error error => Except.error error
+  | Except.ok tail =>
+      match declaration with
+      | PsDeclaration.inductiveDecl info =>
+          match psCheckedNestedRoots all info.name info.constructors List.nil with
+          | Except.error error => Except.error error
+          | Except.ok roots =>
+              if psListIsEmpty roots then Except.ok tail
+              else
+                match psCheckedNestedExpand info.name (Nat.succ (psCheckedNestedSizes roots)) roots List.nil with
+                | Except.error error => Except.error error
+                | Except.ok shapes =>
+                    match psCheckedNestedWrapper all info shapes with
                     | Except.error error => Except.error error
-                    | Except.ok shapes =>
-                        match psCheckedNestedWrapper all info shapes with
-                        | Except.error error => Except.error error
-                        | Except.ok wrapper => Except.ok (List.cons (Prod.mk info.name wrapper) tail)
-          | _ => Except.ok tail
+                    | Except.ok wrapper => Except.ok (List.cons (Prod.mk info.name wrapper) tail)
+      | _ => Except.ok tail
+
+def psCheckedNestedCollectAcc (all : List PsDeclaration) (reversed : List PsDeclaration)
+    (state : Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration))) :
+    Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration)) :=
+  match reversed with
+  | List.nil => state
+  | List.cons declaration rest =>
+      psCheckedNestedCollectAcc all rest (psCheckedNestedCollectStep all declaration state)
+
+def psCheckedNestedCollect (all : List PsDeclaration) (declarations : List PsDeclaration) :
+    Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration)) :=
+  psCheckedNestedCollectAcc all (psListReverse declarations) (Except.ok List.nil)
 
 def psCheckedNestedFind (wrappers : List (Prod PsName PsDeclaration)) : PsName -> Option PsDeclaration :=
   match wrappers with
   | List.nil => fun (_name : PsName) => Option.none
   | List.cons entry rest =>
-      let smaller : PsName -> Option PsDeclaration := psCheckedNestedFind rest;
-      fun (name : PsName) => if psNameEq name (Prod.fst entry) then Option.some (Prod.snd entry) else smaller name
+      fun (name : PsName) =>
+        let smaller : PsName -> Option PsDeclaration := psCheckedNestedFind rest;
+        if psNameEq name (Prod.fst entry) then Option.some (Prod.snd entry) else smaller name
 
 def psCheckedNestedRewrite (wrappers : List (Prod PsName PsDeclaration)) (expr : PsExpr) : PsExpr :=
   match expr with
@@ -948,21 +962,30 @@ def psCheckedNestedRewrite (wrappers : List (Prod PsName PsDeclaration)) (expr :
   | PsExpr.proj name index value => PsExpr.proj name index (psCheckedNestedRewrite wrappers value)
   | _ => expr
 
-def psCheckedNestedNormalize (wrappers : List (Prod PsName PsDeclaration)) (declarations : List PsDeclaration) : List PsDeclaration :=
+def psCheckedNestedNormalizeAcc (wrappers : List (Prod PsName PsDeclaration))
+    (declarations acc : List PsDeclaration) : List PsDeclaration :=
   match declarations with
-  | List.nil => List.nil
+  | List.nil => psListReverse acc
   | List.cons declaration rest =>
-      let tail := psCheckedNestedNormalize wrappers rest;
       match declaration with
       | PsDeclaration.definitionDecl name levels type value =>
-          List.cons (PsDeclaration.definitionDecl name levels (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) tail
+          psCheckedNestedNormalizeAcc wrappers rest
+            (List.cons (PsDeclaration.definitionDecl name levels
+              (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) acc)
       | PsDeclaration.theoremDecl name levels type value =>
-          List.cons (PsDeclaration.theoremDecl name levels (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) tail
+          psCheckedNestedNormalizeAcc wrappers rest
+            (List.cons (PsDeclaration.theoremDecl name levels
+              (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) acc)
       | PsDeclaration.inductiveDecl info =>
           match psCheckedNestedFind wrappers info.name with
-          | Option.none => List.cons declaration tail
-          | Option.some wrapper => List.cons declaration (List.cons wrapper tail)
-      | _ => List.cons declaration tail
+          | Option.none => psCheckedNestedNormalizeAcc wrappers rest (List.cons declaration acc)
+          | Option.some wrapper =>
+              psCheckedNestedNormalizeAcc wrappers rest (List.cons wrapper (List.cons declaration acc))
+      | _ => psCheckedNestedNormalizeAcc wrappers rest (List.cons declaration acc)
+
+def psCheckedNestedNormalize (wrappers : List (Prod PsName PsDeclaration))
+    (declarations : List PsDeclaration) : List PsDeclaration :=
+  psCheckedNestedNormalizeAcc wrappers declarations List.nil
 
 def psCheckedNestedUnitDeclarations : List PsDeclaration :=
   let constructor := PsName.str psCheckedNestedUnitName "unit";

@@ -1,14 +1,15 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
-  "branch": "feat/psc1-direct-js-wasm-selfhost-20261024",
-  "parentCommit": "88f5b3aa7c51ad805bcfe463bce91a4d86a4fd69",
+  "branch": "work/psc1-direct-selfhost-blockers-20261024",
+  "parentCommit": "eefedf2a3f9f0002975870e8128bb0f404723946",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
+    "js",
     "wasm-core"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "88f5b3aa source closure passes both grammars; actual Wasm transport and portable encoder proofs/reference tests passed40015318305; execute genuine independent generations."
+  "reason": "Independently execute current JS and owned import-free Wasm G1 G2 G3 and exact fixed points after verified source133e5892: eleven all-input JS prefix equalities, three all-input encoder equalities,233-definition owned JS guard,100000-element cases and all prior regressions/both grammars passed40061782715. Shared lookup146270cf is included. One shared compiler pipeline; official Lean4.35 checking, strict IR, negatives and all other limits unchanged. Old childJS40061402443 is retained as an earlier source baseline, not duplicated on this ref."
 }

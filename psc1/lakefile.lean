@@ -534,7 +534,7 @@ lean_lib PsJsAppliedPrefixReference where
 
 lean_lib PsScriptRuntimeReference where
   srcDir := "test"
-  roots := #[`ScriptRuntimeReference]
+  roots := #[`ScriptRuntimeReference, `PythonUtf8Reference]
 
 lean_exe psc1_script_runtime_normalization_tests where
   srcDir := "test"

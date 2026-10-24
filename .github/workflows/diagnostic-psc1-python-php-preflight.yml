@@ -87,6 +87,7 @@ jobs:
       - name: Execute independently admitted runtime library in both grammars and targets
         run: node scripts/script-runtime-admission-tests.mjs
       - name: Census both complete source closures in both grammars
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
         run: |
           set +e
           node scripts/generated-target-source-audit.mjs python

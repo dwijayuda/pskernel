@@ -261,7 +261,7 @@ def hasSelfTailWithFuel (name : String) (arity fuel : Nat) :
           hasSelfTailWithFuel name arity remaining;
         if exactSelfCall name arity bound expr then true
         else match expr with
-        | PsVerifiedIrExpr.letE local _ _ body => smaller (List.cons local bound) body
+        | PsVerifiedIrExpr.letE binder _ _ body => smaller (List.cons binder bound) body
         | PsVerifiedIrExpr.ifE _ yes no => smaller bound yes || smaller bound no
         | PsVerifiedIrExpr.matchE _ _ _ alternatives =>
             psListAny

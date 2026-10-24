@@ -93,9 +93,14 @@ private def prepare (row : FieldCase) : IO Fixture := do
   let sorted ← expect (psKernelSessionEnsureSort 4096 checked.snd checked.fst)
   let oldParams ← expect (psKernelOpenSimpleHeaderParams 4096 sorted.snd row.header row.numParams)
   let oldIndices ← expect (psKernelOpenSimpleHeaderIndices 4096 oldParams.session oldParams.result)
+  let oldResultLevel ← match oldIndices.result with
+    | .sort level => pure level
+    | _ => throw (IO.userError "V1 header result is not a sort")
   let (arena,headerId) ← expect (psKernelExprV2PagedImportIntoChecked psKernelExprV2PagedEmpty row.header)
   let analysis ← direct (psKernelExprV2OrdinaryAnalyzeHeaderWithFuel 4096 psKernelEnvironmentEmpty
     0 psKernelLeanNatMaxSizeDefault arena [] [] row.numParams ⟨target,headerId,[]⟩ false)
+  unless psKernelLevelEq oldResultLevel analysis.resultLevel do
+    throw (IO.userError "header result universe mismatch")
   let numIndices := analysis.indices.binders.length
   unless numIndices == oldIndices.binders.length do throw (IO.userError "header index arity mismatch")
   let info := PsKernelInductiveInfo.mk ⟨target,[],row.header⟩ row.numParams numIndices [target] [] 0 false false false
@@ -112,7 +117,7 @@ private def prepare (row : FieldCase) : IO Fixture := do
   let opened ← direct (psKernelExprV2OrdinaryOpenConstructorParamsWithFuel 4096
     context state analysis.parameters.binders root)
   pure ⟨oldOpened.session,oldOpened.result,oldParams.binders,context,opened.fst,
-    analysis.parameters.binders,numIndices,analysis.resultLevel,opened.snd⟩
+    analysis.parameters.binders,numIndices,oldResultLevel,opened.snd⟩
 
 private def sameList {α β : Type} (same : α → β → Bool) : List α → List β → Bool
   | [],[] => true

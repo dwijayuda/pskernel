@@ -1,4 +1,4 @@
-name: PSC1 T05 ordinary header and constructor helpers native-first preflight
+name: PSC1 T05 ordinary constructor fields native-first qualification
 'on':
   workflow_dispatch: null
   push:
@@ -52,13 +52,14 @@ jobs:
         node --check scripts/pskernel-ordinary-header-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-params-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-result-smoke.mjs
+        node --check scripts/pskernel-ordinary-constructor-fields-smoke.mjs
         python3 - <<'PY'
         import hashlib, json, os, pathlib, re, shutil
         repo = pathlib.Path.cwd().parent
         out = pathlib.Path(os.environ['PSC1_T05_DIR'])
         source = os.environ['GITHUB_SHA']
         if re.fullmatch(r'[0-9a-f]{40}',source) is None: raise RuntimeError('Missing exact source SHA')
-        paths = ['.github/workflows/psc1-pskernel-t05-header.yml', 'psc1/kernel-lakefile.lean', 'psc1/lean-toolchain', 'psc1/scripts/install-lean435-ci.sh', 'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean', 'psc1/test/PsKernelOrdinaryHeaderStateProofs.lean', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean', 'psc1/test/PsKernelCacheScopeProofs.lean', 'psc1/test/PsKernelExprV2SessionProofs.lean', 'psc1/test/PsKernelScalarHashWorkerRegression.lean', 'psc1/test/PsKernelClosedCacheAnalysisRegression.lean', 'psc1/test/PsKernelKnotFuelProofs.lean', 'psc1/test/PsKernelOrdinaryHeaderRegression.lean', 'psc1/scripts/pskernel-ordinary-header-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs', 'psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs', 'psc1/scripts/pskernel-generated-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs', 'psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean', 'psc1/test/PsKernelExprV2MetadataProofs.lean', 'psc1/test/PsKernelExprV2PagedModelProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorResultProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean', 'psc1/test/PsKernelOrdinaryConstructorResultRegression.lean', 'psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs', 'psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs']
+        paths = ['.github/workflows/psc1-pskernel-t05-header.yml', 'psc1/kernel-lakefile.lean', 'psc1/lean-toolchain', 'psc1/scripts/install-lean435-ci.sh', 'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean', 'psc1/test/PsKernelOrdinaryHeaderStateProofs.lean', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean', 'psc1/test/PsKernelCacheScopeProofs.lean', 'psc1/test/PsKernelExprV2SessionProofs.lean', 'psc1/test/PsKernelScalarHashWorkerRegression.lean', 'psc1/test/PsKernelClosedCacheAnalysisRegression.lean', 'psc1/test/PsKernelKnotFuelProofs.lean', 'psc1/test/PsKernelOrdinaryHeaderRegression.lean', 'psc1/scripts/pskernel-ordinary-header-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs', 'psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs', 'psc1/scripts/pskernel-generated-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs', 'psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean', 'psc1/test/PsKernelExprV2MetadataProofs.lean', 'psc1/test/PsKernelExprV2PagedModelProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorResultProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean', 'psc1/test/PsKernelOrdinaryConstructorResultRegression.lean', 'psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs', 'psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean', 'psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean', 'psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs']
         frozen = {'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean': '63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean': '7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean': 'cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean': '068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean': '8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145', 'psc1/test/PsKernelExprV2MetadataProofs.lean': '5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20'}
         records = []
         for name in paths:
@@ -83,6 +84,31 @@ jobs:
         set -euo pipefail
         lake -f kernel-lakefile.lean build PsKernelCore PsKernelClosedCacheAnalysisProofs psc1_kernel_expr_v2_dag_regression \
           2>&1 | tee "$PSC1_T05_DIR/native-build.log"
+    - name: Kernel-check the new constructor field and recursive-argument equations before regressions
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_t05_field_proofs_failed=0
+        : > "$PSC1_T05_DIR/fields-proof-status.log"
+        for PSC1_T05_SPEC in \
+          'PsKernelOrdinaryRecursiveArgumentProofs:24:recursive-argument-proofs.log' \
+          'PsKernelOrdinaryConstructorFieldsProofs:23:constructor-fields-proofs.log'; do
+          IFS=: read -r PSC1_T05_MODULE PSC1_T05_COUNT PSC1_T05_LOG <<< "$PSC1_T05_SPEC"
+          psc1_t05_count_status=0
+          psc1_t05_lean_status=0
+          test "$(grep -c '^#print axioms ' "test/$PSC1_T05_MODULE.lean")" -eq "$PSC1_T05_COUNT" \
+            || psc1_t05_count_status=$?
+          lake -f kernel-lakefile.lean env lean "test/$PSC1_T05_MODULE.lean" \
+            2>&1 | tee "$PSC1_T05_DIR/$PSC1_T05_LOG" || psc1_t05_lean_status=$?
+          printf 'PSC1_T05_FIELDS_PROOF_STATUS module=%s count=%s countStatus=%s leanStatus=%s\n' \
+            "$PSC1_T05_MODULE" "$PSC1_T05_COUNT" "$psc1_t05_count_status" "$psc1_t05_lean_status" \
+            | tee -a "$PSC1_T05_DIR/fields-proof-status.log"
+          if [ "$psc1_t05_count_status" -ne 0 ] || [ "$psc1_t05_lean_status" -ne 0 ]; then
+            psc1_t05_field_proofs_failed=1
+          fi
+        done
+        test "$psc1_t05_field_proofs_failed" -eq 0
     - name: Kernel-check all64 new header and structural equations first
       working-directory: psc1
       shell: bash
@@ -207,6 +233,42 @@ jobs:
           2>&1 | tee "$PSC1_T05_DIR/constructor-result-native.log"
         grep -Fqx 'PSC1_ORDINARY_CONSTRUCTOR_RESULT_NATIVE: PASS assertions=432 selectorRows=46 occurrenceTerms=30 targets=2 fullAdmission=false' "$PSC1_T05_DIR/constructor-result-native.log"
         grep -Fqx 'PSC1_ORDINARY_CONSTRUCTOR_RESULT_SECTIONS: PASS harness=1 selector=138 consumer=26 occurrence=240 bounds=16 indexLists=7 precedence=4' "$PSC1_T05_DIR/constructor-result-native.log"
+    - name: Run exact268 native constructor field and recursive-argument assertions
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryConstructorFieldsRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/constructor-fields-native.log"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib
+        root=pathlib.Path(os.environ['PSC1_T05_DIR']);raw=(root/'constructor-fields-native.log').read_bytes()
+        lines=raw.decode().splitlines();prefix='PSC1_CONSTRUCTOR_FIELDS_ASSERT '
+        labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+        groups=[('harness',1),('fields',147),('recursive',105),('boundaries',8),('recursorGuard',7)]
+        if len(labels)!=268 or len(set(labels))!=268:raise RuntimeError('268 unique native field labels required')
+        previous=-1
+        for group,count in groups:
+            marker='PSC1_CONSTRUCTOR_FIELDS_SECTION '+group+'='+str(count)
+            if lines.count(marker)!=1:raise RuntimeError('Exact native field group marker required: '+group)
+            end=lines.index(marker)
+            group_labels=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+            if len(group_labels)!=count or not all(label.startswith(group+'/') for label in group_labels):
+                raise RuntimeError('Ordered exact native field group required: '+group)
+            previous=end
+        markers=['PSC1_ORDINARY_CONSTRUCTOR_FIELDS_NATIVE: PASS assertions=268 fieldRows=21 recursiveRows=15 fuelValues=6 fullAdmission=false',
+                 'PSC1_ORDINARY_CONSTRUCTOR_FIELDS_NATIVE_SECTIONS: PASS harness=1 fields=147 recursive=105 boundaries=8 recursorGuard=7']
+        if any(lines.count(marker)!=1 or lines.index(marker)<=previous for marker in markers):
+            raise RuntimeError('Native fields final markers required')
+        report={'schema':'psc1-t05-fields-native-inventory-v1',
+                'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':'native',
+                'assertions':268,'sectionAssertions':dict(groups),'fieldRows':21,'recursiveRows':15,'fuelValues':6,
+                'assertionLabels':labels,'logSha256':hashlib.sha256(raw).hexdigest(),
+                'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'fields-native-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_T05_FIELDS_NATIVE_INVENTORY: PASS assertions=268 groups=5')
+        PY
     - name: Retain108 previous equations and audit all172 exact axiom reports
       working-directory: psc1
       shell: bash
@@ -328,6 +390,58 @@ jobs:
         (root/'constructor-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T05_CONSTRUCTOR_NATIVE_PROOFS: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
+    - name: Bind new field proofs and native matrix to the retained230 report gate
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        def digest(path):
+            raw=path.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        retained=json.loads((root/'constructor-native-receipt.json').read_text())
+        inventory=json.loads((root/'fields-native-inventory.json').read_text())
+        identity={'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                  'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'job':'native-header','route':'native'}
+        if any(retained[k]!=v for k,v in identity.items()) or retained['status']!='pass' or retained['totalProofs']!=230:
+            raise RuntimeError('Exact retained230 native receipt required')
+        if any(inventory[k]!=identity[k] for k in ('sourceSha','runId','runAttempt','route')):
+            raise RuntimeError('Native field inventory identity mismatch')
+        if inventory['assertions']!=268 or inventory['sectionAssertions']!={'harness':1,'fields':147,'recursive':105,'boundaries':8,'recursorGuard':7}:
+            raise RuntimeError('Exact native fields268 inventory required')
+        expected=[('PsKernelOrdinaryRecursiveArgumentProofs',24,'recursive-argument-proofs.log'),
+                  ('PsKernelOrdinaryConstructorFieldsProofs',23,'constructor-fields-proofs.log')]
+        allowed={'propext','Classical.choice','Quot.sound'};audits=[]
+        for module,count,filename in expected:
+            source=pathlib.Path('test')/(module+'.lean')
+            names=re.findall(r'^#print axioms ([A-Za-z0-9_.$]+)\s*$',source.read_text(),re.M)
+            names=[name if '.' in name else module+'.'+name for name in names]
+            if len(names)!=count or len(set(names))!=count:raise RuntimeError('Exact field source proof inventory: '+module)
+            log=(root/filename).read_text()
+            reports=re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",log)
+            if [name for name,_ in reports]!=names:raise RuntimeError('Exact field ordered proof reports: '+module)
+            if any(bad in log for bad in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler')):
+                raise RuntimeError('Forbidden field proof dependency: '+module)
+            for name,used in reports:
+                if not {x.strip() for x in used.split(',') if x.strip()}<=allowed:
+                    raise RuntimeError('Unexpected field proof dependency: '+name)
+            audits.append({'module':module,'proofs':count,'names':names,'source':digest(source),'log':digest(root/filename)})
+        required=['PSC1_T05_FIELDS_PROOF_STATUS module='+m+' count='+str(n)+' countStatus=0 leanStatus=0' for m,n,_ in expected]
+        if (root/'fields-proof-status.log').read_text().splitlines()!=required:
+            raise RuntimeError('Every new native field proof command must succeed')
+        receipt={'schema':'psc1-t05-fields-native-receipt-v1',**identity,'status':'pass',
+                 'retainedProofs':230,'newProofs':sum(a['proofs'] for a in audits),
+                 'totalProofs':230+sum(a['proofs'] for a in audits),'proofs':audits,
+                 'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
+                 'retainedConstructorReceipt':digest(root/'constructor-native-receipt.json'),
+                 'nativeAssertions':268,'nativeInventory':digest(root/'fields-native-inventory.json'),
+                 'nativeLog':digest(root/'constructor-fields-native.log'),
+                 'constructorHelpersOnly':True,'fieldsAndPositivity':True,'fullAdmission':False,
+                 'publicRoutingChanged':False,'replayArenaModelBridgeEstablished':False}
+        (root/'fields-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_FIELDS_NATIVE_PROOFS: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
     - name: Retain native public DAG and generated-prefix ownership controls
       working-directory: psc1
       shell: bash
@@ -395,13 +509,14 @@ jobs:
         node --check scripts/pskernel-ordinary-header-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-params-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-result-smoke.mjs
+        node --check scripts/pskernel-ordinary-constructor-fields-smoke.mjs
         python3 - <<'PY'
         import hashlib, json, os, pathlib, re, shutil
         repo = pathlib.Path.cwd().parent
         out = pathlib.Path(os.environ['PSC1_T05_DIR'])
         source = os.environ['GITHUB_SHA']
         if re.fullmatch(r'[0-9a-f]{40}',source) is None: raise RuntimeError('Missing exact source SHA')
-        paths = ['.github/workflows/psc1-pskernel-t05-header.yml', 'psc1/kernel-lakefile.lean', 'psc1/lean-toolchain', 'psc1/scripts/install-lean435-ci.sh', 'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean', 'psc1/test/PsKernelOrdinaryHeaderStateProofs.lean', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean', 'psc1/test/PsKernelCacheScopeProofs.lean', 'psc1/test/PsKernelExprV2SessionProofs.lean', 'psc1/test/PsKernelScalarHashWorkerRegression.lean', 'psc1/test/PsKernelClosedCacheAnalysisRegression.lean', 'psc1/test/PsKernelKnotFuelProofs.lean', 'psc1/test/PsKernelOrdinaryHeaderRegression.lean', 'psc1/scripts/pskernel-ordinary-header-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs', 'psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs', 'psc1/scripts/pskernel-generated-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs', 'psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean', 'psc1/test/PsKernelExprV2MetadataProofs.lean', 'psc1/test/PsKernelExprV2PagedModelProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorResultProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean', 'psc1/test/PsKernelOrdinaryConstructorResultRegression.lean', 'psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs', 'psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs']
+        paths = ['.github/workflows/psc1-pskernel-t05-header.yml', 'psc1/kernel-lakefile.lean', 'psc1/lean-toolchain', 'psc1/scripts/install-lean435-ci.sh', 'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean', 'psc1/test/PsKernelOrdinaryHeaderStateProofs.lean', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean', 'psc1/test/PsKernelCacheScopeProofs.lean', 'psc1/test/PsKernelExprV2SessionProofs.lean', 'psc1/test/PsKernelScalarHashWorkerRegression.lean', 'psc1/test/PsKernelClosedCacheAnalysisRegression.lean', 'psc1/test/PsKernelKnotFuelProofs.lean', 'psc1/test/PsKernelOrdinaryHeaderRegression.lean', 'psc1/scripts/pskernel-ordinary-header-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs', 'psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs', 'psc1/scripts/pskernel-generated-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs', 'psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean', 'psc1/test/PsKernelExprV2MetadataProofs.lean', 'psc1/test/PsKernelExprV2PagedModelProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorResultProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean', 'psc1/test/PsKernelOrdinaryConstructorResultRegression.lean', 'psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs', 'psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean', 'psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean', 'psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean', 'psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs']
         frozen = {'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean': '63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean': '7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean': 'cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean': '068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean': '8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145', 'psc1/test/PsKernelExprV2MetadataProofs.lean': '5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20'}
         records = []
         for name in paths:
@@ -562,6 +677,15 @@ jobs:
           2>&1 | tee "$PSC1_T05_DIR/structural-occurrence-check.log"
         lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean \
           2>&1 | tee "$PSC1_T05_DIR/structural-annotations-check.log"
+    - name: Check private constructor and recursive-argument closures before the complete source
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        for PSC1_T05_MODULE in DagOrdinaryConstructorParams DagOrdinaryConstructorResult DagOrdinaryConstructorTypes DagOrdinaryRecursiveArgument DagOrdinaryConstructorFields; do
+          lake exe psc1 check "packages/pskernel-core/src/Ps/KernelCore/API/$PSC1_T05_MODULE.lean" \
+            2>&1 | tee "$PSC1_T05_DIR/$PSC1_T05_MODULE-portable-check.log"
+        done
     - name: Archive actual Lean closure and check complete authentic source after bounded gates
       working-directory: psc1
       shell: bash
@@ -594,7 +718,8 @@ jobs:
           entry,sourceCount:files.length,files};
         for(const module of ['API/DagOrdinaryHeaderTypes','API/DagOrdinaryOccurrence','API/DagOrdinaryAnnotations',
           'API/DagOrdinaryParameters','API/DagOrdinaryHeader','Checker/ExprV2/AdmissionHelpers',
-          'API/DagOrdinaryConstructorParams','API/DagOrdinaryConstructorResult'])
+          'API/DagOrdinaryConstructorParams','API/DagOrdinaryConstructorResult',
+          'API/DagOrdinaryConstructorTypes','API/DagOrdinaryRecursiveArgument','API/DagOrdinaryConstructorFields'])
           if(!visited.has('packages/pskernel-core/src/Ps/KernelCore/'+module+'.lean'))throw Error('Missing T05 module '+module);
         writeFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json',JSON.stringify(report,null,2)+'\n');
         console.log('PSC1_T05_LEAN_SOURCE_CLOSURE: PASS modules='+files.length);
@@ -685,7 +810,7 @@ jobs:
             source=kernel.with_suffix(suffix);shutil.copyfile(source,production/('kernel'+suffix))
         detached=out/'detached';detached.mkdir()
         shutil.copyfile(kernel,detached/'kernel.mjs')
-        scripts=['pskernel-ordinary-header-smoke.mjs', 'pskernel-ordinary-constructor-params-smoke.mjs', 'pskernel-ordinary-constructor-result-smoke.mjs', 'pskernel-scalar-hash-worker-smoke.mjs', 'pskernel-scalar-hash-short-entry-smoke.mjs', 'pskernel-closed-cache-analysis-smoke.mjs', 'pskernel-generated-smoke.mjs', 'pskernel-expr-v2-dag-smoke.mjs', 'pskernel-expr-v2-generated-prefix-smoke.mjs', 'pskernel-invalid-recursor-occurrence-smoke.mjs']
+        scripts=['pskernel-ordinary-constructor-fields-smoke.mjs', 'pskernel-ordinary-header-smoke.mjs', 'pskernel-ordinary-constructor-params-smoke.mjs', 'pskernel-ordinary-constructor-result-smoke.mjs', 'pskernel-scalar-hash-worker-smoke.mjs', 'pskernel-scalar-hash-short-entry-smoke.mjs', 'pskernel-closed-cache-analysis-smoke.mjs', 'pskernel-generated-smoke.mjs', 'pskernel-expr-v2-dag-smoke.mjs', 'pskernel-expr-v2-generated-prefix-smoke.mjs', 'pskernel-invalid-recursor-occurrence-smoke.mjs']
         for name in scripts:shutil.copyfile(pathlib.Path('scripts')/name,detached/name)
         inventory=json.loads((out/'source-inventory.json').read_text())
         report={'schema':'psc1-t05-header-provenance-v1','repository':'dwijayuda/pskernel',
@@ -879,6 +1004,71 @@ jobs:
                  'publicRoutingChanged':False,'performanceQualified':False}
         (root/'constructor-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T05_CONSTRUCTOR_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+    - name: Execute exact constructor fields and positivity matrix with empty PATH
+      working-directory: psc1
+      shell: bash
+      timeout-minutes: 25
+      run: |
+        set -euo pipefail
+        cd "$PSC1_T05_DIR/detached"
+        /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' \
+          -o "$PSC1_T05_DIR/constructor-fields.memory" \
+          env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 \
+          pskernel-ordinary-constructor-fields-smoke.mjs kernel.mjs \
+          2>&1 | tee "$PSC1_T05_DIR/constructor-fields.log"
+        cat "$PSC1_T05_DIR/constructor-fields.memory"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        def digest(path):
+            raw=path.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        def exact(a,b):
+            if type(a) is not type(b):return False
+            if isinstance(a,dict):return a.keys()==b.keys() and all(exact(a[k],b[k]) for k in a)
+            return a==b
+        provenance=json.loads((root/'provenance.json').read_text())
+        retained=json.loads((root/'constructor-receipt.json').read_text())
+        identity={'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                  'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':os.environ['PSC1_T05_ROUTE']}
+        for key,value in identity.items():
+            if provenance[key]!=value or retained['identity'][key]!=value:
+                raise RuntimeError('Fields receipt identity mismatch: '+key)
+        if retained['status']!='pass' or retained['retainedHeaderAssertions']!=1992:
+            raise RuntimeError('Existing constructor and header receipts are required')
+        for name,count in [('params',268),('result',432)]:
+            if retained['results'][name]['result']['assertions']!=count:
+                raise RuntimeError('Retained constructor matrix required: '+name)
+        kernel=root/'detached/kernel.mjs'
+        harness=root/'detached/pskernel-ordinary-constructor-fields-smoke.mjs'
+        if digest(kernel)!=provenance['kernel'] or digest(harness)!=provenance['scripts'][harness.name]:
+            raise RuntimeError('Executed fields kernel or harness changed')
+        log=root/'constructor-fields.log';lines=log.read_text().splitlines()
+        expected={'schema':'psc1-ordinary-constructor-fields-v1',
+                  'kernel':str(kernel.resolve()),'assertions':268,
+                  'sectionAssertions':{'harness':1,'fields':147,'recursive':105,'boundaries':8,'recursorGuard':7},
+                  'fieldRows':21,'recursiveRows':15,'fuelValues':6,
+                  'positiveFields':16,'negativeFields':5,'positiveRecursive':10,'negativeRecursive':5,
+                  'fullAdmission':False,'publicRoutingChanged':False}
+        marker='PSC1_ORDINARY_CONSTRUCTOR_FIELDS_JS: PASS assertions=268 fullAdmission=false'
+        records=[json.loads(line) for line in lines if line.startswith('{')]
+        if lines.count(marker)!=1 or len(records)!=1 or not exact(records[0],expected):
+            raise RuntimeError('Exact fields268 matrix and section inventory required')
+        if sum(expected['sectionAssertions'].values())!=expected['assertions']:
+            raise RuntimeError('Fields assertion total mismatch')
+        measurement=(root/'constructor-fields.memory').read_text().strip()
+        timed=re.fullmatch(r'peak_rss_kib=(\d+) wall_seconds=(\d+(?:\.\d+)?) exit_status=0',measurement)
+        if timed is None or float(timed[2])>=1500:
+            raise RuntimeError('Fields runtime must exit0 within25minutes')
+        receipt={'schema':'psc1-t05-fields-route-receipt-v1','status':'pass','identity':provenance,
+                 'retainedConstructorReceipt':digest(root/'constructor-receipt.json'),
+                 'result':records[0],'log':digest(log),'harness':digest(harness),
+                 'measurement':measurement,'peakRssKiB':int(timed[1]),'wallSeconds':float(timed[2]),
+                 'logs':{p.name:digest(p) for p in sorted(root.glob('*.log'))},
+                 'constructorHelpersOnly':True,'fieldsAndPositivity':True,'fullAdmission':False,
+                 'publicRoutingChanged':False,'performanceQualified':False}
+        (root/'fields-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_FIELDS_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
     - name: Retain bounded gate artifacts on success or failure
       working-directory: psc1

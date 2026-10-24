@@ -31,6 +31,9 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagOrdinaryHeader,
     `Ps.KernelCore.API.DagOrdinaryConstructorParams,
     `Ps.KernelCore.API.DagOrdinaryConstructorResult,
+    `Ps.KernelCore.API.DagOrdinaryConstructorTypes,
+    `Ps.KernelCore.API.DagOrdinaryRecursiveArgument,
+    `Ps.KernelCore.API.DagOrdinaryConstructorFields,
     `Ps.KernelCore.Checker.ExprV2.AdmissionHelpers,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
@@ -365,3 +368,12 @@ lean_exe psc1_kernel_ordinary_constructor_params_regression where
 lean_exe psc1_kernel_ordinary_constructor_result_regression where
   srcDir := "test"
   root := `PsKernelOrdinaryConstructorResultRegression
+
+-- Native-only constructor-field protocols; production remains private.
+lean_lib PsKernelOrdinaryFieldsNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryRecursiveArgumentProofs, `PsKernelOrdinaryConstructorFieldsProofs]
+
+lean_exe psc1_kernel_ordinary_constructor_fields_regression where
+  srcDir := "test"
+  root := `PsKernelOrdinaryConstructorFieldsRegression

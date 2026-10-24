@@ -103,6 +103,8 @@ function prepare(row){
   const b=builder(),headerId=b.add(row.header);
   const analysis=attempted(get("psKernelExprV2OrdinaryAnalyzeHeaderWithFuel")(
     4096n,env,0n,maxNat,b.arena,nil,levels,row.n,{name:target,type:headerId,ctors:nil},false),row.label+"/header");
+  if(!exprExact(oldIndices.result,E.sort(analysis.resultLevel)))throw Error("PSC1_CONSTRUCTOR_FIELDS_HEADER_UNIVERSE");
+  const oldResultLevel=oldIndices.result.level;
   const numIndices=BigInt(array(analysis.indices.binders).length);
   if(numIndices!==BigInt(array(oldIndices.binders).length))throw Error("PSC1_CONSTRUCTOR_FIELDS_HEADER_ARITY");
   const info={base:{name:target,levelParams:levels,type:row.header.expr},numParams:row.n,numIndices,
@@ -120,7 +122,7 @@ function prepare(row){
     4096n,context,state,analysis.parameters.binders,root),row.label+"/prefix");
   return {old:oldOpened.session,oldType:oldOpened.result,oldParams:oldParams.binders,context,
     state:opened.fst,root:opened.snd,params:analysis.parameters.binders,
-    numIndices,resultLevel:analysis.resultLevel};
+    numIndices,resultLevel:oldResultLevel};
 }
 const graphDecode=arena=>{
   const graph=accepted(get("psKernelExprV2DecodeChecked")(arena),"result-canonical");

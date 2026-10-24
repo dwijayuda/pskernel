@@ -51,7 +51,7 @@ jobs:
   generated:
     needs: request
     concurrency:
-      group: psc1-unified-engine-${{ github.ref }}-${{ matrix.target }}
+      group: psc1-unified-engine-${{ github.ref }}-${{ matrix.target }}-${{ needs.request.outputs.mode }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 120

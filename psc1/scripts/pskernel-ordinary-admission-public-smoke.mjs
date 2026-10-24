@@ -85,7 +85,7 @@ const markerResult=ok(get("psKernelExprV2DecodedRequire")(published.owner.built,
 require("routing/finish-carries-injected-suffix",
  published.owner.arena.size===imported.fst.arena.size&&
  published.owner.built.size===imported.fst.built.size&&
- get("psKernelExprEqual")(markerResult,marker)&&hasRecursor(published.execution.declarations));
+ get("psKernelExprEqual")(markerResult)(marker)&&hasRecursor(published.execution.declarations));
 const declined=ok(run(_=>none),"declined");
 const fallback=ok(get("psKernelDagRunFallbackOwnedCommandWithSource")(
  input,execution,nil,safe,owner.arena,owner.built,C.admit(request)),"fallback");

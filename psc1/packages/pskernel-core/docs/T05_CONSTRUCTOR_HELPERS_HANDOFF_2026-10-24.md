@@ -1,3 +1,60 @@
+## 2026-10-24 Constructor helper proof gate fails; proof-body repair
+
+Exact source `be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec`, run
+[`40092935560`](https://github.com/dwijayuda/pskernel/actions/runs/40092935560),
+attempt 1, is terminal **FAIL**. Native job `120869170121` passed production
+imports, the prior 64 header/structural equations, the unchanged eight metadata
+reports and all 17 constructor-parameter equations. The new paged-model and
+constructor-result proof commands failed. All four report counts were exact;
+their Lean statuses were respectively 0, 1, 0, 1.
+
+The failures are eight paged lookup/append goals whose raw `Nat.div`/`Nat.mod`
+terms were not normalized to the notation in the branch hypotheses, and four
+result-check goals whose final true/false conditionals were not reduced by
+restricted simplification. Lean printed `sorryAx` in ten dependent reports
+after these elaboration failures; the native gate rejected the candidate.
+No admitted source theorem or failed report is accepted as a proof.
+
+The source-bound native artifact `12560085976` was independently downloaded,
+CRC checked and rehashed: 220,279 bytes, SHA256
+`e8c81765bda041c488d56fe1ae58f22c0114a9fc98f979417b6f00ca25866225`.
+All 57 files and all 43 copied inputs agree with the authenticated Git blobs,
+original source inventory and terminal log. The exact 122 attempted reports
+and 12 diagnostics are retained in
+`docs/evidence/2026-10-24-t05-be4b47b8-native-failure.json`.
+
+The direct native regressions, retained post-proof gates and both complete
+routes were **not executed**. GitHub records the dependent matrix as skipped
+job `120869585392`; there is no generated or canonical receipt for this source.
+Earlier f5 header passes remain attributed only to f5 and its own run.
+
+This follow-up candidate changes only proof bodies in
+`PsKernelExprV2PagedModelProofs.lean` and
+`PsKernelOrdinaryConstructorResultProofs.lean`: definitional normalization in
+the three paged lookup/append proofs and final reflexive reduction in four
+result proofs. All 35 theorem statements and 33 ordered axiom-report commands
+across those files are preserved. Production source tree
+`07d076b38e25d408200607e3d13147ee425437b8`, workflow, fixtures, matrices and
+every required count remain unchanged. These repairs are **uncompiled at
+commit creation** and require one new exact-source push cohort.
+
+The next native gate still requires all 230 reports, native parameter284 and
+result432 assertions, before either full route. Each route still requires
+header1992, cache1884, parameter268, result432 and all retained controls, with
+actual148-module source closures and source/run/attempt-bound receipts. Keep
+Lean4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, TypeScript7.0.2,
+Node22, fuel4096, empty PATH, old-space2048MiB and the existing caps. Old-space
+is not a hard RSS limit. Do not rerun or combine the rejected be4 cohort.
+
+**T05/B/D remain OPEN; C remains FAIL.** Integration remains at the separately
+qualified T01F/scoped A source `0d9f062846d109c362210d441df5fd407ca2cdd7`.
+All five full work-branch qualification triggers remain paused. The separate
+fields/positivity/replay and decoder drafts remain uncommitted and untested;
+they are not part of this repair. Full ordinary admission, recursor checking
+and atomic publication remain outstanding.
+
+---
+
 # T05 private constructor helpers and paged-storage proof batch
 
 ## Activation boundary

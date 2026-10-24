@@ -1,0 +1,203 @@
+{
+  "schema": "psc1-t05-paged-model-native-proof-repair-v1",
+  "status": "STAGED_UNCOMPILED",
+  "testedSource": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+  "runId": 40092935560,
+  "runAttempt": 1,
+  "jobId": 120869170121,
+  "testedSourceFile": {
+    "bytes": 15908,
+    "sha256": "7c235ebf053fac77533a24c2bc4f2ed59af325f97ab89acc4d1347f7044ddcca",
+    "gitBlobSha": "7f928aa3b3495b39ac393b8e7430c13505f739fa"
+  },
+  "repairedFile": {
+    "path": "t05-fix5/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+    "bytes": 16840,
+    "sha256": "d38b40cf2d2bb717494a4e9344a48490054075b32f5e6d1bed592448dd584556",
+    "gitBlobSha": "facd561e14e6c8771f1336771eb60e10e2154422"
+  },
+  "originalArchive": {
+    "path": "t05-evidence/be4b47b8-native.zip",
+    "bytes": 220279,
+    "sha256": "e8c81765bda041c488d56fe1ae58f22c0114a9fc98f979417b6f00ca25866225",
+    "gitBlobSha": "1df095b68faa0e143f2189a869780d984dab06d8"
+  },
+  "actualProofLog": {
+    "bytes": 14225,
+    "sha256": "0e0bbaa7378752e383d1c16e9d666f499617c534f8458dcdc72d6083f5918374",
+    "gitBlobSha": "e7600dc26b109557962547c831967f6492fa6cec"
+  },
+  "errors": [
+    {
+      "line": 174,
+      "column": 2,
+      "message": "unsolved goals"
+    },
+    {
+      "line": 183,
+      "column": 2,
+      "message": "unsolved goals"
+    },
+    {
+      "line": 196,
+      "column": 4,
+      "message": "unsolved goals"
+    },
+    {
+      "line": 198,
+      "column": 6,
+      "message": "Type mismatch: After simplification, term"
+    },
+    {
+      "line": 206,
+      "column": 10,
+      "message": "Tactic `rewrite` failed: Did not find an occurrence of the pattern"
+    },
+    {
+      "line": 208,
+      "column": 4,
+      "message": "unsolved goals"
+    },
+    {
+      "line": 228,
+      "column": 4,
+      "message": "Type mismatch: After simplification, term"
+    },
+    {
+      "line": 231,
+      "column": 2,
+      "message": "unsolved goals"
+    }
+  ],
+  "diagnosis": "Eight actual branches retained raw Nat.div/Nat.mod guards after simplification because their hypotheses and helper rewrite arguments used overloaded division/modulus notation.",
+  "repair": "Use dsimp only on the pinned HDiv/Div and HMod/Mod projections/instances at each failed branch to normalize the whole local context and target definitionally. Keep the two later explicit helper arguments in the same raw Nat.mod/Nat.div representation. Existing branch proofs and all statements remain unchanged.",
+  "normalizationSites": 8,
+  "changedTheoremBodies": [
+    "valid_id_is_found",
+    "push_find_old",
+    "push_find_new"
+  ],
+  "theoremStatements": [
+    {
+      "name": "array_getD_push_old",
+      "statement": "theorem array_getD_push_old {\u03b1 : Type} (values : Array \u03b1)\n    (value fallback : \u03b1) (index : Nat) (before : index < values.size) :\n    (values.push value).getD index fallback = values.getD index fallback"
+    },
+    {
+      "name": "array_getD_push_new",
+      "statement": "theorem array_getD_push_new {\u03b1 : Type} (values : Array \u03b1)\n    (value fallback : \u03b1) :\n    (values.push value).getD values.size fallback = value"
+    },
+    {
+      "name": "paged_get_eq_optional_get",
+      "statement": "theorem paged_get_eq_optional_get (values : Array PsKernelExprV2Entry) (index : Nat) :\n    psKernelExprV2PagedGet values index = values[index]?"
+    },
+    {
+      "name": "paged_get_push_old",
+      "statement": "theorem paged_get_push_old (values : Array PsKernelExprV2Entry)\n    (value : PsKernelExprV2Entry) (index : Nat) (before : index < values.size) :\n    psKernelExprV2PagedGet (values.push value) index = psKernelExprV2PagedGet values index"
+    },
+    {
+      "name": "paged_get_push_new",
+      "statement": "theorem paged_get_push_new (values : Array PsKernelExprV2Entry)\n    (value : PsKernelExprV2Entry) :\n    psKernelExprV2PagedGet (values.push value) values.size = some value"
+    },
+    {
+      "name": "empty_layout",
+      "statement": "theorem empty_layout (limit : Nat) :\n    Layout (psKernelExprV2PagedEmptyWithLimit limit)"
+    },
+    {
+      "name": "push_growing",
+      "statement": "theorem push_growing (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)\n    (space : arena.active.size < arena.pageLimit) :\n    psKernelExprV2PagedPush arena entry =\n      (PsKernelExprV2PagedArena.mk arena.pages (arena.active.push entry)\n        (arena.size + 1) arena.pageLimit, arena.size)"
+    },
+    {
+      "name": "push_rollover",
+      "statement": "theorem push_rollover (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)\n    (full : \u00ac arena.active.size < arena.pageLimit) :\n    psKernelExprV2PagedPush arena entry =\n      (PsKernelExprV2PagedArena.mk (arena.pages.push arena.active) #[entry]\n        (arena.size + 1) arena.pageLimit, arena.size)"
+    },
+    {
+      "name": "push_id_and_size",
+      "statement": "theorem push_id_and_size (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry) :\n    (psKernelExprV2PagedPush arena entry).snd = arena.size /\\\n      (psKernelExprV2PagedPush arena entry).fst.size = arena.size + 1 /\\\n      (psKernelExprV2PagedPush arena entry).fst.pageLimit = arena.pageLimit"
+    },
+    {
+      "name": "push_layout",
+      "statement": "theorem push_layout (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)\n    (layout : Layout arena) : Layout (psKernelExprV2PagedPush arena entry).fst"
+    },
+    {
+      "name": "valid_id_location",
+      "statement": "theorem valid_id_location (arena : PsKernelExprV2PagedArena) (layout : Layout arena)\n    (id : Nat) (inside : id < arena.size) :\n    id / arena.pageLimit < arena.pages.size \\/\n      (id / arena.pageLimit = arena.pages.size /\\ id % arena.pageLimit < arena.active.size)"
+    },
+    {
+      "name": "find_out_of_bounds",
+      "statement": "theorem find_out_of_bounds (arena : PsKernelExprV2PagedArena)\n    (id : Nat) (outside : arena.size <= id) :\n    psKernelExprV2PagedFind arena id = none"
+    },
+    {
+      "name": "found_id_is_in_bounds",
+      "statement": "theorem found_id_is_in_bounds (arena : PsKernelExprV2PagedArena)\n    (id : Nat) (entry : PsKernelExprV2Entry)\n    (found : psKernelExprV2PagedFind arena id = some entry) : id < arena.size"
+    },
+    {
+      "name": "valid_id_is_found",
+      "statement": "theorem valid_id_is_found (arena : PsKernelExprV2PagedArena) (layout : Layout arena)\n    (id : Nat) (inside : id < arena.size) :\n    Exists (fun entry => psKernelExprV2PagedFind arena id = some entry)"
+    },
+    {
+      "name": "push_find_old",
+      "statement": "theorem push_find_old (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)\n    (layout : Layout arena) (id : Nat) (inside : id < arena.size) :\n    psKernelExprV2PagedFind (psKernelExprV2PagedPush arena entry).fst id =\n      psKernelExprV2PagedFind arena id"
+    },
+    {
+      "name": "push_find_new",
+      "statement": "theorem push_find_new (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)\n    (layout : Layout arena) :\n    psKernelExprV2PagedFind (psKernelExprV2PagedPush arena entry).fst arena.size = some entry"
+    },
+    {
+      "name": "push_find",
+      "statement": "theorem push_find (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)\n    (layout : Layout arena) (id : Nat) :\n    psKernelExprV2PagedFind (psKernelExprV2PagedPush arena entry).fst id =\n      if id = arena.size then some entry else psKernelExprV2PagedFind arena id"
+    },
+    {
+      "name": "push_require_old",
+      "statement": "theorem push_require_old (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)\n    (layout : Layout arena) (id : Nat) (inside : id < arena.size) :\n    psKernelExprV2PagedRequire (psKernelExprV2PagedPush arena entry).fst id =\n      psKernelExprV2PagedRequire arena id"
+    },
+    {
+      "name": "mk_app_preserves_layout_and_metadata",
+      "statement": "theorem mk_app_preserves_layout_and_metadata\n    (arena : PsKernelExprV2PagedArena) (layout : Layout arena)\n    (fn arg : Nat) (f a : PsKernelExprV2Entry) (fe ae : PsKernelExpr)\n    (fnLookup : psKernelExprV2PagedFind arena fn = some f)\n    (argLookup : psKernelExprV2PagedFind arena arg = some a)\n    (fnMetadata : PsKernelExprV2MetadataProofs.Corresponds f fe)\n    (argMetadata : PsKernelExprV2MetadataProofs.Corresponds a ae) :\n    let entry := psKernelExprV2AppEntry fn arg f a\n    let next := (psKernelExprV2PagedPush arena entry).fst\n    psKernelExprV2PagedMkApp arena fn arg = Except.ok (next, arena.size) /\\\n      Layout next /\\\n      psKernelExprV2PagedFind next arena.size = some entry /\\\n      PsKernelExprV2MetadataProofs.Corresponds entry (PsKernelExpr.app fe ae)"
+    }
+  ],
+  "all19StatementsByteIdentical": true,
+  "all17PrintLinesByteIdentical": true,
+  "orderedPrintLines": [
+    "#print axioms PsKernelExprV2PagedModelProofs.array_getD_push_old",
+    "#print axioms PsKernelExprV2PagedModelProofs.array_getD_push_new",
+    "#print axioms PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+    "#print axioms PsKernelExprV2PagedModelProofs.paged_get_push_old",
+    "#print axioms PsKernelExprV2PagedModelProofs.paged_get_push_new",
+    "#print axioms PsKernelExprV2PagedModelProofs.empty_layout",
+    "#print axioms PsKernelExprV2PagedModelProofs.push_id_and_size",
+    "#print axioms PsKernelExprV2PagedModelProofs.push_layout",
+    "#print axioms PsKernelExprV2PagedModelProofs.valid_id_location",
+    "#print axioms PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+    "#print axioms PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+    "#print axioms PsKernelExprV2PagedModelProofs.valid_id_is_found",
+    "#print axioms PsKernelExprV2PagedModelProofs.push_find_old",
+    "#print axioms PsKernelExprV2PagedModelProofs.push_find_new",
+    "#print axioms PsKernelExprV2PagedModelProofs.push_find",
+    "#print axioms PsKernelExprV2PagedModelProofs.push_require_old",
+    "#print axioms PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+  ],
+  "onlyThreeProofBodiesChanged": true,
+  "newAssumptionsOrAxioms": false,
+  "pinnedNotationBridge": {
+    "path": "t05-fix5/paged-model-repair/pinned-notation-bridge.json",
+    "bytes": 3701,
+    "sha256": "99cced33cf703a9f95bfc47d8ab1c77053f99a404a243e86b1907b75c9534ada",
+    "gitBlobSha": "425ee04d63a3ee663e4be3cd643544bc5015ed9a"
+  },
+  "diff": {
+    "path": "t05-fix5/paged-model-repair/repair.diff",
+    "bytes": 3959,
+    "sha256": "52a5c675c0cacdaaa099497fadb350b9a9a1cd79cb8fa878a58b2797a9df205e",
+    "gitBlobSha": "5f5b09d8414b9de62accabf305f22ba592b38dd3"
+  },
+  "productionWorkflowTestsUnchanged": true,
+  "futureT05NextFileUnchanged": {
+    "path": "t05-next/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+    "bytes": 15908,
+    "sha256": "7c235ebf053fac77533a24c2bc4f2ed59af325f97ab89acc4d1347f7044ddcca",
+    "gitBlobSha": "7f928aa3b3495b39ac393b8e7430c13505f739fa"
+  },
+  "localProjectExecution": false,
+  "githubMutationOrDispatch": false,
+  "acceptance": "The repair needs a fresh exact-source Actions run. Failed original reports containing sorryAx are not proofs or qualification."
+}

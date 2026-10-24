@@ -1,0 +1,37 @@
+{
+  "schema": "psc1-t05-constructor-result-fix5-independent-static-review-v1",
+  "status": "NO_CONCRETE_ISSUE_FOUND_UNCOMPILED",
+  "testedSource": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+  "runId": 40092935560,
+  "runAttempt": 1,
+  "jobId": 120869170121,
+  "testedFile": {
+    "bytes": 25511,
+    "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301",
+    "gitBlobSha": "416461c7eb0cacfe4ee747116c334134754e87a2"
+  },
+  "repairedFile": {
+    "path": "t05-fix5/psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+    "bytes": 25543,
+    "sha256": "5fb21b0e72978a520a5528f1177825cae4f3b7b5ed1871787b0c34db6cbfced4",
+    "gitBlobSha": "d61dabc38bfb1b8e29da05053c41b96414794ba0"
+  },
+  "actualProofLog": {
+    "bytes": 4694,
+    "sha256": "786d362e25cd0726028b155f06e97515204963995d9bceb9ac236a82469e86de",
+    "gitBlobSha": "96db77da69f12ab44c123f78a943b99345045cc4"
+  },
+  "changedTheoremBodies": [
+    "contains_projection_name_precedes_receiver",
+    "contains_application_hit_precedes_argument",
+    "validate_recursive_index_rejected",
+    "validate_preserves_exact_index_ids"
+  ],
+  "all16StatementsByteIdentical": true,
+  "all16PrintLinesByteIdentical": true,
+  "exactEdit": "Four existing simp-only calls gain only <;> rfl.",
+  "diagnosis": "Three residual goals are if True reductions; the fourth is the decidable false=true guard. Each closes by definitional reduction without new assumptions.",
+  "productionWorkflowTestsUnchanged": true,
+  "noProjectExecution": true,
+  "noGitHubWritesOrDispatches": true
+}

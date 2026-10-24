@@ -1,0 +1,93 @@
+{
+  "schema": "psc1-t05-constructor-result-proof-repair-static-v1",
+  "status": "STAGED_UNCOMPILED_PROOF_BODY_ONLY",
+  "originalSourceSha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+  "runId": 40092935560,
+  "runAttempt": 1,
+  "nativeJobId": 120869170121,
+  "originalGitBlobSha": "416461c7eb0cacfe4ee747116c334134754e87a2",
+  "before": {
+    "path": "t05-fix5/constructor-result-repair/before.lean.txt",
+    "bytes": 25511,
+    "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301",
+    "gitBlobSha": "416461c7eb0cacfe4ee747116c334134754e87a2"
+  },
+  "after": {
+    "path": "t05-fix5/psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+    "bytes": 25543,
+    "sha256": "5fb21b0e72978a520a5528f1177825cae4f3b7b5ed1871787b0c34db6cbfced4",
+    "gitBlobSha": "d61dabc38bfb1b8e29da05053c41b96414794ba0"
+  },
+  "diagnosticLog": {
+    "path": "t05-evidence/be4b47b8-native-40092935560/job.log",
+    "bytes": 166861,
+    "sha256": "820b53eee03101f725927cb157c10d98329e6109625bd711c5ee119c8c1639dc",
+    "gitBlobSha": "9cb2a5c489ad9952da92404191083f012fad82f9"
+  },
+  "diagnosticExcerpt": {
+    "path": "t05-fix5/constructor-result-repair/diagnostics.txt",
+    "bytes": 2381,
+    "sha256": "71a0fd3df4594d7b56f74a33863b22614aef71e147eb10834c2c766ac6a2512f",
+    "gitBlobSha": "e8d7c2e8a6e4d60f2dd97bfeff0a0985b28ca276"
+  },
+  "diff": {
+    "path": "t05-fix5/constructor-result-repair/repair.diff",
+    "bytes": 2036,
+    "sha256": "1a2f4506ecce1861289e718dcc27ba875e1018229078d88888bf1b11bf01d580",
+    "gitBlobSha": "bc714e713888a4812739e5a4d978fef256b37a3d"
+  },
+  "changedProofs": [
+    "contains_projection_name_precedes_receiver",
+    "contains_application_hit_precedes_argument",
+    "validate_recursive_index_rejected",
+    "validate_preserves_exact_index_ids"
+  ],
+  "repair": "Append <;> rfl after the four existing simp-only calls, reducing exactly the remaining if True and if false = true expressions shown by Actions.",
+  "preservation": {
+    "theoremCount": 16,
+    "all16TheoremStatementsExact": true,
+    "all16ReportNamesExact": true,
+    "allOtherBytesExact": true,
+    "productionChanged": false,
+    "workflowChanged": false,
+    "testsChanged": false,
+    "newAxiomsOrAdmissions": false
+  },
+  "statementDigests": {
+    "consume_empty_preserves_exact_tail": "68dcb6106192ce5a5c6c682a7e238b9d1aa71dc727198bb31a9d46c9241856d8",
+    "consume_missing_argument_is_mismatch": "f01c5cc91c7492b061227cd7efef298aa9184f86f85cc94ba26cf01be47fc4a0",
+    "consume_fvar_compares_only_internal_name": "801fa1e00c95c26ea3a39e9d01c61b533da12f94a9150e08df9e5315d4782cb8",
+    "contains_zero_precedes_lookup": "08d727beac405ac3607071d357566fa8769adb4c46abe66562d7a4b662e56705",
+    "contains_projection_name_precedes_receiver": "2de6de0912fa2d8f022f1d7c0a711b65751797d7c2cade5851b909041e497fd2",
+    "contains_application_hit_precedes_argument": "5eaaf809b8209f2ab8c4d8c231586508771f42edc2d3e1bc9dc5fa794255b025",
+    "contains_application_error_precedes_argument": "a105bad2dbe0d91d45ae8d7fd48425065ee245a3e49ae2011c5a29cf3a14d32c",
+    "contains_const_with_fuel_correspondence": "1bb058385b48c4068b870574ebfaa0f6530a444dc3150d3e67574f8165269223",
+    "contains_const_on_canonical_correspondence": "d910085176d2e7899ccf58374b6bb1e1e88d29398edbe051bcc7ed8795f0c5f5",
+    "indices_contain_target_correspondence": "858e75393bd38ab437e0f6b054d4039ca64b48f1981ec17a780ead56c1a6fb98",
+    "validate_shape_mismatch_precedes_occurrence": "3851eda3a5c9ab7f0ce4d82dd638582989eea68d7317726a02188f8a9bdcc7fa",
+    "validate_recursive_index_rejected": "0ca2d61157ca76ad8cc859daec378e467de7fef1028abafff933e3323303ffa5",
+    "validate_preserves_exact_index_ids": "15e90dc9ba9b273fadbd8a43398f9ad58af64153d4c6c1510cdb3c54e7e0618a",
+    "consume_result_params_correspondence": "3481aa2fd8faa49686b5f5049b6666eec137b36168a00b1c444a57c9f2025135",
+    "inductive_app_indices_correspondence": "6d3e51130aea6fa224908c302b61f5bb40c27ea71e92c45f14491799274f374a",
+    "validate_constructor_result_correspondence": "69803f678594a9edd89acd71362f3c98f54743516ab7f3cb32de715c57ee894e"
+  },
+  "reportNames": [
+    "PsKernelOrdinaryConstructorResultProofs.consume_empty_preserves_exact_tail",
+    "PsKernelOrdinaryConstructorResultProofs.consume_missing_argument_is_mismatch",
+    "PsKernelOrdinaryConstructorResultProofs.consume_fvar_compares_only_internal_name",
+    "PsKernelOrdinaryConstructorResultProofs.contains_zero_precedes_lookup",
+    "PsKernelOrdinaryConstructorResultProofs.contains_projection_name_precedes_receiver",
+    "PsKernelOrdinaryConstructorResultProofs.contains_application_hit_precedes_argument",
+    "PsKernelOrdinaryConstructorResultProofs.contains_application_error_precedes_argument",
+    "PsKernelOrdinaryConstructorResultProofs.contains_const_with_fuel_correspondence",
+    "PsKernelOrdinaryConstructorResultProofs.contains_const_on_canonical_correspondence",
+    "PsKernelOrdinaryConstructorResultProofs.indices_contain_target_correspondence",
+    "PsKernelOrdinaryConstructorResultProofs.validate_shape_mismatch_precedes_occurrence",
+    "PsKernelOrdinaryConstructorResultProofs.validate_recursive_index_rejected",
+    "PsKernelOrdinaryConstructorResultProofs.validate_preserves_exact_index_ids",
+    "PsKernelOrdinaryConstructorResultProofs.consume_result_params_correspondence",
+    "PsKernelOrdinaryConstructorResultProofs.inductive_app_indices_correspondence",
+    "PsKernelOrdinaryConstructorResultProofs.validate_constructor_result_correspondence"
+  ],
+  "verification": "Static source/diagnostic comparison only. No local Lean, compiler, JavaScript, kernel or project-test execution; next Actions run required."
+}

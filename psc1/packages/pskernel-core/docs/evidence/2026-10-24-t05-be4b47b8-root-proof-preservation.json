@@ -1,0 +1,18 @@
+{
+  "PsKernelExprV2PagedModelProofs.lean": {
+    "statementCount": 19,
+    "reportCount": 17,
+    "allStatementsPreserved": true,
+    "allReportsPreserved": true,
+    "bytes": 16840,
+    "sha256": "d38b40cf2d2bb717494a4e9344a48490054075b32f5e6d1bed592448dd584556"
+  },
+  "PsKernelOrdinaryConstructorResultProofs.lean": {
+    "statementCount": 16,
+    "reportCount": 16,
+    "allStatementsPreserved": true,
+    "allReportsPreserved": true,
+    "bytes": 25543,
+    "sha256": "5fb21b0e72978a520a5528f1177825cae4f3b7b5ed1871787b0c34db6cbfced4"
+  }
+}

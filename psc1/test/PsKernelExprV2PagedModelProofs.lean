@@ -178,9 +178,13 @@ theorem valid_id_is_found (arena : PsKernelExprV2PagedArena) (layout : Layout ar
       exact Nat.mod_lt id layout.positive
     refine ⟨(arena.pages.getD (id / arena.pageLimit) (Array.emptyWithCapacity 0)).getD
       (id % arena.pageLimit) psKernelExprV2DummyEntry, ?_⟩
+    dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+      HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
     simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq,
       nonzero, inside, completed, offset]
   · refine ⟨arena.active.getD (id % arena.pageLimit) psKernelExprV2DummyEntry, ?_⟩
+    dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+      HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
     simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq,
       nonzero, inside, atActive, offset]
 
@@ -193,19 +197,27 @@ theorem push_find_old (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2
   by_cases space : arena.active.size < arena.pageLimit
   · rw [push_growing arena entry space]
     rcases valid_id_location arena layout id inside with completed | ⟨atActive, offset⟩
-    · simp [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq,
+    · dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+        HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
+      simp [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq,
         nonzero, inside, nextInside, completed]
-    · simpa only [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq,
+    · dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+        HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
+      simpa only [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq,
         nonzero, inside, nextInside, atActive, Nat.lt_irrefl, ite_false, ite_true] using
-          paged_get_push_old arena.active entry (id % arena.pageLimit) offset
+          paged_get_push_old arena.active entry (Nat.mod id arena.pageLimit) offset
   · rw [push_rollover arena entry space]
     rcases valid_id_location arena layout id inside with completed | ⟨atActive, offset⟩
     · have completedNext : id / arena.pageLimit < arena.pages.size + 1 := by omega
+      dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+        HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
       simp only [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, Array.size_push,
         nonzero, inside, nextInside, completed, completedNext, ite_false, ite_true]
       rw [array_getD_push_old arena.pages arena.active (Array.emptyWithCapacity 0)
-        (id / arena.pageLimit) completed]
-    · simp [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, nonzero, inside,
+        (Nat.div id arena.pageLimit) completed]
+    · dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+        HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
+      simp [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, nonzero, inside,
         nextInside, atActive, array_getD_push_new]
 
 theorem push_find_new (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2Entry)
@@ -225,6 +237,8 @@ theorem push_find_new (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2
     have offset : arena.size % arena.pageLimit = arena.active.size := by
       rw [layout.size, Nat.mul_add_mod_self_right, Nat.mod_eq_of_lt space]
     rw [push_growing arena entry space]
+    dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+      HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
     simpa only [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, nonzero,
       nextInside, page, offset, Nat.lt_irrefl, ite_false, ite_true] using
         paged_get_push_new arena.active entry
@@ -239,6 +253,8 @@ theorem push_find_new (arena : PsKernelExprV2PagedArena) (entry : PsKernelExprV2
     have offset : arena.size % arena.pageLimit = 0 := by
       rw [total, Nat.mul_mod_left]
     rw [push_rollover arena entry space]
+    dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
+      HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
     simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq,
       nonzero, nextInside, page, offset, Array.getD_eq_getD_getElem?]
 

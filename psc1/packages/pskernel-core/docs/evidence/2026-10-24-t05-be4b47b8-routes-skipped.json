@@ -1,0 +1,110 @@
+{
+  "schema": "psc1-t05-constructor-route-skipped-observation-v1",
+  "sourceSha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+  "runId": 40092935560,
+  "runAttempt": 1,
+  "observedAtUtc": "2026-10-24T12:15:26.374392+00:00",
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40092935560",
+  "nativeJob": {
+    "jobId": 120869170121,
+    "status": "completed",
+    "conclusion": "failure",
+    "failedStep": {
+      "name": "Kernel-check50 new constructor and storage equations plus8 unchanged metadata reports",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 9,
+      "started_at": "2026-10-24T12:13:48Z",
+      "completed_at": "2026-10-24T12:13:53Z"
+    },
+    "diagnosticScope": "Native terminal-log and proof diagnostics are owned by controls_receipt and are not inferred here."
+  },
+  "dependentMatrixJob": {
+    "id": 120869585392,
+    "run_id": 40092935560,
+    "workflow_name": "PSC1 T05 ordinary header and constructor helpers native-first preflight",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40092935560",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcJGOB8A",
+    "head_sha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120869585392",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40092935560/job/120869585392",
+    "status": "completed",
+    "conclusion": "skipped",
+    "created_at": "2026-10-24T12:13:57Z",
+    "started_at": "2026-10-24T12:13:57Z",
+    "completed_at": "2026-10-24T12:13:57Z",
+    "name": "generated-header",
+    "steps": [],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120869585392",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": null,
+    "runner_name": null,
+    "runner_group_id": null,
+    "runner_group_name": null
+  },
+  "routeScope": {
+    "generated": {
+      "executed": false,
+      "status": "skipped_before_matrix_expansion",
+      "runtimeAssertionsExecuted": 0
+    },
+    "canonical": {
+      "executed": false,
+      "status": "skipped_before_matrix_expansion",
+      "runtimeAssertionsExecuted": 0
+    }
+  },
+  "notReached": [
+    "native header runtime/official controls",
+    "native Params284 regression",
+    "native Result432 regression",
+    "complete230-report audit and constructor native receipt",
+    "retained native DAG/prefix controls",
+    "bounded production/cache1884 route gates",
+    "full148-module route builds",
+    "Header1992 runtime in either route",
+    "Params268 runtime in either route",
+    "Result432 runtime in either route",
+    "successful header or constructor route receipts"
+  ],
+  "successfulNativeStepNames": [
+    "Verify exact source, pins, frozen references and JavaScript syntax",
+    "Build native production imports and retained DAG executable",
+    "Kernel-check all64 new header and structural equations first",
+    "Build native-only occurrence and metadata import dependencies"
+  ],
+  "evidence": [
+    {
+      "path": "t05-evidence/be4b47b8-runtime-40092935560/run-terminal.json",
+      "bytes": 13916,
+      "sha256": "4711615185ba281f70e69495744cf062a68c2e19c3fce59f74e150c2e36e28fd"
+    },
+    {
+      "path": "t05-evidence/be4b47b8-runtime-40092935560/jobs-terminal.json",
+      "bytes": 7694,
+      "sha256": "540e1cf6840d278b2b08b4fc1734a6b338b16860b158dfcc14c895619b77db3d"
+    },
+    {
+      "path": "t05-evidence/be4b47b8-runtime-40092935560/fresh-source-records.json",
+      "bytes": 886,
+      "sha256": "dad77de2fb4ef33d08c5ef4260692b99a006047553ed8d320df294a7ab5c7631"
+    }
+  ],
+  "preparedInspector": {
+    "path": "t05-evidence/be4b47b8-runtime-40092935560/inspect-terminal-log.py",
+    "bytes": 14751,
+    "sha256": "761ce14576a3288d144849a3ef3e27b07d53ec30dff71ec715829ac2f315abef",
+    "executedAgainstProjectOrRouteOutput": false
+  },
+  "limitations": [
+    "This is a metadata observation of failed prerequisites and skipped dependent work, not route qualification.",
+    "No success is transferred from the previous f5d97baf source.",
+    "No duplicate run, rerun, dispatch, artifact download, or local project execution was performed."
+  ]
+}

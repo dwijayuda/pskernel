@@ -55,7 +55,7 @@ theorem contains_projection_name_precedes_receiver
     psKernelExprV2OrdinaryContainsConstWithFuel (Nat.succ remaining)
         arena target root = Except.ok true := by
   simp only [psKernelExprV2OrdinaryContainsConstWithFuel,
-    psKernelExprV2PagedRequire, lookup, node, sameName]
+    psKernelExprV2PagedRequire, lookup, node, sameName] <;> rfl
 
 theorem contains_application_hit_precedes_argument
     (arena : PsKernelExprV2PagedArena) (target : PsKernelName)
@@ -67,7 +67,7 @@ theorem contains_application_hit_precedes_argument
     psKernelExprV2OrdinaryContainsConstWithFuel (Nat.succ remaining)
         arena target root = Except.ok true := by
   simp only [psKernelExprV2OrdinaryContainsConstWithFuel,
-    psKernelExprV2PagedRequire, lookup, node, found]
+    psKernelExprV2PagedRequire, lookup, node, found] <;> rfl
 
 theorem contains_application_error_precedes_argument
     (arena : PsKernelExprV2PagedArena) (target : PsKernelName)
@@ -237,7 +237,7 @@ theorem validate_recursive_index_rejected
     psKernelExprV2OrdinaryValidateConstructorResult
         arena target levels parameters numIndices root =
       Except.error "simple inductive constructor return index contains a recursive occurrence" := by
-  simp only [psKernelExprV2OrdinaryValidateConstructorResult, matched, recursive]
+  simp only [psKernelExprV2OrdinaryValidateConstructorResult, matched, recursive] <;> rfl
 
 theorem validate_preserves_exact_index_ids
     (arena : PsKernelExprV2PagedArena) (target : PsKernelName)
@@ -249,7 +249,7 @@ theorem validate_preserves_exact_index_ids
       arena target indices = Except.ok false) :
     psKernelExprV2OrdinaryValidateConstructorResult
         arena target levels parameters numIndices root = Except.ok indices := by
-  simp only [psKernelExprV2OrdinaryValidateConstructorResult, matched, nonrecursive]
+  simp only [psKernelExprV2OrdinaryValidateConstructorResult, matched, nonrecursive] <;> rfl
 
 /- Only the internal name is inspected by the frozen V1 prefix consumer.
    Decoding the remaining binder fields makes the reference input explicit;

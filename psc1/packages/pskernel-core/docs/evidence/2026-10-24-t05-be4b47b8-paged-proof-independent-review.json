@@ -1,0 +1,99 @@
+{
+  "schema": "psc1-t05-paged-proof-repair-independent-static-review-v1",
+  "status": "STATIC_REVIEW_ONLY_UNCOMPILED",
+  "originalSourceSha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+  "runId": 40092935560,
+  "runAttempt": 1,
+  "nativeJobId": 120869170121,
+  "before": {
+    "path": "t05-fix5/paged-model-repair/tested.lean",
+    "bytes": 15908,
+    "sha256": "7c235ebf053fac77533a24c2bc4f2ed59af325f97ab89acc4d1347f7044ddcca",
+    "gitBlobSha": "7f928aa3b3495b39ac393b8e7430c13505f739fa"
+  },
+  "after": {
+    "path": "t05-fix5/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+    "bytes": 16840,
+    "sha256": "d38b40cf2d2bb717494a4e9344a48490054075b32f5e6d1bed592448dd584556",
+    "gitBlobSha": "facd561e14e6c8771f1336771eb60e10e2154422"
+  },
+  "diff": {
+    "path": "t05-fix5/paged-model-repair/repair.diff",
+    "bytes": 3959,
+    "sha256": "52a5c675c0cacdaaa099497fadb350b9a9a1cd79cb8fa878a58b2797a9df205e",
+    "gitBlobSha": "5f5b09d8414b9de62accabf305f22ba592b38dd3"
+  },
+  "pinnedNotationBridge": {
+    "path": "t05-fix5/paged-model-repair/pinned-notation-bridge.json",
+    "bytes": 3701,
+    "sha256": "99cced33cf703a9f95bfc47d8ab1c77053f99a404a243e86b1907b75c9534ada",
+    "gitBlobSha": "425ee04d63a3ee663e4be3cd643544bc5015ed9a"
+  },
+  "changes": {
+    "proofBodies": [
+      "valid_id_is_found",
+      "push_find_old",
+      "push_find_new"
+    ],
+    "normalizationSites": 8,
+    "laterHelperArguments": "Nat.mod and Nat.div explicitly match the normalized raw operations"
+  },
+  "preservation": {
+    "all19TheoremStatementsExact": true,
+    "all17ReportNamesExact": true,
+    "allOtherTopLevelBlocksExact": true,
+    "noProductionChanges": true,
+    "noNewAssumptionsOrAxioms": true
+  },
+  "reviewFindings": [
+    "The eight actual diagnostics leave guards/indexes containing Nat.div/Nat.mod while hypotheses and helper applications retain overloaded / and % notation.",
+    "Each inserted dsimp-only list unfolds exactly the HDiv/Div and HMod/Mod projections/instances from pinned Lean Prelude; it does not unfold Nat.div or Nat.mod themselves.",
+    "The two explicit helper arguments preserve the same values while making rewrite/simpa patterns syntactically align after normalization.",
+    "Existing positive page-size, layout and bounds hypotheses are unchanged; active-page and completed-page branch arguments remain the original ones.",
+    "No concrete proof-interface or semantic weakening was found."
+  ],
+  "statementDigests": {
+    "array_getD_push_old": "4eb7b38a84b09fe3ae5f87d0450feeffe0e10489628f0f258d8d46c5f38e0973",
+    "array_getD_push_new": "4d796fde3800cd65b75f05ef1bc76467fcff37222940b1581ffb42bfe2bb6a3c",
+    "paged_get_eq_optional_get": "05e2c861cea2001b310edc63f992df1922dd1c4bb7081a08401b5fc361e600a2",
+    "paged_get_push_old": "da47a357a221e260f5147b1bd1180052b56512e2588153a2e810307101148714",
+    "paged_get_push_new": "ab0c9487281282209c65ee47f1876065adacbd8690b9e4b64ddb8360698455ec",
+    "empty_layout": "fe3d500b5e47f3578de843e5089fa6325d2dc0cb19dd1c9a1bfedc00ee6cd2e0",
+    "push_growing": "8efd8cd91aaa418d28edaa1e6605d53ff7c48f7cfed994aa93a0014318c851f7",
+    "push_rollover": "1972ceeb5e9e43d7384eca4f0c891dda2f31ce0cfe85c03b7966c7dbe9a18549",
+    "push_id_and_size": "a5c6d3b1b240d45771621ff2c01bb8e6186d498e0447fc3347e2800ca162db90",
+    "push_layout": "60d70c1f9e5c74a87b69ebd1e8753a2b0cf87d681dd784edd009eea4afd4e97f",
+    "valid_id_location": "b8851c6554a46888ec25b519e456dceabbd7c712221008d60ff0e4914d851c1a",
+    "find_out_of_bounds": "077a2ed54abb1d241d8e590e6bb85675d589e849c691f2afe7f14ebd2e969323",
+    "found_id_is_in_bounds": "aebbee4465e4369a84666ab69cbb221f9dfd1e1f5e197cad349b274064a232e3",
+    "valid_id_is_found": "977f141bf7aa237188595970d6f1a7575a17bb7e73f089071fb8a009d9514a2f",
+    "push_find_old": "5520d67b63bcc6c94cdeb4559a3f037bff623fee13fe5fddf539c1a6278f0780",
+    "push_find_new": "7d8b52081b9ccbb9d97a3dbabc566d69ca8631a748ffbe1274868cc2a10daff9",
+    "push_find": "1bf84821294471126c4605248d8664b535bafd226d6f207efeacc6d986ef1c5a",
+    "push_require_old": "8bf7857f71d39095ff6e19efc6b02a838c33e070cd9b43d13ab460e647deb49f",
+    "mk_app_preserves_layout_and_metadata": "463a4ac35fde9706570527bd80517cc64c4685a52ef7e96cb8b12a9544f4c8ac"
+  },
+  "reportNames": [
+    "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+    "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+    "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+    "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+    "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+    "PsKernelExprV2PagedModelProofs.empty_layout",
+    "PsKernelExprV2PagedModelProofs.push_id_and_size",
+    "PsKernelExprV2PagedModelProofs.push_layout",
+    "PsKernelExprV2PagedModelProofs.valid_id_location",
+    "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+    "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+    "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+    "PsKernelExprV2PagedModelProofs.push_find_old",
+    "PsKernelExprV2PagedModelProofs.push_find_new",
+    "PsKernelExprV2PagedModelProofs.push_find",
+    "PsKernelExprV2PagedModelProofs.push_require_old",
+    "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+  ],
+  "limits": [
+    "No local Lean/compiler/kernel/test execution occurred. The corrected proofs still require a new Actions native pass.",
+    "The paged storage result does not establish a replay-validator-to-ArenaModel bridge."
+  ]
+}

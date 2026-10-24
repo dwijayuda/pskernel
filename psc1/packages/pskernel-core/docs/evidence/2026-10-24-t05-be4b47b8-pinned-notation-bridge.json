@@ -1,0 +1,53 @@
+{
+  "schema": "psc1-pinned-lean-nat-notation-bridge-source-v1",
+  "repository": "leanprover/lean4",
+  "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "path": "src/Init/Prelude.lean",
+  "gitBlobSha": "58a4c37053f30d37b824190b934e759c16e53d7a",
+  "githubUrl": "https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Prelude.lean",
+  "excerpts": [
+    {
+      "needle": "class HDiv ",
+      "line": 1506,
+      "excerpt": "class HDiv (α : Type u) (β : Type v) (γ : outParam (Type w)) where\n  /-- `a / b` computes the result of dividing `a` by `b`.\n  The meaning of this notation is type-dependent.\n  * For most types like `Nat`, `Int`, `Rat`, `Real`, `a / 0` is defined to be `0`.\n  * For `Nat`, `a / b` rounds downwards.\n  * For `Int`, `a / b` rounds downwards if `b` is positive or upwards if `b` is negative.\n    It is implemented as `Int.ediv`, the unique function satisfying"
+    },
+    {
+      "needle": "class HMod ",
+      "line": 1524,
+      "excerpt": "class HMod (α : Type u) (β : Type v) (γ : outParam (Type w)) where\n  /-- `a % b` computes the remainder upon dividing `a` by `b`.\n  The meaning of this notation is type-dependent.\n  * For `Nat` and `Int` it satisfies `a % b + b * (a / b) = a`,\n    and `a % 0` is defined to be `a`. -/\n  hMod : α → β → γ\n"
+    },
+    {
+      "needle": "class Div ",
+      "line": 1660,
+      "excerpt": "class Div (α : Type u) where\n  /-- `a / b` computes the result of dividing `a` by `b`. See `HDiv`. -/\n  div : α → α → α\n\n/--\nThe notation typeclass for inverses.\nThis enables the notation `a⁻¹ : α` where `a : α`."
+    },
+    {
+      "needle": "class Mod ",
+      "line": 1674,
+      "excerpt": "class Mod (α : Type u) where\n  /-- `a % b` computes the remainder upon dividing `a` by `b`. See `HMod`. -/\n  mod : α → α → α\n\n/-- Notation typeclass for the `∣` operation (typed as `\\|`), which represents divisibility. -/\nclass Dvd (α : Type _) where\n  /-- Divisibility. `a ∣ b` (typed as `\\|`) means that there is some `c` such that `b = a * c`. -/"
+    },
+    {
+      "needle": "instance instHDiv ",
+      "line": 1797,
+      "excerpt": "instance instHDiv [Div α] : HDiv α α α where\n  hDiv a b := Div.div a b\n\n@[default_instance]\ninstance instHMod [Mod α] : HMod α α α where\n  hMod a b := Mod.mod a b\n"
+    },
+    {
+      "needle": "instance instHMod ",
+      "line": 1801,
+      "excerpt": "instance instHMod [Mod α] : HMod α α α where\n  hMod a b := Mod.mod a b\n\n@[default_instance]\ninstance instHPow [Pow α β] : HPow α β α where\n  hPow a b := Pow.pow a b\n"
+    },
+    {
+      "needle": "instance Nat.instDiv",
+      "line": 2320,
+      "excerpt": "instance Nat.instDiv : Div Nat := ⟨Nat.div⟩\n\nset_option bootstrap.genMatcherCode false in\n/--\nThe modulo operator, which computes the remainder when dividing one natural number by another.\nUsually accessed via the `%` operator. When the divisor is `0`, the result is the dividend rather\nthan an error."
+    },
+    {
+      "needle": "instance Nat.instMod",
+      "line": 2408,
+      "excerpt": "instance Nat.instMod : Mod Nat := ⟨Nat.mod⟩\n\ntheorem Nat.mod_lt : (x : Nat) →  {y : Nat} → (hy : LT.lt 0 y) → LT.lt (HMod.hMod x y) y\n  | 0, succ _, _ => Nat.zero_lt_succ _\n  | succ n, m, hm =>\n    show LT.lt (ite (LE.le m (succ n)) (Nat.modCore (succ n) m) (succ n)) _ from\n      match Nat.decLe m (succ n) with"
+    }
+  ],
+  "normalization": "HDiv.hDiv -> instHDiv -> Div.div -> Nat.instDiv -> Nat.div; HMod.hMod -> instHMod -> Mod.mod -> Nat.instMod -> Nat.mod",
+  "proofRepairUsesOnlyDefinitionalUnfolding": true,
+  "noProjectExecution": true
+}

@@ -1,0 +1,1978 @@
+{
+  "schema": "psc1-t05-constructor-helper-native-failure-v1",
+  "status": "VERIFIED_FAILURE",
+  "repository": "dwijayuda/pskernel",
+  "sourceSha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+  "treeSha": "163bd7043c618e0f6b9f77609e9c097b3a6a3f42",
+  "productionSrcTreeSha": "07d076b38e25d408200607e3d13147ee425437b8",
+  "runId": 40092935560,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40092935560",
+  "nativeJob": {
+    "id": 120869170121,
+    "run_id": 40092935560,
+    "workflow_name": "PSC1 T05 ordinary header and constructor helpers native-first preflight",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40092935560",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcJF0ryQ",
+    "head_sha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120869170121",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40092935560/job/120869170121",
+    "status": "completed",
+    "conclusion": "failure",
+    "created_at": "2026-10-24T12:11:54Z",
+    "started_at": "2026-10-24T12:11:56Z",
+    "completed_at": "2026-10-24T12:13:57Z",
+    "name": "native-header",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-24T12:11:57Z",
+        "completed_at": "2026-10-24T12:11:58Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-24T12:11:58Z",
+        "completed_at": "2026-10-24T12:12:18Z"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-24T12:12:18Z",
+        "completed_at": "2026-10-24T12:12:23Z"
+      },
+      {
+        "name": "Install pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-24T12:12:23Z",
+        "completed_at": "2026-10-24T12:12:41Z"
+      },
+      {
+        "name": "Verify exact source, pins, frozen references and JavaScript syntax",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-24T12:12:41Z",
+        "completed_at": "2026-10-24T12:12:41Z"
+      },
+      {
+        "name": "Build native production imports and retained DAG executable",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-24T12:12:41Z",
+        "completed_at": "2026-10-24T12:13:41Z"
+      },
+      {
+        "name": "Kernel-check all64 new header and structural equations first",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-24T12:13:41Z",
+        "completed_at": "2026-10-24T12:13:45Z"
+      },
+      {
+        "name": "Build native-only occurrence and metadata import dependencies",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-24T12:13:45Z",
+        "completed_at": "2026-10-24T12:13:48Z"
+      },
+      {
+        "name": "Kernel-check50 new constructor and storage equations plus8 unchanged metadata reports",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 9,
+        "started_at": "2026-10-24T12:13:48Z",
+        "completed_at": "2026-10-24T12:13:53Z"
+      },
+      {
+        "name": "Run direct native header matrix and official Lean controls",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 10,
+        "started_at": "2026-10-24T12:13:53Z",
+        "completed_at": "2026-10-24T12:13:53Z"
+      },
+      {
+        "name": "Run exact native constructor-parameter protocol controls",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 11,
+        "started_at": "2026-10-24T12:13:53Z",
+        "completed_at": "2026-10-24T12:13:53Z"
+      },
+      {
+        "name": "Run exact432 native constructor-result structural assertions",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 12,
+        "started_at": "2026-10-24T12:13:53Z",
+        "completed_at": "2026-10-24T12:13:53Z"
+      },
+      {
+        "name": "Retain108 previous equations and audit all172 exact axiom reports",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 13,
+        "started_at": "2026-10-24T12:13:53Z",
+        "completed_at": "2026-10-24T12:13:53Z"
+      },
+      {
+        "name": "Require230 exact native reports with50new and180retained plus both constructor regressions",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 14,
+        "started_at": "2026-10-24T12:13:53Z",
+        "completed_at": "2026-10-24T12:13:53Z"
+      },
+      {
+        "name": "Retain native public DAG and generated-prefix ownership controls",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 15,
+        "started_at": "2026-10-24T12:13:53Z",
+        "completed_at": "2026-10-24T12:13:53Z"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 16,
+        "started_at": "2026-10-24T12:13:53Z",
+        "completed_at": "2026-10-24T12:13:55Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 31,
+        "started_at": "2026-10-24T12:13:55Z",
+        "completed_at": "2026-10-24T12:13:55Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 32,
+        "started_at": "2026-10-24T12:13:55Z",
+        "completed_at": "2026-10-24T12:13:55Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 33,
+        "started_at": "2026-10-24T12:13:55Z",
+        "completed_at": "2026-10-24T12:13:55Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120869170121",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000028647,
+    "runner_name": "GitHub Actions 1000028647",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "skippedRouteMatrix": {
+    "id": 120869585392,
+    "run_id": 40092935560,
+    "workflow_name": "PSC1 T05 ordinary header and constructor helpers native-first preflight",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40092935560",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcJGOB8A",
+    "head_sha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120869585392",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40092935560/job/120869585392",
+    "status": "completed",
+    "conclusion": "skipped",
+    "created_at": "2026-10-24T12:13:57Z",
+    "started_at": "2026-10-24T12:13:57Z",
+    "completed_at": "2026-10-24T12:13:57Z",
+    "name": "generated-header",
+    "steps": [],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120869585392",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": null,
+    "runner_name": null,
+    "runner_group_id": null,
+    "runner_group_name": null
+  },
+  "artifact": {
+    "id": 12560085976,
+    "node_id": "MDg6QXJ0aWZhY3QxMjU2MDA4NTk3Ng==",
+    "name": "psc1-t05-header-native-attempt-1",
+    "size_in_bytes": 220279,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12560085976",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12560085976/zip",
+    "expired": false,
+    "digest": "sha256:e8c81765bda041c488d56fe1ae58f22c0114a9fc98f979417b6f00ca25866225",
+    "created_at": "2026-10-24T12:13:54Z",
+    "updated_at": "2026-10-24T12:13:54Z",
+    "expires_at": "2027-01-22T12:11:54Z",
+    "workflow_run": {
+      "id": 40092935560,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "head_sha": "be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec"
+    }
+  },
+  "archive": {
+    "bytes": 220279,
+    "sha256": "e8c81765bda041c488d56fe1ae58f22c0114a9fc98f979417b6f00ca25866225"
+  },
+  "artifactFileCount": 57,
+  "files": [
+    {
+      "path": "constructor-params-proofs.log",
+      "bytes": 2568,
+      "sha256": "85bf7e5709218d3fe82d4f7c797a74eaccd623d4cd6d916c9be7437afc180f08"
+    },
+    {
+      "path": "constructor-proof-imports.log",
+      "bytes": 18560,
+      "sha256": "bd7a65dcb0f1f75b97d0bf2fa8401c79b4dd301480c93729d7ff793069d1ec82"
+    },
+    {
+      "path": "constructor-proof-status.log",
+      "bytes": 447,
+      "sha256": "e61e5867477cf6aad3704df25993562000ae4e1c69f0da702dc6cc5aea5ba3bb"
+    },
+    {
+      "path": "constructor-result-proofs.log",
+      "bytes": 4694,
+      "sha256": "786d362e25cd0726028b155f06e97515204963995d9bceb9ac236a82469e86de"
+    },
+    {
+      "path": "header-state-proofs.log",
+      "bytes": 6319,
+      "sha256": "6e5fa413d81b15224e8853ecd55f1ee492b1a3a6e9255e2e93a6e6c4038a1e00"
+    },
+    {
+      "path": "lean-githash.txt",
+      "bytes": 41,
+      "sha256": "3210a17608d78e1841a0a504c21167150e6a388cf44a077f06e3fcd3a823fe31"
+    },
+    {
+      "path": "lean-version.txt",
+      "bytes": 106,
+      "sha256": "eb22144228dd41cd51a0c84af4f976cd0cef473102dcf99b60be756b11f2b95a"
+    },
+    {
+      "path": "metadata-proofs.log",
+      "bytes": 870,
+      "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+    },
+    {
+      "path": "native-build.log",
+      "bytes": 27210,
+      "sha256": "9eeadf3c69aaa1d39018b6b31455cb97c8c5c3ac01fd7dec5c3fd2fa668ad691"
+    },
+    {
+      "path": "new-header-proof-status.log",
+      "bytes": 87,
+      "sha256": "b26ea17b36034ae6c8864addb06e684cc77fe789276b2b169e1ee667dc2f6611"
+    },
+    {
+      "path": "node-version.txt",
+      "bytes": 9,
+      "sha256": "33e26f35db6e57ce0c486ddc815fe966867e4f649e418eaf323f75f4720eb8e9"
+    },
+    {
+      "path": "occurrence-proofs.log",
+      "bytes": 5048,
+      "sha256": "d7ed04f8a65d342f2e8c64d27ff708687008e86903f8c1c30838b7b5892357f8"
+    },
+    {
+      "path": "paged-model-proofs.log",
+      "bytes": 14225,
+      "sha256": "0e0bbaa7378752e383d1c16e9d666f499617c534f8458dcdc72d6083f5918374"
+    },
+    {
+      "path": "source-inventory.json",
+      "bytes": 11390,
+      "sha256": "a29595493ee25d8a66fa0a91101a34f7d1510128ebd76771b91db402a692b693"
+    },
+    {
+      "path": "sources/.github/workflows/psc1-pskernel-t05-header.yml",
+      "bytes": 67786,
+      "sha256": "beb8fea239071d9664ddbb0551051fe36f7d70091b7e138e5f365a0a2a992893"
+    },
+    {
+      "path": "sources/psc1/kernel-lakefile.lean",
+      "bytes": 15261,
+      "sha256": "79cb8e0ee3cebb987712fe662ae79294653cf5a011ced083a319b6fb2df05d13"
+    },
+    {
+      "path": "sources/psc1/lean-toolchain",
+      "bytes": 25,
+      "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+      "bytes": 23509,
+      "sha256": "fc4a87bab4aaf9adf73956e7263c819629fa998a3d226f9c059c7bd1deec6eef"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean",
+      "bytes": 3151,
+      "sha256": "de60bb221d618ab944edd2cca4f6c8158fbf2a4de50ab5fc1f52ad48c1093e95"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean",
+      "bytes": 5194,
+      "sha256": "b681c1a2751f15f66edcbba043fc6af83ac13147ff06360fc459f5405fb483d1"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean",
+      "bytes": 7877,
+      "sha256": "a44e0ebb823e4cb00a8a9d0b2d6017270ff869e1ebd38a1d344d87b8ac378b91"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean",
+      "bytes": 8213,
+      "sha256": "11d056e95b93bafaac73d0a713bba688aee12f88e9d3478af9c2487f79b6edc9"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean",
+      "bytes": 1418,
+      "sha256": "147627ac8160e681c57a21c12fd3320868b29abbebd7416d51f2d3cc6ec34056"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean",
+      "bytes": 9400,
+      "sha256": "3f5ffae4af048991583563f5962dd28e54d2fde18dc7d1bd4f507bb40c8f54f6"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean",
+      "bytes": 13054,
+      "sha256": "e8d676b29d83502c15dff6ffe9eddc926673f8e74612adce420a389b3fb0b680"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean",
+      "bytes": 10620,
+      "sha256": "cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean",
+      "bytes": 9757,
+      "sha256": "7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean",
+      "bytes": 22765,
+      "sha256": "63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean",
+      "bytes": 21914,
+      "sha256": "8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean",
+      "bytes": 1946,
+      "sha256": "4532206f0bc5fd06fb7b69bcea3c832919dea46f6019ef8cdce2bc0385bbda2b"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean",
+      "bytes": 27573,
+      "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+      "bytes": 675,
+      "sha256": "b8efef2b9c6afd38424aa34f4b1c2ad38341f6604fe09e5f4ccbd7a4566f03c0"
+    },
+    {
+      "path": "sources/psc1/scripts/install-lean435-ci.sh",
+      "bytes": 1051,
+      "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-generated-smoke.mjs",
+      "bytes": 12610,
+      "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs",
+      "bytes": 5956,
+      "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs",
+      "bytes": 18426,
+      "sha256": "915bc9621777aa61604497c43debbcf71e7872fc8f9596977cab0cf1fa251d07"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+      "bytes": 13348,
+      "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+      "bytes": 25991,
+      "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+      "bytes": 1126,
+      "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelCacheScopeProofs.lean",
+      "bytes": 36771,
+      "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+      "bytes": 5877,
+      "sha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelExprV2MetadataProofs.lean",
+      "bytes": 7319,
+      "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+      "bytes": 15908,
+      "sha256": "7c235ebf053fac77533a24c2bc4f2ed59af325f97ab89acc4d1347f7044ddcca"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelExprV2SessionProofs.lean",
+      "bytes": 9724,
+      "sha256": "3a6166709bb4e05239dbce2866f4b52616b554157277a46f3c507d67d0c76f90"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelKnotFuelProofs.lean",
+      "bytes": 131180,
+      "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean",
+      "bytes": 15184,
+      "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean",
+      "bytes": 32857,
+      "sha256": "6efdf378a5e6c463d98ad968bc9e7f60b3a3535aaee59199c2ec55d08b145430"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+      "bytes": 25511,
+      "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryConstructorResultRegression.lean",
+      "bytes": 20470,
+      "sha256": "0b690e2dd88030cdf29e18509cb795a0ad00c5ddcbd8f1f18b33394111b15d20"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryHeaderRegression.lean",
+      "bytes": 26890,
+      "sha256": "9f9522e7f14c9a62703ca59dc2ab11b1c5c49cde9dadb1b39599802c7356cad6"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryHeaderStateProofs.lean",
+      "bytes": 31818,
+      "sha256": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+      "bytes": 29015,
+      "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelScalarHashWorkerRegression.lean",
+      "bytes": 10872,
+      "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2"
+    }
+  ],
+  "copiedInputCount": 43,
+  "copiedInputs": [
+    {
+      "path": ".github/workflows/psc1-pskernel-t05-header.yml",
+      "bytes": 67786,
+      "sha256": "beb8fea239071d9664ddbb0551051fe36f7d70091b7e138e5f365a0a2a992893",
+      "gitBlobSha": "eba807bd486d4e485a9cbd9a5fbd2bf4abf0f159"
+    },
+    {
+      "path": "psc1/kernel-lakefile.lean",
+      "bytes": 15261,
+      "sha256": "79cb8e0ee3cebb987712fe662ae79294653cf5a011ced083a319b6fb2df05d13",
+      "gitBlobSha": "169c8d39c88720ecadd95374c1db90b0f0de5a88"
+    },
+    {
+      "path": "psc1/lean-toolchain",
+      "bytes": 25,
+      "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+      "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915"
+    },
+    {
+      "path": "psc1/scripts/install-lean435-ci.sh",
+      "bytes": 1051,
+      "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9",
+      "gitBlobSha": "b53f59db9e2fbb45feeedea659244cae7e77b64b"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+      "bytes": 675,
+      "sha256": "b8efef2b9c6afd38424aa34f4b1c2ad38341f6604fe09e5f4ccbd7a4566f03c0",
+      "gitBlobSha": "6a58b4dfc767e6160ade4b54f35ea4438a72beb5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+      "bytes": 23509,
+      "sha256": "fc4a87bab4aaf9adf73956e7263c819629fa998a3d226f9c059c7bd1deec6eef",
+      "gitBlobSha": "ac2bbc8d42b93e4c00e8e96f706cc901d3bcc9ac"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean",
+      "bytes": 1418,
+      "sha256": "147627ac8160e681c57a21c12fd3320868b29abbebd7416d51f2d3cc6ec34056",
+      "gitBlobSha": "f811255bd32a6a1b4d644d8a4545a1b2bf6c87f9"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean",
+      "bytes": 9400,
+      "sha256": "3f5ffae4af048991583563f5962dd28e54d2fde18dc7d1bd4f507bb40c8f54f6",
+      "gitBlobSha": "9bdbdf46c32798f3d71132fc94013156713cc80b"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean",
+      "bytes": 3151,
+      "sha256": "de60bb221d618ab944edd2cca4f6c8158fbf2a4de50ab5fc1f52ad48c1093e95",
+      "gitBlobSha": "a02db21d57591bea86dffadbc598e22c0b77c7e4"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean",
+      "bytes": 13054,
+      "sha256": "e8d676b29d83502c15dff6ffe9eddc926673f8e74612adce420a389b3fb0b680",
+      "gitBlobSha": "953963f466f9c3f86311cfbd1e9121c45f3de4eb"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean",
+      "bytes": 8213,
+      "sha256": "11d056e95b93bafaac73d0a713bba688aee12f88e9d3478af9c2487f79b6edc9",
+      "gitBlobSha": "0a6682c5f7926da926e0d2d659a66fae57f5ba88"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean",
+      "bytes": 1946,
+      "sha256": "4532206f0bc5fd06fb7b69bcea3c832919dea46f6019ef8cdce2bc0385bbda2b",
+      "gitBlobSha": "0a1209c2406d07c96d4cca1b241ee377c49f28c0"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryHeaderStateProofs.lean",
+      "bytes": 31818,
+      "sha256": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e",
+      "gitBlobSha": "5a6050deb77d66d7440c976a815e5ae8c29f5b0a"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+      "bytes": 29015,
+      "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351",
+      "gitBlobSha": "2034798a4de1b4ca25b2e6366a88020b97beed27"
+    },
+    {
+      "path": "psc1/test/PsKernelCacheScopeProofs.lean",
+      "bytes": 36771,
+      "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5",
+      "gitBlobSha": "45cb58a271695bee0ae05330f39c3c1a86f1801f"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2SessionProofs.lean",
+      "bytes": 9724,
+      "sha256": "3a6166709bb4e05239dbce2866f4b52616b554157277a46f3c507d67d0c76f90",
+      "gitBlobSha": "d75589d73c3879040d535d638f264ba5f6115a1e"
+    },
+    {
+      "path": "psc1/test/PsKernelScalarHashWorkerRegression.lean",
+      "bytes": 10872,
+      "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2",
+      "gitBlobSha": "aa5dd561cdb3df437c21a61c899f57b160289d0f"
+    },
+    {
+      "path": "psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+      "bytes": 5877,
+      "sha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0",
+      "gitBlobSha": "010333b5d6ac53c60c558c89906b02d7358fb0c0"
+    },
+    {
+      "path": "psc1/test/PsKernelKnotFuelProofs.lean",
+      "bytes": 131180,
+      "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b",
+      "gitBlobSha": "197da10ed3a5f2aeb1548511db60a618891912f1"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryHeaderRegression.lean",
+      "bytes": 26890,
+      "sha256": "9f9522e7f14c9a62703ca59dc2ab11b1c5c49cde9dadb1b39599802c7356cad6",
+      "gitBlobSha": "4c0ada09c1b5f7404e0c8c5672049aed75bcbc77"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+      "bytes": 25991,
+      "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153",
+      "gitBlobSha": "98b68b82566c4171c5fe110f11c9ff72b9e00992"
+    },
+    {
+      "path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c",
+      "gitBlobSha": "59fa82e0575b4119aebcf15fe39ed691346f1d06"
+    },
+    {
+      "path": "psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+      "bytes": 1126,
+      "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff",
+      "gitBlobSha": "11e376e9ea0628aadf9a6f94ddfb2ccf29dcb40c"
+    },
+    {
+      "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736",
+      "gitBlobSha": "494647393a3e4b3bdb7ac11115dac470cef6061a"
+    },
+    {
+      "path": "psc1/scripts/pskernel-generated-smoke.mjs",
+      "bytes": 12610,
+      "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab",
+      "gitBlobSha": "604773a240086eec60997c5e140c95b9e3316cda"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0",
+      "gitBlobSha": "065ed4d1de1bdded148a2774de9f13bb8b1a406a"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db",
+      "gitBlobSha": "529a05c4345983eb96420d17e10415538d645f54"
+    },
+    {
+      "path": "psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs",
+      "bytes": 5956,
+      "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b",
+      "gitBlobSha": "120af542b9c1218f732e1c75faadcdbc66620aa4"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean",
+      "bytes": 22765,
+      "sha256": "63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05",
+      "gitBlobSha": "cb2e3a74cbf9ccc8a8484d1bc31d5ed82eda6490"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean",
+      "bytes": 9757,
+      "sha256": "7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3",
+      "gitBlobSha": "918753c154f2ed96d65702494c7374dcd5ec5001"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean",
+      "bytes": 10620,
+      "sha256": "cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0",
+      "gitBlobSha": "a8b911d20a603b46edcc63a0bf000c1bacec5341"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean",
+      "bytes": 27573,
+      "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51",
+      "gitBlobSha": "44d01196e8cdbb6d67db8a860dc73827c8cb206c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean",
+      "bytes": 5194,
+      "sha256": "b681c1a2751f15f66edcbba043fc6af83ac13147ff06360fc459f5405fb483d1",
+      "gitBlobSha": "aa451845d1c0c452d49a96f44caa5b5985f8284c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean",
+      "bytes": 7877,
+      "sha256": "a44e0ebb823e4cb00a8a9d0b2d6017270ff869e1ebd38a1d344d87b8ac378b91",
+      "gitBlobSha": "632ab0da062959eceeaff28a9f3a420dc89b923f"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean",
+      "bytes": 21914,
+      "sha256": "8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145",
+      "gitBlobSha": "56a70b8ac94283694bf375a8d5c8e7adfd3859b7"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2MetadataProofs.lean",
+      "bytes": 7319,
+      "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20",
+      "gitBlobSha": "c97466b70bddb9867d05ab4282990a3f3e417779"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2PagedModelProofs.lean",
+      "bytes": 15908,
+      "sha256": "7c235ebf053fac77533a24c2bc4f2ed59af325f97ab89acc4d1347f7044ddcca",
+      "gitBlobSha": "7f928aa3b3495b39ac393b8e7430c13505f739fa"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean",
+      "bytes": 15184,
+      "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019",
+      "gitBlobSha": "72168cc434bed09b9cd5624a470d1f672c558354"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+      "bytes": 25511,
+      "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301",
+      "gitBlobSha": "416461c7eb0cacfe4ee747116c334134754e87a2"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean",
+      "bytes": 32857,
+      "sha256": "6efdf378a5e6c463d98ad968bc9e7f60b3a3535aaee59199c2ec55d08b145430",
+      "gitBlobSha": "6bd63ba1a7b940a2b1c7a77a9fa52ae6971b574b"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorResultRegression.lean",
+      "bytes": 20470,
+      "sha256": "0b690e2dd88030cdf29e18509cb795a0ad00c5ddcbd8f1f18b33394111b15d20",
+      "gitBlobSha": "287c3b1e520541feec043171b2f4a08f67d15f28"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs",
+      "bytes": 18426,
+      "sha256": "915bc9621777aa61604497c43debbcf71e7872fc8f9596977cab0cf1fa251d07",
+      "gitBlobSha": "5f611e390fc0d5c3785284fc92306c4b87d70e7b"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+      "bytes": 13348,
+      "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a",
+      "gitBlobSha": "3d2129860909bdc4dcff16a162bf168badcf1aa7"
+    }
+  ],
+  "allCopiedInputsMatchAuthenticatedGitBlobs": true,
+  "allZipMembersReadAndCrcChecked": true,
+  "nativeProofAttempts": [
+    {
+      "module": "PsKernelOrdinaryHeaderStateProofs",
+      "requiredReports": 49,
+      "leanStatus": 0,
+      "reports": [
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.reverse_worker_eq",
+          "dependencies": [
+            "propext",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.reverse_eq",
+          "dependencies": [
+            "propext",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.finish_keeps_complete_returned_owner",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.finish_decline",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.finish_error",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.mandatory_sort_keeps_complete_returned_owner",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_check_decline_precedes_whnf_and_opening",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_check_error_precedes_whnf_and_opening",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_decline_precedes_annotations",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_error_precedes_annotations",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_annotation_error_precedes_allocation",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_opening_error_preserved",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_success_keeps_post_opening_owner_and_original_domain",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_allocation_preserves_every_semantic_field",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_decline_precedes_lookup",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_error_precedes_lookup",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_lookup_error_precedes_check",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_uses_returned_owner_and_original_fuel",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_zero_still_performs_final_whnf",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_successor_keeps_original_fuel",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_successor_decline",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_successor_error",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_wrapper_starts_empty",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_zero_precedes_callbacks_and_lookup",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_decline_uses_predecessor",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_error_uses_predecessor",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_lookup_error_precedes_check",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_threads_post_opening_owner",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_decline",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_error",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_terminal_sort_keeps_complete_returned_owner",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_wrapper_adds_one_before_callbacks",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.constructor_context_is_parameter_context",
+          "dependencies": [],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.constructor_fork_preserves_parameter_semantics_and_freshness",
+          "dependencies": [],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.constructor_fork_ignores_index_semantic_state",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_finish_sort_keeps_both_owners",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_finish_lookup_error",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_finish_nonsort_error",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_check_decline_precedes_whnf",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_check_error_precedes_whnf",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_decline_precedes_opening",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_error_precedes_opening",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_after_sort_composition",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_guard_error_precedes_callbacks",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_duplicate_levels_precede_all_other_guards",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_duplicate_names_precede_freshness_and_types",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_freshness_error_precedes_uniform_and_header",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_uniform_error_precedes_static_header",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_successful_guards_initialize_one_fresh_owner",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        }
+      ],
+      "diagnosticHeaders": [],
+      "log": {
+        "bytes": 6319,
+        "sha256": "6e5fa413d81b15224e8853ecd55f1ee492b1a3a6e9255e2e93a6e6c4038a1e00"
+      }
+    },
+    {
+      "module": "PsKernelOrdinaryOccurrenceProofs",
+      "requiredReports": 15,
+      "leanStatus": 0,
+      "reports": [
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.app_spine_with_fuel_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.app_spine_on_canonical_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_argument_count_correspondence",
+          "dependencies": [],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_arguments_correspondence",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.declared_names_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_head_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_with_fuel_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_structural_adequacy",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_on_canonical_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrences_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.legacy_depth_le_expanded_count",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotation_target_depth",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotation_structural_adequacy",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotations_with_fuel_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotations_on_canonical_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        }
+      ],
+      "diagnosticHeaders": [],
+      "log": {
+        "bytes": 5048,
+        "sha256": "d7ed04f8a65d342f2e8c64d27ff708687008e86903f8c1c30838b7b5892357f8"
+      }
+    },
+    {
+      "module": "PsKernelExprV2MetadataProofs",
+      "requiredReports": 8,
+      "leanStatus": 0,
+      "reports": [
+        {
+          "name": "PsKernelExprV2MetadataProofs.app_preserves",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2MetadataProofs.lam_preserves",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2MetadataProofs.forall_preserves",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2MetadataProofs.let_preserves",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2MetadataProofs.mdata_preserves",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2MetadataProofs.proj_preserves",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        }
+      ],
+      "diagnosticHeaders": [],
+      "log": {
+        "bytes": 870,
+        "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+      }
+    },
+    {
+      "module": "PsKernelExprV2PagedModelProofs",
+      "requiredReports": 17,
+      "leanStatus": 1,
+      "reports": [
+        {
+          "name": "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.empty_layout",
+          "dependencies": [
+            "propext"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.push_id_and_size",
+          "dependencies": [],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.push_layout",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.valid_id_location",
+          "dependencies": [
+            "propext",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+          "dependencies": [
+            "propext",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+          "dependencies": [
+            "propext",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.push_find_old",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.push_find_new",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.push_find",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.push_require_old",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        }
+      ],
+      "diagnosticHeaders": [
+        "test/PsKernelExprV2PagedModelProofs.lean:174:2: error: unsolved goals",
+        "test/PsKernelExprV2PagedModelProofs.lean:183:2: error: unsolved goals",
+        "test/PsKernelExprV2PagedModelProofs.lean:196:4: error: unsolved goals",
+        "test/PsKernelExprV2PagedModelProofs.lean:198:6: error: Type mismatch: After simplification, term",
+        "test/PsKernelExprV2PagedModelProofs.lean:206:10: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern",
+        "test/PsKernelExprV2PagedModelProofs.lean:208:4: error: unsolved goals",
+        "test/PsKernelExprV2PagedModelProofs.lean:228:4: error: Type mismatch: After simplification, term",
+        "test/PsKernelExprV2PagedModelProofs.lean:231:2: error: unsolved goals"
+      ],
+      "log": {
+        "bytes": 14225,
+        "sha256": "0e0bbaa7378752e383d1c16e9d666f499617c534f8458dcdc72d6083f5918374"
+      }
+    },
+    {
+      "module": "PsKernelOrdinaryConstructorParamsProofs",
+      "requiredReports": 17,
+      "leanStatus": 0,
+      "reports": [
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.worker_zero_precedes_parameters_lookup_and_callbacks",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.successor_empty_keeps_complete_owner_without_lookup",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.lookup_error_precedes_defeq",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.syntactic_nonforall_precedes_defeq",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.forall_uses_predecessor_fuel_and_constructor_domain_left",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.defeq_decline_precedes_fvar_and_instantiation",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.defeq_error_precedes_fvar_and_instantiation",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.defeq_false_precedes_fvar_and_instantiation",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.fvar_error_uses_returned_owner_and_existing_parameter_name",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.instantiation_error_precedes_recursive_continuation",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.success_keeps_context_and_complete_returned_owner",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.success_preserves_every_semantic_field_and_freshness",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.one_unit_successful_step_still_reaches_zero_before_empty_tail",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.two_or_more_units_finish_one_parameter_with_returned_owner",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.wrapper_adds_one_before_empty_or_callbacks",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.wrapper_zero_empty_is_identity",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorParamsProofs.with_fuel_uses_full_owner_defeq_without_fallback",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        }
+      ],
+      "diagnosticHeaders": [],
+      "log": {
+        "bytes": 2568,
+        "sha256": "85bf7e5709218d3fe82d4f7c797a74eaccd623d4cd6d916c9be7437afc180f08"
+      }
+    },
+    {
+      "module": "PsKernelOrdinaryConstructorResultProofs",
+      "requiredReports": 16,
+      "leanStatus": 1,
+      "reports": [
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.consume_empty_preserves_exact_tail",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.consume_missing_argument_is_mismatch",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.consume_fvar_compares_only_internal_name",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.contains_zero_precedes_lookup",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.contains_projection_name_precedes_receiver",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.contains_application_hit_precedes_argument",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.contains_application_error_precedes_argument",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.contains_const_with_fuel_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.contains_const_on_canonical_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.indices_contain_target_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.validate_shape_mismatch_precedes_occurrence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.validate_recursive_index_rejected",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.validate_preserves_exact_index_ids",
+          "dependencies": [
+            "propext",
+            "sorryAx",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": false
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.consume_result_params_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.inductive_app_indices_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        },
+        {
+          "name": "PsKernelOrdinaryConstructorResultProofs.validate_constructor_result_correspondence",
+          "dependencies": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ],
+          "allowedStandardAxiomsOnly": true
+        }
+      ],
+      "diagnosticHeaders": [
+        "test/PsKernelOrdinaryConstructorResultProofs.lean:56:46: error: unsolved goals",
+        "test/PsKernelOrdinaryConstructorResultProofs.lean:68:46: error: unsolved goals",
+        "test/PsKernelOrdinaryConstructorResultProofs.lean:239:98: error: unsolved goals",
+        "test/PsKernelOrdinaryConstructorResultProofs.lean:251:78: error: unsolved goals"
+      ],
+      "log": {
+        "bytes": 4694,
+        "sha256": "786d362e25cd0726028b155f06e97515204963995d9bceb9ac236a82469e86de"
+      }
+    }
+  ],
+  "constructorProofStatus": [
+    "PSC1_T05_CONSTRUCTOR_PROOF_STATUS module=PsKernelExprV2MetadataProofs count=8 countStatus=0 leanStatus=0",
+    "PSC1_T05_CONSTRUCTOR_PROOF_STATUS module=PsKernelExprV2PagedModelProofs count=17 countStatus=0 leanStatus=1",
+    "PSC1_T05_CONSTRUCTOR_PROOF_STATUS module=PsKernelOrdinaryConstructorParamsProofs count=17 countStatus=0 leanStatus=0",
+    "PSC1_T05_CONSTRUCTOR_PROOF_STATUS module=PsKernelOrdinaryConstructorResultProofs count=16 countStatus=0 leanStatus=1"
+  ],
+  "headerProofStatus": "PSC1_T05_NEW_PROOF_RESULTS stateCount=0 stateLean=0 occurrenceCount=0 occurrenceLean=0",
+  "failedProofLogs": {
+    "paged-model-proofs.log": "test/PsKernelExprV2PagedModelProofs.lean:38:37: warning: This simp argument is unused:\n  Array.getElem?_push\n\nHint: Omit it from the simp argument list.\n  [apply] simp [Array.getD_eq_getD_getElem?]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:46:6: warning: This simp argument is unused:\n  Array.getD_eq_getD_getElem?\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedGet, Nat.blt_eq, inside]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:174:2: error: unsolved goals\ncase inl\narena : PsKernelExprV2PagedArena\nlayout : Layout arena\nid : Nat\ninside : id < arena.size\nnonzero : arena.pageLimit \u2260 0\ncompleted : id / arena.pageLimit < arena.pages.size\nsize : (arena.pages.getD (id / arena.pageLimit) (Array.emptyWithCapacity 0)).size = arena.pageLimit\noffset : id % arena.pageLimit < (arena.pages.getD (id / arena.pageLimit) (Array.emptyWithCapacity 0)).size\n\u22a2 (if id.div arena.pageLimit < arena.pages.size then\n      if id.mod arena.pageLimit < (arena.pages[id.div arena.pageLimit]?.getD #[]).size then\n        some ((arena.pages[id.div arena.pageLimit]?.getD #[])[id.mod arena.pageLimit]?.getD psKernelExprV2DummyEntry)\n      else none\n    else\n      if id.div arena.pageLimit = arena.pages.size then\n        if id.mod arena.pageLimit < arena.active.size then\n          some (arena.active[id.mod arena.pageLimit]?.getD psKernelExprV2DummyEntry)\n        else none\n      else none) =\n    some (arena.pages[id / arena.pageLimit][id % arena.pageLimit]?.getD psKernelExprV2DummyEntry)\ntest/PsKernelExprV2PagedModelProofs.lean:183:2: error: unsolved goals\ncase inr\narena : PsKernelExprV2PagedArena\nlayout : Layout arena\nid : Nat\ninside : id < arena.size\nnonzero : arena.pageLimit \u2260 0\natActive : id / arena.pageLimit = arena.pages.size\noffset : id % arena.pageLimit < arena.active.size\n\u22a2 (if id.div arena.pageLimit < arena.pages.size then\n      if id.mod arena.pageLimit < (arena.pages[id.div arena.pageLimit]?.getD #[]).size then\n        some ((arena.pages[id.div arena.pageLimit]?.getD #[])[id.mod arena.pageLimit]?.getD psKernelExprV2DummyEntry)\n      else none\n    else\n      if id.div arena.pageLimit = arena.pages.size then\n        if id.mod arena.pageLimit < arena.active.size then\n          some (arena.active[id.mod arena.pageLimit]?.getD psKernelExprV2DummyEntry)\n        else none\n      else none) =\n    some arena.active[id % arena.pageLimit]\ntest/PsKernelExprV2PagedModelProofs.lean:182:34: warning: This simp argument is unused:\n  offset\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq, nonzero, inside, completed]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:185:23: warning: This simp argument is unused:\n  atActive\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq, nonzero, inside, offset]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:196:4: error: unsolved goals\ncase pos.inl\narena : PsKernelExprV2PagedArena\nentry : PsKernelExprV2Entry\nlayout : Layout arena\nid : Nat\ninside : id < arena.size\nnonzero : arena.pageLimit \u2260 0\nnextInside : id < arena.size + 1\nspace : arena.active.size < arena.pageLimit\ncompleted : id / arena.pageLimit < arena.pages.size\n\u22a2 (if id.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages[id.div arena.pageLimit]?.getD #[]) (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size then\n        psKernelExprV2PagedGet (arena.active.push entry) (id.mod arena.pageLimit)\n      else none) =\n    if id.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages[id.div arena.pageLimit]?.getD #[]) (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size then psKernelExprV2PagedGet arena.active (id.mod arena.pageLimit)\n      else none\ntest/PsKernelExprV2PagedModelProofs.lean:198:6: error: Type mismatch: After simplification, term\n  paged_get_push_old arena.active entry (id % arena.pageLimit) offset\n has type\n  psKernelExprV2PagedGet (arena.active.push entry) (id % arena.pageLimit) =\n    psKernelExprV2PagedGet arena.active (id % arena.pageLimit)\nbut is expected to have type\n  (if id.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages.getD (id.div arena.pageLimit) (Array.emptyWithCapacity 0))\n        (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size then\n        psKernelExprV2PagedGet (arena.active.push entry) (id.mod arena.pageLimit)\n      else none) =\n    if id.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages.getD (id.div arena.pageLimit) (Array.emptyWithCapacity 0))\n        (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size then psKernelExprV2PagedGet arena.active (id.mod arena.pageLimit)\n      else none\ntest/PsKernelExprV2PagedModelProofs.lean:206:10: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  (arena.pages.push arena.active).getD (id / arena.pageLimit) (Array.emptyWithCapacity 0)\nin the target expression\n  (if id.div arena.pageLimit < arena.pages.size + 1 then\n      psKernelExprV2PagedGet ((arena.pages.push arena.active).getD (id.div arena.pageLimit) (Array.emptyWithCapacity 0))\n        (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size + 1 then psKernelExprV2PagedGet #[entry] (id.mod arena.pageLimit)\n      else none) =\n    if id.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages.getD (id.div arena.pageLimit) (Array.emptyWithCapacity 0))\n        (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size then psKernelExprV2PagedGet arena.active (id.mod arena.pageLimit)\n      else none\n\ncase neg.inl\narena : PsKernelExprV2PagedArena\nentry : PsKernelExprV2Entry\nlayout : Layout arena\nid : Nat\ninside : id < arena.size\nnonzero : arena.pageLimit \u2260 0\nnextInside : id < arena.size + 1\nspace : \u00acarena.active.size < arena.pageLimit\ncompleted : id / arena.pageLimit < arena.pages.size\ncompletedNext : id / arena.pageLimit < arena.pages.size + 1\n\u22a2 (if id.div arena.pageLimit < arena.pages.size + 1 then\n      psKernelExprV2PagedGet ((arena.pages.push arena.active).getD (id.div arena.pageLimit) (Array.emptyWithCapacity 0))\n        (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size + 1 then psKernelExprV2PagedGet #[entry] (id.mod arena.pageLimit)\n      else none) =\n    if id.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages.getD (id.div arena.pageLimit) (Array.emptyWithCapacity 0))\n        (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size then psKernelExprV2PagedGet arena.active (id.mod arena.pageLimit)\n      else none\ntest/PsKernelExprV2PagedModelProofs.lean:208:4: error: unsolved goals\ncase neg.inr\narena : PsKernelExprV2PagedArena\nentry : PsKernelExprV2Entry\nlayout : Layout arena\nid : Nat\ninside : id < arena.size\nnonzero : arena.pageLimit \u2260 0\nnextInside : id < arena.size + 1\nspace : \u00acarena.active.size < arena.pageLimit\natActive : id / arena.pageLimit = arena.pages.size\noffset : id % arena.pageLimit < arena.active.size\n\u22a2 (if id.div arena.pageLimit < arena.pages.size + 1 then\n      psKernelExprV2PagedGet ((arena.pages.push arena.active)[id.div arena.pageLimit]?.getD #[])\n        (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size + 1 then psKernelExprV2PagedGet #[entry] (id.mod arena.pageLimit)\n      else none) =\n    if id.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages[id.div arena.pageLimit]?.getD #[]) (id.mod arena.pageLimit)\n    else\n      if id.div arena.pageLimit = arena.pages.size then psKernelExprV2PagedGet arena.active (id.mod arena.pageLimit)\n      else none\ntest/PsKernelExprV2PagedModelProofs.lean:197:37: warning: This simp argument is unused:\n  completed\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, nonzero, inside, nextInside]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:205:37: warning: This simp argument is unused:\n  completed\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, Array.size_push, nonzero, inside, nextInside,\n    completedNext, ite_false, ite_true]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:205:48: warning: This simp argument is unused:\n  completedNext\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, Array.size_push, nonzero, inside, nextInside,\n    completed, ite_false, ite_true]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:209:20: warning: This simp argument is unused:\n  atActive\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, nonzero, inside, nextInside, array_getD_push_new]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:209:30: warning: This simp argument is unused:\n  array_getD_push_new\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedFind, Nat.beq_eq, Nat.blt_eq, nonzero, inside, nextInside, atActive]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:228:4: error: Type mismatch: After simplification, term\n  paged_get_push_new arena.active entry\n has type\n  psKernelExprV2PagedGet (arena.active.push entry) arena.active.size = some entry\nbut is expected to have type\n  (if arena.size.div arena.pageLimit < arena.pages.size then\n      psKernelExprV2PagedGet (arena.pages.getD (arena.size.div arena.pageLimit) (Array.emptyWithCapacity 0))\n        (arena.size.mod arena.pageLimit)\n    else\n      if arena.size.div arena.pageLimit = arena.pages.size then\n        psKernelExprV2PagedGet (arena.active.push entry) (arena.size.mod arena.pageLimit)\n      else none) =\n    some entry\ntest/PsKernelExprV2PagedModelProofs.lean:231:2: error: unsolved goals\ncase neg\narena : PsKernelExprV2PagedArena\nentry : PsKernelExprV2Entry\nlayout : Layout arena\nnonzero : arena.pageLimit \u2260 0\nnextInside : arena.size < arena.size + 1\nspace : \u00acarena.active.size < arena.pageLimit\nfull : arena.active.size = arena.pageLimit\ntotal : arena.size = (arena.pages.size + 1) * arena.pageLimit\npage : arena.size / arena.pageLimit = arena.pages.size + 1\noffset : arena.size % arena.pageLimit = 0\n\u22a2 (if arena.size.div arena.pageLimit < arena.pages.size + 1 then\n      if\n          arena.size.mod arena.pageLimit <\n            ((arena.pages.push arena.active)[arena.size.div arena.pageLimit]?.getD #[]).size then\n        some\n          (((arena.pages.push arena.active)[arena.size.div arena.pageLimit]?.getD\n                  #[])[arena.size.mod arena.pageLimit]?.getD\n            psKernelExprV2DummyEntry)\n      else none\n    else\n      if arena.size.div arena.pageLimit = arena.pages.size + 1 then\n        if arena.size.mod arena.pageLimit = 0 then\n          some ([entry][arena.size.mod arena.pageLimit]?.getD psKernelExprV2DummyEntry)\n        else none\n      else none) =\n    some entry\ntest/PsKernelExprV2PagedModelProofs.lean:243:27: warning: This simp argument is unused:\n  page\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq, nonzero, nextInside, offset,\n    Array.getD_eq_getD_getElem?]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\ntest/PsKernelExprV2PagedModelProofs.lean:243:33: warning: This simp argument is unused:\n  offset\n\nHint: Omit it from the simp argument list.\n  [apply] simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq, nonzero, nextInside, page,\n    Array.getD_eq_getD_getElem?]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n'PsKernelExprV2PagedModelProofs.array_getD_push_old' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelExprV2PagedModelProofs.array_getD_push_new' depends on axioms: [propext]\n'PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get' depends on axioms: [propext]\n'PsKernelExprV2PagedModelProofs.paged_get_push_old' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelExprV2PagedModelProofs.paged_get_push_new' depends on axioms: [propext]\n'PsKernelExprV2PagedModelProofs.empty_layout' depends on axioms: [propext]\n'PsKernelExprV2PagedModelProofs.push_id_and_size' does not depend on any axioms\n'PsKernelExprV2PagedModelProofs.push_layout' depends on axioms: [propext, Classical.choice, Quot.sound]\n'PsKernelExprV2PagedModelProofs.valid_id_location' depends on axioms: [propext, Quot.sound]\n'PsKernelExprV2PagedModelProofs.find_out_of_bounds' depends on axioms: [propext, Quot.sound]\n'PsKernelExprV2PagedModelProofs.found_id_is_in_bounds' depends on axioms: [propext, Quot.sound]\n'PsKernelExprV2PagedModelProofs.valid_id_is_found' depends on axioms: [propext, sorryAx, Quot.sound]\n'PsKernelExprV2PagedModelProofs.push_find_old' depends on axioms: [propext, sorryAx, Quot.sound]\n'PsKernelExprV2PagedModelProofs.push_find_new' depends on axioms: [propext, sorryAx, Quot.sound]\n'PsKernelExprV2PagedModelProofs.push_find' depends on axioms: [propext, sorryAx, Quot.sound]\n'PsKernelExprV2PagedModelProofs.push_require_old' depends on axioms: [propext, sorryAx, Quot.sound]\n'PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata' depends on axioms: [propext,\n sorryAx,\n Classical.choice,\n Quot.sound]\n",
+    "constructor-result-proofs.log": "test/PsKernelOrdinaryConstructorResultProofs.lean:56:46: error: unsolved goals\narena : PsKernelExprV2PagedArena\ntarget typeName : PsKernelName\nremaining root index body : Nat\nentry : PsKernelExprV2Entry\nlookup : psKernelExprV2PagedFind arena root = some entry\nnode : entry.node = PsKernelExprV2Node.proj typeName index body\nsameName : psKernelNameEq typeName target = true\n\u22a2 (if True then Except.ok true else psKernelExprV2OrdinaryContainsConstWithFuel remaining arena target body) =\n    Except.ok true\ntest/PsKernelOrdinaryConstructorResultProofs.lean:68:46: error: unsolved goals\narena : PsKernelExprV2PagedArena\ntarget : PsKernelName\nremaining root fn arg : Nat\nentry : PsKernelExprV2Entry\nlookup : psKernelExprV2PagedFind arena root = some entry\nnode : entry.node = PsKernelExprV2Node.app fn arg\nfound : psKernelExprV2OrdinaryContainsConstWithFuel remaining arena target fn = Except.ok true\n\u22a2 (if True then Except.ok true else psKernelExprV2OrdinaryContainsConstWithFuel remaining arena target arg) =\n    Except.ok true\ntest/PsKernelOrdinaryConstructorResultProofs.lean:239:98: error: unsolved goals\narena : PsKernelExprV2PagedArena\ntarget : PsKernelName\nlevels : List PsKernelLevel\nparameters : List PsKernelExprV2OrdinaryOpenBinder\nnumIndices root : Nat\nindices : List Nat\nmatched :\n  psKernelExprV2OrdinaryInductiveAppIndices arena target levels parameters numIndices root = Except.ok (some indices)\nrecursive : psKernelExprV2OrdinaryIndicesContainTarget arena target indices = Except.ok true\n\u22a2 (if True then Except.error \"simple inductive constructor return index contains a recursive occurrence\"\n    else Except.ok indices) =\n    Except.error \"simple inductive constructor return index contains a recursive occurrence\"\ntest/PsKernelOrdinaryConstructorResultProofs.lean:251:78: error: unsolved goals\narena : PsKernelExprV2PagedArena\ntarget : PsKernelName\nlevels : List PsKernelLevel\nparameters : List PsKernelExprV2OrdinaryOpenBinder\nnumIndices root : Nat\nindices : List Nat\nmatched :\n  psKernelExprV2OrdinaryInductiveAppIndices arena target levels parameters numIndices root = Except.ok (some indices)\nnonrecursive : psKernelExprV2OrdinaryIndicesContainTarget arena target indices = Except.ok false\n\u22a2 (if false = true then Except.error \"simple inductive constructor return index contains a recursive occurrence\"\n    else Except.ok indices) =\n    Except.ok indices\n'PsKernelOrdinaryConstructorResultProofs.consume_empty_preserves_exact_tail' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.consume_missing_argument_is_mismatch' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.consume_fvar_compares_only_internal_name' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.contains_zero_precedes_lookup' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.contains_projection_name_precedes_receiver' depends on axioms: [propext,\n sorryAx,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.contains_application_hit_precedes_argument' depends on axioms: [propext,\n sorryAx,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.contains_application_error_precedes_argument' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.contains_const_with_fuel_correspondence' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.contains_const_on_canonical_correspondence' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.indices_contain_target_correspondence' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.validate_shape_mismatch_precedes_occurrence' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.validate_recursive_index_rejected' depends on axioms: [propext,\n sorryAx,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.validate_preserves_exact_index_ids' depends on axioms: [propext,\n sorryAx,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.consume_result_params_correspondence' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.inductive_app_indices_correspondence' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'PsKernelOrdinaryConstructorResultProofs.validate_constructor_result_correspondence' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n"
+  },
+  "orderedReportsPrinted": 122,
+  "failedGoalDiagnostics": 12,
+  "reportsWithSorryAxFromFailedElaboration": 10,
+  "proofsAcceptedForQualification": false,
+  "productionNativeImportsPassed": true,
+  "prior64HeaderReportsPassed": true,
+  "unchangedMetadata8Passed": true,
+  "constructorParams17Passed": true,
+  "nativeRuntimeExecuted": false,
+  "generatedRouteExecuted": false,
+  "canonicalRouteExecuted": false,
+  "terminalLog": {
+    "path": "t05-evidence/be4b47b8-native-40092935560/job.log",
+    "bytes": 166861,
+    "sha256": "820b53eee03101f725927cb157c10d98329e6109625bd711c5ee119c8c1639dc"
+  },
+  "diagnosis": {
+    "paged": "Eight goal failures in lookup/append proof scripts retain raw Nat.div/Nat.mod while premises use notation.",
+    "result": "Four simplification scripts leave true/false conditional goals unreduced.",
+    "sourceContainsAdmittedProofs": false,
+    "sorryAxInDiagnostics": "Lean reports failed elaboration placeholders; the native gate rejected this candidate."
+  },
+  "localProjectExecutionPerformed": false,
+  "fullOrdinaryAdmission": "OPEN",
+  "integrationShaUnchanged": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "verifier": {
+    "path": "/workspace/scratch/caf2bda8dd38/t05-evidence/review-be4b47b8-failure.py",
+    "bytes": 9399,
+    "sha256": "5ffb30dc56894a42b0fd622b3a1926c8e1a40e96e3ddedacd0b5521227c23340"
+  }
+}

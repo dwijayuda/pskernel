@@ -1,0 +1,18 @@
+import Ps.Syntax.Lexer
+
+def psCompilerServiceCandidate (source : String) : String :=
+  match psLex source with
+  | Except.ok tokens => psNatToString (psLexListLength tokens)
+  | Except.error error =>
+      match error with
+      | PsLexError.unterminatedBlockComment span =>
+          String.Internal.append "block:" (psNatToString span.stop.byteOffset)
+      | PsLexError.unterminatedString span =>
+          String.Internal.append "string:" (psNatToString span.stop.byteOffset)
+      | PsLexError.newlineInString span =>
+          String.Internal.append "newline:" (psNatToString span.stop.byteOffset)
+      | PsLexError.unterminatedCharacter span =>
+          String.Internal.append "character:" (psNatToString span.stop.byteOffset)
+      | PsLexError.fuelExhausted => "fuel"
+      | PsLexError.invalidSource _ span =>
+          String.Internal.append "invalid:" (psNatToString span.stop.byteOffset)

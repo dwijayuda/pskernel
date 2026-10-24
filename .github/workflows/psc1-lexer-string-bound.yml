@@ -1,0 +1,68 @@
+name: PSC1 lexer string suffix proof and generated stage comparison
+on:
+  push:
+    branches: [optimization/psc1-lexer-string-suffix-20261025]
+    paths:
+      - psc1/packages/syntax/src/Ps/Syntax/Lexer.lean
+      - psc1/test/LexerStringBoundTests.lean
+      - psc1/scripts/lexer-string-bound-tests.mjs
+      - .github/workflows/psc1-lexer-string-bound.yml
+permissions:
+  contents: read
+jobs:
+  ownership:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-direct-service-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install pinned dependencies and target tools
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gdb
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Prove exact original reader and preserve explicit fuel API
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_lexer_string_bound_tests psc1_lexer_normalization_tests psc1_unified_service_seed psc1_independent_checker psc1_source_census_probe
+          .lake/build/bin/psc1_lexer_string_bound_tests
+          .lake/build/bin/psc1_lexer_normalization_tests
+      - name: Compare independently admitted actual Rust lexer workloads
+        run: node scripts/lexer-string-bound-tests.mjs
+      - name: Census both full compiler grammars
+        run: node scripts/generated-target-source-audit.mjs rust unified
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-lexer-string-bound-${{ github.sha }}
+          path: psc1/dist/lexer-string-bound/
+          retention-days: 90

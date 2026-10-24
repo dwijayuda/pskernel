@@ -463,18 +463,53 @@ def psLexReadStringBodyWithFuel
                 start
                 (List.cons char charsRev)
 
+-- Structural traversal avoids counting an unrelated suffix before each literal.
+-- The explicit-fuel API above remains unchanged; all-input correspondence is
+-- independently checked in LexerStringBoundTests.
+def psLexReadStringBodyStructural
+    (remaining : List Char) :
+    PsSourcePos ->
+    PsSourcePos ->
+    List Char ->
+    Except PsLexError PsLexRead :=
+  match remaining with
+  | List.nil =>
+      fun (position : PsSourcePos) (start : PsSourcePos) (_charsRev : List Char) =>
+        Except.error
+          (PsLexError.unterminatedString (psLexSpan start position))
+  | List.cons char rest =>
+      fun (position : PsSourcePos) (start : PsSourcePos) (charsRev : List Char) =>
+        if psLexCharEq char '"' then
+          let stop := psLexAdvanceChar position char;
+          Except.ok {
+            cursor := { remaining := rest, position := stop }
+            charsRev := List.cons char charsRev
+          }
+        else if psLexCharEq char '\n' then
+          Except.error
+            (PsLexError.newlineInString (psLexSpan start position))
+        else if psLexCharEq char '\\' then
+          match rest with
+          | List.nil =>
+              Except.error
+                (PsLexError.unterminatedString (psLexSpan start position))
+          | List.cons escaped tail =>
+              let afterSlash := psLexAdvanceChar position char;
+              let afterEscape := psLexAdvanceChar afterSlash escaped;
+              psLexReadStringBodyStructural
+                tail afterEscape start
+                (List.cons escaped (List.cons char charsRev))
+        else
+          psLexReadStringBodyStructural
+            rest (psLexAdvanceChar position char) start (List.cons char charsRev)
+
 def psLexReadStringBody
     (remaining : List Char)
     (position : PsSourcePos)
     (start : PsSourcePos)
     (charsRev : List Char) :
     Except PsLexError PsLexRead :=
-  psLexReadStringBodyWithFuel
-    (Nat.add (psLexListLength remaining) 1)
-    remaining
-    position
-    start
-    charsRev
+  psLexReadStringBodyStructural remaining position start charsRev
 
 def psLexHexDigit (char : Char) : Bool :=
   let code : Nat := Char.toNat char;

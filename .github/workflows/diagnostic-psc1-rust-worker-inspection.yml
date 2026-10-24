@@ -1,0 +1,40 @@
+name: PSC1 exact Rust worker inspection
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-rust-worker-inspection.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12571692366'
+          run-id: '40121710673'
+          github-token: ${{ github.token }}
+          path: psc1/dist/rust-inspection-input
+      - name: Verify current producer and inspect exact emitted worker and IR
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
+          import {sha,verifyArtifact} from './host-tools/generated-target-tools.mjs';
+          function find(dir,name){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory()){const r=find(p,name);if(r)return r;}else if(e.name===name)return p;}}
+          const qf=find('dist/rust-inspection-input','qualification.json'),q=JSON.parse(fs.readFileSync(qf)),root=path.dirname(qf);
+          assert.equal(q.testedCommit,'9fcab97b8f21675350020d6667817ab70b3d91e5');assert.equal(q.status,'passed');
+          const mf=path.join(root,'G1-service/artifact.json'),m=verifyArtifact(mf,q.generations[0].artifactSha256);
+          assert.equal(sha(fs.readFileSync(path.join(m.directory,m.executable))),q.executableSha256);
+          const code=fs.readFileSync(path.join(m.directory,'module.rs'),'utf8'),c=JSON.parse(fs.readFileSync(path.join(root,'G1-bootstrap.candidate.json')));
+          for(const name of ['psJsonStringCharsAccWithFuel','psJsonStringAtEnd','psJsonStringNext','psJsonStringGet']){
+           console.log('PSC1_RUST_WORKER_IR: '+JSON.stringify(c.specializedIr[4].filter(d=>d[0].includes(name))));
+           console.log('PSC1_RUST_WORKER_CODE: '+code.split('\n').filter(line=>line.includes('fn ')&&line.includes(name+'(')||line.includes('fn __psr_'+name+'_u36_worker')).join('\n').slice(0,26000));
+          }
+          JS

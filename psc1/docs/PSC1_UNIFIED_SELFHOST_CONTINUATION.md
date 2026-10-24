@@ -56,8 +56,10 @@ The codec uses explicit return frames and tail unwinding for both application
 axes, binders, let bodies and projections; side branches remain structurally
 recursive. codec_spine_acc_eq/codec_spine_eq preserve the exact old opaque
 append tree and refusal priority with no new axioms/fuel/stack allowance.
-The existing static-schema theorem remains unconditional. All five10000-deep
-generated Rust shapes pass; old/current checked observations match.
+The existing static-schema theorem remains unconditional. The admission fold
+and reversal have all-state/list equality proofs. All ten10000-deep expression
+shapes and a10000-declaration generated batch pass;44 old/current observations
+match.
 
 Rust also preserves guarded String-reader borrowing, ordered last-use moves,
 iterative final-owner cleanup of eligible private recursive carriers and

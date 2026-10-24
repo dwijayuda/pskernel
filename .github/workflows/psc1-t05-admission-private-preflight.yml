@@ -1,0 +1,116 @@
+name: PSC1 T05 private admission native and portable diagnostic
+'on':
+  workflow_dispatch: null
+  push:
+    branches: [work/psc1-pskernel-t05-admission-draft-20261025]
+    paths:
+    - .github/workflows/psc1-t05-admission-private-preflight.yml
+    - psc1/kernel-lakefile.lean
+    - psc1/packages/pskernel-core/src/**
+permissions:
+  contents: read
+jobs:
+  admission-native-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_OPTIONS: ''
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Bind private production source
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+        mkdir -p "$RUNNER_TEMP/psc1-t05-admission-private-native"
+        printf 'PSC1_T05_DIR=%s\n' "$RUNNER_TEMP/psc1-t05-admission-private-native" >> "$GITHUB_ENV"
+        export PSC1_T05_DIR="$RUNNER_TEMP/psc1-t05-admission-private-native"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib
+        repo=pathlib.Path('..').resolve();out=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        paths=['.github/workflows/psc1-t05-admission-private-preflight.yml',
+          'psc1/kernel-lakefile.lean','psc1/lean-toolchain','psc1/scripts/install-lean435-ci.sh']
+        paths+=sorted(str(p.relative_to(repo)) for p in
+          (repo/'psc1/packages/pskernel-core/src').rglob('*.lean'))
+        records=[]
+        for name in paths:
+            raw=(repo/name).read_bytes()
+            record={'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),
+              'gitBlobSha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
+            target=out/'sources'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
+            records.append(record)
+        result={'schema':'psc1-t05-admission-private-diagnostic-inputs-v1',
+          'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+          'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'files':records,'qualified':False}
+        (out/'inputs.json').write_text(json.dumps(result,indent=2)+'\n')
+        print('PSC1_T05_ADMISSION_PRIVATE_INPUTS '+json.dumps(result,separators=(',',':')))
+        PY
+    - name: Compile private production imports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean build PsKernelCore 2>&1 | tee "$PSC1_T05_DIR/native-build.log"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        digest=lambda path:{'bytes':len(path.read_bytes()),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+        receipt={'schema':'psc1-t05-admission-private-compile-diagnostic-v1',
+          'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+          'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':'native',
+          'inputs':digest(root/'inputs.json'),'log':digest(root/'native-build.log'),
+          'qualified':False,'diagnosticOnly':True,'privateAdmission':True,
+          'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'diagnostic.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_ADMISSION_PRIVATE_COMPILE: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-admission-private-native-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-t05-admission-private-native/
+        if-no-files-found: error
+        include-hidden-files: true
+  admission-portable-diagnostic:
+    needs: admission-native-diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Check exact native-passed source through authentic PSC1
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        mkdir -p "$RUNNER_TEMP/psc1-admission-private-portable"
+        lake build psc1 2>&1 | tee "$RUNNER_TEMP/psc1-admission-private-portable/compiler-build.log"
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAdmission.lean \
+          2>&1 | tee "$RUNNER_TEMP/psc1-admission-private-portable/admission-source-check.log"
+        printf 'PSC1_T05_ADMISSION_PRIVATE_PORTABLE_DIAGNOSTIC: PASS source=%s fullAdmission=false qualified=false\n' "$GITHUB_SHA"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-admission-private-portable-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-admission-private-portable/
+        if-no-files-found: error

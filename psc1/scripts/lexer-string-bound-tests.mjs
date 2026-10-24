@@ -42,6 +42,8 @@ for(const kind of ['legacy','current']){
   observations.push({module:row.module,inputSha256:sha(row.text),bytes:Buffer.byteLength(row.text),value,elapsedMs:event.elapsedMs,maxRssKiB:event.maxRssKiB,peakTreeRssKiB:event.peakTreeRssKiB});
  }
  records.push({kind,sourceClosureDigest:digest,admissionSha256:admitted.admissionsDigest,checkerCommit:admitted.checkerCommit,artifactSha256:artifact.sha256,seedEvent:seed.event,observations});
+ fs.writeFileSync(path.join(out,'partial.json'),JSON.stringify({qualification:false,records},null,2)+'\n');
+ console.log('PSC1_LEXER_STAGE_RECORD: '+JSON.stringify(records.at(-1)));
 }
 assert.deepEqual(records[0].observations.map(r=>[r.module,r.inputSha256,r.value]),records[1].observations.map(r=>[r.module,r.inputSha256,r.value]));
 const q={schema:'psc1-lexer-string-bound-stage/1',testedCommit:process.env.GITHUB_SHA,status:'passed',allInputProof:'LexerStringBoundTests.exact_original',oldLexerSha256:sha(old),currentLexerSha256:sha(ordered.find(r=>r.module==='Ps.Syntax.Lexer').text),records,qualification:false,scope:'Rust generated lexer stage on real compiler source files and malformed literals; not whole G2 or a fixed point'};

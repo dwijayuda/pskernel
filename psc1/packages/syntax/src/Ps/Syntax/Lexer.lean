@@ -463,45 +463,53 @@ def psLexReadStringBodyWithFuel
                 start
                 (List.cons char charsRev)
 
--- Structural traversal avoids counting an unrelated suffix before each literal.
--- The explicit-fuel API above remains unchanged; all-input correspondence is
--- independently checked in LexerStringBoundTests.
+-- One-character structural steps avoid recounting unrelated input suffixes.
+-- The remembered escape position preserves the exact dangling-slash error span.
+-- The explicit-fuel API above is unchanged.
 def psLexReadStringBodyStructural
     (remaining : List Char) :
+    Option PsSourcePos ->
     PsSourcePos ->
     PsSourcePos ->
     List Char ->
     Except PsLexError PsLexRead :=
   match remaining with
   | List.nil =>
-      fun (position : PsSourcePos) (start : PsSourcePos) (_charsRev : List Char) =>
-        Except.error
-          (PsLexError.unterminatedString (psLexSpan start position))
+      fun (escape : Option PsSourcePos) (position : PsSourcePos)
+          (start : PsSourcePos) (_charsRev : List Char) =>
+        match escape with
+        | Option.none =>
+            Except.error
+              (PsLexError.unterminatedString (psLexSpan start position))
+        | Option.some beforeSlash =>
+            Except.error
+              (PsLexError.unterminatedString (psLexSpan start beforeSlash))
   | List.cons char rest =>
-      fun (position : PsSourcePos) (start : PsSourcePos) (charsRev : List Char) =>
-        if psLexCharEq char '"' then
-          let stop := psLexAdvanceChar position char;
-          Except.ok {
-            cursor := { remaining := rest, position := stop }
-            charsRev := List.cons char charsRev
-          }
-        else if psLexCharEq char '\n' then
-          Except.error
-            (PsLexError.newlineInString (psLexSpan start position))
-        else if psLexCharEq char '\\' then
-          match rest with
-          | List.nil =>
+      fun (escape : Option PsSourcePos) (position : PsSourcePos)
+          (start : PsSourcePos) (charsRev : List Char) =>
+        match escape with
+        | Option.some _ =>
+            psLexReadStringBodyStructural
+              rest Option.none (psLexAdvanceChar position char) start
+              (List.cons char charsRev)
+        | Option.none =>
+            if psLexCharEq char '"' then
+              let stop := psLexAdvanceChar position char;
+              Except.ok {
+                cursor := { remaining := rest, position := stop }
+                charsRev := List.cons char charsRev
+              }
+            else if psLexCharEq char '\n' then
               Except.error
-                (PsLexError.unterminatedString (psLexSpan start position))
-          | List.cons escaped tail =>
-              let afterSlash := psLexAdvanceChar position char;
-              let afterEscape := psLexAdvanceChar afterSlash escaped;
+                (PsLexError.newlineInString (psLexSpan start position))
+            else if psLexCharEq char '\\' then
               psLexReadStringBodyStructural
-                tail afterEscape start
-                (List.cons escaped (List.cons char charsRev))
-        else
-          psLexReadStringBodyStructural
-            rest (psLexAdvanceChar position char) start (List.cons char charsRev)
+                rest (Option.some position) (psLexAdvanceChar position char)
+                start (List.cons char charsRev)
+            else
+              psLexReadStringBodyStructural
+                rest Option.none (psLexAdvanceChar position char) start
+                (List.cons char charsRev)
 
 def psLexReadStringBody
     (remaining : List Char)
@@ -509,7 +517,7 @@ def psLexReadStringBody
     (start : PsSourcePos)
     (charsRev : List Char) :
     Except PsLexError PsLexRead :=
-  psLexReadStringBodyStructural remaining position start charsRev
+  psLexReadStringBodyStructural remaining Option.none position start charsRev
 
 def psLexHexDigit (char : Char) : Bool :=
   let code : Nat := Char.toNat char;

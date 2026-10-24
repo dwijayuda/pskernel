@@ -22,7 +22,7 @@ theorem sufficient_fuel (fuel : Nat) (remaining : List Char)
     (position start : PsSourcePos) (charsRev : List Char)
     (enough : remaining.length < fuel) :
     psLexReadStringBodyWithFuel fuel remaining position start charsRev =
-      psLexReadStringBodyStructural remaining position start charsRev := by
+      psLexReadStringBodyStructural remaining Option.none position start charsRev := by
   induction fuel generalizing remaining position charsRev with
   | zero => omega
   | succ fuel ih =>
@@ -38,7 +38,7 @@ theorem sufficient_fuel (fuel : Nat) (remaining : List Char)
               · cases rest with
                 | nil => rfl
                 | cons escaped tail =>
-                    simp only
+                    simp only [psLexReadStringBodyStructural]
                     apply ih
                     simp only [List.length_cons] at enough
                     omega

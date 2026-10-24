@@ -1,3 +1,19 @@
+## 2026-10-25 — complete ordinary admission implemented; full qualification pending
+
+The constructor phase remains qualified and integrated at **a49d64ae494d51fdc80b688dab0922dd96403e5e**. The subsequent private elimination, generated recursor validation, atomic ordinary admission, and public owner handoff are implemented on isolated draft history. The complete changed source is **not yet qualified or integrated**.
+
+Native preflights have passed: elimination **26 proofs /116 assertions** at6f79308b (run40139635555, also PSC1 check1632); private admission **27 proofs /143 assertions plus18 separate pinned-Lean controls** at09f1cad3 (run40142024947); public handoff **8 proofs /12 assertions** ata049816b (run40141659022). The private production leaf also passed native compilation and authentic PSC1 check1860 atdb7b9161 (run40141120502). The official controls distinguish13 safe generated recursor validations from1 unsafe contract agreement. These diagnostics do not replace the complete source-bound qualification.
+
+Current candidate inventory is **371 native reports =310 retained +26 elimination +27 private admission +8 public handoff**. Both complete generated routes must retain every existing control and add elimination116, private admission143, and public routing12. Full routes are TypeScript→JavaScript and canonical .ps reconstruction→TypeScript→JavaScript; retained bounded DirectJS controls remain separately identified. Verify actual artifacts, source/run/attempt identities, proof names, exact assertion inventories, output hashes, and the artifact-only audit before integration.
+
+See [the new ordinary-admission handoff](docs/T05_ORDINARY_ADMISSION_HANDOFF_2026-10-25.md) for exact commits, preflight evidence, semantics and continuation steps. The public draft preserves the old single-command ABI, keeps complete-original fallback, retains the original external ID table, and carries a successful synchronized checked owner directly into the next command. Every generated recursor type and rule is independently checked before private success; resource checks and complete batch success precede publication.
+
+**A:** scoped T01F qualified. **B:** broader completion OPEN. **C:** full Arena compatibility FAIL at the historical173/193 strict matches (17timeouts,1budget exhaustion,2separately classified unsafe/partial agreements). **D:** performance OPEN, including Church exhaustion and Init.Prelude timeout. Replay→ArenaModel and the external decoder/layout correspondence bridge remain OPEN. No new completion or performance evidence is claimed for those obligations.
+
+Next: finish the exact-source native-first371 workflow and both complete generated routes, inspect and audit their actual artifacts, record qualification, and only then fast-forward integration from its verified expected SHA. Never rerun a matching-source cohort that is already valid, and never inherit qualification from a changed production/proof/harness source.
+
+---
+
 ## 2026-10-25 — private constructor phase qualified and integrated
 
 **Exact source `a49d64ae494d51fdc80b688dab0922dd96403e5e` is qualified through the private ordered constructor loop.** [Run 40137117745, attempt 1](https://github.com/dwijayuda/pskernel/actions/runs/40137117745) passed the complete native-first cohort. [Artifact audit 40137395586, attempt 1](https://github.com/dwijayuda/pskernel/actions/runs/40137395586), auditor source `aea6e85859261e50ebccbb22e0ff259944a35f7a`, checked the actual archived contents and returned `errors=[]`.

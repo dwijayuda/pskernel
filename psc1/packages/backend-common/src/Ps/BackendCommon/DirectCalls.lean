@@ -1,0 +1,128 @@
+import Ps.CompilerIr.Model
+import Ps.BackendCommon.Source
+import Ps.BackendCommon.Plan
+import Ps.Foundation.StringSet
+
+-- Conservative, finite call layers. Hash membership always checks full names.
+-- Dynamic callbacks, implicit value forcing, recursion and exhausted analysis
+-- remain on the existing scheduler. No execution fuel is introduced or changed.
+def psBackendDirectIntrinsic (operation : PsVerifiedIrIntrinsic) : Bool :=
+  match operation with
+  | PsVerifiedIrIntrinsic.natAdd => true
+  | PsVerifiedIrIntrinsic.natSub => true
+  | PsVerifiedIrIntrinsic.natMul => true
+  | PsVerifiedIrIntrinsic.natDiv => true
+  | PsVerifiedIrIntrinsic.natMod => true
+  | PsVerifiedIrIntrinsic.natEq => true
+  | PsVerifiedIrIntrinsic.natNe => true
+  | PsVerifiedIrIntrinsic.natLe => true
+  | PsVerifiedIrIntrinsic.natLt => true
+  | PsVerifiedIrIntrinsic.intOfNat => true
+  | PsVerifiedIrIntrinsic.intRepr => true
+  | PsVerifiedIrIntrinsic.intNegSucc => true
+  | PsVerifiedIrIntrinsic.intNeg => true
+  | PsVerifiedIrIntrinsic.intAdd => true
+  | PsVerifiedIrIntrinsic.intSub => true
+  | PsVerifiedIrIntrinsic.intMul => true
+  | PsVerifiedIrIntrinsic.intEq => true
+  | PsVerifiedIrIntrinsic.intLe => true
+  | PsVerifiedIrIntrinsic.intLt => true
+  | PsVerifiedIrIntrinsic.boolNot => true
+  | PsVerifiedIrIntrinsic.boolAnd => true
+  | PsVerifiedIrIntrinsic.boolOr => true
+  | PsVerifiedIrIntrinsic.boolEq => true
+  | PsVerifiedIrIntrinsic.boolNe => true
+  | PsVerifiedIrIntrinsic.charOfNat => true
+  | PsVerifiedIrIntrinsic.charToNat => true
+  | PsVerifiedIrIntrinsic.stringPush => true
+  | PsVerifiedIrIntrinsic.stringSingleton => true
+  | PsVerifiedIrIntrinsic.stringLength => true
+  | PsVerifiedIrIntrinsic.stringAppend => true
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => true
+  | PsVerifiedIrIntrinsic.stringNext => true
+  | PsVerifiedIrIntrinsic.stringGet => true
+  | PsVerifiedIrIntrinsic.stringAtEnd => true
+  | PsVerifiedIrIntrinsic.stringExtract => true
+  | PsVerifiedIrIntrinsic.stringEq => true
+  | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => true
+  | PsVerifiedIrIntrinsic.arraySize => true
+  | PsVerifiedIrIntrinsic.arrayPush => true
+  | PsVerifiedIrIntrinsic.arrayGet => true
+  | PsVerifiedIrIntrinsic.arrayGetD => true
+  | PsVerifiedIrIntrinsic.arraySet => true
+  | PsVerifiedIrIntrinsic.arraySetIfInBounds => true
+  | _ => false
+
+def psBackendDirectSafeWithFuel (fuel : Nat) :
+    PsStringSet -> PsStringSet -> List String -> PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_known _values : PsStringSet) (_bound : List String) (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining =>
+      fun (known values : PsStringSet) (bound : List String) (expr : PsVerifiedIrExpr) =>
+        let smaller : PsStringSet -> PsStringSet -> List String -> PsVerifiedIrExpr -> Bool :=
+          psBackendDirectSafeWithFuel remaining;
+        let visit : PsVerifiedIrExpr -> Bool := smaller known values bound;
+        match expr with
+        | PsVerifiedIrExpr.literal _ => true
+        | PsVerifiedIrExpr.var name =>
+            psBackendNameSeen name bound || !psStringSetContains values name
+        | PsVerifiedIrExpr.intrinsic operation _ arguments =>
+            psBackendDirectIntrinsic operation && psBackendSourceAll visit arguments
+        | PsVerifiedIrExpr.call fn _ arguments =>
+            match fn with
+            | PsVerifiedIrExpr.var name =>
+                !psBackendNameSeen name bound && !psStringSetContains values name &&
+                  psStringSetContains known name && psBackendSourceAll visit arguments
+            | _ => false
+        | PsVerifiedIrExpr.lambda parameters _ body =>
+            smaller known values
+              (psListAppend (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) bound) body
+        | PsVerifiedIrExpr.letE name _ value body =>
+            visit value && smaller known values (List.cons name bound) body
+        | PsVerifiedIrExpr.ifE condition yes no => visit condition && visit yes && visit no
+        | PsVerifiedIrExpr.record _ _ fields =>
+            psBackendSourceAll (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.projection _ _ target _ => visit target
+        | PsVerifiedIrExpr.constructor _ _ _ fields =>
+            psBackendSourceAll (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.matchE _ _ target alternatives =>
+            visit target && psBackendSourceAll
+              (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                smaller known values
+                  (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name)
+                    alternative.snd.fst) bound) alternative.snd.snd) alternatives
+
+def psBackendDirectValueNames (declarations : List PsVerifiedIrDeclaration)
+    (names : PsStringSet) : PsStringSet :=
+  match declarations with
+  | List.nil => names
+  | List.cons declaration rest =>
+      psBackendDirectValueNames rest
+        (if psListIsEmpty declaration.parameters then psStringSetInsert names declaration.name else names)
+
+def psBackendDirectRound (known values : PsStringSet)
+    (declarations : List PsVerifiedIrDeclaration) (selected : PsStringSet) : PsStringSet :=
+  match declarations with
+  | List.nil => selected
+  | List.cons declaration rest =>
+      let safe : Bool := psBackendDirectSafeWithFuel 4096 known values
+        (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters)
+        declaration.body;
+      psBackendDirectRound known values rest
+        (if safe && !psListIsEmpty declaration.parameters then psStringSetInsert selected declaration.name else selected)
+
+def psBackendDirectCallNames (declarations : List PsVerifiedIrDeclaration) : PsStringSet :=
+  let values : PsStringSet := psBackendDirectValueNames declarations PsStringSet.empty;
+  let leaves : PsStringSet :=
+    psBackendDirectRound PsStringSet.empty values declarations PsStringSet.empty;
+  -- Exactly two immutable layers; neither declaration order nor cycles can
+  -- promote a function through a progressive accumulator.
+  psBackendDirectRound leaves values declarations leaves
+
+def psBackendDirectGlobalCall (known : PsStringSet) (bound : List String)
+    (fn : PsVerifiedIrExpr) : Bool :=
+  match fn with
+  | PsVerifiedIrExpr.var name =>
+      !psBackendNameSeen name bound && psStringSetContains known name
+  | _ => false

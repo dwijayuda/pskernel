@@ -6,6 +6,22 @@ Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 
 [canonical direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns exact source identities and immutable actual results.
 
+## Current milestone and dependency-ordered Python/PHP queue
+
+The user requested a stop after the verified milestone slice. This slice is complete; no further source work is authorized in this turn. Preserve active long qualification jobs.
+
+| Order | Work | Finite acceptance and current evidence |
+| --- | --- | --- |
+| 1 | Measured backend fixes and regression | COMPLETE: Pythonb56da505/PHP13c5d4a6, reviewb33027de. Focused40090956726 PASS retained/runtime/token/readonly/deep tests and87 modules per target in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942. |
+| 2 | Genuine current-source generations | RUNNING, NOT QUALIFIED: request336ff212/run40091210960, Python120864185036/PHP120864185108. Exact compiler/tools snapshot ofb330; only guard/request differ. No duplicate request while active. |
+| 3 | Qualification result reconciliation | On continuation, fetch terminal jobs and immutable artifacts; record exact identities, elapsed/CPU/peak metrics and actual admission/IR/ten-case/raw-byte fixed points. First3600s run40085445958 remains an immutable two-target G2 deadline failure after G1 success. |
+| 4 | Targeted follow-up or clean reproduction | If new attempt fails, fix a demonstrated generic cost with all retained guards before another chain. If it passes, clean fresh G1 without lake cache reproduces every qualified generation. Full source/regression gates alone never qualify G2/G3. |
+| 5 | Performance and review | Original240s profile remains separately unqualified. Preserve qualified Rust/TS/JS/Wasm snapshots. Merge/publication require authorization and required qualification. |
+
+Correctness3600s extends ONLY G2-self/G3-self. Preserve G1/tools/corpus240s,checker120s,historical1800s,performance240s,independent Lean4.35,strictIR,source pairing,negative/security tests,memory/stack/fuel and unsupported-ABI refusals. One shared compiler and one portable emitter per target.
+
+The [AI state](../AI_WORK_STATE.md), [exact receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json) and [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) bind this queue to actual commits and results. Direct-target optimization remains deferred.
+
 ## Qualified compiler checkpoint
 
 Source133e589288b563e74578b771ec35595beb3a9fe8, request2d1f8244,
@@ -46,7 +62,7 @@ continues independently and does not gate compiler development.
 | 4 | Extend independent repeatability if a release requires it. | Clean G1 reproduction already passed for both; independent full-chain replay is not run. Reuse diagnostic/psc1-direct-clean-g1-20261024 at36d917b0; keep the narrower evidence boundary explicit. |
 | 5 | Release review and publication. | Requires authorization and required final qualification. PR175 remains draft/unmerged; npm publication not authorized. |
 
-No active self-host runs remain at this checkpoint.
+The older direct-target checkpoint has no active runs; Python/PHP mission status above supersedes it.
 Use the [architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md) for measured
 mechanisms and [continuation](PSC1_DIRECT_SELFHOST_CONTINUATION.md) for executable
 GitHub-only steps. Preserve exact older Rust/TS qualifications: Rust83e18fe1,
@@ -58,7 +74,8 @@ Do not label these as requalified after later common-source changes.
 Official Lean4.35.0 independent checker at eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
 strict original/transformed IR, source/logical graph pairing, negative/refusal
 tests and all resource/security/fuel limits remain mandatory.
-G1/corpus/tools240s,checker120s and correctnessG2/G31800s remain unchanged.
+G1/corpus/tools240s and checker120s remain unchanged. Python/PHP may explicitly
+request correctnessG2/G33600s; historical1800s and performance240s stay separate.
 Performance240s remains a separate test; longer correctness cannot qualify it.
 
 Earlier failures and completed planning milestones are preserved in Git history

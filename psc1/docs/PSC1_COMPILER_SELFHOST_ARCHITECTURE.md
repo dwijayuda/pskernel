@@ -1,11 +1,102 @@
 # PSC1 compiler self-host architecture
 
-Current direction: genuine DirectJS and import-free DirectWasm generations after
-Practical Core v1 feature freeze. [Roadmap](PSC1_DEVELOPMENT_ROADMAP.md) orders the
+Current direction: Python and PHP generations from the same frozen compiler,
+after qualified DirectJS and import-free DirectWasm generations. [Roadmap](PSC1_DEVELOPMENT_ROADMAP.md) orders the
 work; [AI work state](../AI_WORK_STATE.md) and the
 [direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json) bind
 live status to immutable source/CI identities. Qualified Rust and TypeScript
 remain preserved reference implementations generated from the same compiler.
+
+## Python/PHP measured mechanisms
+
+The shared compiler frontend/elaborator/checked IR/service remains unchanged.
+Each target has one Portable emitter and a thin native API adapter preserving
+defaults and metadata. Explicit ordinary state/Except source is backed by seven
+complete state and four arity equalities. No handwritten second compiler exists.
+
+| Actual defect | Measured evidence | Mechanism and guard |
+| --- | --- | --- |
+| PHP quadratic global captures | First seed envelope1002108077 bytes,961724361 encoded source bytes and18816024 global-reference capture text occurrences; read-only40070297469. | Lexical global demand preserves reference identity/order and all local/helper captures. Exhaustion falls back to full legacy captures, with a zero-budget theorem, scope cases and independent capture-token boundary. Seed envelope falls to59452682 bytes. |
+| PHP inductive storage and destruction | Next G2 exceeds1G while converting1.79MB wire to chars; heap trace holds seven pending generators. Packed arrays fit memory, but exact GDB40072628964 crashes with32 recursive zend_array_destroy frames. | Compact immutable ArrayAccess nodes expose flat tag/field positions, inline first/second fields and packed overflow. Queue descendants before clearing only already-dead nodes; drain references iteratively. Other owners preserve live children. Two-million-cell generated execution and two-million-node cleanup/shared/weak/cycle/refusal tests pass at1G/default stack. |
+| Python repeated UTF8 encoding | Old G2 hits1800s; exact archived-G1 profile40071913715 spends118.890/120s in106950 encodes. | Shared get/next/extract/byte-size/end views use immutable identity snapshots:8 entries/32MiB encoded content, oversized views not retained.234895 retained-helper comparisons, retained/current emitted intrinsics, errors/eviction/identity/concurrency and AST/origin boundaries pass. |
+| Unlisted Python bytecode | SourceFileLoader may execute a timestamp/hash .pyc absent from the artifact manifest. | Source-only617004ce compiles exact bound source bytes for service/probe/consumer. A matching poisoned cache executes under standard loader but is ignored by production. Compiler semantics stay generated; no native delegation. |
+
+The post-UTF8 Python profile40075153915 measures str.encode0.132s/120s,
+_psc_run own44.239s and56.67M generator sends. Shared DirectCalls.lean therefore
+classifies exactly two immutable layers of synchronous nonzero-parameter global
+functions. The intrinsic whitelist excludes callbacks; implicit zero-argument
+value forcing, dynamic calls, shadows, recursion and exhausted analysis keep
+the scheduler. Full names are checked after hash lookup. The direct source
+call depth is at most3, independent of declaration order. Python's independent
+AST guard checks saved callee/arguments, actual non-generator flags and acyclic
+depth before restoring old yield nodes for exact remaining-AST comparison.
+PHP compares direct and retained schedulers with identical runtime/carrier.
+Both targets pass200000-deep dynamic alias/local/parameter-shadow recursion.
+Gate40077267520 passes87 modules per target in both grammars and all admitted
+library/retained regression guards. Genuine request809070eb/run40077476210 independently admits both G1s, passes
+strict IR/all ten cases, then both G2 requests fail the1800s deadline. No G3/fixed
+point. This source gate did not establish compiler-generation qualification.
+
+PHP extraction separately allocates a full character array even for a short
+substring. Exact archived compiler-source diagnostic40077973238 compares25100
+valid/malformed/boundary/huge-index cases and16 slices from18804166 source bytes:
+retained22.741s, proposed0.0243s. This is an actual compiler-source runtime
+operation, not a whole-compiler speedup. Source9c4a9b38/registration94ea0e84 passes gate40078556459, including25100
+emitted API comparisons and1MB slices: use the existing two-key UTF8 validity cache, check full input before
+bounds as required, compare GMP positions against native size before conversion,
+then slice bytes. Preserve early empty-range behavior, invalid/non-boundary start,
+and the historical rule that a mid-codepoint stop extends through the string end.
+No extra retained cache or stack/memory limit is introduced. The same emitter's
+legacy layout policy keeps exact old extraction runtime bytes and dependencies
+for differential tests; the default catalog permits only this complete helper
+block and its utf8Valid dependency to differ. PHP-only source changes leave the
+Python owned compiler closure unchanged.
+
+Python's exact archived hot-worker AST audit40078613463 confirms self tails
+without nested definitions in equality, JSON, list reversal and name lookup.
+The new emitter loops only lambda-free exact global-self tails with nonzero arity,
+no lexical shadow/type arguments and conservative4096 analysis fallback.
+The saved callee and argument evaluation remain; the original fresh result
+temporary snapshots the argument tuple before parallel parameter rebinding.
+Other calls retain the scheduler. No frame is reused for a body creating a lambda,
+so escaping closures retain distinct captured bindings. A separate retained
+policy keeps the original scheduler output; existing WithIoAndDirectCalls API
+retains its previous no-loop behavior.
+
+Independent AST validation restores only the exact three-statement snapshot/
+rebind/continue pattern to the original self-tail yield, checking original callee,
+arity/arguments and lambda absence, then compares all remaining AST. Declaration
+origins are checked against exact actual headers. Gate40079503171 at e20a1154
+passes87-module/both-grammar censuses, all retained/admitted guards,43 loop
+comparisons,2M steps,200k escaping-closure fallback, swaps and typed IO order/
+first-error tests without changing Python recursion limits. Genuine Python
+requeste6327cdd/run40079719620 and PHP extraction request1174300d/run40078954006
+both passed independent G1/strict IR/ten observations and then failed G2 at
+1800057/1800042ms. Neither reached G3/fixed point. Current full40080321500
+passes37/37 for sourcee20a1154. The isolated correctness-3600s profile in451aef05
+passes preflight40083935614 and preserves historical1800s/performance240s/G1
+and every other resource or checking limit. Genuine both-target run40085445958 at requesta6a399c6 FAILED both3600s G2 deadlines after independently checked G1/strictIR/ten-case success. Python3600060ms/tree781180KiB; PHP3600056ms/tree1180260KiB. No G3/fixed point. Readbacks40089881019/40089760678 bind immutable artifacts. Minute resource heartbeats use existing procfs sampling, not compiler callbacks; busy CPU is not semantic progress.
+
+Measured follow-up sourceb56da505/13c5d4a6 uses the same compiler/emitter architecture. Python returns either of the two hot UTF8 identity entries without enumeration/promotion/allocation; immutable8entry/32MiB cache limits and all errors/eviction remain. PHP exposes five existing node fields as public private(set) and uses direct properties only for strictly canonical checked slots. ArrayAccess/iterative dead-node collection remain; indexed reads are a retained policy of the same emitter. The frozen old runtime permits only five visibility declarations, and token comparison restores only canonical reads. Proven two-layer nonzero pure global call sites bypass scheduler requests after the same callee/argument snapshots; dynamic/shadowed/aliased/recursive calls retain scheduling. Existing PHP self-tail loops were already present.
+
+Focused40090956726/job120863330756 at reviewb33027de PASS:234895 UTF8 queries/20000 snapshot-identity hot hits,11 slot token restorations,readonly writes/references refused,frozen node-interface comparisons,2M dead-spine/collection,one static-call token restoration,200k deep dynamic recursion,all source/runtime/admitted-library guards and87-module closures in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942.
+
+One genuine BOTH-target correctness-3600s retry is running on qualification/psc1-python-php-3600s-20261024: control3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0, request336ff212bb810bcafa1573350355fbd1f6a0509e, [run40091210960](https://github.com/dwijayuda/pskernel/actions/runs/40091210960), Python120864185036/PHP120864185108. Compiler and critical host tools exactly matchb33027de; GitHub compare shows only workflow branch guard and request JSON differ. Both jobs entered genuine generation execution; no new G2/G3/fixed-point success is claimed. Preserve these running jobs.
+
+The user requested a stop after this verified milestone slice. On continuation inspect the active jobs before further changes. The new source gates qualify preserved functionality, not self-hosted G2/G3. Original performance240s remains separately unqualified.
+
+Strict IR already requires canonical constructor field order; the PHP emitter
+evaluates in that order. Reordered construction remains refused, while match
+bindings resolve indices by owner/constructor/field. Native legacy layout is a
+policy of the same emitter for differential execution. Public aggregate ABIs
+remain refused; records/arrays keep their existing source semantics.
+
+Source/regression gate40073537409 at617004ce passes both complete86-module
+closures in both grammars, proofs, retained boundaries and four independently
+admitted runtime libraries. Current genuine generations are tracked by the
+[Python/PHP receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json);
+these focused tests alone do not qualify G2/G3 or fixed points. Existing
+memory/stack/fuel/admission/IR/refusal policies are unchanged.
 
 ## Current qualified evidence — 2026-10-24
 
@@ -356,3 +447,42 @@ old/new APIs, exact output bytes/order and first-error priority, with100000-elem
 cases and the retained96-opcode/native/owned-GC comparisons. The top Nat division
 frame is insufficient evidence for a separate arithmetic defect; no limit was
 raised. This fixes encoding as a class rather than modifying individual inputs.
+
+## Python/PHP source architecture — 2026-10-24
+
+The qualified direct-target pattern separates one portable compiler implementation
+from host transport, native adapters and independent checking. Apply the same
+boundary to Python/PHP: CompilerService imports Portable; native Module preserves
+its existing API and calls Portable. Default-argument/metadata compatibility
+does not enter captured compiler source. Source capture still traverses all
+registered owned imports and excludes test references/host/kernel/CLI code.
+
+Original Python/PHP emitters used StateT, private declarations, default record
+initializers, library methods and nested source patterns outside the supported
+compiler grammar. The port keeps the same semantic operations and target text,
+using ordinary functions State -> Except Error (Prod Value State), explicit
+record constructors, ordered accumulators and flat case analysis. It adds no
+grammar extension or alternate compiler. The source controller continues to
+admit Id, Except and CompilerM; unimplemented StateT elaboration is not bypassed.
+
+Native operation correspondence proofs bind seven complete state APIs.
+Flat arity dispatch is compared with the original exact-list patterns for
+arity1/2/3/5, including shorter, exact and arbitrary longer lists. Retained
+original emitters are native test references only, outside every owned compiler
+closure.144 output/refusal comparisons cover all output fields, not merely
+execution results.34816 runtime selector combinations preserve raw helper text,
+dependency order, duplicates and unknowns. Four actual source library probes
+are independently admitted and executed across both grammars and both targets.
+None of these fixture/proof results alone qualifies a generated compiler.
+
+Full source census now reaches86 modules per target. Recursive workers bind a
+partially applied smaller function below dynamic inputs; effects use explicit
+Except constructors rather than contextual spellings inside match branches.
+Keep exact errors, first-error order, lexical captures, declaration positions,
+source/IR identities and all existing fuel/resource/ABI boundaries.
+
+Next qualification uses the existing one-seed harness with Python3.14.8 and
+PHP8.5.12/ext-gmp, interpreter hashes, unchanged240s G1/tools and120s checker,
+and separate1800s correctness G2/G3. Original240s performance remains separate.
+Generated source equality is distinct from operational manifest event/timing
+hashes, clean-build reproducibility, DDC or formal compiler preservation.

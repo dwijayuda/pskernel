@@ -38,7 +38,7 @@ export function compilerSourceClosureDigest(sources) {
  * admission of exact graph bytes only, never source-to-Core/backend preservation.
  */
 export function createCompilerHostSession({ requestId, target, sources, canonicalAdmissions, checkerExecutable }) {
-  if (typeof requestId !== 'string' || !requestId || !['js', 'ts', 'rust', 'wasm-core'].includes(target) ||
+  if (typeof requestId !== 'string' || !requestId || !['js', 'ts', 'rust', 'wasm-core', 'python', 'php'].includes(target) ||
       typeof canonicalAdmissions !== 'string' || !canonicalAdmissions ||
       typeof checkerExecutable !== 'string' || !checkerExecutable) fail('PSC1_HOST_REQUEST_INVALID');
   const sourceClosureDigest = compilerSourceClosureDigest(sources);

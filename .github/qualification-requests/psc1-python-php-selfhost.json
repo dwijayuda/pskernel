@@ -1,0 +1,14 @@
+{
+  "schema": "psc1-python-php-selfhost-request/1",
+  "branch": "feat/psc1-python-php-selfhost-20261024",
+  "parentCommit": "e20a11549cdb1d656c05912089730bf2ebeaf933",
+  "action": "qualify-independent-G1-G2-G3",
+  "profile": "correctness-1800s",
+  "targets": [
+    "python"
+  ],
+  "g2g3TimeoutMs": 1800000,
+  "g1TimeoutMs": 240000,
+  "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
+  "reason": "Python-only qualification after lambda-free exact-self-tail loops. Gate40079503171/job120829903883 PASSED all87-module/both-grammar/native/admitted/retained tests,43 loop comparisons,2Msteps,200kescapingclosurefallback,argument-swap/typed-IO-order-and-first-error,exactASTrestoration. Preserved bounded-call809 Python G1 passed but G2 timedout1800049ms. PHP extraction117 source/active attempt unchanged; no raised limits or weakened verification."
+}

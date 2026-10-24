@@ -7,6 +7,24 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
+## Verified Python/PHP performance-fix milestone — stopped as requested
+
+Use connected GitHub tools/Linux Actions only, fresh expected-HEAD non-force updates, draft [PR176](https://github.com/dwijayuda/pskernel/pull/176). No merge or package publication authorized.
+
+**This bounded milestone is complete; stop after this checkpoint.** The latest user instruction is “continue until milestone slice and then stop.” Source fixes and regression validation are complete; long compiler-generation results remain pending.
+
+- Python b56da50567ac4051b6bea311c1b960ced1c97869: the two hot immutable UTF8 identity entries return without allocation/promotion. The8entry/32MiB budget, errors, eviction and oversized-input policy remain.
+- PHP13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d: canonical checked node reads use externally readonly public private(set) slots. ArrayAccess, indexed differential control, native legacy layout and iterative dead-node reclamation remain. Proven two-layer nonzero pure globals bypass redundant scheduled requests after identical callee/argument snapshots; dynamic calls, recursion, shadows and aliases retain scheduling.
+- Reviewb33027de36225e0a4f6d0f86572bd42115aad42a corrects only a Lean reference comment delimiter after failed preflight40090723561. Production semantics are unchanged by that correction.
+- Focused [40090956726](https://github.com/dwijayuda/pskernel/actions/runs/40090956726)/job120863330756 PASS:234895 UTF8 queries and20000 allocation-free alternating hits;11 canonical slot token restorations with every other token/runtime prefix exact; readonly mutation/reference refusals, frozen node-interface comparisons,2M dead-spine/collection tests, one static-call token restoration,200k dynamic alias/shadow recursion; all retained supervisor/transport/runtime/admitted-library guards and both87-module closures in both grammars. Artifact12559320936,sha256:1b585020c54677b28b70905317d16c027d9ded1d8a71376d264b0947614506d1.
+- Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942.
+- One genuine BOTH-target correctness-3600s retry is running on qualification/psc1-python-php-3600s-20261024: control3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0, request336ff212bb810bcafa1573350355fbd1f6a0509e, [run40091210960](https://github.com/dwijayuda/pskernel/actions/runs/40091210960), Python120864185036/PHP120864185108. Compiler and critical host tools exactly matchb33027de; GitHub compare shows only workflow branch guard and request JSON differ. Both jobs entered genuine generation execution; no new G2/G3/fixed-point success is claimed. Preserve these running jobs.
+- Earlier3600s run40085445958 at requesta6a399c6 FAILED both G2 deadlines after both G1s passed independent admission/strict IR/all ten observations. Python3600060ms/tree peak781180KiB; PHP3600056ms/tree1180260KiB. Neither G3/fixed point ran. Immutable artifacts12558152936/12558950449 and readbacks40089881019/40089760678 remain in the exact receipt. Last inner CPU samples~3543s show busy workloads, not semantic progress; outer wait4 RSS is not interpreter peak and tree sums may double-count shared pages.
+
+Correctness3600s extends ONLY exact G2-self/G3-self wall clocks. Preserve G1/corpus/tools240s,checker120s,historical correctness1800s,separate performance240s,official independent Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict original/transformed IR/source pairing/negative tests,response128MiB,PHP1G/default stack,Python recursion/digit globals and semantic fuel. Jobs180min/execution170min fit hosted6h. No new compiler implementation or verification bypass.
+
+**Next only on continuation:** fetch latest primary and qualification HEAD, then inspect run40091210960 completed jobs/artifacts. Do not submit a duplicate request or cancel live work. Require genuine independent G1→G2→G3 and exact source/admission/IR/observation/raw-byte fixed points per target before calling it self-hosted. On failure diagnose the actual new workload; on success perform clean independent G1 reproduction. Performance240s remains separately unqualified. [Exact receipt](docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json), [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md), [executable continuation](docs/PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md).
+
 ## Completed DirectJS and owned DirectWasm mission
 
 Source commit 133e589288b563e74578b771ec35595beb3a9fe8 is genuinely self-hosted
@@ -104,7 +122,7 @@ the qualified133e5892 source. No merge or package publication occurred.
 
 The original performance-240s profile remains separate and unqualified;
 the measured current G2/G3 times exceed240s. Correctness-1800s does not weaken it.
-G1/corpus/tools240s, checker120s, G2/G3 correctness1800s, semantic fuel and
+G1/corpus/tools240s, checker120s, historical G2/G3 correctness1800s and explicit Python/PHP correctness3600s, semantic fuel and
 all memory/stack/security/refusal limits remain unchanged.
 
 Official independent Lean4.35.0 checker
@@ -120,7 +138,8 @@ head84e1e16f61cec3d28d9fdc62d6eaca4f3c0a8577, source748fd5fd,
 request079b26b9/run39993829327, G2/G3545895/588552ms; full39993835819 passed37/37.
 These qualify older snapshots, not a fresh Rust/TS replay of changed common source.
 
-No active self-host qualification requests remain. Next dependency queue:
+The completed DirectJS/Wasm checkpoint has no active requests; the Python/PHP
+mission above owns current qualification. Deferred Direct-target queue:
 profile the now-completing exact generated compiler workload, optimize one
 measured generic bottleneck with retained-original API/negative proofs, then
 rerun changed-source focused and genuine qualification. Keep original240s

@@ -88,7 +88,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan]
+  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -177,11 +177,11 @@ lean_lib PsBackendWasm where
 
 lean_lib PsBackendPython where
   srcDir := "packages/backend-python/src"
-  roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Module]
+  roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Portable, `Ps.BackendPython.Module, `Ps.BackendPython.CompilerService]
 
 lean_lib PsBackendPhp where
   srcDir := "packages/backend-php/src"
-  roots := #[`Ps.BackendPhp.Runtime, `Ps.BackendPhp.Module]
+  roots := #[`Ps.BackendPhp.Runtime, `Ps.BackendPhp.Portable, `Ps.BackendPhp.Module, `Ps.BackendPhp.CompilerService]
 
 -- Independent admission is host-only; logical checking is never delegated to
 -- formatters, transport code, the elaborator or an unvalidated raw IR wrapper.
@@ -531,3 +531,52 @@ lean_lib PsWasmEncodingSpineReference where
 lean_lib PsJsAppliedPrefixReference where
   srcDir := "test"
   roots := #[`JsAppliedPrefixReference, `JsAppliedPrefixTests]
+
+lean_lib PsScriptRuntimeReference where
+  srcDir := "test"
+  roots := #[`ScriptRuntimeReference, `PythonUtf8Reference, `PhpExtractReference, `PhpNodeReference]
+
+lean_exe psc1_script_runtime_normalization_tests where
+  srcDir := "test"
+  root := `ScriptRuntimeNormalizationTests
+
+lean_lib PsBackendStateReference where
+  srcDir := "test"
+  roots := #[`BackendStateReference]
+
+lean_exe psc1_backend_state_correspondence_tests where
+  srcDir := "test"
+  root := `BackendStateCorrespondenceTests
+
+lean_lib PsScriptEmitterReference where
+  srcDir := "test"
+  roots := #[`ScriptEmitterReference]
+
+lean_exe psc1_script_emitter_normalization_tests where
+  srcDir := "test"
+  root := `ScriptEmitterNormalizationTests
+
+lean_exe psc1_php_capture_tests where
+  srcDir := "test"
+  root := `PhpCaptureScopeTests
+
+lean_exe psc1_php_packed_tests where
+  srcDir := "test"
+  root := `PhpPackedLayoutTests
+
+lean_exe psc1_python_utf8_tests where
+  srcDir := "test"
+  root := `PythonUtf8CacheTests
+
+lean_exe psc1_direct_call_plan_tests where
+  srcDir := "test"
+  root := `DirectCallPlanTests
+
+lean_exe psc1_php_extract_tests where
+  srcDir := "test"
+  root := `PhpExtractTests
+  supportInterpreter := true
+
+lean_exe psc1_python_tail_loop_tests where
+  srcDir := "test"
+  root := `PythonTailLoopTests

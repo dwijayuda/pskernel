@@ -20,7 +20,7 @@ export function boundedRun(executable,args,options={}) {
  const limits=supervisorLimit(options.timeoutMs,options.timeoutPolicy);
  const control=spawnSync('python3',[path.resolve('scripts/bounded-process.py'),JSON.stringify({
   command:[executable,...args],directory,...limits,maxBuffer:32*1024*1024})],
-  {encoding:'utf8',timeout:limits.supervisorGuardMs,killSignal:'SIGKILL',maxBuffer:1024*1024,
+  {encoding:'utf8',stdio:['ignore','pipe','inherit'],timeout:limits.supervisorGuardMs,killSignal:'SIGKILL',maxBuffer:1024*1024,
    cwd:options.cwd,env:options.env||process.env});
  if(control.error||control.status!==0)throw Error('PSC1_SUPERVISOR_FAILED:'+(control.error?.message||control.stderr));
  const result=JSON.parse(control.stdout);
@@ -28,7 +28,7 @@ export function boundedRun(executable,args,options={}) {
  result.stderr=fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8');
  fs.appendFileSync(path.join(directory,'tool-events.jsonl'),JSON.stringify({state:'finished',
   executable,args,status:result.status,signal:result.signal,error:result.error,
-  elapsedMs:result.elapsedMs,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,timeoutMs:result.timeoutMs,timeoutPolicy:result.timeoutPolicy,stdoutBytes:result.stdoutBytes,stderrBytes:result.stderrBytes})+'\n');
+  elapsedMs:result.elapsedMs,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,sampledCpuSeconds:result.sampledCpuSeconds,timeoutMs:result.timeoutMs,timeoutPolicy:result.timeoutPolicy,stdoutBytes:result.stdoutBytes,stderrBytes:result.stderrBytes})+'\n');
  if(temporary)fs.rmSync(directory,{recursive:true,force:true});
  return result;
 }
@@ -58,6 +58,7 @@ export function verifyArtifact(manifestFile,expectedHash) {
  const source=m.files.find(f=>f.path===definition.sourceFile);
  assert.ok(source);assert.equal(source.sha256,m.sourceSha256,'PSC1_TARGET_SOURCE_IDENTITY');
  assert.equal(m.executable,definition.executable);
+ if(definition.runtimeVersion)assert.equal(m.compilerVersion,definition.runtimeVersion,'PSC1_TARGET_RUNTIME_VERSION');
  if(m.target==='wasm-core'){
   assert.equal(m.transport,'psc1-wasm-selfhost-gc/1');assert.ok(Array.isArray(m.publicTypes));
   assert.deepEqual(decodeWasmHex(fs.readFileSync(path.join(directory,definition.sourceFile),'utf8')),fs.readFileSync(path.join(directory,m.executable)));
@@ -104,6 +105,21 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
   executable='module.wasm';
   if(!service)fs.writeFileSync(path.join(directory,'consumer.mjs'),
    "import{loadWasmArtifact}from "+JSON.stringify(transport)+";import{fileURLToPath}from'node:url';const m=loadWasmArtifact(fileURLToPath(new URL('./artifact.json',import.meta.url)));\n"+consumer);
+ } else if(target==='python'||target==='php') {
+  const python=target==='python',sourceFile=definition.sourceFile;
+  fs.writeFileSync(path.join(directory,sourceFile),source);
+  const adapter=python?'generated-python-transport.py':'generated-php-transport.php';
+  fs.copyFileSync(path.resolve('host-tools',adapter),path.join(directory,adapter));
+  executable=sourceFile;
+  const command=python?'python3':'php';
+  const flags=python?['-I']:['-d','memory_limit=1G'];
+  if(python){
+   events.push(runTool(command,['-I','-c',"import ast,pathlib,sys;ast.parse(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))",path.join(directory,sourceFile)],{logDirectory:directory}).event);
+  }else events.push(runTool(command,[...flags,'-l',path.join(directory,sourceFile)],{logDirectory:directory}).event);
+  events.push(runTool(command,[...flags,path.join(directory,adapter),path.join(directory,sourceFile),'probe',JSON.stringify(publicNames)],{logDirectory:directory}).event);
+  if(!service)fs.writeFileSync(path.join(directory,python?'consumer.py':'consumer.php'),python?
+   "import importlib.util,json,pathlib\nspec=importlib.util.spec_from_file_location('psc1_observed',pathlib.Path(__file__).with_name('module.py'))\nm=importlib.util.module_from_spec(spec)\nexec(compile(pathlib.Path(spec.origin).read_bytes(),spec.origin,'exec'),m.__dict__)\n"+consumer:
+   "<?php\ndeclare(strict_types=1);\n$m=require __DIR__.'/module.php';\n"+consumer);
  } else {
   const main=service ?
    'fn main() { let a: Vec<String> = std::env::args().collect(); assert_eq!(a.len(), 3); let input = std::fs::read_to_string(&a[1]).expect("request"); let output = psCompilerRustServiceCandidate(input); assert!(output.len() <= 134217728); std::fs::write(&a[2], output).expect("response"); }' :
@@ -129,7 +145,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
  const manifest={schema:'psc1-generated-target-artifact/1',target,sourceSha256:sha(source),
   executable,service,publicNames,files,events,nodeVersion:process.version,
   rustOptimizationLevel:target==='rust'?1:null,
-  compilerVersion:target==='js'?process.version:target==='wasm-core'?runTool('wasm-tools',['--version']).stdout.trim():target==='rust'?runTool('rustc',['--version']).stdout.trim():
+  compilerVersion:target==='python'?runTool('python3',['--version']).stdout.trim():target==='php'?runTool('php',['-r','echo PHP_VERSION;']).stdout.trim():target==='js'?process.version:target==='wasm-core'?runTool('wasm-tools',['--version']).stdout.trim():target==='rust'?runTool('rustc',['--version']).stdout.trim():
    runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--version']).stdout.trim()};
  if(target==='wasm-core'){manifest.transport='psc1-wasm-selfhost-gc/1';manifest.publicTypes=publicTypes;}
  fs.writeFileSync(path.join(directory,'artifact.json'),JSON.stringify(manifest,null,2)+'\n');
@@ -137,8 +153,8 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
 }
 export function observeArtifact(artifact) {
  const m=verifyArtifact(artifact.file,artifact.sha256);
- const executable=m.target!=='rust'?process.execPath:path.join(m.directory,m.executable);
- const args=m.target!=='rust'?[path.join(m.directory,'consumer.mjs')]:[];
+ const executable=m.target==='python'?'python3':m.target==='php'?'php':m.target!=='rust'?process.execPath:path.join(m.directory,m.executable);
+ const args=m.target==='python'?['-I',path.join(m.directory,'consumer.py')]:m.target==='php'?['-d','memory_limit=1G',path.join(m.directory,'consumer.php')]:m.target!=='rust'?[path.join(m.directory,'consumer.mjs')]:[];
  const r=runTool(executable,args,{logDirectory:m.directory});
  return {observation:JSON.parse(r.stdout.trim()),event:r.event};
 }
@@ -163,7 +179,8 @@ export async function executeService(manifestFile,expectedHash,requestFile,outpu
   maxRssKiB=process.resourceUsage().maxRSS;
  } else {
   const rss=outputFile+'.rss.txt';
-  runTool('/usr/bin/time',['-f','%M','-o',rss,path.join(m.directory,m.executable),requestFile,outputFile+'.tmp'],{logDirectory:path.dirname(outputFile),...limits});
+  const command=m.target==='python'?['python3','-I',path.join(m.directory,'generated-python-transport.py'),path.join(m.directory,m.executable),'execute',JSON.stringify(m.publicNames),requestFile,outputFile+'.tmp']:m.target==='php'?['php','-d','memory_limit=1G',path.join(m.directory,'generated-php-transport.php'),path.join(m.directory,m.executable),'execute',JSON.stringify(m.publicNames),requestFile,outputFile+'.tmp']:[path.join(m.directory,m.executable),requestFile,outputFile+'.tmp'];
+  runTool('/usr/bin/time',['-f','%M','-o',rss,...command],{logDirectory:path.dirname(outputFile),...limits});
   maxRssKiB=Number(fs.readFileSync(rss,'utf8').trim());
  }
  const response=fs.readFileSync(outputFile+'.tmp');assert.ok(response.length>0&&response.length<=128*1024*1024);

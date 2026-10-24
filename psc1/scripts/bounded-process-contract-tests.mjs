@@ -5,15 +5,16 @@ import {compilerRequestLimit,qualificationProfile,supervisorLimit} from './selfh
 import {spawnSync} from 'node:child_process';
 import {boundedRun} from '../host-tools/generated-target-tools.mjs';
 assert.equal(qualificationProfile().name,'performance-240s');
-for(const profile of ['performance-240s','correctness-1800s']) {
+for(const profile of ['performance-240s','correctness-1800s','correctness-3600s']) {
  for(const id of ['G1-bootstrap','G1-lean-modules','G2-ps-list-literal','G3-verified','G2-self','G3-self']) {
-  const expected=profile==='correctness-1800s'&&['G2-self','G3-self'].includes(id)?1800000:240000;
+  const expected=profile!=='performance-240s'&&['G2-self','G3-self'].includes(id)?(profile==='correctness-3600s'?3600000:1800000):240000;
   assert.equal(compilerRequestLimit(profile,id).timeoutMs,expected);
  }
 }
 assert.throws(()=>qualificationProfile('unbounded'),/UNKNOWN_QUALIFICATION/);
 assert.throws(()=>supervisorLimit(240001),/TIMEOUT_OUTSIDE/);
 assert.throws(()=>supervisorLimit(1800001,'g2g3-correctness-1800s'),/TIMEOUT_OUTSIDE/);
+assert.throws(()=>supervisorLimit(3600001,'g2g3-correctness-3600s'),/TIMEOUT_OUTSIDE/);
 assert.throws(()=>supervisorLimit(240000,'unknown'),/UNKNOWN_TIMEOUT/);
 const root=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-process-tree-'));
 try{
@@ -22,11 +23,26 @@ try{
  const extended=boundedRun('python3',['-c','print("long-profile")'],{logDirectory:path.join(root,'extended'),...compilerRequestLimit('correctness-1800s','G2-self')});
  assert.equal(extended.status,0);assert.equal(extended.timeoutMs,1800000);
  assert.ok(extended.maxRssKiB>0&&extended.peakTreeRssKiB>0);
- for(const invalid of [{timeoutMs:240001},{timeoutMs:1800001,timeoutPolicy:'g2g3-correctness-1800s'},{timeoutMs:1,timeoutPolicy:'unknown'}]) {
+ for(const invalid of [{timeoutMs:240001},{timeoutMs:1800001,timeoutPolicy:'g2g3-correctness-1800s'},{timeoutMs:3600001,timeoutPolicy:'g2g3-correctness-3600s'},{timeoutMs:1,timeoutPolicy:'unknown'}]) {
   const rejected=spawnSync('python3',['scripts/bounded-process.py',JSON.stringify({command:['python3','-c','print("must-not-run")'],directory:path.join(root,'refused'),...invalid})],{encoding:'utf8'});
   assert.notEqual(rejected.status,0);
   assert.equal(fs.existsSync(path.join(root,'refused','tool.stdout.txt')),false);
  }
+ for(const profile of ['correctness-1800s','correctness-3600s']) {
+  const d=path.join(root,profile);
+  const request={command:['python3','-c','print("wire-unchanged")'],directory:d,...compilerRequestLimit(profile,'G3-self')};
+  const control=spawnSync('python3',['scripts/bounded-process.py',JSON.stringify(request)],{encoding:'utf8'});
+  assert.equal(control.status,0,control.stderr);
+  const result=JSON.parse(control.stdout);
+  assert.equal(result.status,0);assert.equal(result.timeoutMs,profile==='correctness-3600s'?3600000:1800000);
+  assert.equal(fs.readFileSync(path.join(d,'tool.stdout.txt'),'utf8'),'wire-unchanged\n');
+  assert.match(control.stderr,/PSC1_PROCESS_HEARTBEAT:/);
+  const beats=fs.readFileSync(path.join(d,'resource-heartbeats.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
+  assert.equal(beats[0].kind,'resource-heartbeat-not-semantic-progress');
+  assert.ok(beats.length<=2);assert.ok(result.sampledCpuSeconds>=0);
+  assert.equal(result.maxBuffer,32*1024*1024);
+ }
+ assert.equal(fs.existsSync(path.join(root,'simple','resource-heartbeats.jsonl')),false);
  const pidFile=path.join(root,'descendant.pid');
  const grandchild="import os,signal,time;open("+JSON.stringify(pidFile)+",'w').write(str(os.getpid()));signal.signal(signal.SIGTERM,signal.SIG_IGN);time.sleep(60)";
  const parent="import subprocess,signal,time;subprocess.Popen(['python3','-c',"+JSON.stringify(grandchild)+"]);signal.signal(signal.SIGTERM,signal.SIG_IGN);time.sleep(60)";
@@ -39,7 +55,7 @@ try{
  const inherited=boundedRun('python3',['-c',exitingParent],{logDirectory:path.join(root,'inherited'),timeoutMs:500});
  assert.equal(inherited.error.code,'ETIMEDOUT');assert.ok(inherited.elapsedMs<2000);
  const escapedParent="import subprocess,signal,time;subprocess.Popen(['python3','-c',"+JSON.stringify(grandchild)+"],start_new_session=True);signal.signal(signal.SIGTERM,signal.SIG_IGN);time.sleep(60)";
- const escaped=boundedRun('python3',['-c',escapedParent],{logDirectory:path.join(root,'new-session'),timeoutMs:500,timeoutPolicy:'g2g3-correctness-1800s'});
+ const escaped=boundedRun('python3',['-c',escapedParent],{logDirectory:path.join(root,'new-session'),timeoutMs:500,timeoutPolicy:'g2g3-correctness-3600s'});
  assert.equal(escaped.error.code,'ETIMEDOUT');
  const escapedPid=Number(fs.readFileSync(pidFile,'utf8'));
  let escapedState;try{escapedState=fs.readFileSync('/proc/'+escapedPid+'/stat','utf8').split(' ')[2];}catch(e){assert.equal(e.code,'ENOENT');}

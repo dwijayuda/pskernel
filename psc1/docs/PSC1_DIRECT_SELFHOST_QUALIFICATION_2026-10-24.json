@@ -1,8 +1,8 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-23 23:00:00 UTC",
+  "recordedAtUtc": "2026-10-24 04:21:00 UTC",
   "localDate": "2026-10-24",
-  "status": "both-direct-G1-passed-G2-blocked-shared-lookup-prefix-fix-under-validation",
+  "status": "both-owned-backend-mechanism-fixes-source-proof-runtime-qualified-next-generations",
   "practicalCoreContract": "unchanged",
   "preservedReferences": [
     {
@@ -253,18 +253,20 @@
     }
   },
   "focusedGate": {
-    "commit": "c115c65732ea1bf78aba263658e9ab804e116822",
-    "runId": 40034701526,
-    "jobId": 120691199253,
+    "commit": "133e589288b563e74578b771ec35595beb3a9fe8",
+    "runId": 40061782715,
+    "jobId": 120776657312,
     "status": "passed",
-    "newAllInputLowerExprEquality": true,
-    "prefixEqualities": 52,
-    "ownedWasmDefinitionsScanned": 464,
+    "allInputJsFunctionEqualities": 11,
+    "jsOwnedDefinitionsScanned": 233,
     "unsafePrefixes": [],
-    "retainedOriginalRejected": true,
-    "nativeEarlyResultFuel": 1000000,
-    "exactZeroFuelRefusal": true,
-    "allPriorProofRuntimeRefusalGates": "passed",
+    "retainedOriginalsRejected": 11,
+    "millionFuelEarlyResults": true,
+    "wasmEncoderApiEqualities": 3,
+    "sharedLookupApiEqualities": 3,
+    "wasmPrefixEqualities": 52,
+    "foundationApiEqualities": 6,
+    "allPreviousProofRuntimeRefusalGates": "passed",
     "sourceCensus": {
       "js": 87,
       "wasm": 98,
@@ -275,7 +277,15 @@
       "refused": []
     }
   },
-  "currentAttempt": null,
+  "currentAttempt": {
+    "target": "js",
+    "requestCommit": "d7c6f166309981012b8b50cb18a2dcf724092eb6",
+    "requestParent": "dab1006752de9c26cafff692ad81439c26c8254a",
+    "sourceCommit": "146270cf6b7a037ccd83b08296f6c35f725ee988",
+    "runId": 40061402443,
+    "status": "in_progress",
+    "scope": "Preserved child baseline with shared lookup fix; does not include later eleven JS prefix fixes."
+  },
   "integrationCheckpoint": {
     "pullRequest": 174,
     "commit": "afed7c4b2681533b525d7434856a97a78fd3d745",
@@ -387,29 +397,18 @@
     ]
   },
   "previousFocusedGate": {
-    "commit": "82994f858088a2a14e35eaf9ed17b9156ee91cdb",
-    "productionDispatchCommit": "3b5a9b9ad16ad3d400f28c50377962609092ee76",
-    "runId": 40032762325,
-    "jobId": 120684793164,
+    "commit": "c115c65732ea1bf78aba263658e9ab804e116822",
+    "runId": 40034701526,
+    "jobId": 120691199253,
     "status": "passed",
-    "foundationApiEqualities": 6,
-    "foundationSmokeSize": 100000,
-    "erasureApiEqualities": 3,
-    "genericErasureFoldEquality": true,
-    "checkedSpineEqualities": 3,
-    "ordinaryWorkerEquality": true,
-    "prefixEqualities": 51,
-    "containsSorry": false,
-    "dispatchComparisons": 64,
-    "registeredCallLookups": {
-      "retained": 40,
-      "current": 20
-    },
-    "delegatedSites": {
-      "retained": 35,
-      "current": 0
-    },
-    "allPriorRuntimeAndRefusalGates": "passed",
+    "newAllInputLowerExprEquality": true,
+    "prefixEqualities": 52,
+    "ownedWasmDefinitionsScanned": 464,
+    "unsafePrefixes": [],
+    "retainedOriginalRejected": true,
+    "nativeEarlyResultFuel": 1000000,
+    "exactZeroFuelRefusal": true,
+    "allPriorProofRuntimeRefusalGates": "passed",
     "sourceCensus": {
       "js": 87,
       "wasm": 98,
@@ -1106,6 +1105,52 @@
         ],
         "refused": []
       }
+    },
+    {
+      "commit": "146270cf6b7a037ccd83b08296f6c35f725ee988",
+      "runId": 40036978899,
+      "jobId": 120698778951,
+      "status": "passed",
+      "allInputLookupApiEqualities": 3,
+      "largeListCases": 100000,
+      "firstMatchAndPayloadPreserved": true,
+      "allPreviousGates": "passed"
+    },
+    {
+      "commit": "63a00d13a08c2510e71a0b15581977f8bf038f40",
+      "productionCommit": "e075de33181a05382d4e5805e1941f3b6b2765fe",
+      "runId": 40061544936,
+      "jobId": 120776049268,
+      "status": "passed",
+      "allInputEncoderApiEqualities": 3,
+      "largeListCases": 100000,
+      "exactBytesOrderAndFirstError": true,
+      "allPreviousGates": "passed"
+    },
+    {
+      "commit": "133e589288b563e74578b771ec35595beb3a9fe8",
+      "runId": 40061782715,
+      "jobId": 120776657312,
+      "status": "passed",
+      "allInputJsFunctionEqualities": 11,
+      "jsOwnedDefinitionsScanned": 233,
+      "unsafePrefixes": [],
+      "retainedOriginalsRejected": 11,
+      "millionFuelEarlyResults": true,
+      "wasmEncoderApiEqualities": 3,
+      "sharedLookupApiEqualities": 3,
+      "wasmPrefixEqualities": 52,
+      "foundationApiEqualities": 6,
+      "allPreviousProofRuntimeRefusalGates": "passed",
+      "sourceCensus": {
+        "js": 87,
+        "wasm": 98,
+        "grammars": [
+          "lean",
+          "ps"
+        ],
+        "refused": []
+      }
     }
   ],
   "nextRequestedTarget": "wasm-core",
@@ -1700,11 +1745,40 @@
     "pullRequest": 175,
     "head": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
     "runId": 40033570924,
-    "status": "in_progress",
-    "scope": "current review branch; c115c657 later Wasm fix requires subsequent full CI"
+    "jobId": 120692646423,
+    "gateJobId": 120702393001,
+    "status": "passed",
+    "testedMerge": "bd0182def8baf6b9ffcc31883d612c800cb8c658",
+    "identicalTree": "c06c977dffac1b77e2d92efbd7c7e89f08c04f72",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "allSevenBackends": true,
+    "bothGrammars": true,
+    "artifact": {
+      "id": 12537203984,
+      "digest": "sha256:22c802bc036a2dc09a194e5998777c867d3646746d30552eab0aac14f0d66b37"
+    },
+    "scope": "8d7 tree only; later shared lookup/owned backend fixes require new full CI"
   },
   "nextWasmSourceCommit": "c115c65732ea1bf78aba263658e9ab804e116822",
-  "activeAttempts": [],
+  "activeAttempts": [
+    {
+      "target": "js",
+      "requestCommit": "d7c6f166309981012b8b50cb18a2dcf724092eb6",
+      "requestParent": "dab1006752de9c26cafff692ad81439c26c8254a",
+      "sourceCommit": "146270cf6b7a037ccd83b08296f6c35f725ee988",
+      "runId": 40061402443,
+      "status": "in_progress",
+      "scope": "Preserved child baseline with shared lookup fix; does not include later eleven JS prefix fixes."
+    }
+  ],
   "diagnosticSpineInventory": {
     "runId": 40029584741,
     "compilerExecution": false,
@@ -1820,12 +1894,7 @@
     },
     "scope": "85433830 tree only; subsequent child source needs full CI"
   },
-  "pendingFocusedGate": {
-    "commit": "146270cf6b7a037ccd83b08296f6c35f725ee988",
-    "runId": 40036978899,
-    "status": "in_progress",
-    "change": "Three shared environment/constructor/recursor lookup prefixes; all-input retained proofs;100000-element early/miss/kind/duplicate payload tests."
-  },
+  "pendingFocusedGate": null,
   "ecmascriptArchitectureComparison": {
     "runId": 40035257537,
     "jobId": 120693033144,
@@ -2137,27 +2206,7 @@
       ]
     }
   },
-  "activeDiagnostics": [
-    {
-      "target": "wasm-core",
-      "runId": 40036672078,
-      "commit": "356b569f28f0a4a25df295329b0864b09add6ef9",
-      "kind": "exact retained G2 full reported trace",
-      "profile": "correctness-1800s",
-      "executionStackSizeChanged": false,
-      "qualification": false,
-      "status": "in_progress"
-    },
-    {
-      "target": "js",
-      "runId": 40037023905,
-      "commit": "d62c4d28051d16e49e45cd83543217a4b02308eb",
-      "kind": "exact latest retained G2 CPU profile",
-      "profile": "performance-240s",
-      "qualification": false,
-      "status": "in_progress"
-    }
-  ],
+  "activeDiagnostics": [],
   "sharedPrefixInventory": {
     "runId": 40036411081,
     "status": "passed",
@@ -3144,5 +3193,322 @@
       "declarationSpines": [],
       "otherFirst60": []
     }
-  }
+  },
+  "latestJsCpuDiagnosis": {
+    "runId": 40037023905,
+    "jobId": 120698929286,
+    "status": "passed",
+    "qualification": false,
+    "receipt": {
+      "schema": "psc1-direct-generated-cpu-diagnosis/1",
+      "testedCommit": "d62c4d28051d16e49e45cd83543217a4b02308eb",
+      "source": {
+        "schema": "psc1-direct-generated-profile-request/1",
+        "runId": 40033515365,
+        "requestCommit": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
+        "sourceCommit": "844f8c3b765b6cc1378f164ac4cfcc39b02364a6",
+        "artifactId": 12536664869,
+        "artifactDigest": "sha256:58565e59a32ab927c35c54d108858b571fb3d30d4cbc46229b4a4b00e8d639e7",
+        "target": "js",
+        "requestId": "G2-self",
+        "sourceClosureDigest": "04fe35964af8c177b7d7672ed3bd2ea00c70b1491a58ce64667630c028862faf",
+        "serviceSha256": "1fdc5fc3efa4613480e3f89d73a30cf48596e68c4b528c0285a0f8019150718a",
+        "requestSha256": "1eb8e38276972ca64018c75007ecd87f594ae55ae61812f3ad960e2249bdaa97",
+        "purpose": "Measure actual current direct-driver G1 compiler on exact failed G2 request; existing performance240s diagnostic only; no compiler rebuild or policy change.",
+        "attempt": 5
+      },
+      "retainedG1": {
+        "sourceSha256": "5504466ee36bd00bf53bda57853fa032c59a947a4f942b184c28a433a2712866",
+        "artifactSha256": "1fdc5fc3efa4613480e3f89d73a30cf48596e68c4b528c0285a0f8019150718a",
+        "independentlyAdmitted": true,
+        "observations": 10
+      },
+      "requestSha256": "1eb8e38276972ca64018c75007ecd87f594ae55ae61812f3ad960e2249bdaa97",
+      "profile": "performance-240s",
+      "samplingOverhead": true,
+      "qualification": false,
+      "nativeDelegation": false,
+      "execution": {
+        "elapsedMs": 240144,
+        "status": null,
+        "signal": "SIGKILL",
+        "error": {
+          "code": "ETIMEDOUT",
+          "message": "process tree exceeded hard deadline"
+        },
+        "maxRssKiB": 2031196,
+        "peakTreeRssKiB": 2031196
+      },
+      "processed": [
+        {
+          "file": "isolate-0x41928000-2397-v8.log",
+          "status": 0,
+          "error": null
+        }
+      ]
+    },
+    "sourceShape": {
+      "bytes": 8021036,
+      "generators": 8935,
+      "generatorLetWrappers": 3908,
+      "lazyViewGetters": 6,
+      "invokeSites": 0,
+      "tailInvokeSites": 0,
+      "directDriverSites": 16323
+    },
+    "gcAllTicksPercent": 18.7,
+    "artifact": [
+      {
+        "id": 12537747100,
+        "digest": "sha256:e469b3cc057c87a353eb458e5f4177c991abd2f14769a4d4af4716968eeb8572"
+      }
+    ],
+    "scope": "Exact retained direct-driver source; first240s sampled execution, no full qualification or matched speed claim."
+  },
+  "latestWasmStackDiagnosis": {
+    "runId": 40036672078,
+    "jobId": 120697746101,
+    "status": "passed",
+    "qualification": false,
+    "receipt": {
+      "schema": "psc1-retained-wasm-stack-diagnosis/1",
+      "testedCommit": "356b569f28f0a4a25df295329b0864b09add6ef9",
+      "source": {
+        "schema": "psc1-retained-wasm-stack-diagnosis/1",
+        "attempts": [
+          {
+            "runId": 40035031327,
+            "requestCommit": "e5b9cd765a8b7ee0a96b5cd06c84d1e9a05b9d24",
+            "sourceCommit": "699f84948ff70273e5ab9a7c5c0273316df23e66",
+            "artifactId": 12537505726,
+            "artifactDigest": "sha256:8c95c7ab2104f8200af7c258e7a01b985cbc040073b8bb68d7542ec874910c9c"
+          }
+        ],
+        "serviceSha256": "38cf11fd0fdf7a48d7a3dc9a926b5970e2ddf14e3ad852a5fa6fe682680724cb",
+        "requestSha256": "154f995001505a8f1415f1b407616fec2ba349e344b775bb17b97c5bea710ff6",
+        "closure": "85c03806bb5c045a8d5c48a73ddd1fbe7f5be568ea3c92a599d7b19ac0e5f317",
+        "purpose": "Replay exact retained G2 only to capture full stack after720754ms failure; execution stack/heap/semantic policies unchanged; existing1800s correctness profile; no qualification.",
+        "traceProfile": "correctness-1800s"
+      },
+      "sourceSha256": "8ad03f84ff1beae83c8b896b66a712bf3bf70768c6302af26eecf24978b34341",
+      "binarySha256": "96f44823fec24fb5483f51111ed9fd151cc40b9af435ba12119d363b47843bf9",
+      "runtimeFunctions": 50,
+      "sourceFunctions": 3512,
+      "exportAnchorsVerified": true,
+      "qualification": false,
+      "executionStackSizeChanged": false,
+      "reportedFrameLimit": 16384,
+      "execution": {
+        "elapsedMs": 865433,
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 1029356,
+        "peakTreeRssKiB": 1029356
+      },
+      "frameCount": 16,
+      "frameCounts": [
+        [
+          "__ps_wasm_nat_divmod",
+          2
+        ],
+        [
+          "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmFunction$Nat$N$PsWasmEncodeError",
+          2
+        ],
+        [
+          "__ps_wasm_nat_div",
+          1
+        ],
+        [
+          "__ps_wasm_nat_repr_positive",
+          1
+        ],
+        [
+          "psWasmIntNegativeMagnitude",
+          1
+        ],
+        [
+          "psWasmIntEModNat",
+          1
+        ],
+        [
+          "Ps_Internal_WasmBinaryBytes_psWasmEncodeSlebWithFuel$worker",
+          1
+        ],
+        [
+          "Ps_Internal_WasmBinaryBytes_psWasmEncodeValueType",
+          1
+        ],
+        [
+          "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmValueType$Nat$N$PsWasmEncodeError",
+          1
+        ],
+        [
+          "Ps_Internal_WasmBinaryBytes_psWasmEncodeFunctionType",
+          1
+        ],
+        [
+          "Ps_Internal_WasmBinaryBytes_psWasmEncodeModule",
+          1
+        ],
+        [
+          "Ps_Internal_WasmCompilerService_emit",
+          1
+        ],
+        [
+          "Ps_Internal_CompilerService_compilePrepared",
+          1
+        ],
+        [
+          "Ps_Internal_CompilerService_candidate",
+          1
+        ]
+      ],
+      "firstFrames": [
+        {
+          "index": 11,
+          "name": "__ps_wasm_nat_divmod"
+        },
+        {
+          "index": 11,
+          "name": "__ps_wasm_nat_divmod"
+        },
+        {
+          "index": 12,
+          "name": "__ps_wasm_nat_div"
+        },
+        {
+          "index": 47,
+          "name": "__ps_wasm_nat_repr_positive"
+        },
+        {
+          "index": 2085,
+          "name": "psWasmIntNegativeMagnitude"
+        },
+        {
+          "index": 2091,
+          "name": "psWasmIntEModNat"
+        },
+        {
+          "index": 3368,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeSlebWithFuel$worker"
+        },
+        {
+          "index": 2351,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeValueType"
+        },
+        {
+          "index": 2713,
+          "name": "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmValueType$Nat$N$PsWasmEncodeError"
+        },
+        {
+          "index": 2359,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeFunctionType"
+        },
+        {
+          "index": 2717,
+          "name": "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmFunction$Nat$N$PsWasmEncodeError"
+        },
+        {
+          "index": 2717,
+          "name": "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmFunction$Nat$N$PsWasmEncodeError"
+        },
+        {
+          "index": 2395,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeModule"
+        },
+        {
+          "index": 2482,
+          "name": "Ps_Internal_WasmCompilerService_emit"
+        },
+        {
+          "index": 2020,
+          "name": "Ps_Internal_CompilerService_compilePrepared"
+        },
+        {
+          "index": 2023,
+          "name": "Ps_Internal_CompilerService_candidate"
+        }
+      ],
+      "lastFrames": [
+        {
+          "index": 11,
+          "name": "__ps_wasm_nat_divmod"
+        },
+        {
+          "index": 11,
+          "name": "__ps_wasm_nat_divmod"
+        },
+        {
+          "index": 12,
+          "name": "__ps_wasm_nat_div"
+        },
+        {
+          "index": 47,
+          "name": "__ps_wasm_nat_repr_positive"
+        },
+        {
+          "index": 2085,
+          "name": "psWasmIntNegativeMagnitude"
+        },
+        {
+          "index": 2091,
+          "name": "psWasmIntEModNat"
+        },
+        {
+          "index": 3368,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeSlebWithFuel$worker"
+        },
+        {
+          "index": 2351,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeValueType"
+        },
+        {
+          "index": 2713,
+          "name": "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmValueType$Nat$N$PsWasmEncodeError"
+        },
+        {
+          "index": 2359,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeFunctionType"
+        },
+        {
+          "index": 2717,
+          "name": "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmFunction$Nat$N$PsWasmEncodeError"
+        },
+        {
+          "index": 2717,
+          "name": "Ps_Internal_WasmBinaryBytes_psListFlatMapExcept$spec$N$PsWasmFunction$Nat$N$PsWasmEncodeError"
+        },
+        {
+          "index": 2395,
+          "name": "Ps_Internal_WasmBinaryBytes_psWasmEncodeModule"
+        },
+        {
+          "index": 2482,
+          "name": "Ps_Internal_WasmCompilerService_emit"
+        },
+        {
+          "index": 2020,
+          "name": "Ps_Internal_CompilerService_compilePrepared"
+        },
+        {
+          "index": 2023,
+          "name": "Ps_Internal_CompilerService_candidate"
+        }
+      ]
+    },
+    "artifact": [
+      {
+        "id": 12538405588,
+        "digest": "sha256:57f10df8b0c0540939b18382e64256268dd6ca926c22d0d6169d49f6d863f7e6"
+      }
+    ],
+    "diagnosis": "Reported caller chain includes private binary encoder flatMap recursion, confirmed non-tail source spine. Nat division is not treated as an isolated operand bug; all resource limits preserved."
+  },
+  "nextRequestedTargets": [
+    "js",
+    "wasm-core"
+  ],
+  "nextQualificationSourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8"
 }

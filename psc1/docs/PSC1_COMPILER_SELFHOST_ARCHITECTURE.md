@@ -295,3 +295,21 @@ add per-declaration tracing and qualify the actual normalization before claiming
 The finalized continuation prompt specifies dual-grammar strict census, whole-closure
 admission/IR and actual generated compiler/fixed-point gates. Historical
 checked-selfhost.mjs still uses lean434/PSC2 receipt profiles and is not current evidence.
+
+## Current class-complete owned backend fixes — 2026-10-24
+
+Focused40061782715 at133e5892 proves complete retained function equality for all
+eleven remaining eager recursive prefixes in the owned JS backend. The scanner
+covers233 actual owned definitions and rejects every retained original. This
+includes the backend's own high-fuel lower/type/validate/alias/observed-print
+workers, rather than only emitted application loops. Million-fuel early-result
+and refusal tests pass; actual generated qualification remains required.
+
+The retained Wasm trace40036672078 reaches private binary encoder flatMap on
+function/value-type lists. The confirmed source uses non-tail list reconstruction.
+The private flatMap, byte-chunk and UTF8-char helpers now use fully applied
+reverse accumulators. Focused40061544936 and40061782715 prove all three complete
+old/new APIs, exact output bytes/order and first-error priority, with100000-element
+cases and the retained96-opcode/native/owned-GC comparisons. The top Nat division
+frame is insufficient evidence for a separate arithmetic defect; no limit was
+raised. This fixes encoding as a class rather than modifying individual inputs.

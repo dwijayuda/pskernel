@@ -16,34 +16,30 @@ The preserved review branch is work/psc1-direct-selfhost-blockers-20261024,
 draft PR175, based on draft PR174/integrationafed7c4b. Do not cancel existing
 qualifications or infer success from elapsed job time.
 
-Snapshot as of2026-10-23 23:00UTC (re-query before acting):
-- Latest child146270cf6b7a037ccd83b08296f6c35f725ee988 defers three shared
-  environment/constructor/recursor lookup prefixes; focused40036978899 pending
-  all-input retained equalities and100000-element order/miss/kind/payload tests.
-- c115c657/focused40034701526 PASSED52 all-input Wasm prefix equalities,
-  464-definition guard, actual retained-original negative, million-fuel/zero-
-  fuel and all prior runtime/source/refusal gates.
-- ActualJS8d7a5dc5/run40033515365 completed independently checkedG1/ten cases;
-  G2 deadline1800214ms/3179196KiB, noG3/fixedpoint.
-- ActualWasme5b9cd76/run40035031327 completed independently checkedG1/ten
-  cases; G2 stack720754ms/1009612KiB, repeated runtime11Nat division.
-  That10-frame trace does not prove a Nat operand defect: a deeper caller may
-  already consume the stack. Full retained replay40036672078 is active with
- 16384 reported frames, unchanged execution stack and existing1800s profile.
-- LatestJS retained CPU profile40037023905 is active under original240s,
-  diagnostic only. Earlier profile full summary40036067959 shows21.5%GC ticks
-  and lookup closure registration;104-module source scan40036411081 confirms
-  the eager-prefix shape in those measured workers. Other candidates are an
-  audit queue, not proved defects.
-- Read-only40036922902 reports owned binary local counts/frame-size proxies;
-  largest487, main curried lower-expression function1. These are not actual
-  JIT stack-byte measurements. Use full runtime caller evidence for the fix.
-- Review8d7a5dc5/draft175 full40033570924 is active; keep it stable until
-  terminal, then expected-HEAD non-force integrate the final verified child.
-  Parent854/full40027662328 passes37/37 only for exacttree1382a67a.
-- Neither direct target has a terminal qualifiedG2/G3 fixed point yet.
+Snapshot as of2026-10-24 04:21UTC (re-query before acting):
+- Verified child133e589288b563e74578b771ec35595beb3a9fe8; focused40061782715/
+  job120776657312 PASSED11 complete JS function equalities,233-definition
+  closed owned scan and all retained-original negatives,3 complete encoder
+  equalities/100000-element cases,3 shared lookup equalities,52 Wasm prefix
+  equalities and every prior proof/runtime/refusal/both-grammar gate.
+- Owned encoder sourcee075de33/guard63a00d13 first passed40061544936.
+  Retained Wasm trace40036672078 reaches private encoder flatMap; the top
+  Nat division frame is not a diagnosis of a Nat operand defect. The applied
+  accumulators preserve bytes, first error and ordering.
+- LastJS8d7a/run40033515365 G1/ten cases passed; G2 deadline1800214ms/
+ 3179196KiB. LastWasme5b9/run40035031327 G1/ten cases passed; G2 stack
+ 720754ms/1009612KiB. Neither qualifiedG2/G3/fixedpoint.
+- Earlier childJSd7c6f166/run40061402443 is active on shared lookup source
+ 146270cf; later11 JS prefixes are absent. Preserve its result as that baseline.
+- Review8d7a/draft175 full40033570924 PASSED37/37,all seven/both grammars/apps/
+  packages at exacttreec06c977dffac1b77e2d92efbd7c7e89f08c04f72.
+  The latest source still needs normal full CI.
+- Next fast-forward review from fresh expected8d7a to the verified child,
+  continue on review, and make one request-only commit selectingJS+Wasm.
+  Both independent matrix targets then qualify the same current common source.
+  Check latest manifest/run first: this may already have been dispatched.
 
-1. Re-query the focused lookup gate, retained JS profile/full Wasm trace and review full CI. If still active, continue waiting without
+1. Re-query the latest review qualification/full-CI and preserved child baseline. If still active, continue waiting without
    dispatching duplicates. If completed, inspect the actual job log and immutable
    artifact metadata; record exact source closure, request/service/source/binary
    identities, G2/G3 elapsed times, Linux wait4 RSS and sampled process-tree RSS,

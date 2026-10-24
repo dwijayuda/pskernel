@@ -1,0 +1,52 @@
+name: PSC1 exact Rust later G2 failure trace
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-rust-g2-abort.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 38
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: '812094c1f5e1e0c0dca516dab1e30ef66f3076f7'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12573548958'
+          run-id: '40126488125'
+          github-token: ${{ github.token }}
+          path: psc1/dist/rust-abort-input
+      - name: Install debugger with unchanged inferior stack policy
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq gdb
+      - name: Replay exact failed G2 to its actual abort, never admit or publish
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
+          import {sha,verifyArtifact,boundedRun} from './host-tools/generated-target-tools.mjs';
+          function find(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory()){const f=find(p);if(f)return f;}else if(e.name==='qualification.json')return p;}}
+          const qfile=find('dist/rust-abort-input'),q=JSON.parse(fs.readFileSync(qfile)),root=path.dirname(qfile);
+          assert.equal(q.testedCommit,'812094c1f5e1e0c0dca516dab1e30ef66f3076f7');assert.equal(q.status,'failed');assert.equal(q.target,'rust');assert.equal(q.sourceClosureDigest,'92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2');
+          const mf=path.join(root,'G1-service/artifact.json'),m=verifyArtifact(mf,'5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c2');
+          const exe=path.join(m.directory,m.executable);fs.chmodSync(exe,0o700);assert.equal(sha(fs.readFileSync(exe)),'aa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce');
+          const input=path.join(root,'G2-self.request.json');assert.equal(sha(fs.readFileSync(input)),'c6b04937446d0f549d76d965aae53bac04c23122ab4b14befb7fd425783ad0ad');
+          const dir=path.resolve('dist/rust-g2-abort-trace');fs.mkdirSync(dir,{recursive:true});const output=path.join(dir,'diagnostic-only.candidate.json');
+          const r=boundedRun('gdb',['--batch','-ex','set pagination off','-ex','set confirm off','-ex','set print frame-arguments none','-ex','run','-ex','thread apply all bt 90','-ex','quit','--args',exe,input,output],{logDirectory:dir,timeoutMs:1800000,timeoutPolicy:'g2g3-correctness-1800s'});
+          fs.writeFileSync(path.join(dir,'trace.txt'),r.stdout+'\n'+r.stderr);console.log('PSC1_RUST_LATER_G2_TRACE: '+r.stdout.slice(-42000));
+          delete r.stdout;delete r.stderr;verifyArtifact(mf,'5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c2');
+          const receipt={schema:'psc1-rust-exact-g2-abort/1',testedCommit:process.env.GITHUB_SHA,subjectCommit:q.testedCommit,sourceClosure:q.sourceClosureDigest,executableSha256:q.executableSha256,requestSha256:sha(fs.readFileSync(input)),result:r,qualification:false,admission:'not-run',publication:'not-run',stackLimit:'unchanged'};
+          fs.writeFileSync(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');console.log('PSC1_RUST_LATER_G2_RECEIPT: '+JSON.stringify(receipt));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-rust-later-g2-trace-${{ github.sha }}
+          path: psc1/dist/rust-g2-abort-trace/
+          retention-days: 90

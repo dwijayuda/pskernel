@@ -1,6 +1,6 @@
 # PSC1 AI work state
 
-Updated2026-10-24 Asia/Jakarta (2026-10-24 04:21UTC).
+Updated2026-10-24 Asia/Jakarta (2026-10-24 04:24UTC).
 Use connected GitHub tools and Linux Actions only. Fetch exact HEAD before
 expected-HEAD non-force writes. No PR merge or npm publication authorized.
 Practical Core v1 remains14 families/37 finite criteria.
@@ -10,8 +10,9 @@ owns immutable attempts/identities. Earlier state is preserved in Git history.
 
 ## Verified source checkpoint
 
-Child work/psc1-direct-selfhost-spines2-20261024 now contains
-133e589288b563e74578b771ec35595beb3a9fe8.
+Active review branch work/psc1-direct-selfhost-blockers-20261024 contains
+verified source133e589288b563e74578b771ec35595beb3a9fe8, integrated through
+eefedf2a3f9f0002975870e8128bb0f404723946 without force or a PR merge.
 Focused40061782715/job120776657312 PASSED:
 - Eleven complete JS function equalities against retained originals: decimal
   conversion, type/expr lowering, validation, tail alias/capture rewriting and
@@ -68,8 +69,7 @@ eleven later JS backend prefix fixes and cannot qualify133e5892's JS closure.
 
 Draft[PR175](https://github.com/dwijayuda/pskernel/pull/175) remains open/unmerged,
 base preserved draft174/integrationafed7c4b.
-Review work/psc1-direct-selfhost-blockers-20261024 is at8d7a5dc5 before the
-next integration. Full40033570924, Linux120692646423 and gate120702393001
+Previous review source8d7a5dc5 is qualified by Full40033570924, Linux120692646423 and gate120702393001
 PASSED37/37,0 blocked,releaseReady=true,all seven backends,both grammars,
 applications,minimum Python,installed native packages and IO/library regressions.
 Tested mergebd0182def8baf6b9ffcc31883d612c800cb8c658 and head8d7a5dc5
@@ -77,13 +77,14 @@ have identical treec06c977dffac1b77e2d92efbd7c7e89f08c04f72.
 Artifact12537203984 digest22c802bc036a2dc09a194e5998777c867d3646746d30552eab0aac14f0d66b37.
 This evidence is scoped to that tree; the later compiler fixes need new full CI.
 
-Next: non-force fast-forward the review branch from its fresh expected HEAD to
-this verified child checkpoint, then continue on the review branch. Make one
-request-only commit selecting both JS andWasm so each independent matrix target
-executes the same common source plus its own current backend. The older child
-baseline remains isolated; do not dispatch another copy on its target/ref.
-Multi-commit integrations skip request execution; actual requests still require
-exact branch/path/parent/profile and one native seed followed by generated code.
+Actual current request2d1f8244d8402fbccd5a018890d61d8ed4d20775,
+parenteefedf2a3f9f0002975870e8128bb0f404723946, run40062120079
+selects bothJS andWasm. Each independent matrix target executes the same
+current common source plus its own current backend. Request/source/runtime
+gates and actual generations must be re-queried; no newG2/G3 claim yet.
+Normal full CI for the new review source is running/pending. Old child baseline
+40061402443 remains separate. Multi-commit integration40062110731 correctly
+skipped request execution; real single-commit requests retain every invariant.
 
 ## Preserved boundaries and references
 
@@ -107,9 +108,8 @@ delegation after the seed. PSKernel research does not block this work.
 
 ## Execute next
 
-1. Integrate the verified child into review by fresh expected-HEAD non-force
-   fast-forward, then request JS+Wasm independently on that latest review HEAD.
-   Re-query the manifest/runs first to avoid duplicate requests.
+1. Re-query actual current dual-target40062120079, latest review full CI and
+   preserved child baseline40061402443. Do not duplicate active requests.
 2. Preserve terminal child40061402443 and current review full-CI results.
    Inspect actual generation logs and immutable artifacts before claimingG2/G3.
 3. Fix the next measured mechanism if a generation fails; preserve all-input

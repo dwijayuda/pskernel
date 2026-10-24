@@ -16,7 +16,7 @@ The preserved review branch is work/psc1-direct-selfhost-blockers-20261024,
 draft PR175, based on draft PR174/integrationafed7c4b. Do not cancel existing
 qualifications or infer success from elapsed job time.
 
-Snapshot as of2026-10-24 04:21UTC (re-query before acting):
+Snapshot as of2026-10-24 04:24UTC (re-query before acting):
 - Verified child133e589288b563e74578b771ec35595beb3a9fe8; focused40061782715/
   job120776657312 PASSED11 complete JS function equalities,233-definition
   closed owned scan and all retained-original negatives,3 complete encoder
@@ -34,10 +34,11 @@ Snapshot as of2026-10-24 04:21UTC (re-query before acting):
 - Review8d7a/draft175 full40033570924 PASSED37/37,all seven/both grammars/apps/
   packages at exacttreec06c977dffac1b77e2d92efbd7c7e89f08c04f72.
   The latest source still needs normal full CI.
-- Next fast-forward review from fresh expected8d7a to the verified child,
-  continue on review, and make one request-only commit selectingJS+Wasm.
-  Both independent matrix targets then qualify the same current common source.
-  Check latest manifest/run first: this may already have been dispatched.
+- Review was non-force fast-forwarded through eefedf2a, without a PR merge.
+  Actual request2d1f8244d8402fbccd5a018890d61d8ed4d20775, parent eefedf2a,
+  run40062120079 selectsJS+Wasm independently on the current common source.
+  Normal full CI is running/pending for that source. Re-query before acting;
+  do not duplicate the dual-target request or the preserved child baseline.
 
 1. Re-query the latest review qualification/full-CI and preserved child baseline. If still active, continue waiting without
    dispatching duplicates. If completed, inspect the actual job log and immutable

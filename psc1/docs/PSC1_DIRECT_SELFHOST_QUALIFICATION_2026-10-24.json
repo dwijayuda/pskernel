@@ -1,6 +1,6 @@
 {
   "schema": "psc1-direct-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 04:21:00 UTC",
+  "recordedAtUtc": "2026-10-24 04:24:00 UTC",
   "localDate": "2026-10-24",
   "status": "both-owned-backend-mechanism-fixes-source-proof-runtime-qualified-next-generations",
   "practicalCoreContract": "unchanged",
@@ -277,15 +277,28 @@
       "refused": []
     }
   },
-  "currentAttempt": {
-    "target": "js",
-    "requestCommit": "d7c6f166309981012b8b50cb18a2dcf724092eb6",
-    "requestParent": "dab1006752de9c26cafff692ad81439c26c8254a",
-    "sourceCommit": "146270cf6b7a037ccd83b08296f6c35f725ee988",
-    "runId": 40061402443,
-    "status": "in_progress",
-    "scope": "Preserved child baseline with shared lookup fix; does not include later eleven JS prefix fixes."
-  },
+  "currentAttempt": [
+    {
+      "target": "js",
+      "branch": "work/psc1-direct-selfhost-blockers-20261024",
+      "requestCommit": "2d1f8244d8402fbccd5a018890d61d8ed4d20775",
+      "requestParent": "eefedf2a3f9f0002975870e8128bb0f404723946",
+      "sourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8",
+      "runId": 40062120079,
+      "status": "in_progress",
+      "scope": "Current owned backend mechanisms plus shared lookup fix; independent genuine generations, not yet qualified."
+    },
+    {
+      "target": "wasm-core",
+      "branch": "work/psc1-direct-selfhost-blockers-20261024",
+      "requestCommit": "2d1f8244d8402fbccd5a018890d61d8ed4d20775",
+      "requestParent": "eefedf2a3f9f0002975870e8128bb0f404723946",
+      "sourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8",
+      "runId": 40062120079,
+      "status": "in_progress",
+      "scope": "Current owned backend mechanisms plus shared lookup fix; independent genuine generations, not yet qualified."
+    }
+  ],
   "integrationCheckpoint": {
     "pullRequest": 174,
     "commit": "afed7c4b2681533b525d7434856a97a78fd3d745",
@@ -1777,6 +1790,26 @@
       "runId": 40061402443,
       "status": "in_progress",
       "scope": "Preserved child baseline with shared lookup fix; does not include later eleven JS prefix fixes."
+    },
+    {
+      "target": "js",
+      "branch": "work/psc1-direct-selfhost-blockers-20261024",
+      "requestCommit": "2d1f8244d8402fbccd5a018890d61d8ed4d20775",
+      "requestParent": "eefedf2a3f9f0002975870e8128bb0f404723946",
+      "sourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8",
+      "runId": 40062120079,
+      "status": "in_progress",
+      "scope": "Current owned backend mechanisms plus shared lookup fix; independent genuine generations, not yet qualified."
+    },
+    {
+      "target": "wasm-core",
+      "branch": "work/psc1-direct-selfhost-blockers-20261024",
+      "requestCommit": "2d1f8244d8402fbccd5a018890d61d8ed4d20775",
+      "requestParent": "eefedf2a3f9f0002975870e8128bb0f404723946",
+      "sourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8",
+      "runId": 40062120079,
+      "status": "in_progress",
+      "scope": "Current owned backend mechanisms plus shared lookup fix; independent genuine generations, not yet qualified."
     }
   ],
   "diagnosticSpineInventory": {
@@ -3510,5 +3543,19 @@
     "js",
     "wasm-core"
   ],
-  "nextQualificationSourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8"
+  "nextQualificationSourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8",
+  "reviewIntegration": {
+    "branch": "work/psc1-direct-selfhost-blockers-20261024",
+    "previousHead": "8d7a5dc5488e872c0f81b5f848fd6b44d3654456",
+    "integratedHead": "eefedf2a3f9f0002975870e8128bb0f404723946",
+    "requestHead": "2d1f8244d8402fbccd5a018890d61d8ed4d20775",
+    "force": false,
+    "prMerged": false
+  },
+  "currentFullCiNewSource": {
+    "runId": 40062112762,
+    "head": "eefedf2a3f9f0002975870e8128bb0f404723946",
+    "status": "in_progress",
+    "scope": "Latest executable source; subsequent request/docs do not alter owned compiler source."
+  }
 }

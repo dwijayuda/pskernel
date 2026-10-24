@@ -270,7 +270,7 @@ theorem unsynchronized_input_owner_rejects_before_decoding
     (h : Nat.beq owner.built.size owner.arena.size = false) :
     psKernelExprV2OrdinaryAdmitWith check whnf defeq fuel environment maxRecDepth maxNatSize
       input owner levelParams numParams value isUnsafe =
-    some (.error "PSKERNEL_V2_ORDINARY_INPUT_OWNER_SIZE") := by
+    some (.error "PSKERNEL_V2_GENERATED_OWNER_MISMATCH") := by
   simp [psKernelExprV2OrdinaryAdmitWith, h]
 
 theorem original_namespace_error_precedes_header_check (message : String)

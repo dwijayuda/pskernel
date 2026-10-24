@@ -1,3 +1,9 @@
+## 2026-10-25 — preserve the internal owner-mismatch diagnostic
+
+Run [40143863644](https://github.com/dwijayuda/pskernel/actions/runs/40143863644), attempt 1, at `6531c344f1c3f0a0e400528616ba6de4f837fcc0` passed the repaired session equation and retained 310-report receipt, but failed the retained prefix negative `internal-import-error-does-not-publish-batch`. The new ordinary worker correctly rejected the forged arena/decoded-size mismatch earlier; its newly named internal diagnostic differed from the established `PSKERNEL_V2_GENERATED_OWNER_MISMATCH` contract.
+
+Both ordinary input-owner size guards now return that established diagnostic, and the matching native equation asserts it exactly. Guard order, rejection behavior, checker calls, fuel, and all theorem hypotheses/conclusions apart from that diagnostic literal are unchanged. The retained native and JavaScript prefix tests are **unchanged**. The final 371-report aggregate and both generated routes still require a fresh exact-source qualification. No result from the failed cohort is inherited. Integration remains at qualified constructor source `a49d64ae494d51fdc80b688dab0922dd96403e5e`; full T05 is not yet qualified.
+
 ## 2026-10-25 — retained publication equation follows the checked owner
 
 Full candidate `0f2879386a1fff13db6b887fdbfc818cba848b46` failed native qualification in run [40142939925](https://github.com/dwijayuda/pskernel/actions/runs/40142939925), attempt 1. The sole Lean error was `PsKernelExprV2SessionProofs.lean:168`: the retained post-command publication theorem still assumed the old dispatcher followed by a mandatory generated-owner import. The direct ordinary route now returns its checked owner itself.

@@ -254,8 +254,8 @@ def psKernelExprV2OrdinaryAdmitWith
               | Except.ok header =>
                   psKernelExprV2OrdinaryAfterHeaderWith check whnf defeq fuel
                     input owner.built decl value header
-    else Option.some (Except.error "PSKERNEL_V2_ORDINARY_INPUT_OWNER_SIZE")
-  else Option.some (Except.error "PSKERNEL_V2_ORDINARY_INPUT_OWNER_SIZE")
+    else Option.some (Except.error "PSKERNEL_V2_GENERATED_OWNER_MISMATCH")
+  else Option.some (Except.error "PSKERNEL_V2_GENERATED_OWNER_MISMATCH")
 
 def psKernelExprV2OrdinaryAdmitWithFuel
     (fuel : Nat) (environment : PsKernelEnvironment)

@@ -2,13 +2,13 @@ import fs from 'node:fs';import path from 'node:path';import assert from 'node:a
 const repo='dwijayuda/pskernel',root=path.resolve('dist/unified-v2-readback-input');fs.mkdirSync(root,{recursive:true});
 const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
 async function api(route){const r=await fetch('https://api.github.com/repos/'+repo+route,{headers});assert.equal(r.status,200,route);return r.json();}
-const qualification=await api('/actions/runs/40130597594');
-assert.equal(qualification.head_sha,'f5a00e75ef4b46831ccefdfc78f47a45ea1174bf');assert.equal(qualification.status,'completed');
-const assets=(await api('/actions/runs/40130597594/artifacts?per_page=100')).artifacts;
-assert.equal(assets.length,1);assert.equal(assets[0].name,'psc1-unified-selfhost-correctness-1800s-rust-f5a00e75ef4b46831ccefdfc78f47a45ea1174bf');
-const known=[{id:12575495437,digest:'sha256:8fc1de500c75def9029e9486e123fa00f9abb42b9ab1aed0d4a4567e81bcbb16',run:40130502672}];
+const qualification=await api('/actions/runs/40133622389');
+assert.equal(qualification.head_sha,'f707e037b5f470ceee65891e0c735316ba097444');assert.equal(qualification.status,'completed');
+const assets=(await api('/actions/runs/40133622389/artifacts?per_page=100')).artifacts;
+assert.equal(assets.length,1);assert.equal(assets[0].name,'psc1-unified-selfhost-correctness-1800s-rust-f707e037b5f470ceee65891e0c735316ba097444');
+const known=[{id:12576126918,digest:'sha256:09357b2b1c6ab48d1e9b8a7e3327544072cb0d333c7321def06c4e13871ee9fc',run:40133269028}];
 const metadata=[];
-for(const item of [...known,...assets.map(a=>({id:a.id,digest:a.digest,run:40130597594}))]){
+for(const item of [...known,...assets.map(a=>({id:a.id,digest:a.digest,run:40133622389}))]){
  const a=await api('/actions/artifacts/'+item.id);assert.equal(a.id,item.id);assert.equal(a.workflow_run.id,item.run);assert.equal(a.expired,false);
  if(item.digest)assert.equal(a.digest,item.digest);assert.match(a.digest,/^sha256:[a-f0-9]{64}$/);assert.ok(a.size_in_bytes<=256*1024*1024);
  const response=await fetch('https://api.github.com/repos/'+repo+'/actions/artifacts/'+a.id+'/zip',{headers,redirect:'manual'});

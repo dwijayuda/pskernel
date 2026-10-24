@@ -1,6 +1,6 @@
 import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
 import {sha,verifyArtifact} from '../host-tools/generated-target-tools.mjs';import {compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
-const current='f5a00e75ef4b46831ccefdfc78f47a45ea1174bf',focus='e913a6d391a68c6c9460d090de7100323e3bd9b0';
+const current='f707e037b5f470ceee65891e0c735316ba097444',focus='5d4d4d1a1693de57fa16ecf796536d73040bbf64';
 const checkout=spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'});assert.equal(checkout.status,0);assert.equal(checkout.stdout.trim(),current);
 const root=path.resolve('dist/unified-v2-readback-input'),records=[];
 function find(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())find(p);else if(e.name==='qualification.json')inspect(p);}}

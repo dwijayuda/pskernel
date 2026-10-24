@@ -1,14 +1,14 @@
 {
   "schema": "psc1-python-php-selfhost-request/1",
   "branch": "feat/psc1-python-php-selfhost-20261024",
-  "parentCommit": "a8955c4b99fc0cd847eb05d455435c87cb195a17",
+  "parentCommit": "617004ceb29ce759f38a49b635a47bc25aa7f622",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "python"
+    "php"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "Python-only genuine qualification after measured UTF8 encoding bottleneck. Exact archived G2 profile40071913715 found106950 encode calls consuming118.890/120s. Bounded immutable identity views are now verified by gate40072686708 at a8955c4b: all86-module both-grammar lanes, unchanged catalog/proof/capture/packed tests, independent runtime-byte/AST boundaries, actual retained/current emitted UTF8 intrinsics, wide Unicode/bounds/errors/identity/eviction/oversize/concurrency differential execution and four independent runtime-library admissions. Keep G1240s/G2G31800s/separate240s, all memory/stack/fuel/negative policies unchanged. PHP-only native carrier crash is being fixed independently; no duplicate PHP run."
+  "reason": "PHP-only genuine qualification with compact immutable inductive nodes and iterative reclamation. Exact old packed G2 GDB40072628964 showed32 zend_array_destroy frames at defaultstack, so no stack/memory limit increase. Gate40073537409/job120811928284 at617004ce passes every86-module Lean/PS lane, seven state/four arity proofs,34816 retained catalog cases,144 retained emitter/syntax boundaries,234895 Python view comparisons,2M-cell generated PHP and2M-node reclamation/shared/weak/cycle/refusal tests, four independent108-query runtime libraries. Host transport now executes hashed Python source and ignores poisoned unlisted pyc for service and consumer; negative control proves ordinary loader would execute it. Preserve all profiles, checker, strict IR, source pairing and refusals. Old Python UTF8 requesta8def92c/run40072853176 continues as diagnostic baseline; fresh source-only Python qualification awaits its terminal performance evidence to avoid repeating an unresolved bottleneck."
 }

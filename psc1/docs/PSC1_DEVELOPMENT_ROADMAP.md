@@ -6,6 +6,13 @@ Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 
 [canonical direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns exact source identities and immutable actual results.
 
+## Active unified compiler queue
+
+1. Implement one portable default composition root; keep Python/PHP optional.
+2. Audit the enlarged closure in both grammars, independently admit each generated candidate and execute all four output targets with every engine.
+3. Attempt genuine G1/G2/G3 with exact source/admission/IR/observation/executable fixed points. Qualify each engine only from actual evidence; preserve the existing 240s performance target.
+4. Retain native component adapters and all seven-backend/provider/package regressions. Update exact receipts, then stop at a verified milestone. No merge/publication.
+
 ## Completed provider/package milestone and remaining queue
 
 The user requested a stop at a verified milestone. This milestone is complete; no further feature work is performed in this turn.

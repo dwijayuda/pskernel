@@ -1,0 +1,105 @@
+name: PSC1 unified generated compiler qualification
+on:
+  push:
+    branches: [feat/psc1-unified-selfhost-20261024]
+    paths: [psc1/packages/compiler-unified/**, psc1/scripts/UnifiedServiceSeed.lean, psc1/test/UnifiedServiceTests.lean, psc1/host-tools/generated-target-profiles.mjs, psc1/host-tools/generated-target-tools.mjs, psc1/scripts/generated-target-qualification.mjs, psc1/scripts/generated-target-source-audit.mjs, .github/workflows/psc1-unified-selfhost.yml]
+permissions:
+  contents: read
+concurrency:
+  group: psc1-unified-qualification-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+  generated:
+    concurrency:
+      group: psc1-unified-engine-${{ github.ref }}-${{ matrix.target }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [js, ts, rust, wasm-core]
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native_cache
+        with:
+          path: psc1/.lake
+          key: psc1-direct-service-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install official pinned Lean and locked host dependencies
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+      - name: Install pinned Rust target tools
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+      - name: Install SHA256-pinned owned-binary validator
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Preserve native semantics and independent checking
+        id: native_build
+        run: |
+          set -euo pipefail
+          node --check host-tools/generated-target-profiles.mjs
+          node --check host-tools/generated-wasm-transport.mjs
+          node --check host-tools/generated-target-tools.mjs
+          node --check scripts/generated-target-qualification.mjs
+          node --check scripts/js-statement-tests.mjs
+          node scripts/check-wasm-applied-prefixes.mjs
+          node scripts/check-js-applied-prefixes.mjs
+          node scripts/check-wasm-encoding-spines.mjs
+          node scripts/check-shared-lookup-prefixes.mjs
+          node scripts/check-erasure-declaration-spines.mjs
+          node scripts/generated-target-contract-tests.mjs
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
+      - uses: actions/cache/save@v4
+        if: steps.native_build.outcome == 'success'
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Prove visitors and compare actual runtime and GC transport behavior
+        run: |
+          set -euo pipefail
+          .lake/build/bin/psc1_unified_service_tests
+          .lake/build/bin/psc1_js_service_tests
+          .lake/build/bin/psc1_direct_selfhost_preflight_tests
+          node scripts/direct-selfhost-preflight-tests.mjs
+          .lake/build/bin/psc1_js_statement_tests
+          node scripts/js-statement-tests.mjs
+      - name: Census complete owned backend source in both grammars
+        run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }} unified
+      - name: Execute genuine generated compiler generations and exact fixed point
+        timeout-minutes: 110
+        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host correctness-1800s unified
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-unified-selfhost-correctness-1800s-${{ matrix.target }}-${{ github.sha }}
+          path: |
+            psc1/dist/direct-selfhost-preflight/
+            psc1/dist/js-statement-tests/
+            psc1/dist/generated-unified-${{ matrix.target }}-compiler/
+          retention-days: 90

@@ -10,3 +10,12 @@ const targets=Object.freeze({
 });
 export function generatedTarget(target){assert.ok(Object.hasOwn(targets,target),'PSC1_GENERATED_TARGET_UNSUPPORTED');return targets[target];}
 export const generatedTargets=Object.freeze(Object.keys(targets));
+
+export const unifiedOutputTargets=Object.freeze(['js','ts','rust','wasm-core']);
+export const unifiedCompiler=Object.freeze({entry:'Ps.CompilerUnified.Service',exportName:'psCompilerServiceCandidate'});
+export function compilerService(target,kind='single') {
+ const definition=generatedTarget(target);
+ assert.ok(kind==='single'||kind==='unified','PSC1_SERVICE_KIND_UNSUPPORTED');
+ if(kind==='unified')assert.ok(unifiedOutputTargets.includes(target),'PSC1_UNIFIED_ENGINE_UNSUPPORTED');
+ return kind==='unified'?{...definition,...unifiedCompiler}:definition;
+}

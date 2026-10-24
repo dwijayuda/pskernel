@@ -1,5 +1,10 @@
 # PSC1 AI work state
 
+## Active unified generated compiler milestone (2026-10-24)
+
+User authorized continuation from PR177. Branch feat/psc1-unified-selfhost-20261024 starts at7cf50ecda689a3771bee0d91086ab43563a5c4d3. Implement one portable composition root reusing the four existing compiler services, with execution-engine/output-target separation. Python/PHP remain optional, outside this closure; the qualified native component adapter remains available. The enlarged closure is not yet qualified. New Linux matrix will attempt genuine independent G1/G2/G3 and executable/source/admission/IR/corpus fixed points for JS,TS,Rust,Wasm-core under existing correctness1800s; G1/tools240s/checker120s and all semantic/resource policies unchanged. No merge/publication. Stop at a verified implementation/execution milestone and record narrower pending claims honestly.
+
+
 Updated 2026-10-24 Asia/Jakarta. Use connected GitHub tools and Linux Actions only.
 Fetch exact HEAD before expected-HEAD non-force writes. No PR merge or npm
 publication authorized. Practical Core v1 remains 14 families / 37 finite criteria.

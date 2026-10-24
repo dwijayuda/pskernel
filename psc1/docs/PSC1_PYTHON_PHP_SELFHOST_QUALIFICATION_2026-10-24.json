@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24T11:38:27.291Z",
-  "status": "3600s-attempts-failed-targeted-backend-optimizations-in-progress",
+  "recordedAtUtc": "2026-10-24 12:18:30 UTC",
+  "status": "backend-performance-slice-verified-genuine3600s-retry-pending",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -78,12 +78,13 @@
     "status": "passed"
   },
   "qualification": {
-    "G1": "both latest independently accepted,strict original/transformed IR,all ten observations",
-    "G2": "Python1800057ms and PHP1800042ms hard deadlines",
-    "G3": "not-run",
-    "fixedPoint": "not-run",
-    "cleanReproduction": "not-run",
-    "performance240s": "not-qualified"
+    "G1": "Both first3600s G1s independently accepted with strict original/transformed IR and all ten observations; new retry result pending",
+    "G2": "First3600s attempts deadline failures; current run40091210960 pending",
+    "G3": "not-yet-qualified",
+    "fixedPoint": "not-yet-qualified",
+    "cleanReproduction": "not-run-for-current-Python-PHP-chain",
+    "performance240s": "not-qualified",
+    "currentRun": 40091210960
   },
   "preservedDirectEvidence": {
     "sourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8",
@@ -111,7 +112,7 @@
     40068694963,
     40068963704
   ],
-  "evidenceBoundary": "Native/census/library tests do not qualify compiler self-hosting. Preserve terminal/cancelled distinctions and exact current source; full release/source qualification still required.",
+  "evidenceBoundary": "Focused/full regression gates qualify preserved Practical Core functionality, not Python/PHP self-hosting. Actual new G2/G3 and exact fixed points require terminal independent admission,strictIR,ten-case and raw-byte evidence. Preserve older target qualification snapshots and all failed attempts.",
   "merge": "not-run",
   "publication": "not-run",
   "runtimeSetupDrift": {
@@ -146,7 +147,7 @@
     ],
     "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
   },
-  "nextAction": "Pass fresh Linux source/retained/admitted runtime and seven-backend regression gates for b56da505/13c5d4a6, preserve current3600s profile and every other limit; advance isolated qualification branch with exact validated compiler/tools snapshot and request BOTH targets again. No G2/G3/fixed-point success yet.",
+  "nextAction": "STOP at requested verified milestone slice. On explicit continuation fetch primary/qualification HEAD and run40091210960 terminal jobs before changing source or issuing another request. Read immutable artifacts and exact new G1/G2/G3 source/IR/admission/observations/raw-byte identities. If failed, diagnose measured cost; if passed, independent clean G1 reproduction. No G2/G3 success is inferred from active jobs or source/full gates.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -802,32 +803,43 @@
     "compilerSourceChanged": false
   },
   "currentSourceGate": {
-    "commit": "13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d",
-    "status": "pending-new-Linux-gate",
-    "baseline": {
-      "runId": 40079503171,
-      "jobId": 120829903883,
-      "status": "success",
-      "modulesPerTarget": 87,
-      "grammars": [
-        "lean",
-        "ps"
-      ],
-      "retainedComparisons": 43,
+    "commit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+    "runId": 40090956726,
+    "jobId": 120863330756,
+    "status": "success",
+    "modulesPerTarget": 87,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "artifacts": [
+      {
+        "id": 12559320936,
+        "digest": "sha256:1b585020c54677b28b70905317d16c027d9ded1d8a71376d264b0947614506d1"
+      }
+    ],
+    "python": {
+      "retainedUtf8HelperQueries": 234895,
+      "allocationFreeAlternatingIdentityHits": 20000,
+      "cacheEntries": 8,
+      "cacheBudgetBytes": 33554432,
+      "retainedSelfTailComparisons": 43,
       "deepTailSteps": 2000000,
-      "deepEscapingClosureFallback": 200000,
-      "typedIoOrderAndFirstFailure": true,
-      "parallelArgumentSwap": true,
-      "lexicalShadowRefusal": true,
-      "recursionLimit": "unchanged",
-      "artifacts": [
-        {
-          "id": 12553794512,
-          "digest": "sha256:d333a53cc5f2b22f0ab2f3d13b695fff49f602ec076abb4d2aa10d2b42690fca"
-        }
-      ],
-      "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
-    }
+      "escapingClosureFallback": 200000
+    },
+    "php": {
+      "canonicalReadsRestored": 11,
+      "otherTokensAndRuntimePrefixExact": true,
+      "readonlyMutationAndReferenceRefusals": true,
+      "retainedNodeInterface": true,
+      "deadSpineNodes": 2000000,
+      "knownCallSitesRestored": 1,
+      "deepDynamicAliasAndShadowRecursion": 200000,
+      "memoryLimit": "1G",
+      "stackLimit": "unchanged"
+    },
+    "retainedSupervisorTransportProofRuntimeLibraryAndNegativeChecks": "passed",
+    "selfHostingQualification": "not-implied"
   },
   "phpNodeQualification": {
     "requestCommit": "75f04cfdcafc1fbeea08f66f595f40ff6b777d04",
@@ -1323,7 +1335,38 @@
       ]
     }
   },
-  "activeRequests": [],
+  "activeRequests": [
+    {
+      "branch": "qualification/psc1-python-php-3600s-20261024",
+      "controlCommit": "3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0",
+      "requestCommit": "336ff212bb810bcafa1573350355fbd1f6a0509e",
+      "runId": 40091210960,
+      "profile": "correctness-3600s",
+      "sourceAndToolsCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+      "targets": {
+        "python": {
+          "jobId": 120864185036,
+          "status": "in_progress",
+          "conclusion": null,
+          "currentStep": "Execute genuine generated compiler generations and exact fixed point"
+        },
+        "php": {
+          "jobId": 120864185108,
+          "status": "in_progress",
+          "conclusion": null,
+          "currentStep": "Execute genuine generated compiler generations and exact fixed point"
+        }
+      },
+      "sourceEquivalence": {
+        "changedPaths": [
+          ".github/qualification-requests/psc1-python-php-selfhost.json",
+          ".github/workflows/diagnostic-psc1-python-php-qualification.yml"
+        ],
+        "compilerAndCriticalHostToolsIdentical": true
+      },
+      "fixedPoint": "not-yet-qualified"
+    }
+  ],
   "historicalSourceGates": [
     {
       "runId": 40069330525,
@@ -1386,115 +1429,107 @@
     }
   ],
   "fullCurrentRegression": {
-    "runId": 40080321500,
+    "runId": 40090959568,
     "status": "success",
-    "reviewCommit": "b8406ab3db4ae410ceb45e39fdab07efe6a47eb6",
-    "mergeCommit": "609ff880a415b6608940048a952bcdad681b72c2",
-    "identicalGitTree": "6f31dfcaeab9873381f5c2625381e158c7b5abc7",
-    "linuxJobId": 120834433295,
-    "finalGateJobId": 120838887904,
+    "reviewCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+    "mergeCommit": "2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+    "identicalGitTree": "f4d8a31f19e1574ba91348bc79e1c50aa76ee1ef",
+    "linuxJobId": 120865715808,
+    "finalGateJobId": 120870365297,
     "qualified": 37,
     "blocked": 0,
     "releaseReady": true,
     "backends": 7,
-    "grammars": 2,
-    "pythonVersions": [
-      "3.14.8",
-      "3.15.0"
+    "grammars": [
+      "lean",
+      "ps"
     ],
-    "phpVersion": "8.5.12",
     "targetExecutionBundles": 14,
     "scriptingRegressionGroups": 28,
     "scriptingArtifactBundles": 24,
     "architectureRegressionGroups": 11,
+    "minimumPython": {
+      "targetExecutionBundles": 2,
+      "scriptingRegressionGroups": 14,
+      "artifactBundles": 12,
+      "runtimeEvidence": "runtime-conformance-python314/results.json",
+      "scriptingEvidence": "script-backends-python314/results.json"
+    },
+    "versions": {
+      "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "typescriptConsumer": "Version 7.0.2",
+      "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+      "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+      "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+      "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+      "python": "Python 3.15.0",
+      "pythonMinimum": "Python 3.14.8",
+      "php": "PHP 8.5.12 (cli) (built: Oct 19 2026 17:51:02) (NTS)"
+    },
+    "qualificationArtifact": {
+      "id": 12559464310,
+      "digest": "sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942"
+    },
     "artifacts": [
       {
-        "id": 12555490668,
-        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:0e36b67f28f011aa27e552dba66e6656db1fad7d3651527dd8c7c1c686004c56"
+        "id": 12559555665,
+        "name": "psc1-generated-session-boundary-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:f4aacc2bac16aa79883b35b920f391d4488a76ae8bc001fd1ebe6a392cf20f45"
       },
       {
-        "id": 12555143308,
-        "name": "psc1-scoped-correctness-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:2c4bd74fed182afb01b215858c0b53373d3077024d2e05916435c7f80a8af58c"
+        "id": 12559464310,
+        "name": "psc1-scoped-correctness-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942"
       },
       {
-        "id": 12554902667,
-        "name": "psc1-generated-compiler-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:12461cba06e6f8f755c06b4d910d90860684085e501be0e6ec94e61163902f45"
+        "id": 12559421470,
+        "name": "psc1-practical-compiler-m-applications-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292-attempt-1",
+        "digest": "sha256:ed327bd9c686f0e1a68883600234f664c01ee97569984fe55a482fb82bfd6cfb"
       },
       {
-        "id": 12554868795,
-        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:adb3e64f06b7f9451c31b3ea3cb9badfd6ec59a688c84e98765dafeeb8f29d78"
+        "id": 12559157952,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:a569c3a52bddaec74e241ec79549ddd05752d30475a4280efd6755d48ee1c62c"
       },
       {
-        "id": 12554822300,
-        "name": "psc1-architecture-native-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:76075ce03faf70ad355e55ff2799d512f86a676968ec5430360f6d654178bb02"
+        "id": 12558983599,
+        "name": "psc1-practical-compiler-m-core-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292-attempt-1",
+        "digest": "sha256:3ada5e91bc3cb7f18c51b2a79f18d7d7f754757ac228b61a0f273a4f0b15e2f6"
       },
       {
-        "id": 12554792956,
-        "name": "psc1-generated-session-boundary-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:ea21de12361c7045825bce305a561f0cfa6e7abbc57a9607a985a70da7f0b37d"
+        "id": 12558903993,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:b41d58a560167a169020b558d2d03941ac1f30e17203a5318b5cb7f5a6594db8"
       },
       {
-        "id": 12554753004,
-        "name": "psc1-compiler-closure-semantic-compiler-checked-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:a4d3f07d462c8c911b77fbc3c7f9f3c5a9e19757e7c126578abfbbf9aeb0f441"
+        "id": 12558813009,
+        "name": "psc1-generated-compiler-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:030f18e3bd761b3efacb826afcdd2565c2c2e3be99c04dab47f74d940b36d404"
       },
       {
-        "id": 12554707411,
-        "name": "psc1-development-609ff880a415b6608940048a952bcdad681b72c2",
-        "digest": "sha256:bac2317a5520d45fa45ed941af6ce3dee18db8c870c87384ea52ffdaf36e22db"
+        "id": 12558808737,
+        "name": "psc1-architecture-native-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:3fe4cac3cf90d274f5a0f04e7811f292f910485dc8003cc20d1a6c468d432126"
       },
       {
-        "id": 12554293645,
-        "name": "psc1-php-applications-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
-        "digest": "sha256:88115ecd4b90fbcbf96afb60ea3e1ca2030226601b84ff3c2badf2efa29bfadb"
+        "id": 12558782947,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:7728c28de86667d33854a0a55e91e6f7e45ae8160dab284438fbdc9d08984778"
       },
       {
-        "id": 12554288936,
-        "name": "psc1-practical-compiler-m-core-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
-        "digest": "sha256:940bdb0803cee7f1dd7e34d99eeb12dea8fdce5fb8325f5605b89ff3ac1cf756"
+        "id": 12558683876,
+        "name": "psc1-development-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292",
+        "digest": "sha256:94eaab9b00c35c3c9812d140202c19570df0171b84f266910d642c9c2329f87d"
       },
       {
-        "id": 12554099391,
-        "name": "psc1-practical-compiler-m-applications-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
-        "digest": "sha256:7bcf04f798939132468ff1a7572add99da2ad6f8ef370b80065fcf85aed905b7"
+        "id": 12558353866,
+        "name": "psc1-php-applications-2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292-attempt-1",
+        "digest": "sha256:48d883cd61df3a6e62d6d63d4d4a37adc16a8b192ed00a07afcdf7593176162c"
       }
     ],
-    "phpApplicationMetrics": [
-      {
-        "syntax": "lean",
-        "target": "php",
-        "cases": 12,
-        "metrics": [
-          {
-            "id": "100000-statements",
-            "metrics": {
-              "elapsedSeconds": 32.6,
-              "maxRssKiB": 78940
-            }
-          }
-        ]
-      },
-      {
-        "syntax": "ps",
-        "target": "php",
-        "cases": 12,
-        "metrics": [
-          {
-            "id": "100000-statements",
-            "metrics": {
-              "elapsedSeconds": 32.67,
-              "maxRssKiB": 78720
-            }
-          }
-        ]
-      }
-    ],
-    "evidenceBoundary": "full preserved Practical Core/source functionality, not G2/G3 or fixed-point qualification"
+    "scope": "Current source/regression qualification, not Python/PHP self-host G2/G3 or performance240s"
   },
   "currentRuntimeProfiles": {
     "controlCommit": "e3b0c5f378b5205390080c7fc66667bd6636d4ff",
@@ -3964,13 +3999,13 @@
   "performanceRetry": {
     "python": {
       "commit": "b56da50567ac4051b6bea311c1b960ced1c97869",
-      "status": "implemented-awaiting-CI",
+      "status": "focused-and-full-regression-passed-genuine-generations-pending",
       "mechanism": "Two hottest immutable UTF8 identity entries return without enumerate/promotion/allocation;8 entries/32MiB unchanged",
       "guards": "20000 alternating identity hits preserve exact snapshot; existing234895 helper/public/error/eviction/oversize/concurrency comparisons and exact cache-block allowlist retained"
     },
     "php": {
       "commit": "13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d",
-      "status": "implemented-awaiting-CI",
+      "status": "focused-and-full-regression-passed-genuine-generations-pending",
       "mechanisms": [
         "canonical checked node slots use externally readonly public private(set) fields",
         "known2layer nonzero pure globals bypass yield at scheduled call sites after identical callee/argument snapshots"
@@ -3982,6 +4017,67 @@
         "static-call token checks preserve saved callee, arguments/errors, dynamic aliases/shadows; existing200k recursion retained"
       ],
       "resourceChanges": "none"
+    },
+    "testHeaderCorrection": {
+      "commit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+      "previousRun": 40090723561,
+      "previousJob": 120862646272,
+      "diagnosis": "Lean reference comment used // instead of --; no production logic changed"
+    },
+    "applicationMeasurements": {
+      "runId": 40090959568,
+      "jobId": 120863749120,
+      "scope": "actual generated PHP compiler-like application; not whole compiler self-host timing",
+      "records": [
+        {
+          "syntax": "lean",
+          "target": "php",
+          "cases": 12,
+          "passed": true,
+          "metrics": [
+            {
+              "id": "100000-statements",
+              "elapsedSeconds": 51.73,
+              "maxRssKiB": 78752
+            }
+          ]
+        },
+        {
+          "syntax": "ps",
+          "target": "php",
+          "cases": 12,
+          "passed": true,
+          "metrics": [
+            {
+              "id": "100000-statements",
+              "elapsedSeconds": 51.89,
+              "maxRssKiB": 78808
+            }
+          ]
+        }
+      ]
+    },
+    "integration": {
+      "runId": 40090959568,
+      "status": "success",
+      "jobs": {
+        "directJsClosure": 120865059863,
+        "generatedJs": 120865059869,
+        "rustClosure": 120865059875,
+        "hostSessionBoundary": 120865059913,
+        "semanticClosure": 120865060010
+      },
+      "scope": "Preserved source/host/generated regression checks; not Python/PHP G2/G3 qualification",
+      "directJsG1Preservation": {
+        "runId": 40090959568,
+        "jobId": 120865059869,
+        "status": "passed-diagnostic",
+        "sourceSha256": "8dad2e7fb1e3eb834bed9fc7581b8f2cce36f834c5e7842f19b6f8bb904b871a",
+        "closureDigest": "5b1824ce8d98a9ec9068f351f28abab8485a9786510c47fd5b4cedeac8734a2e",
+        "sourceModules": 87,
+        "cases": 10,
+        "scope": "Current regression independently executes G1; preserved old full chain stays separately identified"
+      }
     }
   },
   "previousCurrentSourceGate": {
@@ -4007,5 +4103,131 @@
       }
     ],
     "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
-  }
+  },
+  "currentMilestone": {
+    "status": "complete-at-user-requested-stop",
+    "scope": "Measured Python UTF8 hot-pair and PHP readonly-slot/static-call fixes; focused and full Practical Core CI; one actual BOTH-target correctness3600s retry launched",
+    "pending": "Actual new G2/G3/admission/fixed-point results; original performance240s; clean G1 reproduction only after successful chains",
+    "userInstruction": "continue until milestone slice and then stop"
+  },
+  "historicalQualificationSummary": {
+    "G1": "both latest independently accepted,strict original/transformed IR,all ten observations",
+    "G2": "Python1800057ms and PHP1800042ms hard deadlines",
+    "G3": "not-run",
+    "fixedPoint": "not-run",
+    "cleanReproduction": "not-run",
+    "performance240s": "not-qualified"
+  },
+  "previousFullCurrentRegression": {
+    "runId": 40080321500,
+    "status": "success",
+    "reviewCommit": "b8406ab3db4ae410ceb45e39fdab07efe6a47eb6",
+    "mergeCommit": "609ff880a415b6608940048a952bcdad681b72c2",
+    "identicalGitTree": "6f31dfcaeab9873381f5c2625381e158c7b5abc7",
+    "linuxJobId": 120834433295,
+    "finalGateJobId": 120838887904,
+    "qualified": 37,
+    "blocked": 0,
+    "releaseReady": true,
+    "backends": 7,
+    "grammars": 2,
+    "pythonVersions": [
+      "3.14.8",
+      "3.15.0"
+    ],
+    "phpVersion": "8.5.12",
+    "targetExecutionBundles": 14,
+    "scriptingRegressionGroups": 28,
+    "scriptingArtifactBundles": 24,
+    "architectureRegressionGroups": 11,
+    "artifacts": [
+      {
+        "id": 12555490668,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:0e36b67f28f011aa27e552dba66e6656db1fad7d3651527dd8c7c1c686004c56"
+      },
+      {
+        "id": 12555143308,
+        "name": "psc1-scoped-correctness-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:2c4bd74fed182afb01b215858c0b53373d3077024d2e05916435c7f80a8af58c"
+      },
+      {
+        "id": 12554902667,
+        "name": "psc1-generated-compiler-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:12461cba06e6f8f755c06b4d910d90860684085e501be0e6ec94e61163902f45"
+      },
+      {
+        "id": 12554868795,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:adb3e64f06b7f9451c31b3ea3cb9badfd6ec59a688c84e98765dafeeb8f29d78"
+      },
+      {
+        "id": 12554822300,
+        "name": "psc1-architecture-native-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:76075ce03faf70ad355e55ff2799d512f86a676968ec5430360f6d654178bb02"
+      },
+      {
+        "id": 12554792956,
+        "name": "psc1-generated-session-boundary-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:ea21de12361c7045825bce305a561f0cfa6e7abbc57a9607a985a70da7f0b37d"
+      },
+      {
+        "id": 12554753004,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:a4d3f07d462c8c911b77fbc3c7f9f3c5a9e19757e7c126578abfbbf9aeb0f441"
+      },
+      {
+        "id": 12554707411,
+        "name": "psc1-development-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:bac2317a5520d45fa45ed941af6ce3dee18db8c870c87384ea52ffdaf36e22db"
+      },
+      {
+        "id": 12554293645,
+        "name": "psc1-php-applications-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
+        "digest": "sha256:88115ecd4b90fbcbf96afb60ea3e1ca2030226601b84ff3c2badf2efa29bfadb"
+      },
+      {
+        "id": 12554288936,
+        "name": "psc1-practical-compiler-m-core-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
+        "digest": "sha256:940bdb0803cee7f1dd7e34d99eeb12dea8fdce5fb8325f5605b89ff3ac1cf756"
+      },
+      {
+        "id": 12554099391,
+        "name": "psc1-practical-compiler-m-applications-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
+        "digest": "sha256:7bcf04f798939132468ff1a7572add99da2ad6f8ef370b80065fcf85aed905b7"
+      }
+    ],
+    "phpApplicationMetrics": [
+      {
+        "syntax": "lean",
+        "target": "php",
+        "cases": 12,
+        "metrics": [
+          {
+            "id": "100000-statements",
+            "metrics": {
+              "elapsedSeconds": 32.6,
+              "maxRssKiB": 78940
+            }
+          }
+        ]
+      },
+      {
+        "syntax": "ps",
+        "target": "php",
+        "cases": 12,
+        "metrics": [
+          {
+            "id": "100000-statements",
+            "metrics": {
+              "elapsedSeconds": 32.67,
+              "maxRssKiB": 78720
+            }
+          }
+        ]
+      }
+    ],
+    "evidenceBoundary": "full preserved Practical Core/source functionality, not G2/G3 or fixed-point qualification"
+  },
+  "reviewCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a"
 }

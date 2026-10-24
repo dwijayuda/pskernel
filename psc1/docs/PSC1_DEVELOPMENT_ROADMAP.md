@@ -6,23 +6,21 @@ Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 
 [canonical direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns exact source identities and immutable actual results.
 
-## Active work order: Python/PHP self-hosting
+## Current milestone and dependency-ordered Python/PHP queue
 
-| Order | Work | Finite acceptance and actual status |
+The user requested a stop after the verified milestone slice. This slice is complete; no further source work is authorized in this turn. Preserve active long qualification jobs.
+
+| Order | Work | Finite acceptance and current evidence |
 | --- | --- | --- |
-| 1 | Preserve qualified baseline | 451aef05 preflight40083935614/full40083940157 PASS37/37, all7 backends/both grammars/apps/packages. Tested003a85ce has identical tree854147ae65853c0c26612f0c48424c9083e33a46. |
-| 2 | Validate measured backend retry | Pythonb56da50567ac4051b6bea311c1b960ced1c97869, PHP13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d: implemented, Linux pending. Hot UTF8 pair keeps8entry/32MiB; PHP readonly canonical slots retain indexed control/frozen node helper, and proven static calls retain dynamic scheduling. Preserve all previous tests; add allocation/token/readonly guards. |
-| 3 | Retry genuine current generations | First3600s requesta6a399c6/run40085445958: both G1/admission/strictIR/ten cases PASS; Python/PHP G2 fail3600060/3600056ms. No G3/fixed point. Readbacks40089881019/40089760678 PASS. After new source gate, isolated exact-source BOTH-target request; no full-CI cancellation. |
-| 4 | Exact fixed points and final regression | Each target independently: one seed, remove native compiler tools, actual G1→G2→G3, official Lean4.35/strictIR/source pairing/ten observations/exact source/admission/IR/raw bytes. New source requires full37/37 again; performance240s remains separate. |
-| 5 | Clean reproduction/review | Once chains pass, fresh G1 without lake cache reproduces each qualified generation. No merge/publication authorization. |
+| 1 | Measured backend fixes and regression | COMPLETE: Pythonb56da505/PHP13c5d4a6, reviewb33027de. Focused40090956726 PASS retained/runtime/token/readonly/deep tests and87 modules per target in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942. |
+| 2 | Genuine current-source generations | RUNNING, NOT QUALIFIED: request336ff212/run40091210960, Python120864185036/PHP120864185108. Exact compiler/tools snapshot ofb330; only guard/request differ. No duplicate request while active. |
+| 3 | Qualification result reconciliation | On continuation, fetch terminal jobs and immutable artifacts; record exact identities, elapsed/CPU/peak metrics and actual admission/IR/ten-case/raw-byte fixed points. First3600s run40085445958 remains an immutable two-target G2 deadline failure after G1 success. |
+| 4 | Targeted follow-up or clean reproduction | If new attempt fails, fix a demonstrated generic cost with all retained guards before another chain. If it passes, clean fresh G1 without lake cache reproduces every qualified generation. Full source/regression gates alone never qualify G2/G3. |
+| 5 | Performance and review | Original240s profile remains separately unqualified. Preserve qualified Rust/TS/JS/Wasm snapshots. Merge/publication require authorization and required qualification. |
 
-Correctness-3600s changes only G2-self/G3-self wall clocks. G1/corpus/tools240s,
-checker120s, historical1800s/performance240s, memory/stack/fuel/security/ABI
-refusals remain. Resource heartbeats measure activity, not semantic progress.
-One existing shared compiler and one portable emitter per target.
-The [AI state](../AI_WORK_STATE.md) and [exact receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
-bind the queue to actual commits/results. Direct-target performance work below
-is deferred while this mission remains incomplete.
+Correctness3600s extends ONLY G2-self/G3-self. Preserve G1/tools/corpus240s,checker120s,historical1800s,performance240s,independent Lean4.35,strictIR,source pairing,negative/security tests,memory/stack/fuel and unsupported-ABI refusals. One shared compiler and one portable emitter per target.
+
+The [AI state](../AI_WORK_STATE.md), [exact receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json) and [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) bind this queue to actual commits and results. Direct-target optimization remains deferred.
 
 ## Qualified compiler checkpoint
 

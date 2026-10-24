@@ -75,11 +75,15 @@ both passed independent G1/strict IR/ten observations and then failed G2 at
 1800057/1800042ms. Neither reached G3/fixed point. Current full40080321500
 passes37/37 for sourcee20a1154. The isolated correctness-3600s profile in451aef05
 passes preflight40083935614 and preserves historical1800s/performance240s/G1
-and every other resource or checking limit. Genuine both-target run40085445958
-at requesta6a399c6 is active on qualification/psc1-python-php-3600s-20261024.
-Only branch guard/request differ from451aef05; generated compiler source and
-critical host tools are identical. Minute resource heartbeats use existing
-procfs sampling, not compiler callbacks. Wait for actual terminal qualification.
+and every other resource or checking limit. Genuine both-target run40085445958 at requesta6a399c6 FAILED both3600s G2 deadlines after independently checked G1/strictIR/ten-case success. Python3600060ms/tree781180KiB; PHP3600056ms/tree1180260KiB. No G3/fixed point. Readbacks40089881019/40089760678 bind immutable artifacts. Minute resource heartbeats use existing procfs sampling, not compiler callbacks; busy CPU is not semantic progress.
+
+Measured follow-up sourceb56da505/13c5d4a6 uses the same compiler/emitter architecture. Python returns either of the two hot UTF8 identity entries without enumeration/promotion/allocation; immutable8entry/32MiB cache limits and all errors/eviction remain. PHP exposes five existing node fields as public private(set) and uses direct properties only for strictly canonical checked slots. ArrayAccess/iterative dead-node collection remain; indexed reads are a retained policy of the same emitter. The frozen old runtime permits only five visibility declarations, and token comparison restores only canonical reads. Proven two-layer nonzero pure global call sites bypass scheduler requests after the same callee/argument snapshots; dynamic/shadowed/aliased/recursive calls retain scheduling. Existing PHP self-tail loops were already present.
+
+Focused40090956726/job120863330756 at reviewb33027de PASS:234895 UTF8 queries/20000 snapshot-identity hot hits,11 slot token restorations,readonly writes/references refused,frozen node-interface comparisons,2M dead-spine/collection,one static-call token restoration,200k deep dynamic recursion,all source/runtime/admitted-library guards and87-module closures in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942.
+
+One genuine BOTH-target correctness-3600s retry is running on qualification/psc1-python-php-3600s-20261024: control3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0, request336ff212bb810bcafa1573350355fbd1f6a0509e, [run40091210960](https://github.com/dwijayuda/pskernel/actions/runs/40091210960), Python120864185036/PHP120864185108. Compiler and critical host tools exactly matchb33027de; GitHub compare shows only workflow branch guard and request JSON differ. Both jobs entered genuine generation execution; no new G2/G3/fixed-point success is claimed. Preserve these running jobs.
+
+The user requested a stop after this verified milestone slice. On continuation inspect the active jobs before further changes. The new source gates qualify preserved functionality, not self-hosted G2/G3. Original performance240s remains separately unqualified.
 
 Strict IR already requires canonical constructor field order; the PHP emitter
 evaluates in that order. Reordered construction remains refused, while match

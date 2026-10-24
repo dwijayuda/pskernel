@@ -1,82 +1,16 @@
-# Continue Python/PHP self-hosting with the3600s correctness profile
+# Resume the verified Python/PHP milestone checkpoint
 
-Use connected GitHub tools and Linux Actions only. Fetch latest HEAD of
-feat/psc1-python-php-selfhost-20261024 and draft PR176 before expected-HEAD,
-non-force updates. Read AI_WORK_STATE.md, the single roadmap and exact
-Python/PHP qualification receipt. No local checkout/build/tests, merge or publish.
+The previous turn stopped at the user's requested milestone slice. Use this prompt only when development is resumed.
 
-Current retry source: Pythonb56da50567ac4051b6bea311c1b960ced1c97869, PHP13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d; Linux gates pending.
-First3600s run40085445958 is terminal FAILURE: both G1s pass independent
-admission/strictIR/ten cases; Python/PHP G2 deadline3600060/3600056ms.
-Neither reached G3/fixed point. Readbacks40089881019/40089760678 pass.
-Read AI/JSON for immutable artifacts, exact identities and current source gates.
-Validate hot-pair cache and readonly-slot/static-call fixes before a new request.
-The historical baseline below stays preserved; active status is superseded.
+Use connected GitHub tools and Linux GitHub Actions only. Fetch latest HEAD of feat/psc1-python-php-selfhost-20261024 and PR176 before any write. Preserve history with expected-HEAD non-force updates. No local checkout/build/test, main merge or npm publication. Read AI_WORK_STATE.md, PSC1_DEVELOPMENT_ROADMAP.md and PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json.
 
-1. Compiler source e20a11549cdb1d656c05912089730bf2ebeaf933 passed focused
-   40079503171 and full40080321500:37/37,all7 backends,both grammars/apps.
-   Reviewb8406ab3 and merge609ff880 have identical Git tree
-   6f31dfcaeab9873381f5c2625381e158c7b5abc7. Preserve all retained regressions.
-2. Supervision/profile commit451aef056de343b8423a9a2e544d2c3d0d6b1fb4 adds
-   closed correctness-3600s ONLY for exact G2-self/G3-self requests. The old
-   correctness-1800s and performance-240s remain. Linux preflight40083935614,
-   job120842917046 PASSED process-tree deadline/escaped-session/output-bound/
-   profile-refusal tests, transport/poisoned-bytecode guards, all source proofs/
-   runtime guards and87-module censuses for each target in both grammars.
-   Full40083940157 also PASSED37/37 for supervision/profile source451aef05:
-   Linux120845118090/gate120850001657; tested003a85ce has identical tree
-   854147ae65853c0c26612f0c48424c9083e33a46.
-3. Read actual3600s run/job IDs from AI state/JSON receipt. Each independently
-   requires seed once, removal of native compiler executables, executing
-   G1→G2→G3, independent Lean admission, strict original/transformed IR,
-   source pairing, all ten positive/refusal observations and exact compiler
-   source/admission/IR/observation/raw executable fixed points. An active request,
-   source census or resource heartbeat never qualifies a generation.
-   Current run40085445958/requesta6a399c6 is on isolated qualification/
-   psc1-python-php-3600s-20261024, Python120847425035/PHP120847425075.
-   Compiler and critical tools exactly match451aef05; only workflow branch guard/
-   request differ. Readback helper177d3837 on diagnostic/psc1-python-php-artifacts-20261024
-   reads immutable completed artifacts without running a compiler. Fill its
-   .github/diagnostics/psc1-python-php-receipt-request.json with schema
-   psc1-python-php-3600s-readback-request/1 and rows containing target,branch,
-   run,job,commit,artifact,digest,conclusion from GitHub metadata.
-4. Latest1800s terminal attempts are preserved: Python e6327cdd/run40079719620,
-   job120830635451 G2 deadline1800057ms/tree786232KiB; PHP1174300d/
-   run40078954006/job120828380302 G2 deadline1800042ms/tree1179544KiB.
-   Both G1s passed all admission/IR/ten cases; neither reached G3/fixed point.
-   Failed artifacts12555068026/12555337743 and exact digests/source identities
-   remain in receipt. Do not replay these unchanged1800s failures.
-5. If a3600s target fails, obtain complete qualification.json and immutable
-   G1 source/request artifacts. Distinguish child wait4 maxRSS from actual
-   interpreter peak and sampled process-tree RSS (shared pages can double-count).
-   Resource heartbeats once/minute report sampled CPU/RSS/process/pipe bytes;
-   no compiler callbacks or source changes are involved.
-6. Actual measured follow-up options, NOT production or qualification:
-   Python40082137157 exact120s profile: UTF8 view lookup20.071s/47.7M,
-   scheduler23.150s; controlled40083320898 hot-pair variant matches five complete
-   candidates and reduces view lookup cost. Owned-sync experiment shows no
-   demonstrated gain. PHP40084087416 node-property/static-known-call variants
-   match all five frozen complete candidates and execute120s each; source
-   transforms and diagnostic tokenizer scratch are isolated on diagnostic/
-   psc1-python-php-artifacts-20261024. Do not raise production memory or stack.
-7. Implement only a demonstrated generic cost if needed; validate retained-source/
-   runtime comparisons, errors/order/fuel/capture/shadow/negative boundaries,
-   complete source census and admitted-library tests before a fresh request.
-   Keep one existing compiler pipeline and one portable emitter per target.
-8. Request-only child must change ONLY
-   .github/qualification-requests/psc1-python-php-selfhost.json:
-   schema psc1-python-php-selfhost-request/1; exact branch/parentCommit;
-   action qualify-independent-G1-G2-G3; profile correctness-3600s;
-   targets only needing qualification; g2g3TimeoutMs3600000;g1TimeoutMs240000;
-   resourcePolicy only-G2-G3-wall-clock-extended;all-other-policies-unchanged.
-   No source/docs in request commit; preserve active per-target concurrency.
-9. Preserve G1/corpus/tools240s,checker120s,official independent Lean4.35.0
-   eb6cafb7290e8bd5f2937522d8d804f58f02bafc,Python3.14.8,PHP8.5.12/ext-gmp,
-   Node22.23.3,response128MiB,PHP1G/default stack,Python recursion/digit globals,
-   semantic fuel and all security/refusal tests. Jobs180min/execution170min fit
-   GitHub-hosted6h. Performance240s remains separately unqualified.
-10. After successful chains, clean fresh G1 without lake cache must reproduce
-    each qualified generation's exact inventories/admissions/IR/ten observations/
-    raw compiler bytes. This is distinct from a second full-chain replay or DDC/
-    formal semantic preservation. Preserve earlier Rust/TS/JS/Wasm receipts.
-    Update AI/roadmap/JSON/PR with exact terminal results; no merge/publication.
+1. Preserve source reviewb33027de36225e0a4f6d0f86572bd42115aad42a. Python fixb56da505 uses allocation-free immutable UTF8 hot-pair hits; PHP13c5d4a6 uses readonly canonical slots and proven static call sites. Source gate40090956726/job120863330756 PASS with all retained/runtime/token/deep/source-census guards. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942.
+2. FIRST inspect https://github.com/dwijayuda/pskernel/actions/runs/40091210960. Qualification branch qualification/psc1-python-php-3600s-20261024; control3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0; request336ff212bb810bcafa1573350355fbd1f6a0509e. Python job120864185036; PHP120864185108. Compiler and critical host tools exactly equalb33027de; compare shows only workflow guard/request differences. Both jobs entered actual generation execution before stopping. Do not cancel or duplicate pending work.
+3. Read terminal job logs and immutable artifact metadata only after completion. Preserve exact source closure, generated bytes, request/service/tool/checker hashes, generation observations and process events. One native seed per target, native compiler tools removed afterward, genuine G1→G2→G3, official independent admission of every generation, strict original/transformed IR, all ten positive/negative observations and exact source/admission/IR/observation/raw-code fixed points are mandatory. Running jobs, G1 success, source/full gates and resource heartbeats are not qualification.
+4. Reuse read-only receipt helper705a1db9f55270eee6ec6caf23545d635797f0fd on diagnostic/psc1-python-php-artifacts-20261024. Before writing, fetch its latest HEAD739f1f8f73e7be20c1d92feedac4817be31c8655 or newer. Update only .github/diagnostics/psc1-python-php-receipt-request.json with schema psc1-python-php-3600s-readback-request/1, requests rows target/branch/run/job/commit/artifact/digest/conclusion from terminal GitHub metadata. The workflow checks exact producer/immutable digests and runs no compiler. Prior readbacks40089881019/40089760678 PASS.
+5. If either new generation fails, diagnose the actual new source/request workload before another implementation. First3600s run40085445958/requesta6a399c6 remains FAILED: Python3600060ms/tree781180KiB,PHP3600056ms/tree1180260KiB after independently checked G1/strictIR/ten cases. Neither G3 nor fixed point ran. Avoid replaying unchanged failures. Profiling/diagnostic hypotheses never establish full-chain speedup.
+6. Keep a single existing compiler pipeline and portable emitter. Preserve retained-original/all-input proofs where applicable, strict canonical slots, readonly mutation/reference refusals, token/AST boundaries, evaluation/error/capture/shadow order, typed IO, deep recursion/collection and both-grammar source censuses. Current source changes require focused plus full37/37/all-seven regression before qualification. Use isolated exact-source qualification snapshots so documentation or ordinary CI does not cancel expensive work.
+7. A fresh qualification request is allowed only when needed after measuring/fixing a failure. The request-only child changes .github/qualification-requests/psc1-python-php-selfhost.json with schema psc1-python-php-selfhost-request/1; exact branch/parentCommit; action qualify-independent-G1-G2-G3; profile correctness-3600s; only targets needing qualification; g2g3TimeoutMs3600000;g1TimeoutMs240000; resourcePolicy only-G2-G3-wall-clock-extended;all-other-policies-unchanged. Preserve other live target work and full-CI history.
+8. G1/corpus/tools240s,checker120s,official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc,strictIR,source pairing,negative tests,response128MiB,PHP1G/default stack,Python recursion/digit globals,semantic fuel and security/resource policies remain unchanged. Correctness3600s applies only G2-self/G3-self; historical1800s and original performance240s stay separate. Jobs180min/execution170min fit hosted6h. Sampled outer CPU includes supervision; wait4 child RSS is not service peak; summed tree RSS can double-count pages.
+9. Once genuine chains/fixed points pass, independently rebuild clean G1 without restored lake cache and reproduce exact inventories/admissions/IR/observations/raw bytes of each qualified generation. Distinguish clean G1 reproduction from another full-chain replay, DDC or formal compiler preservation. Preserve qualified Rust/TypeScript/DirectJS/DirectWasm evidence on their exact source snapshots.
+10. Update AI state, the single roadmap, architecture, dated receipt and draft PR176 with exact verified/pending boundaries, commits, run/jobs, immutable artifacts, elapsed/CPU/peak measurements and next action. No merge or package publication without authorization.

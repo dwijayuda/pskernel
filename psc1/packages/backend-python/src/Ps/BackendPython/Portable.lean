@@ -213,12 +213,12 @@ def emitHelper (id name : String) (args : List String) : Emit String :=
 
 def binary (args : List String) (symbol : String) : Emit String :=
   match args with
-  | [a, b] => bindValue (cat ["(", a, " ", symbol, " ", b, ")"])
+  | List.cons a (List.cons b List.nil) => bindValue (cat ["(", a, " ", symbol, " ", b, ")"])
   | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
 
 def unary (args : List String) (before after : String) : Emit String :=
   match args with
-  | [a] => bindValue (cat [before, a, after])
+  | List.cons a List.nil => bindValue (cat [before, a, after])
   | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
 
 def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
@@ -243,23 +243,23 @@ def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
   | PsVerifiedIrIntrinsic.intLt => binary args "<"
   | PsVerifiedIrIntrinsic.natSub =>
       match args with
-      | [a, b] => bindValue (cat ["(", a, " - ", b, " if ", a, " >= ", b, " else 0)"])
+      | List.cons a (List.cons b List.nil) => bindValue (cat ["(", a, " - ", b, " if ", a, " >= ", b, " else 0)"])
       | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
   | PsVerifiedIrIntrinsic.natDiv =>
       match args with
-      | [a, b] => bindValue (cat ["(0 if ", b, " == 0 else ", a, " // ", b, ")"])
+      | List.cons a (List.cons b List.nil) => bindValue (cat ["(0 if ", b, " == 0 else ", a, " // ", b, ")"])
       | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
   | PsVerifiedIrIntrinsic.natMod =>
       match args with
-      | [a, b] => bindValue (cat ["(", a, " if ", b, " == 0 else ", a, " % ", b, ")"])
+      | List.cons a (List.cons b List.nil) => bindValue (cat ["(", a, " if ", b, " == 0 else ", a, " % ", b, ")"])
       | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
   | PsVerifiedIrIntrinsic.intOfNat =>
       match args with
-      | [a] => psBackendStatePure a
+      | List.cons a List.nil => psBackendStatePure a
       | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
   | PsVerifiedIrIntrinsic.stringSingleton =>
       match args with
-      | [a] => psBackendStatePure a
+      | List.cons a List.nil => psBackendStatePure a
       | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
   | PsVerifiedIrIntrinsic.intNeg => unary args "(-" ")"
   | PsVerifiedIrIntrinsic.intNegSucc => unary args "(-(" " + 1))"
@@ -282,12 +282,12 @@ def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
   | PsVerifiedIrIntrinsic.stringAtEnd =>
       psBackendStateBind (helper "builtins") (fun (_unit : Unit) =>
         match args with
-        | [source, position] => bindValue (cat ["(", position, " >= _psc_b.len(", source, ".encode(\"utf-8\")))"])
+        | List.cons source (List.cons position List.nil) => bindValue (cat ["(", position, " >= _psc_b.len(", source, ".encode(\"utf-8\")))"])
         | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => bindValue "()"
   | PsVerifiedIrIntrinsic.arrayPush =>
       match args with
-      | [array, value] => bindValue (cat [array, " + (", value, ",)"])
+      | List.cons array (List.cons value List.nil) => bindValue (cat [array, " + (", value, ",)"])
       | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
   | PsVerifiedIrIntrinsic.arrayGet => emitHelper "array-get" "_psc_array_get" args
   | PsVerifiedIrIntrinsic.arrayGetD => emitHelper "array-get-d" "_psc_array_get_d" args
@@ -413,94 +413,156 @@ def expression (fuel : Nat) :
                     psStringEq declaration.name name && psListIsEmpty declaration.parameters) module.declarations then
                   emitCall (valueName name) List.nil tail state
                 else Except.ok (Prod.mk (globalName name) state)
-        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolAnd _ [a, b] => do
-            let (left, state) <- emit a false state
-            let (result, state) <- fresh "and" state
-            let (_unit, state) <- line (cat ["if ", left, ":"]) state
-            let (_unit, state) <- withIndent (assignExpression emit b tail result) state
-            let (_unit, state) <- line "else:" state
-            let (_unit, state) <- withIndent (line (cat [result, " = False"])) state
+        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolAnd _ (List.cons a (List.cons b List.nil)) => do
+            let _psc_step_0 <- emit a false state
+            let left := _psc_step_0.fst
+            let state := _psc_step_0.snd
+            let _psc_step_1 <- fresh "and" state
+            let result := _psc_step_1.fst
+            let state := _psc_step_1.snd
+            let _psc_step_2 <- line (cat ["if ", left, ":"]) state
+            let state := _psc_step_2.snd
+            let _psc_step_3 <- withIndent (assignExpression emit b tail result) state
+            let state := _psc_step_3.snd
+            let _psc_step_4 <- line "else:" state
+            let state := _psc_step_4.snd
+            let _psc_step_5 <- withIndent (line (cat [result, " = False"])) state
+            let state := _psc_step_5.snd
             Except.ok (Prod.mk result state)
-        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolOr _ [a, b] => do
-            let (left, state) <- emit a false state
-            let (result, state) <- fresh "or" state
-            let (_unit, state) <- line (cat ["if ", left, ":"]) state
-            let (_unit, state) <- withIndent (line (cat [result, " = True"])) state
-            let (_unit, state) <- line "else:" state
-            let (_unit, state) <- withIndent (assignExpression emit b tail result) state
+        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolOr _ (List.cons a (List.cons b List.nil)) => do
+            let _psc_step_6 <- emit a false state
+            let left := _psc_step_6.fst
+            let state := _psc_step_6.snd
+            let _psc_step_7 <- fresh "or" state
+            let result := _psc_step_7.fst
+            let state := _psc_step_7.snd
+            let _psc_step_8 <- line (cat ["if ", left, ":"]) state
+            let state := _psc_step_8.snd
+            let _psc_step_9 <- withIndent (line (cat [result, " = True"])) state
+            let state := _psc_step_9.snd
+            let _psc_step_10 <- line "else:" state
+            let state := _psc_step_10.snd
+            let _psc_step_11 <- withIndent (assignExpression emit b tail result) state
+            let state := _psc_step_11.snd
             Except.ok (Prod.mk result state)
         | PsVerifiedIrExpr.intrinsic operation types arguments => do
-            let (_unit, state) <- checkTypes types state
-            let (values, state) <- psBackendSourceMapState
+            let _psc_step_12 <- checkTypes types state
+            let state := _psc_step_12.snd
+            let _psc_step_13 <- psBackendSourceMapState
               (fun (argument : PsVerifiedIrExpr) => emit argument false) arguments state
+            let values := _psc_step_13.fst
+            let state := _psc_step_13.snd
             emitIntrinsic operation values tail state
         | PsVerifiedIrExpr.lambda parameters resultType body => do
             checkType 256 resultType
-            let (name, state) <- fresh "closure" state
-            let (pair, state) <- emitParameters scope parameters state
+            let _psc_step_14 <- fresh "closure" state
+            let name := _psc_step_14.fst
+            let state := _psc_step_14.snd
+            let _psc_step_15 <- emitParameters scope parameters state
+            let pair := _psc_step_15.fst
+            let state := _psc_step_15.snd
             let inner : Scope := pair.fst
             let names : List String := pair.snd
-            let (_unit, state) <- line (cat ["def ", name, "(", psTextJoin ", " names, "):"]) state
+            let _psc_step_16 <- line (cat ["def ", name, "(", psTextJoin ", " names, "):"]) state
+            let state := _psc_step_16.snd
             let action : Emit Unit :=
               psBackendStateBind (expression remaining module inner body true)
                 (fun (result : String) => line (cat ["return ", result]))
-            let (_unit, state) <- withIndent action state
+            let _psc_step_17 <- withIndent action state
+            let state := _psc_step_17.snd
             Except.ok (Prod.mk name state)
         | PsVerifiedIrExpr.call fn types arguments => do
-            let (_unit, state) <- checkTypes types state
-            let (callee, state) <- emit fn false state
-            let (saved, state) <- bindValue callee state
-            let (values, state) <- psBackendSourceMapState
+            let _psc_step_18 <- checkTypes types state
+            let state := _psc_step_18.snd
+            let _psc_step_19 <- emit fn false state
+            let callee := _psc_step_19.fst
+            let state := _psc_step_19.snd
+            let _psc_step_20 <- bindValue callee state
+            let saved := _psc_step_20.fst
+            let state := _psc_step_20.snd
+            let _psc_step_21 <- psBackendSourceMapState
               (fun (argument : PsVerifiedIrExpr) => emit argument false) arguments state
+            let values := _psc_step_21.fst
+            let state := _psc_step_21.snd
             emitCall saved values tail state
         | PsVerifiedIrExpr.letE name type value body => do
             checkType 256 type
-            let (value, state) <- emit value false state
-            let (localName, state) <- fresh name state
-            let (_unit, state) <- line (cat [localName, " = ", value]) state
+            let _psc_step_22 <- emit value false state
+            let value := _psc_step_22.fst
+            let state := _psc_step_22.snd
+            let _psc_step_23 <- fresh name state
+            let localName := _psc_step_23.fst
+            let state := _psc_step_23.snd
+            let _psc_step_24 <- line (cat [localName, " = ", value]) state
+            let state := _psc_step_24.snd
             expression remaining module (List.cons (Prod.mk name localName) scope) body tail state
         | PsVerifiedIrExpr.ifE condition yes no => do
-            let (condition, state) <- emit condition false state
-            let (result, state) <- fresh "branch" state
-            let (_unit, state) <- line (cat ["if ", condition, ":"]) state
-            let (_unit, state) <- withIndent (assignExpression emit yes tail result) state
-            let (_unit, state) <- line "else:" state
-            let (_unit, state) <- withIndent (assignExpression emit no tail result) state
+            let _psc_step_25 <- emit condition false state
+            let condition := _psc_step_25.fst
+            let state := _psc_step_25.snd
+            let _psc_step_26 <- fresh "branch" state
+            let result := _psc_step_26.fst
+            let state := _psc_step_26.snd
+            let _psc_step_27 <- line (cat ["if ", condition, ":"]) state
+            let state := _psc_step_27.snd
+            let _psc_step_28 <- withIndent (assignExpression emit yes tail result) state
+            let state := _psc_step_28.snd
+            let _psc_step_29 <- line "else:" state
+            let state := _psc_step_29.snd
+            let _psc_step_30 <- withIndent (assignExpression emit no tail result) state
+            let state := _psc_step_30.snd
             Except.ok (Prod.mk result state)
         | PsVerifiedIrExpr.record name types fields => do
-            let (_unit, state) <- checkTypes types state
+            let _psc_step_31 <- checkTypes types state
+            let state := _psc_step_31.snd
             let schema <- structureFields module name
-            let (values, state) <- emitNamedFields emit fields state
+            let _psc_step_32 <- emitNamedFields emit fields state
+            let values := _psc_step_32.fst
+            let state := _psc_step_32.snd
             let ordered <- orderedValues schema values
             bindValue (tuple ordered) state
         | PsVerifiedIrExpr.projection name types target field => do
-            let (_unit, state) <- checkTypes types state
-            let (target, state) <- emit target false state
+            let _psc_step_33 <- checkTypes types state
+            let state := _psc_step_33.snd
+            let _psc_step_34 <- emit target false state
+            let target := _psc_step_34.fst
+            let state := _psc_step_34.snd
             let fields <- structureFields module name
             let index <- fieldPosition fields field
             bindValue (cat [target, "[", decimal index, "]"]) state
         | PsVerifiedIrExpr.constructor owner name types fields => do
-            let (_unit, state) <- checkTypes types state
+            let _psc_step_35 <- checkTypes types state
+            let state := _psc_step_35.snd
             let schema <- constructorFields module owner name
-            let (values, state) <- emitNamedFields emit fields state
+            let _psc_step_36 <- emitNamedFields emit fields state
+            let values := _psc_step_36.fst
+            let state := _psc_step_36.snd
             let ordered <- orderedValues schema values
             bindValue (tuple (List.cons (psJsonQuote name) ordered)) state
         | PsVerifiedIrExpr.matchE owner types scrutinee alternatives => do
-            let (_unit, state) <- checkTypes types state
-            let (scrutinee, state) <- emit scrutinee false state
-            let (result, state) <- fresh "match" state
+            let _psc_step_37 <- checkTypes types state
+            let state := _psc_step_37.snd
+            let _psc_step_38 <- emit scrutinee false state
+            let scrutinee := _psc_step_38.fst
+            let state := _psc_step_38.snd
+            let _psc_step_39 <- fresh "match" state
+            let result := _psc_step_39.fst
+            let state := _psc_step_39.snd
             let emitWithScope : Scope -> PsVerifiedIrExpr -> Bool -> Emit String :=
               expression remaining module
-            let (_unit, state) <- psBackendSourceForState
+            let _psc_step_40 <- psBackendSourceForState
               (emitAlternative emitWithScope module scope owner scrutinee result (firstAlternative alternatives) tail)
               alternatives state
-            let (_unit, state) <- helper "builtins" state
+            let state := _psc_step_40.snd
+            let _psc_step_41 <- helper "builtins" state
+            let state := _psc_step_41.snd
             let action : Emit Unit :=
               if psListIsEmpty alternatives then
                 line "raise _psc_b.RuntimeError(\"PSC1_IMPOSSIBLE_CONSTRUCTOR\")"
               else psBackendStateBind (line "else:") (fun (_unit : Unit) =>
                 withIndent (line "raise _psc_b.RuntimeError(\"PSC1_IMPOSSIBLE_CONSTRUCTOR\")"))
-            let (_unit, state) <- action state
+            let _psc_step_42 <- action state
+            let state := _psc_step_42.snd
             Except.ok (Prod.mk result state)
 
 def parameterCheck (name : String) (type : PsVerifiedIrType) : Except String String :=
@@ -530,17 +592,22 @@ def emitDeclaration (module : PsVerifiedIrModule) (declaration : PsVerifiedIrDec
     if !psListIsEmpty declaration.typeParameters then
       throw (cat ["PSC1_PYTHON_GENERIC_DECLARATION_UNSUPPORTED: ", declaration.name])
     checkType 256 declaration.resultType
-    let (pair, state) <- emitParameters List.nil declaration.parameters state
+    let _psc_step_43 <- emitParameters List.nil declaration.parameters state
+    let pair := _psc_step_43.fst
+    let state := _psc_step_43.snd
     let scope : Scope := pair.fst
     let parameters : List String := pair.snd
     let name : String :=
       if psListIsEmpty declaration.parameters then valueName declaration.name else globalName declaration.name
-    let (_unit, state) <- noteOrigin declaration.name state
-    let (_unit, state) <- line (cat ["def ", name, "(", psTextJoin ", " parameters, "):"]) state
+    let _psc_step_44 <- noteOrigin declaration.name state
+    let state := _psc_step_44.snd
+    let _psc_step_45 <- line (cat ["def ", name, "(", psTextJoin ", " parameters, "):"]) state
+    let state := _psc_step_45.snd
     let action : Emit Unit :=
       psBackendStateBind (expression 4096 module scope declaration.body true)
         (fun (result : String) => line (cat ["return ", result]))
-    let (_unit, state) <- withIndent action state
+    let _psc_step_46 <- withIndent action state
+    let state := _psc_step_46.snd
     line "" state
 
 def publicParameter (ioAbi : Bool) (item : Prod PsVerifiedIrParameter Nat) :
@@ -556,7 +623,8 @@ def publicParameterCheck (ioAbi : Bool) (publicName : String)
     let check <- if ioAbi && psBackendIoDispatcherType parameter.snd.snd then
         Except.ok (cat ["_psc_b.callable(", parameter.fst, ")"])
       else parameterCheck parameter.fst parameter.snd.snd
-    let (_unit, state) <- line (cat ["if not (", check, "):"]) state
+    let _psc_step_47 <- line (cat ["if not (", check, "):"]) state
+    let state := _psc_step_47.snd
     withIndent (line (cat ["raise _psc_b.TypeError(",
       psJsonQuote (cat ["PSC1_PYTHON_ARGUMENT_TYPE: ", publicName, ":", parameter.fst]), ")"])) state
 
@@ -564,7 +632,8 @@ def emitPublicFunction (name : String)
     (parameters : List (Prod String (Prod String PsVerifiedIrType)))
     (ioAbi calls : Bool) : Emit Unit :=
   fun (state : EmitState) => do
-    let (_unit, state) <- psBackendSourceForState (publicParameterCheck ioAbi name) parameters state
+    let _psc_step_48 <- psBackendSourceForState (publicParameterCheck ioAbi name) parameters state
+    let state := _psc_step_48.snd
     let args : String := psTextJoin ", "
       (psListMap (fun (parameter : Prod String (Prod String PsVerifiedIrType)) => parameter.fst) parameters)
     let call : String :=
@@ -590,19 +659,24 @@ def emitPublics (module : PsVerifiedIrModule) (ioAbi calls : Bool)
         if psListIsEmpty declaration.parameters then
           let force : String :=
             if calls then cat ["_psc_run(", valueName name, ")"] else cat [valueName name, "()"]
-          let (_unit, state) <- line (cat [name, " = ", force]) state
+          let _psc_step_49 <- line (cat [name, " = ", force]) state
+          let state := _psc_step_49.snd
           emitPublics module ioAbi calls rest (List.cons name seen)
             (List.cons (cat [name, ": ", resultType]) stubsRev) state
         else
-          let (_unit, state) <- helper "builtins" state
+          let _psc_step_50 <- helper "builtins" state
+          let state := _psc_step_50.snd
           let parameters <- psListMapExcept (publicParameter ioAbi)
             (psBackendSourceZipIndex declaration.parameters)
           let signature : String := psTextJoin ", "
             (psListMap (fun (parameter : Prod String (Prod String PsVerifiedIrType)) =>
               cat [parameter.fst, ": ", parameter.snd.fst]) parameters)
-          let (_unit, state) <- line (cat ["def ", name, "(", signature, ") -> ", resultType, ":"]) state
-          let (_unit, state) <- withIndent (emitPublicFunction name parameters ioAbi calls) state
-          let (_unit, state) <- line "" state
+          let _psc_step_51 <- line (cat ["def ", name, "(", signature, ") -> ", resultType, ":"]) state
+          let state := _psc_step_51.snd
+          let _psc_step_52 <- withIndent (emitPublicFunction name parameters ioAbi calls) state
+          let state := _psc_step_52.snd
+          let _psc_step_53 <- line "" state
+          let state := _psc_step_53.snd
           emitPublics module ioAbi calls rest (List.cons name seen)
             (List.cons (cat ["def ", name, "(", signature, ") -> ", resultType, ": ..."]) stubsRev) state
 
@@ -610,15 +684,21 @@ def emitModuleBody (module : PsVerifiedIrModule) (publicNames : List String) (io
     Emit String :=
   fun (state : EmitState) => do
     if !psListIsEmpty module.imports then throw "PSC1_PYTHON_FOREIGN_IMPORT_UNSUPPORTED"
-    let (_unit, state) <- psBackendSourceForState (emitDeclaration module) module.declarations state
+    let _psc_step_54 <- psBackendSourceForState (emitDeclaration module) module.declarations state
+    let state := _psc_step_54.snd
     let calls : Bool := psBackendNameSeen "calls" state.helpers
-    let (_unit, state) <- line "from typing import Callable" state
-    let (_unit, state) <- line "" state
+    let _psc_step_55 <- line "from typing import Callable" state
+    let state := _psc_step_55.snd
+    let _psc_step_56 <- line "" state
+    let state := _psc_step_56.snd
     let stubs : List String :=
       ["# Generated PSC1 scalar API; Nat values are nonnegative Python int.", "import builtins as _psc_b", "from typing import Callable", ""]
-    let (stubs, state) <- emitPublics module ioAbi calls publicNames List.nil (psListReverse stubs) state
-    let (_unit, state) <- line (cat ["__all__ = [",
+    let _psc_step_57 <- emitPublics module ioAbi calls publicNames List.nil (psListReverse stubs) state
+    let stubs := _psc_step_57.fst
+    let state := _psc_step_57.snd
+    let _psc_step_58 <- line (cat ["__all__ = [",
       psTextJoin ", " (psListMap psJsonQuote publicNames), "]"]) state
+    let state := _psc_step_58.snd
     Except.ok (Prod.mk (cat [psTextJoin "\n" stubs, "\n"]) state)
 
 def countNewlines (chars : List Char) (count : Nat) : Nat :=
@@ -634,7 +714,9 @@ def psPythonEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : Li
   match psStrictValidateModule validated.raw with
   | Except.error _ => throw "PSC1_PYTHON_IR_VALIDATION_FAILED"
   | Except.ok _ => pure Unit.unit
-  let (stub, state) <- PsPython.emitModuleBody validated.raw publicNames ioAbi PsPython.initialState
+  let _psc_step_59 <- PsPython.emitModuleBody validated.raw publicNames ioAbi PsPython.initialState
+  let stub := _psc_step_59.fst
+  let state := _psc_step_59.snd
   let selected : List String := psPythonRuntimeClosure state.helpers
   let runtime : String := psPythonRuntimeSource selected
   let header : String := "# Generated by PSC1 DirectPython; requires Python >= 3.14.\n# Logical admission does not certify backend preservation.\n\n"

@@ -1,0 +1,57 @@
+name: PSC1 T05 fields portable-source diagnostic
+'on':
+  workflow_dispatch: null
+  push:
+    branches: [work/psc1-pskernel-t05-fields-draft-20261025]
+    paths: [.github/workflows/psc1-t05-fields-portable.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  portable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PSC1_FIELDS_SOURCE: '069c150e7354b2fe1423eb435b28cdffe8ca3928'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: 069c150e7354b2fe1423eb435b28cdffe8ca3928
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Require the matching native diagnostic
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$PSC1_FIELDS_SOURCE"
+        python3 - <<'PY'
+        import json,os,urllib.request
+        request=urllib.request.Request('https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40118630467',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+        with urllib.request.urlopen(request,timeout=60) as response:
+            run=json.load(response)
+        assert run['head_sha']==os.environ['PSC1_FIELDS_SOURCE'] and run['run_attempt']==1
+        assert run['status']=='completed' and run['conclusion']=='success'
+        print('PSC1_FIELDS_NATIVE_DIAGNOSTIC_REQUIRED: PASS source='+run['head_sha']+' run=40118630467 attempt=1')
+        PY
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Build authentic compiler and check constructor field source closure
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        mkdir -p "$RUNNER_TEMP/psc1-fields-portable"
+        lake build psc1 2>&1 | tee "$RUNNER_TEMP/psc1-fields-portable/compiler-build.log"
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean \
+          2>&1 | tee "$RUNNER_TEMP/psc1-fields-portable/fields-source-check.log"
+        printf 'PSC1_T05_FIELDS_PORTABLE_DIAGNOSTIC: PASS source=%s fullAdmission=false qualified=false\n' "$PSC1_FIELDS_SOURCE"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-fields-portable-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-fields-portable/
+        if-no-files-found: error

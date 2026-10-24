@@ -1,0 +1,44 @@
+name: PSC1 retained Python PHP candidate envelope diagnosis
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths:
+      - .github/diagnostics/psc1-python-php-envelope.py
+      - .github/workflows/diagnostic-psc1-python-php-envelope.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bind immutable failed PHP artifact identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12550711608 > artifact-identity.json
+          python3 - <<'PY'
+          import json
+          a=json.load(open("artifact-identity.json"))
+          assert a["digest"]=="sha256:a45a4d5d20123bea5d383a6b54477d4467c715ad056eb2a13d409f1a2860f05a"
+          assert a["workflow_run"]["head_sha"]=="30389b1f218ec9c2f35321e93104edb7bb19d747"
+          assert a["id"]==12550711608
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 40069631375
+          name: psc1-python-php-selfhost-correctness-1800s-php-30389b1f218ec9c2f35321e93104edb7bb19d747
+          path: retained
+      - name: Inspect envelope and generated-source growth without compiling
+        run: python3 .github/diagnostics/psc1-python-php-envelope.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-php-envelope-diagnosis-${{ github.sha }}
+          path: |
+            diagnosis.json
+            artifact-identity.json
+          retention-days: 90

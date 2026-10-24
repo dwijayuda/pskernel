@@ -2,6 +2,7 @@ import Ps.KernelCore.API.DagOrdinaryConstructorParams
 import Ps.KernelCore.API.DagOrdinaryHeader
 import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 import Ps.KernelCore.Research.ExprV2PagedImport
+import Ps.KernelCore.Core.ExprV2.Decode
 import Lean
 
 /-

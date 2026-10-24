@@ -1,3 +1,29 @@
+## 2026-10-25 Paged proof repair passes; native parameter harness import corrected
+
+[Run 40115030307](https://github.com/dwijayuda/pskernel/actions/runs/40115030307),
+attempt 1, at `a9b8a1c38b3b8d3d3ce669368277f70fbd503154` kernel-checked the
+paged repair: all 8 metadata, 17 paged, 17 parameter and 16 result proof-command
+statuses are zero, following the retained 64 header/occurrence reports.
+The native header regression also passed. The next native parameter-regression
+command exposed a missing direct import of `Core.ExprV2.Decode`; its
+`DecodeChecked` and `DecodedRequire` references could not elaborate.
+Consequently native constructor runtime, the final 230-report audit and both
+complete generated routes are not qualified at a9b8.
+
+This candidate imports the decoder explicitly in both standalone constructor
+regression modules that call it, preserving the
+two-line paged proof repair, all production and all assertions, report inventories,
+workflow gates and limits. Follow its own automatic T05 push run; do not rerun
+or inherit the rejected a9b8 cohort. Require all 230 native reports and both
+source-bound authentic generated routes before advancing this helper milestone.
+
+T05/B/D remain OPEN; C remains FAIL. The integration branch remains at
+`0d9f062846d109c362210d441df5fd407ca2cdd7`. Fields/positivity work is preparation
+until the current prerequisite helper cohort passes; recursors, atomic admission
+and the external replay/ArenaModel proof boundary remain outstanding.
+
+---
+
 ## 2026-10-25 T05 completed-page lookup proof repair awaiting qualification
 
 The live work head `90af512e3e60f56ebbd48687a84fef3821876d86` failed

@@ -15,7 +15,15 @@ def codecMakeSpine (depth : Nat) (mode : Nat) (value : PsExpr) : PsExpr :=
         else if Nat.beq mode 1 then PsExpr.lam PsName.anonymous (PsExpr.bvar 1) value PsBinderInfo.explicit
         else if Nat.beq mode 2 then PsExpr.forallE PsName.anonymous (PsExpr.bvar 1) value PsBinderInfo.implicit
         else if Nat.beq mode 3 then PsExpr.letE PsName.anonymous (PsExpr.bvar 1) (PsExpr.lit (PsLiteral.natural 7)) value
-        else PsExpr.proj PsName.anonymous 0 value;
+        else if Nat.beq mode 4 then PsExpr.proj PsName.anonymous 0 value
+        else if Nat.beq mode 5 then PsExpr.app (PsExpr.bvar 0) value
+        else if Nat.beq mode 6 then PsExpr.app (PsExpr.app (PsExpr.bvar 0) (PsExpr.bvar 1)) value
+        else if Nat.beq mode 7 then
+          if Nat.beq (Nat.mod depth 2) 0 then PsExpr.app value (PsExpr.bvar 0)
+          else PsExpr.app (PsExpr.bvar 0) value
+        else if Nat.beq mode 8 then PsExpr.app value (PsExpr.app (PsExpr.bvar 0) (PsExpr.bvar 1))
+        else PsExpr.app (PsExpr.bvar 0)
+          (PsExpr.letE PsName.anonymous (PsExpr.bvar 1) (PsExpr.lit (PsLiteral.natural 7)) value);
       codecMakeSpine rest mode next
 `;
 const probe=`import CodecProbeInternal
@@ -47,7 +55,7 @@ for(const kind of ['legacy','current']){
  const session=createCompilerHostSession({requestId:id,target:'rust',sources,canonicalAdmissions:candidate.admissionRequest.admissions,checkerExecutable:checker});
  const admitted=session.admit(JSON.stringify(candidate.admissionRequest));assert.equal(admitted.accepted,true);
  const consumer=`let mut observations=Vec::<String>::new();
-for mode in 0u32..5 { for depth in [0u32,1,7,32] {
+for mode in 0u32..10 { for depth in [0u32,1,7,32] {
  observations.push(codecProbe(PsNat::from(depth),PsNat::from(mode)));
 }}
 println!("{:?}",observations);
@@ -56,12 +64,12 @@ println!("{:?}",observations);
  const observed=observeArtifact(artifact);
  records.push({kind,closure:digest,requestSha256:sha(fs.readFileSync(request)),candidateSha256:sha(fs.readFileSync(output)),sourceSha256:sha(candidate.source),admissionsSha256:admitted.admissionsDigest,artifactSha256:artifact.sha256,event:observed.event,observations:observed.observation});
  if(kind==='current'){
-  const deep=`let lengths:Vec<String>=(0u32..5).map(|mode| codecProbe(PsNat::from(10000u32),PsNat::from(mode)).len().to_string()).collect();
+  const deep=`let lengths:Vec<String>=(0u32..10).map(|mode| codecProbe(PsNat::from(10000u32),PsNat::from(mode)).len().to_string()).collect();
 println!("{:?}",lengths);
 `;
   const scale=buildTarget({target:'rust',source:candidate.source,directory:path.join(directory,'scale'),consumer:deep,publicNames:['codecProbe']});
-  const result=observeArtifact(scale);assert.equal(result.observation.length,5);assert.ok(result.observation.every(n=>Number(n)>200000));
-  records.push({kind:'deep-10000-five-spines',artifactSha256:scale.sha256,event:result.event,byteLengths:result.observation});
+  const result=observeArtifact(scale);assert.equal(result.observation.length,10);assert.ok(result.observation.every(n=>Number(n)>200000));
+  records.push({kind:'deep-10000-ten-spines',artifactSha256:scale.sha256,event:result.event,byteLengths:result.observation});
  }
 }
 assert.deepEqual(records[1].observations,records[0].observations);

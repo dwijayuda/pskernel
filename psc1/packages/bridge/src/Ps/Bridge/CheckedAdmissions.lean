@@ -175,6 +175,7 @@ def psEncodeCodecLevels
 -- use direct tail calls. No additional semantic fuel or stack allowance.
 inductive PsCodecExprFrame where
   | app (encodedArg : String)
+  | appArg (encodedFn : Except PsCheckedAdmissionCodecError String)
   | lam (name : PsName) (type : Except PsCheckedAdmissionCodecError String) (binder : PsBinderInfo)
   | forallE (name : PsName) (type : Except PsCheckedAdmissionCodecError String) (binder : PsBinderInfo)
   | letE (name : PsName) (type : Except PsCheckedAdmissionCodecError String) (value : Except PsCheckedAdmissionCodecError String)
@@ -190,6 +191,15 @@ def psCodecExprApplyFrame (frame : PsCodecExprFrame)
       | Except.ok encodedFn =>
           Except.ok
             ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedA) (String.Internal.append (":") ((encodedArg)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedF) (String.Internal.append (":") ((encodedFn)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedApp)))))))) ("}"))))
+  | .appArg encodedFn =>
+      match result with
+      | Except.error error => Except.error error
+      | Except.ok encodedArg =>
+          match encodedFn with
+          | Except.error error => Except.error error
+          | Except.ok encodedFn =>
+              Except.ok
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedA) (String.Internal.append (":") ((encodedArg)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedF) (String.Internal.append (":") ((encodedFn)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedApp)))))))) ("}"))))
   | .lam name type binder =>
       match result with
       | Except.error error => Except.error error
@@ -235,6 +245,52 @@ def psCodecExprResume (frames : List PsCodecExprFrame)
   | List.cons frame rest =>
       psCodecExprResume rest (psCodecExprApplyFrame frame result)
 
+-- Compare the two return spines by an unbounded structural tail walk.
+-- This chooses traversal order only, without a fuel or acceptance cutoff.
+def psCodecPreferAppArg (fn : PsExpr) (arg : PsExpr) : Bool :=
+  match fn with
+  | .app parent _ =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg parent child
+      | .lam _ _ child _ => psCodecPreferAppArg parent child
+      | .forallE _ _ child _ => psCodecPreferAppArg parent child
+      | .letE _ _ _ child => psCodecPreferAppArg parent child
+      | .proj _ _ child => psCodecPreferAppArg parent child
+      | _ => false
+  | .lam _ _ body _ =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg body child
+      | .lam _ _ child _ => psCodecPreferAppArg body child
+      | .forallE _ _ child _ => psCodecPreferAppArg body child
+      | .letE _ _ _ child => psCodecPreferAppArg body child
+      | .proj _ _ child => psCodecPreferAppArg body child
+      | _ => false
+  | .forallE _ _ body _ =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg body child
+      | .lam _ _ child _ => psCodecPreferAppArg body child
+      | .forallE _ _ child _ => psCodecPreferAppArg body child
+      | .letE _ _ _ child => psCodecPreferAppArg body child
+      | .proj _ _ child => psCodecPreferAppArg body child
+      | _ => false
+  | .letE _ _ _ body =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg body child
+      | .lam _ _ child _ => psCodecPreferAppArg body child
+      | .forallE _ _ child _ => psCodecPreferAppArg body child
+      | .letE _ _ _ child => psCodecPreferAppArg body child
+      | .proj _ _ child => psCodecPreferAppArg body child
+      | _ => false
+  | .proj _ _ value =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg value child
+      | .lam _ _ child _ => psCodecPreferAppArg value child
+      | .forallE _ _ child _ => psCodecPreferAppArg value child
+      | .letE _ _ _ child => psCodecPreferAppArg value child
+      | .proj _ _ child => psCodecPreferAppArg value child
+      | _ => false
+  | _ => true
+
 def psEncodeCodecExprAcc (expr : PsExpr) (frames : List PsCodecExprFrame) :
     Except PsCheckedAdmissionCodecError String :=
   match expr with
@@ -263,10 +319,15 @@ def psEncodeCodecExprAcc (expr : PsExpr) (frames : List PsCodecExprFrame) :
               Except.ok
                 ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedConst)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedLs) (String.Internal.append (":") ((encodedLevels)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedN) (String.Internal.append (":") ((psEncodeCodecName name)))))))) ("}")))))
   | .app fn arg =>
-      match psEncodeCodecExprAcc arg List.nil with
-      | Except.error error => psCodecExprResume frames (Except.error error)
-      | Except.ok encodedArg =>
-          psEncodeCodecExprAcc fn (List.cons (PsCodecExprFrame.app encodedArg) frames)
+      if psCodecPreferAppArg fn arg then
+        let encodedFn : Except PsCheckedAdmissionCodecError String :=
+          psEncodeCodecExprAcc fn List.nil;
+        psEncodeCodecExprAcc arg (List.cons (PsCodecExprFrame.appArg encodedFn) frames)
+      else
+        match psEncodeCodecExprAcc arg List.nil with
+        | Except.error error => psCodecExprResume frames (Except.error error)
+        | Except.ok encodedArg =>
+            psEncodeCodecExprAcc fn (List.cons (PsCodecExprFrame.app encodedArg) frames)
   | .lam name type body binder =>
       let encodedType : Except PsCheckedAdmissionCodecError String :=
         psEncodeCodecExprAcc type List.nil;

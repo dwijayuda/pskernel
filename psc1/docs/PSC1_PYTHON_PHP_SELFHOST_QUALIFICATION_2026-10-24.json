@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24T10:05:00Z",
-  "status": "3600s-profile-implementation-awaiting-Linux-validation",
+  "recordedAtUtc": "2026-10-24T10:34:00Z",
+  "status": "genuine3600s-Python-and-PHP-qualification-in-progress-not-qualified",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -15,10 +15,12 @@
     "g1Ms": 240000,
     "corpusAndToolsMs": 240000,
     "checkerMs": 120000,
-    "correctnessG2G3Ms": 1800000,
+    "correctnessG2G3Ms": 3600000,
     "performanceG2G3Ms": 240000,
     "phpMemoryLimit": "1G",
-    "otherPolicies": "unchanged"
+    "otherPolicies": "unchanged",
+    "historicalCorrectnessG2G3Ms": 1800000,
+    "correctnessProfile": "correctness-3600s"
   },
   "checker": {
     "version": "4.35.0",
@@ -144,7 +146,7 @@
     ],
     "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
   },
-  "nextAction": "Validate profile, process-tree, negative, transport and source guards in Linux; then isolated BOTH-target correctness-3600s actual G1/G2/G3 and exact fixed points.",
+  "nextAction": "Read terminal run40085445958 Python120847425035/PHP120847425075 without cancelling; require G1/G2/G3 and exact fixed points independently. Primary full regression40083940157 continues at451aef05. On failure inspect exact artifact, implement measured correctness-preserving optimization and retry.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -1540,10 +1542,112 @@
       "ownedSync": "no demonstrated advantage; do not promote"
     },
     "php": {
-      "run": 40083473782,
-      "status": "failed-before-execution-tokenized-unbalanced-fragment",
+      "run": 40084087416,
+      "controlCommit": "4cea7e81d6c9ed1cbafa1128023b08f628bb87e9",
+      "status": "success-five-frozen-candidate-matches-and120s-profiles-only",
       "production": false,
-      "qualification": false
+      "qualification": false,
+      "variants": [
+        {
+          "mode": "node-properties",
+          "modifiedSourceSha256": "d9f58dd4603438af4b4f2d75d5a79918cb5b253359bc3c5d8c631828d57c951e",
+          "slotSites": 40187,
+          "directCallSites": 0,
+          "matchedFrozenCandidates": [
+            "G1-lean-modules",
+            "G1-ps-integer-unicode",
+            "G1-ps-list-literal",
+            "G1-lean-handler-pattern",
+            "G1-lean-ordinary-loop"
+          ],
+          "elapsedSeconds": 120.319131881,
+          "owners": {
+            "<runtime>": 72,
+            "psLexListLengthAcc_\\$psc0SH_0\\$spec\\$Char\\$worker": 7,
+            "psStringEqFrom": 4,
+            "psStringEqFromWithFuel\\$worker": 4,
+            "psEnvironmentIndexFindWorker\\$worker": 4,
+            "psEnvironmentHashStringWorker\\$worker": 3,
+            "psMetaExprHasAssignedVarScan": 3,
+            "psJsonReverseCharsAcc\\$worker": 2,
+            "psStringEq": 2,
+            "psExprInstantiateAtWorker\\$worker": 2,
+            "psEnvironmentNameHash": 2,
+            "psExprLiftBVarsWorker\\$worker": 2,
+            "psJsonStringCharsAccWithFuel\\$worker": 1,
+            "psJsonStringAtEnd": 1,
+            "psJsonCharEq": 1,
+            "psJsonParseArrayWith\\$worker": 1,
+            "psLevelListHasMVar": 1,
+            "psEnvironmentFind": 1,
+            "psLevelInstantiateParams": 1,
+            "psLexIsTwoCharSymbol": 1,
+            "psLexCharEq": 1,
+            "psLexNatBetween": 1,
+            "psLexSkipTriviaWithFuel\\$worker": 1,
+            "psWhnfWithFuel\\$worker": 1,
+            "psInferNameListLength": 1
+          },
+          "peakPhpAllocatedBytes": 1072906240,
+          "scope": "controlled backend-runtime/slot/static-call substitutions on exact archived G1/G2 input; five complete frozen candidate responses match; no admission or fixed-point qualification"
+        },
+        {
+          "mode": "node-properties-and-direct-calls",
+          "modifiedSourceSha256": "3cc935b0a36dafd4db7ed6f5b485159b0c7e82f5697cfe5a13d3885eccde22ac",
+          "slotSites": 40187,
+          "directCallSites": 3224,
+          "matchedFrozenCandidates": [
+            "G1-lean-modules",
+            "G1-ps-integer-unicode",
+            "G1-ps-list-literal",
+            "G1-lean-handler-pattern",
+            "G1-lean-ordinary-loop"
+          ],
+          "elapsedSeconds": 120.347526283,
+          "owners": {
+            "<runtime>": 66,
+            "psLexListLengthAcc_\\$psc0SH_0\\$spec\\$Char\\$worker": 9,
+            "psStringEqFromWithFuel\\$worker": 8,
+            "psExprInstantiateAtWorker\\$worker": 6,
+            "psStringEq": 3,
+            "psLexSkipTriviaWithFuel\\$worker": 2,
+            "psEnvironmentHashStringWorker\\$worker": 2,
+            "psLexCharEq": 2,
+            "psMetaExprHasAssignedVarScan": 2,
+            "psInferTypeWithFuelWorker\\$worker": 2,
+            "psJsonStringNext": 1,
+            "psJsonStringGet": 1,
+            "psJsonReverseCharsAcc\\$worker": 1,
+            "psJsonCharListLengthAcc\\$worker": 1,
+            "psJsonCharCode": 1,
+            "psExprAlphaEq\\$worker": 1,
+            "psLexLetterLike": 1,
+            "psEnvironmentIndexFindWorker\\$worker": 1,
+            "psListReverseAcc_\\$psc0SH_0\\$spec\\$Char\\$worker": 1,
+            "psEnvironmentFindInListWorker\\$worker": 1,
+            "psWhnfWithFuel\\$worker": 1,
+            "psWhnf": 1,
+            "psStringEqFrom": 1,
+            "psMetaInstantiate": 1,
+            "psLexStringToListAccWithFuel\\$worker": 1,
+            "psElabDeclarationsWithOriginsFold": 1,
+            "psLexReadToken": 1,
+            "psLevelListInstantiateParams": 1
+          },
+          "peakPhpAllocatedBytes": 1072873472,
+          "scope": "controlled backend-runtime/slot/static-call substitutions on exact archived G1/G2 input; five complete frozen candidate responses match; no admission or fixed-point qualification"
+        }
+      ],
+      "earlierDiagnosticFailures": [
+        {
+          "run": 40083473782,
+          "reason": "standalone-fragment parse before execution"
+        },
+        {
+          "run": 40083961393,
+          "reason": "tokenizer scratch retained while requiring compiler under1G; corrected by freeing transformation scratch, production limits unchanged"
+        }
+      ]
     }
   },
   "longCorrectnessProfile": {
@@ -1568,6 +1672,66 @@
       "negative cases",
       "source identities"
     ],
-    "diagnostics": "Once/minute resource heartbeat; existing100ms procfs sample, sampled CPU ticks, RSS, process count and pipe byte counts; no semantic progress claim"
+    "diagnostics": "Once/minute resource heartbeat; existing100ms procfs sample, sampled CPU ticks, RSS, process count and pipe byte counts; no semantic progress claim",
+    "implementationCommit": "451aef056de343b8423a9a2e544d2c3d0d6b1fb4"
+  },
+  "profileImplementationCommit": "451aef056de343b8423a9a2e544d2c3d0d6b1fb4",
+  "profileSourcePreflight": {
+    "run": 40083935614,
+    "job": 120842917046,
+    "conclusion": "success",
+    "artifactId": 12555219938,
+    "coverage": "closed240/1800/3600 profile boundaries; actual process-tree escaped-session/deadline/output tests; transport/poisoned-cache guards; retained/admitted runtime guards;87 modules/target/both grammars"
+  },
+  "longCorrectnessQualification": {
+    "status": "in-progress-not-qualified",
+    "sourceAndToolsCommit": "451aef056de343b8423a9a2e544d2c3d0d6b1fb4",
+    "branch": "qualification/psc1-python-php-3600s-20261024",
+    "controlCommit": "2b3467f10741e49c4fa1bb3cf371a44828227975",
+    "requestCommit": "a6a399c604e29f62cec1f74d2db49d9c45873ea0",
+    "run": 40085445958,
+    "sourceEquivalence": {
+      "comparedBase": "451aef056de343b8423a9a2e544d2c3d0d6b1fb4",
+      "changedPaths": [
+        ".github/qualification-requests/psc1-python-php-selfhost.json",
+        ".github/workflows/diagnostic-psc1-python-php-qualification.yml"
+      ],
+      "compilerAndCriticalHostToolsIdentical": true
+    },
+    "targets": [
+      "python",
+      "php"
+    ],
+    "profile": "correctness-3600s",
+    "g2g3TimeoutMs": 3600000,
+    "g1TimeoutMs": 240000,
+    "fixedPoint": "not-yet-qualified",
+    "jobs": {
+      "python": 120847425035,
+      "php": 120847425075
+    }
+  },
+  "profileFullRegression": {
+    "runId": 40083940157,
+    "reviewHead": "451aef056de343b8423a9a2e544d2c3d0d6b1fb4",
+    "testedMerge": "003a85cef05cf894771b67b2dbc648e681e3ca59",
+    "identicalGitTree": "854147ae65853c0c26612f0c48424c9083e33a46",
+    "linuxJob": 120845118090,
+    "gateJob": 120850001657,
+    "status": "success",
+    "qualifiedCriteria": 37,
+    "blockedCriteria": 0,
+    "releaseReady": true,
+    "targetExecutionBundles": 14,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "scriptingRegressionGroups": 28,
+    "scriptingArtifactBundles": 24,
+    "architectureRegressionGroups": 11,
+    "artifactId": 12556184945,
+    "artifactDigest": "sha256:da19bedfa3a895b406eb344d3f840652a15fed672173323fe9be9a21b24f02b7",
+    "scope": "current supervision/profile and unchanged compiler source; seven backend regressions, not Python/PHP G2/G3 qualification"
   }
 }

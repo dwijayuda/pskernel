@@ -71,9 +71,15 @@ passes87-module/both-grammar censuses, all retained/admitted guards,43 loop
 comparisons,2M steps,200k escaping-closure fallback, swaps and typed IO order/
 first-error tests without changing Python recursion limits. Genuine Python
 requeste6327cdd/run40079719620 and PHP extraction request1174300d/run40078954006
-are active independently. Later Python-only source does not change the PHP
-owned closure. Keep source stable and read terminal evidence before next fixes.
-No current G2/G3/fixed-point success is inferred from these focused tests.
+both passed independent G1/strict IR/ten observations and then failed G2 at
+1800057/1800042ms. Neither reached G3/fixed point. Current full40080321500
+passes37/37 for sourcee20a1154. The isolated correctness-3600s profile in451aef05
+passes preflight40083935614 and preserves historical1800s/performance240s/G1
+and every other resource or checking limit. Genuine both-target run40085445958
+at requesta6a399c6 is active on qualification/psc1-python-php-3600s-20261024.
+Only branch guard/request differ from451aef05; generated compiler source and
+critical host tools are identical. Minute resource heartbeats use existing
+procfs sampling, not compiler callbacks. Wait for actual terminal qualification.
 
 Strict IR already requires canonical constructor field order; the PHP emitter
 evaluates in that order. Reordered construction remains refused, while match

@@ -177,11 +177,11 @@ lean_lib PsBackendWasm where
 
 lean_lib PsBackendPython where
   srcDir := "packages/backend-python/src"
-  roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Module]
+  roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Module, `Ps.BackendPython.CompilerService]
 
 lean_lib PsBackendPhp where
   srcDir := "packages/backend-php/src"
-  roots := #[`Ps.BackendPhp.Runtime, `Ps.BackendPhp.Module]
+  roots := #[`Ps.BackendPhp.Runtime, `Ps.BackendPhp.Module, `Ps.BackendPhp.CompilerService]
 
 -- Independent admission is host-only; logical checking is never delegated to
 -- formatters, transport code, the elaborator or an unvalidated raw IR wrapper.

@@ -1,0 +1,74 @@
+name: PSC1 Python PHP self-host source preflight
+on:
+  push:
+    branches: [feat/psc1-python-php-selfhost-20261024]
+    paths:
+      - psc1/packages/**
+      - psc1/scripts/TargetServiceSeed.lean
+      - psc1/host-tools/generated-target-profiles.mjs
+      - psc1/lakefile.lean
+      - .github/workflows/diagnostic-psc1-python-php-preflight.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-python-php-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native_cache
+        with:
+          path: psc1/.lake
+          key: psc1-python-php-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-python-php-native-v1-${{ runner.os }}-
+            psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install official pinned Lean and locked dependencies
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+      - name: Build existing backend facades and census
+        id: native_build
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          node scripts/generated-target-contract-tests.mjs
+          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe
+      - uses: actions/cache/save@v4
+        if: steps.native_build.outcome == 'success'
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Census both complete source closures in both grammars
+        run: |
+          set +e
+          node scripts/generated-target-source-audit.mjs python
+          python_status=$?
+          node scripts/generated-target-source-audit.mjs php
+          php_status=$?
+          test "$python_status" -eq 0 && test "$php_status" -eq 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-python-php-source-${{ github.sha }}
+          path: |
+            psc1/dist/generated-python-compiler/source-audit/
+            psc1/dist/generated-php-compiler/source-audit/
+          retention-days: 90

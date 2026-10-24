@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: promote
+          - name: opt0-promote
             flags: 'mem2reg simplifycfg'
     steps:
       - uses: actions/checkout@v4
@@ -50,9 +50,9 @@ jobs:
           const dir=path.resolve('dist/rust-build-study-'+process.env.STUDY_NAME);fs.mkdirSync(dir,{recursive:true});
           const work=path.join(dir,'work');fs.mkdirSync(work);
           for(const f of ['main.rs','Cargo.lock'])fs.copyFileSync(path.join(m.directory,f),path.join(work,f));
-          const toml=fs.readFileSync(path.join(m.directory,'Cargo.toml'),'utf8');assert.ok(toml.includes('opt-level=0'));fs.writeFileSync(path.join(work,'Cargo.toml'),toml.replace('opt-level=0','opt-level=1'));
+          const toml=fs.readFileSync(path.join(m.directory,'Cargo.toml'),'utf8');assert.ok(toml.includes('opt-level=0'));fs.writeFileSync(path.join(work,'Cargo.toml'),toml);
           const env={...process.env,CARGO_ENCODED_RUSTFLAGS:['-C','no-prepopulate-passes','-C','passes='+process.env.STUDY_FLAGS].join('\u001f'),CARGO_TARGET_DIR:path.join(dir,'target')};delete env.RUSTFLAGS;
-          const receipt={schema:'psc1-rust-build-study/1',subjectCommit:q.testedCommit,controlCommit:process.env.GITHUB_SHA,sourceClosureDigest:q.sourceClosureDigest,sourceSha256:m.sourceSha256,requestSha256:sha(fs.readFileSync(input)),name:process.env.STUDY_NAME,flags:['-C','no-prepopulate-passes','-C','passes='+process.env.STUDY_FLAGS],optimizationLevel:1,codegenUnits:256,qualification:false,admission:'not-run',publication:'not-run'};
+          const receipt={schema:'psc1-rust-build-study/1',subjectCommit:q.testedCommit,controlCommit:process.env.GITHUB_SHA,sourceClosureDigest:q.sourceClosureDigest,sourceSha256:m.sourceSha256,requestSha256:sha(fs.readFileSync(input)),name:process.env.STUDY_NAME,flags:['-C','no-prepopulate-passes','-C','passes='+process.env.STUDY_FLAGS],optimizationLevel:0,codegenUnits:256,qualification:false,admission:'not-run',publication:'not-run'};
           const save=()=>{fs.writeFileSync(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');console.log('PSC1_RUST_BUILD_STUDY: '+JSON.stringify(receipt));};
           let build=boundedRun('cargo',['build','--release','--locked','--message-format=short','--manifest-path',path.join(work,'Cargo.toml')],{env,logDirectory:path.join(dir,'build'),timeoutMs:240000});
           fs.writeFileSync(path.join(dir,'build.txt'),build.stdout+'\n'+build.stderr);console.log('PSC1_STUDY_BUILD_LOG: '+build.stderr.slice(-12000));delete build.stdout;delete build.stderr;receipt.build=build;save();

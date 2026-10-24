@@ -373,11 +373,11 @@ def emitAlternative
   let body : PsVerifiedIrExpr := alternative.snd.snd;
   psBackendStateBind (psBackendStateLift (constructorFields module owner name))
     (fun (fields : List String) =>
-      let prefix : String :=
+      let branchPrefix : String :=
         match first with
         | Option.some firstName => if psStringEq firstName name then "if " else "elif "
         | Option.none => "elif ";
-      psBackendStateBind (line (cat [prefix, scrutinee, "[0] == ", psJsonQuote name, ":"]))
+      psBackendStateBind (line (cat [branchPrefix, scrutinee, "[0] == ", psJsonQuote name, ":"]))
         (fun (_unit : Unit) =>
           withIndent (psBackendStateBind (emitBindings fields scrutinee bindings)
             (fun (entries : List (Prod String String)) =>

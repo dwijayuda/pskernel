@@ -6,16 +6,19 @@ Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 
 [canonical direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns exact source identities and immutable actual results.
 
-## Active provider/package queue
+## Completed provider/package milestone and remaining queue
+
+The user requested a stop at a verified milestone. This milestone is complete; no further feature work is performed in this turn.
 
 | Order | Work | Exact acceptance/status |
 | --- | --- | --- |
-| 1 | Core/provider separation | Implemented8c61a9c5; focused40104342314 PASS retained payloads, binary inventories, strict protocol/IR refusals, both grammars and real optional-target execution. |
-| 2 | Default and add-on packages | In progress: default proofscript includes JS/TS/Rust/Wasm core+component; Python/PHP emitters/resources installed explicitly as matching add-ons. Require actual offline default/add-on inventories, compilation/execution and missing/incompatible/tampered package refusal without output changes. |
-| 3 | Full regression and stop | Require37/37/all-seven/both-grammar source/runtime/application/minimum-Python/installed package checks. Record exact source/tree/run/artifact identities and stop at this verified milestone. No merge/publication. |
-| 4 | Later unified generated distribution | Separate future work: compose selected emitters under one generated service and genuinely qualify enlarged G1→G2→G3/fixed points per claimed engine. Native package split alone makes no new self-host claim. |
+| 1 | Core/provider boundary | COMPLETE: core excludes Python/PHP emitters; each worker excludes frontend/admission/publication/other emitter. Retained payload/IR equality, strict protocol/IR/receipt refusals and missing-provider output preservation PASS. |
+| 2 | Default and explicit add-on packages | COMPLETE: proofscript@0.1.0-psc1.3 has five default targets; matching Python/PHP add-ons are absent until explicitly installed. Offline default10 and optional4 grammar/target executions,26 refusal/preservation cases, source-library/local/global/typed-IO/resource canaries PASS. Core pins optional binary/resource descriptors. |
+| 3 | Required full qualification and stop | COMPLETE: Full [40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASSED: Linux120912148533/final gate120918578150;37/37 criteria,0 blocked,releaseReady=true; all seven backends/both grammars, applications, minimum-Python and installed package/IO/library checks. Review70522c25ea3826c05ba2e80f7f1e9c7df0b58213 and tested merge063d1da64db9beb69a8303af5a2a8788233dc7dd have identical Git treeb2d2ad3e24a07218c081eb20bc85670fd64e29e4. Artifact12566181617,sha256:be0a4ed3850383345acfbf2127d34caa32154ed6c5f8ac10304edd3d54899957. Stop with PR177 draft/unmerged and three matching unpublished tarballs retained. |
+| 4 | Unified generated compiler distribution | DEFERRED until a new instruction: one selected multi-backend composition root, generated execution engine selection and genuine enlarged-source G1→G2→G3/fixed points per claimed engine. Current native package split supplies no new self-host claim. |
+| 5 | Further extensibility/tooling | DEFERRED: stable cross-version portable provider ABI, bounded syntax expansion and comment-preserving refactors. Keep finite Practical Core v1 and all soundness/resource policies. |
 
-The finite [provider contract](../BACKEND_PROVIDER_CONTRACT.json) owns this slice's default/optional split and transport policy. Core retains independent admission/strictIR/ABI/publication; source-library metadata never acquires plugin or checker authority. Earlier3600s retry40091210960 is now a two-target G2 deadline failure; preserve artifacts and do not rerun it for packaging.
+[Contract](../BACKEND_PROVIDER_CONTRACT.json), [guide](PSC1_BACKEND_PROVIDERS.md), [receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json), [AI state](../AI_WORK_STATE.md) and [continuation](PSC1_BACKEND_PROVIDER_CONTINUATION.md) are authoritative for this slice. The older3600s retry40091210960 remains a two-target G2 deadline failure; preserve it and all earlier qualified Rust/TS/JS/Wasm snapshots.
 
 ## Historical Python/PHP milestone queue
 

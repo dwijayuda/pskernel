@@ -105,3 +105,9 @@ Further work after this verified slice: portable provider interfaces where
 needed, one generated multi-backend composition root, and genuine enlarged
 G1→G2→G3/fixed points for each claimed compiler execution engine. Preserve all
 older qualifications on their exact historical source snapshots.
+
+## Verified checkpoint
+
+Full [40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASSED: Linux120912148533/final gate120918578150;37/37 criteria,0 blocked,releaseReady=true; all seven backends/both grammars, applications, minimum-Python and installed package/IO/library checks. Review70522c25ea3826c05ba2e80f7f1e9c7df0b58213 and tested merge063d1da64db9beb69a8303af5a2a8788233dc7dd have identical Git treeb2d2ad3e24a07218c081eb20bc85670fd64e29e4. Artifact12566181617,sha256:be0a4ed3850383345acfbf2127d34caa32154ed6c5f8ac10304edd3d54899957.
+
+Focused40105565252 PASSED at971718f5; normal full CI also requires the exact-commit provider boundary receipt. Three matching unpublished tarballs are retained in the full artifact; see the [machine receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json) for exact hashes. The requested milestone is complete and stopped. [Continuation](PSC1_BACKEND_PROVIDER_CONTINUATION.md).

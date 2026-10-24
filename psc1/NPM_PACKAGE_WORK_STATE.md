@@ -1,48 +1,15 @@
-# PSC1 native npm package — current work state
+# PSC1 native npm package — verified provider/package checkpoint
 
-Updated 2026-10-20. Work is on draft PR #165, stacked on Practical Core PR #163.
-The previous PSC0 distribution work state is preserved
-[verbatim](docs/history/NPM_PACKAGE_WORK_STATE_BEFORE_NATIVE_2026-10-20.md).
+Updated2026-10-24 Asia/Jakarta. Draft [PR177](https://github.com/dwijayuda/pskernel/pull/177), stacked on preserved PR176/17cc49f. No merge or registry publication.
 
-## Current implementation
+proofscript@0.1.0-psc1.3 includes the native checked compiler, JS/TypeScript/Rust/Wasm core/component emitters, host tooling, pinned official Lean checking integration and locked production npm dependencies. Python/PHP are separate explicit @proofscript/backend-python and @proofscript/backend-php provider tarballs. The core contains neither optional emitter nor its output-backend resources and pins each matching add-on's complete native/resource descriptor.
 
-The `psc` workspace command now launches `npm-cli/psc.js`, which validates and
-executes the same checked native Lean compiler as the direct entrypoint.
-`scripts/npm-native-distribution.mjs` builds an unpublished
-`proofscript@0.1.0-psc1.2` tarball containing the native executable, all seven built-in
-backends, compiled prelude/admission provider, source pin, host tools and locked
-production dependencies. No generated PSC0 compiler or checker is a fallback.
+Full [40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASSED: Linux120912148533/final gate120918578150;37/37 criteria,0 blocked,releaseReady=true; all seven backends/both grammars, applications, minimum-Python and installed package/IO/library checks. Review70522c25ea3826c05ba2e80f7f1e9c7df0b58213 and tested merge063d1da64db9beb69a8303af5a2a8788233dc7dd have identical Git treeb2d2ad3e24a07218c081eb20bc85670fd64e29e4. Artifact12566181617,sha256:be0a4ed3850383345acfbf2127d34caa32154ed6c5f8ac10304edd3d54899957.
 
-The package has passed offline local and global installation and generated JS
-execution in Linux CI. The installed native entrypoint locates its bundled host
-files independently. The package remains private and unpublished; no merge,
-release or registry publication is authorized or performed.
+Focused40105565252 also PASS: exact retained emitters/IR, core/worker dependency inventories,16 protocol/IR and8 receipt refusals, actual optional execution in both grammars. Installed package qualification executes10 default and4 optional grammar/target cases and26 refusal/preservation cases. Existing offline local/global core, transitive source-library, installed typed IO and resource checks remain. Source-library metadata still carries no plugin/kernel/FFI authority.
 
-## Optional source libraries
+The [provider receipt](docs/PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json) owns exact source/merge/artifact/tarball identities. [Provider guide](docs/PSC1_BACKEND_PROVIDERS.md) and [npm guide](docs/PSC1_NPM_ECOSYSTEM.md) describe installation and constraints. The [single roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work.
 
-The native import capture path invokes the declarative source resolver with the
-actual importing file. The version-2 metadata contract specifies source kind,
-namespace, public modules, declared dependencies and exact compiler/Lean profile.
-Nested installed versions resolve relative to the importing package. Guest JavaScript
-is never executed to resolve source. Metadata supplies no admission authority.
+Platform scope remains Linux x64/glibc,Node>=22. All packages are private/unpublished qualification tarballs. This milestone does not qualify a unified generated compiler or new G1/G2/G3 fixed point. Older PSC1 all-seven-built-in and PSC0 distributions remain preserved in Git history and [historical work state](docs/history/NPM_PACKAGE_WORK_STATE_BEFORE_NATIVE_2026-10-20.md).
 
-The actual two-library tarball canary passes: four captured source files,
-independent native checking, public `answer = 42`, private declarations hidden.
-Private-module imports, an incompatible pin and an ill-typed transitive source fail
-while preserving previous output. The canary uses local unpublished tarballs;
-registry fetching of transitive dependencies is outside its claim.
-
-## Evidence and commands
-
-See [backend conformance](docs/PSC1_BACKEND_CONFORMANCE.md) for exact successful
-commit/run evidence and [the npm guide](docs/PSC1_NPM_ECOSYSTEM.md) for metadata
-examples, installation and limitations.
-
-Current commands are `npm run npm:pack:native` and `npm run test:npm-libraries`.
-Historical aliases are `npm:archive:psc0` and `npm:inspect:psc0`.
-Tarballs and receipts are retained in the focused Actions artifact under
-`npm-native/`; `SEVEN_BACKEND_QUALIFICATION.json` consolidates runtime and package evidence.
-
-Initial package qualification is Linux x64/glibc, Node >=22. Target runtimes remain
-separate requirements. The current compiler stays authored in Lean and built
-natively; no self-host compiler/kernel regeneration or fixed-point run is claimed.
+Stop at this verified checkpoint. Further generated multi-backend composition, cross-version plugin ABI, non-Linux packages and publication require their respective implementation/qualification/authorization.

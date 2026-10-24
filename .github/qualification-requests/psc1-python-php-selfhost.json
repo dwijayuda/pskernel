@@ -1,14 +1,14 @@
 {
   "schema": "psc1-python-php-selfhost-request/1",
   "branch": "feat/psc1-python-php-selfhost-20261024",
-  "parentCommit": "94ea0e84af36ae6fd39e7174214a41f0436b06d1",
+  "parentCommit": "e20a11549cdb1d656c05912089730bf2ebeaf933",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "php"
+    "python"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "PHP-only qualification after measured whole-source extraction allocation fix. Gate40078556459/job120827082248 passed all87-module/both-grammar/admitted/retained guards and25100helper+25100emittedAPI cases at1G/defaultstack. Python809 source unchanged; preserve both active809 attempts; target concurrency queues this PHP behind its immutable bounded-call baseline."
+  "reason": "Python-only qualification after lambda-free exact-self-tail loops. Gate40079503171/job120829903883 PASSED all87-module/both-grammar/native/admitted/retained tests,43 loop comparisons,2Msteps,200kescapingclosurefallback,argument-swap/typed-IO-order-and-first-error,exactASTrestoration. Preserved bounded-call809 Python G1 passed but G2 timedout1800049ms. PHP extraction117 source/active attempt unchanged; no raised limits or weakened verification."
 }

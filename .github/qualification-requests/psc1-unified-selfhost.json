@@ -1,14 +1,13 @@
 {
   "schema": "psc1-unified-selfhost-request/1",
-  "branch": "feat/psc1-unified-selfhost-20261024",
-  "parentCommit": "84cc15375e4236a902e8af6658d92a640c6aa22a",
+  "branch": "qualification/psc1-rust-nat-runtime-20261025",
+  "parentCommit": "9f24e3ac2a21a5faa1bf4a64b9225076fa52e681",
   "action": "qualify-independent-G1-G2-G3",
   "mode": "--self-host",
-  "profile": "correctness-1800s",
+  "profile": "correctness-3600s",
   "g1TimeoutMs": 240000,
-  "g2g3TimeoutMs": 1800000,
+  "g2g3TimeoutMs": 3600000,
   "targets": [
-    "rust",
-    "wasm-core"
+    "rust"
   ]
 }

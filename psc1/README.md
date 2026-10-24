@@ -17,6 +17,16 @@ Consult [backend conformance](docs/PSC1_BACKEND_CONFORMANCE.md) for exact commit
 executed coverage, target tools and remaining limitations. The presence of an emitter
 does not qualify every language feature.
 
+## Installed generated compiler candidate
+
+The [generated package guide](docs/PSC1_GENERATED_PACKAGE.md) provides an actual
+offline-tested unpublished tarball with explicit TS/Wasm G3 execution via
+`psc generated build`, alongside the current native compiler and matching
+optional Python/PHP packages. Initial generated publication targets JS.
+Native `psc build` retains JS/TS/Rust/Wasm core/component outputs.
+Historical engine qualifications remain separate from the current native source;
+current-root/all-four-engine qualification is still pending.
+
 ## A small program
 
 ```lean

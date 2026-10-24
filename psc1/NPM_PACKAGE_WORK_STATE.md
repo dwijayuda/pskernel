@@ -1,56 +1,49 @@
 # PSC1 npm package work state
 
-## Generated integration — active 2026-10-25
+Updated 2026-10-25 Asia/Jakarta. Packages remain unpublished; draft PR178 is unmerged.
 
-Primary941d2730/run40138989081 passes offline installed generated CLI with native
-compiler unavailable:26 host boundary checks,10 corpus cases and12 refusal/
-tamper cases. Diagnostic72de82f6/run40139913145 additionally passes12 real
-application builds/44 observations in both grammars under preserved TS/Wasm
-G3 engines. JSON-record and CLI-argument semantics agree across both engines.
-This initial explicit generated path publishes independently admitted JS;
-native JS/TS/Rust/Wasm core/component and optional Python/PHP are retained.
-Engine closure92654df5 is historical and separately recorded from native build.
-No all-four-engine/latest-root release or registry publication is claimed.
+## Current installable candidate
 
-Primary941d2730 full40138996117 passes37/37 Practical Core criteria, all seven
-backends/both grammars, native offline installs and matching optional providers.
-Tested merge7606d172 shares tree1c268d41d81ee35aa4182fe59b4b87cfc2421df6.
-Artifact12578274080,ZIPadf631066e56a6fb0617c8132ab14b9ec0ac506a6a125c8e990f9222e8bd04e4.
-Later runtime candidate must pass its own full gate before being called qualified.
-See [generated install guide](docs/PSC1_GENERATED_PACKAGE.md) and the
-[single roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) for current scope and queue.
+[40144094413](https://github.com/dwijayuda/pskernel/actions/runs/40144094413)/
+job121021665068 passes actual offline installed generated CLI:
+26 host-boundary checks,10 compiler cases,12 application builds/44 observations,
+14 refusal/tamper checks, both source grammars and both TS/Wasm engines.
+The native compiler executable is unavailable throughout generated compilation.
 
-The sections below preserve prior package milestones.
+[Artifact12579329783](https://github.com/dwijayuda/pskernel/actions/runs/40144094413/artifacts/12579329783)
+contains proofscript@0.1.0-psc1.3 and matching optional
+@proofscript/backend-python/@proofscript/backend-php tarballs. ZIP SHA256:
+fa1321d92b4a3bece88e726a60ffbda77343116d04c28fb476770e2793b76322.
 
-## Historical unified compiler checkpoint — 2026-10-25
+| Package | Tarball SHA256 |
+| --- | --- |
+| proofscript | 203c7b58ec8e1b3c6aaa0cdaa5ead0aff942a9b4beb7ed1e865f83779ae5e3f0 |
+| @proofscript/backend-python | 31908f41d567569d35d8f8cd8c8fffab4cbfbff8ae2847bc555f7768d740c34d |
+| @proofscript/backend-php | 497c78c2f47b599dc1bf3f4b48cb6a7144e718889d1fbfae021dba0c2b1a7d1a |
 
-The package split remains the qualified native proofscript@0.1.0-psc1.3 core
-(JS/TS/Rust/Wasm core+component) plus explicit matching Python/PHP add-ons.
-Full 40117055147 passes offline default/optional execution and all retained
-package/library/typed-IO checks. Artifact `12570094990` retains all three matching
-unpublished tarballs; exact source/build pins intentionally reject mixed builds.
-[Exact unified receipt](docs/PSC1_UNIFIED_SELFHOST_QUALIFICATION_2026-10-25.json)
-records their digests and the native seven-backend qualification.
+Packaging control9b9b0f7b checks out exact implementationdaa73501.
+Native sourceec90dc12 is the tested merge with identical tree to reviewdaa73501.
+Full40141923929 passes37/37 Practical Core criteria, all seven targets/both
+grammars/apps/native and optional-provider execution. Source/build pins remain
+strict: use these matching add-ons, not older same-version tarballs.
 
-A separate generated composition root now passes all four G1 engines at
-structured-v2 source `783cf8fc` (160 cross-target cases/36 refusals). Earlier
-v1 source `b2ab4d34` passes genuine JS and TS G1/G2/G3 and exact fixed points.
-Current-v2 full chains and generated-engine package/CLI/component/provider
-integration remain pending. The npm metadata still correctly says native-lean
-and noSelfHostQualification:true; no generated distribution or registry
-publication is claimed. Continue through the [single roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md).
+The core includes native JS/TS/Rust/Wasm core/component emitters, independent
+checking integration, locked host dependencies and qualified historical TS/Wasm
+G3 engines on closure92654df5. Use `psc generated build` for explicit generated
+execution and `psc build` for native compilation. Initial generated publication
+is JS. Both paths retain official Lean4.35 admission/strict IR and refusals.
+Generated source/asset/adapters/checker/host dependencies are pinned and output
+publication is transactional. Invalid UTF8 and changed adapter bytes refuse.
 
+Current-root Rust G2/G3 is running separately in40141718481; no outcome is
+inherited by the package. A shared-root/all-four-engine generated release,
+other generated publication targets/components, Rust asset integration, clean
+reproduction and final release qualification remain pending.
+No registry `npm install proofscript` release is claimed. Linux x64/glibc;
+generated execution requires Node22.23.3. See the
+[install guide](docs/PSC1_GENERATED_PACKAGE.md), [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md)
+and [runtime receipt](docs/PSC1_RUST_NAT_RUNTIME_QUALIFICATION_2026-10-25.json).
 
-Updated2026-10-24 Asia/Jakarta. Draft [PR177](https://github.com/dwijayuda/pskernel/pull/177), stacked on preserved PR176/17cc49f. No merge or registry publication.
-
-proofscript@0.1.0-psc1.3 includes the native checked compiler, JS/TypeScript/Rust/Wasm core/component emitters, host tooling, pinned official Lean checking integration and locked production npm dependencies. Python/PHP are separate explicit @proofscript/backend-python and @proofscript/backend-php provider tarballs. The core contains neither optional emitter nor its output-backend resources and pins each matching add-on's complete native/resource descriptor.
-
-Full [40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASSED: Linux `120912148533`/final gate120918578150;37/37 criteria,0 blocked,releaseReady=true; all seven backends/both grammars, applications, minimum-Python and installed package/IO/library checks. Review `70522c25ea3826c05ba2e80f7f1e9c7df0b58213` and tested merge `063d1da64db9beb69a8303af5a2a8788233dc7dd` have identical Git treeb2d2ad3e24a07218c081eb20bc85670fd64e29e4. Artifact `12566181617`,sha256:be0a4ed3850383345acfbf2127d34caa32154ed6c5f8ac10304edd3d54899957.
-
-Focused40105565252 also PASS: exact retained emitters/IR, core/worker dependency inventories,16 protocol/IR and8 receipt refusals, actual optional execution in both grammars. Installed package qualification executes10 default and4 optional grammar/target cases and26 refusal/preservation cases. Existing offline local/global core, transitive source-library, installed typed IO and resource checks remain. Source-library metadata still carries no plugin/kernel/FFI authority.
-
-The [provider receipt](docs/PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json) owns exact source/merge/artifact/tarball identities. [Provider guide](docs/PSC1_BACKEND_PROVIDERS.md) and [npm guide](docs/PSC1_NPM_ECOSYSTEM.md) describe installation and constraints. The [single roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work.
-
-Platform scope remains Linux x64/glibc,Node>=22. All packages are private/unpublished qualification tarballs. This milestone does not qualify a unified generated compiler or new G1/G2/G3 fixed point. Older PSC1 all-seven-built-in and PSC0 distributions remain preserved in Git history and [historical work state](docs/history/NPM_PACKAGE_WORK_STATE_BEFORE_NATIVE_2026-10-20.md).
-
-Stop at this verified checkpoint. Further generated multi-backend composition, cross-version plugin ABI, non-Linux packages and publication require their respective implementation/qualification/authorization.
+Earlier package checkpoints and their exact receipts remain in Git history.
+The [provider guide](docs/PSC1_BACKEND_PROVIDERS.md) retains the unchanged
+native protocol, source-only package authority boundary and installation model.

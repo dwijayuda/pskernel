@@ -1,0 +1,381 @@
+{
+  "schema": "psc1-installed-current-generated-checkpoint/1",
+  "run": 40144094413,
+  "job": 121021665068,
+  "conclusion": "success",
+  "artifact": 12579329783,
+  "artifactZipSha256": "fa1321d92b4a3bece88e726a60ffbda77343116d04c28fb476770e2793b76322",
+  "inputs": {
+    "schema": "psc1-current-package-inputs/1",
+    "controlCommit": "9b9b0f7b6ced777146ca64f57b4c54253c83fa64",
+    "packagingSourceCommit": "daa735017e34ee94da79d747c363237b4adbc4ef",
+    "nativeSourceCommit": "ec90dc1280b395de4d64532517e6ddca727ee07e",
+    "nativeQualificationRun": 40141923929,
+    "nativeArtifact": 12579757745,
+    "core": {
+      "file": "dist/npm-generated/run-DznGBG/tarballs/proofscript-0.1.0-psc1.3.tgz",
+      "sha256": "203c7b58ec8e1b3c6aaa0cdaa5ead0aff942a9b4beb7ed1e865f83779ae5e3f0"
+    },
+    "optional": {
+      "python": {
+        "file": "dist/npm-generated/run-DznGBG/tarballs/proofscript-backend-python-0.1.0-psc1.3.tgz",
+        "sha256": "31908f41d567569d35d8f8cd8c8fffab4cbfbff8ae2847bc555f7768d740c34d",
+        "bytes": 33206928
+      },
+      "php": {
+        "file": "dist/npm-generated/run-DznGBG/tarballs/proofscript-backend-php-0.1.0-psc1.3.tgz",
+        "sha256": "497c78c2f47b599dc1bf3f4b48cb6a7144e718889d1fbfae021dba0c2b1a7d1a",
+        "bytes": 33225275
+      }
+    },
+    "publication": "unpublished"
+  },
+  "qualification": {
+    "schema": "psc1-generated-package-qualification/1",
+    "status": "passed",
+    "testedCommit": "9b9b0f7b6ced777146ca64f57b4c54253c83fa64",
+    "nativeInputTarballSha256": "cacffc3c4a0407cfa5c08ec1ad4ef83955a308fe68d85737fc2c7ba9dc19868c",
+    "distribution": {
+      "schema": "psc1-installed-generated-engines/1",
+      "packageBuildCommit": "9b9b0f7b6ced777146ca64f57b4c54253c83fa64",
+      "nativeCoreSourceCommit": "ec90dc1280b395de4d64532517e6ddca727ee07e",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "engines": {
+        "ts": {
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "qualifiedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "qualification": "qualified",
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "performanceQualification": "not-run-in-this-profile",
+          "executableSha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75",
+          "adapter": {
+            "path": "selfhost/ts/adapter.mjs",
+            "sha256": "15960a31fbfea8dc93e316e71639a7e033c4e6797faf8c2b9d7b9da0355e7a5d"
+          },
+          "dependencies": [
+            {
+              "path": "selfhost/ts/artifact.json",
+              "sha256": "dacdd66e5ed9a92ea3b47069755f17c645df022909d2f84f0dd5b1acb8a0c85b"
+            },
+            {
+              "path": "selfhost/ts/module.d.ts",
+              "sha256": "eb30704e90a4009eda4fbe4076465056a6aa63790ef6966fa1c9248494ad0e1e"
+            },
+            {
+              "path": "selfhost/ts/module.js",
+              "sha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75"
+            },
+            {
+              "path": "selfhost/ts/module.js.map",
+              "sha256": "252a54c1c26ab00a7fb36ba59cd17c1f77168fe029ea88a2133c8db595649898"
+            },
+            {
+              "path": "selfhost/ts/module.ts",
+              "sha256": "cc8f89bea641d935df27ea742ed1d60f6ee70c1c7f7a9fad3b09e3a18a25c47c"
+            },
+            {
+              "path": "selfhost/ts/package.json",
+              "sha256": "d218e29ec01186542b0d85bdc6691d12514e4cdd0ba3b9cd81f253250c8d1e34"
+            },
+            {
+              "path": "selfhost/ts/tsconfig.json",
+              "sha256": "15c99e834a57338ec2edb135c28782c911eb5db8ac881b5aca2b01324209ecec"
+            },
+            {
+              "path": "selfhost/ts/qualification.json",
+              "sha256": "2fe9b19ce6378b66e4450101b8c123348485d08843eea434db5962a7fa1742b2"
+            }
+          ]
+        },
+        "wasm-core": {
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "qualifiedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "qualification": "qualified",
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "performanceQualification": "not-run-in-this-profile",
+          "executableSha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df",
+          "adapter": {
+            "path": "selfhost/wasm-core/adapter.mjs",
+            "sha256": "67b6b330249da51146dcd93a7072eb053c3bbf1ce063b89add62054af6f72556"
+          },
+          "dependencies": [
+            {
+              "path": "selfhost/wasm-core/artifact.json",
+              "sha256": "1f33a6a8b2b731d50f997f1ac4008ec06a0d4d3a4b5c04ca0b1d5ab06d0c6996"
+            },
+            {
+              "path": "selfhost/wasm-core/module.wasm",
+              "sha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df"
+            },
+            {
+              "path": "selfhost/wasm-core/module.wasm.hex",
+              "sha256": "f370d6c4fc845075f3fb307bd0e60dc25ef41390017210e7f8cb9cf9ef056f04"
+            },
+            {
+              "path": "selfhost/wasm-core/probe.mjs",
+              "sha256": "6dd875d6b8235a07673f5bbdb2395cabd5bdee8d20291636793807f5acb3dc18"
+            },
+            {
+              "path": "selfhost/wasm-core/qualification.json",
+              "sha256": "879664b36b59aa7ade892295f246a7feda619833c49fffcf5adbf149ae38fe8e"
+            }
+          ]
+        }
+      },
+      "checker": {
+        "path": "native/bin/psc1_independent_checker",
+        "sha256": "c829020981c1e3a5ddd45c02d2e82b458ce9ee77c2c9668975da9ca6578645cc"
+      },
+      "runner": {
+        "path": "scripts/generated-compiler-runner.mjs",
+        "sha256": "bbcda77cb0942484146fc23bd299ac821bfb13e9780cfdace5742d8c6725187e"
+      },
+      "session": {
+        "path": "host-tools/generated-compiler-session.mjs",
+        "sha256": "8ba8bb8226a62504829fdb3fedae78f44b19e1dc27440b38e877e20218a40974"
+      },
+      "hostDependencies": [
+        {
+          "path": "host-tools/compiler-host-protocol.mjs",
+          "sha256": "def328a4a74c51ce71ae7365b2573ece27964da8f78ef2391310e4f97f1c962f"
+        },
+        {
+          "path": "scripts/compiler-closure-contract.mjs",
+          "sha256": "2a2c1244ab18a85777feef29bfc8802939c21db966c7fe95246939524fe5ad8d"
+        },
+        {
+          "path": "host-tools/generated-wasm-transport.mjs",
+          "sha256": "c1c870ff75140ad4e74427dc94f7d46de9230502d1f737033f28914391376c06"
+        }
+      ],
+      "nativeLibraries": [],
+      "generatedPublicationTargets": [
+        "js"
+      ],
+      "nativeOutputTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core",
+        "wasm-component"
+      ],
+      "unavailableGeneratedEngines": {
+        "js": "latest shared-root fixed point pending",
+        "rust": "G2/G3 performance blocker"
+      },
+      "allFourEngineReleaseQualified": false,
+      "publication": "unpublished"
+    },
+    "cases": [
+      {
+        "engine": "ts",
+        "id": "lean-modules",
+        "grammar": "lean",
+        "passed": true,
+        "manifestSha256": "8a47a553d24e12a037e3b5982f5b5e9e39bb06bbc9d62d593a6dfe7420d96fa8"
+      },
+      {
+        "engine": "ts",
+        "id": "ps-integer-unicode",
+        "grammar": "ps",
+        "passed": true,
+        "manifestSha256": "2ff894a8545fb416a2f11ae8e7c3fc7f5064fdd66f9965f3634dce8d9ef34101"
+      },
+      {
+        "engine": "ts",
+        "id": "ps-list-literal",
+        "grammar": "ps",
+        "passed": true,
+        "manifestSha256": "a1445ba40f95f69bf12d82962d8ae02b6f2ec81c87c89f889e8f061eae5202a7"
+      },
+      {
+        "engine": "ts",
+        "id": "lean-handler-pattern",
+        "grammar": "lean",
+        "passed": true,
+        "manifestSha256": "4e377f9f543e2479990935eeeb2338d7b003954414897832ddefc4d8c3eeec93"
+      },
+      {
+        "engine": "ts",
+        "id": "lean-ordinary-loop",
+        "grammar": "lean",
+        "passed": true,
+        "manifestSha256": "17b64bd88eeccbd0f095e1aa564b2460dfcce275529af1888ee8002b2fba2cf9"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "lean-modules",
+        "grammar": "lean",
+        "passed": true,
+        "manifestSha256": "fb3273d62f100aa456beaa226af8e4f81221d4cc87b6b56d76931bcb46432c1b"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "ps-integer-unicode",
+        "grammar": "ps",
+        "passed": true,
+        "manifestSha256": "c09a22bc35b5b8f29cd483da04c33e0efd5555e1281929ee1f8ac5fdfd8d9a8d"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "ps-list-literal",
+        "grammar": "ps",
+        "passed": true,
+        "manifestSha256": "5f79fe65ffc4c640f4479043d2ad774fb2344f021a1458dc985c482dc22d08bd"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "lean-handler-pattern",
+        "grammar": "lean",
+        "passed": true,
+        "manifestSha256": "84e26fd78a206e484a755a74d49f6eba7e8aa8f8f080f1b4facf1efde2e00005"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "lean-ordinary-loop",
+        "grammar": "lean",
+        "passed": true,
+        "manifestSha256": "68e14cf5fd741ba34e0de989e230a9b6c304977e7e0cfcb9d4e3200f5a6c6b82"
+      }
+    ],
+    "applicationCases": [
+      {
+        "engine": "ts",
+        "grammar": "lean",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+        "manifestSha256": "6888bf542591423627e3dcf16d60730ad57c8245210cdfc68b3bcb3af2aa8400",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "lean",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+        "manifestSha256": "0fb0beb102baccd66b046f66e28d73054db205ece09e78cf4a3affb6066d5802",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "lean",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+        "manifestSha256": "f4743881afe0c888c7737c70b0b236a020ff90bb00ccfb5f1bf852ddc52cf46c",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "lean",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+        "manifestSha256": "61a4805d64c7fb529ebbe84e8aee6871f50bc6c94a8fd26475c87763d362a3d9",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "lean",
+        "app": "single-file",
+        "observations": 1,
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "lean",
+        "app": "single-file",
+        "observations": 1,
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "ps",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+        "manifestSha256": "7098f1a8f7fe34e67a86f3d5c9ea1030e7dbdd02d47f90fb419e7bfd3f7df31d",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "ps",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+        "manifestSha256": "e3f5c3a2b94c03b8d02f968db9f07acf4cae03401511e04d1c1eeebdc12f62ff",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "ps",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+        "manifestSha256": "aba53fe16e4f7d71b92dcb5dbb2bf3b353d076de70b203f2c6f55854cc067f7c",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "ps",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+        "manifestSha256": "763748fd5d4804e1b506085332c09fc930dfd13c4566a8ca5508b4d962ca3ee7",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "ps",
+        "app": "single-file",
+        "observations": 1,
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "ps",
+        "app": "single-file",
+        "observations": 1,
+        "passed": true
+      }
+    ],
+    "negativeCases": 14,
+    "nativeCompilerUnavailableDuringGeneratedCases": true,
+    "offlineInstall": true,
+    "tarball": "dist/npm-generated/run-DznGBG/tarballs/proofscript-0.1.0-psc1.3.tgz",
+    "tarballSha256": "203c7b58ec8e1b3c6aaa0cdaa5ead0aff942a9b4beb7ed1e865f83779ae5e3f0",
+    "bytes": 74693678,
+    "scope": "Qualified historical TS/Wasm engines integrated for independently admitted JS publication; native core unchanged. Not latest-root or all-four-engine qualification."
+  },
+  "nativeFullQualification": {
+    "reviewCommit": "daa735017e34ee94da79d747c363237b4adbc4ef",
+    "testedCommit": "ec90dc1280b395de4d64532517e6ddca727ee07e",
+    "equalTree": "b58461d31dd53d217c1353b4373d4a87bf5e9d65",
+    "run": 40141923929,
+    "job": 121017656399,
+    "finalGate": 121021324743,
+    "conclusion": "success",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "artifact": 12579757745,
+    "digest": "sha256:98ce6b18472cf9d8d994fd16773d959a18ab3f9989a165ac0c8c84db2258dcf6"
+  },
+  "allFourCurrentRootQualified": false,
+  "registryPublication": false
+}

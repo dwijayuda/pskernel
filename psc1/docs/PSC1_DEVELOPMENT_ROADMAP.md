@@ -1,175 +1,69 @@
 # PSC1 development roadmap
 
-## Current dependency-ordered work
+Updated 2026-10-25 Asia/Jakarta. Practical Core v1 remains frozen at fourteen
+families and37 finite criteria. The current implementation is
+`daa735017e34ee94da79d747c363237b4adbc4ef` on draft PR178.
 
-Updated2026-10-25 Asia/Jakarta. Current control8966261900c7d019553fcef5b04bc9e90593c901
-builds on primary941d2730. Existing qualified JS/TS/Wasm records remain immutable;
-no qualification is inherited by the changed source. Work is continuing.
+## Evidence and release boundaries
 
-The exact archived Rust G2 profile40138165186/job121004032945 samples the
-original request at300/600/900/1200/1500s. It measures BigUint cloning/dropping
-in StringEq, decimal Nat literal parsing in JSON/admission encoding and strict
-IR validation. This is a diagnostic, not a successful G2 candidate. The
-archived old executable reaches strict IR validation by1500s. Alternative
-LLVM builds either exceed the existing240s build limit, fail LLVM's own
-verification, or still exceed1800s in G2; none is promoted.
+Full [40141923929](https://github.com/dwijayuda/pskernel/actions/runs/40141923929)
+passes37/37 criteria across all seven backends and both grammars, including real
+applications, minimum Python and installed core/optional-provider regressions.
+Its tested mergeec90dc12 and reviewdaa73501 have identical tree
+b58461d31dd53d217c1353b4373d4a87bf5e9d65.
 
-Candidate65bd033b/56fee6b6 emits exact u64-constructible Nat literals through
-BigUint::from and retains arbitrary-precision decimal parsing above u64.
-It borrows immutable local Nat operands only where existing helpers already
-accept references, retaining snapshots for computed operands. Unified Rust's
-main crate staysopt0/256; only pinned numeric dependencies useopt3. Public
-Nat representation, shared algorithms, semantic fuel and ABI are unchanged.
-Retained-emitter comparisons cover14 numeric boundaries through256bits,
-Unicode/String cursor observations, aliasing and computed-operand order.
+Measured Rust Nat fixes pass focused/native tests and two genuine G1 executions
+on source closure07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af,
+reproducing the exact G1 executable. Frozen request2d27f142,
+[40141718481](https://github.com/dwijayuda/pskernel/actions/runs/40141718481)/
+job121014751809, is still executing G1/G2/G3 under the new separate
+correctness-3600s profile. G2/G3 and fixed point remain pending.
 
-User authorized a sensible longer timeout. Separate correctness-3600s is
-now accepted for Rust G2-self/G3-self only. Existing correctness-1800s and
-performance-240s remain explicit profiles. G1, corpus and build tools240s,
-independent checker120s, memory/stack/fuel limits and refusals remain unchanged.
-The hour profile uses a190-minute hosted job and170-minute qualification step;
-GitHub's six-hour hosted-job cap permits this. Generated wire cannot choose
-limits: a closed-schema request-only commit and exact parent are required.
-Request-policy tests retain invalid-profile/deadline/target/tool refusals.
+[Installed package40144094413](https://github.com/dwijayuda/pskernel/actions/runs/40144094413)
+passes offline install,10 corpus cases,12 application builds/44 observations,
+14 negative/tamper checks and26 host-boundary checks. Its artifact12579329783
+contains the current qualified native core and matching optional Python/PHP
+tarballs, plus independently qualified historical TS/Wasm G3 engines.
+Generated execution initially publishes JS; native core retains JS/TS/Rust/Wasm
+core/component. Engine qualifications remain tied to historical closure92654df5.
+This is an installable unpublished candidate, not an all-four-engine/new-root
+generated release. See the [install guide](PSC1_GENERATED_PACKAGE.md).
 
-Focused40141004793/job121012548777 PASSED at8966261900c7d019553fcef5b04bc9e90593c901:
-14 exact literal boundaries,120 ownership observations, three million-character
-Unicode scans, codec deep-spine proofs/regressions,707 Wasm divmod pairs, both
-120-module grammar censuses and genuine Rust G1/all40 cross-target cases plus9
-envelope refusals. Source closure07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af.
-G1 executable07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6.
-Artifact12578628638,ZIP939144dd681f77eaf2e8dfaca88c12044433ffd9770bd272210af59708e3d944.
-The bounded180s G2 diagnostic is not qualification. Full G2/G3/fixed point and
-240s performance remain PENDING. Exact request2d27f1428e6a53a6de5006f950fc94f2d471b214, parent9f24e3ac,
-run40141718481/job121014751809 uses correctness-3600s. It is RUNNING; no G2/G3
-or fixed point result is available. Do not duplicate or cancel this frozen run.
-
-Primary941d2730 full40138996117 PASSED all selected gates,37/37 criteria,0blocked,
-seven backends/both grammars, practical applications and native core/optional
-packages. Tested merge7606d172 and941d share tree1c268d41d81ee35aa4182fe59b4b87cfc2421df6.
-Full artifact12578274080,ZIPadf631066e56a6fb0617c8132ab14b9ec0ac506a6a125c8e990f9222e8bd04e4.
-This full gate predates the Nat candidate and does not qualify its changed source.
-
-Installed generated package control941d2730/run40138989081 passed26 host
-boundary checks,10 corpus cases and12 refusal/tamper cases with native compiler
-unavailable. Diagnostic72de82f6/run40139913145 additionally passed12 real
-application builds/44 observations: JsonRecords.Transform and PracticalCli.Args
-in both grammars under qualified historical TS/Wasm engines, including Unicode,
-surrogate/duplicate/shape/arity refusals and single-file commands.
-These use historical closure92654df5 and publish independently admitted JS;
-all native targets and optional Python/PHP remain available. No all-four-engine
-or current-source generated release claim. Registry publication/merge remain
-unauthorized.
-
-Immediate queue: complete preflight; issue exact Rust correctness-3600s request;
-record genuine G2/G3 source/admission/IR/executable/observation fixed points;
-promote only verified runtime changes and installed application/adapter tests;
-require full seven-backend/native package gate; update immutable package pins;
-then qualify one frozen shared source under every engine.
-
-Installed hardening4755d000/run40141528871/job121014099532 PASSED:10 corpus
-cases,12 application builds/44 observations,14 refusal/tamper cases and26 host
-boundary checks. Invalid UTF8 and a changed imported Wasm adapter refuse while
-retaining previous output. Artifact12578564122,
-ZIP7816afd5ed797150aab3c468e132a1b33b79046752e6c1c31f09bc25d3e23729.
-Private core tarball SHA256b866ab29e54a0d8b57e98ba28f32dcd546ed903f8440afae63dea29dbd09f6cf.
-Native compiler is unavailable throughout generated cases. This package uses
-the older qualified native core and recorded historical TS/Wasm G3; current
-promotion must pass its own full gate before native package pins are advanced.
-
-
-## Preserved earlier roadmap snapshot
-
-Updated 2026-10-25 Asia/Jakarta. Frozen Practical Core v1 remains14 families/
-37 finite acceptance criteria. [AI state](../AI_WORK_STATE.md) owns continuation;
-[codec qualification receipt](PSC1_UNIFIED_V2_CODEC_QUALIFICATION_2026-10-25.json)
-owns exact code, source, CI, artifact and failed-attempt identities.
-
-## Verified codec/admission stack milestone
-
-Code checkpoint `5d4d4d1a1693de57fa16ecf796536d73040bbf64`/draft PR178;
-120-module closure `e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66`.
-[Full CI40133272707](https://github.com/dwijayuda/pskernel/actions/runs/40133272707)
-PASSED37/37 finite Practical Core criteria. Rust G1 passes, but the genuine
-G2 retry reaches its unchanged1800s deadline without an observed stack
-overflow. No G2 candidate, G3 or fixed point exists for this snapshot.
-Stop at this verified stack-correction milestone; Rust self-host correctness
-and performance remain unqualified. Exact evidence:
-[codec receipt](PSC1_UNIFIED_V2_CODEC_QUALIFICATION_2026-10-25.json).
-
-Focused40133269028/job120989348408 PASSED:44 old/current observations;
-ten10000-deep expression shapes plus a10000-declaration admission fold
-(12825ms,maxRSS34760KiB), both120-module grammar censuses and actual enlarged
-Rust G1/all40 cross-target cases plus9 envelope refusals. Artifact12576126918,
-ZIP09357b2b1c6ab48d1e9b8a7e3327544072cb0d333c7321def06c4e13871ee9fc.
-The180s GDB sample is diagnostic only, not full G2 qualification.
-
-The implementation uses explicit expression return frames, a structural
-comparison of application axes, and fully applied admission/reversal workers.
-It preserves the exact opaque append tree, all-state height/order/refusal
-semantics, original APIs and unconditional Lean equality proofs. Standard
-propext/Quot.sound only; no new axiom or resource allowance.
-
-Preserve qualified structured-v2 TS and Wasm request812094c1/run40126488125,
-closure92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2.
-Both execute G1/G2/G3 and exact source/admission/IR/raw-executable/four-output
-fixed points: TS G2/G3=1379563/1401815ms;Wasm=1396916/1410393ms.
-Immutable readback40130870206/job120982103024 verifies inventories, bytes,
-IR/admission parity and all failed records. Its same-source Rust overflow and
-JS1800278ms G2 deadline remain failures. Earlier v2 Wasm9359f073, v1 JS/TSb2ab4d34
-and historical single-emitter successes remain pinned to their own source.
-Do not inherit their qualifications onto this changed closure.
-
-Full CI job120991938920 and final gate120997291745 pass all seven backends,
-both grammars, real applications, typed IO, minimum Python, exact-build optional
-providers and installed native core/source-library regressions. Review5d4d4d1a
-and tested CI merge764078561a0b4a09dd7cccd1fac4174f566bf4c4 have identical tree
-47b683bb30905531799e7e3717450e1644762c8f. Artifact12576144430,
-ZIPfae7c60ccea2162d46a65b547d935f11216c5bfab3d2f5eb1aba4b620bb1ee7c.
-
-Latest Rust requestf707e037b5f470ceee65891e0c735316ba097444 on
-qualification/psc1-codec-tail-workers-20261025, control
-d8a5ffa168f2744b5897420ecded84ef72475bda, reproduces the exact non-.github source
-tree dfec32f502a08d8f56c2014707087c73ca563f1f from5d4d4d1a.
-Run40133622389/job120990512358 passes G1/all49 tests, then G2 is hard-killed at
-1800055ms. Sampled process-tree peak924096KiB; sampled CPU1889.15s includes
-supervisors. The outer waited child's maxRSS103732KiB is not service peak RSS;
-service-specific completed maxRSS is unavailable after the hard kill.
-Producer manifesta3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005,
-raw G1 executable91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42,
-G2 request636624936f655a0412cf5ce0f31df9436bc9f311e63aee25d808f009a76f4118.
-Artifact12576967932,ZIP0f8f31d00fdb3def362dbcd979fd82649864ca90ca44d4a1be3a96a8cacb5bf8.
-No native fallback, G2 candidate, G3, fixed point, or240s qualification.
-Immutable readback40136555747/job120999195540 PASSED: exact inventory,
-admission/IR/raw-executable verification and same-source independent G1
-reproduction. This is not a clean full replay or a G2/G3 qualification.
-Readback artifact12576759844,
-ZIPae0106604fc1cc70be2ccf0c1ff8ced6033b3f37b4415a131bbcda7d9dc34e73.
-
-Practical Core readiness is37/37 with0 blocked for the finite native release
-contract. Generated distribution readiness is false: current-root Rust G2/G3,
-all-engine frozen-root qualification and integration remain unfinished.
+An isolated lexer candidate, code31e10263/run40143764706, has an all-input equality
+proof, both120-module grammar censuses and admitted generated Rust stage
+comparisons. It removes redundant suffix scans: CheckedAdmissions4039->439ms
+and Rust.Expr3001->341ms in one run. It is not promoted and has no whole-compiler
+G1/G2/G3 qualification. Preserve the active frozen qualification.
 
 ## Single dependency-ordered remaining queue
 
-| Order | Work | Evidence/status |
+| Order | Work | Actual status and acceptance |
 | --- | --- | --- |
-| 1 | Measured Rust G2 performance | BLOCKED at1800055ms on closuree0f7640b; no observed stack overflow or candidate. Profile exact archived input/executable late in the workload before choosing an optimization. |
-| 2 | Rust G2/G3 and exact fixed point | PENDING: optimize the demonstrated generic cost; actual independent admission, strict IR, all120 cross-target cases/27 refusals and raw bytes required. Preserve240s as a separate target. |
-| 3 | One frozen four-engine source | PENDING: TS/Wasm qualify92654df5; earlier JS/TS qualifyv1b2ab4d34. These do not qualifye0f7640b. JS92654df5 reaches its1800s G2 deadline. |
-| 4 | Generated distribution integration | PENDING: assets/CLI, component adaptation, independent host admission/publication and optional-provider dispatch. Current installed core/Python/PHP packages are native and exact-build pinned. |
-| 5 | Clean independent reproduction and release | PENDING: actual clean full replay, final release qualification and240s performance. Merge/npm publication require authorization. |
-| 6 | Broader extensions/readability tools | DEFERRED: preserve finite Practical Core scope and existing working features. |
+| 1 | Reconcile frozen Rust G2/G3 | RUNNING in40141718481. Require terminal admitted candidates,120 cross-target cases/27 refusals, exact source/admission/original+transformed IR/raw-executable/four-target observations. No badge from a deadline increase or diagnostic. |
+| 2 | Resolve any measured terminal blocker | CONDITIONAL. Profile the exact archived producer/request late in its failing phase. Keep the unpromoted lexer candidate available; promote only with full native/G1 and genuine new-root qualification. |
+| 3 | One frozen four-engine source | PENDING. Preserve historical v2 TS/Wasm and v1 JS/TS; qualify the remaining engines on the same current root. Historical source qualifications do not transfer. |
+| 4 | Complete generated distribution integration | PARTIAL. Installed TS/Wasm engines and JS publication pass. Integrate newly qualified Rust/JS assets, remaining generated publication targets, component adapters and optional-provider dispatch. Preserve native core/add-ons. |
+| 5 | Reproduction, performance and release | PENDING. Clean independent replay and final release qualification; optimize toward separate240s profile. Merge/registry publication require authorization. |
+| 6 | Broader extensions/readability | DEFERRED beyond frozen v1. Retain working source-only packages and every current feature. |
 
-Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict original/
-transformed IR, source pairing, negative tests and all memory/stack/fuel/security
-policies remain. G1/corpus/tools240s,checker120s,G2/G3 correctness1800s;
-historical Python/PHP3600s remain unchanged.
-Long chains require explicit request-only commits; ordinary edits do not launch
-them. After a successful gate, documentation/receipt-only updates use the
-existing dependency selector while carrying any failed/cancelled code debt.
-See the [service guide](PSC1_UNIFIED_COMPILER_SERVICE.md) and
-[executable continuation](PSC1_UNIFIED_SELFHOST_CONTINUATION.md).
+## Fixed policies
+
+Official independent Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+strict original/transformed IR, source pairing, negative tests, unsupported-ABI
+refusals and all memory/stack/fuel limits remain mandatory.
+G1/corpus/tools240s and checker120s remain unchanged.
+Separate Rust correctness-3600s extends only G2-self/G3-self, with190-minute job/
+170-minute step. Existing correctness-1800s and performance-240s remain.
+A correctness pass does not qualify240s performance.
+
+Normal development retains tiered/dependency-selected CI. Long self-hosting runs
+require closed-schema request-only commits with exact parents; ordinary edits
+do not launch them. Documentation/receipt updates reuse only successful code
+baselines and retain failed/cancelled test debt.
+[AI state](../AI_WORK_STATE.md) records live status; the
+[runtime receipt](PSC1_RUST_NAT_RUNTIME_QUALIFICATION_2026-10-25.json) owns exact
+identities and measurements; the [continuation](PSC1_UNIFIED_SELFHOST_CONTINUATION.md)
+is executable. Earlier roadmap snapshots remain in Git and canonical receipts.
 
 ## Preserved historical queues
 

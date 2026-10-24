@@ -8,7 +8,16 @@ and exact fixed points on source closure
 Their historical source is recorded separately from the native package build.
 Current-root Rust and unified JS qualification remain separate blockers.
 
-Use Linux x64/glibc and Node22.23.3. Download the exact tarball and qualification
+Use Linux x64/glibc and Node22.23.3.
+
+The [current package artifact](https://github.com/dwijayuda/pskernel/actions/runs/40144094413/artifacts/12579329783)
+contains the core and matching Python/PHP tarballs. Its ZIP SHA256 is
+`fa1321d92b4a3bece88e726a60ffbda77343116d04c28fb476770e2793b76322`.
+The core tarball SHA256 is
+`203c7b58ec8e1b3c6aaa0cdaa5ead0aff942a9b4beb7ed1e865f83779ae5e3f0`.
+The [package receipt](PSC1_GENERATED_PACKAGE_QUALIFICATION_2026-10-25.json)
+pins all three files, the current native build and each historical G3 engine.
+ Download the exact tarball and qualification
 receipt from the linked CI artifact in AI_WORK_STATE.md; verify its SHA256.
 Packages remain unpublished. No `npm install proofscript` registry release is
 claimed. Install the artifact into an application:
@@ -45,7 +54,11 @@ Use explicit `ordinary-checked` assurance only for the supported ordinary slice.
 All captured modules use one grammar. Generated-engine execution publishes JS
 in this initial installed path. Other generated targets are explicitly refused.
 The normal `psc build` path retains native JS/TS/Rust/Wasm core/component outputs;
-matching Python/PHP provider tarballs remain optional. Consult the
+matching Python/PHP provider tarballs remain optional. Install either matching
+add-on explicitly with `npm install --ignore-scripts ./proofscript-backend-python-0.1.0-psc1.3.tgz`
+or `npm install --ignore-scripts ./proofscript-backend-php-0.1.0-psc1.3.tgz`.
+Use files from the same current artifact because source/build identities are strict.
+Consult the
 [provider guide](PSC1_BACKEND_PROVIDERS.md) for matching-build add-on installation.
 
 Every accepted generated build requires the pinned independent official

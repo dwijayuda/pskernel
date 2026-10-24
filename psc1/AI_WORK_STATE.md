@@ -362,3 +362,11 @@ rerun changed-source focused and genuine qualification. Keep original240s
 performance acceptance explicit. Independent full-chain repeatability is a
 separate future evidence scope. Do not repeat unchanged correctness chains for
 documentation-only updates. See the [executable continuation](docs/PSC1_DIRECT_SELFHOST_CONTINUATION.md).
+
+The earlier full gate40126174119 fails its existing runtime-free Boolean
+assertion: unused private prelude List templates gained a cleanup helper.
+Keep that assertion unchanged. A conservative carrier-use scan now omits
+all unused type templates only when selected declarations contain no carrier
+types/operations and no types are public. Unknown/polymorphic types, named
+types, constructor/record/match/projection operations and scan exhaustion
+retain the existing carrier path. Focused and final gates must validate it.

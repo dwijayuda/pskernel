@@ -1325,6 +1325,59 @@ def psRustWithFailureLocation {alpha : Type} (location : String)
       Except.error (psRustConcat4 "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering location="
         location " reason=" (psRustEmitFailureReason error))
 
+-- A selected scalar-only module cannot construct or mention a carrier.
+-- Omit its unused prelude type templates and their cleanup support. Any
+-- unknown type, polymorphic type or exhausted scan conservatively retains all.
+def psRustTypeMayUseCarrier (fuel : Nat) (type : PsVerifiedIrType) : Bool :=
+  match fuel with
+  | Nat.zero => true
+  | Nat.succ remaining =>
+      match type with
+      | .primitive _ => false
+      | .function parameters result =>
+          psListAny (psRustTypeMayUseCarrier remaining) parameters ||
+            psRustTypeMayUseCarrier remaining result
+      | _ => true
+
+def psRustExprMayUseCarrier (fuel : Nat) (expr : PsVerifiedIrExpr) : Bool :=
+  match fuel with
+  | Nat.zero => true
+  | Nat.succ remaining =>
+      match expr with
+      | .literal _ => false
+      | .var _ => false
+      | .intrinsic _ types arguments =>
+          psListAny (psRustTypeMayUseCarrier remaining) types ||
+            psListAny (psRustExprMayUseCarrier remaining) arguments
+      | .lambda parameters result body =>
+          psListAny (fun (parameter : PsVerifiedIrParameter) =>
+            psRustTypeMayUseCarrier remaining parameter.type) parameters ||
+          psRustTypeMayUseCarrier remaining result ||
+          psRustExprMayUseCarrier remaining body
+      | .call fn types arguments =>
+          psRustExprMayUseCarrier remaining fn ||
+          psListAny (psRustTypeMayUseCarrier remaining) types ||
+          psListAny (psRustExprMayUseCarrier remaining) arguments
+      | .letE _ type value body =>
+          psRustTypeMayUseCarrier remaining type ||
+          psRustExprMayUseCarrier remaining value ||
+          psRustExprMayUseCarrier remaining body
+      | .ifE condition yes no =>
+          psRustExprMayUseCarrier remaining condition ||
+          psRustExprMayUseCarrier remaining yes ||
+          psRustExprMayUseCarrier remaining no
+      | _ => true
+
+def psRustSelectedModuleNeedsCarriers (module : PsVerifiedIrModule)
+    (publicTypes : List String) : Bool :=
+  !psListIsEmpty publicTypes ||
+  psListAny (fun (declaration : PsVerifiedIrDeclaration) =>
+    !psListIsEmpty declaration.typeParameters ||
+    psListAny (fun (parameter : PsVerifiedIrParameter) =>
+      psRustTypeMayUseCarrier 4096 parameter.type) declaration.parameters ||
+    psRustTypeMayUseCarrier 4096 declaration.resultType ||
+    psRustExprMayUseCarrier 4096 declaration.body) module.declarations
+
 def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
     (publicValues publicTypes : List String) : Except String String :=
   match psStrictValidateModule source.raw with
@@ -1334,6 +1387,7 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
       if psRustModuleHasImports module.imports then
         Except.error "PSC1_RUST_EXTERNAL_IMPORT_UNSUPPORTED"
       else
+        let needsCarriers : Bool := psRustSelectedModuleNeedsCarriers module publicTypes;
         let valueNames : List String := psRustValueDeclarationNames module.declarations;
         match psRustWithFailureLocation "names" (psRustValidateModuleNames module) with
         | Except.error error => Except.error error
@@ -1346,7 +1400,7 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
                       psRustWithFailureLocation (psRustConcat2 "structure:" value.name)
                         (psRustEmitStructureWithVisibility
                           (psRustStringListContains publicTypes value.name) value))
-                    module.structures with
+                    (if needsCarriers then module.structures else List.nil) with
                 | Except.error error => Except.error error
                 | Except.ok structures =>
                     match psListMapExcept
@@ -1354,7 +1408,7 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
                           psRustWithFailureLocation (psRustConcat2 "inductive:" value.name)
                             (psRustEmitInductiveWithVisibility
                               (psRustStringListContains publicTypes value.name) value))
-                        module.inductives with
+                        (if needsCarriers then module.inductives else List.nil) with
                     | Except.error error => Except.error error
                     | Except.ok inductives =>
                         match psListMapExcept
@@ -1370,7 +1424,7 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
                             Except.ok (psRustConcat2
                               (psRustJoin "\n"
                                 (psListAppend ["#![forbid(unsafe_code)]", runtime.source,
-                                  (if psRustPrivateDropRuntimeNeeded publicTypes module.inductives
+                                  (if needsCarriers && psRustPrivateDropRuntimeNeeded publicTypes module.inductives
                                     then psRustSharedDropRuntime else "")]
                                   (psListAppend structures (psListAppend inductives declarations))))
                               "\n")

@@ -127,6 +127,13 @@ def main : IO Unit := do
     ((psRustTailStringMove ["alias"] (p "worker" strT) (.var "alias") []).isSome)
   require "duplicate move waits for the last occurrence"
     ((psRustTailStringMove ["alias"] (p "worker" strT) (.var "alias") [.var "alias"]).isNone)
+  require "carrier scan keeps unknown types" (psRustTypeMayUseCarrier 32 .unknown)
+  require "carrier scan exhaustion keeps types" (psRustTypeMayUseCarrier 0 boolT)
+  require "scalar signatures do not use carriers" (!psRustTypeMayUseCarrier 32 boolT)
+  require "carrier scan keeps named types" (psRustTypeMayUseCarrier 32 spineT)
+  require "carrier scan keeps constructor expressions" (psRustExprMayUseCarrier 32 emptySpine)
+  require "carrier scan exhaustion keeps expressions" (psRustExprMayUseCarrier 0 (.literal (.bool false)))
+  require "exported type ABI retains carriers" (psRustSelectedModuleNeedsCarriers module ["Exported"])
   IO.FS.createDirAll "dist/rust-string-ownership"
   for legacy in [false,true] do
     match emit legacy with

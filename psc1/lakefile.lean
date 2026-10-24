@@ -88,7 +88,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept]
+  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -177,7 +177,7 @@ lean_lib PsBackendWasm where
 
 lean_lib PsBackendPython where
   srcDir := "packages/backend-python/src"
-  roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Module, `Ps.BackendPython.CompilerService]
+  roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Portable, `Ps.BackendPython.Module, `Ps.BackendPython.CompilerService]
 
 lean_lib PsBackendPhp where
   srcDir := "packages/backend-php/src"

@@ -1,6 +1,7 @@
 import Ps.BackendPython.Runtime
 import Ps.BackendPhp.Runtime
 import Ps.BackendCommon.StateExcept
+import Ps.Foundation.Text
 
 def runtimeText(python : Bool, helper : String) : String :=
   if (python) { psPythonRuntimeBody(helper) } else { psPhpRuntimePart(helper) }

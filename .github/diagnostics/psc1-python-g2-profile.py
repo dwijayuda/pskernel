@@ -53,3 +53,5 @@ finally:
  print(json.dumps(receipt),flush=True)
  print((out/"actual-G2-cumulative.txt").read_text(),flush=True)
  print((out/"actual-G2-self.txt").read_text(),flush=True)
+
+# Exact self-tail-qualified G1 baseline; terminal G2 deadline40079719620.

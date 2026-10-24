@@ -1,0 +1,50 @@
+name: PSC1 exact current PHP G2 asynchronous phase profile
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-php-current-phase.php]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.12'
+          extensions: gmp, pcntl
+          tools: none
+          coverage: none
+      - name: Require exact failed job and immutable artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/dwijayuda/pskernel/actions/jobs/120828380302 > job.json
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12555337743 > artifact.json
+          python3 - <<'PY'
+          import json
+          j=json.load(open("job.json"));a=json.load(open("artifact.json"))
+          assert j["run_id"]==40078954006 and j["status"]=="completed" and j["conclusion"]=="failure"
+          assert a["workflow_run"]["id"]==40078954006
+          assert a["workflow_run"]["head_sha"]=="1174300d0efc2a10cf6887e598a1a4057f36c7cc"
+          assert a["digest"]=="sha256:072e3111a2d9367a8bef2df82db6041f23c8bd582642f0730e7ddb9c7dde8ef7"
+          assert not a["expired"]
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40078954006'
+          artifact-ids: '12555337743'
+          path: baseline
+      - name: Profile exact generated G1 and G2 request with120-second diagnostic budget
+        run: timeout --kill-after=10s 150s /usr/bin/time -v php -d memory_limit=1G .github/diagnostics/psc1-php-current-phase.php
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-php-current-phase-${{ github.sha }}
+          path: diagnostics/
+          retention-days: 90

@@ -53,7 +53,7 @@ jobs:
            assert.equal(compilerSourceClosureDigest(sources),q.sourceClosureDigest);
            for(const [i,row] of q.sourceInventory.entries()){
             assert.equal(row.module,sources[i].module);assert.equal(row.bytes,Buffer.byteLength(sources[i].text));
-            assert.equal(row.sha256,sha(sources[i].text));assert.ok(!/^Ps\\.Backend(Python|Php)\\./.test(row.module));
+            assert.equal(row.sha256,sha(sources[i].text));assert.ok(!row.module.startsWith('Ps.BackendPython.')&&!row.module.startsWith('Ps.BackendPhp.'));
            }
            const generations=q.generations.map(g=>{
             const manifestFile=path.join(dir,'G'+g.generation+'-service','artifact.json');

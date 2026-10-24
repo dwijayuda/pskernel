@@ -12,9 +12,11 @@ verifies manifest5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c
 executableaa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce,
 and requestc6b04937446d0f549d76d965aae53bac04c23122ab4b14befb7fd425783ad0ad.
 After517774ms GDB records90 repeated psEncodeCodecExpr frames.
-The new structural accumulator removes return frames along application,
-binder, let-body and projection spines. Side branches remain structurally
-recursive; no new fuel cap or enlarged stack. Retained-source all-input
+The revised structural accumulator removes return frames along application,
+binder, let-body and projection spines. Explicit return frames preserve the
+original opaque String append tree as well as refusal priority; no
+associativity axiom. Side branches remain structurally recursive; no new
+fuel cap or enlarged stack. Retained-source all-input
 equality and deep generated execution must pass before qualification.
 The JS G2 job120969044278 independently reaches its unchanged1800s deadline
 (1800278ms,maxRSS3157096KiB); it is not qualified. Preserve TS/Wasm jobs in

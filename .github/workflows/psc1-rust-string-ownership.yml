@@ -5,6 +5,7 @@ on:
     paths:
       - psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean
       - psc1/test/CodecSpine*.lean
+      - psc1/scripts/codec-spine-tests.mjs
       - psc1/test/CodecStaticSchemaTests.lean
       - psc1/packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.lean
       - psc1/packages/backend-rust/src/**
@@ -68,6 +69,7 @@ jobs:
       - name: Execute differential Rust, alias snapshots and million-character scans
         run: |
           set -euo pipefail
+          node scripts/codec-spine-tests.mjs
           node scripts/rust-string-ownership-tests.mjs
           node scripts/wasm-nat-divmod-tests.mjs
       - name: Audit both grammars and execute enlarged G1
@@ -99,6 +101,7 @@ jobs:
         with:
           name: psc1-rust-string-ownership-${{ github.sha }}
           path: |
+            psc1/dist/codec-spine/
             psc1/dist/wasm-nat-divmod/
             psc1/dist/rust-string-ownership/
             psc1/dist/generated-unified-rust-compiler/

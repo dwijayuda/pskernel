@@ -191,7 +191,7 @@ private def fieldEq (fixture : Fixture)
           left.session.state.nextFresh == right.state.nextFresh &&
           sameList (binderEq built) left.fields right.fields &&
           sameList (fun a b => binderEq built a.field b.field &&
-            sameList (binderEq built) a.arguments b.arguments &&
+            sameList (binderEq built) a.args b.arguments &&
             sameList (decodedEq built) a.indices b.indices) left.recursiveFields right.recursiveFields &&
           localsEq built left.session.context.localContext.decls right.context.locals &&
           referencesEq right.state.whnf.declarations fixture.state.whnf.declarations &&
@@ -222,8 +222,8 @@ private def fieldsMatrix (counter : IO.Ref Nat) : IO Unit := do
       match got.recursiveFields with
       | [recursive] =>
           unless recursive.arguments.length == 2 && got.context.locals.length == 3 &&
-              !(got.context.locals.any (fun local =>
-                recursive.arguments.any (fun arg => psKernelNameEq local.name arg.internalName))) do
+              !(got.context.locals.any (fun localDecl =>
+                recursive.arguments.any (fun arg => psKernelNameEq localDecl.name arg.internalName))) do
             throw (IO.userError "temporary recursive arguments leaked into field context")
       | _ => throw (IO.userError "missing recursive field")
   unless (← counter.get) - before == 147 do throw (IO.userError "fields assertion inventory")

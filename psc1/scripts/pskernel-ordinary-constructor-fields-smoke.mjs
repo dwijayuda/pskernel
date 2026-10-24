@@ -153,7 +153,7 @@ function fieldEqual(old,actual,fixture){
   return exprExact(left.result,d(right.result))&&left.session.state.nextFresh===right.state.nextFresh&&
     bindersEqual(left.fields,right.fields,d)&&
     seqEqual(left.recursiveFields,right.recursiveFields,(a,b)=>
-      binderEqual(a.field,b.field,d)&&bindersEqual(a.arguments,b.arguments,d)&&
+      binderEqual(a.field,b.field,d)&&bindersEqual(a.args,b.arguments,d)&&
       seqEqual(a.indices,b.indices,(x,y)=>exprExact(x,d(y))))&&
     localsEqual(left.session,right.context,d)&&
     same(right.state.whnf.declarations,fixture.state.whnf.declarations)&&

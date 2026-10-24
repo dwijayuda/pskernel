@@ -5,7 +5,7 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {emitBackendProvider} from '../host-tools/backend-providers.mjs';
+import {emitBackendProvider,validateBackendProviderReceipt,backendProviderMaxBytes,backendProviderProtocol} from '../host-tools/backend-providers.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const out=path.join(root,'dist/backend-providers');
 const sha=b=>createHash('sha256').update(b).digest('hex');
@@ -17,6 +17,13 @@ fs.mkdirSync(out,{recursive:true});
 run(path.join(root,'.lake/build/bin/psc1_backend_provider_tests'),[path.join(out,'fixtures')]);
 const core=path.join(root,'.lake/build/bin/psc1');
 const id=JSON.parse(run(core,['--identity']));
+const contract=JSON.parse(fs.readFileSync(path.join(root,'BACKEND_PROVIDER_CONTRACT.json'),'utf8'));
+assert.equal(contract.protocol,backendProviderProtocol);
+assert.equal(contract.limits.requestBytes,backendProviderMaxBytes);
+assert.equal(contract.limits.responseBytes,backendProviderMaxBytes);
+assert.deepEqual(contract.coreTargets,id.targets);
+assert.deepEqual(id.optionalTargets,Object.keys(contract.optionalProviders));
+assert.equal(id.backendProviderProtocol,contract.protocol);
 assert.deepEqual(id.targets,['js','ts','rust','wasm-core','wasm-component']);
 const coreSymbols=run('nm',['--defined-only',core]);
 assert.doesNotMatch(coreSymbols,/initialize_Ps_BackendPython|initialize_Ps_BackendPhp|l_psPythonEmit|l_psPhpEmit/,
@@ -37,6 +44,10 @@ for(const target of ['python','php']){
  expected.requestSha256=sha(fixture);assert.deepEqual(response,expected,'all provider fields equal retained in-process emitter');
  const provenance=JSON.parse(fs.readFileSync(path.join(stage,'psc1-input.json'),'utf8')).backendProvider;
  assert.equal(provenance.requestSha256,sha(fixture));assert.equal(provenance.publicationAuthority,'core-host');
+ validateBackendProviderReceipt(provenance,target);
+ for(const changed of [{...provenance,publicationAuthority:'provider'},
+  {...provenance,target:target==='python'?'php':'python'},{...provenance,requestSha256:'wrong'},
+  {...provenance,kernel:'authority'}])assert.throws(()=>validateBackendProviderReceipt(changed,target),/PSC1_PROVIDER_RECEIPT_/);
  const malformed=path.join(stage,'malformed.json');fs.writeFileSync(malformed,'{"unexpected":true}');
  const bad=spawnSync(binary,['emit',malformed],{encoding:'utf8',timeout:10000,
   env:{...process.env,PSC1_BACKEND_REQUEST_SHA256:'0'.repeat(64)}});

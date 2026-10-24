@@ -7,7 +7,21 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
-## Verified Python/PHP performance-fix milestone — stopped as requested
+## Active backend provider/package milestone
+
+Latest instruction: implement the provider boundary and package split, then stop at a verified milestone. Work on feat/psc1-backend-provider-packages-20261024, stacked on preserved17cc49f90318abc358c731601311b90b8f8ea9fb/PR176. GitHub/Linux Actions only; expected-HEAD non-force updates; no merge/publication.
+
+Implementation8c61a9c5a699528a26b744b04b77a73698198fbd separates native Python/PHP emit-only workers from the default core. Core keeps source capture, official Lean admission, strict original/transformed IR and specialization, ABI policy, artifact validation and atomic publication. Host-only versioned native JSON transport revalidates IR/ABI in workers; exact compiler/checker identities and candidate-only responses are mandatory. The portable compiler and target semantics are unchanged.
+
+Focused40104342314/job120902798092 PASSED: core symbol inventory excludes Python/PHP emitters; workers exclude frontend/admission/publication host and each other's emitter; exact IR round trips and retained emitter payloads;16 malformed/identity/IR refusals; both grammars actually independently checked and executed per optional target; absent worker preserves previous output. Artifact12563299390,sha256:63ed5e88362a25ff178b00a21008e431eb6a44948c979c1be44ef2139cc852bc.
+
+In progress: unpublished proofscript default package with JS/TS/Rust/Wasm core+component; explicit @proofscript/backend-python and @proofscript/backend-php add-on tarballs, exact pin/source/ABI/binary/resource identities, offline local install and refusal/preservation tests. Required milestone acceptance: default inventories prove optional emitters/resources absent, all five default installed targets compile in both grammars; each explicit add-on executes in both grammars; absent/incompatible/tampered providers refuse without publication; existing full37/37/all-seven regression remains required. Do not call package split verified before those gates pass. This is native packaging/provider qualification, not a new unified generated compiler G1/G2/G3 claim.
+
+Prior3600s retry40091210960 is now terminal FAILURE for both targets after independently checked G1/strictIR/ten cases. Python120864185036: G2 hard deadline3600050ms,tree peak781728KiB,sampled outer CPU3769.69s; artifact12560473608,sha256:4ccf5de2578439f2304ec3d79a9898a348f6fd5d4756813cfb47ef6e252f1dfa. PHP120864185108:3600059ms,tree1183780KiB,CPU3830.25s; artifact12560213248,sha256:b74513cedb36dae3dc534fdb0f63d4080109b0c361e46aab591af489fee0a1fa. Neither reached G3/fixed point. Preserve failed source/request336ff212 and all earlier Rust/TS/JS/Wasm qualified snapshots; no unchanged self-host retry belongs to this packaging milestone. CPU includes supervision and sampled tree RSS can double-count shared pages.
+
+Next: finish installed package qualification, pass unchanged full correctness requirements, reconcile exact commits/run/artifact identities and stop. Preserve both grammars, seven-backend semantics, official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict IR, source pairing, security/refusal tests, resource policies and separate self-host profiles.
+
+## Historical Python/PHP performance-fix checkpoint
 
 Use connected GitHub tools/Linux Actions only, fresh expected-HEAD non-force updates, draft [PR176](https://github.com/dwijayuda/pskernel/pull/176). No merge or package publication authorized.
 

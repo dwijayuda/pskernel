@@ -6,7 +6,20 @@ Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 
 [canonical direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns exact source identities and immutable actual results.
 
-## Current milestone and dependency-ordered Python/PHP queue
+## Active provider/package queue
+
+| Order | Work | Exact acceptance/status |
+| --- | --- | --- |
+| 1 | Core/provider separation | Implemented8c61a9c5; focused40104342314 PASS retained payloads, binary inventories, strict protocol/IR refusals, both grammars and real optional-target execution. |
+| 2 | Default and add-on packages | In progress: default proofscript includes JS/TS/Rust/Wasm core+component; Python/PHP emitters/resources installed explicitly as matching add-ons. Require actual offline default/add-on inventories, compilation/execution and missing/incompatible/tampered package refusal without output changes. |
+| 3 | Full regression and stop | Require37/37/all-seven/both-grammar source/runtime/application/minimum-Python/installed package checks. Record exact source/tree/run/artifact identities and stop at this verified milestone. No merge/publication. |
+| 4 | Later unified generated distribution | Separate future work: compose selected emitters under one generated service and genuinely qualify enlarged G1→G2→G3/fixed points per claimed engine. Native package split alone makes no new self-host claim. |
+
+The finite [provider contract](../BACKEND_PROVIDER_CONTRACT.json) owns this slice's default/optional split and transport policy. Core retains independent admission/strictIR/ABI/publication; source-library metadata never acquires plugin or checker authority. Earlier3600s retry40091210960 is now a two-target G2 deadline failure; preserve artifacts and do not rerun it for packaging.
+
+## Historical Python/PHP milestone queue
+
+
 
 The user requested a stop after the verified milestone slice. This slice is complete; no further source work is authorized in this turn. Preserve active long qualification jobs.
 

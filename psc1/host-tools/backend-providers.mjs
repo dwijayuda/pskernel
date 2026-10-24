@@ -129,3 +129,17 @@ export function emitBackendProvider(stage,target,requestFile,importer){
  fs.writeFileSync(infoFile,JSON.stringify({...info,backendProvider:receipt},null,2)+'\n');
  return response;
 }
+
+export function validateBackendProviderReceipt(value,target){
+ exact(value,['protocol','target','packageName','version','mode','compilerSourceCommit',
+  'binarySha256','requestSha256','responseSha256','candidateOnly','publicationAuthority'],
+  'PSC1_PROVIDER_RECEIPT_SCHEMA');
+ if(!targets.has(target)||value.target!==target||value.protocol!==backendProviderProtocol||
+  value.packageName!=='@proofscript/backend-'+target||typeof value.version!=='string'||
+  !['explicit-workspace-build','installed-package'].includes(value.mode)||
+  value.candidateOnly!==true||value.publicationAuthority!=='core-host'||
+  !['binarySha256','requestSha256','responseSha256'].every(k=>/^[a-f0-9]{64}$/.test(value[k]))||
+  (value.mode==='installed-package'?!/^[a-f0-9]{40}$/.test(value.compilerSourceCommit):value.compilerSourceCommit!==null))
+  fail('PSC1_PROVIDER_RECEIPT_IDENTITY');
+ return value;
+}

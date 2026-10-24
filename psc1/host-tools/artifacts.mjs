@@ -10,7 +10,7 @@ import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 import { parse } from '@babel/parser';
 import * as prettier from 'prettier';
-import {emitBackendProvider} from './backend-providers.mjs';
+import {emitBackendProvider, validateBackendProviderReceipt} from './backend-providers.mjs';
 
 const require = createRequire(import.meta.url);
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -560,7 +560,7 @@ export function publish(stage, output, kind) {
     kernelAdmissionSha256: sha256(admissions),
     sourceClosureSha256: sha256(json(sourceRecords.map(({ path, sha256, bytes }) => ({ path, sha256, bytes })))),
     compiler: info.compiler ?? 'PSC1 native', publicNames: info.publicNames,
-    ...(info.backendProvider ? {backendProvider: info.backendProvider} : {}),
+    ...(info.backendProvider ? {backendProvider: validateBackendProviderReceipt(info.backendProvider, kind)} : {}),
     formatter: ['js', 'ts', 'ecma'].includes(kind) ? { prettier: '3.6.2', babelParser: '7.28.0' } : null,
     ...(targetPlan ? { runtimeContract: targetPlan.runtimeContract, targetPlans: targetPlan.plans } : {}),
     claim: 'source admission and bounded IR validation; not a backend-preservation proof',

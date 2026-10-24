@@ -11,6 +11,9 @@ on:
       - psc1/host-tools/artifacts.mjs
       - psc1/scripts/backend-provider-tests.mjs
       - psc1/test/BackendProviderTests.lean
+      - psc1/BACKEND_PROVIDER_CONTRACT.json
+      - psc1/scripts/npm-native-distribution.mjs
+      - psc1/scripts/npm-backend-provider-canary.mjs
       - psc1/lakefile.lean
       - .github/workflows/diagnostic-psc1-backend-providers.yml
 permissions:
@@ -79,4 +82,115 @@ jobs:
         with:
           name: psc1-provider-${{ github.sha }}
           path: psc1/dist/backend-providers/
+          retention-days: 90
+
+  packages:
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PSC1_HEAD_SHA: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install minimum supported Python for compatibility checks
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.8'
+      - name: Record minimum Python interpreter
+        run: echo "PSC1_PYTHON_314=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
+      - name: Install current Python for target validation and execution
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.15.0'
+      - name: Install PHP and selected exact-integer extension
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.11'
+          extensions: gmp, ffi
+          tools: none
+          coverage: none
+      - name: Record scripting target runtimes
+        run: |
+          python3 --version
+          php --version
+          php -r 'echo "gmp=" . (extension_loaded("gmp") ? "enabled" : "missing") . PHP_EOL;'
+      - name: Cache pinned Lean installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Cache exact-source native build objects
+        id: native_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-provider-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install locked host formatting dependencies and run host regressions
+        working-directory: psc1/host-tools
+        run: |
+          set -euo pipefail
+          test -s package-lock.json
+          npm --prefix "$PWD" --workspaces=false ci --ignore-scripts --no-audit --no-fund
+          node test-artifacts.mjs
+      - name: Install pinned Rust target tools
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          rustup default 1.90.0
+          rustc --version
+          cargo --version
+          rustfmt --version
+      - name: Install SHA-256-pinned Wasm tools and component runtime
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools" "$RUNNER_TEMP/wasmtime"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz' -o "$RUNNER_TEMP/wasmtime.tar.xz"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/wasmtime.tar.xz" | sha256sum -c -
+          tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
+          install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Install isolated pinned component String consumer
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/psc1-wasmtime-python"
+          "$RUNNER_TEMP/psc1-wasmtime-python/bin/python" -m pip install --only-binary=:all: --no-deps wasmtime==49.0.0
+          "$RUNNER_TEMP/psc1-wasmtime-python/bin/python" -c 'import importlib.metadata; assert importlib.metadata.version("wasmtime")=="49.0.0"'
+          echo "PSC1_WASMTIME_PY=$RUNNER_TEMP/psc1-wasmtime-python/bin/python" >> "$GITHUB_ENV"
+      - name: Install isolated pinned TypeScript consumer checker
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-ts7"
+          echo '{"name":"psc1-ts7-consumer-tests","version":"0.0.0","private":true}' > "$RUNNER_TEMP/psc1-ts7/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-ts7" --ignore-scripts --no-save --no-audit --no-fund typescript@7.0.2
+          echo "PSC1_TSC=$RUNNER_TEMP/psc1-ts7/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Execute npm source metadata boundary regressions
+        working-directory: psc1
+        run: node scripts/npm-library-resolution-tests.mjs
+      - name: Build the exact source core and both optional providers
+        run: lake build psc1 psc1_backend_python psc1_backend_php
+      - name: Prepare unchanged locked Rust adapter dependencies
+        run: cargo fetch --locked --manifest-path host-tools/typed-io-rust/Cargo.toml
+      - name: Qualify offline default and optional npm packages
+        run: node scripts/npm-native-distribution.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-backend-packages-${{ github.sha }}
+          path: psc1/dist/scoped-correctness/npm-native/
           retention-days: 90

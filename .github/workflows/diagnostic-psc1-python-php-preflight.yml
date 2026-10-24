@@ -93,7 +93,7 @@ jobs:
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
           PSC1_SCRIPT_TRANSPORT_TESTS=1 node scripts/generated-target-contract-tests.mjs
-          lake build psc1 psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests psc1_php_packed_tests psc1_python_utf8_tests psc1_direct_call_plan_tests psc1_php_extract_tests psc1_python_tail_loop_tests
+          lake build psc1 psc1_backend_python psc1_backend_php psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests psc1_php_packed_tests psc1_python_utf8_tests psc1_direct_call_plan_tests psc1_php_extract_tests psc1_python_tail_loop_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:

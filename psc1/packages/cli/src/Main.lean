@@ -99,9 +99,9 @@ private def psCliExecution
 private def psCliCheckedExecution (args : List String) : IO Unit := do
   match args with
   | [] | ["--help"] | ["-h"] => IO.println psCliUsage
-  | ["--version"] => IO.println ("PSC1 0.1.0-psc1.2 (checked native; Lean " ++ Lean.versionString ++ ")")
+  | ["--version"] => IO.println ("PSC1 0.1.0-psc1.3 (checked native; Lean " ++ Lean.versionString ++ ")")
   | ["--identity"] =>
-      IO.println ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++ Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\",\"targets\":" ++ psJsonArray (([PsBackendTarget.js, .ts, .rust, .wasmCore, .wasmComponent]).map (fun target => psJsonQuote (psBackendTargetName target))) ++ "}")
+      IO.println ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++ Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\",\"targets\":" ++ psJsonArray (([PsBackendTarget.js, .ts, .rust, .wasmCore, .wasmComponent]).map (fun target => psJsonQuote (psBackendTargetName target))) ++ ",\"optionalTargets\":[\"python\",\"php\"],\"backendProviderProtocol\":\"psc1-backend-provider/1\"}")
   | ["check", inputPath] => psHostDirectCheck inputPath
   | ["admissions", inputPath] => psHostDirectAdmissions inputPath
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSource inputPath)

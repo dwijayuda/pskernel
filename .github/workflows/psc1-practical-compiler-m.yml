@@ -102,7 +102,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_ts_continuation_tests psc1_independent_checker psc1_wasm_string_abi_tests
+          lake build psc1 psc1_backend_python psc1_backend_php psc1_ts_continuation_tests psc1_independent_checker psc1_wasm_string_abi_tests
           .lake/build/bin/psc1_wasm_string_abi_tests
       - name: Save successful compilation before running regressions
         if: steps.native_cache.outputs.cache-hit != 'true'
@@ -215,7 +215,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_independent_checker psc1_php_utf8_tests
+          lake build psc1 psc1_backend_python psc1_backend_php psc1_independent_checker psc1_php_utf8_tests
       - name: Save successful compilation before execution
         if: steps.native_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4

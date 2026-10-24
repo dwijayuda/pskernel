@@ -229,8 +229,8 @@ def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
                     match psRustEmitAlternativeListWith locals emitAlternative inductiveName alternatives with
                     | Except.error error => Except.error error
                     | Except.ok printedAlternatives =>
-                        Except.ok (psRustJoin "" ["match ", psRustCloneExprPrinted scrutinee printedScrutinee,
-                          " { ", psRustJoin ", " printedAlternatives, " }"])
+                        Except.ok (psRustJoin "" ["match &(", psRustCloneExprPrinted scrutinee printedScrutinee,
+                          ") { ", psRustJoin ", " printedAlternatives, " }"])
             | _ =>
                 match ordinary expr with
                 | Except.error error => Except.error error

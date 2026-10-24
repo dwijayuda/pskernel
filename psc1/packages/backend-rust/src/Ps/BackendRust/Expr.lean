@@ -991,7 +991,7 @@ def psRustEmitMatchBindingLetsWorker
         psRustConcat4
           "let "
           (psRustIdentifier binding.name)
-          " = (*"
+          " = (**"
           (psRustConcat4
             (psRustMatchBindingTemp index)
             ").clone(); "
@@ -1345,9 +1345,9 @@ def psRustEmitExprWorker
               | Except.ok printedAlternatives =>
                   Except.ok
                     (psRustConcat4
-                      "(match "
+                      "(match &("
                       (psRustCloneExprPrinted scrutinee printedScrutinee)
-                      " { "
+                      ") { "
                       (psRustConcat2
                         (psRustJoin ", " printedAlternatives)
                         " })"))

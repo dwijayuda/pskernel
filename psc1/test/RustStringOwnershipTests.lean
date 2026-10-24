@@ -51,6 +51,39 @@ private def module : PsVerifiedIrModule :=
     reader "readEnd" .stringAtEnd boolT, reader "readNext" .stringNext natT,
     reader "readGet" .stringGet (.primitive .char),scanner "scan" false,
     scanner "scanAlias" true,workerScanner,paired "swap" false,paired "duplicate" true,later,shadow]}
+private def spineT : PsVerifiedIrType := .named "Spine" []
+private def emptySpine : PsVerifiedIrExpr := .constructor "Spine" "nil" [] []
+private def spineModule : PsVerifiedIrModule := {
+  imports := [],structures := []
+  inductives := [{name := "Spine",typeParameters := [],constructors := [
+    {name := "nil",fields := []},
+    {name := "cons",fields := [
+      {name := "head",type := natT},{name := "tail",type := spineT}]}]}]
+  declarations := [
+    {name := "makeSpine",typeParameters := [],parameters := [p "fuel" natT,p "acc" spineT],
+     resultType := spineT,
+     body := .ifE (intrinsic .natEq [.var "fuel",n 0]) (.var "acc")
+       (call "makeSpine" [left,.constructor "Spine" "cons" [] [("head",n 1),("tail",.var "acc")]])},
+    {name := "countSpine",typeParameters := [],parameters := [p "xs" spineT,p "count" natT],
+     resultType := natT,
+     body := .matchE "Spine" [] (.var "xs") [
+       ("nil",([], .var "count")),
+       ("cons",([.mk "head" "head",.mk "tail" "rest"],
+         call "countSpine" [.var "rest",added]))]},
+    {name := "probeSpine",typeParameters := [],parameters := [p "size" natT],resultType := natT,
+     body := .letE "xs" spineT (call "makeSpine" [.var "size",emptySpine])
+       (.letE "shared" spineT (.var "xs")
+         (intrinsic .natAdd [call "countSpine" [.var "xs",n 0],call "countSpine" [.var "shared",n 0]]))}
+  ]
+}
+private def emitSpineLegacy (isPublic : Bool) : Except PsRustEmitError String := do
+  let inductives <- spineModule.inductives.mapM
+    (RustStringOwnershipReference.psRustEmitInductiveWithVisibility isPublic)
+  let declarations <- spineModule.declarations.mapM
+    (fun d => RustStringOwnershipReference.psRustEmitDeclarationWithVisibility
+      (isPublic || d.name == "probeSpine") spineModule.declarations [] d)
+  pure (psRustAssembleModuleSource [] inductives declarations)
+
 private def require (name : String) (ok : Bool) : IO Unit := do
   if !ok then throw (IO.userError ("PSC1_RUST_STRING_OWNERSHIP_FAIL: " ++ name))
 private def emit (legacy : Bool) : Except PsRustEmitError String := do
@@ -98,4 +131,28 @@ def main : IO Unit := do
     | .error _ => throw (IO.userError "ownership fixture emission refused")
     | .ok text =>
         IO.FS.writeFile ("dist/rust-string-ownership/" ++ (if legacy then "legacy.rs" else "current.rs")) text
+  let checked <- match psStrictValidateModule spineModule with
+    | .error _ => throw (IO.userError "recursive sharing fixture strict IR refused")
+    | .ok checked => pure checked
+  for legacy in [false,true] do
+    for isPublic in [false,true] do
+      let output <- if legacy then
+          match emitSpineLegacy isPublic with
+          | .error _ => throw (IO.userError "legacy recursive fixture refused")
+          | .ok text => pure text
+        else if isPublic then
+          match psRustEmitModule spineModule with
+          | .error _ => throw (IO.userError "public recursive fixture refused")
+          | .ok text => pure text
+        else
+          match psRustEmitSelectedValidatedModule checked ["probeSpine"] [] with
+          | .error error => throw (IO.userError error)
+          | .ok text => pure text
+      IO.FS.writeFile ("dist/rust-string-ownership/spine-" ++
+        (if legacy then "legacy" else "current") ++ (if isPublic then "-public.rs" else "-private.rs")) output
+  for value in spineModule.inductives do
+    match psRustEmitInductiveWithVisibility true value,
+        RustStringOwnershipReference.psRustEmitInductiveWithVisibility true value with
+    | .ok current,.ok legacy => require "public enum bytes preserve move-out ABI" (current == legacy)
+    | _,_ => throw (IO.userError "public enum ABI emission refused")
   IO.println "PSC1_RUST_STRING_OWNERSHIP_NATIVE: checked structural reader/arity/shadow/type/fuel guards; retained original and current emitters"

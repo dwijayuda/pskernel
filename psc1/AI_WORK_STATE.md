@@ -56,6 +56,20 @@ local absent from the full body; exhaustion/escaping captures retain copies.
 Tail arguments move only their last direct local occurrence after all other
 argument snapshots. Add renamed-worker, duplicate, capture and exhaustion
 regressions. This keeps worker fusion's capture-safe lexical IR unchanged.
+The renamed-worker extension passes150 old/current observations and three
+million-character scans. Both grammars and enlarged G1 pass8b61aea4, closure
+d90f44e3e883c7502869fbfbf5eb312cee5d78ba61b893bb148a4900468c4ab3.
+Actual G2 diagnostic40123048722/job120958550385 now reaches failure in8563ms:
+GDB records repeated drop_in_place<List$spec$Char>/Rc::drop_slow frames,
+SIGSEGV then SIGABRT. The exact recursive destruction site is established.
+
+Add generic iterative final-owner reclamation only for private inductives
+with an empty constructor and exact self-recursive Rc fields. Detach those
+fields into a non-reentrant, thread-local drain; shared owners only decrement.
+Public enum layouts/field move-out remain unchanged; match borrowed carriers
+with identical cloned bindings. No unsafe code, leaked owners, increased stack
+or resource limits. Focused tests compare retained recursive sharing results,
+exercise a million-node private spine and compile public owned-field matches.
 Full current-source qualification remains pending.
 
 Preserve official Lean4.35.0, strict original/transformed IR and all prior

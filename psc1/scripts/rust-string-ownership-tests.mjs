@@ -36,5 +36,29 @@ println!("{{}}");
 `;
 const artifact=buildTarget({target:'rust',source:current,directory:path.join(root,'scale'),consumer:large,publicNames});
 const result=observeArtifact(artifact);
-const receipt={schema:'psc1-rust-string-ownership/1',testedCommit:process.env.GITHUB_SHA,differentialObservations:observations[0].length,unicodeCharactersPerScan:1000000,scans:3,scaleEvent:result.event,legacyEmitterSha256:sha(fs.readFileSync('test/RustStringOwnershipReference.lean')),sourceSha256:sha(current),publicStringABI:'unchanged',defaultStack:'unchanged'};
+const recursive=[];
+const spineConsumer=`
+let observations:Vec<String>=[0u32,1,7,1000].iter().map(|n|probeSpine(PsNat::from(*n)).to_string()).collect();
+println!("{:?}",observations);
+`;
+for(const kind of ['legacy','current']){
+ const source=fs.readFileSync(path.join(root,'spine-'+kind+'-private.rs'),'utf8');
+ const artifact=buildTarget({target:'rust',source,directory:path.join(root,'spine-'+kind),consumer:spineConsumer,publicNames:['probeSpine']});
+ recursive.push(observeArtifact(artifact).observation);
+}
+assert.deepEqual(recursive[0],recursive[1]);assert.deepEqual(recursive[1],['0','2','14','2000']);
+const privateSource=fs.readFileSync(path.join(root,'spine-current-private.rs'),'utf8');
+assert.ok(privateSource.includes(' Drop for Spine'));
+assert.ok(privateSource.includes('__ps_internal_drop_shared'));
+const privateLarge=buildTarget({target:'rust',source:privateSource,directory:path.join(root,'spine-scale'),
+ consumer:'assert_eq!(probeSpine(PsNat::from(1000000u32)),PsNat::from(2000000u32)); println!("{}");',publicNames:['probeSpine']});
+const privateResult=observeArtifact(privateLarge);
+for(const kind of ['legacy','current']){
+ const source=fs.readFileSync(path.join(root,'spine-'+kind+'-public.rs'),'utf8');
+ assert.ok(!source.includes(' Drop for Spine'),'public downstream move-out ABI unchanged');
+ const artifact=buildTarget({target:'rust',source,directory:path.join(root,'spine-public-'+kind),publicNames:['probeSpine'],
+ consumer:'let value=makeSpine(PsNat::from(2u32),Spine::nil {}); if let Spine::cons { head, tail } = value { assert_eq!(*head,PsNat::from(1u32)); assert_eq!(countSpine((*tail).clone(),PsNat::from(0u32)),PsNat::from(1u32)); } else { panic!("public constructor"); } println!("{}");'});
+ observeArtifact(artifact);
+}
+const receipt={schema:'psc1-rust-string-ownership/1',testedCommit:process.env.GITHUB_SHA,differentialObservations:observations[0].length,unicodeCharactersPerScan:1000000,scans:3,scaleEvent:result.event,legacyEmitterSha256:sha(fs.readFileSync('test/RustStringOwnershipReference.lean')),sourceSha256:sha(current),publicStringABI:'unchanged',defaultStack:'unchanged',privateRecursiveNodes:1000000,sharedOwnerChecks:recursive[1],privateDropEvent:privateResult.event,publicEnumMoveOut:'preserved'};
 fs.writeFileSync(path.join(root,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');console.log('PSC1_RUST_STRING_OWNERSHIP: '+JSON.stringify(receipt));

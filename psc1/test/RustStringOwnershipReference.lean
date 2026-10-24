@@ -1479,4 +1479,24 @@ def psRustEmitDeclarationWithVisibility (isPublic : Bool)
                             printedBody
                             " }")))
 
+def psRustEmitInductiveWithVisibility (isPublic : Bool)
+    (inductiveInfo : PsVerifiedIrInductive) :
+    Except PsRustEmitError String :=
+  match psRustEmitConstructorList inductiveInfo.constructors with
+  | Except.error error =>
+      Except.error error
+  | Except.ok printedConstructors =>
+      let generic :=
+        psRustGenericNames inductiveInfo.typeParameters;
+      Except.ok
+        (psRustConcat4
+          (if isPublic then "#[derive(Clone)]\npub enum " else "#[derive(Clone)]\nenum ")
+          (psRustIdentifier inductiveInfo.name)
+          generic
+          (psRustConcat4
+            " { "
+            (psRustJoin ", " printedConstructors)
+            " }"
+            ""))
+
 end RustStringOwnershipReference

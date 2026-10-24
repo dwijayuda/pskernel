@@ -78,7 +78,7 @@ if(process.env.PSC1_SCRIPT_TRANSPORT_TESTS==='1'){
     assert.deepEqual(JSON.parse(fs.readFileSync(output)),{status:'refused',input});
    }
    const adapter=path.join(directory,target==='python'?'generated-python-transport.py':'generated-php-transport.php');
-   fs.appendFileSync(adapter,'\n# changed\n');
+   const changed=fs.readFileSync(adapter);changed[0]^=1;fs.writeFileSync(adapter,changed);
    assert.throws(()=>verifyArtifact(artifact.file,artifact.sha256),/FILE_CHANGED/);
   }finally{fs.rmSync(directory,{recursive:true,force:true});}
  }

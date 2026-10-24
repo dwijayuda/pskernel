@@ -3,15 +3,15 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {sha,verifyArtifact,executeService} from '../host-tools/generated-target-tools.mjs';
+import {sha,verifyArtifact,executeService,buildTarget} from '../host-tools/generated-target-tools.mjs';
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
-import {corpus,refusals,expectedObservations,rustObservations} from './generated-target-corpus.mjs';
+import {corpus,refusals,expectedObservations,rustObservations,pythonObservations,phpObservations} from './generated-target-corpus.mjs';
 assert.equal(corpus.length,5);assert.equal(refusals.length,5);
 assert.deepEqual([...corpus,...refusals].map(c=>c.id).sort(),['lean-modules','ps-integer-unicode','ps-list-literal','lean-handler-pattern','lean-ordinary-loop','malformed-list','wrong-body','missing-import','checked-partial','verified'].sort());
 assert.deepEqual(Object.keys(expectedObservations).sort(),corpus.map(c=>c.id).sort());
 assert.deepEqual(Object.keys(rustObservations).sort(),corpus.map(c=>c.id).sort());
 const sources=[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}];
-for(const target of ['ts','rust','js','wasm-core']){
+for(const target of ['ts','rust','js','wasm-core','python','php']){
  const session=createCompilerHostSession({requestId:'negative',target,sources,canonicalAdmissions:'[]',checkerExecutable:'/must-not-execute'});
  assert.throws(()=>session.admit(JSON.stringify({protocol:'psc1-compiler-host/1',op:'admit',requestId:'negative',
   target:target==='ts'?'rust':'ts',sourceClosureDigest:compilerSourceClosureDigest(sources),admissions:'[]'})),/REQUEST_MISMATCH/);
@@ -57,3 +57,30 @@ try {
  }
  console.log('PSC1_GENERATED_TARGET_WIRE_REFUSAL: malformed wire forwarded unchanged');
 } finally { fs.rmSync(transport,{recursive:true,force:true}); }
+
+for(const observations of [pythonObservations,phpObservations])assert.deepEqual(Object.keys(observations).sort(),corpus.map(c=>c.id).sort());
+
+// Transport fixtures have no compiler semantics and never grant qualification.
+if(process.env.PSC1_SCRIPT_TRANSPORT_TESTS==='1'){
+ for(const target of ['python','php']){
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-'+target+'-wire-'));
+  const exported=target==='python'?'psCompilerPythonServiceCandidate':'psCompilerPhpServiceCandidate';
+  try{
+   const source=target==='python'?
+    "import json\n__all__=['"+exported+"']\ndef "+exported+"(wire):\n return json.dumps({'status':'refused','input':wire},ensure_ascii=False)\n":
+    "<?php\nreturn ['"+exported+"'=>static fn(string $wire): string => json_encode(['status'=>'refused','input'=>$wire],JSON_THROW_ON_ERROR)];\n";
+   const artifact=buildTarget({target,source,directory,service:true,publicNames:[exported]});
+   for(const [i,input] of ['malformed JSON','null','{}','[\"wrong-protocol\",\"G2-self\"]','λ🙂\u0000'].entries()){
+    const request=path.join(directory,'request-'+i+'.json'),output=path.join(directory,'response-'+i+'.json');
+    fs.writeFileSync(request,input);
+    const receipt=await executeService(artifact.file,artifact.sha256,request,output,'correctness-1800s');
+    assert.equal(receipt.target,target);
+    assert.deepEqual(JSON.parse(fs.readFileSync(output)),{status:'refused',input});
+   }
+   const adapter=path.join(directory,target==='python'?'generated-python-transport.py':'generated-php-transport.php');
+   fs.appendFileSync(adapter,'\n# changed\n');
+   assert.throws(()=>verifyArtifact(artifact.file,artifact.sha256),/FILE_CHANGED/);
+  }finally{fs.rmSync(directory,{recursive:true,force:true});}
+ }
+ console.log('PSC1_SCRIPT_TRANSPORT_CONTRACT: Python/PHP exact malformed wire, Unicode, NUL, API inventory and adapter identity boundaries passed');
+}

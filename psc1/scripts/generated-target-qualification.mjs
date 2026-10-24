@@ -7,7 +7,7 @@ import {readOwnedCompilerSources} from '../host-tools/compiler-source-inputs.mjs
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
 import {sha,buildTarget,observeArtifact,verifyArtifact,runTool,boundedRun} from '../host-tools/generated-target-tools.mjs';
 import {validateClosureCounts} from './compiler-closure-contract.mjs';
-import {corpus,refusals,expectedObservations,observedExpressions,rustObservations} from './generated-target-corpus.mjs';
+import {corpus,refusals,expectedObservations,observedExpressions,rustObservations,pythonObservations,phpObservations} from './generated-target-corpus.mjs';
 import {generatedTarget} from '../host-tools/generated-target-profiles.mjs';
 import {qualificationProfile,compilerRequestLimit,PERFORMANCE_PROFILE} from './selfhost-qualification-profiles.mjs';
 const [target,mode='--self-host',profileName=PERFORMANCE_PROFILE]=process.argv.slice(2);
@@ -21,7 +21,7 @@ const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
 const runner=path.resolve('scripts/generated-target-runner.mjs');
 const inventoryFiles=['scripts/generated-target-qualification.mjs','scripts/generated-target-runner.mjs',
  'scripts/selfhost-qualification-profiles.mjs','scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
- 'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','host-tools/generated-target-profiles.mjs','host-tools/generated-wasm-transport.mjs','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
+ 'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','host-tools/generated-target-profiles.mjs','host-tools/generated-wasm-transport.mjs','host-tools/generated-python-transport.py','host-tools/generated-php-transport.php','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
 const tools=[checker,process.execPath,...inventoryFiles.map(p=>path.resolve(p))].map(file=>({file,sha256:sha(fs.readFileSync(file))}));
 const seedHash=sha(fs.readFileSync(seed));let seedCalls=0;
 const events=[],report={schema:'psc1-generated-target-qualification/1',target,mode,
@@ -113,7 +113,7 @@ function exercise(artifact,generation) {
  for(const item of corpus) {
   const label='G'+generation+'-'+item.id,r=request(label,item.grammar,item.assurance,item.entry,item.sources);
   const c=generated(artifact,r,label),identity=checkCandidate(c,r);
-  const consumer=target!=='rust'?item.consumer+'\nconsole.log(JSON.stringify('+observedExpressions[item.id]+'));\n':rustObservations[item.id];
+  const consumer=target==='python'?'print(json.dumps('+pythonObservations[item.id]+',ensure_ascii=False))\n':target==='php'?'echo json_encode('+phpObservations[item.id]+',JSON_THROW_ON_ERROR);\n':target!=='rust'?item.consumer+'\nconsole.log(JSON.stringify('+observedExpressions[item.id]+'));\n':rustObservations[item.id];
   const built=buildTarget({target,source:c.value.source,directory:path.join(directory,label),consumer,publicNames:c.value.publicNames,publicTypes:target==='wasm-core'?c.value.specializedIr[4].filter(d=>c.value.publicNames.includes(d[0])).map(d=>({name:d[0],parameters:d[2].map(p=>p[1]),result:d[3]})):[]});
   const observation=observeArtifact(built);assert.deepEqual(observation.observation,expectedObservations[item.id]);
   observations.push({id:item.id,...identity,observation:observation.observation});

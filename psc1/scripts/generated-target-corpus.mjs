@@ -45,3 +45,18 @@ export const rustObservations = {
  'lean-handler-pattern':'println!("{{\\\"normal\\\":\\\"{}\\\",\\\"caught\\\":\\\"{}\\\"}}", observe(false), observe(true));',
  'lean-ordinary-loop':'println!("{{\\\"zero\\\":\\\"{}\\\",\\\"five\\\":\\\"{}\\\"}}", answer(PsNat::from(0u8)), answer(PsNat::from(5u8)));'
 };
+
+export const pythonObservations = {
+  "lean-modules": "{'answer':str(m.answer),'exports':m.__all__}",
+  "ps-integer-unicode": "{'huge':str(m.huge),'text':m.text}",
+  "ps-list-literal": "{'empty':str(m.answer(False)),'first':str(m.answer(True))}",
+  "lean-handler-pattern": "{'normal':str(m.observe(False)),'caught':str(m.observe(True))}",
+  "lean-ordinary-loop": "{'zero':str(m.answer(0)),'five':str(m.answer(5))}"
+};
+export const phpObservations = {
+  "lean-modules": "['answer'=>gmp_strval($m['answer']),'exports'=>array_keys($m)]",
+  "ps-integer-unicode": "['huge'=>gmp_strval($m['huge']),'text'=>$m['text']]",
+  "ps-list-literal": "['empty'=>gmp_strval($m['answer'](false)),'first'=>gmp_strval($m['answer'](true))]",
+  "lean-handler-pattern": "['normal'=>gmp_strval($m['observe'](false)),'caught'=>gmp_strval($m['observe'](true))]",
+  "lean-ordinary-loop": "['zero'=>gmp_strval($m['answer'](gmp_init(0))),'five'=>gmp_strval($m['answer'](gmp_init(5)))]"
+};

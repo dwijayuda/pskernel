@@ -5,16 +5,20 @@ feat/psc1-python-php-selfhost-20261024 before expected-HEAD non-force updates.
 Read AI_WORK_STATE.md, the single roadmap, architecture and preserved direct
 qualification receipt. No local checkouts/builds/tests, PR merge or publishing.
 
-1. Inspect latest source preflight40065397379 atbae72b4b and later harness
-   checkpointba2a1246. Both existing backend facades build natively. This does
-   not qualify their source parse/elaboration, admission, IR or generated execution.
-2. Check all complete Python/PHP closure records in both Lean and canonical PS.
-   Fix actual source refusals as semantic-preserving source-class normalizations.
-   Keep whole existing backend functionality, scalar/foreign-ABI refusals and
-   exact evaluation/error/order/resource behavior; avoid duplicate emitters.
-3. Run source preflight with host protocol target inventory extended to Python/PHP.
-   PSC1_SCRIPT_TRANSPORT_TESTS=1 exercises unchanged malformed/Unicode/NUL wire,
-   public API inventory and adapter file identity. Fixtures grant no qualification.
+1. Start from verified implementation24f93a383886894cb411ecb76ff38fa46dd47177.
+   Source gate40069330525/job120799158087 PASSED both complete86-module closures,
+   both grammars,34816 retained runtime comparisons, seven state/four arity
+   complete API equalities,144 full retained-emitter comparisons, unchanged-wire
+   transport negatives and four independently admitted runtime applications.
+   Artifact12550731070 digest432892ba71dfd10da59fcc150fa0220476fae2881c27d199cfca10820afb603d.
+   This proves source readiness and regression scopes, not compiler G1/G2/G3.
+2. There is one portable emitter per target, behind unchanged native compatibility
+   APIs. Keep CompilerService imports pointing to Portable; do not capture the
+   native default-argument/metadata adapters or test references as compiler code.
+3. Python3.14.8 and PHP8.5.12/ext-gmp are exact runtime guards. The setup action
+   installed8.5.12 when8.5.11 was requested;40068963704 correctly refused drift.
+   Workflows/inventory now explicitly request8.5.12 and retain the strict guard.
+   Qualification records actual interpreter hashes and verifies them throughout.
 4. After both closures pass, create one request-only child commit changing
    .github/qualification-requests/psc1-python-php-selfhost.json. Schema
    psc1-python-php-selfhost-request/1; exact current branch and parentCommit;

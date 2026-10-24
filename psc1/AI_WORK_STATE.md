@@ -12,8 +12,16 @@ owns immutable attempts, artifacts, timings and source identities.
 Continue on feat/psc1-python-php-selfhost-20261024, draft
 [PR176](https://github.com/dwijayuda/pskernel/pull/176), based on preserved
 direct-target checkpoint6393226e5d29ad246e9421fe398d78c43954c6d9.
-Latest executable/source checkpoint:6f73c9f0bbd04a5577ac90d80f7a0481914cb1f4; source preflight is pending.
-No Python/PHP G1, G2/G3 or fixed-point qualification is claimed yet.
+Verified executable/source checkpoint:24f93a383886894cb411ecb76ff38fa46dd47177.
+[Source gate40069330525](https://github.com/dwijayuda/pskernel/actions/runs/40069330525),
+job120799158087 PASSED at this checkpoint:86 modules per target, both .lean/.ps
+grammars accepted with no refusals. Native build and all named runtime/state/
+retained-emitter/admitted-library regressions pass. Seven state and four arity
+complete API equalities are checked by official Lean4.35.0.
+Artifact12550731070 digest432892ba71dfd10da59fcc150fa0220476fae2881c27d199cfca10820afb603d.
+Source readiness is not generated compiler qualification. No Python/PHP G1,
+G2/G3 or fixed-point qualification is claimed yet. Next commit is the isolated
+explicit request for both targets, from this verified implementation.
 
 The existing emitters now have one portable implementation each:
 Ps.BackendPython.Portable and Ps.BackendPhp.Portable. The old Module paths are
@@ -23,7 +31,7 @@ There is no second handwritten compiler, alternate frontend or native delegation
 
 The proved normal form is State -> Except Error (Prod Value State):
 seven complete operation equalities to StateT (Except) passed official Lean;
-four complete arity-dispatch equalities are added at this checkpoint and await CI.
+four complete arity-dispatch equalities also passed the source gate.
 The source port uses explicit state/results, flat constructor cases and typed
 workers under dynamic inputs, without extending the frozen language grammar.
 Ordered line/origin accumulators preserve printed output and offsets.
@@ -34,11 +42,10 @@ seven state API proofs/tests,144 complete retained-emitter output/refusal
 comparisons, and all four independently admitted/generated runtime probes
 (Python/PHP × Lean/PS,104 runtime and8 state queries each) PASSED.
 These are compiler/library regressions, not generated compiler qualification.
-Both closures contain86 modules. Python's entire closure parses in both
-grammars; elaboration reached the final entry and refused contextual throw.
-PHP's remaining parse refusal was the nested do RHS at643:13.
-Current6f73c9f0 replaces contextual pure/throw with explicit Except
-constructors and extracts that RHS into an ordinary typed helper. Re-query CI.
+Both closures now contain86 modules and pass the full four-lane source census.
+Contextual Except spellings, nested do RHSs, list/nested constructor patterns,
+tuple action binds and recursive application arities were normalized as source
+classes. Native compatibility APIs remain intact; no grammar/authority bypass.
 
 The shared production harness supports both targets, the existing ten cases,
 hash-bound unchanged-wire transport and the same independent admission/IR

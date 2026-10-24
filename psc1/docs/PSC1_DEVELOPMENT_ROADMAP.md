@@ -20,8 +20,8 @@ service are reused, with small host transport adapters only. No Python/PHP self-
 ported to the supported explicit state/Except source normal form, with native
 compatibility adapters. Seven state API equalities,34816 runtime comparisons,
 144 retained-emitter comparisons and four independently admitted generated
-runtime probes pass40068694963. Source6f73c9f0 addresses the final
-observed contextual-Except/nested-do refusals; whole-source CI must confirm it.
+runtime probes pass40068694963. Source gate40069330525 at24f93a38 PASSED all four86-module
+source lanes, native proofs and regressions; genuine compiler generations are next.
 See [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md).
 The later direct performance queue is deferred while this user-directed mission runs.
 

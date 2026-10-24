@@ -1,11 +1,11 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 06:08 UTC",
-  "status": "portable-emitter-native-regressions-passed-whole-source-gate-pending",
+  "recordedAtUtc": "2026-10-24 06:17 UTC",
+  "status": "whole-source-gate-passed-ready-genuine-generations",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
-  "sourceCommit": "6f73c9f0bbd04a5577ac90d80f7a0481914cb1f4",
+  "sourceCommit": "24f93a383886894cb411ecb76ff38fa46dd47177",
   "targets": [
     "python",
     "php"
@@ -73,7 +73,7 @@
     "explicitExceptConstructors": true,
     "nestedDoRhsExtracted": true,
     "completeArityEqualitiesAdded": 4,
-    "status": "pending-Linux-CI"
+    "status": "passed"
   },
   "qualification": {
     "G1": "not-run",
@@ -119,5 +119,43 @@
     "observed": "8.5.12",
     "result": "exact-version-guard-refused",
     "resolution": "Explicit8.5.12 in workflows and trusted inventory; exact-version assertions retained, no wildcard fallback."
-  }
+  },
+  "sourceGate": {
+    "runId": 40069330525,
+    "jobId": 120799158087,
+    "commit": "24f93a383886894cb411ecb76ff38fa46dd47177",
+    "status": "passed",
+    "modulesPerTarget": 86,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "refused": [],
+    "stateApiEqualities": 7,
+    "arityApiEqualities": 4,
+    "runtimeComparisons": 34816,
+    "retainedEmitterComparisons": 144,
+    "admittedRuntimeLibraryCombinations": 4,
+    "artifact": {
+      "id": 12550731070,
+      "node_id": "MDg6QXJ0aWZhY3QxMjU1MDczMTA3MA==",
+      "name": "psc1-python-php-source-24f93a383886894cb411ecb76ff38fa46dd47177",
+      "size_in_bytes": 9613874,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550731070",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550731070/zip",
+      "expired": false,
+      "digest": "sha256:432892ba71dfd10da59fcc150fa0220476fae2881c27d199cfca10820afb603d",
+      "created_at": "2026-10-24T06:14:42Z",
+      "updated_at": "2026-10-24T06:14:42Z",
+      "expires_at": "2027-01-22T06:13:12Z",
+      "workflow_run": {
+        "id": 40069330525,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-python-php-selfhost-20261024",
+        "head_sha": "24f93a383886894cb411ecb76ff38fa46dd47177"
+      }
+    }
+  },
+  "nextAction": "Create isolated request-only commit for both genuine qualification targets from fresh HEAD; no generations qualified yet."
 }

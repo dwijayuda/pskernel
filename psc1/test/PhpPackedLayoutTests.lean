@@ -73,11 +73,14 @@ def main : IO Unit := do
           IO.println (finding.code ++ ":" ++ finding.owner ++ ":" ++ finding.path ++ ":" ++ finding.detail)
         throw (IO.userError "packed fixture did not strictly validate")
     | .ok validated => pure validated
-  let reordered := { module with declarations := module.declarations.map (fun declaration =>
-    if declaration.name == "three" then { declaration with body :=
-      call "read" [.constructor "Choice" "three" [] [
-        ("right", n 11), ("text", .literal (.string "λ🙂")), ("left", n 9)]] }
-    else declaration) }
+  let badDeclarations := module.declarations.map (fun declaration =>
+    if declaration.name == "three" then
+      { declaration with
+        body := call "read" [.constructor "Choice" "three" [] [
+          ("right", n 11), ("text", .literal (.string "λ🙂")), ("left", n 9)]]
+      }
+    else declaration)
+  let reordered : PsVerifiedIrModule := { module with declarations := badDeclarations }
   match psStrictValidateModule reordered with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "noncanonical constructor field order admitted")

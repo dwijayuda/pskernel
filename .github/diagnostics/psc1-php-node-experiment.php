@@ -11,7 +11,9 @@ if(hash('sha256',$source)!==$report['generations'][0]['sourceSha256'])throw new 
 $split=strpos($source,'// declaration ');if($split===false)throw new RuntimeException('DECLARATIONS');
 $prefix=substr($source,0,$split);$program=substr($source,$split);
 foreach(['string $tag','int $count','mixed $first','mixed $second','array $rest']as$field){$needle='private '.$field.';';if(substr_count($prefix,$needle)!==1)throw new RuntimeException('PROPERTY');$prefix=str_replace($needle,'public private(set) '.$field.';',$prefix);}
-$tokens=token_get_all('<?php '.$program,TOKEN_PARSE);array_shift($tokens);
+// This suffix closes its enclosing module scope; tokenize without standalone-fragment parsing.
+// Requiring the complete modified module below still performs PHP's actual syntax validation.
+$tokens=token_get_all('<?php '.$program);array_shift($tokens);
 $text=static fn($token)=>is_array($token)?$token[1]:$token;
 $next=static function(int $index)use($tokens):int{do{++$index;}while(isset($tokens[$index])&&is_array($tokens[$index])&&in_array($tokens[$index][0],[T_WHITESPACE,T_COMMENT,T_DOC_COMMENT],true));return$index;};
 $plain=[];$bindings=[];$assignments=[];

@@ -1,17 +1,14 @@
 {
   "schema": "psc1-unified-selfhost-request/1",
   "branch": "feat/psc1-unified-selfhost-20261024",
-  "parentCommit": "658df6d9e9bada4e11e369ab6d0e73d0dab74d4c",
-  "action": "validate-independent-G1",
-  "mode": "--g1-only",
+  "parentCommit": "84cc15375e4236a902e8af6658d92a640c6aa22a",
+  "action": "qualify-independent-G1-G2-G3",
+  "mode": "--self-host",
   "profile": "correctness-1800s",
   "g1TimeoutMs": 240000,
   "g2g3TimeoutMs": 1800000,
   "targets": [
-    "js",
-    "ts",
     "rust",
     "wasm-core"
-  ],
-  "reason": "Verify structured v2 request root in all four generated engines, both source grammars, independent admission, forty cross-target corpus cases and nine envelope refusals. Existing long old-source attempts remain preserved."
+  ]
 }

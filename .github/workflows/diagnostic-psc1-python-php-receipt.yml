@@ -1,0 +1,74 @@
+name: PSC1 Python PHP3600s immutable qualification readback
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-python-php-receipt-request.json]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  request:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    outputs:
+      rows: ${{ steps.read.outputs.rows }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - id: read
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          const r=JSON.parse(fs.readFileSync('.github/diagnostics/psc1-python-php-receipt-request.json'));
+          assert.equal(r.schema,'psc1-python-php-3600s-readback-request/1');
+          assert.ok(Array.isArray(r.rows)&&r.rows.length>0&&r.rows.length<=2);
+          for(const row of r.rows){assert.ok(['python','php'].includes(row.target));assert.ok(['success','failure'].includes(row.conclusion));for(const k of ['run','job','artifact'])assert.match(String(row[k]),/^[0-9]+$/);assert.match(row.commit,/^[0-9a-f]{40}$/);assert.match(row.digest,/^sha256:[0-9a-f]{64}$/);assert.equal(row.branch,'qualification/psc1-python-php-3600s-20261024');}
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'rows='+JSON.stringify(r.rows)+'\n');
+          JS
+  inspect:
+    needs: request
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        row: ${{ fromJSON(needs.request.outputs.rows) }}
+    env:
+      PSC1_RECEIPT_ROW: ${{ toJSON(matrix.row) }}
+      PSC1_RUN: ${{ matrix.row.run }}
+      PSC1_ARTIFACT: ${{ matrix.row.artifact }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Verify completed producer job and immutable artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/dwijayuda/pskernel/actions/runs/$PSC1_RUN" > run.json
+          gh api "repos/dwijayuda/pskernel/actions/runs/$PSC1_RUN/jobs" > jobs.json
+          gh api "repos/dwijayuda/pskernel/actions/artifacts/$PSC1_ARTIFACT" > artifact.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          const row=JSON.parse(process.env.PSC1_RECEIPT_ROW),r=JSON.parse(fs.readFileSync('run.json')),j=JSON.parse(fs.readFileSync('jobs.json')).jobs.find(j=>j.id===row.job),a=JSON.parse(fs.readFileSync('artifact.json'));
+          assert.equal(r.head_sha,row.commit);assert.equal(r.head_branch,row.branch);assert.ok(j);assert.equal(j.status,'completed');assert.equal(j.conclusion,row.conclusion);assert.equal(j.name,'qualify ('+row.target+')');
+          assert.equal(a.workflow_run.id,row.run);assert.equal(a.workflow_run.head_sha,row.commit);assert.equal(a.digest,row.digest);assert.equal(a.expired,false);
+          JS
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ matrix.row.run }}
+          artifact-ids: ${{ matrix.row.artifact }}
+          path: baseline
+      - name: Read exact source bytes and qualification receipts without executing a compiler
+        run: node .github/diagnostics/psc1-python-php-receipt.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-python-php3600s-readback-${{ matrix.row.target }}-${{ github.sha }}
+          path: diagnostics/
+          retention-days: 90

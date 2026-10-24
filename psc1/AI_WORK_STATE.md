@@ -3,7 +3,32 @@
 Updated 2026-10-25 Asia/Jakarta. GitHub/Linux Actions only; fresh expected-HEAD
 non-force updates. No merge or npm publication authorized.
 
-## Codec spine correction in progress
+## Admission/codec stack correction in progress
+
+New source e98ea691d311348059313183452fe517a7d783fa passes exact codec
+all-input proofs,40 retained/current observations,ten10000-deep generated
+Rust shapes (9298ms,maxRSS32304KiB),both grammar censuses and enlarged RustG1.
+Focused40132160344/job120985984748 passes; closure9bcae9b83374869f57b3a466e6a665680180e2fa8cbf6d5b15fa320e8617b2db.
+Its Rust-only chain request04771b2b/run40132435573 is active; preserve it.
+
+Earlier first-frame requestf5a00e75/run40130597594 passes G1 but G2 overflows
+after530106ms,maxRSS463544KiB; noG3/fixedpoint. Immutable readback40131756188/
+job120984747463 confirms exact independent-G1 reproduction at closure50d5d0d0.
+GDB replay40131756069/job120984747118 records the accumulator at the stack
+guard after523662ms, with many psEncodeCheckedAdmissionsLoop closure frames
+beneath it. The declaration loop constructs a recursive function before its
+state argument, retaining the declaration-depth return stack. Normalize that
+loop and the final string reversal to fully applied structural tail workers.
+Retain their previous definitions and prove equality for every state/list.
+
+Preserved request812094c1/run40126488125 has qualified TS and Wasm G1/G2/G3
+and exact executable/source/admission/IR/four-target fixed points on closure92654df5.
+TS G2/G3=1379563/1401815ms;Wasm=1396916/1410393ms. Immutable readback40130870206
+verifies seven records, source inventories/executables and IR/admission parity.
+Its Rust overflow and JS1800278ms G2 deadline remain failed, not qualified.
+All historical evidence and limits remain. No merge or npm publication.
+
+## Earlier codec correction checkpoint (historical)
 
 Current source a3d3e0a9444934d3f55c41939e971c39e56472d3 has enlarged Rust G1
 passing, but real G2 in run40126488125/job120969044264 aborts after520538ms

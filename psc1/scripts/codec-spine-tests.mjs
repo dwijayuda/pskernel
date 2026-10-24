@@ -25,12 +25,27 @@ def codecMakeSpine (depth : Nat) (mode : Nat) (value : PsExpr) : PsExpr :=
         else PsExpr.app (PsExpr.bvar 0)
           (PsExpr.letE PsName.anonymous (PsExpr.bvar 1) (PsExpr.lit (PsLiteral.natural 7)) value);
       codecMakeSpine rest mode next
+def codecMakeAdmissions (count : Nat) (acc : List PsDeclaration) : List PsDeclaration :=
+  match count with
+  | Nat.zero => acc
+  | Nat.succ rest =>
+      codecMakeAdmissions rest
+        (List.cons
+          (PsDeclaration.definitionDecl (PsName.str PsName.anonymous "entry") List.nil
+            (PsExpr.sortE PsLevel.zero) (PsExpr.sortE PsLevel.zero)) acc)
 `;
 const probe=`import CodecProbeInternal
 def codecProbe (depth : Nat) (mode : Nat) : String :=
-  match psEncodeCodecExpr (codecMakeSpine depth mode (PsExpr.lit (PsLiteral.string "λ🙂"))) with
-  | Except.error _ => "refused"
-  | Except.ok value => value
+  if Nat.beq mode 10 then
+    let state : PsCheckedAdmissionEncodeState :=
+      PsCheckedAdmissionEncodeState.mk PsBridgeHeightIndex.empty List.nil;
+    match psEncodeCheckedAdmissionsLoop List.nil (codecMakeAdmissions depth List.nil) state with
+    | Except.error _ => "refused"
+    | Except.ok finalState => psJsonArray (psCheckedAdmissionReverseStrings finalState.admissionsRev)
+  else
+    match psEncodeCodecExpr (codecMakeSpine depth mode (PsExpr.lit (PsLiteral.string "λ🙂"))) with
+    | Except.error _ => "refused"
+    | Except.ok value => value
 `;
 const seed=path.resolve('.lake/build/bin/psc1_unified_service_seed');
 const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
@@ -40,10 +55,19 @@ for(const kind of ['legacy','current']){
  if(kind==='legacy'){
   const row=sources.find(row=>row.module==='Ps.Bridge.CheckedAdmissions');
   const frozen=fs.readFileSync('test/CodecSpineReference.lean','utf8');
-  const original=frozen.slice(frozen.indexOf('def psEncodeCodecExpr'),frozen.indexOf('\nend PsCodecSpineReference'));
+  const original=frozen.slice(frozen.indexOf('def psEncodeCodecExpr'),frozen.indexOf('\ndef psEncodeCheckedAdmissionsLoop'));
   const start=row.text.indexOf('-- Explicit return frames preserve the original opaque append tree exactly.');
   const end=row.text.indexOf('\ndef psEncodeCodecNames',start);
   assert.ok(start>0&&end>start);row.text=row.text.slice(0,start)+original+row.text.slice(end);
+  const loopStart=row.text.indexOf('def psEncodeCheckedAdmissionsLoopWorker');
+  const loopEnd=row.text.indexOf('\ndef psCheckedAdmissionReverseStringsWorker',loopStart);
+  const oldLoop=frozen.slice(frozen.indexOf('def psEncodeCheckedAdmissionsLoop'),frozen.indexOf('\ndef psCheckedAdmissionReverseStringsAcc'));
+  assert.ok(loopStart>0&&loopEnd>loopStart);row.text=row.text.slice(0,loopStart)+oldLoop+row.text.slice(loopEnd);
+  const reverseStart=row.text.indexOf('def psCheckedAdmissionReverseStringsWorker');
+  const reverseEnd=row.text.indexOf('\ndef psCheckedAdmissionReverseStrings\n',reverseStart);
+  const oldReverse=frozen.slice(frozen.indexOf('def psCheckedAdmissionReverseStringsAcc'),frozen.indexOf('\nend PsCodecSpineReference'));
+  assert.ok(reverseStart>0&&reverseEnd>reverseStart);row.text=row.text.slice(0,reverseStart)+oldReverse+row.text.slice(reverseEnd);
+
  }
  sources.push({module:'CodecProbeInternal',kind:'lean',text:helper},{module:'CodecProbe',kind:'lean',text:probe});
  const digest=compilerSourceClosureDigest(sources),id='codec-spine-'+kind;
@@ -55,7 +79,7 @@ for(const kind of ['legacy','current']){
  const session=createCompilerHostSession({requestId:id,target:'rust',sources,canonicalAdmissions:candidate.admissionRequest.admissions,checkerExecutable:checker});
  const admitted=session.admit(JSON.stringify(candidate.admissionRequest));assert.equal(admitted.accepted,true);
  const consumer=`let mut observations=Vec::<String>::new();
-for mode in 0u32..10 { for depth in [0u32,1,7,32] {
+for mode in 0u32..11 { for depth in [0u32,1,7,32] {
  observations.push(codecProbe(PsNat::from(depth),PsNat::from(mode)));
 }}
 println!("{:?}",observations);
@@ -64,12 +88,12 @@ println!("{:?}",observations);
  const observed=observeArtifact(artifact);
  records.push({kind,closure:digest,requestSha256:sha(fs.readFileSync(request)),candidateSha256:sha(fs.readFileSync(output)),sourceSha256:sha(candidate.source),admissionsSha256:admitted.admissionsDigest,artifactSha256:artifact.sha256,event:observed.event,observations:observed.observation});
  if(kind==='current'){
-  const deep=`let lengths:Vec<String>=(0u32..10).map(|mode| codecProbe(PsNat::from(10000u32),PsNat::from(mode)).len().to_string()).collect();
+  const deep=`let lengths:Vec<String>=(0u32..11).map(|mode| codecProbe(PsNat::from(10000u32),PsNat::from(mode)).len().to_string()).collect();
 println!("{:?}",lengths);
 `;
   const scale=buildTarget({target:'rust',source:candidate.source,directory:path.join(directory,'scale'),consumer:deep,publicNames:['codecProbe']});
-  const result=observeArtifact(scale);assert.equal(result.observation.length,10);assert.ok(result.observation.every(n=>Number(n)>200000));
-  records.push({kind:'deep-10000-ten-spines',artifactSha256:scale.sha256,event:result.event,byteLengths:result.observation});
+  const result=observeArtifact(scale);assert.equal(result.observation.length,11);assert.ok(result.observation.every(n=>Number(n)>200000));
+  records.push({kind:'deep-10000-ten-spines-and-admission-fold',artifactSha256:scale.sha256,event:result.event,byteLengths:result.observation});
  }
 }
 assert.deepEqual(records[1].observations,records[0].observations);

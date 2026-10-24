@@ -649,98 +649,100 @@ structure PsCheckedAdmissionEncodeState where
   heights : PsBridgeHeightIndex
   admissionsRev : List String
 
+def psEncodeCheckedAdmissionsLoopWorker
+    (allDeclarations : List PsDeclaration)
+    (declarations : List PsDeclaration)
+    (state : PsCheckedAdmissionEncodeState) :
+    Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
+  match declarations with
+  | List.nil => Except.ok state
+  | List.cons declaration rest =>
+      match declaration with
+      | .definitionDecl name levelParams type value =>
+          let height :=
+            Nat.succ
+              (psBridgeExprMaxRegularHeight
+                state.heights
+                value);
+          match
+              psEncodeCodecDefinition
+                name
+                levelParams
+                type
+                value
+                height with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := psBridgeHeightInsert state.heights name height
+                admissionsRev :=
+                  List.cons
+                    (psEncodeConstantAdmission encoded)
+                    state.admissionsRev
+              }
+      | .theoremDecl name levelParams type value =>
+          match psEncodeCodecTheorem name levelParams type value with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := state.heights
+                admissionsRev :=
+                  List.cons
+                    (psEncodeConstantAdmission encoded)
+                    state.admissionsRev
+              }
+      | .inductiveDecl info =>
+          match psEncodeCodecInductive allDeclarations info with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := state.heights
+                admissionsRev :=
+                  List.cons
+                    (psEncodeInductiveAdmission encoded)
+                    state.admissionsRev
+              }
+      | .constructorDecl _ =>
+          psEncodeCheckedAdmissionsLoopWorker allDeclarations rest state
+      | .recursorDecl _ =>
+          psEncodeCheckedAdmissionsLoopWorker allDeclarations rest state
+      | .axiomDecl _ _ _ =>
+          Except.error
+            PsCheckedAdmissionCodecError.unsupportedDeclaration
+      | .opaqueDecl name levelParams type value =>
+          match psEncodeCodecOpaque name levelParams type value with
+          | Except.error error => Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := state.heights
+                admissionsRev :=
+                  List.cons (psEncodeConstantAdmission encoded) state.admissionsRev
+              }
+      | .partialDecl _ _ _ _ =>
+          Except.error
+            PsCheckedAdmissionCodecError.unsupportedDeclaration
+
 def psEncodeCheckedAdmissionsLoop
     (allDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
-  match declarations with
-  | List.nil =>
-      fun (state : PsCheckedAdmissionEncodeState) =>
-        Except.ok state
-  | List.cons declaration rest =>
-      let smaller : PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
-        psEncodeCheckedAdmissionsLoop allDeclarations rest;
-      fun (state : PsCheckedAdmissionEncodeState) =>
-        match declaration with
-        | .definitionDecl name levelParams type value =>
-            let height :=
-              Nat.succ
-                (psBridgeExprMaxRegularHeight
-                  state.heights
-                  value);
-            match
-                psEncodeCodecDefinition
-                  name
-                  levelParams
-                  type
-                  value
-                  height with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := psBridgeHeightInsert state.heights name height
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeConstantAdmission encoded)
-                      state.admissionsRev
-                }
-        | .theoremDecl name levelParams type value =>
-            match psEncodeCodecTheorem name levelParams type value with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeConstantAdmission encoded)
-                      state.admissionsRev
-                }
-        | .inductiveDecl info =>
-            match psEncodeCodecInductive allDeclarations info with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeInductiveAdmission encoded)
-                      state.admissionsRev
-                }
-        | .constructorDecl _ =>
-            smaller state
-        | .recursorDecl _ =>
-            smaller state
-        | .axiomDecl _ _ _ =>
-            Except.error
-              PsCheckedAdmissionCodecError.unsupportedDeclaration
-        | .opaqueDecl name levelParams type value =>
-            match psEncodeCodecOpaque name levelParams type value with
-            | Except.error error => Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons (psEncodeConstantAdmission encoded) state.admissionsRev
-                }
-        | .partialDecl _ _ _ _ =>
-            Except.error
-              PsCheckedAdmissionCodecError.unsupportedDeclaration
+  fun (state : PsCheckedAdmissionEncodeState) =>
+    psEncodeCheckedAdmissionsLoopWorker allDeclarations declarations state
+
+def psCheckedAdmissionReverseStringsWorker
+    (values : List String) (acc : List String) : List String :=
+  match values with
+  | List.nil => acc
+  | List.cons head tail =>
+      psCheckedAdmissionReverseStringsWorker tail (List.cons head acc)
 
 def psCheckedAdmissionReverseStringsAcc
     (values : List String) :
     List String -> List String :=
-  match values with
-  | List.nil =>
-      fun (acc : List String) => acc
-  | List.cons head tail =>
-      let smaller : List String -> List String :=
-        psCheckedAdmissionReverseStringsAcc tail;
-      fun (acc : List String) =>
-        smaller (List.cons head acc)
-
+  fun (acc : List String) => psCheckedAdmissionReverseStringsWorker values acc
 
 def psCheckedAdmissionReverseStrings
     (values : List String) : List String :=

@@ -102,6 +102,7 @@ jobs:
           .lake/build/bin/psc1_python_utf8_tests
           .lake/build/bin/psc1_direct_call_plan_tests
           .lake/build/bin/psc1_php_extract_tests
+          .lake/build/bin/psc1_python_tail_loop_tests
       - name: Execute independently admitted runtime library in both grammars and targets
         run: node scripts/script-runtime-admission-tests.mjs
       - name: Census both complete source closures in both grammars

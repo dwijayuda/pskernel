@@ -410,3 +410,12 @@ lean_lib PsKernelOrdinaryEliminationNativeProofs where
 lean_exe psc1_kernel_ordinary_elimination_regression where
   srcDir := "test"
   root := `PsKernelOrdinaryEliminationRegression
+
+-- Atomic ordinary admission handoff; native protocol checks stay outside the portable closure.
+lean_lib PsKernelOrdinaryAdmissionPublicNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryAdmissionPublicProofs]
+
+lean_exe psc1_kernel_ordinary_admission_public_regression where
+  srcDir := "test"
+  root := `PsKernelOrdinaryAdmissionPublicRegression

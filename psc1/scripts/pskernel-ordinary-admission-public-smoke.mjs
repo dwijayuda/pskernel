@@ -51,8 +51,8 @@ const s=ok(get("psKernelExprV2PagedMkSort")(unit(get("psKernelExprV2PagedEmpty")
 const t=ok(get("psKernelExprV2PagedMkConst")(s.fst,name,nil),"datatype");
 const r=ok(get("psKernelExprV2PagedMkConst")(t.fst,recName,list([one])),"recursor");
 const arena=r.fst;
-const input=ok(get("psKernelExprV2DecodeCanonicalFuel")(
- arena.size+1n,arena,unit(get("psKernelExprV2DecodedEmpty")),0n),"decode");
+const input=ok(get("psKernelExprV2DecodeCanonicalFuel")(arena.size+1n)
+ (arena)(unit(get("psKernelExprV2DecodedEmpty")))(0n),"decode");
 const value={name,type:s.snd,ctors:list([{name:ctorName,type:t.snd}])};
 const request=D.ordinaryInductive(nil,0n,value,false);
 const declaration=ok(get("psKernelDagDecodeDeclaration")(input,request),"request");

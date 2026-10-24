@@ -134,6 +134,7 @@ jobs:
           .lake/build/bin/psc1_script_runtime_normalization_tests
           .lake/build/bin/psc1_backend_state_correspondence_tests
           .lake/build/bin/psc1_script_emitter_normalization_tests
+          .lake/build/bin/psc1_php_capture_tests
           node scripts/direct-selfhost-preflight-tests.mjs
           .lake/build/bin/psc1_js_statement_tests
           node scripts/js-statement-tests.mjs

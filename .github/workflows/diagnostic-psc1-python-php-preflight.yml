@@ -86,6 +86,7 @@ jobs:
           .lake/build/bin/psc1_script_runtime_normalization_tests
           .lake/build/bin/psc1_backend_state_correspondence_tests
           .lake/build/bin/psc1_script_emitter_normalization_tests
+          .lake/build/bin/psc1_php_capture_tests
       - name: Execute independently admitted runtime library in both grammars and targets
         run: node scripts/script-runtime-admission-tests.mjs
       - name: Census both complete source closures in both grammars

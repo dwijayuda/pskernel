@@ -1,31 +1,76 @@
 # PSC1 development roadmap
 
-Updated 2026-10-24 Asia/Jakarta.
-Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 criteria.
-[AI work state](../AI_WORK_STATE.md) owns continuation and the
-[canonical direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
-owns exact source identities and immutable actual results.
+Updated 2026-10-25 Asia/Jakarta. Frozen Practical Core v1 remains14 families/
+37 finite criteria. [AI state](../AI_WORK_STATE.md) owns continuation;
+[unified receipt](PSC1_UNIFIED_SELFHOST_QUALIFICATION_2026-10-25.json) owns
+exact source identities, individual engine evidence and immutable failures.
 
-## Active unified compiler queue
+## Verified unified-service milestone
 
-1. Implement one portable default composition root; keep Python/PHP optional.
-2. Audit the enlarged closure in both grammars, independently admit each generated candidate and execute all four output targets with every engine.
-3. Attempt genuine G1/G2/G3 with exact source/admission/IR/observation/executable fixed points. Qualify each engine only from actual evidence; preserve the existing 240s performance target.
-4. Retain native component adapters and all seven-backend/provider/package regressions. Update exact receipts, then stop at a verified milestone. No merge/publication.
+One 120-module composition root shares frontend/elaboration/checked IR and four
+existing emitter families. Current structured-v2 request `783cf8fc` passes all four
+actual G1 engines, both grammar source audits,160 cross-target cases and36
+envelope refusals. Native compiler tools are removed after the sole seed.
+Immutable readback verifies exact inventories/executables and originalIR/
+canonical-admission equality across engines. Python/PHP are absent from this
+closure and remain optional native packages. Native component adaptation stays
+available. Current-v2 G2/G3/fixed points are not run.
 
-## Completed provider/package milestone and remaining queue
+Earlier v1 source `b2ab4d34` genuinely qualifies JS and TS unified G1/G2/G3 and
+exact executable/source/admission/IR/four-target observation fixed points:
+JS1112514/1096375ms;TS925482/1009493ms, run `40113918732`.
+These are preserved exact-source qualifications, not current-v2 claims.
+V1 Wasm reaches1800101ms G2; Rust optimized target build exceeds240s;
+optimization 0 retry passes G1 then stack-overflows in G2 after1179495ms.
 
-The user requested a stop at a verified milestone. This milestone is complete; no further feature work is performed in this turn.
+Full [40117055147](https://github.com/dwijayuda/pskernel/actions/runs/40117055147)
+PASSED: Linux `120943685823`/final gate120948016037;37/37 finite criteria,
+0 blocked,releaseReady=true. All seven backends/both grammars, practical
+applications, typed IO, minimum Python, optional-provider and installed-package
+regressions pass. Review `783cf8fceeda094b3e49b166e4d10af05e4b0413` and tested
+merge `b816df5d8082d2e805e99684e7ce2a2cc7224a54` have identical Git tree
+cfc8b5304f943945d1a52bc9de2047fb4ad4b928. Artifact `12570094990`,
+sha256:b16c12f209ae899aa74e74117c0e4bd7cf6868188400d37e34f280649178d6df.
+The normal full gate executes the unified native dispatch/refusal tests.
+All three matching native tarballs are retained: core SHA256
+61460e75952c1a8125c0aebab6639837b141832fa751f658a2a7093514086ff6,
+Python `f100acd470c266075d577dd1bdeb73eb62d1c38158f81cba806d79052f0dacbc`,
+PHP `7e0301cd9f44ce2abca7d929cd013e5d45a1ded2c0bccc784400829b439c8ab2`.
+Use matching builds; exact source/descriptor pins intentionally reject mixing.
+
+
+This milestone stops as requested with PR178 draft/unmerged. No npm publication.
+The existing native proofscript distribution/provider split remains separate
+from generated-engine distribution work.
+
+## Single dependency-ordered remaining queue
 
 | Order | Work | Exact acceptance/status |
 | --- | --- | --- |
-| 1 | Core/provider boundary | COMPLETE: core excludes Python/PHP emitters; each worker excludes frontend/admission/publication/other emitter. Retained payload/IR equality, strict protocol/IR/receipt refusals and missing-provider output preservation PASS. |
-| 2 | Default and explicit add-on packages | COMPLETE: proofscript@0.1.0-psc1.3 has five default targets; matching Python/PHP add-ons are absent until explicitly installed. Offline default10 and optional4 grammar/target executions,26 refusal/preservation cases, source-library/local/global/typed-IO/resource canaries PASS. Core pins optional binary/resource descriptors. |
-| 3 | Required full qualification and stop | COMPLETE: Full [40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASSED: Linux120912148533/final gate120918578150;37/37 criteria,0 blocked,releaseReady=true; all seven backends/both grammars, applications, minimum-Python and installed package/IO/library checks. Review70522c25ea3826c05ba2e80f7f1e9c7df0b58213 and tested merge063d1da64db9beb69a8303af5a2a8788233dc7dd have identical Git treeb2d2ad3e24a07218c081eb20bc85670fd64e29e4. Artifact12566181617,sha256:be0a4ed3850383345acfbf2127d34caa32154ed6c5f8ac10304edd3d54899957. Stop with PR177 draft/unmerged and three matching unpublished tarballs retained. |
-| 4 | Unified generated compiler distribution | DEFERRED until a new instruction: one selected multi-backend composition root, generated execution engine selection and genuine enlarged-source G1→G2→G3/fixed points per claimed engine. Current native package split supplies no new self-host claim. |
-| 5 | Further extensibility/tooling | DEFERRED: stable cross-version portable provider ABI, bounded syntax expansion and comment-preserving refactors. Keep finite Practical Core v1 and all soundness/resource policies. |
+| 1 | Execute structured-v2 Rust/Wasm self-compilation | PENDING: explicit request-only G1/G2/G3 and executable/source/admission/IR/observations fixed points. Diagnose actual repeated failures; v2 removes a giant nested request string, but no whole-workload improvement is yet measured. |
+| 2 | Complete source fixes and freeze the unified root | Rust stack site remains undiagnosed; optimization 1 builds of the15.2MB admitted source exceed240s even at256 units. New correctness-only unified Rust builds use0/256 and verified stable Cargo inputs; do not change historical single-emitter optimization 1, limits or semantics. |
+| 3 | Qualify the frozen root in all four engines | PENDING: current-v2 JS/TS must earn their own full chains after source stabilizes. All four require actual independent admission, strict IR, corpus/refusals and exact fixed points. Preserve older v1 JS/TS chains and all earlier single-backend evidence. |
+| 4 | Integrate the generated distribution | PENDING: engine asset/CLI selection, host admission/publication, component adapters and optional-provider dispatch. Native proofscript@0.1.0-psc1.3 and exact-build Python/PHP packages remain qualified; do not relabel them as a generated compiler release. |
+| 5 | Performance and independent release reproduction | PENDING: optimize actual matched compiler workloads toward separate240s target; clean independent reproduction and required final release qualification. Longer correctness and G1 validation cannot qualify performance or a full release. Merge/npm publication require authorization. |
+| 6 | Broader extension/readability tooling | DEFERRED: stable portable provider ABI, bounded syntax extensions and lossless refactoring. Preserve finite Practical Core scope and authority boundaries. |
 
-[Contract](../BACKEND_PROVIDER_CONTRACT.json), [guide](PSC1_BACKEND_PROVIDERS.md), [receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json), [AI state](../AI_WORK_STATE.md) and [continuation](PSC1_BACKEND_PROVIDER_CONTINUATION.md) are authoritative for this slice. The older3600s retry40091210960 remains a two-target G2 deadline failure; preserve it and all earlier qualified Rust/TS/JS/Wasm snapshots.
+Long CI runs require a validated request-only commit; G1-only mode is available
+for bounded source-validation milestones. Ordinary source edits do not launch
+G2/G3. Full normal CI additionally requires unified native dispatch/refusal tests
+alongside every retained seven-backend/provider/package regression.
+
+Use the [service guide](PSC1_UNIFIED_COMPILER_SERVICE.md) and
+[executable continuation](PSC1_UNIFIED_SELFHOST_CONTINUATION.md).
+Official independent Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+strict original/transformed IR/source pairing/negative tests and all
+memory/stack/fuel/security policies remain. G1/tools240s,checker120s,
+G2/G3 correctness 1800s, separate performance240s and historical Python/PHP3600s
+remain unchanged.
+
+## Preserved historical queues
+
+The following are prior checkpoint snapshots. The queue above governs current
+work; canonical receipts retain each exact qualified or failed source.
 
 ## Historical Python/PHP milestone queue
 
@@ -35,9 +80,9 @@ The user requested a stop after the verified milestone slice. This slice is comp
 
 | Order | Work | Finite acceptance and current evidence |
 | --- | --- | --- |
-| 1 | Measured backend fixes and regression | COMPLETE: Pythonb56da505/PHP13c5d4a6, reviewb33027de. Focused40090956726 PASS retained/runtime/token/readonly/deep tests and87 modules per target in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942. |
-| 2 | Genuine current-source generations | RUNNING, NOT QUALIFIED: request336ff212/run40091210960, Python120864185036/PHP120864185108. Exact compiler/tools snapshot ofb330; only guard/request differ. No duplicate request while active. |
-| 3 | Qualification result reconciliation | On continuation, fetch terminal jobs and immutable artifacts; record exact identities, elapsed/CPU/peak metrics and actual admission/IR/ten-case/raw-byte fixed points. First3600s run40085445958 remains an immutable two-target G2 deadline failure after G1 success. |
+| 1 | Measured backend fixes and regression | COMPLETE: Python `b56da505`/PHP `13c5d4a6`, review `b33027de`. Focused40090956726 PASS retained/runtime/token/readonly/deep tests and87 modules per target in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux `120865715808`, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Review `b33027de` and tested merge `2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292` share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact `12559464310`,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942. |
+| 2 | Genuine current-source generations | RUNNING, NOT QUALIFIED: request `336ff212`/run `40091210960`, Python `120864185036`/PHP `120864185108`. Exact compiler/tools snapshot ofb330; only guard/request differ. No duplicate request while active. |
+| 3 | Qualification result reconciliation | On continuation, fetch terminal jobs and immutable artifacts; record exact identities, elapsed/CPU/peak metrics and actual admission/IR/ten-case/raw-byte fixed points. First3600s run `40085445958` remains an immutable two-target G2 deadline failure after G1 success. |
 | 4 | Targeted follow-up or clean reproduction | If new attempt fails, fix a demonstrated generic cost with all retained guards before another chain. If it passes, clean fresh G1 without lake cache reproduces every qualified generation. Full source/regression gates alone never qualify G2/G3. |
 | 5 | Performance and review | Original240s profile remains separately unqualified. Preserve qualified Rust/TS/JS/Wasm snapshots. Merge/publication require authorization and required qualification. |
 
@@ -47,8 +92,8 @@ The [AI state](../AI_WORK_STATE.md), [exact receipt](PSC1_PYTHON_PHP_SELFHOST_QU
 
 ## Qualified compiler checkpoint
 
-Source133e589288b563e74578b771ec35595beb3a9fe8, request2d1f8244,
-[Linux40062120079](https://github.com/dwijayuda/pskernel/actions/runs/40062120079):
+Source133e589288b563e74578b771ec35595beb3a9fe8, request `2d1f8244`,
+[Linux `40062120079`](https://github.com/dwijayuda/pskernel/actions/runs/40062120079):
 DirectJS and owned import-free DirectWasm independently PASS genuine G1→G2→G3
 and exact source/admission/IR/ten-case/target-byte fixed points.
 JS G2/G3:824066/832426ms; Wasm:876840/888398ms, within correctness1800s.
@@ -59,13 +104,13 @@ A second clean full G2/G3 replay and a formal compiler-preservation/DDC proof ar
 separate claims and were not performed.
 
 [Full40062210987](https://github.com/dwijayuda/pskernel/actions/runs/40062210987)
-PASSED: Linux120780825013 and final gate120786364196;37/37 qualified,0 blocked,
+PASSED: Linux `120780825013` and final gate120786364196;37/37 qualified,0 blocked,
 releaseReady=true, all seven backends, both grammars, applications, minimum
 Python and installed native package/IO/library regressions. Tested review HEAD
 06186537cf9339fc3f24a7d13387c2ad55ee0749 and merge
 980d096ca3e85b9ad2970f16602ad1d14a089d69 have identical Git tree
 cbf312e1f4bca9e7085719c12b627be5c16099a7, verified through GitHub APIs and checkout log.
-Artifact12549325904, digest
+Artifact `12549325904`, digest
 sha256:6ad48b109e2e995c344a6855a85de44380f6ee628b67f4033990a152598a7bf9.
 This qualifies the tested compiler source; the final receipt update edits docs only.
 
@@ -89,12 +134,12 @@ The older direct-target checkpoint has no active runs; Python/PHP mission status
 Use the [architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md) for measured
 mechanisms and [continuation](PSC1_DIRECT_SELFHOST_CONTINUATION.md) for executable
 GitHub-only steps. Preserve exact older Rust/TS qualifications: Rust83e18fe1,
-source5e0b548e/run39908529181; TS84e1e16f, source748fd5fd/run39993829327.
+source `5e0b548e`/run `39908529181`; TS84e1e16f, source `748fd5fd`/run `39993829327`.
 Do not label these as requalified after later common-source changes.
 
 ## Evidence and correctness policy
 
-Official Lean4.35.0 independent checker at eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+Official Lean 4.35.0 independent checker at eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
 strict original/transformed IR, source/logical graph pairing, negative/refusal
 tests and all resource/security/fuel limits remain mandatory.
 G1/corpus/tools240s and checker120s remain unchanged. Python/PHP may explicitly

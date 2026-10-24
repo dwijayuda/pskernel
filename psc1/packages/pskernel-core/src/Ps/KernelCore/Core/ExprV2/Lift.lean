@@ -248,14 +248,14 @@ def psKernelExprV2PagedLiftWithFuel
             fun (_amount : Nat) =>
               Except.error "PSKERNEL_V2_PORTABLE_LIFT_FUEL"
   | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->
-          Except String (PsKernelExprV2PagedLiftState × Nat) :=
-        psKernelExprV2PagedLiftWithFuel remaining;
       fun (state : PsKernelExprV2PagedLiftState) =>
         fun (source : Nat) =>
           fun (cutoff : Nat) =>
             fun (amount : Nat) =>
+              let smaller :
+                  PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->
+                  Except String (PsKernelExprV2PagedLiftState × Nat) :=
+                psKernelExprV2PagedLiftWithFuel remaining;
               if Nat.beq amount 0 then
                 Except.ok (Prod.mk state source)
               else

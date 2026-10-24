@@ -126,14 +126,23 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
    'fn main() { '+consumer+' }';
   fs.writeFileSync(path.join(directory,'module.rs'),source);
   fs.writeFileSync(path.join(directory,'main.rs'),source+'\n'+main+'\n');
-  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level=1\n');
+  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level='+(serviceKind==='unified'?0:1)+'\n'+(serviceKind==='unified'?'codegen-units=256\n':''));
   const locked=path.resolve('scripts/fixtures/selfhost-rust.Cargo.lock');
   // The first diagnostic records the exact resolver output. Once checked in,
   // every subsequent build uses that repository lock without re-resolution.
   if(fs.existsSync(locked)) fs.copyFileSync(locked,path.join(directory,'Cargo.lock'));
   else events.push(runTool('cargo',['generate-lockfile','--manifest-path',path.join(directory,'Cargo.toml')],{logDirectory:directory}).event);
-  events.push(runTool('cargo',['build','--release','--locked','--message-format=short','--manifest-path',path.join(directory,'Cargo.toml')],
+  // A stable Cargo package path avoids generation-specific crate metadata in
+  // executable fixed points. Every generation rewrites and verifies exact inputs.
+  const rustBuildDirectory=serviceKind==='unified'?path.resolve('dist/unified-rust-service-build'):directory;
+  const rustInputs=['main.rs','Cargo.toml','Cargo.lock'];
+  if(serviceKind==='unified'){
+   fs.mkdirSync(rustBuildDirectory,{recursive:true});
+   for(const file of rustInputs)fs.copyFileSync(path.join(directory,file),path.join(rustBuildDirectory,file));
+  }
+  events.push(runTool('cargo',['build','--release','--locked','--message-format=short','--manifest-path',path.join(rustBuildDirectory,'Cargo.toml')],
    {env:{...process.env,CARGO_TARGET_DIR:path.resolve('dist/selfhost-rust-cargo')},logDirectory:directory}).event);
+  if(serviceKind==='unified')for(const file of rustInputs)assert.equal(sha(fs.readFileSync(path.join(rustBuildDirectory,file))),sha(fs.readFileSync(path.join(directory,file))),'PSC1_RUST_BUILD_INPUT_CHANGED');
   executable='service.bin';
   fs.copyFileSync(path.resolve('dist/selfhost-rust-cargo/release/psc1-generated-target'),path.join(directory,executable));
   fs.chmodSync(path.join(directory,executable),0o700);
@@ -144,7 +153,8 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
  });
  const manifest={schema:'psc1-generated-target-artifact/1',target,sourceSha256:sha(source),
   executable,service,publicNames,files,events,nodeVersion:process.version,
-  rustOptimizationLevel:target==='rust'?1:null,
+  rustOptimizationLevel:target==='rust'?(serviceKind==='unified'?0:1):null,
+  rustCodegenUnits:target==='rust'&&serviceKind==='unified'?256:null,
   compilerVersion:target==='python'?runTool('python3',['--version']).stdout.trim():target==='php'?runTool('php',['-r','echo PHP_VERSION;']).stdout.trim():target==='js'?process.version:target==='wasm-core'?runTool('wasm-tools',['--version']).stdout.trim():target==='rust'?runTool('rustc',['--version']).stdout.trim():
    runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--version']).stdout.trim()};
  if(serviceKind==='unified')manifest.serviceKind='unified';

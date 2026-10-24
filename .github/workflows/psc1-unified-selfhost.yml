@@ -2,14 +2,51 @@ name: PSC1 unified generated compiler qualification
 on:
   push:
     branches: [feat/psc1-unified-selfhost-20261024]
-    paths: [psc1/packages/compiler-unified/**, psc1/scripts/UnifiedServiceSeed.lean, psc1/test/UnifiedServiceTests.lean, psc1/host-tools/generated-target-profiles.mjs, psc1/host-tools/generated-target-tools.mjs, psc1/scripts/generated-target-qualification.mjs, psc1/scripts/generated-target-source-audit.mjs, .github/workflows/psc1-unified-selfhost.yml]
+    paths: [.github/qualification-requests/psc1-unified-selfhost.json]
 permissions:
   contents: read
 concurrency:
   group: psc1-unified-qualification-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 jobs:
+  request:
+    if: ${{ github.event.commits[1] == null }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      targets: ${{ steps.request.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Require explicit request-only commit and exact parent
+        id: request
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';import fs from 'node:fs';import {spawnSync} from 'node:child_process';
+          const file='.github/qualification-requests/psc1-unified-selfhost.json';
+          const r=JSON.parse(fs.readFileSync('../'+file)),e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
+          assert.equal(r.schema,'psc1-unified-selfhost-request/1');
+          assert.equal(r.branch,'feat/psc1-unified-selfhost-20261024');
+          assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
+          assert.equal(r.action,'qualify-independent-G1-G2-G3');
+          assert.equal(r.profile,'correctness-1800s');
+          assert.equal(r.g1TimeoutMs,240000);assert.equal(r.g2g3TimeoutMs,1800000);
+          assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
+          assert.ok(Array.isArray(r.targets)&&r.targets.length>0&&r.targets.every(t=>['js','ts','rust','wasm-core'].includes(t)));
+          assert.equal(new Set(r.targets).size,r.targets.length);
+          const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);
+          const d=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});assert.equal(d.status,0);
+          assert.deepEqual(d.stdout.split(String.fromCharCode(0)).filter(Boolean),[file]);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'targets='+JSON.stringify(r.targets)+'\n');
+          console.log('PSC1_UNIFIED_EXPLICIT_REQUEST: '+JSON.stringify(r));
+          JS
   generated:
+    needs: request
     concurrency:
       group: psc1-unified-engine-${{ github.ref }}-${{ matrix.target }}
       cancel-in-progress: false
@@ -18,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [js, ts, rust, wasm-core]
+        target: ${{ fromJSON(needs.request.outputs.targets) }}
     env:
       PSC1_BRANCH_HEAD: ${{ github.sha }}
     defaults:

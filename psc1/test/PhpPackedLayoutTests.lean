@@ -49,7 +49,7 @@ private def module : PsVerifiedIrModule := {
       body := call "read" [.constructor "Choice" "one" [] [("value", n 7)]]},
     {name := "three", typeParameters := [], parameters := [], resultType := natT,
       body := call "read" [.constructor "Choice" "three" [] [
-        ("right", n 11), ("text", .literal (.string "λ🙂")), ("left", n 9)]]}
+        ("left", n 9), ("text", .literal (.string "λ🙂")), ("right", n 11)]]}
   ]
 }
 private def requireOk (value : Except String α) : IO α :=
@@ -67,8 +67,20 @@ private def execute (path : String) (size : Nat) : IO String := do
 
 def main : IO Unit := do
   let validated <- match psStrictValidateModule module with
-    | .error _ => throw (IO.userError "packed fixture did not strictly validate")
+    | .error _ => do
+        let report := psCheckVerifiedIrModule psIrCheckDefaultOptions module
+        for finding in report.findings do
+          IO.println (finding.code ++ ":" ++ finding.owner ++ ":" ++ finding.path ++ ":" ++ finding.detail)
+        throw (IO.userError "packed fixture did not strictly validate")
     | .ok validated => pure validated
+  let reordered := { module with declarations := module.declarations.map (fun declaration =>
+    if declaration.name == "three" then { declaration with body :=
+      call "read" [.constructor "Choice" "three" [] [
+        ("right", n 11), ("text", .literal (.string "λ🙂")), ("left", n 9)]] }
+    else declaration) }
+  match psStrictValidateModule reordered with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "noncanonical constructor field order admitted")
   let legacy <- requireOk (psPhpEmitModuleWithIoAndPolicies validated ["run", "empty", "one", "three"] false true false)
   let packed <- requireOk (psPhpEmitModuleWithIo validated ["run", "empty", "one", "three"] false)
   unless legacy.runtimeSource == packed.runtimeSource &&
@@ -99,4 +111,4 @@ def main : IO Unit := do
   let second <- requireOk (PsPhp.constructorFields context "Other" "one")
   unless first == ["value"] && second == ["different"] do
     throw (IO.userError "owner-qualified constructor layout mismatch")
-  IO.println "PSC1_PHP_PACKED_LAYOUT: strict IR; zero/one/three fields, reordered construction/bindings, Unicode, recursive lists, six retained-layout comparisons and200000-cell1G execution passed"
+  IO.println "PSC1_PHP_PACKED_LAYOUT: strict IR; zero/one/three fields, canonical construction/noncanonical refusal/reordered bindings, Unicode, recursive lists, six retained-layout comparisons and200000-cell1G execution passed"

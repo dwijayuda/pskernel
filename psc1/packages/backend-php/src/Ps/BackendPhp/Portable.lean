@@ -655,13 +655,6 @@ def fieldIndex (field : String) (fields : List String) (index : Nat) : Except St
   | List.cons name rest =>
       if psStringEq name field then Except.ok index else fieldIndex field rest (Nat.succ index)
 
-def orderedFieldValues (fields : List String) (values : List (Prod String String)) : Except String (List String) :=
-  psListMapExcept
-    (fun (field : String) =>
-      match psBackendSourceFind (fun (entry : Prod String String) => psStringEq entry.fst field) values with
-      | Option.none => Except.error "PSC1_PHP_INTERNAL_CONSTRUCTOR_VALUE"
-      | Option.some entry => Except.ok entry.snd) fields
-
 def emitBindings (context : Context) (owner constructorName target : String) (bindings : List PsVerifiedIrMatchBinding)
     (locals : List (Prod String String))
     (state : EmitState) : Except String (Prod (List (Prod String String)) EmitState) :=
@@ -720,19 +713,17 @@ def emitField (emit : PsVerifiedIrExpr -> Emit String) (field : Prod String PsVe
 
 
 def emitConstructor (emit : PsVerifiedIrExpr -> Emit String) (context : Context)
-    (owner constructorName : String) (fields : List (Prod String PsVerifiedIrExpr)) : Emit String :=
+    (_owner constructorName : String) (fields : List (Prod String PsVerifiedIrExpr)) : Emit String :=
   fun (state : EmitState) =>
     if !context.flatConstructors then do
       let pair <- psBackendSourceMapState (emitField emit) fields state
       bindValue (cat ["[", quote constructorName, ", [", psTextJoin ", " pair.fst, "]]"]) pair.snd
     else do
+      -- Strict IR requires canonical constructor field order. Map expressions
+      -- once in that same order; never reorder potentially effectful calls.
       let pair <- psBackendSourceMapState
-        (fun (field : Prod String PsVerifiedIrExpr) =>
-          psBackendStateBind (emit field.snd)
-            (fun (value : String) => psBackendStatePure (Prod.mk field.fst value))) fields state
-      let layout <- constructorFields context owner constructorName
-      let ordered <- orderedFieldValues layout pair.fst
-      bindValue (cat ["[", psTextJoin ", " (List.cons (quote constructorName) ordered), "]"]) pair.snd
+        (fun (field : Prod String PsVerifiedIrExpr) => emit field.snd) fields state
+      bindValue (cat ["[", psTextJoin ", " (List.cons (quote constructorName) pair.fst), "]"]) pair.snd
 
 def regularIntrinsic (emit : PsVerifiedIrExpr -> Emit String) (context : Context)
     (operation : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrExpr) : Emit String :=

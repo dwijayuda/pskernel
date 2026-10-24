@@ -155,8 +155,9 @@ structure EmitState where
   helpers : List String
   originsRev : List (Prod String Nat)
   directNames : PsStringSet
+  tailLoop : Option (Prod String (List String))
 
-def initialState : EmitState := EmitState.mk List.nil 0 0 0 List.nil List.nil PsStringSet.empty
+def initialState : EmitState := EmitState.mk List.nil 0 0 0 List.nil List.nil PsStringSet.empty Option.none
 def Emit (Value : Type) : Type := PsBackendStateExcept EmitState String Value
 def Scope : Type := List (Prod String String)
 
@@ -168,13 +169,13 @@ def padding (count : Nat) (builder : PsTextBuilder) : String :=
 def line (text : String) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk (List.cons (cat [padding state.indent psTextBuilderEmpty, text]) state.linesRev)
-      (Nat.succ state.lineCount) state.indent state.nextIndex state.helpers state.originsRev state.directNames)
+      (Nat.succ state.lineCount) state.indent state.nextIndex state.helpers state.originsRev state.directNames state.tailLoop)
 
 def fresh (hint : String) : Emit String :=
   psBackendStateBind (psBackendStateGet Unit.unit) (fun (state : EmitState) =>
     psBackendStateBind
       (psBackendStateSet (EmitState.mk state.linesRev state.lineCount state.indent
-        (Nat.succ state.nextIndex) state.helpers state.originsRev state.directNames))
+        (Nat.succ state.nextIndex) state.helpers state.originsRev state.directNames state.tailLoop))
       (fun (_unit : Unit) =>
         psBackendStatePure (cat ["_psc_l", decimal state.nextIndex, "_", encodePart hint])))
 
@@ -182,13 +183,13 @@ def helper (name : String) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk state.linesRev state.lineCount state.indent state.nextIndex
       (if psBackendNameSeen name state.helpers then state.helpers else psListAppend state.helpers [name])
-      state.originsRev state.directNames)
+      state.originsRev state.directNames state.tailLoop)
 
 def shiftIndent (increase : Bool) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk state.linesRev state.lineCount
       (if increase then Nat.succ state.indent else Nat.sub state.indent 1)
-      state.nextIndex state.helpers state.originsRev state.directNames)
+      state.nextIndex state.helpers state.originsRev state.directNames state.tailLoop)
 
 def withIndent {Value : Type} (action : Emit Value) : Emit Value :=
   psBackendStateBind (shiftIndent true) (fun (_unit : Unit) =>
@@ -206,6 +207,88 @@ def tuple (values : List String) : String :=
   | List.cons value rest =>
       if psListIsEmpty rest then cat ["(", value, ",)"]
       else cat ["(", psTextJoin ", " values, ")"]
+
+
+def setTailLoop (context : Option (Prod String (List String))) : Emit Unit :=
+  psBackendStateModify (fun (state : EmitState) =>
+    EmitState.mk state.linesRev state.lineCount state.indent state.nextIndex state.helpers
+      state.originsRev state.directNames context)
+
+-- Reusing a Python frame is safe only when this body creates no lexical
+-- closures. Exhaustion conservatively retains the original scheduler.
+def noLambdaWithFuel (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining =>
+      fun (expr : PsVerifiedIrExpr) =>
+        let visit : PsVerifiedIrExpr -> Bool := noLambdaWithFuel remaining;
+        match expr with
+        | PsVerifiedIrExpr.literal _ => true
+        | PsVerifiedIrExpr.var _ => true
+        | PsVerifiedIrExpr.lambda _ _ _ => false
+        | PsVerifiedIrExpr.call fn _ arguments => visit fn && psBackendSourceAll visit arguments
+        | PsVerifiedIrExpr.intrinsic _ _ arguments => psBackendSourceAll visit arguments
+        | PsVerifiedIrExpr.letE _ _ value body => visit value && visit body
+        | PsVerifiedIrExpr.ifE condition yes no => visit condition && visit yes && visit no
+        | PsVerifiedIrExpr.record _ _ fields =>
+            psBackendSourceAll (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.projection _ _ target _ => visit target
+        | PsVerifiedIrExpr.constructor _ _ _ fields =>
+            psBackendSourceAll (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.matchE _ _ target alternatives =>
+            visit target && psBackendSourceAll
+              (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                visit alternative.snd.snd) alternatives
+
+def exactSelfCall (name : String) (arity : Nat) (bound : List String)
+    (expr : PsVerifiedIrExpr) : Bool :=
+  match expr with
+  | PsVerifiedIrExpr.call fn types arguments =>
+      match fn with
+      | PsVerifiedIrExpr.var target =>
+          psStringEq name target && !psBackendNameSeen target bound &&
+            psListIsEmpty types && Nat.beq arity (psListLength arguments)
+      | _ => false
+  | _ => false
+
+def hasSelfTailWithFuel (name : String) (arity fuel : Nat) :
+    List String -> PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_bound : List String) (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining =>
+      fun (bound : List String) (expr : PsVerifiedIrExpr) =>
+        let smaller : List String -> PsVerifiedIrExpr -> Bool :=
+          hasSelfTailWithFuel name arity remaining;
+        if exactSelfCall name arity bound expr then true
+        else match expr with
+        | PsVerifiedIrExpr.letE local _ _ body => smaller (List.cons local bound) body
+        | PsVerifiedIrExpr.ifE _ yes no => smaller bound yes || smaller bound no
+        | PsVerifiedIrExpr.matchE _ _ _ alternatives =>
+            psListAny
+              (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                smaller
+                  (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name)
+                    alternative.snd.fst) bound) alternative.snd.snd) alternatives
+        | _ => false
+
+def selfLoopParameters (context : Option (Prod String (List String))) (scope : Scope)
+    (expr : PsVerifiedIrExpr) (tail : Bool) : Option (List String) :=
+  if !tail then Option.none
+  else match context with
+  | Option.none => Option.none
+  | Option.some pair =>
+      if exactSelfCall pair.fst (psListLength pair.snd)
+          (psListMap (fun (entry : Prod String String) => entry.fst) scope) expr
+      then Option.some pair.snd else Option.none
+
+-- Preserve the saved callee, argument evaluation order and fresh-name sequence.
+-- The one temporary that held the old tail result now snapshots all arguments.
+def emitSelfLoop (parameters values : List String) : Emit String :=
+  psBackendStateBind (helper "calls") (fun (_unit : Unit) =>
+    psBackendStateBind (bindValue (tuple values)) (fun (snapshot : String) =>
+      psBackendStateBind (line (cat [tuple parameters, " = ", snapshot])) (fun (_unit : Unit) =>
+        psBackendStateBind (line "continue") (fun (_unit : Unit) =>
+          psBackendStatePure snapshot))))
 
 def emitCall (fn : String) (args : List String) (tail : Bool) : Emit String :=
   psBackendStateBind (helper "calls") (fun (_unit : Unit) =>
@@ -531,13 +614,15 @@ def expression (fuel : Nat) :
               (fun (argument : PsVerifiedIrExpr) => emit argument false) arguments state
             let values := _psc_step_21.fst
             let state := _psc_step_21.snd
-            if psBackendDirectGlobalCall state.directNames
+            match selfLoopParameters state.tailLoop scope (PsVerifiedIrExpr.call fn types arguments) tail with
+            | Option.some parameters => emitSelfLoop parameters values state
+            | Option.none =>
+              if psBackendDirectGlobalCall state.directNames
                 (psListMap (fun (entry : Prod String String) => entry.fst) scope) fn then
-              -- Keep the selected runtime/public wrapper contract. Only this
-              -- statically non-suspending call bypasses the generator request.
-              psBackendStateBind (helper "calls") (fun (_unit : Unit) =>
-                bindValue (cat [saved, "(", psTextJoin ", " values, ")"])) state
-            else emitCall saved values tail state
+                -- Keep runtime selection and public wrappers identical.
+                psBackendStateBind (helper "calls") (fun (_unit : Unit) =>
+                  bindValue (cat [saved, "(", psTextJoin ", " values, ")"])) state
+              else emitCall saved values tail state
         | PsVerifiedIrExpr.letE name type value body => do
             checkType 256 type
             let _psc_step_22 <- emit value false state
@@ -637,11 +722,12 @@ def parameterCheck (name : String) (type : PsVerifiedIrType) : Except String Str
 def noteOrigin (name : String) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk state.linesRev state.lineCount state.indent state.nextIndex state.helpers
-      (List.cons (Prod.mk name (Nat.succ state.lineCount)) state.originsRev) state.directNames)
+      (List.cons (Prod.mk name (Nat.succ state.lineCount)) state.originsRev) state.directNames state.tailLoop)
 
-def emitDeclaration (module : PsVerifiedIrModule) (declaration : PsVerifiedIrDeclaration) :
-    Emit Unit :=
+def emitDeclarationWithTailLoops (module : PsVerifiedIrModule) (declaration : PsVerifiedIrDeclaration)
+    (tailLoops : Bool) : Emit Unit :=
   fun (state : EmitState) => do
+    let outerLoop : Option (Prod String (List String)) := state.tailLoop
     if !psListIsEmpty declaration.typeParameters then
       Except.error (cat ["PSC1_PYTHON_GENERIC_DECLARATION_UNSUPPORTED: ", declaration.name])
     checkType 256 declaration.resultType
@@ -659,9 +745,22 @@ def emitDeclaration (module : PsVerifiedIrModule) (declaration : PsVerifiedIrDec
     let action : Emit Unit :=
       psBackendStateBind (expression 4096 module scope declaration.body true)
         (fun (result : String) => line (cat ["return ", result]))
-    let _psc_step_46 <- withIndent action state
+    let loopEnabled : Bool := tailLoops && !psListIsEmpty declaration.parameters &&
+      noLambdaWithFuel 4096 declaration.body &&
+      hasSelfTailWithFuel declaration.name (psListLength declaration.parameters) 4096
+        (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.body
+    let _loopSet <- setTailLoop
+      (if loopEnabled then Option.some (Prod.mk declaration.name parameters) else Option.none) state
+    let state := _loopSet.snd
+    let body : Emit Unit :=
+      if loopEnabled then psBackendStateBind (line "while True:") (fun (_unit : Unit) => withIndent action)
+      else action
+    let _psc_step_46 <- withIndent body state
     let state := _psc_step_46.snd
-    line "" state
+    psBackendStateBind (line "") (fun (_unit : Unit) => setTailLoop outerLoop) state
+
+def emitDeclaration (module : PsVerifiedIrModule) (declaration : PsVerifiedIrDeclaration) : Emit Unit :=
+  emitDeclarationWithTailLoops module declaration false
 
 def publicParameter (ioAbi : Bool) (item : Prod PsVerifiedIrParameter Nat) :
     Except String (Prod String (Prod String PsVerifiedIrType)) := do
@@ -732,11 +831,12 @@ def emitPublics (module : PsVerifiedIrModule) (ioAbi calls : Bool)
           emitPublics module ioAbi calls rest (List.cons name seen)
             (List.cons (cat ["def ", name, "(", signature, ") -> ", resultType, ": ..."]) stubsRev) state
 
-def emitModuleBody (module : PsVerifiedIrModule) (publicNames : List String) (ioAbi : Bool) :
+def emitModuleBodyWithTailLoops (module : PsVerifiedIrModule) (publicNames : List String) (ioAbi tailLoops : Bool) :
     Emit String :=
   fun (state : EmitState) => do
     if !psListIsEmpty module.imports then Except.error "PSC1_PYTHON_FOREIGN_IMPORT_UNSUPPORTED"
-    let _psc_step_54 <- psBackendSourceForState (emitDeclaration module) module.declarations state
+    let _psc_step_54 <- psBackendSourceForState (fun (declaration : PsVerifiedIrDeclaration) =>
+      emitDeclarationWithTailLoops module declaration tailLoops) module.declarations state
     let state := _psc_step_54.snd
     let calls : Bool := psBackendNameSeen "calls" state.helpers
     let _psc_step_55 <- line "from typing import Callable" state
@@ -753,6 +853,9 @@ def emitModuleBody (module : PsVerifiedIrModule) (publicNames : List String) (io
     let state := _psc_step_58.snd
     Except.ok (Prod.mk (cat [psTextJoin "\n" stubs, "\n"]) state)
 
+def emitModuleBody (module : PsVerifiedIrModule) (publicNames : List String) (ioAbi : Bool) : Emit String :=
+  emitModuleBodyWithTailLoops module publicNames ioAbi false
+
 def countNewlines (chars : List Char) (count : Nat) : Nat :=
   match chars with
   | List.nil => count
@@ -761,16 +864,16 @@ def countNewlines (chars : List Char) (count : Nat) : Nat :=
 
 end PsPython
 
-def psPythonEmitModuleWithIoAndDirectCalls (validated : PsValidatedIrModule) (publicNames : List String)
-    (ioAbi directCalls : Bool) : Except String PsPythonOutput := do
+def psPythonEmitModuleWithIoAndOptimizations (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi directCalls tailLoops : Bool) : Except String PsPythonOutput := do
   match psStrictValidateModule validated.raw with
   | Except.error _ => Except.error "PSC1_PYTHON_IR_VALIDATION_FAILED"
   | Except.ok _ => Except.ok Unit.unit
   let directNames : PsStringSet :=
     if directCalls then psBackendDirectCallNames validated.raw.declarations else PsStringSet.empty
   let initial : PsPython.EmitState :=
-    PsPython.EmitState.mk List.nil 0 0 0 List.nil List.nil directNames
-  let _psc_step_59 <- PsPython.emitModuleBody validated.raw publicNames ioAbi initial
+    PsPython.EmitState.mk List.nil 0 0 0 List.nil List.nil directNames Option.none
+  let _psc_step_59 <- PsPython.emitModuleBodyWithTailLoops validated.raw publicNames ioAbi tailLoops initial
   let stub := _psc_step_59.fst
   let state := _psc_step_59.snd
   let selected : List String := psPythonRuntimeClosure state.helpers
@@ -784,7 +887,11 @@ def psPythonEmitModuleWithIoAndDirectCalls (validated : PsValidatedIrModule) (pu
     (psListMap (fun (pair : Prod String Nat) => Prod.mk pair.fst (Nat.add pair.snd offset))
       (psListReverse state.originsRev)))
 
+def psPythonEmitModuleWithIoAndDirectCalls (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi directCalls : Bool) : Except String PsPythonOutput :=
+  psPythonEmitModuleWithIoAndOptimizations validated publicNames ioAbi directCalls false
+
 -- One emitter; the disabled policy is retained for exact output regression.
 def psPythonEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
     (ioAbi : Bool) : Except String PsPythonOutput :=
-  psPythonEmitModuleWithIoAndDirectCalls validated publicNames ioAbi true
+  psPythonEmitModuleWithIoAndOptimizations validated publicNames ioAbi true true

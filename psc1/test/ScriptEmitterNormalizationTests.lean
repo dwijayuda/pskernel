@@ -97,12 +97,25 @@ private def samePython (raw : PsVerifiedIrModule) (names : List String) (ioAbi :
   | Except.error a, Except.error b =>
       unless a == b do throw (IO.userError "Python error identity")
   | Except.ok a, Except.ok b =>
-      let addedLines := (a.runtimeSource.splitOn "\n").length - (b.runtimeSource.splitOn "\n").length
       unless a.stub == b.stub &&
           psPythonUtf8ReferenceNeutral a.runtimeSource == b.runtimeSource &&
           a.runtimeHelpers == b.runtimeHelpers &&
-          a.declarationLines == b.declarationLines.map (fun pair => (pair.1, pair.2 + addedLines)) do
+          a.declarationLines.map Prod.fst == b.declarationLines.map Prod.fst do
         throw (IO.userError "Python retained metadata/runtime outside explicit UTF8 cache")
+      -- Tail loops add body lines while preserving declaration/header identity.
+      -- Check exact actual header positions rather than a constant prefix shift.
+      let actualLines := a.source.splitOn "\n"
+      for declaration in raw.declarations do
+        let origin <- match a.declarationLines.find? (fun entry => entry.1 == declaration.name) with
+          | .none => throw (IO.userError "Python missing declaration origin")
+          | .some entry => pure entry.2
+        let symbol := if declaration.parameters.isEmpty then PsPython.valueName declaration.name
+          else PsPython.globalName declaration.name
+        match actualLines[origin - 1]? with
+        | .some line =>
+            unless origin > 0 && line.startsWith ("def " ++ symbol ++ "(") do
+              throw (IO.userError "Python origin does not point to exact declaration header")
+        | .none => throw (IO.userError "Python origin outside actual source")
       IO.FS.createDirAll "dist/script-emitter-comparison"
       let actual := s!"dist/script-emitter-comparison/{label}.actual.py"
       let expected := s!"dist/script-emitter-comparison/{label}.reference.py"

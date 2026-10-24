@@ -17,6 +17,8 @@ on:
       - psc1/test/PhpCaptureScopeTests.lean
       - psc1/test/PhpPackedLayoutTests.lean
       - psc1/test/PythonUtf8*.lean
+      - psc1/test/PythonTailLoopTests.lean
+      - psc1/scripts/python-tail-loop-tests.py
       - psc1/test/PhpExtract*.lean
       - psc1/scripts/php-extract-runtime-tests.php
       - psc1/test/DirectCallPlanTests.lean
@@ -84,7 +86,7 @@ jobs:
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
           PSC1_SCRIPT_TRANSPORT_TESTS=1 node scripts/generated-target-contract-tests.mjs
-          lake build psc1 psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests psc1_php_packed_tests psc1_python_utf8_tests psc1_direct_call_plan_tests psc1_php_extract_tests
+          lake build psc1 psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests psc1_php_packed_tests psc1_python_utf8_tests psc1_direct_call_plan_tests psc1_php_extract_tests psc1_python_tail_loop_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -118,6 +120,7 @@ jobs:
           path: |
             psc1/dist/python-direct/
             psc1/dist/php-extract/
+            psc1/dist/python-tail/
             psc1/dist/python-utf8/
             psc1/dist/php-packed/
             psc1/dist/script-emitter-comparison/

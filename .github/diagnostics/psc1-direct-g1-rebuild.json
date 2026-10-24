@@ -1,0 +1,22 @@
+{
+  "schema": "psc1-direct-independent-g1-rebuild/1",
+  "qualifiedRunId": 40062120079,
+  "qualifiedCommit": "2d1f8244d8402fbccd5a018890d61d8ed4d20775",
+  "purpose": "Fresh native build with no .lake restore; independently checked executing G1; compare exact source/admission/IR/observations and code bytes with all three qualified generations. No second full G2/G3 replay claim.",
+  "targets": [
+    {
+      "target": "js",
+      "jobId": 120777813920,
+      "artifactId": 12548433615,
+      "artifactDigest": "sha256:b14f41fb1b329b7b163d21cb31814e089db93f01eb9f43d834cace6649ce4d1f",
+      "sourceClosureDigest": "5b1824ce8d98a9ec9068f351f28abab8485a9786510c47fd5b4cedeac8734a2e"
+    },
+    {
+      "target": "wasm-core",
+      "jobId": 120777813877,
+      "artifactId": 12549160290,
+      "artifactDigest": "sha256:0af48f55d5ed24580e6fc98cd41ede78fe98a5147c0510b9c19eb648aa0cf51c",
+      "sourceClosureDigest": "322f29eb0b4c734ea09c7f4ee53380633faa3799b367808c0d393783cd6e48c1"
+    }
+  ]
+}

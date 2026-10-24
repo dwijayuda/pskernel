@@ -25,7 +25,7 @@ def main : IO Unit := do
   unless actual.composer == retained.composer && actual.declarations == retained.declarations do
     throw (IO.userError "PHP extraction unrelated API metadata changed")
   let requirements := psPhpRuntimeClosure ["stringExtract"]
-  unless requirements == ["gmp","utf8Valid","unicodeChars","stringExtract"] do
+  unless requirements == ["gmp","unicodeChars","utf8Valid","stringExtract"] do
     throw (IO.userError "PHP extraction dependency inventory changed")
   let oldRequirements := PsScriptRuntimeReference.Php.psPhpRuntimeClosure ["stringExtract"]
   unless psPhpRuntimeClosureWithExtractionPolicy ["stringExtract"] false == oldRequirements do

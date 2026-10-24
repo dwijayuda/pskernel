@@ -622,3 +622,8 @@ lean_lib PsWasmNatDivModReference where
 lean_exe psc1_wasm_nat_divmod_tests where
   srcDir := "test"
   root := `WasmNatDivModTests
+
+lean_lib PsCodecSpineProof where
+  srcDir := "test"
+  roots := #[`CodecSpineReference, `CodecSpineProof]
+

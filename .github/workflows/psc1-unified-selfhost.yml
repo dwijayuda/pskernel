@@ -115,7 +115,7 @@ jobs:
           node scripts/check-erasure-declaration-spines.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_rust_string_ownership_tests psc1_wasm_nat_divmod_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
+          lake build psc1_codec_static_schema_tests psc1_rust_string_ownership_tests psc1_wasm_nat_divmod_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -133,8 +133,10 @@ jobs:
       - name: Require Rust String ownership and Wasm arbitrary-Nat differential regressions
         run: |
           set -euo pipefail
+          .lake/build/bin/psc1_codec_static_schema_tests
           .lake/build/bin/psc1_rust_string_ownership_tests
           .lake/build/bin/psc1_wasm_nat_divmod_tests
+          node scripts/codec-spine-tests.mjs
           node scripts/rust-string-ownership-tests.mjs
           node scripts/wasm-nat-divmod-tests.mjs
       - name: Census complete owned backend source in both grammars
@@ -147,6 +149,7 @@ jobs:
         with:
           name: psc1-unified-selfhost-correctness-1800s-${{ matrix.target }}-${{ github.sha }}
           path: |
+            psc1/dist/codec-spine/
             psc1/dist/rust-string-ownership/
             psc1/dist/wasm-nat-divmod/
             psc1/dist/direct-selfhost-preflight/

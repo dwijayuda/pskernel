@@ -3,6 +3,25 @@
 Updated 2026-10-25 Asia/Jakarta. GitHub/Linux Actions only; fresh expected-HEAD
 non-force updates. No merge or npm publication authorized.
 
+## Codec spine correction in progress
+
+Current source a3d3e0a9444934d3f55c41939e971c39e56472d3 has enlarged Rust G1
+passing, but real G2 in run40126488125/job120969044264 aborts after520538ms
+(maxRSS462464KiB). Exact archived-G1 replay40128155977/job120973928569
+verifies manifest5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c2,
+executableaa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce,
+and requestc6b04937446d0f549d76d965aae53bac04c23122ab4b14befb7fd425783ad0ad.
+After517774ms GDB records90 repeated psEncodeCodecExpr frames.
+The revised structural accumulator removes return frames along application,
+binder, let-body and projection spines. Explicit return frames preserve the
+original opaque String append tree as well as refusal priority; no
+associativity axiom. Side branches remain structurally recursive; no new
+fuel cap or enlarged stack. Retained-source all-input
+equality and deep generated execution must pass before qualification.
+The JS G2 job120969044278 independently reaches its unchanged1800s deadline
+(1800278ms,maxRSS3157096KiB); it is not qualified. Preserve TS/Wasm jobs in
+the same run and all earlier exact-source successful evidence.
+
 ## Active v2 G2/G3 qualification and measured Rust/Wasm blockers
 
 Resumed from84cc15375e4236a902e8af6658d92a640c6aa22a/PR178 on2026-10-25.
@@ -343,3 +362,11 @@ rerun changed-source focused and genuine qualification. Keep original240s
 performance acceptance explicit. Independent full-chain repeatability is a
 separate future evidence scope. Do not repeat unchanged correctness chains for
 documentation-only updates. See the [executable continuation](docs/PSC1_DIRECT_SELFHOST_CONTINUATION.md).
+
+The earlier full gate40126174119 fails its existing runtime-free Boolean
+assertion: unused private prelude List templates gained a cleanup helper.
+Keep that assertion unchanged. A conservative carrier-use scan now omits
+all unused type templates only when selected declarations contain no carrier
+types/operations and no types are public. Unknown/polymorphic types, named
+types, constructor/record/match/projection operations and scan exhaustion
+retain the existing carrier path. Focused and final gates must validate it.

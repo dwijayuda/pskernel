@@ -3,6 +3,10 @@ on:
   push:
     branches: [feat/psc1-unified-selfhost-20261024]
     paths:
+      - psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean
+      - psc1/test/CodecSpine*.lean
+      - psc1/scripts/codec-spine-tests.mjs
+      - psc1/test/CodecStaticSchemaTests.lean
       - psc1/packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.lean
       - psc1/packages/backend-rust/src/**
       - psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
@@ -57,13 +61,15 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_wasm_nat_divmod_tests psc1_rust_string_ownership_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe
+          lake build psc1_codec_static_schema_tests psc1_wasm_nat_divmod_tests psc1_rust_string_ownership_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe
+          .lake/build/bin/psc1_codec_static_schema_tests
           .lake/build/bin/psc1_wasm_nat_divmod_tests
           .lake/build/bin/psc1_rust_string_ownership_tests
           .lake/build/bin/psc1_unified_service_tests
       - name: Execute differential Rust, alias snapshots and million-character scans
         run: |
           set -euo pipefail
+          node scripts/codec-spine-tests.mjs
           node scripts/rust-string-ownership-tests.mjs
           node scripts/wasm-nat-divmod-tests.mjs
       - name: Audit both grammars and execute enlarged G1
@@ -95,6 +101,7 @@ jobs:
         with:
           name: psc1-rust-string-ownership-${{ github.sha }}
           path: |
+            psc1/dist/codec-spine/
             psc1/dist/wasm-nat-divmod/
             psc1/dist/rust-string-ownership/
             psc1/dist/generated-unified-rust-compiler/

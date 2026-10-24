@@ -1,0 +1,101 @@
+name: PSC1 immutable unified qualification receipt readback
+on:
+  push:
+    branches: [diagnostic/psc1-unified-receipts-20261025]
+    paths: [.github/workflows/diagnostic-psc1-unified-receipts.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  readback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12569716244,12569600307,12569455511,12568190623'
+          run-id: '40113918732'
+          github-token: ${{ github.token }}
+          path: psc1/dist/unified-receipt-input/v1
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12569456057'
+          run-id: '40115403218'
+          github-token: ${{ github.token }}
+          path: psc1/dist/unified-receipt-input/rust-retry
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12570385929,12569501209,12569441180,12569281754'
+          run-id: '40117051185'
+          github-token: ${{ github.token }}
+          path: psc1/dist/unified-receipt-input/v2
+      - name: Verify immutable artifacts, source inventories and cross-engine admission/IR parity
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';
+          import {sha,verifyArtifact} from './host-tools/generated-target-tools.mjs';
+          import {compilerSourceClosureDigest} from './host-tools/compiler-host-protocol.mjs';
+          const records=[];
+          function visit(dir){for(const item of fs.readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,item.name);if(item.isDirectory())visit(file);else if(item.name==='qualification.json')inspect(file);}}
+          function inspect(file){
+           const dir=path.dirname(file),q=JSON.parse(fs.readFileSync(file));
+           assert.equal(q.schema,'psc1-generated-target-qualification/1');assert.equal(q.serviceKind,'unified');
+           assert.equal(q.sourceModules,120);assert.equal(q.sourceInventory.length,120);
+           assert.ok(['b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac','0cf66b05272e40f26e3d1464478b8b944d7745bc','783cf8fceeda094b3e49b166e4d10af05e4b0413'].includes(q.testedCommit));
+           const outer=JSON.parse(fs.readFileSync(path.join(dir,'G1-bootstrap.request.json')));
+           const wire=typeof outer[2]==='string'?JSON.parse(outer[2]):outer[2];
+           const sources=wire[6].map(([module,text])=>({module,text,kind:wire[3]}));
+           assert.equal(compilerSourceClosureDigest(sources),q.sourceClosureDigest);
+           for(const [i,row] of q.sourceInventory.entries()){
+            assert.equal(row.module,sources[i].module);assert.equal(row.bytes,Buffer.byteLength(sources[i].text));
+            assert.equal(row.sha256,sha(sources[i].text));assert.ok(!/^Ps\\.Backend(Python|Php)\\./.test(row.module));
+           }
+           const generations=q.generations.map(g=>{
+            const manifestFile=path.join(dir,'G'+g.generation+'-service','artifact.json');
+            const m=verifyArtifact(manifestFile,g.artifactSha256);
+            assert.equal(m.sourceSha256,g.sourceSha256);assert.equal(m.serviceKind,'unified');
+            const executableSha256=sha(fs.readFileSync(path.join(path.dirname(manifestFile),m.executable)));
+            assert.equal(executableSha256,q.executableSha256);
+            assert.equal(g.logicalAdmission,'accepted');assert.equal(g.observations.length,4);
+            assert.deepEqual(g.observations.map(r=>r.target),['js','ts','rust','wasm-core']);
+            assert.ok(g.observations.every(r=>r.observations.length===10));
+            const {observations,...identity}=g;
+            return {...identity,executableSha256,observationsSha256:sha(JSON.stringify(observations)),crossTargetCases:40,
+             rustOptimizationLevel:m.rustOptimizationLevel,rustCodegenUnits:m.rustCodegenUnits};
+           });
+           assert.equal((q.cases||[]).length,generations.length*40);
+           assert.equal((q.envelopeRefusals||[]).length,generations.length*9);
+           const events=q.events.filter(e=>['G2-self','G3-self'].includes(e.id));
+           const record={testedCommit:q.testedCommit,target:q.target,protocol:outer[0],status:q.status,mode:q.mode,
+            correctnessQualification:q.correctnessQualification,performanceQualification:q.performanceQualification,profile:q.profile,
+            sourceClosureDigest:q.sourceClosureDigest,sourceModules:q.sourceModules,sourceInventorySha256:sha(JSON.stringify(q.sourceInventory)),
+            root:q.sourceInventory.at(-1),nativeSeedSha256:q.nativeSeedSha256,toolsInventorySha256:sha(JSON.stringify(q.tools)),
+            bootstrap:q.bootstrap,executableSha256:q.executableSha256,generations,cases:(q.cases||[]).length,
+            envelopeRefusals:(q.envelopeRefusals||[]).length,nativeDelegationBoundary:q.nativeDelegationBoundary,
+            fixedPoint:q.fixedPoint,events,failure:q.failure?.slice(0,1400),stackOverflow:q.failure?.includes('stack overflow')||false};
+           records.push(record);console.log('PSC1_UNIFIED_RECEIPT_RECORD: '+JSON.stringify(record));
+          }
+          visit('dist/unified-receipt-input');
+          assert.equal(records.length,9);
+          const current=records.filter(r=>r.testedCommit==='783cf8fceeda094b3e49b166e4d10af05e4b0413');
+          assert.equal(current.length,4);assert.ok(current.every(r=>r.status==='passed'&&r.generations.length===1&&r.cases===40&&r.envelopeRefusals===9));
+          for(const key of ['sourceClosureDigest','sourceInventorySha256'])assert.equal(new Set(current.map(r=>r[key])).size,1,key);
+          for(const key of ['originalIrSha256','admissionsSha256'])assert.equal(new Set(current.map(r=>r.bootstrap[key])).size,1,key);
+          const report={schema:'psc1-unified-receipt-readback/1',records,currentFourEngineG1:'passed',sharedOriginalIr:'identical',
+           sharedCanonicalAdmissions:'identical',optionalEmitters:'absent',currentG2G3:'not-run',formalPreservation:'not-provided'};
+          fs.mkdirSync('dist/unified-receipt-readback',{recursive:true});
+          fs.writeFileSync('dist/unified-receipt-readback/receipt.json',JSON.stringify(report,null,2));
+          console.log('PSC1_UNIFIED_RECEIPT_READBACK: '+JSON.stringify({records:records.length,currentFourEngineG1:report.currentFourEngineG1,sharedOriginalIr:report.sharedOriginalIr,sharedCanonicalAdmissions:report.sharedCanonicalAdmissions}));
+          
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-unified-receipt-readback-${{ github.sha }}
+          path: psc1/dist/unified-receipt-readback/
+          retention-days: 90

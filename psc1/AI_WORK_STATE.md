@@ -23,6 +23,14 @@ Source readiness is not generated compiler qualification. No Python/PHP G1,
 G2/G3 or fixed-point qualification is claimed yet. Next commit is the isolated
 explicit request for both targets, from this verified implementation.
 
+Actual request30389b1f218ec9c2f35321e93104edb7bb19d747, parenta685da2c6c4090d103d09a855accfcda674b3cf6,
+[run40069631375](https://github.com/dwijayuda/pskernel/actions/runs/40069631375)
+is ACTIVE for both targets. Exact request-only gate120800073301 PASSED.
+Python job120800177259 and PHP120800177269 are running; no G1/G2/G3 result
+has been read yet. Re-query terminal evidence before making any qualification claim.
+Documentation updates after the request do not change captured compiler source
+or pinned harness/runtime files and do not cancel the manual generation jobs.
+
 The existing emitters now have one portable implementation each:
 Ps.BackendPython.Portable and Ps.BackendPhp.Portable. The old Module paths are
 native compatibility adapters preserving existing APIs/defaults/metadata.

@@ -5,6 +5,11 @@ feat/psc1-python-php-selfhost-20261024 before expected-HEAD non-force updates.
 Read AI_WORK_STATE.md, the single roadmap, architecture and preserved direct
 qualification receipt. No local checkouts/builds/tests, PR merge or publishing.
 
+0. The request-only commit30389b1f218ec9c2f35321e93104edb7bb19d747 already launched
+   run40069631375; request gate120800073301 passed. Python120800177259 and
+   PHP120800177269 are active. Re-query them, preserve terminal logs/artifacts,
+   and do not launch a duplicate unchanged-source request. Generation results
+   remain unqualified until genuine terminal evidence is read.
 1. Start from verified implementation24f93a383886894cb411ecb76ff38fa46dd47177.
    Source gate40069330525/job120799158087 PASSED both complete86-module closures,
    both grammars,34816 retained runtime comparisons, seven state/four arity

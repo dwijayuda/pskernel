@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 06:17 UTC",
-  "status": "whole-source-gate-passed-ready-genuine-generations",
+  "recordedAtUtc": "2026-10-24 06:19 UTC",
+  "status": "genuine-qualification-running",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -157,5 +157,23 @@
       }
     }
   },
-  "nextAction": "Create isolated request-only commit for both genuine qualification targets from fresh HEAD; no generations qualified yet."
+  "nextAction": "Re-query actual qualification and latest normal CI; diagnose terminal failures from retained artifacts; qualify both current-source fixed points.",
+  "activeQualification": {
+    "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
+    "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
+    "runId": 40069631375,
+    "requestJobId": 120800073301,
+    "status": "in_progress",
+    "targets": {
+      "python": {
+        "jobId": 120800177259,
+        "status": "in_progress"
+      },
+      "php": {
+        "jobId": 120800177269,
+        "status": "in_progress"
+      }
+    },
+    "scope": "One native seed per target, then actual generated G1/G2/G3; no result inferred before terminal evidence."
+  }
 }

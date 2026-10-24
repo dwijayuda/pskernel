@@ -46,8 +46,9 @@ lexical shadowing.
 A small private WeakMap/generator scheduler is selected for source calls and
 callbacks. Generated functions remain ordinary callables while the scheduler
 holds suspended calls on the heap. It does not interpret IR and imposes no execution
-fuel. PHP tail calls currently retain frames; the deep cloud test allows 1 GiB for
-100,000 suspended calls. External process timeouts observe deliberate divergence.
+fuel. Recognized direct self-tail calls use guarded statement loops with argument
+snapshots; other source calls retain the explicit heap scheduler. Deep cloud
+tests keep the existing1GiB policy. External process timeouts observe deliberate divergence.
 
 Nat subtraction saturates, division by zero returns zero, and modulo by zero
 returns its dividend. Numeric values do not silently truncate to PHP machine ints.
@@ -63,3 +64,22 @@ declaration starts.
 See [runtime semantics](../../docs/PSC1_RUNTIME_SEMANTICS.md) for the reference
 definitions and full publication boundary. Backend preservation is not formally
 proved; actual qualified cases are recorded from Linux CI.
+
+## Compact private data and compiler workloads
+
+The same portable emitter serves native and generated compilers. Internal
+inductives use immutable ArrayAccess nodes with flat logical tag/field positions,
+inline first/second fields and packed overflow. Owner-qualified checked layouts
+resolve match bindings; strict canonical construction order stays mandatory.
+Records and ordinary arrays retain their existing representations and semantics.
+Aggregate public signatures remain refused.
+
+Dead nodes queue descendants before clearing their own fields, then drain the
+queue iteratively. Children held by other owners stay live and unchanged. This
+avoids recursive Zend array destruction without raising the default stack or
+PHP1G limit. Legacy array layout remains a policy of the same emitter for
+comparison tests. Two-million-cell execution, two-million-node reclamation,
+shared ownership, weak collection, cycles and mutation/offset refusals pass Linux.
+
+Actual G1/G2/G3 qualification, exact PHP8.5.12/ext-gmp runs and preserved failures
+belong to the [self-host receipt](../../docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json).

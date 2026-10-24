@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 07:10 UTC",
-  "status": "Python-UTF8-qualification-active-PHP-iterative-node-fix-awaiting-gates",
+  "recordedAtUtc": "2026-10-24 07:22:24 UTC",
+  "status": "PHP-iterative-node-genuine-requested-Python-UTF8-baseline-running",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -157,7 +157,7 @@
       }
     }
   },
-  "nextAction": "Read Python UTF8 genuine qualification; require PHP iterative-node native/source gates then PHP-only retry. Full current-source seven-backend CI and clean reproduction remain required.",
+  "nextAction": "Observe PHP node request75f04cfd and old Python run40072853176. Use terminal generated workload evidence for next fixes. Do not launch an unchanged Python performance rerun before reading the active result; require fresh source-only Python qualification when its bottleneck is resolved. Full37/37 and clean G1 reproduction remain pending.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -761,12 +761,64 @@
   },
   "pythonUtf8Qualification": {
     "requestCommit": "a8def92c857b71344717d92e2260aef25675fabb",
-    "status": "requested-not-yet-read"
+    "runId": 40072853176,
+    "jobId": 120810006994,
+    "status": "in_progress",
+    "source": "current Python UTF8/compiler source",
+    "transport": "pre-source-only adapter baseline; fresh hardened pipeline still required",
+    "evidenceBoundary": "Do not infer G2/G3 before terminal evidence; source-only host fix does not alter compiler source but changes tool identity."
   },
   "phpNodeFix": {
-    "status": "implemented-awaiting-Linux-gates",
+    "status": "passed-native-source-and-admitted-library-gates",
     "mechanism": "compact immutable ArrayAccess inductive carriers with inline first/second fields and packed overflow; explicit pending queue clears only already-dead nodes and releases descendants iteratively; live shared children never mutated",
     "preserved": "same tag/field logical positions, owner-qualified layout, scalar public ABI and unsupported named-ABI refusal; legacy array layout remains test policy of same emitter",
-    "tests": "legacy outputs, shape/order/Unicode, shared owners, mutation/offset refusal, weak dead-child/cycle collection,2M-cell generated collection and2M-node dead-spine cleanup at1G/defaultstack"
+    "tests": "legacy outputs, shape/order/Unicode, shared owners, mutation/offset refusal, weak dead-child/cycle collection,2M-cell generated collection and2M-node dead-spine cleanup at1G/defaultstack",
+    "sourceCommit": "4fc1f95c6700a797af79e118fedd232b8a997e46",
+    "gate": {
+      "runId": 40073347040,
+      "jobId": 120811340114,
+      "status": "passed"
+    }
+  },
+  "sourceOnlyPythonTransport": {
+    "commit": "617004ceb29ce759f38a49b635a47bc25aa7f622",
+    "gate": {
+      "runId": 40073537409,
+      "jobId": 120811928284,
+      "status": "passed"
+    },
+    "issue": "SourceFileLoader could execute unlisted timestamp/hash pyc instead of manifest-bound module.py",
+    "resolution": "compile and execute exact source bytes in service/probe and generated consumer; no unlisted cache import",
+    "negativeControl": "poisoned pyc with matching timestamp/size is proved executable by standard loader; service and consumer still execute only bound source",
+    "compilerSourceChanged": false
+  },
+  "currentSourceGate": {
+    "commit": "617004ceb29ce759f38a49b635a47bc25aa7f622",
+    "runId": 40073537409,
+    "jobId": 120811928284,
+    "status": "passed",
+    "modulesPerTarget": 86,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "refused": [],
+    "retainedCatalogCases": 34816,
+    "stateEqualities": 7,
+    "arityEqualities": 4,
+    "retainedEmitterSyntaxCases": 144,
+    "pythonUtf8DifferentialQueries": 234895,
+    "phpGeneratedCollectionCells": 2000000,
+    "phpIterativeDeadSpineNodes": 2000000,
+    "admittedRuntimeLibraryCombinations": 4,
+    "queriesPerCombination": 108,
+    "stateQueriesPerCombination": 8
+  },
+  "phpNodeQualification": {
+    "requestCommit": "75f04cfdcafc1fbeea08f66f595f40ff6b777d04",
+    "parentCommit": "617004ceb29ce759f38a49b635a47bc25aa7f622",
+    "status": "requested-run-not-yet-read",
+    "target": "php",
+    "hostTransport": "current source-only Python host tools inventory"
   }
 }

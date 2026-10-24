@@ -41,8 +41,7 @@ decimal conversion limit. Literals with 600 or more decimal digits use hexadecim
 syntax. The cloud suite executes 5,001-digit tests with a digit limit of 640.
 
 Helpers are selected with their transitive dependencies and embedded in the output.
-A scalar constant can be runtime-free. Public argument checks need only a builtin
-alias unless other operations require helpers. The selected API appears exactly in
+A scalar constant can be runtime-free. Public argument checks select the builtin support group. The selected API appears exactly in
 `__all__` and `.pyi`. Declaration origins record generated line starts after the
 selected runtime prefix; they are not a full debugger source map.
 
@@ -54,3 +53,16 @@ exact selected runtime text and each final artifact independently.
 
 See [runtime semantics](../../docs/PSC1_RUNTIME_SEMANTICS.md) for the reference
 operations, ABI and limitations. Backend preservation is not formally proved.
+
+## Compiler workloads and artifact execution
+
+The single portable emitter also serves the generated compiler; the native Module
+path preserves its existing API. Byte operations share bounded immutable UTF8
+identity views (eight entries,32MiB encoded content), with no global recursion or
+digit-limit changes. Identity keys avoid repeated String equality/encoding work.
+Oversized views are not retained; Unicode/error/position semantics are preserved.
+
+The hash-bound qualification transport executes exact source bytes and ignores
+unlisted .pyc caches, including during probes and generated-consumer execution.
+Current compiler generation results, exact Python3.14.8 evidence and limits are
+tracked in the [self-host receipt](../../docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json).

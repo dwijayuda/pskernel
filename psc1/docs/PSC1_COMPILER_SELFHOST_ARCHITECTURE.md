@@ -7,27 +7,32 @@ work; [AI work state](../AI_WORK_STATE.md) and the
 live status to immutable source/CI identities. Qualified Rust and TypeScript
 remain preserved reference implementations generated from the same compiler.
 
-## PHP actual workload and bounded lexical captures
+## Python/PHP measured mechanisms
 
-The first real PHP seed in40069631375 produced a1002108077-byte envelope,
-above the unchanged134217728 cap. Artifact diagnosis40070297469 records
-961724361 encoded-source bytes and18816024 global-reference capture text
-occurrences across6152 use clauses. No PHP G1 was admitted by this attempt.
+The shared compiler frontend/elaborator/checked IR/service remains unchanged.
+Each target has one Portable emitter and a thin native API adapter preserving
+defaults and metadata. Explicit ordinary state/Except source is backed by seven
+complete state and four arity equalities. No handwritten second compiler exists.
 
-The PHP emitter previously captured every global by reference for each closure.
-Sourceda5c5c6e894019f8200e0771512f7e232a3403c6 computes lexical global demand over the same
-checked expression: parameters, let and match binders shadow globals; nested
-lambda demand propagates. The existing global order/reference identity and all
-local/helper captures remain. Exhausted analysis retains the full legacy set,
-proved for the zero-budget case; it never drops possible dependencies on refusal.
-No compiler frontend, runtime, IO, verification or resource policy changes.
+| Actual defect | Measured evidence | Mechanism and guard |
+| --- | --- | --- |
+| PHP quadratic global captures | First seed envelope1002108077 bytes,961724361 encoded source bytes and18816024 global-reference capture text occurrences; read-only40070297469. | Lexical global demand preserves reference identity/order and all local/helper captures. Exhaustion falls back to full legacy captures, with a zero-budget theorem, scope cases and independent capture-token boundary. Seed envelope falls to59452682 bytes. |
+| PHP inductive storage and destruction | Next G2 exceeds1G while converting1.79MB wire to chars; heap trace holds seven pending generators. Packed arrays fit memory, but exact GDB40072628964 crashes with32 recursive zend_array_destroy frames. | Compact immutable ArrayAccess nodes expose flat tag/field positions, inline first/second fields and packed overflow. Queue descendants before clearing only already-dead nodes; drain references iteratively. Other owners preserve live children. Two-million-cell generated execution and two-million-node cleanup/shared/weak/cycle/refusal tests pass at1G/default stack. |
+| Python repeated UTF8 encoding | Old G2 hits1800s; exact archived-G1 profile40071913715 spends118.890/120s in106950 encodes. | Shared get/next/extract/byte-size/end views use immutable identity snapshots:8 entries/32MiB encoded content, oversized views not retained.234895 retained-helper comparisons, retained/current emitted intrinsics, errors/eviction/identity/concurrency and AST/origin boundaries pass. |
+| Unlisted Python bytecode | SourceFileLoader may execute a timestamp/hash .pyc absent from the artifact manifest. | Source-only617004ce compiles exact bound source bytes for service/probe/consumer. A matching poisoned cache executes under standard loader but is ignored by production. Compiler semantics stay generated; no native delegation. |
 
-Legacy-policy output still compares every original field/byte against the
-retained native emitter. Production PHP is tokenized independently by PHP:
-only ordered-subset global reference items in use clauses may differ; every
-other token and local/helper capture must match. Native lexical tests and full
-application regressions supplement this boundary; genuine generations remain
-necessary and cannot be inferred from these tests.
+Strict IR already requires canonical constructor field order; the PHP emitter
+evaluates in that order. Reordered construction remains refused, while match
+bindings resolve indices by owner/constructor/field. Native legacy layout is a
+policy of the same emitter for differential execution. Public aggregate ABIs
+remain refused; records/arrays keep their existing source semantics.
+
+Source/regression gate40073537409 at617004ce passes both complete86-module
+closures in both grammars, proofs, retained boundaries and four independently
+admitted runtime libraries. Current genuine generations are tracked by the
+[Python/PHP receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json);
+these focused tests alone do not qualify G2/G3 or fixed points. Existing
+memory/stack/fuel/admission/IR/refusal policies are unchanged.
 
 ## Current qualified evidence — 2026-10-24
 

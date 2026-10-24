@@ -8,38 +8,23 @@ owns exact source identities and immutable actual results.
 
 ## Active work order: Python/PHP self-hosting
 
-| Order | Work | Exact acceptance |
+| Order | Work | Finite acceptance and current status |
 | --- | --- | --- |
-| 1 | Full existing Python/PHP emitter closure normalization | Native facade build and both complete .lean/.ps censuses; preserve prior scalar/runtime/IO/negative behavior and source identities. |
-| 2 | Independently checked G1 for each | One native seed, strict original/transformed IR, official Lean4.35 admission, generated execution of all five positive and five refusal cases. |
-| 3 | Genuine G2/G3 and exact fixed points | Each generated compiler compiles the same captured full source; disable native compiler tools after the seed. Exact source/admission/IR/ten observations/raw code identities, correctness1800s with original240s profile separate. |
-| 4 | Full source regression and reproducibility | Seven backends/both grammars/37 criteria and real apps; clean G1 reproduction separately scoped. Preserve qualified DirectJS/Wasm/Rust/TS snapshots and all old failures. |
+| 1 | Portable source and focused correctness | PASS617004ce/run40073537409: complete86-module closures, both grammars, proofs, retained-runtime/emitter boundaries, Python UTF8 differentials, PHP2M collection/reclamation and admitted libraries. |
+| 2 | Current generated compilers | PHP current node/source-only request75f04cfdcafc1fbeea08f66f595f40ff6b777d04 pending. Python UTF8 requesta8def92c/run40072853176 active with earlier transport; read terminal performance evidence before fresh source-only request. Prior G1s pass; current G2/G3 remain unqualified. |
+| 3 | Actual fixed points | Each generated G1 compiles the same complete captured compiler toG2, thenG3, with native tools removed. Require independent Lean4.35 checking, both strict IR graphs, source pairing, ten positive/refusal cases and exact source/admission/IR/observations/raw executable identities. Correctness1800s; performance240s separate. |
+| 4 | Full regression and reproducibility | Latest source37/37, seven backends/both grammars/four real application categories; independent clean G1 reproduction separately. No merge/publication without authorization. |
 
-Branch feat/psc1-python-php-selfhost-20261024. Existing emitters and shared compiler
-service are reused, with small host transport adapters only. No Python/PHP self-host qualification is claimed yet. Both emitters are now
-ported to the supported explicit state/Except source normal form, with native
-compatibility adapters. Seven state API equalities,34816 runtime comparisons,
-144 retained-emitter comparisons and four independently admitted generated
-runtime probes pass40068694963. Source gate40069330525 at24f93a38 PASSED all four86-module
-source lanes, native proofs and regressions; genuine compiler generations are next.
-See [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md).
-The later direct performance queue is deferred while this user-directed mission runs.
+One existing shared compiler and one portable emitter per target; native adapters
+preserve existing APIs. Measured fixes are bounded Python UTF8 identity views,
+lexical PHP global captures and immutable compact PHP nodes with iterative
+reclamation. Source-only Python loading closes an actual unlisted-bytecode path;
+poisoned-cache controls pass. No memory/stack/fuel/checker/negative gate is weakened.
 
-Actual workload40069631375: Python remains active; PHP failed before G1
-admission because the native candidate envelope was1.002GB, above the unchanged
-128MiB cap. Read-only40070297469 diagnoses every-global/every-closure captures.
-PHP lexical global-demand fixda5c5c6e894019f8200e0771512f7e232a3403c6 passes source gate
-40070774006. Preserve full legacy capture fallback and token boundaries; require
-runtime scope cases40070902724 before PHP-only retry. No output/memory/fuel cap
-change and no duplicate unchanged Python run. See the Python/PHP receipt.
-
-Latest actual queue: PHP packed layout passes40072162242; genuine retry request
-c3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7 active. Python G1 passes but G2 exceeded
-1800s; exact CPU profile40071913715 attributes118.890/120s to106950 UTF8
-encodes. Bounded immutable identity views are implemented awaiting focused/full
-source gates, then a Python-only retry. Preserve all limits and previous artifacts.
-These independent target changes do not justify re-running the other unchanged
-closure; compare source inventories before carrying evidence forward.
+The [current receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
+retains exact failed/successful scopes and measurements;
+[continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) owns executable next steps.
+Direct-target performance work below is deferred during this user mission.
 
 ## Qualified compiler checkpoint
 

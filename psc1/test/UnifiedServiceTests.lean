@@ -22,6 +22,7 @@ def main : IO Unit := do
       | throw (IO.userError "refusal JSON")
     unless (parsed.getObjValAs? String "status").toOption == some "refused" do
       throw (IO.userError "invalid envelope accepted")
-    unless (parsed.getObjVal? "source").isError do
-      throw (IO.userError "refusal leaked candidate")
+    match parsed.getObjVal? "source" with
+    | Except.ok _ => throw (IO.userError "refusal leaked candidate")
+    | Except.error _ => pure ()
   IO.println "PSC1_UNIFIED_SERVICE_NATIVE: four exact retained emitters; nine envelope/optional refusals"

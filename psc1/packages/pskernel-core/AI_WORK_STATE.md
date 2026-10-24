@@ -1,3 +1,19 @@
+## 2026-10-25 — private constructor phase ready for exact310-report qualification
+
+The qualified integration remains042d3a12d902f821c7b0ad8630c18f9d6d8bf639. Its full run40118532017/attempt1 and actual artifact audit40118566527/attempt1 remain the prerequisite evidence recorded below.
+
+This commit promotes the private field, recursive-argument, single-constructor-analysis and ordered constructor-loop batch from work/psc1-pskernel-t05-loop-draft-20261025 at435cb30302aa68dc35313138c0189a6de8f64abf, preserving its history. It preserves the qualified parameter-harness owner-identity repair from042; draft predecessors did not contain that harness repair.
+
+Early native preflight40136763321/attempt1, job120999794956, passed all80 added proof reports and430 assertions (fields268, analysis93, loop69) at exact435cb303. Analysis preflight40135113480/attempt1 atc7387bc8 also passed native66/361 and the authentic portable compiler's1687-declaration leaf check. The Loop portable diagnostic remains separate from full qualification; inspect its actual matching-source outcome rather than assuming success.
+
+The required primary cohort now has310 native proof reports = retained230 + recursive24 + fields23 + analysis19 + loop14. It copies59 exact source inputs, retains all prior controls and frozen references, and requires both complete generated routes with header1992/cache1884/parameters268/results432/fields268/analysis93/loop69. The full routes perform their existing whole-source checks; no extra overlapping private-leaf check is added. The artifact audit must use profile"loop" and verify actual archives/receipts against this changed work SHA and its unique matching run/attempt.
+
+Read [the current constructor-phase handoff](docs/T05_CONSTRUCTOR_PHASE_HANDOFF_2026-10-25.md). New code remains private: the loop stages constructor metadata and original-root references internally after validation, with original decoded boundary ownership as an explicit precondition. Generated recursor validation, complete atomic admission and public routing remain OPEN; the safe fallback is unchanged. No full T05, external decoder/layout bridge, Replay-to-ArenaModel bridge or performance qualification is claimed.
+
+Do not integrate this changed source until its exact310 native inventory, complete generated/canonical runs and artifact audit pass. Preserve A qualified; B OPEN; C FAIL at the historical173/193 strict checkpoint; D OPEN. Preserve Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, fuel4096, resource limits, independent checks, retained negatives, Linux Actions only, and expected-SHA non-force history.
+
+---
+
 ## 2026-10-25 — constructor helpers qualified and integrated; private field/analysis preflight next
 
 This section supersedes the pending-status entries below. Exact qualified implementation source: **042d3a12d902f821c7b0ad8630c18f9d6d8bf639**. The integration branch was advanced from0d9f062846d109c362210d441df5fd407ca2cdd7 to042d3a12 by a non-force expected-SHA fast-forward after checking the exact source-bound receipts and artifact audit. History is preserved.

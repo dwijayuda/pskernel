@@ -1,5 +1,20 @@
 ## 2026-10-25 Paged proof repair passes; native parameter harness import corrected
 
+## 2026-10-25 — exact constructor harness repair; fresh qualification required
+
+The work source immediately before this change is a298be9d9d770dffcfdbffd7f8414e8d76f9641a. Its run40115285221/attempt1 passed native-header (job120935189637): all230 required proof reports, params284, result432 and retained controls. Both complete routes compiled and passed the retained1992header matrix, but each stopped at the parameter harness assertion boundaries/successor-empty-no-lookup. This cohort is NOT qualified.
+
+The defect is in two expected JavaScript values: a generated branded Prod was compared against an unbranded object literal. The repair keeps strict symbol-aware equality globally, checks exact generated Option/Except wrappers, and requires the identical complete owner object plus unchanged root999999. It does not change kernel production, theorem statements, fuel, error precedence, fixtures or assertion counts. The earlier paged getElem/getD proof and both explicit Decode imports remain intact.
+
+Early Linux artifact diagnostic40118325288/attempt1 at5b51fd797067e1c5f69a1bb46b36899b1427e63c authenticated the a298 generated artifact12569921711, kernel SHA25628993d3311086e139d7932a2fa8c1fd6e299c9ddebb955e6204ec01e08faeacf, and actual148-module Git source closure. It then passed params268 and result432 independently. The repaired parameter harness is18519bytes, SHA25605da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660, exactly matching the file committed here. Diagnostic artifact12570313053 is378795bytes, SHA256076fd8e10be27fe473f57fc5cfc18548b3ad9952a8cee189f6bdf401e28877a5. This is diagnostic-only evidence, not qualification of this changed source.
+
+Next: use the single matching-source native-first T05 workflow triggered by this commit. Require230 native reports, native params284/result432, both complete generated and canonical routes, retained controls, header1992/cache1884/params268/result432 per route, and actual source-bound artifact/receipt verification. Do not inherit a298 evidence or launch a duplicate cohort. Full-kernel routes currently use TypeScript-to-JavaScript; do not relabel this as full-kernel DirectJS support.
+
+A private fields/recursive-argument draft is separately checkpointed on work/psc1-pskernel-t05-fields-draft-20261025 (latest a1dfa9655c0a9d6a7264907306332e89504a391f) with three production modules,47 additional proof reports and268 proposed assertions per native/generated harness. Its own native diagnostic is not full qualification. Public admission/fallback and integration remain unchanged. Complete and qualify the prerequisite helpers before promoting the next batch; recursor validation/atomic publication remain open.
+
+Integration remains0d9f062846d109c362210d441df5fd407ca2cdd7. A scoped T01F qualified; B OPEN; C FAIL (historical173/193 strict matches,17timeouts,one budget exhaustion,two separately classified safety/partial contracts); D OPEN. Replay-to-ArenaModel and concrete external decoder proof obligations remain open.
+
+
 [Run 40115030307](https://github.com/dwijayuda/pskernel/actions/runs/40115030307),
 attempt 1, at `a9b8a1c38b3b8d3d3ce669368277f70fbd503154` kernel-checked the
 paged repair: all 8 metadata, 17 paged, 17 parameter and 16 result proof-command

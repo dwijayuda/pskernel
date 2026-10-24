@@ -212,10 +212,14 @@ const worker=(fuel,callback,fixture,pars,root)=>get("psKernelExprV2OrdinaryOpenC
   (fuel)(callback)(fixture.context)(fixture.state)(pars)(root);
 const withCallback=(fuel,callback,fixture,pars,root)=>get("psKernelExprV2OrdinaryOpenConstructorParamsWith")
   (callback,fuel,fixture.context,fixture.state,pars,root);
+const emptyIdentity=value=>{
+  const pair=attempted(value,"empty-parameters");
+  return same(value,Option.some(ok(pair)))&&pair.fst===single.state&&pair.snd===999999n;
+};
 must(same(worker(0n,forbidden,single,nil,999999n),Option.some(err(budget))),"zero-before-empty-invalid-root");
 must(same(worker(0n,forbidden,single,singleParameter,999999n),Option.some(err(budget))),"zero-before-nonempty-invalid-root");
-must(same(worker(1n,forbidden,single,nil,999999n),Option.some(ok({fst:single.state,snd:999999n}))),"successor-empty-no-lookup");
-must(same(withCallback(0n,forbidden,single,nil,999999n),Option.some(ok({fst:single.state,snd:999999n}))),"wrapper-zero-empty-identity");
+must(emptyIdentity(worker(1n,forbidden,single,nil,999999n)),"successor-empty-no-lookup");
+must(emptyIdentity(withCallback(0n,forbidden,single,nil,999999n)),"wrapper-zero-empty-identity");
 let calls=[];
 const positive=fuel=>_ctx=>state=>left=>right=>{calls.push({fuel,left,right});return Option.some(ok({fst:state,snd:true}));};
 const atOne=worker(1n,positive,single,singleParameter,single.root);

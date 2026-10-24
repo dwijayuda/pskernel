@@ -2,13 +2,13 @@
   "schema": "psc1-python-php-3600s-readback-request/1",
   "rows": [
     {
-      "target": "php",
+      "target": "python",
       "branch": "qualification/psc1-python-php-3600s-20261024",
       "run": 40085445958,
-      "job": 120847425075,
+      "job": 120847425035,
       "commit": "a6a399c604e29f62cec1f74d2db49d9c45873ea0",
-      "artifact": 12558950449,
-      "digest": "sha256:42516399119bb175b540f59efcc8461c106bbea3f290accd61945a69acdd4f1f",
+      "artifact": 12558152936,
+      "digest": "sha256:a32295c72c7fcfb7f1013fc6ffe5ddb81aa293d1a4fd0075f2f4dc40234d4286",
       "conclusion": "failure"
     }
   ]

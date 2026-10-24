@@ -1,14 +1,14 @@
 {
   "schema": "psc1-direct-selfhost-request/1",
   "branch": "work/psc1-direct-selfhost-spines2-20261024",
-  "parentCommit": "699f84948ff70273e5ab9a7c5c0273316df23e66",
+  "parentCommit": "dab1006752de9c26cafff692ad81439c26c8254a",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "wasm-core"
+    "js"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "Execute actual owned Wasm generations after c115c657 main lowering recursive prefix fix; full focused40034701526 passed52 all-input worker equalities,464-definition closure guard, original negative, both grammars and every prior runtime/refusal test. Do not duplicate the separately active JS request40033515365."
+  "reason": "Genuine JS generations after measured shared lookup prefix fix146270cf. Focused40036978899 passed all3 retained API equalities,100000-element first-match/error/payload tests, both complete grammars and all earlier proof/runtime gates. Official checker/strict IR/negative cases/resource limits unchanged; later Wasm-only encoding changes do not alter this JS source closure."
 }

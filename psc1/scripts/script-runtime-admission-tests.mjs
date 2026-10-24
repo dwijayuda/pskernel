@@ -18,24 +18,30 @@ const records=JSON.parse(fs.readFileSync(oracle));
 const python=String.raw`import importlib.util,json,sys
 spec=importlib.util.spec_from_file_location("runtime_probe",sys.argv[1])
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-assert sorted(m.__all__)==["dependencies","runtimeText"]
+assert sorted(m.__all__)==["dependencies","runtimeText","stateSummary"]
 records=json.load(open(sys.argv[2],encoding="utf-8"))
 for name,pybody,pydeps,phpbody,phpdeps in records:
  assert m.runtimeText(True,name)==pybody
  assert m.runtimeText(False,name)==phpbody
  assert m.dependencies(True,name)==pydeps
  assert m.dependencies(False,name)==phpdeps
-print(json.dumps({"queries":len(records)*4,"passed":True}))
+for value in [0,1,37,1000000]:
+ assert m.stateSummary(value,False)==value+1
+ assert m.stateSummary(value,True)==0
+print(json.dumps({"queries":len(records)*4,"stateQueries":8,"passed":True}))
 `;
 const php=String.raw`$m=require $argv[1];
-$names=array_keys($m);sort($names);if($names!==['dependencies','runtimeText'])throw new RuntimeException('API');
+$names=array_keys($m);sort($names);if($names!==['dependencies','runtimeText','stateSummary'])throw new RuntimeException('API');
 $records=json_decode(file_get_contents($argv[2]),true,512,JSON_THROW_ON_ERROR);
 foreach($records as [$name,$pybody,$pydeps,$phpbody,$phpdeps]){
  foreach([[$m['runtimeText'](true,$name),$pybody],[$m['runtimeText'](false,$name),$phpbody],[$m['dependencies'](true,$name),$pydeps],[$m['dependencies'](false,$name),$phpdeps]] as [$actual,$expected]){
   if($actual!==$expected)throw new RuntimeException('RETAINED_RUNTIME_MISMATCH');
  }
 }
-echo json_encode(['queries'=>count($records)*4,'passed'=>true],JSON_THROW_ON_ERROR);
+foreach([0,1,37,1000000] as $value){
+ if(gmp_cmp($m['stateSummary'](gmp_init($value),false),$value+1)!==0||gmp_cmp($m['stateSummary'](gmp_init($value),true),0)!==0)throw new RuntimeException('STATE');
+}
+echo json_encode(['queries'=>count($records)*4,'stateQueries'=>8,'passed'=>true],JSON_THROW_ON_ERROR);
 `;
 const results=[];
 for(const target of ['python','php'])for(const grammar of ['lean','ps']){

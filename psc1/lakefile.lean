@@ -88,7 +88,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan]
+  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -539,3 +539,11 @@ lean_lib PsScriptRuntimeReference where
 lean_exe psc1_script_runtime_normalization_tests where
   srcDir := "test"
   root := `ScriptRuntimeNormalizationTests
+
+lean_lib PsBackendStateReference where
+  srcDir := "test"
+  roots := #[`BackendStateReference]
+
+lean_exe psc1_backend_state_correspondence_tests where
+  srcDir := "test"
+  root := `BackendStateCorrespondenceTests

@@ -1,5 +1,6 @@
 import Ps.BackendPython.Runtime
 import Ps.BackendPhp.Runtime
+import Ps.BackendCommon.StateExcept
 
 def runtimeText(python : Bool, helper : String) : String :=
   if (python) { psPythonRuntimeBody(helper) } else { psPhpRuntimePart(helper) }
@@ -7,3 +8,16 @@ def runtimeText(python : Bool, helper : String) : String :=
 def dependencies(python : Bool, helper : String) : String :=
   if (python) { psTextJoin("|", psPythonRuntimeClosure([helper, helper, "unknown"])) }
   else { psTextJoin("|", psPhpRuntimeClosure([helper, helper, "unknown"])) }
+
+def Ps.Internal.RuntimeProbe.stateNext(value : Nat) : PsBackendStateExcept(Nat, String, Nat) :=
+  psBackendStateBind(psBackendStateSet(Nat.succ(value)),
+    fun (unit : Unit) => psBackendStateGet(Unit.unit))
+
+def stateSummary(start : Nat, fail : Bool) : Nat :=
+  let action : PsBackendStateExcept(Nat, String, Nat) :=
+    if (fail) { psBackendStateThrow("failure") }
+    else { psBackendStateBind(psBackendStatePure(start), Ps.Internal.RuntimeProbe.stateNext) }
+  match action(start) with {
+  | Except.error error => 0
+  | Except.ok pair => pair.fst
+  }

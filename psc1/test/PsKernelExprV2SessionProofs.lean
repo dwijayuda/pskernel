@@ -148,26 +148,23 @@ theorem session_import_preserves_original_input_namespace
         params safety installed.arena installed.built := by
   simp only [psKernelDagRunSessionCommands, imported]
 
+/- Every successful dispatcher route now returns its checked owner directly.
+   The demand gate consumes that owner before the batch can publish any result. -/
 theorem post_command_import_error_prevents_publication
     (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
     (input built : PsKernelExprV2Decoded)
     (execution : PsKernelDagExecutionState)
     (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
     (arena : PsKernelExprV2PagedArena)
-    (result : Prod PsKernelDagReply PsKernelDagExecutionState)
-    (installed : PsKernelDagGeneratedState) (error : String)
-    (admitted : psKernelDagRunCommandWithSource input execution
+    (result : PsKernelDagOwnedCommandResult) (error : String)
+    (admitted : psKernelDagRunOwnedCommandWithSource input execution
       params safety arena built command = Except.ok result)
-    (imported : psKernelDagGeneratedAfterCommandWithPrevious command
-      execution.session.environment (Prod.snd result).session.environment
-      (PsKernelDagGeneratedState.mk arena built (Prod.snd result).declarations) =
-      Except.ok installed)
     (failed : psKernelDagGeneratedDemandRange
-      (Prod.snd result).session.environment built.size installed = Except.error error) :
+      result.execution.session.environment built.size result.owner = Except.error error) :
     psKernelDagRunCommandsWithSource (command :: rest) input execution
       params safety arena built = Except.error (PsKernelError.internalError error) := by
   rw [psKernelDagRunCommandsWithSource]
-  simp only [admitted, imported, failed]
+  simp only [admitted, failed]
 
 theorem append_demands_preserves_order
     (names pending : List PsKernelName) :

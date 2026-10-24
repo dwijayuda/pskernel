@@ -1,3 +1,11 @@
+## 2026-10-25 — retained publication equation follows the checked owner
+
+Full candidate `0f2879386a1fff13db6b887fdbfc818cba848b46` failed native qualification in run [40142939925](https://github.com/dwijayuda/pskernel/actions/runs/40142939925), attempt 1. The sole Lean error was `PsKernelExprV2SessionProofs.lean:168`: the retained post-command publication theorem still assumed the old dispatcher followed by a mandatory generated-owner import. The direct ordinary route now returns its checked owner itself.
+
+The repair changes that theorem's success premise to `psKernelDagRunOwnedCommandWithSource` and its demand-failure premise to the returned execution environment and owner. Its conclusion still requires the whole batch to fail before publication. This equation covers both direct ordinary and fallback success; the public fallback error-before-import equation remains checked separately. The changed theorem interface is explicit: it is not claimed to be an unchanged historical statement. Production, resource limits, proof names, and the **371-report** inventory are unchanged.
+
+On the failed source, the new 26/27/8 proof groups and native elimination116, private143 plus official18, and public12 controls passed; these are diagnostic evidence only. Both generated routes were skipped. The repaired exact source requires a fresh complete native/generated/canonical run and archive audit before integration. Integration remains `a49d64ae494d51fdc80b688dab0922dd96403e5e`. A is qualified; B remains OPEN; C remains FAIL; D remains OPEN. Replay/ArenaModel and external-decoder/layout bridges remain open.
+
 # T05 complete ordinary DAG admission — preflight checkpoint, 2026-10-25
 
 ## Status and branch ownership

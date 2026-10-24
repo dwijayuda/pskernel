@@ -96,10 +96,19 @@ def main():
     need(dig(b)==prov["scripts"][name] and b==blob("psc1/scripts/"+name),"Original harness authentication")
     before=dig(b)
     if kind=="params":
-      old=b"ok({fst:single.state,snd:999999n})"
-      new=b'ok(get("Prod").mk(single.state,999999n))'
-      need(b.count(old)==2,"Exactly two expected-value replacements")
-      b=b.replace(old,new)
+      anchor=b"  (callback,fuel,fixture.context,fixture.state,pars,root);\n"
+      helper=b'''const emptyIdentity=value=>{
+  const pair=attempted(value,"empty-parameters");
+  return same(value,Option.some(ok(pair)))&&pair.fst===single.state&&pair.snd===999999n;
+};
+'''
+      need(b.count(anchor)==1,"Expected empty-boundary helper anchor")
+      b=b.replace(anchor,anchor+helper)
+      for call in (b"worker(1n,forbidden,single,nil,999999n)",b"withCallback(0n,forbidden,single,nil,999999n)"):
+        old=b"same("+call+b",Option.some(ok({fst:single.state,snd:999999n})))"
+        new=b"emptyIdentity("+call+b")"
+        need(b.count(old)==1,"Exactly one expected boundary assertion")
+        b=b.replace(old,new)
     R["harnesses"][kind]={"before":before,"after":dig(b),"replacements":2 if kind=="params" else 0}
     (OUT/name).write_bytes(b)
   need(R["harnesses"]["result"]["before"]==R["harnesses"]["result"]["after"],"Result harness must remain unchanged")

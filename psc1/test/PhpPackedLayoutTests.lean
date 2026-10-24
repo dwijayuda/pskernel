@@ -58,8 +58,10 @@ private def requireOk (value : Except String α) : IO α :=
   | .ok result => pure result
 
 private def execute (path : String) (size : Nat) : IO String := do
-  let result <- IO.Process.output { cmd := "php",
-    args := #["-d", "memory_limit=1G", "dist/php-packed/consumer.php", path, toString size] }
+  let result <- IO.Process.output {
+    cmd := "php"
+    args := #["-d", "memory_limit=1G", "dist/php-packed/consumer.php", path, toString size]
+  }
   unless result.exitCode == 0 do throw (IO.userError ("PHP packed execution failed: " ++ result.stderr))
   pure result.stdout
 

@@ -46,6 +46,27 @@ def psRustIntrinsicBorrowsStringArgument
   | PsVerifiedIrIntrinsic.stringExtract => Nat.beq index 0
   | _ => false
 
+-- Nat positions and arithmetic inputs are also borrowed by the existing
+-- read-only runtime helpers. Keep computed operands as owned snapshots.
+def psRustIntrinsicBorrowsNatArgument
+    (operation : PsVerifiedIrIntrinsic) (index : Nat) : Bool :=
+  match operation with
+  | PsVerifiedIrIntrinsic.stringNext => Nat.beq index 1
+  | PsVerifiedIrIntrinsic.stringGet => Nat.beq index 1
+  | PsVerifiedIrIntrinsic.stringAtEnd => Nat.beq index 1
+  | PsVerifiedIrIntrinsic.stringExtract =>
+      Nat.ble 1 index && Nat.ble index 2
+  | PsVerifiedIrIntrinsic.natAdd => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natSub => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natMul => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natDiv => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natMod => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natEq => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natNe => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natLe => Nat.ble index 1
+  | PsVerifiedIrIntrinsic.natLt => Nat.ble index 1
+  | _ => false
+
 def psRustEmitIntrinsicArgumentsWith
     (emitExpr : PsVerifiedIrExpr -> Except PsRustEmitError String)
     (locals : List String) (operation : PsVerifiedIrIntrinsic)
@@ -64,7 +85,8 @@ def psRustEmitIntrinsicArgumentsWith
             let selected : String :=
               match expr with
               | PsVerifiedIrExpr.var name =>
-                  if psRustIntrinsicBorrowsStringArgument operation index &&
+                  if (psRustIntrinsicBorrowsStringArgument operation index ||
+                      psRustIntrinsicBorrowsNatArgument operation index) &&
                       psRustStringListContains locals name then
                     psRustIdentifier name
                   else psRustCloneExprPrinted expr printed

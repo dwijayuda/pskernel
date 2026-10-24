@@ -70,3 +70,56 @@ def psBackendSourceFlatMapAcc {A B : Type} (convert : A -> List B)
 
 def psBackendSourceFlatMap {A B : Type} (convert : A -> List B) (values : List A) : List B :=
   psBackendSourceFlatMapAcc convert values List.nil
+
+def psBackendSourceArgs1 {A Value : Type}
+    (action : A -> Value) (failure : Value)
+    (arguments : List A) : Value :=
+  match arguments with
+  | List.nil => failure
+  | List.cons arg0 rest0 =>
+    if psListIsEmpty rest0 then action arg0 else failure
+
+def psBackendSourceArgs2 {A Value : Type}
+    (action : A -> A -> Value) (failure : Value)
+    (arguments : List A) : Value :=
+  match arguments with
+  | List.nil => failure
+  | List.cons arg0 rest0 =>
+    match rest0 with
+    | List.nil => failure
+    | List.cons arg1 rest1 =>
+      if psListIsEmpty rest1 then action arg0 arg1 else failure
+
+def psBackendSourceArgs3 {A Value : Type}
+    (action : A -> A -> A -> Value) (failure : Value)
+    (arguments : List A) : Value :=
+  match arguments with
+  | List.nil => failure
+  | List.cons arg0 rest0 =>
+    match rest0 with
+    | List.nil => failure
+    | List.cons arg1 rest1 =>
+      match rest1 with
+      | List.nil => failure
+      | List.cons arg2 rest2 =>
+        if psListIsEmpty rest2 then action arg0 arg1 arg2 else failure
+
+def psBackendSourceArgs5 {A Value : Type}
+    (action : A -> A -> A -> A -> A -> Value) (failure : Value)
+    (arguments : List A) : Value :=
+  match arguments with
+  | List.nil => failure
+  | List.cons arg0 rest0 =>
+    match rest0 with
+    | List.nil => failure
+    | List.cons arg1 rest1 =>
+      match rest1 with
+      | List.nil => failure
+      | List.cons arg2 rest2 =>
+        match rest2 with
+        | List.nil => failure
+        | List.cons arg3 rest3 =>
+          match rest3 with
+          | List.nil => failure
+          | List.cons arg4 rest4 =>
+            if psListIsEmpty rest4 then action arg0 arg1 arg2 arg3 arg4 else failure

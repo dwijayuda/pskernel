@@ -124,7 +124,8 @@ def exprRequirements (valueNames : List String) (fuel : Nat) :
   | Nat.zero => fun (_bound : List String) (_expr : PsVerifiedIrExpr) => List.nil
   | Nat.succ remaining =>
       fun (bound : List String) (expr : PsVerifiedIrExpr) =>
-        let visit : PsVerifiedIrExpr -> List String := exprRequirements valueNames remaining bound;
+        let smaller : List String -> PsVerifiedIrExpr -> List String := exprRequirements valueNames remaining;
+        let visit : PsVerifiedIrExpr -> List String := smaller bound;
         match expr with
         | PsVerifiedIrExpr.literal value =>
             match value with
@@ -142,13 +143,13 @@ def exprRequirements (valueNames : List String) (fuel : Nat) :
               (psBackendSourceFlatMap (fun (parameter : PsVerifiedIrParameter) =>
                 typeRequirements remaining parameter.type) parameters)
               (psListAppend (typeRequirements remaining result)
-                (exprRequirements valueNames remaining
+                (smaller
                   (psListAppend (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) bound) body))
         | PsVerifiedIrExpr.call fn _ arguments =>
             List.cons "calls" (psListAppend (visit fn) (psBackendSourceFlatMap visit arguments))
         | PsVerifiedIrExpr.letE name type value body =>
             psListAppend (typeRequirements remaining type)
-              (psListAppend (visit value) (exprRequirements valueNames remaining (List.cons name bound) body))
+              (psListAppend (visit value) (smaller (List.cons name bound) body))
         | PsVerifiedIrExpr.ifE condition yes no =>
             psListAppend (visit condition) (psListAppend (visit yes) (visit no))
         | PsVerifiedIrExpr.record _ _ fields =>
@@ -160,7 +161,7 @@ def exprRequirements (valueNames : List String) (fuel : Nat) :
             psListAppend (visit target)
               (psBackendSourceFlatMap
                 (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
-                  exprRequirements valueNames remaining
+                  smaller
                     (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name)
                       alternative.snd.fst) bound) alternative.snd.snd) alternatives)
 
@@ -262,9 +263,11 @@ def callBind (name : String) (arity : Nat) (args : List String) : Emit String :=
   else psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
 
 def binary (args : List String) (symbol : String) : Emit String :=
-  match args with
-  | List.cons a (List.cons b List.nil) => bindValue (cat ["(", a, " ", symbol, " ", b, ")"])
-  | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  psBackendSourceArgs2
+    (fun (a b : String) =>
+      bindValue (cat ["(", a, " ", symbol, " ", b, ")"]))
+    (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+    args
 
 def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
     (args : List String) : Emit String :=
@@ -275,62 +278,90 @@ def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
   | PsVerifiedIrIntrinsic.intMul => callBind "gmp_mul" 2 args
   | PsVerifiedIrIntrinsic.intSub => callBind "gmp_sub" 2 args
   | PsVerifiedIrIntrinsic.natSub =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0 ? gmp_init(0) : gmp_sub(", a, ", ", b, "))"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0 ? gmp_init(0) : gmp_sub(", a, ", ", b, "))"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natDiv =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", b, ", 0) === 0 ? gmp_init(0) : gmp_div_q(", a, ", ", b, ", GMP_ROUND_ZERO))"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", b, ", 0) === 0 ? gmp_init(0) : gmp_div_q(", a, ", ", b, ", GMP_ROUND_ZERO))"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natMod =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", b, ", 0) === 0 ? ", a, " : gmp_mod(", a, ", ", b, "))"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", b, ", 0) === 0 ? ", a, " : gmp_mod(", a, ", ", b, "))"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natEq =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") === 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") === 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intEq =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") === 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") === 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natNe =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") !== 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") !== 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natLe =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") <= 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") <= 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intLe =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") <= 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") <= 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natLt =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intLt =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intOfNat =>
-      match args with
-      | List.cons a List.nil => psBackendStatePure a
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          psBackendStatePure a)
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intRepr =>
-      match args with
-      | List.cons a List.nil => bindValue (cat ["gmp_strval(", a, ", 10)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          bindValue (cat ["gmp_strval(", a, ", 10)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intNegSucc =>
-      match args with
-      | List.cons a List.nil => bindValue (cat ["gmp_neg(gmp_add(", a, ", 1))"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          bindValue (cat ["gmp_neg(gmp_add(", a, ", 1))"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intNeg => callBind "gmp_neg" 1 args
   | PsVerifiedIrIntrinsic.boolNot =>
-      match args with
-      | List.cons a List.nil => bindValue (cat ["(!", a, ")"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          bindValue (cat ["(!", a, ")"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.boolEq => binary args "==="
   | PsVerifiedIrIntrinsic.stringEq => binary args "==="
   | PsVerifiedIrIntrinsic.boolNe => binary args "!=="
@@ -339,44 +370,57 @@ def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
   | PsVerifiedIrIntrinsic.charOfNat => callBind "$__ps_charOfNat" 1 args
   | PsVerifiedIrIntrinsic.charToNat => callBind "$__ps_charToNat" 1 args
   | PsVerifiedIrIntrinsic.stringSingleton =>
-      match args with
-      | List.cons a List.nil => psBackendStatePure a
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          psBackendStatePure a)
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.stringPush => binary args "."
   | PsVerifiedIrIntrinsic.stringAppend => binary args "."
   | PsVerifiedIrIntrinsic.stringLength =>
-      match args with
-      | List.cons a List.nil => bindValue (cat ["gmp_init(count($__ps_unicodeChars(", a, ")))"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          bindValue (cat ["gmp_init(count($__ps_unicodeChars(", a, ")))"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.stringUtf8ByteSize =>
-      match args with
-      | List.cons a List.nil => bindValue (cat ["gmp_init(strlen(", a, "))"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          bindValue (cat ["gmp_init(strlen(", a, "))"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.stringGet => callBind "$__ps_stringGet" 2 args
   | PsVerifiedIrIntrinsic.stringNext => callBind "$__ps_stringNext" 2 args
   | PsVerifiedIrIntrinsic.stringExtract => callBind "$__ps_stringExtract" 3 args
   | PsVerifiedIrIntrinsic.stringAtEnd =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(gmp_cmp(", b, ", strlen(", a, ")) >= 0)"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(gmp_cmp(", b, ", strlen(", a, ")) >= 0)"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
-      match args with
-      | List.cons _value List.nil => bindValue "[]"
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (_value : String) =>
+          bindValue "[]")
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arraySize =>
-      match args with
-      | List.cons a List.nil => bindValue (cat ["gmp_init(count(", a, "))"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          bindValue (cat ["gmp_init(count(", a, "))"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arrayPush =>
-      match args with
-      | List.cons a (List.cons value List.nil) =>
+      psBackendSourceArgs2
+        (fun (a value : String) =>
           psBackendStateBind (bindValue a) (fun (result : String) =>
             psBackendStateBind (line (cat [result, "[] = ", value, ";"]))
-              (fun (_unit : Unit) => psBackendStatePure result))
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+              (fun (_unit : Unit) => psBackendStatePure result)))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arrayGet =>
-      match args with
-      | List.cons a (List.cons index List.nil) =>
+      psBackendSourceArgs2
+        (fun (a index : String) =>
           fun (state : EmitState) => do
             let _psc_step_4 <- line (cat ["if (gmp_cmp(", index, ", 0) < 0 || gmp_cmp(", index, ", count(", a, ")) >= 0) {"]) state
             let state := _psc_step_4.snd
@@ -388,16 +432,18 @@ def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
             let state := _psc_step_7.snd
             let _psc_step_8 <- line "}" state
             let state := _psc_step_8.snd
-            bindValue (cat [a, "[gmp_intval(", index, ")]"]) state
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+            bindValue (cat [a, "[gmp_intval(", index, ")]"]) state)
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arrayGetD =>
-      match args with
-      | List.cons a (List.cons index (List.cons fallback List.nil)) =>
-          bindValue (cat ["(gmp_cmp(", index, ", 0) >= 0 && gmp_cmp(", index, ", count(", a, ")) < 0 ? ", a, "[gmp_intval(", index, ")] : ", fallback, ")"])
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+      psBackendSourceArgs3
+        (fun (a index fallback : String) =>
+          bindValue (cat ["(gmp_cmp(", index, ", 0) >= 0 && gmp_cmp(", index, ", count(", a, ")) < 0 ? ", a, "[gmp_intval(", index, ")] : ", fallback, ")"]))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arraySet =>
-      match args with
-      | List.cons a (List.cons index (List.cons value List.nil)) =>
+      psBackendSourceArgs3
+        (fun (a index value : String) =>
           fun (state : EmitState) => do
             let _psc_step_9 <- bindValue a state
             let result := _psc_step_9.fst
@@ -420,11 +466,12 @@ def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
             let state := _psc_step_17.snd
             let _psc_step_18 <- line "}" state
             let state := _psc_step_18.snd
-            Except.ok (Prod.mk result state)
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+            Except.ok (Prod.mk result state))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arraySetIfInBounds =>
-      match args with
-      | List.cons a (List.cons index (List.cons value List.nil)) =>
+      psBackendSourceArgs3
+        (fun (a index value : String) =>
           fun (state : EmitState) => do
             let _psc_step_19 <- bindValue a state
             let result := _psc_step_19.fst
@@ -439,11 +486,12 @@ def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
             let state := _psc_step_23.snd
             let _psc_step_24 <- line "}" state
             let state := _psc_step_24.snd
-            Except.ok (Prod.mk result state)
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+            Except.ok (Prod.mk result state))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arrayMap =>
-      match args with
-      | List.cons fn (List.cons array List.nil) =>
+      psBackendSourceArgs2
+        (fun (fn array : String) =>
           fun (state : EmitState) => do
             let _psc_step_25 <- bindValue "[]" state
             let result := _psc_step_25.fst
@@ -461,11 +509,12 @@ def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
             let state := _psc_step_30.snd
             let _psc_step_31 <- line "}" state
             let state := _psc_step_31.snd
-            Except.ok (Prod.mk result state)
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+            Except.ok (Prod.mk result state))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arrayFoldl =>
-      match args with
-      | List.cons fn (List.cons initial (List.cons array (List.cons start (List.cons stop List.nil)))) =>
+      psBackendSourceArgs5
+        (fun (fn initial array start stop : String) =>
           fun (state : EmitState) => do
             let _psc_step_32 <- bindValue initial state
             let result := _psc_step_32.fst
@@ -487,8 +536,9 @@ def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
             let state := _psc_step_38.snd
             let _psc_step_39 <- line "}" state
             let state := _psc_step_39.snd
-            Except.ok (Prod.mk result state)
-      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+            Except.ok (Prod.mk result state))
+        (psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+        args
   | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
 
 structure ParameterInfo where
@@ -503,8 +553,8 @@ def emitParameter (parameter : PsVerifiedIrParameter) : Emit ParameterInfo :=
       psBackendStatePure (ParameterInfo.mk parameter.name name text parameter.type)))
 
 def emitBindings (target : String) (bindings : List PsVerifiedIrMatchBinding)
-    (locals : List (Prod String String)) : Emit (List (Prod String String)) :=
-  fun (state : EmitState) =>
+    (locals : List (Prod String String))
+    (state : EmitState) : Except String (Prod (List (Prod String String)) EmitState) :=
     match bindings with
     | List.nil => Except.ok (Prod.mk locals state)
     | List.cons binding rest => do
@@ -520,8 +570,7 @@ def emitAlternatives
     (body : Context -> PsVerifiedIrExpr -> Emit Unit)
     (context : Context) (target : String)
     (alternatives : List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)))
-    (first : Bool) : Emit Unit :=
-  fun (state : EmitState) =>
+    (first : Bool) (state : EmitState) : Except String (Prod Unit EmitState) :=
     match alternatives with
     | List.nil =>
         if first then line "throw new \\UnexpectedValueException('PSC1_PHP_EMPTY_MATCH');" state
@@ -561,7 +610,8 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
         psBackendStateThrow "PSC1_PHP_LOWERING_BUDGET"
   | Nat.succ remaining =>
       fun (context : Context) (expr : PsVerifiedIrExpr) (state : EmitState) =>
-        let emit : PsVerifiedIrExpr -> Emit String := expression remaining context;
+        let smaller : Context -> PsVerifiedIrExpr -> Emit String := expression remaining;
+        let emit : PsVerifiedIrExpr -> Emit String := smaller context;
         match expr with
         | PsVerifiedIrExpr.literal value =>
             match value with
@@ -585,17 +635,25 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
                     if psBackendNameSeen name context.valueNames then
                       bindValue (invoke context entry.snd List.nil) state
                     else Except.ok (Prod.mk entry.snd state)
-        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolAnd _ (List.cons left (List.cons right List.nil)) =>
-            expression remaining context
-              (PsVerifiedIrExpr.ifE left right (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))) state
-        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolOr _ (List.cons left (List.cons right List.nil)) =>
-            expression remaining context
-              (PsVerifiedIrExpr.ifE left (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)) right) state
-        | PsVerifiedIrExpr.intrinsic operation _ arguments => do
-            let _psc_step_51 <- psBackendSourceMapState emit arguments state
-            let printed := _psc_step_51.fst
-            let state := _psc_step_51.snd
-            intrinsic context operation printed state
+        | PsVerifiedIrExpr.intrinsic operation _ arguments =>
+            let fallback : Emit String :=
+              fun (input : EmitState) => do
+                let pair <- psBackendSourceMapState emit arguments input
+                intrinsic context operation pair.fst pair.snd;
+            let action : Emit String :=
+              match operation with
+              | PsVerifiedIrIntrinsic.boolAnd =>
+                  psBackendSourceArgs2 (fun (left right : PsVerifiedIrExpr) =>
+                    smaller context
+                      (PsVerifiedIrExpr.ifE left right (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))))
+                    fallback arguments
+              | PsVerifiedIrIntrinsic.boolOr =>
+                  psBackendSourceArgs2 (fun (left right : PsVerifiedIrExpr) =>
+                    smaller context
+                      (PsVerifiedIrExpr.ifE left (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)) right))
+                    fallback arguments
+              | _ => fallback;
+            action state
         | PsVerifiedIrExpr.call fn _ arguments => do
             let _psc_step_52 <- emit fn state
             let value := _psc_step_52.fst
@@ -617,7 +675,7 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
             let state := _psc_step_56.snd
             let _psc_step_57 <- line (cat [localName, " = ", printed, ";"]) state
             let state := _psc_step_57.snd
-            expression remaining (withLocals context (List.cons (Prod.mk name localName) context.locals)) body state
+            smaller (withLocals context (List.cons (Prod.mk name localName) context.locals)) body state
         | PsVerifiedIrExpr.ifE condition yes no => do
             let _psc_step_58 <- emit condition state
             let printedCondition := _psc_step_58.fst
@@ -678,7 +736,7 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
             let state := _psc_step_77.snd
             let locals : List (Prod String String) :=
               psListMap (fun (parameter : ParameterInfo) => Prod.mk parameter.sourceName parameter.localName) printedParameters
-            let _psc_step_78 <- expression remaining
+            let _psc_step_78 <- smaller
               (withLocals context (psListAppend locals context.locals)) body state
             let value := _psc_step_78.fst
             let state := _psc_step_78.snd
@@ -713,7 +771,7 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
             let state := _psc_step_86.snd
             let body : Context -> PsVerifiedIrExpr -> Emit Unit :=
               fun (inner : Context) (branch : PsVerifiedIrExpr) =>
-                psBackendStateBind (expression remaining inner branch) (fun (value : String) =>
+                psBackendStateBind (smaller inner branch) (fun (value : String) =>
                   line (cat [result, " = ", value, ";"]))
             let _psc_step_87 <- emitAlternatives body context target alternatives true state
             let state := _psc_step_87.snd
@@ -722,11 +780,14 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
 def directSelfCall (declaration : PsVerifiedIrDeclaration) (bound : List String)
     (expr : PsVerifiedIrExpr) : Option (List PsVerifiedIrExpr) :=
   match expr with
-  | PsVerifiedIrExpr.call (PsVerifiedIrExpr.var name) _ arguments =>
-      if !psListIsEmpty declaration.parameters && psStringEq name declaration.name &&
-          !psBackendNameSeen name bound &&
-          Nat.beq (psListLength arguments) (psListLength declaration.parameters) then
-        Option.some arguments else Option.none
+  | PsVerifiedIrExpr.call fn _ arguments =>
+      match fn with
+      | PsVerifiedIrExpr.var name =>
+          if !psListIsEmpty declaration.parameters && psStringEq name declaration.name &&
+              !psBackendNameSeen name bound &&
+              Nat.beq (psListLength arguments) (psListLength declaration.parameters) then
+            Option.some arguments else Option.none
+      | _ => Option.none
   | _ => Option.none
 
 def hasDirectSelfTail (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
@@ -735,19 +796,20 @@ def hasDirectSelfTail (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
   | Nat.zero => fun (_bound : List String) (_expr : PsVerifiedIrExpr) => false
   | Nat.succ remaining =>
       fun (bound : List String) (expr : PsVerifiedIrExpr) =>
+        let smaller : List String -> PsVerifiedIrExpr -> Bool := hasDirectSelfTail declaration remaining;
         match directSelfCall declaration bound expr with
         | Option.some _ => true
         | Option.none =>
             match expr with
             | PsVerifiedIrExpr.letE name _ _ body =>
-                hasDirectSelfTail declaration remaining (List.cons name bound) body
+                smaller (List.cons name bound) body
             | PsVerifiedIrExpr.ifE _ yes no =>
-                hasDirectSelfTail declaration remaining bound yes ||
-                  hasDirectSelfTail declaration remaining bound no
+                smaller bound yes ||
+                  smaller bound no
             | PsVerifiedIrExpr.matchE _ _ _ alternatives =>
                 psListAny
                   (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
-                    hasDirectSelfTail declaration remaining
+                    smaller
                       (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) =>
                         binding.name) alternative.snd.fst) bound) alternative.snd.snd) alternatives
             | _ => false
@@ -763,6 +825,7 @@ def directSelfTail (declaration : PsVerifiedIrDeclaration) (parameters : List St
         psBackendStateThrow "PSC1_PHP_LOWERING_BUDGET"
   | Nat.succ remaining =>
       fun (context : Context) (expr : PsVerifiedIrExpr) (state : EmitState) =>
+        let smaller : Context -> PsVerifiedIrExpr -> Emit Unit := directSelfTail declaration parameters remaining;
         let emit : PsVerifiedIrExpr -> Emit String := expression remaining context;
         match directSelfCall declaration
             (psListMap (fun (entry : Prod String String) => entry.fst) context.locals) expr with
@@ -787,7 +850,7 @@ def directSelfTail (declaration : PsVerifiedIrDeclaration) (parameters : List St
                 let state := _psc_step_91.snd
                 let _psc_step_92 <- line (cat [localName, " = ", printed, ";"]) state
                 let state := _psc_step_92.snd
-                directSelfTail declaration parameters remaining
+                smaller
                   (withLocals context (List.cons (Prod.mk name localName) context.locals)) body state
             | PsVerifiedIrExpr.ifE condition yes no => do
                 let _psc_step_93 <- emit condition state
@@ -797,7 +860,7 @@ def directSelfTail (declaration : PsVerifiedIrDeclaration) (parameters : List St
                 let state := _psc_step_94.snd
                 let _psc_step_95 <- indent true state
                 let state := _psc_step_95.snd
-                let _psc_step_96 <- directSelfTail declaration parameters remaining context yes state
+                let _psc_step_96 <- smaller context yes state
                 let state := _psc_step_96.snd
                 let _psc_step_97 <- indent false state
                 let state := _psc_step_97.snd
@@ -805,7 +868,7 @@ def directSelfTail (declaration : PsVerifiedIrDeclaration) (parameters : List St
                 let state := _psc_step_98.snd
                 let _psc_step_99 <- indent true state
                 let state := _psc_step_99.snd
-                let _psc_step_100 <- directSelfTail declaration parameters remaining context no state
+                let _psc_step_100 <- smaller context no state
                 let state := _psc_step_100.snd
                 let _psc_step_101 <- indent false state
                 let state := _psc_step_101.snd
@@ -814,7 +877,7 @@ def directSelfTail (declaration : PsVerifiedIrDeclaration) (parameters : List St
                 let _psc_step_102 <- emit scrutinee state
                 let target := _psc_step_102.fst
                 let state := _psc_step_102.snd
-                emitAlternatives (directSelfTail declaration parameters remaining) context target alternatives true state
+                emitAlternatives smaller context target alternatives true state
             | _ => do
                 let _psc_step_103 <- emit expr state
                 let value := _psc_step_103.fst

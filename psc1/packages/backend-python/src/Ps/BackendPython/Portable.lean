@@ -111,7 +111,9 @@ def hexDigits (fuel : Nat) : Nat -> String -> String :=
   | Nat.succ remaining =>
       fun (value : Nat) (acc : String) =>
         if Nat.beq value 0 then acc
-        else hexDigits remaining (Nat.div value 16)
+        else
+          let smaller : Nat -> String -> String := hexDigits remaining;
+          smaller (Nat.div value 16)
           (cat [psJsonHexDigit (Nat.mod value 16), acc])
 
 def naturalLiteral (value : Nat) : String :=
@@ -212,14 +214,18 @@ def emitHelper (id name : String) (args : List String) : Emit String :=
     bindValue (cat [name, "(", psTextJoin ", " args, ")"]))
 
 def binary (args : List String) (symbol : String) : Emit String :=
-  match args with
-  | List.cons a (List.cons b List.nil) => bindValue (cat ["(", a, " ", symbol, " ", b, ")"])
-  | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+  psBackendSourceArgs2
+    (fun (a b : String) =>
+      bindValue (cat ["(", a, " ", symbol, " ", b, ")"]))
+    (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+    args
 
 def unary (args : List String) (before after : String) : Emit String :=
-  match args with
-  | List.cons a List.nil => bindValue (cat [before, a, after])
-  | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+  psBackendSourceArgs1
+    (fun (a : String) =>
+      bindValue (cat [before, a, after]))
+    (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+    args
 
 def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
     (tail : Bool) : Emit String :=
@@ -242,25 +248,35 @@ def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
   | PsVerifiedIrIntrinsic.natLt => binary args "<"
   | PsVerifiedIrIntrinsic.intLt => binary args "<"
   | PsVerifiedIrIntrinsic.natSub =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(", a, " - ", b, " if ", a, " >= ", b, " else 0)"])
-      | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(", a, " - ", b, " if ", a, " >= ", b, " else 0)"]))
+        (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natDiv =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(0 if ", b, " == 0 else ", a, " // ", b, ")"])
-      | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(0 if ", b, " == 0 else ", a, " // ", b, ")"]))
+        (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+        args
   | PsVerifiedIrIntrinsic.natMod =>
-      match args with
-      | List.cons a (List.cons b List.nil) => bindValue (cat ["(", a, " if ", b, " == 0 else ", a, " % ", b, ")"])
-      | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+      psBackendSourceArgs2
+        (fun (a b : String) =>
+          bindValue (cat ["(", a, " if ", b, " == 0 else ", a, " % ", b, ")"]))
+        (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intOfNat =>
-      match args with
-      | List.cons a List.nil => psBackendStatePure a
-      | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          psBackendStatePure a)
+        (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+        args
   | PsVerifiedIrIntrinsic.stringSingleton =>
-      match args with
-      | List.cons a List.nil => psBackendStatePure a
-      | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+      psBackendSourceArgs1
+        (fun (a : String) =>
+          psBackendStatePure a)
+        (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+        args
   | PsVerifiedIrIntrinsic.intNeg => unary args "(-" ")"
   | PsVerifiedIrIntrinsic.intNegSucc => unary args "(-(" " + 1))"
   | PsVerifiedIrIntrinsic.intRepr => emitHelper "int-repr" "_psc_int_repr" args
@@ -281,14 +297,18 @@ def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
   | PsVerifiedIrIntrinsic.stringExtract => emitHelper "string-extract" "_psc_string_extract" args
   | PsVerifiedIrIntrinsic.stringAtEnd =>
       psBackendStateBind (helper "builtins") (fun (_unit : Unit) =>
-        match args with
-        | List.cons source (List.cons position List.nil) => bindValue (cat ["(", position, " >= _psc_b.len(", source, ".encode(\"utf-8\")))"])
-        | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+        psBackendSourceArgs2
+          (fun (source position : String) =>
+            bindValue (cat ["(", position, " >= _psc_b.len(", source, ".encode(\"utf-8\")))"]))
+          (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"))
+          args
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => bindValue "()"
   | PsVerifiedIrIntrinsic.arrayPush =>
-      match args with
-      | List.cons array (List.cons value List.nil) => bindValue (cat [array, " + (", value, ",)"])
-      | _ => psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"
+      psBackendSourceArgs2
+        (fun (array value : String) =>
+          bindValue (cat [array, " + (", value, ",)"]))
+        (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+        args
   | PsVerifiedIrIntrinsic.arrayGet => emitHelper "array-get" "_psc_array_get" args
   | PsVerifiedIrIntrinsic.arrayGetD => emitHelper "array-get-d" "_psc_array_get_d" args
   | PsVerifiedIrIntrinsic.arraySet => emitHelper "array-set" "_psc_array_set" args
@@ -390,6 +410,68 @@ def firstAlternative (alternatives : List (Prod String (Prod (List PsVerifiedIrM
   | List.nil => Option.none
   | List.cons alternative _ => Option.some alternative.fst
 
+
+def emitBoolAnd (emit : PsVerifiedIrExpr -> Bool -> Emit String)
+    (a b : PsVerifiedIrExpr) (tail : Bool) : Emit String :=
+  fun (state : EmitState) => do
+    let _psc_step_0 <- emit a false state
+    let left := _psc_step_0.fst
+    let state := _psc_step_0.snd
+    let _psc_step_1 <- fresh "and" state
+    let result := _psc_step_1.fst
+    let state := _psc_step_1.snd
+    let _psc_step_2 <- line (cat ["if ", left, ":"]) state
+    let state := _psc_step_2.snd
+    let _psc_step_3 <- withIndent (assignExpression emit b tail result) state
+    let state := _psc_step_3.snd
+    let _psc_step_4 <- line "else:" state
+    let state := _psc_step_4.snd
+    let _psc_step_5 <- withIndent (line (cat [result, " = False"])) state
+    let state := _psc_step_5.snd
+    Except.ok (Prod.mk result state)
+
+def emitBoolOr (emit : PsVerifiedIrExpr -> Bool -> Emit String)
+    (a b : PsVerifiedIrExpr) (tail : Bool) : Emit String :=
+  fun (state : EmitState) => do
+    let _psc_step_6 <- emit a false state
+    let left := _psc_step_6.fst
+    let state := _psc_step_6.snd
+    let _psc_step_7 <- fresh "or" state
+    let result := _psc_step_7.fst
+    let state := _psc_step_7.snd
+    let _psc_step_8 <- line (cat ["if ", left, ":"]) state
+    let state := _psc_step_8.snd
+    let _psc_step_9 <- withIndent (line (cat [result, " = True"])) state
+    let state := _psc_step_9.snd
+    let _psc_step_10 <- line "else:" state
+    let state := _psc_step_10.snd
+    let _psc_step_11 <- withIndent (assignExpression emit b tail result) state
+    let state := _psc_step_11.snd
+    Except.ok (Prod.mk result state)
+
+def emitRegularIntrinsic (emit : PsVerifiedIrExpr -> Bool -> Emit String)
+    (operation : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) (tail : Bool) : Emit String :=
+  fun (state : EmitState) => do
+    let _psc_step_12 <- checkTypes types state
+    let state := _psc_step_12.snd
+    let _psc_step_13 <- psBackendSourceMapState
+      (fun (argument : PsVerifiedIrExpr) => emit argument false) arguments state
+    let values := _psc_step_13.fst
+    let state := _psc_step_13.snd
+    emitIntrinsic operation values tail state
+
+def emitIntrinsicExpression (emit : PsVerifiedIrExpr -> Bool -> Emit String)
+    (operation : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) (tail : Bool) : Emit String :=
+  let fallback : Emit String := emitRegularIntrinsic emit operation types arguments tail;
+  match operation with
+  | PsVerifiedIrIntrinsic.boolAnd =>
+      psBackendSourceArgs2 (fun (a b : PsVerifiedIrExpr) => emitBoolAnd emit a b tail) fallback arguments
+  | PsVerifiedIrIntrinsic.boolOr =>
+      psBackendSourceArgs2 (fun (a b : PsVerifiedIrExpr) => emitBoolOr emit a b tail) fallback arguments
+  | _ => fallback
+
 def expression (fuel : Nat) :
     PsVerifiedIrModule -> Scope -> PsVerifiedIrExpr -> Bool -> Emit String :=
   match fuel with
@@ -399,7 +481,8 @@ def expression (fuel : Nat) :
   | Nat.succ remaining =>
       fun (module : PsVerifiedIrModule) (scope : Scope) (expr : PsVerifiedIrExpr)
           (tail : Bool) (state : EmitState) =>
-        let emit : PsVerifiedIrExpr -> Bool -> Emit String := expression remaining module scope;
+        let smaller : PsVerifiedIrModule -> Scope -> PsVerifiedIrExpr -> Bool -> Emit String := expression remaining;
+        let emit : PsVerifiedIrExpr -> Bool -> Emit String := smaller module scope;
         match expr with
         | PsVerifiedIrExpr.literal value => do
             let text <- literal value
@@ -413,46 +496,8 @@ def expression (fuel : Nat) :
                     psStringEq declaration.name name && psListIsEmpty declaration.parameters) module.declarations then
                   emitCall (valueName name) List.nil tail state
                 else Except.ok (Prod.mk (globalName name) state)
-        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolAnd _ (List.cons a (List.cons b List.nil)) => do
-            let _psc_step_0 <- emit a false state
-            let left := _psc_step_0.fst
-            let state := _psc_step_0.snd
-            let _psc_step_1 <- fresh "and" state
-            let result := _psc_step_1.fst
-            let state := _psc_step_1.snd
-            let _psc_step_2 <- line (cat ["if ", left, ":"]) state
-            let state := _psc_step_2.snd
-            let _psc_step_3 <- withIndent (assignExpression emit b tail result) state
-            let state := _psc_step_3.snd
-            let _psc_step_4 <- line "else:" state
-            let state := _psc_step_4.snd
-            let _psc_step_5 <- withIndent (line (cat [result, " = False"])) state
-            let state := _psc_step_5.snd
-            Except.ok (Prod.mk result state)
-        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolOr _ (List.cons a (List.cons b List.nil)) => do
-            let _psc_step_6 <- emit a false state
-            let left := _psc_step_6.fst
-            let state := _psc_step_6.snd
-            let _psc_step_7 <- fresh "or" state
-            let result := _psc_step_7.fst
-            let state := _psc_step_7.snd
-            let _psc_step_8 <- line (cat ["if ", left, ":"]) state
-            let state := _psc_step_8.snd
-            let _psc_step_9 <- withIndent (line (cat [result, " = True"])) state
-            let state := _psc_step_9.snd
-            let _psc_step_10 <- line "else:" state
-            let state := _psc_step_10.snd
-            let _psc_step_11 <- withIndent (assignExpression emit b tail result) state
-            let state := _psc_step_11.snd
-            Except.ok (Prod.mk result state)
-        | PsVerifiedIrExpr.intrinsic operation types arguments => do
-            let _psc_step_12 <- checkTypes types state
-            let state := _psc_step_12.snd
-            let _psc_step_13 <- psBackendSourceMapState
-              (fun (argument : PsVerifiedIrExpr) => emit argument false) arguments state
-            let values := _psc_step_13.fst
-            let state := _psc_step_13.snd
-            emitIntrinsic operation values tail state
+        | PsVerifiedIrExpr.intrinsic operation types arguments =>
+            emitIntrinsicExpression emit operation types arguments tail state
         | PsVerifiedIrExpr.lambda parameters resultType body => do
             checkType 256 resultType
             let _psc_step_14 <- fresh "closure" state
@@ -466,7 +511,7 @@ def expression (fuel : Nat) :
             let _psc_step_16 <- line (cat ["def ", name, "(", psTextJoin ", " names, "):"]) state
             let state := _psc_step_16.snd
             let action : Emit Unit :=
-              psBackendStateBind (expression remaining module inner body true)
+              psBackendStateBind (smaller module inner body true)
                 (fun (result : String) => line (cat ["return ", result]))
             let _psc_step_17 <- withIndent action state
             let state := _psc_step_17.snd
@@ -495,7 +540,7 @@ def expression (fuel : Nat) :
             let state := _psc_step_23.snd
             let _psc_step_24 <- line (cat [localName, " = ", value]) state
             let state := _psc_step_24.snd
-            expression remaining module (List.cons (Prod.mk name localName) scope) body tail state
+            smaller module (List.cons (Prod.mk name localName) scope) body tail state
         | PsVerifiedIrExpr.ifE condition yes no => do
             let _psc_step_25 <- emit condition false state
             let condition := _psc_step_25.fst
@@ -549,7 +594,7 @@ def expression (fuel : Nat) :
             let result := _psc_step_39.fst
             let state := _psc_step_39.snd
             let emitWithScope : Scope -> PsVerifiedIrExpr -> Bool -> Emit String :=
-              expression remaining module
+              smaller module
             let _psc_step_40 <- psBackendSourceForState
               (emitAlternative emitWithScope module scope owner scrutinee result (firstAlternative alternatives) tail)
               alternatives state
@@ -642,9 +687,8 @@ def emitPublicFunction (name : String)
     line (cat ["return ", call]) state
 
 def emitPublics (module : PsVerifiedIrModule) (ioAbi calls : Bool)
-    (names : List String) (seen : List String) (stubsRev : List String) :
-    Emit (List String) :=
-  fun (state : EmitState) =>
+    (names : List String) (seen : List String) (stubsRev : List String)
+    (state : EmitState) : Except String (Prod (List String) EmitState) :=
     match names with
     | List.nil => Except.ok (Prod.mk (psListReverse stubsRev) state)
     | List.cons name rest => do

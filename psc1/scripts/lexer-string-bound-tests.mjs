@@ -7,7 +7,7 @@ import {validateClosureCounts} from './compiler-closure-contract.mjs';
 const out=path.resolve('dist/lexer-string-bound');fs.mkdirSync(out,{recursive:true});
 const old=fs.readFileSync('test/fixtures/LexerBeforeStringBound.lean.txt','utf8');
 const probe=fs.readFileSync('test/fixtures/LexerStringBoundProbe.lean.txt','utf8');
-const ordered=readOwnedCompilerSources('Ps.Syntax.Lexer');
+const ordered=[...new Map([...readOwnedCompilerSources('Ps.Syntax.Lexer'),...readOwnedCompilerSources('Ps.Foundation.Name')].map(r=>[r.module,r])).values()];
 const inputs=readOwnedCompilerSources('Ps.CompilerUnified.Service').filter(r=>[
  'Ps.Syntax.Lexer','Ps.Bridge.CheckedAdmissions','Ps.BackendRust.Runtime','Ps.BackendRust.Expr',
  'Ps.BackendWasm.EncodeExpr','Ps.CompilerUnified.Service'].includes(r.module));
@@ -44,6 +44,6 @@ for(const kind of ['legacy','current']){
  records.push({kind,sourceClosureDigest:digest,admissionSha256:admitted.admissionsDigest,checkerCommit:admitted.checkerCommit,artifactSha256:artifact.sha256,seedEvent:seed.event,observations});
 }
 assert.deepEqual(records[0].observations.map(r=>[r.module,r.inputSha256,r.value]),records[1].observations.map(r=>[r.module,r.inputSha256,r.value]));
-const q={schema:'psc1-lexer-string-bound-stage/1',testedCommit:process.env.GITHUB_SHA,status:'passed',allInputProof:'LexerStringBoundTests.exact_original',oldLexerSha256:sha(old),currentLexerSha256:sha(ordered.at(-1).text),records,qualification:false,scope:'Rust generated lexer stage on real compiler source files and malformed literals; not whole G2 or a fixed point'};
+const q={schema:'psc1-lexer-string-bound-stage/1',testedCommit:process.env.GITHUB_SHA,status:'passed',allInputProof:'LexerStringBoundTests.exact_original',oldLexerSha256:sha(old),currentLexerSha256:sha(ordered.find(r=>r.module==='Ps.Syntax.Lexer').text),records,qualification:false,scope:'Rust generated lexer stage on real compiler source files and malformed literals; not whole G2 or a fixed point'};
 fs.writeFileSync(path.join(out,'qualification.json'),JSON.stringify(q,null,2)+'\n');
 console.log('PSC1_LEXER_STRING_BOUND_STAGE: '+JSON.stringify(q));

@@ -1,4 +1,5 @@
 import Ps.Syntax.Lexer
+import Ps.Foundation.Name
 
 def psCompilerServiceCandidate (source : String) : String :=
   match psLex source with

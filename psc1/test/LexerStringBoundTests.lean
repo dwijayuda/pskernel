@@ -6,7 +6,7 @@ namespace LexerStringBoundTests
 theorem length_acc {α : Type} (xs : List α) (acc : Nat) :
     psLexListLengthAcc xs acc = xs.length + acc := by
   induction xs generalizing acc with
-  | nil => rfl
+  | nil => simp [psLexListLengthAcc]
   | cons head tail ih =>
       simp only [psLexListLengthAcc, List.length_cons]
       rw [ih]
@@ -55,7 +55,8 @@ theorem exact_original (remaining : List Char) (position start : PsSourcePos)
   symm
   apply sufficient_fuel
   rw [length_eq]
-  omega
+  change remaining.length < Nat.succ remaining.length
+  exact Nat.lt_succ_self remaining.length
 
 end LexerStringBoundTests
 

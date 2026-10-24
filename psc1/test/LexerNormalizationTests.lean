@@ -1,18 +1,29 @@
 import Ps.Syntax.Lexer
 
 namespace PsLexerNormalizationReference
+private theorem reverse_acc_standard {alpha : Type} (values acc : List alpha) :
+    psListReverseAcc values acc = values.reverse ++ acc := by
+  induction values generalizing acc with
+  | nil => rfl
+  | cons head tail ih =>
+      simp [psListReverseAcc, ih, List.reverse_cons, List.append_assoc]
+
+private theorem reverse_standard {alpha : Type} (values : List alpha) :
+    psListReverse values = values.reverse := by
+  simp [psListReverse, reverse_acc_standard]
+
+theorem append_standard {alpha : Type} (left right : List alpha) :
+    psListAppend left right = left ++ right := by
+  simp [psListAppend, reverse_acc_standard, reverse_standard]
+
 theorem append_nil {alpha : Type} (values : List alpha) :
     psListAppend values [] = values := by
-  induction values with
-  | nil => rfl
-  | cons head tail ih => simp only [psListAppend, ih]
+  simp only [append_standard, List.append_nil]
 
 theorem append_assoc {alpha : Type} (left middle right : List alpha) :
     psListAppend (psListAppend left middle) right =
       psListAppend left (psListAppend middle right) := by
-  induction left with
-  | nil => rfl
-  | cons head tail ih => simp only [psListAppend, ih]
+  simp only [append_standard, List.append_assoc]
 
 theorem reverse_acc_append {alpha : Type} (values acc : List alpha) :
     psListReverseAcc values acc =
@@ -153,7 +164,8 @@ theorem lean_acc_eq (inputBound fuel : Nat) (cursor : PsLexCursor) (reversed : L
                 | error error => simp only [result, withPrefix]
                 | ok rest =>
                     simp only [result, withPrefix, PsLexerNormalizationReference.reverse_cons,
-                      PsLexerNormalizationReference.append_assoc, psListAppend]
+                      PsLexerNormalizationReference.append_standard, List.append_assoc,
+                      List.cons_append, List.nil_append]
 
 theorem lean_normalized_eq (inputBound fuel : Nat) (cursor : PsLexCursor) :
     psLexAllWorker inputBound fuel cursor = legacyLean inputBound fuel cursor := by
@@ -184,7 +196,8 @@ theorem proofscript_acc_eq (inputBound fuel : Nat) (cursor : PsLexCursor) (rever
                 | error error => simp only [result, withPrefix]
                 | ok rest =>
                     simp only [result, withPrefix, PsLexerNormalizationReference.reverse_cons,
-                      PsLexerNormalizationReference.append_assoc, psListAppend]
+                      PsLexerNormalizationReference.append_standard, List.append_assoc,
+                      List.cons_append, List.nil_append]
 
 theorem proofscript_normalized_eq (inputBound fuel : Nat) (cursor : PsLexCursor) :
     psLexAllProofScriptWorker inputBound fuel cursor = legacyProofScript inputBound fuel cursor := by

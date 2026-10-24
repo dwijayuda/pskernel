@@ -5,6 +5,7 @@ on:
     paths:
       - psc1/packages/syntax/src/Ps/Syntax/Lexer.lean
       - psc1/test/LexerStringBoundTests.lean
+      - psc1/test/LexerNormalizationTests.lean
       - psc1/scripts/lexer-string-bound-tests.mjs
       - .github/workflows/psc1-lexer-string-bound.yml
 permissions:
@@ -41,8 +42,6 @@ jobs:
           npm ci --prefix .. --ignore-scripts --include=optional
           rustup toolchain install 1.90.0 --profile minimal
           rustup default 1.90.0
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq gdb
           mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools"
           curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
           echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -

@@ -1,5 +1,6 @@
 import Ps.CompilerIr.Model
 import Ps.BackendCommon.Source
+import Ps.BackendCommon.Plan
 import Ps.Foundation.StringSet
 
 -- Conservative, finite call layers. Hash membership always checks full names.

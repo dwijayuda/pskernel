@@ -467,16 +467,13 @@ def psLexReadStringBodyWithFuel
 -- The remembered escape position preserves the exact dangling-slash error span.
 -- The explicit-fuel API above is unchanged.
 def psLexReadStringBodyStructural
-    (remaining : List Char) :
-    Option PsSourcePos ->
-    PsSourcePos ->
-    PsSourcePos ->
-    List Char ->
-    Except PsLexError PsLexRead :=
+    (remaining : List Char)
+    (escape : Option PsSourcePos)
+    (position : PsSourcePos)
+    (start : PsSourcePos)
+    (charsRev : List Char) : Except PsLexError PsLexRead :=
   match remaining with
   | List.nil =>
-      fun (escape : Option PsSourcePos) (position : PsSourcePos)
-          (start : PsSourcePos) (_charsRev : List Char) =>
         match escape with
         | Option.none =>
             Except.error
@@ -485,8 +482,6 @@ def psLexReadStringBodyStructural
             Except.error
               (PsLexError.unterminatedString (psLexSpan start beforeSlash))
   | List.cons char rest =>
-      fun (escape : Option PsSourcePos) (position : PsSourcePos)
-          (start : PsSourcePos) (charsRev : List Char) =>
         match escape with
         | Option.some _ =>
             psLexReadStringBodyStructural

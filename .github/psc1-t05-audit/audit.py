@@ -2,7 +2,7 @@
 """Read-only T05 cohort artifact audit, executed only on a GitHub Linux runner.
 
 This verifies archived evidence and exact Git inputs. It does not compile or run
-the compiler/kernel, replace qualification, or establish full T05 admission.
+the compiler/kernel, supply missing qualification, or certify full-kernel completion.
 """
 import ast
 import hashlib
@@ -75,11 +75,12 @@ SHA = CONFIG["sourceSha"]
 RUN = CONFIG["runId"]
 ATTEMPT = CONFIG["runAttempt"]
 PROFILE = CONFIG.get("profile", "helpers")
-FIELDS = PROFILE in ("fields", "analysis", "loop")
-ANALYSIS = PROFILE in ("analysis", "loop")
-LOOP = PROFILE == "loop"
-SOURCE_INPUT_COUNT = 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
-NATIVE_PROOF_TOTAL = 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
+ADMISSION = PROFILE == "admission"
+FIELDS = PROFILE in ("fields", "analysis", "loop", "admission")
+ANALYSIS = PROFILE in ("analysis", "loop", "admission")
+LOOP = PROFILE in ("loop", "admission")
+SOURCE_INPUT_COUNT = 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
+NATIVE_PROOF_TOTAL = 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
 FIELDS_SECTIONS = {"harness":1,"fields":147,"recursive":105,"boundaries":8,"recursorGuard":7}
 ANALYSIS_SECTIONS = {"harness":1,"matrix":84,"protocol":8}
 LOOP_SECTIONS = {"harness":1,"matrix":56,"protocol":12}
@@ -92,6 +93,32 @@ if ANALYSIS:
     SCRIPT_NAMES.append("pskernel-ordinary-constructor-analysis-smoke.mjs")
 if LOOP:
     SCRIPT_NAMES.append("pskernel-ordinary-constructor-loop-smoke.mjs")
+if ADMISSION:
+    SCRIPT_NAMES.extend(["pskernel-ordinary-elimination-smoke.mjs",
+        "pskernel-ordinary-admission-private-smoke.mjs","pskernel-ordinary-admission-public-smoke.mjs"])
+ADMISSION_LATER_LOGS = {"elimination.log","ordinary-admission-private.log","ordinary-admission-public.log"} if ADMISSION else set()
+ELIMINATION_SECTIONS = {"harness":1,"policy":63,"raw":28,"member":12,"protocol":12}
+PRIVATE_ADMISSION_SECTIONS = {"harness":1,"matrix":126,"protocol":16}
+PUBLIC_ADMISSION_SECTIONS = {"harness":1,"routing":7,"boundary":4}
+ADMISSION_PROOFS = [
+    ("PsKernelOrdinaryEliminationProofs",26,"elimination-proofs.log"),
+    ("PsKernelOrdinaryAdmissionProofs",27,"ordinary-admission-proofs.log"),
+    ("PsKernelOrdinaryAdmissionPublicProofs",8,"ordinary-admission-public-proofs.log")]
+ADMISSION_FROZEN_BLOBS = {
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean":"7b896a50da30370d3a185b79f9ffeeaa379bbb9b",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.lean":"ae0d498305cab3f253bd53f40d66ae0919420027",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.lean":"0db1095805c4e6bc4d0025b073fec1807ebf2206"}
+ADMISSION_ORACLE_LABELS = [
+    "type-empty","enum-two","direct-recursive","reflexive","parameterized","dependent-index",
+    "universe","prop-empty","prop-unit","prop-proof-field","prop-data-field","prop-two",
+    "unsafe-reference","safe-prior-reference","duplicate-level-before-mvar",
+    "late-wrong-result","negative-function","safe-unsafe-reference"]
+PUBLIC_ADMISSION_LABELS = [
+    "harness/rejection-active","routing/direct-owner-retained","routing/finish-carries-injected-suffix",
+    "routing/decline-restarts-original","routing/hard-error-does-not-fallback","routing/resource-limit-failure",
+    "routing/same-batch-recursor-check","routing/cross-call-checked-recursor",
+    "boundary/private-generated-id-not-external","boundary/later-command-failure-atomic",
+    "boundary/fallback-original-bounds","boundary/preflight-precedence"]
 BLOBS = {}
 REPORT = {
     "schema":"psc1-t05-artifact-audit-v1",
@@ -101,8 +128,8 @@ REPORT = {
     "auditRunId":os.environ.get("GITHUB_RUN_ID"),
     "auditRunAttempt":os.environ.get("GITHUB_RUN_ATTEMPT"),
     "sourceExecution":"none; artifact and Git-byte inspection only",
-    "fullAdmission":False,"performanceQualified":False,
-    "replayArenaModelBridgeEstablished":False,
+    **({"ordinaryAdmissionTarget":True,"fullKernel":False} if ADMISSION else {"fullAdmission":False}),
+    "performanceQualified":False,"replayArenaModelBridgeEstablished":False,
     "canonicalClaim":"manifest closure, membership and content hashes; no new semantic equivalence proof",
     "routes":{},"errors":[],
 }
@@ -364,7 +391,7 @@ def source_inventory(e, expected_paths, frozen):
             "Node22 pin")
     return {"files":len(records),"allGitBytesMatched":True,
             "inventory":digest(e.raw("source-inventory.json")),
-            "frozenReferences":len(frozen)}
+            "frozenReferences":len(frozen) + (3 if ADMISSION else 0)}
 
 
 def proof_reports(source, raw, module, count):
@@ -715,10 +742,15 @@ def route_audit(e, closure):
         "schema":"psc1-t05-header-provenance-v1","repository":REPO,"leanCommit":LEAN,
         "typescript":"7.0.2","node":e.text("node-version.txt").strip(),
         "fuel":4096,"oldSpaceMiB":2048,"oldSpaceIsHardRssLimit":False,"emptyPATH":True,
-        "headerOnly":False,"constructorHelpersOnly":True,"fullAdmission":False,
-        "publicFallbackUsed":False,
+        "headerOnly":False,
+        **({"constructorHelpersOnly":False,"ordinaryAdmission":True,"fullOrdinaryAdmission":True,"fullKernel":False,
+            "publicRoutingChanged":True,"publicFallbackRetained":True} if ADMISSION else
+           {"constructorHelpersOnly":True,"fullAdmission":False,"publicFallbackUsed":False}),
     }.items():
         same(provenance.get(key),expected,"provenance " + key)
+    if ADMISSION:
+        require("fullAdmission" not in provenance and "publicFallbackUsed" not in provenance,
+                "Public source provenance must not retain obsolete helper-only scope flags")
     same(e.text("typescript-version.txt").strip(),"Version 7.0.2","TypeScript pin")
     e.check_digest("source-inventory.json",provenance["sourceInventory"])
     e.check_digest("lean-source-manifest.json",provenance["leanSourceManifest"])
@@ -754,7 +786,7 @@ def route_audit(e, closure):
     top_logs = {k for k in e.files if "/" not in k and k.endswith(".log")}
     later_logs = ({"constructor-fields.log"} if FIELDS else set()) | (
         {"constructor-analysis.log"} if ANALYSIS else set()) | (
-        {"constructor-loop.log"} if LOOP else set())
+        {"constructor-loop.log"} if LOOP else set()) | ADMISSION_LATER_LOGS
     e.log_digests(header["logs"],top_logs - {"constructor-params.log","constructor-result.log"} - later_logs)
     logged_json(e.terminal,"PSC1_T05_HEADER_ROUTE: PASS ",header)
     constructor = e.json("constructor-receipt.json")
@@ -899,7 +931,7 @@ def fields_route_audit(e):
     for k,v in timing.items(): same(r.get(k),v,"fields measurement "+k)
     top_logs={k for k in e.files if "/" not in k and k.endswith(".log")}
     later_logs = ({"constructor-analysis.log"} if ANALYSIS else set()) | (
-        {"constructor-loop.log"} if LOOP else set())
+        {"constructor-loop.log"} if LOOP else set()) | ADMISSION_LATER_LOGS
     e.log_digests(r["logs"],top_logs-later_logs)
     logged_json(e.terminal,"PSC1_T05_FIELDS_ROUTE: PASS ",r)
     return {"fieldsAssertions":268,"sections":FIELDS_SECTIONS,"measurement":timing,
@@ -983,7 +1015,7 @@ def analysis_route_audit(e):
     timing=measurement(e,"constructor-analysis.memory")
     for k,v in timing.items(): same(r.get(k),v,"analysis measurement "+k)
     top_logs={k for k in e.files if "/" not in k and k.endswith(".log")}
-    e.log_digests(r["logs"],top_logs-({"constructor-loop.log"} if LOOP else set()))
+    e.log_digests(r["logs"],top_logs-(({"constructor-loop.log"} if LOOP else set()) | ADMISSION_LATER_LOGS))
     logged_json(e.terminal,"PSC1_T05_ANALYSIS_ROUTE: PASS ",r)
     return {"analysisAssertions":93,"sections":ANALYSIS_SECTIONS,"measurement":timing,
             "receipt":digest(e.raw("analysis-receipt.json")),
@@ -1065,12 +1097,191 @@ def loop_route_audit(e):
     same(r["result"],expected,"loop receipt matrix")
     timing=measurement(e,"constructor-loop.memory")
     for k,v in timing.items(): same(r.get(k),v,"loop measurement "+k)
-    e.log_digests(r["logs"],{k for k in e.files if "/" not in k and k.endswith(".log")})
+    e.log_digests(r["logs"],{k for k in e.files if "/" not in k and k.endswith(".log")} - ADMISSION_LATER_LOGS)
     logged_json(e.terminal,"PSC1_T05_LOOP_ROUTE: PASS ",r)
     return {"loopAssertions":69,"sections":LOOP_SECTIONS,"measurement":timing,
             "receipt":digest(e.raw("loop-receipt.json")),
             "allLoopReceiptLogDigestsMatched":True}
 
+
+def admission_native_inventory(e, name, total, sections, prefix, section_prefix, final,
+                               extra, ordered=True):
+    path=name+"-native-inventory.json"; logname=name+"-native.log"
+    inv=e.json(path); e.identity(inv)
+    wanted={"schema":"psc1-t05-"+name+"-native-inventory-v1",
+            "assertions":total,"sectionAssertions":sections,**extra}
+    for key,value in wanted.items(): same(inv.get(key),value,name+" native inventory "+key)
+    lines=e.text(logname).splitlines()
+    labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+    require(len(labels)==len(set(labels))==total and all(labels),name+" unique native assertions")
+    same(inv["assertionLabels"],labels,name+" native executed labels")
+    same(inv["logSha256"],digest(e.raw(logname))["sha256"],name+" native log digest")
+    previous=-1
+    first_section=None
+    for group,count in sections.items():
+        marker=section_prefix+group+"="+str(count)
+        require(lines.count(marker)==1,name+" unique section marker "+group)
+        end=lines.index(marker)
+        require(end>previous,name+" section marker order")
+        if first_section is None: first_section=end
+        grouped=[label for label in labels if label.startswith(group+"/")]
+        require(len(grouped)==count,name+" section label count "+group)
+        if ordered:
+            between=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+            same(between,grouped,name+" ordered section interval "+group)
+        previous=end
+    if not ordered:
+        require(all(i<first_section for i,line in enumerate(lines) if line.startswith(prefix)),
+                name+" terminal summary follows all assertions")
+    require(lines.count(final)==1 and lines.index(final)>previous,name+" final native marker")
+    return {"assertions":total,"sectionAssertions":sections,"assertionLabels":labels,
+            "inventory":digest(e.raw(path)),"log":digest(e.raw(logname))}
+
+
+def admission_native_audit(e):
+    r=e.json("ordinary-admission-native-receipt.json"); e.identity(r)
+    expected={"schema":"psc1-t05-ordinary-admission-native-receipt-v1","status":"pass",
+        "retainedProofs":310,"newProofs":61,"totalProofs":371,
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "nativeAssertions":{"elimination":116,"privateAdmission":143,"publicRouting":12},
+        "ordinaryAdmission":True,"fullOrdinaryAdmission":True,"publicRoutingChanged":True,"fullKernel":False,
+        "performanceQualified":False,"replayArenaModelBridgeEstablished":False}
+    for key,value in expected.items(): same(r.get(key),value,"complete ordinary native receipt "+key)
+    records=[]
+    for module,count,filename in ADMISSION_PROOFS:
+        source=git_bytes("psc1/test/"+module+".lean"); raw=e.raw(filename)
+        names=proof_reports(source,raw,module,count)
+        records.append({"module":module,"proofs":count,"names":names,
+                        "source":digest(source),"log":digest(raw)})
+    same(r["proofs"],records,"61 additional exact source-named proof reports")
+    same(e.text("ordinary-admission-proof-status.log").splitlines(),[
+        "PSC1_T05_ADMISSION_PROOF_STATUS module="+module+" count="+str(count)+
+        " countStatus=0 leanStatus=0" for module,count,_ in ADMISSION_PROOFS],
+        "three additional proof command statuses")
+    e.check_digest("loop-native-receipt.json",r["retainedLoopReceipt"])
+    e.check_digest("source-inventory.json",r["sourceInventory"])
+    names=["elimination","ordinary-admission-private","ordinary-admission-public"]
+    same(sorted(r["nativeInventories"]),sorted(names),"three native inventory receipts")
+    same(sorted(r["nativeLogs"]),sorted(names),"three native log receipts")
+    for name in names:
+        e.check_digest(name+"-native-inventory.json",r["nativeInventories"][name])
+        e.check_digest(name+"-native.log",r["nativeLogs"][name])
+    e.log_digests(r["retainedNativeControls"],["dag-native.log","prefix-native.log"])
+    prefix="PSC1_T05_ADMISSION_NATIVE_INVENTORY: PASS "
+    printed=[json.loads(line[len(prefix):]) for line in e.terminal.splitlines() if line.startswith(prefix)]
+    same(printed,[e.json(name+"-native-inventory.json") for name in names],
+         "three printed native inventories match archived source-bound records")
+    elimination=admission_native_inventory(e,"elimination",116,ELIMINATION_SECTIONS,
+        "PSC1_ELIMINATION_ASSERT ","PSC1_ELIMINATION_SECTION ",
+        "PSC1_ORDINARY_ELIMINATION_NATIVE: PASS assertions=116 policyRows=9 rawRows=4 fuelValues=6 fullAdmission=false",
+        {"policyRows":9,"rawRows":4,"fuelValues":6,"fullAdmission":False,"publicRoutingChanged":False})
+    private=admission_native_inventory(e,"ordinary-admission-private",143,PRIVATE_ADMISSION_SECTIONS,
+        "PSC1_ORDINARY_ADMISSION_ASSERT ","PSC1_ORDINARY_ADMISSION_SECTION ",
+        "PSC1_ORDINARY_ADMISSION_PRIVATE_NATIVE: PASS assertions=143 rows=18 fuelValues=6 privateAdmission=true fullAdmission=false",
+        {"rows":18,"fuelValues":6,"positive":14,"negative":4,
+         "privateAdmission":True,"fullAdmission":False,"publicRoutingChanged":False})
+    public=admission_native_inventory(e,"ordinary-admission-public",12,PUBLIC_ADMISSION_SECTIONS,
+        "PSC1_ADMISSION_PUBLIC_ASSERT ","PSC1_ADMISSION_PUBLIC_SECTION ",
+        "PSC1_ORDINARY_ADMISSION_PUBLIC_NATIVE: PASS assertions=12 publicRoutingChanged=true ordinaryAdmission=true",
+        {"ordinaryAdmission":True,"publicRoutingChanged":True,"fullKernel":False},ordered=False)
+    private_labels=["harness/constructor-tags"]
+    for label in ADMISSION_ORACLE_LABELS:
+        private_labels.extend("matrix/"+label+"/fuel="+str(fuel) for fuel in (0,1,2,3,8,4096))
+        private_labels.append("matrix/"+label+"/required-outcome")
+    private_labels.extend("protocol/"+label for label in (
+        "rec-type-error","rec-type-decline","rec-type-nonsort","rec-type-fresh-context",
+        "first-rule-error","first-rule-decline","second-rule-error","second-rule-decline",
+        "rule-defeq-error","rule-defeq-decline","rule-defeq-false","first-rule-fresh-context",
+        "real-callbacks-match-wrapper","private-header-id-not-input","private-ctor-id-not-input",
+        "retry-after-late-failure"))
+    same(private["assertionLabels"],private_labels,"exact private18x6 outcomes and16 protocols")
+    same(public["assertionLabels"],PUBLIC_ADMISSION_LABELS,"exact twelve public native controls")
+    oracle=r["officialOracle"]
+    for key,value in {"controls":18,"accepted":14,"rejected":4,"safeGenerated":13,"unsafeContract":1}.items():
+        same(oracle.get(key),value,"independent Lean oracle "+key)
+    lines=e.text("ordinary-admission-private-native.log").splitlines()
+    prefix="PSC1_ORDINARY_ADMISSION_ORACLE_ASSERT "
+    labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+    same(labels,ADMISSION_ORACLE_LABELS,"exact eighteen executed independent Lean controls")
+    same(oracle["assertionLabels"],labels,"independent Lean receipt labels")
+    e.check_digest("ordinary-admission-private-native.log",oracle["log"])
+    marker="PSC1_ORDINARY_ADMISSION_ORACLE: PASS controls=18 accepted=14 rejected=4 safeGenerated=13 unsafeContract=1"
+    line_marker(e.text("ordinary-admission-private-native.log"),marker)
+    require(lines.index(marker)>max(i for i,line in enumerate(lines) if line.startswith(prefix)),
+            "independent Lean oracle final marker follows all controls")
+    # Terminal receipt markers are verified against the same archived JSON.
+    logged_json(e.terminal,"PSC1_T05_ORDINARY_ADMISSION_NATIVE_PROOFS: PASS ",r)
+    return {"newReports":61,"retainedReports":310,"totalReports":371,
+        "elimination":elimination,"privateAdmission":private,"publicRouting":public,
+        "officialOracle":{"controls":18,"accepted":14,"rejected":4,
+                          "safeGenerated":13,"unsafeContract":1},
+        "receipt":digest(e.raw("ordinary-admission-native-receipt.json"))}
+
+def admission_route_audit(e):
+    prov=e.json("provenance.json")
+    kernel="/home/runner/work/_temp/psc1-t05-"+e.route+"/detached/kernel.mjs"
+    specs=[
+        {"name":"elimination","schema":"psc1-t05-elimination-route-receipt-v1",
+         "prior":"loop-receipt.json","priorKey":"retainedLoopReceipt",
+         "harness":"pskernel-ordinary-elimination-smoke.mjs",
+         "result":{"schema":"psc1-ordinary-elimination-v1","kernel":kernel,
+             "assertions":116,"sectionAssertions":ELIMINATION_SECTIONS,
+             "policyRows":9,"rawRows":4,"fuelValues":6,"fullAdmission":False,"publicRoutingChanged":False},
+         "marker":"PSC1_ORDINARY_ELIMINATION_JS: PASS assertions=116 fullAdmission=false",
+         "receiptMarker":"PSC1_T05_ELIMINATION_ROUTE: PASS ",
+         "later":{"ordinary-admission-private.log","ordinary-admission-public.log"}},
+        {"name":"ordinary-admission-private","schema":"psc1-t05-ordinary-admission-private-route-receipt-v1",
+         "prior":"elimination-receipt.json","priorKey":"retainedEliminationReceipt",
+         "harness":"pskernel-ordinary-admission-private-smoke.mjs",
+         "result":{"schema":"psc1-ordinary-admission-private-v1","kernel":kernel,
+             "assertions":143,"sectionAssertions":PRIVATE_ADMISSION_SECTIONS,
+             "rows":18,"fuelValues":6,"positive":14,"negative":4,
+             "privateAdmission":True,"fullAdmission":False,"publicRoutingChanged":False},
+         "marker":"PSC1_ORDINARY_ADMISSION_PRIVATE_JS: PASS assertions=143 privateAdmission=true fullAdmission=false",
+         "receiptMarker":"PSC1_T05_ORDINARY_ADMISSION_PRIVATE_ROUTE: PASS ",
+         "later":{"ordinary-admission-public.log"}},
+        {"name":"ordinary-admission-public","schema":"psc1-t05-ordinary-admission-public-route-receipt-v1",
+         "prior":"ordinary-admission-private-receipt.json","priorKey":"retainedPrivateAdmissionReceipt",
+         "harness":"pskernel-ordinary-admission-public-smoke.mjs",
+         "result":{"schema":"psc1-ordinary-admission-public-v1","kernel":kernel,
+             "assertions":12,"sectionAssertions":PUBLIC_ADMISSION_SECTIONS,
+             "assertionLabels":PUBLIC_ADMISSION_LABELS,"publicRoutingChanged":True,
+             "ordinaryAdmission":True,"fullKernel":False,"performanceQualified":False},
+         "marker":"PSC1_ORDINARY_ADMISSION_PUBLIC_JS: PASS assertions=12 publicRoutingChanged=true ordinaryAdmission=true",
+         "receiptMarker":"PSC1_T05_ORDINARY_ADMISSION_PUBLIC_ROUTE: PASS ","later":set()}]
+    results={}
+    top_logs={name for name in e.files if "/" not in name and name.endswith(".log")}
+    for spec in specs:
+        name=spec["name"]; path=name+"-receipt.json"; r=e.json(path)
+        same(r.get("identity"),prov,name+" route provenance"); e.identity(r["identity"])
+        public=name=="ordinary-admission-public"
+        for key,value in {"schema":spec["schema"],"status":"pass",
+            "ordinaryAdmission":public,"fullOrdinaryAdmission":public,"publicRoutingChanged":public,
+            "fullKernel":False,"performanceQualified":False}.items():
+            same(r.get(key),value,name+" route receipt "+key)
+        require("fullAdmission" not in r,name+" aggregate receipt uses precise ordinary/kernel scope")
+        e.check_digest(spec["prior"],r[spec["priorKey"]])
+        e.check_digest(name+".log",r["log"])
+        e.check_digest("detached/"+spec["harness"],r["harness"])
+        log=e.text(name+".log")
+        line_marker(log,spec["marker"])
+        same([json.loads(line) for line in log.splitlines() if line.startswith("{")],
+             [spec["result"]],name+" actual generated runtime JSON")
+        same(r["result"],spec["result"],name+" source-bound runtime receipt")
+        if public:
+            prefix="PSC1_ADMISSION_PUBLIC_ASSERT "
+            labels=[line[len(prefix):] for line in log.splitlines() if line.startswith(prefix)]
+            same(labels,PUBLIC_ADMISSION_LABELS,"exact executed public generated control labels")
+            for group,count in PUBLIC_ADMISSION_SECTIONS.items():
+                line_marker(log,"PSC1_ADMISSION_PUBLIC_SECTION "+group+"="+str(count))
+        timing=measurement(e,name+".memory")
+        for key,value in timing.items(): same(r.get(key),value,name+" measured resource "+key)
+        e.log_digests(r["logs"],top_logs)
+        logged_json(e.terminal,spec["receiptMarker"],r)
+        results[name]={"assertions":spec["result"]["assertions"],
+            "sections":spec["result"]["sectionAssertions"],"measurement":timing,
+            "receipt":digest(e.raw(path)),"allReceiptLogDigestsMatched":True}
+    return results
 
 def wait_for_cohort():
     deadline = time.monotonic() + 75 * 60
@@ -1095,7 +1306,7 @@ def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
-    require(PROFILE in ("helpers","fields","analysis","loop"),"Unknown audit profile")
+    require(PROFILE in ("helpers","fields","analysis","loop","admission"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
             "Exact numeric run and attempt required")
@@ -1122,6 +1333,19 @@ def main():
         same(frozen.get(ANALYSIS_ORACLE_PATH),ANALYSIS_ORACLE_SHA256,"frozen analysis V1 oracle hash")
         same(git_blob_sha(git_bytes(ANALYSIS_ORACLE_PATH)),ANALYSIS_ORACLE_GIT_BLOB,
              "frozen analysis V1 oracle Git blob")
+    if ADMISSION:
+        blob_lists = [ast.literal_eval(x) for x in
+            re.findall(r"^\s*frozen_blobs = (\{.*\})$",source_workflow,re.M)]
+        require(len(blob_lists)==2 and blob_lists[0]==blob_lists[1],
+                "Native and route frozen Git-blob definitions agree")
+        frozen_blobs=blob_lists[0]
+        same(frozen_blobs,ADMISSION_FROZEN_BLOBS,"three additional frozen oracle Git blobs")
+        require(set(frozen).isdisjoint(frozen_blobs) and len(set(frozen)|set(frozen_blobs))==10,
+                "Exactly ten distinct frozen reference paths")
+        for path,oid in frozen_blobs.items():
+            require(path in expected_paths,"Frozen oracle missing from source inventory")
+            same(git_blob_sha(git_bytes(path)),oid,"frozen ordinary oracle "+path)
+        REPORT["frozenOracleGitBlobs"]=frozen_blobs
     closure = lean_closure()
     REPORT["actualLeanClosureCount"] = len(closure)
     REPORT["targetWorkflowSource"] = digest(git_bytes(WORKFLOW))
@@ -1178,6 +1402,8 @@ def main():
                 result["analysisQualification"] = analysis_native_audit(evidence) if route == "native" else analysis_route_audit(evidence)
             if LOOP:
                 result["loopQualification"] = loop_native_audit(evidence) if route == "native" else loop_route_audit(evidence)
+            if ADMISSION:
+                result["ordinaryAdmissionQualification"] = admission_native_audit(evidence) if route == "native" else admission_route_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -1192,17 +1418,22 @@ def main():
     same(final_run.get("conclusion"),"success","final cohort conclusion")
     REPORT["status"] = "pass"
     REPORT["scope"] = {
-        "constructorHelpersQualified":True,"fullT05AdmissionQualified":False,
+        "constructorHelpersQualified":True,"fullT05AdmissionQualified":ADMISSION,
+        "ordinaryAdmissionQualified":ADMISSION,"publicRoutingQualified":ADMISSION,"fullKernelQualified":False,
         "projectB":"OPEN","projectC":"FAIL","projectD":"OPEN",
         "nativeProofReports":NATIVE_PROOF_TOTAL,
         "nativeAssertions":{"params":284,"result":432,
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
-            **({"loop":69} if LOOP else {})},
+            **({"loop":69} if LOOP else {}),
+            **({"elimination":116,"privateAdmission":143,"publicRouting":12} if ADMISSION else {})},
         "eachGeneratedRouteAssertions":{"header":1992,"cache":1884,"params":268,"result":432,
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
-            **({"loop":69} if LOOP else {})},
+            **({"loop":69} if LOOP else {}),
+            **({"elimination":116,"privateAdmission":143,"publicRouting":12} if ADMISSION else {})},
         "constructorFieldsQualified":FIELDS,"singleConstructorAnalysisQualified":ANALYSIS,
         "constructorLoopQualified":LOOP,"profile":PROFILE,
+        **({"independentLeanControls":{"controls":18,"accepted":14,"rejected":4,
+                "safeGenerated":13,"unsafeContract":1}} if ADMISSION else {}),
     }
 
 
@@ -1231,7 +1462,10 @@ if __name__ == "__main__":
             "profile":PROFILE,
             "report":digest(payload.encode()),
             "errors":REPORT["errors"],
-            "fullAdmission":False,"performanceQualified":False,
+            **({"ordinaryAdmissionQualified":REPORT["status"] == "pass",
+                "fullOrdinaryAdmission":REPORT["status"] == "pass","fullKernel":False}
+               if ADMISSION else {"fullAdmission":False}),
+            "performanceQualified":False,
         }
         (OUT / "summary.json").write_text(json.dumps(summary,indent=2) + "\n")
         print("PSC1_T05_ARTIFACT_AUDIT: " + REPORT["status"].upper() + " " +

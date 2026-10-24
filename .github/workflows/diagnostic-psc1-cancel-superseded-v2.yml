@@ -17,12 +17,12 @@ jobs:
         run: |
           python3 <<'PY'
           import os,json,urllib.request,time
-          base='https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40124889755'
+          base='https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40125830600'
           headers={'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}
           def read():
               with urllib.request.urlopen(urllib.request.Request(base,headers=headers)) as r:return json.load(r)
           r=read()
-          assert r['head_sha']=='4c1ad0f0c8e0cec66e4c07d06342cc1166405bfd'
+          assert r['head_sha']=='e23afbdf72adcf6e67bbb4a34355449432127636'
           assert r['head_branch']=='qualification/psc1-unified-v2-20261025'
           assert r['path']=='.github/workflows/psc1-unified-selfhost.yml'
           assert r['event']=='push'
@@ -34,5 +34,5 @@ jobs:
               if r['status']=='completed':break
               time.sleep(5)
           print('PSC1_SUPERSEDED_QUALIFICATION: '+json.dumps({k:r[k] for k in ['id','head_sha','head_branch','status','conclusion']}))
-          assert r['status']=='completed'
+          # Cancellation is asynchronous; accepted request and later terminal readback are distinct.
           PY

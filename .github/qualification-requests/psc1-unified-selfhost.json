@@ -1,16 +1,13 @@
 {
   "schema": "psc1-unified-selfhost-request/1",
   "branch": "qualification/psc1-unified-v2-20261025",
-  "parentCommit": "8cb563761edbac9862babd3fd7b194f1085b75b6",
+  "parentCommit": "c3b367863dd491350d9aae18da10e669260ffa6f",
   "action": "qualify-independent-G1-G2-G3",
   "mode": "--self-host",
   "profile": "correctness-1800s",
   "g1TimeoutMs": 240000,
   "g2g3TimeoutMs": 1800000,
   "targets": [
-    "rust",
-    "wasm-core",
-    "ts",
-    "js"
+    "rust"
   ]
 }

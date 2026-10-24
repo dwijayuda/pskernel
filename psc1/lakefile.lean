@@ -614,3 +614,11 @@ lean_lib PsRustStringOwnershipReference where
 lean_exe psc1_rust_string_ownership_tests where
   srcDir := "test"
   root := `RustStringOwnershipTests
+
+lean_lib PsWasmNatDivModReference where
+  srcDir := "test"
+  roots := #[`WasmNatDivModReference]
+
+lean_exe psc1_wasm_nat_divmod_tests where
+  srcDir := "test"
+  root := `WasmNatDivModTests

@@ -27,7 +27,21 @@ It preserves public String signatures, all wrapper shadow/type/arity/fuel
 guards, eta-capture snapshots, old paths for other arguments and all resource
 limits. Focused Linux CI compares actual old/current Rust observations and
 runs two million-character scans, both source grammars and enlarged G1;
-a bounded G2 stack diagnostic follows. Results remain pending until CI.
+a bounded G2 stack diagnostic follows. The first Rust fixture run40121512148 passes100 retained-original comparisons
+and two million-character Unicode scans in1060ms. Its owned source census
+caught a nested pattern syntax restriction;9fcab97b rewrites the same match
+into the supported nested form. Unchanged v2 Rust G2 in40120346573 fails
+after648336ms with stack overflow; no G2 candidate/G3/fixed point.
+
+Exact Wasm mapper40121535934 verifies identical original/specialized IR and
+8343 production function indices: the dominant sampled functions are Nat
+compare/half/divmod/subtraction/addition/construction. The active runtime
+change factors even divisors and handles division by one directly while
+retaining the original odd-divisor arbitrary-Nat algorithm and division by
+zero semantics. Differential Wasm tests retain the exact old divmod function,
+share every other runtime function, use actual validated binaries, compare
+against JS arbitrary-precision arithmetic and record workload timing.
+Current implementation qualification remains pending until CI.
 
 Preserve official Lean4.35.0, strict original/transformed IR and all prior
 qualified sources/artifacts. G1/tools240s,checker120s,G2/G3 correctness1800s

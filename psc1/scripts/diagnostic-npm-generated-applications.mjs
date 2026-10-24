@@ -76,6 +76,7 @@ const distribution={schema:'psc1-installed-generated-engines/1',packageBuildComm
  nativeCoreSourceCommit:nativeDistribution.sourceCommit,checkerCommit,engines,
  checker:filePin('native/bin/psc1_independent_checker'),runner:filePin('scripts/generated-compiler-runner.mjs'),
  session:filePin('host-tools/generated-compiler-session.mjs'),
+ hostDependencies:['host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs','host-tools/generated-wasm-transport.mjs'].map(filePin),
  nativeLibraries:nativeDistribution.bundledNativeLibraries.map(r=>filePin('native/lib/'+r.name)),
  generatedPublicationTargets:['js'],nativeOutputTargets:nativeDistribution.builtInTargets,
  unavailableGeneratedEngines:{js:'latest shared-root fixed point pending',rust:'G2/G3 performance blocker'},
@@ -129,6 +130,19 @@ for(const engine of Object.keys(engines)){
  assert.notEqual(r.status,0);assert.match(r.stderr,/IDENTITY_CHANGED/);assert.equal(fs.readlinkSync(path.join(prior,'current')),pointer);fs.writeFileSync(asset,bytes);
 }
 // Real application source modules exercise both grammars through installed engines.
+// Imported transport and invalid UTF8 must refuse without changing a generation.
+const shared=distribution.hostDependencies.find(r=>r.path.endsWith('generated-wasm-transport.mjs'));
+const sharedFile=path.join(installed,shared.path),sharedBytes=fs.readFileSync(sharedFile);
+{
+ const prior=path.join(consumer,'wasm-core-'+corpus[0].id),pointer=fs.readlinkSync(path.join(prior,'current'));
+ fs.appendFileSync(sharedFile,' ');
+ const bad=spawnSync(process.execPath,[cli,'generated','build','--project',path.join(consumer,'wasm-core-'+corpus[0].id+'.json'),'--engine','wasm-core','--out',prior],{encoding:'utf8',timeout:240000});
+ assert.notEqual(bad.status,0);assert.match(bad.stderr,/IDENTITY_CHANGED/);assert.equal(fs.readlinkSync(path.join(prior,'current')),pointer);
+ fs.writeFileSync(sharedFile,sharedBytes);
+ const invalid=path.join(consumer,'Invalid.ps');write(invalid,Buffer.from([0xff]));
+ const failed=spawnSync(process.execPath,[cli,'generated','build',invalid,'--engine','ts','--out',prior],{encoding:'utf8',timeout:240000});
+ assert.notEqual(failed.status,0);assert.equal(fs.readlinkSync(path.join(prior,'current')),pointer);
+}
 const applicationCases=[];
 const canonicalPs=new Map();
 {
@@ -196,7 +210,7 @@ for(const grammar of ['lean','ps']){
 fs.renameSync(path.join(installed,'native/bin/psc1.disabled'),path.join(installed,'native/bin/psc1'));
 assert.equal(JSON.parse(command(['--identity'])).leanCommit,checkerCommit);
 const receipt={schema:'psc1-generated-package-qualification/1',status:'passed',testedCommit:process.env.GITHUB_SHA,
- nativeInputTarballSha256:sha(fs.readFileSync(nativeTarball)),distribution,cases,applicationCases,negativeCases:12,
+ nativeInputTarballSha256:sha(fs.readFileSync(nativeTarball)),distribution,cases,applicationCases,negativeCases:14,
  nativeCompilerUnavailableDuringGeneratedCases:true,offlineInstall:true,tarball:path.relative(root,tarball),
  tarballSha256:sha(fs.readFileSync(tarball)),bytes:fs.statSync(tarball).size,
  scope:'Qualified historical TS/Wasm engines integrated for independently admitted JS publication; native core unchanged. Not latest-root or all-four-engine qualification.'};

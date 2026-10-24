@@ -1,3 +1,28 @@
+## 2026-10-25 — constructor helpers qualified and integrated; private field/analysis preflight next
+
+This section supersedes the pending-status entries below. Exact qualified implementation source: **042d3a12d902f821c7b0ad8630c18f9d6d8bf639**. The integration branch was advanced from0d9f062846d109c362210d441df5fd407ca2cdd7 to042d3a12 by a non-force expected-SHA fast-forward after checking the exact source-bound receipts and artifact audit. History is preserved.
+
+[Qualification run40118532017](https://github.com/dwijayuda/pskernel/actions/runs/40118532017), attempt1, passed all three required jobs. Native120944854175 passed230 ordered, source-named proof reports, native constructor parameters284 and results432, and retained controls. Generated120945461409 and canonical120945461442 each passed their complete148-module source closure, retained header1992/cache1884 controls, parameters268 and results432. Both full-kernel routes use TypeScript-to-JavaScript; the canonical route first reconstructs the .ps closure. This evidence does not claim full-kernel DirectJS support.
+
+[Artifact audit40118566527](https://github.com/dwijayuda/pskernel/actions/runs/40118566527), attempt1, auditor source1ff27d0b199d5ac57e84a14e03e214adcc5ea481/job120944961522, inspected actual ZIP contents on Linux. All three routes passed with errors=[], nativeReports230, and70/243/246 files respectively. It authenticated API archive digests, safe unique ZIP members/CRCs,43 copied source inputs against exact Git blobs, all proof names/axioms, runtime receipts/logs, source/canonical manifests and archives, detached kernel and harness digests, and source/run/attempt identity. Audit JSON217134bytes has SHA256ea2cbc35bddf572f796018f3ce09dfba08086f584f7529bdf8d2c21a5ad01038.
+
+| Artifact | ID | ZIP bytes | SHA256 |
+| --- | ---: | ---: | --- |
+| Native | 12570127788 | 234574 | c0007191df5713cd9872486bf631043746844511f08470ab479899332d99b001 |
+| Generated | 12570697954 | 2383658 | 7c8d9289be686f64b68cf8babfcf869aaefae4b249c623c58f2b9567efea7911 |
+| Canonical | 12571426456 | 2512754 | a18ac4cff83e63725c0a89656af685d504234955eb7cccb77238546bf03e4823 |
+| Audit | 12571083358 | 51638 | b954f1fcdbca0ff11448db2193c24e0e8a775b9484128df79869ad7f045ed470 |
+
+The sound paged-array getElem/getD proof repair, both native Decode imports, and the exact generated empty-prefix owner-identity assertion repair are now qualified together. Native proof scope still assumes valid internal paged layouts where stated; no external-decoder-to-layout or Replay-to-ArenaModel bridge is inferred.
+
+Next private source is **c7387bc8715706e71c656c16ca67eae585cac2fe** on work/psc1-pskernel-t05-analysis-draft-20261025. It preserves the fields draft history and adds single-constructor analysis plus19 new native equations and93 proposed native/generated assertions. Fields adds47 equations and268 assertions. Its native-first diagnostic must pass66 reports and361 assertions, then authentic PSC1 portable elaboration, before promotion. Prior fields5aab99c9 passed47 native proofs/268 assertions but failed portable matchExpectedType; the new source adds the missing List type annotation, retaining the earlier Option annotation. No production algorithm or theorem statement was weakened.
+
+Prepare the next full cohort with all retained230 reports plus47 fields and19 analysis reports (296 total), exact55 source inputs including the frozen V1 ConstructorAdmission oracle, both complete generated routes, and actual artifact auditing. Do not inherit qualification from042 after production/proof changes; do not launch duplicate matching-source runs. All new helpers remain private. Public safe fallback is unchanged. Outer constructor metadata admission, generated recursor validation and atomic publication remain OPEN.
+
+A: T01F scoped implementation remains qualified. B: broader completion OPEN. C: full Arena compatibility remains FAIL (historical173/193 strict,17 timeouts,1 budget exhaustion,2 separately classified unsafe/partial agreements). D: performance OPEN, including Church exhaustion and Init.Prelude timeout. Preserve Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, fuel4096, published resource limits, independent checking and retained negatives. Use connected GitHub and Linux Actions only; no local builds, main merge, force push or npm publication.
+
+---
+
 ## 2026-10-25 Paged proof repair passes; native parameter harness import corrected
 
 ## 2026-10-25 — exact constructor harness repair; fresh qualification required

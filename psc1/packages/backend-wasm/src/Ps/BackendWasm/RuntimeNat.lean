@@ -443,6 +443,15 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.structNew psWasmNatDivModName,
         PsWasmInstruction.else_,
+          -- Keep the original zero-dividend bound before factoring: every
+          -- recursive branch halves the dividend, including tiny/huge inputs.
+          PsWasmInstruction.localGet 0,
+          PsWasmInstruction.refTest psWasmNatZeroName,
+          PsWasmInstruction.ifStart (Option.some psWasmNatDivModRef),
+            PsWasmInstruction.call psWasmNatZeroFn,
+            PsWasmInstruction.call psWasmNatZeroFn,
+            PsWasmInstruction.structNew psWasmNatDivModName,
+          PsWasmInstruction.else_,
           -- For canonical Nat, a nonzero divisor with zero half is one.
           PsWasmInstruction.localGet 1,
           PsWasmInstruction.call psWasmNatHalfFn,
@@ -531,6 +540,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
                 PsWasmInstruction.end_,
               PsWasmInstruction.end_,
             PsWasmInstruction.end_,
+          PsWasmInstruction.end_,
           PsWasmInstruction.end_,
         PsWasmInstruction.end_
       ]

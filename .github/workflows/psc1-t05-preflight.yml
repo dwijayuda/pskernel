@@ -1,0 +1,43 @@
+name: PSC1 T05 artifact harness diagnostic
+'on':
+  workflow_dispatch: null
+  push:
+    branches: [work/psc1-pskernel-t05-preflight-20261025]
+    paths: [.github/workflows/psc1-t05-preflight.yml, .github/psc1-t05-preflight.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: diagnostic
+        persist-credentials: false
+    - uses: actions/checkout@v4
+      with:
+        ref: a298be9d9d770dffcfdbffd7f8414e8d76f9641a
+        path: source
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate archived source and run both harnesses independently
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        SOURCE_ROOT: ${{ github.workspace }}/source
+        PREFLIGHT_OUT: ${{ runner.temp }}/psc1-t05-preflight
+      run: |
+        set -euo pipefail
+        export NODE_BIN="$(command -v node)"
+        python3 diagnostic/.github/psc1-t05-preflight.py
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-t05-preflight/
+        if-no-files-found: error

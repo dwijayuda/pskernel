@@ -1,13 +1,10 @@
 # PSC1 compiler self-host architecture
 
-Current direction: Python and PHP generations from the same frozen compiler,
-after qualified DirectJS and import-free DirectWasm generations. [Roadmap](PSC1_DEVELOPMENT_ROADMAP.md) orders the
-work; [AI work state](../AI_WORK_STATE.md) and the
-[direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json) bind
-live status to immutable source/CI identities. Qualified Rust and TypeScript
-remain preserved reference implementations generated from the same compiler.
+Current provider/package checkpoint: the native core includes JS/TS/Rust/Wasm core+component, with exact-build-pinned optional Python/PHP emit-only providers. The shared portable compiler is unchanged. Core retains independent admission, strict original/transformed IR, ABI policy and publication; workers validate IR/ABI and return candidates only. [Full40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASS37/37/all-seven/both grammars; [receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json), [guide](PSC1_BACKEND_PROVIDERS.md) and [roadmap](PSC1_DEVELOPMENT_ROADMAP.md) own exact status.
 
-## Python/PHP measured mechanisms
+This native package milestone is complete and stopped as requested. One generated multi-backend composition root and genuine enlarged-source G1/G2/G3/fixed points remain a separate next milestone. Preserve qualified Rust/TS/JS/Wasm evidence on exact older snapshots. Python/PHP retry40091210960 failed both3600s G2 deadlines; no G3/fixed point. Historical mechanisms/evidence below remain preserved.
+
+## Historical Python/PHP measured mechanisms
 
 The shared compiler frontend/elaborator/checked IR/service remains unchanged.
 Each target has one Portable emitter and a thin native API adapter preserving

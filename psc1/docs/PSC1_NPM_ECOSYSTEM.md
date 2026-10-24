@@ -1,10 +1,6 @@
 # PSC1 native npm toolchain and source packages
 
-Current finite v1 compiler source and installed-package qualification:
-`9ee6c5ffe8ac344b349fde7eee8f5ef867bd5dde`,
-[Linux run 39829564386](https://github.com/dwijayuda/pskernel/actions/runs/39829564386).
-See [the candidate guide](PSC1_RELEASE_CANDIDATE.md) for the exact tarball,
-SHA-256, retained artifact and ABI choices. Package publication remains separate.
+Current native provider/package checkpoint: review70522c25ea3826c05ba2e80f7f1e9c7df0b58213, tested merge063d1da64db9beb69a8303af5a2a8788233dc7dd, [Linux40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849). All three unpublished matching tarballs and exact hashes are in the [provider receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json). The [provider guide](PSC1_BACKEND_PROVIDERS.md) defines the default/add-on boundary. The older [candidate guide](PSC1_RELEASE_CANDIDATE.md) retains historical package evidence. Publication remains separate.
 
 ## Current implementation
 
@@ -17,12 +13,13 @@ fallback.
 compiler and tests unpublished tarballs in Linux CI. It does not build a self-host
 generation or establish behavioral verification.
 
-The package is named `proofscript`, version `0.1.0-psc1.2`, and remains
+The package is named `proofscript`, version `0.1.0-psc1.3`, and remains
 `private: true`. It contains:
 
 | Included item | Responsibility |
 | --- | --- |
-| `native/bin/psc1` | One compiler, official pinned Lean admission provider, compiled Core prelude and all seven built-in target implementations |
+| `native/bin/psc1` | One compiler, official pinned Lean admission provider, compiled Core prelude and five built-in targets: JS/TS/Rust/Wasm core/component |
+| Explicit Python/PHP add-ons | Separate emit-only executables/resources; core-pinned exact build; neither is a default dependency |
 | `native/lib/` when needed | Non-system Lean shared libraries observed from the executable |
 | `npm-cli/psc.js` | Identity-checked command transport |
 | `npm-cli/libraries.mjs` | Declarative npm metadata and filesystem path transport |
@@ -37,8 +34,7 @@ support. Node >=22 is required. Python, PHP, Cargo, Rustfmt, Wasm tools and the
 TypeScript consumer checker are not installed merely by installing `proofscript`.
 Selected targets report their separate validation/runtime requirements.
 
-The distribution test checks all seven targets in native identity. Inclusion in
-the executable is separate from feature-level qualification; the
+Native identity reports five built-in targets, two optional targets and the provider protocol. The distribution test independently installs each optional add-on and executes both grammars across all seven targets. Inclusion and installation are separate from feature-level qualification; the
 [backend conformance record](PSC1_BACKEND_CONFORMANCE.md) remains authoritative.
 
 ## Build and install the unpublished package
@@ -47,7 +43,7 @@ From the `psc1` directory in the qualified Linux environment:
 
 ```sh
 npm --prefix host-tools --workspaces=false ci --ignore-scripts
-lake build psc1
+lake build psc1 psc1_backend_python psc1_backend_php
 node scripts/npm-library-resolution-tests.mjs
 node scripts/npm-native-distribution.mjs
 ```
@@ -57,8 +53,11 @@ The distribution command creates and tests a tarball under
 CI artifact to obtain the tested tarball, then install that file:
 
 ```sh
-npm install ./proofscript-0.1.0-psc1.2.tgz
+npm install ./proofscript-0.1.0-psc1.3.tgz
 npx psc --identity
+# Install either optional backend only when required, from the same artifact:
+npm install ./proofscript-backend-python-0.1.0-psc1.3.tgz
+npm install ./proofscript-backend-php-0.1.0-psc1.3.tgz
 npx psc build src/Main.ps --target js --out dist/Main.js
 npx psc build src/Main.ps --targets ts,js --out-dir dist
 ```
@@ -84,8 +83,7 @@ The historical script and recovery artifacts retain their original provenance.
 ## Portable optional libraries
 
 A source package is an ordinary npm package containing supported `.ps` or
-`.lean` files. The initial contract supports portable source libraries only:
-no compiler plugins, macros, FFI, runtime adapters, kernel extensions or new axioms.
+`.lean` files. The source-library contract supports portable source only: no compiler plugins, macros, FFI, runtime adapters, kernel extensions or new axioms. The separately versioned backend-provider contract does not change source-library authority.
 
 A consumer registers a module prefix and declares its npm dependency:
 
@@ -160,10 +158,10 @@ The metadata test runs ten boundary groups, including private source, symlink
 containment, identity/profile enforcement, forbidden authority, absence of guest
 module evaluation and nested dependency resolution.
 
-The distribution test packs the complete toolchain, installs it locally and globally
+The distribution test packs the core plus two explicit optional providers, installs the core locally and globally
 offline with an initially empty npm cache, compares native/npm identities, checks
 installed native library resolution, builds and executes JavaScript without
-installing TypeScript, then invokes the source-library canary.
+installing TypeScript, then invokes the source-library canary. It also independently type-checks/executes installed TS, runs Rust/core-Wasm/component consumers, installs each optional backend offline, executes both source grammars, and checks26 absence/identity/integrity refusals without output changes.
 
 That canary creates and packs two independent `.ps` libraries. The second imports
 the first and its own private module. A consumer installs both local tarballs,
@@ -184,7 +182,7 @@ The portable semantic compiler does not depend on npm transport. The native host
 currently launches the metadata resolver per import edge. Metadata caching in one
 captured session is a possible performance improvement if measurement justifies it.
 
-Optional host/runtime adapters, conflicting global declaration names across
+General host/runtime adapter plugins, conflicting global declaration names across
 simultaneous library versions, binary platform packages and non-Linux qualification
 remain separate work. Built-in runtime helper selection stays with each backend;
 optional source libraries do not install a global generated-program runtime.

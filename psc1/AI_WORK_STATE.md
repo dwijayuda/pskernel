@@ -4,10 +4,28 @@ Updated 2026-10-24 Asia/Jakarta. Use connected GitHub tools and Linux Actions on
 Fetch exact HEAD before expected-HEAD non-force writes. No PR merge or npm
 publication authorized. Practical Core v1 remains 14 families / 37 finite criteria.
 [Roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the dependency queue;
-[canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
-owns immutable attempts, artifacts, timings and source identities.
+[direct-target receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
+and [provider receipt](docs/PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json)
+own their exact attempts, artifacts, timings and source identities.
 
-## Verified Python/PHP performance-fix milestone — stopped as requested
+## Verified backend provider/package milestone — stopped as requested
+
+**The requested milestone is complete. Stop after this checkpoint.** Implementation commits8c61a9c5,abd95b94,971718f5; required-CI review70522c25ea3826c05ba2e80f7f1e9c7df0b58213. Base17cc49f90318abc358c731601311b90b8f8ea9fb/PR176 remains preserved. Draft [PR177](https://github.com/dwijayuda/pskernel/pull/177), branch feat/psc1-backend-provider-packages-20261024. All writes expected-HEAD/non-force; GitHub/Linux Actions only. No merge/publication.
+
+- Default unpublished proofscript@0.1.0-psc1.3 includes JS,TypeScript,Rust,Wasm core and Wasm component. Python/PHP are explicit matching @proofscript/backend-python and @proofscript/backend-php add-ons; neither is a default dependency.
+- Core retains source capture, frontend/elaboration, independent official Lean admission, strict original/transformed IR, closed specialization, public ABI policy, target tooling, provenance and atomic publication. Separate workers revalidate IR/ABI and emit candidates only. Exact complete provider descriptors/native bytes/runtime resources are pinned by the core distribution; a rewritten provider manifest cannot authorize a replacement binary.
+- Focused [40105565252](https://github.com/dwijayuda/pskernel/actions/runs/40105565252) at971718f5 PASSED source120906418234/package120906661489. Core symbol inventory excludes optional emitters; workers exclude PSC1 frontend/admission/publication/other emitter. Exact retained payload/IR comparisons,16 malformed identity/IR refusals,8 receipt refusals, actual both-grammar optional executions and missing-provider output preservation pass. Artifacts12564079454/12564308767 and exact digests are in the receipt.
+- Offline installed core executes10 default grammar/target cases; both add-ons install independently and execute4 grammar/target cases.26 missing/pin/source/target/schema/binary/resource/self-authorized-hash cases preserve previous output. Strict independent TypeScript checking, native Rust, core Wasm and component execution pass. Existing local/global core, source-library, installed typed IO and runtime-resource canaries remain. Dedicated first package attempt40105154897 failed TypeScript7 TS5112; --ignoreConfig corrected explicit-file invocation with strict checks intact.
+- Full [40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASSED: Linux120912148533/final gate120918578150;37/37 criteria,0 blocked,releaseReady=true; all seven backends/both grammars, applications, minimum-Python and installed package/IO/library checks. Review70522c25ea3826c05ba2e80f7f1e9c7df0b58213 and tested merge063d1da64db9beb69a8303af5a2a8788233dc7dd have identical Git treeb2d2ad3e24a07218c081eb20bc85670fd64e29e4. Artifact12566181617,sha256:be0a4ed3850383345acfbf2127d34caa32154ed6c5f8ac10304edd3d54899957.
+- Normal full CI now requires the provider transport/dependency/refusal gate and exact-commit receipt. The package builder retains all three matching installable tarballs in the full artifact. Core SHA2566c06085e60ffde19c7418bf265e27b4ebc9a244572a388564beb8b1c0fdcab28; Python7c9d2cbeb47dcdd2c680c5981cc1458ff59fb590c48ed1f0f96f243c4c2fbc07; PHPea756a91fb6ccb1d8aaa7409f82b7b3c2ace8da22a94f59027ecb96b06e7c8d4. Use all three from the same artifact; exact source/build pins intentionally reject mixed builds.
+
+This qualifies the native Linux x64/glibc distribution/provider boundary, not a new unified generated compiler, cross-platform release, unrestricted compiler plugin system or formal backend-preservation theorem. Portable compiler sources/semantics and all source-library authority restrictions are unchanged. Preserve official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strictIR/source pairing/negative tests and all resource policies. Provider requests/responses64MiB,identity10s,emission120s; self-host G1/tools240s,checker120s,performance240s,historical1800s/3600s profiles remain separate and unchanged.
+
+Prior Python/PHP retry40091210960 is terminal G2 deadline failure for both, no G3/fixed point: Python3600050ms/tree781728KiB,PHP3600059ms/tree1183780KiB. Actual failed artifacts and service/request/source-closure identities remain in this receipt. Do not replay these failures for packaging. Older Rust/TS/JS/Wasm qualifications remain pinned to their exact historical sources.
+
+[Finite contract](BACKEND_PROVIDER_CONTRACT.json), [provider guide](docs/PSC1_BACKEND_PROVIDERS.md), [exact receipt](docs/PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json), [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) and [continuation](docs/PSC1_BACKEND_PROVIDER_CONTINUATION.md) govern this checkpoint. Next only on authorization: unified generated multi-backend composition root and genuine enlarged-source qualification per claimed engine.
+
+## Historical Python/PHP performance-fix checkpoint
 
 Use connected GitHub tools/Linux Actions only, fresh expected-HEAD non-force updates, draft [PR176](https://github.com/dwijayuda/pskernel/pull/176). No merge or package publication authorized.
 

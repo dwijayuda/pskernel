@@ -21,6 +21,17 @@ const architecture = read('dist/scoped-correctness/backend-architecture/results.
 const minimumRuntime = read('dist/scoped-correctness/runtime-conformance-python314/results.json');
 const minimumScripts = read('dist/scoped-correctness/script-backends-python314/results.json');
 const distribution = read('dist/scoped-correctness/npm-native/qualification.json');
+const backendProviders=read('dist/backend-providers/qualification.json');
+assert.equal(backendProviders.schema,'psc1-backend-provider-tests/1');
+assert.equal(backendProviders.testedCommit,process.env.GITHUB_SHA);
+for(const key of ['defaultBinaryExcludesOptionalEmitters','providersExcludeFrontendCheckerAndPublisher',
+ 'retainedPayloadsExact','malformedWorkerRefused','missingProviderPreservesOutput'])
+ assert.equal(backendProviders[key],true,'backend-provider:'+key);
+assert.deepEqual(backendProviders.defaultTargets,['js','ts','rust','wasm-core','wasm-component']);
+assert.deepEqual(backendProviders.cases.map(r=>r.syntax+'/'+r.target).sort(),
+ ['lean/php','lean/python','ps/php','ps/python']);
+assert.ok(backendProviders.cases.every(r=>r.passed&&r.admission==='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'));
+
 const library = read(distribution.optionalLibraryReceipt);
 const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));
@@ -301,6 +312,19 @@ for (const [data, expectedTargets] of [[whileRuntime, targets], [minimumWhile, [
     x.externalTimeoutMs === 2000 && x.earlyReturnPreflight && x.unusedPatternRhsEvaluated));
 }
 assert.equal(distribution.qualification, 'passed');
+assert.deepEqual(distribution.builtInTargets,['js','ts','rust','wasm-core','wasm-component']);
+assert.deepEqual(distribution.optionalTargets,['python','php']);
+assert.deepEqual(distribution.compilerIdentity.targets,distribution.builtInTargets);
+assert.equal(distribution.backendProviderProtocol,'psc1-backend-provider/1');
+assert.equal(distribution.providerQualification.passed,true);
+assert.equal(distribution.providerQualification.optionalPackagesAbsentByDefault,true);
+assert.equal(distribution.providerQualification.optionalResourcesAbsentByDefault,true);
+assert.equal(distribution.providerQualification.records.length,10);
+assert.equal(distribution.providerQualification.providerRecords.length,4);
+assert.ok(distribution.providerQualification.providerRecords.every(r=>r.executed&&r.admission==='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'));
+assert.ok(distribution.providerQualification.refusals.length>=20);
+assert.deepEqual(Object.keys(distribution.addonTarballs).sort(),['php','python']);
+
 assert.deepEqual(distribution.installedTypedIo.map(r=>r.syntax).sort(),['lean','ps']);
 assert.ok(distribution.installedTypedIo.every(r=>r.passed&&r.target==='js'));
 assert.equal(distribution.adapterResources.length,9);

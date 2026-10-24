@@ -9,8 +9,13 @@ import { createHash } from 'node:crypto';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist/scoped-correctness/npm-native');
 const pin = JSON.parse(fs.readFileSync(path.join(root, 'NATIVE_SOURCE_PIN.json'), 'utf8'));
-const version = '0.1.0-psc1.2';
+const version = '0.1.0-psc1.3';
+const providerContract=JSON.parse(fs.readFileSync(path.join(root,'BACKEND_PROVIDER_CONTRACT.json'),'utf8'));
+const coreTargets=providerContract.coreTargets;
+const optionalTargets=Object.keys(providerContract.optionalProviders);
+const optionalHostResources=Object.values(providerContract.optionalProviders).flatMap(p=>p.resources);
 const targets = ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'];
+assert.deepEqual([...coreTargets,...optionalTargets],targets,'package split preserves all seven targets');
 const json = value => JSON.stringify(value, null, 2) + '\n';
 const sha = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const cleanEnv = { ...process.env };
@@ -28,7 +33,7 @@ function identity(binary, env = cleanEnv) {
   const value = JSON.parse(run(binary, ['--identity'], { env }));
   assert.equal(value.protocol, pin.compilerProtocol); assert.equal(value.profile, pin.compilerProfile);
   assert.equal(value.lean, pin.version); assert.equal(value.leanCommit, pin.commit);
-  assert.deepEqual([...value.targets].sort(), [...targets].sort(), 'native compiler must contain all seven selected backends');
+  assert.deepEqual([...value.targets].sort(), [...coreTargets].sort(), 'default native compiler contains only five built-in targets');
   return value;
 }
 if (process.platform !== 'linux' || process.arch !== 'x64' || !process.report.getReport().header.glibcVersionRuntime) {
@@ -44,9 +49,10 @@ fs.chmodSync(path.join(stage, 'native/bin/psc1'), 0o755);
 for (const file of ['psc.js', 'libraries.mjs']) copy(path.join(root, 'npm-cli', file), path.join(stage, 'npm-cli', file));
 fs.chmodSync(path.join(stage, 'npm-cli/psc.js'), 0o755);
 copy(path.join(root, 'NATIVE_SOURCE_PIN.json'), path.join(stage, 'NATIVE_SOURCE_PIN.json'));
+copy(path.join(root,'BACKEND_PROVIDER_CONTRACT.json'),path.join(stage,'BACKEND_PROVIDER_CONTRACT.json'));
 copy(path.join(root, 'profile.json'), path.join(stage, 'profile.json'));
 for (const item of fs.readdirSync(path.join(root, 'host-tools'), { withFileTypes: true })) {
-  if (item.isFile() && item.name !== '.npmrc' && item.name !== 'package-lock.json' && !item.name.startsWith('test-')) {
+  if (item.isFile() && !optionalHostResources.includes(item.name) && item.name !== '.npmrc' && item.name !== 'package-lock.json' && !item.name.startsWith('test-')) {
     copy(path.join(root, 'host-tools', item.name), path.join(stage, 'host-tools', item.name));
   }
 }
@@ -85,10 +91,10 @@ const meta = {
   exports: { './package.json': './package.json',
     './io/node': './host-tools/typed-io.mjs', './io/wasm-core': './host-tools/typed-io-wasm.mjs' }, engines: { node: '>=22' },
   os: ['linux'], cpu: ['x64'], libc: ['glibc'],
-  files: ['npm-cli/', 'native/', 'host-tools/', 'licenses/', 'NATIVE_SOURCE_PIN.json', 'NATIVE_DISTRIBUTION.json', 'profile.json', 'README.md'],
+  files: ['npm-cli/', 'native/', 'host-tools/', 'licenses/', 'NATIVE_SOURCE_PIN.json', 'NATIVE_DISTRIBUTION.json', 'BACKEND_PROVIDER_CONTRACT.json', 'profile.json', 'README.md'],
   dependencies: hostMeta.dependencies, bundledDependencies: Object.keys(hostMeta.dependencies),
   proofscript: { compilerProfile: pin.compilerProfile, sourceKind: 'native-lean',
-    builtInTargets: targets, publicationStatus: 'unpublished-qualification-only' }
+    builtInTargets: coreTargets, optionalTargets, backendProviderProtocol:providerContract.protocol, publicationStatus: 'unpublished-qualification-only' }
 };
 write(path.join(stage, 'package.json'), json(meta));
 const lock = JSON.parse(fs.readFileSync(path.join(root, 'host-tools/package-lock.json'), 'utf8'));
@@ -101,13 +107,23 @@ run('npm', ['--prefix', stage, '--workspaces=false', 'ci', '--omit=dev', '--igno
 run('npm', ['--prefix', stage, '--workspaces=false', 'shrinkwrap', '--ignore-scripts']);
 write(path.join(stage, 'README.md'), '# ProofScript PSC1\n\nUnpublished Linux x64/glibc native toolchain.\n\n' +
   'Install this tarball with npm install ./proofscript-' + version + '.tgz. Use npx psc --help.\n\n' +
-  'All seven built-in backends are compiled into the native binary. Core logical and runtime declarations are compiled in.\n' +
+  'JS, TypeScript, Rust, core Wasm and component Wasm are built in. Python/PHP are explicitly installed optional packages. Core logical and runtime declarations are compiled in.\n' +
   'JavaScript output needs no TypeScript compiler. Selected Rust/Wasm/Python/PHP targets require their target tools.\n' +
   'The compiler, host formatter and libraries resolver ship together. Portable source libraries are independently checked.\n' +
-  'IO Node and core-Wasm adapters export as proofscript/io/node and proofscript/io/wasm-core. Standalone Python/PHP sources and the locked Rust crate ship in host-tools/.\n' +
+  'IO Node and core-Wasm adapters export as proofscript/io/node and proofscript/io/wasm-core. The locked Rust crate ships in host-tools/. Standalone Python/PHP adapters ship with their optional packages.\n' +
   'No npm installation script, network binary download, compiler fallback or package publication is used.\n');
+const backendProviderPackages=Object.fromEntries(optionalTargets.map(target=>{
+ const spec=providerContract.optionalProviders[target],binary=path.join(root,'.lake/build/bin/psc1_backend_'+target);
+ return [target,{schema:'psc1-backend-package/1',protocol:providerContract.protocol,target,
+  compilerProtocol:pin.compilerProtocol,compilerProfile:pin.compilerProfile,
+  leanVersion:pin.version,leanCommit:pin.commit,compilerSourceCommit:process.env.GITHUB_SHA||null,
+  runtimeContract:'psc1-runtime-semantics/1',
+  native:{path:'native/bin/psc1_backend_'+target,sha256:sha(binary),bytes:fs.statSync(binary).size},
+  resources:spec.resources.map(file=>({path:'resources/'+file,sha256:sha(path.join(root,'host-tools',file)),
+   bytes:fs.statSync(path.join(root,'host-tools',file)).size}))}];
+}));
 const distribution = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
-  compilerIdentity: nativeIdentity, nativeSha256: sha(native), nativeBytes: fs.statSync(native).size,
+  compilerIdentity: nativeIdentity, backendProviderPackages, builtInTargets:coreTargets, optionalTargets, backendProviderProtocol:providerContract.protocol, nativeSha256: sha(native), nativeBytes: fs.statSync(native).size,
   platform: { os: 'linux', cpu: 'x64', libc: 'glibc', qualifiedGlibc: process.report.getReport().header.glibcVersionRuntime },
   hostDependencyLockSha256: sha(path.join(root, 'host-tools/package-lock.json')),
   bundledNpmDependencies: meta.dependencies, bundledNativeLibraries: sharedLibraries,
@@ -119,6 +135,40 @@ fs.mkdirSync(tarballs, { recursive: true });
 const packed = JSON.parse(run('npm', ['pack', stage, '--pack-destination', tarballs, '--ignore-scripts', '--json']));
 assert.equal(packed.length, 1);
 const tarball = path.join(tarballs, packed[0].filename);
+const addonTarballs={};
+for(const target of optionalTargets){
+ const spec=providerContract.optionalProviders[target];
+ const addon=path.join(runRoot,'addons',target,'package');
+ const binary=path.join(root,'.lake/build/bin/psc1_backend_'+target);
+ copy(binary,path.join(addon,'native/bin/psc1_backend_'+target));
+ fs.chmodSync(path.join(addon,'native/bin/psc1_backend_'+target),0o755);
+ const providerIdentity=JSON.parse(run(binary,['--identity']));
+ assert.equal(providerIdentity.protocol,providerContract.protocol);
+ assert.equal(providerIdentity.target,target);assert.equal(providerIdentity.candidateOnly,true);
+ assert.equal(providerIdentity.leanVersion,pin.version);assert.equal(providerIdentity.leanCommit,pin.commit);
+ const resources=spec.resources.map(file=>{
+  const destination=path.join(addon,'resources',file);
+  copy(path.join(root,'host-tools',file),destination);
+  return {path:'resources/'+file,sha256:sha(destination),bytes:fs.statSync(destination).size};
+ });
+ for(const file of ['NATIVE_SOURCE_PIN.json'])copy(path.join(root,file),path.join(addon,file));
+ copy(path.join(stage,'licenses'),path.join(addon,'licenses'));
+ const contract=backendProviderPackages[target];
+ assert.deepEqual(resources,contract.resources,'copied optional resources match core-pinned identity');
+ const addonMeta={name:spec.package,version,private:true,type:'module',
+  description:'PSC1 optional '+target+' emit-only provider; unpublished Linux qualification package',
+  os:meta.os,cpu:meta.cpu,libc:meta.libc,engines:meta.engines,
+  files:['native/','resources/','licenses/','NATIVE_SOURCE_PIN.json','README.md'],
+  exports:{'./package.json':'./package.json',...Object.fromEntries(spec.resources.map(file=>['./runtime/'+file,'./resources/'+file]))},
+  peerDependencies:{proofscript:version},proofscript:{backendProvider:contract}};
+ write(path.join(addon,'package.json'),json(addonMeta));
+ write(path.join(addon,'README.md'),'# '+spec.package+'\\n\\nExplicit optional backend for proofscript@'+version+
+  '. Receives strict checked IR and returns candidates; core retains independent admission and publication.\\n'+
+  'Install the matching core and this local unpublished tarball. Target execution requires the corresponding runtime.\\n');
+ const result=JSON.parse(run('npm',['pack',addon,'--pack-destination',tarballs,'--ignore-scripts','--json']));
+ assert.equal(result.length,1);addonTarballs[target]=path.join(tarballs,result[0].filename);
+}
+
 const consumer = path.join(runRoot, 'consumer');
 write(path.join(consumer, 'package.json'), json({ name: 'psc1-native-canary', version: '0.0.0', private: true, type: 'module' }));
 const emptyCache = path.join(runRoot, 'empty-npm-cache');
@@ -148,11 +198,19 @@ const globalPrefix = path.join(runRoot, 'global');
 run('npm', ['install', '--global', '--prefix', globalPrefix, '--cache', emptyCache, '--offline', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
 assert.deepEqual(JSON.parse(run(path.join(globalPrefix, 'bin/psc'), ['--identity'])), nativeIdentity);
 console.log(run(process.execPath, [path.join(root, 'scripts/npm-native-library-canary.mjs'), path.join(runRoot, 'library'), cli]).trim());
+const providerQualification=JSON.parse(run(process.execPath,[
+ path.join(root,'scripts/npm-backend-provider-canary.mjs'),runRoot,consumer,cli,
+ addonTarballs.python,addonTarballs.php],{env:{...cleanEnv,PSC1_TSC:process.env.PSC1_TSC||''}}));
+assert.equal(providerQualification.passed,true);
+
 const adapterResources=[
  'typed-io.mjs','typed-io-wasm.mjs','typed_io.py','typed_io_component.py','typed-io.php',
  'typed-io-rust/Cargo.toml','typed-io-rust/Cargo.lock','typed-io-rust/src/lib.rs','typed-io-rust/src/policy_server.rs'
 ].map(file=>{
- const original=path.join(root,'host-tools',file),actual=path.join(installed,'host-tools',file);
+ const original=path.join(root,'host-tools',file),actual=file==='typed_io.py'
+  ?path.join(consumer,'node_modules/@proofscript/backend-python/resources',file)
+  :file==='typed-io.php'?path.join(consumer,'node_modules/@proofscript/backend-php/resources',file)
+  :path.join(installed,'host-tools',file);
  assert.equal(sha(actual),sha(original),'installed host resource identity: '+file);
  return {file,sha256:sha(actual)};
 });
@@ -193,7 +251,8 @@ for(const syntax of ['lean','ps']){
  installedTypedIo.push({syntax,target:'js',passed:true,sourceClosureSha256:manifest.sourceClosureSha256,
   kernelAdmissionSha256:manifest.kernelAdmissionSha256,artifactSha256:sha(generatedIo)});
 }
-const receipt = { ...distribution, qualification: 'passed', adapterResources,installedTypedIo, tarball: path.relative(root, tarball),
+const receipt = { ...distribution, qualification: 'passed', providerQualification,
+  addonTarballs:Object.fromEntries(Object.entries(addonTarballs).map(([target,file])=>[target,{path:path.relative(root,file),sha256:sha(file),bytes:fs.statSync(file).size}])),adapterResources,installedTypedIo, tarball: path.relative(root, tarball),
   tarballSha256: sha(tarball), tarballBytes: fs.statSync(tarball).size,
   offlineLocalInstall: true, offlineGlobalInstall: true, nativeNpmIdentityAgreement: true,
   nativeDirectBuild: true, generatedJavaScriptExecuted: true, typeScriptInstalled: false,
@@ -203,7 +262,7 @@ write(path.join(output, 'qualification.json'), json(receipt));
 write(path.join(runRoot, 'NATIVE_DISTRIBUTION.json'), json(distribution));
 // Retain the installable tarball, receipts and library/source bundles once every
 // qualification succeeded. Avoid archiving four duplicate native installations.
-for (const temporary of [stage, consumer, globalPrefix, emptyCache, path.join(runRoot,'installed-rust-host-target')]) {
+for (const temporary of [stage, consumer, globalPrefix, emptyCache, path.join(runRoot,'installed-rust-host-target'),path.join(runRoot,'addons'),path.join(runRoot,'rust-package-target')]) {
   fs.rmSync(temporary, { recursive: true, force: true });
 }
 console.log('PSC1_NPM_NATIVE_DISTRIBUTION: PASS ' + JSON.stringify(receipt));

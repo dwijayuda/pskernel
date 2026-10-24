@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 12:18:30 UTC",
-  "status": "backend-performance-slice-verified-genuine3600s-retry-pending",
+  "recordedAtUtc": "2026-10-24 16:03:50 UTC",
+  "status": "performance-retry-G2-3600s-deadline-failed-native-provider-package-qualified-separately",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -79,9 +79,9 @@
   },
   "qualification": {
     "G1": "Both first3600s G1s independently accepted with strict original/transformed IR and all ten observations; new retry result pending",
-    "G2": "First3600s attempts deadline failures; current run40091210960 pending",
-    "G3": "not-yet-qualified",
-    "fixedPoint": "not-yet-qualified",
+    "G2": "Python3600050ms and PHP3600059ms hard deadlines in run40091210960",
+    "G3": "not-run",
+    "fixedPoint": "not-run",
     "cleanReproduction": "not-run-for-current-Python-PHP-chain",
     "performance240s": "not-qualified",
     "currentRun": 40091210960
@@ -147,7 +147,7 @@
     ],
     "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
   },
-  "nextAction": "STOP at requested verified milestone slice. On explicit continuation fetch primary/qualification HEAD and run40091210960 terminal jobs before changing source or issuing another request. Read immutable artifacts and exact new G1/G2/G3 source/IR/admission/observations/raw-byte identities. If failed, diagnose measured cost; if passed, independent clean G1 reproduction. No G2/G3 success is inferred from active jobs or source/full gates.",
+  "nextAction": "Stop at verified native provider/package milestone PR177. Preserve failed interpreter self-host source/artifacts and separate performance240s target; do not replay unchanged3600s failures for packaging. On future authorized work read current AI state, provider receipt and roadmap.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -1335,38 +1335,7 @@
       ]
     }
   },
-  "activeRequests": [
-    {
-      "branch": "qualification/psc1-python-php-3600s-20261024",
-      "controlCommit": "3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0",
-      "requestCommit": "336ff212bb810bcafa1573350355fbd1f6a0509e",
-      "runId": 40091210960,
-      "profile": "correctness-3600s",
-      "sourceAndToolsCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
-      "targets": {
-        "python": {
-          "jobId": 120864185036,
-          "status": "in_progress",
-          "conclusion": null,
-          "currentStep": "Execute genuine generated compiler generations and exact fixed point"
-        },
-        "php": {
-          "jobId": 120864185108,
-          "status": "in_progress",
-          "conclusion": null,
-          "currentStep": "Execute genuine generated compiler generations and exact fixed point"
-        }
-      },
-      "sourceEquivalence": {
-        "changedPaths": [
-          ".github/qualification-requests/psc1-python-php-selfhost.json",
-          ".github/workflows/diagnostic-psc1-python-php-qualification.yml"
-        ],
-        "compilerAndCriticalHostToolsIdentical": true
-      },
-      "fixedPoint": "not-yet-qualified"
-    }
-  ],
+  "activeRequests": [],
   "historicalSourceGates": [
     {
       "runId": 40069330525,
@@ -3999,13 +3968,13 @@
   "performanceRetry": {
     "python": {
       "commit": "b56da50567ac4051b6bea311c1b960ced1c97869",
-      "status": "focused-and-full-regression-passed-genuine-generations-pending",
+      "status": "focused-and-full-regression-passed-G2-3600s-deadline-failed",
       "mechanism": "Two hottest immutable UTF8 identity entries return without enumerate/promotion/allocation;8 entries/32MiB unchanged",
       "guards": "20000 alternating identity hits preserve exact snapshot; existing234895 helper/public/error/eviction/oversize/concurrency comparisons and exact cache-block allowlist retained"
     },
     "php": {
       "commit": "13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d",
-      "status": "focused-and-full-regression-passed-genuine-generations-pending",
+      "status": "focused-and-full-regression-passed-G2-3600s-deadline-failed",
       "mechanisms": [
         "canonical checked node slots use externally readonly public private(set) fields",
         "known2layer nonzero pure globals bypass yield at scheduled call sites after identical callee/argument snapshots"
@@ -4078,6 +4047,72 @@
         "cases": 10,
         "scope": "Current regression independently executes G1; preserved old full chain stays separately identified"
       }
+    },
+    "qualification": {
+      "runId": 40091210960,
+      "requestCommit": "336ff212bb810bcafa1573350355fbd1f6a0509e",
+      "sourceAndToolsCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+      "status": "both-G2-3600s-deadline-fail-no-G3-no-fixed-point",
+      "targets": {
+        "python": {
+          "jobId": 120864185036,
+          "status": "failed",
+          "sourceModules": 87,
+          "sourceClosureDigest": "1b62cd5530fd46b82812ab8137ed1d39aec6caec46cd6b1646f83c2ba84e257c",
+          "generations": [
+            1
+          ],
+          "fixedPoint": "not-run",
+          "event": {
+            "role": "generated-compiler",
+            "target": "python",
+            "id": "G2-self",
+            "serviceSha256": "1657115b3f08501a3bbbbbc1e6cec3d23c8c4834ff580cdb4fb1e4fc7554198f",
+            "requestSha256": "d66961aea6604fc671f558cfcce5dc4c3f5955d57e6e7dc32fc0b4eadc24b212",
+            "timeoutMs": 3600000,
+            "timeoutPolicy": "g2g3-correctness-3600s",
+            "maxRssKiB": 67860,
+            "peakTreeRssKiB": 781728,
+            "sampledCpuSeconds": 3769.69,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 3600050,
+            "status": null,
+            "signal": "SIGKILL",
+            "error": "process tree exceeded hard deadline"
+          },
+          "artifactId": 12560473608,
+          "artifactDigest": "sha256:4ccf5de2578439f2304ec3d79a9898a348f6fd5d4756813cfb47ef6e252f1dfa"
+        },
+        "php": {
+          "jobId": 120864185108,
+          "status": "failed",
+          "sourceModules": 87,
+          "sourceClosureDigest": "f919dd8ae92626e1b3d387f5409a3d955fe982243f6d06a1eea5c142ed806eed",
+          "generations": [
+            1
+          ],
+          "fixedPoint": "not-run",
+          "event": {
+            "role": "generated-compiler",
+            "target": "php",
+            "id": "G2-self",
+            "serviceSha256": "e7e8b8095a8224bfb643589d6a42ad06723363c836a8afe6ef9ed49e97dfdd65",
+            "requestSha256": "ede1747247303e5e41e231259dc63b57c874b6172148363f6197db19b6565c30",
+            "timeoutMs": 3600000,
+            "timeoutPolicy": "g2g3-correctness-3600s",
+            "maxRssKiB": 74264,
+            "peakTreeRssKiB": 1183780,
+            "sampledCpuSeconds": 3830.25,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 3600059,
+            "status": null,
+            "signal": "SIGKILL",
+            "error": "process tree exceeded hard deadline"
+          },
+          "artifactId": 12560473608,
+          "artifactDigest": "sha256:4ccf5de2578439f2304ec3d79a9898a348f6fd5d4756813cfb47ef6e252f1dfa"
+        }
+      }
     }
   },
   "previousCurrentSourceGate": {
@@ -4108,7 +4143,8 @@
     "status": "complete-at-user-requested-stop",
     "scope": "Measured Python UTF8 hot-pair and PHP readonly-slot/static-call fixes; focused and full Practical Core CI; one actual BOTH-target correctness3600s retry launched",
     "pending": "Actual new G2/G3/admission/fixed-point results; original performance240s; clean G1 reproduction only after successful chains",
-    "userInstruction": "continue until milestone slice and then stop"
+    "userInstruction": "continue until milestone slice and then stop",
+    "historical": true
   },
   "historicalQualificationSummary": {
     "G1": "both latest independently accepted,strict original/transformed IR,all ten observations",
@@ -4229,5 +4265,45 @@
     ],
     "evidenceBoundary": "full preserved Practical Core/source functionality, not G2/G3 or fixed-point qualification"
   },
-  "reviewCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a"
+  "reviewCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+  "historicalActiveRequestsAtMilestoneStop": [
+    {
+      "branch": "qualification/psc1-python-php-3600s-20261024",
+      "controlCommit": "3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0",
+      "requestCommit": "336ff212bb810bcafa1573350355fbd1f6a0509e",
+      "runId": 40091210960,
+      "profile": "correctness-3600s",
+      "sourceAndToolsCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+      "targets": {
+        "python": {
+          "jobId": 120864185036,
+          "status": "in_progress",
+          "conclusion": null,
+          "currentStep": "Execute genuine generated compiler generations and exact fixed point"
+        },
+        "php": {
+          "jobId": 120864185108,
+          "status": "in_progress",
+          "conclusion": null,
+          "currentStep": "Execute genuine generated compiler generations and exact fixed point"
+        }
+      },
+      "sourceEquivalence": {
+        "changedPaths": [
+          ".github/qualification-requests/psc1-python-php-selfhost.json",
+          ".github/workflows/diagnostic-psc1-python-php-qualification.yml"
+        ],
+        "compilerAndCriticalHostToolsIdentical": true
+      },
+      "fixedPoint": "not-yet-qualified"
+    }
+  ],
+  "nativeProviderMilestone": {
+    "receipt": "PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json",
+    "pullRequest": 177,
+    "reviewCommit": "70522c25ea3826c05ba2e80f7f1e9c7df0b58213",
+    "runId": 40106542849,
+    "status": "qualified-native-provider-package-milestone",
+    "scope": "Separate native packaging milestone; no new interpreter G2/G3/fixed point"
+  }
 }

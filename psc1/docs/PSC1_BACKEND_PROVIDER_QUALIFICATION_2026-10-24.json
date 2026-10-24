@@ -1,0 +1,1100 @@
+{
+  "schema": "psc1-backend-provider-qualification/1",
+  "status": "qualified-native-provider-package-milestone",
+  "branch": "feat/psc1-backend-provider-packages-20261024",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/177",
+  "baseCommit": "17cc49f90318abc358c731601311b90b8f8ea9fb",
+  "reviewCommit": "70522c25ea3826c05ba2e80f7f1e9c7df0b58213",
+  "implementationCommits": [
+    "8c61a9c5a699528a26b744b04b77a73698198fbd",
+    "abd95b940080008ceea9d0dce2f6ebfc2e8c0fb1",
+    "971718f56743bf3dea811e7c41ec1921909c0dbf",
+    "70522c25ea3826c05ba2e80f7f1e9c7df0b58213"
+  ],
+  "contract": "../BACKEND_PROVIDER_CONTRACT.json",
+  "defaultTargets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component"
+  ],
+  "optionalPackages": {
+    "python": {
+      "package": "@proofscript/backend-python",
+      "extension": ".py",
+      "runtimeVersion": "psc1-python-runtime/1",
+      "resources": [
+        "typed_io.py",
+        "generated-python-transport.py"
+      ]
+    },
+    "php": {
+      "package": "@proofscript/backend-php",
+      "extension": ".php",
+      "runtimeVersion": "psc1-php-runtime/1",
+      "resources": [
+        "typed-io.php",
+        "generated-php-transport.php"
+      ]
+    }
+  },
+  "checker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "authority": "unchanged independent official Lean admission in core host"
+  },
+  "boundary": {
+    "providerProtocol": "psc1-backend-provider/1",
+    "coreOwns": [
+      "source capture",
+      "frontend/elaboration",
+      "independent admission",
+      "strict original/transformed IR",
+      "closed specialization",
+      "public ABI policy",
+      "target validation",
+      "provenance",
+      "atomic publication"
+    ],
+    "providerOwns": [
+      "existing target emitter",
+      "strict IR and ABI revalidation",
+      "candidate-only response"
+    ],
+    "providerCannotAdmitOrPublish": true,
+    "hostOnlyNativeJsonAdapters": true,
+    "portableCompilerSourcesUnchanged": true,
+    "packageDescriptorPinnedByCore": true,
+    "missingOrIncompatibleProviderNoFallback": true,
+    "limits": {
+      "requestBytes": 67108864,
+      "responseBytes": 67108864,
+      "identityTimeoutMs": 10000,
+      "executionTimeoutMs": 120000
+    }
+  },
+  "focused": {
+    "runId": 40105565252,
+    "reviewCommit": "971718f56743bf3dea811e7c41ec1921909c0dbf",
+    "sourceJobId": 120906418234,
+    "packageJobId": 120906661489,
+    "status": "success",
+    "nativeIrAndRetainedEmitterPayloadComparisons": "exact",
+    "nativeMalformedIdentityIrRefusals": 16,
+    "receiptRefusals": 8,
+    "coreBinaryExcludesOptionalEmitters": true,
+    "workersExcludePscFrontendAdmissionPublicationAndOtherEmitter": true,
+    "actualBothGrammarOptionalExecutions": 4,
+    "artifacts": [
+      {
+        "id": 12564308767,
+        "name": "psc1-backend-packages-971718f56743bf3dea811e7c41ec1921909c0dbf",
+        "digest": "sha256:04fae5dfb595df4fde54ac94f245f7b30318bfd168dfd9ff0d2dc78807752fc2"
+      },
+      {
+        "id": 12564079454,
+        "name": "psc1-provider-971718f56743bf3dea811e7c41ec1921909c0dbf",
+        "digest": "sha256:9ee080602ca1bd5f4ef94c41408e045804ad10c2981eab72a1d701b951bfef13"
+      }
+    ],
+    "package": {
+      "schemaVersion": 1,
+      "sourceCommit": "971718f56743bf3dea811e7c41ec1921909c0dbf",
+      "branchHeadCommit": "971718f56743bf3dea811e7c41ec1921909c0dbf",
+      "compilerIdentity": {
+        "protocol": "psc1-native/1",
+        "profile": "psc1-checked-direct/1",
+        "lean": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "targets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "backendProviderProtocol": "psc1-backend-provider/1"
+      },
+      "backendProviderPackages": {
+        "python": {
+          "schema": "psc1-backend-package/1",
+          "protocol": "psc1-backend-provider/1",
+          "target": "python",
+          "compilerProtocol": "psc1-native/1",
+          "compilerProfile": "psc1-checked-direct/1",
+          "leanVersion": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "compilerSourceCommit": "971718f56743bf3dea811e7c41ec1921909c0dbf",
+          "runtimeContract": "psc1-runtime-semantics/1",
+          "native": {
+            "path": "native/bin/psc1_backend_python",
+            "sha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "bytes": 119097176
+          },
+          "resources": [
+            {
+              "path": "resources/typed_io.py",
+              "sha256": "445f19dd5e7271d96ea5e3b24c385cfe851e54038a45cfe2ea9510296f4d8d8d",
+              "bytes": 9857
+            },
+            {
+              "path": "resources/generated-python-transport.py",
+              "sha256": "8c56de21ab5850b30f78edceb5f20225aee7725539fcd7425f63f70f3f2b4237",
+              "bytes": 1183
+            }
+          ]
+        },
+        "php": {
+          "schema": "psc1-backend-package/1",
+          "protocol": "psc1-backend-provider/1",
+          "target": "php",
+          "compilerProtocol": "psc1-native/1",
+          "compilerProfile": "psc1-checked-direct/1",
+          "leanVersion": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "compilerSourceCommit": "971718f56743bf3dea811e7c41ec1921909c0dbf",
+          "runtimeContract": "psc1-runtime-semantics/1",
+          "native": {
+            "path": "native/bin/psc1_backend_php",
+            "sha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "bytes": 119147696
+          },
+          "resources": [
+            {
+              "path": "resources/typed-io.php",
+              "sha256": "f066cf3f6254ac3df5c5aef92c952c9133ce368046e9180cf05e1680e766a546",
+              "bytes": 14150
+            },
+            {
+              "path": "resources/generated-php-transport.php",
+              "sha256": "45c4525af5a9cfd26bc1678a45be8a4183fb84c14e83a99a68baf5a6c20c233a",
+              "bytes": 1111
+            }
+          ]
+        }
+      },
+      "builtInTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core",
+        "wasm-component"
+      ],
+      "optionalTargets": [
+        "python",
+        "php"
+      ],
+      "backendProviderProtocol": "psc1-backend-provider/1",
+      "nativeSha256": "4000bcf43af7c4b0ed6e5e284b5b2c7ce6ff36e6a61166599ba19bc1ec9e783d",
+      "nativeBytes": 124618352,
+      "platform": {
+        "os": "linux",
+        "cpu": "x64",
+        "libc": "glibc",
+        "qualifiedGlibc": "2.39"
+      },
+      "hostDependencyLockSha256": "7d8f3f53689b0ae639a2c1b6dccc26955016b026a3578a0b3d9b343fe3411345",
+      "bundledNpmDependencies": {
+        "@babel/parser": "7.28.0",
+        "prettier": "3.6.2"
+      },
+      "bundledNativeLibraries": [],
+      "logicalAdmission": "official Lean 4.35.0",
+      "noSelfHostQualification": true,
+      "publicationStatus": "unpublished",
+      "packageQualification": "receipt written only after install and execution tests",
+      "qualification": "passed",
+      "providerQualification": {
+        "schema": "psc1-installed-backend-providers/1",
+        "testedCommit": "971718f56743bf3dea811e7c41ec1921909c0dbf",
+        "passed": true,
+        "defaultTargets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "explicitOfflineInstalls": true,
+        "optionalPackagesAbsentByDefault": true,
+        "optionalResourcesAbsentByDefault": true,
+        "records": [
+          {
+            "syntax": "lean",
+            "target": "js",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "ts",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "rust",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "wasm-core",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "wasm-component",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "js",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "ts",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "rust",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "wasm-core",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "wasm-component",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          }
+        ],
+        "providerRecords": [
+          {
+            "target": "python",
+            "syntax": "lean",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-python",
+            "binarySha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "python",
+            "syntax": "ps",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-python",
+            "binarySha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "php",
+            "syntax": "lean",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-php",
+            "binarySha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "php",
+            "syntax": "ps",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-php",
+            "binarySha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          }
+        ],
+        "refusals": [
+          "absent-lean-python",
+          "absent-lean-php",
+          "absent-ps-python",
+          "absent-ps-php",
+          "python-lean-pin",
+          "python-lean-source",
+          "python-lean-target",
+          "python-lean-schema",
+          "python-binary-integrity",
+          "python-self-authorized-binary-refused",
+          "python-resource-integrity",
+          "python-ps-pin",
+          "python-ps-source",
+          "python-ps-target",
+          "python-ps-schema",
+          "php-lean-pin",
+          "php-lean-source",
+          "php-lean-target",
+          "php-lean-schema",
+          "php-binary-integrity",
+          "php-self-authorized-binary-refused",
+          "php-resource-integrity",
+          "php-ps-pin",
+          "php-ps-source",
+          "php-ps-target",
+          "php-ps-schema"
+        ],
+        "preservedExistingOutput": true
+      },
+      "addonTarballs": {
+        "python": {
+          "path": "dist/scoped-correctness/npm-native/run-dlTh4K/tarballs/proofscript-backend-python-0.1.0-psc1.3.tgz",
+          "sha256": "11f4dd7b1e67b048e4efc7fbe29779e50068442439e85d8692a44189685f620d",
+          "bytes": 33206927
+        },
+        "php": {
+          "path": "dist/scoped-correctness/npm-native/run-dlTh4K/tarballs/proofscript-backend-php-0.1.0-psc1.3.tgz",
+          "sha256": "c12c7be5e233640a84557089bdc8bb9dac1b3020179912f2fb002bc0cfdde00c",
+          "bytes": 33225276
+        }
+      },
+      "adapterResources": [
+        {
+          "file": "typed-io.mjs",
+          "sha256": "a4bdabb80b8b76dd7dbbb1f547a8ce5bf8cc3bd081e43df168307dd4beff7dfe"
+        },
+        {
+          "file": "typed-io-wasm.mjs",
+          "sha256": "25b63a011635d273c17e71f7815a49c77e1119a3db9b9e7bdf03ccc2b87cace4"
+        },
+        {
+          "file": "typed_io.py",
+          "sha256": "445f19dd5e7271d96ea5e3b24c385cfe851e54038a45cfe2ea9510296f4d8d8d"
+        },
+        {
+          "file": "typed_io_component.py",
+          "sha256": "e94c4788ef64dc3e7f2bd998016d0a14c5d197f00dbd03d86fb9010491964329"
+        },
+        {
+          "file": "typed-io.php",
+          "sha256": "f066cf3f6254ac3df5c5aef92c952c9133ce368046e9180cf05e1680e766a546"
+        },
+        {
+          "file": "typed-io-rust/Cargo.toml",
+          "sha256": "d28a3e016a9066f90c97dbaf7b080e87f11f8b14be59f101008d82ffcc6b553d"
+        },
+        {
+          "file": "typed-io-rust/Cargo.lock",
+          "sha256": "da0b94a30c54d1275a0e59b85b622cf2215d561d8a9257209b1913bc1057b42a"
+        },
+        {
+          "file": "typed-io-rust/src/lib.rs",
+          "sha256": "15d3a2939f276e9831924ae3494393c75a02ff5a18bff47c95700a2afe4c72b2"
+        },
+        {
+          "file": "typed-io-rust/src/policy_server.rs",
+          "sha256": "19f426587494dd772b8627792c9ac996fa2166f8733968458b8f97b22b17ce2e"
+        }
+      ],
+      "installedTypedIo": [
+        {
+          "syntax": "lean",
+          "target": "js",
+          "passed": true,
+          "sourceClosureSha256": "6a51b53bc28031eed4960f19baec7874b73ec5598da1b913131a0916ca84e905",
+          "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+          "artifactSha256": "16434d73786bf75c93736d92b86558db4425fe2e1dea0d980058dea7b935f09e"
+        },
+        {
+          "syntax": "ps",
+          "target": "js",
+          "passed": true,
+          "sourceClosureSha256": "c2fa76dcdcf7eab579d43ac15ed4719b295f67327286543a76647a781dfe0960",
+          "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+          "artifactSha256": "16434d73786bf75c93736d92b86558db4425fe2e1dea0d980058dea7b935f09e"
+        }
+      ],
+      "tarball": "dist/scoped-correctness/npm-native/run-dlTh4K/tarballs/proofscript-0.1.0-psc1.3.tgz",
+      "tarballSha256": "d1ed2530833624625054a52cf746983686455fa48b5b5eb2b672594fea55f928",
+      "tarballBytes": 37810665,
+      "offlineLocalInstall": true,
+      "offlineGlobalInstall": true,
+      "nativeNpmIdentityAgreement": true,
+      "nativeDirectBuild": true,
+      "generatedJavaScriptExecuted": true,
+      "typeScriptInstalled": false,
+      "optionalLibraryReceipt": "dist/scoped-correctness/npm-native/run-dlTh4K/library/qualification.json",
+      "nodeVersion": "v22.23.3",
+      "npmVersion": "10.9.9"
+    }
+  },
+  "fullRegression": {
+    "runId": 40106542849,
+    "status": "success",
+    "reviewCommit": "70522c25ea3826c05ba2e80f7f1e9c7df0b58213",
+    "testedMerge": "063d1da64db9beb69a8303af5a2a8788233dc7dd",
+    "identicalGitTree": "b2d2ad3e24a07218c081eb20bc85670fd64e29e4",
+    "linuxJobId": 120912148533,
+    "gateJobId": 120918578150,
+    "qualified": 37,
+    "blocked": 0,
+    "releaseReady": true,
+    "backends": 7,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "targetExecutionBundles": 14,
+    "scriptingRegressionGroups": 28,
+    "scriptingArtifactBundles": 24,
+    "architectureRegressionGroups": 11,
+    "requiredProviderReceipt": {
+      "schema": "psc1-backend-provider-tests/1",
+      "testedCommit": "063d1da64db9beb69a8303af5a2a8788233dc7dd",
+      "defaultTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core",
+        "wasm-component"
+      ],
+      "defaultBinaryExcludesOptionalEmitters": true,
+      "providersExcludeFrontendCheckerAndPublisher": true,
+      "retainedPayloadsExact": true,
+      "malformedWorkerRefused": true,
+      "missingProviderPreservesOutput": true,
+      "cases": [
+        {
+          "target": "python",
+          "syntax": "lean",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c"
+        },
+        {
+          "target": "python",
+          "syntax": "ps",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c"
+        },
+        {
+          "target": "php",
+          "syntax": "lean",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7"
+        },
+        {
+          "target": "php",
+          "syntax": "ps",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7"
+        }
+      ]
+    },
+    "versions": {
+      "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "typescriptConsumer": "Version 7.0.2",
+      "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+      "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+      "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+      "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+      "python": "Python 3.15.0",
+      "pythonMinimum": "Python 3.14.8",
+      "php": "PHP 8.5.12 (cli) (built: Oct 19 2026 17:51:02) (NTS)"
+    },
+    "minimumPython": {
+      "targetExecutionBundles": 2,
+      "scriptingRegressionGroups": 14,
+      "artifactBundles": 12,
+      "runtimeEvidence": "runtime-conformance-python314/results.json",
+      "scriptingEvidence": "script-backends-python314/results.json"
+    },
+    "package": {
+      "schemaVersion": 1,
+      "sourceCommit": "063d1da64db9beb69a8303af5a2a8788233dc7dd",
+      "branchHeadCommit": "70522c25ea3826c05ba2e80f7f1e9c7df0b58213",
+      "compilerIdentity": {
+        "protocol": "psc1-native/1",
+        "profile": "psc1-checked-direct/1",
+        "lean": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "targets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "backendProviderProtocol": "psc1-backend-provider/1"
+      },
+      "backendProviderPackages": {
+        "python": {
+          "schema": "psc1-backend-package/1",
+          "protocol": "psc1-backend-provider/1",
+          "target": "python",
+          "compilerProtocol": "psc1-native/1",
+          "compilerProfile": "psc1-checked-direct/1",
+          "leanVersion": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "compilerSourceCommit": "063d1da64db9beb69a8303af5a2a8788233dc7dd",
+          "runtimeContract": "psc1-runtime-semantics/1",
+          "native": {
+            "path": "native/bin/psc1_backend_python",
+            "sha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "bytes": 119097176
+          },
+          "resources": [
+            {
+              "path": "resources/typed_io.py",
+              "sha256": "445f19dd5e7271d96ea5e3b24c385cfe851e54038a45cfe2ea9510296f4d8d8d",
+              "bytes": 9857
+            },
+            {
+              "path": "resources/generated-python-transport.py",
+              "sha256": "8c56de21ab5850b30f78edceb5f20225aee7725539fcd7425f63f70f3f2b4237",
+              "bytes": 1183
+            }
+          ]
+        },
+        "php": {
+          "schema": "psc1-backend-package/1",
+          "protocol": "psc1-backend-provider/1",
+          "target": "php",
+          "compilerProtocol": "psc1-native/1",
+          "compilerProfile": "psc1-checked-direct/1",
+          "leanVersion": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "compilerSourceCommit": "063d1da64db9beb69a8303af5a2a8788233dc7dd",
+          "runtimeContract": "psc1-runtime-semantics/1",
+          "native": {
+            "path": "native/bin/psc1_backend_php",
+            "sha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "bytes": 119147696
+          },
+          "resources": [
+            {
+              "path": "resources/typed-io.php",
+              "sha256": "f066cf3f6254ac3df5c5aef92c952c9133ce368046e9180cf05e1680e766a546",
+              "bytes": 14150
+            },
+            {
+              "path": "resources/generated-php-transport.php",
+              "sha256": "45c4525af5a9cfd26bc1678a45be8a4183fb84c14e83a99a68baf5a6c20c233a",
+              "bytes": 1111
+            }
+          ]
+        }
+      },
+      "builtInTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core",
+        "wasm-component"
+      ],
+      "optionalTargets": [
+        "python",
+        "php"
+      ],
+      "backendProviderProtocol": "psc1-backend-provider/1",
+      "nativeSha256": "4000bcf43af7c4b0ed6e5e284b5b2c7ce6ff36e6a61166599ba19bc1ec9e783d",
+      "nativeBytes": 124618352,
+      "platform": {
+        "os": "linux",
+        "cpu": "x64",
+        "libc": "glibc",
+        "qualifiedGlibc": "2.39"
+      },
+      "hostDependencyLockSha256": "7d8f3f53689b0ae639a2c1b6dccc26955016b026a3578a0b3d9b343fe3411345",
+      "bundledNpmDependencies": {
+        "@babel/parser": "7.28.0",
+        "prettier": "3.6.2"
+      },
+      "bundledNativeLibraries": [],
+      "logicalAdmission": "official Lean 4.35.0",
+      "noSelfHostQualification": true,
+      "publicationStatus": "unpublished",
+      "packageQualification": "receipt written only after install and execution tests",
+      "qualification": "passed",
+      "providerQualification": {
+        "schema": "psc1-installed-backend-providers/1",
+        "testedCommit": "063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "passed": true,
+        "defaultTargets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "explicitOfflineInstalls": true,
+        "optionalPackagesAbsentByDefault": true,
+        "optionalResourcesAbsentByDefault": true,
+        "records": [
+          {
+            "syntax": "lean",
+            "target": "js",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "ts",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "rust",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "wasm-core",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "wasm-component",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "js",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "ts",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "rust",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "wasm-core",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "wasm-component",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          }
+        ],
+        "providerRecords": [
+          {
+            "target": "python",
+            "syntax": "lean",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-python",
+            "binarySha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "python",
+            "syntax": "ps",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-python",
+            "binarySha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "php",
+            "syntax": "lean",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-php",
+            "binarySha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "php",
+            "syntax": "ps",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-php",
+            "binarySha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          }
+        ],
+        "refusals": [
+          "absent-lean-python",
+          "absent-lean-php",
+          "absent-ps-python",
+          "absent-ps-php",
+          "python-lean-pin",
+          "python-lean-source",
+          "python-lean-target",
+          "python-lean-schema",
+          "python-binary-integrity",
+          "python-self-authorized-binary-refused",
+          "python-resource-integrity",
+          "python-ps-pin",
+          "python-ps-source",
+          "python-ps-target",
+          "python-ps-schema",
+          "php-lean-pin",
+          "php-lean-source",
+          "php-lean-target",
+          "php-lean-schema",
+          "php-binary-integrity",
+          "php-self-authorized-binary-refused",
+          "php-resource-integrity",
+          "php-ps-pin",
+          "php-ps-source",
+          "php-ps-target",
+          "php-ps-schema"
+        ],
+        "preservedExistingOutput": true
+      },
+      "addonTarballs": {
+        "python": {
+          "path": "dist/scoped-correctness/npm-native/run-3Df1Je/tarballs/proofscript-backend-python-0.1.0-psc1.3.tgz",
+          "sha256": "7c9d2cbeb47dcdd2c680c5981cc1458ff59fb590c48ed1f0f96f243c4c2fbc07",
+          "bytes": 33206929
+        },
+        "php": {
+          "path": "dist/scoped-correctness/npm-native/run-3Df1Je/tarballs/proofscript-backend-php-0.1.0-psc1.3.tgz",
+          "sha256": "ea756a91fb6ccb1d8aaa7409f82b7b3c2ace8da22a94f59027ecb96b06e7c8d4",
+          "bytes": 33225275
+        }
+      },
+      "adapterResources": [
+        {
+          "file": "typed-io.mjs",
+          "sha256": "a4bdabb80b8b76dd7dbbb1f547a8ce5bf8cc3bd081e43df168307dd4beff7dfe"
+        },
+        {
+          "file": "typed-io-wasm.mjs",
+          "sha256": "25b63a011635d273c17e71f7815a49c77e1119a3db9b9e7bdf03ccc2b87cace4"
+        },
+        {
+          "file": "typed_io.py",
+          "sha256": "445f19dd5e7271d96ea5e3b24c385cfe851e54038a45cfe2ea9510296f4d8d8d"
+        },
+        {
+          "file": "typed_io_component.py",
+          "sha256": "e94c4788ef64dc3e7f2bd998016d0a14c5d197f00dbd03d86fb9010491964329"
+        },
+        {
+          "file": "typed-io.php",
+          "sha256": "f066cf3f6254ac3df5c5aef92c952c9133ce368046e9180cf05e1680e766a546"
+        },
+        {
+          "file": "typed-io-rust/Cargo.toml",
+          "sha256": "d28a3e016a9066f90c97dbaf7b080e87f11f8b14be59f101008d82ffcc6b553d"
+        },
+        {
+          "file": "typed-io-rust/Cargo.lock",
+          "sha256": "da0b94a30c54d1275a0e59b85b622cf2215d561d8a9257209b1913bc1057b42a"
+        },
+        {
+          "file": "typed-io-rust/src/lib.rs",
+          "sha256": "15d3a2939f276e9831924ae3494393c75a02ff5a18bff47c95700a2afe4c72b2"
+        },
+        {
+          "file": "typed-io-rust/src/policy_server.rs",
+          "sha256": "19f426587494dd772b8627792c9ac996fa2166f8733968458b8f97b22b17ce2e"
+        }
+      ],
+      "installedTypedIo": [
+        {
+          "syntax": "lean",
+          "target": "js",
+          "passed": true,
+          "sourceClosureSha256": "6a51b53bc28031eed4960f19baec7874b73ec5598da1b913131a0916ca84e905",
+          "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+          "artifactSha256": "16434d73786bf75c93736d92b86558db4425fe2e1dea0d980058dea7b935f09e"
+        },
+        {
+          "syntax": "ps",
+          "target": "js",
+          "passed": true,
+          "sourceClosureSha256": "c2fa76dcdcf7eab579d43ac15ed4719b295f67327286543a76647a781dfe0960",
+          "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+          "artifactSha256": "16434d73786bf75c93736d92b86558db4425fe2e1dea0d980058dea7b935f09e"
+        }
+      ],
+      "tarball": "dist/scoped-correctness/npm-native/run-3Df1Je/tarballs/proofscript-0.1.0-psc1.3.tgz",
+      "tarballSha256": "6c06085e60ffde19c7418bf265e27b4ebc9a244572a388564beb8b1c0fdcab28",
+      "tarballBytes": 37810688,
+      "offlineLocalInstall": true,
+      "offlineGlobalInstall": true,
+      "nativeNpmIdentityAgreement": true,
+      "nativeDirectBuild": true,
+      "generatedJavaScriptExecuted": true,
+      "typeScriptInstalled": false,
+      "optionalLibraryReceipt": "dist/scoped-correctness/npm-native/run-3Df1Je/library/qualification.json",
+      "nodeVersion": "v22.23.3",
+      "npmVersion": "10.9.9"
+    },
+    "artifacts": [
+      {
+        "id": 12566181617,
+        "name": "psc1-scoped-correctness-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:be0a4ed3850383345acfbf2127d34caa32154ed6c5f8ac10304edd3d54899957"
+      },
+      {
+        "id": 12565585727,
+        "name": "psc1-practical-compiler-m-applications-063d1da64db9beb69a8303af5a2a8788233dc7dd-attempt-1",
+        "digest": "sha256:0ec8be36a7c9b6e4ca48d88d218033ce37e1ead534d4c20263fa9aa3a244106b"
+      },
+      {
+        "id": 12565371941,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:9460281e16e0dd1d2b0ad6ba433fc662f6af9c2744c637a9fc3213d12366d77f"
+      },
+      {
+        "id": 12565287141,
+        "name": "psc1-generated-compiler-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:4a9ed8bf8dffb8a259939aaf5e5dfe829b74d33f9818302a5e13d9e8e8e75442"
+      },
+      {
+        "id": 12565285578,
+        "name": "psc1-development-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:82847b50237ede6a364d7527056c2eabcef665ddb77110e0e50e5c53a34eeba9"
+      },
+      {
+        "id": 12565197344,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:d477d5ed8daa49731b1306e0fab875eb2deb56ff4533c0ddf3d3eca04cf36d7c"
+      },
+      {
+        "id": 12565116677,
+        "name": "psc1-php-applications-063d1da64db9beb69a8303af5a2a8788233dc7dd-attempt-1",
+        "digest": "sha256:a4f29e68734ef77861f31ce548a0f7be6340c9f1bb9833c4e402449b2dcea00a"
+      },
+      {
+        "id": 12564799198,
+        "name": "psc1-generated-session-boundary-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:0386f4fb286c32b74675d06da1f3daee4dbd7fd321988aa22372bccad4ebce40"
+      },
+      {
+        "id": 12564779390,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:21fed645aebd11f238b52d2168917cd8b11361078661c6a0b9cee499ae551021"
+      },
+      {
+        "id": 12564659341,
+        "name": "psc1-practical-compiler-m-core-063d1da64db9beb69a8303af5a2a8788233dc7dd-attempt-1",
+        "digest": "sha256:0c193bc641555faff6b5b39b4d310060baa58b4a5ef0876673edfebb5d754055"
+      },
+      {
+        "id": 12564638739,
+        "name": "psc1-architecture-native-063d1da64db9beb69a8303af5a2a8788233dc7dd",
+        "digest": "sha256:2cda0c951392c4b336893fd422595c4548b0b64a3cd7da6745ed8895a42cd03c"
+      }
+    ],
+    "scope": "Native provider/default/add-on package and preserved finite Practical Core regression qualification; not new unified generated self-hosting"
+  },
+  "earlierRuns": [
+    {
+      "runId": 40104342314,
+      "commit": "8c61a9c5a699528a26b744b04b77a73698198fbd",
+      "status": "success",
+      "scope": "initial protocol/binary/retained/actual both-grammar gate"
+    },
+    {
+      "runId": 40105154897,
+      "commit": "abd95b940080008ceea9d0dce2f6ebfc2e8c0fb1",
+      "source": "success",
+      "packages": "failed",
+      "failure": "TypeScript7 TS5112 required explicit --ignoreConfig for explicit input files",
+      "fix": "971718f adds --ignoreConfig and retains strict type checking"
+    },
+    {
+      "runId": 40105916653,
+      "commit": "971718f56743bf3dea811e7c41ec1921909c0dbf",
+      "status": "cancelled",
+      "reason": "added provider boundary gate as a required part of every full regression; superseded before full integration"
+    }
+  ],
+  "priorPythonPhpSelfHostRetry": {
+    "runId": 40091210960,
+    "requestCommit": "336ff212bb810bcafa1573350355fbd1f6a0509e",
+    "sourceAndToolsCommit": "b33027de36225e0a4f6d0f86572bd42115aad42a",
+    "status": "both-G2-3600s-deadline-fail-no-G3-no-fixed-point",
+    "targets": {
+      "python": {
+        "jobId": 120864185036,
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "1b62cd5530fd46b82812ab8137ed1d39aec6caec46cd6b1646f83c2ba84e257c",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "event": {
+          "role": "generated-compiler",
+          "target": "python",
+          "id": "G2-self",
+          "serviceSha256": "1657115b3f08501a3bbbbbc1e6cec3d23c8c4834ff580cdb4fb1e4fc7554198f",
+          "requestSha256": "d66961aea6604fc671f558cfcce5dc4c3f5955d57e6e7dc32fc0b4eadc24b212",
+          "timeoutMs": 3600000,
+          "timeoutPolicy": "g2g3-correctness-3600s",
+          "maxRssKiB": 67860,
+          "peakTreeRssKiB": 781728,
+          "sampledCpuSeconds": 3769.69,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 3600050,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        },
+        "artifactId": 12560473608,
+        "artifactDigest": "sha256:4ccf5de2578439f2304ec3d79a9898a348f6fd5d4756813cfb47ef6e252f1dfa"
+      },
+      "php": {
+        "jobId": 120864185108,
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "f919dd8ae92626e1b3d387f5409a3d955fe982243f6d06a1eea5c142ed806eed",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "event": {
+          "role": "generated-compiler",
+          "target": "php",
+          "id": "G2-self",
+          "serviceSha256": "e7e8b8095a8224bfb643589d6a42ad06723363c836a8afe6ef9ed49e97dfdd65",
+          "requestSha256": "ede1747247303e5e41e231259dc63b57c874b6172148363f6197db19b6565c30",
+          "timeoutMs": 3600000,
+          "timeoutPolicy": "g2g3-correctness-3600s",
+          "maxRssKiB": 74264,
+          "peakTreeRssKiB": 1183780,
+          "sampledCpuSeconds": 3830.25,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 3600059,
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "process tree exceeded hard deadline"
+        },
+        "artifactId": 12560473608,
+        "artifactDigest": "sha256:4ccf5de2578439f2304ec3d79a9898a348f6fd5d4756813cfb47ef6e252f1dfa"
+      }
+    }
+  },
+  "qualificationBoundary": {
+    "nativeLinuxX64GlibcDistribution": true,
+    "registryPublication": false,
+    "newUnifiedGeneratedCompiler": false,
+    "newG1G2G3FixedPoint": false,
+    "formalBackendPreservationProof": false,
+    "generalLanguagePluginFramework": false
+  },
+  "nextAction": "STOP at the requested verified milestone. Preserve PR177 draft/unmerged and all three unpublished tarballs. On a newly authorized continuation read this receipt/latest HEAD first. Unified generated multi-backend composition and G1/G2/G3/fixed points remain separate future work.",
+  "g1Preservation": {
+    "runId": 40106542849,
+    "jobId": 120911348119,
+    "status": "passed-diagnostic",
+    "completedCorpusGenerations": [
+      1
+    ],
+    "cases": 10,
+    "service": {
+      "generation": 1,
+      "sha256": "8dad2e7fb1e3eb834bed9fc7581b8f2cce36f834c5e7842f19b6f8bb904b871a",
+      "export": "psCompilerJsServiceCandidate",
+      "sourceClosureDigest": "5b1824ce8d98a9ec9068f351f28abab8485a9786510c47fd5b4cedeac8734a2e",
+      "sourceModules": 87,
+      "candidateAdmission": "80bc5ec1ea7b0af59c27200903d7222a24fbd1942a96c0cfa5878d9fe7cf6993",
+      "canonicalOriginalIr": "504532c172c27a30f0555c3942fbc01a951456d564a3be9f525ed299cf582262",
+      "canonicalSpecializedIr": "94122ea712bb89888099b900f0357d804e373d2caa0a5b30e1556ba3c0752300"
+    },
+    "scope": "Existing single-emitter generated-JS G1 regression; same historical qualified service hash; not new unified multi-backend self-host qualification"
+  },
+  "recordedAtUtc": "2026-10-24 16:03:50 UTC",
+  "milestone": {
+    "complete": true,
+    "userInstruction": "implement backend provider boundary/package split and stop at a verified milestone",
+    "sourceChangesFinished": true,
+    "focusedAndFullCiPassed": true,
+    "stopped": true
+  }
+}

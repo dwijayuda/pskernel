@@ -206,6 +206,7 @@ lean_lib PsHost where
     `Ps.Host.LeanChecked,
     `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend,
+    `Ps.Host.BackendProviderProtocol,
     `Ps.Host.ScriptBackend,
     `Ps.Host.WasmComponent,
     `Ps.Host.WasmString
@@ -580,3 +581,16 @@ lean_exe psc1_php_extract_tests where
 lean_exe psc1_python_tail_loop_tests where
   srcDir := "test"
   root := `PythonTailLoopTests
+
+-- Optional emit-only workers never link into the default psc1 executable.
+lean_exe psc1_backend_python where
+  srcDir := "packages/backend-python/src"
+  root := `Ps.BackendPython.ProviderMain
+
+lean_exe psc1_backend_php where
+  srcDir := "packages/backend-php/src"
+  root := `Ps.BackendPhp.ProviderMain
+
+lean_exe psc1_backend_provider_tests where
+  srcDir := "test"
+  root := `BackendProviderTests

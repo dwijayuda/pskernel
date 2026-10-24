@@ -1,0 +1,45 @@
+{
+  "schema": "psc1-backend-provider-contract/1",
+  "protocol": "psc1-backend-provider/1",
+  "coreTargets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component"
+  ],
+  "optionalProviders": {
+    "python": {
+      "package": "@proofscript/backend-python",
+      "extension": ".py",
+      "runtimeVersion": "psc1-python-runtime/1",
+      "resources": [
+        "typed_io.py",
+        "generated-python-transport.py"
+      ]
+    },
+    "php": {
+      "package": "@proofscript/backend-php",
+      "extension": ".php",
+      "runtimeVersion": "psc1-php-runtime/1",
+      "resources": [
+        "typed-io.php",
+        "generated-php-transport.php"
+      ]
+    }
+  },
+  "wireEncoding": "native Lean ToJson/FromJson, exact compiler-source and Lean identity pinned; not portable psc1-ir/1",
+  "limits": {
+    "requestBytes": 67108864,
+    "responseBytes": 67108864,
+    "identityTimeoutMs": 10000,
+    "executionTimeoutMs": 120000
+  },
+  "authority": {
+    "provider": "candidate-only",
+    "admission": "independent official Lean 4.35.0 in core host",
+    "strictOriginalAndTransformedIr": true,
+    "publication": "core-host"
+  },
+  "qualification": "Installed offline core plus explicit add-ons; retained emitter payloads; both grammars; all-seven existing regressions; does not confer new self-host G2/G3 qualification"
+}

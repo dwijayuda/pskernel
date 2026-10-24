@@ -8,7 +8,7 @@ private def expect {α : Type} (label : String) : Except String α → IO α
   | .ok value => pure value
   | .error message => throw (IO.userError (label ++ ": " ++ message))
 
-private def public {α : Type} (label : String) : Except PsKernelError α → IO α
+private def expectPublic {α : Type} (label : String) : Except PsKernelError α → IO α
   | .ok value => pure value
   | .error _ => throw (IO.userError ("PSC1_ADMISSION_PUBLIC_UNEXPECTED_ERROR " ++ label))
 
@@ -60,7 +60,7 @@ def main : IO Unit := do
   let value := PsKernelDagInductive.mk name s.snd [PsKernelDagConstructor.mk ctorName t.snd]
   let request := PsKernelDagDeclarationRequest.ordinaryInductive [] 0 value false
   let declaration ← expect "request" (psKernelDagDecodeDeclaration input request)
-  let session ← public "empty"
+  let session ← expectPublic "empty"
     (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   let owner ← expect "session-owner" (psKernelDagGeneratedFromSession session arena input)
   let execution := PsKernelDagExecutionState.mk session owner.declarations
@@ -68,7 +68,7 @@ def main : IO Unit := do
     (psKernelExprV2OrdinaryAdmitWithFuel 4096 (psKernelKernelSessionEnvironment session)
       session.resources.maxRecDepth session.resources.maxNatSize
       input owner [] 0 value false)
-  let direct ← public "direct"
+  let direct ← expectPublic "direct"
     (psKernelDagRunOwnedCommandWithSource input execution [] .safe
       owner.arena owner.built (.admit request))
   require "routing/direct-owner-retained"
@@ -83,7 +83,7 @@ def main : IO Unit := do
   let marker := PsKernelExpr.sort (.succ (.succ (.succ .zero)))
   let imported ← expect "marker" (psKernelDagGeneratedImport marker checked.owner)
   let marked := PsKernelExprV2OrdinaryAdmissionResult.mk checked.environment imported.fst
-  let published ← public "finish-marker"
+  let published ← expectPublic "finish-marker"
     (psKernelDagRunOrdinaryOwnedWith (fun _ => some (.ok marked)) input execution
       [] .safe owner.arena owner.built request declaration)
   let markerResult ← expect "marker-result"
@@ -94,10 +94,10 @@ def main : IO Unit := do
      psKernelExprEqual markerResult marker &&
      hasRecursor recName published.execution.declarations)
 
-  let declined ← public "declined"
+  let declined ← expectPublic "declined"
     (psKernelDagRunOrdinaryOwnedWith (fun _ => none) input execution
       [] .safe owner.arena owner.built request declaration)
-  let fallback ← public "fallback"
+  let fallback ← expectPublic "fallback"
     (psKernelDagRunFallbackOwnedCommandWithSource input execution
       [] .safe owner.arena owner.built (.admit request))
   require "routing/decline-restarts-original"
@@ -122,7 +122,7 @@ def main : IO Unit := do
          message == "declaration limit exceeded"
      | _ => false)
 
-  let batch ← public "batch"
+  let batch ← expectPublic "batch"
     (psKernelV1RunDag session [] .safe arena [.admit request,.check r.snd])
   require "routing/same-batch-recursor-check"
     (match batch.replies with
@@ -130,7 +130,7 @@ def main : IO Unit := do
          receipt.declarationsBefore == 0 && receipt.declarationsAfter == 3
      | _ => false)
 
-  let later ← public "cross-call"
+  let later ← expectPublic "cross-call"
     (psKernelV1RunDag batch.session [] .safe arena [.check r.snd])
   require "routing/cross-call-checked-recursor"
     (match later.replies with

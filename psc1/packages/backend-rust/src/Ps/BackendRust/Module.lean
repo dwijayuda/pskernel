@@ -1335,7 +1335,7 @@ def psRustTypeMayUseCarrier (fuel : Nat) (type : PsVerifiedIrType) : Bool :=
       match type with
       | .primitive _ => false
       | .function parameters result =>
-          psListAny (psRustTypeMayUseCarrier remaining) parameters ||
+          psListAny (fun (value : PsVerifiedIrType) => psRustTypeMayUseCarrier remaining value) parameters ||
             psRustTypeMayUseCarrier remaining result
       | _ => true
 
@@ -1347,8 +1347,8 @@ def psRustExprMayUseCarrier (fuel : Nat) (expr : PsVerifiedIrExpr) : Bool :=
       | .literal _ => false
       | .var _ => false
       | .intrinsic _ types arguments =>
-          psListAny (psRustTypeMayUseCarrier remaining) types ||
-            psListAny (psRustExprMayUseCarrier remaining) arguments
+          psListAny (fun (value : PsVerifiedIrType) => psRustTypeMayUseCarrier remaining value) types ||
+            psListAny (fun (value : PsVerifiedIrExpr) => psRustExprMayUseCarrier remaining value) arguments
       | .lambda parameters result body =>
           psListAny (fun (parameter : PsVerifiedIrParameter) =>
             psRustTypeMayUseCarrier remaining parameter.type) parameters ||
@@ -1356,8 +1356,8 @@ def psRustExprMayUseCarrier (fuel : Nat) (expr : PsVerifiedIrExpr) : Bool :=
           psRustExprMayUseCarrier remaining body
       | .call fn types arguments =>
           psRustExprMayUseCarrier remaining fn ||
-          psListAny (psRustTypeMayUseCarrier remaining) types ||
-          psListAny (psRustExprMayUseCarrier remaining) arguments
+          psListAny (fun (value : PsVerifiedIrType) => psRustTypeMayUseCarrier remaining value) types ||
+          psListAny (fun (value : PsVerifiedIrExpr) => psRustExprMayUseCarrier remaining value) arguments
       | .letE _ type value body =>
           psRustTypeMayUseCarrier remaining type ||
           psRustExprMayUseCarrier remaining value ||

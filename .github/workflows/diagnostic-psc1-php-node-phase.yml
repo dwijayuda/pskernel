@@ -1,0 +1,53 @@
+name: PSC1 exact PHP node G2 phase and compiler-source slice diagnostics
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-php-node-phase.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [sample, slice]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.12'
+          extensions: gmp
+          tools: none
+          coverage: none
+      - name: Require exact failed artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ulimit -s
+          gh api repos/dwijayuda/pskernel/actions/jobs/120812693944 > job.json
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12553366583 > artifact.json
+          python3 - <<'PY'
+          import json
+          j=json.load(open("job.json"));a=json.load(open("artifact.json"))
+          assert j["run_id"]==40073754301 and j["status"]=="completed" and j["conclusion"]=="failure"
+          assert a["workflow_run"]["id"]==40073754301 and a["workflow_run"]["head_sha"]=="75f04cfdcafc1fbeea08f66f595f40ff6b777d04"
+          assert a["digest"]=="sha256:d26db3c9ed1123d3bbd2be83f4936c4c2065aad29c53ea28e54d358d2551da49" and not a["expired"]
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40073754301'
+          artifact-ids: '12553366583'
+          path: baseline
+      - name: Diagnose actual generated workload with unchanged memory and stack limits
+        run: python3 .github/diagnostics/psc1-php-node-phase.py ${{ matrix.mode }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-php-node-diagnostic-${{ matrix.mode }}-${{ github.sha }}
+          path: diagnostics/
+          retention-days: 90

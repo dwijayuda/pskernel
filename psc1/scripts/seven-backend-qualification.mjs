@@ -21,6 +21,17 @@ const architecture = read('dist/scoped-correctness/backend-architecture/results.
 const minimumRuntime = read('dist/scoped-correctness/runtime-conformance-python314/results.json');
 const minimumScripts = read('dist/scoped-correctness/script-backends-python314/results.json');
 const distribution = read('dist/scoped-correctness/npm-native/qualification.json');
+const backendProviders=read('dist/backend-providers/qualification.json');
+assert.equal(backendProviders.schema,'psc1-backend-provider-tests/1');
+assert.equal(backendProviders.testedCommit,process.env.GITHUB_SHA);
+for(const key of ['defaultBinaryExcludesOptionalEmitters','providersExcludeFrontendCheckerAndPublisher',
+ 'retainedPayloadsExact','malformedWorkerRefused','missingProviderPreservesOutput'])
+ assert.equal(backendProviders[key],true,'backend-provider:'+key);
+assert.deepEqual(backendProviders.defaultTargets,['js','ts','rust','wasm-core','wasm-component']);
+assert.deepEqual(backendProviders.cases.map(r=>r.syntax+'/'+r.target).sort(),
+ ['lean/php','lean/python','ps/php','ps/python']);
+assert.ok(backendProviders.cases.every(r=>r.passed&&r.admission==='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'));
+
 const library = read(distribution.optionalLibraryReceipt);
 const namespaceBoundaries = ['lean', 'ps'].map(syntax =>
   read('dist/scoped-correctness/namespace-boundaries/' + syntax + '.json'));

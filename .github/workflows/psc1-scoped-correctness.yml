@@ -125,13 +125,17 @@ jobs:
           set -euo pipefail
           lean --version
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1 psc1_backend_python psc1_backend_php psc1_php_utf8_tests psc1_ts_continuation_tests psc1_wasm_string_abi_tests psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
+          lake build psc1 psc1_backend_python psc1_backend_php psc1_backend_provider_tests psc1_php_utf8_tests psc1_ts_continuation_tests psc1_wasm_string_abi_tests psc1_script_ir_tests psc1_runtime_oracle psc1_backend_common_tests psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests contextual_inference_tests psc1_do_tests psc1_data_tests psc1_while_tests psc1_namespace_tests psc1_operator_tests psc1_ordinary_tests psc1_typed_error_oracle psc1_typed_error_tests psc1_source_census_probe psc1_independent_checker
       - name: Save successful compilation before running regressions
         if: steps.native_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: psc1/.lake
           key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Require optional backend transport, dependency and refusal regressions
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' }}
+        working-directory: psc1
+        run: node scripts/backend-provider-tests.mjs
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1
         run: |
@@ -340,6 +344,7 @@ jobs:
         with:
           name: psc1-scoped-correctness-${{ github.sha }}
           path: |
+            psc1/dist/backend-providers/
             psc1/dist/development/
             psc1/host-tools/package-lock.json
             psc1/dist/scoped-correctness/

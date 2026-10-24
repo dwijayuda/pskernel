@@ -52,6 +52,9 @@ for($i=0;$i<count($tokens);++$i){
 }
 if($slots<1000||($mode==='node-properties-and-direct-calls'&&$calls<100))throw new RuntimeException('EXPECTED_OPTIMIZATION_SITES');
 $modified=$prefix.$result;$module=dirname($original).'/diagnostic-'.$mode.'.php';file_put_contents($module,$modified);$module=realpath($module);
+// Release tokenizer/transformation scratch before running the compiler under its unchanged1G limit.
+unset($tokens,$next,$plain,$bindings,$assignments,$prefix,$program,$result,$source);
+gc_collect_cycles();
 $api=require $module;$smoke=[];
 foreach(['G1-lean-modules','G1-ps-integer-unicode','G1-ps-list-literal','G1-lean-handler-pattern','G1-lean-ordinary-loop']as$label){
  $response=$api['psCompilerPhpServiceCandidate'](file_get_contents($base.'/'.$label.'.request.json'));

@@ -52,7 +52,7 @@ function request(id,grammar,assurance,entry,sources,outputTarget=target) {
  const digest=compilerSourceClosureDigest(captured);
  const inner=JSON.stringify(['psc1-compiler-service/1',id,digest,grammar,assurance,entry,sources.map(s=>[s.module,s.text])]);
  return {id,grammar,assurance,entry,sources:captured,digest,outputTarget,
-  text:unified?JSON.stringify(['psc1-unified-compiler-service/1',outputTarget,inner]):inner,inner};
+  text:unified?JSON.stringify(['psc1-unified-compiler-service/2',outputTarget,JSON.parse(inner)]):inner,inner};
 }
 function candidateFile(file) {
  const b=fs.readFileSync(file);assert.ok(b.length>0&&b.length<=128*1024*1024);
@@ -145,8 +145,8 @@ function exerciseAll(artifact,generation) {
  if(unified) {
   for(const [index,input] of ['malformed','null','{}',
     JSON.stringify(['wrong','js','{}']),
-    ...['python','php','wasm-component','unknown'].map(t=>JSON.stringify(['psc1-unified-compiler-service/1',t,'{}'])),
-    JSON.stringify(['psc1-unified-compiler-service/1','js','{}','extra'])].entries()) {
+    ...['python','php','wasm-component','unknown'].map(t=>JSON.stringify(['psc1-unified-compiler-service/2',t,[]])),
+    JSON.stringify(['psc1-unified-compiler-service/2','js',[],'extra'])].entries()) {
    const label='G'+generation+'-envelope-'+index;
    const c=generated(artifact,{id:label,text:input},label);
    assert.equal(c.value.status,'refused');assert.equal(c.value.phase,'wire');
@@ -167,9 +167,9 @@ try {
  const bootstrap=request('G1-bootstrap','lean','ordinary-checked',entry,sources);
  report.sourceClosureDigest=bootstrap.digest;checkpoint();
  const input=path.join(directory,'G1-bootstrap.request.json'),output=path.join(directory,'G1-bootstrap.candidate.json');
- fs.writeFileSync(input,bootstrap.text);if(unified)fs.writeFileSync(input+'.inner',bootstrap.inner);assert.equal(seedCalls,0);
+ fs.writeFileSync(input,bootstrap.text);assert.equal(seedCalls,0);
  assert.equal(sha(fs.readFileSync(seed)),seedHash);seedCalls++;
- const seedRun=runTool(seed,[target,unified?input+'.inner':input,output],{logDirectory:directory});events.push({role:'stage0-seed',...seedRun.event});
+ const seedRun=runTool(seed,[target,input,output],{logDirectory:directory});events.push({role:'stage0-seed',...seedRun.event});
  assert.equal(sha(fs.readFileSync(seed)),seedHash);assert.equal(sha(fs.readFileSync(input)),sha(bootstrap.text));
  const initial=candidateFile(output),baseline=checkCandidate(initial,bootstrap);
  assert.deepEqual(initial.value.publicNames,[exportName]);

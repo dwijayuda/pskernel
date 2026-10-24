@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       targets: ${{ steps.request.outputs.targets }}
+      mode: ${{ steps.request.outputs.mode }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,7 +34,8 @@ jobs:
           assert.equal(r.schema,'psc1-unified-selfhost-request/1');
           assert.equal(r.branch,'feat/psc1-unified-selfhost-20261024');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
-          assert.equal(r.action,'qualify-independent-G1-G2-G3');
+          assert.ok(['--g1-only','--self-host'].includes(r.mode));
+          assert.equal(r.action,r.mode==='--g1-only'?'validate-independent-G1':'qualify-independent-G1-G2-G3');
           assert.equal(r.profile,'correctness-1800s');
           assert.equal(r.g1TimeoutMs,240000);assert.equal(r.g2g3TimeoutMs,1800000);
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
@@ -43,6 +45,7 @@ jobs:
           const d=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});assert.equal(d.status,0);
           assert.deepEqual(d.stdout.split(String.fromCharCode(0)).filter(Boolean),[file]);
           fs.appendFileSync(process.env.GITHUB_OUTPUT,'targets='+JSON.stringify(r.targets)+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'mode='+r.mode+'\n');
           console.log('PSC1_UNIFIED_EXPLICIT_REQUEST: '+JSON.stringify(r));
           JS
   generated:
@@ -131,7 +134,7 @@ jobs:
         run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }} unified
       - name: Execute genuine generated compiler generations and exact fixed point
         timeout-minutes: 110
-        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host correctness-1800s unified
+        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} ${{ needs.request.outputs.mode }} correctness-1800s unified
       - uses: actions/upload-artifact@v4
         if: always()
         with:

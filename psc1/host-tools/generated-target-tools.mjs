@@ -176,7 +176,7 @@ export async function executeService(manifestFile,expectedHash,requestFile,outpu
  let id;
  try {
   let wire=JSON.parse(input.toString('utf8'));
-  if(m.serviceKind==='unified'&&Array.isArray(wire)&&wire[0]==='psc1-unified-compiler-service/1'&&typeof wire[2]==='string')wire=JSON.parse(wire[2]);
+  if(m.serviceKind==='unified'&&Array.isArray(wire)&&wire[0]==='psc1-unified-compiler-service/2'&&Array.isArray(wire[2]))wire=wire[2];
   if(Array.isArray(wire)&&wire[0]==='psc1-compiler-service/1')id=wire[1];
  } catch {}
  const limits=compilerRequestLimit(profile,id);

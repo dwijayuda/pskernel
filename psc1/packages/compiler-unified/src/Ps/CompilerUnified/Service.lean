@@ -24,11 +24,27 @@ def refused (target code : String) : String :=
     ("target", psJsonQuote target)
   ]
 
-def dispatch (target input : String) : String :=
-  if psStringEq target "js" then psCompilerJsServiceCandidate input
-  else if psStringEq target "ts" then psCompilerTsServiceCandidate input
-  else if psStringEq target "rust" then psCompilerRustServiceCandidate input
-  else if psStringEq target "wasm-core" then psCompilerWasmServiceCandidate input
+def run (target : PsBackendTarget)
+    (emit : PsValidatedIrModule -> List String ->
+      Except Ps.Internal.CompilerService.Error (Prod String (List String)))
+    (values : List PsJsonValue) : String :=
+  match Ps.Internal.CompilerService.decodeRequestFields values with
+  | Except.error error => Ps.Internal.CompilerService.refused target "" "" error
+  | Except.ok request =>
+      match Ps.Internal.CompilerService.compile target emit request with
+      | Except.error error =>
+          Ps.Internal.CompilerService.refused target request.requestId request.sourceClosureDigest error
+      | Except.ok output => output
+
+def dispatch (target : String) (values : List PsJsonValue) : String :=
+  if psStringEq target "js" then
+    run PsBackendTarget.js Ps.Internal.JsCompilerService.emit values
+  else if psStringEq target "ts" then
+    run PsBackendTarget.ts Ps.Internal.TsCompilerService.emit values
+  else if psStringEq target "rust" then
+    run PsBackendTarget.rust Ps.Internal.RustCompilerService.emit values
+  else if psStringEq target "wasm-core" then
+    run PsBackendTarget.wasmCore Ps.Internal.WasmCompilerService.emit values
   else refused target "target-unavailable"
 
 def fields (values : List PsJsonValue) : String :=
@@ -37,14 +53,17 @@ def fields (values : List PsJsonValue) : String :=
     match Ps.Internal.CompilerService.stringAt values 0 with
     | Except.error _ => refused "" "expected-string"
     | Except.ok protocol =>
-        if !psStringEq protocol "psc1-unified-compiler-service/1" then refused "" "protocol"
+        if !psStringEq protocol "psc1-unified-compiler-service/2" then refused "" "protocol"
         else
           match Ps.Internal.CompilerService.stringAt values 1 with
           | Except.error _ => refused "" "expected-string"
           | Except.ok target =>
-              match Ps.Internal.CompilerService.stringAt values 2 with
-              | Except.error _ => refused target "expected-string"
-              | Except.ok input => dispatch target input
+              match Ps.Internal.CompilerService.atWorker values 2 with
+              | Except.error _ => refused target "expected-array"
+              | Except.ok input =>
+                  match input with
+                  | PsJsonValue.array request => dispatch target request
+                  | _ => refused target "expected-array"
 
 def candidate (input : String) : String :=
   match psJsonParse input with

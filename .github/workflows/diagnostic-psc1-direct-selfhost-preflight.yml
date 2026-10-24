@@ -27,6 +27,8 @@ on:
       - psc1/scripts/check-shared-lookup-prefixes.mjs
       - psc1/scripts/check-erasure-declaration-spines.mjs
       - psc1/test/JsStatement*.lean
+      - psc1/test/JsAppliedPrefix*.lean
+      - psc1/scripts/check-js-applied-prefixes.mjs
       - psc1/scripts/js-statement-tests.mjs
       - psc1/scripts/check-wasm-applied-prefixes.mjs
       - psc1/scripts/direct-selfhost-preflight-tests.mjs
@@ -85,6 +87,7 @@ jobs:
           node --check scripts/generated-target-qualification.mjs
           node --check scripts/js-statement-tests.mjs
           node scripts/check-wasm-applied-prefixes.mjs
+          node scripts/check-js-applied-prefixes.mjs
           node scripts/check-wasm-encoding-spines.mjs
           node scripts/check-shared-lookup-prefixes.mjs
           node scripts/check-erasure-declaration-spines.mjs

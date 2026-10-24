@@ -105,6 +105,7 @@ jobs:
           node --check scripts/generated-target-qualification.mjs
           node --check scripts/js-statement-tests.mjs
           node scripts/check-wasm-applied-prefixes.mjs
+          node scripts/check-js-applied-prefixes.mjs
           node scripts/check-wasm-encoding-spines.mjs
           node scripts/check-shared-lookup-prefixes.mjs
           node scripts/check-erasure-declaration-spines.mjs

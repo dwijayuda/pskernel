@@ -1194,12 +1194,12 @@ def psJsPrintDeclarationsObservedWith
         Except.ok
           (PsJsPrintedModule.mk (psTextBuilderFinish builder) (psListReverse spansRev))
   | List.cons declaration rest =>
-      let smaller :
-          Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
-          List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
-        psJsPrintDeclarationsObservedWith print rest;
       fun (observe : Bool) (builder : PsTextBuilder)
           (position : PsJsGeneratedPosition) (spansRev : List PsJsGeneratedDeclarationSpan) =>
+        let smaller :
+            Bool -> PsTextBuilder -> PsJsGeneratedPosition ->
+            List PsJsGeneratedDeclarationSpan -> Except PsJsEmitError PsJsPrintedModule :=
+          psJsPrintDeclarationsObservedWith print rest;
         match print declaration with
         | Except.error error => Except.error error
         | Except.ok printed =>

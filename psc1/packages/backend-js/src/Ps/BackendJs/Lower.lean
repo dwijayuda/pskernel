@@ -13,9 +13,9 @@ def psVerifiedIrIntDecimalMagnitudeWithFuel
       fun (_text : String) (_position : Nat) (acc : Nat) =>
         acc
   | fuel + 1 =>
-      let smaller : String -> Nat -> Nat -> Nat :=
-        psVerifiedIrIntDecimalMagnitudeWithFuel fuel;
       fun (text : String) (position : Nat) (acc : Nat) =>
+        let smaller : String -> Nat -> Nat -> Nat :=
+          psVerifiedIrIntDecimalMagnitudeWithFuel fuel;
         if String.Internal.atEnd text (String.Pos.Raw.mk position) then
           acc
         else
@@ -279,11 +279,11 @@ def psJsTypeSupportedWithPolicyAndFuel
   | Nat.zero =>
       fun (_type : PsVerifiedIrType) => false
   | Nat.succ remaining =>
-      let smaller : PsVerifiedIrType -> Bool :=
-        psJsTypeSupportedWithPolicyAndFuel
-          profile uniform
-          remaining;
       fun (type : PsVerifiedIrType) =>
+        let smaller : PsVerifiedIrType -> Bool :=
+          psJsTypeSupportedWithPolicyAndFuel
+            profile uniform
+            remaining;
         match type with
         | PsVerifiedIrType.primitive primitive =>
             psJsPrimitiveTypeSupportedWithProfile
@@ -960,13 +960,13 @@ def psJsLowerExprWithPolicyAndFuel
       fun (_expr : PsVerifiedIrExpr) =>
         Except.error PsJsLowerError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          PsVerifiedIrExpr ->
-            Except PsJsLowerError PsJsIrExpr :=
-        psJsLowerExprWithPolicyAndFuel
-          profile uniform
-          remaining;
       fun (expr : PsVerifiedIrExpr) =>
+        let smaller :
+            PsVerifiedIrExpr ->
+              Except PsJsLowerError PsJsIrExpr :=
+          psJsLowerExprWithPolicyAndFuel
+            profile uniform
+            remaining;
         match expr with
         | PsVerifiedIrExpr.literal literal =>
             match

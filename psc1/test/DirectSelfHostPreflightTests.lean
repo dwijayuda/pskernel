@@ -1,3 +1,4 @@
+import JsAppliedPrefixTests
 import WasmEncodingSpineTests
 import SharedLookupPrefixTests
 import FoundationListTests
@@ -353,6 +354,7 @@ private def fixtureModule : PsVerifiedIrModule :=
   ]
 
 def main : IO Unit := do
+  runJsAppliedPrefixTests
   runWasmEncodingSpineTests
   runSharedLookupPrefixTests
   runFoundationListTests

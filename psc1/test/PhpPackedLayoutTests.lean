@@ -105,8 +105,8 @@ def main : IO Unit := do
     unless old == actual && actual == s!"[\"{size}\",\"3\",\"7\",\"20\"]" do
       throw (IO.userError "packed/legacy observations differ")
   let large <- execute "dist/php-packed/packed.php" 2000000
-  unless large == "[\"200000\",\"3\",\"7\",\"20\"]" do
-    throw (IO.userError "packed large collection result mismatch")
+  unless large == "[\"2000000\",\"3\",\"7\",\"20\"]" do
+    throw (IO.userError ("packed large collection result mismatch: " ++ large))
   -- Owner-qualified same-tag layout lookup must not confuse field names.
   let other : PsVerifiedIrInductive := {
     name := "Other", typeParameters := [],
@@ -124,4 +124,4 @@ def main : IO Unit := do
   }
   unless runtime.exitCode == 0 do throw (IO.userError (runtime.stdout ++ runtime.stderr))
   IO.print runtime.stdout
-  IO.println "PSC1_PHP_PACKED_LAYOUT: strict IR; zero/one/three fields, canonical construction/noncanonical refusal/reordered bindings, Unicode, recursive lists, six retained-layout comparisons and200000-cell1G execution passed"
+  IO.println "PSC1_PHP_PACKED_LAYOUT: strict IR; zero/one/three fields, canonical construction/noncanonical refusal/reordered bindings, Unicode, recursive lists, six retained-layout comparisons and2000000-cell1G execution passed"

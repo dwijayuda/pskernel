@@ -1,5 +1,24 @@
 # PSC1 self-host qualification profiles
 
+## Unified Rust hour correctness profile (2026-10-25)
+
+The explicit unified request controller now supports a separate Rust-only
+`correctness-3600s` profile: only G2-self/G3-self receive3600000ms each.
+G1/corpus/tools remain240000ms; checker remains120000ms. Memory, stack,
+semantic fuel, IR checks and negative tests remain unchanged. Existing1800s
+correctness and240s performance profiles remain available independently.
+The new profile grants no240s performance claim.
+
+An exact request-only commit with a closed schema and exact parent is required.
+The trusted controller rejects other engines for this new hour request.
+The job is190minutes and the qualification step170minutes, accommodating both
+requests/setup/admission/corpus and evidence retention within GitHub's six-hour
+hosted job cap. Supervisor cleanup remains bounded to5000ms beyond its child.
+Normal edits do not launch long chains. See AI_WORK_STATE.md for actual runs.
+
+The following section records the original1800s profile and historical results.
+
+
 The default `performance-240s` profile retains the existing 240000 ms hard deadline
 for every G1/G2/G3 request, tool build and corpus execution. The existing 15-minute
 performance workflows remain separate and unchanged.

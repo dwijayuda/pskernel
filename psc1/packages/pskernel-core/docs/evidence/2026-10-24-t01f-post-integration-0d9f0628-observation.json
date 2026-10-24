@@ -1,0 +1,827 @@
+{
+  "schema": "psc1-t01f-post-integration-status-observation-v1",
+  "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "runAttempt": 1,
+  "observedAtUtc": "2026-10-24T10:37:54.677489+00:00",
+  "scope": "Read-only terminal API status and four job logs for the automatic integration-push follow-up runs. This is not a qualification receipt or a repeat artifact verification.",
+  "runs": [
+    {
+      "role": "generated",
+      "id": 40067352825,
+      "name": "PSC1 Expression V2 production integration",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+      "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      "run_attempt": 1,
+      "event": "push",
+      "created_at": "2026-10-24T05:43:13Z",
+      "run_started_at": "2026-10-24T05:43:13Z",
+      "updated_at": "2026-10-24T07:01:38Z",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825",
+      "jobs": [
+        {
+          "id": 120793282974,
+          "name": "generated-dag-integration",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T06:17:59Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120793282974",
+          "elapsedSeconds": 2083
+        },
+        {
+          "id": 120793283063,
+          "name": "native-dag-integration",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T05:46:54Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120793283063",
+          "elapsedSeconds": 218
+        },
+        {
+          "id": 120800129543,
+          "name": "paired-initial-owner",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:18:01Z",
+          "completed_at": "2026-10-24T06:18:30Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120800129543",
+          "elapsedSeconds": 29
+        },
+        {
+          "id": 120800129564,
+          "name": "t01f-generated-shards (5)",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "started_at": "2026-10-24T06:36:20Z",
+          "completed_at": "2026-10-24T07:01:31Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120800129564",
+          "elapsedSeconds": 1511,
+          "nonSuccessSteps": [
+            {
+              "name": "Authenticate inputs and execute the complete selected String sample",
+              "status": "completed",
+              "conclusion": "cancelled",
+              "number": 5,
+              "started_at": "2026-10-24T06:36:46Z",
+              "completed_at": "2026-10-24T07:01:28Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 11,
+              "started_at": "2026-10-24T07:01:30Z",
+              "completed_at": "2026-10-24T07:01:30Z"
+            }
+          ]
+        },
+        {
+          "id": 120800129568,
+          "name": "t01f-generated-shards (3)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:25:56Z",
+          "completed_at": "2026-10-24T06:36:18Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120800129568",
+          "elapsedSeconds": 622
+        },
+        {
+          "id": 120800129569,
+          "name": "t01f-generated-shards (1)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:18:01Z",
+          "completed_at": "2026-10-24T06:25:53Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120800129569",
+          "elapsedSeconds": 472
+        },
+        {
+          "id": 120800129594,
+          "name": "t01f-generated-shards (2)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:22:46Z",
+          "completed_at": "2026-10-24T06:28:54Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120800129594",
+          "elapsedSeconds": 368
+        },
+        {
+          "id": 120800129614,
+          "name": "t01f-generated-shards (0)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:18:01Z",
+          "completed_at": "2026-10-24T06:22:44Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120800129614",
+          "elapsedSeconds": 283
+        },
+        {
+          "id": 120800129638,
+          "name": "t01f-generated-shards (4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:28:56Z",
+          "completed_at": "2026-10-24T06:40:24Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120800129638",
+          "elapsedSeconds": 688
+        },
+        {
+          "id": 120808796383,
+          "name": "t01f-generated-complete",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": "2026-10-24T07:01:34Z",
+          "completed_at": "2026-10-24T07:01:37Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352825/job/120808796383",
+          "elapsedSeconds": 3,
+          "nonSuccessSteps": [
+            {
+              "name": "Require every producer and shard job to succeed",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 2,
+              "started_at": "2026-10-24T07:01:36Z",
+              "completed_at": "2026-10-24T07:01:36Z"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 3,
+              "started_at": "2026-10-24T07:01:36Z",
+              "completed_at": "2026-10-24T07:01:36Z"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 4,
+              "started_at": "2026-10-24T07:01:36Z",
+              "completed_at": "2026-10-24T07:01:36Z"
+            },
+            {
+              "name": "Run actions/download-artifact@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 5,
+              "started_at": "2026-10-24T07:01:36Z",
+              "completed_at": "2026-10-24T07:01:36Z"
+            },
+            {
+              "name": "Run actions/download-artifact@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 6,
+              "started_at": "2026-10-24T07:01:36Z",
+              "completed_at": "2026-10-24T07:01:36Z"
+            },
+            {
+              "name": "Reauthenticate and require all six complete String samples",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 7,
+              "started_at": "2026-10-24T07:01:36Z",
+              "completed_at": "2026-10-24T07:01:36Z"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 8,
+              "started_at": "2026-10-24T07:01:36Z",
+              "completed_at": "2026-10-24T07:01:36Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "canonical",
+      "id": 40067352798,
+      "name": "PSC1 PSKernel-Core correctness",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "run_attempt": 1,
+      "event": "push",
+      "created_at": "2026-10-24T05:43:13Z",
+      "run_started_at": "2026-10-24T05:43:13Z",
+      "updated_at": "2026-10-24T07:09:44Z",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798",
+      "jobs": [
+        {
+          "id": 120793282884,
+          "name": "native-kernel",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:17Z",
+          "completed_at": "2026-10-24T05:44:48Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120793282884",
+          "elapsedSeconds": 91
+        },
+        {
+          "id": 120793283055,
+          "name": "psc1-portability",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T06:29:24Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120793283055",
+          "elapsedSeconds": 2768
+        },
+        {
+          "id": 120802398182,
+          "name": "t01f-canonical-shards (4)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:44:04Z",
+          "completed_at": "2026-10-24T06:53:10Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120802398182",
+          "elapsedSeconds": 546
+        },
+        {
+          "id": 120802398201,
+          "name": "t01f-canonical-shards (1)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:29:26Z",
+          "completed_at": "2026-10-24T06:36:35Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120802398201",
+          "elapsedSeconds": 429
+        },
+        {
+          "id": 120802398210,
+          "name": "t01f-canonical-shards (3)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:36:38Z",
+          "completed_at": "2026-10-24T06:44:17Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120802398210",
+          "elapsedSeconds": 459
+        },
+        {
+          "id": 120802398224,
+          "name": "t01f-canonical-shards (0)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:29:27Z",
+          "completed_at": "2026-10-24T06:35:12Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120802398224",
+          "elapsedSeconds": 345
+        },
+        {
+          "id": 120802398240,
+          "name": "t01f-canonical-shards (5)",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "started_at": "2026-10-24T06:44:19Z",
+          "completed_at": "2026-10-24T07:09:38Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120802398240",
+          "elapsedSeconds": 1519,
+          "nonSuccessSteps": [
+            {
+              "name": "Authenticate inputs and execute the complete selected String sample",
+              "status": "completed",
+              "conclusion": "cancelled",
+              "number": 5,
+              "started_at": "2026-10-24T06:44:44Z",
+              "completed_at": "2026-10-24T07:09:35Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 11,
+              "started_at": "2026-10-24T07:09:36Z",
+              "completed_at": "2026-10-24T07:09:36Z"
+            }
+          ]
+        },
+        {
+          "id": 120802398249,
+          "name": "t01f-canonical-shards (2)",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T06:35:15Z",
+          "completed_at": "2026-10-24T06:44:02Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120802398249",
+          "elapsedSeconds": 527
+        },
+        {
+          "id": 120810407313,
+          "name": "t01f-canonical-complete",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": "2026-10-24T07:09:41Z",
+          "completed_at": "2026-10-24T07:09:44Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352798/job/120810407313",
+          "elapsedSeconds": 3,
+          "nonSuccessSteps": [
+            {
+              "name": "Require every producer and shard job to succeed",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 2,
+              "started_at": "2026-10-24T07:09:42Z",
+              "completed_at": "2026-10-24T07:09:42Z"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 3,
+              "started_at": "2026-10-24T07:09:42Z",
+              "completed_at": "2026-10-24T07:09:42Z"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 4,
+              "started_at": "2026-10-24T07:09:42Z",
+              "completed_at": "2026-10-24T07:09:42Z"
+            },
+            {
+              "name": "Run actions/download-artifact@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 5,
+              "started_at": "2026-10-24T07:09:42Z",
+              "completed_at": "2026-10-24T07:09:42Z"
+            },
+            {
+              "name": "Run actions/download-artifact@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 6,
+              "started_at": "2026-10-24T07:09:42Z",
+              "completed_at": "2026-10-24T07:09:42Z"
+            },
+            {
+              "name": "Reauthenticate and require all six complete String samples",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 7,
+              "started_at": "2026-10-24T07:09:42Z",
+              "completed_at": "2026-10-24T07:09:42Z"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 8,
+              "started_at": "2026-10-24T07:09:42Z",
+              "completed_at": "2026-10-24T07:09:43Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "research",
+      "id": 40067352803,
+      "name": "PSC1 PSKernel-Core Expression V2 research",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+      "path": ".github/workflows/psc1-pskernel-expr-v2.yml",
+      "run_attempt": 1,
+      "event": "push",
+      "created_at": "2026-10-24T05:43:13Z",
+      "run_started_at": "2026-10-24T05:43:13Z",
+      "updated_at": "2026-10-24T06:03:49Z",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352803",
+      "jobs": [
+        {
+          "id": 120793282924,
+          "name": "expr-v2-differential",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T05:44:15Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352803/job/120793282924",
+          "elapsedSeconds": 59
+        },
+        {
+          "id": 120793283108,
+          "name": "generated-js-full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T06:03:48Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352803/job/120793283108",
+          "elapsedSeconds": 1232
+        },
+        {
+          "id": 120793283113,
+          "name": "full-checker-bridge",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T05:44:20Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352803/job/120793283113",
+          "elapsedSeconds": 64
+        },
+        {
+          "id": 120793283120,
+          "name": "portable-v2-check",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T06:02:38Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352803/job/120793283120",
+          "elapsedSeconds": 1162
+        },
+        {
+          "id": 120793283146,
+          "name": "portable-ps-closure",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:17Z",
+          "completed_at": "2026-10-24T05:47:16Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352803/job/120793283146",
+          "elapsedSeconds": 239
+        },
+        {
+          "id": 120793283648,
+          "name": "whnf-subset-regression",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T05:44:18Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352803/job/120793283648",
+          "elapsedSeconds": 62
+        }
+      ]
+    },
+    {
+      "role": "arena",
+      "id": 40067352802,
+      "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+      "path": ".github/workflows/psc1-pskernel-arena435.yml",
+      "run_attempt": 1,
+      "event": "push",
+      "created_at": "2026-10-24T05:43:13Z",
+      "run_started_at": "2026-10-24T05:43:13Z",
+      "updated_at": "2026-10-24T06:26:41Z",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352802",
+      "jobs": [
+        {
+          "id": 120793282858,
+          "name": "official-arena-reference",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T05:45:13Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352802/job/120793282858",
+          "elapsedSeconds": 117
+        },
+        {
+          "id": 120793661756,
+          "name": "generated-arena-comparison",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": "2026-10-24T05:45:16Z",
+          "completed_at": "2026-10-24T06:26:41Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352802/job/120793661756",
+          "elapsedSeconds": 2485,
+          "nonSuccessSteps": [
+            {
+              "name": "Compare all 193 cases without exclusions and without changing kernel fuel",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 9,
+              "started_at": "2026-10-24T06:14:59Z",
+              "completed_at": "2026-10-24T06:26:38Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 21,
+              "started_at": "2026-10-24T06:26:40Z",
+              "completed_at": "2026-10-24T06:26:40Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "profile",
+      "id": 40067352799,
+      "name": "PSC1 authentic Arena timeout diagnostics",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "head_branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+      "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+      "run_attempt": 1,
+      "event": "push",
+      "created_at": "2026-10-24T05:43:13Z",
+      "run_started_at": "2026-10-24T05:43:13Z",
+      "updated_at": "2026-10-24T06:17:20Z",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352799",
+      "jobs": [
+        {
+          "id": 120793282784,
+          "name": "authentic-timeout-diagnostics",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-24T05:43:16Z",
+          "completed_at": "2026-10-24T06:17:19Z",
+          "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40067352799/job/120793282784",
+          "elapsedSeconds": 2043
+        }
+      ]
+    }
+  ],
+  "cancelledRoutes": [
+    {
+      "route": "generated",
+      "runId": 40067352825,
+      "runAttempt": 1,
+      "cancelledJobId": 120800129564,
+      "cancelledJobName": "t01f-generated-shards (5)",
+      "sampleIndex": 5,
+      "sample": "Aé€😀",
+      "successfulShardIndices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "jobElapsedSeconds": 1511,
+      "cancelledStep": {
+        "name": "Authenticate inputs and execute the complete selected String sample",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "number": 5,
+        "started_at": "2026-10-24T06:36:46Z",
+        "completed_at": "2026-10-24T07:01:28Z"
+      },
+      "cancelledStepElapsedSeconds": 1482,
+      "observedReasonLines": [
+        "2026-10-24T07:01:28.7514297Z ##[error]The operation was canceled."
+      ],
+      "explicitCancellationCause": null,
+      "cancellingActor": null,
+      "timingInterpretation": "Elapsed times are observations only; neither a timeout cause nor a cancelling actor is established by the accessible log/API data.",
+      "observedSingletonPassLines": [
+        "2026-10-24T06:42:19.9597680Z PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\""
+      ],
+      "observedFullMixedPassLines": [
+        "2026-10-24T07:01:28.5820476Z PSC1_T01F_STRING_SHARD_JS: PASS {\"kernelSha256\":\"7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528\",\"fixtureSha256\":\"563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d\",\"harnessSha256\":\"d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2\",\"requests\":294,\"metadata\":377,\"declarations\":\"377\",\"samples\":1,\"availableSamples\":6,\"executedSamples\":1,\"fuel\":4096,\"independentAdmission\":true,\"assertions\":1400,\"constructionMs\":52.16753700000001,\"admissionMs\":53660.109566,\"metadataMs\":1711.247040000002,\"totalMs\":1482147.1664530002,\"diagnosticTracing\":false,\"measurements\":[{\"sample\":\"Aé€😀\",\"utf8Bytes\":10,\"owners\":224,\"ownerAndConstructionMs\":7005.579048,\"totalMs\":1426541.0153700002,\"arenaNodes\":\"288\",\"ownedArenaNodes\":\"10476\",\"memory\":{\"rss\":1314787328,\"heapTotal\":558452736,\"heapUsed\":329944352,\"external\":4809253,\"arrayBuffers\":2812104}}],\"sampleIndex\":5,\"sample\":\"Aé€😀\"}"
+      ],
+      "observedShardReceiptPassLines": [
+        "2026-10-24T07:01:28.7348690Z PSC1_T01F_SHARD_RECEIPT_PASS {\"route\":\"generated\",\"index\":5,\"sourceSha\":\"0d9f062846d109c362210d441df5fd407ca2cdd7\"}"
+      ],
+      "loggedMixedPayload": {
+        "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 52.16753700000001,
+        "admissionMs": 53660.109566,
+        "metadataMs": 1711.247040000002,
+        "totalMs": 1482147.1664530002,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "Aé€😀",
+            "utf8Bytes": 10,
+            "owners": 224,
+            "ownerAndConstructionMs": 7005.579048,
+            "totalMs": 1426541.0153700002,
+            "arenaNodes": "288",
+            "ownedArenaNodes": "10476",
+            "memory": {
+              "rss": 1314787328,
+              "heapTotal": 558452736,
+              "heapUsed": 329944352,
+              "external": 4809253,
+              "arrayBuffers": 2812104
+            }
+          }
+        ],
+        "sampleIndex": 5,
+        "sample": "Aé€😀"
+      },
+      "loggedPayloadIndependentlyRecomputed": false,
+      "followupShardArtifactDownloadedOrVerified": false,
+      "aggregateJobId": 120808796383,
+      "aggregateGate": {
+        "name": "Require every producer and shard job to succeed",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 2,
+        "started_at": "2026-10-24T07:01:36Z",
+        "completed_at": "2026-10-24T07:01:36Z"
+      },
+      "aggregateExecution": {
+        "name": "Reauthenticate and require all six complete String samples",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 7,
+        "started_at": "2026-10-24T07:01:36Z",
+        "completed_at": "2026-10-24T07:01:36Z"
+      },
+      "aggregateLogLines": [
+        "2026-10-24T07:01:36.1938285Z   PSC1_T01F_SHARDS_RESULT: cancelled",
+        "2026-10-24T07:01:36.2120333Z ##[error]Process completed with exit code 1.",
+        "2026-10-24T07:01:36.4289508Z ##[error]No files were found with the provided path: /home/runner/work/_temp/psc1-t01f-generated-complete/. No artifacts will be uploaded."
+      ],
+      "strictFullRouteAggregatePass": false
+    },
+    {
+      "route": "canonical",
+      "runId": 40067352798,
+      "runAttempt": 1,
+      "cancelledJobId": 120802398240,
+      "cancelledJobName": "t01f-canonical-shards (5)",
+      "sampleIndex": 5,
+      "sample": "Aé€😀",
+      "successfulShardIndices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "jobElapsedSeconds": 1519,
+      "cancelledStep": {
+        "name": "Authenticate inputs and execute the complete selected String sample",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "number": 5,
+        "started_at": "2026-10-24T06:44:44Z",
+        "completed_at": "2026-10-24T07:09:35Z"
+      },
+      "cancelledStepElapsedSeconds": 1491,
+      "observedReasonLines": [
+        "2026-10-24T07:09:35.1388873Z ##[error]The operation was canceled."
+      ],
+      "explicitCancellationCause": null,
+      "cancellingActor": null,
+      "timingInterpretation": "Elapsed times are observations only; neither a timeout cause nor a cancelling actor is established by the accessible log/API data.",
+      "observedSingletonPassLines": [
+        "2026-10-24T06:50:42.0317046Z PSC1_T01F_JS_SINGLETON_PASS \"Aé€😀\""
+      ],
+      "observedFullMixedPassLines": [],
+      "observedShardReceiptPassLines": [],
+      "loggedMixedPayload": null,
+      "loggedPayloadIndependentlyRecomputed": false,
+      "followupShardArtifactDownloadedOrVerified": false,
+      "aggregateJobId": 120810407313,
+      "aggregateGate": {
+        "name": "Require every producer and shard job to succeed",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 2,
+        "started_at": "2026-10-24T07:09:42Z",
+        "completed_at": "2026-10-24T07:09:42Z"
+      },
+      "aggregateExecution": {
+        "name": "Reauthenticate and require all six complete String samples",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 7,
+        "started_at": "2026-10-24T07:09:42Z",
+        "completed_at": "2026-10-24T07:09:42Z"
+      },
+      "aggregateLogLines": [
+        "2026-10-24T07:09:42.7921907Z   PSC1_T01F_SHARDS_RESULT: cancelled",
+        "2026-10-24T07:09:42.8107259Z ##[error]Process completed with exit code 1.",
+        "2026-10-24T07:09:43.0352047Z ##[error]No files were found with the provided path: /home/runner/work/_temp/psc1-t01f-canonical-complete/. No artifacts will be uploaded."
+      ],
+      "strictFullRouteAggregatePass": false
+    }
+  ],
+  "otherRetainedFollowupScope": {
+    "research": "All six jobs report success; artifacts were not requalified for this follow-up.",
+    "arena": "Official reference job succeeded and generated comparison job failed its all-193-case comparison step. Raw case outcomes and artifact bytes were not inspected; no prior classification is inherited.",
+    "profile": "Diagnostic job reports success. Artifact measurements and limitations were not reverified for this follow-up."
+  },
+  "qualificationSeparation": {
+    "originalQualifiedSourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "originalQualificationRunIds": {
+      "generated": 40061694631,
+      "canonical": 40061694623,
+      "research": 40061694661,
+      "arena": 40061694705,
+      "profile": 40061694607
+    },
+    "originalQualificationAttempt": 1,
+    "followupRunsCombinedWithOriginalQualification": false,
+    "followupStrictFinalRoutePass": false,
+    "interpretation": "Both automatic follow-up route runs are cancelled and neither produced a successful strict aggregate job. Generated mixed logging reached its 1,400-assertion and shard-receipt markers immediately before cancellation; this does not turn the cancelled job/run into a pass. Canonical mixed logging did not reach the full mixed PASS. These observations remain separate from the original source/run/attempt-bound qualification."
+  },
+  "accessLimitations": [
+    "Generic GitHub fetch rejects both cancelled job check-run and annotation endpoints with HTTP 400 INVALID_ARGUMENT; no approved purpose-built annotation reader was exposed. Accessible run/job metadata and logs do not identify a cancelling actor or explicit cause.",
+    "No follow-up artifacts were downloaded, rehashed, or requalified. API success/failure statuses and logged counters are not substituted for complete artifact verification."
+  ],
+  "actionsTaken": {
+    "githubMutations": false,
+    "dispatches": false,
+    "retries": false,
+    "cancellations": false,
+    "localProjectExecution": false
+  },
+  "evidenceFiles": [
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/annotation-access-limit.json",
+      "bytes": 640,
+      "sha256": "07a2dbd88b6b12bcaeb82ec492b6d3b139cb0ec095f302e5dac58816bb9128f4"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/job-120800129564.log",
+      "bytes": 47676,
+      "sha256": "da793483abf6dc53eaed502ee3041072db3e67eec5973818c4ae38e4df126b99"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/job-120802398240.log",
+      "bytes": 46756,
+      "sha256": "12f80231335b322382bfbd3eb54d09f72678493cf089cdf10d0bcb994f3d5400"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/job-120808796383.log",
+      "bytes": 4321,
+      "sha256": "1229625f0d8c478060ca68c9ea24e7b392f459c74e9f3b95e8b83f91ff89704f"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/job-120810407313.log",
+      "bytes": 4321,
+      "sha256": "8d546a677d98d31ef4df7cf3f2292015395aaf3229f9ffcf5d3f9b68931dd1fc"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/jobs-40067352798.json",
+      "bytes": 40280,
+      "sha256": "096935ee1df23975771544625a7e0b5a3e3ea82643ed2039bcfba3f5ef373767"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/jobs-40067352799.json",
+      "bytes": 4674,
+      "sha256": "dbabc6afe9b5cc850663acbdf1fac2ce30ea7d4a5c09e2fd7daa7eddd2959e00"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/jobs-40067352802.json",
+      "bytes": 8606,
+      "sha256": "0687ecbc3e57b3e1525e3142cbdb3aa09f4f15e5720022c77472c4c15aa2c547"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/jobs-40067352803.json",
+      "bytes": 28708,
+      "sha256": "21f28905ee05a33e52d77c025a0f8d1fce09d38c5709160f29f472634c069ec8"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/jobs-40067352825.json",
+      "bytes": 49333,
+      "sha256": "0690d1fd1e753e5ff7a45caab0f7bf9e7a79ab7522ccae865b13cef9dbbe4480"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/run-40067352798.json",
+      "bytes": 14013,
+      "sha256": "12c501546634bbd718a59ed2980a7334c578925b55735b7a63867638e2568bdf"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/run-40067352799.json",
+      "bytes": 14020,
+      "sha256": "9858b225db4901e81563066ed6e90fb7c4c320c0398d9b8efc29be77634ff20c"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/run-40067352802.json",
+      "bytes": 14019,
+      "sha256": "952856c8efac7bb612aa1bfa7ccf49651294dd44a3e89ef621a09fe21950003b"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/run-40067352803.json",
+      "bytes": 14013,
+      "sha256": "8d9ddd8431b3d2440aafdfe68a1ce717e5679bb8af9835808a1dce6bd0b7236c"
+    },
+    {
+      "path": "t01f-evidence/0d9f0628-post-integration-observation/run-40067352825.json",
+      "bytes": 14027,
+      "sha256": "0c361ffeeeb8241f72526b94661630e9c148ace1ec8e0142d56e82384bec04eb"
+    }
+  ]
+}

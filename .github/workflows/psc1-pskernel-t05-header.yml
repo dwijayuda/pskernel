@@ -86,12 +86,28 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
-        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryHeaderStateProofs.lean)" -eq 49
+        psc1_t05_state_count_status=0
+        psc1_t05_state_lean_status=0
+        psc1_t05_occurrence_count_status=0
+        psc1_t05_occurrence_lean_status=0
+        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryHeaderStateProofs.lean)" -eq 49 \
+          || psc1_t05_state_count_status=$?
         lake -f kernel-lakefile.lean env lean test/PsKernelOrdinaryHeaderStateProofs.lean \
-          2>&1 | tee "$PSC1_T05_DIR/header-state-proofs.log"
-        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryOccurrenceProofs.lean)" -eq 15
+          2>&1 | tee "$PSC1_T05_DIR/header-state-proofs.log" \
+          || psc1_t05_state_lean_status=$?
+        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryOccurrenceProofs.lean)" -eq 15 \
+          || psc1_t05_occurrence_count_status=$?
         lake -f kernel-lakefile.lean env lean test/PsKernelOrdinaryOccurrenceProofs.lean \
-          2>&1 | tee "$PSC1_T05_DIR/occurrence-proofs.log"
+          2>&1 | tee "$PSC1_T05_DIR/occurrence-proofs.log" \
+          || psc1_t05_occurrence_lean_status=$?
+        printf 'PSC1_T05_NEW_PROOF_RESULTS stateCount=%s stateLean=%s occurrenceCount=%s occurrenceLean=%s\n' \
+          "$psc1_t05_state_count_status" "$psc1_t05_state_lean_status" \
+          "$psc1_t05_occurrence_count_status" "$psc1_t05_occurrence_lean_status" \
+          | tee "$PSC1_T05_DIR/new-header-proof-status.log"
+        if [ "$psc1_t05_state_count_status" -ne 0 ] || [ "$psc1_t05_state_lean_status" -ne 0 ] \
+          || [ "$psc1_t05_occurrence_count_status" -ne 0 ] || [ "$psc1_t05_occurrence_lean_status" -ne 0 ]; then
+          exit 1
+        fi
     - name: Run direct native header matrix and official Lean controls
       working-directory: psc1
       shell: bash
@@ -178,6 +194,7 @@ jobs:
         name: psc1-t05-header-native-attempt-${{ github.run_attempt }}
         path: ${{ runner.temp }}/psc1-t05-native/
         if-no-files-found: error
+        include-hidden-files: true
   generated-header:
     needs:
     - native-header
@@ -631,3 +648,4 @@ jobs:
         name: psc1-t05-header-${{ matrix.route }}-attempt-${{ github.run_attempt }}
         path: ${{ runner.temp }}/psc1-t05-${{ matrix.route }}/
         if-no-files-found: error
+        include-hidden-files: true

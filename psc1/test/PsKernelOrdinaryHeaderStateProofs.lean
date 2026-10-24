@@ -396,9 +396,6 @@ theorem header_finish_nonsort_error
     psKernelExprV2OrdinaryHeaderFinish parameters indices =
       Except.error "simple inductive result must be a sort" := by
   simp only [psKernelExprV2OrdinaryHeaderFinish, found]
-  cases node : entry.node <;> try rfl
-  rename_i level
-  exact False.elim (notSort level node)
 
 theorem header_check_decline_precedes_whnf
     (numParams : Nat)
@@ -461,6 +458,7 @@ theorem header_after_sort_composition
                   | Except.ok indices =>
                       Option.some (psKernelExprV2OrdinaryHeaderFinish parameters indices) := by
   simp only [psKernelExprV2OrdinaryHeaderPhasesWith, checked, sorted]
+  rfl
 
 variable (arena : PsKernelExprV2PagedArena) (environment : PsKernelEnvironment)
 variable (levelParams : List PsKernelName) (numParams : Nat) (value : PsKernelDagInductive)

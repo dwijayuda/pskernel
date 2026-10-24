@@ -1,3 +1,55 @@
+## 2026-10-24 T05 first native run failed; proof-body and evidence corrections
+
+Exact source `4439fa78fe7d04acfdc4f9b28c719bb5458daeda`, run
+[`40086320399`](https://github.com/dwijayuda/pskernel/actions/runs/40086320399),
+attempt 1, compiled the complete native production imports and retained DAG
+executable. Native job `120849887166` then failed the new proof gate:
+`header_finish_nonsort_error` had redundant tactics after its goal was solved,
+and `header_after_sort_composition` left a reflexive match equality unclosed.
+The latter printed a `sorryAx` dependency from its unsolved goal, so this source
+is explicitly **not proof-qualified**. The occurrence proof file, native
+runtime, retained audit and both generated routes were not reached.
+
+The correction changes only those two proof bodies, preserving all 49 theorem
+statements and reports. The proof step now collects both independent modules'
+results before failing if either failed; native runtime and generated jobs still
+require proof success. It also explicitly includes hidden copied source paths
+in the two T05 artifacts. Independent inspection verified all 37 files in the
+failed native archive and 31 available copied sources against their Git blobs;
+the copied `.github` workflow was missing under the previous upload default.
+That limitation is recorded, not treated as a complete archive.
+
+This corrective candidate is untested until its own run completes. It changes
+no production implementation, public admission routing, proof statement, test
+matrix, fuel/resource limit, or retained qualification gate. Require all 64 new
+and 108 retained native reports, then the existing strict bounded code-generation
+checks/1,884 cache assertions and exactly 1,992 header assertions per authentic
+generated route. Follow the new push run once; do not rerun the failed source
+or combine attempts.
+
+T01F/scoped A remain qualified only at integrated source
+`0d9f062846d109c362210d441df5fd407ca2cdd7`. T05 and B remain OPEN, C remains
+FAIL, and D remains OPEN. All five full work-branch qualification triggers
+remain paused. Continue the header handoff after resolving actual narrow
+failures; the separate paged-model proof draft and constructor recipe are
+preparation, not tested or integrated work.
+
+Evidence: `docs/evidence/2026-10-24-t05-header-4439-native-failure.json`.
+
+The later automatic integration-push cohort at the same qualified 0d9 source
+is separate: generated run `40067352825` and canonical run `40067352798` ended
+cancelled in mixed shard 5 after 1,511 and 1,519 whole-job seconds. Generated
+logged its 1,400-assertion PASS and shard receipt immediately before cancellation;
+canonical did not log a complete mixed PASS. Both aggregate prerequisite gates
+failed and skipped aggregation. The logs say only "The operation was canceled";
+they do not establish the cause or actor. These observations do not supply any
+part of the original qualifying cohort and establish no repeatability margin.
+Research/profile success and Arena failure in that follow-up are API status
+observations, not new independently qualified artifact results. See
+`docs/evidence/2026-10-24-t01f-post-integration-0d9f0628-observation.json`.
+
+---
+
 # T05 ordinary DAG header — first executable candidate
 
 ## Current source and qualification boundary

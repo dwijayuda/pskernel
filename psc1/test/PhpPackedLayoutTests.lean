@@ -111,7 +111,7 @@ def main : IO Unit := do
   let other : PsVerifiedIrInductive := {
     name := "Other", typeParameters := [],
     constructors := [{name := "one", fields := [{name := "different", type := strT}]}] }
-  let context : PsPhp.Context := .mk [] [] [] [] false true true [choice, other]
+  let context : PsPhp.Context := .mk [] [] [] [] false true true [choice, other] PsStringSet.empty
   let first <- requireOk (PsPhp.constructorFields context "Choice" "one")
   let second <- requireOk (PsPhp.constructorFields context "Other" "one")
   unless first == ["value"] && second == ["different"] do

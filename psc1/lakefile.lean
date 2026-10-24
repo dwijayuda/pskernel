@@ -88,7 +88,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source]
+  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -567,3 +567,7 @@ lean_exe psc1_php_packed_tests where
 lean_exe psc1_python_utf8_tests where
   srcDir := "test"
   root := `PythonUtf8CacheTests
+
+lean_exe psc1_direct_call_plan_tests where
+  srcDir := "test"
+  root := `DirectCallPlanTests

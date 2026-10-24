@@ -3,6 +3,7 @@ import Ps.Bridge.Json
 import Ps.BackendPython.Runtime
 import Ps.BackendCommon.Plan
 import Ps.BackendCommon.Source
+import Ps.BackendCommon.DirectCalls
 
 structure PsPythonOutput where
   source : String
@@ -153,8 +154,9 @@ structure EmitState where
   nextIndex : Nat
   helpers : List String
   originsRev : List (Prod String Nat)
+  directNames : PsStringSet
 
-def initialState : EmitState := EmitState.mk List.nil 0 0 0 List.nil List.nil
+def initialState : EmitState := EmitState.mk List.nil 0 0 0 List.nil List.nil PsStringSet.empty
 def Emit (Value : Type) : Type := PsBackendStateExcept EmitState String Value
 def Scope : Type := List (Prod String String)
 
@@ -166,13 +168,13 @@ def padding (count : Nat) (builder : PsTextBuilder) : String :=
 def line (text : String) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk (List.cons (cat [padding state.indent psTextBuilderEmpty, text]) state.linesRev)
-      (Nat.succ state.lineCount) state.indent state.nextIndex state.helpers state.originsRev)
+      (Nat.succ state.lineCount) state.indent state.nextIndex state.helpers state.originsRev state.directNames)
 
 def fresh (hint : String) : Emit String :=
   psBackendStateBind (psBackendStateGet Unit.unit) (fun (state : EmitState) =>
     psBackendStateBind
       (psBackendStateSet (EmitState.mk state.linesRev state.lineCount state.indent
-        (Nat.succ state.nextIndex) state.helpers state.originsRev))
+        (Nat.succ state.nextIndex) state.helpers state.originsRev state.directNames))
       (fun (_unit : Unit) =>
         psBackendStatePure (cat ["_psc_l", decimal state.nextIndex, "_", encodePart hint])))
 
@@ -180,13 +182,13 @@ def helper (name : String) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk state.linesRev state.lineCount state.indent state.nextIndex
       (if psBackendNameSeen name state.helpers then state.helpers else psListAppend state.helpers [name])
-      state.originsRev)
+      state.originsRev state.directNames)
 
 def shiftIndent (increase : Bool) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk state.linesRev state.lineCount
       (if increase then Nat.succ state.indent else Nat.sub state.indent 1)
-      state.nextIndex state.helpers state.originsRev)
+      state.nextIndex state.helpers state.originsRev state.directNames)
 
 def withIndent {Value : Type} (action : Emit Value) : Emit Value :=
   psBackendStateBind (shiftIndent true) (fun (_unit : Unit) =>
@@ -529,7 +531,13 @@ def expression (fuel : Nat) :
               (fun (argument : PsVerifiedIrExpr) => emit argument false) arguments state
             let values := _psc_step_21.fst
             let state := _psc_step_21.snd
-            emitCall saved values tail state
+            if psBackendDirectGlobalCall state.directNames
+                (psListMap (fun (entry : Prod String String) => entry.fst) scope) fn then
+              -- Keep the selected runtime/public wrapper contract. Only this
+              -- statically non-suspending call bypasses the generator request.
+              psBackendStateBind (helper "calls") (fun (_unit : Unit) =>
+                bindValue (cat [saved, "(", psTextJoin ", " values, ")"])) state
+            else emitCall saved values tail state
         | PsVerifiedIrExpr.letE name type value body => do
             checkType 256 type
             let _psc_step_22 <- emit value false state
@@ -629,7 +637,7 @@ def parameterCheck (name : String) (type : PsVerifiedIrType) : Except String Str
 def noteOrigin (name : String) : Emit Unit :=
   psBackendStateModify (fun (state : EmitState) =>
     EmitState.mk state.linesRev state.lineCount state.indent state.nextIndex state.helpers
-      (List.cons (Prod.mk name (Nat.succ state.lineCount)) state.originsRev))
+      (List.cons (Prod.mk name (Nat.succ state.lineCount)) state.originsRev) state.directNames)
 
 def emitDeclaration (module : PsVerifiedIrModule) (declaration : PsVerifiedIrDeclaration) :
     Emit Unit :=
@@ -753,12 +761,16 @@ def countNewlines (chars : List Char) (count : Nat) : Nat :=
 
 end PsPython
 
-def psPythonEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
-    (ioAbi : Bool) : Except String PsPythonOutput := do
+def psPythonEmitModuleWithIoAndDirectCalls (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi directCalls : Bool) : Except String PsPythonOutput := do
   match psStrictValidateModule validated.raw with
   | Except.error _ => Except.error "PSC1_PYTHON_IR_VALIDATION_FAILED"
   | Except.ok _ => Except.ok Unit.unit
-  let _psc_step_59 <- PsPython.emitModuleBody validated.raw publicNames ioAbi PsPython.initialState
+  let directNames : PsStringSet :=
+    if directCalls then psBackendDirectCallNames validated.raw.declarations else PsStringSet.empty
+  let initial : PsPython.EmitState :=
+    PsPython.EmitState.mk List.nil 0 0 0 List.nil List.nil directNames
+  let _psc_step_59 <- PsPython.emitModuleBody validated.raw publicNames ioAbi initial
   let stub := _psc_step_59.fst
   let state := _psc_step_59.snd
   let selected : List String := psPythonRuntimeClosure state.helpers
@@ -771,3 +783,8 @@ def psPythonEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : Li
     stub runtime selected
     (psListMap (fun (pair : Prod String Nat) => Prod.mk pair.fst (Nat.add pair.snd offset))
       (psListReverse state.originsRev)))
+
+-- One emitter; the disabled policy is retained for exact output regression.
+def psPythonEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi : Bool) : Except String PsPythonOutput :=
+  psPythonEmitModuleWithIoAndDirectCalls validated publicNames ioAbi true

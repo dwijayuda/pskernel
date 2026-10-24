@@ -1,14 +1,14 @@
 {
   "schema": "psc1-python-php-selfhost-request/1",
   "branch": "feat/psc1-python-php-selfhost-20261024",
-  "parentCommit": "1c461c98201c49548e68155d02ca6d71d0626c7a",
+  "parentCommit": "a8955c4b99fc0cd847eb05d455435c87cb195a17",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "php"
+    "python"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "PHP-only genuine qualification after verified packed inductive storage: source1c461c98 and gate40072162242 pass all86-module Lean/PS lanes, seven state/four arity proofs, retained runtime/emitter/capture boundaries, strict canonical-field-order refusal, owner-qualified match indexing, legacy-layout observations and200000-cell1G execution plus four admitted runtime libraries. Keep response128MiB/PHP1G and all other policies unchanged. Native seed once then actual generated G1 G2 G3 with independent Lean4.35 admission, strict IR, ten cases and exact fixed points. Python30389 G1 passed but G2 timed out1800s; its actual CPU profile40071913715 diagnoses UTF8 encode99%, to be fixed independently."
+  "reason": "Python-only genuine qualification after measured UTF8 encoding bottleneck. Exact archived G2 profile40071913715 found106950 encode calls consuming118.890/120s. Bounded immutable identity views are now verified by gate40072686708 at a8955c4b: all86-module both-grammar lanes, unchanged catalog/proof/capture/packed tests, independent runtime-byte/AST boundaries, actual retained/current emitted UTF8 intrinsics, wide Unicode/bounds/errors/identity/eviction/oversize/concurrency differential execution and four independent runtime-library admissions. Keep G1240s/G2G31800s/separate240s, all memory/stack/fuel/negative policies unchanged. PHP-only native carrier crash is being fixed independently; no duplicate PHP run."
 }

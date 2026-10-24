@@ -1,0 +1,262 @@
+{
+  "schema": "psc1-lexer-string-bound-stage/1",
+  "testedCommit": "31e102637ed1984c71c96906fbbd3dc2fd8bf6d4",
+  "status": "passed",
+  "allInputProof": "LexerStringBoundTests.exact_original",
+  "oldLexerSha256": "be54e6d4e152ccbdfec650394ce173551a6ce10d987bc3a11f5a81dcc5326d65",
+  "currentLexerSha256": "fb4974f5080518bbb6cc8d95e5e378a1a4f58a1892e8aec4a0bb43fa1c97e560",
+  "records": [
+    {
+      "kind": "legacy",
+      "sourceClosureDigest": "e4ab0090623588f61299ae50bf485b58b7c53645ad27d93a3b3493bb02015096",
+      "admissionSha256": "81628a4644f1fb0020e43306f2a5c95bf377c7e73a304fdd2e203a73c056a450",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "artifactSha256": "ed65d8c0a9d831d9d7c003c9f440a38ddc6a262210b48ccce3501b6dfc33504a",
+      "seedEvent": {
+        "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_unified_service_seed",
+        "args": [
+          "rust",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/lexer-string-bound/legacy/request.json",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/lexer-string-bound/legacy/candidate.json"
+        ],
+        "status": 0,
+        "signal": null,
+        "elapsedMs": 306,
+        "maxRssKiB": 62184,
+        "peakTreeRssKiB": 51944,
+        "error": null
+      },
+      "observations": [
+        {
+          "module": "Ps.Syntax.Lexer",
+          "inputSha256": "fb4974f5080518bbb6cc8d95e5e378a1a4f58a1892e8aec4a0bb43fa1c97e560",
+          "bytes": 39000,
+          "value": "4913",
+          "elapsedMs": 294,
+          "maxRssKiB": 12192,
+          "peakTreeRssKiB": 8728
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "inputSha256": "404f933d8a6793b8a622912d1919b366e5d5573bae89d9b4745f69e78b11cf88",
+          "bytes": 58953,
+          "value": "9968",
+          "elapsedMs": 4039,
+          "maxRssKiB": 15520,
+          "peakTreeRssKiB": 15232
+        },
+        {
+          "module": "Ps.BackendRust.Expr",
+          "inputSha256": "4b198649dad0326dadb3dcc79a7dd2d784237e990bc647431c7d50f026803aed",
+          "bytes": 50873,
+          "value": "6434",
+          "elapsedMs": 3001,
+          "maxRssKiB": 12208,
+          "peakTreeRssKiB": 11172
+        },
+        {
+          "module": "Ps.BackendRust.Runtime",
+          "inputSha256": "dc3fa685fa635a9639861d0c9179082be449c0222311fcff168304a5a1d889cd",
+          "bytes": 5693,
+          "value": "123",
+          "elapsedMs": 92,
+          "maxRssKiB": 12240,
+          "peakTreeRssKiB": 2820
+        },
+        {
+          "module": "Ps.CompilerUnified.Service",
+          "inputSha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313",
+          "bytes": 3427,
+          "value": "541",
+          "elapsedMs": 67,
+          "maxRssKiB": 12208,
+          "peakTreeRssKiB": 3112
+        },
+        {
+          "module": "empty",
+          "inputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0,
+          "value": "1",
+          "elapsedMs": 11,
+          "maxRssKiB": 12192,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "unicode",
+          "inputSha256": "733ff88dba2e8e1364adbe490197683f85a468b3ada0741884e8b2e52f69b6f7",
+          "bytes": 20,
+          "value": "4",
+          "elapsedMs": 11,
+          "maxRssKiB": 12212,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "escape",
+          "inputSha256": "8bbcb681750af483258c5ca72e83c5c397bf66aa01e7c7787c0d212fc1f6fa1d",
+          "bytes": 6,
+          "value": "2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12080,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "unterminated",
+          "inputSha256": "fba6e97680006ae6b73c2c8bd7ba7fb6766a652f2a6203788e58b80cd344a9f5",
+          "bytes": 2,
+          "value": "string:2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12196,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "newline",
+          "inputSha256": "422b6e380acaa9ba096e424e88ae518cc55b4d8200909533189438a3002954bb",
+          "bytes": 5,
+          "value": "newline:2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12212,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "slash",
+          "inputSha256": "88a2ce63ef94ee3a05199db9492b1c865191b516a763a7ac2c082394182eabf9",
+          "bytes": 3,
+          "value": "string:2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12212,
+          "peakTreeRssKiB": 0
+        }
+      ]
+    },
+    {
+      "kind": "current",
+      "sourceClosureDigest": "3054520be5eadd012d94f59e6a6ef7a984a214090a7a84b7c4dec245e8ca5d24",
+      "admissionSha256": "2e82e7612a7bdff66ee7c27348598b4c659e66d6680f616a8172c978526e6d64",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "artifactSha256": "add8a177991274c802b22062099bbd11be49a7f704edb844965fef7a56bbca20",
+      "seedEvent": {
+        "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_unified_service_seed",
+        "args": [
+          "rust",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/lexer-string-bound/current/request.json",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/lexer-string-bound/current/candidate.json"
+        ],
+        "status": 0,
+        "signal": null,
+        "elapsedMs": 340,
+        "maxRssKiB": 60140,
+        "peakTreeRssKiB": 60140,
+        "error": null
+      },
+      "observations": [
+        {
+          "module": "Ps.Syntax.Lexer",
+          "inputSha256": "fb4974f5080518bbb6cc8d95e5e378a1a4f58a1892e8aec4a0bb43fa1c97e560",
+          "bytes": 39000,
+          "value": "4913",
+          "elapsedMs": 268,
+          "maxRssKiB": 12204,
+          "peakTreeRssKiB": 8756
+        },
+        {
+          "module": "Ps.Bridge.CheckedAdmissions",
+          "inputSha256": "404f933d8a6793b8a622912d1919b366e5d5573bae89d9b4745f69e78b11cf88",
+          "bytes": 58953,
+          "value": "9968",
+          "elapsedMs": 439,
+          "maxRssKiB": 15444,
+          "peakTreeRssKiB": 15148
+        },
+        {
+          "module": "Ps.BackendRust.Expr",
+          "inputSha256": "4b198649dad0326dadb3dcc79a7dd2d784237e990bc647431c7d50f026803aed",
+          "bytes": 50873,
+          "value": "6434",
+          "elapsedMs": 341,
+          "maxRssKiB": 12192,
+          "peakTreeRssKiB": 11988
+        },
+        {
+          "module": "Ps.BackendRust.Runtime",
+          "inputSha256": "dc3fa685fa635a9639861d0c9179082be449c0222311fcff168304a5a1d889cd",
+          "bytes": 5693,
+          "value": "123",
+          "elapsedMs": 35,
+          "maxRssKiB": 12212,
+          "peakTreeRssKiB": 2868
+        },
+        {
+          "module": "Ps.CompilerUnified.Service",
+          "inputSha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313",
+          "bytes": 3427,
+          "value": "541",
+          "elapsedMs": 30,
+          "maxRssKiB": 12196,
+          "peakTreeRssKiB": 3116
+        },
+        {
+          "module": "empty",
+          "inputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0,
+          "value": "1",
+          "elapsedMs": 11,
+          "maxRssKiB": 12432,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "unicode",
+          "inputSha256": "733ff88dba2e8e1364adbe490197683f85a468b3ada0741884e8b2e52f69b6f7",
+          "bytes": 20,
+          "value": "4",
+          "elapsedMs": 11,
+          "maxRssKiB": 12212,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "escape",
+          "inputSha256": "8bbcb681750af483258c5ca72e83c5c397bf66aa01e7c7787c0d212fc1f6fa1d",
+          "bytes": 6,
+          "value": "2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12192,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "unterminated",
+          "inputSha256": "fba6e97680006ae6b73c2c8bd7ba7fb6766a652f2a6203788e58b80cd344a9f5",
+          "bytes": 2,
+          "value": "string:2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12212,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "newline",
+          "inputSha256": "422b6e380acaa9ba096e424e88ae518cc55b4d8200909533189438a3002954bb",
+          "bytes": 5,
+          "value": "newline:2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12212,
+          "peakTreeRssKiB": 0
+        },
+        {
+          "module": "slash",
+          "inputSha256": "88a2ce63ef94ee3a05199db9492b1c865191b516a763a7ac2c082394182eabf9",
+          "bytes": 3,
+          "value": "string:2",
+          "elapsedMs": 11,
+          "maxRssKiB": 12240,
+          "peakTreeRssKiB": 0
+        }
+      ]
+    }
+  ],
+  "qualification": false,
+  "scope": "Rust generated lexer stage on real compiler source files and malformed literals; not whole G2 or a fixed point",
+  "run": 40143764706,
+  "job": 121020712723,
+  "artifact": 12579034746,
+  "artifactZipSha256": "1cb29f0bc7aac7fbb75c9f587661fea0897b3506897bf5d24b783e5a988a4151",
+  "promoted": false,
+  "fullCompilerQualification": false
+}

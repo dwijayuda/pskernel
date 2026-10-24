@@ -1,5 +1,50 @@
 # PSC1 AI work state
 
+## Isolated lexer optimization candidate — not promoted
+
+Branch optimization/psc1-lexer-string-suffix-20261025, code
+31e102637ed1984c71c96906fbbd3dc2fd8bf6d4. Primary PR178 remains ondaa735017e34ee94da79d747c363237b4adbc4ef.
+Frozen Rust request2d27f142/run40141718481 continues on closure07eedac1;
+do not modify/cancel/duplicate it or inherit its outcome onto this changed root.
+
+Run40143764706/job121020712723 PASSED the original-fuel wrapper equality
+for every character list, source position and accumulator. The explicit
+psLexReadStringBodyWithFuel API is byte-for-byte unchanged. Structural steps
+consume one character and carry the previous slash position so malformed
+escape errors preserve their exact spans. No semantic fuel/stack/heap/time
+limit changed. No axiom declaration or sorry: printed proof dependencies are
+standard propext, Classical.choice and Quot.sound. The retained lexer proofs
+are repaired against current accumulator append;320 bounded comparisons and
+100001-token inputs in each grammar pass.
+
+Both120-module owned grammar censuses pass. Generated Rust probes for retained
+and current lexers are independently admitted by official Lean4.35.0 and
+built through the existing strict-IR pipeline. Eleven observations per probe
+(five actual compiler files and six malformed/Unicode inputs) match exactly.
+Single-run stage timings, not a whole-G2 benchmark: CheckedAdmissions
+4039->439ms;BackendRust.Expr3001->341ms;Lexer294->268ms;Runtime92->35ms;
+CompilerUnified.Service67->30ms. Peak memory remains in the receipt.
+Artifact12579034746,ZIP1cb29f0bc7aac7fbb75c9f587661fea0897b3506897bf5d24b783e5a988a4151.
+Probe source digests are e4ab0090 (legacy) and3054520b (current);
+these are probe closures, not the full self-host compiler closure.
+
+Retained failed experiments:40142504183 proof-fixture errors;40142786332
+probe formatting dependency missing;40143048708/40143347658/40143535273
+owned-elaborator structuralRecursionArity refusal. Exact diagnosis: the
+helper declared one recursive parameter but supplied five. Declaring its
+complete telescope uses the existing generalized-recursion planner. No
+frontend rule or checker was weakened. All failed CI/artifacts remain.
+
+Status: PROVED and STAGE-TESTED, not full-seven-backend-qualified, no genuine
+new-root G1/G2/G3 or fixed point. Do not promote solely from stage timings.
+If the frozen primary Rust run passes, preserve that frozen root and defer
+this optimization to the separate240s performance work. If it fails, diagnose
+the terminal request and use this candidate only when relevant, then require
+full native/G1/source and genuine-generation qualification on its new root.
+The inherited state below is the primary checkpoint before this isolated
+experiment; it is not qualification of the experimental compiler source.
+
+
 ## Active measured-runtime candidate and longer Rust qualification
 
 Updated2026-10-25 Asia/Jakarta. Current control8966261900c7d019553fcef5b04bc9e90593c901

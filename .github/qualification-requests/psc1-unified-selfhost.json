@@ -1,7 +1,7 @@
 {
   "schema": "psc1-unified-selfhost-request/1",
   "branch": "qualification/psc1-unified-v2-20261025",
-  "parentCommit": "b14de17a89604e8073a29fbeec2282c5fd02d0ed",
+  "parentCommit": "8cb563761edbac9862babd3fd7b194f1085b75b6",
   "action": "qualify-independent-G1-G2-G3",
   "mode": "--self-host",
   "profile": "correctness-1800s",

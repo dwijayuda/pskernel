@@ -20,7 +20,7 @@ export function boundedRun(executable,args,options={}) {
  const limits=supervisorLimit(options.timeoutMs,options.timeoutPolicy);
  const control=spawnSync('python3',[path.resolve('scripts/bounded-process.py'),JSON.stringify({
   command:[executable,...args],directory,...limits,maxBuffer:32*1024*1024})],
-  {encoding:'utf8',timeout:limits.supervisorGuardMs,killSignal:'SIGKILL',maxBuffer:1024*1024,
+  {encoding:'utf8',stdio:['ignore','pipe','inherit'],timeout:limits.supervisorGuardMs,killSignal:'SIGKILL',maxBuffer:1024*1024,
    cwd:options.cwd,env:options.env||process.env});
  if(control.error||control.status!==0)throw Error('PSC1_SUPERVISOR_FAILED:'+(control.error?.message||control.stderr));
  const result=JSON.parse(control.stdout);
@@ -28,7 +28,7 @@ export function boundedRun(executable,args,options={}) {
  result.stderr=fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8');
  fs.appendFileSync(path.join(directory,'tool-events.jsonl'),JSON.stringify({state:'finished',
   executable,args,status:result.status,signal:result.signal,error:result.error,
-  elapsedMs:result.elapsedMs,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,timeoutMs:result.timeoutMs,timeoutPolicy:result.timeoutPolicy,stdoutBytes:result.stdoutBytes,stderrBytes:result.stderrBytes})+'\n');
+  elapsedMs:result.elapsedMs,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,sampledCpuSeconds:result.sampledCpuSeconds,timeoutMs:result.timeoutMs,timeoutPolicy:result.timeoutPolicy,stdoutBytes:result.stdoutBytes,stderrBytes:result.stderrBytes})+'\n');
  if(temporary)fs.rmSync(directory,{recursive:true,force:true});
  return result;
 }

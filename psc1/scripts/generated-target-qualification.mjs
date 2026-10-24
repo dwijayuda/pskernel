@@ -97,10 +97,11 @@ function generated(artifact,r,label) {
  fs.writeFileSync(input,r.text);
  report.activeRequest={id:r.id,requestSha256:sha(r.text),producer:artifact.sha256};checkpoint();
  const limits=compilerRequestLimit(profileName,r.id);
+ console.log('PSC1_TARGET_REQUEST_STARTED: '+JSON.stringify({target,id:r.id,serviceSha256:artifact.sha256,requestSha256:sha(r.text),...limits,at:new Date().toISOString()}));
  const began=Date.now(),result=boundedRun(process.execPath,[runner,artifact.file,artifact.sha256,input,output,profileName],
   {logDirectory:path.join(directory,label+'-process'),...limits});
  const event={role:'generated-compiler',target,id:r.id,serviceSha256:artifact.sha256,
-  requestSha256:sha(r.text),...limits,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,memoryMeasurement:result.memoryMeasurement,elapsedMs:Date.now()-began,status:result.status,signal:result.signal,error:result.error?.message||null};
+  requestSha256:sha(r.text),...limits,maxRssKiB:result.maxRssKiB,peakTreeRssKiB:result.peakTreeRssKiB,sampledCpuSeconds:result.sampledCpuSeconds,memoryMeasurement:result.memoryMeasurement,elapsedMs:Date.now()-began,status:result.status,signal:result.signal,error:result.error?.message||null};
  events.push(event);checkpoint();
  console.log('PSC1_TARGET_REQUEST_EXECUTION: '+JSON.stringify(event));
  fs.writeFileSync(path.join(directory,label+'.stdout.txt'),result.stdout||'');

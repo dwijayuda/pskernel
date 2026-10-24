@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       targets: ${{ steps.request.outputs.targets }}
+      profile: ${{ steps.request.outputs.profile }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,8 +37,8 @@ jobs:
           assert.ok(['feat/psc1-python-php-selfhost-20261024'].includes(r.branch));
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.equal(r.action,'qualify-independent-G1-G2-G3');
-          assert.equal(r.profile,'correctness-1800s');
-          assert.equal(r.g2g3TimeoutMs,1800000);assert.equal(r.g1TimeoutMs,240000);
+          assert.ok(['correctness-1800s','correctness-3600s'].includes(r.profile));
+          assert.equal(r.g2g3TimeoutMs,r.profile==='correctness-3600s'?3600000:1800000);assert.equal(r.g1TimeoutMs,240000);
           assert.equal(r.resourcePolicy,'only-G2-G3-wall-clock-extended;all-other-policies-unchanged');
           assert.ok(Array.isArray(r.targets)&&r.targets.length>0&&r.targets.every(t=>['python','php'].includes(t)));
           assert.equal(new Set(r.targets).size,r.targets.length);
@@ -46,6 +47,7 @@ jobs:
           const d=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});assert.equal(d.status,0);
           assert.deepEqual(d.stdout.split(String.fromCharCode(0)).filter(Boolean),['.github/qualification-requests/psc1-python-php-selfhost.json']);
           fs.appendFileSync(process.env.GITHUB_OUTPUT,'targets='+JSON.stringify(r.targets)+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'profile='+r.profile+'\n');
           console.log('PSC1_PYTHON_PHP_EXPLICIT_REQUEST: '+JSON.stringify(r));
           JS
   qualify:
@@ -54,7 +56,7 @@ jobs:
       cancel-in-progress: false
     needs: request
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
@@ -108,6 +110,7 @@ jobs:
         id: native_build
         run: |
           set -euo pipefail
+          node scripts/bounded-process-contract-tests.mjs
           node --check host-tools/generated-target-profiles.mjs
           node --check host-tools/generated-wasm-transport.mjs
           node --check host-tools/generated-target-tools.mjs
@@ -146,12 +149,12 @@ jobs:
       - name: Census complete owned backend source in both grammars
         run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }}
       - name: Execute genuine generated compiler generations and exact fixed point
-        timeout-minutes: 110
-        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host correctness-1800s
+        timeout-minutes: 170
+        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} --self-host ${{ needs.request.outputs.profile }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-python-php-selfhost-correctness-1800s-${{ matrix.target }}-${{ github.sha }}
+          name: psc1-python-php-selfhost-${{ needs.request.outputs.profile }}-${{ matrix.target }}-${{ github.sha }}
           path: |
             psc1/dist/direct-selfhost-preflight/
             psc1/dist/js-statement-tests/

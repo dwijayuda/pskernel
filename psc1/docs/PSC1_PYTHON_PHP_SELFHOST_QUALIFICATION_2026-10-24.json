@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 09:00:00 UTC",
-  "status": "PHP-extraction-and-Python-lambda-free-self-tail-genuine-qualification-active",
+  "recordedAtUtc": "2026-10-24T10:05:00Z",
+  "status": "3600s-profile-implementation-awaiting-Linux-validation",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -76,10 +76,10 @@
     "status": "passed"
   },
   "qualification": {
-    "G1": "prior actual attempts accepted strict IR/all ten cases; latest changed-source terminal evidence pending",
-    "G2": "prior both1800s deadline failures; current separate requests active",
-    "G3": "not-yet-qualified",
-    "fixedPoint": "not-yet-qualified",
+    "G1": "both latest independently accepted,strict original/transformed IR,all ten observations",
+    "G2": "Python1800057ms and PHP1800042ms hard deadlines",
+    "G3": "not-run",
+    "fixedPoint": "not-run",
     "cleanReproduction": "not-run",
     "performance240s": "not-qualified"
   },
@@ -121,43 +121,30 @@
     "resolution": "Explicit8.5.12 in workflows and trusted inventory; exact-version assertions retained, no wildcard fallback."
   },
   "sourceGate": {
-    "runId": 40069330525,
-    "jobId": 120799158087,
-    "commit": "24f93a383886894cb411ecb76ff38fa46dd47177",
-    "status": "passed",
-    "modulesPerTarget": 86,
+    "runId": 40079503171,
+    "jobId": 120829903883,
+    "status": "success",
+    "modulesPerTarget": 87,
     "grammars": [
       "lean",
       "ps"
     ],
-    "refused": [],
-    "stateApiEqualities": 7,
-    "arityApiEqualities": 4,
-    "runtimeComparisons": 34816,
-    "retainedEmitterComparisons": 144,
-    "admittedRuntimeLibraryCombinations": 4,
-    "artifact": {
-      "id": 12550731070,
-      "node_id": "MDg6QXJ0aWZhY3QxMjU1MDczMTA3MA==",
-      "name": "psc1-python-php-source-24f93a383886894cb411ecb76ff38fa46dd47177",
-      "size_in_bytes": 9613874,
-      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550731070",
-      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550731070/zip",
-      "expired": false,
-      "digest": "sha256:432892ba71dfd10da59fcc150fa0220476fae2881c27d199cfca10820afb603d",
-      "created_at": "2026-10-24T06:14:42Z",
-      "updated_at": "2026-10-24T06:14:42Z",
-      "expires_at": "2027-01-22T06:13:12Z",
-      "workflow_run": {
-        "id": 40069330525,
-        "repository_id": 1381609925,
-        "head_repository_id": 1381609925,
-        "head_branch": "feat/psc1-python-php-selfhost-20261024",
-        "head_sha": "24f93a383886894cb411ecb76ff38fa46dd47177"
+    "retainedComparisons": 43,
+    "deepTailSteps": 2000000,
+    "deepEscapingClosureFallback": 200000,
+    "typedIoOrderAndFirstFailure": true,
+    "parallelArgumentSwap": true,
+    "lexicalShadowRefusal": true,
+    "recursionLimit": "unchanged",
+    "artifacts": [
+      {
+        "id": 12553794512,
+        "digest": "sha256:d333a53cc5f2b22f0ab2f3d13b695fff49f602ec076abb4d2aa10d2b42690fca"
       }
-    }
+    ],
+    "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
   },
-  "nextAction": "Read current Python40079719620/job120830635451 and PHP40078954006/job120828380302 terminal evidence. Keep source stable while genuine attempts run. If failure, profile exact archived new artifact and fix demonstrated class; preserve all limits/checks. Require final current-source37/37 and independently clean G1 reproduction after both qualify.",
+  "nextAction": "Validate profile, process-tree, negative, transport and source guards in Linux; then isolated BOTH-target correctness-3600s actual G1/G2/G3 and exact fixed points.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -205,7 +192,9 @@
         "conclusion": "failure"
       }
     },
-    "scope": "One native seed per target, then actual generated G1/G2/G3; no result inferred before terminal evidence."
+    "scope": "One native seed per target, then actual generated G1/G2/G3; no result inferred before terminal evidence.",
+    "historical": true,
+    "supersededBy": "pythonSelfTailLoops.qualification and phpExtraction.qualification"
   },
   "phpCaptureFix": {
     "sourceCommit": "da5c5c6e894019f8200e0771512f7e232a3403c6",
@@ -811,26 +800,28 @@
     "compilerSourceChanged": false
   },
   "currentSourceGate": {
-    "commit": "617004ceb29ce759f38a49b635a47bc25aa7f622",
-    "runId": 40073537409,
-    "jobId": 120811928284,
-    "status": "passed",
-    "modulesPerTarget": 86,
+    "runId": 40079503171,
+    "jobId": 120829903883,
+    "status": "success",
+    "modulesPerTarget": 87,
     "grammars": [
       "lean",
       "ps"
     ],
-    "refused": [],
-    "retainedCatalogCases": 34816,
-    "stateEqualities": 7,
-    "arityEqualities": 4,
-    "retainedEmitterSyntaxCases": 144,
-    "pythonUtf8DifferentialQueries": 234895,
-    "phpGeneratedCollectionCells": 2000000,
-    "phpIterativeDeadSpineNodes": 2000000,
-    "admittedRuntimeLibraryCombinations": 4,
-    "queriesPerCombination": 108,
-    "stateQueriesPerCombination": 8
+    "retainedComparisons": 43,
+    "deepTailSteps": 2000000,
+    "deepEscapingClosureFallback": 200000,
+    "typedIoOrderAndFirstFailure": true,
+    "parallelArgumentSwap": true,
+    "lexicalShadowRefusal": true,
+    "recursionLimit": "unchanged",
+    "artifacts": [
+      {
+        "id": 12553794512,
+        "digest": "sha256:d333a53cc5f2b22f0ab2f3d13b695fff49f602ec076abb4d2aa10d2b42690fca"
+      }
+    ],
+    "commit": "e20a11549cdb1d656c05912089730bf2ebeaf933"
   },
   "phpNodeQualification": {
     "requestCommit": "75f04cfdcafc1fbeea08f66f595f40ff6b777d04",
@@ -1191,9 +1182,47 @@
       "requestCommit": "1174300d0efc2a10cf6887e598a1a4057f36c7cc",
       "runId": 40078954006,
       "jobId": 120828380302,
-      "status": "in_progress",
+      "status": "completed",
       "generationEvidence": "terminal receipt not yet read",
-      "sourceEvolution": "Later Python-only tail-loop source does not alter this PHP owned source closure or critical host tools."
+      "sourceEvolution": "Later Python-only tail-loop source does not alter this PHP owned source closure or critical host tools.",
+      "conclusion": "failure",
+      "result": {
+        "target": "php",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "06a9a142162fffbef3e332a95e5d85a0d4ad2876c0b321001c391729337f2974",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"php\",\"id\":\"G2-self\",\"serviceSha256\":\"3fb74d6d6fd2479a55d2d42243ce4708ea10265d574b7b41225307eb0cb7e58d\",\"requestSha256\":\"164437d102ccd97290a41af09d551867d047bcbe713310ff181284564ce888bb\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":74192,\"peakTreeRssKiB\":1179544,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800042,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "3fb74d6d6fd2479a55d2d42243ce4708ea10265d574b7b41225307eb0cb7e58d",
+            "startedAt": "2026-10-24T08:53:38.508Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"php\",\"id\":\"G2-self\",\"serviceSha256\":\"3fb74d6d6fd2479a55d2d42243ce4708ea10265d574b7b41225307eb0cb7e58d\",\"requestSha256\":\"164437d102ccd97290a41af09d551867d047bcbe713310ff181284564ce888bb\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":74192,\"peakTreeRssKiB\":1179544,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800042,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+            "completedAt": "2026-10-24T09:23:39.083Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12555337743,
+          "digest": "sha256:072e3111a2d9367a8bef2df82db6041f23c8bd582642f0730e7ddb9c7dde8ef7"
+        }
+      ]
     }
   },
   "pythonSelfTailLoops": {
@@ -1246,8 +1275,299 @@
       "requestCommit": "e6327cddbbb74917fcdebed8e00bdf6b8db55c42",
       "runId": 40079719620,
       "jobId": 120830635451,
-      "status": "in_progress",
-      "generationEvidence": "terminal receipt not yet read"
+      "status": "completed",
+      "generationEvidence": "terminal receipt not yet read",
+      "conclusion": "failure",
+      "result": {
+        "target": "python",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "9313bf6be070fb447d463afb6bf72e3932ba9ebdb24c070783d74effbd514008",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"python\",\"id\":\"G2-self\",\"serviceSha256\":\"4299bc4e5b88efa8f39d459a1c10bd0ca2cedfb6c93e54f5e35d01be8168fc08\",\"requestSha256\":\"065657d720858113c1d7219cd5d575420ba36a0ca0b4b7d78a1c7c9760ed6af5\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":67728,\"peakTreeRssKiB\":786232,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800057,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "4299bc4e5b88efa8f39d459a1c10bd0ca2cedfb6c93e54f5e35d01be8168fc08",
+            "startedAt": "2026-10-24T08:55:56.723Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"python\",\"id\":\"G2-self\",\"serviceSha256\":\"4299bc4e5b88efa8f39d459a1c10bd0ca2cedfb6c93e54f5e35d01be8168fc08\",\"requestSha256\":\"065657d720858113c1d7219cd5d575420ba36a0ca0b4b7d78a1c7c9760ed6af5\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":67728,\"peakTreeRssKiB\":786232,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800057,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+            "completedAt": "2026-10-24T09:25:57.554Z"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "id": 12555068026,
+          "digest": "sha256:5c37d10d0bd1879eec245254daa9e2175bbfe3cfd28acaf751d2bc4555edef27"
+        }
+      ]
     }
+  },
+  "activeRequests": [],
+  "historicalSourceGates": [
+    {
+      "runId": 40069330525,
+      "jobId": 120799158087,
+      "commit": "24f93a383886894cb411ecb76ff38fa46dd47177",
+      "status": "passed",
+      "modulesPerTarget": 86,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "refused": [],
+      "stateApiEqualities": 7,
+      "arityApiEqualities": 4,
+      "runtimeComparisons": 34816,
+      "retainedEmitterComparisons": 144,
+      "admittedRuntimeLibraryCombinations": 4,
+      "artifact": {
+        "id": 12550731070,
+        "node_id": "MDg6QXJ0aWZhY3QxMjU1MDczMTA3MA==",
+        "name": "psc1-python-php-source-24f93a383886894cb411ecb76ff38fa46dd47177",
+        "size_in_bytes": 9613874,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550731070",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550731070/zip",
+        "expired": false,
+        "digest": "sha256:432892ba71dfd10da59fcc150fa0220476fae2881c27d199cfca10820afb603d",
+        "created_at": "2026-10-24T06:14:42Z",
+        "updated_at": "2026-10-24T06:14:42Z",
+        "expires_at": "2027-01-22T06:13:12Z",
+        "workflow_run": {
+          "id": 40069330525,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "feat/psc1-python-php-selfhost-20261024",
+          "head_sha": "24f93a383886894cb411ecb76ff38fa46dd47177"
+        }
+      }
+    },
+    {
+      "commit": "617004ceb29ce759f38a49b635a47bc25aa7f622",
+      "runId": 40073537409,
+      "jobId": 120811928284,
+      "status": "passed",
+      "modulesPerTarget": 86,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "refused": [],
+      "retainedCatalogCases": 34816,
+      "stateEqualities": 7,
+      "arityEqualities": 4,
+      "retainedEmitterSyntaxCases": 144,
+      "pythonUtf8DifferentialQueries": 234895,
+      "phpGeneratedCollectionCells": 2000000,
+      "phpIterativeDeadSpineNodes": 2000000,
+      "admittedRuntimeLibraryCombinations": 4,
+      "queriesPerCombination": 108,
+      "stateQueriesPerCombination": 8
+    }
+  ],
+  "fullCurrentRegression": {
+    "runId": 40080321500,
+    "status": "success",
+    "reviewCommit": "b8406ab3db4ae410ceb45e39fdab07efe6a47eb6",
+    "mergeCommit": "609ff880a415b6608940048a952bcdad681b72c2",
+    "identicalGitTree": "6f31dfcaeab9873381f5c2625381e158c7b5abc7",
+    "linuxJobId": 120834433295,
+    "finalGateJobId": 120838887904,
+    "qualified": 37,
+    "blocked": 0,
+    "releaseReady": true,
+    "backends": 7,
+    "grammars": 2,
+    "pythonVersions": [
+      "3.14.8",
+      "3.15.0"
+    ],
+    "phpVersion": "8.5.12",
+    "targetExecutionBundles": 14,
+    "scriptingRegressionGroups": 28,
+    "scriptingArtifactBundles": 24,
+    "architectureRegressionGroups": 11,
+    "artifacts": [
+      {
+        "id": 12555490668,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:0e36b67f28f011aa27e552dba66e6656db1fad7d3651527dd8c7c1c686004c56"
+      },
+      {
+        "id": 12555143308,
+        "name": "psc1-scoped-correctness-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:2c4bd74fed182afb01b215858c0b53373d3077024d2e05916435c7f80a8af58c"
+      },
+      {
+        "id": 12554902667,
+        "name": "psc1-generated-compiler-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:12461cba06e6f8f755c06b4d910d90860684085e501be0e6ec94e61163902f45"
+      },
+      {
+        "id": 12554868795,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:adb3e64f06b7f9451c31b3ea3cb9badfd6ec59a688c84e98765dafeeb8f29d78"
+      },
+      {
+        "id": 12554822300,
+        "name": "psc1-architecture-native-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:76075ce03faf70ad355e55ff2799d512f86a676968ec5430360f6d654178bb02"
+      },
+      {
+        "id": 12554792956,
+        "name": "psc1-generated-session-boundary-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:ea21de12361c7045825bce305a561f0cfa6e7abbc57a9607a985a70da7f0b37d"
+      },
+      {
+        "id": 12554753004,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:a4d3f07d462c8c911b77fbc3c7f9f3c5a9e19757e7c126578abfbbf9aeb0f441"
+      },
+      {
+        "id": 12554707411,
+        "name": "psc1-development-609ff880a415b6608940048a952bcdad681b72c2",
+        "digest": "sha256:bac2317a5520d45fa45ed941af6ce3dee18db8c870c87384ea52ffdaf36e22db"
+      },
+      {
+        "id": 12554293645,
+        "name": "psc1-php-applications-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
+        "digest": "sha256:88115ecd4b90fbcbf96afb60ea3e1ca2030226601b84ff3c2badf2efa29bfadb"
+      },
+      {
+        "id": 12554288936,
+        "name": "psc1-practical-compiler-m-core-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
+        "digest": "sha256:940bdb0803cee7f1dd7e34d99eeb12dea8fdce5fb8325f5605b89ff3ac1cf756"
+      },
+      {
+        "id": 12554099391,
+        "name": "psc1-practical-compiler-m-applications-609ff880a415b6608940048a952bcdad681b72c2-attempt-1",
+        "digest": "sha256:7bcf04f798939132468ff1a7572add99da2ad6f8ef370b80065fcf85aed905b7"
+      }
+    ],
+    "phpApplicationMetrics": [
+      {
+        "syntax": "lean",
+        "target": "php",
+        "cases": 12,
+        "metrics": [
+          {
+            "id": "100000-statements",
+            "metrics": {
+              "elapsedSeconds": 32.6,
+              "maxRssKiB": 78940
+            }
+          }
+        ]
+      },
+      {
+        "syntax": "ps",
+        "target": "php",
+        "cases": 12,
+        "metrics": [
+          {
+            "id": "100000-statements",
+            "metrics": {
+              "elapsedSeconds": 32.67,
+              "maxRssKiB": 78720
+            }
+          }
+        ]
+      }
+    ],
+    "evidenceBoundary": "full preserved Practical Core/source functionality, not G2/G3 or fixed-point qualification"
+  },
+  "currentRuntimeProfiles": {
+    "controlCommit": "e3b0c5f378b5205390080c7fc66667bd6636d4ff",
+    "python": {
+      "runId": 40082137157,
+      "scope": "exact archived generated G1/G2 request cProfile120s",
+      "sourceSha256": "6170b904c3da1c717689e10f70eb5e99899572776f011b60b21119bec95c00ab",
+      "requestSha256": "065657d720858113c1d7219cd5d575420ba36a0ca0b4b7d78a1c7c9760ed6af5",
+      "calls": 314923837,
+      "schedulerOwnSeconds": 23.15,
+      "generatorSends": {
+        "calls": 36560947,
+        "ownSeconds": 12.567
+      },
+      "utf8IdentityView": {
+        "calls": 47700039,
+        "ownSeconds": 20.071
+      },
+      "stringEqWorker": {
+        "calls": 717983,
+        "ownSeconds": 9.546,
+        "cumulativeSeconds": 36.197
+      },
+      "lastPhase": "expression instantiation,51 suspended generators"
+    },
+    "php": {
+      "runId": 40082137206,
+      "scope": "120 asynchronous interrupted-callsite/stack samples,not CPU attribution",
+      "sourceSha256": "5c55eeee69ded03bf98939be1b447a5b92f9e23c6509bbdf32aa95ee1f3ab95d",
+      "requestSha256": "164437d102ccd97290a41af09d551867d047bcbe713310ff181284564ce888bb",
+      "peakPhpAllocatedBytes": 686821376,
+      "labelRecoveryRunId": 40082826544,
+      "labelRecoveryControlCommit": "ea4ae57a18a7e07e32caf5e46a90bbb9f9c3b864",
+      "samples": 120,
+      "nodeOffsetGet": 22,
+      "nodeOffsetExists": 3,
+      "nodeDestructor": 5,
+      "runtimeOther": 49,
+      "labelBoundary": "initial relative-path comparison mislabelled owners; read-only reclassification of retained samples recovered labels without rerunning compiler"
+    }
+  },
+  "controlledExperiments": {
+    "python": {
+      "run": 40083320898,
+      "status": "success-five-frozen-candidate-matches-and-120s-profiles-only",
+      "production": false,
+      "qualification": false,
+      "hotPair": "UTF8 lookup own10.518s/60.194M vs baseline20.071s/47.7M; different profiled runs, no full-chain speed claim",
+      "ownedSync": "no demonstrated advantage; do not promote"
+    },
+    "php": {
+      "run": 40083473782,
+      "status": "failed-before-execution-tokenized-unbalanced-fragment",
+      "production": false,
+      "qualification": false
+    }
+  },
+  "longCorrectnessProfile": {
+    "name": "correctness-3600s",
+    "g2g3TimeoutMs": 3600000,
+    "g1TimeoutMs": 240000,
+    "corpusTimeoutMs": 240000,
+    "toolTimeoutMs": 240000,
+    "checkerTimeoutMs": 120000,
+    "jobTimeoutMinutes": 180,
+    "executionStepTimeoutMinutes": 170,
+    "githubHostedJobLimitMinutes": 360,
+    "limitsSource": "https://github.com/github/docs/blob/main/content/actions/reference/limits.md",
+    "unchanged": [
+      "performance-240s",
+      "correctness-1800s",
+      "memory",
+      "stack",
+      "fuel",
+      "strict IR",
+      "independent Lean 4.35",
+      "negative cases",
+      "source identities"
+    ],
+    "diagnostics": "Once/minute resource heartbeat; existing100ms procfs sample, sampled CPU ticks, RSS, process count and pipe byte counts; no semantic progress claim"
   }
 }

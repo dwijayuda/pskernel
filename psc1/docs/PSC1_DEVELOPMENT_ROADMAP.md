@@ -10,18 +10,17 @@ owns exact source identities and immutable actual results.
 
 | Order | Work | Finite acceptance and current status |
 | --- | --- | --- |
-| 1 | Preserve validated mechanisms | PASSED sourcee20a1154/run40079503171/job120829903883:87 modules/target/both grammars, all retained/API/admitted/runtime guards. Bounded Python UTF8 views; lexical PHP captures; immutable nodes/iterative release; bounded synchronous globals; PHP byte slicing with25100helper+25100API checks; lambda-free Python self-tail loops with exact AST restoration,43 comparisons,2M steps/200k closure fallback/typed IO order and errors. |
-| 2 | Genuine current generations | PHP1174300d/run40078954006/job120828380302 and Pythone6327cdd/run40079719620/job120830635451 ACTIVE. Keep source stable/read terminal evidence. Both earlier809070eb G1s PASS independent admission/strict IR/ten cases, but both G2 fail1800s; no G3/fixed point. Later Python-only source leaves PHP closure unchanged. |
-| 3 | Exact fixed points | Seed once, remove native compiler tools, actual G1→G2→G3; independent Lean4.35, source pairing, both strict graphs, ten positive/refusal cases, exact source/admission/IR/observations/raw executable identities. Correctness1800s and performance240s remain separate. If failure, profile exact new artifact and fix demonstrated class before another request. |
-| 4 | Final regression/reproduction | Baseline40073884191 PASSED37/37/all7 backends/both grammars/applications at edcbab7b/tree0d12de8a. New source needs final full CI, then separately independent clean G1 reproducing each qualified generation without lake cache. No merge/publication authorized. |
+| 1 | Preserve current qualified compiler | Sourcee20a1154 focused40079503171 PASS; full40080321500 PASS37/37, all7 backends/both grammars/apps/installed IO. Reviewb8406ab3 and tested609ff880 share tree6f31dfcaeab9873381f5c2625381e158c7b5abc7. |
+| 2 | Validate longer supervision | Add separate correctness-3600s only for G2-self/G3-self. Preserve G1/corpus/tools240s,checker120s, performance240s, historical1800s and every other resource/verification policy.180min jobs/170min execution fit hosted6h. Linux process-tree/negative/transport/source guards required. |
+| 3 | Genuine both-target generations | Latest Python40079719620/PHP40078954006 G1 independent/strictIR/ten cases PASS; G2 fail1800057/1800042ms. No G3/fixed point. Execute both current sources with3600s, seed once/remove native tools, independently admit each generation and require exact source/admission/IR/observation/raw-byte fixed points. |
+| 4 | Diagnose actual failures and retry | Minute CPU/RSS/process/output heartbeats are resource diagnostics only. Optimize measured generic costs with retained-reference/order/error/negative coverage if3600s fails; do not promote controlled experiments without validation. |
+| 5 | Independent reproduction/review | Once genuine chains pass, clean G1 reproduces each generation without lake cache. Performance240s remains separately unqualified. No merge/publication authorization. |
 
-One existing shared compiler and one portable emitter per target; native adapters
-preserve APIs. Source-only Python execution closes actual unlisted-bytecode
-replacement. Every legacy policy/negative boundary/resource limit remains.
-Source gates alone do not qualify compiler generations. The [current receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
-retains exact results and [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md)
-owns executable next steps. Direct-target performance work below is deferred
-during this mission.
+Same existing shared frontend/elaborator/checked pipeline and one portable
+emitter per target. Preserve previous Rust/TS/JS/Wasm qualification receipts.
+The [current receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
+owns exact evidence and [AI state](../AI_WORK_STATE.md) owns current continuation.
+Direct-target performance optimization below is deferred during this mission.
 
 ## Qualified compiler checkpoint
 
@@ -75,7 +74,8 @@ Do not label these as requalified after later common-source changes.
 Official Lean4.35.0 independent checker at eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
 strict original/transformed IR, source/logical graph pairing, negative/refusal
 tests and all resource/security/fuel limits remain mandatory.
-G1/corpus/tools240s,checker120s and correctnessG2/G31800s remain unchanged.
+G1/corpus/tools240s and checker120s remain unchanged. Python/PHP may explicitly
+request correctnessG2/G33600s; historical1800s and performance240s stay separate.
 Performance240s remains a separate test; longer correctness cannot qualify it.
 
 Earlier failures and completed planning milestones are preserved in Git history

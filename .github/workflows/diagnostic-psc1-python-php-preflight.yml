@@ -9,6 +9,9 @@ on:
       - psc1/host-tools/generated-target-tools.mjs
       - psc1/host-tools/generated-python-transport.py
       - psc1/host-tools/generated-php-transport.php
+      - psc1/scripts/selfhost-qualification-profiles.mjs
+      - psc1/scripts/bounded-process.py
+      - psc1/scripts/bounded-process-contract-tests.mjs
       - psc1/scripts/generated-target-qualification.mjs
       - psc1/scripts/generated-target-contract-tests.mjs
       - psc1/host-tools/compiler-host-protocol.mjs
@@ -83,6 +86,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
+          node scripts/bounded-process-contract-tests.mjs
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
           PSC1_SCRIPT_TRANSPORT_TESTS=1 node scripts/generated-target-contract-tests.mjs

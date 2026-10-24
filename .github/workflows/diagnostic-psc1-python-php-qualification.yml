@@ -120,7 +120,7 @@ jobs:
           node scripts/check-erasure-declaration-spines.mjs
           PSC1_SCRIPT_TRANSPORT_TESTS=1 node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests
+          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests psc1_php_packed_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -135,6 +135,7 @@ jobs:
           .lake/build/bin/psc1_backend_state_correspondence_tests
           .lake/build/bin/psc1_script_emitter_normalization_tests
           .lake/build/bin/psc1_php_capture_tests
+          .lake/build/bin/psc1_php_packed_tests
           node scripts/direct-selfhost-preflight-tests.mjs
           .lake/build/bin/psc1_js_statement_tests
           node scripts/js-statement-tests.mjs

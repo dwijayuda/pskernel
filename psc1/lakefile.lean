@@ -559,3 +559,7 @@ lean_exe psc1_script_emitter_normalization_tests where
 lean_exe psc1_php_capture_tests where
   srcDir := "test"
   root := `PhpCaptureScopeTests
+
+lean_exe psc1_php_packed_tests where
+  srcDir := "test"
+  root := `PhpPackedLayoutTests

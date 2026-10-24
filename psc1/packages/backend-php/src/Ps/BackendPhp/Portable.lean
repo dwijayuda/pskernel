@@ -172,6 +172,8 @@ structure Context where
   helpers : List String
   scheduled : Bool
   preciseCaptures : Bool
+  flatConstructors : Bool
+  inductives : List PsVerifiedIrInductive
 
 structure EmitState where
   linesRev : List String
@@ -182,7 +184,7 @@ structure EmitState where
 def Emit (Value : Type) : Type := PsBackendStateExcept EmitState String Value
 
 def withLocals (context : Context) (locals : List (Prod String String)) : Context :=
-  Context.mk context.globals context.valueNames locals context.helpers context.scheduled context.preciseCaptures
+  Context.mk context.globals context.valueNames locals context.helpers context.scheduled context.preciseCaptures context.flatConstructors context.inductives
 
 def padding (count : Nat) (builder : PsTextBuilder) : String :=
   match count with
@@ -297,7 +299,7 @@ def captureForWithFuel (fuel : Nat) (context : Context)
     | Except.error _ => capture context
     | Except.ok names =>
         capture (Context.mk (selectedGlobalsAcc names context.globals List.nil)
-          context.valueNames context.locals context.helpers context.scheduled context.preciseCaptures)
+          context.valueNames context.locals context.helpers context.scheduled context.preciseCaptures context.flatConstructors context.inductives)
 
 def captureFor (context : Context) (parameters : List PsVerifiedIrParameter)
     (body : PsVerifiedIrExpr) : String :=
@@ -634,7 +636,33 @@ def emitParameter (parameter : PsVerifiedIrParameter) : Emit ParameterInfo :=
     psBackendStateBind (fresh parameter.name) (fun (name : String) =>
       psBackendStatePure (ParameterInfo.mk parameter.name name text parameter.type)))
 
-def emitBindings (target : String) (bindings : List PsVerifiedIrMatchBinding)
+-- Packed constructor positions come from the owner-qualified validated layout.
+-- Expression evaluation stays in source field order before values are reordered.
+def constructorFields (context : Context) (owner constructorName : String) : Except String (List String) := do
+  let info <- match psBackendSourceFind
+      (fun (info : PsVerifiedIrInductive) => psStringEq info.name owner) context.inductives with
+    | Option.none => Except.error "PSC1_PHP_INTERNAL_INDUCTIVE_LAYOUT"
+    | Option.some info => Except.ok info
+  let layout <- match psBackendSourceFind
+      (fun (layout : PsVerifiedIrConstructor) => psStringEq layout.name constructorName) info.constructors with
+    | Option.none => Except.error "PSC1_PHP_INTERNAL_CONSTRUCTOR_LAYOUT"
+    | Option.some layout => Except.ok layout
+  Except.ok (psListMap (fun (field : PsVerifiedIrConstructorField) => field.name) layout.fields)
+
+def fieldIndex (field : String) (fields : List String) (index : Nat) : Except String Nat :=
+  match fields with
+  | List.nil => Except.error "PSC1_PHP_INTERNAL_CONSTRUCTOR_FIELD"
+  | List.cons name rest =>
+      if psStringEq name field then Except.ok index else fieldIndex field rest (Nat.succ index)
+
+def orderedFieldValues (fields : List String) (values : List (Prod String String)) : Except String (List String) :=
+  psListMapExcept
+    (fun (field : String) =>
+      match psBackendSourceFind (fun (entry : Prod String String) => psStringEq entry.fst field) values with
+      | Option.none => Except.error "PSC1_PHP_INTERNAL_CONSTRUCTOR_VALUE"
+      | Option.some entry => Except.ok entry.snd) fields
+
+def emitBindings (context : Context) (owner constructorName target : String) (bindings : List PsVerifiedIrMatchBinding)
     (locals : List (Prod String String))
     (state : EmitState) : Except String (Prod (List (Prod String String)) EmitState) :=
     match bindings with
@@ -644,13 +672,18 @@ def emitBindings (target : String) (bindings : List PsVerifiedIrMatchBinding)
         let _psc_step_40 <- fresh binding.name state
         let name := _psc_step_40.fst
         let state := _psc_step_40.snd
-        let _psc_step_41 <- line (cat [name, " = ", target, "[1][", quote binding.field, "];"]) state
+        let access <- if context.flatConstructors then do
+          let fields <- constructorFields context owner constructorName
+          let index <- fieldIndex binding.field fields 1
+          Except.ok (cat ["[", decimal index, "]"])
+        else Except.ok (cat ["[1][", quote binding.field, "]"])
+        let _psc_step_41 <- line (cat [name, " = ", target, access, ";"]) state
         let state := _psc_step_41.snd
-        emitBindings target rest (List.cons (Prod.mk binding.name name) locals) state
+        emitBindings context owner constructorName target rest (List.cons (Prod.mk binding.name name) locals) state
 
 def emitAlternatives
     (body : Context -> PsVerifiedIrExpr -> Emit Unit)
-    (context : Context) (target : String)
+    (context : Context) (owner target : String)
     (alternatives : List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)))
     (first : Bool) (state : EmitState) : Except String (Prod Unit EmitState) :=
     match alternatives with
@@ -672,19 +705,34 @@ def emitAlternatives
         let state := _psc_step_46.snd
         let _psc_step_47 <- indent true state
         let state := _psc_step_47.snd
-        let _psc_step_48 <- emitBindings target alternative.snd.fst context.locals state
+        let _psc_step_48 <- emitBindings context owner alternative.fst target alternative.snd.fst context.locals state
         let locals := _psc_step_48.fst
         let state := _psc_step_48.snd
         let _psc_step_49 <- body (withLocals context locals) alternative.snd.snd state
         let state := _psc_step_49.snd
         let _psc_step_50 <- indent false state
         let state := _psc_step_50.snd
-        emitAlternatives body context target rest false state
+        emitAlternatives body context owner target rest false state
 
 def emitField (emit : PsVerifiedIrExpr -> Emit String) (field : Prod String PsVerifiedIrExpr) : Emit String :=
   psBackendStateBind (emit field.snd) (fun (value : String) =>
     psBackendStatePure (cat [quote field.fst, " => ", value]))
 
+
+def emitConstructor (emit : PsVerifiedIrExpr -> Emit String) (context : Context)
+    (owner constructorName : String) (fields : List (Prod String PsVerifiedIrExpr)) : Emit String :=
+  fun (state : EmitState) =>
+    if !context.flatConstructors then do
+      let pair <- psBackendSourceMapState (emitField emit) fields state
+      bindValue (cat ["[", quote constructorName, ", [", psTextJoin ", " pair.fst, "]]"]) pair.snd
+    else do
+      let pair <- psBackendSourceMapState
+        (fun (field : Prod String PsVerifiedIrExpr) =>
+          psBackendStateBind (emit field.snd)
+            (fun (value : String) => psBackendStatePure (Prod.mk field.fst value))) fields state
+      let layout <- constructorFields context owner constructorName
+      let ordered <- orderedFieldValues layout pair.fst
+      bindValue (cat ["[", psTextJoin ", " (List.cons (quote constructorName) ordered), "]"]) pair.snd
 
 def regularIntrinsic (emit : PsVerifiedIrExpr -> Emit String) (context : Context)
     (operation : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrExpr) : Emit String :=
@@ -843,12 +891,9 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
             let value := _psc_step_83.fst
             let state := _psc_step_83.snd
             bindValue (cat [value, "[", quote field, "]"]) state
-        | PsVerifiedIrExpr.constructor _ constructorName _ fields => do
-            let _psc_step_84 <- psBackendSourceMapState (emitField emit) fields state
-            let values := _psc_step_84.fst
-            let state := _psc_step_84.snd
-            bindValue (cat ["[", quote constructorName, ", [", psTextJoin ", " values, "]]"]) state
-        | PsVerifiedIrExpr.matchE _ _ scrutinee alternatives => do
+        | PsVerifiedIrExpr.constructor owner constructorName _ fields =>
+            emitConstructor emit context owner constructorName fields state
+        | PsVerifiedIrExpr.matchE owner _ scrutinee alternatives => do
             let _psc_step_85 <- emit scrutinee state
             let target := _psc_step_85.fst
             let state := _psc_step_85.snd
@@ -859,7 +904,7 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
               fun (inner : Context) (branch : PsVerifiedIrExpr) =>
                 psBackendStateBind (smaller inner branch) (fun (value : String) =>
                   line (cat [result, " = ", value, ";"]))
-            let _psc_step_87 <- emitAlternatives body context target alternatives true state
+            let _psc_step_87 <- emitAlternatives body context owner target alternatives true state
             let state := _psc_step_87.snd
             Except.ok (Prod.mk result state)
 
@@ -959,11 +1004,11 @@ def directSelfTail (declaration : PsVerifiedIrDeclaration) (parameters : List St
                 let _psc_step_101 <- indent false state
                 let state := _psc_step_101.snd
                 line "}" state
-            | PsVerifiedIrExpr.matchE _ _ scrutinee alternatives => do
+            | PsVerifiedIrExpr.matchE owner _ scrutinee alternatives => do
                 let _psc_step_102 <- emit scrutinee state
                 let target := _psc_step_102.fst
                 let state := _psc_step_102.snd
-                emitAlternatives smaller context target alternatives true state
+                emitAlternatives smaller context owner target alternatives true state
             | _ => do
                 let _psc_step_103 <- emit expr state
                 let value := _psc_step_103.fst
@@ -1138,8 +1183,8 @@ def emitModule (module : PsVerifiedIrModule) (context : Context) (publicNames : 
 
 end PsPhp
 
-def psPhpEmitModuleWithIoAndCapturePolicy (validated : PsValidatedIrModule) (publicNames : List String)
-    (ioAbi preciseCaptures : Bool) : Except String PsPhpPortableModule := do
+def psPhpEmitModuleWithIoAndPolicies (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi preciseCaptures flatConstructors : Bool) : Except String PsPhpPortableModule := do
   match psStrictValidateModule validated.raw with
   | Except.error _ => Except.error "PSC1_PHP_IR_VALIDATION_FAILED"
   | Except.ok _ => Except.ok Unit.unit
@@ -1164,7 +1209,7 @@ def psPhpEmitModuleWithIoAndCapturePolicy (validated : PsValidatedIrModule) (pub
     psListMap PsPhp.globalEntry (psBackendSourceZipIndex module.declarations)
   let context : PsPhp.Context :=
     PsPhp.Context.mk globals valueNames List.nil (psPhpRuntimeVariables requirements)
-      (psBackendNameSeen "calls" requirements) preciseCaptures
+      (psBackendNameSeen "calls" requirements) preciseCaptures flatConstructors module.inductives
   let sourcePrefix : String := PsPhp.cat ["<?php\n",
     "// Generated by ProofScript PSC1 DirectPHP. Public API: return value of require.\n",
     "declare(strict_types=1);\n\nreturn (static function (): array {\n", runtimeSource]
@@ -1179,7 +1224,12 @@ def psPhpEmitModuleWithIoAndCapturePolicy (validated : PsValidatedIrModule) (pub
     (PsPhp.cat [sourcePrefix, psTextJoin "\n" (psListReverse state.linesRev), "\n"])
     composer runtimeSource psPhpRuntimeVersion requirements globals positions)
 
+-- Retained layout is a testable policy of the same emitter, not another compiler.
+def psPhpEmitModuleWithIoAndCapturePolicy (validated : PsValidatedIrModule)
+    (publicNames : List String) (ioAbi preciseCaptures : Bool) : Except String PsPhpPortableModule :=
+  psPhpEmitModuleWithIoAndPolicies validated publicNames ioAbi preciseCaptures false
+
 -- Native compatibility and generated service use the same optimized emitter.
 def psPhpEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
     (ioAbi : Bool) : Except String PsPhpPortableModule :=
-  psPhpEmitModuleWithIoAndCapturePolicy validated publicNames ioAbi true
+  psPhpEmitModuleWithIoAndPolicies validated publicNames ioAbi true true

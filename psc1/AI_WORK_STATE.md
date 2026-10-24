@@ -7,6 +7,31 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
+## PHP G1 accepted; G2 allocation diagnosis — 2026-10-24
+
+Request59ef3544/run40071043260/job120804424493 proves that the capture fix
+reduced seed candidate size from1002108077 to59452682 bytes; raw PHP source
+18412349 bytes/SHA3623c6341e139a0febae0b5f8953cacabd0551b0af1406316369e30df41a53f5.
+Native seed22138ms/maxRSS392476KiB. G1 independently admits, validates both
+strict IR graphs and executes all ten positive/refusal cases with native compiler
+tools removed. G2 FAILED after8372ms/maxRSS1122256KiB at unchanged PHP1G.
+No G2/G3/fixed point is qualified. Artifact12551302677 digest
+bda38c19687b8ad9a75d5c6c3e047481ed04ad0d3b579ad74449dcba93825fbc.
+
+Read-only40071337944 locates the failure in psJsonStringToChars' explicit tail
+loop. Instrumented-copy40071473414 atb16b8c6a confirms seven pending generators
+while heap grows to1G; request1789940 bytes/1789677 scalars. This is a storage
+cost, not a growing scheduler stack. Diagnostic timing is not qualification.
+
+Current patch uses the validated owner/constructor field layout to emit a flat
+packed internal inductive array, following the existing compact target pattern.
+Fields still evaluate in original order before canonical positioning; match
+indices resolve by owner/constructor/field, so reordered bindings remain correct.
+Records, runtime bytes, public scalar ABI/refusals, checking and limits stay.
+The same emitter retains legacy layout for differential tests. Require native
+shape/order/Unicode/recursive/owner tests,200000-cell1G execution and full source
+gate success before PHP-only retry. Python's unchanged run remains active.
+
 ## Python/PHP actual workload update — 2026-10-24 06:37 UTC
 
 PHP job120800177269 in40069631375 FAILED before G1 admission: its native seed

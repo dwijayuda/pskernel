@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 06:37 UTC",
-  "status": "python-qualification-active-php-capture-fix-source-tested",
+  "recordedAtUtc": "2026-10-24 06:50 UTC",
+  "status": "python-active-php-G1-accepted-G2-memory-blocked",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -157,7 +157,7 @@
       }
     }
   },
-  "nextAction": "Read capture-case gate40070902724; PHP-only request after success, no duplicate Python request. Re-query Python40069631375 terminal evidence. Preserve all caps/limits.",
+  "nextAction": "Read actual Python terminal result. Require packed PHP native regression and complete source gates before next PHP-only request. Genuine G2/G3/fixed points and full current-source CI still pending.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -187,7 +187,13 @@
       "scope": "86 modules per target, both grammars; existing proofs/runtime/emitter/token-boundary/library probes; budget theorem built, runtime capture cases awaiting gate40070902724"
     },
     "mechanism": "lexical free-global demand, preserved global order and by-reference identity; locals/helpers unchanged; complete legacy captures on bounded analysis exhaustion",
-    "limitsChanged": false
+    "limitsChanged": false,
+    "scopeCases": {
+      "runId": 40070902724,
+      "jobId": 120803905654,
+      "commit": "4e4bfcb5a535af39925c5a601d39d08fcdca5bb7",
+      "status": "passed"
+    }
   },
   "firstPhpFailure": {
     "runId": 40069631375,
@@ -238,5 +244,409 @@
     },
     "generations": [],
     "qualified": false
+  },
+  "phpLexicalAttempt": {
+    "requestCommit": "59ef3544cb97e03ffb9e0289e61685b654349cf2",
+    "parentCommit": "31ca919e0f2d1ea6fb59e923887d6704a13042fe",
+    "runId": 40071043260,
+    "jobId": 120804424493,
+    "status": "failed",
+    "generations": [
+      {
+        "generation": 1,
+        "sourceClosureDigest": "acfe41fb9df0d7df8393fe90aa116b8ef55d8171ca51c2e559001e6db8e802e9",
+        "sourceSha256": "3623c6341e139a0febae0b5f8953cacabd0551b0af1406316369e30df41a53f5",
+        "admissionsSha256": "0af65c595edb630238734407d23908150fd8196fd180360b32441b3a7924b1ff",
+        "originalIrSha256": "0062c605c50fe8ab9f0a543cb117cfda6e8fc6968f0b6b43943983a1aa15e53c",
+        "specializedIrSha256": "ba140cc470c38e35dc0d5f0f2f8defa94159111c11380ac11abe6b403a01773c",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerPhpServiceCandidate"
+        ],
+        "artifactSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "observations": [
+          {
+            "id": "lean-modules",
+            "sourceClosureDigest": "d91254b72ec79ad17b12ac02e47974f13e4ac9d88e6f50360aabfa0a7d53e721",
+            "sourceSha256": "3297f90e1b6f6eb0c3e677ac47d98e8ba9369054c88d2f11b3d7537aa6eb8e5c",
+            "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+            "originalIrSha256": "2091e6d53ef774abf0d8079eb1d0a3c103fa71c2c21a9118da215305b3f0cb32",
+            "specializedIrSha256": "0063a063676ab946e8512ba7f930842e64e70fa94a102f62959f892b8d412292",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "answer"
+            ],
+            "observation": {
+              "answer": "42",
+              "exports": [
+                "answer"
+              ]
+            }
+          },
+          {
+            "id": "ps-integer-unicode",
+            "sourceClosureDigest": "f470e37c5106f4e234081214923402f6a2e82fc0475f307cc1c7ccc66d8c78f3",
+            "sourceSha256": "62505b4b5d7bf77aa05d44e6da6572279d21cd2b58724104dd99e562f04e2145",
+            "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+            "originalIrSha256": "84840e7f4044261f34acfd46fdbd1d811dbefe7ef24af6525a1e031d2576e737",
+            "specializedIrSha256": "3fe93b7666b548e3084c7c61ec24cc95b5f37e605f789dc482604f77ead69bbc",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "huge",
+              "text"
+            ],
+            "observation": {
+              "huge": "-9007199254740993123456789",
+              "text": "λ🙂"
+            }
+          },
+          {
+            "id": "ps-list-literal",
+            "sourceClosureDigest": "990ff8089cfb7a59868ba553ca480ad8f5cb0d52ae240bb09589cdbb80a686f5",
+            "sourceSha256": "a8420e2ea0b9d6244ad07d772431200796e7d2432d4870d292ee3fa8fb681076",
+            "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+            "originalIrSha256": "ee47e989dd251b44bb52a785ba80f0a3e56817cd9f6cc774802661227d59967e",
+            "specializedIrSha256": "1e25559ef8984659a4e3cf5879fb8b84cb6f71e7901a05a1155d9b996769d7c8",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "answer"
+            ],
+            "observation": {
+              "empty": "0",
+              "first": "7"
+            }
+          },
+          {
+            "id": "lean-handler-pattern",
+            "sourceClosureDigest": "438be06e48d3df4602ce227da6da664b0065bd3c33fcf23b264ac5550b08297e",
+            "sourceSha256": "69ec8cefc9c9ba7828e13bd93678fb76bf0c2836d3af7c76e47ffa2516f3a8f1",
+            "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+            "originalIrSha256": "4532b90dfe27f82a21db957553b5137bdd2b2baad79075f07fa555732730b852",
+            "specializedIrSha256": "c534af59337f556207c8f6ac15fa3a769a832f6c15749881bac5d36d142ecd12",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "observe"
+            ],
+            "observation": {
+              "normal": "3",
+              "caught": "8"
+            }
+          },
+          {
+            "id": "lean-ordinary-loop",
+            "sourceClosureDigest": "4c4044a6d864b40eca4dea995e3534a9b55ee319515f7b58aaca7a781cbe8ee6",
+            "sourceSha256": "fb08d9d9b1e31c67674b6a2939c6995b8722d41f15efcba9ffc2ac952a8fa586",
+            "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+            "originalIrSha256": "10f63beb16f8b618119fa0873d9103f92f4f65d5cacb43b33d1005576afde009",
+            "specializedIrSha256": "cf99a791acf40195ce3cae0550d6c3575213a5e84cf416671a513f8483ddefaf",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "answer"
+            ],
+            "observation": {
+              "zero": "0",
+              "five": "5"
+            }
+          },
+          {
+            "id": "malformed-list",
+            "refused": true,
+            "phase": "parse",
+            "code": "source-refused"
+          },
+          {
+            "id": "wrong-body",
+            "refused": true,
+            "phase": "elaboration",
+            "code": "source-refused"
+          },
+          {
+            "id": "missing-import",
+            "refused": true,
+            "phase": "capture",
+            "code": "import-order-or-missing"
+          },
+          {
+            "id": "checked-partial",
+            "refused": true,
+            "phase": "preparation",
+            "code": "checked-preparation-refused"
+          },
+          {
+            "id": "verified",
+            "refused": true,
+            "phase": "wire",
+            "code": "assurance-unavailable"
+          }
+        ]
+      }
+    ],
+    "bootstrap": {
+      "sourceClosureDigest": "acfe41fb9df0d7df8393fe90aa116b8ef55d8171ca51c2e559001e6db8e802e9",
+      "sourceSha256": "3623c6341e139a0febae0b5f8953cacabd0551b0af1406316369e30df41a53f5",
+      "admissionsSha256": "0af65c595edb630238734407d23908150fd8196fd180360b32441b3a7924b1ff",
+      "originalIrSha256": "0062c605c50fe8ab9f0a543cb117cfda6e8fc6968f0b6b43943983a1aa15e53c",
+      "specializedIrSha256": "ba140cc470c38e35dc0d5f0f2f8defa94159111c11380ac11abe6b403a01773c",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "logicalAdmission": "accepted",
+      "publicNames": [
+        "psCompilerPhpServiceCandidate"
+      ]
+    },
+    "source": {
+      "bytes": 18412349,
+      "sha256": "3623c6341e139a0febae0b5f8953cacabd0551b0af1406316369e30df41a53f5"
+    },
+    "candidateBytes": 59452682,
+    "events": [
+      {
+        "role": "stage0-seed",
+        "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_target_service_seed",
+        "args": [
+          "php",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/generated-php-compiler/G1-bootstrap.request.json",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/generated-php-compiler/G1-bootstrap.candidate.json"
+        ],
+        "status": 0,
+        "signal": null,
+        "elapsedMs": 22138,
+        "maxRssKiB": 392476,
+        "peakTreeRssKiB": 331100,
+        "error": null
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-lean-modules",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "c0a0920a43fb71cdf2f006813d3ebc0c50d091d156f62424446e3c328cb65ff3",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211700,
+        "peakTreeRssKiB": 275780,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 1007,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211700
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-ps-integer-unicode",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "47e31bdc66d4380ed3b3939293d4aa0045c46c02d0baf68a5da47717956669a4",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211700,
+        "peakTreeRssKiB": 275860,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 913,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211700
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-ps-list-literal",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "9b1466c350a2a2af47d9db665b4341bef46106952f28285f932719bc5448484e",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211868,
+        "peakTreeRssKiB": 275856,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 1383,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211868
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-lean-handler-pattern",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "45175f688dd4b323951f678643a8eb75073b6bd9ab866a4b660c636c0d79df35",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211844,
+        "peakTreeRssKiB": 273844,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 5771,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211844
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-lean-ordinary-loop",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "d60cf7444c33338c97cb0cebc856ab89b9e8626c5394ad3251ad8f332e340a29",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211796,
+        "peakTreeRssKiB": 275988,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 6873,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211796
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-malformed-list",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "6a46dc557e813d10ba048d24f1a23c9274523a99bf73fd69ffce2b160246346c",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211736,
+        "peakTreeRssKiB": 275872,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 442,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211736
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-wrong-body",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "0267a6213fdb56705b08d94b13da7e6a768d8ec8ab25df7979aa56e278a78df9",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211572,
+        "peakTreeRssKiB": 275716,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 449,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211572
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-missing-import",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "e66945b488063298034f3eaf3b2fcf08dd11f1b708e6e0d17780dc0253e59ecb",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211736,
+        "peakTreeRssKiB": 275748,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 446,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211736
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-checked-partial",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "4d8600058dcb70f06636672a29cdc5ae3203d63ee2fb67ab23c2ed0dfd830573",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211892,
+        "peakTreeRssKiB": 276016,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 450,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211892
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G1-verified",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "2c65cd68e4e4b35e9d8cc5c5656e9724233677da68fcfdffd1d0262843035aea",
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxRssKiB": 211620,
+        "peakTreeRssKiB": 275728,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 418,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 211620
+      },
+      {
+        "role": "generated-compiler",
+        "target": "php",
+        "id": "G2-self",
+        "serviceSha256": "3d89d2ff7e583035d1af61db463752f8a719fa48a7b1286f4c5897c05df32c43",
+        "requestSha256": "8407c981bf6240ba86f8c166a5e89ac4bb56fbb9448358b8833d3b0a28d84c1a",
+        "timeoutMs": 1800000,
+        "timeoutPolicy": "g2g3-correctness-1800s",
+        "maxRssKiB": 1122256,
+        "peakTreeRssKiB": 1195816,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 8372,
+        "status": 1,
+        "signal": null,
+        "error": null
+      }
+    ],
+    "artifact": {
+      "id": 12551302677,
+      "node_id": "MDg6QXJ0aWZhY3QxMjU1MTMwMjY3Nw==",
+      "name": "psc1-python-php-selfhost-correctness-1800s-php-59ef3544cb97e03ffb9e0289e61685b654349cf2",
+      "size_in_bytes": 5780181,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12551302677",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12551302677/zip",
+      "expired": false,
+      "digest": "sha256:bda38c19687b8ad9a75d5c6c3e047481ed04ad0d3b579ad74449dcba93825fbc",
+      "created_at": "2026-10-24T06:42:10Z",
+      "updated_at": "2026-10-24T06:42:10Z",
+      "expires_at": "2027-01-22T06:39:10Z",
+      "workflow_run": {
+        "id": 40071043260,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-python-php-selfhost-20261024",
+        "head_sha": "59ef3544cb97e03ffb9e0289e61685b654349cf2"
+      }
+    },
+    "g2": {
+      "status": "failed-memory-1G",
+      "elapsedMs": 8372,
+      "maxRssKiB": 1122256,
+      "peakTreeRssKiB": 1195816
+    },
+    "diagnostic": {
+      "readOnlyRunId": 40071337944,
+      "heapTraceRunId": 40071473414,
+      "heapTraceCommit": "b16b8c6a344d641811841d7bf7362517b826f723",
+      "requestBytes": 1789940,
+      "unicodeScalars": 1789677,
+      "pendingGenerators": 7,
+      "conclusion": "heap grows while explicit tail loop allocates nested associative-array char-list nodes, not growing scheduler stack",
+      "scope": "instrumented diagnostic copy, not qualification"
+    }
+  },
+  "phpPackedFix": {
+    "status": "implemented-awaiting-Linux-gates",
+    "mechanism": "owner-qualified checked layouts, flat packed internal inductive arrays; evaluate fields in original order before canonical ordering; unchanged scalar public ABI, record layout, runtime and guards; retained layout policy for differential execution",
+    "requiredTests": "zero/one/three fields, reordered construction/bindings, Unicode, recursive lists, owner isolation, retained-layout results and200000-cell1G execution"
   }
 }

@@ -30,11 +30,11 @@ def main : IO Unit := do
     [("Ctor", ([{ field := "value", name := "global", type := natT }], .var "global"))]) ["subject"]
   let context : PsPhp.Context := PsPhp.Context.mk
     [("global", "$g0_global"), ("unrelated", "$g1_unrelated")] []
-    [("global", "$v0_global")] ["$__ps_wrap"] true true
+    [("global", "$v0_global")] ["$__ps_wrap"] true true false []
   let captured := PsPhp.captureFor context [] (.var "global")
   unless captured == " use ($v0_global, $__ps_wrap)" do
     throw (IO.userError "local shadowing or helper captures changed")
-  let globals : PsPhp.Context := PsPhp.Context.mk context.globals [] [] context.helpers true true
+  let globals : PsPhp.Context := PsPhp.Context.mk context.globals [] [] context.helpers true true false []
   unless PsPhp.captureFor globals [] (.var "global") == " use (&$g0_global, $__ps_wrap)" do
     throw (IO.userError "needed global reference or global order lost")
   unless PsPhp.captureForWithFuel 0 globals [] (.var "global") == PsPhp.capture globals do

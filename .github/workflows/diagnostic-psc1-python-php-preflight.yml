@@ -14,6 +14,7 @@ on:
       - psc1/host-tools/compiler-host-protocol.mjs
       - psc1/scripts/php-capture-token-comparison.php
       - psc1/test/PhpCaptureScopeTests.lean
+      - psc1/test/PhpPackedLayoutTests.lean
       - psc1/test/BackendState*.lean
       - psc1/test/ScriptEmitter*.lean
       - psc1/test/ScriptRuntime*.lean
@@ -75,7 +76,7 @@ jobs:
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
           PSC1_SCRIPT_TRANSPORT_TESTS=1 node scripts/generated-target-contract-tests.mjs
-          lake build psc1 psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests
+          lake build psc1 psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests psc1_php_capture_tests psc1_php_packed_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -87,6 +88,7 @@ jobs:
           .lake/build/bin/psc1_backend_state_correspondence_tests
           .lake/build/bin/psc1_script_emitter_normalization_tests
           .lake/build/bin/psc1_php_capture_tests
+          .lake/build/bin/psc1_php_packed_tests
       - name: Execute independently admitted runtime library in both grammars and targets
         run: node scripts/script-runtime-admission-tests.mjs
       - name: Census both complete source closures in both grammars
@@ -103,6 +105,7 @@ jobs:
         with:
           name: psc1-python-php-source-${{ github.sha }}
           path: |
+            psc1/dist/php-packed/
             psc1/dist/script-emitter-comparison/
             psc1/dist/python-php-runtime-admission/
             psc1/dist/generated-python-compiler/source-audit/

@@ -116,7 +116,7 @@ private def samePhp (raw : PsVerifiedIrModule) (names : List String) (ioAbi : Bo
           a.declarationLines == b.declarationLines do
         throw (IO.userError "PHP complete retained-emitter fallback identity")
   | _, _ => throw (IO.userError "PHP legacy acceptance changed")
-  match psPhpEmitValidatedModule { raw := raw } names ioAbi, reference with
+  match psPhpEmitModuleWithIoAndCapturePolicy { raw := raw } names ioAbi true, reference with
   | Except.error a, Except.error b =>
       unless a == b do throw (IO.userError "PHP production error identity")
   | Except.ok a, Except.ok b =>

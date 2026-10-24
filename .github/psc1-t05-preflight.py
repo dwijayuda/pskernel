@@ -116,6 +116,7 @@ def main():
         code=cp.returncode
       except subprocess.TimeoutExpired:code=124
     text=(OUT/(kind+".log")).read_text()
+    print("PSC1_T05_DIAGNOSTIC_LOG "+kind+"\n"+text,flush=True)
     expected=268 if kind=="params" else 432
     marker="PSC1_ORDINARY_CONSTRUCTOR_"+kind.upper()+"_JS: PASS assertions="+str(expected)+" fullAdmission=false"
     passed=code==0 and text.splitlines().count(marker)==1

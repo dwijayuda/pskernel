@@ -8,6 +8,11 @@ const out=path.resolve('dist/lexer-string-bound');fs.mkdirSync(out,{recursive:tr
 const old=fs.readFileSync('test/fixtures/LexerBeforeStringBound.lean.txt','utf8');
 const probe=fs.readFileSync('test/fixtures/LexerStringBoundProbe.lean.txt','utf8');
 const ordered=[...new Map([...readOwnedCompilerSources('Ps.Syntax.Lexer'),...readOwnedCompilerSources('Ps.Foundation.Name')].map(r=>[r.module,r])).values()];
+const census=path.join(out,'source-census.json');
+runTool(path.resolve('.lake/build/bin/psc1_source_census_probe'),['--grammar','lean','--out',census,'--modules',...ordered.flatMap(r=>[r.module,r.path])],{logDirectory:out});
+const failures=JSON.parse(fs.readFileSync(census)).records.filter(r=>r.elaboration!=='accepted');
+console.log('PSC1_LEXER_CENSUS_DETAIL: '+JSON.stringify(failures));
+assert.equal(failures.length,0,'candidate must pass owned source elaboration');
 const inputs=readOwnedCompilerSources('Ps.CompilerUnified.Service').filter(r=>[
  'Ps.Syntax.Lexer','Ps.Bridge.CheckedAdmissions','Ps.BackendRust.Runtime','Ps.BackendRust.Expr',
  'Ps.BackendWasm.EncodeExpr','Ps.CompilerUnified.Service'].includes(r.module));

@@ -1,77 +1,83 @@
 # Continue Python/PHP self-hosting from the verified checkpoint
 
-Use connected GitHub tools and Linux Actions only. Fetch fresh HEAD of
+Use connected GitHub tools and Linux Actions only. Fetch latest HEAD of
 feat/psc1-python-php-selfhost-20261024, draft PR176, before expected-HEAD/non-force
-writes. Read AI_WORK_STATE.md, the single roadmap and Python/PHP JSON receipt.
-Preserve all histories and qualified Rust/TS/DirectJS/Wasm snapshots.
-No local checkout/build/test, force push, merge or package publication.
+writes. Read AI_WORK_STATE.md, the single roadmap and exact Python/PHP JSON
+receipt. Preserve all histories/failed artifacts and qualified Rust/TS/DirectJS/
+Wasm snapshots. No local checkout/build/test, force push, merge or publication.
 
-1. Baseline source617004ce/run40073537409 PASSED both86-module/both-grammar
-   closures, seven state/four arity full API equalities,34816 catalog/144 retained
-   emitter comparisons,234895 Python UTF8 differentials, PHP2M-cell generated
-   execution and2M-node iterative cleanup/shared/weak/cycle/refusal tests at1G/
-   default stack. Four independently admitted runtime libraries each pass108
-   runtime+8 state queries. Source evidence is not compiler-generation evidence.
-2. Full baseline40073884191 PASSED37/37,7 backends/both grammars/applications/
-   installed package regressions. HEADedcbab7b61d95285759d24e71caa5c37b3eb844c and
-   merge647ffdb0d382dd572e36e7fd598ec91be6c8d9bb share exact Git tree
-   0d12de8a05dae203d2701c1e01592bbad3526125. This precedes new direct-call source.
-3. Both last genuine runs are TERMINAL failures with G1 independently admitted,
-   strict IR and all ten cases PASS: Python a8def92c/run40072853176/job120810006994
-   G2 deadline1800060ms; PHP75f04cfd/run40073754301/job120812693944 G2 deadline
-   1800045ms. Neither ran G3/fixed point. Preserve exact hashes/artifacts in JSON.
-   Python retry used earlier transport; current source-only host must be qualified.
-4. Measured Python profile40075153915 on exact generated workload: str.encode
-   0.132s of120s after immutable UTF8 cache versus118.890s before; _psc_run own
-   44.239s,56.67M generator sends. PHP phase40076097853 samples120s,80 pending
-   generators/646971392 allocated bytes; yield-boundary samples are not CPU
-   attribution. Read-only owner recovery6010eafb reuses preserved samples;
-   no need to rerun compiler merely for diagnostic labels. Actual PHP compiler
-   source18804166-byte extract0..32 PASSES1.542s/736912KiB; do not claim OOM.
-5. New bounded direct-call source3232294d/import fix36ff105c/dual-target tests
-   b7499950 PASSED gate40077267520/job120823225254:87 modules/target/both grammars, all retained/runtime/admitted/200000-deep recursion tests. Shared DirectCalls.lean uses conservative
-   scalar/no-callback intrinsic whitelist and exactly2 immutable nonzero-parameter
-   call layers. Full string names checked after hash lookup. Dynamic calls,
-   lexical shadows, recursion/cycles, implicit value forcing and zero/exhausted
-   analysis retain scheduler. Maximum direct source call depth3.
-   Python independent AST boundary checks exact saved callee/arguments,
-   non-generator implementation and acyclic bound; all other AST unchanged.
-   PHP tests compare same carrier/runtime with direct-calls flag off/on, exact
-   metadata, selected ordinary closures and200000-deep recursive aliases/
-   parameter/local shadows. Preserve old APIs and strict pre-emission validation.
-6. Bounded-call source preflight b7499950/run40077267520 is SUCCESS. Find extraction preflight by exact8a99b06d SHA; require native,87-module/both-grammar and admitted runtime-library tests.
-   Read completed logs only. Fix demonstrated classes, preserving every existing
-   source/runtime/admission/negative test. Both complete source censuses and
-   independent admitted libraries must pass; no native-only exemption.
-7. Bounded-call request809070eb6c2f794ea962b1f00324d263367ab2e9 is ACTIVE in
-   run40077476210: Python120823970885/PHP120823970819. Preserve terminal evidence.
-   PHP-only extraction source9c4a9b38/test-order8a99b06d is UNDER VALIDATION.
-   Diagnostic40077973238 passes25100 exact helper cases;16 actual compiler-source
-   slices improve22.741s→0.0243s. Existing UTF8 validity cache, full input/error
-   priority, huge/negative indices and byte-boundary behavior are preserved.
-   The same emitter's legacy runtime policy keeps old exact bytes; default
-   catalog changes only extraction block/validity dependency. Python closure is
-   unchanged, so retain active809 Python attempt. After new PHP source gate
-   passes, create isolated PHP-only request-only child changing
-   .github/qualification-requests/psc1-python-php-selfhost.json:
+1. Current sourcee20a11549cdb1d656c05912089730bf2ebeaf933 PASSED source gate
+   40079503171/job120829903883:87 modules per target/both grammars, all retained/
+   state/arity/runtime/admission guards. Python self-tail loops pass43 retained
+   comparisons,2M steps,200k escaping-closure fallback, argument swaps/lexical
+   shadows/typed IO order and first-error checks. Independent AST restoration
+   permits only exact lambda-free self-tail snapshots and bounded synchronous
+   globals; all other AST exact. Origins point to actual declaration headers.
+2. Read current genuine qualification terminal evidence, not active logs:
+   - Python requeste6327cddbbb74917fcdebed8e00bdf6b8db55c42, parente20a1154;
+     run40079719620/job120830635451. Includes source-only host and self-tail loops.
+   - PHP request1174300d0efc2a10cf6887e598a1a4057f36c7cc, parent94ea0e84;
+     run40078954006/job120828380302. Includes byte extraction/immutable nodes.
+   Later Python-only source leaves this PHP owned closure/critical host files
+   unchanged. Keep source stable while these actual executions run. Each target
+   independently requires G1→G2→G3 and all exact fixed points.
+3. Both previous bounded-call809070eb/run40077476210 jobs are terminal FAILURE:
+   Python120823970885 G2 deadline1800049ms; PHP120823970819 deadline1800068ms.
+   Both G1s independently admitted, strict original/transformed IR/all10 cases
+   PASS, no G3/fixed point. Artifacts12554079601 Python/12554652594 PHP and exact
+   digests/closures/service/request hashes remain in JSON. Do not replay unchanged.
+4. Actual measured mechanisms:
+   - PHP quadratic captures made1.002GB seed; lexical globals reduce59.45MB,
+     retaining scope/reference identity and zero-budget full-capture fallback.
+   - Packed arrays then crash in recursive zend_array_destroy (exact GDB40072628964).
+     Immutable compact nodes queue only dead descendants;2M generated collection/
+     2M cleanup/shared/weak/cycle/refusal tests pass at1G/default stack.
+   - Python original120s profile spends118.890s encoding. Immutable8-entry/32MiB
+     identity views pass234895 checks; new profile40075153915 encodes0.132s,
+     scheduler own44.239s/56.67M sends. Shared2-layer bounded direct globals then
+     pass gates but still time out G2; archived AST40078613463 confirms hot
+     equality/JSON/list/name workers are lambda-free exact self tails.
+   - PHP extract allocates full-source character array for short slices. Exact
+     diagnostic40077973238 passes25100 malformed/boundary/huge-index helper cases;
+    16 slices of18804166-byte compiler source cost22.741s old/0.0243s proposed.
+     Production source9c4a9b38/94ea0e84 reuses existing2-key UTF8 cache, bounds GMP
+     conversion and preserves exact errors/mid-codepoint/early-empty semantics.
+     Gate40078556459 adds25100 emitted API comparisons/1MB slices. Exact historical
+     helper/dependencies remain a policy of the same emitter, not another compiler.
+   - Source-only host617004ce executes exact hash-bound module.py; poisoned unlisted
+     .pyc executes under standard loader but is ignored in service/probe/consumer.
+5. If either current attempt fails, obtain complete qualification.json and exact
+   source/service/request/tool identities from its immutable artifact. Profile
+   that actual generated workload and identify the next demonstrated class.
+   Fix with retained-original/negative/order/fuel/capture guards and complete
+   both-grammar/source/admitted-library tests. No speculative redesign or replay
+   of unresolved unchanged failures. Earlier small/native gates do not qualify G2.
+6. After a real fix and passed full source gate, issue an isolated request-only
+   child changing .github/qualification-requests/psc1-python-php-selfhost.json:
    schema psc1-python-php-selfhost-request/1; exact branch/parentCommit;
-   action qualify-independent-G1-G2-G3; profile correctness-1800s;
-   targets [php] for this PHP-only source change; g2g3TimeoutMs1800000;g1TimeoutMs240000;
-   resourcePolicy only-G2-G3-wall-clock-extended;all-other-policies-unchanged.
-   No source/docs in request commit. Native seed once, then remove native
-   compiler tools; independently check/admit every G1/G2/G3, both strict IR
-   graphs, paired logical source, all ten positive/refusal observations and exact
-   source/admission/IR/observation/raw executable fixed points.
-8. Official independent Lean4.35.0 checker
-   eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Exact Python3.14.8/PHP8.5.12/ext-gmp.
-   Preserve G1/corpus/tools240s/checker120s,G2/G31800s,response128MiB,PHP1G/
-   default stack, semantic fuel, Python recursion/digit globals and separate
-   original performance240s. Hard-timeout outer wait4 RSS is not service peak.
-9. Diagnose actual next failed generated phase; do not replay unchanged failure.
-   Once both succeed, require final current-source37/37 and clean G1 reproduction:
-   fresh native/checker, no .lake build cache, exact inventories/admissions/IR/
-   ten observations/raw module.py/module.php match EACH qualified G1/G2/G3.
-   Existing Direct clean audit36d917b0/run40064496804 is template, not Python/PHP
-   qualification. This clean G1 audit is not a second full-chain replay or DDC.
+   action qualify-independent-G1-G2-G3; profile correctness-1800s; only targets
+   whose owned source/critical tools changed; g2g3TimeoutMs1800000;
+   g1TimeoutMs240000; resourcePolicy
+   only-G2-G3-wall-clock-extended;all-other-policies-unchanged.
+   No source/docs in request commit. Per-target concurrency preserves active runs.
+7. Mandatory independent official Lean4.35.0 checker
+   eb6cafb7290e8bd5f2937522d8d804f58f02bafc; strict original/transformed IR,
+   source/logical pairing, all ten positive/refusal observations and exact captured
+   source/admission/IR/observations/raw executable fixed points. Native seed once,
+   then remove native compiler tools. Preserve Python3.14.8/PHP8.5.12/ext-gmp,
+   Node22.23.3,G1/corpus/tools240s,checker120s,G2/G31800s,response128MiB,semantic
+   fuel,PHP1G/default stack,Python recursion/digit globals and separate original
+   performance240s. Timeout outer wait4 RSS is not generated-service peak.
+8. Full baseline40073884191 PASSED37/37/all7 backends/both grammars/applications/
+   installed package regressions at edcbab7b and merge647ffdb0 with identical tree
+   0d12de8a05dae203d2701c1e01592bbad3526125. It predates current optimizations.
+   Require current-source full release CI. Dependency selection carries cancelled
+   update debt from the last successful gate; do not weaken that selection.
+9. Once both current pipelines qualify, independently rebuild clean G1 without
+   .lake cache and compare exact inventories/admissions/IR/all10 observations/raw
+   module.py/module.php with EACH qualified G1/G2/G3. Existing Direct clean audit
+  36d917b0/run40064496804 is template, not Python/PHP evidence. Require successful
+   producer run/job/artifact digest/source closure guards. This is clean G1
+   reproduction, not a second full-chain replay or DDC/formal preservation proof.
 10. Update AI_WORK_STATE.md, roadmap, exact receipt and draft PR176 with terminal
-    results and active exact SHAs. Continue actual qualification, not planning only.
+    results/current exact identities. Continue actual implementation/qualification.

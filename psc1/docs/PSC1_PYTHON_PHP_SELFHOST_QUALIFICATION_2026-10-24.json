@@ -1,11 +1,11 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 08:32 UTC",
-  "status": "bounded-call-both-target-genuine-active-PHP-extraction-fix-under-validation",
+  "recordedAtUtc": "2026-10-24 09:00:00 UTC",
+  "status": "PHP-extraction-and-Python-lambda-free-self-tail-genuine-qualification-active",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
-  "sourceCommit": "8a99b06d834d8366e95f29b6ea4046d4cdfeb51f",
+  "sourceCommit": "e20a11549cdb1d656c05912089730bf2ebeaf933",
   "targets": [
     "python",
     "php"
@@ -76,10 +76,10 @@
     "status": "passed"
   },
   "qualification": {
-    "G1": "prior-attempts-passed;bounded-direct-call-current-generation-not-yet-run",
-    "G2": "latest-both-hard-deadline1800s",
-    "G3": "not-run",
-    "fixedPoint": "not-run",
+    "G1": "prior actual attempts accepted strict IR/all ten cases; latest changed-source terminal evidence pending",
+    "G2": "prior both1800s deadline failures; current separate requests active",
+    "G3": "not-yet-qualified",
+    "fixedPoint": "not-yet-qualified",
     "cleanReproduction": "not-run",
     "performance240s": "not-qualified"
   },
@@ -157,7 +157,7 @@
       }
     }
   },
-  "nextAction": "Read bounded-call qualification40077476210 terminal results. Validate PHP extraction source8a99b06d with complete native/source/admitted-library gates, then isolated PHP-only genuine request (per-target concurrency queues it behind preserved809 baseline). Preserve Python809 because its owned source is unchanged. Require final full37/37 and clean G1 reproduction once qualified.",
+  "nextAction": "Read current Python40079719620/job120830635451 and PHP40078954006/job120828380302 terminal evidence. Keep source stable while genuine attempts run. If failure, profile exact archived new artifact and fix demonstrated class; preserve all limits/checks. Require final current-source37/37 and independently clean G1 reproduction after both qualify.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -1039,18 +1039,96 @@
     "requestCommit": "809070eb6c2f794ea962b1f00324d263367ab2e9",
     "parentCommit": "f1ca58a92045514da39c3d105dc54d18becc17ac",
     "runId": 40077476210,
-    "status": "in_progress",
+    "status": "completed",
     "jobs": {
       "php": 120823970819,
       "python": 120823970885
     },
     "scope": "genuine current bounded-call G1/G2/G3/fixed-point attempt with source-only Python host; terminal generations not yet read",
-    "sourceEvolution": "Later PHP-only extraction edits do not alter Python owned closure. PHP request809 remains immutable bounded-call baseline; changed PHP source requires new qualification."
+    "sourceEvolution": "Later PHP-only extraction edits do not alter Python owned closure. PHP request809 remains immutable bounded-call baseline; changed PHP source requires new qualification.",
+    "conclusion": "failure",
+    "results": {
+      "python": {
+        "target": "python",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "bb35812ecde860facd66fe9f3738e5f8c95a6ecaddb5bd2204ca055609215e5b",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"python\",\"id\":\"G2-self\",\"serviceSha256\":\"b3dc6b76ce5a321bcb6e36f6971e5a3413c92ca6a7acaec7a7d7360ceba2b5a3\",\"requestSha256\":\"47cb2ec8e01329913abc9325fa9450ec71e847912bc1d426a15047f38a91c92c\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":67452,\"peakTreeRssKiB\":684156,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800049,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "b3dc6b76ce5a321bcb6e36f6971e5a3413c92ca6a7acaec7a7d7360ceba2b5a3",
+            "startedAt": "2026-10-24T08:20:34.063Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"python\",\"id\":\"G2-self\",\"serviceSha256\":\"b3dc6b76ce5a321bcb6e36f6971e5a3413c92ca6a7acaec7a7d7360ceba2b5a3\",\"requestSha256\":\"47cb2ec8e01329913abc9325fa9450ec71e847912bc1d426a15047f38a91c92c\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":67452,\"peakTreeRssKiB\":684156,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800049,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+            "completedAt": "2026-10-24T08:50:34.711Z"
+          }
+        ]
+      },
+      "php": {
+        "target": "php",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "status": "failed",
+        "sourceModules": 87,
+        "sourceClosureDigest": "48e75d1629521d8ba258ecade1246f3154ad46be2760d269387ce8b6aff9b6e2",
+        "generations": [
+          1
+        ],
+        "fixedPoint": "not-run",
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"php\",\"id\":\"G2-self\",\"serviceSha256\":\"b3f71d510ad7965e4068ba475af6f253371348c9f9fa0541fd397cea39f70da5\",\"requestSha256\":\"726d81c92be1e9f0593c364384cb5f92afa15cb5b681035fbe57361ba4502639\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":74176,\"peakTreeRssKiB\":1180988,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800068,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "attempts": [
+          {
+            "generation": 2,
+            "producer": "b3f71d510ad7965e4068ba475af6f253371348c9f9fa0541fd397cea39f70da5",
+            "startedAt": "2026-10-24T08:21:26.573Z",
+            "status": "failed",
+            "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"php\",\"id\":\"G2-self\",\"serviceSha256\":\"b3f71d510ad7965e4068ba475af6f253371348c9f9fa0541fd397cea39f70da5\",\"requestSha256\":\"726d81c92be1e9f0593c364384cb5f92afa15cb5b681035fbe57361ba4502639\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":74176,\"peakTreeRssKiB\":1180988,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800068,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+            "completedAt": "2026-10-24T08:51:27.504Z"
+          }
+        ]
+      }
+    },
+    "artifacts": [
+      {
+        "id": 12554652594,
+        "name": "psc1-python-php-selfhost-correctness-1800s-php-809070eb6c2f794ea962b1f00324d263367ab2e9",
+        "digest": "sha256:606490fefffd957cd7c2a5be2830e37c82b02b268a3a53b42604561f65b90dce"
+      },
+      {
+        "id": 12554079601,
+        "name": "psc1-python-php-selfhost-correctness-1800s-python-809070eb6c2f794ea962b1f00324d263367ab2e9",
+        "digest": "sha256:88d991062b030d3fd5b529704e6cc53c4dbf5d5e61b6e76ed29790cd5f9dfb44"
+      }
+    ],
+    "evidenceBoundary": "Both G1s independently admitted, strict IR/all ten cases passed; both G2 hard deadlines1800s. No G3/fixed point. Immutable source809 artifacts preserved."
   },
   "phpExtraction": {
     "sourceCommit": "9c4a9b38c8d1e15e3cd9a09247b9fa28d8b0e663",
     "testOrderFixCommit": "8a99b06d834d8366e95f29b6ea4046d4cdfeb51f",
-    "status": "under-source-native-validation",
+    "status": "passed-native-source-admitted-runtime-gate",
     "mechanism": "validate with existing two-key UTF8 cache, bound GMP indices before native conversion, validate codepoint boundaries, native byte substring; no whole-source character array for extraction",
     "preserved": "early empty-range before invalid-UTF8 error; invalid/negative/outside/mid-codepoint start behavior; mid-codepoint stop extends through end exactly as retained helper; huge indices; no extra retained cache; PHP1G/defaultstack unchanged",
     "legacyPolicy": "same emitter retains exact old runtime closure/source for legacy layout policy; default catalog checked outside exact extraction block and approved utf8Valid dependency",
@@ -1075,6 +1153,101 @@
         }
       ],
       "scope": "retained helper differential and exact generated compiler-source operation; not G2/G3/fixed-point success"
+    },
+    "registrationFixCommit": "94ea0e84af36ae6fd39e7174214a41f0436b06d1",
+    "gate": {
+      "runId": 40078556459,
+      "jobId": 120827082248,
+      "status": "success",
+      "modulesPerTarget": 87,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "retainedHelperCases": 25100,
+      "retainedEmittedCases": 25100,
+      "largeSourceBytes": 1000000,
+      "largeSourceSlices": 16,
+      "artifacts": [
+        {
+          "id": 12554192438,
+          "digest": "sha256:d686ac14622548c65dc6682f854ffb2ce757e4afb3cbcf55f883f3229b3a78be"
+        }
+      ]
+    },
+    "qualification": {
+      "schema": "psc1-python-php-selfhost-request/1",
+      "branch": "feat/psc1-python-php-selfhost-20261024",
+      "parentCommit": "94ea0e84af36ae6fd39e7174214a41f0436b06d1",
+      "action": "qualify-independent-G1-G2-G3",
+      "profile": "correctness-1800s",
+      "targets": [
+        "php"
+      ],
+      "g2g3TimeoutMs": 1800000,
+      "g1TimeoutMs": 240000,
+      "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
+      "reason": "PHP-only qualification after measured whole-source extraction allocation fix. Gate40078556459/job120827082248 passed all87-module/both-grammar/admitted/retained guards and25100helper+25100emittedAPI cases at1G/defaultstack. Python809 source unchanged; preserve both active809 attempts; target concurrency queues this PHP behind its immutable bounded-call baseline.",
+      "requestCommit": "1174300d0efc2a10cf6887e598a1a4057f36c7cc",
+      "runId": 40078954006,
+      "jobId": 120828380302,
+      "status": "in_progress",
+      "generationEvidence": "terminal receipt not yet read",
+      "sourceEvolution": "Later Python-only tail-loop source does not alter this PHP owned source closure or critical host tools."
+    }
+  },
+  "pythonSelfTailLoops": {
+    "sourceCommit": "e20a11549cdb1d656c05912089730bf2ebeaf933",
+    "mechanism": "loop only lambda-free exact global-self tails, nonzero arity, no shadow/type arguments, finite4096 analysis with conservative exhaustion fallback; preserve callee lookup/evaluation, snapshot all arguments in original fresh temporary before parallel parameter rebinding; non-self/dynamic calls retain scheduler",
+    "legacyPolicy": "same emitter advanced policy retains old scheduler; previous WithIoAndDirectCalls API preserves its no-loop behavior",
+    "proofs": "all-input zero-budget no-lambda and self-tail fallback identities",
+    "guard": "independent AST checker restores only exact three-statement self-tail snapshots to original yields, checks lambda-free reference, exact callee/arity/arguments, and compares all remaining AST; origins checked against exact actual function headers",
+    "gate": {
+      "runId": 40079503171,
+      "jobId": 120829903883,
+      "status": "success",
+      "modulesPerTarget": 87,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "retainedComparisons": 43,
+      "deepTailSteps": 2000000,
+      "deepEscapingClosureFallback": 200000,
+      "typedIoOrderAndFirstFailure": true,
+      "parallelArgumentSwap": true,
+      "lexicalShadowRefusal": true,
+      "recursionLimit": "unchanged",
+      "artifacts": [
+        {
+          "id": 12553794512,
+          "digest": "sha256:d333a53cc5f2b22f0ab2f3d13b695fff49f602ec076abb4d2aa10d2b42690fca"
+        }
+      ]
+    },
+    "archivedShapeAudit": {
+      "runId": 40078613463,
+      "controlCommit": "cb6660fd6e2a0022f8609ce2675cbeb5d990b85f",
+      "scope": "read-only exact archived UTF8-G1 AST audit; hot equality/JSON/reverse/name-lookup workers have exact self tails without nested definitions; not new compiler execution"
+    },
+    "qualification": {
+      "schema": "psc1-python-php-selfhost-request/1",
+      "branch": "feat/psc1-python-php-selfhost-20261024",
+      "parentCommit": "e20a11549cdb1d656c05912089730bf2ebeaf933",
+      "action": "qualify-independent-G1-G2-G3",
+      "profile": "correctness-1800s",
+      "targets": [
+        "python"
+      ],
+      "g2g3TimeoutMs": 1800000,
+      "g1TimeoutMs": 240000,
+      "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
+      "reason": "Python-only qualification after lambda-free exact-self-tail loops. Gate40079503171/job120829903883 PASSED all87-module/both-grammar/native/admitted/retained tests,43 loop comparisons,2Msteps,200kescapingclosurefallback,argument-swap/typed-IO-order-and-first-error,exactASTrestoration. Preserved bounded-call809 Python G1 passed but G2 timedout1800049ms. PHP extraction117 source/active attempt unchanged; no raised limits or weakened verification.",
+      "requestCommit": "e6327cddbbb74917fcdebed8e00bdf6b8db55c42",
+      "runId": 40079719620,
+      "jobId": 120830635451,
+      "status": "in_progress",
+      "generationEvidence": "terminal receipt not yet read"
     }
   }
 }

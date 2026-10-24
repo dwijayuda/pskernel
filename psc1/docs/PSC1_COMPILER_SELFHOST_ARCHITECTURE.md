@@ -33,15 +33,16 @@ depth before restoring old yield nodes for exact remaining-AST comparison.
 PHP compares direct and retained schedulers with identical runtime/carrier.
 Both targets pass200000-deep dynamic alias/local/parameter-shadow recursion.
 Gate40077267520 passes87 modules per target in both grammars and all admitted
-library/retained regression guards. Genuine request809070eb/run40077476210 is
-active; this source gate does not establish G2/G3 or fixed points.
+library/retained regression guards. Genuine request809070eb/run40077476210 independently admits both G1s, passes
+strict IR/all ten cases, then both G2 requests fail the1800s deadline. No G3/fixed
+point. This source gate did not establish compiler-generation qualification.
 
 PHP extraction separately allocates a full character array even for a short
 substring. Exact archived compiler-source diagnostic40077973238 compares25100
 valid/malformed/boundary/huge-index cases and16 slices from18804166 source bytes:
 retained22.741s, proposed0.0243s. This is an actual compiler-source runtime
-operation, not a whole-compiler speedup. New source9c4a9b38/8a99b06d is under
-validation: use the existing two-key UTF8 validity cache, check full input before
+operation, not a whole-compiler speedup. Source9c4a9b38/registration94ea0e84 passes gate40078556459, including25100
+emitted API comparisons and1MB slices: use the existing two-key UTF8 validity cache, check full input before
 bounds as required, compare GMP positions against native size before conversion,
 then slice bytes. Preserve early empty-range behavior, invalid/non-boundary start,
 and the historical rule that a mid-codepoint stop extends through the string end.
@@ -50,6 +51,29 @@ legacy layout policy keeps exact old extraction runtime bytes and dependencies
 for differential tests; the default catalog permits only this complete helper
 block and its utf8Valid dependency to differ. PHP-only source changes leave the
 Python owned compiler closure unchanged.
+
+Python's exact archived hot-worker AST audit40078613463 confirms self tails
+without nested definitions in equality, JSON, list reversal and name lookup.
+The new emitter loops only lambda-free exact global-self tails with nonzero arity,
+no lexical shadow/type arguments and conservative4096 analysis fallback.
+The saved callee and argument evaluation remain; the original fresh result
+temporary snapshots the argument tuple before parallel parameter rebinding.
+Other calls retain the scheduler. No frame is reused for a body creating a lambda,
+so escaping closures retain distinct captured bindings. A separate retained
+policy keeps the original scheduler output; existing WithIoAndDirectCalls API
+retains its previous no-loop behavior.
+
+Independent AST validation restores only the exact three-statement snapshot/
+rebind/continue pattern to the original self-tail yield, checking original callee,
+arity/arguments and lambda absence, then compares all remaining AST. Declaration
+origins are checked against exact actual headers. Gate40079503171 at e20a1154
+passes87-module/both-grammar censuses, all retained/admitted guards,43 loop
+comparisons,2M steps,200k escaping-closure fallback, swaps and typed IO order/
+first-error tests without changing Python recursion limits. Genuine Python
+requeste6327cdd/run40079719620 and PHP extraction request1174300d/run40078954006
+are active independently. Later Python-only source does not change the PHP
+owned closure. Keep source stable and read terminal evidence before next fixes.
+No current G2/G3/fixed-point success is inferred from these focused tests.
 
 Strict IR already requires canonical constructor field order; the PHP emitter
 evaluates in that order. Reordered construction remains refused, while match

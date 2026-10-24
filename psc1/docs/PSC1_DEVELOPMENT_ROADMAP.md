@@ -10,22 +10,18 @@ owns exact source identities and immutable actual results.
 
 | Order | Work | Finite acceptance and current status |
 | --- | --- | --- |
-| 1 | Validate measured runtime optimizations | PASS sourceb7499950/run40077267520/job120823225254:87 modules/target, both grammars and all retained/admitted/deep-recursion guards. Shared conservative classification,2 immutable call layers; dynamic/shadow/recursive/value-forcing calls retain suspension. Both target retained-scheduler/deep-recursion tests, Python exact AST boundary, zero-budget fallback, complete source census and admitted libraries passed. |
-| 2 | Genuine current generated compilers | Both latest G1s PASS independent admission/strict IR/ten cases. Python40072853176 and PHP40073754301 each FAIL G2 hard deadline1800s; no G3/fixed point. Python actual profile shows UTF8 fix worked and scheduler own cost dominates. PHP iterative nodes remove observed destruction crash;120s phase samples retain bounded pending generators. Bounded-call BOTH request809070eb/run40077476210 is active, including source-only Python host. PHP-only extraction source leaves Python closure unchanged; issue separate PHP request after its full source gate succeeds, preserving active809 baseline. |
-| 3 | Actual fixed points | Native seed once, then remove native compiler tools. Each G1 compiles same complete captured compiler toG2, thenG3; independent Lean4.35, both strict graphs, source pairing, ten positive/refusal cases and exact source/admission/IR/observation/raw executable identities mandatory. Correctness1800s and performance240s remain separate. |
-| 4 | Full regression and reproducibility | Baseline40073884191 PASSED37/37,7 backends/both grammars/applications at edcbab7b/tree0d12de8a. It precedes new direct-call optimization. Require final current-source full CI and separately independent clean G1 reproduction. No merge/publication authorized. |
+| 1 | Preserve validated mechanisms | PASSED sourcee20a1154/run40079503171/job120829903883:87 modules/target/both grammars, all retained/API/admitted/runtime guards. Bounded Python UTF8 views; lexical PHP captures; immutable nodes/iterative release; bounded synchronous globals; PHP byte slicing with25100helper+25100API checks; lambda-free Python self-tail loops with exact AST restoration,43 comparisons,2M steps/200k closure fallback/typed IO order and errors. |
+| 2 | Genuine current generations | PHP1174300d/run40078954006/job120828380302 and Pythone6327cdd/run40079719620/job120830635451 ACTIVE. Keep source stable/read terminal evidence. Both earlier809070eb G1s PASS independent admission/strict IR/ten cases, but both G2 fail1800s; no G3/fixed point. Later Python-only source leaves PHP closure unchanged. |
+| 3 | Exact fixed points | Seed once, remove native compiler tools, actual G1→G2→G3; independent Lean4.35, source pairing, both strict graphs, ten positive/refusal cases, exact source/admission/IR/observations/raw executable identities. Correctness1800s and performance240s remain separate. If failure, profile exact new artifact and fix demonstrated class before another request. |
+| 4 | Final regression/reproduction | Baseline40073884191 PASSED37/37/all7 backends/both grammars/applications at edcbab7b/tree0d12de8a. New source needs final full CI, then separately independent clean G1 reproducing each qualified generation without lake cache. No merge/publication authorized. |
 
-One shared compiler and one portable emitter per target; native adapters preserve
-APIs. Measured fixes: bounded Python UTF8 views, lexical PHP global captures and
-immutable compact PHP nodes with iterative reclamation. New direct-call analysis
-uses bounded immutable layers, full-name-checked hashed sets and conservative
-fallback rather than raising native stacks or execution fuel. Source-only Python
-loading closes the actual unlisted-bytecode path; poisoned-cache controls pass.
-
-The [current receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
-retains exact failures, profiles, hashes and evidence boundaries;
-[continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) owns executable next steps.
-Direct-target performance work below is deferred during this mission.
+One existing shared compiler and one portable emitter per target; native adapters
+preserve APIs. Source-only Python execution closes actual unlisted-bytecode
+replacement. Every legacy policy/negative boundary/resource limit remains.
+Source gates alone do not qualify compiler generations. The [current receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
+retains exact results and [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md)
+owns executable next steps. Direct-target performance work below is deferred
+during this mission.
 
 ## Qualified compiler checkpoint
 

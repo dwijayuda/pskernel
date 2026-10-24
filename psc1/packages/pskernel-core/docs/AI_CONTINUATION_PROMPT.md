@@ -1,3 +1,37 @@
+## 2026-10-25 T05 completed-page lookup proof repair awaiting qualification
+
+The live work head `90af512e3e60f56ebbd48687a84fef3821876d86` failed
+[run 40093645264](https://github.com/dwijayuda/pskernel/actions/runs/40093645264),
+attempt 1, native job `120871279861`. The terminal log has one Lean error:
+`valid_id_is_found` leaves the completed-page offset bound expressed with
+checked array indexing while the established hypothesis uses `Array.getD`.
+The other paged proofs and all 17 parameter / 16 result proof commands
+elaborated; the failed theorem's `sorryAx` report was rejected. Native
+constructor regressions, the retained post-proof audit and both generated
+routes were not executed. This source is not qualified.
+
+The present repair adds only a rewrite by the pinned Lean theorem
+`Array.getElem_eq_getD (Array.emptyWithCapacity 0)`, followed by the existing
+`offset` hypothesis. Its in-bounds proof is the existing `completed`
+hypothesis. All theorem statements, 17 paged report commands, prior proof
+repairs, production, fixtures, workflow gates and resource limits are retained.
+This candidate is uncompiled at commit creation; follow its single automatic
+T05 native-first push run and require its own complete 230-report gate,
+native parameter284/result432, and both authentic routes with
+header1992/cache1884/parameter268/result432 before calling the slice qualified.
+
+Integration remains at qualified T01F/scoped A source
+`0d9f062846d109c362210d441df5fd407ca2cdd7`.
+T05/B/D remain OPEN and C remains FAIL. Physical `Layout` assumes valid internal
+page lengths; replay establishment and concrete decoder/ArenaModel
+correspondence for untrusted input remain separate obligations. After this
+helper batch qualifies, follow
+[the constructor handoff](T05_CONSTRUCTOR_HELPERS_HANDOFF_2026-10-24.md)
+for private field/positivity workers, then recursors and atomic admission.
+Do not promote the public fallback or inherit a predecessor's receipts.
+
+---
+
 ## 2026-10-24 Constructor helper proof gate fails; proof-body repair
 
 Exact source `be4b47b80fd9c9dd21a28ffe8b15a691bb2c20ec`, run

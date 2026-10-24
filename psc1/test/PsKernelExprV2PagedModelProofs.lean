@@ -182,6 +182,8 @@ theorem valid_id_is_found (arena : PsKernelExprV2PagedArena) (layout : Layout ar
       HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *
     simp [psKernelExprV2PagedFind, psKernelExprV2PagedGet, Nat.beq_eq, Nat.blt_eq,
       nonzero, inside, completed, offset]
+    rw [Array.getElem_eq_getD (Array.emptyWithCapacity 0)]
+    exact offset
   · refine ⟨arena.active.getD (id % arena.pageLimit) psKernelExprV2DummyEntry, ?_⟩
     dsimp only [HDiv.hDiv, instHDiv, Div.div, Nat.instDiv,
       HMod.hMod, instHMod, Mod.mod, Nat.instMod] at *

@@ -1,14 +1,17 @@
 {
   "schema": "psc1-unified-selfhost-request/1",
   "branch": "feat/psc1-unified-selfhost-20261024",
-  "parentCommit": "6c46641efa11293fbe45f960bea38daeaf8305ec",
-  "action": "qualify-independent-G1-G2-G3",
+  "parentCommit": "658df6d9e9bada4e11e369ab6d0e73d0dab74d4c",
+  "action": "validate-independent-G1",
+  "mode": "--g1-only",
   "profile": "correctness-1800s",
   "g1TimeoutMs": 240000,
   "g2g3TimeoutMs": 1800000,
   "targets": [
-    "rust"
+    "js",
+    "ts",
+    "rust",
+    "wasm-core"
   ],
-  "resourcePolicy": "all-existing-policies-unchanged",
-  "reason": "Exact archived 15.2MB unified Rust source measured opt1 default and 256 units above240s; opt0/256 builds in51719ms. New unified correctness profile uses0/256 with canonical verified build inputs. Retain all old single-emitter profiles."
+  "reason": "Verify structured v2 request root in all four generated engines, both source grammars, independent admission, forty cross-target corpus cases and nine envelope refusals. Existing long old-source attempts remain preserved."
 }

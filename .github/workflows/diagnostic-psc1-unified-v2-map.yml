@@ -1,0 +1,66 @@
+name: PSC1 exact v2 Wasm function index map
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-unified-v2-map.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-direct-service-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: psc1-direct-service-native-v1-${{ runner.os }}-
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12569441180'
+          run-id: '40117051185'
+          github-token: ${{ github.token }}
+          path: psc1/dist/v2-map-input
+      - name: Build exact owned diagnostic imports
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lake" build PsCompilerUnified
+      - name: Map production lowered functions and verify exact checked IR identity
+        run: |
+          set -euo pipefail
+          mkdir -p dist/unified-v2-map
+          input="$(find dist/v2-map-input -name G1-bootstrap.request.json -print -quit)"
+          lake env lean --run scripts/DiagnosticUnifiedWasmMap.lean "$input" dist/unified-v2-map/candidate.json
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
+          import {sha} from './host-tools/generated-target-tools.mjs';
+          function find(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory()){const r=find(p);if(r)return r;}else if(e.name==='qualification.json')return p;}}
+          const q=JSON.parse(fs.readFileSync(find('dist/v2-map-input'))),c=JSON.parse(fs.readFileSync('dist/unified-v2-map/candidate.json'));
+          assert.equal(q.testedCommit,'783cf8fceeda094b3e49b166e4d10af05e4b0413');assert.equal(c.status,'candidate');
+          assert.equal(sha(JSON.stringify(c.originalIr)),q.bootstrap.originalIrSha256);assert.equal(sha(JSON.stringify(c.specializedIr)),q.bootstrap.specializedIrSha256);
+          for(const row of q.sourceInventory)assert.equal(sha(fs.readFileSync(row.path)),row.sha256);
+          const names=JSON.parse(c.source),map=names.map((name,index)=>({index,name}));
+          fs.writeFileSync('dist/unified-v2-map/functions.json',JSON.stringify(map));
+          console.log('PSC1_EXACT_WASM_MAP: '+JSON.stringify({functions:map.length,originalIr:q.bootstrap.originalIrSha256,specializedIr:q.bootstrap.specializedIrSha256,qualification:false}));
+          console.log('PSC1_WASM_MAP_PREFIX: '+JSON.stringify(map.slice(0,100)));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-unified-v2-map-${{ github.sha }}
+          path: psc1/dist/unified-v2-map/
+          retention-days: 90

@@ -3,6 +3,7 @@ on:
   push:
     branches: [feat/psc1-unified-selfhost-20261024]
     paths:
+      - psc1/packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.lean
       - psc1/packages/backend-rust/src/**
       - psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
       - psc1/test/WasmNatDivMod*.lean

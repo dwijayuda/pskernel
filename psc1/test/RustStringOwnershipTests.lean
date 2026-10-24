@@ -28,7 +28,8 @@ private def scanner (name : String) (alias : Bool) : PsVerifiedIrDeclaration :=
        (.letE "character" (.primitive .char) (call "readGet" [.var "text",.var "position"]) recur))}
 private def workerScanner : PsVerifiedIrDeclaration :=
   let original := scanner "scanWorker" false
-  {original with parameters := [p "fuel" natT,p "__workerString" strT,p "position" natT,p "count" natT],
+  { original with
+    parameters := [p "fuel" natT,p "__workerString" strT,p "position" natT,p "count" natT]
     body := .letE "text" strT (.var "__workerString") original.body}
 private def pairResult : PsVerifiedIrExpr :=
   intrinsic .natAdd [intrinsic .natMul [intrinsic .stringLength [.var "a"],n 100],intrinsic .stringLength [.var "b"]]

@@ -1,0 +1,48 @@
+name: PSC1 recover exact current PHP async sample labels
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-php-current-labels.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify both immutable artifact identities
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12555337743 > baseline.json
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12555955734 > sample.json
+          python3 - <<'PY'
+          import json
+          for path,run,sha,digest in [
+            ("baseline.json",40078954006,"1174300d0efc2a10cf6887e598a1a4057f36c7cc","sha256:072e3111a2d9367a8bef2df82db6041f23c8bd582642f0730e7ddb9c7dde8ef7"),
+            ("sample.json",40082137206,"e3b0c5f378b5205390080c7fc66667bd6636d4ff","sha256:4bfcfdcee8f715508e4dd1c9781dde0156b3aa9ba1b8c201d19189068f8842d5")]:
+            a=json.load(open(path));assert a["workflow_run"]["id"]==run and a["workflow_run"]["head_sha"]==sha and a["digest"]==digest and not a["expired"]
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40078954006'
+          artifact-ids: '12555337743'
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40082137206'
+          artifact-ids: '12555955734'
+          path: sample
+      - name: Read-only owner recovery
+        run: python3 .github/diagnostics/psc1-php-current-labels.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-php-current-labels-${{ github.sha }}
+          path: diagnostics/
+          retention-days: 90

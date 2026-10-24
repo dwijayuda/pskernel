@@ -78,7 +78,9 @@ jobs:
           path: psc1/.lake
           key: ${{ steps.native_cache.outputs.cache-primary-key }}
       - name: Compare retained runtime bytes and exhaustive catalog selections
-        run: .lake/build/bin/psc1_script_runtime_normalization_tests
+        run: |
+          .lake/build/bin/psc1_script_runtime_normalization_tests
+          .lake/build/bin/psc1_backend_state_correspondence_tests
       - name: Execute independently admitted runtime library in both grammars and targets
         run: node scripts/script-runtime-admission-tests.mjs
       - name: Census both complete source closures in both grammars

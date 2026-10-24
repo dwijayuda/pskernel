@@ -7,6 +7,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
+import {isDeepStrictEqual} from 'node:util';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const pin=JSON.parse(fs.readFileSync(path.join(root,'NATIVE_SOURCE_PIN.json'),'utf8'));
@@ -60,6 +61,8 @@ export function resolveBackendProvider(target,importer){
   contract.runtimeContract!=='psc1-runtime-semantics/1'||
   !/^[a-f0-9]{40}$/.test(contract.compilerSourceCommit)||
   contract.compilerSourceCommit!==distribution.sourceCommit)fail('PSC1_PROVIDER_PACKAGE_IDENTITY');
+ if(!isDeepStrictEqual(contract,distribution.backendProviderPackages?.[target]))
+  fail('PSC1_PROVIDER_PACKAGE_IDENTITY','provider must match the core-pinned build artifact');
  exact(contract.native,['path','sha256','bytes'],'PSC1_PROVIDER_NATIVE_SCHEMA');
  if(contract.native.path!=='native/bin/psc1_backend_'+target||
   !/^[a-f0-9]{64}$/.test(contract.native.sha256)||

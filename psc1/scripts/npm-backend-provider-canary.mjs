@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 const [runRoot,consumer,cli,pythonTarball,phpTarball]=process.argv.slice(2);
 assert.ok(phpTarball,'usage: runRoot consumer cli python.tgz php.tgz');
@@ -48,7 +49,7 @@ for(const syntax of ['lean','ps']){
   if(target==='ts'){
    assert.ok(process.env.PSC1_TSC,'pinned independent TypeScript checker required');
    const emitted=path.join(consumer,'ts-consumer-'+syntax);
-   command(process.execPath,[process.env.PSC1_TSC,'--strict','--target','es2022','--module','es2022','--outDir',emitted,output]);
+   command(process.execPath,[process.env.PSC1_TSC,'--ignoreConfig','--strict','--target','es2022','--module','es2022','--outDir',emitted,output]);
    const m=await import(pathToFileURL(path.join(emitted,path.basename(output,'.ts')+'.js')).href);
    assert.equal(typeof m.truth==='function'?m.truth():m.truth,true);
   }
@@ -80,6 +81,9 @@ for(const [target,tarball]of [['python',pythonTarball],['php',phpTarball]]){
  assert.equal(addonMeta.name,spec.package);
  assert.deepEqual(addonMeta.peerDependencies,{proofscript:meta.version});
  assert.equal(addonMeta.proofscript.backendProvider.target,target);
+ const installedWorker=path.join(addon,addonMeta.proofscript.backendProvider.native.path);
+ const linked=command('ldd',[installedWorker],{env:{...env,LD_LIBRARY_PATH:path.join(installed,'native/lib')}});
+ assert.doesNotMatch(linked,/=>\s+not found|\/\.elan\//,'optional worker uses core bundled native libraries');
  if(target==='python'){
   assert.equal(fs.existsSync(path.join(consumer,'node_modules/@proofscript/backend-php')),false);
  }
@@ -112,6 +116,14 @@ for(const [target,tarball]of [['python',pythonTarball],['php',phpTarball]]){
    try{refused(args,/PSC1_PROVIDER_BINARY_INTEGRITY/);assert.deepEqual(fs.readFileSync(output),before);}
    finally{fs.writeFileSync(binary,bytes);}
    refusals.push(target+'-binary-integrity');
+   const forged=JSON.parse(original);
+   const forgedBytes=Buffer.from(bytes);forgedBytes[forgedBytes.length-1]^=1;
+   forged.proofscript.backendProvider.native.sha256=createHash('sha256').update(forgedBytes).digest('hex');
+   fs.writeFileSync(binary,forgedBytes);fs.writeFileSync(metadataFile,JSON.stringify(forged));
+   try{refused(args,/PSC1_PROVIDER_PACKAGE_IDENTITY/);assert.deepEqual(fs.readFileSync(output),before);}
+   finally{fs.writeFileSync(binary,bytes);fs.writeFileSync(metadataFile,original);}
+   refusals.push(target+'-self-authorized-binary-refused');
+
    const resource=path.join(addon,addonMeta.proofscript.backendProvider.resources[0].path),saved=fs.readFileSync(resource);
    fs.appendFileSync(resource,'#tamper');
    try{refused(args,/PSC1_PROVIDER_BINARY_INTEGRITY/);assert.deepEqual(fs.readFileSync(output),before);}

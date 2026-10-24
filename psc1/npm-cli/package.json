@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/psc1-cli",
-  "version": "0.1.0-psc1.2",
+  "version": "0.1.0-psc1.3",
   "private": true,
   "type": "module",
   "description": "PSC1 checked native compiler launcher",

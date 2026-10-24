@@ -112,8 +112,18 @@ write(path.join(stage, 'README.md'), '# ProofScript PSC1\n\nUnpublished Linux x6
   'The compiler, host formatter and libraries resolver ship together. Portable source libraries are independently checked.\n' +
   'IO Node and core-Wasm adapters export as proofscript/io/node and proofscript/io/wasm-core. The locked Rust crate ships in host-tools/. Standalone Python/PHP adapters ship with their optional packages.\n' +
   'No npm installation script, network binary download, compiler fallback or package publication is used.\n');
+const backendProviderPackages=Object.fromEntries(optionalTargets.map(target=>{
+ const spec=providerContract.optionalProviders[target],binary=path.join(root,'.lake/build/bin/psc1_backend_'+target);
+ return [target,{schema:'psc1-backend-package/1',protocol:providerContract.protocol,target,
+  compilerProtocol:pin.compilerProtocol,compilerProfile:pin.compilerProfile,
+  leanVersion:pin.version,leanCommit:pin.commit,compilerSourceCommit:process.env.GITHUB_SHA||null,
+  runtimeContract:'psc1-runtime-semantics/1',
+  native:{path:'native/bin/psc1_backend_'+target,sha256:sha(binary),bytes:fs.statSync(binary).size},
+  resources:spec.resources.map(file=>({path:'resources/'+file,sha256:sha(path.join(root,'host-tools',file)),
+   bytes:fs.statSync(path.join(root,'host-tools',file)).size}))}];
+}));
 const distribution = { schemaVersion: 1, sourceCommit: process.env.GITHUB_SHA || null, branchHeadCommit: process.env.PSC1_HEAD_SHA || null,
-  compilerIdentity: nativeIdentity, builtInTargets:coreTargets, optionalTargets, backendProviderProtocol:providerContract.protocol, nativeSha256: sha(native), nativeBytes: fs.statSync(native).size,
+  compilerIdentity: nativeIdentity, backendProviderPackages, builtInTargets:coreTargets, optionalTargets, backendProviderProtocol:providerContract.protocol, nativeSha256: sha(native), nativeBytes: fs.statSync(native).size,
   platform: { os: 'linux', cpu: 'x64', libc: 'glibc', qualifiedGlibc: process.report.getReport().header.glibcVersionRuntime },
   hostDependencyLockSha256: sha(path.join(root, 'host-tools/package-lock.json')),
   bundledNpmDependencies: meta.dependencies, bundledNativeLibraries: sharedLibraries,
@@ -143,12 +153,8 @@ for(const target of optionalTargets){
  });
  for(const file of ['NATIVE_SOURCE_PIN.json'])copy(path.join(root,file),path.join(addon,file));
  copy(path.join(stage,'licenses'),path.join(addon,'licenses'));
- const contract={schema:'psc1-backend-package/1',protocol:providerContract.protocol,target,
-  compilerProtocol:pin.compilerProtocol,compilerProfile:pin.compilerProfile,
-  leanVersion:pin.version,leanCommit:pin.commit,compilerSourceCommit:distribution.sourceCommit,
-  runtimeContract:'psc1-runtime-semantics/1',
-  native:{path:'native/bin/psc1_backend_'+target,sha256:sha(binary),bytes:fs.statSync(binary).size},
-  resources};
+ const contract=backendProviderPackages[target];
+ assert.deepEqual(resources,contract.resources,'copied optional resources match core-pinned identity');
  const addonMeta={name:spec.package,version,private:true,type:'module',
   description:'PSC1 optional '+target+' emit-only provider; unpublished Linux qualification package',
   os:meta.os,cpu:meta.cpu,libc:meta.libc,engines:meta.engines,

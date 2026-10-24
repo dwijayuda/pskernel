@@ -1,0 +1,46 @@
+{
+  "source": "e3666c65701aa64231d9c4c4798f294a91ca10e1",
+  "run_id": 40087421025,
+  "run_attempt": 1,
+  "job_id": 120853086417,
+  "terminal_conclusion": "failure",
+  "actual_diagnostic_blocks": 2,
+  "repair_status": "staged, uncompiled and untested",
+  "changed_proof_bodies": [
+    "annotation_step"
+  ],
+  "unchanged_theorem_statements": 20,
+  "unchanged_model_helper_definitions": 6,
+  "unchanged_axiom_report_names": [
+    "PsKernelOrdinaryOccurrenceProofs.app_spine_with_fuel_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.app_spine_on_canonical_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.uniform_argument_count_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.uniform_arguments_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.declared_names_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_head_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_with_fuel_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_structural_adequacy",
+    "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_on_canonical_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.uniform_occurrences_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.legacy_depth_le_expanded_count",
+    "PsKernelOrdinaryOccurrenceProofs.annotation_target_depth",
+    "PsKernelOrdinaryOccurrenceProofs.annotation_structural_adequacy",
+    "PsKernelOrdinaryOccurrenceProofs.annotations_with_fuel_correspondence",
+    "PsKernelOrdinaryOccurrenceProofs.annotations_on_canonical_correspondence"
+  ],
+  "outside_annotation_step_byte_equal": true,
+  "before": {
+    "bytes": 28689,
+    "sha256": "461d938b691f904ed4c48adff9254d8f13b859e7bca88129f5b9fad238017498"
+  },
+  "after": {
+    "path": "t05-candidate/psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+    "bytes": 29015,
+    "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351"
+  },
+  "terminal_log": {
+    "bytes": 99352,
+    "sha256": "ae80b71d22d1dabb6a5d742642f79d777a21e472f04aa7a8efb7400409962237"
+  },
+  "reason": "Explicitly case-split both name-comparison Booleans in singleton/two-argument branches; simplification now reduces the fallback SemiOutParam/AutoParam guard as well as the first OutParam/OptParam guard."
+}

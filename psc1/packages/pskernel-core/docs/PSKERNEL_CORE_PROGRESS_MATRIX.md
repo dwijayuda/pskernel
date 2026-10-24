@@ -1,3 +1,36 @@
+## 2026-10-24 T05 annotation proof: final two branch corrections pending CI
+
+Source `e3666c65701aa64231d9c4c4798f294a91ca10e1`, run
+[`40087421025`](https://github.com/dwijayuda/pskernel/actions/runs/40087421025),
+attempt 1, passed production compilation and all 49 state/header equations.
+The earlier structural correspondence and depth diagnostics are resolved.
+Two goals remain in the single `annotation_step` helper: the fallback
+`semiOutParam` and `autoParam` name guards. Two of the 15 occurrence/annotation
+reports consequently still depend on `sorryAx`; the native gate remains FAIL,
+and native runtime, retained audit and generated routes were not reached.
+
+This correction explicitly splits both name Booleans for the one- and
+two-argument cases. Every byte outside that helper, all 20 theorem statements,
+the six model/helper definitions and all 15 report names are preserved.
+Production, test matrices, workflow and resource limits are unchanged.
+The correction is untested until its own single push run completes.
+
+Evidence: `docs/evidence/2026-10-24-t05-header-e366-native-failure.json` records
+the actual terminal-log/source review; no complete artifact inspection is
+claimed for that failed run. The body-only preservation record is
+`2026-10-24-t05-e366-annotation-repair-static.json`.
+
+Require the complete 172-report native gate and native/official controls on
+the next exact source, then the retained bounded code-generation checks and
+both complete routes with 1,884 cache and 1,992 header assertions each. Do not
+inherit earlier proof passes. T05/B/D remain OPEN, C remains FAIL, the five
+full work qualification triggers remain paused, and the recorded T01F/scoped A
+qualification remains pinned to integrated 0d9 with its later follow-up
+cancellation observations kept separately. Future constructor/model drafts
+remain uncommitted and untested.
+
+---
+
 ## 2026-10-24 T05 state proofs pass; structural proof corrections remain untested
 
 Exact source `f24d5a0bf70a1e27feeeb8041f7156da2efdb1a5`, run

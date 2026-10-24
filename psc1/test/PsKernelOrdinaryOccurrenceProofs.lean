@@ -383,11 +383,15 @@ theorem annotation_step (fuel : Nat) (expr : PsKernelExpr) :
     | cons first rest =>
         cases rest with
         | nil =>
-            simp only [args] <;> (split <;> simp_all)
+            cases outParam : psKernelNameEq name psKernelTypeAnnotationOutParamName <;>
+              cases semiOutParam : psKernelNameEq name psKernelTypeAnnotationSemiOutParamName <;>
+              simp_all [args]
         | cons second tail =>
             cases tail with
             | nil =>
-                simp only [args] <;> (split <;> simp_all)
+                cases optParam : psKernelNameEq name psKernelTypeAnnotationOptParamName <;>
+                  cases autoParam : psKernelNameEq name psKernelTypeAnnotationAutoParamName <;>
+                  simp_all [args]
             | cons third tail => rfl
 
 theorem app_args_worker_depth

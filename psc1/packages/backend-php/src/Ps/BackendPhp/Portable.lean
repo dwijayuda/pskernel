@@ -603,6 +603,13 @@ def emitField (emit : PsVerifiedIrExpr -> Emit String) (field : Prod String PsVe
   psBackendStateBind (emit field.snd) (fun (value : String) =>
     psBackendStatePure (cat [quote field.fst, " => ", value]))
 
+
+def regularIntrinsic (emit : PsVerifiedIrExpr -> Emit String) (context : Context)
+    (operation : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrExpr) : Emit String :=
+  fun (state : EmitState) => do
+    let pair <- psBackendSourceMapState emit arguments state
+    intrinsic context operation pair.fst pair.snd
+
 def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
   match fuel with
   | Nat.zero =>
@@ -636,10 +643,7 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
                       bindValue (invoke context entry.snd List.nil) state
                     else Except.ok (Prod.mk entry.snd state)
         | PsVerifiedIrExpr.intrinsic operation _ arguments =>
-            let fallback : Emit String :=
-              fun (input : EmitState) => do
-                let pair <- psBackendSourceMapState emit arguments input
-                intrinsic context operation pair.fst pair.snd;
+            let fallback : Emit String := regularIntrinsic emit context operation arguments;
             let action : Emit String :=
               match operation with
               | PsVerifiedIrIntrinsic.boolAnd =>
@@ -964,16 +968,16 @@ def checkType (type : PsVerifiedIrType) : Except String Unit :=
   | Except.ok _ => Except.ok Unit.unit
 
 def checkDeclaration (declaration : PsVerifiedIrDeclaration) : Except String Unit := do
-  if !psListIsEmpty declaration.typeParameters then throw "PSC1_PHP_SPECIALIZATION_REQUIRED"
+  if !psListIsEmpty declaration.typeParameters then Except.error "PSC1_PHP_SPECIALIZATION_REQUIRED"
   checkType declaration.resultType
   psBackendSourceForExcept (fun (parameter : PsVerifiedIrParameter) => checkType parameter.type) declaration.parameters
 
 def checkStructure (info : PsVerifiedIrStructure) : Except String Unit := do
-  if !psListIsEmpty info.typeParameters then throw "PSC1_PHP_SPECIALIZATION_REQUIRED"
+  if !psListIsEmpty info.typeParameters then Except.error "PSC1_PHP_SPECIALIZATION_REQUIRED"
   psBackendSourceForExcept (fun (field : PsVerifiedIrStructureField) => checkType field.type) info.fields
 
 def checkInductive (info : PsVerifiedIrInductive) : Except String Unit := do
-  if !psListIsEmpty info.typeParameters then throw "PSC1_PHP_SPECIALIZATION_REQUIRED"
+  if !psListIsEmpty info.typeParameters then Except.error "PSC1_PHP_SPECIALIZATION_REQUIRED"
   psBackendSourceForExcept (fun (constructor : PsVerifiedIrConstructor) =>
     psBackendSourceForExcept (fun (field : PsVerifiedIrConstructorField) => checkType field.type) constructor.fields)
     info.constructors
@@ -982,7 +986,7 @@ def checkPublics (module : PsVerifiedIrModule) (ioAbi : Bool) (names seen : List
   match names with
   | List.nil => Except.ok Unit.unit
   | List.cons name rest => do
-      if psBackendNameSeen name seen then throw (cat ["PSC1_PHP_DUPLICATE_PUBLIC_DECLARATION: ", name])
+      if psBackendNameSeen name seen then Except.error (cat ["PSC1_PHP_DUPLICATE_PUBLIC_DECLARATION: ", name])
       let declaration <- match psBackendSourceFind (fun (value : PsVerifiedIrDeclaration) =>
           psStringEq value.name name) module.declarations with
         | Option.none => Except.error (cat ["PSC1_PHP_UNKNOWN_PUBLIC_DECLARATION: ", name])
@@ -990,7 +994,7 @@ def checkPublics (module : PsVerifiedIrModule) (ioAbi : Bool) (names seen : List
       if !publicScalar declaration.resultType ||
           !psBackendSourceAll (fun (parameter : PsVerifiedIrParameter) =>
             publicScalar parameter.type || (ioAbi && psBackendIoDispatcherType parameter.type)) declaration.parameters then
-        throw (cat ["PSC1_PHP_PUBLIC_ABI_UNSUPPORTED: ", name])
+        Except.error (cat ["PSC1_PHP_PUBLIC_ABI_UNSUPPORTED: ", name])
       checkPublics module ioAbi rest (List.cons name seen)
 
 def globalEntry (entry : Prod PsVerifiedIrDeclaration Nat) : Prod String String :=
@@ -1055,10 +1059,10 @@ end PsPhp
 def psPhpEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
     (ioAbi : Bool) : Except String PsPhpPortableModule := do
   match psStrictValidateModule validated.raw with
-  | Except.error _ => throw "PSC1_PHP_IR_VALIDATION_FAILED"
-  | Except.ok _ => pure Unit.unit
+  | Except.error _ => Except.error "PSC1_PHP_IR_VALIDATION_FAILED"
+  | Except.ok _ => Except.ok Unit.unit
   let module : PsVerifiedIrModule := validated.raw
-  if !psListIsEmpty module.imports then throw "PSC1_PHP_EXTERNAL_IMPORT_UNSUPPORTED"
+  if !psListIsEmpty module.imports then Except.error "PSC1_PHP_EXTERNAL_IMPORT_UNSUPPORTED"
   psBackendSourceForExcept PsPhp.checkDeclaration module.declarations
   psBackendSourceForExcept PsPhp.checkStructure module.structures
   psBackendSourceForExcept PsPhp.checkInductive module.inductives

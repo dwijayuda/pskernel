@@ -635,7 +635,7 @@ def emitDeclaration (module : PsVerifiedIrModule) (declaration : PsVerifiedIrDec
     Emit Unit :=
   fun (state : EmitState) => do
     if !psListIsEmpty declaration.typeParameters then
-      throw (cat ["PSC1_PYTHON_GENERIC_DECLARATION_UNSUPPORTED: ", declaration.name])
+      Except.error (cat ["PSC1_PYTHON_GENERIC_DECLARATION_UNSUPPORTED: ", declaration.name])
     checkType 256 declaration.resultType
     let _psc_step_43 <- emitParameters List.nil declaration.parameters state
     let pair := _psc_step_43.fst
@@ -693,8 +693,8 @@ def emitPublics (module : PsVerifiedIrModule) (ioAbi calls : Bool)
     | List.nil => Except.ok (Prod.mk (psListReverse stubsRev) state)
     | List.cons name rest => do
         if psBackendNameSeen name seen then
-          throw (cat ["PSC1_PYTHON_DUPLICATE_PUBLIC_DECLARATION: ", name])
-        if !publicNameAllowed name then throw (cat ["PSC1_PYTHON_PUBLIC_NAME_UNSUPPORTED: ", name])
+          Except.error (cat ["PSC1_PYTHON_DUPLICATE_PUBLIC_DECLARATION: ", name])
+        if !publicNameAllowed name then Except.error (cat ["PSC1_PYTHON_PUBLIC_NAME_UNSUPPORTED: ", name])
         let declaration <- match psBackendSourceFind (fun (value : PsVerifiedIrDeclaration) =>
             psStringEq value.name name) module.declarations with
           | Option.none => Except.error (cat ["PSC1_PYTHON_PUBLIC_DECLARATION_MISSING: ", name])
@@ -727,7 +727,7 @@ def emitPublics (module : PsVerifiedIrModule) (ioAbi calls : Bool)
 def emitModuleBody (module : PsVerifiedIrModule) (publicNames : List String) (ioAbi : Bool) :
     Emit String :=
   fun (state : EmitState) => do
-    if !psListIsEmpty module.imports then throw "PSC1_PYTHON_FOREIGN_IMPORT_UNSUPPORTED"
+    if !psListIsEmpty module.imports then Except.error "PSC1_PYTHON_FOREIGN_IMPORT_UNSUPPORTED"
     let _psc_step_54 <- psBackendSourceForState (emitDeclaration module) module.declarations state
     let state := _psc_step_54.snd
     let calls : Bool := psBackendNameSeen "calls" state.helpers
@@ -756,8 +756,8 @@ end PsPython
 def psPythonEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
     (ioAbi : Bool) : Except String PsPythonOutput := do
   match psStrictValidateModule validated.raw with
-  | Except.error _ => throw "PSC1_PYTHON_IR_VALIDATION_FAILED"
-  | Except.ok _ => pure Unit.unit
+  | Except.error _ => Except.error "PSC1_PYTHON_IR_VALIDATION_FAILED"
+  | Except.ok _ => Except.ok Unit.unit
   let _psc_step_59 <- PsPython.emitModuleBody validated.raw publicNames ioAbi PsPython.initialState
   let stub := _psc_step_59.fst
   let state := _psc_step_59.snd

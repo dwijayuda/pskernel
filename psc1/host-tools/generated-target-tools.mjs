@@ -58,6 +58,7 @@ export function verifyArtifact(manifestFile,expectedHash) {
  const source=m.files.find(f=>f.path===definition.sourceFile);
  assert.ok(source);assert.equal(source.sha256,m.sourceSha256,'PSC1_TARGET_SOURCE_IDENTITY');
  assert.equal(m.executable,definition.executable);
+ if(definition.runtimeVersion)assert.equal(m.compilerVersion,definition.runtimeVersion,'PSC1_TARGET_RUNTIME_VERSION');
  if(m.target==='wasm-core'){
   assert.equal(m.transport,'psc1-wasm-selfhost-gc/1');assert.ok(Array.isArray(m.publicTypes));
   assert.deepEqual(decodeWasmHex(fs.readFileSync(path.join(directory,definition.sourceFile),'utf8')),fs.readFileSync(path.join(directory,m.executable)));

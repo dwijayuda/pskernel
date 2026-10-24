@@ -1,4 +1,5 @@
 import Ps.BackendCommon.StateExcept
+import Ps.BackendCommon.Source
 
 namespace PsBackendStateReference
 
@@ -52,3 +53,80 @@ theorem lift_exact {State Error Value : Type} (action : Except Error Value) :
   rfl
 
 end PsBackendStateReference
+
+theorem psBackendSourceArgs1_exact {A Value : Type}
+    (action : A -> Value) (failure : Value)
+    (arguments : List A) :
+    psBackendSourceArgs1 action failure arguments =
+      (match arguments with
+      | [arg0] => action arg0
+      | _ => failure) := by
+  cases arguments with
+  | nil => rfl
+  | cons arg0 rest0 =>
+      cases rest0 with
+      | nil => rfl
+      | cons extra rest => rfl
+
+theorem psBackendSourceArgs2_exact {A Value : Type}
+    (action : A -> A -> Value) (failure : Value)
+    (arguments : List A) :
+    psBackendSourceArgs2 action failure arguments =
+      (match arguments with
+      | [arg0, arg1] => action arg0 arg1
+      | _ => failure) := by
+  cases arguments with
+  | nil => rfl
+  | cons arg0 rest0 =>
+      cases rest0 with
+      | nil => rfl
+      | cons arg1 rest1 =>
+          cases rest1 with
+          | nil => rfl
+          | cons extra rest => rfl
+
+theorem psBackendSourceArgs3_exact {A Value : Type}
+    (action : A -> A -> A -> Value) (failure : Value)
+    (arguments : List A) :
+    psBackendSourceArgs3 action failure arguments =
+      (match arguments with
+      | [arg0, arg1, arg2] => action arg0 arg1 arg2
+      | _ => failure) := by
+  cases arguments with
+  | nil => rfl
+  | cons arg0 rest0 =>
+      cases rest0 with
+      | nil => rfl
+      | cons arg1 rest1 =>
+          cases rest1 with
+          | nil => rfl
+          | cons arg2 rest2 =>
+              cases rest2 with
+              | nil => rfl
+              | cons extra rest => rfl
+
+theorem psBackendSourceArgs5_exact {A Value : Type}
+    (action : A -> A -> A -> A -> A -> Value) (failure : Value)
+    (arguments : List A) :
+    psBackendSourceArgs5 action failure arguments =
+      (match arguments with
+      | [arg0, arg1, arg2, arg3, arg4] => action arg0 arg1 arg2 arg3 arg4
+      | _ => failure) := by
+  cases arguments with
+  | nil => rfl
+  | cons arg0 rest0 =>
+      cases rest0 with
+      | nil => rfl
+      | cons arg1 rest1 =>
+          cases rest1 with
+          | nil => rfl
+          | cons arg2 rest2 =>
+              cases rest2 with
+              | nil => rfl
+              | cons arg3 rest3 =>
+                  cases rest3 with
+                  | nil => rfl
+                  | cons arg4 rest4 =>
+                      cases rest4 with
+                      | nil => rfl
+                      | cons extra rest => rfl

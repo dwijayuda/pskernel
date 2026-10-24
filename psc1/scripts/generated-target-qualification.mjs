@@ -23,6 +23,14 @@ const inventoryFiles=['scripts/generated-target-qualification.mjs','scripts/gene
  'scripts/selfhost-qualification-profiles.mjs','scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
  'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','host-tools/generated-target-profiles.mjs','host-tools/generated-wasm-transport.mjs','host-tools/generated-python-transport.py','host-tools/generated-php-transport.php','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
 const tools=[checker,process.execPath,...inventoryFiles.map(p=>path.resolve(p))].map(file=>({file,sha256:sha(fs.readFileSync(file))}));
+if(target==='python'||target==='php'){
+ const python=target==='python';
+ const binary=runTool(python?'python3':'php',python?['-I','-c','import sys; print(sys.executable)']:['-r','echo PHP_BINARY;']).stdout.trim();
+ const file=fs.realpathSync(binary);
+ tools.push({file,sha256:sha(fs.readFileSync(file)),role:target+'-interpreter'});
+ const version=runTool(python?'python3':'php',python?['--version']:['-r','echo PHP_VERSION;']).stdout.trim();
+ assert.equal(version,definition.runtimeVersion,'PSC1_QUALIFICATION_RUNTIME_VERSION');
+}
 const seedHash=sha(fs.readFileSync(seed));let seedCalls=0;
 const events=[],report={schema:'psc1-generated-target-qualification/1',target,mode,
  profile,correctnessQualification:'not-qualified',performanceQualification:'not-qualified',

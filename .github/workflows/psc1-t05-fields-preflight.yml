@@ -134,3 +134,35 @@ jobs:
         name: psc1-t05-fields-native-diagnostic-${{ github.run_attempt }}
         path: ${{ runner.temp }}/psc1-t05-fields-native/
         if-no-files-found: error
+  fields-portable-diagnostic:
+    needs: fields-native-diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Check exact native-passed source through authentic PSC1
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        mkdir -p "$RUNNER_TEMP/psc1-fields-portable"
+        lake build psc1 2>&1 | tee "$RUNNER_TEMP/psc1-fields-portable/compiler-build.log"
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean \
+          2>&1 | tee "$RUNNER_TEMP/psc1-fields-portable/fields-source-check.log"
+        printf 'PSC1_T05_FIELDS_PORTABLE_DIAGNOSTIC: PASS source=%s fullAdmission=false qualified=false\n' "$GITHUB_SHA"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-fields-portable-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-fields-portable/
+        if-no-files-found: error

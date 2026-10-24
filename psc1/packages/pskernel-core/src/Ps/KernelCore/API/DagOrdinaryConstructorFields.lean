@@ -92,7 +92,7 @@ def psKernelExprV2OrdinaryFinishField
           (Prod.fst fvarBuilt) body 0 with
       | Except.error error => Except.error error
       | Except.ok instantiated =>
-          let recursiveField :=
+          let recursiveField : Option PsKernelExprV2OrdinaryRecursiveField :=
             match analysis.recursiveInfo with
             | Option.none => Option.none
             | Option.some info =>

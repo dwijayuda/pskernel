@@ -18,6 +18,7 @@ on:
       - psc1/test/PhpPackedLayoutTests.lean
       - psc1/test/PythonUtf8*.lean
       - psc1/scripts/python-utf8*.py
+      - psc1/scripts/poison-python-transport-cache.py
       - psc1/test/BackendState*.lean
       - psc1/test/ScriptEmitter*.lean
       - psc1/test/ScriptRuntime*.lean

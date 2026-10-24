@@ -118,7 +118,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
   }else events.push(runTool(command,[...flags,'-l',path.join(directory,sourceFile)],{logDirectory:directory}).event);
   events.push(runTool(command,[...flags,path.join(directory,adapter),path.join(directory,sourceFile),'probe',JSON.stringify(publicNames)],{logDirectory:directory}).event);
   if(!service)fs.writeFileSync(path.join(directory,python?'consumer.py':'consumer.php'),python?
-   "import importlib.util,json,pathlib\nspec=importlib.util.spec_from_file_location('psc1_observed',pathlib.Path(__file__).with_name('module.py'))\nm=importlib.util.module_from_spec(spec)\nspec.loader.exec_module(m)\n"+consumer:
+   "import importlib.util,json,pathlib\nspec=importlib.util.spec_from_file_location('psc1_observed',pathlib.Path(__file__).with_name('module.py'))\nm=importlib.util.module_from_spec(spec)\nexec(compile(pathlib.Path(spec.origin).read_bytes(),spec.origin,'exec'),m.__dict__)\n"+consumer:
    "<?php\ndeclare(strict_types=1);\n$m=require __DIR__.'/module.php';\n"+consumer);
  } else {
   const main=service ?

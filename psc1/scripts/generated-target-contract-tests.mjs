@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {sha,verifyArtifact,executeService,buildTarget} from '../host-tools/generated-target-tools.mjs';
+import {sha,verifyArtifact,executeService,buildTarget,observeArtifact,runTool} from '../host-tools/generated-target-tools.mjs';
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
 import {corpus,refusals,expectedObservations,rustObservations,pythonObservations,phpObservations} from './generated-target-corpus.mjs';
 assert.equal(corpus.length,5);assert.equal(refusals.length,5);
@@ -70,6 +70,14 @@ if(process.env.PSC1_SCRIPT_TRANSPORT_TESTS==='1'){
     "import json\n__all__=['"+exported+"']\ndef "+exported+"(wire):\n return json.dumps({'status':'refused','input':wire},ensure_ascii=False)\n":
     "<?php\nreturn ['"+exported+"'=>static fn(string $wire): string => json_encode(['status'=>'refused','input'=>$wire],JSON_THROW_ON_ERROR)];\n";
    const artifact=buildTarget({target,source,directory,service:true,publicNames:[exported]});
+   if(target==='python'){
+    runTool('python3',['-I',path.resolve('scripts/poison-python-transport-cache.py'),path.join(directory,'module.py')]);
+    assert.equal(verifyArtifact(artifact.file,artifact.sha256).sourceSha256,sha(source));
+    const consumerDirectory=path.join(directory,'consumer-probe');
+    const observed=buildTarget({target,source:"__all__=['answer']\\nanswer=42\\n".replaceAll('\\n','\n'),directory:consumerDirectory,publicNames:['answer'],consumer:"print(json.dumps({'answer':m.answer}))"});
+    runTool('python3',['-I',path.resolve('scripts/poison-python-transport-cache.py'),path.join(consumerDirectory,'module.py')]);
+    assert.deepEqual(observeArtifact(observed).observation,{answer:42});
+   }
    for(const [i,input] of ['malformed JSON','null','{}','[\"wrong-protocol\",\"G2-self\"]','λ🙂\u0000'].entries()){
     const request=path.join(directory,'request-'+i+'.json'),output=path.join(directory,'response-'+i+'.json');
     fs.writeFileSync(request,input);
@@ -82,5 +90,5 @@ if(process.env.PSC1_SCRIPT_TRANSPORT_TESTS==='1'){
    assert.throws(()=>verifyArtifact(artifact.file,artifact.sha256),/FILE_CHANGED/);
   }finally{fs.rmSync(directory,{recursive:true,force:true});}
  }
- console.log('PSC1_SCRIPT_TRANSPORT_CONTRACT: Python/PHP exact malformed wire, Unicode, NUL, API inventory and adapter identity boundaries passed');
+ console.log('PSC1_SCRIPT_TRANSPORT_CONTRACT: Python/PHP exact malformed wire, Unicode, NUL, API inventory, adapter identity and poisoned-Python-cache source execution boundaries passed');
 }

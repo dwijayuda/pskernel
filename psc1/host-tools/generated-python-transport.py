@@ -3,7 +3,8 @@ import importlib.util,json,pathlib,sys
 module_path,mode,names=sys.argv[1:4]
 spec=importlib.util.spec_from_file_location("psc1_generated_service",module_path)
 module=importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+# Execute the hash-bound source, never an unlisted timestamp/hash .pyc cache.
+exec(compile(pathlib.Path(module_path).read_bytes(),module_path,"exec"),module.__dict__)
 expected=json.loads(names)
 if sorted(module.__all__)!=sorted(expected): raise RuntimeError("PSC1_TARGET_API_MISMATCH")
 if mode=="probe": sys.exit(0)

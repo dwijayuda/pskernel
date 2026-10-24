@@ -221,7 +221,19 @@ theorem worker_forall_composes_predecessor_step_and_complete_owner
         | Except.ok step =>
             psKernelExprV2OrdinaryCtorAllowsLargeElimWorker fuel
               check whnf step.context step.state step.body step.revNonProp) := by
-  simp only [psKernelExprV2OrdinaryCtorAllowsLargeElimWorker, reduced, found, node]
+  cases stepped : psKernelExprV2OrdinaryEliminationStepWith
+      check whnf fuel context next userName domain body binderInfo revNonProp with
+  | none =>
+      simp only [psKernelExprV2OrdinaryCtorAllowsLargeElimWorker,
+        reduced, found, node, stepped]
+  | some attempted =>
+      cases attempted with
+      | error error =>
+          simp only [psKernelExprV2OrdinaryCtorAllowsLargeElimWorker,
+            reduced, found, node, stepped]
+      | ok step =>
+          simp only [psKernelExprV2OrdinaryCtorAllowsLargeElimWorker,
+            reduced, found, node, stepped]
 
 theorem worker_terminal_membership_uses_reduced_owner_and_all_arguments
     (type root : Nat) (next : PsKernelExprV2CheckState) (entry : PsKernelExprV2Entry)
@@ -310,7 +322,17 @@ theorem policy_singleton_composition_preserves_decline_error_and_negation
         | Except.ok canLarge =>
             if canLarge then Option.some (Except.ok false)
             else Option.some (Except.ok true)) := by
-  simp [psKernelExprV2OrdinaryElimOnlyAtZeroWith, notNonzero]
+  cases analyzed : psKernelExprV2OrdinaryCtorAllowsLargeElimWith
+      check whnf defeq fuel context state parameters ctor.type with
+  | none =>
+      simp [psKernelExprV2OrdinaryElimOnlyAtZeroWith, notNonzero, analyzed]
+  | some attempted =>
+      cases attempted with
+      | error error =>
+          simp [psKernelExprV2OrdinaryElimOnlyAtZeroWith, notNonzero, analyzed]
+      | ok canLarge =>
+          cases canLarge <;>
+            simp [psKernelExprV2OrdinaryElimOnlyAtZeroWith, notNonzero, analyzed]
 
 end PsKernelOrdinaryEliminationProofs
 

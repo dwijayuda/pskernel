@@ -17,3 +17,7 @@ The draft now includes 26 named native proof reports and 116 assertions in each 
 The automatic workflow `.github/workflows/psc1-t05-elimination-preflight.yml` runs native production compilation, all 26 exact source-named proof reports and all 116 unique native assertions before the authentic PSC1 leaf check. It archives exact source inputs and checks the frozen V1 Git blob. At commit creation these checks are pending; follow the single matching-source diagnostic. This is preflight evidence only. The changed source must pass the complete expanded source-bound qualification before integration.
 
 Generated recursor validation and atomic publication wait for the prerequisite constructor phase's complete qualification. Public admission and fallback are unchanged. Full T05 remains incomplete; A is scoped qualified, B and D remain OPEN, and C remains FAIL at the historical strict-compatibility checkpoint.
+
+## First native preflight repair
+
+Source `22e0f61e22bc1e9e13076791992f3470928296e2`, run [40139196551](https://github.com/dwijayuda/pskernel/actions/runs/40139196551), compiled the production module but failed two proof bodies before runtime. The forall-composition and singleton-policy goals require explicit case splits on the existing callback results. This successor changes only those two proof bodies, preserving all 26 theorem statements and the 116-assertion fixtures. Its own native-first diagnostic is required; the failed source supplies no proof/runtime qualification.

@@ -39,10 +39,20 @@ owns immutable attempts/hashes/artifacts; the roadmap owns the dependency queue.
   CPU ticks, resident memory, processes and pipe bytes are diagnostics, not
   semantic phase progress. Compiler wire/stdout and output caps are unchanged.
   Supervisor stderr streams to CI; receipts preserve sampled CPU and maxRSS.
-- Next: pass profile/process-tree/transport/source guards in Linux, then submit
-  request-only BOTH-target3600s genuine G1→G2→G3/exact-fixed-point qualification.
-  If a target fails, diagnose its exact artifact and optimize one measured class
-  before retrying. Current G2/G3 remain **not qualified** pending actual results.
+- Profile/supervision implementation451aef056de343b8423a9a2e544d2c3d0d6b1fb4
+  PASSED Linux preflight40083935614/job120842917046, including actual deadline/
+  escaped-session/output-bound tests, profile refusals, transport and both censuses.
+- **Actual3600s BOTH-target run40085445958 ACTIVE**, request
+  a6a399c604e29f62cec1f74d2db49d9c45873ea0 on
+  qualification/psc1-python-php-3600s-20261024; control2b3467f10741e49c4fa1bb3cf371a44828227975.
+  Python job120847425035/PHP120847425075. GitHub compare against451aef05 confirms
+  only workflow branch guard and request JSON differ: compiler and critical host
+  tools are identical. This avoids cancelling primary full regression40083940157,
+  still active at451aef05. Native seed/checker before genuine generated execution.
+  Neither G2/G3 nor fixed point is qualified until terminal evidence passes.
+- Next: read terminal jobs and immutable artifacts. On failure diagnose the
+  actual workload, implement one measured correctness-preserving optimization,
+  validate and retry. Preserve all previous failures and current-source37/37.
 
 Preserve Python3.14.8/PHP8.5.12/ext-gmp/Node22.23.3, official independent
 Lean4.35.0 checker eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
@@ -53,8 +63,10 @@ lookups and23.150s to scheduler. Controlled hot-pair cache experiment40083320898
 matches five frozen complete candidates and reduces cache lookup overhead;
 it is not production or qualification. PHP120s samples/label recovery
 40082137206/40082826544 interrupt node field readers25/120 times;
-sampling is not CPU attribution. Node-property diagnostic40083473782 failed
-fragment tokenization before execution; it establishes no performance result.
+sampling is not CPU attribution. Node-property diagnostics40083473782/40083961393 failed before real workload
+execution (fragment parsing, then retained tokenizer scratch). Corrected diagnostic
+40084087416 matches all five frozen complete candidates for each variant and
+executes120s each at unchanged1G; this is not production or qualification.
 Keep the fully regression-qualified compiler stable for the longer attempt.
 
 ## Completed DirectJS and owned DirectWasm mission

@@ -7,6 +7,34 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
+## Python measured UTF8 fix; packed PHP qualification — 2026-10-24
+
+Python40069631375/job120800177259 completed: G1 independently accepted with
+both strict IR graphs and all ten cases; G2 hit1800s at1800058ms/maxRSS67136KiB.
+Retain artifact12551661211/digest140e46b966269b2dfa6c6c1a04711c21818c7a6b2b2fb49ba9c741967bd07e80.
+CPU diagnosis40071913715/job120806986604 replays exact archived G1/request:
+106950 str.encode calls consume118.890/120 seconds. This is diagnostic CPU
+evidence, not admission or a fixed point. Cold-import diagnostic peak is separate
+from warmed qualification RSS.
+
+Current Python patch adds one shared bounded UTF8 view: eight immutable identity
+entries and32MiB encoded-content budget. Identity hits avoid equality scans;
+concurrent misses can replace only complete bounded snapshots. Oversized views
+are encoded without retention. get/next/extract/byte-size/end preserve the same
+encoding/errors/byte positions. No new dependencies or global recursion/digit
+changes. Require retained-helper/emitted-intrinsic differential, Unicode/bounds/
+surrogate/eviction/identity/oversize/concurrency tests, independent AST/byte
+boundaries and both full source lanes before Python-only qualification.
+
+Packed PHP source1c461c98201c49548e68155d02ca6d71d0626c7a PASSED
+40072162242/job120807749872: both86-module/both-grammar lanes, proofs,
+existing runtime/emitter/capture checks, six legacy-layout differential executions,
+canonical constructor order/refusal, reordered match bindings, owner-qualified
+layouts, Unicode and200000-cell execution under unchanged1G; all four admitted
+runtime libraries. Requestc3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7 now retries
+genuine PHP generations. The strict IR contract already enforces constructor
+field order; the emitter preserves it directly, with no reorder transformation.
+
 ## PHP G1 accepted; G2 allocation diagnosis — 2026-10-24
 
 Request59ef3544/run40071043260/job120804424493 proves that the capture fix

@@ -563,3 +563,7 @@ lean_exe psc1_php_capture_tests where
 lean_exe psc1_php_packed_tests where
   srcDir := "test"
   root := `PhpPackedLayoutTests
+
+lean_exe psc1_python_utf8_tests where
+  srcDir := "test"
+  root := `PythonUtf8CacheTests

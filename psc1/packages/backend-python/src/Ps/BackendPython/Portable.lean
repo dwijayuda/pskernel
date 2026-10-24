@@ -291,7 +291,7 @@ def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
   | PsVerifiedIrIntrinsic.arraySize =>
       psBackendStateBind (helper "builtins") (fun (_unit : Unit) => unary args "_psc_b.len(" ")")
   | PsVerifiedIrIntrinsic.stringUtf8ByteSize =>
-      psBackendStateBind (helper "builtins") (fun (_unit : Unit) => unary args "_psc_b.len(" ".encode(\"utf-8\"))")
+      psBackendStateBind (helper "builtins") (fun (_unit : Unit) => unary args "_psc_b.len(_psc_utf8(" "))")
   | PsVerifiedIrIntrinsic.stringGet => emitHelper "string-get" "_psc_string_get" args
   | PsVerifiedIrIntrinsic.stringNext => emitHelper "string-next" "_psc_string_next" args
   | PsVerifiedIrIntrinsic.stringExtract => emitHelper "string-extract" "_psc_string_extract" args
@@ -299,7 +299,7 @@ def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
       psBackendStateBind (helper "builtins") (fun (_unit : Unit) =>
         psBackendSourceArgs2
           (fun (source position : String) =>
-            bindValue (cat ["(", position, " >= _psc_b.len(", source, ".encode(\"utf-8\")))"]))
+            bindValue (cat ["(", position, " >= _psc_b.len(_psc_utf8(", source, ")))"]))
           (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
           args)
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => bindValue "()"

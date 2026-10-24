@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 06:50 UTC",
-  "status": "python-active-php-G1-accepted-G2-memory-blocked",
+  "recordedAtUtc": "2026-10-24 07:00 UTC",
+  "status": "PHP-packed-qualification-active-Python-UTF8-fix-awaiting-gates",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -157,17 +157,47 @@
       }
     }
   },
-  "nextAction": "Read actual Python terminal result. Require packed PHP native regression and complete source gates before next PHP-only request. Genuine G2/G3/fixed points and full current-source CI still pending.",
+  "nextAction": "Inspect PHP packed qualification; require complete Python UTF8/source gates before a Python-only genuine G1/G2/G3 request. Preserve full seven-backend CI and clean reproduction requirements.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
     "runId": 40069631375,
     "requestJobId": 120800073301,
-    "status": "in_progress",
+    "status": "completed",
     "targets": {
       "python": {
         "jobId": 120800177259,
-        "status": "in_progress"
+        "status": "completed",
+        "conclusion": "failure",
+        "g1": "independently-accepted-strict-IR-ten-cases",
+        "g2": {
+          "status": "failed-hard-deadline",
+          "elapsedMs": 1800058,
+          "maxRssKiB": 67136,
+          "peakTreeRssKiB": 162140,
+          "requestSha256": "822ea09dcd34a946ba7f6e4ba07e06ff670d887850f4c5fae6ab6f2359a0ca00",
+          "sourceClosureDigest": "f4357bfb2dab173ddf70c972262ac0a818a1b2405012bbc3e45d1fb174e70954"
+        },
+        "artifact": {
+          "id": 12551661211,
+          "node_id": "MDg6QXJ0aWZhY3QxMjU1MTY2MTIxMQ==",
+          "name": "psc1-python-php-selfhost-correctness-1800s-python-30389b1f218ec9c2f35321e93104edb7bb19d747",
+          "size_in_bytes": 7045014,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12551661211",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12551661211/zip",
+          "expired": false,
+          "digest": "sha256:140e46b966269b2dfa6c6c1a04711c21818c7a6b2b2fb49ba9c741967bd07e80",
+          "created_at": "2026-10-24T06:50:47Z",
+          "updated_at": "2026-10-24T06:50:47Z",
+          "expires_at": "2027-01-22T06:17:41Z",
+          "workflow_run": {
+            "id": 40069631375,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "feat/psc1-python-php-selfhost-20261024",
+            "head_sha": "30389b1f218ec9c2f35321e93104edb7bb19d747"
+          }
+        }
       },
       "php": {
         "jobId": 120800177269,
@@ -645,8 +675,39 @@
     }
   },
   "phpPackedFix": {
-    "status": "implemented-awaiting-Linux-gates",
+    "status": "source-and-runtime-regressions-passed",
     "mechanism": "owner-qualified checked layouts, flat packed internal inductive arrays; evaluate fields in original order before canonical ordering; unchanged scalar public ABI, record layout, runtime and guards; retained layout policy for differential execution",
-    "requiredTests": "zero/one/three fields, reordered construction/bindings, Unicode, recursive lists, owner isolation, retained-layout results and200000-cell1G execution"
+    "requiredTests": "zero/one/three fields, reordered construction/bindings, Unicode, recursive lists, owner isolation, retained-layout results and200000-cell1G execution",
+    "commit": "1c461c98201c49548e68155d02ca6d71d0626c7a",
+    "gate": {
+      "runId": 40072162242,
+      "jobId": 120807749872,
+      "status": "passed"
+    },
+    "canonicalOrder": "strict IR already enforces field order; emit in that order, reject reordered construction, resolve reordered match bindings by owner/constructor/field"
+  },
+  "pythonCpuProfile": {
+    "runId": 40071913715,
+    "jobId": 120806986604,
+    "commit": "de1b62acaaf347098e881243d23db55a5f5a147e",
+    "status": "passed-diagnostic",
+    "profileSeconds": 120,
+    "encodeCalls": 106950,
+    "encodeSeconds": 118.89,
+    "sourceSha256": "4ed6c9f670c3478dec70deaf8f0359222f4cd6f90fc3fa5799dfe7ff871c6e0b",
+    "artifactId": 12551239261,
+    "artifactDigest": "sha256:1d4332b9043e620fb01a5478c7a5f457527a7bbd9b160509afd3b57f646e6e74",
+    "scope": "cProfile after import of exact archived generated G1 and exact G2 request, no native compiler/admission/fixed-point claim; cold import peak is not comparable to warmed qualification RSS"
+  },
+  "phpPackedQualification": {
+    "requestCommit": "c3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7",
+    "parentCommit": "1c461c98201c49548e68155d02ca6d71d0626c7a",
+    "status": "requested-not-yet-read"
+  },
+  "pythonUtf8Fix": {
+    "status": "implemented-awaiting-Linux-gates",
+    "mechanism": "eight-entry immutable identity snapshots,32MiB encoded-content budget; no String equality key scans; exact str.encode on miss; oversized views not retained; get/next/extract/byte-size/end share same view",
+    "semantics": "same source API/UTF8 errors/continuation positions, no recursion or digit-limit globals changed",
+    "newTests": "retained helpers and emitted intrinsics across Unicode/bounds/surrogates, eviction/identity/oversize/concurrent snapshots; independent cache-neutral AST/runtime-byte boundaries and declaration offsets"
   }
 }

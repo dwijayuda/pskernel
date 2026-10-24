@@ -1,4 +1,5 @@
 import ScriptEmitterReference
+import PythonUtf8Reference
 
 private def natT : PsVerifiedIrType := .primitive .nat
 private def boxT : PsVerifiedIrType := .named "Box" []
@@ -90,16 +91,29 @@ private def requireResult (result : Except String α) : IO α :=
   | .error message => throw (IO.userError message)
 
 
-private def samePython (raw : PsVerifiedIrModule) (names : List String) (ioAbi : Bool) : IO Unit := do
+private def samePython (raw : PsVerifiedIrModule) (names : List String) (ioAbi : Bool) (label : Nat) : IO Unit := do
   match psPythonEmitModule { raw := raw } names ioAbi,
       PsScriptEmitterReference.Python.psPythonEmitModule { raw := raw } names ioAbi with
   | Except.error a, Except.error b =>
       unless a == b do throw (IO.userError "Python error identity")
   | Except.ok a, Except.ok b =>
-      unless a.source == b.source && a.stub == b.stub &&
-          a.runtimeSource == b.runtimeSource && a.runtimeHelpers == b.runtimeHelpers &&
-          a.declarationLines == b.declarationLines do
-        throw (IO.userError "Python retained-emitter output identity")
+      let addedLines := (a.runtimeSource.splitOn "\n").length - (b.runtimeSource.splitOn "\n").length
+      unless a.stub == b.stub &&
+          psPythonUtf8ReferenceNeutral a.runtimeSource == b.runtimeSource &&
+          a.runtimeHelpers == b.runtimeHelpers &&
+          a.declarationLines == b.declarationLines.map (fun pair => (pair.1, pair.2 + addedLines)) do
+        throw (IO.userError "Python retained metadata/runtime outside explicit UTF8 cache")
+      IO.FS.createDirAll "dist/script-emitter-comparison"
+      let actual := s!"dist/script-emitter-comparison/{label}.actual.py"
+      let expected := s!"dist/script-emitter-comparison/{label}.reference.py"
+      IO.FS.writeFile actual a.source
+      IO.FS.writeFile expected b.source
+      let result <- IO.Process.output {
+        cmd := "python3"
+        args := #["-I", "scripts/python-utf8-token-comparison.py", actual, expected]
+      }
+      unless result.exitCode == 0 do
+        throw (IO.userError ("Python UTF8 AST delta: " ++ result.stdout ++ result.stderr))
   | _, _ => throw (IO.userError "Python acceptance changed")
 
 private def samePhp (raw : PsVerifiedIrModule) (names : List String) (ioAbi : Bool)
@@ -142,7 +156,7 @@ def main : IO Unit := do
   for raw in [badModule, abiModule, captureModule, psVerifiedIrModuleEmpty, reorderedValues, shadowedValue] do
     for names in [[], ["answer"], ["readBox"], ["x", "shadow"], ["answer", "answer"], ["missing"]] do
       for ioAbi in [false, true] do
-        samePython raw names ioAbi
+        samePython raw names ioAbi cases
         samePhp raw names ioAbi cases
         cases := cases + 2
-  IO.println s!"PSC1_SCRIPT_EMITTER_NORMALIZATION: {cases} retained-emitter/fallback output/refusal comparisons and production global-capture token boundaries passed"
+  IO.println s!"PSC1_SCRIPT_EMITTER_NORMALIZATION: {cases} retained-emitter/fallback output/refusal comparisons and capture-policy/Python-UTF8 syntax boundaries passed"

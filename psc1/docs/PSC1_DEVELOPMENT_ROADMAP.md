@@ -33,6 +33,14 @@ PHP lexical global-demand fixda5c5c6e894019f8200e0771512f7e232a3403c6 passes sou
 runtime scope cases40070902724 before PHP-only retry. No output/memory/fuel cap
 change and no duplicate unchanged Python run. See the Python/PHP receipt.
 
+Latest actual queue: PHP packed layout passes40072162242; genuine retry request
+c3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7 active. Python G1 passes but G2 exceeded
+1800s; exact CPU profile40071913715 attributes118.890/120s to106950 UTF8
+encodes. Bounded immutable identity views are implemented awaiting focused/full
+source gates, then a Python-only retry. Preserve all limits and previous artifacts.
+These independent target changes do not justify re-running the other unchanged
+closure; compare source inventories before carrying evidence forward.
+
 ## Qualified compiler checkpoint
 
 Source133e589288b563e74578b771ec35595beb3a9fe8, request2d1f8244,

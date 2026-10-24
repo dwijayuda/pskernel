@@ -13,6 +13,7 @@ on:
       - psc1/scripts/generated-target-contract-tests.mjs
       - psc1/host-tools/compiler-host-protocol.mjs
       - psc1/scripts/php-capture-token-comparison.php
+      - psc1/scripts/php-node-runtime-tests.php
       - psc1/test/PhpCaptureScopeTests.lean
       - psc1/test/PhpPackedLayoutTests.lean
       - psc1/test/PythonUtf8*.lean

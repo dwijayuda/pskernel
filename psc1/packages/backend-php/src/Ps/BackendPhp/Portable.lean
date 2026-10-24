@@ -55,12 +55,12 @@ def stemAcc (chars : List Char) (builder : PsTextBuilder) : String :=
 
 def stem (value : String) : String := stemAcc (psJsonStringToChars value) psTextBuilderEmpty
 
-def typeText (fuel : Nat) : PsVerifiedIrType -> Except String String :=
+def typeTextWithCarrier (nodes : Bool) (fuel : Nat) : PsVerifiedIrType -> Except String String :=
   match fuel with
   | Nat.zero => fun (_type : PsVerifiedIrType) => Except.error "PSC1_PHP_TYPE_BUDGET"
   | Nat.succ remaining =>
       fun (type : PsVerifiedIrType) =>
-        let check : PsVerifiedIrType -> Except String String := typeText remaining;
+        let check : PsVerifiedIrType -> Except String String := typeTextWithCarrier nodes remaining;
         match type with
         | PsVerifiedIrType.primitive scalar =>
             match scalar with
@@ -77,8 +77,11 @@ def typeText (fuel : Nat) : PsVerifiedIrType -> Except String String :=
             Except.ok "\\Closure"
         | PsVerifiedIrType.named _ arguments => do
             let _ <- psListMapExcept check arguments
-            Except.ok "array"
+            Except.ok (if nodes then "array|\\ArrayAccess" else "array")
         | _ => Except.error "PSC1_PHP_TYPE_UNSUPPORTED: machine scalars, floats and unresolved types are not qualified"
+
+def typeText (fuel : Nat) (type : PsVerifiedIrType) : Except String String :=
+  typeTextWithCarrier false fuel type
 
 def typeRequirements (fuel : Nat) : PsVerifiedIrType -> List String :=
   match fuel with
@@ -155,7 +158,7 @@ def exprRequirements (valueNames : List String) (fuel : Nat) :
         | PsVerifiedIrExpr.record _ _ fields =>
             psBackendSourceFlatMap (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
         | PsVerifiedIrExpr.constructor _ _ _ fields =>
-            psBackendSourceFlatMap (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+            List.cons "nodes" (psBackendSourceFlatMap (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields)
         | PsVerifiedIrExpr.projection _ _ target _ => visit target
         | PsVerifiedIrExpr.matchE _ _ target alternatives =>
             psListAppend (visit target)
@@ -320,7 +323,10 @@ def guardCondition (context : Context) (name : String) (type : PsVerifiedIrType)
       | PsVerifiedIrPrimitiveType.unit => cat [name, " !== null"]
       | _ => "true"
   | PsVerifiedIrType.function _ _ => cat ["!(", name, " instanceof \\Closure)"]
-  | PsVerifiedIrType.named _ _ => cat ["!is_array(", name, ")"]
+  | PsVerifiedIrType.named _ _ =>
+      if context.flatConstructors then
+        cat ["!(is_array(", name, ") || ", name, " instanceof \\ArrayAccess)"]
+      else cat ["!is_array(", name, ")"]
   | _ => "true"
 
 def guard (context : Context) (name : String) (type : PsVerifiedIrType) : Emit Unit :=
@@ -631,13 +637,16 @@ structure ParameterInfo where
   printedType : String
   irType : PsVerifiedIrType
 
-def emitParameter (parameter : PsVerifiedIrParameter) : Emit ParameterInfo :=
-  psBackendStateBind (psBackendStateLift (typeText 4096 parameter.type)) (fun (text : String) =>
+def emitParameterFor (nodes : Bool) (parameter : PsVerifiedIrParameter) : Emit ParameterInfo :=
+  psBackendStateBind (psBackendStateLift (typeTextWithCarrier nodes 4096 parameter.type)) (fun (text : String) =>
     psBackendStateBind (fresh parameter.name) (fun (name : String) =>
       psBackendStatePure (ParameterInfo.mk parameter.name name text parameter.type)))
 
 -- Packed constructor positions come from the owner-qualified validated layout.
 -- Expression evaluation stays in source field order before values are reordered.
+def emitParameter (parameter : PsVerifiedIrParameter) : Emit ParameterInfo :=
+  emitParameterFor false parameter
+
 def constructorFields (context : Context) (owner constructorName : String) : Except String (List String) := do
   let info <- match psBackendSourceFind
       (fun (info : PsVerifiedIrInductive) => psStringEq info.name owner) context.inductives with
@@ -723,7 +732,7 @@ def emitConstructor (emit : PsVerifiedIrExpr -> Emit String) (context : Context)
       -- once in that same order; never reorder potentially effectful calls.
       let pair <- psBackendSourceMapState
         (fun (field : Prod String PsVerifiedIrExpr) => emit field.snd) fields state
-      bindValue (cat ["[", psTextJoin ", " (List.cons (quote constructorName) pair.fst), "]"]) pair.snd
+      bindValue (cat ["$__ps_nodes(", psTextJoin ", " (List.cons (quote constructorName) pair.fst), ")"]) pair.snd
 
 def regularIntrinsic (emit : PsVerifiedIrExpr -> Emit String) (context : Context)
     (operation : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrExpr) : Emit String :=
@@ -837,10 +846,10 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
             let _psc_step_71 <- fresh "closure" state
             let target := _psc_step_71.fst
             let state := _psc_step_71.snd
-            let _psc_step_72 <- psBackendSourceMapState emitParameter parameters state
+            let _psc_step_72 <- psBackendSourceMapState (emitParameterFor context.flatConstructors) parameters state
             let printedParameters := _psc_step_72.fst
             let state := _psc_step_72.snd
-            let resultType <- typeText 4096 result
+            let resultType <- typeTextWithCarrier context.flatConstructors 4096 result
             let printed : List String := psListMap (fun (parameter : ParameterInfo) =>
               cat ["mixed ", parameter.localName]) printedParameters
             let _psc_step_73 <- line (cat [target, " = ", if context.scheduled then "$__ps_wrap(" else "",
@@ -1015,10 +1024,10 @@ def emitDeclaration (context : Context) (declaration : PsVerifiedIrDeclaration) 
         psStringEq entry.fst declaration.name) context.globals with
       | Option.some entry => Except.ok entry.snd
       | Option.none => Except.error "PSC1_PHP_INTERNAL_SYMBOL"
-    let _psc_step_104 <- psBackendSourceMapState emitParameter declaration.parameters state
+    let _psc_step_104 <- psBackendSourceMapState (emitParameterFor context.flatConstructors) declaration.parameters state
     let parameters := _psc_step_104.fst
     let state := _psc_step_104.snd
-    let resultType <- typeText 4096 declaration.resultType
+    let resultType <- typeTextWithCarrier context.flatConstructors 4096 declaration.resultType
     let _psc_step_105 <- line (cat ["// declaration ", quote declaration.name]) state
     let state := _psc_step_105.snd
     let _psc_step_106 <- psBackendSourceForState
@@ -1172,6 +1181,13 @@ def emitModule (module : PsVerifiedIrModule) (context : Context) (publicNames : 
     let state := _psc_step_128.snd
     Except.ok (Prod.mk positions state)
 
+def withoutNodeRequirements (requirements : List String) : List String :=
+  match requirements with
+  | List.nil => List.nil
+  | List.cons helper rest =>
+      if psStringEq helper "nodes" then withoutNodeRequirements rest
+      else List.cons helper (withoutNodeRequirements rest)
+
 end PsPhp
 
 def psPhpEmitModuleWithIoAndPolicies (validated : PsValidatedIrModule) (publicNames : List String)
@@ -1194,7 +1210,8 @@ def psPhpEmitModuleWithIoAndPolicies (validated : PsValidatedIrModule) (publicNa
           (PsPhp.exprRequirements valueNames 4096
             (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.body)))
     module.declarations
-  let requirements : List String := psPhpRuntimeClosure requested
+  let requirements : List String := psPhpRuntimeClosure
+    (if flatConstructors then requested else PsPhp.withoutNodeRequirements requested)
   let runtimeSource : String := psPhpSelectedRuntimeSource requirements
   let globals : List (Prod String String) :=
     psListMap PsPhp.globalEntry (psBackendSourceZipIndex module.declarations)

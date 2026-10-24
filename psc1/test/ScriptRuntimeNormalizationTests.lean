@@ -18,6 +18,9 @@ def main (args : List String) : IO Unit := do
   for name in phpNames ++ ["unknown", "", "λ🙂"] do
     unless psPhpRuntimePart name == PsScriptRuntimeReference.Php.psPhpRuntimePart name do
       throw (IO.userError ("PHP runtime bytes: " ++ name))
+  unless psPhpRuntimeClosure ["nodes", "nodes", "unknown"] == ["nodes"] &&
+      psPhpRuntimeVariables ["nodes"] == ["$__ps_nodes"] do
+    throw (IO.userError "PHP node helper closure/inventory")
   let mut cases := 0
   for selected in selections pythonNames do
     for requested in [selected, selected.reverse, selected ++ selected, "unknown" :: selected] do
@@ -37,13 +40,13 @@ def main (args : List String) : IO Unit := do
       cases := cases + 1
 
   if let some output := args.head? then
-    let names := pythonNames ++ phpNames ++ ["unknown", "", "λ🙂", "stringGet"]
+    let names := pythonNames ++ phpNames ++ ["nodes", "unknown", "", "λ🙂", "stringGet"]
     let records := names.map fun name =>
       Lean.Json.arr #[
         Lean.toJson name,
         Lean.toJson (psPythonRuntimeBody name),
         Lean.toJson (String.intercalate "|" (PsScriptRuntimeReference.Python.psPythonRuntimeClosure [name, name, "unknown"])),
-        Lean.toJson (PsScriptRuntimeReference.Php.psPhpRuntimePart name),
+        Lean.toJson (if name == "nodes" then psPhpRuntimePart name else PsScriptRuntimeReference.Php.psPhpRuntimePart name),
         Lean.toJson (String.intercalate "|" (PsScriptRuntimeReference.Php.psPhpRuntimeClosure [name, name, "unknown"]))]
     IO.FS.writeFile output ((Lean.Json.arr records.toArray).compress ++ "\n")
   IO.println s!"PSC1_SCRIPT_RUNTIME_NORMALIZATION: {cases} catalog subset/order/duplicate/unknown selections and retained runtime bytes outside explicit Python UTF8 cache substitutions passed"

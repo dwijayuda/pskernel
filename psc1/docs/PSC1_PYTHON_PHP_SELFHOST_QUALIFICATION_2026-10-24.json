@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 07:00 UTC",
-  "status": "PHP-packed-qualification-active-Python-UTF8-fix-awaiting-gates",
+  "recordedAtUtc": "2026-10-24 07:10 UTC",
+  "status": "Python-UTF8-qualification-active-PHP-iterative-node-fix-awaiting-gates",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -157,7 +157,7 @@
       }
     }
   },
-  "nextAction": "Inspect PHP packed qualification; require complete Python UTF8/source gates before a Python-only genuine G1/G2/G3 request. Preserve full seven-backend CI and clean reproduction requirements.",
+  "nextAction": "Read Python UTF8 genuine qualification; require PHP iterative-node native/source gates then PHP-only retry. Full current-source seven-backend CI and clean reproduction remain required.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -702,12 +702,71 @@
   "phpPackedQualification": {
     "requestCommit": "c3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7",
     "parentCommit": "1c461c98201c49548e68155d02ca6d71d0626c7a",
-    "status": "requested-not-yet-read"
+    "status": "failed",
+    "runId": 40072293961,
+    "jobId": 120808252365,
+    "G1": "independently-accepted-strict-IR-ten-cases",
+    "G2": {
+      "status": "native-SIGSEGV",
+      "elapsedMs": 11621,
+      "maxRssKiB": 922568,
+      "peakTreeRssKiB": 996124,
+      "requestSha256": "a64dd3c272b8fe86087486833ee469232a8d22ca5f29b4f58b2c59aa0a805b7b",
+      "sourceSha256": "a4991840197e44252db9fab2550c14889f07bf417d5973b18561bcf828fff7b4"
+    },
+    "artifact": {
+      "id": 12551956561,
+      "node_id": "MDg6QXJ0aWZhY3QxMjU1MTk1NjU2MQ==",
+      "name": "psc1-python-php-selfhost-correctness-1800s-php-c3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7",
+      "size_in_bytes": 5674418,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12551956561",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12551956561/zip",
+      "expired": false,
+      "digest": "sha256:1495d0af41cebd791c4b3f4d25739bed0bebdd3169a76ab4349f5924eb2b8e01",
+      "created_at": "2026-10-24T07:01:50Z",
+      "updated_at": "2026-10-24T07:01:50Z",
+      "expires_at": "2027-01-22T06:58:23Z",
+      "workflow_run": {
+        "id": 40072293961,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-python-php-selfhost-20261024",
+        "head_sha": "c3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7"
+      }
+    },
+    "gdb": {
+      "runId": 40072628964,
+      "jobId": 120809157548,
+      "commit": "a55d629a36d8f6cfc97e4839003a13d0d7d0d49a",
+      "artifactId": 12551743408,
+      "artifactDigest": "sha256:255bde2cfc168eb0ba580fb4ed257ffa42585e205a04f04381d99a0c6bc054a2",
+      "result": "SIGSEGV with32 repeated zend_array_destroy frames",
+      "memoryLimit": "1G",
+      "stackLimit": "unchanged",
+      "scope": "exact archived generated source/request under debugger; no native compiler or qualification"
+    }
   },
   "pythonUtf8Fix": {
-    "status": "implemented-awaiting-Linux-gates",
+    "status": "passed-source-runtime-differential",
     "mechanism": "eight-entry immutable identity snapshots,32MiB encoded-content budget; no String equality key scans; exact str.encode on miss; oversized views not retained; get/next/extract/byte-size/end share same view",
     "semantics": "same source API/UTF8 errors/continuation positions, no recursion or digit-limit globals changed",
-    "newTests": "retained helpers and emitted intrinsics across Unicode/bounds/surrogates, eviction/identity/oversize/concurrent snapshots; independent cache-neutral AST/runtime-byte boundaries and declaration offsets"
+    "newTests": "retained helpers and emitted intrinsics across Unicode/bounds/surrogates, eviction/identity/oversize/concurrent snapshots; independent cache-neutral AST/runtime-byte boundaries and declaration offsets",
+    "gate": {
+      "runId": 40072686708,
+      "jobId": 120809333873,
+      "commit": "a8955c4b99fc0cd847eb05d455435c87cb195a17",
+      "differentialQueries": 234895,
+      "status": "passed"
+    }
+  },
+  "pythonUtf8Qualification": {
+    "requestCommit": "a8def92c857b71344717d92e2260aef25675fabb",
+    "status": "requested-not-yet-read"
+  },
+  "phpNodeFix": {
+    "status": "implemented-awaiting-Linux-gates",
+    "mechanism": "compact immutable ArrayAccess inductive carriers with inline first/second fields and packed overflow; explicit pending queue clears only already-dead nodes and releases descendants iteratively; live shared children never mutated",
+    "preserved": "same tag/field logical positions, owner-qualified layout, scalar public ABI and unsupported named-ABI refusal; legacy array layout remains test policy of same emitter",
+    "tests": "legacy outputs, shape/order/Unicode, shared owners, mutation/offset refusal, weak dead-child/cycle collection,2M-cell generated collection and2M-node dead-spine cleanup at1G/defaultstack"
   }
 }

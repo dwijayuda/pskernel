@@ -86,12 +86,14 @@ def main : IO Unit := do
   | .ok _ => throw (IO.userError "noncanonical constructor field order admitted")
   let legacy <- requireOk (psPhpEmitModuleWithIoAndPolicies validated ["run", "empty", "one", "three"] false true false)
   let packed <- requireOk (psPhpEmitModuleWithIo validated ["run", "empty", "one", "three"] false)
-  unless legacy.runtimeSource == packed.runtimeSource &&
-      legacy.runtimeRequirements == packed.runtimeRequirements &&
+  let runtimeNeutral := packed.runtimeSource.replace (psPhpRuntimePart "nodes") ""
+  let addedLines := (packed.runtimeSource.splitOn "\n").length - (legacy.runtimeSource.splitOn "\n").length
+  unless legacy.runtimeSource == runtimeNeutral &&
+      packed.runtimeRequirements.filter (fun name => name != "nodes") == legacy.runtimeRequirements &&
       legacy.declarations == packed.declarations &&
-      legacy.declarationLines == packed.declarationLines &&
+      packed.declarationLines == legacy.declarationLines.map (fun pair => (pair.1, pair.2 + addedLines)) &&
       legacy.composer == packed.composer do
-    throw (IO.userError "packed layout changed unrelated output metadata")
+    throw (IO.userError "node carrier changed unrelated output metadata")
   IO.FS.createDirAll "dist/php-packed"
   IO.FS.writeFile "dist/php-packed/legacy.php" legacy.source
   IO.FS.writeFile "dist/php-packed/packed.php" packed.source
@@ -102,7 +104,7 @@ def main : IO Unit := do
     let actual <- execute "dist/php-packed/packed.php" size
     unless old == actual && actual == s!"[\"{size}\",\"3\",\"7\",\"20\"]" do
       throw (IO.userError "packed/legacy observations differ")
-  let large <- execute "dist/php-packed/packed.php" 200000
+  let large <- execute "dist/php-packed/packed.php" 2000000
   unless large == "[\"200000\",\"3\",\"7\",\"20\"]" do
     throw (IO.userError "packed large collection result mismatch")
   -- Owner-qualified same-tag layout lookup must not confuse field names.
@@ -114,4 +116,12 @@ def main : IO Unit := do
   let second <- requireOk (PsPhp.constructorFields context "Other" "one")
   unless first == ["value"] && second == ["different"] do
     throw (IO.userError "owner-qualified constructor layout mismatch")
+  IO.FS.writeFile "dist/php-packed/node-runtime.php"
+    ("<?php\n" ++ psPhpRuntimePart "nodes" ++ "\nreturn $__ps_nodes;\n")
+  let runtime <- IO.Process.output {
+    cmd := "php"
+    args := #["-d", "memory_limit=1G", "scripts/php-node-runtime-tests.php", "dist/php-packed/node-runtime.php"]
+  }
+  unless runtime.exitCode == 0 do throw (IO.userError (runtime.stdout ++ runtime.stderr))
+  IO.print runtime.stdout
   IO.println "PSC1_PHP_PACKED_LAYOUT: strict IR; zero/one/three fields, canonical construction/noncanonical refusal/reordered bindings, Unicode, recursive lists, six retained-layout comparisons and200000-cell1G execution passed"

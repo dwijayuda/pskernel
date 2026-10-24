@@ -7,6 +7,32 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
+## PHP native destruction root cause; Python UTF8 request — 2026-10-24
+
+Python gate40072686708/job120809333873 at a8955c4b PASSED both complete
+source grammars,234895 helper comparisons, retained/current emitted UTF8
+intrinsics, error/identity/eviction/oversize/concurrency cases and syntax/byte
+boundaries. Requesta8def92c857b71344717d92e2260aef25675fabb launches genuine Python
+generations with all original limits. PHP-only edits below do not change its
+captured source; verify inventories before carrying evidence forward.
+
+Packed PHP requestc3f53a7b/run40072293961/job120808252365 passed G1 and all ten
+cases, then G2 exited139 after11621ms/maxRSS922568KiB, without a PHP1G error.
+Exact debugger replay40072628964/job120809157548 at a55d629a proves SIGSEGV
+in32 repeated zend_array_destroy frames. Both memory and stack limits unchanged.
+Artifact12551743408/digest255bde2cfc168eb0ba580fb4ed257ffa42585e205a04f04381d99a0c6bc054a2.
+The same input now fits memory but recursively destroys a deep character spine.
+
+Current PHP patch retains the logical flat tag/field layout while using compact
+immutable ArrayAccess nodes with inline first/second fields and packed overflow.
+A destructor queues children before clearing only the already-dead node, then
+drains references iteratively. A child retained by any other owner stays live
+and is never cleared. Named public ABI refusal, scalar ABI, original validation,
+fuel, PHP1G and default stack remain. Same emitter retains array policy for
+differential execution. Require all old tests plus shape/order/Unicode/shared
+ownership/mutation/offset/weak-collection/cycle/2M-cell/2M-dead-spine checks and
+complete source gates before a PHP-only retry. No G2/G3/fixed-point claim yet.
+
 ## Python measured UTF8 fix; packed PHP qualification — 2026-10-24
 
 Python40069631375/job120800177259 completed: G1 independently accepted with

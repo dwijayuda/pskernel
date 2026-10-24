@@ -18,7 +18,7 @@ added=initText.count("\n")+injection.count("\n")
 markers=[]
 for line,content in enumerate(text.splitlines(),1):
  match=re.match(r'^\s*// declaration ("(?:[^"\\]|\\.)*")$',content)
- if match:markers.append((line+added,json.loads(match.group(1))))
+ if match:markers.append((line+added,match.group(1)[1:-1]))
 assert markers and added>0
 positions=[line for line,name in markers]
 rows=[]

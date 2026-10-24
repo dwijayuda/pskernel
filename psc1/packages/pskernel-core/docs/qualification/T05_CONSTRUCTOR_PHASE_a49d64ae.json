@@ -1,0 +1,140 @@
+{
+  "schema": "psc1-t05-constructor-phase-qualification-v1",
+  "qualifiedSource": "a49d64ae494d51fdc80b688dab0922dd96403e5e",
+  "cohort": {
+    "runId": 40137117745,
+    "runAttempt": 1,
+    "workflow": ".github/workflows/psc1-pskernel-t05-header.yml",
+    "jobs": {
+      "native": 121000873763,
+      "generated": 121001363939,
+      "canonical": 121001363940
+    }
+  },
+  "native": {
+    "proofReports": 310,
+    "receiptChain": [
+      172,
+      230,
+      277,
+      296,
+      310
+    ],
+    "assertions": {
+      "params": 284,
+      "result": 432,
+      "fields": 268,
+      "analysis": 93,
+      "loop": 69
+    }
+  },
+  "eachGeneratedRoute": {
+    "sourceModules": 153,
+    "checkedDeclarations": 1833,
+    "assertions": {
+      "header": 1992,
+      "cache": 1884,
+      "params": 268,
+      "result": 432,
+      "fields": 268,
+      "analysis": 93,
+      "loop": 69
+    }
+  },
+  "sourceInputs": 59,
+  "detachedScripts": 13,
+  "frozenReferences": 7,
+  "routes": {
+    "generated": "Lean source to TypeScript to JavaScript",
+    "canonical": "canonical .ps reconstruction to TypeScript to JavaScript",
+    "bounded": "retained strict generation controls; no full-kernel DirectJS claim"
+  },
+  "resources": {
+    "lean": "v4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "fuel": 4096,
+    "emptyPATH": true,
+    "oldSpaceMiB": 2048,
+    "oldSpaceIsHardRssLimit": false,
+    "runtimeStepLimitSeconds": 1500
+  },
+  "artifacts": [
+    {
+      "id": 12577959515,
+      "name": "psc1-t05-header-generated-attempt-1",
+      "bytes": 2526563,
+      "sha256": "ff3873539a5374209ec08494960acfd2726c2b7cb13d174a6cdb112361e272f7",
+      "sourceSha": "a49d64ae494d51fdc80b688dab0922dd96403e5e",
+      "runId": 40137117745
+    },
+    {
+      "id": 12577956111,
+      "name": "psc1-t05-header-native-attempt-1",
+      "bytes": 317946,
+      "sha256": "422f9bb299043946486087837d8323a5bff62cc08319bfa0ab7649ffa93afd94",
+      "sourceSha": "a49d64ae494d51fdc80b688dab0922dd96403e5e",
+      "runId": 40137117745
+    },
+    {
+      "id": 12577463268,
+      "name": "psc1-t05-header-canonical-attempt-1",
+      "bytes": 2660219,
+      "sha256": "2c1e17843fbf7ebdb1220290ab6912e3b47b96339bd2a03aa018c150038ee824",
+      "sourceSha": "a49d64ae494d51fdc80b688dab0922dd96403e5e",
+      "runId": 40137117745
+    }
+  ],
+  "kernels": {
+    "generated": {
+      "bytes": 10189312,
+      "sha256": "e372ed98bd91861655cd367b18aa9e78c682abd48887f82527c8ed4c79a6aed2"
+    },
+    "canonical": {
+      "bytes": 10189319,
+      "sha256": "bb42b32ef2a5b369df6c21f6994ab3520af411b98574e2e8e4ce68b958c1c75e"
+    }
+  },
+  "audit": {
+    "sourceSha": "aea6e85859261e50ebccbb22e0ff259944a35f7a",
+    "runId": 40137395586,
+    "runAttempt": 1,
+    "jobId": 121001722592,
+    "profile": "loop",
+    "actualArchiveFiles": {
+      "native": 102,
+      "generated": 276,
+      "canonical": 279
+    },
+    "report": {
+      "bytes": 248320,
+      "sha256": "ac29414c7d33eb9b55616d4d0654549a70824538e284ff47edea9fc23c39da94"
+    },
+    "errors": [],
+    "artifact": {
+      "id": 12578225005,
+      "bytes": 58432,
+      "sha256": "a0cc62cf3b5f52b7be822b1dde540e5d23de71070701217720a817450f9aa7da"
+    }
+  },
+  "integration": {
+    "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+    "expectedPrevious": "042d3a12d902f821c7b0ad8630c18f9d6d8bf639",
+    "head": "a49d64ae494d51fdc80b688dab0922dd96403e5e",
+    "force": false,
+    "aheadBy": 12,
+    "behindBy": 0
+  },
+  "scope": {
+    "privateConstructorPhaseQualified": true,
+    "publicRoutingChanged": false,
+    "fullT05AdmissionQualified": false,
+    "replayArenaModelBridgeEstablished": false,
+    "externalDecoderLayoutBridgeEstablished": false,
+    "performanceQualified": false,
+    "projectA": "scoped qualified",
+    "projectB": "OPEN",
+    "projectC": "FAIL (historical strict checkpoint)",
+    "projectD": "OPEN"
+  }
+}

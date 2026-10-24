@@ -1,3 +1,35 @@
+## 2026-10-25 — private constructor phase qualified and integrated
+
+**Exact source `a49d64ae494d51fdc80b688dab0922dd96403e5e` is qualified through the private ordered constructor loop.** [Run 40137117745, attempt 1](https://github.com/dwijayuda/pskernel/actions/runs/40137117745) passed the complete native-first cohort. [Artifact audit 40137395586, attempt 1](https://github.com/dwijayuda/pskernel/actions/runs/40137395586), auditor source `aea6e85859261e50ebccbb22e0ff259944a35f7a`, checked the actual archived contents and returned `errors=[]`.
+
+| Evidence | Exact result |
+| --- | --- |
+| Native proof reports | 310; chained receipts 172 → 230 → 277 → 296 → 310 |
+| Native constructor assertions | Parameters 284; result 432; fields 268; analysis 93; loop 69 |
+| Each complete generated route | Header 1,992; cache 1,884; parameters 268; result 432; fields 268; analysis 93; loop 69, with retained controls |
+| Actual complete source closure | 153 modules; 1,833 declarations checked |
+| Actual archived files inspected | Native 102; generated 276; canonical 279 |
+| Copied inputs / detached scripts / frozen references | 59 / 13 / 7 |
+| Audit JSON | 248,320 bytes; SHA256 `ac29414c7d33eb9b55616d4d0654549a70824538e284ff47edea9fc23c39da94` |
+
+The two complete routes are TypeScript-to-JavaScript and canonical `.ps` reconstruction-to-TypeScript-to-JavaScript. Retained bounded strict-generation checks remain separate; this is not a full-kernel DirectJS claim. Lean 4.35.0, its exact pinned commit, TypeScript 7.0.2, fuel 4096, empty PATH and the 2048 MiB V8 old-space setting were preserved. Old-space is not a hard RSS limit.
+
+Integration was advanced non-force from `042d3a12d902f821c7b0ad8630c18f9d6d8bf639` to `a49d64ae494d51fdc80b688dab0922dd96403e5e` after verifying ancestry (12 commits ahead, none behind) and all exact-source receipts. This documentation successor changes no production, proof, fixture or workflow input; the qualification remains attributed to a49d64ae.
+
+### Current implementation work
+
+The independent private elimination-policy draft is on `work/psc1-pskernel-t05-elimination-draft-20261025`, now `6f79308b3ee3971b4e17e5803addb5196148b2bb`. It has 26 additional theorem reports and 116 assertions per native/generated fixture. Its first preflight at 22e0f61e compiled production but failed two proof bodies; the successor uses explicit result case splits with every statement unchanged. Follow its single automatic [run 40139635555](https://github.com/dwijayuda/pskernel/actions/runs/40139635555); neither the failed run nor the a49 constructor evidence qualifies this changed slice.
+
+The constructor prerequisite is now satisfied. Continue the private ordinary path through elimination policy, generated recursor type checking and mandatory sort validation, same-fuel rule type-preservation checks, and atomic environment/owner publication. Preserve the original input namespace, complete callback owners, fresh checking sessions, and existing safe fallback. The final owner must synchronize its decoded suffix after the last DefEq callback. Public routing changes and full T05 qualification remain outstanding.
+
+Track separately: **A scoped qualified; B OPEN; C FAIL; D OPEN.** The historical Arena checkpoint remains 173 strict matches out of 193, with 17 timeouts, one reduction-budget exhaustion and two separately classified unsafe/partial agreements. Church exhaustion, the Init.Prelude timeout, Replay-to-ArenaModel and the external decoder/layout bridge remain open. No full admission, compatibility or performance completion is claimed.
+
+See the current constructor handoff and machine-readable qualification record below. Earlier entries are historical checkpoints.
+
+---
+
+[Constructor handoff](docs/T05_CONSTRUCTOR_PHASE_HANDOFF_2026-10-25.md) · [Exact qualification record](docs/qualification/T05_CONSTRUCTOR_PHASE_a49d64ae.json)
+
 ## 2026-10-25 — private constructor phase ready for exact310-report qualification
 
 The qualified integration remains042d3a12d902f821c7b0ad8630c18f9d6d8bf639. Its full run40118532017/attempt1 and actual artifact audit40118566527/attempt1 remain the prerequisite evidence recorded below.

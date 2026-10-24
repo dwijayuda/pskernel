@@ -68,7 +68,7 @@ private def spineModule : PsVerifiedIrModule := {
      resultType := natT,
      body := .matchE "Spine" [] (.var "xs") [
        ("nil",([], .var "count")),
-       ("cons",([.mk "head" "head",.mk "tail" "rest"],
+       ("cons",([.mk "head" "head" natT,.mk "tail" "rest" spineT],
          call "countSpine" [.var "rest",added]))]},
     {name := "probeSpine",typeParameters := [],parameters := [p "size" natT],resultType := natT,
      body := .letE "xs" spineT (call "makeSpine" [.var "size",emptySpine])

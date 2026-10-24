@@ -1,0 +1,15 @@
+{
+  "schema": "psc1-python-php-selfhost-request/1",
+  "branch": "feat/psc1-python-php-selfhost-20261024",
+  "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
+  "action": "qualify-independent-G1-G2-G3",
+  "profile": "correctness-1800s",
+  "targets": [
+    "python",
+    "php"
+  ],
+  "g2g3TimeoutMs": 1800000,
+  "g1TimeoutMs": 240000,
+  "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
+  "reason": "Execute the same owned compiler source/frontend/elaborator/strict IR and existing Python/PHP emitters, now normalized through ordinary state/Except functions. Source40069330525 passed all86-module Lean/PS lanes, seven state/four arity all-input equalities,34816 runtime comparisons,144 retained-emitter comparisons, four admitted generated runtime probes and transport negatives. One native seed per target, then remove native compiler tools and require independent Lean4.35 checking, both strict IR graphs, all ten cases and exact G1 G2 G3 fixed points. Python3.14.8/PHP8.5.12 are version-guarded with interpreter hashes. Original240s performance, semantic fuel and memory/stack/security limits are unchanged; no merge or publication."
+}

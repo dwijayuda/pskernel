@@ -25,6 +25,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           artifact-ids: '12568190623'
+          merge-multiple: true
           run-id: '40113918732'
           github-token: ${{ github.token }}
           path: psc1/dist/rust-build-input

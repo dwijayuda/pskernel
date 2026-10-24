@@ -1,4 +1,5 @@
 import ScriptRuntimeReference
+import Lean.Data.Json
 
 def selections : List String -> List (List String)
   | [] => [[]]
@@ -6,7 +7,7 @@ def selections : List String -> List (List String)
       let tail := selections rest
       tail ++ tail.map (name :: ·)
 
-def main : IO Unit := do
+def main (args : List String) : IO Unit := do
   let pythonNames := ["builtins","calls","int-repr","char-of-nat","string-get","string-next","string-extract","array-get","array-get-d","array-set","array-set-if","array-map","array-foldl"]
   let phpNames := ["gmp","calls","utf8Valid","unicodeChars","charOfNat","charToNat","stringGet","stringNext","stringExtract"]
   for name in pythonNames ++ ["unknown", "", "λ🙂"] do
@@ -34,4 +35,15 @@ def main : IO Unit := do
       unless psPhpSelectedRuntimeSource requested == PsScriptRuntimeReference.Php.psPhpSelectedRuntimeSource requested do
         throw (IO.userError "PHP runtime concatenation bytes")
       cases := cases + 1
+
+  if let some output := args.head? then
+    let names := pythonNames ++ phpNames ++ ["unknown", "", "λ🙂", "stringGet"]
+    let records := names.map fun name =>
+      Lean.Json.arr #[
+        Lean.toJson name,
+        Lean.toJson (PsScriptRuntimeReference.Python.psPythonRuntimeBody name),
+        Lean.toJson (String.intercalate "|" (PsScriptRuntimeReference.Python.psPythonRuntimeClosure [name, name, "unknown"])),
+        Lean.toJson (PsScriptRuntimeReference.Php.psPhpRuntimePart name),
+        Lean.toJson (String.intercalate "|" (PsScriptRuntimeReference.Php.psPhpRuntimeClosure [name, name, "unknown"]))]
+    IO.FS.writeFile output ((Lean.Json.arr records.toArray).compress ++ "\n")
   IO.println s!"PSC1_SCRIPT_RUNTIME_NORMALIZATION: {cases} catalog subset/order/duplicate/unknown selections and exact retained runtime byte comparisons passed"

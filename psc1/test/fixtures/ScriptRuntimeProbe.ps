@@ -1,0 +1,9 @@
+import Ps.BackendPython.Runtime
+import Ps.BackendPhp.Runtime
+
+def runtimeText(python : Bool, helper : String) : String :=
+  if (python) { psPythonRuntimeBody(helper) } else { psPhpRuntimePart(helper) }
+
+def dependencies(python : Bool, helper : String) : String :=
+  if (python) { psTextJoin("|", psPythonRuntimeClosure([helper, helper, "unknown"])) }
+  else { psTextJoin("|", psPhpRuntimeClosure([helper, helper, "unknown"])) }

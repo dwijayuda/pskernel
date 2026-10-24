@@ -1,7 +1,7 @@
 name: PSC1 Python PHP independent G1 G2 G3 qualification
 on:
   push:
-    branches: [feat/psc1-python-php-selfhost-20261024]
+    branches: [qualification/psc1-python-php-3600s-20261024]
     paths: [.github/qualification-requests/psc1-python-php-selfhost.json]
 permissions:
   contents: read
@@ -34,7 +34,7 @@ jobs:
           const r=JSON.parse(fs.readFileSync('../.github/qualification-requests/psc1-python-php-selfhost.json'));
           const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
           assert.equal(r.schema,'psc1-python-php-selfhost-request/1');
-          assert.ok(['feat/psc1-python-php-selfhost-20261024'].includes(r.branch));
+          assert.ok(['qualification/psc1-python-php-3600s-20261024'].includes(r.branch));
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.equal(r.action,'qualify-independent-G1-G2-G3');
           assert.ok(['correctness-1800s','correctness-3600s'].includes(r.profile));

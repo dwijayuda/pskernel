@@ -1,0 +1,179 @@
+name: PSC1 T05 elimination native and portable diagnostic
+'on':
+  workflow_dispatch: null
+  push:
+    branches: [work/psc1-pskernel-t05-elimination-draft-20261025]
+    paths:
+    - .github/workflows/psc1-t05-elimination-preflight.yml
+    - psc1/kernel-lakefile.lean
+    - psc1/packages/pskernel-core/src/**
+    - psc1/test/PsKernelOrdinaryEliminationProofs.lean
+    - psc1/test/PsKernelOrdinaryEliminationRegression.lean
+    - psc1/scripts/pskernel-ordinary-elimination-smoke.mjs
+permissions:
+  contents: read
+jobs:
+  elimination-native-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_OPTIONS: ''
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Bind diagnostic inputs and frozen V1 elimination
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+        node --check scripts/pskernel-ordinary-elimination-smoke.mjs
+        mkdir -p "$RUNNER_TEMP/psc1-t05-elimination-native"
+        printf 'PSC1_T05_DIR=%s\n' "$RUNNER_TEMP/psc1-t05-elimination-native" >> "$GITHUB_ENV"
+        export PSC1_T05_DIR="$RUNNER_TEMP/psc1-t05-elimination-native"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib
+        repo=pathlib.Path('..').resolve();out=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        paths=['.github/workflows/psc1-t05-elimination-preflight.yml','psc1/kernel-lakefile.lean',
+          'psc1/lean-toolchain','psc1/scripts/install-lean435-ci.sh',
+          'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',
+          'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryElimination.lean',
+          'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean',
+          'psc1/test/PsKernelOrdinaryEliminationProofs.lean',
+          'psc1/test/PsKernelOrdinaryEliminationRegression.lean',
+          'psc1/scripts/pskernel-ordinary-elimination-smoke.mjs']
+        records=[]
+        for name in paths:
+            raw=(repo/name).read_bytes()
+            record={'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),
+              'gitBlobSha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
+            if name.endswith('/Common/Elimination.lean'):
+                assert record['gitBlobSha']=='7b896a50da30370d3a185b79f9ffeeaa379bbb9b'
+            target=out/'sources'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
+            records.append(record)
+        result={'schema':'psc1-t05-elimination-diagnostic-inputs-v1',
+          'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+          'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'files':records,'qualified':False}
+        (out/'inputs.json').write_text(json.dumps(result,indent=2)+'\n')
+        print('PSC1_T05_ELIMINATION_INPUTS '+json.dumps(result,separators=(',',':')))
+        PY
+    - name: Compile private production imports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean build PsKernelCore 2>&1 | tee "$PSC1_T05_DIR/native-build.log"
+    - name: Kernel-check the elimination equations before runtime
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_t05_elimination_count_status=0
+        psc1_t05_elimination_lean_status=0
+        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryEliminationProofs.lean)" -eq 26 \
+          || psc1_t05_elimination_count_status=$?
+        lake -f kernel-lakefile.lean env lean test/PsKernelOrdinaryEliminationProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/elimination-proofs.log" || psc1_t05_elimination_lean_status=$?
+        printf 'PSC1_T05_ELIMINATION_PROOF_STATUS module=PsKernelOrdinaryEliminationProofs count=26 countStatus=%s leanStatus=%s\n' \
+          "$psc1_t05_elimination_count_status" "$psc1_t05_elimination_lean_status" \
+          | tee "$PSC1_T05_DIR/elimination-proof-status.log"
+        test "$psc1_t05_elimination_count_status" -eq 0
+        test "$psc1_t05_elimination_lean_status" -eq 0
+    - name: Run exact native elimination assertions and audit the inventory
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryEliminationRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/elimination-native.log"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        source=pathlib.Path('test/PsKernelOrdinaryEliminationProofs.lean')
+        module='PsKernelOrdinaryEliminationProofs'
+        names=re.findall(r'^#print axioms ([A-Za-z0-9_.$]+)\s*$',source.read_text(),re.M)
+        names=[name if '.' in name else module+'.'+name for name in names]
+        proofRaw=(root/'elimination-proofs.log').read_bytes();proofLog=proofRaw.decode()
+        actual=re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",proofLog)
+        assert len(names)==len(set(names))==26 and [n for n,_ in actual]==names
+        assert not any(x in proofLog for x in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler'))
+        assert all({x.strip() for x in axioms.split(',') if x.strip()} <= {'propext','Classical.choice','Quot.sound'} for _,axioms in actual)
+        assert (root/'elimination-proof-status.log').read_text().splitlines()==[
+          'PSC1_T05_ELIMINATION_PROOF_STATUS module='+module+' count=26 countStatus=0 leanStatus=0']
+        raw=(root/'elimination-native.log').read_bytes();log=raw.decode()
+        labels=re.findall(r'^PSC1_ELIMINATION_ASSERT (.+)$',log,re.M)
+        sections=re.findall(r'^PSC1_ELIMINATION_SECTION ([A-Za-z0-9_]+)=(\d+)$',log,re.M)
+        expected={"harness":1,"policy":63,"raw":28,"member":12,"protocol":12}
+        assert len(labels)==len(set(labels))==116
+        assert len(sections)==len(expected) and {k:int(v) for k,v in sections}==expected
+        assert {k:sum(label.startswith(k+'/') for label in labels) for k in expected}==expected
+        marker='PSC1_ORDINARY_ELIMINATION_NATIVE: PASS assertions=116 policyRows=9 rawRows=4 fuelValues=6 fullAdmission=false'
+        assert log.splitlines().count(marker)==1
+        inventory={'schema':'psc1-t05-elimination-native-inventory-v1',
+          'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+          'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':'native',
+          'assertions':116,'sectionAssertions':expected,'policyRows':9,'rawRows':4,'fuelValues':6,
+          'assertionLabels':labels,
+          'logSha256':hashlib.sha256(raw).hexdigest(),'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'elimination-native-inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
+        print('PSC1_T05_ELIMINATION_NATIVE_INVENTORY: PASS assertions=116 groups=5')
+        digest=lambda path:{'bytes':len(path.read_bytes()),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+        receipt={'schema':'psc1-t05-elimination-native-diagnostic-v1',
+          'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+          'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'totalProofs':26,
+          'proofs':[{'module':module,'count':26,'names':names,
+            'source':digest(source),'log':digest(root/'elimination-proofs.log')}],
+          'nativeAssertions':116,'inventory':digest(root/'elimination-native-inventory.json'),
+          'inputs':digest(root/'inputs.json'),'qualified':False,'diagnosticOnly':True,
+          'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'diagnostic.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_ELIMINATION_DIAGNOSTIC: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-elimination-native-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-t05-elimination-native/
+        if-no-files-found: error
+        include-hidden-files: true
+  elimination-portable-diagnostic:
+    needs: elimination-native-diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Check exact native-passed source through authentic PSC1
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        mkdir -p "$RUNNER_TEMP/psc1-elimination-portable"
+        lake build psc1 2>&1 | tee "$RUNNER_TEMP/psc1-elimination-portable/compiler-build.log"
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryElimination.lean \
+          2>&1 | tee "$RUNNER_TEMP/psc1-elimination-portable/elimination-source-check.log"
+        printf 'PSC1_T05_ELIMINATION_PORTABLE_DIAGNOSTIC: PASS source=%s fullAdmission=false qualified=false\n' "$GITHUB_SHA"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-elimination-portable-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-elimination-portable/
+        if-no-files-found: error

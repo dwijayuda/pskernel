@@ -1,4 +1,4 @@
-name: PSC1 T05 ordinary constructor phase native-first qualification
+name: PSC1 T05 complete ordinary admission native-first qualification
 'on':
   workflow_dispatch: null
   push:
@@ -55,14 +55,18 @@ jobs:
         node --check scripts/pskernel-ordinary-constructor-fields-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-analysis-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-loop-smoke.mjs
+        node --check scripts/pskernel-ordinary-elimination-smoke.mjs
+        node --check scripts/pskernel-ordinary-admission-private-smoke.mjs
+        node --check scripts/pskernel-ordinary-admission-public-smoke.mjs
         python3 - <<'PY'
         import hashlib, json, os, pathlib, re, shutil
         repo = pathlib.Path.cwd().parent
         out = pathlib.Path(os.environ['PSC1_T05_DIR'])
         source = os.environ['GITHUB_SHA']
         if re.fullmatch(r'[0-9a-f]{40}',source) is None: raise RuntimeError('Missing exact source SHA')
-        paths = [".github/workflows/psc1-pskernel-t05-header.yml","psc1/kernel-lakefile.lean","psc1/lean-toolchain","psc1/scripts/install-lean435-ci.sh","psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean","psc1/test/PsKernelOrdinaryHeaderStateProofs.lean","psc1/test/PsKernelOrdinaryOccurrenceProofs.lean","psc1/test/PsKernelCacheScopeProofs.lean","psc1/test/PsKernelExprV2SessionProofs.lean","psc1/test/PsKernelScalarHashWorkerRegression.lean","psc1/test/PsKernelClosedCacheAnalysisRegression.lean","psc1/test/PsKernelKnotFuelProofs.lean","psc1/test/PsKernelOrdinaryHeaderRegression.lean","psc1/scripts/pskernel-ordinary-header-smoke.mjs","psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs","psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs","psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs","psc1/scripts/pskernel-generated-smoke.mjs","psc1/scripts/pskernel-expr-v2-dag-smoke.mjs","psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs","psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean","psc1/test/PsKernelExprV2MetadataProofs.lean","psc1/test/PsKernelExprV2PagedModelProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean","psc1/test/PsKernelOrdinaryConstructorResultProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean","psc1/test/PsKernelOrdinaryConstructorResultRegression.lean","psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs","psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean","psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean","psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorAnalysis.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisProofs.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisRegression.lean","psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorLoop.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopRegression.lean","psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs"]
+        paths = [".github/workflows/psc1-pskernel-t05-header.yml","psc1/kernel-lakefile.lean","psc1/lean-toolchain","psc1/scripts/install-lean435-ci.sh","psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean","psc1/test/PsKernelOrdinaryHeaderStateProofs.lean","psc1/test/PsKernelOrdinaryOccurrenceProofs.lean","psc1/test/PsKernelCacheScopeProofs.lean","psc1/test/PsKernelExprV2SessionProofs.lean","psc1/test/PsKernelScalarHashWorkerRegression.lean","psc1/test/PsKernelClosedCacheAnalysisRegression.lean","psc1/test/PsKernelKnotFuelProofs.lean","psc1/test/PsKernelOrdinaryHeaderRegression.lean","psc1/scripts/pskernel-ordinary-header-smoke.mjs","psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs","psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs","psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs","psc1/scripts/pskernel-generated-smoke.mjs","psc1/scripts/pskernel-expr-v2-dag-smoke.mjs","psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs","psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean","psc1/test/PsKernelExprV2MetadataProofs.lean","psc1/test/PsKernelExprV2PagedModelProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean","psc1/test/PsKernelOrdinaryConstructorResultProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean","psc1/test/PsKernelOrdinaryConstructorResultRegression.lean","psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs","psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean","psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean","psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorAnalysis.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisProofs.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisRegression.lean","psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorLoop.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopRegression.lean","psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryElimination.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursorValidation.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/test/PsKernelOrdinaryEliminationProofs.lean","psc1/test/PsKernelOrdinaryEliminationRegression.lean","psc1/test/PsKernelOrdinaryAdmissionProofs.lean","psc1/test/PsKernelExprV2OrdinaryAdmissionRegression.lean","psc1/test/PsKernelOrdinaryAdmissionPublicProofs.lean","psc1/test/PsKernelOrdinaryAdmissionPublicRegression.lean","psc1/scripts/pskernel-ordinary-elimination-smoke.mjs","psc1/scripts/pskernel-ordinary-admission-private-smoke.mjs","psc1/scripts/pskernel-ordinary-admission-public-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.lean"]
         frozen = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean":"63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean":"7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean":"cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean":"068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean":"8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145","psc1/test/PsKernelExprV2MetadataProofs.lean":"5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean":"16cce0a367dfa144a56770f76bcb0605d3a370b360175c4f26583387cf2a1723"}
+        frozen_blobs = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean":"7b896a50da30370d3a185b79f9ffeeaa379bbb9b","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.lean":"ae0d498305cab3f253bd53f40d66ae0919420027","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.lean":"0db1095805c4e6bc4d0025b073fec1807ebf2206"}
         records = []
         for name in paths:
             raw = (repo/name).read_bytes()
@@ -70,6 +74,8 @@ jobs:
                       'gitBlobSha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
             if name in frozen and record['sha256'] != frozen[name]:
                 raise RuntimeError('Frozen V1 reference changed: '+name)
+            if name in frozen_blobs and record['gitBlobSha'] != frozen_blobs[name]:
+                raise RuntimeError('Frozen V1 generated-admission reference changed: '+name)
             target = out/'sources'/name; target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(raw)
             records.append(record)
         report = {'schema':'psc1-t05-header-source-inventory-v1','repository':'dwijayuda/pskernel',
@@ -86,6 +92,32 @@ jobs:
         set -euo pipefail
         lake -f kernel-lakefile.lean build PsKernelCore PsKernelClosedCacheAnalysisProofs psc1_kernel_expr_v2_dag_regression \
           2>&1 | tee "$PSC1_T05_DIR/native-build.log"
+    - name: Kernel-check elimination, independent recursor validation and public publication equations
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_t05_admission_proofs_failed=0
+        : > "$PSC1_T05_DIR/ordinary-admission-proof-status.log"
+        for PSC1_T05_SPEC in \
+          'PsKernelOrdinaryEliminationProofs:26:elimination-proofs.log' \
+          'PsKernelOrdinaryAdmissionProofs:27:ordinary-admission-proofs.log' \
+          'PsKernelOrdinaryAdmissionPublicProofs:8:ordinary-admission-public-proofs.log'; do
+          IFS=: read -r PSC1_T05_MODULE PSC1_T05_COUNT PSC1_T05_LOG <<< "$PSC1_T05_SPEC"
+          psc1_t05_count_status=0
+          psc1_t05_lean_status=0
+          test "$(grep -c '^#print axioms ' "test/$PSC1_T05_MODULE.lean")" -eq "$PSC1_T05_COUNT" \
+            || psc1_t05_count_status=$?
+          lake -f kernel-lakefile.lean env lean "test/$PSC1_T05_MODULE.lean" \
+            2>&1 | tee "$PSC1_T05_DIR/$PSC1_T05_LOG" || psc1_t05_lean_status=$?
+          printf 'PSC1_T05_ADMISSION_PROOF_STATUS module=%s count=%s countStatus=%s leanStatus=%s\n' \
+            "$PSC1_T05_MODULE" "$PSC1_T05_COUNT" "$psc1_t05_count_status" "$psc1_t05_lean_status" \
+            | tee -a "$PSC1_T05_DIR/ordinary-admission-proof-status.log"
+          if [ "$psc1_t05_count_status" -ne 0 ] || [ "$psc1_t05_lean_status" -ne 0 ]; then
+            psc1_t05_admission_proofs_failed=1
+          fi
+        done
+        test "$psc1_t05_admission_proofs_failed" -eq 0
     - name: Kernel-check the new constructor field and recursive-argument equations before regressions
       working-directory: psc1
       shell: bash
@@ -373,6 +405,17 @@ jobs:
         (root/'loop-native-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
         print('PSC1_T05_LOOP_NATIVE_INVENTORY: PASS assertions=69 groups=3')
         PY
+    - name: Run elimination116, private admission143 with official18 controls and public routing12
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryEliminationRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/elimination-native.log"
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2OrdinaryAdmissionRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/ordinary-admission-private-native.log"
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryAdmissionPublicRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/ordinary-admission-public-native.log"
     - name: Retain108 previous equations and audit all172 exact axiom reports
       working-directory: psc1
       shell: bash
@@ -662,6 +705,98 @@ jobs:
         grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$PSC1_T05_DIR/prefix-native.log"
         grep -Fqx 'PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$PSC1_T05_DIR/prefix-native.log"
         grep -Fqx 'PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7' "$PSC1_T05_DIR/prefix-native.log"
+    - name: Bind all371 native reports and exact ordinary admission controls to the retained310 gate
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        def digest(path):
+            raw=path.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        identity={'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                  'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'job':'native-header','route':'native'}
+        retained=json.loads((root/'loop-native-receipt.json').read_text())
+        if any(retained[k]!=v for k,v in identity.items()) or retained['status']!='pass' or retained['totalProofs']!=310:
+            raise RuntimeError('Exact retained310 native receipt required')
+        expected=[('PsKernelOrdinaryEliminationProofs',26,'elimination-proofs.log'),
+                  ('PsKernelOrdinaryAdmissionProofs',27,'ordinary-admission-proofs.log'),
+                  ('PsKernelOrdinaryAdmissionPublicProofs',8,'ordinary-admission-public-proofs.log')]
+        allowed={'propext','Classical.choice','Quot.sound'};audits=[]
+        for module,count,filename in expected:
+            source=pathlib.Path('test')/(module+'.lean')
+            names=re.findall(r'^#print axioms ([A-Za-z0-9_.$]+)\s*$',source.read_text(),re.M)
+            names=[name if '.' in name else module+'.'+name for name in names]
+            if len(names)!=count or len(set(names))!=count:raise RuntimeError('Exact admission source proof inventory: '+module)
+            log=(root/filename).read_text()
+            reports=re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",log)
+            if [name for name,_ in reports]!=names:raise RuntimeError('Exact admission ordered proof reports: '+module)
+            if any(bad in log for bad in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler')):
+                raise RuntimeError('Forbidden admission proof dependency: '+module)
+            for name,used in reports:
+                if not {x.strip() for x in used.split(',') if x.strip()}<=allowed:
+                    raise RuntimeError('Unexpected admission proof dependency: '+name)
+            audits.append({'module':module,'proofs':count,'names':names,'source':digest(source),'log':digest(root/filename)})
+        required=['PSC1_T05_ADMISSION_PROOF_STATUS module='+m+' count='+str(n)+' countStatus=0 leanStatus=0' for m,n,_ in expected]
+        if (root/'ordinary-admission-proof-status.log').read_text().splitlines()!=required:
+            raise RuntimeError('Every added native admission proof command must succeed')
+        if sum(a['proofs'] for a in audits)!=61:raise RuntimeError('Exactly61 new reports required')
+        suites=[
+          ('elimination',116,[('harness',1),('policy',63),('raw',28),('member',12),('protocol',12)],
+           'PSC1_ELIMINATION_ASSERT ','PSC1_ELIMINATION_SECTION ',
+           'PSC1_ORDINARY_ELIMINATION_NATIVE: PASS assertions=116 policyRows=9 rawRows=4 fuelValues=6 fullAdmission=false',
+           {'policyRows':9,'rawRows':4,'fuelValues':6,'fullAdmission':False,'publicRoutingChanged':False}),
+          ('ordinary-admission-private',143,[('harness',1),('matrix',126),('protocol',16)],
+           'PSC1_ORDINARY_ADMISSION_ASSERT ','PSC1_ORDINARY_ADMISSION_SECTION ',
+           'PSC1_ORDINARY_ADMISSION_PRIVATE_NATIVE: PASS assertions=143 rows=18 fuelValues=6 privateAdmission=true fullAdmission=false',
+           {'rows':18,'fuelValues':6,'positive':14,'negative':4,'privateAdmission':True,'fullAdmission':False,'publicRoutingChanged':False}),
+          ('ordinary-admission-public',12,[('harness',1),('routing',7),('boundary',4)],
+           'PSC1_ADMISSION_PUBLIC_ASSERT ','PSC1_ADMISSION_PUBLIC_SECTION ',
+           'PSC1_ORDINARY_ADMISSION_PUBLIC_NATIVE: PASS assertions=12 publicRoutingChanged=true ordinaryAdmission=true',
+           {'ordinaryAdmission':True,'publicRoutingChanged':True,'fullKernel':False})]
+        inventories={};native_logs={}
+        for name,count,groups,prefix,section_prefix,marker,metadata in suites:
+            log=root/(name+'-native.log');raw=log.read_bytes();lines=raw.decode().splitlines()
+            labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+            section_lines=[line for line in lines if line.startswith(section_prefix)]
+            expected_sections=[section_prefix+group+'='+str(n) for group,n in groups]
+            if len(labels)!=count or len(set(labels))!=count or sum(n for _,n in groups)!=count:
+                raise RuntimeError('Exact unique native admission labels required: '+name)
+            if section_lines!=expected_sections:raise RuntimeError('Exact native admission section markers required: '+name)
+            if [label.split('/',1)[0] for label in labels]!=[group for group,n in groups for _ in range(n)]:
+                raise RuntimeError('Ordered exact native admission groups required: '+name)
+            if lines.count(marker)!=1 or lines.index(marker)<=max(lines.index(line) for line in expected_sections):
+                raise RuntimeError('Exact native admission final marker required: '+name)
+            record={'schema':'psc1-t05-'+name+'-native-inventory-v1',**identity,
+                    'assertions':count,'sectionAssertions':dict(groups),'assertionLabels':labels,
+                    'logSha256':hashlib.sha256(raw).hexdigest(),**metadata}
+            destination=root/(name+'-native-inventory.json')
+            destination.write_text(json.dumps(record,indent=2)+'\n')
+            inventories[name]=digest(destination);native_logs[name]=digest(log)
+            print('PSC1_T05_ADMISSION_NATIVE_INVENTORY: PASS '+json.dumps(record,separators=(',',':')))
+        oracle_log=root/'ordinary-admission-private-native.log'
+        oracle_lines=oracle_log.read_text().splitlines()
+        oracle_prefix='PSC1_ORDINARY_ADMISSION_ORACLE_ASSERT '
+        oracle_labels=[line[len(oracle_prefix):] for line in oracle_lines if line.startswith(oracle_prefix)]
+        oracle_marker='PSC1_ORDINARY_ADMISSION_ORACLE: PASS controls=18 accepted=14 rejected=4 safeGenerated=13 unsafeContract=1'
+        if len(oracle_labels)!=18 or len(set(oracle_labels))!=18 or oracle_lines.count(oracle_marker)!=1:
+            raise RuntimeError('Exact18 independent Lean admission controls required')
+        oracle={'controls':18,'accepted':14,'rejected':4,'safeGenerated':13,'unsafeContract':1,
+                'assertionLabels':oracle_labels,'log':digest(oracle_log)}
+        receipt={'schema':'psc1-t05-ordinary-admission-native-receipt-v1',**identity,'status':'pass',
+                 'retainedProofs':310,'newProofs':61,'totalProofs':371,'proofs':audits,
+                 'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
+                 'retainedLoopReceipt':digest(root/'loop-native-receipt.json'),
+                 'sourceInventory':digest(root/'source-inventory.json'),
+                 'nativeAssertions':{'elimination':116,'privateAdmission':143,'publicRouting':12},
+                 'nativeInventories':inventories,'nativeLogs':native_logs,'officialOracle':oracle,
+                 'retainedNativeControls':{name:digest(root/name) for name in ['dag-native.log','prefix-native.log']},
+                 'ordinaryAdmission':True,'fullOrdinaryAdmission':True,'publicRoutingChanged':True,'fullKernel':False,
+                 'performanceQualified':False,'replayArenaModelBridgeEstablished':False}
+        (root/'ordinary-admission-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_ORDINARY_ADMISSION_NATIVE_PROOFS: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -718,14 +853,18 @@ jobs:
         node --check scripts/pskernel-ordinary-constructor-fields-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-analysis-smoke.mjs
         node --check scripts/pskernel-ordinary-constructor-loop-smoke.mjs
+        node --check scripts/pskernel-ordinary-elimination-smoke.mjs
+        node --check scripts/pskernel-ordinary-admission-private-smoke.mjs
+        node --check scripts/pskernel-ordinary-admission-public-smoke.mjs
         python3 - <<'PY'
         import hashlib, json, os, pathlib, re, shutil
         repo = pathlib.Path.cwd().parent
         out = pathlib.Path(os.environ['PSC1_T05_DIR'])
         source = os.environ['GITHUB_SHA']
         if re.fullmatch(r'[0-9a-f]{40}',source) is None: raise RuntimeError('Missing exact source SHA')
-        paths = [".github/workflows/psc1-pskernel-t05-header.yml","psc1/kernel-lakefile.lean","psc1/lean-toolchain","psc1/scripts/install-lean435-ci.sh","psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean","psc1/test/PsKernelOrdinaryHeaderStateProofs.lean","psc1/test/PsKernelOrdinaryOccurrenceProofs.lean","psc1/test/PsKernelCacheScopeProofs.lean","psc1/test/PsKernelExprV2SessionProofs.lean","psc1/test/PsKernelScalarHashWorkerRegression.lean","psc1/test/PsKernelClosedCacheAnalysisRegression.lean","psc1/test/PsKernelKnotFuelProofs.lean","psc1/test/PsKernelOrdinaryHeaderRegression.lean","psc1/scripts/pskernel-ordinary-header-smoke.mjs","psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs","psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs","psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs","psc1/scripts/pskernel-generated-smoke.mjs","psc1/scripts/pskernel-expr-v2-dag-smoke.mjs","psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs","psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean","psc1/test/PsKernelExprV2MetadataProofs.lean","psc1/test/PsKernelExprV2PagedModelProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean","psc1/test/PsKernelOrdinaryConstructorResultProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean","psc1/test/PsKernelOrdinaryConstructorResultRegression.lean","psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs","psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean","psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean","psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorAnalysis.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisProofs.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisRegression.lean","psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorLoop.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopRegression.lean","psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs"]
+        paths = [".github/workflows/psc1-pskernel-t05-header.yml","psc1/kernel-lakefile.lean","psc1/lean-toolchain","psc1/scripts/install-lean435-ci.sh","psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean","psc1/test/PsKernelOrdinaryHeaderStateProofs.lean","psc1/test/PsKernelOrdinaryOccurrenceProofs.lean","psc1/test/PsKernelCacheScopeProofs.lean","psc1/test/PsKernelExprV2SessionProofs.lean","psc1/test/PsKernelScalarHashWorkerRegression.lean","psc1/test/PsKernelClosedCacheAnalysisRegression.lean","psc1/test/PsKernelKnotFuelProofs.lean","psc1/test/PsKernelOrdinaryHeaderRegression.lean","psc1/scripts/pskernel-ordinary-header-smoke.mjs","psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs","psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs","psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs","psc1/scripts/pskernel-generated-smoke.mjs","psc1/scripts/pskernel-expr-v2-dag-smoke.mjs","psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs","psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean","psc1/test/PsKernelExprV2MetadataProofs.lean","psc1/test/PsKernelExprV2PagedModelProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean","psc1/test/PsKernelOrdinaryConstructorResultProofs.lean","psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean","psc1/test/PsKernelOrdinaryConstructorResultRegression.lean","psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs","psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean","psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean","psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean","psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorAnalysis.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisProofs.lean","psc1/test/PsKernelOrdinaryConstructorAnalysisRegression.lean","psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorLoop.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean","psc1/test/PsKernelExprV2OrdinaryConstructorLoopRegression.lean","psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryElimination.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursorValidation.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/test/PsKernelOrdinaryEliminationProofs.lean","psc1/test/PsKernelOrdinaryEliminationRegression.lean","psc1/test/PsKernelOrdinaryAdmissionProofs.lean","psc1/test/PsKernelExprV2OrdinaryAdmissionRegression.lean","psc1/test/PsKernelOrdinaryAdmissionPublicProofs.lean","psc1/test/PsKernelOrdinaryAdmissionPublicRegression.lean","psc1/scripts/pskernel-ordinary-elimination-smoke.mjs","psc1/scripts/pskernel-ordinary-admission-private-smoke.mjs","psc1/scripts/pskernel-ordinary-admission-public-smoke.mjs","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.lean"]
         frozen = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean":"63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean":"7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean":"cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean":"068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean":"8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145","psc1/test/PsKernelExprV2MetadataProofs.lean":"5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean":"16cce0a367dfa144a56770f76bcb0605d3a370b360175c4f26583387cf2a1723"}
+        frozen_blobs = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean":"7b896a50da30370d3a185b79f9ffeeaa379bbb9b","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.lean":"ae0d498305cab3f253bd53f40d66ae0919420027","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.lean":"0db1095805c4e6bc4d0025b073fec1807ebf2206"}
         records = []
         for name in paths:
             raw = (repo/name).read_bytes()
@@ -733,6 +872,8 @@ jobs:
                       'gitBlobSha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
             if name in frozen and record['sha256'] != frozen[name]:
                 raise RuntimeError('Frozen V1 reference changed: '+name)
+            if name in frozen_blobs and record['gitBlobSha'] != frozen_blobs[name]:
+                raise RuntimeError('Frozen V1 generated-admission reference changed: '+name)
             target = out/'sources'/name; target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(raw)
             records.append(record)
         report = {'schema':'psc1-t05-header-source-inventory-v1','repository':'dwijayuda/pskernel',
@@ -918,7 +1059,7 @@ jobs:
         for(const module of ['API/DagOrdinaryHeaderTypes','API/DagOrdinaryOccurrence','API/DagOrdinaryAnnotations',
           'API/DagOrdinaryParameters','API/DagOrdinaryHeader','Checker/ExprV2/AdmissionHelpers',
           'API/DagOrdinaryConstructorParams','API/DagOrdinaryConstructorResult',
-          'API/DagOrdinaryConstructorTypes','API/DagOrdinaryRecursiveArgument','API/DagOrdinaryConstructorFields','API/DagOrdinaryConstructorAnalysis','API/DagOrdinaryConstructorLoop'])
+          'API/DagOrdinaryConstructorTypes','API/DagOrdinaryRecursiveArgument','API/DagOrdinaryConstructorFields','API/DagOrdinaryConstructorAnalysis','API/DagOrdinaryConstructorLoop','API/DagOrdinaryElimination','API/DagOrdinaryGenerated','API/DagOrdinaryRecursorValidation','API/DagOrdinaryAdmission','API/Dag','API/DagGenerated'])
           if(!visited.has('packages/pskernel-core/src/Ps/KernelCore/'+module+'.lean'))throw Error('Missing T05 module '+module);
         writeFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json',JSON.stringify(report,null,2)+'\n');
         console.log('PSC1_T05_LEAN_SOURCE_CLOSURE: PASS modules='+files.length);
@@ -1009,7 +1150,7 @@ jobs:
             source=kernel.with_suffix(suffix);shutil.copyfile(source,production/('kernel'+suffix))
         detached=out/'detached';detached.mkdir()
         shutil.copyfile(kernel,detached/'kernel.mjs')
-        scripts=['pskernel-ordinary-constructor-loop-smoke.mjs', 'pskernel-ordinary-constructor-analysis-smoke.mjs', 'pskernel-ordinary-constructor-fields-smoke.mjs', 'pskernel-ordinary-header-smoke.mjs', 'pskernel-ordinary-constructor-params-smoke.mjs', 'pskernel-ordinary-constructor-result-smoke.mjs', 'pskernel-scalar-hash-worker-smoke.mjs', 'pskernel-scalar-hash-short-entry-smoke.mjs', 'pskernel-closed-cache-analysis-smoke.mjs', 'pskernel-generated-smoke.mjs', 'pskernel-expr-v2-dag-smoke.mjs', 'pskernel-expr-v2-generated-prefix-smoke.mjs', 'pskernel-invalid-recursor-occurrence-smoke.mjs']
+        scripts=['pskernel-ordinary-elimination-smoke.mjs', 'pskernel-ordinary-admission-private-smoke.mjs', 'pskernel-ordinary-admission-public-smoke.mjs', 'pskernel-ordinary-constructor-loop-smoke.mjs', 'pskernel-ordinary-constructor-analysis-smoke.mjs', 'pskernel-ordinary-constructor-fields-smoke.mjs', 'pskernel-ordinary-header-smoke.mjs', 'pskernel-ordinary-constructor-params-smoke.mjs', 'pskernel-ordinary-constructor-result-smoke.mjs', 'pskernel-scalar-hash-worker-smoke.mjs', 'pskernel-scalar-hash-short-entry-smoke.mjs', 'pskernel-closed-cache-analysis-smoke.mjs', 'pskernel-generated-smoke.mjs', 'pskernel-expr-v2-dag-smoke.mjs', 'pskernel-expr-v2-generated-prefix-smoke.mjs', 'pskernel-invalid-recursor-occurrence-smoke.mjs']
         for name in scripts:shutil.copyfile(pathlib.Path('scripts')/name,detached/name)
         inventory=json.loads((out/'source-inventory.json').read_text())
         report={'schema':'psc1-t05-header-provenance-v1','repository':'dwijayuda/pskernel',
@@ -1021,7 +1162,7 @@ jobs:
                 'kernel':digest(detached/'kernel.mjs'),'harness':digest(detached/'pskernel-ordinary-header-smoke.mjs'),
                 'sourceInventory':digest(out/'source-inventory.json'),'leanSourceManifest':digest(out/'lean-source-manifest.json'),
                 'scripts':{name:digest(detached/name) for name in scripts},
-                'headerOnly':False,'constructorHelpersOnly':True,'fullAdmission':False,'publicFallbackUsed':False}
+                'headerOnly':False,'constructorHelpersOnly':False,'ordinaryAdmission':True,'fullOrdinaryAdmission':True,'fullKernel':False,'publicRoutingChanged':True,'publicFallbackRetained':True}
         if report['sourceSha']!=inventory['sourceSha'] or report['route']!=inventory['route']:
             raise RuntimeError('Source inventory identity mismatch')
         if report['route']=='canonical':
@@ -1394,6 +1535,114 @@ jobs:
                  'publicRoutingChanged':False,'performanceQualified':False}
         (root/'loop-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T05_LOOP_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+    - name: Execute elimination116, private admission143 and public routing12 on the complete detached route
+      timeout-minutes: 25
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$PSC1_T05_DIR/detached"
+        for PSC1_T05_SUITE in elimination ordinary-admission-private ordinary-admission-public; do
+          if [ "$PSC1_T05_SUITE" = elimination ]; then
+            PSC1_T05_HARNESS=pskernel-ordinary-elimination-smoke.mjs
+          else
+            PSC1_T05_HARNESS="pskernel-$PSC1_T05_SUITE-smoke.mjs"
+          fi
+          /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' \
+            -o "$PSC1_T05_DIR/$PSC1_T05_SUITE.memory" \
+            env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 \
+            "$PSC1_T05_HARNESS" "$PSC1_T05_DIR/detached/kernel.mjs" \
+            2>&1 | tee "$PSC1_T05_DIR/$PSC1_T05_SUITE.log"
+          cat "$PSC1_T05_DIR/$PSC1_T05_SUITE.memory"
+        done
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        def digest(path):
+            raw=path.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        def exact(a,b):
+            if type(a) is not type(b):return False
+            if isinstance(a,dict):return a.keys()==b.keys() and all(exact(a[k],b[k]) for k in a)
+            if isinstance(a,list):return len(a)==len(b) and all(exact(x,y) for x,y in zip(a,b))
+            return a==b
+        provenance=json.loads((root/'provenance.json').read_text())
+        identity={'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                  'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':os.environ['PSC1_T05_ROUTE']}
+        if any(provenance[k]!=v for k,v in identity.items()):
+            raise RuntimeError('Admission provenance identity mismatch')
+        if provenance['sourceInventory']!=digest(root/'source-inventory.json'):
+            raise RuntimeError('Admission source inventory changed')
+        kernel=root/'detached/kernel.mjs'
+        if digest(kernel)!=provenance['kernel']:raise RuntimeError('Executed admission kernel changed')
+        expected_kernel=str(kernel.resolve())
+        suites=[
+          ('elimination','pskernel-ordinary-elimination-smoke.mjs',
+           'PSC1_ORDINARY_ELIMINATION_JS: PASS assertions=116 fullAdmission=false',
+           {'schema':'psc1-ordinary-elimination-v1','kernel':expected_kernel,'assertions':116,
+            'sectionAssertions':{'harness':1,'policy':63,'raw':28,'member':12,'protocol':12},
+            'policyRows':9,'rawRows':4,'fuelValues':6,'fullAdmission':False,'publicRoutingChanged':False},
+           'loop-receipt.json','psc1-t05-loop-route-receipt-v1','retainedLoopReceipt',
+           'psc1-t05-elimination-route-receipt-v1','PSC1_T05_ELIMINATION_ROUTE'),
+          ('ordinary-admission-private','pskernel-ordinary-admission-private-smoke.mjs',
+           'PSC1_ORDINARY_ADMISSION_PRIVATE_JS: PASS assertions=143 privateAdmission=true fullAdmission=false',
+           {'schema':'psc1-ordinary-admission-private-v1','kernel':expected_kernel,'assertions':143,
+            'sectionAssertions':{'harness':1,'matrix':126,'protocol':16},
+            'rows':18,'fuelValues':6,'positive':14,'negative':4,
+            'privateAdmission':True,'fullAdmission':False,'publicRoutingChanged':False},
+           'elimination-receipt.json','psc1-t05-elimination-route-receipt-v1','retainedEliminationReceipt',
+           'psc1-t05-ordinary-admission-private-route-receipt-v1','PSC1_T05_ORDINARY_ADMISSION_PRIVATE_ROUTE'),
+          ('ordinary-admission-public','pskernel-ordinary-admission-public-smoke.mjs',
+           'PSC1_ORDINARY_ADMISSION_PUBLIC_JS: PASS assertions=12 publicRoutingChanged=true ordinaryAdmission=true',
+           {'schema':'psc1-ordinary-admission-public-v1','kernel':expected_kernel,'assertions':12,
+            'sectionAssertions':{'harness':1,'routing':7,'boundary':4},
+            'publicRoutingChanged':True,'ordinaryAdmission':True,'fullKernel':False,'performanceQualified':False},
+           'ordinary-admission-private-receipt.json','psc1-t05-ordinary-admission-private-route-receipt-v1',
+           'retainedPrivateAdmissionReceipt','psc1-t05-ordinary-admission-public-route-receipt-v1',
+           'PSC1_T05_ORDINARY_ADMISSION_PUBLIC_ROUTE')]
+        parents={'loop-receipt.json':(69,{'harness':1,'matrix':56,'protocol':12}),
+                 'elimination-receipt.json':(116,{'harness':1,'policy':63,'raw':28,'member':12,'protocol':12}),
+                 'ordinary-admission-private-receipt.json':(143,{'harness':1,'matrix':126,'protocol':16})}
+        for name,script,marker,expected,parent,parent_schema,parent_key,schema,receipt_marker in suites:
+            retained=json.loads((root/parent).read_text())
+            if retained['status']!='pass' or retained['schema']!=parent_schema or retained['identity']!=provenance:
+                raise RuntimeError('Exact retained admission receipt required: '+parent)
+            parent_count,parent_sections=parents[parent]
+            if retained['result']['assertions']!=parent_count or retained['result']['sectionAssertions']!=parent_sections:
+                raise RuntimeError('Exact retained admission matrix required: '+parent)
+            harness=root/'detached'/script
+            if digest(harness)!=provenance['scripts'][script]:
+                raise RuntimeError('Executed admission harness changed: '+name)
+            log=root/(name+'.log');lines=log.read_text().splitlines()
+            records=[json.loads(line) for line in lines if line.startswith('{')]
+            if name=='ordinary-admission-public':
+                prefix='PSC1_ADMISSION_PUBLIC_ASSERT '
+                labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+                groups=expected['sectionAssertions']
+                if len(labels)!=12 or len(set(labels))!=12 or [x.split('/',1)[0] for x in labels]!=[g for g,n in groups.items() for _ in range(n)]:
+                    raise RuntimeError('Exact public admission labels required')
+                sections=[line for line in lines if line.startswith('PSC1_ADMISSION_PUBLIC_SECTION ')]
+                if sections!=['PSC1_ADMISSION_PUBLIC_SECTION '+g+'='+str(n) for g,n in groups.items()]:
+                    raise RuntimeError('Exact public admission sections required')
+                expected={**expected,'assertionLabels':labels}
+            if lines.count(marker)!=1 or len(records)!=1 or not exact(records[0],expected):
+                raise RuntimeError('Exact admission route matrix required: '+name)
+            if sum(expected['sectionAssertions'].values())!=expected['assertions']:
+                raise RuntimeError('Admission route assertion total mismatch: '+name)
+            measurement=(root/(name+'.memory')).read_text().strip()
+            timed=re.fullmatch(r'peak_rss_kib=(\d+) wall_seconds=(\d+(?:\.\d+)?) exit_status=0',measurement)
+            if timed is None or float(timed[2])>=1500:
+                raise RuntimeError('Admission runtime must exit0 within25minutes: '+name)
+            receipt={'schema':schema,'status':'pass','identity':provenance,parent_key:digest(root/parent),
+                     'result':records[0],'log':digest(log),'harness':digest(harness),
+                     'measurement':measurement,'peakRssKiB':int(timed[1]),'wallSeconds':float(timed[2]),
+                     'logs':{p.name:digest(p) for p in sorted(root.glob('*.log'))},
+                     'ordinaryAdmission':name=='ordinary-admission-public',
+                     'fullOrdinaryAdmission':name=='ordinary-admission-public',
+                     'publicRoutingChanged':name=='ordinary-admission-public',
+                     'fullKernel':False,'performanceQualified':False}
+            (root/(name+'-receipt.json')).write_text(json.dumps(receipt,indent=2)+'\n')
+            print(receipt_marker+': PASS '+json.dumps(receipt,separators=(',',':')))
         PY
     - name: Retain bounded gate artifacts on success or failure
       working-directory: psc1

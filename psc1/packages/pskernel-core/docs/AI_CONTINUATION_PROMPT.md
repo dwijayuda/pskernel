@@ -1,6 +1,6 @@
 ## 2026-10-25 — complete ordinary admission implemented; full qualification pending
 
-The constructor phase remains qualified and integrated at **a49d64ae494d51fdc80b688dab0922dd96403e5e**. The subsequent private elimination, generated recursor validation, atomic ordinary admission, and public owner handoff are implemented on isolated draft history. The complete changed source is **not yet qualified or integrated**.
+The constructor phase remains qualified and integrated at **a49d64ae494d51fdc80b688dab0922dd96403e5e**. The work branch now combines private elimination, generated recursor validation, atomic ordinary admission, public owner handoff, and the expanded full371 qualification workflow. Draft histories are preserved. The complete changed source is **not yet qualified or integrated**.
 
 Native preflights have passed: elimination **26 proofs /116 assertions** at6f79308b (run40139635555, also PSC1 check1632); private admission **27 proofs /143 assertions plus18 separate pinned-Lean controls** at09f1cad3 (run40142024947); public handoff **8 proofs /12 assertions** ata049816b (run40141659022). The private production leaf also passed native compilation and authentic PSC1 check1860 atdb7b9161 (run40141120502). The official controls distinguish13 safe generated recursor validations from1 unsafe contract agreement. These diagnostics do not replace the complete source-bound qualification.
 
@@ -10,7 +10,7 @@ See [the new ordinary-admission handoff](T05_ORDINARY_ADMISSION_HANDOFF_2026-10-
 
 **A:** scoped T01F qualified. **B:** broader completion OPEN. **C:** full Arena compatibility FAIL at the historical173/193 strict matches (17timeouts,1budget exhaustion,2separately classified unsafe/partial agreements). **D:** performance OPEN, including Church exhaustion and Init.Prelude timeout. Replay→ArenaModel and the external decoder/layout correspondence bridge remain OPEN. No new completion or performance evidence is claimed for those obligations.
 
-Next: finish the exact-source native-first371 workflow and both complete generated routes, inspect and audit their actual artifacts, record qualification, and only then fast-forward integration from its verified expected SHA. Never rerun a matching-source cohort that is already valid, and never inherit qualification from a changed production/proof/harness source.
+Next: inspect the matching-source native-first371 Actions run and complete both generated routes, inspect and audit their actual artifacts, record qualification, and only then fast-forward integration from its verified expected SHA. Never rerun a matching-source cohort that is already valid, and never inherit qualification from a changed production/proof/harness source.
 
 ---
 

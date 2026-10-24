@@ -36,6 +36,10 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagOrdinaryConstructorFields,
     `Ps.KernelCore.API.DagOrdinaryConstructorAnalysis,
     `Ps.KernelCore.API.DagOrdinaryConstructorLoop,
+    `Ps.KernelCore.API.DagOrdinaryElimination,
+    `Ps.KernelCore.API.DagOrdinaryGenerated,
+    `Ps.KernelCore.API.DagOrdinaryRecursorValidation,
+    `Ps.KernelCore.API.DagOrdinaryAdmission,
     `Ps.KernelCore.Checker.ExprV2.AdmissionHelpers,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
@@ -397,3 +401,30 @@ lean_lib PsKernelOrdinaryLoopNativeProofs where
 lean_exe psc1_kernel_ordinary_constructor_loop_regression where
   srcDir := "test"
   root := `PsKernelExprV2OrdinaryConstructorLoopRegression
+
+-- Private elimination policy; native diagnostics do not publish admission.
+lean_lib PsKernelOrdinaryEliminationNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryEliminationProofs]
+
+lean_exe psc1_kernel_ordinary_elimination_regression where
+  srcDir := "test"
+  root := `PsKernelOrdinaryEliminationRegression
+
+-- Private recursor checking and complete ordinary-admission native protocols.
+lean_lib PsKernelOrdinaryAdmissionNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryAdmissionProofs]
+
+lean_exe psc1_kernel_ordinary_admission_private_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2OrdinaryAdmissionRegression
+
+-- Atomic ordinary admission handoff; native protocol checks stay outside the portable closure.
+lean_lib PsKernelOrdinaryAdmissionPublicNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryAdmissionPublicProofs]
+
+lean_exe psc1_kernel_ordinary_admission_public_regression where
+  srcDir := "test"
+  root := `PsKernelOrdinaryAdmissionPublicRegression

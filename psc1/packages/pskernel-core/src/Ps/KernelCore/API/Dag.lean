@@ -2,6 +2,7 @@ import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.API.DagGenerated
 import Ps.KernelCore.API.DagAdmission
+import Ps.KernelCore.API.DagOrdinaryAdmission
 import Ps.KernelCore.Checker.ExprV2.Terminal
 import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.Whnf
@@ -22,8 +23,12 @@ supported unsafe/partial mutual definitions attempt direct admission. Original s
 header checking, inference-only proposition testing, body checking and terminal
 comparison share one fresh DAG checking state with separate inference caches.
 Mutual members use fresh private checking owners and publish the completed
-batch atomically. Inductives and unsupported rules use complete original admission.
-Successful admission records original same-batch type IDs and transparent
+batch atomically. Ordinary inductives use the complete private DAG header,
+constructor, elimination and recursor validation path. Mutual/nested inductives
+and unsupported rules use complete original admission.
+Successful ordinary admission carries its synchronized checked generated owner;
+its recursor type and rules are not imported a second time. Other successful
+admission records original same-batch type IDs and transparent
 definition body IDs. This permits owning constant/projection inference and
 delta unfolding without repeatedly importing environment types or bodies.
 
@@ -234,6 +239,119 @@ def psKernelDagRunCommand
     Except PsKernelError (Prod PsKernelDagReply PsKernelDagExecutionState) :=
   psKernelDagRunCommandWithSource built execution levelParams safety arena built command
 
+/- An owned command result is private to one validated batch. It carries the
+   checked generated syntax forward without importing ordinary recursors again.
+   No caller can supply this record to the public untrusted-input entry point. -/
+structure PsKernelDagOwnedCommandResult where
+  reply : PsKernelDagReply
+  execution : PsKernelDagExecutionState
+  owner : PsKernelDagGeneratedState
+
+/- Existing complete original admission remains the fallback. Generated metadata
+   is imported only after that admission succeeds, before any batch publication. -/
+def psKernelDagRunFallbackOwnedCommandWithSource
+    (input : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded)
+    (command : PsKernelDagCommand) :
+    Except PsKernelError PsKernelDagOwnedCommandResult :=
+  match psKernelDagRunCommandWithSource input execution
+      levelParams safety arena built command with
+  | Except.error error => Except.error error
+  | Except.ok result =>
+      let nextExecution := Prod.snd result;
+      let generated :=
+        PsKernelDagGeneratedState.mk arena built nextExecution.declarations;
+      match psKernelDagGeneratedAfterCommandWithPrevious command
+          execution.session.environment nextExecution.session.environment generated with
+      | Except.error error => Except.error (PsKernelError.internalError error)
+      | Except.ok owner =>
+          Except.ok
+            (PsKernelDagOwnedCommandResult.mk (Prod.fst result)
+              (PsKernelDagExecutionState.mk nextExecution.session owner.declarations) owner)
+
+/- Resource and receipt publication follow the same complete-admission boundary
+   as other declarations. The successful private owner contains the constructor
+   and independently checked recursor references; no partial owner is returned
+   on rejection. Native evaluator authority is cleared exactly as in V1. -/
+def psKernelDagFinishOwnedOrdinaryAdmission
+    (session : PsKernelKernelSession) (declaration : PsKernelDeclarationRequest)
+    (checked : PsKernelExprV2OrdinaryAdmissionResult) :
+    Except PsKernelError PsKernelDagOwnedCommandResult :=
+  if psKernelResourceAllowsSize session.resources
+      (psKernelEnvironmentSize checked.environment) then
+    let environment :=
+      psKernelEnvironmentWithNativeEvaluator checked.environment Option.none;
+    let next :=
+      PsKernelKernelSession.mk environment session.resources session.provider;
+    let admitted :=
+      PsKernelCheckedDeclaration.mk declaration (psKernelV1Receipt session environment);
+    Except.ok
+      (PsKernelDagOwnedCommandResult.mk
+        (PsKernelDagReply.admitted admitted.receipt)
+        (PsKernelDagExecutionState.mk next checked.owner.declarations) checked.owner)
+  else
+    Except.error
+      (PsKernelError.resourceExhausted PsKernelResourceError.declarationLimit
+        "declaration limit exceeded")
+
+/- The injected worker is internal and receives the established canonical owner.
+   It permits protocol proofs and controls for late failure/decline. Decline
+   restarts the original request with the original session, arena, and input
+   table; no intermediate ordinary environment or appended syntax is reused. -/
+def psKernelDagRunOrdinaryOwnedWith
+    (admit : PsKernelDagGeneratedState ->
+      Option (Except String PsKernelExprV2OrdinaryAdmissionResult))
+    (input : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded)
+    (request : PsKernelDagDeclarationRequest)
+    (declaration : PsKernelDeclarationRequest) :
+    Except PsKernelError PsKernelDagOwnedCommandResult :=
+  match psKernelKernelSessionPreflight execution.session with
+  | Except.error error => Except.error error
+  | Except.ok _ =>
+      match admit (PsKernelDagGeneratedState.mk arena built execution.declarations) with
+      | Option.none =>
+          psKernelDagRunFallbackOwnedCommandWithSource input execution
+            levelParams safety arena built (PsKernelDagCommand.admit request)
+      | Option.some attempted =>
+          match attempted with
+          | Except.error error => Except.error (psKernelErrorFromMessage error)
+          | Except.ok checked =>
+              psKernelDagFinishOwnedOrdinaryAdmission execution.session declaration checked
+
+def psKernelDagRunOwnedCommandWithSource
+    (input : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded)
+    (command : PsKernelDagCommand) :
+    Except PsKernelError PsKernelDagOwnedCommandResult :=
+  match command with
+  | PsKernelDagCommand.admit request =>
+      match request with
+      | PsKernelDagDeclarationRequest.ordinaryInductive levels numParams value isUnsafe =>
+          match psKernelDagDecodeDeclaration input request with
+          | Except.error error => Except.error (PsKernelError.rejectedInvalid error)
+          | Except.ok declaration =>
+              let admit :=
+                fun (owner : PsKernelDagGeneratedState) =>
+                  psKernelExprV2OrdinaryAdmitWithFuel execution.session.resources.fuel
+                    (psKernelKernelSessionEnvironment execution.session)
+                    execution.session.resources.maxRecDepth execution.session.resources.maxNatSize
+                    input owner levels numParams value isUnsafe;
+              psKernelDagRunOrdinaryOwnedWith admit input execution
+                levelParams safety arena built request declaration
+      | _ =>
+          psKernelDagRunFallbackOwnedCommandWithSource input execution
+            levelParams safety arena built command
+  | _ =>
+      psKernelDagRunFallbackOwnedCommandWithSource input execution
+        levelParams safety arena built command
+
 def psKernelDagRunCommandsWithSource
     (commands : List PsKernelDagCommand) :
     PsKernelExprV2Decoded -> PsKernelDagExecutionState -> List PsKernelName ->
@@ -255,30 +373,23 @@ def psKernelDagRunCommandsWithSource
           (safety : PsKernelDefinitionSafety)
           (arena : PsKernelExprV2PagedArena)
           (built : PsKernelExprV2Decoded) =>
-        match psKernelDagRunCommandWithSource input execution
+        match psKernelDagRunOwnedCommandWithSource input execution
             levelParams safety arena built command with
         | Except.error error => Except.error error
         | Except.ok result =>
-            let nextExecution := Prod.snd result;
-            let generated := PsKernelDagGeneratedState.mk
-              arena built nextExecution.declarations;
-            match psKernelDagGeneratedAfterCommandWithPrevious command
-                execution.session.environment nextExecution.session.environment generated with
+            match psKernelDagGeneratedDemandRange
+                result.execution.session.environment built.size result.owner with
             | Except.error error => Except.error (PsKernelError.internalError error)
-            | Except.ok installed =>
-                match psKernelDagGeneratedDemandRange
-                    nextExecution.session.environment built.size installed with
-                | Except.error error => Except.error (PsKernelError.internalError error)
-                | Except.ok ready =>
-                    let owner := PsKernelDagExecutionState.mk
-                      nextExecution.session ready.declarations;
-                    let recur := psKernelDagRunCommandsWithSource rest;
-                    match recur input owner levelParams safety ready.arena ready.built with
-                    | Except.error error => Except.error error
-                    | Except.ok tail =>
-                        Except.ok
-                          (PsKernelDagBatchResult.mk tail.session
-                            (List.cons (Prod.fst result) tail.replies))
+            | Except.ok ready =>
+                let owner := PsKernelDagExecutionState.mk
+                  result.execution.session ready.declarations;
+                let recur := psKernelDagRunCommandsWithSource rest;
+                match recur input owner levelParams safety ready.arena ready.built with
+                | Except.error error => Except.error error
+                | Except.ok tail =>
+                    Except.ok
+                      (PsKernelDagBatchResult.mk tail.session
+                        (List.cons result.reply tail.replies))
 
 /- The input namespace is captured once. Appended generated nodes may be used
    internally but never become valid external command/declaration IDs. -/

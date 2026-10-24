@@ -14,8 +14,11 @@ This import is performed once per successful ordinary, mutual or nested inductiv
 in a batch, not inside WHNF. Only the newly admitted final-environment prefix is
 visited; the previous checked environment is the exact name boundary. It preserves original IDs by appending smart-constructed
 nodes, and appends the corresponding source expressions to the decoded table.
-It deliberately remains a recursive-expression import: inductive admission is
-still the V1 fallback, not a completed DAG-native admission path.
+This remains a recursive-expression import for complete-original fallback and
+for adapting previously admitted session metadata. Successful direct ordinary
+admission retains its independently checked generated owner and skips this
+post-admission import. Mutual/nested admission and declined direct operations
+retain the complete-original path.
 Repeated source subtrees are not interned by this bridge. Its construction and
 retained-memory costs must be included in whole-batch measurements.
 

@@ -7,6 +7,49 @@ work; [AI work state](../AI_WORK_STATE.md) and the
 live status to immutable source/CI identities. Qualified Rust and TypeScript
 remain preserved reference implementations generated from the same compiler.
 
+## Current qualified evidence — 2026-10-24
+
+Executable source133e5892, request2d1f8244, Linux40062120079 PASSED actual
+independently admittedG1→G2→G3 and exact fixed points for BOTH DirectJS and
+owned import-free DirectWasm. Native compiler tools are disabled after one seed.
+All generations pass strict original/transformed IR and ten positive/negative
+observations. JS G2/G3824066/832426ms, maxRSS3076776/3179880KiB;
+Wasm876840/888398ms, maxRSS1508096/1816228KiB. Different closures87/98modules
+prevent interpreting these as a matched backend speed comparison.
+
+Fresh clean audit40064496804, control36d917b0, restores no .lake cache. Its
+independently checkedG1 reproduces exact source inventories, admissions, IR,
+observations and raw target source/executable bytes of each qualifiedG1/G2/G3.
+JS module.js SHA8dad2e7fb1e3eb834bed9fc7581b8f2cce36f834c5e7842f19b6f8bb904b871a;
+owned module.wasm SHAaddc90b9cfff0dcbb8ea8d8f1d7824187750b5250514915608cda5607f170b72.
+Operational manifests include events/timings/paths, so raw code equality is
+recorded separately from service-manifest hashes. This audit is not a second
+fullG2/G3 replay, DDC or formal compiler-preservation proof.
+
+The final successful mechanism fixes address source classes: eleven owned JS
+recursive-prefix bindings moved beneath all dynamic arguments; three Wasm
+encoder list helpers use fully applied ordered reverse accumulators; shared
+lookup prefixes defer work until their dynamic lookup name arrives. Complete
+retained-original API equalities and class scans accompany actual generated
+qualification. Earlier measured lazyUTF8/direct-dispatch and ordered collector
+fixes remain. No representation rewrite, alternate compiler or resource-limit
+increase was required. Original performance240s remains unqualified.
+
+[Full40062210987](https://github.com/dwijayuda/pskernel/actions/runs/40062210987)
+PASSED: Linux120780825013 and final gate120786364196;37/37 qualified,0 blocked,
+releaseReady=true, all seven backends, both grammars, applications, minimum
+Python and installed native package/IO/library regressions. Tested review HEAD
+06186537cf9339fc3f24a7d13387c2ad55ee0749 and merge
+980d096ca3e85b9ad2970f16602ad1d14a089d69 have identical Git tree
+cbf312e1f4bca9e7085719c12b627be5c16099a7, verified through GitHub APIs and checkout log.
+Artifact12549325904, digest
+sha256:6ad48b109e2e995c344a6855a85de44380f6ee628b67f4033990a152598a7bf9.
+This qualifies the tested compiler source; the final receipt update edits docs only.
+
+Earlier diagnoses, old-source pending statements and architecture milestones
+below are retained as dated history. The roadmap and current receipt govern
+live status; later actual qualification supersedes those pending statements.
+
 ## Shared semantics and authority
 
 All targets execute Ps.Internal.CompilerService.candidate, the same frontend,

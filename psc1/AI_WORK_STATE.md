@@ -1,123 +1,129 @@
 # PSC1 AI work state
 
-Updated2026-10-24 Asia/Jakarta (2026-10-24 04:24UTC).
-Use connected GitHub tools and Linux Actions only. Fetch exact HEAD before
-expected-HEAD non-force writes. No PR merge or npm publication authorized.
-Practical Core v1 remains14 families/37 finite criteria.
-[Roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the queue;
+Updated 2026-10-24 Asia/Jakarta. Use connected GitHub tools and Linux Actions only.
+Fetch exact HEAD before expected-HEAD non-force writes. No PR merge or npm
+publication authorized. Practical Core v1 remains 14 families / 37 finite criteria.
+[Roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the dependency queue;
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
-owns immutable attempts/identities. Earlier state is preserved in Git history.
+owns immutable attempts, artifacts, timings and source identities.
 
-## Verified source checkpoint
+## Completed DirectJS and owned DirectWasm mission
 
-Active review branch work/psc1-direct-selfhost-blockers-20261024 contains
-verified source133e589288b563e74578b771ec35595beb3a9fe8, integrated through
-eefedf2a3f9f0002975870e8128bb0f404723946 without force or a PR merge.
-Focused40061782715/job120776657312 PASSED:
-- Eleven complete JS function equalities against retained originals: decimal
-  conversion, type/expr lowering, validation, tail alias/capture rewriting and
-  observed declaration printing. Recursive prefixes execute beneath all dynamic
-  inputs. The guard scans233 owned JS definitions with no eager prefix and
-  rejects all eleven originals; million-fuel early-result/refusal tests pass.
-- Three complete owned Wasm encoder equalities: generic Except flatMap,
-  byte-chunk concatenation and UTF8 character encoding. Applied reverse
-  accumulators preserve exact bytes, order and first-error priority.
-  100000-element cases pass. Productione075de33/guard63a00d13 first passed
-  focused40061544936/job120776049268.
+Source commit 133e589288b563e74578b771ec35595beb3a9fe8 is genuinely self-hosted
+for both targets by request 2d1f8244d8402fbccd5a018890d61d8ed4d20775,
+parent eefedf2a3f9f0002975870e8128bb0f404723946.
+[Qualification 40062120079](https://github.com/dwijayuda/pskernel/actions/runs/40062120079)
+PASSED both jobs: JS 120777813920 and Wasm 120777813877.
+Each target used one native seed, disabled native compiler tools afterward,
+executed G1 → G2 → G3, independently admitted each generation, validated strict
+original/transformed IR, and passed all ten positive/negative observations.
+Exact captured source/admission/IR/observation/target-byte fixed points passed.
+
+| Target | Modules | G2 ms / maxRSS KiB | G3 ms / maxRSS KiB |
+| --- | --- | --- | --- |
+| DirectJS | 87 | 824066 / 3076776 | 832426 / 3179880 |
+| Owned DirectWasm | 98 | 876840 / 1508096 | 888398 / 1816228 |
+
+These are actual generated compiler workloads with different target closures,
+not a matched backend speed benchmark. Memory uses Linux child maxRSS and
+separately sampled descendant RSS; see exact execution events in the receipt.
+
+JS closure: 5b1824ce8d98a9ec9068f351f28abab8485a9786510c47fd5b4cedeac8734a2e.
+Wasm closure: 322f29eb0b4c734ea09c7f4ee53380633faa3799b367808c0d393783cd6e48c1.
+JS source SHA256 across all three generations:
+8dad2e7fb1e3eb834bed9fc7581b8f2cce36f834c5e7842f19b6f8bb904b871a.
+Owned Wasm binary SHA256 across all three:
+addc90b9cfff0dcbb8ea8d8f1d7824187750b5250514915608cda5607f170b72.
+Artifacts: JS 12548433615; Wasm 12549160290. Digests, request and producer
+identities are in the receipt. Operational manifests contain timings/events,
+so different manifest hashes do not contradict equal compiler executable bytes.
+
+## Independent clean G1 reproduction
+
+[Audit 40064496804](https://github.com/dwijayuda/pskernel/actions/runs/40064496804)
+PASSED both clean Linux jobs at diagnostic control commit
+36d917b01a008fcae2259fc7a604b3e8a47e3db1 on
+diagnostic/psc1-direct-clean-g1-20261024.
+No .lake build cache was restored. Fresh native seed/checker builds execute
+the production G1-only harness, independently admit G1, validate strict IR and
+all ten cases, then compare exact source inventory, admissions, IR, observations
+and JS source / Wasm hex+binary bytes against EACH qualified G1/G2/G3.
+All comparisons passed. Artifacts 12548393011 (JS), 12548652944 (Wasm).
+The diagnostic request/script/workflow are preserved on that branch.
+
+Scope: independently rebuilt G1 reproduces the three previously qualified
+generation artifacts. A second independent full G2/G3 replay was not run.
+This is not a DDC or formal compiler semantic-preservation proof.
+
+## Source mechanisms and regression evidence
+
+Focused 40061782715/job120776657312 PASSED at source133e5892:
+- Eleven all-input full JS API equalities against retained originals, covering
+  decimal/type/expr lowering, validation, tail aliases/captures and printing.
+  Move recursive prefixes beneath every dynamic input; scan233 owned definitions,
+  reject all eleven original defects, test million-fuel early results/refusals.
+- Three complete Wasm encoder API equalities: Except flatMap, byte chunks and
+  UTF8 characters use fully applied reverse accumulators, preserving bytes,
+  order and first-error priority, including100000-element cases.
 - Three shared environment/constructor/recursor lookup equalities and100000
-  early/miss/kind/duplicate-payload cases, first passed146270cf/40036978899.
-- All earlier52 Wasm prefix equalities, six foundation API equalities, ordinary
-  expansion, checked/erasure collector/index proofs and exact error/order policy.
-- All earlier JS runtime, statement/capture/alias/fuel,10584 lazy-view and64
-  dispatch order/trap tests; native/reference output and strict original/target IR.
-- Actual owned import-free GC Wasm runtime/carrier/96-opcode/Unicode/Nat/Int
-  comparisons. Complete87-module JS and98-module Wasm .lean/.ps censuses,
-  no refusals. No sorry, verification bypass or fuel/heap/stack increase.
-These are source/proof/runtime gates, not G2/G3 qualification.
+  early/missing/kind/duplicate-payload cases, source146270cf.
+- All earlier52 Wasm prefix, six foundation and checked/erasure collector/index
+  equalities; original fuel, errors, insertion/index and source/logical pairing.
+- All retained JS lazy UTF8 views, capture/alias/fuel,10584 view comparisons,
+  64 direct-dispatch order/trap tests, native/reference comparisons.
+- Owned import-free GC Wasm transport,96-opcode/Unicode/Nat/Int cases and
+  complete87/98-module Lean/PS source censuses. No verification or limit changes.
 
-## Actual generation evidence and measured mechanisms
+Earlier failures remain immutable in the receipt. In particular the older
+shared-lookup-only JS baseline d7c6f166/run40061402443 FAILED its G2 deadline:
+1800233ms /3107644KiB, no G3/fixed point. It lacks the eleven later JS fixes.
+Earlier Wasm stack traces reached encoder flatMap; the top Nat division frame
+did not establish an arithmetic defect. Fix the demonstrated source class,
+rather than raising stack/fuel or replacing the compiler architecture.
 
-Both direct targets have completed independently checkedG1 and all ten cases.
-Neither has qualifiedG2/G3/fixedpoint yet.
+## Full Practical Core and review
 
-Latest completed JS8d7a5dc5/run40033515365:
-G2 deadline1800214ms/3179196KiB; noG3/fixedpoint.
-Closure04fe35964af8c177b7d7672ed3bd2ea00c70b1491a58ce64667630c028862faf.
-Exact retained CPU40037023905 passes as a diagnostic only:
-240144ms/2031196KiB,18.7%GC ticks. Actual G1 has16323 direct driver requests,
-zero delegated invoke sites,6 lazy getters,8021036 source bytes.
-Later source audit identifies unused recursive-prefix construction in the JS
-backend's own high-fuel workers;133e5892 fixes that entire owned backend class.
-Counts/profile samples are not end-to-end performance qualification.
+[Full40062210987](https://github.com/dwijayuda/pskernel/actions/runs/40062210987)
+PASSED: Linux120780825013 and final gate120786364196;37/37 qualified,0 blocked,
+releaseReady=true, all seven backends, both grammars, applications, minimum
+Python and installed native package/IO/library regressions. Tested review HEAD
+06186537cf9339fc3f24a7d13387c2ad55ee0749 and merge
+980d096ca3e85b9ad2970f16602ad1d14a089d69 have identical Git tree
+cbf312e1f4bca9e7085719c12b627be5c16099a7, verified through GitHub APIs and checkout log.
+Artifact12549325904, digest
+sha256:6ad48b109e2e995c344a6855a85de44380f6ee628b67f4033990a152598a7bf9.
+This qualifies the tested compiler source; the final receipt update edits docs only.
 
-Latest completed Wasme5b9cd76/run40035031327:
-G2 stack720754ms/1009612KiB; noG3/fixedpoint.
-Closure85c03806bb5c045a8d5c48a73ddd1fbe7f5be568ea3c92a599d7b19ac0e5f317.
-Exact retained trace40036672078 replays without changing execution stack,
-heap or semantic limits. Reported frames include Nat division plus private
-binary encoder flatMap on function/value-type lists, encodeModule and service.
-Source inspection confirms non-tail flatMap recursion; the three proved encoder
-accumulators address that list-spine class. Do not misdiagnose the top Nat frame
-as proof of a large-operand bug or raise execution limits.
-Diagnostic865433ms/1029356KiB is not a qualification attempt.
+Draft [PR175](https://github.com/dwijayuda/pskernel/pull/175) remains open,
+unmerged, based on preserved PR174/integrationafed7c4b. The review branch
+work/psc1-direct-selfhost-blockers-20261024 was advanced without force.
+Final evidence reconciliation edits documentation only; compiler code remains
+the qualified133e5892 source. No merge or package publication occurred.
 
-The old child JS requestd7c6f166/run40061402443 is still active on shared lookup
-source146270cf. Preserve its terminal evidence, but it does not include the
-eleven later JS backend prefix fixes and cannot qualify133e5892's JS closure.
+## Boundaries and next executable work
 
-## Review integration and full Practical Core qualification
-
-Draft[PR175](https://github.com/dwijayuda/pskernel/pull/175) remains open/unmerged,
-base preserved draft174/integrationafed7c4b.
-Previous review source8d7a5dc5 is qualified by Full40033570924, Linux120692646423 and gate120702393001
-PASSED37/37,0 blocked,releaseReady=true,all seven backends,both grammars,
-applications,minimum Python,installed native packages and IO/library regressions.
-Tested mergebd0182def8baf6b9ffcc31883d612c800cb8c658 and head8d7a5dc5
-have identical treec06c977dffac1b77e2d92efbd7c7e89f08c04f72.
-Artifact12537203984 digest22c802bc036a2dc09a194e5998777c867d3646746d30552eab0aac14f0d66b37.
-This evidence is scoped to that tree; the later compiler fixes need new full CI.
-
-Actual current request2d1f8244d8402fbccd5a018890d61d8ed4d20775,
-parenteefedf2a3f9f0002975870e8128bb0f404723946, run40062120079
-selects bothJS andWasm. Each independent matrix target executes the same
-current common source plus its own current backend. Request/source/runtime
-gates and actual generations must be re-queried; no newG2/G3 claim yet.
-Normal full CI for the new review source is running/pending. Old child baseline
-40061402443 remains separate. Multi-commit integration40062110731 correctly
-skipped request execution; real single-commit requests retain every invariant.
-
-## Preserved boundaries and references
-
-Fresh refs verified2026-10-24 04:19UTC:
-Rust fix/psc1-rust-owned-string-moves-20261023 remains83e18fe183498f7d8b0fc3e3faa5bdacc41cb23d,
-qualified run39908529181/source5e0b548e: G2/G3692788/660042ms.
-TS perf/psc1-erasure-applied-workers-20261023 remains84e1e16f61cec3d28d9fdc62d6eaca4f3c0a8577,
-qualified source748fd5fd/request079b26b9/run39993829327:
-G2/G3545895/588552ms and exact fixed point. Full39993835819 passes37/37.
-Their older source qualifications are preserved, not inherited by changed source.
+The original performance-240s profile remains separate and unqualified;
+the measured current G2/G3 times exceed240s. Correctness-1800s does not weaken it.
+G1/corpus/tools240s, checker120s, G2/G3 correctness1800s, semantic fuel and
+all memory/stack/security/refusal limits remain unchanged.
 
 Official independent Lean4.35.0 checker
-eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict original/transformed IR,
-source/logical graph pairing, all negative/refusal tests and exact identities
-remain mandatory. G1/corpus/tools240s,checker120s,G2/G3 correctness1800s,
-original performance240s and every other resource/security policy are unchanged.
-Same-run fixed points and independent clean-build reproducibility are separate.
-Only target emission/runtime differ; one shared compiler service/frontend/
-elaborator/checked pipeline, no handwritten alternate compiler or native
-delegation after the seed. PSKernel research does not block this work.
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict original/transformed IR and
+negative tests remain mandatory. All targets share the existing compiler
+service, frontend, elaborator and checked pipeline. Only emission/runtime
+carriers differ; no alternate handwritten compiler or native delegation.
 
-## Execute next
+Preserve qualified Rust branch fix/psc1-rust-owned-string-moves-20261023,
+head83e18fe183498f7d8b0fc3e3faa5bdacc41cb23d, source5e0b548e/run39908529181,
+G2/G3692788/660042ms. Preserve TS perf/psc1-erasure-applied-workers-20261023,
+head84e1e16f61cec3d28d9fdc62d6eaca4f3c0a8577, source748fd5fd,
+request079b26b9/run39993829327, G2/G3545895/588552ms; full39993835819 passed37/37.
+These qualify older snapshots, not a fresh Rust/TS replay of changed common source.
 
-1. Re-query actual current dual-target40062120079, latest review full CI and
-   preserved child baseline40061402443. Do not duplicate active requests.
-2. Preserve terminal child40061402443 and current review full-CI results.
-   Inspect actual generation logs and immutable artifacts before claimingG2/G3.
-3. Fix the next measured mechanism if a generation fails; preserve all-input
-   proofs, guards, strict IR, admission and refusal behavior. Keep the current
-   owned JS/Wasm prefix scans and encoder/lookup order/error invariants.
-4. Qualify latest-source full37/37/all-seven/application CI, G1→G2→G3 and exact
-   source/admission/IR/observation/source-byte/owned-binary fixed points.
-   Optimize240s and qualify clean-build reproducibility separately.
-5. Reconcile this state, roadmap, receipt and
-   [executable continuation](docs/PSC1_DIRECT_SELFHOST_CONTINUATION.md).
-   Continue actual implementation/qualification; do not stop at planning.
+No active self-host qualification requests remain. Next dependency queue:
+profile the now-completing exact generated compiler workload, optimize one
+measured generic bottleneck with retained-original API/negative proofs, then
+rerun changed-source focused and genuine qualification. Keep original240s
+performance acceptance explicit. Independent full-chain repeatability is a
+separate future evidence scope. Do not repeat unchanged correctness chains for
+documentation-only updates. See the [executable continuation](docs/PSC1_DIRECT_SELFHOST_CONTINUATION.md).

@@ -25,6 +25,14 @@ source lanes, native proofs and regressions; genuine compiler generations are ne
 See [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md).
 The later direct performance queue is deferred while this user-directed mission runs.
 
+Actual workload40069631375: Python remains active; PHP failed before G1
+admission because the native candidate envelope was1.002GB, above the unchanged
+128MiB cap. Read-only40070297469 diagnoses every-global/every-closure captures.
+PHP lexical global-demand fixda5c5c6e894019f8200e0771512f7e232a3403c6 passes source gate
+40070774006. Preserve full legacy capture fallback and token boundaries; require
+runtime scope cases40070902724 before PHP-only retry. No output/memory/fuel cap
+change and no duplicate unchanged Python run. See the Python/PHP receipt.
+
 ## Qualified compiler checkpoint
 
 Source133e589288b563e74578b771ec35595beb3a9fe8, request2d1f8244,
@@ -65,7 +73,7 @@ continues independently and does not gate compiler development.
 | 4 | Extend independent repeatability if a release requires it. | Clean G1 reproduction already passed for both; independent full-chain replay is not run. Reuse diagnostic/psc1-direct-clean-g1-20261024 at36d917b0; keep the narrower evidence boundary explicit. |
 | 5 | Release review and publication. | Requires authorization and required final qualification. PR175 remains draft/unmerged; npm publication not authorized. |
 
-No active self-host runs remain at this checkpoint.
+The older direct-target checkpoint has no active runs; Python/PHP mission status above supersedes it.
 Use the [architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md) for measured
 mechanisms and [continuation](PSC1_DIRECT_SELFHOST_CONTINUATION.md) for executable
 GitHub-only steps. Preserve exact older Rust/TS qualifications: Rust83e18fe1,

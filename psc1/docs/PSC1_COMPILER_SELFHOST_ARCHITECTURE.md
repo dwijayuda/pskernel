@@ -7,6 +7,28 @@ work; [AI work state](../AI_WORK_STATE.md) and the
 live status to immutable source/CI identities. Qualified Rust and TypeScript
 remain preserved reference implementations generated from the same compiler.
 
+## PHP actual workload and bounded lexical captures
+
+The first real PHP seed in40069631375 produced a1002108077-byte envelope,
+above the unchanged134217728 cap. Artifact diagnosis40070297469 records
+961724361 encoded-source bytes and18816024 global-reference capture text
+occurrences across6152 use clauses. No PHP G1 was admitted by this attempt.
+
+The PHP emitter previously captured every global by reference for each closure.
+Sourceda5c5c6e894019f8200e0771512f7e232a3403c6 computes lexical global demand over the same
+checked expression: parameters, let and match binders shadow globals; nested
+lambda demand propagates. The existing global order/reference identity and all
+local/helper captures remain. Exhausted analysis retains the full legacy set,
+proved for the zero-budget case; it never drops possible dependencies on refusal.
+No compiler frontend, runtime, IO, verification or resource policy changes.
+
+Legacy-policy output still compares every original field/byte against the
+retained native emitter. Production PHP is tokenized independently by PHP:
+only ordered-subset global reference items in use clauses may differ; every
+other token and local/helper capture must match. Native lexical tests and full
+application regressions supplement this boundary; genuine generations remain
+necessary and cannot be inferred from these tests.
+
 ## Current qualified evidence — 2026-10-24
 
 Executable source133e5892, request2d1f8244, Linux40062120079 PASSED actual

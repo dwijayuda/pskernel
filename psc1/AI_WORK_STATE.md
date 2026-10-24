@@ -7,7 +7,32 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
-## Active Python/PHP self-hosting mission — 2026-10-24
+## Python/PHP actual workload update — 2026-10-24 06:37 UTC
+
+PHP job120800177269 in40069631375 FAILED before G1 admission: its native seed
+candidate was1002108077 bytes, over the unchanged134217728-byte cap.
+Read-only diagnosis40070297469 of the retained artifact found961724361 bytes
+of encoded source and18816024 global-reference capture text occurrences.
+The old emitter captured every global in every closure; this was quadratic.
+Native seed25495ms/maxRSS4688184KiB. No PHP generation is qualified.
+
+Sourceda5c5c6e894019f8200e0771512f7e232a3403c6 replaces only PHP global capture selection
+with lexical free-variable demand; globals retain reference identity and order,
+locals/helpers retain their original captures, and exhausted analysis falls back
+to the complete original set. No memory, fuel, output or stack cap is increased.
+Gate40070774006/job120803515773 PASSED both86-module/both-grammar censuses,
+all prior proofs/runtime/library tests and144 legacy-fallback/output/refusal
+comparisons plus independent PHP token comparison outside global use clauses.
+The budget fallback theorem compiled. Commit4e4bfcb5a535af39925c5a601d39d08fcdca5bb7 adds
+execution of lexical shadow/initializer/match/nested/forward/helper cases to both
+gates (40070902724 pending). Require that success before a PHP-only retry.
+
+Python job120800177259 remains active in40069631375. Do not duplicate it.
+The PHP-only emitter change does not modify the Python captured compiler closure;
+verify inventory identities before reusing evidence. Current-source full CI and
+clean reproduction are still required separately.
+
+## Python/PHP source-port checkpoint — superseded status below
 
 Continue on feat/psc1-python-php-selfhost-20261024, draft
 [PR176](https://github.com/dwijayuda/pskernel/pull/176), based on preserved
@@ -25,9 +50,8 @@ explicit request for both targets, from this verified implementation.
 
 Actual request30389b1f218ec9c2f35321e93104edb7bb19d747, parenta685da2c6c4090d103d09a855accfcda674b3cf6,
 [run40069631375](https://github.com/dwijayuda/pskernel/actions/runs/40069631375)
-is ACTIVE for both targets. Exact request-only gate120800073301 PASSED.
-Python job120800177259 and PHP120800177269 are running; no G1/G2/G3 result
-has been read yet. Re-query terminal evidence before making any qualification claim.
+was launched for both targets; see superseding actual-workload update above. Exact request-only gate120800073301 PASSED.
+Python job120800177259 is active; PHP120800177269 failed before G1 admission. Re-query terminal evidence before making any qualification claim.
 Documentation updates after the request do not change captured compiler source
 or pinned harness/runtime files and do not cancel the manual generation jobs.
 

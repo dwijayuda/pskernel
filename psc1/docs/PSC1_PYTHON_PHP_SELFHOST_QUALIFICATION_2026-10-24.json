@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 06:19 UTC",
-  "status": "genuine-qualification-running",
+  "recordedAtUtc": "2026-10-24 06:37 UTC",
+  "status": "python-qualification-active-php-capture-fix-source-tested",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
@@ -157,7 +157,7 @@
       }
     }
   },
-  "nextAction": "Re-query actual qualification and latest normal CI; diagnose terminal failures from retained artifacts; qualify both current-source fixed points.",
+  "nextAction": "Read capture-case gate40070902724; PHP-only request after success, no duplicate Python request. Re-query Python40069631375 terminal evidence. Preserve all caps/limits.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -171,9 +171,72 @@
       },
       "php": {
         "jobId": 120800177269,
-        "status": "in_progress"
+        "status": "completed",
+        "conclusion": "failure"
       }
     },
     "scope": "One native seed per target, then actual generated G1/G2/G3; no result inferred before terminal evidence."
+  },
+  "phpCaptureFix": {
+    "sourceCommit": "da5c5c6e894019f8200e0771512f7e232a3403c6",
+    "testExecutionWorkflowCommit": "4e4bfcb5a535af39925c5a601d39d08fcdca5bb7",
+    "sourceGate": {
+      "runId": 40070774006,
+      "jobId": 120803515773,
+      "status": "passed",
+      "scope": "86 modules per target, both grammars; existing proofs/runtime/emitter/token-boundary/library probes; budget theorem built, runtime capture cases awaiting gate40070902724"
+    },
+    "mechanism": "lexical free-global demand, preserved global order and by-reference identity; locals/helpers unchanged; complete legacy captures on bounded analysis exhaustion",
+    "limitsChanged": false
+  },
+  "firstPhpFailure": {
+    "runId": 40069631375,
+    "jobId": 120800177269,
+    "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
+    "sourceClosureSha256": "2a65d8ac8ac652048ea87e9a80fa3ab5608741be03d4cebe4946d42883565044",
+    "phase": "native seed candidate envelope before G1 admission",
+    "nativeSeedMs": 25495,
+    "maxRssKiB": 4688184,
+    "sampledPeakRssKiB": 4612408,
+    "candidateBytes": 1002108077,
+    "candidateSha256": "bf880fd0d817d0697965a8b02d36fee4e4a0ffbc689d1cc0b8017e7bc250d206",
+    "candidateLimitBytes": 134217728,
+    "encodedSourceBytes": 961724361,
+    "captureTextCounts": {
+      "globalByReference": 18816024,
+      "captureClauses": 6152
+    },
+    "artifact": {
+      "id": 12550711608,
+      "digest": "sha256:a45a4d5d20123bea5d383a6b54477d4467c715ad056eb2a13d409f1a2860f05a"
+    },
+    "diagnosis": {
+      "commit": "60fedeb8958de655386dd46972b2063d9f5b4c35",
+      "runId": 40070297469,
+      "jobId": 120802089856,
+      "artifact": {
+        "id": 12550947636,
+        "node_id": "MDg6QXJ0aWZhY3QxMjU1MDk0NzYzNg==",
+        "name": "psc1-php-envelope-diagnosis-60fedeb8958de655386dd46972b2063d9f5b4c35",
+        "size_in_bytes": 2103,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550947636",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12550947636/zip",
+        "expired": false,
+        "digest": "sha256:d09da4ff02490eb8a141993fa2b4397ab41717c5b1a0b1bde232e8138ea5c3b3",
+        "created_at": "2026-10-24T06:31:06Z",
+        "updated_at": "2026-10-24T06:31:06Z",
+        "expires_at": "2027-01-22T06:27:47Z",
+        "workflow_run": {
+          "id": 40070297469,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "diagnostic/psc1-python-php-artifacts-20261024",
+          "head_sha": "60fedeb8958de655386dd46972b2063d9f5b4c35"
+        }
+      },
+      "scope": "read-only bounded artifact scan; text capture counts, no compiler executed"
+    },
+    "generations": [],
+    "qualified": false
   }
 }

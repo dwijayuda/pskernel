@@ -11,13 +11,15 @@ on:
       - psc1/host-tools/generated-php-transport.php
       - psc1/scripts/generated-target-qualification.mjs
       - psc1/scripts/generated-target-contract-tests.mjs
+      - psc1/host-tools/compiler-host-protocol.mjs
+      - psc1/test/ScriptRuntime*.lean
       - psc1/lakefile.lean
       - .github/workflows/diagnostic-psc1-python-php-preflight.yml
 permissions:
   contents: read
 concurrency:
   group: psc1-python-php-source-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   source:
     runs-on: ubuntu-24.04
@@ -66,12 +68,14 @@ jobs:
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
           PSC1_SCRIPT_TRANSPORT_TESTS=1 node scripts/generated-target-contract-tests.mjs
-          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe
+          lake build psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
           path: psc1/.lake
           key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Compare retained runtime bytes and exhaustive catalog selections
+        run: .lake/build/bin/psc1_script_runtime_normalization_tests
       - name: Census both complete source closures in both grammars
         run: |
           set +e

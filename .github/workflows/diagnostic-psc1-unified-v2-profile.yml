@@ -1,0 +1,43 @@
+name: PSC1 structured v2 bounded workload profiles
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-unified-v2-profile.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  sample:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: rust
+            artifact: '12569281754'
+          - target: wasm-core
+            artifact: '12569441180'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ matrix.artifact }}
+          run-id: '40117051185'
+          github-token: ${{ github.token }}
+          path: psc1/dist/v2-profile-input
+      - name: Install native debugger
+        if: matrix.target == 'rust'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq gdb
+      - name: Sample exact generated compiler workload without qualification
+        working-directory: psc1
+        run: node scripts/diagnostic-unified-v2-profile.mjs ${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-unified-v2-profile-${{ matrix.target }}-${{ github.sha }}
+          path: psc1/dist/unified-v2-profile-*/
+          retention-days: 90

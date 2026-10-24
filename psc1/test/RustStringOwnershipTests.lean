@@ -55,11 +55,13 @@ private def spineT : PsVerifiedIrType := .named "Spine" []
 private def emptySpine : PsVerifiedIrExpr := .constructor "Spine" "nil" [] []
 private def spineModule : PsVerifiedIrModule := {
   imports := [],structures := []
-  inductives := [{name := "Spine",typeParameters := [],constructors := [
+  inductives := [{name := "Drop",typeParameters := [],constructors := [{name := "unit",fields := []}]},
+    {name := "Spine",typeParameters := [],constructors := [
     {name := "nil",fields := []},
     {name := "cons",fields := [
       {name := "head",type := natT},{name := "tail",type := spineT}]}]}]
   declarations := [
+    {name := "drop",typeParameters := [],parameters := [p "value" natT],resultType := natT,body := .var "value"},
     {name := "makeSpine",typeParameters := [],parameters := [p "fuel" natT,p "acc" spineT],
      resultType := spineT,
      body := .ifE (intrinsic .natEq [.var "fuel",n 0]) (.var "acc")

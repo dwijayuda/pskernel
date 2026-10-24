@@ -83,7 +83,20 @@ by a resource-bound correction: keep the original zero-dividend fast return
 before even-divisor factoring, so recursion always halves the dividend.
 Add tiny dividends against a20001-bit divisor. Cancel only that exact stale
 run via a validated Linux Actions control; preserve original v2 request9359
-and its still-running Wasm job. Full current-source qualification remains pending.
+and its still-running Wasm job. Corrected-bound focused40125175783/job120964951312 PASSES707 operand pairs/
+2828 actual Wasm results including20001-bit divisors, all Rust fixtures,
+both grammars and enlarged G1 closure5411a98e. Original structured-v2 Wasm
+request9359/run40120346573/job120950418397 genuinely PASSES G2/G3/fixedpoint
+at closurea3350d64:1647713/1542403ms, peak2767832/2192844KiB. Rust at that
+same old source remains failed; preserve individual Wasm success.
+
+The first corrected four-engine requeste23afbdf/run40125830600 starts at
+the exact primary0c75 snapshot. A final namespace regression supersedes it:
+fully qualify the private cleanup runtime's standard-library types, Option
+constructors, drop function and Drop trait so user declarations drop/Drop
+cannot shadow them. Add both names to retained/current sharing fixtures.
+No language semantics, target profile, public ABI or resource limit changes.
+Full current-source qualification remains pending.
 
 Preserve official Lean4.35.0, strict original/transformed IR and all prior
 qualified sources/artifacts. G1/tools240s,checker120s,G2/G3 correctness1800s

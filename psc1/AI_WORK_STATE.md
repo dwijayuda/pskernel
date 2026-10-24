@@ -3,6 +3,31 @@
 Updated 2026-10-25 Asia/Jakarta. GitHub/Linux Actions only; fresh expected-HEAD
 non-force updates. No merge or npm publication authorized.
 
+## Active continuation: measured Rust performance and generated packages
+
+Continued from3364d255 on2026-10-25; previous stop instruction below is a
+completed historical milestone. Current user authorization continues development.
+No compiler source or qualified engine bytes are changed by this package slice.
+
+Exact Rust G2 diagnostic control39011c8a/run40138165186 replays archived
+f707e037 G1 executable91b12534 and request63662493, sampling300/600/900/1200/1500s.
+It is diagnostic only, with the unchanged1800s outer policy.
+Build experiments40138326355/40138435314 retain failed opt1/no-LLVM240s and
+LLVM instcombine fixed-point-verification failures. Verification is not bypassed.
+A promotion-only opt0 experiment follows; none is promoted to production yet.
+
+Generated package integration is implemented but CI PENDING: explicit
+psc generated build dispatch uses immutable qualified historical TS/Wasm G3
+engines on shared closure92654df5, existing official Lean4.35 host session,
+exact imported-file pins and atomic publication. Initial generated publication
+target is JS; all five native core targets and optional Python/PHP remain.
+The wrapper retains the native CLI. It must work with native compiler removed,
+both grammars, retained corpus/refusals and tampered imported-engine refusal.
+This does not qualify current closuree0f7640b or an all-four-engine release.
+New workflowpsc1-generated-package-integration.yml verifies immutable ZIPs,
+packs an unpublished candidate and tests actual offline npm installation.
+No npm registry publication or merge is authorized.
+
 ## Verified codec-frame milestone
 
 Code checkpoint `5d4d4d1a1693de57fa16ecf796536d73040bbf64`/draft PR178;

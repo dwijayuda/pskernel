@@ -1,7 +1,7 @@
 {
   "schema": "psc1-python-php-selfhost-request/1",
   "branch": "qualification/psc1-python-php-3600s-20261024",
-  "parentCommit": "2b3467f10741e49c4fa1bb3cf371a44828227975",
+  "parentCommit": "3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-3600s",
   "targets": [
@@ -11,5 +11,5 @@
   "g2g3TimeoutMs": 3600000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "User-authorized independent Python/PHP correctness qualification with3600s only G2/G3, unchanged fully regression-qualified compiler source and all independent checking/resource/negative/fixed-point policies; profile and source preflight40083935614 passed. Exact primary451aef05 snapshot on isolated qualification branch, workflow branch guard only; ordinary final release40083940157 continues independently."
+  "reason": "Retry measured Python immutable UTF8 hot pair and PHP readonly canonical slots/proven static calls. b33027de passes Linux source gate40090956726/job120863330756, all retained/API/runtime/negative tests and both87-module/both-grammar censuses. Exact source/tools snapshot; primary full40090959568 continues independently. All limits/checking unchanged except existing G2/G3 correctness3600s."
 }

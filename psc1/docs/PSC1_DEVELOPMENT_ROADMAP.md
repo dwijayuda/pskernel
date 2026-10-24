@@ -10,21 +10,22 @@ owns exact source identities and immutable actual results.
 
 | Order | Work | Finite acceptance and current status |
 | --- | --- | --- |
-| 1 | Portable source and focused correctness | PASS617004ce/run40073537409: complete86-module closures, both grammars, proofs, retained-runtime/emitter boundaries, Python UTF8 differentials, PHP2M collection/reclamation and admitted libraries. |
-| 2 | Current generated compilers | PHP current node/source-only request75f04cfdcafc1fbeea08f66f595f40ff6b777d04 pending. Python UTF8 requesta8def92c/run40072853176 active with earlier transport; read terminal performance evidence before fresh source-only request. Prior G1s pass; current G2/G3 remain unqualified. |
-| 3 | Actual fixed points | Each generated G1 compiles the same complete captured compiler toG2, thenG3, with native tools removed. Require independent Lean4.35 checking, both strict IR graphs, source pairing, ten positive/refusal cases and exact source/admission/IR/observations/raw executable identities. Correctness1800s; performance240s separate. |
-| 4 | Full regression and reproducibility | Latest source37/37, seven backends/both grammars/four real application categories; independent clean G1 reproduction separately. No merge/publication without authorization. |
+| 1 | Validate measured scheduler optimization | PASS sourceb7499950/run40077267520/job120823225254:87 modules/target, both grammars and all retained/admitted/deep-recursion guards. Shared conservative classification,2 immutable call layers; dynamic/shadow/recursive/value-forcing calls retain suspension. Both target retained-scheduler/deep-recursion tests, Python exact AST boundary, zero-budget fallback, complete source census and admitted libraries passed. |
+| 2 | Genuine current generated compilers | Both latest G1s PASS independent admission/strict IR/ten cases. Python40072853176 and PHP40073754301 each FAIL G2 hard deadline1800s; no G3/fixed point. Python actual profile shows UTF8 fix worked and scheduler own cost dominates. PHP iterative nodes remove observed destruction crash;120s phase samples retain bounded pending generators. After gate success issue isolated BOTH-target request, including source-only Python host. |
+| 3 | Actual fixed points | Native seed once, then remove native compiler tools. Each G1 compiles same complete captured compiler toG2, thenG3; independent Lean4.35, both strict graphs, source pairing, ten positive/refusal cases and exact source/admission/IR/observation/raw executable identities mandatory. Correctness1800s and performance240s remain separate. |
+| 4 | Full regression and reproducibility | Baseline40073884191 PASSED37/37,7 backends/both grammars/applications at edcbab7b/tree0d12de8a. It precedes new direct-call optimization. Require final current-source full CI and separately independent clean G1 reproduction. No merge/publication authorized. |
 
-One existing shared compiler and one portable emitter per target; native adapters
-preserve existing APIs. Measured fixes are bounded Python UTF8 identity views,
-lexical PHP global captures and immutable compact PHP nodes with iterative
-reclamation. Source-only Python loading closes an actual unlisted-bytecode path;
-poisoned-cache controls pass. No memory/stack/fuel/checker/negative gate is weakened.
+One shared compiler and one portable emitter per target; native adapters preserve
+APIs. Measured fixes: bounded Python UTF8 views, lexical PHP global captures and
+immutable compact PHP nodes with iterative reclamation. New direct-call analysis
+uses bounded immutable layers, full-name-checked hashed sets and conservative
+fallback rather than raising native stacks or execution fuel. Source-only Python
+loading closes the actual unlisted-bytecode path; poisoned-cache controls pass.
 
 The [current receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
-retains exact failed/successful scopes and measurements;
+retains exact failures, profiles, hashes and evidence boundaries;
 [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) owns executable next steps.
-Direct-target performance work below is deferred during this user mission.
+Direct-target performance work below is deferred during this mission.
 
 ## Qualified compiler checkpoint
 

@@ -1,11 +1,11 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 07:22:24 UTC",
-  "status": "PHP-iterative-node-genuine-requested-Python-UTF8-baseline-running",
+  "recordedAtUtc": "2026-10-24 08:14 UTC",
+  "status": "current-Python-PHP-G1-pass-G2-timeouts-measured-bounded-direct-call-optimization-under-validation",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
-  "sourceCommit": "24f93a383886894cb411ecb76ff38fa46dd47177",
+  "sourceCommit": "b749995073f091b03f32ea6c811d9c1a5c4a3b35",
   "targets": [
     "python",
     "php"
@@ -76,8 +76,8 @@
     "status": "passed"
   },
   "qualification": {
-    "G1": "not-run",
-    "G2": "not-run",
+    "G1": "prior-attempts-passed;bounded-direct-call-current-generation-not-yet-run",
+    "G2": "latest-both-hard-deadline1800s",
     "G3": "not-run",
     "fixedPoint": "not-run",
     "cleanReproduction": "not-run",
@@ -157,7 +157,7 @@
       }
     }
   },
-  "nextAction": "Observe PHP node request75f04cfd and old Python run40072853176. Use terminal generated workload evidence for next fixes. Do not launch an unchanged Python performance rerun before reading the active result; require fresh source-only Python qualification when its bottleneck is resolved. Full37/37 and clean G1 reproduction remain pending.",
+  "nextAction": "Bounded direct-call gate40077267520 PASSED. Issue isolated BOTH-target genuine qualification request, then read terminal G1/G2/G3/fixed points. Require final current-source37/37 and independently clean G1 reproduction.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -763,10 +763,28 @@
     "requestCommit": "a8def92c857b71344717d92e2260aef25675fabb",
     "runId": 40072853176,
     "jobId": 120810006994,
-    "status": "in_progress",
+    "status": "completed",
     "source": "current Python UTF8/compiler source",
     "transport": "pre-source-only adapter baseline; fresh hardened pipeline still required",
-    "evidenceBoundary": "Do not infer G2/G3 before terminal evidence; source-only host fix does not alter compiler source but changes tool identity."
+    "evidenceBoundary": "Do not infer G2/G3 before terminal evidence; source-only host fix does not alter compiler source but changes tool identity.",
+    "conclusion": "failure",
+    "g1": "independently-accepted-strict-IR-ten-cases",
+    "g2": {
+      "status": "hard-deadline",
+      "elapsedMs": 1800060,
+      "outerMaxRssKiB": 67216,
+      "peakTreeRssKiB": 447408,
+      "sourceClosureDigest": "558eb809b7a70325357282541f28aadb3c128b876cc13e52176edb94dcfa22a6",
+      "compilerSourceSha256": "9c8cfbf9fb9e2e1440fcfd0b2ae98395d3db4cd1e8d5ef006605bd53df453304",
+      "serviceSha256": "d2c77a150ceb8312aa2e9bdb3b06a556fe65da71743488b4676b07edcd5c2c7d",
+      "requestSha256": "f3f6684861b4c5e565bff3517427a1a135e915b65c7b8ba44822539fabd54311"
+    },
+    "artifact": {
+      "id": 12551829905,
+      "digest": "sha256:b6b5b4917f58eaddfac84742287b75865e154ff905544e98c30783f49f65f784"
+    },
+    "g3": "not-run",
+    "fixedPoint": "not-run"
   },
   "phpNodeFix": {
     "status": "passed-native-source-and-admitted-library-gates",
@@ -817,8 +835,204 @@
   "phpNodeQualification": {
     "requestCommit": "75f04cfdcafc1fbeea08f66f595f40ff6b777d04",
     "parentCommit": "617004ceb29ce759f38a49b635a47bc25aa7f622",
-    "status": "requested-run-not-yet-read",
+    "status": "completed",
     "target": "php",
-    "hostTransport": "current source-only Python host tools inventory"
+    "hostTransport": "current source-only Python host tools inventory",
+    "runId": 40073754301,
+    "jobId": 120812693944,
+    "conclusion": "failure",
+    "g1": "independently-accepted-strict-IR-ten-cases",
+    "g2": {
+      "status": "hard-deadline",
+      "elapsedMs": 1800045,
+      "outerMaxRssKiB": 74008,
+      "peakTreeRssKiB": 1195192,
+      "sourceClosureDigest": "d254148ccf66e3914638ff566e2743d1217cfcc5bf4222c6260dd8ece22c5dcc",
+      "compilerSourceSha256": "5752bf05f37aec0a920d84b5dfb9a202666bb9729c84a8a53b27b1e5687b532a",
+      "serviceSha256": "2e28e3be27e3b9df6abaa77f8f9e26d6137d5e082780d17f6ab56cda55e50887",
+      "requestSha256": "f5226ad8000582876dde2bf214f128fa1d4b75b83dae5350e76dc38d4baf18af"
+    },
+    "artifact": {
+      "id": 12553366583,
+      "digest": "sha256:d26db3c9ed1123d3bbd2be83f4936c4c2065aad29c53ea28e54d358d2551da49"
+    },
+    "g3": "not-run",
+    "fixedPoint": "not-run"
+  },
+  "memoryMetricBoundary": "For hard timeouts, outer wait4 maxRSS is not the generated service peak. Descendant RSS is separately sampled and may double-count shared pages; no inner completion time receipt exists on timeout.",
+  "pythonPostUtf8Profile": {
+    "runId": 40075153915,
+    "controlCommit": "0ad74765a536a5fe98767f8edb186d02aa4a9160",
+    "scope": "120-second sampled exact generated G1 compiling actual G2 request; diagnostic only",
+    "calls": 258130375,
+    "runOwnSeconds": 44.239,
+    "generatorSend": {
+      "calls": 56671446,
+      "ownSeconds": 18.493,
+      "cumulativeSeconds": 56.55
+    },
+    "stringEqWorker": {
+      "calls": 3547162,
+      "ownSeconds": 4.961,
+      "cumulativeSeconds": 16.914
+    },
+    "utf8": {
+      "calls": 20267892,
+      "ownSeconds": 9.838,
+      "cumulativeSeconds": 10.293
+    },
+    "strEncode": {
+      "calls": 592272,
+      "ownSeconds": 0.132
+    },
+    "phase": "elaboration/name resolution,72 suspended generators at sample end",
+    "interpretation": "UTF8 full-source encoding bottleneck fixed; scheduler overhead now largest measured own cost. Profile instrumentation overhead differs from qualification.",
+    "artifacts": [
+      {
+        "id": 12553275200,
+        "digest": "sha256:a5bd784ddfb5c11eef4cd14db1a73aeba0cc5a0fc9adf20d71e0b18a3f88f8a1"
+      }
+    ]
+  },
+  "phpNodeDiagnostics": {
+    "runId": 40076097853,
+    "controlCommit": "d66af538769a20e349a242d5814015fd06b8f4ce",
+    "slice": {
+      "jobId": 120819644916,
+      "status": "passed",
+      "actualCompilerSourceBytes": 18804166,
+      "range": [
+        0,
+        32
+      ],
+      "elapsedSeconds": 1.541822743,
+      "maxRssKiB": 736912,
+      "scope": "exact generated runtime extraction on actual compiler source; not full self-hosting"
+    },
+    "phase": {
+      "jobId": 120819645037,
+      "status": "diagnostic-budget-ended",
+      "elapsedSeconds": 120.5046,
+      "maxRssKiB": 688152,
+      "latestSeconds": 111.9919,
+      "ticks": 36884480,
+      "pending": 80,
+      "heapBytes": 646971392,
+      "limit": "line samples valid; declaration label regex was overescaped, so runtime labels are not owner/CPU attribution"
+    },
+    "artifacts": [
+      {
+        "id": 12553192582,
+        "name": "psc1-php-node-diagnostic-slice-d66af538769a20e349a242d5814015fd06b8f4ce",
+        "digest": "sha256:39bb5481b4df91f88392f9422d34f6df2f9bb8041ecd791c57df51e8acf74966"
+      },
+      {
+        "id": 12553033112,
+        "name": "psc1-php-node-diagnostic-sample-d66af538769a20e349a242d5814015fd06b8f4ce",
+        "digest": "sha256:f25429bb9b3d742f8afe7a428d4519390873fbab3802ebe98a7b5f4e687b6a9d"
+      }
+    ]
+  },
+  "fullPracticalCoreBaseline": {
+    "runId": 40073884191,
+    "conclusion": "success",
+    "reviewCommit": "edcbab7b61d95285759d24e71caa5c37b3eb844c",
+    "mergeCommit": "647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+    "identicalGitTree": "0d12de8a05dae203d2701c1e01592bbad3526125",
+    "linuxJobId": 120815634508,
+    "finalGateJobId": 120820109040,
+    "qualified": 37,
+    "blocked": 0,
+    "releaseReady": true,
+    "backends": 7,
+    "grammars": 2,
+    "artifacts": [
+      {
+        "id": 12553216697,
+        "name": "psc1-scoped-correctness-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:98e2420a303bafd7a30e72ba7f55587323dff10a9f44dc342cf833e705c3bcdc"
+      },
+      {
+        "id": 12552846089,
+        "name": "psc1-generated-compiler-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:4f68d4dda2b8820072f19aebb5115d753d4e420d88affd880b0000fbf7f5ea41"
+      },
+      {
+        "id": 12552781163,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:e69a3cafa4cceb5a037ef39fc577fae64f5e2e5327513cc158629acff7eb4b48"
+      },
+      {
+        "id": 12552750856,
+        "name": "psc1-development-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:9911666565184816a91b8a6f78a6343b7859b3c2ec0f2b465a1d405e354ca36d"
+      },
+      {
+        "id": 12552552556,
+        "name": "psc1-practical-compiler-m-core-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb-attempt-1",
+        "digest": "sha256:1c1cf7fe10d869bc135ef306429459ff4475c36144bbb639e0d295d169f035b4"
+      },
+      {
+        "id": 12552483382,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:64a7b519f9f48a1581fe9f9b5a88d8d48fb0ccf53286e061e77a9a97f72e6bb2"
+      },
+      {
+        "id": 12552442275,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:f1234a41b76da459c9434e2c458ad03c93e175d4acb35fc6d2e8ceb1b2daf3b2"
+      },
+      {
+        "id": 12552263236,
+        "name": "psc1-php-applications-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb-attempt-1",
+        "digest": "sha256:36cb3737050426a19872de2267a63b7745e7f4d247effc1b19435163870b5f82"
+      },
+      {
+        "id": 12552167650,
+        "name": "psc1-practical-compiler-m-applications-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb-attempt-1",
+        "digest": "sha256:571d94f608ab0b1efe1712d49f6c8b7420b366ff776416d21074315cefc52d7a"
+      },
+      {
+        "id": 12551954279,
+        "name": "psc1-architecture-native-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:e6d02d3f142840ba7f94d60cdf47a990d1064c18b49c84d56be93d723d6b61be"
+      },
+      {
+        "id": 12551903983,
+        "name": "psc1-generated-session-boundary-647ffdb0d382dd572e36e7fd598ec91be6c8d9bb",
+        "digest": "sha256:143d558723a2b47bfbeb8accd874ae7b51e2591d698246080c4870dbc94c2033"
+      }
+    ],
+    "scope": "full preserved compiler functionality before new direct-call optimization; not current G2/G3 qualification"
+  },
+  "boundedDirectCalls": {
+    "commit": "3232294d25d477717c0ac4669a55e60d8cdc8459",
+    "importFixCommit": "36ff105c907b92d48f57665fe92686639608f5fd",
+    "status": "passed-native-source-and-admitted-library-gate",
+    "mechanism": "shared checked-IR conservative intrinsic whitelist, full-name-checked hash membership, two immutable nonzero-parameter call layers; zero-fuel fallback, dynamic callbacks/shadows/recursive cycles/implicit value forcing retain scheduler; maximum direct source call depth3",
+    "guards": "Python AST neutralization checks actual non-generator callee and exact saved callee/arguments/acyclic depth; PHP retained scheduler policy uses identical carrier/runtime; deep alias/shadow/dynamic recursion regression",
+    "generationEvidence": "not-run",
+    "dualTargetTestsCommit": "b749995073f091b03f32ea6c811d9c1a5c4a3b35",
+    "runId": 40077267520,
+    "gate": {
+      "runId": 40077267520,
+      "jobId": 120823225254,
+      "sourceCommit": "b749995073f091b03f32ea6c811d9c1a5c4a3b35",
+      "modulesPerTarget": 87,
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "refused": [],
+      "pythonDirectCalls": 2,
+      "maxDirectSourceDepth": 3,
+      "deepRecursiveObservation": 200000,
+      "artifact": [
+        {
+          "id": 12553253051,
+          "digest": "sha256:6da7d28e269d2fe15e2672e6376262da82f458156144627d70b99b67fa4015c4"
+        }
+      ]
+    }
   }
 }

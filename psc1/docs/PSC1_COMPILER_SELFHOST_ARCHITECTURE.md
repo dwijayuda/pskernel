@@ -1,5 +1,36 @@
 # PSC1 compiler self-host architecture
 
+## Current codec/admission stack milestone
+
+Code5d4d4d1a/closuree0f7640b retains the single120-module JS/TS/Rust/Wasm
+composition root and optional native Python/PHP providers. Codec return frames
+and fully applied admission/reversal workers remove the demonstrated return
+stack accumulation. Exact all-input Lean proofs and generated Rust deep
+expression/admission-batch regressions pass without new axioms or limits.
+Full40133272707 passes37/37 finite criteria/all seven native targets/both
+grammars and installed matching packages.
+
+Rust requestf707e037 passes G1 but reaches1800s G2 after1800055ms without an
+observed stack overflow; no candidate/G3/fixed point. Readback40136555747
+verifies its immutable failure and same-source independent G1 reproduction.
+The next task is late profiling of this exact workload, followed by a measured
+generic optimization and real G2/G3/fixed-point retry.
+
+Preserved v2 TS/Wasm source92654df5 genuinely passes all three generations and
+exact executable/source/admission/IR/four-target fixed points, independently
+read back in40130870206. Its JS G2 deadline and Rust overflow remain failures.
+Older v2 Wasm and v1 JS/TS qualifications stay pinned to their own source.
+Native npm qualification remains distinct from generated-distribution readiness.
+
+[Exact codec receipt](PSC1_UNIFIED_V2_CODEC_QUALIFICATION_2026-10-25.json),
+[roadmap](PSC1_DEVELOPMENT_ROADMAP.md),
+[continuation](PSC1_UNIFIED_SELFHOST_CONTINUATION.md).
+
+## Historical previous unified/provider snapshots
+
+The following paragraphs describe earlier checkpoints. Current status and
+remaining work are governed by the section above.
+
 Current unified-service checkpoint (2026-10-25): one 120-module portable root composes existing JS/TS/Rust/Wasm emitters. Structured-v2 source `783cf8fc` passes all four actual generated G1 engines,160 cross-target cases/36 refusals and immutable originalIR/admission parity. Earlier v1 source `b2ab4d34` passes genuine JS/TS G1/G2/G3 and exact executable/source/admission/IR/observations fixed points. These source scopes are separate. Rust optimization1 target-build deadline, v1 Rust G2 stack overflow and v1 Wasm G2 deadline are retained as actual failures. Full 40117055147 passes37/37 finite criteria/all seven backends/both grammars and installed optional packages. The native npm distribution remains native; generated assets/CLI/component/provider integration and current-v2 G2/G3 are pending. [Guide](PSC1_UNIFIED_COMPILER_SERVICE.md), [exact receipt](PSC1_UNIFIED_SELFHOST_QUALIFICATION_2026-10-25.json), [roadmap](PSC1_DEVELOPMENT_ROADMAP.md).
 
 Current provider/package checkpoint: the native core includes JS/TS/Rust/Wasm core+component, with exact-build-pinned optional Python/PHP emit-only providers. The shared portable compiler is unchanged. Core retains independent admission, strict original/transformed IR, ABI policy and publication; workers validate IR/ABI and return candidates only. [Full 40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASS37/37/all-seven/both grammars; [receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json), [guide](PSC1_BACKEND_PROVIDERS.md) and [roadmap](PSC1_DEVELOPMENT_ROADMAP.md) own exact status.

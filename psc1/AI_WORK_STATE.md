@@ -3,150 +3,147 @@
 Updated 2026-10-25 Asia/Jakarta. GitHub/Linux Actions only; fresh expected-HEAD
 non-force updates. No merge or npm publication authorized.
 
-## Admission/codec stack correction in progress
+## Verified codec-frame milestone
 
-New source e98ea691d311348059313183452fe517a7d783fa passes exact codec
-all-input proofs,40 retained/current observations,ten10000-deep generated
-Rust shapes (9298ms,maxRSS32304KiB),both grammar censuses and enlarged RustG1.
-Focused40132160344/job120985984748 passes; closure9bcae9b83374869f57b3a466e6a665680180e2fa8cbf6d5b15fa320e8617b2db.
-Its Rust-only chain request04771b2b/run40132435573 is active; preserve it.
+Code checkpoint `5d4d4d1a1693de57fa16ecf796536d73040bbf64`/draft PR178;
+120-module closure `e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66`.
+[Full CI40133272707](https://github.com/dwijayuda/pskernel/actions/runs/40133272707)
+PASSED37/37 finite Practical Core criteria. Rust G1 passes, but the genuine
+G2 retry reaches its unchanged1800s deadline without an observed stack
+overflow. No G2 candidate, G3 or fixed point exists for this snapshot.
+Stop at this verified stack-correction milestone; Rust self-host correctness
+and performance remain unqualified. Exact evidence:
+[codec receipt](docs/PSC1_UNIFIED_V2_CODEC_QUALIFICATION_2026-10-25.json).
 
-Earlier first-frame requestf5a00e75/run40130597594 passes G1 but G2 overflows
-after530106ms,maxRSS463544KiB; noG3/fixedpoint. Immutable readback40131756188/
-job120984747463 confirms exact independent-G1 reproduction at closure50d5d0d0.
-GDB replay40131756069/job120984747118 records the accumulator at the stack
-guard after523662ms, with many psEncodeCheckedAdmissionsLoop closure frames
-beneath it. The declaration loop constructs a recursive function before its
-state argument, retaining the declaration-depth return stack. Normalize that
-loop and the final string reversal to fully applied structural tail workers.
-Retain their previous definitions and prove equality for every state/list.
+The existing checked expression encoder now represents application, binder,
+let-body and projection return paths as explicit frames and unwinds them by
+direct tail calls. Side branches remain structurally recursive. It preserves
+the exact original opaque String.Internal.append tree and error priority,
+without a new fuel cutoff or increased stack/heap/time allowance.
+CodecSpineReference retains the previous production source. codec_spine_acc_eq
+and codec_spine_eq prove equality for every expression/frame stack; the
+existing static-schema theorem remains unconditional. Pinned Lean reports
+only standard propext/Quot.sound dependencies, no sorryAx or added axioms.
 
-Preserved request812094c1/run40126488125 has qualified TS and Wasm G1/G2/G3
-and exact executable/source/admission/IR/four-target fixed points on closure92654df5.
-TS G2/G3=1379563/1401815ms;Wasm=1396916/1410393ms. Immutable readback40130870206
-verifies seven records, source inventories/executables and IR/admission parity.
-Its Rust overflow and JS1800278ms G2 deadline remain failed, not qualified.
-All historical evidence and limits remain. No merge or npm publication.
+Focused40133269028/job120989348408 PASSED:44 old/current observations;
+ten10000-deep expression shapes plus a10000-declaration admission fold
+(12825ms,maxRSS34760KiB), both120-module grammar censuses and actual enlarged
+Rust G1/all40 cross-target cases plus9 envelope refusals. Artifact12576126918,
+ZIP09357b2b1c6ab48d1e9b8a7e3327544072cb0d333c7321def06c4e13871ee9fc.
+The180s GDB sample is diagnostic only, not full G2 qualification.
 
-## Earlier codec correction checkpoint (historical)
+Rust String reader forwarding and ordered last-use moves avoid repeated
+whole-input copies; private recursive carriers with an empty constructor
+reclaim final Rc owners through a non-reentrant queue. Public enum layouts/
+owned field moves remain unchanged. Scalar-only selected modules omit unused
+private prelude templates after a conservative carrier-use scan, preserving
+the existing runtime-free Boolean regression. Unknown/generic/named types,
+carrier operations and scan exhaustion retain the carrier path.
 
-Current source a3d3e0a9444934d3f55c41939e971c39e56472d3 has enlarged Rust G1
-passing, but real G2 in run40126488125/job120969044264 aborts after520538ms
-(maxRSS462464KiB). Exact archived-G1 replay40128155977/job120973928569
-verifies manifest5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c2,
-executableaa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce,
-and requestc6b04937446d0f549d76d965aae53bac04c23122ab4b14befb7fd425783ad0ad.
-After517774ms GDB records90 repeated psEncodeCodecExpr frames.
-The revised structural accumulator removes return frames along application,
-binder, let-body and projection spines. Explicit return frames preserve the
-original opaque String append tree as well as refusal priority; no
-associativity axiom. Side branches remain structurally recursive; no new
-fuel cap or enlarged stack. Retained-source all-input
-equality and deep generated execution must pass before qualification.
-The JS G2 job120969044278 independently reaches its unchanged1800s deadline
-(1800278ms,maxRSS3157096KiB); it is not qualified. Preserve TS/Wasm jobs in
-the same run and all earlier exact-source successful evidence.
+Wasm Nat divmod factors even divisors, handles divisor one and checks a zero
+dividend first; each new recursive division step halves the dividend. The
+old odd-divisor and division-by-zero paths remain. Differential actual Wasm
+execution covers707 pairs/2828 results through513-bit inputs and20001-bit
+divisors. All source, theorem, runtime, ownership, aliasing and namespace
+regressions remain required in normal full/manual qualification workflows.
 
-## Active v2 G2/G3 qualification and measured Rust/Wasm blockers
+Preserve qualified structured-v2 TS and Wasm request812094c1/run40126488125,
+closure92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2.
+Both execute G1/G2/G3 and exact source/admission/IR/raw-executable/four-output
+fixed points: TS G2/G3=1379563/1401815ms;Wasm=1396916/1410393ms.
+Immutable readback40130870206/job120982103024 verifies inventories, bytes,
+IR/admission parity and all failed records. Its same-source Rust overflow and
+JS1800278ms G2 deadline remain failures. Earlier v2 Wasm9359f073, v1 JS/TSb2ab4d34
+and historical single-emitter successes remain pinned to their own source.
+Do not inherit their qualifications onto this changed closure.
 
-Resumed from84cc15375e4236a902e8af6658d92a640c6aa22a/PR178 on2026-10-25.
-Explicit request9359f07320eaf84af1e551fb86c38718150291ff launches Rust/Wasm
-[40120346573](https://github.com/dwijayuda/pskernel/actions/runs/40120346573)
-at the existing structured-v2 source. Do not duplicate or cancel its live jobs.
-No current-v2 G2/G3/fixed-point success is claimed while it runs.
+Full CI job120991938920 and final gate120997291745 pass all seven backends,
+both grammars, real applications, typed IO, minimum Python, exact-build optional
+providers and installed native core/source-library regressions. Review5d4d4d1a
+and tested CI merge764078561a0b4a09dd7cccd1fac4174f566bf4c4 have identical tree
+47b683bb30905531799e7e3717450e1644762c8f. Artifact12576144430,
+ZIPfae7c60ccea2162d46a65b547d935f11216c5bfab3d2f5eb1aba4b620bb1ee7c.
 
-Bounded archived-G1 diagnostic766297e1/run40120526852 verifies exact producer
-manifest/executable/captured source identities. Rustjob120950869895 passes
-three default-stack GDB samples at60/120/180s: each is String::clone/memcpy
-inside psJsonStringCharsAccWithFuel$worker, before psJsonParse completes.
-This locates repeated whole-input copies, not the later stack-overflow site.
-Wasmjob120950869762 retains240s V8 samples; Nat binary runtime arithmetic
-dominates the top samples. Mapping exact production function indices is
-separate diagnostic40120639238, not self-host qualification.
+Latest Rust requestf707e037b5f470ceee65891e0c735316ba097444 on
+qualification/psc1-codec-tail-workers-20261025, control
+d8a5ffa168f2744b5897420ecded84ef72475bda, reproduces the exact non-.github source
+tree dfec32f502a08d8f56c2014707087c73ca563f1f from5d4d4d1a.
+Run40133622389/job120990512358 passes G1/all49 tests, then G2 is hard-killed at
+1800055ms. Sampled process-tree peak924096KiB; sampled CPU1889.15s includes
+supervisors. The outer waited child's maxRSS103732KiB is not service peak RSS;
+service-specific completed maxRSS is unavailable after the hard kill.
+Producer manifesta3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005,
+raw G1 executable91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42,
+G2 request636624936f655a0412cf5ce0f31df9436bc9f311e63aee25d808f009a76f4118.
+Artifact12576967932,ZIP0f8f31d00fdb3def362dbcd979fd82649864ca90ca44d4a1be3a96a8cacb5bf8.
+No native fallback, G2 candidate, G3, fixed point, or240s qualification.
+Immutable readback40136555747/job120999195540 PASSED: exact inventory,
+admission/IR/raw-executable verification and same-source independent G1
+reproduction. This is not a clean full replay or a G2/G3 qualification.
+Readback artifact12576759844,
+ZIPae0106604fc1cc70be2ccf0c1ff8ced6033b3f37b4415a131bbcda7d9dc34e73.
 
-The active Rust fix structurally recognizes checked identity-forwarding,
-read-only String intrinsic wrappers, and moves a same-position unchanged
-String after evaluating every other tail argument into ordered temporaries.
-It preserves public String signatures, all wrapper shadow/type/arity/fuel
-guards, eta-capture snapshots, old paths for other arguments and all resource
-limits. Focused Linux CI compares actual old/current Rust observations and
-runs two million-character scans, both source grammars and enlarged G1;
-a bounded G2 stack diagnostic follows. The first Rust fixture run40121512148 passes100 retained-original comparisons
-and two million-character Unicode scans in1060ms. Its owned source census
-caught a nested pattern syntax restriction;9fcab97b rewrites the same match
-into the supported nested form. Unchanged v2 Rust G2 in40120346573 fails
-after648336ms with stack overflow; no G2 candidate/G3/fixed point.
+## Dependency-ordered continuation queue
 
-Exact Wasm mapper40121535934 verifies identical original/specialized IR and
-8343 production function indices: the dominant sampled functions are Nat
-compare/half/divmod/subtraction/addition/construction. The active runtime
-change factors even divisors and handles division by one directly while
-retaining the original odd-divisor arbitrary-Nat algorithm and division by
-zero semantics. Differential Wasm tests retain the exact old divmod function,
-share every other runtime function, use actual validated binaries, compare
-against JS arbitrary-precision arithmetic and record workload timing.
-Focused40121896995 passes703 Nat-divmod pairs/2812 actual Wasm results,
-including513-bit inputs, zero/one/odd/even divisors and a BigInt oracle.
-Sampled128-bit/128 workload351ms→297ms is a scoped measurement only.
-Both grammar audits and enlarged Rust G1 pass at75adeaa7, closure
-159b072e2c39365b67ec447b85f53d8389ba0b73e97c815976545d160d77294e.
+1. Profile the exact archived Rust G1/G2 request late in its1800s workload.
+   Resource heartbeats do not identify the hot function. Use Linux CI only,
+   verify the producer/request hashes above, sample later phases, and preserve
+   the same stack/heap/fuel/deadline policy. This is the immediate release blocker.
+2. Optimize only the measured generic cost with exact semantic regressions,
+   both source grammars and independent checking; retry real Rust G2/G3 and
+   exact source/admission/IR/raw-executable/four-output fixed points.
+3. Freeze a shared root and qualify all four engines on that exact closure.
+   TS/Wasm success on92654df5 and v1 JS/TS success remain historical, not new-root
+   qualifications. Keep the JS1800s failure tracked.
+4. Integrate generated assets/CLI, host admission/publication, component adapters
+   and optional-provider dispatch. Current npm artifacts remain native-lean;
+   Python/PHP remain optional and all seven native target mappings remain.
+5. Clean independent full reproduction, release qualification and optimization
+   toward the separate240s profile. No merge/npm publication without authorization.
 
-The bounded G2 samples still show String copies. Exact archived worker
-inspection40122554517 proves why: worker fusion intentionally uses fresh
-parameters and typed lexical lets; the original same-position move check
-does not follow those aliases. Extend String let moves only when the
-existing conservative WorkerFusion.mentions visitor proves the original
-local absent from the full body; exhaustion/escaping captures retain copies.
-Tail arguments move only their last direct local occurrence after all other
-argument snapshots. Add renamed-worker, duplicate, capture and exhaustion
-regressions. This keeps worker fusion's capture-safe lexical IR unchanged.
-The renamed-worker extension passes120 old/current observations and three
-million-character scans. Both grammars and enlarged G1 pass8b61aea4, closure
-d90f44e3e883c7502869fbfbf5eb312cee5d78ba61b893bb148a4900468c4ab3.
-Actual G2 diagnostic40123048722/job120958550385 now reaches failure in8563ms:
-GDB records repeated drop_in_place<List$spec$Char>/Rc::drop_slow frames,
-SIGSEGV then SIGABRT. The exact recursive destruction site is established.
+Official independent Lean4.35.0 remains pinned to
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Strict original/transformed IR,
+source/logical pairing, negative tests, semantic fuel and all resource policies
+remain. G1/corpus/tools240s; checker120s; G2/G3 correctness1800s; separate
+performance240s; historical optional Python/PHP3600s. Longer correctness
+success never qualifies the240s performance target.
 
-Add generic iterative final-owner reclamation only for private inductives
-with an empty constructor and exact self-recursive Rc fields. Detach those
-fields into a non-reentrant, thread-local drain; shared owners only decrement.
-Public enum layouts/field move-out remain unchanged; match borrowed carriers
-with identical cloned bindings. No unsafe code, leaked owners, increased stack
-or resource limits. Focused tests compare retained recursive sharing results,
-exercise a million-node private spine and compile public owned-field matches.
-Focused40124112555/job120961745118 passes120 retained-original observations,
-three million-character scans2054ms, and million-node private spine1064ms/
-127632KiB maxRSS with public enum move-out preserved. G1 closureeeca0749
-passes both grammars/all40+9 cases. The default-stack full G2 diagnostic now
-runs180794ms without crashing; actual samples reach elaboration/type inference.
-This is diagnostic progress, not G2 qualification.
+## Source-diagnosis history for this milestone
 
-The first isolated four-engine request4c1ad0f0/run40124889755 starts fromd771e1ca
-with only workflow/request differences. It is superseded before qualification
-by a resource-bound correction: keep the original zero-dividend fast return
-before even-divisor factoring, so recursion always halves the dividend.
-Add tiny dividends against a20001-bit divisor. Cancel only that exact stale
-run via a validated Linux Actions control; preserve original v2 request9359
-and its still-running Wasm job. Corrected-bound focused40125175783/job120964951312 PASSES707 operand pairs/
-2828 actual Wasm results including20001-bit divisors, all Rust fixtures,
-both grammars and enlarged G1 closure5411a98e. Original structured-v2 Wasm
-request9359/run40120346573/job120950418397 genuinely PASSES G2/G3/fixedpoint
-at closurea3350d64:1647713/1542403ms, peak2767832/2192844KiB. Rust at that
-same old source remains failed; preserve individual Wasm success.
+- Original structured-v2 Rust/Wasm request9359f073/run40120346573: Wasm genuinely
+  passes G1/G2/G3 and exact fixed point on closurea3350d64; Rust G2 overflows
+  after648336ms. Retain both individual results despite the failed matrix.
+- Archived-input profile40120526852: Rust spends early samples copying whole
+  Strings in JSON character decoding. Exact Wasm function mapper40121535934
+  verifies8343 indices and locates Nat runtime arithmetic. These are scoped
+  diagnoses, not qualifications.
+- Source8b61aea4/run40123048722 traces recursive List<Char> destruction after
+ 8563ms. Iterative private carrier reclamation and ordered String moves fix
+  that earlier site; million-character and million-node regressions execute.
+- Source0c75e855 restores the crucial dividend-halving resource bound; a3d3e0a9
+  fully qualifies generated cleanup std paths against source names Drop/drop.
+- Request812094c1/run40126488125: Rust G1 passes, G2 aborts after520538ms.
+  Exact archived-G1 replay40128155977 verifies producer/request identities
+  and records90 repeated psEncodeCodecExpr frames after517774ms.
+- ca938791 initially tests text-chunk reassociation; the Lean proof correctly
+  rejects opaque-append associativity.854b15ef replaces it with exact return
+  frames. No new axiom or weakened theorem is introduced.
+- dbc5069e removes unused private carriers from scalar-only selected output
+  after full40126174119 exposed the unchanged runtime-free assertion.
+  Request6963af8d/run40130336112 stops in source census before G1/G2;
+  e913a6d3 fully applies the recursive visitor under lambdas in both grammars.
+  The invalid attempt is retained, not counted as compiler execution.
 
-The first corrected four-engine requeste23afbdf/run40125830600 starts at
-the exact primary0c75 snapshot. A final namespace regression supersedes it:
-fully qualify the private cleanup runtime's standard-library types, Option
-constructors, drop function and Drop trait so user declarations drop/Drop
-cannot shadow them. Add both names to retained/current sharing fixtures.
-No language semantics, target profile, public ABI or resource limit changes.
-Full current-source qualification remains pending.
+- e98ea691/04771b2b/run40132435573 passes G1 but overflows after638133ms;
+  its exact stack site is not traced. Preserve the failed comparison snapshot.
+- b36632a3/5d4d4d1a fully apply the admission fold and reversal, retaining
+  originals and all-state/list proofs. The final actual request reaches1800s
+  without an observed overflow; the remaining blocker is a measured deadline,
+  with its hot function still unprofiled.
 
-Preserve official Lean4.35.0, strict original/transformed IR and all prior
-qualified sources/artifacts. G1/tools240s,checker120s,G2/G3 correctness1800s
-and separate performance240s stay unchanged. No merge/publication.
+## Historical initial unified compiler milestone
 
-## Preserved verified unified compiler milestone
+This is an archived earlier checkpoint; the current status and queue above govern.
 
 Draft [PR178](https://github.com/dwijayuda/pskernel/pull/178), branch
 feat/psc1-unified-selfhost-20261024, preserves PR177/base7cf50ecda689a3771bee0d91086ab43563a5c4d3.

@@ -30,8 +30,10 @@ claim must receive its own adapter/integration qualification.
 ## Linux qualification
 
 ```sh
-lake build psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe
+lake build psc1_codec_static_schema_tests psc1_rust_string_ownership_tests psc1_wasm_nat_divmod_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe
 .lake/build/bin/psc1_unified_service_tests
+.lake/build/bin/psc1_codec_static_schema_tests
+node scripts/codec-spine-tests.mjs
 node scripts/generated-target-source-audit.mjs js unified
 node scripts/generated-target-qualification.mjs js --self-host correctness-1800s unified
 ```
@@ -65,4 +67,33 @@ qualification do not qualify the new composition.
 
 ## Evidence boundary
 
-The first string-envelope v1 source b2ab4d34 genuinely passed JS and TS G1/G2/G3 and executable/source/admission/IR/four-target fixed points. V1 Wasm G2 reached1800s; Rust first exceeded the240s optimized target-build limit, then its optimization 0 retry passed G1 but overflowed the stack in G2. V2 removes the avoidable whole-request JSON string and directly feeds the existing decoded request to the same compiler/emitter APIs. Current v2 source `783cf8fc` passes all four G1 engines (160 corpus cases/36 envelope refusals), both source grammars and immutable originalIR/admission parity. V2 G2/G3/fixed points are not run in this milestone. See PSC1_UNIFIED_SELFHOST_QUALIFICATION_2026-10-25.json for exact independent scopes and artifacts.
+Code `5d4d4d1a` uses exact codec return frames, structural selection of both
+application axes, and fully applied admission/reversal workers. All-input
+Lean equalities preserve opaque append trees, heights, order and refusals;
+generated Rust executes ten10000-deep shapes and a10000-declaration batch.
+No extra fuel, stack, heap or deadline allowance is introduced.
+
+Full40133272707 passes37/37 finite Practical Core criteria, all seven native
+targets/both grammars, applications, IO, minimum Python and matching installed
+core/optional packages. Review5d4d4d1a and CI merge76407856 have identical
+Git tree47b683bb30905531799e7e3717450e1644762c8f.
+
+Latest Rust requestf707e037/40133622389 passes actual G1, then reaches the
+1800s G2 deadline (1800055ms) without an observed stack overflow. No G2 candidate,
+G3 or fixed point exists. Immutable readback40136555747 confirms source,
+admissions, IR and raw executable identities and separate-run G1 reproduction;
+it does not qualify the failed chain. The remaining hot function requires
+late profiling of the exact archived request/executable.
+
+Preserved source92654df5/request812094c1 genuinely qualifies v2 TS and Wasm
+G1/G2/G3 and exact source/admission/IR/raw-executable/four-target fixed points.
+Readback40130870206 verifies those successful individual jobs and retains the
+same matrix's failed Rust/JS jobs. TS G2/G3=1379563/1401815ms;
+Wasm=1396916/1410393ms. Earlier v2 Wasm9359f073 and v1 JS/TSb2ab4d34 remain
+qualified on their own snapshots. None of these results qualifies changed
+closuree0f7640b or a generated npm distribution. The240s profile is separate.
+
+See [current codec receipt](PSC1_UNIFIED_V2_CODEC_QUALIFICATION_2026-10-25.json),
+[historical receipt](PSC1_UNIFIED_SELFHOST_QUALIFICATION_2026-10-25.json),
+[roadmap](PSC1_DEVELOPMENT_ROADMAP.md) and
+[executable continuation](PSC1_UNIFIED_SELFHOST_CONTINUATION.md).

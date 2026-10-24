@@ -12,6 +12,7 @@ const values=[0n,1n,2n,3n,5n,7n,15n,16n,17n,127n,128n,129n,255n,256n,257n,
  (1n<<32n)-1n,1n<<32n,(1n<<64n)+1n,(1n<<128n)-1n,(1n<<256n)+12345n,(1n<<512n)+19n];
 const pairs=values.flatMap(a=>values.map(b=>[a,b]));
 for(const b of values)for(const delta of [-1n,0n,1n])if(b+delta>=0n)pairs.push([b+delta,b]);
+for(const a of [0n,1n,2n,17n])pairs.push([a,1n<<20000n]);
 let seed=123456789n;
 for(let i=0;i<200;i++){seed=(seed*1103515245n+12345n)%((1n<<96n)-1n);const a=seed;seed=(seed*1103515245n+12345n)%((1n<<48n)-1n);pairs.push([a,seed]);}
 for(const [a,b]of pairs){
@@ -30,7 +31,7 @@ for(const kind of ['legacy','current']){
 }
 assert.equal(times.current.checksum,times.legacy.checksum);
 const receipt={schema:'psc1-wasm-nat-divmod/1',testedCommit:process.env.GITHUB_SHA,pairs:pairs.length,actualResults:pairs.length*4,
- maxInputBits:513,divisorZero:'unchanged',oddAndEvenDivisors:true,arbitraryPrecision:'preserved',sampledWorkload:times,
+ maxInputBits:20001,tinyDividendHugeDivisor:true,divisorZero:'unchanged',oddAndEvenDivisors:true,arbitraryPrecision:'preserved',sampledWorkload:times,
  originalFunctionSha256:sha(fs.readFileSync('test/WasmNatDivModReference.lean')),qualification:false};
 fs.writeFileSync(path.join(root,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_WASM_NAT_DIVMOD: '+JSON.stringify(receipt));

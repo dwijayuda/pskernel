@@ -56,7 +56,7 @@ local absent from the full body; exhaustion/escaping captures retain copies.
 Tail arguments move only their last direct local occurrence after all other
 argument snapshots. Add renamed-worker, duplicate, capture and exhaustion
 regressions. This keeps worker fusion's capture-safe lexical IR unchanged.
-The renamed-worker extension passes150 old/current observations and three
+The renamed-worker extension passes120 old/current observations and three
 million-character scans. Both grammars and enlarged G1 pass8b61aea4, closure
 d90f44e3e883c7502869fbfbf5eb312cee5d78ba61b893bb148a4900468c4ab3.
 Actual G2 diagnostic40123048722/job120958550385 now reaches failure in8563ms:
@@ -70,7 +70,20 @@ Public enum layouts/field move-out remain unchanged; match borrowed carriers
 with identical cloned bindings. No unsafe code, leaked owners, increased stack
 or resource limits. Focused tests compare retained recursive sharing results,
 exercise a million-node private spine and compile public owned-field matches.
-Full current-source qualification remains pending.
+Focused40124112555/job120961745118 passes120 retained-original observations,
+three million-character scans2054ms, and million-node private spine1064ms/
+127632KiB maxRSS with public enum move-out preserved. G1 closureeeca0749
+passes both grammars/all40+9 cases. The default-stack full G2 diagnostic now
+runs180794ms without crashing; actual samples reach elaboration/type inference.
+This is diagnostic progress, not G2 qualification.
+
+The first isolated four-engine request4c1ad0f0/run40124889755 starts fromd771e1ca
+with only workflow/request differences. It is superseded before qualification
+by a resource-bound correction: keep the original zero-dividend fast return
+before even-divisor factoring, so recursion always halves the dividend.
+Add tiny dividends against a20001-bit divisor. Cancel only that exact stale
+run via a validated Linux Actions control; preserve original v2 request9359
+and its still-running Wasm job. Full current-source qualification remains pending.
 
 Preserve official Lean4.35.0, strict original/transformed IR and all prior
 qualified sources/artifacts. G1/tools240s,checker120s,G2/G3 correctness1800s

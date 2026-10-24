@@ -42,8 +42,9 @@ constructors and extracts that RHS into an ordinary typed helper. Re-query CI.
 
 The shared production harness supports both targets, the existing ten cases,
 hash-bound unchanged-wire transport and the same independent admission/IR
-pipeline. Python3.14.8 and PHP8.5.11/ext-gmp are pinned; qualification records
-interpreter binary hashes. Preserve G1/corpus/tools240s,checker120s,
+pipeline. Python3.14.8 and PHP8.5.12/ext-gmp are pinned; qualification records
+interpreter binary hashes. Guard40068963704 caught setup requesting8.5.11 but
+installing8.5.12;8.5.12 is now explicit and exact-version drift remains fatal. Preserve G1/corpus/tools240s,checker120s,
 G2/G3 correctness1800s, separate original performance240s and all other limits.
 PHP retains1G; Python recursion and integer-digit global settings are unchanged.
 

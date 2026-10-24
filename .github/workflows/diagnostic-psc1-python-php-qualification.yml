@@ -75,7 +75,7 @@ jobs:
           python-version: '3.14.8'
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
-          php-version: '8.5.11'
+          php-version: '8.5.12'
           extensions: gmp
           tools: none
           coverage: none

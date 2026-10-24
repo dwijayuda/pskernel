@@ -391,7 +391,7 @@ Keep exact errors, first-error order, lexical captures, declaration positions,
 source/IR identities and all existing fuel/resource/ABI boundaries.
 
 Next qualification uses the existing one-seed harness with Python3.14.8 and
-PHP8.5.11/ext-gmp, interpreter hashes, unchanged240s G1/tools and120s checker,
+PHP8.5.12/ext-gmp, interpreter hashes, unchanged240s G1/tools and120s checker,
 and separate1800s correctness G2/G3. Original240s performance remains separate.
 Generated source equality is distinct from operational manifest event/timing
 hashes, clean-build reproducibility, DDC or formal compiler preservation.

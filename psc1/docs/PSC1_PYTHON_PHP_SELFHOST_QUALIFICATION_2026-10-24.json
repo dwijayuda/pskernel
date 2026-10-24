@@ -27,7 +27,7 @@
   },
   "runtimes": {
     "python": "3.14.8",
-    "php": "8.5.11",
+    "php": "8.5.12",
     "phpExtensions": [
       "gmp"
     ],
@@ -66,7 +66,8 @@
       },
       "admission": "not-run",
       "generatedCompiler": "not-run"
-    }
+    },
+    "observedPhpVersion": "8.5.12"
   },
   "currentFixes": {
     "explicitExceptConstructors": true,
@@ -105,9 +106,18 @@
     40067720303,
     40067973921,
     40068379958,
-    40068694963
+    40068694963,
+    40068963704
   ],
   "evidenceBoundary": "Native/census/library tests do not qualify compiler self-hosting. Preserve terminal/cancelled distinctions and exact current source; full release/source qualification still required.",
   "merge": "not-run",
-  "publication": "not-run"
+  "publication": "not-run",
+  "runtimeSetupDrift": {
+    "runId": 40068963704,
+    "jobId": 120798065470,
+    "requested": "8.5.11",
+    "observed": "8.5.12",
+    "result": "exact-version-guard-refused",
+    "resolution": "Explicit8.5.12 in workflows and trusted inventory; exact-version assertions retained, no wildcard fallback."
+  }
 }

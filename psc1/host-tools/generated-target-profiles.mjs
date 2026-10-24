@@ -5,7 +5,7 @@ const targets=Object.freeze({
  ts:Object.freeze({entry:'Ps.BackendTs.CompilerService',exportName:'psCompilerTsServiceCandidate',sourceFile:'module.ts',executable:'module.js'}),
  js:Object.freeze({entry:'Ps.BackendJs.CompilerService',exportName:'psCompilerJsServiceCandidate',sourceFile:'module.js',executable:'module.js'}),
  python:Object.freeze({entry:'Ps.BackendPython.CompilerService',exportName:'psCompilerPythonServiceCandidate',sourceFile:'module.py',executable:'module.py',runtimeVersion:'Python 3.14.8'}),
- php:Object.freeze({entry:'Ps.BackendPhp.CompilerService',exportName:'psCompilerPhpServiceCandidate',sourceFile:'module.php',executable:'module.php',runtimeVersion:'8.5.11'}),
+ php:Object.freeze({entry:'Ps.BackendPhp.CompilerService',exportName:'psCompilerPhpServiceCandidate',sourceFile:'module.php',executable:'module.php',runtimeVersion:'8.5.12'}),
  'wasm-core':Object.freeze({entry:'Ps.BackendWasm.CompilerService',exportName:'psCompilerWasmServiceCandidate',sourceFile:'module.wasm.hex',executable:'module.wasm'})
 });
 export function generatedTarget(target){assert.ok(Object.hasOwn(targets,target),'PSC1_GENERATED_TARGET_UNSUPPORTED');return targets[target];}

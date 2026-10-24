@@ -2,16 +2,13 @@ import fs from 'node:fs';import path from 'node:path';import assert from 'node:a
 const repo='dwijayuda/pskernel',root=path.resolve('dist/unified-v2-readback-input');fs.mkdirSync(root,{recursive:true});
 const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
 async function api(route){const r=await fetch('https://api.github.com/repos/'+repo+route,{headers});assert.equal(r.status,200,route);return r.json();}
-const current=await api('/actions/runs/40126488125');assert.equal(current.head_sha,'812094c1f5e1e0c0dca516dab1e30ef66f3076f7');assert.equal(current.status,'completed');
-const assets=(await api('/actions/runs/40126488125/artifacts?per_page=100')).artifacts;
-assert.equal(assets.length,4);assert.ok(['js','ts','rust','wasm-core'].every(t=>assets.some(a=>a.name==='psc1-unified-selfhost-correctness-1800s-'+t+'-812094c1f5e1e0c0dca516dab1e30ef66f3076f7')));
-const known=[
- {id:12572179712,digest:'sha256:e2826e164fb66d2916a57f39839d4d7c89b231d294afd67d904c5fecfed466be',run:40120346573},
- {id:12570778666,run:40120346573},
- {id:12573542754,digest:'sha256:3114d0ddfb0cbe144fc4cf79027ce6b3a36606bb2e0f9d57fccd6e41efd41f52',run:40126169429}
-];
+const qualification=await api('/actions/runs/40130597594');
+assert.equal(qualification.head_sha,'f5a00e75ef4b46831ccefdfc78f47a45ea1174bf');assert.equal(qualification.status,'completed');
+const assets=(await api('/actions/runs/40130597594/artifacts?per_page=100')).artifacts;
+assert.equal(assets.length,1);assert.equal(assets[0].name,'psc1-unified-selfhost-correctness-1800s-rust-f5a00e75ef4b46831ccefdfc78f47a45ea1174bf');
+const known=[{id:12575495437,digest:'sha256:8fc1de500c75def9029e9486e123fa00f9abb42b9ab1aed0d4a4567e81bcbb16',run:40130502672}];
 const metadata=[];
-for(const item of [...known,...assets.map(a=>({id:a.id,digest:a.digest,run:40126488125}))]){
+for(const item of [...known,...assets.map(a=>({id:a.id,digest:a.digest,run:40130597594}))]){
  const a=await api('/actions/artifacts/'+item.id);assert.equal(a.id,item.id);assert.equal(a.workflow_run.id,item.run);assert.equal(a.expired,false);
  if(item.digest)assert.equal(a.digest,item.digest);assert.match(a.digest,/^sha256:[a-f0-9]{64}$/);assert.ok(a.size_in_bytes<=256*1024*1024);
  const response=await fetch('https://api.github.com/repos/'+repo+'/actions/artifacts/'+a.id+'/zip',{headers,redirect:'manual'});

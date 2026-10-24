@@ -64,6 +64,7 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm ci --prefix .. --ignore-scripts --include=optional
+          npm ci --prefix host-tools --ignore-scripts --include=optional
       - name: Build existing backend facades and census
         id: native_build
         run: |

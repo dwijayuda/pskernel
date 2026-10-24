@@ -41,7 +41,22 @@ retaining the original odd-divisor arbitrary-Nat algorithm and division by
 zero semantics. Differential Wasm tests retain the exact old divmod function,
 share every other runtime function, use actual validated binaries, compare
 against JS arbitrary-precision arithmetic and record workload timing.
-Current implementation qualification remains pending until CI.
+Focused40121896995 passes703 Nat-divmod pairs/2812 actual Wasm results,
+including513-bit inputs, zero/one/odd/even divisors and a BigInt oracle.
+Sampled128-bit/128 workload351ms→297ms is a scoped measurement only.
+Both grammar audits and enlarged Rust G1 pass at75adeaa7, closure
+159b072e2c39365b67ec447b85f53d8389ba0b73e97c815976545d160d77294e.
+
+The bounded G2 samples still show String copies. Exact archived worker
+inspection40122554517 proves why: worker fusion intentionally uses fresh
+parameters and typed lexical lets; the original same-position move check
+does not follow those aliases. Extend String let moves only when the
+existing conservative WorkerFusion.mentions visitor proves the original
+local absent from the full body; exhaustion/escaping captures retain copies.
+Tail arguments move only their last direct local occurrence after all other
+argument snapshots. Add renamed-worker, duplicate, capture and exhaustion
+regressions. This keeps worker fusion's capture-safe lexical IR unchanged.
+Full current-source qualification remains pending.
 
 Preserve official Lean4.35.0, strict original/transformed IR and all prior
 qualified sources/artifacts. G1/tools240s,checker120s,G2/G3 correctness1800s

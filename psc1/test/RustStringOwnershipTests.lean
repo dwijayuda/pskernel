@@ -26,6 +26,10 @@ private def scanner (name : String) (alias : Bool) : PsVerifiedIrDeclaration :=
    body := .ifE (intrinsic .natEq [.var "fuel",n 0]) (.var "count")
      (.ifE (call "readEnd" [.var "text",.var "position"]) (.var "count")
        (.letE "character" (.primitive .char) (call "readGet" [.var "text",.var "position"]) recur))}
+private def workerScanner : PsVerifiedIrDeclaration :=
+  let original := scanner "scanWorker" false
+  {original with parameters := [p "fuel" natT,p "__workerString" strT,p "position" natT,p "count" natT],
+    body := .letE "text" strT (.var "__workerString") original.body}
 private def pairResult : PsVerifiedIrExpr :=
   intrinsic .natAdd [intrinsic .natMul [intrinsic .stringLength [.var "a"],n 100],intrinsic .stringLength [.var "b"]]
 private def paired (name : String) (duplicate : Bool) : PsVerifiedIrDeclaration :=
@@ -45,7 +49,7 @@ private def module : PsVerifiedIrModule :=
   {imports := [],structures := [],inductives := [],declarations := [
     reader "readEnd" .stringAtEnd boolT, reader "readNext" .stringNext natT,
     reader "readGet" .stringGet (.primitive .char),scanner "scan" false,
-    scanner "scanAlias" true,paired "swap" false,paired "duplicate" true,later,shadow]}
+    scanner "scanAlias" true,workerScanner,paired "swap" false,paired "duplicate" true,later,shadow]}
 private def require (name : String) (ok : Bool) : IO Unit := do
   if !ok then throw (IO.userError ("PSC1_RUST_STRING_OWNERSHIP_FAIL: " ++ name))
 private def emit (legacy : Bool) : Except PsRustEmitError String := do
@@ -77,6 +81,16 @@ def main : IO Unit := do
   require "malformed wrapper arity refused"
     (match psRustEmitExprWorker module.declarations 8 ["text"] (call "readEnd" [.var "text"]) with
      | .error .intrinsicArity => true | _ => false)
+  require "worker alias moves when the original name is dead"
+    (psRustLetValuePrinted 64 ["source"] strT (.var "source") (.var "alias") "(source).clone()" == "source")
+  require "escaping source capture retains a copy"
+    (psRustLetValuePrinted 64 ["source"] strT (.var "source") (.lambda [] strT (.var "source")) "(source).clone()" == "(source).clone()")
+  require "exhausted liveness keeps the copy"
+    (psRustLetValuePrinted 0 ["source"] strT (.var "source") (.var "alias") "(source).clone()" == "(source).clone()")
+  require "renamed worker String can move"
+    ((psRustTailStringMove ["alias"] (p "worker" strT) (.var "alias") []).isSome)
+  require "duplicate move waits for the last occurrence"
+    ((psRustTailStringMove ["alias"] (p "worker" strT) (.var "alias") [.var "alias"]).isNone)
   IO.FS.createDirAll "dist/rust-string-ownership"
   for legacy in [false,true] do
     match emit legacy with

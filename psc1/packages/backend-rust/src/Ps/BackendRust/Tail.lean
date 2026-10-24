@@ -93,7 +93,28 @@ def psRustTailStringPassthrough (parameter : PsVerifiedIrParameter)
       | _ => false
   | _ => false
 
-def psRustTailHasStringPassthrough (parameters : List PsVerifiedIrParameter)
+-- Only the last direct occurrence of a local can move. Earlier occurrences,
+-- computed operands and frozen eta captures are evaluated into owned temporaries.
+def psRustTailStringMove (locals : List String) (parameter : PsVerifiedIrParameter)
+    (argument : PsVerifiedIrExpr) (others : List PsVerifiedIrExpr) : Option String :=
+  match parameter.type with
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.string =>
+          match argument with
+          | PsVerifiedIrExpr.var name =>
+              let duplicate : Bool := psListAny
+                (fun (other : PsVerifiedIrExpr) =>
+                  match other with
+                  | PsVerifiedIrExpr.var value => psStringEq value name
+                  | _ => false) others;
+              if psRustStringListContains locals name && !duplicate then Option.some name
+              else Option.none
+          | _ => Option.none
+      | _ => Option.none
+  | _ => Option.none
+
+def psRustTailHasStringPassthrough (locals : List String) (parameters : List PsVerifiedIrParameter)
     (arguments : List PsVerifiedIrExpr) : Bool :=
   match parameters with
   | List.nil => false
@@ -101,8 +122,9 @@ def psRustTailHasStringPassthrough (parameters : List PsVerifiedIrParameter)
       match arguments with
       | List.nil => false
       | List.cons argument others =>
-          if psRustTailStringPassthrough parameter argument then true
-          else psRustTailHasStringPassthrough rest others
+          match psRustTailStringMove locals parameter argument others with
+          | Option.some _ => true
+          | Option.none => psRustTailHasStringPassthrough locals rest others
 
 def psRustTailArgumentTemp (index : Nat) : String :=
   psRustConcat2 "__ps_internal_tail_arg_" (psNatToString index)
@@ -117,7 +139,7 @@ def psRustTailPrepareCaptured (captured : List String) (index : Nat) :
       Prod.mk (psRustJoin "" ["let ", temp, " = ", printed, "; ", prepared.fst])
         (List.cons temp prepared.snd)
 
-def psRustTailPrepareArguments (parameters : List PsVerifiedIrParameter)
+def psRustTailPrepareArguments (locals : List String) (parameters : List PsVerifiedIrParameter)
     (arguments : List PsVerifiedIrExpr) (printed : List String) (index : Nat) :
     Prod String (List String) :=
   match parameters with
@@ -129,21 +151,22 @@ def psRustTailPrepareArguments (parameters : List PsVerifiedIrParameter)
           match printed with
           | List.nil => Prod.mk "" List.nil
           | List.cons value values =>
-              let prepared := psRustTailPrepareArguments rest others values (Nat.succ index);
-              if psRustTailStringPassthrough parameter argument then
-                Prod.mk prepared.fst (List.cons (psRustIdentifier parameter.name) prepared.snd)
-              else
-                let temp := psRustTailArgumentTemp index;
-                Prod.mk (psRustJoin "" ["let ", temp, " = ", value, "; ", prepared.fst])
-                  (List.cons temp prepared.snd)
+              let prepared := psRustTailPrepareArguments locals rest others values (Nat.succ index);
+              match psRustTailStringMove locals parameter argument others with
+              | Option.some name =>
+                  Prod.mk prepared.fst (List.cons (psRustIdentifier name) prepared.snd)
+              | Option.none =>
+                  let temp := psRustTailArgumentTemp index;
+                  Prod.mk (psRustJoin "" ["let ", temp, " = ", value, "; ", prepared.fst])
+                    (List.cons temp prepared.snd)
 
-def psRustTailTransition (declaration : PsVerifiedIrDeclaration)
+def psRustTailTransition (locals : List String) (declaration : PsVerifiedIrDeclaration)
     (call : PsRustTailCall) (printed : List String) : String :=
   let offset := psListLength call.captured;
   let parameters := psRustTailParameterSuffix offset declaration.parameters;
-  if psRustTailHasStringPassthrough parameters call.arguments then
+  if psRustTailHasStringPassthrough locals parameters call.arguments then
     let captures := psRustTailPrepareCaptured call.captured 0;
-    let arguments := psRustTailPrepareArguments parameters call.arguments printed offset;
+    let arguments := psRustTailPrepareArguments locals parameters call.arguments printed offset;
     psRustJoin "" ["{ ", captures.fst, arguments.fst, "__ps_internal_tail_state = ",
       psRustTailTuple (psListAppend captures.snd arguments.snd), "; continue; }"]
   else psRustConcat3 "{ __ps_internal_tail_state = "
@@ -166,7 +189,7 @@ def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
             match psRustEmitExprListWith ordinary call.arguments with
             | Except.error error => Except.error error
             | Except.ok printed =>
-                Except.ok (psRustTailTransition declaration call printed)
+                Except.ok (psRustTailTransition locals declaration call printed)
         | Option.none =>
             match expr with
             | PsVerifiedIrExpr.letE name type value body =>
@@ -176,7 +199,7 @@ def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
                     match smaller (List.cons name locals) (psRustTailEnterAlias declaration locals aliases remaining name value) body with
                     | Except.error error => Except.error error
                     | Except.ok printedBody =>
-                        match psRustTailLet name type value printedValue printedBody with
+                        match psRustTailLet name type value (psRustLetValuePrinted remaining locals type value body printedValue) printedBody with
                         | Except.error error => Except.error error
                         | Except.ok printedLet =>
                             match psRustTailAliasFor declaration locals remaining name value with

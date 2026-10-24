@@ -1,4 +1,5 @@
 import Ps.BackendRust.Captures
+import Ps.CompilerIr.WorkerFusion
 
 def psRustCloneExprPrinted (expr : PsVerifiedIrExpr) (printed : String) : String :=
   match expr with
@@ -1113,6 +1114,26 @@ def psRustCallStringReader (declarations : List PsVerifiedIrDeclaration)
         else psRustFindStringReader declarations name
     | _ => Option.none
 
+-- Worker beta applications retain typed lexical lets. Move a local String
+-- through a let only when the original binding is absent from the whole body.
+-- The existing conservative visitor includes shadowed mentions and keeps the
+-- original copy on exhaustion; escaping captures therefore retain snapshots.
+def psRustLetValuePrinted (fuel : Nat) (locals : List String)
+    (type : PsVerifiedIrType) (value body : PsVerifiedIrExpr) (printed : String) : String :=
+  match type with
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.string =>
+          match value with
+          | PsVerifiedIrExpr.var name =>
+              if psRustStringListContains locals name &&
+                  !Ps.Internal.WorkerFusion.mentions fuel name body then
+                psRustIdentifier name
+              else printed
+          | _ => printed
+      | _ => printed
+  | _ => printed
+
 def psRustEmitExprWorker
     (declarations : List PsVerifiedIrDeclaration)
     (fuel : Nat) :
@@ -1216,7 +1237,7 @@ def psRustEmitExprWorker
                   | Except.ok printedType =>
                       Except.ok (psRustJoin ""
                         ["{ let ", psRustIdentifier name, ": ", printedType, " = ",
-                          psRustCloneExprPrinted value printedValue, "; ", printedBody, " }"])
+                          psRustCloneExprPrinted value (psRustLetValuePrinted remaining locals type value body printedValue), "; ", printedBody, " }"])
         | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
           match emitNested condition with
           | Except.error error =>

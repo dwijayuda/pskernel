@@ -48,7 +48,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.elan/bin:$PATH"
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_independent_checker psc1_js_service_seed
+          lake build psc1_independent_checker psc1_js_service_seed psc1_source_census_probe
           node scripts/generated-session-boundary-tests.mjs
       - name: Verify immutable native and qualified engine archives
         env:

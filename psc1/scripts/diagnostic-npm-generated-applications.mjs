@@ -130,13 +130,31 @@ for(const engine of Object.keys(engines)){
 }
 // Real application source modules exercise both grammars through installed engines.
 const applicationCases=[];
+const canonicalPs=new Map();
+{
+ // Standard library .ps is derived by the existing owned translator, exactly as
+ // normal native package resolution and compiler source census already do.
+ const ordered=[],seen=new Set();
+ function visit(module){
+  if(seen.has(module))return;
+  const file=path.join(root,'stdlib',...module.split('.'))+'.lean',text=fs.readFileSync(file,'utf8');
+  for(const m of text.matchAll(/^import\s+(.+)$/gm))for(const dep of m[1].trim().split(/\s+/))visit(dep);
+  seen.add(module);ordered.push({module,file});
+ }
+ visit('ProofScript.System.IO');
+ const report=path.join(work,'stdlib-ps-census.json');
+ run(path.join(root,'.lake/build/bin/psc1_source_census_probe'),['--grammar','ps','--out',report,'--modules',...ordered.flatMap(x=>[x.module,x.file])]);
+ const q=JSON.parse(fs.readFileSync(report));
+ for(const r of q.records){assert.equal(r.translation,'accepted');assert.equal(r.parse,'accepted');assert.equal(r.elaboration,'accepted');assert.equal(typeof r.inputSource,'string');canonicalPs.set(r.module,r.inputSource);}
+}
+
 function applicationSources(grammar,entryModule,entryText){
  const ordered=[],seen=new Set(),active=new Set();
  function visit(module,text){
   if(seen.has(module))return;assert.ok(!active.has(module),'application import cycle');active.add(module);
   const file=module.startsWith('ProofScript.')?path.join(root,'stdlib',...module.split('.'))+'.'+grammar
    :path.join(root,'test/applications',...module.split('.'))+'.'+grammar;
-  const source=text===undefined?fs.readFileSync(file,'utf8'):text;
+  const source=text===undefined?(grammar==='ps'&&module.startsWith('ProofScript.')?canonicalPs.get(module):fs.readFileSync(file,'utf8')):text;assert.equal(typeof source,'string');
   for(const m of source.matchAll(/^import\s+(.+)$/gm))for(const name of m[1].trim().split(/\s+/))visit(name);
   active.delete(module);seen.add(module);ordered.push({module,kind:grammar,text:source});
  }

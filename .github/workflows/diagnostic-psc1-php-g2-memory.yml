@@ -1,0 +1,44 @@
+name: PSC1 PHP exact G2 memory-site inspection
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-php-g2-memory.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact failed job and immutable artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/dwijayuda/pskernel/actions/jobs/120804424493 > job.json
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12551302677 > artifact.json
+          python3 - <<'PY'
+          import json
+          j=json.load(open("job.json"));a=json.load(open("artifact.json"))
+          assert j["run_id"]==40071043260 and j["status"]=="completed" and j["conclusion"]=="failure"
+          assert a["workflow_run"]["id"]==40071043260
+          assert a["workflow_run"]["head_sha"]=="59ef3544cb97e03ffb9e0289e61685b654349cf2"
+          assert a["digest"]=="sha256:bda38c19687b8ad9a75d5c6c3e047481ed04ad0d3b579ad74449dcba93825fbc"
+          assert not a["expired"]
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40071043260'
+          artifact-ids: '12551302677'
+          path: baseline
+      - name: Read exact generated source failure site and qualification evidence
+        run: python3 .github/diagnostics/psc1-php-g2-memory.py baseline
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-php-g2-memory-inspection-${{ github.sha }}
+          path: diagnostics/
+          retention-days: 90

@@ -15,11 +15,12 @@ def psPhpRuntimeSelectAcc (requested : List String) (order : List String)
         psPhpRuntimeSelectAcc requested rest (List.cons helper selectedRev)
       else psPhpRuntimeSelectAcc requested rest selectedRev
 
-def psPhpRuntimeClosure (requested : List String) : List String :=
+def psPhpRuntimeClosureWithExtractionPolicy (requested : List String) (efficient : Bool) : List String :=
   let withGet : List String :=
     if psBackendNameSeen "stringNext" requested then List.cons "stringGet" requested else requested;
   let withValid : List String :=
-    if psBackendNameSeen "stringGet" withGet then List.cons "utf8Valid" withGet else withGet;
+    if psBackendNameSeen "stringGet" withGet || (efficient && psBackendNameSeen "stringExtract" withGet) then
+      List.cons "utf8Valid" withGet else withGet;
   let withChars : List String :=
     if psBackendNameSeen "stringExtract" withValid then List.cons "unicodeChars" withValid else withValid;
   let withGmp : List String :=
@@ -27,6 +28,9 @@ def psPhpRuntimeClosure (requested : List String) : List String :=
         psBackendNameSeen helper ["charOfNat", "charToNat", "stringGet", "stringNext", "stringExtract"]) withChars
     then List.cons "gmp" withChars else withChars;
   psPhpRuntimeSelectAcc withGmp psPhpRuntimeOrder List.nil
+
+def psPhpRuntimeClosure (requested : List String) : List String :=
+  psPhpRuntimeClosureWithExtractionPolicy requested true
 
 def psPhpRuntimeVariablesAcc (requirements : List String) (variablesRev : List String) : List String :=
   match requirements with
@@ -51,14 +55,30 @@ def psPhpRuntimePart (helper : String) : String :=
   else if psStringEq helper "charToNat" then "    $__ps_charToNat = static function (string $character): \\GMP {\n        $first = ord($character[0]);\n        if ($first < 0x80) {\n            return gmp_init($first);\n        }\n        $size = strlen($character);\n        $value = $first & (0x7f >> $size);\n        for ($index = 1; $index < $size; $index++) {\n            $value = ($value << 6) | (ord($character[$index]) & 0x3f);\n        }\n        return gmp_init($value);\n    };\n"
   else if psStringEq helper "stringGet" then "    $__ps_stringGet = static function (string $source, \\GMP $position) use ($__ps_utf8Valid): string {\n        // Validate the entire String even when the requested position is outside it.\n        if (!$__ps_utf8Valid($source)) {\n            throw new \\TypeError('PSC1_PHP_INVALID_UTF8');\n        }\n        if (gmp_cmp($position, 0) < 0 || gmp_cmp($position, strlen($source)) >= 0) {\n            return 'A';\n        }\n        // Conversion is safe only after comparison with the native String size.\n        $offset = gmp_intval($position);\n        $first = ord($source[$offset]);\n        if ($first < 0x80) {\n            return $source[$offset];\n        }\n        if ($first < 0xc0) {\n            return 'A';\n        }\n        $width = $first <= 0xdf ? 2 : ($first <= 0xef ? 3 : 4);\n        return substr($source, $offset, $width);\n    };\n"
   else if psStringEq helper "stringNext" then "    $__ps_stringNext = static function (string $source, \\GMP $position) use ($__ps_stringGet): \\GMP {\n        return gmp_add($position, strlen($__ps_stringGet($source, $position)));\n    };\n"
-  else if psStringEq helper "stringExtract" then "    $__ps_stringExtract = static function (string $source, \\GMP $start, \\GMP $stop) use ($__ps_unicodeChars): string {\n        if (gmp_cmp($start, $stop) >= 0) {\n            return '';\n        }\n        $offset = 0;\n        $started = false;\n        $result = '';\n        foreach ($__ps_unicodeChars($source) as $character) {\n            if (!$started) {\n                $started = gmp_cmp($start, $offset) === 0;\n            }\n            if ($started) {\n                if (gmp_cmp($stop, $offset) === 0) {\n                    return $result;\n                }\n                $result .= $character;\n            }\n            $offset += strlen($character);\n        }\n        return $result;\n    };\n"
+  else if psStringEq helper "stringExtract" then "    $__ps_stringExtract = static function (string $source, \\GMP $start, \\GMP $stop) use ($__ps_utf8Valid): string {\n        if (gmp_cmp($start, $stop) >= 0) {\n            return '';\n        }\n        if (!$__ps_utf8Valid($source)) {\n            throw new \\TypeError('PSC1_PHP_INVALID_UTF8');\n        }\n        $size = strlen($source);\n        if (gmp_cmp($start, 0) < 0 || gmp_cmp($start, $size) >= 0) {\n            return '';\n        }\n        $begin = gmp_intval($start);\n        if ((ord($source[$begin]) & 0xc0) === 0x80) {\n            return '';\n        }\n        $end = $size;\n        if (gmp_cmp($stop, $size) < 0) {\n            $candidate = gmp_intval($stop);\n            if ((ord($source[$candidate]) & 0xc0) !== 0x80) {\n                $end = $candidate;\n            }\n        }\n        return substr($source, $begin, $end - $begin);\n    };\n"
   else ""
 
-def psPhpRuntimeSourceAcc (requirements : List String) (source : String) : String :=
+-- The same emitter retains the exact historical helper for differential policy.
+-- Production validates UTF8 once through the existing two-key validity cache;
+-- no additional retained String cache or global interpreter limit is introduced.
+def psPhpRuntimePartWithExtractionPolicy (helper : String) (efficient : Bool) : String :=
+  if efficient || !psStringEq helper "stringExtract" then psPhpRuntimePart helper
+  else "    $__ps_stringExtract = static function (string $source, \\GMP $start, \\GMP $stop) use ($__ps_unicodeChars): string {\n        if (gmp_cmp($start, $stop) >= 0) {\n            return '';\n        }\n        $offset = 0;\n        $started = false;\n        $result = '';\n        foreach ($__ps_unicodeChars($source) as $character) {\n            if (!$started) {\n                $started = gmp_cmp($start, $offset) === 0;\n            }\n            if ($started) {\n                if (gmp_cmp($stop, $offset) === 0) {\n                    return $result;\n                }\n                $result .= $character;\n            }\n            $offset += strlen($character);\n        }\n        return $result;\n    };\n"
+
+def psPhpRuntimeSourceAccWithExtractionPolicy (requirements : List String) (source : String)
+    (efficient : Bool) : String :=
   match requirements with
   | List.nil => source
   | List.cons helper rest =>
-      psPhpRuntimeSourceAcc rest (String.Internal.append source (psPhpRuntimePart helper))
+      psPhpRuntimeSourceAccWithExtractionPolicy rest
+        (String.Internal.append source (psPhpRuntimePartWithExtractionPolicy helper efficient)) efficient
+
+def psPhpRuntimeSourceAcc (requirements : List String) (source : String) : String :=
+  psPhpRuntimeSourceAccWithExtractionPolicy requirements source true
+
+def psPhpSelectedRuntimeSourceWithExtractionPolicy (requirements : List String)
+    (efficient : Bool) : String :=
+  psPhpRuntimeSourceAccWithExtractionPolicy requirements "" efficient
 
 def psPhpSelectedRuntimeSource (requirements : List String) : String :=
-  psPhpRuntimeSourceAcc requirements ""
+  psPhpSelectedRuntimeSourceWithExtractionPolicy requirements true

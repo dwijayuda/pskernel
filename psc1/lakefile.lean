@@ -534,7 +534,7 @@ lean_lib PsJsAppliedPrefixReference where
 
 lean_lib PsScriptRuntimeReference where
   srcDir := "test"
-  roots := #[`ScriptRuntimeReference, `PythonUtf8Reference]
+  roots := #[`ScriptRuntimeReference, `PythonUtf8Reference, `PhpExtractReference]
 
 lean_exe psc1_script_runtime_normalization_tests where
   srcDir := "test"
@@ -571,3 +571,7 @@ lean_exe psc1_python_utf8_tests where
 lean_exe psc1_direct_call_plan_tests where
   srcDir := "test"
   root := `DirectCallPlanTests
+
+lean_exe psc1_php_extract_tests where
+  root := `PhpExtractTests
+  supportInterpreter := true

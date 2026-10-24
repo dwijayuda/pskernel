@@ -1220,9 +1220,9 @@ def psPhpEmitModuleWithIoAndPoliciesAndDirectCalls (validated : PsValidatedIrMod
           (PsPhp.exprRequirements valueNames 4096
             (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.body)))
     module.declarations
-  let requirements : List String := psPhpRuntimeClosure
-    (if flatConstructors then requested else PsPhp.withoutNodeRequirements requested)
-  let runtimeSource : String := psPhpSelectedRuntimeSource requirements
+  let requirements : List String := psPhpRuntimeClosureWithExtractionPolicy
+    (if flatConstructors then requested else PsPhp.withoutNodeRequirements requested) flatConstructors
+  let runtimeSource : String := psPhpSelectedRuntimeSourceWithExtractionPolicy requirements flatConstructors
   let globals : List (Prod String String) :=
     psListMap PsPhp.globalEntry (psBackendSourceZipIndex module.declarations)
   let context : PsPhp.Context :=

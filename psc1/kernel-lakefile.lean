@@ -410,3 +410,12 @@ lean_lib PsKernelOrdinaryEliminationNativeProofs where
 lean_exe psc1_kernel_ordinary_elimination_regression where
   srcDir := "test"
   root := `PsKernelOrdinaryEliminationRegression
+
+-- Private recursor checking and complete ordinary-admission native protocols.
+lean_lib PsKernelOrdinaryAdmissionNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryAdmissionProofs]
+
+lean_exe psc1_kernel_ordinary_admission_private_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2OrdinaryAdmissionRegression

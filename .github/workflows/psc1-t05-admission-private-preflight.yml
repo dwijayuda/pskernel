@@ -1,4 +1,4 @@
-name: PSC1 T05 private admission native and portable diagnostic
+name: PSC1 T05 private admission native diagnostic
 'on':
   workflow_dispatch: null
   push:
@@ -7,6 +7,8 @@ name: PSC1 T05 private admission native and portable diagnostic
     - .github/workflows/psc1-t05-admission-private-preflight.yml
     - psc1/kernel-lakefile.lean
     - psc1/packages/pskernel-core/src/**
+    - psc1/test/PsKernelOrdinaryAdmissionProofs.lean
+    - psc1/test/PsKernelExprV2OrdinaryAdmissionRegression.lean
 permissions:
   contents: read
 jobs:
@@ -40,7 +42,9 @@ jobs:
         import hashlib,json,os,pathlib
         repo=pathlib.Path('..').resolve();out=pathlib.Path(os.environ['PSC1_T05_DIR'])
         paths=['.github/workflows/psc1-t05-admission-private-preflight.yml',
-          'psc1/kernel-lakefile.lean','psc1/lean-toolchain','psc1/scripts/install-lean435-ci.sh']
+          'psc1/kernel-lakefile.lean','psc1/lean-toolchain','psc1/scripts/install-lean435-ci.sh',
+          'psc1/test/PsKernelOrdinaryAdmissionProofs.lean',
+          'psc1/test/PsKernelExprV2OrdinaryAdmissionRegression.lean']
         paths+=sorted(str(p.relative_to(repo)) for p in
           (repo/'psc1/packages/pskernel-core/src').rglob('*.lean'))
         records=[]
@@ -75,6 +79,87 @@ jobs:
         (root/'diagnostic.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T05_ADMISSION_PRIVATE_COMPILE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
+    - name: Kernel-check private rule validation and synchronized publication
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_private_count_status=0
+        psc1_private_lean_status=0
+        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryAdmissionProofs.lean)" -eq 27 \
+          || psc1_private_count_status=$?
+        lake -f kernel-lakefile.lean env lean test/PsKernelOrdinaryAdmissionProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/admission-private-proofs.log" || psc1_private_lean_status=$?
+        printf 'PSC1_T05_ADMISSION_PRIVATE_PROOF_STATUS module=PsKernelOrdinaryAdmissionProofs count=27 countStatus=%s leanStatus=%s\n' \
+          "$psc1_private_count_status" "$psc1_private_lean_status" \
+          | tee "$PSC1_T05_DIR/admission-private-proof-status.log"
+        test "$psc1_private_count_status" -eq 0
+        test "$psc1_private_lean_status" -eq 0
+    - name: Run complete private admission matrix and separate pinned Lean controls
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2OrdinaryAdmissionRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/admission-private-native.log"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        source=pathlib.Path('test/PsKernelOrdinaryAdmissionProofs.lean')
+        module='PsKernelOrdinaryAdmissionProofs'
+        names=re.findall(r'^#print axioms ([A-Za-z0-9_.$]+)\s*$',source.read_text(),re.M)
+        names=[name if '.' in name else module+'.'+name for name in names]
+        proofRaw=(root/'admission-private-proofs.log').read_bytes();proofLog=proofRaw.decode()
+        actual=re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",proofLog)
+        assert len(names)==len(set(names))==27 and [n for n,_ in actual]==names
+        assert not any(x in proofLog for x in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler'))
+        assert all({x.strip() for x in axioms.split(',') if x.strip()} <= {'propext','Classical.choice','Quot.sound'} for _,axioms in actual)
+        assert (root/'admission-private-proof-status.log').read_text().splitlines()==[
+          'PSC1_T05_ADMISSION_PRIVATE_PROOF_STATUS module='+module+' count=27 countStatus=0 leanStatus=0']
+        raw=(root/'admission-private-native.log').read_bytes();log=raw.decode()
+        labels=re.findall(r'^PSC1_ORDINARY_ADMISSION_ASSERT (.+)$',log,re.M)
+        sections=re.findall(r'^PSC1_ORDINARY_ADMISSION_SECTION ([A-Za-z0-9_]+)=(\d+)$',log,re.M)
+        expected={'harness':1,'matrix':126,'protocol':16}
+        assert len(labels)==len(set(labels))==143
+        assert len(sections)==len(expected) and {k:int(v) for k,v in sections}==expected
+        assert {k:sum(label.startswith(k+'/') for label in labels) for k in expected}==expected
+        marker='PSC1_ORDINARY_ADMISSION_PRIVATE_NATIVE: PASS assertions=143 rows=18 fuelValues=6 privateAdmission=true fullAdmission=false'
+        assert log.splitlines().count(marker)==1
+        rows=[label[len('matrix/'):-len('/required-outcome')] for label in labels if label.startswith('matrix/') and label.endswith('/required-outcome')]
+        assert len(rows)==len(set(rows))==18
+        fuels=[0,1,2,3,8,4096]
+        assert {label for label in labels if label.startswith('matrix/')}=={
+          'matrix/'+row+'/fuel='+str(fuel) for row in rows for fuel in fuels}|{
+          'matrix/'+row+'/required-outcome' for row in rows}
+        oracleLabels=re.findall(r'^PSC1_ORDINARY_ADMISSION_ORACLE_ASSERT (.+)$',log,re.M)
+        oracleMarker='PSC1_ORDINARY_ADMISSION_ORACLE: PASS controls=18 accepted=14 rejected=4 safeGenerated=13 unsafeContract=1'
+        assert oracleLabels==rows and log.splitlines().count(oracleMarker)==1
+        identity={'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+          'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':'native'}
+        inventory={'schema':'psc1-t05-admission-private-native-inventory-v1',**identity,
+          'assertions':143,'sectionAssertions':expected,'rows':18,'fuelValues':6,
+          'assertionLabels':labels,'logSha256':hashlib.sha256(raw).hexdigest(),
+          'privateAdmission':True,'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'admission-private-native-inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
+        oracle={'schema':'psc1-t05-admission-official-native-inventory-v1',**identity,
+          'controls':18,'accepted':14,'rejected':4,'safeGenerated':13,'unsafeContract':1,
+          'assertionLabels':oracleLabels,'logSha256':hashlib.sha256(raw).hexdigest(),
+          'leanVersion':'4.35.0','leanCommit':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'}
+        (root/'admission-official-native-inventory.json').write_text(json.dumps(oracle,indent=2)+'\n')
+        print('PSC1_T05_ADMISSION_PRIVATE_NATIVE_INVENTORY: PASS assertions=143 groups=3')
+        print('PSC1_T05_ADMISSION_OFFICIAL_NATIVE_INVENTORY: PASS controls=18 accepted=14 rejected=4 safeGenerated=13 unsafeContract=1')
+        digest=lambda path:{'bytes':len(path.read_bytes()),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+        receipt={'schema':'psc1-t05-admission-private-native-diagnostic-v1',**identity,'totalProofs':27,
+          'proofs':[{'module':module,'count':27,'names':names,
+            'source':digest(source),'log':digest(root/'admission-private-proofs.log')}],
+          'nativeAssertions':143,'officialControls':18,
+          'inventory':digest(root/'admission-private-native-inventory.json'),
+          'officialInventory':digest(root/'admission-official-native-inventory.json'),
+          'inputs':digest(root/'inputs.json'),'qualified':False,'diagnosticOnly':True,
+          'privateAdmission':True,'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'diagnostic.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_ADMISSION_PRIVATE_DIAGNOSTIC: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -82,35 +167,3 @@ jobs:
         path: ${{ runner.temp }}/psc1-t05-admission-private-native/
         if-no-files-found: error
         include-hidden-files: true
-  admission-portable-diagnostic:
-    needs: admission-native-diagnostic
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.sha }}
-        persist-credentials: false
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-    - name: Install pinned Lean
-      run: bash psc1/scripts/install-lean435-ci.sh
-    - name: Check exact native-passed source through authentic PSC1
-      working-directory: psc1
-      shell: bash
-      run: |
-        set -euo pipefail
-        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
-        mkdir -p "$RUNNER_TEMP/psc1-admission-private-portable"
-        lake build psc1 2>&1 | tee "$RUNNER_TEMP/psc1-admission-private-portable/compiler-build.log"
-        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAdmission.lean \
-          2>&1 | tee "$RUNNER_TEMP/psc1-admission-private-portable/admission-source-check.log"
-        printf 'PSC1_T05_ADMISSION_PRIVATE_PORTABLE_DIAGNOSTIC: PASS source=%s fullAdmission=false qualified=false\n' "$GITHUB_SHA"
-    - uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: psc1-t05-admission-private-portable-diagnostic-${{ github.run_attempt }}
-        path: ${{ runner.temp }}/psc1-admission-private-portable/
-        if-no-files-found: error

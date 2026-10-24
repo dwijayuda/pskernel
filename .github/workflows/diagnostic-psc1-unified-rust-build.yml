@@ -1,0 +1,70 @@
+name: PSC1 exact unified Rust target build measurements
+on:
+  push:
+    branches: [diagnostic/psc1-unified-rust-build-20261025]
+    paths: [.github/workflows/diagnostic-psc1-unified-rust-build.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        optimization: [0, 1]
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12568190623'
+          run-id: '40113918732'
+          github-token: ${{ github.token }}
+          path: psc1/dist/rust-build-input
+      - name: Pin compiler and fetch unchanged reviewed dependencies
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+          cargo fetch --locked --manifest-path dist/rust-build-input/generated-unified-rust-compiler/G1-service/Cargo.toml
+      - name: Measure actual admitted compiler source without extending tool deadline
+        env:
+          PSC1_DIAGNOSTIC_OPT: ${{ matrix.optimization }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';
+          import {sha,boundedRun} from './host-tools/generated-target-tools.mjs';
+          const root='dist/rust-build-input/generated-unified-rust-compiler';
+          const q=JSON.parse(fs.readFileSync(root+'/qualification.json'));
+          assert.equal(q.testedCommit,'b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac');
+          assert.equal(q.sourceClosureDigest,'873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d');
+          assert.equal(q.bootstrap.logicalAdmission,'accepted');
+          const dir=root+'/G1-service',source=fs.readFileSync(dir+'/module.rs');
+          assert.equal(sha(source),q.bootstrap.sourceSha256);
+          const candidate=JSON.parse(fs.readFileSync(root+'/G1-bootstrap.candidate.json'));
+          assert.equal(sha(candidate.source),sha(source));
+          const cargo=fs.readFileSync(dir+'/Cargo.toml','utf8');
+          assert.ok(cargo.endsWith('opt-level=1\n'));
+          fs.writeFileSync(dir+'/Cargo.toml',cargo.replace('opt-level=1','opt-level='+process.env.PSC1_DIAGNOSTIC_OPT)+'codegen-units=256\n');
+          const r=boundedRun('cargo',['build','--release','--locked','--offline','--message-format=short','--manifest-path',dir+'/Cargo.toml'],
+            {timeoutMs:240000,logDirectory:path.resolve('dist/rust-build-measurement'),env:{...process.env,CARGO_TARGET_DIR:path.resolve('dist/rust-build-target')}});
+          const report={schema:'psc1-unified-rust-build-measurement/1',sourceCommit:q.testedCommit,sourceSha256:sha(source),sourceBytes:source.length,
+           sourceModules:q.sourceModules,optimization:Number(process.env.PSC1_DIAGNOSTIC_OPT),codegenUnits:256,timeoutMs:240000,
+           elapsedMs:r.elapsedMs,status:r.status,signal:r.signal,error:r.error,maxRssKiB:r.maxRssKiB,peakTreeRssKiB:r.peakTreeRssKiB,
+           selfHostQualification:'not-provided'};
+          fs.writeFileSync('dist/rust-build-measurement/report.json',JSON.stringify(report,null,2));
+          console.log('PSC1_UNIFIED_RUST_BUILD_MEASUREMENT: '+JSON.stringify(report));
+          if(r.status!==0)console.log(r.stderr.slice(-3000));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-unified-rust-build-opt${{ matrix.optimization }}-${{ github.sha }}
+          path: psc1/dist/rust-build-measurement/
+          retention-days: 90

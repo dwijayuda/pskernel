@@ -1,0 +1,1461 @@
+{
+  "schema": "psc1-t01f-final-qualification-reconciliation-v1",
+  "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "runIds": {
+    "generatedIntegration": 40061694631,
+    "canonicalCorrectness": 40061694623,
+    "research": 40061694661,
+    "fullArena": 40061694705,
+    "profile": 40061694607
+  },
+  "runAttempt": 1,
+  "observedAtUtc": "2026-10-24T05:41:07.889590+00:00",
+  "scopedAAndT01FReadiness": "READY_FOR_ROOT_REVIEW",
+  "ready": true,
+  "integrationPerformed": false,
+  "pendingRequiredEvidence": [],
+  "checks": {
+    "native": {
+      "status": "PASS",
+      "proofReports": 232,
+      "proofFiles": 16,
+      "universalCacheAnalysisProofs": 7,
+      "unchangedScalarProofs": 11,
+      "retainedKnotProofs": 16,
+      "artifactId": 12547507468,
+      "artifactFiles": 50,
+      "requiredMarkerChecks": 120
+    },
+    "canonicalNative": {
+      "status": "PASS",
+      "cases": 62,
+      "retainedC0Stages": 4,
+      "jobId": 120776389590
+    },
+    "sourcePreservation": {
+      "status": "PASS",
+      "rootSourceComparisonReceiptReconciled": true,
+      "handoff": "c775391e13506208a9c7372bd212102b7e9a49e5",
+      "productionFiles": [
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/BinderSpines.lean",
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/DeltaStep.lean",
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Quick.lean",
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Core.lean",
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Helpers.lean",
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/Whnf.lean",
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean",
+        "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
+      ],
+      "protectedFilesUnchanged": [
+        "Runtime/Acceleration/Cache.lean",
+        "Runtime/Acceleration/CachePolicy.lean",
+        "Core/Expr.lean",
+        "Runtime/Acceleration/ScalarHash.lean",
+        "Checker/Knot.lean",
+        "psc1/test/PsKernelScalarHashWorkerRegression.lean"
+      ],
+      "unchangedScalarProofs": 11,
+      "scope": "Static source-preservation review; separate from runtime qualification."
+    },
+    "generatedProducer": {
+      "status": "PASS",
+      "artifactId": 12548237667,
+      "artifactFiles": 69,
+      "matrixAssertions": 1884,
+      "providerCLI": 24,
+      "providerAPI": 8,
+      "producerIdentity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+        "runId": "40061694631",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9986116,
+            "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1208,
+            "sha256": "1f8d13f7357fa0173a075e7fcf1ab8bc61054e7b0dc23c189a141a89f843b167"
+          },
+          "orchestrator": {
+            "bytes": 15637,
+            "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+          },
+          "workflow": {
+            "bytes": 97086,
+            "sha256": "0328921094ce5c2e5cf06e5b765813a7e1093ff74e71dc2c7759939b1dbe943b"
+          },
+          "providerManifest": {
+            "bytes": 2204,
+            "sha256": "93adf0f535d1d4f287b867d2b754a4dd4e66ffae95c35ad06ad4209376b8e86a"
+          }
+        }
+      },
+      "fullWorkerInspection": "Independent static complete-body inspection; not represented as an executed final workflow body guard.",
+      "resourcePolicy": {
+        "fuel": 4096,
+        "nodeMajor": 22,
+        "typescript": "7.0.2",
+        "oldSpaceMiB": 2048,
+        "oldSpaceIsHardRssLimit": false,
+        "emptyPATH": true,
+        "shardJobMinutes": 25,
+        "maxParallel": 2
+      }
+    },
+    "canonicalProducer": {
+      "status": "PASS",
+      "artifactId": 12548996560,
+      "artifactFiles": 43,
+      "matrixAssertions": 1884,
+      "providerCLI": 24,
+      "providerAPI": 8,
+      "producerIdentity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+        "runId": "40061694623",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+        "route": "canonical",
+        "producerJob": "psc1-portability",
+        "producerArtifact": "psc1-canonical-kernel-qualification",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 9986123,
+            "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1199,
+            "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+          },
+          "orchestrator": {
+            "bytes": 15637,
+            "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+          },
+          "workflow": {
+            "bytes": 45334,
+            "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+          },
+          "providerManifest": {
+            "bytes": 2416,
+            "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+          }
+        }
+      },
+      "fullWorkerInspection": "Independent static complete-body inspection; not represented as an executed final workflow body guard.",
+      "resourcePolicy": {
+        "fuel": 4096,
+        "nodeMajor": 22,
+        "typescript": "7.0.2",
+        "oldSpaceMiB": 2048,
+        "oldSpaceIsHardRssLimit": false,
+        "emptyPATH": true,
+        "shardJobMinutes": 25,
+        "maxParallel": 2
+      }
+    },
+    "frozenOwner": {
+      "status": "PASS",
+      "workers": 32,
+      "validatedCalls": 384,
+      "summaryRows": 8,
+      "artifactId": 12548746266,
+      "frozenDriverSource": "4ebfd97b4588f8651e8b7a81bc00b2a05cfe1e3c",
+      "frozenDriverSha256": "7c8a82758b90958d973623d26e4c4dfbd900126cd737c190adffb76cb1563221",
+      "historicalBaselineRole": "Explicitly frozen comparison input only; no historical qualification is transferred.",
+      "performanceQualified": false
+    },
+    "research": {
+      "status": "PASS",
+      "jobs": 6,
+      "artifacts": 6,
+      "archivedFiles": 8
+    },
+    "C": {
+      "status": "FAIL",
+      "completeCollection": true,
+      "cases": 193,
+      "strictMatches": 173,
+      "classifications": {
+        "matched_kernel_rejection": 60,
+        "matched_metadata_rejection": 1,
+        "pskernel_timeout": 17,
+        "matched_transport_rejection": 7,
+        "agreement_with_unsafe_or_partial_contract_difference": 2,
+        "matched_acceptance": 105,
+        "pskernel_resource_exhausted": 1
+      },
+      "falseAccepts": 0,
+      "falseRejects": 0,
+      "artifactFiles": 785
+    },
+    "D": {
+      "status": "OPEN",
+      "profileCollectionComplete": true,
+      "cases": 4,
+      "artifactFiles": 58,
+      "tickRecords": 96842,
+      "kernelQualified": false,
+      "limitations": [
+        "Instrumented timing includes V8 profiler overhead.",
+        "SIGKILL can truncate the final buffered tick-log tail.",
+        "Observed /proc VmHWM is a sampled lower bound on peak RSS.",
+        "Neither profiling nor diagnostic completion establishes kernel conformance.",
+        "Node old-space is not a hard RSS bound.",
+        "Diagnostic collection alone does not establish full corpus conformance or general performance qualification."
+      ]
+    }
+  },
+  "routes": {
+    "generated": {
+      "status": "PASS",
+      "route": "generated",
+      "runId": 40061694631,
+      "runAttempt": 1,
+      "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "originalAggregate": {
+        "schema": "psc1-t01f-sharded-qualification-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694631",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+          "route": "generated",
+          "producerJob": "generated-dag-integration",
+          "producerArtifact": "psc1-v2-dag-generated-js",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986116,
+              "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1208,
+              "sha256": "1f8d13f7357fa0173a075e7fcf1ab8bc61054e7b0dc23c189a141a89f843b167"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 97086,
+              "sha256": "0328921094ce5c2e5cf06e5b765813a7e1093ff74e71dc2c7759939b1dbe943b"
+            },
+            "providerManifest": {
+              "bytes": 2204,
+              "sha256": "93adf0f535d1d4f287b867d2b754a4dd4e66ffae95c35ad06ad4209376b8e86a"
+            }
+          }
+        },
+        "job": "t01f-generated-complete",
+        "node": "v22.23.3",
+        "shards": 6,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "requestsPerShard": 294,
+        "metadataPerShard": 377,
+        "independentAdmissionPerShard": true,
+        "completeNegativesPerSample": true,
+        "singletonSequences": 6,
+        "assertionsPerSample": 1400,
+        "executedAssertions": 8400,
+        "includesRepeatedPrefix": true,
+        "performanceQualified": false,
+        "receipts": [
+          {
+            "sampleIndex": 0,
+            "sample": "",
+            "receipt": {
+              "bytes": 3462,
+              "sha256": "8adcfad44930f1a1e7a76a61bef9c293c6db12eeec591e0261f7ed8add5cc1f6"
+            },
+            "measurement": "peak_rss_kib=742740 wall_seconds=294.49 exit_status=0",
+            "runtime": {
+              "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 53.991382999999985,
+              "admissionMs": 53415.752797,
+              "metadataMs": 1654.3279709999988,
+              "totalMs": 294379.58688099997,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "",
+                  "utf8Bytes": 0,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 6376.225300999999,
+                  "totalMs": 239073.020882,
+                  "arenaNodes": "32",
+                  "ownedArenaNodes": "10220",
+                  "memory": {
+                    "rss": 754368512,
+                    "heapTotal": 486744064,
+                    "heapUsed": 402382648,
+                    "external": 4810869,
+                    "arrayBuffers": 2809692
+                  }
+                }
+              ],
+              "sampleIndex": 0,
+              "sample": ""
+            }
+          },
+          {
+            "sampleIndex": 1,
+            "sample": "a",
+            "receipt": {
+              "bytes": 3452,
+              "sha256": "9eb178ddba778516e0e2eba8c789b463758ae36752b81e7a9995dcafba74442a"
+            },
+            "measurement": "peak_rss_kib=815012 wall_seconds=414.22 exit_status=0",
+            "runtime": {
+              "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 143.746212,
+              "admissionMs": 50808.470829,
+              "metadataMs": 1610.8414570000023,
+              "totalMs": 414074.746265,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "a",
+                  "utf8Bytes": 1,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 6380.414166999995,
+                  "totalMs": 361350.437359,
+                  "arenaNodes": "72",
+                  "ownedArenaNodes": "10260",
+                  "memory": {
+                    "rss": 833691648,
+                    "heapTotal": 522133504,
+                    "heapUsed": 492776040,
+                    "external": 4810217,
+                    "arrayBuffers": 2813068
+                  }
+                }
+              ],
+              "sampleIndex": 1,
+              "sample": "a"
+            }
+          },
+          {
+            "sampleIndex": 2,
+            "sample": "é",
+            "receipt": {
+              "bytes": 3462,
+              "sha256": "ac1cdb0cdb9bc0784540a76a64e8496b88045a49a15780aa9d7357a959d314ac"
+            },
+            "measurement": "peak_rss_kib=825552 wall_seconds=520.68 exit_status=0",
+            "runtime": {
+              "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 54.05189899999999,
+              "admissionMs": 54795.115068,
+              "metadataMs": 1869.6776919999975,
+              "totalMs": 520558.779521,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "é",
+                  "utf8Bytes": 2,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 6960.824533999999,
+                  "totalMs": 463657.028216,
+                  "arenaNodes": "88",
+                  "ownedArenaNodes": "10276",
+                  "memory": {
+                    "rss": 842059776,
+                    "heapTotal": 530665472,
+                    "heapUsed": 386253880,
+                    "external": 4806993,
+                    "arrayBuffers": 2809844
+                  }
+                }
+              ],
+              "sampleIndex": 2,
+              "sample": "é"
+            }
+          },
+          {
+            "sampleIndex": 3,
+            "sample": "€",
+            "receipt": {
+              "bytes": 3475,
+              "sha256": "d06d2a5b1f198d580594fe214c1342f6fa22d8dcfd79b4c8e3d6bb89f4e3e79f"
+            },
+            "measurement": "peak_rss_kib=848620 wall_seconds=618.51 exit_status=0",
+            "runtime": {
+              "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 53.38088300000001,
+              "admissionMs": 59669.775228,
+              "metadataMs": 2034.3575869999986,
+              "totalMs": 618389.6122689999,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "€",
+                  "utf8Bytes": 3,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 7272.1811790000065,
+                  "totalMs": 556438.3809120001,
+                  "arenaNodes": "104",
+                  "ownedArenaNodes": "10292",
+                  "memory": {
+                    "rss": 867356672,
+                    "heapTotal": 547704832,
+                    "heapUsed": 310425168,
+                    "external": 4810657,
+                    "arrayBuffers": 2809624
+                  }
+                }
+              ],
+              "sampleIndex": 3,
+              "sample": "€"
+            }
+          },
+          {
+            "sampleIndex": 4,
+            "sample": "😀",
+            "receipt": {
+              "bytes": 3478,
+              "sha256": "5dfe8c53d80d5a188c571dcf0fdc4688584c9c32abb6f98ceb1e119fd7789215"
+            },
+            "measurement": "peak_rss_kib=939816 wall_seconds=641.66 exit_status=0",
+            "runtime": {
+              "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 57.349861000000004,
+              "admissionMs": 55824.708759999994,
+              "metadataMs": 1832.436625000002,
+              "totalMs": 641523.07167,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "😀",
+                  "utf8Bytes": 4,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 6805.372145000001,
+                  "totalMs": 583604.9989880001,
+                  "arenaNodes": "120",
+                  "ownedArenaNodes": "10308",
+                  "memory": {
+                    "rss": 960729088,
+                    "heapTotal": 523706368,
+                    "heapUsed": 239160256,
+                    "external": 4809785,
+                    "arrayBuffers": 2812636
+                  }
+                }
+              ],
+              "sampleIndex": 4,
+              "sample": "😀"
+            }
+          },
+          {
+            "sampleIndex": 5,
+            "sample": "Aé€😀",
+            "receipt": {
+              "bytes": 3501,
+              "sha256": "4bfe86a9db0a4dab4bdf8ed5e7c6a0cbfe8f3e045a25486044dc635d45da423e"
+            },
+            "measurement": "peak_rss_kib=1142340 wall_seconds=1251.58 exit_status=0",
+            "runtime": {
+              "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 47.127324000000016,
+              "admissionMs": 44506.734320999996,
+              "metadataMs": 1399.5518620000003,
+              "totalMs": 1251445.453069,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "Aé€😀",
+                  "utf8Bytes": 10,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 5724.0299589999995,
+                  "totalMs": 1205348.48323,
+                  "arenaNodes": "288",
+                  "ownedArenaNodes": "10476",
+                  "memory": {
+                    "rss": 1167581184,
+                    "heapTotal": 550326272,
+                    "heapUsed": 459944184,
+                    "external": 4806105,
+                    "arrayBuffers": 2808956
+                  }
+                }
+              ],
+              "sampleIndex": 5,
+              "sample": "Aé€😀"
+            }
+          }
+        ]
+      },
+      "aggregateArtifact": {
+        "artifactId": 12549448137,
+        "name": "psc1-t01f-generated-complete-attempt-1",
+        "zip": {
+          "bytes": 2777,
+          "sha256": "0053bf0bd2f592a8872530b07b56e0ab7784f24671155d6d6c3044938bf2e817"
+        },
+        "files": {
+          "qualification.json": {
+            "bytes": 12000,
+            "sha256": "614da48456f10fd60789970a3f636ae5ae57078853c23d7993770f59b40e3fcc"
+          }
+        }
+      },
+      "aggregateJobId": 120791049523,
+      "strictActualAggregateMarkerVerified": true,
+      "shardReceipts": [
+        {
+          "artifactId": 12549165377,
+          "name": "psc1-t01f-generated-shard-0-attempt-1",
+          "zip": {
+            "bytes": 5620,
+            "sha256": "7dc86b5a52e670c73093663363f64e4f98086f1d8e0a88c802f61b1a9ba37a2f"
+          },
+          "receipt": {
+            "bytes": 3462,
+            "sha256": "8adcfad44930f1a1e7a76a61bef9c293c6db12eeec591e0261f7ed8add5cc1f6"
+          }
+        },
+        {
+          "artifactId": 12548961280,
+          "name": "psc1-t01f-generated-shard-1-attempt-1",
+          "zip": {
+            "bytes": 5624,
+            "sha256": "eb94761b3ce0fe9b0bff795c7b19baa9f55703968f8389ebcb7afdcda54c6417"
+          },
+          "receipt": {
+            "bytes": 3452,
+            "sha256": "9eb178ddba778516e0e2eba8c789b463758ae36752b81e7a9995dcafba74442a"
+          }
+        },
+        {
+          "artifactId": 12549310362,
+          "name": "psc1-t01f-generated-shard-2-attempt-1",
+          "zip": {
+            "bytes": 5631,
+            "sha256": "eb6d91ce0492db8da56d5a5b1c2abad768b9b5db5cc7377de1628dd5a665167d"
+          },
+          "receipt": {
+            "bytes": 3462,
+            "sha256": "ac1cdb0cdb9bc0784540a76a64e8496b88045a49a15780aa9d7357a959d314ac"
+          }
+        },
+        {
+          "artifactId": 12549321310,
+          "name": "psc1-t01f-generated-shard-3-attempt-1",
+          "zip": {
+            "bytes": 5645,
+            "sha256": "94bcdfbc720bccb9f3ea97893b22dce6bd2ba823d596f529443734e9b450d638"
+          },
+          "receipt": {
+            "bytes": 3475,
+            "sha256": "d06d2a5b1f198d580594fe214c1342f6fa22d8dcfd79b4c8e3d6bb89f4e3e79f"
+          }
+        },
+        {
+          "artifactId": 12549187686,
+          "name": "psc1-t01f-generated-shard-4-attempt-1",
+          "zip": {
+            "bytes": 5645,
+            "sha256": "7f5a9c7f428c654f3f62af562a51677aa492af42b67881214cd98007428dc4b4"
+          },
+          "receipt": {
+            "bytes": 3478,
+            "sha256": "5dfe8c53d80d5a188c571dcf0fdc4688584c9c32abb6f98ceb1e119fd7789215"
+          }
+        },
+        {
+          "artifactId": 12548634372,
+          "name": "psc1-t01f-generated-shard-5-attempt-1",
+          "zip": {
+            "bytes": 5672,
+            "sha256": "319427b0199cde7975473d9cd98c3aabf14dcaaab83e8dbb41b9736f3be4b943"
+          },
+          "receipt": {
+            "bytes": 3501,
+            "sha256": "4bfe86a9db0a4dab4bdf8ed5e7c6a0cbfe8f3e045a25486044dc635d45da423e"
+          }
+        }
+      ],
+      "timings": [
+        {
+          "sampleIndex": 0,
+          "sample": "",
+          "jobSeconds": 323.0,
+          "jobMarginSeconds": 1177.0,
+          "processSeconds": 294.49,
+          "processMarginSeconds": 1205.51,
+          "peakRssKiB": 742740
+        },
+        {
+          "sampleIndex": 1,
+          "sample": "a",
+          "jobSeconds": 453.0,
+          "jobMarginSeconds": 1047.0,
+          "processSeconds": 414.22,
+          "processMarginSeconds": 1085.78,
+          "peakRssKiB": 815012
+        },
+        {
+          "sampleIndex": 2,
+          "sample": "é",
+          "jobSeconds": 552.0,
+          "jobMarginSeconds": 948.0,
+          "processSeconds": 520.68,
+          "processMarginSeconds": 979.32,
+          "peakRssKiB": 825552
+        },
+        {
+          "sampleIndex": 3,
+          "sample": "€",
+          "jobSeconds": 651.0,
+          "jobMarginSeconds": 849.0,
+          "processSeconds": 618.51,
+          "processMarginSeconds": 881.49,
+          "peakRssKiB": 848620
+        },
+        {
+          "sampleIndex": 4,
+          "sample": "😀",
+          "jobSeconds": 668.0,
+          "jobMarginSeconds": 832.0,
+          "processSeconds": 641.66,
+          "processMarginSeconds": 858.34,
+          "peakRssKiB": 939816
+        },
+        {
+          "sampleIndex": 5,
+          "sample": "Aé€😀",
+          "jobSeconds": 1283.0,
+          "jobMarginSeconds": 217.0,
+          "processSeconds": 1251.58,
+          "processMarginSeconds": 248.42000000000007,
+          "peakRssKiB": 1142340
+        }
+      ],
+      "executedAssertions": 8400,
+      "includesRepeatedPrefix": true,
+      "independentAdmissionPerShard": 294,
+      "metadataPerShard": 377,
+      "singletonSequences": 6,
+      "completeOriginalNegativesPerSample": true
+    },
+    "canonical": {
+      "status": "PASS",
+      "route": "canonical",
+      "runId": 40061694623,
+      "runAttempt": 1,
+      "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "originalAggregate": {
+        "schema": "psc1-t01f-sharded-qualification-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694623",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986123,
+              "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 45334,
+              "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+            }
+          }
+        },
+        "job": "t01f-canonical-complete",
+        "node": "v22.23.3",
+        "shards": 6,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "requestsPerShard": 294,
+        "metadataPerShard": 377,
+        "independentAdmissionPerShard": true,
+        "completeNegativesPerSample": true,
+        "singletonSequences": 6,
+        "assertionsPerSample": 1400,
+        "executedAssertions": 8400,
+        "includesRepeatedPrefix": true,
+        "performanceQualified": false,
+        "receipts": [
+          {
+            "sampleIndex": 0,
+            "sample": "",
+            "receipt": {
+              "bytes": 3461,
+              "sha256": "0ed3f892e59f6636bd93e2a97a4a4d94033b23b4291a5350af1f1b34a890097e"
+            },
+            "measurement": "peak_rss_kib=900516 wall_seconds=219.59 exit_status=0",
+            "runtime": {
+              "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 32.510433000000006,
+              "admissionMs": 40410.539280000005,
+              "metadataMs": 1327.2253229999988,
+              "totalMs": 219487.256655,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "",
+                  "utf8Bytes": 0,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 4490.219401000002,
+                  "totalMs": 177605.476309,
+                  "arenaNodes": "32",
+                  "ownedArenaNodes": "10220",
+                  "memory": {
+                    "rss": 921387008,
+                    "heapTotal": 527519744,
+                    "heapUsed": 373288136,
+                    "external": 4806925,
+                    "arrayBuffers": 2809776
+                  }
+                }
+              ],
+              "sampleIndex": 0,
+              "sample": ""
+            }
+          },
+          {
+            "sampleIndex": 1,
+            "sample": "a",
+            "receipt": {
+              "bytes": 3458,
+              "sha256": "1f7279eba6fa8bee95a2e4870cb501de557cb7de05c7026cfdd475bc081ddc39"
+            },
+            "measurement": "peak_rss_kib=851336 wall_seconds=403.40 exit_status=0",
+            "runtime": {
+              "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 63.252902999999975,
+              "admissionMs": 48770.934378,
+              "metadataMs": 1555.136781000001,
+              "totalMs": 403304.425897,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "a",
+                  "utf8Bytes": 1,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 6102.499961000001,
+                  "totalMs": 352749.410889,
+                  "arenaNodes": "72",
+                  "ownedArenaNodes": "10260",
+                  "memory": {
+                    "rss": 871079936,
+                    "heapTotal": 526589952,
+                    "heapUsed": 273591656,
+                    "external": 4808237,
+                    "arrayBuffers": 2811088
+                  }
+                }
+              ],
+              "sampleIndex": 1,
+              "sample": "a"
+            }
+          },
+          {
+            "sampleIndex": 2,
+            "sample": "é",
+            "receipt": {
+              "bytes": 3453,
+              "sha256": "fd5297109e56492767a8e8b408de4b2b88e777bae8aa7ae52465daff8c53d5c2"
+            },
+            "measurement": "peak_rss_kib=758284 wall_seconds=399.75 exit_status=0",
+            "runtime": {
+              "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 42.174294,
+              "admissionMs": 42089.490627,
+              "metadataMs": 1420.7972600000066,
+              "totalMs": 399655.054441,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "é",
+                  "utf8Bytes": 2,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 5377.049751999999,
+                  "totalMs": 355962.770014,
+                  "arenaNodes": "88",
+                  "ownedArenaNodes": "10276",
+                  "memory": {
+                    "rss": 775086080,
+                    "heapTotal": 521609216,
+                    "heapUsed": 409318552,
+                    "external": 4808025,
+                    "arrayBuffers": 2810876
+                  }
+                }
+              ],
+              "sampleIndex": 2,
+              "sample": "é"
+            }
+          },
+          {
+            "sampleIndex": 3,
+            "sample": "€",
+            "receipt": {
+              "bytes": 3473,
+              "sha256": "ebe6159e60172a3889ff77b837dcbd99d401a754bdf2a40d2e1cdd1122c401b4"
+            },
+            "measurement": "peak_rss_kib=851636 wall_seconds=592.34 exit_status=0",
+            "runtime": {
+              "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 48.14715699999999,
+              "admissionMs": 56521.708484,
+              "metadataMs": 1558.7120979999963,
+              "totalMs": 592219.730111,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "€",
+                  "utf8Bytes": 3,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 6451.463776999997,
+                  "totalMs": 533919.9415900001,
+                  "arenaNodes": "104",
+                  "ownedArenaNodes": "10292",
+                  "memory": {
+                    "rss": 870797312,
+                    "heapTotal": 515842048,
+                    "heapUsed": 324165520,
+                    "external": 4808905,
+                    "arrayBuffers": 2811756
+                  }
+                }
+              ],
+              "sampleIndex": 3,
+              "sample": "€"
+            }
+          },
+          {
+            "sampleIndex": 4,
+            "sample": "😀",
+            "receipt": {
+              "bytes": 3479,
+              "sha256": "4b5443f8b3e2175d03f6a0f3ac8ec6521bc4685e56f2806589bf61a536ad0877"
+            },
+            "measurement": "peak_rss_kib=911572 wall_seconds=672.28 exit_status=0",
+            "runtime": {
+              "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 62.115144000000015,
+              "admissionMs": 54282.528410000006,
+              "metadataMs": 1767.8803610000032,
+              "totalMs": 672151.273757,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "😀",
+                  "utf8Bytes": 4,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 6905.285296999995,
+                  "totalMs": 615846.312953,
+                  "arenaNodes": "120",
+                  "ownedArenaNodes": "10308",
+                  "memory": {
+                    "rss": 932233216,
+                    "heapTotal": 526065664,
+                    "heapUsed": 124292152,
+                    "external": 4812173,
+                    "arrayBuffers": 2810480
+                  }
+                }
+              ],
+              "sampleIndex": 4,
+              "sample": "😀"
+            }
+          },
+          {
+            "sampleIndex": 5,
+            "sample": "Aé€😀",
+            "receipt": {
+              "bytes": 3485,
+              "sha256": "578ec77526f9c6475f0d578a312fe2153366395a1d3959c26c3fce2b06863f95"
+            },
+            "measurement": "peak_rss_kib=1194780 wall_seconds=1000.24 exit_status=0",
+            "runtime": {
+              "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+              "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+              "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+              "requests": 294,
+              "metadata": 377,
+              "declarations": "377",
+              "samples": 1,
+              "availableSamples": 6,
+              "executedSamples": 1,
+              "fuel": 4096,
+              "independentAdmission": true,
+              "assertions": 1400,
+              "constructionMs": 31.019419999999997,
+              "admissionMs": 34858.93104,
+              "metadataMs": 1141.979926,
+              "totalMs": 1000138.882871,
+              "diagnosticTracing": false,
+              "measurements": [
+                {
+                  "sample": "Aé€😀",
+                  "utf8Bytes": 10,
+                  "owners": 224,
+                  "ownerAndConstructionMs": 4891.910445000001,
+                  "totalMs": 963990.258274,
+                  "arenaNodes": "288",
+                  "ownedArenaNodes": "10476",
+                  "memory": {
+                    "rss": 1221529600,
+                    "heapTotal": 589123584,
+                    "heapUsed": 500527008,
+                    "external": 4806325,
+                    "arrayBuffers": 2809176
+                  }
+                }
+              ],
+              "sampleIndex": 5,
+              "sample": "Aé€😀"
+            }
+          }
+        ]
+      },
+      "aggregateArtifact": {
+        "artifactId": 12549523345,
+        "name": "psc1-t01f-canonical-complete-attempt-1",
+        "zip": {
+          "bytes": 2770,
+          "sha256": "29ff21a6087baeb091bd94f6cc857b5f63f00d94fd134ae74b01f73702d91c76"
+        },
+        "files": {
+          "qualification.json": {
+            "bytes": 11977,
+            "sha256": "c5d3d847605f101cb302865498a0e3cbf5317220e119bac29a2542c024023cd3"
+          }
+        }
+      },
+      "aggregateJobId": 120792296619,
+      "strictActualAggregateMarkerVerified": true,
+      "shardReceipts": [
+        {
+          "artifactId": 12548922369,
+          "name": "psc1-t01f-canonical-shard-0-attempt-1",
+          "zip": {
+            "bytes": 5649,
+            "sha256": "3af52452ae426cf37dce7cdcd5c553518618a8ce959f1edb2b4bebe2304c8b70"
+          },
+          "receipt": {
+            "bytes": 3461,
+            "sha256": "0ed3f892e59f6636bd93e2a97a4a4d94033b23b4291a5350af1f1b34a890097e"
+          }
+        },
+        {
+          "artifactId": 12549530089,
+          "name": "psc1-t01f-canonical-shard-1-attempt-1",
+          "zip": {
+            "bytes": 5637,
+            "sha256": "f44cd4698fe52bcb7746c5e224f8a01b8093afc038e3482aaf26b769c5f80b25"
+          },
+          "receipt": {
+            "bytes": 3458,
+            "sha256": "1f7279eba6fa8bee95a2e4870cb501de557cb7de05c7026cfdd475bc081ddc39"
+          }
+        },
+        {
+          "artifactId": 12549331783,
+          "name": "psc1-t01f-canonical-shard-2-attempt-1",
+          "zip": {
+            "bytes": 5638,
+            "sha256": "7ad5c66f32fe37a04139f314d9003b38d5655ccd5280ba9382bacf143749be8f"
+          },
+          "receipt": {
+            "bytes": 3453,
+            "sha256": "fd5297109e56492767a8e8b408de4b2b88e777bae8aa7ae52465daff8c53d5c2"
+          }
+        },
+        {
+          "artifactId": 12548334919,
+          "name": "psc1-t01f-canonical-shard-3-attempt-1",
+          "zip": {
+            "bytes": 5660,
+            "sha256": "e7cd18512baad1aba5c070d78213c380480bf0807141ecc62dc6fb1502b5ce05"
+          },
+          "receipt": {
+            "bytes": 3473,
+            "sha256": "ebe6159e60172a3889ff77b837dcbd99d401a754bdf2a40d2e1cdd1122c401b4"
+          }
+        },
+        {
+          "artifactId": 12549790294,
+          "name": "psc1-t01f-canonical-shard-4-attempt-1",
+          "zip": {
+            "bytes": 5662,
+            "sha256": "f25ed3255e2cd053bb6f17f03a91868874fdf119577ccf34547152ac86f1c4b9"
+          },
+          "receipt": {
+            "bytes": 3479,
+            "sha256": "4b5443f8b3e2175d03f6a0f3ac8ec6521bc4685e56f2806589bf61a536ad0877"
+          }
+        },
+        {
+          "artifactId": 12549701259,
+          "name": "psc1-t01f-canonical-shard-5-attempt-1",
+          "zip": {
+            "bytes": 5670,
+            "sha256": "51e9a0264f2099c0e279af035e7daa417c10f01fee653432885bdcdcbf4279ef"
+          },
+          "receipt": {
+            "bytes": 3485,
+            "sha256": "578ec77526f9c6475f0d578a312fe2153366395a1d3959c26c3fce2b06863f95"
+          }
+        }
+      ],
+      "timings": [
+        {
+          "sampleIndex": 0,
+          "sample": "",
+          "jobSeconds": 245.0,
+          "jobMarginSeconds": 1255.0,
+          "processSeconds": 219.59,
+          "processMarginSeconds": 1280.41,
+          "peakRssKiB": 900516
+        },
+        {
+          "sampleIndex": 1,
+          "sample": "a",
+          "jobSeconds": 442.0,
+          "jobMarginSeconds": 1058.0,
+          "processSeconds": 403.4,
+          "processMarginSeconds": 1096.6,
+          "peakRssKiB": 851336
+        },
+        {
+          "sampleIndex": 2,
+          "sample": "é",
+          "jobSeconds": 431.0,
+          "jobMarginSeconds": 1069.0,
+          "processSeconds": 399.75,
+          "processMarginSeconds": 1100.25,
+          "peakRssKiB": 758284
+        },
+        {
+          "sampleIndex": 3,
+          "sample": "€",
+          "jobSeconds": 628.0,
+          "jobMarginSeconds": 872.0,
+          "processSeconds": 592.34,
+          "processMarginSeconds": 907.66,
+          "peakRssKiB": 851636
+        },
+        {
+          "sampleIndex": 4,
+          "sample": "😀",
+          "jobSeconds": 704.0,
+          "jobMarginSeconds": 796.0,
+          "processSeconds": 672.28,
+          "processMarginSeconds": 827.72,
+          "peakRssKiB": 911572
+        },
+        {
+          "sampleIndex": 5,
+          "sample": "Aé€😀",
+          "jobSeconds": 1027.0,
+          "jobMarginSeconds": 473.0,
+          "processSeconds": 1000.24,
+          "processMarginSeconds": 499.76,
+          "peakRssKiB": 1194780
+        }
+      ],
+      "executedAssertions": 8400,
+      "includesRepeatedPrefix": true,
+      "independentAdmissionPerShard": 294,
+      "metadataPerShard": 377,
+      "singletonSequences": 6,
+      "completeOriginalNegativesPerSample": true
+    }
+  },
+  "requiredRouteCount": 2,
+  "requiredSamplesPerRoute": [
+    "",
+    "a",
+    "é",
+    "€",
+    "😀",
+    "Aé€😀"
+  ],
+  "requiredAssertionsPerSelectedSample": 1400,
+  "requiredExecutedAssertionsPerRoute": 8400,
+  "executedAssertionsAcrossBothRoutes": 16800,
+  "includesRepeatedPrefixes": true,
+  "milestones": {
+    "A_scoped": "READY_FOR_ROOT_REVIEW",
+    "T01F": "READY_FOR_ROOT_REVIEW",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN"
+  },
+  "evidenceFiles": {
+    "reconcile_final_0d9f0628.py": {
+      "path": "/workspace/scratch/caf2bda8dd38/t01f-evidence/reconcile_final_0d9f0628.py",
+      "bytes": 24079,
+      "sha256": "9a7bc697ac4d7fb436550036d2afb55537c8ce076859b8ccf739cd5d9efad8cc"
+    },
+    "generated_common_inspection.py": {
+      "path": "t01f-evidence/generated_common_inspection.py",
+      "bytes": 14499,
+      "sha256": "0f1654da89f0a9417a78322d8a81390fb98b94a9d24e3221a4465b7b3f403038"
+    },
+    "currentPointer": {
+      "path": "t01f-evidence/current-final-source-0d9f0628.json",
+      "bytes": 5781,
+      "sha256": "cf7d088c7acf11015f98045d3d7edc52c07b1b87118240c73b113961b226b4c0"
+    },
+    "native": {
+      "path": "t01f-evidence/2026-10-24-t01f-closed-cache-final-0d9f-native.json",
+      "bytes": 212790,
+      "sha256": "7558d9cc2322f195d50756506bf21d93c131e9ee07f220bc71e7f29acc97cfb7"
+    },
+    "generatedProducer": {
+      "path": "t01f-evidence/2026-10-24-t01f-closed-cache-final-0d9f-generated-producer.json",
+      "bytes": 368796,
+      "sha256": "b7c6f79cba83b01c641f934cfd771f12b29836dd4dab9fd0a98f7340af483425"
+    },
+    "owner": {
+      "path": "t01f-evidence/2026-10-24-t01f-closed-cache-final-0d9f-owner.json",
+      "bytes": 632268,
+      "sha256": "366e8de9097d59d31db0bf57952d770393d3f804ca4ca130d041742b334e4387"
+    },
+    "canonicalNative": {
+      "path": "t01f-evidence/2026-10-24-t01f-0d9f0628-canonical-native.json",
+      "bytes": 9092,
+      "sha256": "d3426fc5b5e97a60c276316e789386ea2933ed6b33743c69ea99dfa9106d5460"
+    },
+    "canonicalProducer": {
+      "path": "t01f-evidence/2026-10-24-t01f-0d9f0628-canonical-producer.json",
+      "bytes": 92387,
+      "sha256": "30b241d8e16fecfb2fe52c9fb00f08d755a884cc8b8d9fd803f9bc1ce4fa7f2c"
+    },
+    "research": {
+      "path": "t01f-evidence/2026-10-24-t01f-final-0d9f0628-retained-research.json",
+      "bytes": 295966,
+      "sha256": "a95147b3c267eb77df1b56fe8bd6566853b4844906999046daebd86398bdf92d"
+    },
+    "arena": {
+      "path": "t01f-evidence/2026-10-24-t01f-final-0d9f0628-retained-arena.json",
+      "bytes": 632983,
+      "sha256": "36c60bd71c962c27de0636b1fe9fe3b51d0f2ce031f167df92041bdfae5fc65e"
+    },
+    "profile": {
+      "path": "t01f-evidence/2026-10-24-t01f-final-0d9f0628-retained-profile.json",
+      "bytes": 117964,
+      "sha256": "782b566350c82f70230a0a1b9495d93b4d1bf354431356cc31474b187495268c"
+    },
+    "sourceScope": {
+      "path": "t01f-evidence/2026-10-24-t01f-final-0d9f0628-requested-scope.json",
+      "bytes": 6534,
+      "sha256": "673ea101015eb202dba88b9637c4b007fe62523a666749f354d6748ab55871de"
+    },
+    "generatedSourceRecords": {
+      "path": "t01f-evidence/0d9f0628-generated-40061694631/source-records.json",
+      "bytes": 9156,
+      "sha256": "3834bcd563df6dfdc51c249d74b2cc7b1a9415cbcde29978197ab999160fa42c"
+    },
+    "canonicalSourceRecords": {
+      "path": "t01f-evidence/0d9f0628-canonical-40061694623/source-records.json",
+      "bytes": 3543,
+      "sha256": "f886278171a3661dc49cedbe4912b0b6562c97db049c558de116b8132c6f1bbd"
+    },
+    "generatedFinalRoute": {
+      "path": "t01f-evidence/0d9f0628-generated-40061694631/inspection-all.json",
+      "bytes": 2501844,
+      "sha256": "ae46b926147f1cf44ce288667c06c40557071c802cb0bf06b2a2bf82a33d76ec"
+    },
+    "generatedRepoReadyRoute": {
+      "path": "t01f-evidence/2026-10-24-t01f-closed-cache-final-0d9f-generated-route.json",
+      "bytes": 924883,
+      "sha256": "91f3dcaa66d217d1ad6e6ce39756cf7c78a59ff93c5b9f69d97276aad1a9fb1a"
+    },
+    "generatedTerminalRun": {
+      "path": "t01f-evidence/0d9f0628-generated-40061694631/run.json",
+      "bytes": 14014,
+      "sha256": "ee43c24c85a7cb86703d7c726d42ddb2ea9bbf6ecc6fa93b891033979b0197db"
+    },
+    "canonicalFinalRoute": {
+      "path": "t01f-evidence/0d9f0628-canonical-40061694623/canonical-final-evidence.json",
+      "bytes": 166321,
+      "sha256": "ec2a3538682c62571342366c6158d1e08b7ce346be065ee03c884150df76a328"
+    },
+    "canonicalRepoReadyRoute": {
+      "path": "t01f-evidence/2026-10-24-t01f-0d9f0628-canonical-final.json",
+      "bytes": 166321,
+      "sha256": "ec2a3538682c62571342366c6158d1e08b7ce346be065ee03c884150df76a328"
+    },
+    "canonicalTerminalRun": {
+      "path": "t01f-evidence/0d9f0628-canonical-40061694623/run.json",
+      "bytes": 14000,
+      "sha256": "5f94fc45ab2ec5a07dcd00afddd4fd660b2d0c37eedce1a9916ae49f86b7646d"
+    }
+  },
+  "qualificationLimitations": [
+    "Scoped A/T01F readiness is distinct from complete Expression V2, whole Lean compatibility, performance/release qualification and overall soundness.",
+    "C remains FAIL; unsafe/partial contract-difference agreements, timeouts and resource exhaustion are not strict matches.",
+    "D remains OPEN; current finite timing/RSS observations and diagnostic collection do not establish general speedup.",
+    "Node old-space 2048 MiB is not a hard RSS limit.",
+    "Canonical research closure validation/check/build passed; its one-file artifact does not archive the hidden bootstrap manifest, so independent manifest-byte verification is not claimed there.",
+    "The full canonical producer separately archives and verifies its complete 140-module source tar/manifest.",
+    "Complete generated worker-body checks in final producer receipts are independent static inspections, not executed final workflow body guards.",
+    "Full-kernel DirectJS remains explicitly unsupported; qualified production uses the pinned TypeScript route.",
+    "The frozen owner baseline and driver are explicit comparison inputs only; no historical qualification is transferred.",
+    "This reconciliation authorizes no ref update: root must independently review and perform fresh-ref/ancestry/non-force expected-SHA integration."
+  ],
+  "localInspection": "Consolidation of existing required receipts plus static identity/hash/raw aggregate and shard bindings. No new CI, local builds, Lean/compiler/JS/kernel execution, or broader audit."
+}

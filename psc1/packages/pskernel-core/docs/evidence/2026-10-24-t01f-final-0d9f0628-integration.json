@@ -1,0 +1,43 @@
+{
+  "schema": "psc1-t01f-qualified-integration-v1",
+  "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "treeSha": "1a1f6054722ab63824251e45a29f99edc3e0dcbc",
+  "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "previousHead": "123c41197950b6761be965fd21c57142ee2b0d1c",
+  "expectedSha": "123c41197950b6761be965fd21c57142ee2b0d1c",
+  "force": false,
+  "updateResult": {
+    "success": true
+  },
+  "verifiedHead": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "verifiedTree": "1a1f6054722ab63824251e45a29f99edc3e0dcbc",
+  "verifiedAtUtc": "2026-10-24T05:43:28Z",
+  "workHeadAtVerification": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "ancestry": {
+    "status": "ahead",
+    "aheadBy": 79,
+    "behindBy": 0,
+    "mergeBase": "123c41197950b6761be965fd21c57142ee2b0d1c"
+  },
+  "qualifiedRuns": {
+    "generated": 40061694631,
+    "canonical": 40061694623,
+    "research": 40061694661,
+    "arena": 40061694705,
+    "profile": 40061694607
+  },
+  "runAttempt": 1,
+  "strictAssertionsPerSample": 1400,
+  "strictExecutedAssertionsPerRoute": 8400,
+  "includesRepeatedPrefixes": true,
+  "milestones": {
+    "T01F": "QUALIFIED",
+    "A": "SCOPED QUALIFIED",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN",
+    "T05": "OPEN"
+  },
+  "qualificationScope": "Exact source scoped qualification; C FAIL and D OPEN retained separately. No untested documentation child integrated.",
+  "next": "T05 ordinary DAG admission; first owned header-analysis slice, retaining the whole-admission fallback until all owning phases qualify."
+}

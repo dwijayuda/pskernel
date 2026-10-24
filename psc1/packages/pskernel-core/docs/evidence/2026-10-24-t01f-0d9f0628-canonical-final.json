@@ -1,0 +1,4255 @@
+{
+  "schema": "psc1-t01f-final-canonical-evidence-v1",
+  "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "runId": 40061694623,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623",
+  "scope": "Exact canonical six-sample route and retained correctness gates",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "gitBlobSha": "3f13a4dc52b63bd4d49606bdd75ff21b8d101d00",
+      "bytes": 45334,
+      "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+    },
+    {
+      "path": "psc1/scripts/pskernel-t01f-shards.mjs",
+      "gitBlobSha": "91f9d140dd339092fe675a634ed112242442f985",
+      "bytes": 15637,
+      "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2StringEnvironmentRegression.lean",
+      "gitBlobSha": "154bec1f4350cd948b1451fe6689b9809f05cd11",
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+      "gitBlobSha": "68acf28a8b355105e021eb547a4d0b835c40a876",
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    },
+    {
+      "path": "psc1/scripts/pskernel-canonical-provider.mjs",
+      "gitBlobSha": "5af595432579d0134b017a5883e952629cd76e35",
+      "bytes": 12759,
+      "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+    },
+    {
+      "path": "psc1/npm-runtime/canonical-admissions-wire.mjs",
+      "gitBlobSha": "c300178b84a5301ddc7178782a8eab97c55cc19a",
+      "bytes": 5462,
+      "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/PROVIDER.md",
+      "gitBlobSha": "2f2490ad578d76dfec4d8e2c322460a80e4ec8b2",
+      "bytes": 11813,
+      "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+    },
+    {
+      "path": "psc1/scripts/bootstrap-manifest.mjs",
+      "gitBlobSha": "ceb965192e6ba70046d7fe7769c9917063a4fb4e",
+      "bytes": 4810,
+      "sha256": "0288d91fe560822051095efe20f8dacdebfcdbba5869d4e3d5d3a65f96bf73ef"
+    },
+    {
+      "path": "psc1/scripts/bootstrap-project.mjs",
+      "gitBlobSha": "734db05bccdd777f3cb1fa95aa9904e36caa9926",
+      "bytes": 4987,
+      "sha256": "57dd414323fa1c2e88b0e19929012f011032ba795b6c46913ece7d0df3500376"
+    },
+    {
+      "path": "psc1/scripts/pskernel-artifact-manifest.mjs",
+      "gitBlobSha": "30b16cf50a77ddc56b3f3efd7d9b5120918e0010",
+      "bytes": 2991,
+      "sha256": "84067dd036c43a32fd913f373241233d340f59bda9ea56cced36ba0e2cb50914"
+    },
+    {
+      "path": "psc1/scripts/pskernel-provider-smoke.mjs",
+      "gitBlobSha": "04186f9fec8e498ac64050424221ab25d1b682fc",
+      "bytes": 10882,
+      "sha256": "2820fad2b53fe955170dc1cabdc86cd1e6ff3ff7e30c73136d923d9852ab7712"
+    },
+    {
+      "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+      "gitBlobSha": "494647393a3e4b3bdb7ac11115dac470cef6061a",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+      "gitBlobSha": "4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b",
+      "bytes": 9629,
+      "sha256": "fe26126cae9c7757d29b3b2193d9530a2de0dc7d5e76a591abb6f2a4b35421bf"
+    },
+    {
+      "path": "psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+      "gitBlobSha": "010333b5d6ac53c60c558c89906b02d7358fb0c0",
+      "bytes": 5877,
+      "sha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0"
+    }
+  ],
+  "nativeEvidence": {
+    "schema": "psc1-t01f-final-canonical-native-v1",
+    "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "runId": 40061694623,
+    "runAttempt": 1,
+    "jobId": 120776389590,
+    "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120776389590",
+    "conclusion": "success",
+    "jobStartedAt": "2026-10-24T04:16:33Z",
+    "jobCompletedAt": "2026-10-24T04:18:03Z",
+    "nativeRegressionCases": 62,
+    "regressionMarkers": [
+      "PSC1_KERNEL_REGRESSION PASS: Lean 4.35 native evaluator is not a kernel reduction",
+      "PSC1_KERNEL_REGRESSION PASS: closed semantic cache is eligible",
+      "PSC1_KERNEL_REGRESSION PASS: raw localExpr semantic cache is ineligible",
+      "PSC1_KERNEL_REGRESSION PASS: wrapped localExpr semantic cache is ineligible",
+      "PSC1_KERNEL_REGRESSION PASS: localExpr defeq pair semantic cache is ineligible",
+      "PSC1_KERNEL_REGRESSION PASS: closed defeq pair semantic cache is eligible",
+      "PSC1_KERNEL_REGRESSION PASS: scope retains monotone fresh identifier",
+      "PSC1_KERNEL_REGRESSION PASS: scope drops child whnf cache",
+      "PSC1_KERNEL_REGRESSION PASS: scope drops child checked-inference cache",
+      "PSC1_KERNEL_REGRESSION PASS: scope drops child positive defeq cache",
+      "PSC1_KERNEL_REGRESSION PASS: scope drops child negative defeq cache",
+      "PSC1_KERNEL_REGRESSION PASS: C0 beta identity",
+      "PSC1_KERNEL_REGRESSION PASS: C0 beta nondependent body",
+      "PSC1_KERNEL_REGRESSION PASS: C0 beta two binders",
+      "PSC1_KERNEL_REGRESSION PASS: C0 beta argument excess",
+      "PSC1_KERNEL_REGRESSION PASS: C0 beta argument shortfall",
+      "PSC1_KERNEL_REGRESSION PASS: C0 beta unchanged nonlambda",
+      "PSC1_KERNEL_REGRESSION PASS: C0 linear consumed lambda spine matches old fuel walker",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 bound variable zero",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 shifts outer variable",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 open application",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 unchanged closed application",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 open lambda capture avoidance",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 open dependent forall",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 let binder",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 metadata",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 projection",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 nested binders",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 closed binder fast path",
+      "PSC1_KERNEL_REGRESSION PASS: C0 inst1 replacement lifts correctly",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi zero-index substitution",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi second-index substitution",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi outer-index decrement",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi nonzero start",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi nonzero binder offset",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi application",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi lambda capture avoidance",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi forall capture avoidance",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi let binder",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi metadata",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi projection",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi nested binders",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi closed term unchanged",
+      "PSC1_KERNEL_REGRESSION PASS: C0 multi empty replacement list",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift zero amount",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift bound var at cutoff",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift preserves index below cutoff",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift nonzero cutoff",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift open application",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift closed application",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift lambda cutoff capture avoidance",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift forall cutoff capture avoidance",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift let binder cutoff",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift metadata",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift projection",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift nested binders",
+      "PSC1_KERNEL_REGRESSION PASS: C0 lift nested binders high cutoff",
+      "PSC1_KERNEL_REGRESSION PASS: Lean 4.35 string atEnd alias parity",
+      "PSC1_KERNEL_REGRESSION PASS: Lean 4.35 UTF-8 next alias parity",
+      "PSC1_KERNEL_REGRESSION PASS: Nat maximum shim matches pinned Lean",
+      "PSC1_KERNEL_REGRESSION PASS: String append alias parity",
+      "PSC1_KERNEL_REGRESSION PASS: max universe successor distributes to both arms"
+    ],
+    "retainedC0Comparisons": [
+      "PSC1_C0_BETA_BENCH depth=24 calls=120000 old_ms=111 c0_ms=49 checksum=120000",
+      "PSC1_C0_BETA_BENCH depth=96 calls=120000 old_ms=369 c0_ms=150 checksum=120000",
+      "PSC1_C0_BETA_BENCH: COMPLETE (matched native comparison)",
+      "PSC1_C0_INST1_BENCH depth=12 calls=25000 prior_ms=22 c0_ms=14 checksum=625000",
+      "PSC1_C0_INST1_BENCH depth=32 calls=25000 prior_ms=55 c0_ms=35 checksum=1625000",
+      "PSC1_C0_INST1_BENCH: COMPLETE",
+      "PSC1_C0_MULTI_BENCH depth=12 calls=25000 prior_ms=22 c0_ms=18 checksum=625000",
+      "PSC1_C0_MULTI_BENCH depth=32 calls=25000 prior_ms=52 c0_ms=44 checksum=1625000",
+      "PSC1_C0_MULTI_BENCH: COMPLETE",
+      "PSC1_C0_LIFT_BENCH depth=12 calls=25000 prior_ms=16 c0_ms=19 checksum=625000",
+      "PSC1_C0_LIFT_BENCH depth=32 calls=25000 prior_ms=40 c0_ms=33 checksum=1625000",
+      "PSC1_C0_LIFT_BENCH: COMPLETE"
+    ],
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "jobLogDigest": {
+      "bytes": 76167,
+      "sha256": "9f1338e168bb351b687928da76773c1ef3d3e924db7b49adb0253aa8a04a7582"
+    },
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-24T04:16:34Z",
+        "completed_at": "2026-10-24T04:16:34Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-24T04:16:34Z",
+        "completed_at": "2026-10-24T04:16:56Z"
+      },
+      {
+        "name": "Install pinned Lean via elan",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-24T04:16:56Z",
+        "completed_at": "2026-10-24T04:17:10Z"
+      },
+      {
+        "name": "Verify toolchain and compile the independent kernel",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-24T04:17:10Z",
+        "completed_at": "2026-10-24T04:17:57Z"
+      },
+      {
+        "name": "Run native safety and semantics regression",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-24T04:17:57Z",
+        "completed_at": "2026-10-24T04:17:57Z"
+      },
+      {
+        "name": "Run same-process old-versus-C0 beta-spine performance comparison",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-24T04:17:57Z",
+        "completed_at": "2026-10-24T04:17:58Z"
+      },
+      {
+        "name": "Run native C0 single-substitution parity and performance comparison",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-24T04:17:58Z",
+        "completed_at": "2026-10-24T04:17:59Z"
+      },
+      {
+        "name": "Run same-run C0 multi-variable substitution performance comparison",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-24T04:17:59Z",
+        "completed_at": "2026-10-24T04:18:00Z"
+      },
+      {
+        "name": "Measure same-run C0 binder-aware lifting and require parity",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-24T04:18:00Z",
+        "completed_at": "2026-10-24T04:18:00Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18,
+        "started_at": "2026-10-24T04:18:00Z",
+        "completed_at": "2026-10-24T04:18:00Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19,
+        "started_at": "2026-10-24T04:18:00Z",
+        "completed_at": "2026-10-24T04:18:00Z"
+      }
+    ],
+    "verification": {
+      "sourceRunAttempt": true,
+      "allNativeQualificationStepsSuccess": true,
+      "native62Cases": true,
+      "fourRetainedC0ComparisonsComplete": true,
+      "pinnedLean435Commit": true,
+      "githubActionsLinux": true
+    },
+    "scope": "Canonical correctness workflow native safety/semantics and retained same-process C0 comparisons at this exact final source and attempt. Universal proof, official, full canonical producer, six-shard route, C/D and global qualification are separate gates. Timing rows are measurements, not a general speedup claim.",
+    "inspection": "Static terminal-job log inspection only; no local Lean/compiler/JavaScript/kernel execution."
+  },
+  "producerJob": {
+    "id": 120776389456,
+    "run_id": 40061694623,
+    "workflow_name": "PSC1 PSKernel-Core correctness",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcHtVzUA",
+    "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120776389456",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120776389456",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-24T04:16:30Z",
+    "started_at": "2026-10-24T04:16:32Z",
+    "completed_at": "2026-10-24T05:03:00Z",
+    "name": "psc1-portability",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-24T04:16:33Z",
+        "completed_at": "2026-10-24T04:16:34Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-24T04:16:34Z",
+        "completed_at": "2026-10-24T04:16:55Z"
+      },
+      {
+        "name": "Install pinned Lean via elan",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-24T04:16:55Z",
+        "completed_at": "2026-10-24T04:17:08Z"
+      },
+      {
+        "name": "Check kernel modules are in portable source profile",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-24T04:17:08Z",
+        "completed_at": "2026-10-24T04:17:08Z"
+      },
+      {
+        "name": "Build real PSC1 compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-24T04:17:08Z",
+        "completed_at": "2026-10-24T04:17:56Z"
+      },
+      {
+        "name": "Translate first kernel source through PSC1",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-24T04:17:56Z",
+        "completed_at": "2026-10-24T04:17:57Z"
+      },
+      {
+        "name": "Check complete kernel source closure using PSC1",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-24T04:17:57Z",
+        "completed_at": "2026-10-24T04:26:13Z"
+      },
+      {
+        "name": "Reconstruct all kernel sources in canonical .ps",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-24T04:26:13Z",
+        "completed_at": "2026-10-24T04:27:25Z"
+      },
+      {
+        "name": "PSC1 checks generated ProofScript kernel",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-24T04:27:25Z",
+        "completed_at": "2026-10-24T04:35:38Z"
+      },
+      {
+        "name": "Install pinned TypeScript 7 for generated portable kernel",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-24T04:35:38Z",
+        "completed_at": "2026-10-24T04:35:41Z"
+      },
+      {
+        "name": "Generate independent JS kernel from the .ps closure",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11,
+        "started_at": "2026-10-24T04:35:41Z",
+        "completed_at": "2026-10-24T04:46:18Z"
+      },
+      {
+        "name": "Produce authentic T01F inputs for canonical independent replay",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12,
+        "started_at": "2026-10-24T04:46:18Z",
+        "completed_at": "2026-10-24T04:47:18Z"
+      },
+      {
+        "name": "Run checked DAG semantics from the canonical ProofScript bundle",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 13,
+        "started_at": "2026-10-24T04:47:18Z",
+        "completed_at": "2026-10-24T04:49:52Z"
+      },
+      {
+        "name": "Check canonical-source invalid recursor-headed occurrence in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 14,
+        "started_at": "2026-10-24T04:49:52Z",
+        "completed_at": "2026-10-24T04:49:54Z"
+      },
+      {
+        "name": "Run inference-mode parity from the canonical ProofScript executable",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15,
+        "started_at": "2026-10-24T04:49:54Z",
+        "completed_at": "2026-10-24T04:49:57Z"
+      },
+      {
+        "name": "Check large numerals in the canonical ProofScript executable",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 16,
+        "started_at": "2026-10-24T04:49:57Z",
+        "completed_at": "2026-10-24T04:49:57Z"
+      },
+      {
+        "name": "Check canonical-source DAG proof irrelevance in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17,
+        "started_at": "2026-10-24T04:49:57Z",
+        "completed_at": "2026-10-24T04:50:06Z"
+      },
+      {
+        "name": "Check canonical-source ordered DAG Nat DefEq in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18,
+        "started_at": "2026-10-24T04:50:06Z",
+        "completed_at": "2026-10-24T04:50:16Z"
+      },
+      {
+        "name": "Check canonical-source ordered DAG lazy delta DefEq in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19,
+        "started_at": "2026-10-24T04:50:16Z",
+        "completed_at": "2026-10-24T04:50:49Z"
+      },
+      {
+        "name": "Check canonical-source ordered DAG full-shape and residual DefEq in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20,
+        "started_at": "2026-10-24T04:50:49Z",
+        "completed_at": "2026-10-24T04:50:51Z"
+      },
+      {
+        "name": "Check canonical-source ordered DAG terminal DefEq in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21,
+        "started_at": "2026-10-24T04:50:51Z",
+        "completed_at": "2026-10-24T04:52:10Z"
+      },
+      {
+        "name": "Check canonical-source DAG admission guards in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22,
+        "started_at": "2026-10-24T04:52:10Z",
+        "completed_at": "2026-10-24T04:52:16Z"
+      },
+      {
+        "name": "Check canonical-source DAG Quot reduction in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23,
+        "started_at": "2026-10-24T04:52:16Z",
+        "completed_at": "2026-10-24T04:52:28Z"
+      },
+      {
+        "name": "Check canonical-source DAG recursors and private owner IDs in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 24,
+        "started_at": "2026-10-24T04:52:28Z",
+        "completed_at": "2026-10-24T04:53:04Z"
+      },
+      {
+        "name": "Check canonical-source mutual and nested prefix owners in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 25,
+        "started_at": "2026-10-24T04:53:04Z",
+        "completed_at": "2026-10-24T04:53:39Z"
+      },
+      {
+        "name": "Check canonical-source DAG K conversion in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 26,
+        "started_at": "2026-10-24T04:53:39Z",
+        "completed_at": "2026-10-24T04:53:52Z"
+      },
+      {
+        "name": "Check canonical-source name and string workers in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 27,
+        "started_at": "2026-10-24T04:53:52Z",
+        "completed_at": "2026-10-24T04:53:56Z"
+      },
+      {
+        "name": "Check canonical-source Quot owners and actual admissions in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 28,
+        "started_at": "2026-10-24T04:53:56Z",
+        "completed_at": "2026-10-24T04:54:23Z"
+      },
+      {
+        "name": "Check complete canonical-source DAG checker state in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 29,
+        "started_at": "2026-10-24T04:54:23Z",
+        "completed_at": "2026-10-24T04:54:28Z"
+      },
+      {
+        "name": "Exercise the canonical-source checked batch provider in detached Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 30,
+        "started_at": "2026-10-24T04:54:28Z",
+        "completed_at": "2026-10-24T04:54:32Z"
+      },
+      {
+        "name": "Package the complete canonical source and checked provider",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 31,
+        "started_at": "2026-10-24T04:54:32Z",
+        "completed_at": "2026-10-24T04:54:32Z"
+      },
+      {
+        "name": "Report DirectJS kernel capability without claiming support",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 32,
+        "started_at": "2026-10-24T04:54:32Z",
+        "completed_at": "2026-10-24T05:02:56Z"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 33,
+        "started_at": "2026-10-24T05:02:56Z",
+        "completed_at": "2026-10-24T05:02:58Z"
+      },
+      {
+        "name": "Post Install pinned TypeScript 7 for generated portable kernel",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 65,
+        "started_at": "2026-10-24T05:02:58Z",
+        "completed_at": "2026-10-24T05:02:58Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 66,
+        "started_at": "2026-10-24T05:02:58Z",
+        "completed_at": "2026-10-24T05:02:58Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 67,
+        "started_at": "2026-10-24T05:02:58Z",
+        "completed_at": "2026-10-24T05:02:58Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120776389456",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000028162,
+    "runner_name": "GitHub Actions 1000028162",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "producerLogDigest": {
+    "bytes": 339119,
+    "sha256": "fb875da25b0238df850613827e3488287ac448df6e5a53a9c9274554278d51e9"
+  },
+  "producerArtifact": {
+    "artifactId": 12548996560,
+    "name": "psc1-canonical-kernel-qualification",
+    "zip": {
+      "bytes": 2051789,
+      "sha256": "124bbbaf01c0d993509a5d637d9b0aa8efb75f9449c8a7451d7b7eec4bb3ea26"
+    },
+    "files": {
+      "_temp/psc1-t01f-canonical/fixture.json": {
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      "_temp/psc1-t01f-canonical/fixture.sha256": {
+        "bytes": 123,
+        "sha256": "65f911e313edb388e1abe0ecf3ee04e99a33ef72d178f38e60b4dcf9e2c1690d"
+      },
+      "_temp/psc1-t01f-canonical/lean-githash.txt": {
+        "bytes": 41,
+        "sha256": "3210a17608d78e1841a0a504c21167150e6a388cf44a077f06e3fcd3a823fe31"
+      },
+      "_temp/psc1-t01f-canonical/lean-version.txt": {
+        "bytes": 106,
+        "sha256": "eb22144228dd41cd51a0c84af4f976cd0cef473102dcf99b60be756b11f2b95a"
+      },
+      "_temp/psc1-t01f-canonical/native.log": {
+        "bytes": 25860,
+        "sha256": "f085a2d70d4a103322a96ad32e89082795fff9cda611d2bd15c887a8a49ba3aa"
+      },
+      "_temp/psc1-t01f-canonical/provenance.json": {
+        "bytes": 1199,
+        "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+      },
+      "_temp/psc1-canonical-provider.log": {
+        "bytes": 11417,
+        "sha256": "9373314e48a1ee85a45f3a0c204eb37de41b5a9a5c2e3d54a86dace7bbc100fe"
+      },
+      "_temp/psc1-proof-irrelevance-canonical.log": {
+        "bytes": 136,
+        "sha256": "fd5516fb73a0997dac2ac8eb66faae9de8f21cb6d1438d85b2f86b3ea01b4639"
+      },
+      "_temp/psc1-lazy-nat-canonical.log": {
+        "bytes": 73,
+        "sha256": "5f179494fb60eb798345c313f524be3121283654d19150c09b6923c5a8c1e8e0"
+      },
+      "_temp/psc1-lazy-delta-canonical.log": {
+        "bytes": 292,
+        "sha256": "2891f674e857376d261082c96075cfe21270b4022411a21d3ce89ffa2b3d282b"
+      },
+      "_temp/psc1-invalid-occurrence-canonical.log": {
+        "bytes": 126,
+        "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+      },
+      "_temp/psc1-full-shape-canonical.log": {
+        "bytes": 89,
+        "sha256": "5eb0426733a625f6ffd436ba04295a36bb8550e65bdad967377eae89bfac1506"
+      },
+      "_temp/psc1-final-rules-canonical.log": {
+        "bytes": 208,
+        "sha256": "fb8be8d449e8686f69d92695e72feda1818c1a26859350b6652e023734f4f63a"
+      },
+      "_temp/psc1-admission-guard-canonical.log": {
+        "bytes": 120,
+        "sha256": "62c9fac53dfff1b44e4f4540d5cd8f0c7477c6e6366c1753822eb5abd22cfcc0"
+      },
+      "_temp/psc1-quot-canonical.log": {
+        "bytes": 81,
+        "sha256": "4aa385ff1cdae5919049a32a41eda194cad24b818d9c453f779ea7bc8cfd3afe"
+      },
+      "_temp/psc1-recursor-canonical.log": {
+        "bytes": 601,
+        "sha256": "ad28f997dadc4078d843f23daad20f461937db6fe0341bca503a49d660e30d38"
+      },
+      "_temp/psc1-generated-prefix-canonical.log": {
+        "bytes": 225,
+        "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+      },
+      "_temp/psc1-quot-owner-canonical.log": {
+        "bytes": 197,
+        "sha256": "a5d303427ce62c43e7b798b017eb2bc10c7c2404b9cef8ceed5f9a94ddc1fac0"
+      },
+      "_temp/psc1-name-worker-canonical.log": {
+        "bytes": 339,
+        "sha256": "8ed6f494eb67256fcbe261ea78840993cf08e962947b8e7ca6cde6cd9dc173ed"
+      },
+      "_temp/psc1-scalar-hash-canonical.log": {
+        "bytes": 176,
+        "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+      },
+      "_temp/psc1-scalar-hash-short-entry-canonical.log": {
+        "bytes": 108,
+        "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+      },
+      "_temp/psc1-closed-cache-analysis-canonical.log": {
+        "bytes": 184,
+        "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+      },
+      "_temp/psc1-recursor-k-canonical.log": {
+        "bytes": 392,
+        "sha256": "934df6ba1948f95ed9ca2b0775ef73cc562d7597de495697e89aa012ad936f4c"
+      },
+      "_temp/psc1-owned-state-canonical.log": {
+        "bytes": 215,
+        "sha256": "18d90014492e918eea7105b9ce1dd2d2c4657aa2df502bea1998474736c6cba2"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/README.md": {
+        "bytes": 11813,
+        "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/artifacts.json": {
+        "bytes": 2416,
+        "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/canonical-source.tar.gz": {
+        "bytes": 121034,
+        "sha256": "59ff9a22173d0fbefbe9bd331e979434963618f5db21c68fe67792c258f9ec82"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/package.json": {
+        "bytes": 42,
+        "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs": {
+        "bytes": 5462,
+        "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/pskernel-core.d.ts": {
+        "bytes": 369264,
+        "sha256": "c669e86e85078536129cfc2785846d9b67470fdd2c894d3eee99b3751266df58"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/pskernel-core.js": {
+        "bytes": 9986123,
+        "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/pskernel-core.js.map": {
+        "bytes": 8134550,
+        "sha256": "64fe1474530d324958a63031d7a76a54f5b44cef1605233642d9e82d9192173b"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/pskernel-core.ts": {
+        "bytes": 9167333,
+        "sha256": "87315bf86765b780566b2b9cb3a943bf22744a5e4cb867a490653b4749f0f9b3"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs": {
+        "bytes": 12759,
+        "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json": {
+        "bytes": 11046,
+        "sha256": "dfde6009303c2e45e8db4758e2c3fa61eb6dcb0d8f47f3ed5426f3c1b68026fc"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/pskernel-core.js": {
+        "bytes": 9986123,
+        "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/pskernel-core.d.ts": {
+        "bytes": 369264,
+        "sha256": "c669e86e85078536129cfc2785846d9b67470fdd2c894d3eee99b3751266df58"
+      },
+      "pskernel/pskernel/psc1/dist/pskernel-selfhost/pskernel-core.js.map": {
+        "bytes": 8134550,
+        "sha256": "64fe1474530d324958a63031d7a76a54f5b44cef1605233642d9e82d9192173b"
+      },
+      "_temp/psc1-canonical-js-smoke.log": {
+        "bytes": 4855,
+        "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+      },
+      "_temp/psc1-canonical-dag-smoke.log": {
+        "bytes": 2287877,
+        "sha256": "02fec4be93eebff726219b1c6bb43764725e14ebdc0ced4592395e9d9486baf2"
+      },
+      "_temp/psc1-canonical-nat-smoke.log": {
+        "bytes": 234,
+        "sha256": "58db13c8dfafc1eb1e4ec62342d2328667c4c3ecbd537277369ca6b4be4b1d5d"
+      },
+      "_temp/psc1-canonical-infer-only.log": {
+        "bytes": 65,
+        "sha256": "228d3a73e3d81783ed7380667f22313144b7db49bef9c00f59627cc9f6ff4041"
+      },
+      "_temp/psc1-direct-capability.log": {
+        "bytes": 15925,
+        "sha256": "7e46a11c585922a970329fecdfd3e9e1320abc52411962e49ae9c8182f1de7f7"
+      }
+    }
+  },
+  "producerProvenance": {
+    "schema": "psc1-t01f-source-provenance-v1",
+    "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "runId": "40061694623",
+    "runAttempt": "1",
+    "job": "psc1-portability",
+    "route": "canonical",
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "v22.23.3",
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "kernel": {
+      "bytes": 9986123,
+      "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "generatedRunner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    }
+  },
+  "providerManifest": {
+    "schema": "pskernel-core-artifacts-v1",
+    "repository": "dwijayuda/pskernel",
+    "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "sourceUrl": "https://github.com/dwijayuda/pskernel/tree/0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "workflowRun": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623",
+    "runAttempt": "1",
+    "kind": "canonical-ps-generated-js",
+    "leanToolchain": "leanprover/lean4:v4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "node": "v22.23.3",
+    "checkerFuelDefault": 4096,
+    "qualification": "File integrity receipt only. Qualification requires the linked workflow to finish successfully.",
+    "files": [
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.js",
+        "bytes": 9986123,
+        "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.ts",
+        "bytes": 9167333,
+        "sha256": "87315bf86765b780566b2b9cb3a943bf22744a5e4cb867a490653b4749f0f9b3"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.d.ts",
+        "bytes": 369264,
+        "sha256": "c669e86e85078536129cfc2785846d9b67470fdd2c894d3eee99b3751266df58"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/pskernel-core.js.map",
+        "bytes": 8134550,
+        "sha256": "64fe1474530d324958a63031d7a76a54f5b44cef1605233642d9e82d9192173b"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/scripts/pskernel-canonical-provider.mjs",
+        "bytes": 12759,
+        "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/npm-runtime/canonical-admissions-wire.mjs",
+        "bytes": 5462,
+        "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/package.json",
+        "bytes": 42,
+        "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/canonical-source.tar.gz",
+        "bytes": 121034,
+        "sha256": "59ff9a22173d0fbefbe9bd331e979434963618f5db21c68fe67792c258f9ec82"
+      },
+      {
+        "path": "dist/pskernel-selfhost/provider/README.md",
+        "bytes": 11813,
+        "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+      }
+    ]
+  },
+  "nativeFixture": {
+    "exactMarkers": [
+      "PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096",
+      "PSC1_T01F_METADATA_PASS declarations=377",
+      "PSC1_T01F_CLOSURE_PASS requests=294 declarations=377"
+    ],
+    "sampleCases": 6,
+    "singletonSequences": 6,
+    "requests": 294,
+    "metadata": 377
+  },
+  "directJSCapability": {
+    "terminalMarker": "PSC1_DIRECTJS_COMPLETE_KERNEL: UNSUPPORTED (explicit emitter capability limit)",
+    "qualifiedRoute": "canonical .ps through TypeScript to JavaScript",
+    "separateFromT01FRouteQualification": true
+  },
+  "retainedLogGates": [
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_ZETA: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_BETA: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_WHNF_STATE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_NAT_PROJECTION: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_TRANSFORM_JS: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_DELTA: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_NESTED_OUTCOMES: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_BINDER: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_CHECK_APP: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_CONSTANT_INDEX: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_CHECK_LET: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_LET_CACHE_SCOPE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_LET_LOCAL_WHNF: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_STATEFUL_DEFEQ: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_APP_CONVERSION: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_APP_CONVERSION_CACHE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_APP_EAGER_CONTEXT: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_SIMPLE_ADMISSION_MATRIX: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_THEOREM_ADMISSION_MATRIX: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_UNSAFE_ADMISSION: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_UNSAFE_FRESH_BODY: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_MUTUAL_ADMISSION: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_BINDER_SPINE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_DEFEQ_PREFIX: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_CHEAP_CORE_POLICY: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS"
+    },
+    {
+      "file": "psc1-canonical-dag-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "^PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS"
+    },
+    {
+      "file": "psc1-invalid-occurrence-canonical.log",
+      "flags": "-Eq",
+      "requiredMarker": "^PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS [0-9]+ invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls$"
+    },
+    {
+      "file": "psc1-canonical-infer-only.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_JS_INFER_ONLY: PASS"
+    },
+    {
+      "file": "psc1-canonical-nat-smoke.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_NAT_LARGE_RUNTIME: PASS"
+    },
+    {
+      "file": "psc1-proof-irrelevance-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_JS_PROOF_IRRELEVANCE: PASS comparisons=1350"
+    },
+    {
+      "file": "psc1-proof-irrelevance-canonical.log",
+      "flags": "-Fq",
+      "requiredMarker": "PSC1_V2_DAG_JS_PROOF_IRRELEVANCE_TERMINAL: PASS comparisons=180"
+    },
+    {
+      "file": "psc1-lazy-nat-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_JS_LAZY_NAT: PASS comparisons=1350 stage=192"
+    },
+    {
+      "file": "psc1-lazy-delta-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_JS_LAZY_DELTA: PASS comparisons=1800 stage=1024 steps=128"
+    },
+    {
+      "file": "psc1-lazy-delta-canonical.log",
+      "flags": "-Fq",
+      "requiredMarker": "PSC1_V2_PAIR_SCAN_JS: PASS"
+    },
+    {
+      "file": "psc1-full-shape-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_JS_FULL_SHAPE: PASS stageComparisons=342 ownerComparisons=108"
+    },
+    {
+      "file": "psc1-final-rules-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_JS_FINAL_RULES: PASS owner=648 final=216 projection=175 stringBuild=144 stringStage=32"
+    },
+    {
+      "file": "psc1-final-rules-canonical.log",
+      "flags": "-Fq",
+      "requiredMarker": "PSC1_V2_STRING_PROJECTION_JS: PASS differential=1296 owners=16 failures=32"
+    },
+    {
+      "file": "psc1-admission-guard-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_ADMISSION_GUARD_JS: PASS staticComparisons=420 publicComparisons=672 sharedDepth=128 hostile=12"
+    },
+    {
+      "file": "psc1-quot-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_QUOT: PASS public=240 core=480 owners=720 reducer=60"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_JS: PASS public=252 core=504 owners=720 reducer=72 privateIDs=9"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-Fq",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_CACHE_MODE_JS: PASS wrappers=2 cheapModes=4 warmCold=8"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-Fq",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_UNIVERSE_NEGATIVES_JS: PASS cases=2"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_MAJOR_MATRIX_JS: PASS public=126 core=504 owners=360 reducer=432"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_MAJOR_ADMISSION_JS: PASS valid=6 admitted=2 rejected=2"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_MAJOR_STATE_JS: PASS sequence=4 propagated=40"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY_JS: PASS comparisons=70 fields=20"
+    },
+    {
+      "file": "psc1-recursor-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_DAG_RECURSOR_MAJOR_STRING_JS: PASS callbacks=24 propagated=48"
+    },
+    {
+      "file": "psc1-generated-prefix-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3"
+    },
+    {
+      "file": "psc1-generated-prefix-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2"
+    },
+    {
+      "file": "psc1-generated-prefix-canonical.log",
+      "flags": "-Eq",
+      "requiredMarker": "^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$"
+    },
+    {
+      "file": "psc1-recursor-k-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_K_GENERATED_DIRECT_ADMISSION_PASS cases=2"
+    },
+    {
+      "file": "psc1-recursor-k-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_K_GENERATED_CHECKED_PASS valid=6 invalid=3 declarations=2 batch=6"
+    },
+    {
+      "file": "psc1-recursor-k-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_K_GENERATED_MATRIX_PASS public=108 core=432 reducer=648"
+    },
+    {
+      "file": "psc1-recursor-k-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_K_GENERATED_FIXED_OWNER_PASS cases=96"
+    },
+    {
+      "file": "psc1-recursor-k-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_K_GENERATED_OWNER_PASS carrier=16 propagated=16 metadata=16"
+    },
+    {
+      "file": "psc1-recursor-k-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_K_GENERATED_ORDER_PASS guards=5"
+    },
+    {
+      "file": "psc1-recursor-k-canonical.log",
+      "flags": "-Eq",
+      "requiredMarker": "^PSC1_V2_RECURSOR_K_GENERATED_PASS assertions=[0-9]+$"
+    },
+    {
+      "file": "psc1-scalar-hash-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_SCALAR_HASH_WORKER_JS: PASS {\"cases\":2730,\"strings\":12,\"stages\":8190,\"assertions\":13665,\"modulus\":\"65521\",\"algorithmChanged\":false}"
+    },
+    {
+      "file": "psc1-scalar-hash-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_SCALAR_HASH_LONG_JS: PASS cases=3"
+    },
+    {
+      "file": "psc1-scalar-hash-short-entry-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {\"cases\":19,\"assertions\":38,\"shortMaxPairs\":4,\"genericFallback\":true}"
+    },
+    {
+      "file": "psc1-closed-cache-analysis-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {\"expressions\":20,\"states\":2,\"mapQueries\":40,\"pairQueries\":800,\"inferQueries\":80,\"assertions\":1884,\"smallAndIndexed\":true,\"openEntriesSeeded\":true}"
+    },
+    {
+      "file": "psc1-name-worker-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_NAME_WORKER_STRINGS_PASS raw=24576 full=64 controls=16 long=24"
+    },
+    {
+      "file": "psc1-name-worker-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_NAME_WORKER_NAMES_PASS pairs=400 deep=4 maxDepth=1024"
+    },
+    {
+      "file": "psc1-name-worker-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_NAME_WORKER_ABI_PASS rawPartials=4 namePartials=1 executions=7"
+    },
+    {
+      "file": "psc1-name-worker-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_NAME_WORKER_CHECKING_PASS declarations=10 checked=10 normalized=10 negatives=4 official=native-gate"
+    },
+    {
+      "file": "psc1-name-worker-canonical.log",
+      "flags": "-Eq",
+      "requiredMarker": "^PSC1_NAME_WORKER_PASS assertions=[1-9][0-9]*$"
+    },
+    {
+      "file": "psc1-quot-owner-canonical.log",
+      "flags": "-Eq",
+      "requiredMarker": "^PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions=[0-9]+$"
+    },
+    {
+      "file": "psc1-owned-state-canonical.log",
+      "flags": "-Eq",
+      "requiredMarker": "^PSC1_V2_OWNED_STATE_JS_PASS carrier=42 propagated=56 differential=540 defeqCarrier=38 defeqPropagated=44 assertions=[0-9]+$"
+    },
+    {
+      "file": "psc1-owned-state-canonical.log",
+      "flags": "-Fqx",
+      "requiredMarker": "PSC1_V2_ADMISSION_OWNED_STATE_JS_PASS carrier=8 propagated=12 differential=336 publicWhnf=168"
+    },
+    {
+      "file": "psc1-canonical-provider.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_CANONICAL_PROVIDER: PASS mode=js cases=24 PATH=empty cwd=detached"
+    },
+    {
+      "file": "psc1-canonical-provider.log",
+      "flags": "-q",
+      "requiredMarker": "PSC1_CANONICAL_PROVIDER_API: PASS cases=8 PATH=empty cwd=detached"
+    }
+  ],
+  "cacheAnalysisMatrix": {
+    "expressions": 20,
+    "states": 2,
+    "mapQueries": 40,
+    "pairQueries": 800,
+    "inferQueries": 80,
+    "assertions": 1884,
+    "smallAndIndexed": true,
+    "openEntriesSeeded": true
+  },
+  "providerTests": {
+    "cliCases": 24,
+    "apiCases": 8,
+    "emptyPATH": true,
+    "detachedCwd": true
+  },
+  "canonicalSource": {
+    "bootstrapManifest": {
+      "schemaVersion": 2,
+      "generation": "bootstrap",
+      "entry": "packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps",
+      "sourceCount": 140,
+      "generated": [
+        "packages/pskernel-core/src/Ps/KernelCore/API/Dag.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/DagAdmissionGuards.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/DagDeclaration.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/DagTypes.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/Kernel.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/KernelContractV1.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/Outcome.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/Provider.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/API/Session.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Declaration/Admission.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Declaration/Validation.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Admission.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/AdmissionLoops.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Analysis.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Header.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Recursor.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Admission.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Commit.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Discover.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Flatten.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Rebase.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/ReservedNames.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Restore.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/RestoreExpr.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Types.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Validation.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Types.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Bootstrap.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Context.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/BinderSpines.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/DeltaStep.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/FinalRules.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/FullShape.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/LazyDelta.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Quick.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Shortcuts.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Support.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Beta.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Check.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckApplication.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckCallbacks.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckCore.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckHelpers.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckLet.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckProjection.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckProjectionHelpers.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckState.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckWhnf.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Constant.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Args.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/BinderSpines.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/DeltaStep.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FinalRules.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyDelta.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyNat.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyProjection.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Prefix.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/ProofIrrelevance.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Quick.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEqPair.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Delta.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Environment.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/InferApplication.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Knot.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Nat.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Projection.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Quot.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Recursor.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/RecursorK.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/RecursorMajor.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/String.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Terminal.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Whnf.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfOwned.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Constant.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Core.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Helpers.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Knot.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Ops.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Projection.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Recursor/Analysis.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Recursor/Reduction.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/KernelReductions.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/PrimitiveData.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/PrimitiveNat.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/Primitives.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/Whnf.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/WhnfCore.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/ResourcePolicy.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/Session.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Checker/State.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Declaration.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Expr.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprScalar.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Decode.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Equality.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Lift.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/PairMemo.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSpine.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSupport.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Level.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/LocalContext.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Name.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Abstract.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Beta.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Lift.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/ListOps.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Environment/Environment.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Environment/Lookup.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Environment/Operations.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Environment/Semantic.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/EnvironmentIndex.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Runtime/Capability/Lean434NativeReduction.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/Runtime/Capability/Types.ps",
+        "packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps"
+      ],
+      "closureSha256": "1685d131e4be21e44cb05fb637e9f62debd81890592e1b105c695175ceb265f1"
+    },
+    "archiveDigest": {
+      "bytes": 121034,
+      "sha256": "59ff9a22173d0fbefbe9bd331e979434963618f5db21c68fe67792c258f9ec82"
+    },
+    "manifestMatchesTar": true,
+    "allSourceFilesReadAndHashed": true,
+    "closureSha256": "1685d131e4be21e44cb05fb637e9f62debd81890592e1b105c695175ceb265f1",
+    "sourceFileDigests": {
+      ".proofscript-bootstrap.json": {
+        "bytes": 11046,
+        "sha256": "dfde6009303c2e45e8db4758e2c3fa61eb6dcb0d8f47f3ed5426f3c1b68026fc"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Environment/Semantic.ps": {
+        "bytes": 1585,
+        "sha256": "077e10811bcb36fddc5838ee97ed5ea0683c52265c032655163b12f0f2e1a77b"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Environment/Lookup.ps": {
+        "bytes": 1216,
+        "sha256": "efe3c2a3cc6c7c3f849c7a7ca4f00e311acc4bafcd8a3c1e42fb28a72425048e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Environment/Environment.ps": {
+        "bytes": 1025,
+        "sha256": "c6b7d87f859cbdc8f308903e338d9791d752c880350c0f029558a941ec2c57c6"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Environment/Operations.ps": {
+        "bytes": 1498,
+        "sha256": "0d3c7d1f9289a2b6f828676d4b4efc7092145480b2f7739130cfbf4b23a46c30"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Runtime/Capability/Types.ps": {
+        "bytes": 410,
+        "sha256": "0d53b95d3cb31ca010b61de5e5994aedba4bfc0eb840bcd82d1494ccfaddd333"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Runtime/Capability/Lean434NativeReduction.ps": {
+        "bytes": 1658,
+        "sha256": "64f7a372b163d361541b6016526df105396203585f9079e294108d29fe8e310d"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/EnvironmentIndex.ps": {
+        "bytes": 6327,
+        "sha256": "40a5bfde20a22fcb85542b3e591b754fdddaede0f788a1ef85c3ced0bd950c53"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.ps": {
+        "bytes": 9833,
+        "sha256": "41880230b721270b93f680822cad129169c8ece9ee45bccb470c7263a6ab5425"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.ps": {
+        "bytes": 825,
+        "sha256": "33df278aaa6287c2a255ba8bd738f3961cd9697ac5bda8d67bc71dce438c770f"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.ps": {
+        "bytes": 7299,
+        "sha256": "9fff571d27c54ebc03ba69c380a768609079ab5df214193a699e748dec0c4d53"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.ps": {
+        "bytes": 11519,
+        "sha256": "ca616424f75b2e6abfcaca4289d6c7ff3e51fe4041a1e947198ddd6014ba9fe5"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Types.ps": {
+        "bytes": 3774,
+        "sha256": "c28dad6fb1d98002aed9c080b840e2be0b39ce5f46bb8c42527a8fc2f494ed49"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.ps": {
+        "bytes": 8738,
+        "sha256": "d112f30b265c0987ac8c25330143ecea4909ade50b41e78b719212804c3d1af8"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.ps": {
+        "bytes": 7297,
+        "sha256": "41535cddc1fd228e546fba7e351790237d00a502571adcbbf2b654394e7597e7"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.ps": {
+        "bytes": 13630,
+        "sha256": "f34ad80a67c79b273ee8bb23bdfff1177b195a7bd87593643e2475e191b16021"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.ps": {
+        "bytes": 3575,
+        "sha256": "c4dfb3b7ab4cc1ba5e1cf7e8173bf3cd0cec5a56bbd80227c6d447d2e07bc685"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/AdmissionLoops.ps": {
+        "bytes": 11777,
+        "sha256": "52d09da5f84c960b71de75f4a3672df5326683c9cc0feb7feadb84bd71ff3406"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Recursor.ps": {
+        "bytes": 11509,
+        "sha256": "1d673e0c202c0e674326f5760c779866f58098301f07a572b610042cd946d9fb"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Admission.ps": {
+        "bytes": 5211,
+        "sha256": "3b31da384924847e91f3d72b93424dd6f2b445e42c47179506135f4e1970b704"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Header.ps": {
+        "bytes": 6650,
+        "sha256": "b13fee263ace332f27bbba73ed985564802a6d2efc1536e3ebf5857cc60c07c5"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Analysis.ps": {
+        "bytes": 18067,
+        "sha256": "45eaf819a549e4d56d089ee42c8cfd59b080df79791d51d3ac34cc3c402a7489"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.ps": {
+        "bytes": 6844,
+        "sha256": "0973074dad64567ae691921563712f219497d29aa361b866796bfb88ecae89f2"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.ps": {
+        "bytes": 7206,
+        "sha256": "6a499eb4f939da341fc8535979d1bf8d1cce79723c027fd51fc91873c15544fb"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.ps": {
+        "bytes": 3812,
+        "sha256": "745eedc48789d3f8610e4056358a4c91aa2165e62079b4516889b3ed3f6da0d3"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.ps": {
+        "bytes": 2616,
+        "sha256": "e29226848a0d84cc6ac5bfd644b7d0dc2c2cdafe13e33c7ba8618f692f85da65"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Discover.ps": {
+        "bytes": 13539,
+        "sha256": "ad1d572c9df18978abde151b4f5cf062e68ed27bc9ddfd36396c68c43839ab9e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Restore.ps": {
+        "bytes": 8126,
+        "sha256": "108011fc3a4ad6a56940116ae59a498bfd11432f93b4d4044454202cf13d7332"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Types.ps": {
+        "bytes": 572,
+        "sha256": "800f17efa10fe7e98c2eeff90b3a88b18f50789e8079ba1fe0622155da02342b"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/RestoreExpr.ps": {
+        "bytes": 10946,
+        "sha256": "0567739b4c07e168d6ba94cc2158ec87126d7fff7b401b15d1fdb83712322508"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Admission.ps": {
+        "bytes": 3450,
+        "sha256": "0083bd7d7a47c5e01dc9af92a07ae1dc0b122031e75b9f661be525ae2ff302c8"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/ReservedNames.ps": {
+        "bytes": 2646,
+        "sha256": "f305d199dd45e4c299032a0f9dcda8191faac16a06c9626220ebb54bb5807636"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Commit.ps": {
+        "bytes": 1693,
+        "sha256": "47ce9871ffa5b237461a01d7a99cca9f6add22371176fd482eac5a2aa54e69a9"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Flatten.ps": {
+        "bytes": 11651,
+        "sha256": "8e67cf898a1df0eec26eb49e50b13b91a56f91c2b44454f79b881860af42e8be"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Rebase.ps": {
+        "bytes": 9822,
+        "sha256": "be68bfd975905f389c98bb35f6db08823ede9c07f743b07b004e0d4fbdfcd6e1"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Validation.ps": {
+        "bytes": 14619,
+        "sha256": "fc37014efab1e0143781abeab127001b6627476f94acda3854cf3af1d5e44b89"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Declaration/Admission.ps": {
+        "bytes": 9254,
+        "sha256": "5ea55266ade6e084f52138dc92ceff8fbef43b61c9178fd3d4da34386549d1c4"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Declaration/Validation.ps": {
+        "bytes": 7259,
+        "sha256": "41f2c4bfa4dfb7d518e92dd00c3a7711da68684b95b427c00589db8bd6af1409"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.ps": {
+        "bytes": 2161,
+        "sha256": "089a8f133ed3bc0ce33717218c95a41b35e78f6e6465f60eb3a3fcde6f9bf526"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Bootstrap.ps": {
+        "bytes": 13576,
+        "sha256": "c48f4dfcd3faef61bb101028bbed94c68ed206cc7dbab4c8fb0d30ee6908dbd5"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/DagTypes.ps": {
+        "bytes": 1669,
+        "sha256": "cfddb1fe186468b35898a45a83b151a0cc7a469a646e2d2fbd37e45adc498af7"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/Session.ps": {
+        "bytes": 1716,
+        "sha256": "1d6ebc484f649a70fc98b0d909293072b82fdf47bad48a1420c42df09c7bff1b"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/Outcome.ps": {
+        "bytes": 8852,
+        "sha256": "86c5e384fa183d67da9480976f57e2b4a39c43d7b9d9f8cde759ede8a0e91eee"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/Dag.ps": {
+        "bytes": 12348,
+        "sha256": "343caf7077b5608f92bdb9e34d2f1a1f35d5272d4627876b14f10f7e1fada8f8"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/Kernel.ps": {
+        "bytes": 6201,
+        "sha256": "4d47eb2147849ddd35c2289ff100e767fc74cf42f6778971330057e049c1d860"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/KernelContractV1.ps": {
+        "bytes": 1228,
+        "sha256": "5113e78234865f8dc024b53223a4a48fbee9c877beb40c13cd930b0e568a9de1"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/DagDeclaration.ps": {
+        "bytes": 10351,
+        "sha256": "ad216ebae0760a097079d177d3d8d538a13cec4cfa4b5b5bb6d6eb330a4b84f7"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/Provider.ps": {
+        "bytes": 679,
+        "sha256": "51d802adbdff76b4b1cba41f026838f16141f0facd23c046484993f96d9f7deb"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.ps": {
+        "bytes": 22232,
+        "sha256": "159e2497d7d0f7756769aaae8545c86e55de71d7eabf2e7a8189bda7b176f77f"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.ps": {
+        "bytes": 20548,
+        "sha256": "e57b44ecb1b008812389ea744816208525f899c92604931f99aac0f37fc62188"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/API/DagAdmissionGuards.ps": {
+        "bytes": 7839,
+        "sha256": "f623004d2258dcf50541cb450544a955aa97216fcfe8574b1e62abe9270edec3"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps": {
+        "bytes": 522,
+        "sha256": "7625ad1fb33acbebf3e2495ec9e3bb5b72feba8b7dc4e26704673091d270d70b"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSpine.ps": {
+        "bytes": 3076,
+        "sha256": "5110cdeb7d1c8b1d630cb3744659b1cbcad1b31084f7eddcdb4c990de94e963f"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Lift.ps": {
+        "bytes": 11298,
+        "sha256": "2d7eb97b3ed6bc86168a7a993cf2b961ad7c2b01393738e0a2d95e5c34393491"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Equality.ps": {
+        "bytes": 7584,
+        "sha256": "b4d043e1f215a6c48439f9cf1715de36259f8d0fd668d6a01ba7ce208af7505a"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Decode.ps": {
+        "bytes": 5974,
+        "sha256": "50fa0ef2fd10de96dfcd5ea5b6b0f16bf2df810f92ed1b4a227c8a5665a6c03a"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.ps": {
+        "bytes": 5775,
+        "sha256": "12a7d6dd22ebfd0259bd4795ca6185ccf8853d949bb9b3a2d71314baf16a9e1b"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.ps": {
+        "bytes": 4647,
+        "sha256": "05e3920e7e08084f6cf37bd11dfa9be5004ff02d9b71c71dd6d0398ed883ec02"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/PairMemo.ps": {
+        "bytes": 747,
+        "sha256": "49ae7b2d9bb82c9bdbbc3e1e32f69825c6afaa166a11a3081263e7de59216a95"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.ps": {
+        "bytes": 2119,
+        "sha256": "0c244e8f9a2f570e18de91efaf02d04b6ccc9bed84ea9dbd3b5c5b7bdd6f9b9a"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSupport.ps": {
+        "bytes": 8309,
+        "sha256": "8d0865fa9995faec05c9650bafb4d51e50e4873b5d8fa699043897bc96572caa"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.ps": {
+        "bytes": 14484,
+        "sha256": "49bc9cec666b91601089beb21bda566474021e22392c6bc0f11e1b555a708825"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.ps": {
+        "bytes": 4497,
+        "sha256": "7641647b9d7b26136f29a3391ceb58216f35bdafab5cea8212879b9f4aaf8098"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Name.ps": {
+        "bytes": 10730,
+        "sha256": "3941309f66691649e22655c4868e60d47f59ba1c9251a52a285d2c99cf0b1f00"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Abstract.ps": {
+        "bytes": 4769,
+        "sha256": "56f2ec805259cf14ff3c3218492695384d1b7987390eb143e42e7c8d9386f31a"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Lift.ps": {
+        "bytes": 6956,
+        "sha256": "139ebec671f6731fc419e27647467416ed1ed94e756999b3a50c29bd10b11529"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Beta.ps": {
+        "bytes": 4488,
+        "sha256": "9a1d29f5bc3531f098535931901801823e6df1525bbf766d240b4e6dbba29b04"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/ListOps.ps": {
+        "bytes": 1943,
+        "sha256": "f8a502268db55ffb0533c8593d6a33697a6a8d0831462cefb232aac6bec22c6b"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.ps": {
+        "bytes": 11693,
+        "sha256": "9a103443acfbeaf403ea3cc347c6d7d379449fd363cfb054032e125d7a81e161"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Declaration.ps": {
+        "bytes": 5935,
+        "sha256": "423b4ac8b38ac8ac49622224e9b2c0eec1367a3198475aa79f5cdeac30c7d72e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/LocalContext.ps": {
+        "bytes": 2740,
+        "sha256": "34be8d8cb2bb697829cf583abc7bdc71bb32a3cc6963197b55f540b476827f19"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/ExprScalar.ps": {
+        "bytes": 1853,
+        "sha256": "7c9bafb3d3502be145e4daf150c2769a126176df2faf1409bf4440d6b26a0445"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Expr.ps": {
+        "bytes": 22641,
+        "sha256": "8b783126150f2ac1cfa51195c988ecf8ff7f633a18e8c2026f82fb6597ed31d8"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Core/Level.ps": {
+        "bytes": 20622,
+        "sha256": "8bac178a3de2549b85c790d351f834114bb9706609586139f1525b2892da5975"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/State.ps": {
+        "bytes": 3915,
+        "sha256": "cce3725178f49fa7f76bcf19bf57e1c86875fc047c9f49c2ca628a46f8325063"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/String.ps": {
+        "bytes": 4526,
+        "sha256": "24ba4d3304be91d10045b71846c7206ddc522d60e427ddac483088afcf07f941"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckHelpers.ps": {
+        "bytes": 8990,
+        "sha256": "39fcac470ce93e5cc04a60178e4820484c53f4557fe008c570d2677ec456306a"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.ps": {
+        "bytes": 3825,
+        "sha256": "fde86df6a1bcdc9beaafdd0d5a0eb32a4154137862172c25a4d20ff26b18c04e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Delta.ps": {
+        "bytes": 2592,
+        "sha256": "60f47e5cf98e9c3f8f1070251e8a64dc44dcbcc95f3e087f9b66e40000ad914e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Quot.ps": {
+        "bytes": 6181,
+        "sha256": "7de522110cd9ce1b101c4836fb5a171a63222e1f95d4af781c360723e1e05284"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/RecursorMajor.ps": {
+        "bytes": 13313,
+        "sha256": "6feef8c2f10c8d6c08a4edf7056e924abd6ca4b536c0d29ea9f48b8b4a8f4d9a"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckApplication.ps": {
+        "bytes": 7420,
+        "sha256": "4e15ebbc5fa7c2e037032e85c811af2bd2de847239e25e6ff4a2c6b8ea3b3d80"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Recursor.ps": {
+        "bytes": 16737,
+        "sha256": "809ca0feee4e205043d3036c97f1b93fe357ca8769d9fc14e514c6d63ca3dbbf"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FinalRules.ps": {
+        "bytes": 17299,
+        "sha256": "6506448c2583b59bc430aab3f9e421228edd35e404c268600148225640c6ac72"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.ps": {
+        "bytes": 16997,
+        "sha256": "5caa029393b4678ae7a2fe233736070ca9aa8323a88cdec4689b66952447436e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyNat.ps": {
+        "bytes": 13830,
+        "sha256": "71c9f6ae0d541340651421c4a233c2b60997465fa45d86e38f2b4ce1b8b8f050"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyProjection.ps": {
+        "bytes": 9708,
+        "sha256": "5fd95b82dbad8027878e1559b961badff071987b84427bed65fcb07e6973a6a8"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Quick.ps": {
+        "bytes": 5352,
+        "sha256": "6ab304b0a3db83dc07f20ecbf34a1ba9e3695285395eb7ea95d8eba0ce4ca995"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Args.ps": {
+        "bytes": 3119,
+        "sha256": "772b7411675df5b1545b339e44cbe55e562248665515acb34384a7abbc014524"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/DeltaStep.ps": {
+        "bytes": 20440,
+        "sha256": "546901aec29fb4bb8609ab920fbb4e956b6b8ad7e286687baf0e8c2f4d85d986"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyDelta.ps": {
+        "bytes": 7371,
+        "sha256": "55d30a51fc0b9730a835fa0e052c456d1e5e639a0b922af1637ba4f69859445d"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/BinderSpines.ps": {
+        "bytes": 11083,
+        "sha256": "79fe74835613b541951e9f549bcd2209704eb27cc4563795bf81ba5381ff9274"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/ProofIrrelevance.ps": {
+        "bytes": 6922,
+        "sha256": "0db715732fea130d641d98f1175ecfd8f3914c6f02ea6063e57f187be219c798"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Prefix.ps": {
+        "bytes": 15510,
+        "sha256": "55997df6576f7ebcc921ddc4408a4283c72382681da6f70abfd42e504994b9c2"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Constant.ps": {
+        "bytes": 963,
+        "sha256": "e4b0b652ec9d579ae4b758ea553be4911d4588b3335e5f3070c61deb87a52905"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckWhnf.ps": {
+        "bytes": 2022,
+        "sha256": "6e18aa299aa1593f923319771c4652c4a9a029a4d6e0b5d12af07d26b265c5f1"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfOwned.ps": {
+        "bytes": 20734,
+        "sha256": "32bf6686fd87bcdfb539cd64fe162800f89d7af0e37b2bdbc3f9e863e90825de"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckProjection.ps": {
+        "bytes": 13335,
+        "sha256": "1c2e6144a894d5cfc11e1e444d836426bb881e98c7c3b5fd53bac247f75a90ba"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Whnf.ps": {
+        "bytes": 19144,
+        "sha256": "1cceb96fade52861210e166db0cfcab0bfc7bec6b8d636bcbf90f7fb43624519"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/RecursorK.ps": {
+        "bytes": 7349,
+        "sha256": "ad6f0a293c08db6480a0f77ec5013a8a4d030de17a42f0f4091fc4925a1b15a8"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckCallbacks.ps": {
+        "bytes": 4497,
+        "sha256": "78b926fcb456dba62a9486a0dfd8b8c2e61e11f9c6a8e4bb0cdbf9b9d6919c7e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Beta.ps": {
+        "bytes": 3317,
+        "sha256": "6d2e3e0f7d931a55f478764b07bd442441c4c7bc27de85c457cae4b58d410c28"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckProjectionHelpers.ps": {
+        "bytes": 14911,
+        "sha256": "9ded4abeadc79130f4b6a60d76c62d2b6f1b64eee560cf682370c842cf38f0d2"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq.ps": {
+        "bytes": 5256,
+        "sha256": "7d7a1d37a3b35f8dd929eb57823395d137cd6d3151da12764b9d98be744b4b8b"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Knot.ps": {
+        "bytes": 5832,
+        "sha256": "bf805bf410694629eef548cc4d8db6d5fb0bd99473ececd99123417fb98b1d6a"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckCore.ps": {
+        "bytes": 10242,
+        "sha256": "f785b3eeb48e846cb2bf505953009a97695f5bfe70d0be8d59e8c9b635539506"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Terminal.ps": {
+        "bytes": 2352,
+        "sha256": "d23774a6f3f95f1eb538102214994674825e0f7df1653bc397c89144eef2a5d7"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/InferApplication.ps": {
+        "bytes": 6800,
+        "sha256": "3f18a52af57cc2d607f9cd12b855e9c23e8cd2a453b04a2c4cdeeb14d481629d"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Environment.ps": {
+        "bytes": 3446,
+        "sha256": "799ccab3ffbb6dea87e3d2b853022cf4c0dc5f73a7dbb9d16b510b8eb96090d3"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Nat.ps": {
+        "bytes": 8555,
+        "sha256": "c4e98676611d3fcd4bcfd18d1bb4d85f66f7e4c766b3ba44c725edcba74998fa"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Projection.ps": {
+        "bytes": 1798,
+        "sha256": "8414abe0a926da1d80310cf212d15cf18629c995bb0e36c2f4ef78d61267f654"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Check.ps": {
+        "bytes": 4009,
+        "sha256": "a28d633bdb2916fde90953fac14664a2992a593082a1878ffef6fbc215c9c9e5"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEqPair.ps": {
+        "bytes": 2746,
+        "sha256": "21256dc90900f06aeb43596ec54ce91fe5c98aa474562caf2d3ca556b16d6590"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckLet.ps": {
+        "bytes": 5389,
+        "sha256": "a22c33bd3b111fbcf557de69f836b01aec40d49dbdf5be118d41b53ee9a1286c"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckState.ps": {
+        "bytes": 9943,
+        "sha256": "f5e38da692f433eff1415e43d65fc560049b7b036b190021d46b96b8b1a64f25"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/FinalRules.ps": {
+        "bytes": 10358,
+        "sha256": "381c17e49bb115c8b4868bf568c1992955dc7a3316b0e8145a24fd9337b6cf7d"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/FullShape.ps": {
+        "bytes": 4464,
+        "sha256": "d2d22b82bf37e218460c367524d16fb65243f5706febd5b88ec235907ea6b19c"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Shortcuts.ps": {
+        "bytes": 4543,
+        "sha256": "230d90569e03bbdc61fe8895e9b627e03e6a35f70aae216978afa8a14f45ce66"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Quick.ps": {
+        "bytes": 2945,
+        "sha256": "8a7527bda1429f4030b3a801a10f2f69f22d681f011355ea61b7d9512a996bde"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/DeltaStep.ps": {
+        "bytes": 10797,
+        "sha256": "de80a1b41b66b0067f5d7cc2389940480afbb0dbcaf2345fc6d1b6be30025c4e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Support.ps": {
+        "bytes": 41,
+        "sha256": "588e0ae8ccf3b805994454b674e0504aa9d7c4be4a0177257f76345da66823df"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/LazyDelta.ps": {
+        "bytes": 10500,
+        "sha256": "e652d783ab6034013c334533a4243cc19ab1cc9cf94a3a220e0625178d174cbd"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/BinderSpines.ps": {
+        "bytes": 13623,
+        "sha256": "5945363d137e49c7a1f94593f0cd5716aabaf38f9fb9acf615da320caec774a4"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Session.ps": {
+        "bytes": 3989,
+        "sha256": "6730faad14dd8e1fde5d3266467040e4217feb55295965aa42c8cf180b716f00"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/Primitives.ps": {
+        "bytes": 52,
+        "sha256": "bfdf1e52cd5cd2566031dab871d1cbc7585f3f5dacf9f6784907bec725be98c5"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/Whnf.ps": {
+        "bytes": 4557,
+        "sha256": "e6cb16a1aecbe71dfeae78502c5b5105e177f9aa9ef4f298e3240b8bbc95ab05"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/WhnfCore.ps": {
+        "bytes": 8867,
+        "sha256": "defaa7a4ad641cda5f031cb813bba1743f1a3a0373e80d2badcdc598123b81b8"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/PrimitiveData.ps": {
+        "bytes": 4287,
+        "sha256": "3dae7ad50d11cfe627abba5d749bb022cd1f29e41e228c746e37391f39a0c452"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/KernelReductions.ps": {
+        "bytes": 6460,
+        "sha256": "8d54b78481fb05e664acfd87486ea3fad674d1f4426495e642c05f24537cefcf"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/PrimitiveNat.ps": {
+        "bytes": 7719,
+        "sha256": "158249836c63c5c9f138aaba5edc28a391d6ae3df6be853afcf7edc7198c8b92"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference.ps": {
+        "bytes": 1201,
+        "sha256": "770de1e7607e11969a3e5d4d27ca4818adf2f6c8e977acc9f5e23ac467941b37"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/ResourcePolicy.ps": {
+        "bytes": 6593,
+        "sha256": "2f57ff2faa3d62e8db6c4ea89f1c591d2e8141e194c364e9c67bf8249f3481fa"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Knot.ps": {
+        "bytes": 13194,
+        "sha256": "ee87dc5bb26f4655166fc0ca9714195a6cea20f82d370489cffeff59719c0e8d"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Recursor/Reduction.ps": {
+        "bytes": 6220,
+        "sha256": "e923fa288146d16242c0e90f5d5e667f60de6b9245fd93ba56b0146a49dfad73"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Recursor/Analysis.ps": {
+        "bytes": 10699,
+        "sha256": "35c32f34eae9e949e5d5b7621d42bacb467ef93ff669ad478bb0d5bcd73d1536"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Core.ps": {
+        "bytes": 11747,
+        "sha256": "0c90beec7851210603f988b206974cf2d210053c8bf5cc89801f6722b5e812e9"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Constant.ps": {
+        "bytes": 1452,
+        "sha256": "cf8cf4d5a258a895dfa5a225833d34f09a03e0ebee9b0e1f6ab2de0a09f8c135"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Helpers.ps": {
+        "bytes": 4310,
+        "sha256": "6e132455e7750691c265da2b3e4be11cf4bf46444e3a09ca6e5a8c553afad28e"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Projection.ps": {
+        "bytes": 10569,
+        "sha256": "a9af18e30dcae60bdcc6dc9645f0d2ba8941a244e06a5bb904559350b7f92d56"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Ops.ps": {
+        "bytes": 1086,
+        "sha256": "f9d9b8ec549fcbec95fff159ee23b6ab532b67ca2674987e40237c399ff9ab87"
+      },
+      "packages/pskernel-core/src/Ps/KernelCore/Checker/Context.ps": {
+        "bytes": 13884,
+        "sha256": "5eec9ae75fa7a08355ef0a70137b2db11b6453c1702d09c8659728d45de54da4"
+      }
+    }
+  },
+  "fullGeneratedWorkerStaticInspection": {
+    "exportCount": 1,
+    "structuralRecursiveSites": 11,
+    "oldExprHashCalls": 0,
+    "oldHasFVarCalls": 0,
+    "recurry": false,
+    "resultWrap": false,
+    "wholeBodyDigest": {
+      "bytes": 6635,
+      "sha256": "acf1ee331fe66a9eedc96f310a92a219068a04f450f9cfdaabc0d06bb7a48f98"
+    },
+    "workflowGate": false
+  },
+  "runtimeConstraints": {
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "nodeMajor": 22,
+    "fuel": 4096,
+    "oldSpaceMiB": 2048,
+    "oldSpaceIsHardRssLimit": false,
+    "shardJobMinutes": 25,
+    "emptyPATH": true
+  },
+  "completeFinalRoute": true,
+  "performanceQualified": false,
+  "inspection": "All local work is static source/log/JSON/ZIP/tar/digest inspection. No local Lean, compiler, JavaScript, or kernel execution.",
+  "qualificationLimits": "This evidence does not establish generated-route qualification, Arena C acceptance, whole-query D performance, T05 completion, overall soundness, or a general speedup.",
+  "shards": [
+    {
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694623",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986123,
+              "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 45334,
+              "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 0,
+        "sample": "",
+        "elapsedMs": 219646.86333,
+        "measurement": "peak_rss_kib=900516 wall_seconds=219.59 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 32.510433000000006,
+          "admissionMs": 40410.539280000005,
+          "metadataMs": 1327.2253229999988,
+          "totalMs": 219487.256655,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "",
+              "utf8Bytes": 0,
+              "owners": 224,
+              "ownerAndConstructionMs": 4490.219401000002,
+              "totalMs": 177605.476309,
+              "arenaNodes": "32",
+              "ownedArenaNodes": "10220",
+              "memory": {
+                "rss": 921387008,
+                "heapTotal": 527519744,
+                "heapUsed": 373288136,
+                "external": 4806925,
+                "arrayBuffers": 2809776
+              }
+            }
+          ],
+          "sampleIndex": 0,
+          "sample": ""
+        },
+        "log": {
+          "bytes": 14609,
+          "sha256": "dc8469febe7cfc09211e4803576cf56c91ee8fb8b8bc281e51278f7579594b65"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "c2fe6b40e92147fc00093fd6e1ec315524def2e7820274e6bd4b9154d3949521"
+        }
+      },
+      "receiptDigest": {
+        "bytes": 3461,
+        "sha256": "0ed3f892e59f6636bd93e2a97a4a4d94033b23b4291a5350af1f1b34a890097e"
+      },
+      "admission": {
+        "requests": 294,
+        "admissionMs": 40410.539280000005
+      },
+      "metadata": {
+        "declarations": 377,
+        "milliseconds": 1327.2253229999988
+      },
+      "memory": {
+        "peakRssKiB": 900516,
+        "wallSeconds": 219.59,
+        "exitStatus": 0
+      },
+      "verification": {
+        "exactIdentityAndHashes": true,
+        "all294AdmissionsOrdered": true,
+        "metadata377": true,
+        "assertions1400": true,
+        "oneSelectedSingletonAndCase": true,
+        "uninstrumented": true,
+        "exit0": true,
+        "completeOriginalNegativesViaExactExecutedHarness": true,
+        "timedCommandAndWholeJobBelow1500Seconds": true
+      },
+      "jobElapsedSeconds": 245.0
+    },
+    {
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694623",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986123,
+              "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 45334,
+              "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 1,
+        "sample": "a",
+        "elapsedMs": 403456.780865,
+        "measurement": "peak_rss_kib=851336 wall_seconds=403.40 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 63.252902999999975,
+          "admissionMs": 48770.934378,
+          "metadataMs": 1555.136781000001,
+          "totalMs": 403304.425897,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "a",
+              "utf8Bytes": 1,
+              "owners": 224,
+              "ownerAndConstructionMs": 6102.499961000001,
+              "totalMs": 352749.410889,
+              "arenaNodes": "72",
+              "ownedArenaNodes": "10260",
+              "memory": {
+                "rss": 871079936,
+                "heapTotal": 526589952,
+                "heapUsed": 273591656,
+                "external": 4808237,
+                "arrayBuffers": 2811088
+              }
+            }
+          ],
+          "sampleIndex": 1,
+          "sample": "a"
+        },
+        "log": {
+          "bytes": 14599,
+          "sha256": "0e3e7ea5ce1e56538792ad32a051cf92bc6cea92b3e6e37a02eeaa8c626883d2"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "e0a6b6b222f307cb61500a34fffbce52c1067cecd05b408c0aafef02ce606289"
+        }
+      },
+      "receiptDigest": {
+        "bytes": 3458,
+        "sha256": "1f7279eba6fa8bee95a2e4870cb501de557cb7de05c7026cfdd475bc081ddc39"
+      },
+      "admission": {
+        "requests": 294,
+        "admissionMs": 48770.934378
+      },
+      "metadata": {
+        "declarations": 377,
+        "milliseconds": 1555.136781000001
+      },
+      "memory": {
+        "peakRssKiB": 851336,
+        "wallSeconds": 403.4,
+        "exitStatus": 0
+      },
+      "verification": {
+        "exactIdentityAndHashes": true,
+        "all294AdmissionsOrdered": true,
+        "metadata377": true,
+        "assertions1400": true,
+        "oneSelectedSingletonAndCase": true,
+        "uninstrumented": true,
+        "exit0": true,
+        "completeOriginalNegativesViaExactExecutedHarness": true,
+        "timedCommandAndWholeJobBelow1500Seconds": true
+      },
+      "jobElapsedSeconds": 442.0
+    },
+    {
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694623",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986123,
+              "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 45334,
+              "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 2,
+        "sample": "é",
+        "elapsedMs": 399772.767544,
+        "measurement": "peak_rss_kib=758284 wall_seconds=399.75 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 42.174294,
+          "admissionMs": 42089.490627,
+          "metadataMs": 1420.7972600000066,
+          "totalMs": 399655.054441,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "é",
+              "utf8Bytes": 2,
+              "owners": 224,
+              "ownerAndConstructionMs": 5377.049751999999,
+              "totalMs": 355962.770014,
+              "arenaNodes": "88",
+              "ownedArenaNodes": "10276",
+              "memory": {
+                "rss": 775086080,
+                "heapTotal": 521609216,
+                "heapUsed": 409318552,
+                "external": 4808025,
+                "arrayBuffers": 2810876
+              }
+            }
+          ],
+          "sampleIndex": 2,
+          "sample": "é"
+        },
+        "log": {
+          "bytes": 14596,
+          "sha256": "6ea84e65054ac59de7f53a305f15420ab2819628611fb6f76c00be199da4c72d"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "9bacfbd7f4e605609179c8571810d0d2b1e01a34ad15a49ac691e06fe1daeed8"
+        }
+      },
+      "receiptDigest": {
+        "bytes": 3453,
+        "sha256": "fd5297109e56492767a8e8b408de4b2b88e777bae8aa7ae52465daff8c53d5c2"
+      },
+      "admission": {
+        "requests": 294,
+        "admissionMs": 42089.490627
+      },
+      "metadata": {
+        "declarations": 377,
+        "milliseconds": 1420.7972600000066
+      },
+      "memory": {
+        "peakRssKiB": 758284,
+        "wallSeconds": 399.75,
+        "exitStatus": 0
+      },
+      "verification": {
+        "exactIdentityAndHashes": true,
+        "all294AdmissionsOrdered": true,
+        "metadata377": true,
+        "assertions1400": true,
+        "oneSelectedSingletonAndCase": true,
+        "uninstrumented": true,
+        "exit0": true,
+        "completeOriginalNegativesViaExactExecutedHarness": true,
+        "timedCommandAndWholeJobBelow1500Seconds": true
+      },
+      "jobElapsedSeconds": 431.0
+    },
+    {
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694623",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986123,
+              "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 45334,
+              "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 3,
+        "sample": "€",
+        "elapsedMs": 592376.3169209999,
+        "measurement": "peak_rss_kib=851636 wall_seconds=592.34 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 48.14715699999999,
+          "admissionMs": 56521.708484,
+          "metadataMs": 1558.7120979999963,
+          "totalMs": 592219.730111,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "€",
+              "utf8Bytes": 3,
+              "owners": 224,
+              "ownerAndConstructionMs": 6451.463776999997,
+              "totalMs": 533919.9415900001,
+              "arenaNodes": "104",
+              "ownedArenaNodes": "10292",
+              "memory": {
+                "rss": 870797312,
+                "heapTotal": 515842048,
+                "heapUsed": 324165520,
+                "external": 4808905,
+                "arrayBuffers": 2811756
+              }
+            }
+          ],
+          "sampleIndex": 3,
+          "sample": "€"
+        },
+        "log": {
+          "bytes": 14613,
+          "sha256": "fd5300adfabf6d392624c3370113e36cd7f82b7be9e4bbef84304ef963281172"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "6ab27b050fa8a4f65b356bc65d71bc1588e3ba2fb13f4dcd2b7a6a99507cb1fb"
+        }
+      },
+      "receiptDigest": {
+        "bytes": 3473,
+        "sha256": "ebe6159e60172a3889ff77b837dcbd99d401a754bdf2a40d2e1cdd1122c401b4"
+      },
+      "admission": {
+        "requests": 294,
+        "admissionMs": 56521.708484
+      },
+      "metadata": {
+        "declarations": 377,
+        "milliseconds": 1558.7120979999963
+      },
+      "memory": {
+        "peakRssKiB": 851636,
+        "wallSeconds": 592.34,
+        "exitStatus": 0
+      },
+      "verification": {
+        "exactIdentityAndHashes": true,
+        "all294AdmissionsOrdered": true,
+        "metadata377": true,
+        "assertions1400": true,
+        "oneSelectedSingletonAndCase": true,
+        "uninstrumented": true,
+        "exit0": true,
+        "completeOriginalNegativesViaExactExecutedHarness": true,
+        "timedCommandAndWholeJobBelow1500Seconds": true
+      },
+      "jobElapsedSeconds": 628.0
+    },
+    {
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694623",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986123,
+              "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 45334,
+              "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 4,
+        "sample": "😀",
+        "elapsedMs": 672325.8054419999,
+        "measurement": "peak_rss_kib=911572 wall_seconds=672.28 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 62.115144000000015,
+          "admissionMs": 54282.528410000006,
+          "metadataMs": 1767.8803610000032,
+          "totalMs": 672151.273757,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "😀",
+              "utf8Bytes": 4,
+              "owners": 224,
+              "ownerAndConstructionMs": 6905.285296999995,
+              "totalMs": 615846.312953,
+              "arenaNodes": "120",
+              "ownedArenaNodes": "10308",
+              "memory": {
+                "rss": 932233216,
+                "heapTotal": 526065664,
+                "heapUsed": 124292152,
+                "external": 4812173,
+                "arrayBuffers": 2810480
+              }
+            }
+          ],
+          "sampleIndex": 4,
+          "sample": "😀"
+        },
+        "log": {
+          "bytes": 14626,
+          "sha256": "7c6f11b0acc23a8dc2c32c375af6f96bd429fdb36866fadc34381ac317d8dc47"
+        },
+        "memory": {
+          "bytes": 54,
+          "sha256": "0c3d288c25ec01593877afb57517a914866472162a0a78d550b1681146b9ac8f"
+        }
+      },
+      "receiptDigest": {
+        "bytes": 3479,
+        "sha256": "4b5443f8b3e2175d03f6a0f3ac8ec6521bc4685e56f2806589bf61a536ad0877"
+      },
+      "admission": {
+        "requests": 294,
+        "admissionMs": 54282.528410000006
+      },
+      "metadata": {
+        "declarations": 377,
+        "milliseconds": 1767.8803610000032
+      },
+      "memory": {
+        "peakRssKiB": 911572,
+        "wallSeconds": 672.28,
+        "exitStatus": 0
+      },
+      "verification": {
+        "exactIdentityAndHashes": true,
+        "all294AdmissionsOrdered": true,
+        "metadata377": true,
+        "assertions1400": true,
+        "oneSelectedSingletonAndCase": true,
+        "uninstrumented": true,
+        "exit0": true,
+        "completeOriginalNegativesViaExactExecutedHarness": true,
+        "timedCommandAndWholeJobBelow1500Seconds": true
+      },
+      "jobElapsedSeconds": 704.0
+    },
+    {
+      "receipt": {
+        "schema": "psc1-t01f-shard-receipt-v1",
+        "status": "pass",
+        "identity": {
+          "repository": "dwijayuda/pskernel",
+          "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+          "runId": "40061694623",
+          "runAttempt": "1",
+          "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+          "route": "canonical",
+          "producerJob": "psc1-portability",
+          "producerArtifact": "psc1-canonical-kernel-qualification",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelFuel": 4096,
+          "nodeOldSpaceLimitMiB": 2048,
+          "requests": 294,
+          "metadata": 377,
+          "samples": [
+            "",
+            "a",
+            "é",
+            "€",
+            "😀",
+            "Aé€😀"
+          ],
+          "hashes": {
+            "kernel": {
+              "bytes": 9986123,
+              "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+            },
+            "fixture": {
+              "bytes": 2791525,
+              "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+            },
+            "fixtureProducer": {
+              "bytes": 39734,
+              "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+            },
+            "generatedRunner": {
+              "bytes": 27140,
+              "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+            },
+            "provenance": {
+              "bytes": 1199,
+              "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+            },
+            "orchestrator": {
+              "bytes": 15637,
+              "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+            },
+            "workflow": {
+              "bytes": 45334,
+              "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+            },
+            "providerManifest": {
+              "bytes": 2416,
+              "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+            }
+          }
+        },
+        "job": "t01f-canonical-shards",
+        "node": "v22.23.3",
+        "sampleIndex": 5,
+        "sample": "Aé€😀",
+        "elapsedMs": 1000257.031223,
+        "measurement": "peak_rss_kib=1194780 wall_seconds=1000.24 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 31.019419999999997,
+          "admissionMs": 34858.93104,
+          "metadataMs": 1141.979926,
+          "totalMs": 1000138.882871,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "Aé€😀",
+              "utf8Bytes": 10,
+              "owners": 224,
+              "ownerAndConstructionMs": 4891.910445000001,
+              "totalMs": 963990.258274,
+              "arenaNodes": "288",
+              "ownedArenaNodes": "10476",
+              "memory": {
+                "rss": 1221529600,
+                "heapTotal": 589123584,
+                "heapUsed": 500527008,
+                "external": 4806325,
+                "arrayBuffers": 2809176
+              }
+            }
+          ],
+          "sampleIndex": 5,
+          "sample": "Aé€😀"
+        },
+        "log": {
+          "bytes": 14625,
+          "sha256": "c1bfbe1961b2722be086c4e7f5b8d7b95114cdff64d900af794c15af7bce98d2"
+        },
+        "memory": {
+          "bytes": 56,
+          "sha256": "a2c6d69da89f9b86463682e34751f77bc88e62c4c6a7ac2b11d2a0e490348de2"
+        }
+      },
+      "receiptDigest": {
+        "bytes": 3485,
+        "sha256": "578ec77526f9c6475f0d578a312fe2153366395a1d3959c26c3fce2b06863f95"
+      },
+      "admission": {
+        "requests": 294,
+        "admissionMs": 34858.93104
+      },
+      "metadata": {
+        "declarations": 377,
+        "milliseconds": 1141.979926
+      },
+      "memory": {
+        "peakRssKiB": 1194780,
+        "wallSeconds": 1000.24,
+        "exitStatus": 0
+      },
+      "verification": {
+        "exactIdentityAndHashes": true,
+        "all294AdmissionsOrdered": true,
+        "metadata377": true,
+        "assertions1400": true,
+        "oneSelectedSingletonAndCase": true,
+        "uninstrumented": true,
+        "exit0": true,
+        "completeOriginalNegativesViaExactExecutedHarness": true,
+        "timedCommandAndWholeJobBelow1500Seconds": true
+      },
+      "jobElapsedSeconds": 1027.0
+    }
+  ],
+  "shardJobs": [
+    {
+      "id": 120785472871,
+      "run_id": 40061694623,
+      "workflow_name": "PSC1 PSKernel-Core correctness",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcH2ANZw",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120785472871",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120785472871",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-24T05:03:00Z",
+      "started_at": "2026-10-24T05:03:02Z",
+      "completed_at": "2026-10-24T05:07:07Z",
+      "name": "t01f-canonical-shards (0)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T05:03:03Z",
+          "completed_at": "2026-10-24T05:03:04Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T05:03:04Z",
+          "completed_at": "2026-10-24T05:03:22Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T05:03:22Z",
+          "completed_at": "2026-10-24T05:03:22Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T05:03:22Z",
+          "completed_at": "2026-10-24T05:03:24Z"
+        },
+        {
+          "name": "Authenticate inputs and execute the complete selected String sample",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T05:03:24Z",
+          "completed_at": "2026-10-24T05:07:04Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T05:07:04Z",
+          "completed_at": "2026-10-24T05:07:05Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-24T05:07:05Z",
+          "completed_at": "2026-10-24T05:07:05Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-24T05:07:05Z",
+          "completed_at": "2026-10-24T05:07:05Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T05:07:05Z",
+          "completed_at": "2026-10-24T05:07:05Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120785472871",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028192,
+      "runner_name": "GitHub Actions 1000028192",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120785472903,
+      "run_id": 40061694623,
+      "workflow_name": "PSC1 PSKernel-Core correctness",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcH2ANhw",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120785472903",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120785472903",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-24T05:03:00Z",
+      "started_at": "2026-10-24T05:03:02Z",
+      "completed_at": "2026-10-24T05:10:24Z",
+      "name": "t01f-canonical-shards (1)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T05:03:03Z",
+          "completed_at": "2026-10-24T05:03:04Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T05:03:04Z",
+          "completed_at": "2026-10-24T05:03:31Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T05:03:31Z",
+          "completed_at": "2026-10-24T05:03:36Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T05:03:36Z",
+          "completed_at": "2026-10-24T05:03:37Z"
+        },
+        {
+          "name": "Authenticate inputs and execute the complete selected String sample",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T05:03:37Z",
+          "completed_at": "2026-10-24T05:10:21Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T05:10:21Z",
+          "completed_at": "2026-10-24T05:10:22Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-24T05:10:22Z",
+          "completed_at": "2026-10-24T05:10:22Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-24T05:10:22Z",
+          "completed_at": "2026-10-24T05:10:22Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T05:10:22Z",
+          "completed_at": "2026-10-24T05:10:22Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120785472903",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028193,
+      "runner_name": "GitHub Actions 1000028193",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120785472845,
+      "run_id": 40061694623,
+      "workflow_name": "PSC1 PSKernel-Core correctness",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcH2ANTQ",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120785472845",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120785472845",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-24T05:03:00Z",
+      "started_at": "2026-10-24T05:07:10Z",
+      "completed_at": "2026-10-24T05:14:21Z",
+      "name": "t01f-canonical-shards (2)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T05:07:11Z",
+          "completed_at": "2026-10-24T05:07:12Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T05:07:12Z",
+          "completed_at": "2026-10-24T05:07:34Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T05:07:34Z",
+          "completed_at": "2026-10-24T05:07:35Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T05:07:35Z",
+          "completed_at": "2026-10-24T05:07:37Z"
+        },
+        {
+          "name": "Authenticate inputs and execute the complete selected String sample",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T05:07:37Z",
+          "completed_at": "2026-10-24T05:14:17Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T05:14:17Z",
+          "completed_at": "2026-10-24T05:14:18Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-24T05:14:18Z",
+          "completed_at": "2026-10-24T05:14:18Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-24T05:14:18Z",
+          "completed_at": "2026-10-24T05:14:18Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T05:14:18Z",
+          "completed_at": "2026-10-24T05:14:19Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120785472845",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028195,
+      "runner_name": "GitHub Actions 1000028195",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120785472835,
+      "run_id": 40061694623,
+      "workflow_name": "PSC1 PSKernel-Core correctness",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcH2ANQw",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120785472835",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120785472835",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-24T05:03:00Z",
+      "started_at": "2026-10-24T05:10:26Z",
+      "completed_at": "2026-10-24T05:20:54Z",
+      "name": "t01f-canonical-shards (3)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T05:10:27Z",
+          "completed_at": "2026-10-24T05:10:29Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T05:10:29Z",
+          "completed_at": "2026-10-24T05:10:54Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T05:10:54Z",
+          "completed_at": "2026-10-24T05:10:57Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T05:10:57Z",
+          "completed_at": "2026-10-24T05:10:58Z"
+        },
+        {
+          "name": "Authenticate inputs and execute the complete selected String sample",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T05:10:58Z",
+          "completed_at": "2026-10-24T05:20:51Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T05:20:51Z",
+          "completed_at": "2026-10-24T05:20:52Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-24T05:20:52Z",
+          "completed_at": "2026-10-24T05:20:52Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-24T05:20:52Z",
+          "completed_at": "2026-10-24T05:20:52Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T05:20:52Z",
+          "completed_at": "2026-10-24T05:20:52Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120785472835",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028200,
+      "runner_name": "GitHub Actions 1000028200",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120785472836,
+      "run_id": 40061694623,
+      "workflow_name": "PSC1 PSKernel-Core correctness",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcH2ANRA",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120785472836",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120785472836",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-24T05:03:00Z",
+      "started_at": "2026-10-24T05:14:24Z",
+      "completed_at": "2026-10-24T05:26:08Z",
+      "name": "t01f-canonical-shards (4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T05:14:24Z",
+          "completed_at": "2026-10-24T05:14:26Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T05:14:26Z",
+          "completed_at": "2026-10-24T05:14:47Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T05:14:47Z",
+          "completed_at": "2026-10-24T05:14:49Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T05:14:49Z",
+          "completed_at": "2026-10-24T05:14:50Z"
+        },
+        {
+          "name": "Authenticate inputs and execute the complete selected String sample",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T05:14:50Z",
+          "completed_at": "2026-10-24T05:26:03Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T05:26:03Z",
+          "completed_at": "2026-10-24T05:26:04Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-24T05:26:04Z",
+          "completed_at": "2026-10-24T05:26:04Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-24T05:26:04Z",
+          "completed_at": "2026-10-24T05:26:05Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T05:26:05Z",
+          "completed_at": "2026-10-24T05:26:05Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120785472836",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028203,
+      "runner_name": "GitHub Actions 1000028203",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120785472869,
+      "run_id": 40061694623,
+      "workflow_name": "PSC1 PSKernel-Core correctness",
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUlmxxc8AAAAcH2ANZQ",
+      "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120785472869",
+      "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120785472869",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-24T05:03:00Z",
+      "started_at": "2026-10-24T05:20:57Z",
+      "completed_at": "2026-10-24T05:38:04Z",
+      "name": "t01f-canonical-shards (5)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T05:20:57Z",
+          "completed_at": "2026-10-24T05:20:59Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T05:20:59Z",
+          "completed_at": "2026-10-24T05:21:19Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T05:21:19Z",
+          "completed_at": "2026-10-24T05:21:19Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T05:21:19Z",
+          "completed_at": "2026-10-24T05:21:20Z"
+        },
+        {
+          "name": "Authenticate inputs and execute the complete selected String sample",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T05:21:20Z",
+          "completed_at": "2026-10-24T05:38:01Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T05:38:01Z",
+          "completed_at": "2026-10-24T05:38:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-24T05:38:02Z",
+          "completed_at": "2026-10-24T05:38:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-24T05:38:02Z",
+          "completed_at": "2026-10-24T05:38:02Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T05:38:02Z",
+          "completed_at": "2026-10-24T05:38:02Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120785472869",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028207,
+      "runner_name": "GitHub Actions 1000028207",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ],
+  "shardArtifacts": [
+    {
+      "artifactId": 12548922369,
+      "name": "psc1-t01f-canonical-shard-0-attempt-1",
+      "zip": {
+        "bytes": 5649,
+        "sha256": "3af52452ae426cf37dce7cdcd5c553518618a8ce959f1edb2b4bebe2304c8b70"
+      },
+      "files": {
+        "receipt.json": {
+          "bytes": 3461,
+          "sha256": "0ed3f892e59f6636bd93e2a97a4a4d94033b23b4291a5350af1f1b34a890097e"
+        },
+        "generated.log": {
+          "bytes": 14609,
+          "sha256": "dc8469febe7cfc09211e4803576cf56c91ee8fb8b8bc281e51278f7579594b65"
+        },
+        "inputs.json": {
+          "bytes": 1663,
+          "sha256": "92f1a4af6a25660720ffec90477b0b7976e0c0847c9218343882293385fc7cbd"
+        },
+        "generated.memory": {
+          "bytes": 54,
+          "sha256": "c2fe6b40e92147fc00093fd6e1ec315524def2e7820274e6bd4b9154d3949521"
+        }
+      }
+    },
+    {
+      "artifactId": 12549530089,
+      "name": "psc1-t01f-canonical-shard-1-attempt-1",
+      "zip": {
+        "bytes": 5637,
+        "sha256": "f44cd4698fe52bcb7746c5e224f8a01b8093afc038e3482aaf26b769c5f80b25"
+      },
+      "files": {
+        "receipt.json": {
+          "bytes": 3458,
+          "sha256": "1f7279eba6fa8bee95a2e4870cb501de557cb7de05c7026cfdd475bc081ddc39"
+        },
+        "inputs.json": {
+          "bytes": 1663,
+          "sha256": "92f1a4af6a25660720ffec90477b0b7976e0c0847c9218343882293385fc7cbd"
+        },
+        "generated.memory": {
+          "bytes": 54,
+          "sha256": "e0a6b6b222f307cb61500a34fffbce52c1067cecd05b408c0aafef02ce606289"
+        },
+        "generated.log": {
+          "bytes": 14599,
+          "sha256": "0e3e7ea5ce1e56538792ad32a051cf92bc6cea92b3e6e37a02eeaa8c626883d2"
+        }
+      }
+    },
+    {
+      "artifactId": 12549331783,
+      "name": "psc1-t01f-canonical-shard-2-attempt-1",
+      "zip": {
+        "bytes": 5638,
+        "sha256": "7ad5c66f32fe37a04139f314d9003b38d5655ccd5280ba9382bacf143749be8f"
+      },
+      "files": {
+        "receipt.json": {
+          "bytes": 3453,
+          "sha256": "fd5297109e56492767a8e8b408de4b2b88e777bae8aa7ae52465daff8c53d5c2"
+        },
+        "inputs.json": {
+          "bytes": 1663,
+          "sha256": "92f1a4af6a25660720ffec90477b0b7976e0c0847c9218343882293385fc7cbd"
+        },
+        "generated.log": {
+          "bytes": 14596,
+          "sha256": "6ea84e65054ac59de7f53a305f15420ab2819628611fb6f76c00be199da4c72d"
+        },
+        "generated.memory": {
+          "bytes": 54,
+          "sha256": "9bacfbd7f4e605609179c8571810d0d2b1e01a34ad15a49ac691e06fe1daeed8"
+        }
+      }
+    },
+    {
+      "artifactId": 12548334919,
+      "name": "psc1-t01f-canonical-shard-3-attempt-1",
+      "zip": {
+        "bytes": 5660,
+        "sha256": "e7cd18512baad1aba5c070d78213c380480bf0807141ecc62dc6fb1502b5ce05"
+      },
+      "files": {
+        "receipt.json": {
+          "bytes": 3473,
+          "sha256": "ebe6159e60172a3889ff77b837dcbd99d401a754bdf2a40d2e1cdd1122c401b4"
+        },
+        "inputs.json": {
+          "bytes": 1663,
+          "sha256": "92f1a4af6a25660720ffec90477b0b7976e0c0847c9218343882293385fc7cbd"
+        },
+        "generated.log": {
+          "bytes": 14613,
+          "sha256": "fd5300adfabf6d392624c3370113e36cd7f82b7be9e4bbef84304ef963281172"
+        },
+        "generated.memory": {
+          "bytes": 54,
+          "sha256": "6ab27b050fa8a4f65b356bc65d71bc1588e3ba2fb13f4dcd2b7a6a99507cb1fb"
+        }
+      }
+    },
+    {
+      "artifactId": 12549790294,
+      "name": "psc1-t01f-canonical-shard-4-attempt-1",
+      "zip": {
+        "bytes": 5662,
+        "sha256": "f25ed3255e2cd053bb6f17f03a91868874fdf119577ccf34547152ac86f1c4b9"
+      },
+      "files": {
+        "receipt.json": {
+          "bytes": 3479,
+          "sha256": "4b5443f8b3e2175d03f6a0f3ac8ec6521bc4685e56f2806589bf61a536ad0877"
+        },
+        "inputs.json": {
+          "bytes": 1663,
+          "sha256": "92f1a4af6a25660720ffec90477b0b7976e0c0847c9218343882293385fc7cbd"
+        },
+        "generated.log": {
+          "bytes": 14626,
+          "sha256": "7c6f11b0acc23a8dc2c32c375af6f96bd429fdb36866fadc34381ac317d8dc47"
+        },
+        "generated.memory": {
+          "bytes": 54,
+          "sha256": "0c3d288c25ec01593877afb57517a914866472162a0a78d550b1681146b9ac8f"
+        }
+      }
+    },
+    {
+      "artifactId": 12549701259,
+      "name": "psc1-t01f-canonical-shard-5-attempt-1",
+      "zip": {
+        "bytes": 5670,
+        "sha256": "51e9a0264f2099c0e279af035e7daa417c10f01fee653432885bdcdcbf4279ef"
+      },
+      "files": {
+        "receipt.json": {
+          "bytes": 3485,
+          "sha256": "578ec77526f9c6475f0d578a312fe2153366395a1d3959c26c3fce2b06863f95"
+        },
+        "inputs.json": {
+          "bytes": 1663,
+          "sha256": "92f1a4af6a25660720ffec90477b0b7976e0c0847c9218343882293385fc7cbd"
+        },
+        "generated.memory": {
+          "bytes": 56,
+          "sha256": "a2c6d69da89f9b86463682e34751f77bc88e62c4c6a7ac2b11d2a0e490348de2"
+        },
+        "generated.log": {
+          "bytes": 14625,
+          "sha256": "c1bfbe1961b2722be086c4e7f5b8d7b95114cdff64d900af794c15af7bce98d2"
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "schema": "psc1-t01f-sharded-qualification-v1",
+    "status": "pass",
+    "identity": {
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+      "runId": "40061694623",
+      "runAttempt": "1",
+      "workflow": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "route": "canonical",
+      "producerJob": "psc1-portability",
+      "producerArtifact": "psc1-canonical-kernel-qualification",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "kernelFuel": 4096,
+      "nodeOldSpaceLimitMiB": 2048,
+      "requests": 294,
+      "metadata": 377,
+      "samples": [
+        "",
+        "a",
+        "é",
+        "€",
+        "😀",
+        "Aé€😀"
+      ],
+      "hashes": {
+        "kernel": {
+          "bytes": 9986123,
+          "sha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28"
+        },
+        "fixture": {
+          "bytes": 2791525,
+          "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+        },
+        "fixtureProducer": {
+          "bytes": 39734,
+          "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+        },
+        "generatedRunner": {
+          "bytes": 27140,
+          "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+        },
+        "provenance": {
+          "bytes": 1199,
+          "sha256": "418cd0fee5f6f135765b3d94be31f972e9bcbbb0bbb2ef714657740e68d23971"
+        },
+        "orchestrator": {
+          "bytes": 15637,
+          "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+        },
+        "workflow": {
+          "bytes": 45334,
+          "sha256": "56cf7eb4eba5a26209668175c9a9910dda1a3f1e0d5299431febc3426437aae3"
+        },
+        "providerManifest": {
+          "bytes": 2416,
+          "sha256": "9b56d920e3fd06e4e16e4984193e5805d0ba6244f1a3fd7fd22f07813378fb5c"
+        }
+      }
+    },
+    "job": "t01f-canonical-complete",
+    "node": "v22.23.3",
+    "shards": 6,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "requestsPerShard": 294,
+    "metadataPerShard": 377,
+    "independentAdmissionPerShard": true,
+    "completeNegativesPerSample": true,
+    "singletonSequences": 6,
+    "assertionsPerSample": 1400,
+    "executedAssertions": 8400,
+    "includesRepeatedPrefix": true,
+    "performanceQualified": false,
+    "receipts": [
+      {
+        "sampleIndex": 0,
+        "sample": "",
+        "receipt": {
+          "bytes": 3461,
+          "sha256": "0ed3f892e59f6636bd93e2a97a4a4d94033b23b4291a5350af1f1b34a890097e"
+        },
+        "measurement": "peak_rss_kib=900516 wall_seconds=219.59 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 32.510433000000006,
+          "admissionMs": 40410.539280000005,
+          "metadataMs": 1327.2253229999988,
+          "totalMs": 219487.256655,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "",
+              "utf8Bytes": 0,
+              "owners": 224,
+              "ownerAndConstructionMs": 4490.219401000002,
+              "totalMs": 177605.476309,
+              "arenaNodes": "32",
+              "ownedArenaNodes": "10220",
+              "memory": {
+                "rss": 921387008,
+                "heapTotal": 527519744,
+                "heapUsed": 373288136,
+                "external": 4806925,
+                "arrayBuffers": 2809776
+              }
+            }
+          ],
+          "sampleIndex": 0,
+          "sample": ""
+        }
+      },
+      {
+        "sampleIndex": 1,
+        "sample": "a",
+        "receipt": {
+          "bytes": 3458,
+          "sha256": "1f7279eba6fa8bee95a2e4870cb501de557cb7de05c7026cfdd475bc081ddc39"
+        },
+        "measurement": "peak_rss_kib=851336 wall_seconds=403.40 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 63.252902999999975,
+          "admissionMs": 48770.934378,
+          "metadataMs": 1555.136781000001,
+          "totalMs": 403304.425897,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "a",
+              "utf8Bytes": 1,
+              "owners": 224,
+              "ownerAndConstructionMs": 6102.499961000001,
+              "totalMs": 352749.410889,
+              "arenaNodes": "72",
+              "ownedArenaNodes": "10260",
+              "memory": {
+                "rss": 871079936,
+                "heapTotal": 526589952,
+                "heapUsed": 273591656,
+                "external": 4808237,
+                "arrayBuffers": 2811088
+              }
+            }
+          ],
+          "sampleIndex": 1,
+          "sample": "a"
+        }
+      },
+      {
+        "sampleIndex": 2,
+        "sample": "é",
+        "receipt": {
+          "bytes": 3453,
+          "sha256": "fd5297109e56492767a8e8b408de4b2b88e777bae8aa7ae52465daff8c53d5c2"
+        },
+        "measurement": "peak_rss_kib=758284 wall_seconds=399.75 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 42.174294,
+          "admissionMs": 42089.490627,
+          "metadataMs": 1420.7972600000066,
+          "totalMs": 399655.054441,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "é",
+              "utf8Bytes": 2,
+              "owners": 224,
+              "ownerAndConstructionMs": 5377.049751999999,
+              "totalMs": 355962.770014,
+              "arenaNodes": "88",
+              "ownedArenaNodes": "10276",
+              "memory": {
+                "rss": 775086080,
+                "heapTotal": 521609216,
+                "heapUsed": 409318552,
+                "external": 4808025,
+                "arrayBuffers": 2810876
+              }
+            }
+          ],
+          "sampleIndex": 2,
+          "sample": "é"
+        }
+      },
+      {
+        "sampleIndex": 3,
+        "sample": "€",
+        "receipt": {
+          "bytes": 3473,
+          "sha256": "ebe6159e60172a3889ff77b837dcbd99d401a754bdf2a40d2e1cdd1122c401b4"
+        },
+        "measurement": "peak_rss_kib=851636 wall_seconds=592.34 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 48.14715699999999,
+          "admissionMs": 56521.708484,
+          "metadataMs": 1558.7120979999963,
+          "totalMs": 592219.730111,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "€",
+              "utf8Bytes": 3,
+              "owners": 224,
+              "ownerAndConstructionMs": 6451.463776999997,
+              "totalMs": 533919.9415900001,
+              "arenaNodes": "104",
+              "ownedArenaNodes": "10292",
+              "memory": {
+                "rss": 870797312,
+                "heapTotal": 515842048,
+                "heapUsed": 324165520,
+                "external": 4808905,
+                "arrayBuffers": 2811756
+              }
+            }
+          ],
+          "sampleIndex": 3,
+          "sample": "€"
+        }
+      },
+      {
+        "sampleIndex": 4,
+        "sample": "😀",
+        "receipt": {
+          "bytes": 3479,
+          "sha256": "4b5443f8b3e2175d03f6a0f3ac8ec6521bc4685e56f2806589bf61a536ad0877"
+        },
+        "measurement": "peak_rss_kib=911572 wall_seconds=672.28 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 62.115144000000015,
+          "admissionMs": 54282.528410000006,
+          "metadataMs": 1767.8803610000032,
+          "totalMs": 672151.273757,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "😀",
+              "utf8Bytes": 4,
+              "owners": 224,
+              "ownerAndConstructionMs": 6905.285296999995,
+              "totalMs": 615846.312953,
+              "arenaNodes": "120",
+              "ownedArenaNodes": "10308",
+              "memory": {
+                "rss": 932233216,
+                "heapTotal": 526065664,
+                "heapUsed": 124292152,
+                "external": 4812173,
+                "arrayBuffers": 2810480
+              }
+            }
+          ],
+          "sampleIndex": 4,
+          "sample": "😀"
+        }
+      },
+      {
+        "sampleIndex": 5,
+        "sample": "Aé€😀",
+        "receipt": {
+          "bytes": 3485,
+          "sha256": "578ec77526f9c6475f0d578a312fe2153366395a1d3959c26c3fce2b06863f95"
+        },
+        "measurement": "peak_rss_kib=1194780 wall_seconds=1000.24 exit_status=0",
+        "runtime": {
+          "kernelSha256": "740c85aa160056546342853da81b6b86440081cd4e1ce857c0257be49e245d28",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 31.019419999999997,
+          "admissionMs": 34858.93104,
+          "metadataMs": 1141.979926,
+          "totalMs": 1000138.882871,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "Aé€😀",
+              "utf8Bytes": 10,
+              "owners": 224,
+              "ownerAndConstructionMs": 4891.910445000001,
+              "totalMs": 963990.258274,
+              "arenaNodes": "288",
+              "ownedArenaNodes": "10476",
+              "memory": {
+                "rss": 1221529600,
+                "heapTotal": 589123584,
+                "heapUsed": 500527008,
+                "external": 4806325,
+                "arrayBuffers": 2809176
+              }
+            }
+          ],
+          "sampleIndex": 5,
+          "sample": "Aé€😀"
+        }
+      }
+    ]
+  },
+  "aggregateJob": {
+    "id": 120792296619,
+    "run_id": 40061694623,
+    "workflow_name": "PSC1 PSKernel-Core correctness",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40061694623",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcH8gsqw",
+    "head_sha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120792296619",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40061694623/job/120792296619",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-24T05:38:04Z",
+    "started_at": "2026-10-24T05:38:07Z",
+    "completed_at": "2026-10-24T05:38:41Z",
+    "name": "t01f-canonical-complete",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-24T05:38:08Z",
+        "completed_at": "2026-10-24T05:38:09Z"
+      },
+      {
+        "name": "Require every producer and shard job to succeed",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-24T05:38:09Z",
+        "completed_at": "2026-10-24T05:38:10Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-24T05:38:10Z",
+        "completed_at": "2026-10-24T05:38:30Z"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-24T05:38:30Z",
+        "completed_at": "2026-10-24T05:38:34Z"
+      },
+      {
+        "name": "Run actions/download-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-24T05:38:34Z",
+        "completed_at": "2026-10-24T05:38:36Z"
+      },
+      {
+        "name": "Run actions/download-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-24T05:38:36Z",
+        "completed_at": "2026-10-24T05:38:37Z"
+      },
+      {
+        "name": "Reauthenticate and require all six complete String samples",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-24T05:38:37Z",
+        "completed_at": "2026-10-24T05:38:37Z"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-24T05:38:37Z",
+        "completed_at": "2026-10-24T05:38:38Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15,
+        "started_at": "2026-10-24T05:38:38Z",
+        "completed_at": "2026-10-24T05:38:38Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 16,
+        "started_at": "2026-10-24T05:38:38Z",
+        "completed_at": "2026-10-24T05:38:38Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17,
+        "started_at": "2026-10-24T05:38:38Z",
+        "completed_at": "2026-10-24T05:38:38Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120792296619",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000028239,
+    "runner_name": "GitHub Actions 1000028239",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "aggregateArtifact": {
+    "artifactId": 12549523345,
+    "name": "psc1-t01f-canonical-complete-attempt-1",
+    "zip": {
+      "bytes": 2770,
+      "sha256": "29ff21a6087baeb091bd94f6cc857b5f63f00d94fd134ae74b01f73702d91c76"
+    },
+    "files": {
+      "qualification.json": {
+        "bytes": 11977,
+        "sha256": "c5d3d847605f101cb302865498a0e3cbf5317220e119bac29a2542c024023cd3"
+      }
+    }
+  },
+  "strictFullShardedPass": true,
+  "assertionsPerSample": 1400,
+  "executedAssertions": 8400,
+  "includesRepeatedPrefix": true
+}

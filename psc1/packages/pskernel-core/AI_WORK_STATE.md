@@ -1,3 +1,85 @@
+## 2026-10-24 T01F qualified at exact 0d9f source and integrated
+
+**T01F and scoped A are qualified at
+`0d9f062846d109c362210d441df5fd407ca2cdd7`. B remains OPEN, C remains FAIL,
+D remains OPEN, and T05 remains OPEN.** This is the newest status entry;
+older failed, incomplete and diagnostic results below remain historical.
+
+Both final routes completed at this exact source, attempt 1:
+
+- [Generated integration 40061694631](https://github.com/dwijayuda/pskernel/actions/runs/40061694631):
+  all ten jobs and ten artifacts independently verified. Six complete String
+  samples each executed exactly 1,400 assertions; the strict aggregate is
+  **8,400 executed assertions, including repeated prefixes**. Mixed whole job
+  1,283 s; unchanged-cap margin 217 s; process 1,251.58 s / 1,142,340 KiB RSS.
+- [Canonical correctness 40061694623](https://github.com/dwijayuda/pskernel/actions/runs/40061694623):
+  all nine jobs and eight artifacts independently verified, including all 68
+  archived files. Six complete samples and the strict aggregate passed exactly
+  **1,400 assertions per sample / 8,400 executed assertions including repeated
+  prefixes**. Mixed whole job 1,027 s; cap margin 473 s; process 1,000.24 s /
+  1,194,780 KiB RSS.
+
+Both original `PSC1_T01F_FULL_STRING_SHARDED_JS: PASS` records match their
+archived receipts. Every shard independently admitted all 294 requests and
+compared all 377 metadata records, with singleton and original negative
+controls preserved. Each route passed the exact 1,884-assertion cache matrix
+and 24 CLI + eight API provider cases. All 140 canonical reconstructed source
+modules plus their manifest were independently verified from the source tar.
+
+The final native gate passed all 232 exact proof reports across sixteen
+modules, including the seven new universal cache equivalences, eleven unchanged
+scalar-hash proofs and sixteen retained Knot equations. All retained native,
+generated, research and frozen 32-worker/384-call owner gates were checked at
+the exact final source. No earlier source or attempt supplies a missing pass.
+
+The current-source full Arena run `40061694705` remains **C FAIL**: 173/193
+strict matches, 17 timeouts, one reduction-budget exhaustion, and two separate
+unsafe/partial contract-difference agreements. Profile run `40061694607`
+completed diagnostic collection; Church remains resource-exhausted and
+Init.Prelude reaches the fixed 60-second diagnostic timeout. **D remains OPEN**;
+the finite DAG/legacy and frozen-baseline comparisons are kept distinct.
+
+Integration branch `integration/psc1-pskernel-expr-v2-lean435-20261021` was
+fast-forwarded from `123c41197950b6761be965fd21c57142ee2b0d1c` to the exact
+qualified source `0d9f062846d109c362210d441df5fd407ca2cdd7` using `force: false` and
+the freshly observed old head as `expected_sha`. Ancestry was ahead 79 /
+behind 0 with that old head as merge base. Fresh API verification at
+**2026-10-24 05:43:28 UTC** confirmed both branches at the qualified source
+and tree. No untested documentation child was integrated.
+
+The detailed record and complete evidence index are in
+[T01F_QUALIFICATION_2026-10-24.md](docs/T01F_QUALIFICATION_2026-10-24.md), including independent reconciliation and
+source-preservation receipts. Production changes from the requested c775
+handoff are exactly the new CacheAnalysis module and seven specified checker
+files. All protected cache/hash/core files and production Checker/Knot are
+unchanged. No unconditional pair lookup was rewritten using an unproved
+invariant.
+
+This containing checkpoint changes documentation, evidence and five work-branch
+push triggers only; it does not claim a new executable qualification. Those
+five full triggers are paused for the next bounded implementation batch, with
+the saved integration draft synchronized. The T01F narrow and phase diagnostic
+workflows remain manual-only. Lean 4.35.0 commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, TypeScript 7.0.2, Node 22,
+fuel 4096, old-space 2048 MiB, empty PATH, max-parallel two and the 25-minute
+mixed/shard cap are unchanged. Old-space is not a hard RSS limit.
+
+**Next executable task: T05 ordinary DAG inductive admission.** Start with the
+ID-native ordinary uniform-occurrence/header/parameter/index analysis slice.
+Preserve guard order, structural versus checker-fuel bounds, mandatory public
+WHNF and complete callback-returned state. Constructor analysis must resume
+the parameter owner while retaining the append-only arena required by index
+IDs, without importing the index owner's semantic caches/freshness. Keep
+whole-admission fallback until constructors, generated recursor types/rules
+and atomic publication have qualified ID-native replacements. Do not combine
+mutual/nested migration or claim T05 complete from a header-only pass.
+
+Use Actions Linux only for all builds and project execution/tests. Fresh-read
+both live branches before changes and use non-force expected-SHA updates to
+preserve concurrent history. No main merge or npm publication.
+
+---
+
 ## 2026-10-24 complete Knot-corrected narrow PASS; one new final source activated
 
 Exact source `e136c06fb378c7882eaa795366e7a781440588f9` completed

@@ -1,0 +1,32 @@
+{
+  "schema": "psc1-t01f-root-final-review-v1",
+  "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "runAttempt": 1,
+  "scopedAAndT01F": "QUALIFIED",
+  "integrationPerformed": false,
+  "rootReconciledBothOriginalStrictAggregateMarkersAndReceipts": true,
+  "strictAssertionsPerSample": 1400,
+  "strictExecutedAssertionsPerRoute": 8400,
+  "executedAssertionsAcrossBothRoutes": 16800,
+  "includesRepeatedPrefixes": true,
+  "independentReconciliation": {
+    "file": "2026-10-24-t01f-final-0d9f0628-reconciliation.json",
+    "bytes": 54404,
+    "sha256": "1198951a5c1e6fcd434d3d6bded743fff774739967d951d525b51c37b058478e"
+  },
+  "canonicalAggregate": {
+    "artifactId": 12549523345,
+    "zipSha256": "29ff21a6087baeb091bd94f6cc857b5f63f00d94fd134ae74b01f73702d91c76",
+    "qualificationSha256": "c5d3d847605f101cb302865498a0e3cbf5317220e119bac29a2542c024023cd3"
+  },
+  "milestones": {
+    "T01F": "QUALIFIED at exact source",
+    "A": "SCOPED QUALIFIED at exact source",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN",
+    "T05": "OPEN"
+  },
+  "localActivity": "Static source/JSON/ZIP/hash/log review only; no local project execution or tests.",
+  "next": "Fresh live-ref/ancestry validation and non-force expected-SHA integration of the exact qualified source."
+}

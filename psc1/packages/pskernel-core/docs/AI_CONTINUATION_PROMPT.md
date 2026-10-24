@@ -1,3 +1,52 @@
+## 2026-10-24 T05 ordinary header candidate after qualified T01F integration
+
+**T01F/scoped A remain qualified only at `0d9f062846d109c362210d441df5fd407ca2cdd7`,
+the current integration source. T05 remains OPEN; B remains OPEN, C remains FAIL,
+and D remains OPEN.** The preceding work checkpoint is
+`1e1fa35d19bc5180eebc3fd19e8638919ec6e06f`. This new entry supersedes older
+instructions to wait for T01F qualification: that qualification and integration
+are complete, as documented in `docs/T01F_QUALIFICATION_2026-10-24.md` and its
+source/run/attempt-bound evidence. It does not transfer those passes to this
+new executable candidate.
+
+The first T05 implementation slice adds private ID-native ordinary-inductive
+header analysis: uniform occurrences, annotation consumption, parameter and
+index opening, and the exact original header guard/checking sequence. It keeps
+separate complete parameter/index owners and an explicit constructor-state
+accessor that retains parameter semantics/freshness with the index-appended
+arena. The two admission EnsureSort helpers move byte-for-byte into a shared
+checker module. Public ordinary admission still uses its existing complete
+fallback; constructor validation, recursor construction and atomic publication
+are not implemented by this slice.
+
+The candidate includes 64 new audited native proof reports (15 structural correspondence
+and 49 state/header equations) and a direct-worker matrix requiring exactly
+1,992 assertions on each authentic generated route. The structural theorems use
+an explicit node/depth/child-reference `ArenaModel`; establishing that model
+from successful whole-arena replay validation remains a separate proof
+obligation. Header success is not a full ordinary-admission receipt.
+
+**At this checkpoint the T05 candidate is untested.** Its new native-first
+`psc1-pskernel-t05-header.yml` workflow must check the proofs, native regression
+and official controls before bounded code generation and the expensive complete
+generated and canonical PSC1-to-TypeScript-to-JavaScript routes. The existing
+1,884-assertion closed-cache matrix and strict generated-body checks remain
+prerequisites. Follow one exact candidate run; do not dispatch a duplicate or
+combine outcomes across sources or attempts. All five full work-branch
+qualification triggers remain paused, and both T01F diagnostic workflows
+remain manual-only.
+
+Continue from `docs/T05_ORDINARY_HEADER_HANDOFF_2026-10-24.md`. Fix actual native,
+compiler or runtime failures without weakening the assertions or trust audit.
+After this bounded slice passes, continue ordinary constructor/positivity,
+recursor validation and private publication. Full T05 acceptance still requires
+the complete ordinary path and the retained exact-source final qualification
+gates before a further integration update. Use connected GitHub operations and
+GitHub Actions Linux only for project execution; preserve the pinned toolchain,
+resources, history, and expected-SHA non-force updates.
+
+---
+
 ## 2026-10-24 T01F qualified at exact 0d9f source and integrated
 
 **T01F and scoped A are qualified at

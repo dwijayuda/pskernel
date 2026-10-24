@@ -24,6 +24,12 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagTypes,
     `Ps.KernelCore.API.DagDeclaration,
     `Ps.KernelCore.API.DagAdmissionGuards,
+    `Ps.KernelCore.API.DagOrdinaryHeaderTypes,
+    `Ps.KernelCore.API.DagOrdinaryOccurrence,
+    `Ps.KernelCore.API.DagOrdinaryAnnotations,
+    `Ps.KernelCore.API.DagOrdinaryParameters,
+    `Ps.KernelCore.API.DagOrdinaryHeader,
+    `Ps.KernelCore.Checker.ExprV2.AdmissionHelpers,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
     `Ps.KernelCore.Checker.ExprV2.RecursorMajor,
@@ -328,3 +334,11 @@ lean_exe psc1_kernel_expr_v2_string_environment_regression where
   root := `PsKernelExprV2StringEnvironmentRegression
   srcDir := "test"
 
+-- Native-only T05 header equations stay outside the portable production closure.
+lean_lib PsKernelOrdinaryHeaderProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryHeaderStateProofs, `PsKernelOrdinaryOccurrenceProofs]
+
+lean_exe psc1_kernel_ordinary_header_regression where
+  srcDir := "test"
+  root := `PsKernelOrdinaryHeaderRegression

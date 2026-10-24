@@ -1,0 +1,283 @@
+{
+  "schema": "psc1-t05-ordinary-header-candidate-static-v1",
+  "status": "STATIC_REVIEW_ONLY_UNTESTED_PENDING_GITHUB_ACTIONS",
+  "productionBaseSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "workParentSha": "1e1fa35d19bc5180eebc3fd19e8638919ec6e06f",
+  "integrationSourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "productionFiles": [
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+      "bytes": 23509,
+      "characters": 23509,
+      "sha256": "fc4a87bab4aaf9adf73956e7263c819629fa998a3d226f9c059c7bd1deec6eef",
+      "gitBlobSha": "ac2bbc8d42b93e4c00e8e96f706cc901d3bcc9ac"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean",
+      "bytes": 3151,
+      "characters": 3151,
+      "sha256": "de60bb221d618ab944edd2cca4f6c8158fbf2a4de50ab5fc1f52ad48c1093e95",
+      "gitBlobSha": "a02db21d57591bea86dffadbc598e22c0b77c7e4"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean",
+      "bytes": 8213,
+      "characters": 8213,
+      "sha256": "11d056e95b93bafaac73d0a713bba688aee12f88e9d3478af9c2487f79b6edc9",
+      "gitBlobSha": "0a6682c5f7926da926e0d2d659a66fae57f5ba88"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean",
+      "bytes": 1418,
+      "characters": 1418,
+      "sha256": "147627ac8160e681c57a21c12fd3320868b29abbebd7416d51f2d3cc6ec34056",
+      "gitBlobSha": "f811255bd32a6a1b4d644d8a4545a1b2bf6c87f9"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean",
+      "bytes": 9336,
+      "characters": 9336,
+      "sha256": "f26c06c1e6b70b6651cb684efa782d72bd1c282bafceda1dae71ccc056df06aa",
+      "gitBlobSha": "3a6ac249dbfb4073e1b684d49347a8f821f4d784"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean",
+      "bytes": 13054,
+      "characters": 13054,
+      "sha256": "e8d676b29d83502c15dff6ffe9eddc926673f8e74612adce420a389b3fb0b680",
+      "gitBlobSha": "953963f466f9c3f86311cfbd1e9121c45f3de4eb"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean",
+      "bytes": 1946,
+      "characters": 1946,
+      "sha256": "4532206f0bc5fd06fb7b69bcea3c832919dea46f6019ef8cdce2bc0385bbda2b",
+      "gitBlobSha": "0a1209c2406d07c96d4cca1b241ee377c49f28c0"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+      "bytes": 567,
+      "characters": 567,
+      "sha256": "d1d2acfec7d19424fa30f5ae7b966978fae3c9343f33a17590d825619c9952dd",
+      "gitBlobSha": "0444d301b5259a389a7b03844590cbd27be5ef59"
+    }
+  ],
+  "proofModules": [
+    {
+      "path": "psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+      "bytes": 28546,
+      "characters": 28404,
+      "sha256": "67c4f8a5bfe970de35a5e8918ff7880bb55b9013ff25bcc5586224a48ac8e03c",
+      "gitBlobSha": "b5093a41e073fd0477d7bac0e5da5e1439f35877",
+      "reportCount": 15,
+      "theoremDeclarationCount": 20,
+      "expectedReportNames": [
+        "PsKernelOrdinaryOccurrenceProofs.app_spine_with_fuel_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.app_spine_on_canonical_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.uniform_argument_count_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.uniform_arguments_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.declared_names_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_head_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_with_fuel_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_structural_adequacy",
+        "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_on_canonical_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.uniform_occurrences_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.legacy_depth_le_expanded_count",
+        "PsKernelOrdinaryOccurrenceProofs.annotation_target_depth",
+        "PsKernelOrdinaryOccurrenceProofs.annotation_structural_adequacy",
+        "PsKernelOrdinaryOccurrenceProofs.annotations_with_fuel_correspondence",
+        "PsKernelOrdinaryOccurrenceProofs.annotations_on_canonical_correspondence"
+      ]
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryHeaderStateProofs.lean",
+      "bytes": 31907,
+      "characters": 31903,
+      "sha256": "20fefc41ef37247ddd18bf99dfe6211ccc7706ee14037a86db1bba41a5b009eb",
+      "gitBlobSha": "67de9a439f85d01c7aafdb72b502da38ab750c64",
+      "reportCount": 49,
+      "theoremDeclarationCount": 49,
+      "expectedReportNames": [
+        "PsKernelOrdinaryHeaderStateProofs.reverse_worker_eq",
+        "PsKernelOrdinaryHeaderStateProofs.reverse_eq",
+        "PsKernelOrdinaryHeaderStateProofs.finish_keeps_complete_returned_owner",
+        "PsKernelOrdinaryHeaderStateProofs.finish_decline",
+        "PsKernelOrdinaryHeaderStateProofs.finish_error",
+        "PsKernelOrdinaryHeaderStateProofs.mandatory_sort_keeps_complete_returned_owner",
+        "PsKernelOrdinaryHeaderStateProofs.binder_check_decline_precedes_whnf_and_opening",
+        "PsKernelOrdinaryHeaderStateProofs.binder_check_error_precedes_whnf_and_opening",
+        "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_decline_precedes_annotations",
+        "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_error_precedes_annotations",
+        "PsKernelOrdinaryHeaderStateProofs.binder_annotation_error_precedes_allocation",
+        "PsKernelOrdinaryHeaderStateProofs.binder_opening_error_preserved",
+        "PsKernelOrdinaryHeaderStateProofs.binder_success_keeps_post_opening_owner_and_original_domain",
+        "PsKernelOrdinaryHeaderStateProofs.binder_allocation_preserves_every_semantic_field",
+        "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_decline_precedes_lookup",
+        "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_error_precedes_lookup",
+        "PsKernelOrdinaryHeaderStateProofs.param_step_lookup_error_precedes_check",
+        "PsKernelOrdinaryHeaderStateProofs.param_step_uses_returned_owner_and_original_fuel",
+        "PsKernelOrdinaryHeaderStateProofs.params_zero_still_performs_final_whnf",
+        "PsKernelOrdinaryHeaderStateProofs.params_successor_keeps_original_fuel",
+        "PsKernelOrdinaryHeaderStateProofs.params_successor_decline",
+        "PsKernelOrdinaryHeaderStateProofs.params_successor_error",
+        "PsKernelOrdinaryHeaderStateProofs.params_wrapper_starts_empty",
+        "PsKernelOrdinaryHeaderStateProofs.indices_zero_precedes_callbacks_and_lookup",
+        "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_decline_uses_predecessor",
+        "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_error_uses_predecessor",
+        "PsKernelOrdinaryHeaderStateProofs.indices_successor_lookup_error_precedes_check",
+        "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_threads_post_opening_owner",
+        "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_decline",
+        "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_error",
+        "PsKernelOrdinaryHeaderStateProofs.indices_terminal_sort_keeps_complete_returned_owner",
+        "PsKernelOrdinaryHeaderStateProofs.indices_wrapper_adds_one_before_callbacks",
+        "PsKernelOrdinaryHeaderStateProofs.constructor_context_is_parameter_context",
+        "PsKernelOrdinaryHeaderStateProofs.constructor_fork_preserves_parameter_semantics_and_freshness",
+        "PsKernelOrdinaryHeaderStateProofs.constructor_fork_ignores_index_semantic_state",
+        "PsKernelOrdinaryHeaderStateProofs.header_finish_sort_keeps_both_owners",
+        "PsKernelOrdinaryHeaderStateProofs.header_finish_lookup_error",
+        "PsKernelOrdinaryHeaderStateProofs.header_finish_nonsort_error",
+        "PsKernelOrdinaryHeaderStateProofs.header_check_decline_precedes_whnf",
+        "PsKernelOrdinaryHeaderStateProofs.header_check_error_precedes_whnf",
+        "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_decline_precedes_opening",
+        "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_error_precedes_opening",
+        "PsKernelOrdinaryHeaderStateProofs.header_after_sort_composition",
+        "PsKernelOrdinaryHeaderStateProofs.header_guard_error_precedes_callbacks",
+        "PsKernelOrdinaryHeaderStateProofs.header_duplicate_levels_precede_all_other_guards",
+        "PsKernelOrdinaryHeaderStateProofs.header_duplicate_names_precede_freshness_and_types",
+        "PsKernelOrdinaryHeaderStateProofs.header_freshness_error_precedes_uniform_and_header",
+        "PsKernelOrdinaryHeaderStateProofs.header_uniform_error_precedes_static_header",
+        "PsKernelOrdinaryHeaderStateProofs.header_successful_guards_initialize_one_fresh_owner"
+      ]
+    }
+  ],
+  "newProofCount": 64,
+  "requiredGeneratedAssertionsPerRoute": 1992,
+  "generatedSectionAssertions": {
+    "harness": 1,
+    "header": 444,
+    "occurrence": 1378,
+    "annotations": 94,
+    "state": 47,
+    "phases": 20,
+    "topCallbacks": 8
+  },
+  "testFiles": [
+    {
+      "path": "psc1/test/PsKernelOrdinaryHeaderRegression.lean",
+      "bytes": 26890,
+      "sha256": "9f9522e7f14c9a62703ca59dc2ab11b1c5c49cde9dadb1b39599802c7356cad6"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+      "bytes": 25991,
+      "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+    }
+  ],
+  "nativeRequiredMarkers": [
+    "PSC1_ORDINARY_HEADER_NATIVE: PASS matrix=432 positiveDirect=10 crossFault=2 headerOnly=true",
+    "PSC1_ORDINARY_OCCURRENCE_NATIVE: PASS heads=171 fuelCases=1026 wrappers=171 sharedOffsets=2",
+    "PSC1_ORDINARY_ANNOTATIONS_NATIVE: PASS fuelCases=75 wrappers=15 invalidIDs=2",
+    "PSC1_ORDINARY_HEADER_STATE_NATIVE: PASS sequences=3 propagated=24 forkFields=all boundaries=3",
+    "PSC1_ORDINARY_HEADER_ORACLE: PASS accepted=4 rejected=2 headerOnly=true",
+    "PSC1_ORDINARY_HEADER_REGRESSION: PASS headerOnly=true fullAdmission=false"
+  ],
+  "workflow": {
+    "path": ".github/workflows/psc1-pskernel-t05-header.yml",
+    "bytes": 47229,
+    "characters": 47229,
+    "sha256": "cc20fd514346cd2fd93c3f2b8a3641289ce921f91d8d50dd7f67bdddc833338f",
+    "gitBlobSha": "4aa1b810511c2c469b7d45ccc0cafc9c694c8539"
+  },
+  "lake": {
+    "path": "psc1/kernel-lakefile.lean",
+    "bytes": 14384,
+    "characters": 14384,
+    "sha256": "9ef0b56eab0cdf6f1ed386d45c3b3ec5214703caa5f880894a34e81ea707ed14",
+    "gitBlobSha": "93bb75060fce499b2e7b2e9364f15c87a312cba6"
+  },
+  "ensureSortMove": {
+    "sourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "oldPath": "API/DagAdmission.lean",
+    "newPath": "Checker/ExprV2/AdmissionHelpers.lean",
+    "movedDeclarations": [
+      "psKernelExprV2AdmissionEnsureSortOwnedWith",
+      "psKernelExprV2AdmissionEnsureSortWithFuel"
+    ],
+    "movedBlockBytes": 1903,
+    "movedBlockSha256": "cd1d034bf4d4ec2c5a8a4ddea8ce9480013eec49b3a07980fe842f04663883e3",
+    "declarationNamesAndBodiesByteIdentical": true,
+    "wholeAdmissionRoutingChanged": false,
+    "qualification": "UNTESTED T05 local draft; compile/proof/runtime validation must run on Actions Linux."
+  },
+  "compositionReview": {
+    "schema": "psc1-t05-ordinary-header-composition-static-review-v1",
+    "baseSourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+    "status": "STATIC_REVIEW_COMPLETE_ACTIONS_PENDING",
+    "reviewedFiles": [
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean",
+        "bytes": 8213,
+        "sha256": "11d056e95b93bafaac73d0a713bba688aee12f88e9d3478af9c2487f79b6edc9"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean",
+        "bytes": 1418,
+        "sha256": "147627ac8160e681c57a21c12fd3320868b29abbebd7416d51f2d3cc6ec34056"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean",
+        "bytes": 1946,
+        "sha256": "4532206f0bc5fd06fb7b69bcea3c832919dea46f6019ef8cdce2bc0385bbda2b"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+        "bytes": 23509,
+        "sha256": "fc4a87bab4aaf9adf73956e7263c819629fa998a3d226f9c059c7bd1deec6eef"
+      }
+    ],
+    "ensureSortMove": {
+      "declarations": [
+        "psKernelExprV2AdmissionEnsureSortOwnedWith",
+        "psKernelExprV2AdmissionEnsureSortWithFuel"
+      ],
+      "movedBlockBytes": 1903,
+      "movedBlockSha256": "cd1d034bf4d4ec2c5a8a4ddea8ce9480013eec49b3a07980fe842f04663883e3",
+      "completeMovedBlockByteIdentical": true,
+      "remainingDagAdmissionByteIdenticalAfterImportRemoval": true
+    },
+    "findings": [],
+    "reviewedProperties": [
+      "Ordinary guard order is duplicate universes, unique inductive/recursor/constructor names, existing-name check, uniform occurrences, static no-metavariable/no-free-variable/universe guard, then checked header phases.",
+      "Header checker and mandatory public EnsureSort both receive original fuel and complete returned owners; Option.none and Except.error propagate without fallback inside this worker.",
+      "Parameter opening receives the original header ID in the returned sorted state; index opening receives the actual parameter context/state/result.",
+      "HeaderFinish reads the actual index-result ID in the actual returned index arena and preserves both parameter and index owners.",
+      "Constructor context is exactly the parameter context; constructor state preserves every parameter semantic field and fresh counter while replacing only its arena with the index arena.",
+      "Moving EnsureSort preserves its complete byte-identical declarations and does not alter any remaining ordinary/mutual/nested/public fallback routing.",
+      "New modules use existing portable structures, Option/Except/Prod shapes, explicit Nat/List recursion and full callback ownership; no proof theorem or Lean runtime API is imported into this production slice."
+    ],
+    "explicitPreconditions": [
+      "AnalyzeHeaderWith and lower workers are private operations on a canonical append-only arena; they do not replay-validate arbitrary input arenas.",
+      "Declaration references must belong to the checked owning arena/environment; callback success must retain an append-only continuation of that owner.",
+      "The existing public DAG validation/fallback boundary remains authoritative and is not replaced by a header-analysis result."
+    ],
+    "limitations": [
+      "No local Lean/compiler/JavaScript/kernel/project execution occurred. Native/portable/generated qualification is pending Actions.",
+      "Finite direct-worker/V1/official-control tests are not a universal complete header-checker equivalence proof.",
+      "The occurrence/annotation semantic proof layer explicitly assumes ArenaModel; replay-validator establishment of that model remains a separate obligation.",
+      "No T05 completion, complete inductive admission, constructor/recursor correctness or publication claim is made."
+    ]
+  },
+  "protectedProductionChanges": [],
+  "publicOrdinaryRoutingChanged": false,
+  "fullOrdinaryAdmissionImplemented": false,
+  "fiveFullWorkQualificationTriggers": "PAUSED inherited from1e1",
+  "proofBoundary": "ArenaModel is an explicit node/child/depth premise; replay validation and decoder establishment are not yet proved.",
+  "qualification": {
+    "T01F_scopedA": "QUALIFIED only at0d9",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN",
+    "T05": "OPEN"
+  },
+  "execution": "No local Lean/compiler/JavaScript/kernel or project tests; execution is required on GitHub Actions Linux."
+}

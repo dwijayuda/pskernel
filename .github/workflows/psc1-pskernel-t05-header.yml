@@ -1,0 +1,633 @@
+name: PSC1 T05 ordinary header native-first preflight
+on:
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t01f-string-20261022
+    paths:
+    - psc1/kernel-lakefile.lean
+    - psc1/lean-toolchain
+    - psc1/packages/pskernel-core/src/**
+    - psc1/test/**
+    - psc1/scripts/**
+    - psc1/check-psc1-source.mjs
+    - .github/workflows/psc1-pskernel-t05-header.yml
+permissions:
+  contents: read
+jobs:
+  native-header:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PSC1_T05_ROUTE: native
+      NODE_OPTIONS: ''
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      shell: bash
+      run: |
+        bash psc1/scripts/install-lean435-ci.sh
+    - name: Verify exact source, pins, frozen references and JavaScript syntax
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        export PSC1_T05_DIR="$RUNNER_TEMP/psc1-t05-$PSC1_T05_ROUTE"
+        printf 'PSC1_T05_DIR=%s\n' "$PSC1_T05_DIR" >> "$GITHUB_ENV"
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        test "$(node -p 'process.versions.node.split(".")[0]')" = 22
+        mkdir -p "$PSC1_T05_DIR"
+        lean --version > "$PSC1_T05_DIR/lean-version.txt"
+        lean --githash > "$PSC1_T05_DIR/lean-githash.txt"
+        node --version > "$PSC1_T05_DIR/node-version.txt"
+        printf 'PSC1_T05_NODE=%s\n' "$(command -v node)" >> "$GITHUB_ENV"
+        node --check scripts/pskernel-ordinary-header-smoke.mjs
+        python3 - <<'PY'
+        import hashlib, json, os, pathlib, re, shutil
+        repo = pathlib.Path.cwd().parent
+        out = pathlib.Path(os.environ['PSC1_T05_DIR'])
+        source = os.environ['GITHUB_SHA']
+        if re.fullmatch(r'[0-9a-f]{40}',source) is None: raise RuntimeError('Missing exact source SHA')
+        paths = ['.github/workflows/psc1-pskernel-t05-header.yml', 'psc1/kernel-lakefile.lean', 'psc1/lean-toolchain', 'psc1/scripts/install-lean435-ci.sh', 'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean', 'psc1/test/PsKernelOrdinaryHeaderStateProofs.lean', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean', 'psc1/test/PsKernelCacheScopeProofs.lean', 'psc1/test/PsKernelExprV2SessionProofs.lean', 'psc1/test/PsKernelScalarHashWorkerRegression.lean', 'psc1/test/PsKernelClosedCacheAnalysisRegression.lean', 'psc1/test/PsKernelKnotFuelProofs.lean', 'psc1/test/PsKernelOrdinaryHeaderRegression.lean', 'psc1/scripts/pskernel-ordinary-header-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs', 'psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs', 'psc1/scripts/pskernel-generated-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs', 'psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean']
+        frozen = {'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean': '63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean': '7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean': 'cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean': '068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51'}
+        records = []
+        for name in paths:
+            raw = (repo/name).read_bytes()
+            record = {'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),
+                      'gitBlobSha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
+            if name in frozen and record['sha256'] != frozen[name]:
+                raise RuntimeError('Frozen V1 reference changed: '+name)
+            target = out/'sources'/name; target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(raw)
+            records.append(record)
+        report = {'schema':'psc1-t05-header-source-inventory-v1','repository':'dwijayuda/pskernel',
+                  'sourceSha':source,'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                  'job':os.environ['GITHUB_JOB'],'route':os.environ['PSC1_T05_ROUTE'],
+                  'leanCommit':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc','files':records}
+        (out/'source-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_T05_SOURCE_INVENTORY '+json.dumps(report,separators=(',',':')))
+        PY
+    - name: Build native production imports and retained DAG executable
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean build PsKernelCore PsKernelClosedCacheAnalysisProofs psc1_kernel_expr_v2_dag_regression \
+          2>&1 | tee "$PSC1_T05_DIR/native-build.log"
+    - name: Kernel-check all64 new header and structural equations first
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryHeaderStateProofs.lean)" -eq 49
+        lake -f kernel-lakefile.lean env lean test/PsKernelOrdinaryHeaderStateProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/header-state-proofs.log"
+        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryOccurrenceProofs.lean)" -eq 15
+        lake -f kernel-lakefile.lean env lean test/PsKernelOrdinaryOccurrenceProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/occurrence-proofs.log"
+    - name: Run direct native header matrix and official Lean controls
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryHeaderRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/header-native.log"
+        grep -Fqx 'PSC1_ORDINARY_HEADER_NATIVE: PASS matrix=432 positiveDirect=10 crossFault=2 headerOnly=true' "$PSC1_T05_DIR/header-native.log"
+        grep -Fqx 'PSC1_ORDINARY_OCCURRENCE_NATIVE: PASS heads=171 fuelCases=1026 wrappers=171 sharedOffsets=2' "$PSC1_T05_DIR/header-native.log"
+        grep -Fqx 'PSC1_ORDINARY_ANNOTATIONS_NATIVE: PASS fuelCases=75 wrappers=15 invalidIDs=2' "$PSC1_T05_DIR/header-native.log"
+        grep -Fqx 'PSC1_ORDINARY_HEADER_STATE_NATIVE: PASS sequences=3 propagated=24 forkFields=all boundaries=3' "$PSC1_T05_DIR/header-native.log"
+        grep -Fqx 'PSC1_ORDINARY_HEADER_ORACLE: PASS accepted=4 rejected=2 headerOnly=true' "$PSC1_T05_DIR/header-native.log"
+        grep -Fqx 'PSC1_ORDINARY_HEADER_REGRESSION: PASS headerOnly=true fullAdmission=false' "$PSC1_T05_DIR/header-native.log"
+    - name: Retain108 previous equations and audit all172 exact axiom reports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(grep -c '^#print axioms ' test/PsKernelCacheScopeProofs.lean)" -eq 60
+        lake -f kernel-lakefile.lean env lean test/PsKernelCacheScopeProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/cache-scope-proofs.log"
+        test "$(grep -c '^#print axioms ' test/PsKernelExprV2SessionProofs.lean)" -eq 14
+        lake -f kernel-lakefile.lean env lean test/PsKernelExprV2SessionProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/session-proofs.log"
+        test "$(grep -c '^#print axioms ' test/PsKernelScalarHashWorkerRegression.lean)" -eq 11
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelScalarHashWorkerRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/scalar-hash-native.log"
+        test "$(grep -c '^#print axioms ' test/PsKernelClosedCacheAnalysisRegression.lean)" -eq 7
+        lake -f kernel-lakefile.lean env lean test/PsKernelClosedCacheAnalysisRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/closed-cache-analysis-proofs.log"
+        test "$(grep -c '^#print axioms ' test/PsKernelKnotFuelProofs.lean)" -eq 16
+        lake -f kernel-lakefile.lean env lean test/PsKernelKnotFuelProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/knot-fuel-proofs.log"
+        grep -Fqx 'PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12' "$PSC1_T05_DIR/scalar-hash-native.log"
+        grep -Fqx 'PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3' "$PSC1_T05_DIR/scalar-hash-native.log"
+        grep -Fqx 'PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15' "$PSC1_T05_DIR/knot-fuel-proofs.log"
+        grep -Fqx 'PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical' "$PSC1_T05_DIR/knot-fuel-proofs.log"
+        python3 - <<'PY'
+        import hashlib, json, os, pathlib, re
+        root = pathlib.Path(os.environ['PSC1_T05_DIR'])
+        expected = [('PsKernelOrdinaryHeaderStateProofs', 49, 'header-state-proofs.log', False), ('PsKernelOrdinaryOccurrenceProofs', 15, 'occurrence-proofs.log', False), ('PsKernelCacheScopeProofs', 60, 'cache-scope-proofs.log', False), ('PsKernelExprV2SessionProofs', 14, 'session-proofs.log', False), ('PsKernelScalarHashWorkerRegression', 11, 'scalar-hash-native.log', True), ('PsKernelClosedCacheAnalysisRegression', 7, 'closed-cache-analysis-proofs.log', False), ('PsKernelKnotFuelProofs', 16, 'knot-fuel-proofs.log', False)]
+        allowed = {'propext','Classical.choice','Quot.sound'}
+        audits = []
+        for module,count,filename,_ in expected:
+            source = pathlib.Path('test')/(module+'.lean')
+            names = re.findall(r'^#print axioms ([A-Za-z0-9_.$]+)\s*$',source.read_text(),re.M)
+            names = [name if '.' in name else module+'.'+name for name in names]
+            if len(names)!=count or len(set(names))!=count: raise RuntimeError('Exact unique source proof inventory: '+module)
+            log = (root/filename).read_text()
+            reports = re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",log)
+            if [name for name,_ in reports]!=names: raise RuntimeError('Ordered exact proof reports: '+module)
+            if any(bad in log for bad in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler')):
+                raise RuntimeError('Forbidden proof dependency: '+module)
+            for name,axioms in reports:
+                used = {axiom.strip() for axiom in axioms.split(',') if axiom.strip()}
+                if not used<=allowed: raise RuntimeError('Unexpected axiom dependency: '+name)
+            audits.append({'module':module,'proofs':count,'names':names,'logSha256':hashlib.sha256((root/filename).read_bytes()).hexdigest()})
+        if sum(x['proofs'] for x in audits)!=172: raise RuntimeError('Expected64new+108retained')
+        inventory=json.loads((root/'source-inventory.json').read_text())
+        receipt={'schema':'psc1-t05-header-native-receipt-v1','sourceSha':inventory['sourceSha'],
+                 'runId':inventory['runId'],'runAttempt':inventory['runAttempt'],'job':inventory['job'],'route':'native',
+                 'newProofs':64,'retainedProofs':108,'totalProofs':172,'orderedUniqueReports':True,
+                 'allowedStandardAxiomsOnly':True,'proofs':audits,'headerOnly':True,'fullAdmission':False}
+        (root/'native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_HEADER_NATIVE_PROOFS: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+    - name: Retain native public DAG and generated-prefix ownership controls
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        .lake/build/bin/psc1_kernel_expr_v2_dag_regression \
+          2>&1 | tee "$PSC1_T05_DIR/dag-native.log" | sed '/^PSC1_DAG_PASS /d'
+        grep -Fq 'PSC1_V2_DAG_REGRESSION: PASS' "$PSC1_T05_DIR/dag-native.log"
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2GeneratedPrefixRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/prefix-native.log"
+        grep -Fqx 'PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3' "$PSC1_T05_DIR/prefix-native.log"
+        grep -Fqx 'PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7' "$PSC1_T05_DIR/prefix-native.log"
+        grep -Fqx 'PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$PSC1_T05_DIR/prefix-native.log"
+        grep -Fqx 'PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7' "$PSC1_T05_DIR/prefix-native.log"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-header-native-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-t05-native/
+        if-no-files-found: error
+  generated-header:
+    needs:
+    - native-header
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        route:
+        - generated
+        - canonical
+    env:
+      PSC1_T05_ROUTE: ${{ matrix.route }}
+      NODE_OPTIONS: ''
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      shell: bash
+      run: |
+        bash psc1/scripts/install-lean435-ci.sh
+    - name: Verify exact route source, pins, frozen references and syntax
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        export PSC1_T05_DIR="$RUNNER_TEMP/psc1-t05-$PSC1_T05_ROUTE"
+        printf 'PSC1_T05_DIR=%s\n' "$PSC1_T05_DIR" >> "$GITHUB_ENV"
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        test "$(node -p 'process.versions.node.split(".")[0]')" = 22
+        mkdir -p "$PSC1_T05_DIR"
+        lean --version > "$PSC1_T05_DIR/lean-version.txt"
+        lean --githash > "$PSC1_T05_DIR/lean-githash.txt"
+        node --version > "$PSC1_T05_DIR/node-version.txt"
+        printf 'PSC1_T05_NODE=%s\n' "$(command -v node)" >> "$GITHUB_ENV"
+        node --check scripts/pskernel-ordinary-header-smoke.mjs
+        python3 - <<'PY'
+        import hashlib, json, os, pathlib, re, shutil
+        repo = pathlib.Path.cwd().parent
+        out = pathlib.Path(os.environ['PSC1_T05_DIR'])
+        source = os.environ['GITHUB_SHA']
+        if re.fullmatch(r'[0-9a-f]{40}',source) is None: raise RuntimeError('Missing exact source SHA')
+        paths = ['.github/workflows/psc1-pskernel-t05-header.yml', 'psc1/kernel-lakefile.lean', 'psc1/lean-toolchain', 'psc1/scripts/install-lean435-ci.sh', 'psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean', 'psc1/test/PsKernelOrdinaryHeaderStateProofs.lean', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean', 'psc1/test/PsKernelCacheScopeProofs.lean', 'psc1/test/PsKernelExprV2SessionProofs.lean', 'psc1/test/PsKernelScalarHashWorkerRegression.lean', 'psc1/test/PsKernelClosedCacheAnalysisRegression.lean', 'psc1/test/PsKernelKnotFuelProofs.lean', 'psc1/test/PsKernelOrdinaryHeaderRegression.lean', 'psc1/scripts/pskernel-ordinary-header-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs', 'psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs', 'psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs', 'psc1/scripts/pskernel-generated-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-dag-smoke.mjs', 'psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs', 'psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean']
+        frozen = {'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean': '63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean': '7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean': 'cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean': '068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51'}
+        records = []
+        for name in paths:
+            raw = (repo/name).read_bytes()
+            record = {'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),
+                      'gitBlobSha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
+            if name in frozen and record['sha256'] != frozen[name]:
+                raise RuntimeError('Frozen V1 reference changed: '+name)
+            target = out/'sources'/name; target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(raw)
+            records.append(record)
+        report = {'schema':'psc1-t05-header-source-inventory-v1','repository':'dwijayuda/pskernel',
+                  'sourceSha':source,'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                  'job':os.environ['GITHUB_JOB'],'route':os.environ['PSC1_T05_ROUTE'],
+                  'leanCommit':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc','files':records}
+        (out/'source-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_T05_SOURCE_INVENTORY '+json.dumps(report,separators=(',',':')))
+        PY
+    - name: Build authentic PSC1 for the bounded generation gate
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake build psc1 2>&1 | tee "$PSC1_T05_DIR/compiler-build.log"
+    - name: Install pinned TypeScript7.0.2
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/psc1-dag-ts"
+        echo '{"name":"psc1-dag-ts","private":true,"version":"0.0.0"}' > "$RUNNER_TEMP/psc1-dag-ts/package.json"
+        npm install --prefix "$RUNNER_TEMP/psc1-dag-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+        PSC1_T05_TSC="$RUNNER_TEMP/psc1-dag-ts/node_modules/typescript/bin/tsc"
+        test "$(node "$PSC1_T05_TSC" --version)" = "Version 7.0.2"
+        printf 'PSC0_TSC=%s\n' "$PSC1_T05_TSC" >> "$GITHUB_ENV"
+        node "$PSC1_T05_TSC" --version > "$PSC1_T05_DIR/typescript-version.txt"
+    - name: Require retained bounded scalar and closed-cache strict generation plus1884matrix
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean \
+          --out dist/expr-v2/scalar-hash/kernel.js
+        cp dist/expr-v2/scalar-hash/kernel.js "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 scripts/pskernel-scalar-hash-worker-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
+          | tee "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 scripts/pskernel-scalar-hash-short-entry-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
+          | tee -a "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
+        grep -Fqx 'PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {"cases":19,"assertions":38,"shortMaxPairs":4,"genericFallback":true}' "$RUNNER_TEMP/psc1-scalar-hash-probe.log"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 scripts/pskernel-closed-cache-analysis-smoke.mjs "$RUNNER_TEMP/psc1-scalar-hash-probe.mjs" \
+          | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-probe.log"
+        grep -Fqx 'PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {"expressions":20,"states":2,"mapQueries":40,"pairQueries":800,"inferQueries":80,"assertions":1884,"smallAndIndexed":true,"openEntriesSeeded":true}' "$RUNNER_TEMP/psc1-closed-cache-analysis-probe.log"
+        python3 - <<'PY' | tee "$RUNNER_TEMP/psc1-closed-cache-analysis-codegen.log"
+        import pathlib, re
+        text = pathlib.Path('dist/expr-v2/scalar-hash/kernel.js').read_text()
+        def implementations(prefix):
+            return re.findall(r'^export function (' + prefix + r'[A-Za-z0-9_$]*)\(', text, re.M)
+        def body_of(name):
+            marker = 'function* __ps$impl$' + name + '('
+            if marker not in text: marker = 'export function ' + name + '('
+            start = text.index(marker)
+            end = text.find('\nexport ', start + len(marker))
+            return text[start:] if end < 0 else text[start:end]
+        analysis_name = 'psKernelExprClosedCacheAnalysis'
+        if implementations(analysis_name) != [analysis_name]:
+            raise RuntimeError('Closed-cache analysis must have exactly one non-recurried export')
+        analysis_body = body_of(analysis_name)
+        print('PSC1_CLOSED_CACHE_ANALYSIS_BODY ' + repr(analysis_body))
+        for forbidden in ('_$psc0SH', '__ps$wrap', 'psKernelExprHash', 'psKernelExprHasFVar'):
+            if forbidden in analysis_body:
+                raise RuntimeError('Unexpected closed-cache analysis staging or old traversal: ' + forbidden)
+        if analysis_body.count('__ps$invoke(' + analysis_name + ',') != 11:
+            raise RuntimeError('Closed-cache analysis must retain exactly eleven structural self-dispatch sites')
+        print('PSC1_CLOSED_CACHE_ANALYSIS_CODEGEN: PASS dataResult=true recursiveSites=11 oldHashCalls=0 oldHasFVarCalls=0 recurry=false')
+        expected = {
+            'psKernelCacheStringHashPairsWithFuel': (2, ['psKernelCacheStringHashPairsWithFuel']),
+            'psKernelCacheStringHashStateWithFuel': (1, ['psKernelCacheStringHashPairsWithFuel']),
+        }
+        names = []
+        for name, (transitions, calls) in expected.items():
+            found = implementations(name)
+            if found != [name]:
+                raise RuntimeError('Data-result iterator was recurried: ' + repr(found))
+            names.extend(found)
+            body = body_of(name)
+            print('PSC1_HASH_ITERATOR_BODY ' + name + ' ' + repr(body))
+            for machinery in ('__ps$wrap', 'psKernelCacheStringHashStep', 'psKernelCacheMix'):
+                if machinery in body:
+                    raise RuntimeError('Unexpected staging or transition dispatch: ' + machinery)
+            if body.count('__ps$invoke(') != len(calls):
+                raise RuntimeError('Unexpected scheduler calls in ' + name)
+            for call in calls:
+                if body.count('__ps$invoke(' + call + ',') != 1:
+                    raise RuntimeError('Expected exactly one dispatch to ' + call)
+            if len(re.findall(r'function\s*\*\s*\(', body)) != 1:
+                raise RuntimeError('Expected exactly one structural generator block in ' + name)
+            if body.count('__ps$stringNext(') != transitions or body.count('__ps$stringGet(') != transitions:
+                raise RuntimeError('Unexpected primitive transition count in ' + name)
+        entry = body_of('psKernelCacheStringHash')
+        print('PSC1_HASH_FUSED_ENTRY_BODY ' + repr(entry))
+        forbidden = ('__ps$wrap','psKernelCacheStringHashWorker','psKernelCacheStringHashScan',
+                     'psKernelCacheStringHashStateWithFuel','psKernelCacheStringHashRemainderWithFuel',
+                     'psKernelCacheStringHashOctetsWithFuel','psKernelCacheStringHashStep','psKernelCacheMix')
+        if any(name in entry for name in forbidden):
+            raise RuntimeError('Full entry retains a staged/state/scan transition dispatch')
+        if entry.count('__ps$invoke(') != 2:
+            raise RuntimeError('Full entry must have exactly two mutually exclusive static dispatch sites')
+        if entry.count('__ps$invoke(psKernelCacheStringHashPairsWithFuel,') != 1 or entry.count('__ps$invoke(psKernelCacheStringHashShortPairs,') != 1:
+            raise RuntimeError('Full entry must have one short-leaf site and one unchanged pair fallback site')
+        if 'const paired = ((pairs <= 4n) ? (yield* __ps$invoke(psKernelCacheStringHashShortPairs,' not in entry or ': (yield* __ps$invoke(psKernelCacheStringHashPairsWithFuel,' not in entry:
+            raise RuntimeError('Short leaf and generic pair dispatch must be exclusive branches of the exact <=4 bound')
+        if len(re.findall(r'function\s*\*\s*\(',entry)) != 1:
+            raise RuntimeError('Fused entry still allocates an extra generator block')
+        if entry.count('__ps$stringNext(') != 1 or entry.count('__ps$stringGet(') != 1:
+            raise RuntimeError('Fused entry must contain exactly one odd remainder transition')
+        short = body_of('psKernelCacheStringHashShortPairs')
+        print('PSC1_HASH_SHORT_PAIRS_BODY ' + repr(short))
+        if implementations('psKernelCacheStringHashShortPairs') != ['psKernelCacheStringHashShortPairs']:
+            raise RuntimeError('Pure short-pair entry was recurried')
+        for machinery in ('function*', '__ps$run', '__ps$invoke', '__ps$wrap',
+                          'psKernelCacheStringHashPairsWithFuel',
+                          'psKernelCacheStringHashStep', 'psKernelCacheMix'):
+            if machinery in short:
+                raise RuntimeError('Short pairs must be a pure primitive generated leaf: ' + machinery)
+        if short.count('__ps$stringNext(') != 8 or short.count('__ps$stringGet(') != 8:
+            raise RuntimeError('Short pairs must contain exactly eight inlined immutable primitive transitions')
+        level = body_of('psKernelCacheLevelListHash')
+        print('PSC1_HASH_LEVEL_LIST_ENTRY_BODY ' + repr(level))
+        if '__ps$wrap' in level or 'case "nil": return 575n;' not in level:
+            raise RuntimeError('Empty universe arguments must return exact constant575 without a staged result')
+        if level.count('__ps$invoke(psKernelCacheLevelListHashWorker,') != 1:
+            raise RuntimeError('Keep exactly one generic staged-worker fallback')
+        if level.count('__ps$invoke(psKernelCacheLevelHash,') != 3:
+            raise RuntimeError('Expected specialized one-level and two-level branches')
+        marker = 'export function psKernelCacheStringHashStep('
+        start = text.index(marker)
+        end = text.find('\nexport ', start + len(marker))
+        step = text[start:] if end < 0 else text[start:end]
+        for machinery in ('function*', '__ps$run', '__ps$invoke', '__ps$wrap'):
+            if machinery in step:
+                raise RuntimeError('Byte transition is not a pure generated leaf: ' + machinery)
+        marker = 'function* __ps$impl$psKernelCacheStringHash('
+        start = text.index(marker)
+        end = text.find('\nexport ', start + len(marker))
+        entry = text[start:] if end < 0 else text[start:end]
+        if 'psKernelCacheStringHashWorker' in entry or '__ps$wrap' in entry:
+            raise RuntimeError('Full hash still dispatches through the staged public worker')
+        print('PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false')
+        print('PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=' + str(len(names)))
+        print('PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairFallbackSites=1 shortLeafSites=1 exclusiveBranches=true primitiveRemainder=1 structuralGeneratorBlocks=1')
+        print('PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true')
+        print('PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false')
+        PY
+    - name: Archive actual Lean closure and check complete authentic source after bounded gates
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        node --input-type=module <<'NODE'
+        import {readFileSync,writeFileSync,mkdirSync,copyFileSync} from 'node:fs';
+        import {createHash} from 'node:crypto';
+        import path from 'node:path';
+        import {packageBySection,parseImports} from './scripts/workspace-layout.mjs';
+        const entry='packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',visited=new Set();
+        function visit(source){
+          if(visited.has(source))return;visited.add(source);
+          for(const imported of parseImports(readFileSync(source,'utf8'))){
+            const parts=imported.split('.');let dependency;
+            if(parts[0]==='ProofScript')dependency=path.posix.join('stdlib',...parts)+'.lean';
+            else if(parts[0]==='Ps'&&packageBySection.has(parts[1]))dependency=path.posix.join('packages',packageBySection.get(parts[1]),'src',...parts)+'.lean';
+            else throw Error('PSKERNEL_CLOSURE_UNKNOWN_IMPORT '+imported);
+            visit(dependency);
+          }
+        }
+        visit(entry);
+        const files=[...visited].sort().map(source=>{
+          const bytes=readFileSync(source),target=path.join(process.env.PSC1_T05_DIR,'lean-source',source);
+          mkdirSync(path.dirname(target),{recursive:true});copyFileSync(source,target);
+          return {path:source,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+        });
+        const report={schema:'psc1-t05-lean-source-closure-v1',sourceSha:process.env.GITHUB_SHA,
+          runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,route:process.env.PSC1_T05_ROUTE,
+          entry,sourceCount:files.length,files};
+        for(const module of ['API/DagOrdinaryHeaderTypes','API/DagOrdinaryOccurrence','API/DagOrdinaryAnnotations',
+          'API/DagOrdinaryParameters','API/DagOrdinaryHeader','Checker/ExprV2/AdmissionHelpers'])
+          if(!visited.has('packages/pskernel-core/src/Ps/KernelCore/'+module+'.lean'))throw Error('Missing T05 module '+module);
+        writeFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json',JSON.stringify(report,null,2)+'\n');
+        console.log('PSC1_T05_LEAN_SOURCE_CLOSURE: PASS modules='+files.length);
+        NODE
+        tar -czf "$PSC1_T05_DIR/lean-source.tar.gz" -C "$PSC1_T05_DIR/lean-source" .
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+          2>&1 | tee "$PSC1_T05_DIR/complete-lean-check.log"
+    - name: Reconstruct and authenticate the complete canonical ProofScript closure
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        node scripts/bootstrap-project.mjs \
+          packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+          dist/pskernel-selfhost/workspace
+        node --input-type=module <<'NODE'
+        import { readFileSync } from 'node:fs';
+        import path from 'node:path';
+        import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+        import { packageBySection, parseImports } from './scripts/workspace-layout.mjs';
+        const workspace='dist/pskernel-selfhost/workspace';
+        const entry='packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean';
+        const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+        const expected=new Set(), visited=new Set();
+        function visit(source){
+          if(visited.has(source))return;
+          visited.add(source);
+          const text=readFileSync(source,'utf8');
+          for(const imported of parseImports(text)){
+            const parts=imported.split('.');
+            let dependency;
+            if(parts[0]==='ProofScript'){
+              dependency=path.posix.join('stdlib',...parts)+'.lean';
+            }else if(parts[0]==='Ps' && packageBySection.has(parts[1])){
+              dependency=path.posix.join('packages',packageBySection.get(parts[1]),'src',...parts)+'.lean';
+            }else throw Error('PSKERNEL_CLOSURE_UNKNOWN_IMPORT '+imported);
+            visit(dependency);
+          }
+          expected.add(source.replace(/\.lean$/u,'.ps'));
+        }
+        visit(entry);
+        if(manifest.entry!==entry.replace(/\.lean$/u,'.ps') ||
+            manifest.sourceCount!==expected.size ||
+            manifest.generated.length!==expected.size ||
+            new Set(manifest.generated).size!==expected.size ||
+            !manifest.generated.every(p=>expected.has(p)))
+          throw Error('PSKERNEL_PORTABLE_FULL_SOURCE_CLOSURE_REQUIRED');
+        await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+        console.log('PSKERNEL_CANONICAL_PS_SOURCES: PASS modules='+expected.size);
+        NODE
+        cp dist/pskernel-selfhost/workspace/.proofscript-bootstrap.json "$PSC1_T05_DIR/canonical-manifest.json"
+        tar -czf "$PSC1_T05_DIR/canonical-source.tar.gz" -C dist/pskernel-selfhost/workspace .
+      if: matrix.route == 'canonical'
+    - name: Check and compile the independent complete route through TypeScript to JavaScript
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ "$PSC1_T05_ROUTE" = canonical ]; then
+          lake exe psc1 check dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            2>&1 | tee "$PSC1_T05_DIR/canonical-ps-check.log"
+          lake exe psc1 build dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            --out dist/pskernel-selfhost/pskernel-core.js 2>&1 | tee "$PSC1_T05_DIR/complete-build.log"
+          PSC1_T05_KERNEL=dist/pskernel-selfhost/pskernel-core.js
+        else
+          test "$PSC1_T05_ROUTE" = generated
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            --out dist/expr-v2/integration/kernel.js 2>&1 | tee "$PSC1_T05_DIR/complete-build.log"
+          PSC1_T05_KERNEL=dist/expr-v2/integration/kernel.js
+        fi
+        export PSC1_T05_KERNEL
+        printf 'PSC1_T05_KERNEL=%s\n' "$PSC1_T05_KERNEL" >> "$GITHUB_ENV"
+        test -s "$PSC1_T05_KERNEL"
+        test -s "${PSC1_T05_KERNEL%.js}.ts"
+        test -s "${PSC1_T05_KERNEL%.js}.d.ts"
+        test -s "${PSC1_T05_KERNEL%.js}.js.map"
+        node --check "$PSC1_T05_KERNEL"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,shutil
+        out=pathlib.Path(os.environ['PSC1_T05_DIR']);kernel=pathlib.Path(os.environ['PSC1_T05_KERNEL'])
+        def digest(p):
+            raw=p.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        mapping=json.loads(kernel.with_suffix('.js.map').read_text())
+        if mapping.get('version')!=3 or not mapping.get('sources') or not mapping.get('mappings'):
+            raise RuntimeError('Invalid complete generated source map')
+        production=out/'production';production.mkdir()
+        for suffix in ('.js','.ts','.d.ts','.js.map'):
+            source=kernel.with_suffix(suffix);shutil.copyfile(source,production/('kernel'+suffix))
+        detached=out/'detached';detached.mkdir()
+        shutil.copyfile(kernel,detached/'kernel.mjs')
+        scripts=['pskernel-ordinary-header-smoke.mjs', 'pskernel-scalar-hash-worker-smoke.mjs', 'pskernel-scalar-hash-short-entry-smoke.mjs', 'pskernel-closed-cache-analysis-smoke.mjs', 'pskernel-generated-smoke.mjs', 'pskernel-expr-v2-dag-smoke.mjs', 'pskernel-expr-v2-generated-prefix-smoke.mjs', 'pskernel-invalid-recursor-occurrence-smoke.mjs']
+        for name in scripts:shutil.copyfile(pathlib.Path('scripts')/name,detached/name)
+        inventory=json.loads((out/'source-inventory.json').read_text())
+        report={'schema':'psc1-t05-header-provenance-v1','repository':'dwijayuda/pskernel',
+                'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'job':os.environ['GITHUB_JOB'],
+                'route':os.environ['PSC1_T05_ROUTE'],'leanCommit':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
+                'typescript':'7.0.2','node':(out/'node-version.txt').read_text().strip(),
+                'fuel':4096,'oldSpaceMiB':2048,'oldSpaceIsHardRssLimit':False,'emptyPATH':True,
+                'kernel':digest(detached/'kernel.mjs'),'harness':digest(detached/'pskernel-ordinary-header-smoke.mjs'),
+                'sourceInventory':digest(out/'source-inventory.json'),'leanSourceManifest':digest(out/'lean-source-manifest.json'),
+                'scripts':{name:digest(detached/name) for name in scripts},
+                'headerOnly':True,'fullAdmission':False,'publicFallbackUsed':False}
+        if report['sourceSha']!=inventory['sourceSha'] or report['route']!=inventory['route']:
+            raise RuntimeError('Source inventory identity mismatch')
+        if report['route']=='canonical':
+            report['canonicalManifest']=digest(out/'canonical-manifest.json')
+            report['canonicalSourceArchive']=digest(out/'canonical-source.tar.gz')
+        (out/'provenance.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_T05_HEADER_PROVENANCE '+json.dumps(report,separators=(',',':')))
+        PY
+    - name: Retain controls and execute exact1992directheaderassertions with empty PATH
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$PSC1_T05_DIR/detached"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 pskernel-scalar-hash-worker-smoke.mjs kernel.mjs \
+          | tee "$PSC1_T05_DIR/scalar-hash.log"
+        grep -Fq 'PSC1_SCALAR_HASH_WORKER_JS: PASS ' "$PSC1_T05_DIR/scalar-hash.log"
+        grep -Fqx 'PSC1_SCALAR_HASH_LONG_JS: PASS cases=3' "$PSC1_T05_DIR/scalar-hash.log"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 pskernel-closed-cache-analysis-smoke.mjs kernel.mjs \
+          | tee "$PSC1_T05_DIR/closed-cache-analysis.log"
+        grep -Fqx 'PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {"expressions":20,"states":2,"mapQueries":40,"pairQueries":800,"inferQueries":80,"assertions":1884,"smallAndIndexed":true,"openEntriesSeeded":true}' "$PSC1_T05_DIR/closed-cache-analysis.log"
+        /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' \
+          -o "$PSC1_T05_DIR/dag.memory" \
+          env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 --expose-gc \
+          pskernel-expr-v2-dag-smoke.mjs kernel.mjs 2>&1 | tee "$PSC1_T05_DIR/dag.log" | sed -u '/^PSC1_DAG_PASS /d'
+        cat "$PSC1_T05_DIR/dag.memory"
+        python3 - <<'PY'
+        import os, pathlib
+        text = (pathlib.Path(os.environ['PSC1_T05_DIR']) / 'dag.log').read_text()
+        markers = [
+            'PSC1_V2_DAG_JS: PASS',
+            'PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6',
+            'PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64',
+            'PSC1_V2_TRANSFORM_JS: PASS',
+        ]
+        controls = 'ZETA BETA WHNF_STATE PUBLIC_CACHE QUICK_DEFEQ NAT_PROJECTION NESTED_OUTCOMES BINDER CHECK_APP DELTA CONSTANT_INDEX MUTUAL_INDEX CHECK_PROJECTION CHECK_LET LET_CACHE_SCOPE LET_LOCAL_WHNF STATEFUL_DEFEQ APP_CONVERSION APP_CONVERSION_CACHE APP_EAGER_CONTEXT SIMPLE_ADMISSION_MATRIX ADMISSION_SHARED_STATE ADMISSION_POLICY_SAFETY ADMISSION_FINAL_GUARDS THEOREM_ADMISSION_MATRIX THEOREM_ISPROP_STATE UNSAFE_ADMISSION UNSAFE_FRESH_BODY MUTUAL_ADMISSION MUTUAL_FRESH_MEMBER BINDER_SPINE BINDER_SPINE_BUDGET BINDER_SPINE_CACHE BINDER_SPINE_FALLBACK DEFEQ_PREFIX CHEAP_CORE_POLICY CHEAP_PROJECTION_POLICY DEFEQ_REFLECTION DEFEQ_PREFIX_GUARDS'.split()
+        markers.extend('PSC1_V2_DAG_JS_' + name + ': PASS' for name in controls)
+        for marker in markers:
+            if marker not in text:
+                raise RuntimeError('Missing retained DAG gate: ' + marker)
+        if 'PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6' not in text.splitlines():
+            raise RuntimeError('Missing exact staged ABI gate')
+        PY
+        /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' \
+          -o "$PSC1_T05_DIR/prefix.memory" \
+          env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 --expose-gc \
+          pskernel-expr-v2-generated-prefix-smoke.mjs kernel.mjs 2>&1 | tee "$PSC1_T05_DIR/prefix.log"
+        cat "$PSC1_T05_DIR/prefix.memory"
+        grep -Fqx 'PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3' "$PSC1_T05_DIR/prefix.log"
+        grep -Fqx 'PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2' "$PSC1_T05_DIR/prefix.log"
+        grep -Eq '^PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=[0-9]+$' "$PSC1_T05_DIR/prefix.log"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 pskernel-scalar-hash-short-entry-smoke.mjs kernel.mjs \
+          2>&1 | tee "$PSC1_T05_DIR/short-entry.log"
+        grep -Fqx 'PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {"cases":19,"assertions":38,"shortMaxPairs":4,"genericFallback":true}' "$PSC1_T05_DIR/short-entry.log"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 pskernel-generated-smoke.mjs kernel.mjs \
+          2>&1 | tee "$PSC1_T05_DIR/generated-smoke.log"
+        grep -Fqx 'PSKERNEL_GENERATED_COMPLETE_CHECKER: PASS' "$PSC1_T05_DIR/generated-smoke.log"
+        grep -Fqx 'PSKERNEL_GENERATED_SMOKE: PASS' "$PSC1_T05_DIR/generated-smoke.log"
+        env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 pskernel-invalid-recursor-occurrence-smoke.mjs kernel.mjs \
+          2>&1 | tee "$PSC1_T05_DIR/invalid-recursor.log"
+        grep -Eq '^PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS [0-9]+ invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls$' "$PSC1_T05_DIR/invalid-recursor.log"
+        /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' \
+          -o "$PSC1_T05_DIR/header.memory" \
+          env PATH="" "$PSC1_T05_NODE" --max-old-space-size=2048 pskernel-ordinary-header-smoke.mjs kernel.mjs \
+          2>&1 | tee "$PSC1_T05_DIR/header.log"
+        cat "$PSC1_T05_DIR/header.memory"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        def digest(p):
+            raw=p.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        lines=(root/'header.log').read_text().splitlines();prefix='PSC1_ORDINARY_HEADER_JS: PASS '
+        records=[json.loads(line[len(prefix):]) for line in lines if line.startswith(prefix)]
+        expected={'assertions':1992,'headerCases':432,'positiveDirect':10,'occurrenceFuelCases':1026,
+                  'annotationFuelCases':75,'callbackSequences':3,'callbackFailures':24,
+                  'headerOnly':True,'fullAdmission':False,'publicFallbackUsed':False,
+                  'sectionAssertions':{'harness':1,'header':444,'occurrence':1378,'annotations':94,'state':47,'phases':20,'topCallbacks':8}}
+        def exact(a,b):
+            if type(a) is not type(b):return False
+            if isinstance(a,dict):return a.keys()==b.keys() and all(exact(a[k],b[k]) for k in a)
+            return a==b
+        if len(records)!=1 or not exact(records[0],expected):raise RuntimeError('Exact1992matrixandsectioncountsrequired')
+        measurement=(root/'header.memory').read_text().strip()
+        timed=re.fullmatch(r'peak_rss_kib=(\d+) wall_seconds=(\d+(?:\.\d+)?) exit_status=0',measurement)
+        if timed is None or float(timed[2])>=1500:raise RuntimeError('Header runtime must exit0within25minutes')
+        provenance=json.loads((root/'provenance.json').read_text())
+        for key,value in {'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                          'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':os.environ['PSC1_T05_ROUTE']}.items():
+            if provenance[key]!=value:raise RuntimeError('Receiptidentitymismatch:'+key)
+        if digest(root/'detached/kernel.mjs')!=provenance['kernel'] or digest(root/'detached/pskernel-ordinary-header-smoke.mjs')!=provenance['harness']:
+            raise RuntimeError('Executedinputchanged')
+        receipt={'schema':'psc1-t05-header-route-receipt-v1','status':'pass','identity':provenance,
+                 'result':records[0],'measurement':measurement,'peakRssKiB':int(timed[1]),'wallSeconds':float(timed[2]),
+                 'logs':{p.name:digest(p) for p in sorted(root.glob('*.log'))},
+                 'headerOnly':True,'fullAdmission':False,'performanceQualified':False}
+        (root/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_T05_HEADER_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+      timeout-minutes: 25
+    - name: Retain bounded gate artifacts on success or failure
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$PSC1_T05_DIR/bounded"
+        for PSC1_T05_FILE in "$RUNNER_TEMP/psc1-scalar-hash-probe.log" "$RUNNER_TEMP/psc1-closed-cache-analysis-probe.log" "$RUNNER_TEMP/psc1-closed-cache-analysis-codegen.log"; do
+          if [ -f "$PSC1_T05_FILE" ]; then cp "$PSC1_T05_FILE" "$PSC1_T05_DIR/bounded/"; fi
+        done
+        if [ -d dist/expr-v2/scalar-hash ]; then cp -R dist/expr-v2/scalar-hash/. "$PSC1_T05_DIR/bounded/"; fi
+      if: always()
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-header-${{ matrix.route }}-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-t05-${{ matrix.route }}/
+        if-no-files-found: error

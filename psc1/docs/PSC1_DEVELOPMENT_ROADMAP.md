@@ -6,6 +6,21 @@ Frozen [Practical Core v1](PSC1_PRACTICAL_CORE_V1_CONTRACT.json):14 families/37 
 [canonical direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns exact source identities and immutable actual results.
 
+## Active work order: Python/PHP self-hosting
+
+| Order | Work | Exact acceptance |
+| --- | --- | --- |
+| 1 | Full existing Python/PHP emitter closure normalization | Native facade build and both complete .lean/.ps censuses; preserve prior scalar/runtime/IO/negative behavior and source identities. |
+| 2 | Independently checked G1 for each | One native seed, strict original/transformed IR, official Lean4.35 admission, generated execution of all five positive and five refusal cases. |
+| 3 | Genuine G2/G3 and exact fixed points | Each generated compiler compiles the same captured full source; disable native compiler tools after the seed. Exact source/admission/IR/ten observations/raw code identities, correctness1800s with original240s profile separate. |
+| 4 | Full source regression and reproducibility | Seven backends/both grammars/37 criteria and real apps; clean G1 reproduction separately scoped. Preserve qualified DirectJS/Wasm/Rust/TS snapshots and all old failures. |
+
+Branch feat/psc1-python-php-selfhost-20261024. Existing emitters and shared compiler
+service are reused, with small host transport adapters only. No Python/PHP
+self-host qualification is claimed at this initial source/harness checkpoint.
+See [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md).
+The later direct performance queue is deferred while this user-directed mission runs.
+
 ## Qualified compiler checkpoint
 
 Source133e589288b563e74578b771ec35595beb3a9fe8, request2d1f8244,

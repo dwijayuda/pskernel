@@ -7,6 +7,36 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
+## Active Python/PHP self-hosting mission — 2026-10-24
+
+The user now requests genuine self-hosting with the Python and PHP backends.
+This supersedes the direct-target performance queue as the active work order.
+Branch feat/psc1-python-php-selfhost-20261024 starts from preserved qualified
+direct-target review6393226e5d29ad246e9421fe398d78c43954c6d9.
+DirectJS/Wasm, Rust/TS qualifications below retain their exact source scopes.
+
+Thin pure facades call the existing psPythonEmitModule and
+psPhpEmitValidatedModule through Ps.Internal.CompilerService.candidate.
+The shared source/frontend/elaborator/strict IR/admission pipeline is unchanged.
+The generation harness now has hash-bound Python/PHP transport, complete
+ten-case observations and unchanged independent checker/resource boundaries.
+Python3.14.8 and PHP8.5.11/ext-gmp are pinned to existing release CI versions.
+Transport passes unchanged malformed wire to generated refusal logic; it does
+not elaborate, lower or print compiler code. Python global integer-digit and
+recursion settings remain untouched; PHP transport retains1G memory policy.
+
+Current source preflight40065397379 atbae72b4b successfully BUILT both facades
+and native seed/checker/census; its source audit is still pending.
+Later harness commitba2a1246 requires the host-target allowlist extension in this
+checkpoint. No Python/PHP G1, G2/G3 or fixed-point claim exists yet.
+Next: verify whole source closure census in both grammars, normalize actual
+unsupported source classes with exact regression evidence, then issue a single
+request-only qualification commit through the new dedicated manual workflow.
+Keep1800s correctness separate from original240s performance and G1/tool limits.
+
+[Python/PHP continuation](docs/PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) owns exact
+execution steps. Do not merge PRs or publish packages.
+
 ## Completed DirectJS and owned DirectWasm mission
 
 Source commit 133e589288b563e74578b771ec35595beb3a9fe8 is genuinely self-hosted

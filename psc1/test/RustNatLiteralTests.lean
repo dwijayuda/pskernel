@@ -15,10 +15,10 @@ private def values : List Nat := [
 ]
 
 def main : IO Unit := do
-  let declarations := values.zipIdx |>.map (fun (value,index) =>
+  let declarations : List PsVerifiedIrDeclaration := values.zipIdx |>.map (fun (value,index) =>
     {name := "literal" ++ toString index,typeParameters := [],parameters := [],
      resultType := PsVerifiedIrType.primitive .nat,
-     body := PsVerifiedIrExpr.literal (.natural value)} : PsVerifiedIrDeclaration)
+     body := PsVerifiedIrExpr.literal (.natural value)})
   let module : PsVerifiedIrModule := {imports := [],structures := [],inductives := [],declarations}
   match psStrictValidateModule module with
   | .error _ => throw (IO.userError "literal fixture strict IR refused")

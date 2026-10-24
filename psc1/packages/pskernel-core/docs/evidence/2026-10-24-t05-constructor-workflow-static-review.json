@@ -1,0 +1,212 @@
+{
+  "schema": "psc1-t05-future-constructor-workflow-static-v1",
+  "status": "DRAFT_FROZEN_UNCOMMITTED_UNEXECUTED",
+  "baseSourceSha": "60fe91758a897d6f8936b28a257baab0057c52b3",
+  "files": [
+    {
+      "path": ".github/workflows/psc1-pskernel-t05-header.yml",
+      "bytes": 67786,
+      "sha256": "beb8fea239071d9664ddbb0551051fe36f7d70091b7e138e5f365a0a2a992893",
+      "gitBlobSha": "eba807bd486d4e485a9cbd9a5fbd2bf4abf0f159"
+    },
+    {
+      "path": "psc1/kernel-lakefile.lean",
+      "bytes": 15261,
+      "sha256": "79cb8e0ee3cebb987712fe662ae79294653cf5a011ced083a319b6fb2df05d13",
+      "gitBlobSha": "169c8d39c88720ecadd95374c1db90b0f0de5a88"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+      "bytes": 675,
+      "sha256": "b8efef2b9c6afd38424aa34f4b1c2ad38341f6604fe09e5f4ccbd7a4566f03c0",
+      "gitBlobSha": "6a58b4dfc767e6160ade4b54f35ea4438a72beb5"
+    }
+  ],
+  "sourceInputCountPerJob": 43,
+  "frozenReferenceCount": 6,
+  "oldStepsChangedOnlyForExpandedSourceInventoryClosureAndHarnessProvenance": {
+    "native-header": [
+      "Verify exact source, pins, frozen references and JavaScript syntax"
+    ],
+    "generated-header": [
+      "Verify exact route source, pins, frozen references and syntax",
+      "Archive actual Lean closure and check complete authentic source after bounded gates",
+      "Check and compile the independent complete route through TypeScript to JavaScript"
+    ]
+  },
+  "addedSteps": {
+    "native-header": [
+      "Build native-only occurrence and metadata import dependencies",
+      "Kernel-check50 new constructor and storage equations plus8 unchanged metadata reports",
+      "Run exact native constructor-parameter protocol controls",
+      "Run exact432 native constructor-result structural assertions",
+      "Require230 exact native reports with50new and180retained plus both constructor regressions"
+    ],
+    "generated-header": [
+      "Check small structural occurrence and annotation closures before complete source",
+      "Execute both exact constructor matrices with empty PATH and bind their receipts"
+    ]
+  },
+  "allOtherOldStepObjectsUnchanged": true,
+  "retainedNative172ReceiptAndGateUnchanged": true,
+  "combinedNativeProofs": {
+    "new": 50,
+    "retained": 180,
+    "total": 230
+  },
+  "addedProofInventory": [
+    {
+      "module": "PsKernelExprV2MetadataProofs",
+      "proofs": 8,
+      "names": [
+        "PsKernelExprV2MetadataProofs.app_preserves",
+        "PsKernelExprV2MetadataProofs.lam_preserves",
+        "PsKernelExprV2MetadataProofs.forall_preserves",
+        "PsKernelExprV2MetadataProofs.let_preserves",
+        "PsKernelExprV2MetadataProofs.mdata_preserves",
+        "PsKernelExprV2MetadataProofs.proj_preserves",
+        "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+        "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth"
+      ],
+      "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+    },
+    {
+      "module": "PsKernelExprV2PagedModelProofs",
+      "proofs": 17,
+      "names": [
+        "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+        "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+        "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+        "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+        "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+        "PsKernelExprV2PagedModelProofs.empty_layout",
+        "PsKernelExprV2PagedModelProofs.push_id_and_size",
+        "PsKernelExprV2PagedModelProofs.push_layout",
+        "PsKernelExprV2PagedModelProofs.valid_id_location",
+        "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+        "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+        "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+        "PsKernelExprV2PagedModelProofs.push_find_old",
+        "PsKernelExprV2PagedModelProofs.push_find_new",
+        "PsKernelExprV2PagedModelProofs.push_find",
+        "PsKernelExprV2PagedModelProofs.push_require_old",
+        "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+      ],
+      "sha256": "7c4dadb26838d9d66a96c2ccfae6616af58d49fa49d96b54c12d9f78f708ce8c"
+    },
+    {
+      "module": "PsKernelOrdinaryConstructorParamsProofs",
+      "proofs": 17,
+      "names": [
+        "PsKernelOrdinaryConstructorParamsProofs.worker_zero_precedes_parameters_lookup_and_callbacks",
+        "PsKernelOrdinaryConstructorParamsProofs.successor_empty_keeps_complete_owner_without_lookup",
+        "PsKernelOrdinaryConstructorParamsProofs.lookup_error_precedes_defeq",
+        "PsKernelOrdinaryConstructorParamsProofs.syntactic_nonforall_precedes_defeq",
+        "PsKernelOrdinaryConstructorParamsProofs.forall_uses_predecessor_fuel_and_constructor_domain_left",
+        "PsKernelOrdinaryConstructorParamsProofs.defeq_decline_precedes_fvar_and_instantiation",
+        "PsKernelOrdinaryConstructorParamsProofs.defeq_error_precedes_fvar_and_instantiation",
+        "PsKernelOrdinaryConstructorParamsProofs.defeq_false_precedes_fvar_and_instantiation",
+        "PsKernelOrdinaryConstructorParamsProofs.fvar_error_uses_returned_owner_and_existing_parameter_name",
+        "PsKernelOrdinaryConstructorParamsProofs.instantiation_error_precedes_recursive_continuation",
+        "PsKernelOrdinaryConstructorParamsProofs.success_keeps_context_and_complete_returned_owner",
+        "PsKernelOrdinaryConstructorParamsProofs.success_preserves_every_semantic_field_and_freshness",
+        "PsKernelOrdinaryConstructorParamsProofs.one_unit_successful_step_still_reaches_zero_before_empty_tail",
+        "PsKernelOrdinaryConstructorParamsProofs.two_or_more_units_finish_one_parameter_with_returned_owner",
+        "PsKernelOrdinaryConstructorParamsProofs.wrapper_adds_one_before_empty_or_callbacks",
+        "PsKernelOrdinaryConstructorParamsProofs.wrapper_zero_empty_is_identity",
+        "PsKernelOrdinaryConstructorParamsProofs.with_fuel_uses_full_owner_defeq_without_fallback"
+      ],
+      "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019"
+    },
+    {
+      "module": "PsKernelOrdinaryConstructorResultProofs",
+      "proofs": 16,
+      "names": [
+        "PsKernelOrdinaryConstructorResultProofs.consume_empty_preserves_exact_tail",
+        "PsKernelOrdinaryConstructorResultProofs.consume_missing_argument_is_mismatch",
+        "PsKernelOrdinaryConstructorResultProofs.consume_fvar_compares_only_internal_name",
+        "PsKernelOrdinaryConstructorResultProofs.contains_zero_precedes_lookup",
+        "PsKernelOrdinaryConstructorResultProofs.contains_projection_name_precedes_receiver",
+        "PsKernelOrdinaryConstructorResultProofs.contains_application_hit_precedes_argument",
+        "PsKernelOrdinaryConstructorResultProofs.contains_application_error_precedes_argument",
+        "PsKernelOrdinaryConstructorResultProofs.contains_const_with_fuel_correspondence",
+        "PsKernelOrdinaryConstructorResultProofs.contains_const_on_canonical_correspondence",
+        "PsKernelOrdinaryConstructorResultProofs.indices_contain_target_correspondence",
+        "PsKernelOrdinaryConstructorResultProofs.validate_shape_mismatch_precedes_occurrence",
+        "PsKernelOrdinaryConstructorResultProofs.validate_recursive_index_rejected",
+        "PsKernelOrdinaryConstructorResultProofs.validate_preserves_exact_index_ids",
+        "PsKernelOrdinaryConstructorResultProofs.consume_result_params_correspondence",
+        "PsKernelOrdinaryConstructorResultProofs.inductive_app_indices_correspondence",
+        "PsKernelOrdinaryConstructorResultProofs.validate_constructor_result_correspondence"
+      ],
+      "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301"
+    }
+  ],
+  "nativeImportDependencies": {
+    "Result": "Build PsKernelOrdinaryHeaderProofs and require PsKernelOrdinaryOccurrenceProofs.olean before direct Result proof checking.",
+    "PagedModel": "Build unchanged PsKernelExprV2MetadataNativeProofs and require PsKernelExprV2MetadataProofs.olean before direct PagedModel proof checking."
+  },
+  "nativeRegressionAssertions": {
+    "params": 284,
+    "result": 432
+  },
+  "nativeParamsGroups": {
+    "direct": 227,
+    "owner": 21,
+    "boundaries": 28,
+    "faults": 8
+  },
+  "nativeParamsFiveMarkersExactlyOnceAnd284OrderedLabelsRequired": true,
+  "generatedAssertions": {
+    "retainedHeader": 1992,
+    "params": 268,
+    "result": 432
+  },
+  "generatedParamsSections": {
+    "harness": 1,
+    "direct": 227,
+    "protocol": 20,
+    "boundaries": 14,
+    "faults": 6
+  },
+  "generatedResultSections": {
+    "harness": 1,
+    "selector": 138,
+    "consumer": 26,
+    "occurrence": 240,
+    "bounds": 16,
+    "indexLists": 7,
+    "precedence": 4
+  },
+  "allGeneratedContractsParsedStrictly": true,
+  "bothActualNewHarnessesCopiedAndHashedInArtifacts": true,
+  "receiptsBoundToSourceRunAttemptRouteAndGeneratedKernel": true,
+  "allOldBounded1884StrictBodyAndRetainedRuntimeRunBlocksUnchanged": true,
+  "structuralPrecheckAdditionMatchesAuthorizedCurrentWorkflow": true,
+  "productionClosure": "Derived from imports and required to contain both new portable modules; expected current146+2=148, never hardcoded.",
+  "newProductionRoots": 2,
+  "newSelfHostImports": 2,
+  "nativeProofsExcludedFromPortableClosure": true,
+  "pinsAndLimitsUnchanged": {
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "nodeMajor": 22,
+    "fuel": 4096,
+    "oldSpaceMiB": 2048,
+    "oldSpaceIsHardRssLimit": false,
+    "emptyPATH": true,
+    "nativeJobMinutes": 25,
+    "generatedJobMinutes": 75,
+    "retainedHeaderRuntimeStepMinutes": 25,
+    "newConstructorRuntimeStepMinutes": 25
+  },
+  "oldMixed25MinuteCapAndFiveFullPausedTriggerFilesUntouched": true,
+  "singleExistingNarrowWorkflowExpanded": true,
+  "pendingPlaceholders": [],
+  "yamlParsed": true,
+  "pythonBlocksAstParsed": 10,
+  "noLocalProjectExecution": true,
+  "noGitHubMutation": true,
+  "fullAdmission": false,
+  "replayArenaModelBridgeEstablished": false
+}

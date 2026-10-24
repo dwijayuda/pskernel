@@ -1,0 +1,463 @@
+{
+  "schema": "psc1-t05-header-route-terminal-log-observation-v2",
+  "sourceSha": "f5d97bafbd48adde29101ed44f45288ae53b9c87",
+  "runId": 40089243726,
+  "runAttempt": 1,
+  "route": "generated",
+  "observedAtUtc": "2026-10-24T11:47:49.452146+00:00",
+  "scope": "Independent static inspection of fresh terminal Actions job log and API metadata; archived file bytes and copied source are verified separately.",
+  "job": {
+    "id": 120858822962,
+    "run_id": 40089243726,
+    "workflow_name": "PSC1 T05 ordinary header native-first preflight",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40089243726",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcI79JMg",
+    "head_sha": "f5d97bafbd48adde29101ed44f45288ae53b9c87",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120858822962",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40089243726/job/120858822962",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-24T11:18:57Z",
+    "started_at": "2026-10-24T11:19:00Z",
+    "completed_at": "2026-10-24T11:45:25Z",
+    "name": "generated-header (generated)",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-24T11:19:01Z",
+        "completed_at": "2026-10-24T11:19:02Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-24T11:19:02Z",
+        "completed_at": "2026-10-24T11:19:24Z"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-24T11:19:24Z",
+        "completed_at": "2026-10-24T11:19:24Z"
+      },
+      {
+        "name": "Install pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-24T11:19:24Z",
+        "completed_at": "2026-10-24T11:19:38Z"
+      },
+      {
+        "name": "Verify exact route source, pins, frozen references and syntax",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-24T11:19:38Z",
+        "completed_at": "2026-10-24T11:19:38Z"
+      },
+      {
+        "name": "Build authentic PSC1 for the bounded generation gate",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-24T11:19:38Z",
+        "completed_at": "2026-10-24T11:20:28Z"
+      },
+      {
+        "name": "Install pinned TypeScript7.0.2",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-24T11:20:28Z",
+        "completed_at": "2026-10-24T11:20:30Z"
+      },
+      {
+        "name": "Require retained bounded scalar and closed-cache strict generation plus1884matrix",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-24T11:20:30Z",
+        "completed_at": "2026-10-24T11:21:30Z"
+      },
+      {
+        "name": "Check small structural occurrence and annotation closures before complete source",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-24T11:21:30Z",
+        "completed_at": "2026-10-24T11:23:22Z"
+      },
+      {
+        "name": "Archive actual Lean closure and check complete authentic source after bounded gates",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-24T11:23:22Z",
+        "completed_at": "2026-10-24T11:31:32Z"
+      },
+      {
+        "name": "Reconstruct and authenticate the complete canonical ProofScript closure",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 11,
+        "started_at": "2026-10-24T11:31:32Z",
+        "completed_at": "2026-10-24T11:31:32Z"
+      },
+      {
+        "name": "Check and compile the independent complete route through TypeScript to JavaScript",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12,
+        "started_at": "2026-10-24T11:31:32Z",
+        "completed_at": "2026-10-24T11:42:02Z"
+      },
+      {
+        "name": "Retain controls and execute exact1992directheaderassertions with empty PATH",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 13,
+        "started_at": "2026-10-24T11:42:02Z",
+        "completed_at": "2026-10-24T11:45:19Z"
+      },
+      {
+        "name": "Retain bounded gate artifacts on success or failure",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 14,
+        "started_at": "2026-10-24T11:45:19Z",
+        "completed_at": "2026-10-24T11:45:19Z"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15,
+        "started_at": "2026-10-24T11:45:19Z",
+        "completed_at": "2026-10-24T11:45:22Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 29,
+        "started_at": "2026-10-24T11:45:22Z",
+        "completed_at": "2026-10-24T11:45:22Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 30,
+        "started_at": "2026-10-24T11:45:22Z",
+        "completed_at": "2026-10-24T11:45:22Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 31,
+        "started_at": "2026-10-24T11:45:22Z",
+        "completed_at": "2026-10-24T11:45:22Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120858822962",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000028619,
+    "runner_name": "GitHub Actions 1000028619",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "runStatusAtObservation": "in_progress",
+  "runConclusionAtObservation": null,
+  "inputFiles": [
+    {
+      "path": "t05-evidence/f5d97baf-runtime-40089243726/generated-job.log",
+      "bytes": 274391,
+      "sha256": "11483b1c375ca48edd4f684aec669123c25db805813303f45425f96168997633"
+    },
+    {
+      "path": "t05-evidence/f5d97baf-runtime-40089243726/run-at-generated-terminal.json",
+      "bytes": 13893,
+      "sha256": "dfa50d9ebf948ab72719791c6d88a0b68578b3b4f906c10c436e2436c36019ad"
+    },
+    {
+      "path": "t05-evidence/f5d97baf-runtime-40089243726/jobs-at-generated-terminal.json",
+      "bytes": 16897,
+      "sha256": "0e5791d1bc15323c52d75400b55ce340ce2dcaa97dd036c413ce8bc998a440d6"
+    }
+  ],
+  "actualOutputPassMarkers": [
+    "PSC1_SCALAR_HASH_LONG_JS: PASS cases=3",
+    "PSC1_SCALAR_HASH_WORKER_JS: PASS {\"cases\":2730,\"strings\":12,\"stages\":8190,\"assertions\":13665,\"modulus\":\"65521\",\"algorithmChanged\":false}",
+    "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {\"cases\":19,\"assertions\":38,\"shortMaxPairs\":4,\"genericFallback\":true}",
+    "PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {\"expressions\":20,\"states\":2,\"mapQueries\":40,\"pairQueries\":800,\"inferQueries\":80,\"assertions\":1884,\"smallAndIndexed\":true,\"openEntriesSeeded\":true}",
+    "PSC1_CLOSED_CACHE_ANALYSIS_CODEGEN: PASS dataResult=true recursiveSites=11 oldHashCalls=0 oldHasFVarCalls=0 recurry=false",
+    "PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false",
+    "PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=2",
+    "PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairFallbackSites=1 shortLeafSites=1 exclusiveBranches=true primitiveRemainder=1 structuralGeneratorBlocks=1",
+    "PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true",
+    "PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false",
+    "PSC1_T05_LEAN_SOURCE_CLOSURE: PASS modules=146",
+    "PSC1_SCALAR_HASH_LONG_JS: PASS cases=3",
+    "PSC1_SCALAR_HASH_WORKER_JS: PASS {\"cases\":2730,\"strings\":12,\"stages\":8190,\"assertions\":13665,\"modulus\":\"65521\",\"algorithmChanged\":false}",
+    "PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {\"expressions\":20,\"states\":2,\"mapQueries\":40,\"pairQueries\":800,\"inferQueries\":80,\"assertions\":1884,\"smallAndIndexed\":true,\"openEntriesSeeded\":true}",
+    "PSC1_EXPR_EQUALITY_DELAYED_JS: PASS hostile=21 staged=2 sharedDepth=64",
+    "PSC1_V2_DAG_JS_WHNF_STAGED_ABI: PASS exports=2 partials=4 executions=6",
+    "PSC1_V2_TRANSFORM_JS: PASS",
+    "PSC1_V2_DAG_JS_ZETA: PASS",
+    "PSC1_V2_DAG_JS_BETA: PASS",
+    "PSC1_V2_DAG_JS_WHNF_STATE: PASS",
+    "PSC1_V2_DAG_JS_PROJECTION_UNSELECTED_FIELD: PASS",
+    "PSC1_V2_DAG_JS_NAT_PROJECTION: PASS",
+    "PSC1_V2_DAG_JS_PUBLIC_CACHE: PASS",
+    "PSC1_V2_DAG_JS_QUICK_DEFEQ: PASS",
+    "PSC1_V2_DAG_JS_CONSTANT_INDEX: PASS",
+    "PSC1_V2_DAG_JS_DELTA: PASS",
+    "PSC1_V2_DAG_JS_NESTED_OUTCOMES: PASS",
+    "PSC1_V2_DAG_JS_CHECK_APP: PASS",
+    "PSC1_V2_DAG_JS_BINDER: PASS",
+    "PSC1_V2_DAG_JS_MUTUAL_INDEX: PASS",
+    "PSC1_V2_DAG_JS_CHECK_PROJECTION: PASS",
+    "PSC1_V2_DAG_JS_CHECK_LET: PASS",
+    "PSC1_V2_DAG_JS_LET_CACHE_SCOPE: PASS",
+    "PSC1_V2_DAG_JS_LET_LOCAL_WHNF: PASS",
+    "PSC1_V2_DAG_JS_STATEFUL_DEFEQ: PASS",
+    "PSC1_V2_DAG_JS_APP_CONVERSION: PASS",
+    "PSC1_V2_DAG_JS_APP_CONVERSION_CACHE: PASS",
+    "PSC1_V2_DAG_JS_APP_EAGER_CONTEXT: PASS",
+    "PSC1_V2_DAG_JS_SIMPLE_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_JS_ADMISSION_SHARED_STATE: PASS",
+    "PSC1_V2_DAG_JS_UNSAFE_FRESH_BODY: PASS",
+    "PSC1_V2_DAG_JS_ADMISSION_POLICY_SAFETY: PASS",
+    "PSC1_V2_DAG_JS_ADMISSION_FINAL_GUARDS: PASS",
+    "PSC1_V2_DAG_JS_THEOREM_ADMISSION_MATRIX: PASS",
+    "PSC1_V2_DAG_JS_THEOREM_ISPROP_STATE: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE_BUDGET: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE_CACHE: PASS",
+    "PSC1_V2_DAG_JS_BINDER_SPINE_FALLBACK: PASS",
+    "PSC1_V2_DAG_JS_UNSAFE_ADMISSION: PASS",
+    "PSC1_V2_DAG_JS_DEFEQ_PREFIX: PASS",
+    "PSC1_V2_DAG_JS_CHEAP_CORE_POLICY: PASS",
+    "PSC1_V2_DAG_JS_CHEAP_PROJECTION_POLICY: PASS",
+    "PSC1_V2_DAG_JS_DEFEQ_REFLECTION: PASS",
+    "PSC1_V2_DAG_JS_DEFEQ_PREFIX_GUARDS: PASS",
+    "PSC1_V2_DAG_JS_MUTUAL_ADMISSION: PASS",
+    "PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS",
+    "PSC1_V2_DAG_JS: PASS",
+    "PSC1_V2_GENERATED_PREFIX_JS: PASS new=24 recursors=7 direct=6 privateIDs=3",
+    "PSC1_V2_GENERATED_PREFIX_CONTROLS_JS: PASS positive=6 negative=7 assertions=605",
+    "PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2",
+    "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {\"cases\":19,\"assertions\":38,\"shortMaxPairs\":4,\"genericFallback\":true}",
+    "PSKERNEL_GENERATED_COMPLETE_CHECKER: PASS",
+    "PSKERNEL_GENERATED_SMOKE: PASS",
+    "PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS 9 invalid/reducible/nonrecursive/erased/unsafe/nested/resource/publication controls",
+    "PSC1_ORDINARY_HEADER_JS: PASS {\"assertions\":1992,\"sectionAssertions\":{\"harness\":1,\"header\":444,\"occurrence\":1378,\"annotations\":94,\"state\":47,\"phases\":20,\"topCallbacks\":8},\"headerCases\":432,\"positiveDirect\":10,\"occurrenceFuelCases\":1026,\"annotationFuelCases\":75,\"callbackSequences\":3,\"callbackFailures\":24,\"headerOnly\":true,\"fullAdmission\":false,\"publicFallbackUsed\":false}",
+    "PSC1_T05_HEADER_ROUTE: PASS {\"schema\":\"psc1-t05-header-route-receipt-v1\",\"status\":\"pass\",\"identity\":{\"schema\":\"psc1-t05-header-provenance-v1\",\"repository\":\"dwijayuda/pskernel\",\"sourceSha\":\"f5d97bafbd48adde29101ed44f45288ae53b9c87\",\"runId\":\"40089243726\",\"runAttempt\":\"1\",\"job\":\"generated-header\",\"route\":\"generated\",\"leanCommit\":\"eb6cafb7290e8bd5f2937522d8d804f58f02bafc\",\"typescript\":\"7.0.2\",\"node\":\"v22.23.3\",\"fuel\":4096,\"oldSpaceMiB\":2048,\"oldSpaceIsHardRssLimit\":false,\"emptyPATH\":true,\"kernel\":{\"bytes\":10070415,\"sha256\":\"2791092cfde0858dcf4d127edb46b1def3da09a78ac7c63d0774e3c36d4f7e38\"},\"harness\":{\"bytes\":25991,\"sha256\":\"f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153\"},\"sourceInventory\":{\"bytes\":8512,\"sha256\":\"3b81d5d6587b457922fa2a7ef8bfd08fc55ef5dbc347b0950e1443f6ee7b58cb\"},\"leanSourceManifest\":{\"bytes\":30436,\"sha256\":\"0be57ceceefbe30eb40260bfa6dfa7286da23f06af0602953b32a5a3767a1f08\"},\"scripts\":{\"pskernel-ordinary-header-smoke.mjs\":{\"bytes\":25991,\"sha256\":\"f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153\"},\"pskernel-scalar-hash-worker-smoke.mjs\":{\"bytes\":2546,\"sha256\":\"1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c\"},\"pskernel-scalar-hash-short-entry-smoke.mjs\":{\"bytes\":1126,\"sha256\":\"eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff\"},\"pskernel-closed-cache-analysis-smoke.mjs\":{\"bytes\":7826,\"sha256\":\"0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736\"},\"pskernel-generated-smoke.mjs\":{\"bytes\":12610,\"sha256\":\"2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab\"},\"pskernel-expr-v2-dag-smoke.mjs\":{\"bytes\":244729,\"sha256\":\"b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0\"},\"pskernel-expr-v2-generated-prefix-smoke.mjs\":{\"bytes\":28982,\"sha256\":\"dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db\"},\"pskernel-invalid-recursor-occurrence-smoke.mjs\":{\"bytes\":5956,\"sha256\":\"a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b\"}},\"headerOnly\":true,\"fullAdmission\":false,\"publicFallbackUsed\":false},\"result\":{\"assertions\":1992,\"sectionAssertions\":{\"harness\":1,\"header\":444,\"occurrence\":1378,\"annotations\":94,\"state\":47,\"phases\":20,\"topCallbacks\":8},\"headerCases\":432,\"positiveDirect\":10,\"occurrenceFuelCases\":1026,\"annotationFuelCases\":75,\"callbackSequences\":3,\"callbackFailures\":24,\"headerOnly\":true,\"fullAdmission\":false,\"publicFallbackUsed\":false},\"measurement\":\"peak_rss_kib=295972 wall_seconds=3.93 exit_status=0\",\"peakRssKiB\":295972,\"wallSeconds\":3.93,\"logs\":{\"closed-cache-analysis.log\":{\"bytes\":184,\"sha256\":\"51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda\"},\"compiler-build.log\":{\"bytes\":24992,\"sha256\":\"c22c1c09f0a927c51a75ddedd096a6bb7a87329aa716f3e5dfb63836caf06d66\"},\"complete-build.log\":{\"bytes\":16075,\"sha256\":\"05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac\"},\"complete-lean-check.log\":{\"bytes\":15891,\"sha256\":\"158cd2aac7c135b9f6d78e829a1a444712c15865fbd42ebd3e6337af4acd161a\"},\"dag.log\":{\"bytes\":2287878,\"sha256\":\"48b5447b6ef6f70af188004e7ea106b45daa41fd3cdfbe647caee1be123f000c\"},\"generated-smoke.log\":{\"bytes\":4855,\"sha256\":\"18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1\"},\"header.log\":{\"bytes\":373,\"sha256\":\"e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de\"},\"invalid-recursor.log\":{\"bytes\":126,\"sha256\":\"891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3\"},\"prefix.log\":{\"bytes\":225,\"sha256\":\"c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555\"},\"scalar-hash.log\":{\"bytes\":176,\"sha256\":\"dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353\"},\"short-entry.log\":{\"bytes\":108,\"sha256\":\"6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5\"},\"structural-annotations-check.log\":{\"bytes\":15890,\"sha256\":\"f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e\"},\"structural-occurrence-check.log\":{\"bytes\":15890,\"sha256\":\"d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c\"}},\"headerOnly\":true,\"fullAdmission\":false,\"performanceQualified\":false}"
+  ],
+  "result": {
+    "assertions": 1992,
+    "sectionAssertions": {
+      "harness": 1,
+      "header": 444,
+      "occurrence": 1378,
+      "annotations": 94,
+      "state": 47,
+      "phases": 20,
+      "topCallbacks": 8
+    },
+    "headerCases": 432,
+    "positiveDirect": 10,
+    "occurrenceFuelCases": 1026,
+    "annotationFuelCases": 75,
+    "callbackSequences": 3,
+    "callbackFailures": 24,
+    "headerOnly": true,
+    "fullAdmission": false,
+    "publicFallbackUsed": false
+  },
+  "originalLoggedReceipt": {
+    "schema": "psc1-t05-header-route-receipt-v1",
+    "status": "pass",
+    "identity": {
+      "schema": "psc1-t05-header-provenance-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "f5d97bafbd48adde29101ed44f45288ae53b9c87",
+      "runId": "40089243726",
+      "runAttempt": "1",
+      "job": "generated-header",
+      "route": "generated",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "typescript": "7.0.2",
+      "node": "v22.23.3",
+      "fuel": 4096,
+      "oldSpaceMiB": 2048,
+      "oldSpaceIsHardRssLimit": false,
+      "emptyPATH": true,
+      "kernel": {
+        "bytes": 10070415,
+        "sha256": "2791092cfde0858dcf4d127edb46b1def3da09a78ac7c63d0774e3c36d4f7e38"
+      },
+      "harness": {
+        "bytes": 25991,
+        "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+      },
+      "sourceInventory": {
+        "bytes": 8512,
+        "sha256": "3b81d5d6587b457922fa2a7ef8bfd08fc55ef5dbc347b0950e1443f6ee7b58cb"
+      },
+      "leanSourceManifest": {
+        "bytes": 30436,
+        "sha256": "0be57ceceefbe30eb40260bfa6dfa7286da23f06af0602953b32a5a3767a1f08"
+      },
+      "scripts": {
+        "pskernel-ordinary-header-smoke.mjs": {
+          "bytes": 25991,
+          "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+        },
+        "pskernel-scalar-hash-worker-smoke.mjs": {
+          "bytes": 2546,
+          "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+        },
+        "pskernel-scalar-hash-short-entry-smoke.mjs": {
+          "bytes": 1126,
+          "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff"
+        },
+        "pskernel-closed-cache-analysis-smoke.mjs": {
+          "bytes": 7826,
+          "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+        },
+        "pskernel-generated-smoke.mjs": {
+          "bytes": 12610,
+          "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab"
+        },
+        "pskernel-expr-v2-dag-smoke.mjs": {
+          "bytes": 244729,
+          "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+        },
+        "pskernel-expr-v2-generated-prefix-smoke.mjs": {
+          "bytes": 28982,
+          "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+        },
+        "pskernel-invalid-recursor-occurrence-smoke.mjs": {
+          "bytes": 5956,
+          "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b"
+        }
+      },
+      "headerOnly": true,
+      "fullAdmission": false,
+      "publicFallbackUsed": false
+    },
+    "result": {
+      "assertions": 1992,
+      "sectionAssertions": {
+        "harness": 1,
+        "header": 444,
+        "occurrence": 1378,
+        "annotations": 94,
+        "state": 47,
+        "phases": 20,
+        "topCallbacks": 8
+      },
+      "headerCases": 432,
+      "positiveDirect": 10,
+      "occurrenceFuelCases": 1026,
+      "annotationFuelCases": 75,
+      "callbackSequences": 3,
+      "callbackFailures": 24,
+      "headerOnly": true,
+      "fullAdmission": false,
+      "publicFallbackUsed": false
+    },
+    "measurement": "peak_rss_kib=295972 wall_seconds=3.93 exit_status=0",
+    "peakRssKiB": 295972,
+    "wallSeconds": 3.93,
+    "logs": {
+      "closed-cache-analysis.log": {
+        "bytes": 184,
+        "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+      },
+      "compiler-build.log": {
+        "bytes": 24992,
+        "sha256": "c22c1c09f0a927c51a75ddedd096a6bb7a87329aa716f3e5dfb63836caf06d66"
+      },
+      "complete-build.log": {
+        "bytes": 16075,
+        "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+      },
+      "complete-lean-check.log": {
+        "bytes": 15891,
+        "sha256": "158cd2aac7c135b9f6d78e829a1a444712c15865fbd42ebd3e6337af4acd161a"
+      },
+      "dag.log": {
+        "bytes": 2287878,
+        "sha256": "48b5447b6ef6f70af188004e7ea106b45daa41fd3cdfbe647caee1be123f000c"
+      },
+      "generated-smoke.log": {
+        "bytes": 4855,
+        "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+      },
+      "header.log": {
+        "bytes": 373,
+        "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+      },
+      "invalid-recursor.log": {
+        "bytes": 126,
+        "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+      },
+      "prefix.log": {
+        "bytes": 225,
+        "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+      },
+      "scalar-hash.log": {
+        "bytes": 176,
+        "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+      },
+      "short-entry.log": {
+        "bytes": 108,
+        "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+      },
+      "structural-annotations-check.log": {
+        "bytes": 15890,
+        "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+      },
+      "structural-occurrence-check.log": {
+        "bytes": 15890,
+        "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+      }
+    },
+    "headerOnly": true,
+    "fullAdmission": false,
+    "performanceQualified": false
+  },
+  "runtimeStepSeconds": 197.0,
+  "runtimeStepMarginTo25MinutesSeconds": 1303.0,
+  "checks": {
+    "exact1992AndSectionCounts": true,
+    "sameSourceRunAttempt": true,
+    "oneActualMatrixAndReceipt": true,
+    "boundedAndFull1884Each": true,
+    "boundedAndFullScalarAndShortEntry": true,
+    "allRequiredRetainedMarkers": true,
+    "allRequiredJobStepsSuccess": true,
+    "zeroLoggedErrorAnnotations": true,
+    "headerWithin25Minutes": true,
+    "entireRuntimeStepWithin25Minutes": true
+  },
+  "limits": [
+    "Header-only infrastructure slice; no full inductive admission claim.",
+    "Reported kernel/harness/manifest/log digests are preserved here; independent rehashing of their artifact bytes is a separate review.",
+    "This observation neither combines attempts/sources nor qualifies uncommitted future constructor drafts."
+  ]
+}

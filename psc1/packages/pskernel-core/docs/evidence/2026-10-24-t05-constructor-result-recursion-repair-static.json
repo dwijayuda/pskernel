@@ -1,0 +1,41 @@
+{
+  "schema": "psc1-t05-constructor-result-recursion-portability-repair-v1",
+  "scope": "Separate future batch only; current header candidate unchanged.",
+  "reason": "Current exact60fe run40087914982 attempt1 failed full PSC1 check with structuralRecursionArity. Compiler requires a direct recursive application to supply exactly the declared before-colon arguments. Future ConsumeResultParams had the same one-declared/three-supplied form.",
+  "evidence": {
+    "path": "t05-evidence/2026-10-24-t05-60fe-route-terminal-observation.json",
+    "bytes": 18846,
+    "sha256": "3028dfa409cc64e188746b17087177b641dfdf934c08a7975022d2c46995b091"
+  },
+  "file": {
+    "path": "t05-next/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean",
+    "bytes": 7877,
+    "sha256": "a44e0ebb823e4cb00a8a9d0b2d6017270ff869e1ebd38a1d344d87b8ac378b91"
+  },
+  "priorSha256": "177bf72156d87e37cf769a87286e216af0ede9c0871b9e2a8696c011a5c89a86",
+  "change": "Inside the existing successful internal-name match branch, bind only the recursive parameter-list argument to smaller, then apply arena/tail through that binding.",
+  "changedDefinition": "psKernelExprV2OrdinaryConsumeResultParams",
+  "signaturesPreserved": 6,
+  "branchOrderAndTimingPreserved": true,
+  "proofStatementsBodiesReportsUnchanged": true,
+  "proofReportCount": 16,
+  "unchangedFiles": [
+    {
+      "path": "t05-next/psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+      "bytes": 25511,
+      "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301"
+    },
+    {
+      "path": "t05-next/psc1/test/PsKernelOrdinaryConstructorResultRegression.lean",
+      "bytes": 20470,
+      "sha256": "0b690e2dd88030cdf29e18509cb795a0ad00c5ddcbd8f1f18b33394111b15d20"
+    },
+    {
+      "path": "t05-next/psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+      "bytes": 13348,
+      "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+    }
+  ],
+  "newExecutionsOrQualifications": false,
+  "localProjectExecution": false
+}

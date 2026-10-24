@@ -1,0 +1,73 @@
+{
+  "schema": "psc1-t05-constructor-parameter-proofs-static-review-v1",
+  "status": "DRAFT_UNCOMMITTED_UNCOMPILED",
+  "scope": "Private constructor-parameter state/fuel/short-circuit equations only. No complete ordinary admission or canonical-arena establishment claim.",
+  "owner": "controls_receipt",
+  "files": [
+    {
+      "path": "t05-next/psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean",
+      "bytes": 15184,
+      "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019",
+      "gitBlobSha": "72168cc434bed09b9cd5624a470d1f672c558354"
+    },
+    {
+      "path": "t05-next/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean",
+      "bytes": 5194,
+      "sha256": "b681c1a2751f15f66edcbba043fc6af83ac13147ff06360fc459f5405fb483d1",
+      "gitBlobSha": "aa451845d1c0c452d49a96f44caa5b5985f8284c"
+    },
+    {
+      "path": "t05-prep/current-0d9f/Admission/Inductive/Ordinary/Constructor.lean",
+      "bytes": 21914,
+      "sha256": "8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145",
+      "gitBlobSha": "56a70b8ac94283694bf375a8d5c8e7adfd3859b7"
+    }
+  ],
+  "namespace": "PsKernelOrdinaryConstructorParamsProofs",
+  "theoremCount": 17,
+  "axiomPrintCount": 17,
+  "exactPrintNames": [
+    "PsKernelOrdinaryConstructorParamsProofs.worker_zero_precedes_parameters_lookup_and_callbacks",
+    "PsKernelOrdinaryConstructorParamsProofs.successor_empty_keeps_complete_owner_without_lookup",
+    "PsKernelOrdinaryConstructorParamsProofs.lookup_error_precedes_defeq",
+    "PsKernelOrdinaryConstructorParamsProofs.syntactic_nonforall_precedes_defeq",
+    "PsKernelOrdinaryConstructorParamsProofs.forall_uses_predecessor_fuel_and_constructor_domain_left",
+    "PsKernelOrdinaryConstructorParamsProofs.defeq_decline_precedes_fvar_and_instantiation",
+    "PsKernelOrdinaryConstructorParamsProofs.defeq_error_precedes_fvar_and_instantiation",
+    "PsKernelOrdinaryConstructorParamsProofs.defeq_false_precedes_fvar_and_instantiation",
+    "PsKernelOrdinaryConstructorParamsProofs.fvar_error_uses_returned_owner_and_existing_parameter_name",
+    "PsKernelOrdinaryConstructorParamsProofs.instantiation_error_precedes_recursive_continuation",
+    "PsKernelOrdinaryConstructorParamsProofs.success_keeps_context_and_complete_returned_owner",
+    "PsKernelOrdinaryConstructorParamsProofs.success_preserves_every_semantic_field_and_freshness",
+    "PsKernelOrdinaryConstructorParamsProofs.one_unit_successful_step_still_reaches_zero_before_empty_tail",
+    "PsKernelOrdinaryConstructorParamsProofs.two_or_more_units_finish_one_parameter_with_returned_owner",
+    "PsKernelOrdinaryConstructorParamsProofs.wrapper_adds_one_before_empty_or_callbacks",
+    "PsKernelOrdinaryConstructorParamsProofs.wrapper_zero_empty_is_identity",
+    "PsKernelOrdinaryConstructorParamsProofs.with_fuel_uses_full_owner_defeq_without_fallback"
+  ],
+  "coverage": [
+    "Worker zero precedes even empty parameter lists, root lookup and callbacks.",
+    "Successor empty list returns original complete owner and root, without lookup.",
+    "Only syntactic forallE proceeds; no preliminary WHNF or annotation consumption.",
+    "DefEq receives predecessor fuel, constructor domain on the left and existing header parameter type on the right.",
+    "DefEq decline, error and false stop before fvar construction or instantiation.",
+    "Existing parameter.internalName is used in the complete callback-returned owner arena.",
+    "Fvar construction and instantiation errors propagate before recursive continuation.",
+    "Successful continuation retains the original context and every returned semantic state field; only the arena is replaced and nextFresh is not incremented.",
+    "One successful step at worker fuel one still reaches the zero-fuel error before its empty tail.",
+    "Worker fuel two or greater can finish a single parameter with the returned owner.",
+    "Public wrapper adds one, public zero/empty is identity, WithFuel selects full-owner DefEq without fallback."
+  ],
+  "premises": "Lookup/node/callback/fvar/transform observations only; no premise assumes this worker result.",
+  "trust": "No new axioms, sorry, admit, native_decide, or execution oracle. Actual axiom reports require future Actions kernel-checking.",
+  "currentHeaderCandidateFilesUnchanged": {
+    "t05-candidate/psc1/test/PsKernelOrdinaryHeaderStateProofs.lean": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e",
+    "t05-candidate/.github/workflows/psc1-pskernel-t05-header.yml": "6b5fb8c3951b8bcca95e04b5835bc87bd3ef48225249af5f72926698f15f0a1b",
+    "t05-candidate/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean": "e8d676b29d83502c15dff6ffe9eddc926673f8e74612adce420a389b3fb0b680",
+    "t05-candidate/psc1/kernel-lakefile.lean": "9ef0b56eab0cdf6f1ed386d45c3b3ec5214703caa5f880894a34e81ea707ed14"
+  },
+  "noCurrentWorkflowChanges": true,
+  "noLocalProjectExecution": true,
+  "noGitHubMutation": true,
+  "futureActionsRequired": true
+}

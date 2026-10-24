@@ -1,0 +1,109 @@
+{
+  "schema": "psc1-t05-constructor-prepared-batch-v1",
+  "status": "UNCOMMITTED_UNEXECUTED",
+  "preparedAgainstSource": "f5d97bafbd48adde29101ed44f45288ae53b9c87",
+  "activationRequires": "A complete current-header narrow pass on both routes; no pass inheritance to this changed source.",
+  "newProofReports": 50,
+  "retainedProofReports": 180,
+  "totalProofReports": 230,
+  "nativeAssertions": {
+    "parameters": 284,
+    "result": 432
+  },
+  "generatedAssertionsPerRoute": {
+    "parameters": 268,
+    "result": 432,
+    "retainedHeader": 1992,
+    "retainedCache": 1884
+  },
+  "files": [
+    {
+      "path": ".github/workflows/psc1-pskernel-t05-header.yml",
+      "bytes": 67786,
+      "characters": 67786,
+      "sha256": "beb8fea239071d9664ddbb0551051fe36f7d70091b7e138e5f365a0a2a992893",
+      "gitBlobSha": "eba807bd486d4e485a9cbd9a5fbd2bf4abf0f159"
+    },
+    {
+      "path": "psc1/kernel-lakefile.lean",
+      "bytes": 15261,
+      "characters": 15261,
+      "sha256": "79cb8e0ee3cebb987712fe662ae79294653cf5a011ced083a319b6fb2df05d13",
+      "gitBlobSha": "169c8d39c88720ecadd95374c1db90b0f0de5a88"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+      "bytes": 675,
+      "characters": 675,
+      "sha256": "b8efef2b9c6afd38424aa34f4b1c2ad38341f6604fe09e5f4ccbd7a4566f03c0",
+      "gitBlobSha": "6a58b4dfc767e6160ade4b54f35ea4438a72beb5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean",
+      "bytes": 5194,
+      "characters": 5194,
+      "sha256": "b681c1a2751f15f66edcbba043fc6af83ac13147ff06360fc459f5405fb483d1",
+      "gitBlobSha": "aa451845d1c0c452d49a96f44caa5b5985f8284c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean",
+      "bytes": 7877,
+      "characters": 7877,
+      "sha256": "a44e0ebb823e4cb00a8a9d0b2d6017270ff869e1ebd38a1d344d87b8ac378b91",
+      "gitBlobSha": "632ab0da062959eceeaff28a9f3a420dc89b923f"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2PagedModelProofs.lean",
+      "bytes": 15908,
+      "characters": 15818,
+      "sha256": "7c235ebf053fac77533a24c2bc4f2ed59af325f97ab89acc4d1347f7044ddcca",
+      "gitBlobSha": "7f928aa3b3495b39ac393b8e7430c13505f739fa"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean",
+      "bytes": 15184,
+      "characters": 15180,
+      "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019",
+      "gitBlobSha": "72168cc434bed09b9cd5624a470d1f672c558354"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+      "bytes": 25511,
+      "characters": 25406,
+      "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301",
+      "gitBlobSha": "416461c7eb0cacfe4ee747116c334134754e87a2"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean",
+      "bytes": 32857,
+      "characters": 32662,
+      "sha256": "6efdf378a5e6c463d98ad968bc9e7f60b3a3535aaee59199c2ec55d08b145430",
+      "gitBlobSha": "6bd63ba1a7b940a2b1c7a77a9fa52ae6971b574b"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorResultRegression.lean",
+      "bytes": 20470,
+      "characters": 20183,
+      "sha256": "0b690e2dd88030cdf29e18509cb795a0ad00c5ddcbd8f1f18b33394111b15d20",
+      "gitBlobSha": "287c3b1e520541feec043171b2f4a08f67d15f28"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs",
+      "bytes": 18426,
+      "characters": 18426,
+      "sha256": "915bc9621777aa61604497c43debbcf71e7872fc8f9596977cab0cf1fa251d07",
+      "gitBlobSha": "5f611e390fc0d5c3785284fc92306c4b87d70e7b"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+      "bytes": 13348,
+      "characters": 13348,
+      "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a",
+      "gitBlobSha": "3d2129860909bdc4dcff16a162bf168badcf1aa7"
+    }
+  ],
+  "publicOrdinaryRoutingChanged": false,
+  "fullAdmission": false,
+  "replayArenaModelBridgeEstablished": false,
+  "separateBridgeDraftIncluded": false
+}

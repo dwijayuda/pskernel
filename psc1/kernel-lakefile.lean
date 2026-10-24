@@ -29,6 +29,8 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagOrdinaryAnnotations,
     `Ps.KernelCore.API.DagOrdinaryParameters,
     `Ps.KernelCore.API.DagOrdinaryHeader,
+    `Ps.KernelCore.API.DagOrdinaryConstructorParams,
+    `Ps.KernelCore.API.DagOrdinaryConstructorResult,
     `Ps.KernelCore.Checker.ExprV2.AdmissionHelpers,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
@@ -342,3 +344,24 @@ lean_lib PsKernelOrdinaryHeaderProofs where
 lean_exe psc1_kernel_ordinary_header_regression where
   srcDir := "test"
   root := `PsKernelOrdinaryHeaderRegression
+
+-- Native-only dependencies for paged storage and constructor correspondence proofs.
+lean_lib PsKernelExprV2MetadataNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelExprV2MetadataProofs]
+
+lean_lib PsKernelExprV2PagedModelNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelExprV2PagedModelProofs]
+
+lean_lib PsKernelOrdinaryConstructorNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelOrdinaryConstructorParamsProofs, `PsKernelOrdinaryConstructorResultProofs]
+
+lean_exe psc1_kernel_ordinary_constructor_params_regression where
+  srcDir := "test"
+  root := `PsKernelOrdinaryConstructorParamsRegression
+
+lean_exe psc1_kernel_ordinary_constructor_result_regression where
+  srcDir := "test"
+  root := `PsKernelOrdinaryConstructorResultRegression

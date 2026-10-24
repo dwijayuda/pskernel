@@ -1,0 +1,42 @@
+{
+  "schema": "psc1-t05-future-result-correspondence-independent-static-review-v1",
+  "status": "STATIC_REVIEW_ONLY_UNCOMPILED",
+  "reviewer": "controls_receipt",
+  "sourcePath": "t05-next/psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+  "bytes": 25511,
+  "sha256": "313d55dd73bd54a9feacf61ff376b9ae73fe2da7c8d859b6176e818d4be50301",
+  "reviewedTheorems": [
+    "consume_result_params_correspondence",
+    "inductive_app_indices_correspondence",
+    "validate_constructor_result_correspondence"
+  ],
+  "totalTheorems": 16,
+  "totalExactPrints": 16,
+  "reviewedContracts": [
+    "Consumer existentially exposes the actual DAG selection, decoded equality to the frozen V1 consumer, and validity of any selected suffix.",
+    "Consumer assumptions contain only the shared ArenaModel and validity of input argument IDs; no assumption of the consumer result or parameter type validity.",
+    "Selector derives head/argument decoding and validity from the existing app-spine theorem, then uses the consumer correspondence and the existing exact length correspondence.",
+    "Selector returns original index IDs; exact target, universes, parameter fvar names, and arity match frozen V1 behavior.",
+    "Validator composes selector and occurrence correspondence, preserving V1 shape error before recursive-index error and mapping successful original index IDs through decode."
+  ],
+  "proofCaseReview": [
+    "Consumer nil/missing argument and every expression-node case cover both name comparison outcomes.",
+    "Selector covers non-constant head, unequal name, unequal universes, prefix mismatch, and unequal/equal arity.",
+    "Validator covers selection mismatch and both recursive-index Boolean outcomes."
+  ],
+  "frozenReferencesRead": [
+    "t05-prep/current-0d9f/Admission/Inductive/Ordinary/Constructor.lean",
+    "t05-prep/current-0d9f/Core/Expr.lean",
+    "t05-prep/current-0d9f/Core/ExprV2/TransformSpine.lean"
+  ],
+  "supportingInterfacesRead": "t05-fix3/psc1/test/PsKernelOrdinaryOccurrenceProofs.lean: ArenaModel, validId/validIds, app-spine correspondence, exact argument length correspondence",
+  "concreteStatementOrCompositionMismatchFound": false,
+  "limits": [
+    "Original 13 proof bodies were outside this focused review.",
+    "Kernel elaboration and axiom reports require future Actions execution.",
+    "Replay validation establishing ArenaModel remains an explicit separate obligation."
+  ],
+  "noCurrentCandidateChanges": true,
+  "noLocalProjectExecution": true,
+  "noGitHubMutation": true
+}

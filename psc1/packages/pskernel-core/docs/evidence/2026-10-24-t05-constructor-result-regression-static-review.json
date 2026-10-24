@@ -1,0 +1,79 @@
+{
+  "schema": "psc1-t05-constructor-result-regression-static-v1",
+  "status": "DRAFT_UNCOMPILED_UNEXECUTED",
+  "referenceSourceSha": "0d9f062846d109c362210d441df5fd407ca2cdd7",
+  "nativeFile": {
+    "path": "t05-next/psc1/test/PsKernelOrdinaryConstructorResultRegression.lean",
+    "bytes": 20470,
+    "sha256": "0b690e2dd88030cdf29e18509cb795a0ad00c5ddcbd8f1f18b33394111b15d20"
+  },
+  "generatedFileReviewedReadOnly": {
+    "path": "t05-next/psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+    "bytes": 13348,
+    "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+  },
+  "nativeCommand": "lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryConstructorResultRegression.lean",
+  "nativeRequiredMarkers": [
+    "PSC1_ORDINARY_CONSTRUCTOR_RESULT_NATIVE: PASS assertions=432 selectorRows=46 occurrenceTerms=30 targets=2 fullAdmission=false",
+    "PSC1_ORDINARY_CONSTRUCTOR_RESULT_SECTIONS: PASS harness=1 selector=138 consumer=26 occurrence=240 bounds=16 indexLists=7 precedence=4"
+  ],
+  "assertions": 432,
+  "sectionAssertions": {
+    "harness": 1,
+    "selector": 138,
+    "consumer": 26,
+    "occurrence": 240,
+    "bounds": 16,
+    "indexLists": 7,
+    "precedence": 4
+  },
+  "selectorRows": {
+    "base": 32,
+    "descriptorVariants": 12,
+    "sharedIndices": 2,
+    "checksPerRow": 3
+  },
+  "consumerRows": {
+    "differential": 10,
+    "checksPerDifferentialRow": 2,
+    "lookupAndShortCircuit": 6
+  },
+  "occurrence": {
+    "terms": 30,
+    "targets": 2,
+    "checksEach": 4
+  },
+  "boundRows": {
+    "explicitBranchBounds": 14,
+    "invalidRoot": 2
+  },
+  "checkedByStaticReview": [
+    "Native and generated base row labels S01 through S32 exactly agree.",
+    "The native builder records IDs during construction; expected IDs are not obtained from selector/application-spine output.",
+    "Each selector row compares decoded selection and validation with frozen V1, then requires the exact original ID suffix.",
+    "Generated higher-order/curried and ordinary/uncurried helper ABIs match the source declarations.",
+    "All production builder suffix names match Builder.lean, including Forall, Let, MData and Proj.",
+    "Occurrence scans cover every node constructor and both projection-name and receiver cases.",
+    "Lower-bound probes preserve first-hit/first-error order; adequate canonical bounds are independent of checker fuel.",
+    "Generated harness has no concrete semantic or ABI mismatch found; it was not edited."
+  ],
+  "knownLimits": [
+    "All future source/proof/test drafts remain outside the current candidate and workflow run.",
+    "No local Lean/compiler/JavaScript/kernel execution occurred.",
+    "No executed assertion count or proof success is claimed.",
+    "The current header candidate must finish its own exact-source qualification first."
+  ],
+  "currentCandidateFilesChanged": false,
+  "generatedFileEdited": false,
+  "githubMutations": false,
+  "productionSourceAfterPortabilityRepair": {
+    "path": "t05-next/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean",
+    "bytes": 7877,
+    "sha256": "a44e0ebb823e4cb00a8a9d0b2d6017270ff869e1ebd38a1d344d87b8ac378b91"
+  },
+  "productionRepair": {
+    "path": "t05-next/constructor-result-recursion-repair-static.json",
+    "bytes": 2055,
+    "sha256": "7d6a20752b486309e96d12ccbb7371538261c05eaa3eca890082adddfe20290d"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "schema": "psc1-t05-paged-model-native-api-static-review-v1",
+  "status": "STAGED_UNCOMPILED_UNTESTED",
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "reviewedUtc": "2026-10-24T11:21:53.751743+00:00",
+  "change": {
+    "theorem": "found_id_is_in_bounds",
+    "before": "by_contra outside",
+    "after": [
+      "apply Decidable.by_contra",
+      "intro outside"
+    ],
+    "reason": "Pinned native tactic syntax provides false_or_by_contra, not the standalone by_contra tactic. Use the exact available decidable theorem; Nat comparison supplies its Decidable instance."
+  },
+  "unchangedTheoremStatements": 19,
+  "unchangedAxiomPrints": [
+    "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+    "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+    "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+    "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+    "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+    "PsKernelExprV2PagedModelProofs.empty_layout",
+    "PsKernelExprV2PagedModelProofs.push_id_and_size",
+    "PsKernelExprV2PagedModelProofs.push_layout",
+    "PsKernelExprV2PagedModelProofs.valid_id_location",
+    "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+    "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+    "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+    "PsKernelExprV2PagedModelProofs.push_find_old",
+    "PsKernelExprV2PagedModelProofs.push_find_new",
+    "PsKernelExprV2PagedModelProofs.push_find",
+    "PsKernelExprV2PagedModelProofs.push_require_old",
+    "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+  ],
+  "outsideOneTacticReplacementByteEqual": true,
+  "beforeSha256": "7c4dadb26838d9d66a96c2ccfae6616af58d49fa49d96b54c12d9f78f708ce8c",
+  "after": {
+    "path": "t05-next/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+    "bytes": 15908,
+    "lines": 312,
+    "sha256": "7c235ebf053fac77533a24c2bc4f2ed59af325f97ab89acc4d1347f7044ddcca",
+    "gitBlobSha": "7f928aa3b3495b39ac393b8e7430c13505f739fa"
+  },
+  "verifiedPrimaryAPIs": [
+    {
+      "path": "src/Init/PropLemmas.lean",
+      "gitBlobSha": "2c7d94dd4d29e8babe20fdb43e05906eedcf90f0",
+      "signature": "theorem Decidable.by_contra [Decidable p] : (\u00acp \u2192 False) \u2192 p := of_not_not"
+    },
+    {
+      "path": "src/Init/Tactics.lean",
+      "gitBlobSha": "4cd586b2368c04282d0df635e06695c3ca2e2bbf",
+      "finding": "Defines false_or_by_contra syntax; no by_contra tactic."
+    },
+    {
+      "path": "src/Lean/Elab/Tactic/FalseOrByContra.lean",
+      "gitBlobSha": "a3b45ce11a81326802cf813746c153da4ff62a93",
+      "finding": "Implements false_or_by_contra; no by_contra alias."
+    },
+    {
+      "path": "src/Lean/Elab/Tactic/BuiltinTactic.lean",
+      "gitBlobSha": "d9c4ce60d1060de505789cfdb0c71a1d98dcee8a",
+      "finding": "No by_contra alias."
+    },
+    {
+      "path": "src/Init/Data/Array/Lemmas.lean",
+      "gitBlobSha": "b25a086095ded3acdcbc066c3365d61507729943",
+      "verifiedNames": [
+        "getD_eq_getD_getElem?",
+        "getElem?_push",
+        "getElem?_push_size",
+        "size_singleton",
+        "getElem?_eq_none"
+      ]
+    },
+    {
+      "path": "src/Init/Data/Nat/Div/Basic.lean",
+      "gitBlobSha": "de984fa8bcba0e0324b6d236a54b1637f471705d",
+      "verifiedNames": [
+        "div_lt_iff_lt_mul",
+        "div_eq_of_lt_le",
+        "div_add_mod",
+        "mul_add_mod_self_right",
+        "mul_div_cancel",
+        "mul_mod_left"
+      ]
+    }
+  ],
+  "retainedMetadataReuse": {
+    "sourceBlob": "c97466b70bddb9867d05ab4282990a3f3e417779",
+    "theorem": "PsKernelExprV2MetadataProofs.app_preserves",
+    "argumentOrderMatches": true
+  },
+  "limits": [
+    "No local project execution, compiler invocation, Lean checking, test or GitHub mutation.",
+    "No new trust axioms, circular model assumptions or changes to production.",
+    "Remaining tactic behavior requires actual future Actions feedback; no speculative simplifier edits made.",
+    "All replay/global decoder/actual DecodeChecked bridge obligations remain separate."
+  ]
+}

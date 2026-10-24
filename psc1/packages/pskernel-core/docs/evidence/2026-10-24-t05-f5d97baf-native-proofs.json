@@ -1,0 +1,2084 @@
+{
+  "schema": "psc1-t05-f5d97baf-native-independent-proof-and-receipt-inspection-v1",
+  "repository": "dwijayuda/pskernel",
+  "sourceSha": "f5d97bafbd48adde29101ed44f45288ae53b9c87",
+  "runId": 40089243726,
+  "runAttempt": 1,
+  "jobId": 120858341284,
+  "jobConclusion": "success",
+  "jobStartedAt": "2026-10-24T11:16:34Z",
+  "jobCompletedAt": "2026-10-24T11:18:57Z",
+  "jobWholeSeconds": 143.0,
+  "artifactId": 12558173561,
+  "artifactName": "psc1-t05-header-native-attempt-1",
+  "artifactZipPath": "t05-evidence/f5d9-native.zip",
+  "artifactZipBytes": 173633,
+  "artifactZipSha256": "8c442a0a3c0c1e1137b41eb7cffec248bdfa828ea469d0f4990946a0cb0b80be",
+  "artifactApiDigestMatched": true,
+  "artifactCrcVerified": true,
+  "artifactFileCount": 49,
+  "artifactCopiedSourceCount": 32,
+  "allCopiedSourcesMatchEmbeddedInventoryBytesSha256AndGitBlob": true,
+  "independentlyFetchedExactSourcePaths": [
+    ".github/workflows/psc1-pskernel-t05-header.yml",
+    "psc1/test/PsKernelCacheScopeProofs.lean",
+    "psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+    "psc1/test/PsKernelExprV2SessionProofs.lean",
+    "psc1/test/PsKernelKnotFuelProofs.lean",
+    "psc1/test/PsKernelOrdinaryHeaderStateProofs.lean",
+    "psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+    "psc1/test/PsKernelScalarHashWorkerRegression.lean"
+  ],
+  "independentlyFetchedExactSourcePathCount": 8,
+  "all32CopiedSourcesMatchExactSourceGitTreeBlobMap": true,
+  "gitTreeSha": "9e85b027cc0f8535efc475b490069f2012fd1435",
+  "gitTreeBlobMapPath": "t05-evidence/f5d9-git-blobs.json",
+  "gitTreeBlobMapSha256": "d8a94cb8af79fa9c43151849e2f73775ca753816a7c05b084fdda4a2c0581d25",
+  "gitTreeBlobMapFetchedAndAuthenticatedBy": "root",
+  "hiddenWorkflowCopyPresentAndMatchesFreshGitHubSource": true,
+  "newProofStatusCodes": {
+    "stateCount": 0,
+    "stateLean": 0,
+    "occurrenceCount": 0,
+    "occurrenceLean": 0
+  },
+  "newProofs": 64,
+  "retainedProofs": 108,
+  "totalProofs": 172,
+  "orderedUniqueSourceReportsVerified": true,
+  "allowedStandardAxiomsOnly": true,
+  "allowedAxioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "proofModules": [
+    {
+      "module": "PsKernelOrdinaryHeaderStateProofs",
+      "proofCount": 49,
+      "sourceGitBlobSha": "5a6050deb77d66d7440c976a815e5ae8c29f5b0a",
+      "sourceSha256": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e",
+      "logPath": "header-state-proofs.log",
+      "logBytes": 6319,
+      "logSha256": "6e5fa413d81b15224e8853ecd55f1ee492b1a3a6e9255e2e93a6e6c4038a1e00",
+      "reports": [
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.reverse_worker_eq",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.reverse_eq",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.finish_keeps_complete_returned_owner",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.finish_decline",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.finish_error",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.mandatory_sort_keeps_complete_returned_owner",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_check_decline_precedes_whnf_and_opening",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_check_error_precedes_whnf_and_opening",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_decline_precedes_annotations",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_error_precedes_annotations",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_annotation_error_precedes_allocation",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_opening_error_preserved",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_success_keeps_post_opening_owner_and_original_domain",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.binder_allocation_preserves_every_semantic_field",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_decline_precedes_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_error_precedes_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_lookup_error_precedes_check",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.param_step_uses_returned_owner_and_original_fuel",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_zero_still_performs_final_whnf",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_successor_keeps_original_fuel",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_successor_decline",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_successor_error",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.params_wrapper_starts_empty",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_zero_precedes_callbacks_and_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_decline_uses_predecessor",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_error_uses_predecessor",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_lookup_error_precedes_check",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_threads_post_opening_owner",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_decline",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_error",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_terminal_sort_keeps_complete_returned_owner",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.indices_wrapper_adds_one_before_callbacks",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.constructor_context_is_parameter_context",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.constructor_fork_preserves_parameter_semantics_and_freshness",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.constructor_fork_ignores_index_semantic_state",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_finish_sort_keeps_both_owners",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_finish_lookup_error",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_finish_nonsort_error",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_check_decline_precedes_whnf",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_check_error_precedes_whnf",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_decline_precedes_opening",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_error_precedes_opening",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_after_sort_composition",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_guard_error_precedes_callbacks",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_duplicate_levels_precede_all_other_guards",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_duplicate_names_precede_freshness_and_types",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_freshness_error_precedes_uniform_and_header",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_uniform_error_precedes_static_header",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryHeaderStateProofs.header_successful_guards_initialize_one_fresh_owner",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "PsKernelOrdinaryOccurrenceProofs",
+      "proofCount": 15,
+      "sourceGitBlobSha": "2034798a4de1b4ca25b2e6366a88020b97beed27",
+      "sourceSha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351",
+      "logPath": "occurrence-proofs.log",
+      "logBytes": 5048,
+      "logSha256": "d7ed04f8a65d342f2e8c64d27ff708687008e86903f8c1c30838b7b5892357f8",
+      "reports": [
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.app_spine_with_fuel_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.app_spine_on_canonical_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_argument_count_correspondence",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_arguments_correspondence",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.declared_names_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_head_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_with_fuel_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_structural_adequacy",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_on_canonical_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.uniform_occurrences_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.legacy_depth_le_expanded_count",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotation_target_depth",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotation_structural_adequacy",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotations_with_fuel_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelOrdinaryOccurrenceProofs.annotations_on_canonical_correspondence",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "PsKernelCacheScopeProofs",
+      "proofCount": 60,
+      "sourceGitBlobSha": "45cb58a271695bee0ae05330f39c3c1a86f1801f",
+      "sourceSha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5",
+      "logPath": "cache-scope-proofs.log",
+      "logBytes": 9311,
+      "logSha256": "d6f86aa750b5d93f9c42fea60153aac1f8457d8ef868e314632b6f7c83b566ae",
+      "reports": [
+        {
+          "name": "PsKernelCacheScopeProofs.exit_scope_restores_all_caches",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.exit_scope_counter_exact",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_parent",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.exit_scope_counter_ge_child",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.semantic_fvar_ineligible",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_scope_counter_exact",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.constant_reference_factorization_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.constant_reference_factorization_extensional",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_starts_without_success_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_preserves",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.inference_cache_eligibility_extensional",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches",
+          "axioms": []
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks",
+          "axioms": [
+            "propext"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "PsKernelExprV2SessionProofs",
+      "proofCount": 14,
+      "sourceGitBlobSha": "d75589d73c3879040d535d638f264ba5f6115a1e",
+      "sourceSha256": "3a6166709bb4e05239dbce2866f4b52616b554157277a46f3c507d67d0c76f90",
+      "logPath": "session-proofs.log",
+      "logBytes": 1774,
+      "logSha256": "6252fcd741c45297f1a7e0fb9e2699d3fe7783add8a224076453a801a73a101a",
+      "reports": [
+        {
+          "name": "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelExprV2SessionProofs.append_demands_preserves_order",
+          "axioms": []
+        }
+      ]
+    },
+    {
+      "module": "PsKernelScalarHashWorkerRegression",
+      "proofCount": 11,
+      "sourceGitBlobSha": "aa5dd561cdb3df437c21a61c899f57b160289d0f",
+      "sourceSha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2",
+      "logPath": "scalar-hash-native.log",
+      "logBytes": 1338,
+      "logSha256": "03beaf46178d8d4a50e9f7e59cb19ab827655d608f7ea34ded4348e7bc6d2ccb",
+      "reports": [
+        {
+          "name": "PsKernelScalarHashWorkerRegression.short_pairs_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.entry_pairs_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.pairs_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.state_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.state_succ",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.state_step_commutes",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.state_fixed",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.scan_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.worker_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelScalarHashWorkerRegression.hash_eq_before",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "PsKernelClosedCacheAnalysisRegression",
+      "proofCount": 7,
+      "sourceGitBlobSha": "010333b5d6ac53c60c558c89906b02d7358fb0c0",
+      "sourceSha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0",
+      "logPath": "closed-cache-analysis-proofs.log",
+      "logBytes": 841,
+      "logSha256": "c2c46a84ff00535731181520b4eab0cbdfd6c0181360b2163706dd4f34a8669f",
+      "reports": [
+        {
+          "name": "PsKernelClosedCacheAnalysisRegression.analysis_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelClosedCacheAnalysisRegression.semantic_map_insert_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelClosedCacheAnalysisRegression.semantic_pair_contains_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelClosedCacheAnalysisRegression.semantic_pair_insert_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelClosedCacheAnalysisRegression.infer_map_get_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelClosedCacheAnalysisRegression.infer_map_insert_eq",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "PsKernelKnotFuelProofs",
+      "proofCount": 16,
+      "sourceGitBlobSha": "197da10ed3a5f2aeb1548511db60a618891912f1",
+      "sourceSha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b",
+      "logPath": "knot-fuel-proofs.log",
+      "logBytes": 2190,
+      "logSha256": "5c71d5b3f7f63b1cf56cf60c6dcf82f436503ea3bd78f5ee56daaa8dbe8febd0",
+      "reports": [
+        {
+          "name": "PsKernelKnotFuelProofs.ReduceRecursorBoundedWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.IsDefEqWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.WhnfWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.WhnfCoreWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.WhnfCoreWithFuel_full_mode_preserves_historical",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.InferCoreWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.InferAppOnlyLoopWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.DefEqLazyReductionWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.DefEqLazyProjReductionWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.DefEqArgsWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.DefEqLambdaSpineWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.DefEqForallSpineWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.DefEqCompareExprListsWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.WhnfCountLambdasWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "name": "PsKernelKnotFuelProofs.StringConstructorDataWithFuel_delayed_recursion_preserves",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        }
+      ]
+    }
+  ],
+  "nativeReceiptSha256": "f1a00f081aff4399bb8e34a5b77678a002d3f77c0946d358c9e4c7dbd4b435d1",
+  "nativeReceiptBytes": 15339,
+  "nativeReceiptMatchesTerminalMarker": true,
+  "originalNativeReceipt": {
+    "schema": "psc1-t05-header-native-receipt-v1",
+    "sourceSha": "f5d97bafbd48adde29101ed44f45288ae53b9c87",
+    "runId": "40089243726",
+    "runAttempt": "1",
+    "job": "native-header",
+    "route": "native",
+    "newProofs": 64,
+    "retainedProofs": 108,
+    "totalProofs": 172,
+    "orderedUniqueReports": true,
+    "allowedStandardAxiomsOnly": true,
+    "proofs": [
+      {
+        "module": "PsKernelOrdinaryHeaderStateProofs",
+        "proofs": 49,
+        "names": [
+          "PsKernelOrdinaryHeaderStateProofs.reverse_worker_eq",
+          "PsKernelOrdinaryHeaderStateProofs.reverse_eq",
+          "PsKernelOrdinaryHeaderStateProofs.finish_keeps_complete_returned_owner",
+          "PsKernelOrdinaryHeaderStateProofs.finish_decline",
+          "PsKernelOrdinaryHeaderStateProofs.finish_error",
+          "PsKernelOrdinaryHeaderStateProofs.mandatory_sort_keeps_complete_returned_owner",
+          "PsKernelOrdinaryHeaderStateProofs.binder_check_decline_precedes_whnf_and_opening",
+          "PsKernelOrdinaryHeaderStateProofs.binder_check_error_precedes_whnf_and_opening",
+          "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_decline_precedes_annotations",
+          "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_error_precedes_annotations",
+          "PsKernelOrdinaryHeaderStateProofs.binder_annotation_error_precedes_allocation",
+          "PsKernelOrdinaryHeaderStateProofs.binder_opening_error_preserved",
+          "PsKernelOrdinaryHeaderStateProofs.binder_success_keeps_post_opening_owner_and_original_domain",
+          "PsKernelOrdinaryHeaderStateProofs.binder_allocation_preserves_every_semantic_field",
+          "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_decline_precedes_lookup",
+          "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_error_precedes_lookup",
+          "PsKernelOrdinaryHeaderStateProofs.param_step_lookup_error_precedes_check",
+          "PsKernelOrdinaryHeaderStateProofs.param_step_uses_returned_owner_and_original_fuel",
+          "PsKernelOrdinaryHeaderStateProofs.params_zero_still_performs_final_whnf",
+          "PsKernelOrdinaryHeaderStateProofs.params_successor_keeps_original_fuel",
+          "PsKernelOrdinaryHeaderStateProofs.params_successor_decline",
+          "PsKernelOrdinaryHeaderStateProofs.params_successor_error",
+          "PsKernelOrdinaryHeaderStateProofs.params_wrapper_starts_empty",
+          "PsKernelOrdinaryHeaderStateProofs.indices_zero_precedes_callbacks_and_lookup",
+          "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_decline_uses_predecessor",
+          "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_error_uses_predecessor",
+          "PsKernelOrdinaryHeaderStateProofs.indices_successor_lookup_error_precedes_check",
+          "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_threads_post_opening_owner",
+          "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_decline",
+          "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_error",
+          "PsKernelOrdinaryHeaderStateProofs.indices_terminal_sort_keeps_complete_returned_owner",
+          "PsKernelOrdinaryHeaderStateProofs.indices_wrapper_adds_one_before_callbacks",
+          "PsKernelOrdinaryHeaderStateProofs.constructor_context_is_parameter_context",
+          "PsKernelOrdinaryHeaderStateProofs.constructor_fork_preserves_parameter_semantics_and_freshness",
+          "PsKernelOrdinaryHeaderStateProofs.constructor_fork_ignores_index_semantic_state",
+          "PsKernelOrdinaryHeaderStateProofs.header_finish_sort_keeps_both_owners",
+          "PsKernelOrdinaryHeaderStateProofs.header_finish_lookup_error",
+          "PsKernelOrdinaryHeaderStateProofs.header_finish_nonsort_error",
+          "PsKernelOrdinaryHeaderStateProofs.header_check_decline_precedes_whnf",
+          "PsKernelOrdinaryHeaderStateProofs.header_check_error_precedes_whnf",
+          "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_decline_precedes_opening",
+          "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_error_precedes_opening",
+          "PsKernelOrdinaryHeaderStateProofs.header_after_sort_composition",
+          "PsKernelOrdinaryHeaderStateProofs.header_guard_error_precedes_callbacks",
+          "PsKernelOrdinaryHeaderStateProofs.header_duplicate_levels_precede_all_other_guards",
+          "PsKernelOrdinaryHeaderStateProofs.header_duplicate_names_precede_freshness_and_types",
+          "PsKernelOrdinaryHeaderStateProofs.header_freshness_error_precedes_uniform_and_header",
+          "PsKernelOrdinaryHeaderStateProofs.header_uniform_error_precedes_static_header",
+          "PsKernelOrdinaryHeaderStateProofs.header_successful_guards_initialize_one_fresh_owner"
+        ],
+        "logSha256": "6e5fa413d81b15224e8853ecd55f1ee492b1a3a6e9255e2e93a6e6c4038a1e00"
+      },
+      {
+        "module": "PsKernelOrdinaryOccurrenceProofs",
+        "proofs": 15,
+        "names": [
+          "PsKernelOrdinaryOccurrenceProofs.app_spine_with_fuel_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.app_spine_on_canonical_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.uniform_argument_count_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.uniform_arguments_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.declared_names_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_head_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_with_fuel_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_structural_adequacy",
+          "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_on_canonical_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.uniform_occurrences_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.legacy_depth_le_expanded_count",
+          "PsKernelOrdinaryOccurrenceProofs.annotation_target_depth",
+          "PsKernelOrdinaryOccurrenceProofs.annotation_structural_adequacy",
+          "PsKernelOrdinaryOccurrenceProofs.annotations_with_fuel_correspondence",
+          "PsKernelOrdinaryOccurrenceProofs.annotations_on_canonical_correspondence"
+        ],
+        "logSha256": "d7ed04f8a65d342f2e8c64d27ff708687008e86903f8c1c30838b7b5892357f8"
+      },
+      {
+        "module": "PsKernelCacheScopeProofs",
+        "proofs": 60,
+        "names": [
+          "PsKernelCacheScopeProofs.exit_scope_restores_all_caches",
+          "PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child",
+          "PsKernelCacheScopeProofs.exit_scope_counter_exact",
+          "PsKernelCacheScopeProofs.exit_scope_counter_ge_parent",
+          "PsKernelCacheScopeProofs.exit_scope_counter_ge_child",
+          "PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child",
+          "PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag",
+          "PsKernelCacheScopeProofs.semantic_fvar_ineligible",
+          "PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags",
+          "PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag",
+          "PsKernelCacheScopeProofs.dag_whnf_starts_without_cache",
+          "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup",
+          "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication",
+          "PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache",
+          "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup",
+          "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication",
+          "PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax",
+          "PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax",
+          "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache",
+          "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache",
+          "PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references",
+          "PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena",
+          "PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches",
+          "PsKernelCacheScopeProofs.dag_check_scope_counter_exact",
+          "PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache",
+          "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup",
+          "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication",
+          "PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache",
+          "PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment",
+          "PsKernelCacheScopeProofs.constant_reference_factorization_preserves",
+          "PsKernelCacheScopeProofs.constant_reference_factorization_extensional",
+          "PsKernelCacheScopeProofs.dag_check_starts_without_success_cache",
+          "PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache",
+          "PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache",
+          "PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish",
+          "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup",
+          "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication",
+          "PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache",
+          "PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache",
+          "PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache",
+          "PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache",
+          "PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache",
+          "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup",
+          "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication",
+          "PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache",
+          "PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache",
+          "PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache",
+          "PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment",
+          "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before",
+          "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before",
+          "PsKernelCacheScopeProofs.inference_cache_eligibility_preserves",
+          "PsKernelCacheScopeProofs.inference_cache_eligibility_extensional",
+          "PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks",
+          "PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner",
+          "PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure",
+          "PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches",
+          "PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks",
+          "PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks",
+          "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before",
+          "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before"
+        ],
+        "logSha256": "d6f86aa750b5d93f9c42fea60153aac1f8457d8ef868e314632b6f7c83b566ae"
+      },
+      {
+        "module": "PsKernelExprV2SessionProofs",
+        "proofs": 14,
+        "names": [
+          "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+          "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+          "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+          "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+          "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+          "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+          "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+          "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+          "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+          "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+          "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+          "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+          "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+          "PsKernelExprV2SessionProofs.append_demands_preserves_order"
+        ],
+        "logSha256": "6252fcd741c45297f1a7e0fb9e2699d3fe7783add8a224076453a801a73a101a"
+      },
+      {
+        "module": "PsKernelScalarHashWorkerRegression",
+        "proofs": 11,
+        "names": [
+          "PsKernelScalarHashWorkerRegression.short_pairs_eq",
+          "PsKernelScalarHashWorkerRegression.entry_pairs_eq",
+          "PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker",
+          "PsKernelScalarHashWorkerRegression.pairs_eq_before",
+          "PsKernelScalarHashWorkerRegression.state_eq_before",
+          "PsKernelScalarHashWorkerRegression.state_succ",
+          "PsKernelScalarHashWorkerRegression.state_step_commutes",
+          "PsKernelScalarHashWorkerRegression.state_fixed",
+          "PsKernelScalarHashWorkerRegression.scan_eq_before",
+          "PsKernelScalarHashWorkerRegression.worker_eq_before",
+          "PsKernelScalarHashWorkerRegression.hash_eq_before"
+        ],
+        "logSha256": "03beaf46178d8d4a50e9f7e59cb19ab827655d608f7ea34ded4348e7bc6d2ccb"
+      },
+      {
+        "module": "PsKernelClosedCacheAnalysisRegression",
+        "proofs": 7,
+        "names": [
+          "PsKernelClosedCacheAnalysisRegression.analysis_eq",
+          "PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq",
+          "PsKernelClosedCacheAnalysisRegression.semantic_map_insert_eq",
+          "PsKernelClosedCacheAnalysisRegression.semantic_pair_contains_eq",
+          "PsKernelClosedCacheAnalysisRegression.semantic_pair_insert_eq",
+          "PsKernelClosedCacheAnalysisRegression.infer_map_get_eq",
+          "PsKernelClosedCacheAnalysisRegression.infer_map_insert_eq"
+        ],
+        "logSha256": "c2c46a84ff00535731181520b4eab0cbdfd6c0181360b2163706dd4f34a8669f"
+      },
+      {
+        "module": "PsKernelKnotFuelProofs",
+        "proofs": 16,
+        "names": [
+          "PsKernelKnotFuelProofs.ReduceRecursorBoundedWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.IsDefEqWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.WhnfWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.WhnfCoreWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.WhnfCoreWithFuel_full_mode_preserves_historical",
+          "PsKernelKnotFuelProofs.InferCoreWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.InferAppOnlyLoopWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.DefEqLazyReductionWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.DefEqLazyProjReductionWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.DefEqArgsWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.DefEqLambdaSpineWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.DefEqForallSpineWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.DefEqCompareExprListsWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.WhnfCountLambdasWithFuel_delayed_recursion_preserves",
+          "PsKernelKnotFuelProofs.StringConstructorDataWithFuel_delayed_recursion_preserves"
+        ],
+        "logSha256": "5c71d5b3f7f63b1cf56cf60c6dcf82f436503ea3bd78f5ee56daaa8dbe8febd0"
+      }
+    ],
+    "headerOnly": true,
+    "fullAdmission": false
+  },
+  "headerNativeMarkers": [
+    "PSC1_ORDINARY_HEADER_NATIVE: PASS matrix=432 positiveDirect=10 crossFault=2 headerOnly=true",
+    "PSC1_ORDINARY_OCCURRENCE_NATIVE: PASS heads=171 fuelCases=1026 wrappers=171 sharedOffsets=2",
+    "PSC1_ORDINARY_ANNOTATIONS_NATIVE: PASS fuelCases=75 wrappers=15 invalidIDs=2",
+    "PSC1_ORDINARY_HEADER_STATE_NATIVE: PASS sequences=3 propagated=24 forkFields=all boundaries=3",
+    "PSC1_ORDINARY_HEADER_ORACLE: PASS accepted=4 rejected=2 headerOnly=true",
+    "PSC1_ORDINARY_HEADER_REGRESSION: PASS headerOnly=true fullAdmission=false"
+  ],
+  "retainedRequiredMarkers": {
+    "scalar-hash-native.log": [
+      "PSC1_SCALAR_HASH_WORKER_NATIVE: PASS cases=2730 strings=12",
+      "PSC1_SCALAR_HASH_LONG_NATIVE: PASS cases=3"
+    ],
+    "knot-fuel-proofs.log": [
+      "PSKERNEL_KNOT_FUEL_PROOFS: PASS workers=15",
+      "PSKERNEL_WHNFCACHE_MODE_PROOFS: PASS allModes=correctedEager fullMode=historical"
+    ],
+    "dag-native.log": [
+      "PSC1_V2_DAG_REGRESSION: PASS"
+    ],
+    "prefix-native.log": [
+      "PSC1_V2_GENERATED_PREFIX: PASS new=24 recursors=7 direct=6 privateIDs=3",
+      "PSC1_V2_GENERATED_PREFIX_OFFICIAL: PASS families=5 positive=6 negative=7",
+      "PSC1_V2_SESSION_OWNERS: PASS kinds=8 direct=7 privateIDs=5 forks=2",
+      "PSC1_V2_SESSION_OWNERS_OFFICIAL: PASS declarations=4 direct=7"
+    ]
+  },
+  "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "nodeVersion": "v22.23.3",
+  "jobLogPath": "t05-evidence/f5d97baf-native-40089243726/job.log",
+  "jobLogBytes": 148476,
+  "jobLogSha256": "53c3ecfe24a7e5c5607d2845f0c60954b52d8303881a7af2c0699440fd21b84c",
+  "nativeGatesAllPassed": true,
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-10-24T11:16:34Z",
+      "completed_at": "2026-10-24T11:16:35Z"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-10-24T11:16:35Z",
+      "completed_at": "2026-10-24T11:16:56Z"
+    },
+    {
+      "name": "Run actions/setup-node@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-10-24T11:16:56Z",
+      "completed_at": "2026-10-24T11:16:57Z"
+    },
+    {
+      "name": "Install pinned Lean",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-10-24T11:16:57Z",
+      "completed_at": "2026-10-24T11:17:09Z"
+    },
+    {
+      "name": "Verify exact source, pins, frozen references and JavaScript syntax",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-24T11:17:09Z",
+      "completed_at": "2026-10-24T11:17:10Z"
+    },
+    {
+      "name": "Build native production imports and retained DAG executable",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-24T11:17:10Z",
+      "completed_at": "2026-10-24T11:18:28Z"
+    },
+    {
+      "name": "Kernel-check all64 new header and structural equations first",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-10-24T11:18:28Z",
+      "completed_at": "2026-10-24T11:18:32Z"
+    },
+    {
+      "name": "Run direct native header matrix and official Lean controls",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-10-24T11:18:32Z",
+      "completed_at": "2026-10-24T11:18:34Z"
+    },
+    {
+      "name": "Retain108 previous equations and audit all172 exact axiom reports",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9,
+      "started_at": "2026-10-24T11:18:34Z",
+      "completed_at": "2026-10-24T11:18:47Z"
+    },
+    {
+      "name": "Retain native public DAG and generated-prefix ownership controls",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10,
+      "started_at": "2026-10-24T11:18:47Z",
+      "completed_at": "2026-10-24T11:18:54Z"
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 11,
+      "started_at": "2026-10-24T11:18:54Z",
+      "completed_at": "2026-10-24T11:18:55Z"
+    },
+    {
+      "name": "Post Run actions/setup-node@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 21,
+      "started_at": "2026-10-24T11:18:55Z",
+      "completed_at": "2026-10-24T11:18:55Z"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 22,
+      "started_at": "2026-10-24T11:18:55Z",
+      "completed_at": "2026-10-24T11:18:55Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 23,
+      "started_at": "2026-10-24T11:18:55Z",
+      "completed_at": "2026-10-24T11:18:55Z"
+    }
+  ],
+  "files": [
+    {
+      "path": "cache-scope-proofs.log",
+      "bytes": 9311,
+      "sha256": "d6f86aa750b5d93f9c42fea60153aac1f8457d8ef868e314632b6f7c83b566ae",
+      "zipCrc32": "b4b71b9b"
+    },
+    {
+      "path": "closed-cache-analysis-proofs.log",
+      "bytes": 841,
+      "sha256": "c2c46a84ff00535731181520b4eab0cbdfd6c0181360b2163706dd4f34a8669f",
+      "zipCrc32": "57f4acee"
+    },
+    {
+      "path": "dag-native.log",
+      "bytes": 2197,
+      "sha256": "dd8027463b01693baa8afb677bd585c757df0b69b775c7b1aa035ea6d58c8d35",
+      "zipCrc32": "fa1d9a5e"
+    },
+    {
+      "path": "header-native.log",
+      "bytes": 501,
+      "sha256": "60dab9c356379374608045fb8b5151ce17cc57cfc119c08321e2547d08d60ddf",
+      "zipCrc32": "446fbddf"
+    },
+    {
+      "path": "header-state-proofs.log",
+      "bytes": 6319,
+      "sha256": "6e5fa413d81b15224e8853ecd55f1ee492b1a3a6e9255e2e93a6e6c4038a1e00",
+      "zipCrc32": "04b194b7"
+    },
+    {
+      "path": "knot-fuel-proofs.log",
+      "bytes": 2190,
+      "sha256": "5c71d5b3f7f63b1cf56cf60c6dcf82f436503ea3bd78f5ee56daaa8dbe8febd0",
+      "zipCrc32": "9c0e2e59"
+    },
+    {
+      "path": "lean-githash.txt",
+      "bytes": 41,
+      "sha256": "3210a17608d78e1841a0a504c21167150e6a388cf44a077f06e3fcd3a823fe31",
+      "zipCrc32": "8900553f"
+    },
+    {
+      "path": "lean-version.txt",
+      "bytes": 106,
+      "sha256": "eb22144228dd41cd51a0c84af4f976cd0cef473102dcf99b60be756b11f2b95a",
+      "zipCrc32": "724c3a73"
+    },
+    {
+      "path": "native-build.log",
+      "bytes": 27069,
+      "sha256": "78f4acb999adedeb9bd37d3c3049426566c64a1158477137700a0caa5b7cff5f",
+      "zipCrc32": "dbc6be40"
+    },
+    {
+      "path": "native-receipt.json",
+      "bytes": 15339,
+      "sha256": "f1a00f081aff4399bb8e34a5b77678a002d3f77c0946d358c9e4c7dbd4b435d1",
+      "zipCrc32": "31833f51"
+    },
+    {
+      "path": "new-header-proof-status.log",
+      "bytes": 87,
+      "sha256": "b26ea17b36034ae6c8864addb06e684cc77fe789276b2b169e1ee667dc2f6611",
+      "zipCrc32": "0481ca08"
+    },
+    {
+      "path": "node-version.txt",
+      "bytes": 9,
+      "sha256": "33e26f35db6e57ce0c486ddc815fe966867e4f649e418eaf323f75f4720eb8e9",
+      "zipCrc32": "bf1071a1"
+    },
+    {
+      "path": "occurrence-proofs.log",
+      "bytes": 5048,
+      "sha256": "d7ed04f8a65d342f2e8c64d27ff708687008e86903f8c1c30838b7b5892357f8",
+      "zipCrc32": "3a0c17ee"
+    },
+    {
+      "path": "prefix-native.log",
+      "bytes": 274,
+      "sha256": "c18249a75aba7c6b63bd487422f47331623f02ace878be3d3f8ec0da17493f21",
+      "zipCrc32": "9f4e1550"
+    },
+    {
+      "path": "scalar-hash-native.log",
+      "bytes": 1338,
+      "sha256": "03beaf46178d8d4a50e9f7e59cb19ab827655d608f7ea34ded4348e7bc6d2ccb",
+      "zipCrc32": "0e2d4bbe"
+    },
+    {
+      "path": "session-proofs.log",
+      "bytes": 1774,
+      "sha256": "6252fcd741c45297f1a7e0fb9e2699d3fe7783add8a224076453a801a73a101a",
+      "zipCrc32": "77c7f6b2"
+    },
+    {
+      "path": "source-inventory.json",
+      "bytes": 8506,
+      "sha256": "fa1c3e97c97adc574d5e622b87dffb12fa9685a2f36419bc491021e7cfd806b4",
+      "zipCrc32": "39297c9f"
+    },
+    {
+      "path": "sources/.github/workflows/psc1-pskernel-t05-header.yml",
+      "bytes": 48741,
+      "sha256": "b13ebb9e372e018897fe5368f44ba8af00fb4801817b52a9993f56827e13f419",
+      "zipCrc32": "feb1d750",
+      "gitBlobSha": "d83b805b8b25b14abebb0a5abe9342ccd55e996d"
+    },
+    {
+      "path": "sources/psc1/kernel-lakefile.lean",
+      "bytes": 14384,
+      "sha256": "9ef0b56eab0cdf6f1ed386d45c3b3ec5214703caa5f880894a34e81ea707ed14",
+      "zipCrc32": "4b05522a",
+      "gitBlobSha": "93bb75060fce499b2e7b2e9364f15c87a312cba6"
+    },
+    {
+      "path": "sources/psc1/lean-toolchain",
+      "bytes": 25,
+      "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+      "zipCrc32": "284dedd0",
+      "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+      "bytes": 23509,
+      "sha256": "fc4a87bab4aaf9adf73956e7263c819629fa998a3d226f9c059c7bd1deec6eef",
+      "zipCrc32": "94673870",
+      "gitBlobSha": "ac2bbc8d42b93e4c00e8e96f706cc901d3bcc9ac"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean",
+      "bytes": 3151,
+      "sha256": "de60bb221d618ab944edd2cca4f6c8158fbf2a4de50ab5fc1f52ad48c1093e95",
+      "zipCrc32": "7389c6e2",
+      "gitBlobSha": "a02db21d57591bea86dffadbc598e22c0b77c7e4"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean",
+      "bytes": 8213,
+      "sha256": "11d056e95b93bafaac73d0a713bba688aee12f88e9d3478af9c2487f79b6edc9",
+      "zipCrc32": "1597fa73",
+      "gitBlobSha": "0a6682c5f7926da926e0d2d659a66fae57f5ba88"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean",
+      "bytes": 1418,
+      "sha256": "147627ac8160e681c57a21c12fd3320868b29abbebd7416d51f2d3cc6ec34056",
+      "zipCrc32": "8998b1a3",
+      "gitBlobSha": "f811255bd32a6a1b4d644d8a4545a1b2bf6c87f9"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean",
+      "bytes": 9400,
+      "sha256": "3f5ffae4af048991583563f5962dd28e54d2fde18dc7d1bd4f507bb40c8f54f6",
+      "zipCrc32": "297c4b0a",
+      "gitBlobSha": "9bdbdf46c32798f3d71132fc94013156713cc80b"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean",
+      "bytes": 13054,
+      "sha256": "e8d676b29d83502c15dff6ffe9eddc926673f8e74612adce420a389b3fb0b680",
+      "zipCrc32": "3edca287",
+      "gitBlobSha": "953963f466f9c3f86311cfbd1e9121c45f3de4eb"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean",
+      "bytes": 10620,
+      "sha256": "cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0",
+      "zipCrc32": "d49328b5",
+      "gitBlobSha": "a8b911d20a603b46edcc63a0bf000c1bacec5341"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean",
+      "bytes": 9757,
+      "sha256": "7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3",
+      "zipCrc32": "9be0bfb9",
+      "gitBlobSha": "918753c154f2ed96d65702494c7374dcd5ec5001"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean",
+      "bytes": 22765,
+      "sha256": "63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05",
+      "zipCrc32": "a56f4c2e",
+      "gitBlobSha": "cb2e3a74cbf9ccc8a8484d1bc31d5ed82eda6490"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean",
+      "bytes": 1946,
+      "sha256": "4532206f0bc5fd06fb7b69bcea3c832919dea46f6019ef8cdce2bc0385bbda2b",
+      "zipCrc32": "4dcb8e01",
+      "gitBlobSha": "0a1209c2406d07c96d4cca1b241ee377c49f28c0"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean",
+      "bytes": 27573,
+      "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51",
+      "zipCrc32": "334a3367",
+      "gitBlobSha": "44d01196e8cdbb6d67db8a860dc73827c8cb206c"
+    },
+    {
+      "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+      "bytes": 567,
+      "sha256": "d1d2acfec7d19424fa30f5ae7b966978fae3c9343f33a17590d825619c9952dd",
+      "zipCrc32": "61aa4f81",
+      "gitBlobSha": "0444d301b5259a389a7b03844590cbd27be5ef59"
+    },
+    {
+      "path": "sources/psc1/scripts/install-lean435-ci.sh",
+      "bytes": 1051,
+      "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9",
+      "zipCrc32": "370712ca",
+      "gitBlobSha": "b53f59db9e2fbb45feeedea659244cae7e77b64b"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736",
+      "zipCrc32": "82ed9d52",
+      "gitBlobSha": "494647393a3e4b3bdb7ac11115dac470cef6061a"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0",
+      "zipCrc32": "1743c183",
+      "gitBlobSha": "065ed4d1de1bdded148a2774de9f13bb8b1a406a"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db",
+      "zipCrc32": "669b45cf",
+      "gitBlobSha": "529a05c4345983eb96420d17e10415538d645f54"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-generated-smoke.mjs",
+      "bytes": 12610,
+      "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab",
+      "zipCrc32": "6858d3fc",
+      "gitBlobSha": "604773a240086eec60997c5e140c95b9e3316cda"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs",
+      "bytes": 5956,
+      "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b",
+      "zipCrc32": "0239840a",
+      "gitBlobSha": "120af542b9c1218f732e1c75faadcdbc66620aa4"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+      "bytes": 25991,
+      "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153",
+      "zipCrc32": "5f0b2ff8",
+      "gitBlobSha": "98b68b82566c4171c5fe110f11c9ff72b9e00992"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+      "bytes": 1126,
+      "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff",
+      "zipCrc32": "9e026176",
+      "gitBlobSha": "11e376e9ea0628aadf9a6f94ddfb2ccf29dcb40c"
+    },
+    {
+      "path": "sources/psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c",
+      "zipCrc32": "d3011473",
+      "gitBlobSha": "59fa82e0575b4119aebcf15fe39ed691346f1d06"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelCacheScopeProofs.lean",
+      "bytes": 36771,
+      "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5",
+      "zipCrc32": "369d8a11",
+      "gitBlobSha": "45cb58a271695bee0ae05330f39c3c1a86f1801f"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+      "bytes": 5877,
+      "sha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0",
+      "zipCrc32": "9d8a8444",
+      "gitBlobSha": "010333b5d6ac53c60c558c89906b02d7358fb0c0"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelExprV2SessionProofs.lean",
+      "bytes": 9724,
+      "sha256": "3a6166709bb4e05239dbce2866f4b52616b554157277a46f3c507d67d0c76f90",
+      "zipCrc32": "9d4df884",
+      "gitBlobSha": "d75589d73c3879040d535d638f264ba5f6115a1e"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelKnotFuelProofs.lean",
+      "bytes": 131180,
+      "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b",
+      "zipCrc32": "e4d2a350",
+      "gitBlobSha": "197da10ed3a5f2aeb1548511db60a618891912f1"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryHeaderRegression.lean",
+      "bytes": 26890,
+      "sha256": "9f9522e7f14c9a62703ca59dc2ab11b1c5c49cde9dadb1b39599802c7356cad6",
+      "zipCrc32": "df9b31ee",
+      "gitBlobSha": "4c0ada09c1b5f7404e0c8c5672049aed75bcbc77"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryHeaderStateProofs.lean",
+      "bytes": 31818,
+      "sha256": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e",
+      "zipCrc32": "a1be7238",
+      "gitBlobSha": "5a6050deb77d66d7440c976a815e5ae8c29f5b0a"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+      "bytes": 29015,
+      "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351",
+      "zipCrc32": "98984dbb",
+      "gitBlobSha": "2034798a4de1b4ca25b2e6366a88020b97beed27"
+    },
+    {
+      "path": "sources/psc1/test/PsKernelScalarHashWorkerRegression.lean",
+      "bytes": 10872,
+      "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2",
+      "zipCrc32": "be3b43d5",
+      "gitBlobSha": "aa5dd561cdb3df437c21a61c899f57b160289d0f"
+    }
+  ],
+  "scope": "Exact-source native header infrastructure proof/regression gate only.",
+  "overallRunStatusAtObservation": "in_progress",
+  "generatedRoutesNotQualifiedByThisReport": true,
+  "fullOrdinaryAdmission": false,
+  "arenaModelEstablishmentStillSeparate": true,
+  "noLocalLeanJavaScriptCompilerKernelOrTestExecution": true,
+  "noGitHubMutation": true,
+  "noPriorRunPassEvidenceReused": true
+}

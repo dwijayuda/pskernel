@@ -1,3 +1,70 @@
+## 2026-10-24 T05 header narrow pass; constructor helpers next
+
+**The ordinary-header narrow candidate passed at exact source
+`f5d97bafbd48adde29101ed44f45288ae53b9c87`, run `40089243726`, attempt 1.**
+Both route artifacts have been independently verified. Its source tree is `9e85b027cc0f8535efc475b490069f2012fd1435`;
+the production tree is `6951c3237eaca9fcc1ec9c173028cb651a6afa0d`.
+
+The native gate checked all **172** ordered, unique, source-named reports:
+49 header/state +15 occurrence/annotation +60 scope +14 session +11 scalar
++7 closed-cache +16 Knot. All four direct proof-command statuses were zero;
+only the permitted standard axioms appeared. The direct native header,
+occurrence, annotation, complete-state, official Lean and retained controls
+passed. All 49 native artifact files and 32 copied inputs were independently
+verified at artifact `12558173561`.
+
+Both authentic complete routes passed, each with **1,992** direct header
+assertions and the retained **1,884** cache assertions, scalar/short-entry
+matrices, strict generated-body checks, DAG/owner/prefix, generated smoke and
+invalid-recursor controls. The generated route used job `120858822962`, artifact
+`12558878274`; the canonical route used job `120858823020`, artifact
+`12559537082`. All 223 generated and 226 canonical artifact files,
+each route's 32 copied source inputs, actual 146-module Lean closure and archive,
+and the canonical 146-module ProofScript closure/manifest were independently
+rehashed and source-bound. Exact original provenance and receipt log digests
+matched; no source or attempt mixing was used.
+
+The generated header matrix took 3.93 seconds, with 295,972 KiB maximum RSS; its
+whole detached runtime step was 197 seconds. The canonical header matrix took
+3.29 seconds, with 306,436 KiB maximum
+RSS; its whole detached runtime step was 158 seconds.
+These are scoped observations, not general speedup or full-admission evidence.
+The unchanged pins and limits were Lean 4.35.0 at
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, TypeScript 7.0.2, Node 22, fuel 4096,
+empty PATH and 2048 MiB V8 old-space. Old-space is not a hard RSS limit. The
+25-minute detached runtime cap and 75-minute route-production job cap remained.
+
+The preceding 60fe source passed native checks but failed both complete PSC1
+checks with `structuralRecursionArity`. The qualified f5 source repairs exactly
+two branch-local recursive partial applications in `DagOrdinaryOccurrence.lean`
+and adds small structural source prechecks before the full source check. All
+proof statements and regression inventories were retained. The earlier failure
+is preserved separately; no f5 success is attributed to 60fe.
+
+This is a **header-only narrow pass**, with `fullAdmission=false` and
+`publicFallbackUsed=false`. The structural equivalence proofs still assume the
+explicit ArenaModel; its replay establishment and concrete decoder relation
+are separate obligations. Public ordinary admission routing is unchanged.
+
+The following coherent candidate adds private constructor-parameter alignment,
+structural constructor-result/occurrence helpers, and native paged-storage
+proofs. It requires 50 new reports plus 180 retained reports (**230 total**),
+native parameter 284/result 432 assertions, and generated parameter 268/result 432
+assertions on each complete route, in addition to the retained header 1992 and
+cache 1884 gates. Read `docs/T05_CONSTRUCTOR_HELPERS_HANDOFF_2026-10-24.md` for
+the exact scope and workflow. This changed candidate must pass its own one
+source/run/attempt cohort; it inherits no f5 receipts.
+
+**T05/B/D remain OPEN; C remains FAIL.** T01F/scoped A remain qualified only at
+the original `0d9f062846d109c362210d441df5fd407ca2cdd7` cohort, which remains the
+integration HEAD. The separate later integration-push cancellation observation
+does not qualify another cohort. All five full work-branch qualification
+triggers remain paused; both T01F diagnostics remain manual-only. Full ordinary
+constructor/positivity, recursor validation, complete owned admission and atomic
+publication still precede final T05 qualification and integration.
+
+---
+
 ## 2026-10-24 T05 native gate passes; complete PSC1 production exposes recursion arity
 
 Exact source `60fe91758a897d6f8936b28a257baab0057c52b3`, run

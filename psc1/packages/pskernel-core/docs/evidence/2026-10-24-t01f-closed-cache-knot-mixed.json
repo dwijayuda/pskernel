@@ -1,0 +1,1906 @@
+{
+  "schema": "psc1-t01f-closed-cache-mixed-terminal-evidence-v1",
+  "status": "PASS",
+  "scope": "narrow-selected-mixed-sample-only",
+  "source": "e136c06fb378c7882eaa795366e7a781440588f9",
+  "run_id": 40033825281,
+  "run_attempt": 1,
+  "job_id": 120694671292,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/40033825281",
+  "job": {
+    "id": 120694671292,
+    "run_id": 40033825281,
+    "workflow_name": "PSC1 T01F closed-cache analysis preflight",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40033825281",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcGfaHvA",
+    "head_sha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120694671292",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40033825281/job/120694671292",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-23T22:46:35Z",
+    "started_at": "2026-10-23T22:46:38Z",
+    "completed_at": "2026-10-23T23:07:51Z",
+    "name": "generated-hash-runtime (mixed, 25)",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-23T22:46:39Z",
+        "completed_at": "2026-10-23T22:46:40Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-23T22:46:40Z",
+        "completed_at": "2026-10-23T22:47:00Z"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-23T22:47:00Z",
+        "completed_at": "2026-10-23T22:47:00Z"
+      },
+      {
+        "name": "Run actions/download-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-23T22:47:00Z",
+        "completed_at": "2026-10-23T22:47:02Z"
+      },
+      {
+        "name": "Authenticate exact same-run producer and detached input bytes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-23T22:47:02Z",
+        "completed_at": "2026-10-23T22:47:02Z"
+      },
+      {
+        "name": "Retained generated DAG, minimal String, and ownership controls",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 6,
+        "started_at": "2026-10-23T22:47:02Z",
+        "completed_at": "2026-10-23T22:47:02Z"
+      },
+      {
+        "name": "Independent mixed Unicode sample with full unchanged assertions",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-23T22:47:02Z",
+        "completed_at": "2026-10-23T23:07:46Z"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-23T23:07:46Z",
+        "completed_at": "2026-10-23T23:07:48Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15,
+        "started_at": "2026-10-23T23:07:48Z",
+        "completed_at": "2026-10-23T23:07:48Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 16,
+        "started_at": "2026-10-23T23:07:48Z",
+        "completed_at": "2026-10-23T23:07:48Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17,
+        "started_at": "2026-10-23T23:07:48Z",
+        "completed_at": "2026-10-23T23:07:48Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120694671292",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000028121,
+    "runner_name": "GitHub Actions 1000028121",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "artifact": {
+    "id": 12538410452,
+    "name": "psc1-t01f-hash-runtime-mixed",
+    "size_in_bytes": 543752,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12538410452",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12538410452/zip",
+    "expired": false,
+    "created_at": "2026-10-23T23:07:47Z",
+    "expires_at": "2027-01-21T22:28:23Z",
+    "updated_at": "2026-10-23T23:07:47Z",
+    "digest": "sha256:8c586c701994158affb6cb2a34578294d91b820aacb68379cd503d4aa3f94c48",
+    "workflow_run": {
+      "id": 40033825281,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "head_sha": "e136c06fb378c7882eaa795366e7a781440588f9"
+    }
+  },
+  "artifact_zip_verified": {
+    "bytes": 543752,
+    "sha256": "8c586c701994158affb6cb2a34578294d91b820aacb68379cd503d4aa3f94c48"
+  },
+  "artifact_files": [
+    {
+      "path": "detached/closed-cache-analysis-smoke.mjs",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+    },
+    {
+      "path": "detached/fixture.json",
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    {
+      "path": "detached/dag-smoke.mjs",
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+    },
+    {
+      "path": "detached/kernel.mjs",
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    {
+      "path": "detached/prefix-smoke.mjs",
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+    },
+    {
+      "path": "detached/scalar-hash-smoke.mjs",
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+    },
+    {
+      "path": "mixed-receipt.json",
+      "bytes": 1704,
+      "sha256": "6eb4da7c7ee7fea5873d8f689d9e8dac818f401b8ecd81ddc600a0730368ef61"
+    },
+    {
+      "path": "detached/string-smoke.mjs",
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    },
+    {
+      "path": "mixed.log",
+      "bytes": 131503,
+      "sha256": "10bf54f1b2c7a8359e771f649ab82017b99d1f1badc0c085ccab49a86e384d3d"
+    },
+    {
+      "path": "mixed.memory",
+      "bytes": 56,
+      "sha256": "89b47540ab00bd357026f417769d37ad1547df79405ec462e0d93b63a30ebdec"
+    },
+    {
+      "path": "reuse-provenance.json",
+      "bytes": 913,
+      "sha256": "6d430493427c0aa9d015ac327c4dcb8425f3998d23d24dca7db7acc8fad009a6"
+    }
+  ],
+  "all_artifact_files_verified": true,
+  "whole_job_elapsed_seconds": 1273.0,
+  "whole_job_margin_seconds": 227.0,
+  "timed_process_margin_seconds": 256.72,
+  "copied_repository_inputs": [
+    {
+      "artifact_path": "detached/string-smoke.mjs",
+      "repository_path": "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+      "git_blob": "68acf28a8b355105e021eb547a4d0b835c40a876",
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    },
+    {
+      "artifact_path": "detached/dag-smoke.mjs",
+      "repository_path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+      "git_blob": "065ed4d1de1bdded148a2774de9f13bb8b1a406a",
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+    },
+    {
+      "artifact_path": "detached/prefix-smoke.mjs",
+      "repository_path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+      "git_blob": "529a05c4345983eb96420d17e10415538d645f54",
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+    },
+    {
+      "artifact_path": "detached/scalar-hash-smoke.mjs",
+      "repository_path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+      "git_blob": "59fa82e0575b4119aebcf15fe39ed691346f1d06",
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+    },
+    {
+      "artifact_path": "detached/closed-cache-analysis-smoke.mjs",
+      "repository_path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+      "git_blob": "494647393a3e4b3bdb7ac11115dac470cef6061a",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+    }
+  ],
+  "source_records": {
+    "source": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "files": [
+      {
+        "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+        "blob": "01d2716a6b4876c3e3be5f2dc508f4f7dc4cbee5",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/.github/workflows/psc1-pskernel-t01f-hash.yml",
+        "bytes": 37998,
+        "sha256": "77dcbadfc50b69fcbbf20a2a7015727b62cdd154ce860deb09a1a42592cdce7f"
+      },
+      {
+        "path": "psc1/kernel-lakefile.lean",
+        "blob": "9bffc62528c293a916d5fa194dc52dab3610ca95",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/kernel-lakefile.lean",
+        "bytes": 13757,
+        "sha256": "a757b196a2bdf9920333cc6e3642d664886f12463c94c7565d53da5a385d6a6d"
+      },
+      {
+        "path": "psc1/test/PsKernelCacheScopeProofs.lean",
+        "blob": "45cb58a271695bee0ae05330f39c3c1a86f1801f",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelCacheScopeProofs.lean",
+        "bytes": 36771,
+        "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2SessionProofs.lean",
+        "blob": "d75589d73c3879040d535d638f264ba5f6115a1e",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelExprV2SessionProofs.lean",
+        "bytes": 9724,
+        "sha256": "3a6166709bb4e05239dbce2866f4b52616b554157277a46f3c507d67d0c76f90"
+      },
+      {
+        "path": "psc1/test/PsKernelScalarHashWorkerRegression.lean",
+        "blob": "aa5dd561cdb3df437c21a61c899f57b160289d0f",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelScalarHashWorkerRegression.lean",
+        "bytes": 10872,
+        "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2"
+      },
+      {
+        "path": "psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+        "blob": "010333b5d6ac53c60c558c89906b02d7358fb0c0",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+        "bytes": 5877,
+        "sha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0"
+      },
+      {
+        "path": "psc1/test/PsKernelKnotFuelProofs.lean",
+        "blob": "197da10ed3a5f2aeb1548511db60a618891912f1",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelKnotFuelProofs.lean",
+        "bytes": 131180,
+        "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+        "blob": "4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+        "bytes": 9629,
+        "sha256": "fe26126cae9c7757d29b3b2193d9530a2de0dc7d5e76a591abb6f2a4b35421bf"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2StringEnvironmentRegression.lean",
+        "blob": "154bec1f4350cd948b1451fe6689b9809f05cd11",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelExprV2StringEnvironmentRegression.lean",
+        "bytes": 39734,
+        "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+        "blob": "68acf28a8b355105e021eb547a4d0b835c40a876",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      {
+        "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+        "blob": "494647393a3e4b3bdb7ac11115dac470cef6061a",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+        "bytes": 7826,
+        "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+      },
+      {
+        "path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+        "blob": "59fa82e0575b4119aebcf15fe39ed691346f1d06",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+        "bytes": 2546,
+        "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+      },
+      {
+        "path": "psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+        "blob": "11e376e9ea0628aadf9a6f94ddfb2ccf29dcb40c",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+        "bytes": 1126,
+        "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+        "blob": "065ed4d1de1bdded148a2774de9f13bb8b1a406a",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+        "bytes": 244729,
+        "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+        "blob": "529a05c4345983eb96420d17e10415538d645f54",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+        "bytes": 28982,
+        "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+      }
+    ]
+  },
+  "producer_artifact": {
+    "id": 12535974274,
+    "name": "psc1-t01f-hash-generated-producer",
+    "size_in_bytes": 1174733,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535974274",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535974274/zip",
+    "expired": false,
+    "created_at": "2026-10-23T22:46:32Z",
+    "expires_at": "2027-01-21T22:28:23Z",
+    "updated_at": "2026-10-23T22:46:32Z",
+    "digest": "sha256:35c223645deec2fd359da421415d55ee20b7c7bec449ca789a4951a90796ce5f",
+    "workflow_run": {
+      "id": 40033825281,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "head_sha": "e136c06fb378c7882eaa795366e7a781440588f9"
+    }
+  },
+  "producer_zip_verified": {
+    "bytes": 1174733,
+    "sha256": "35c223645deec2fd359da421415d55ee20b7c7bec449ca789a4951a90796ce5f"
+  },
+  "producer_provenance": {
+    "schema": "psc1-t01f-source-provenance-v1",
+    "sourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "runId": "40033825281",
+    "runAttempt": "1",
+    "job": "generated-string",
+    "route": "generated",
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "v22.23.3",
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "kernel": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "generatedRunner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    }
+  },
+  "runtime_provenance": {
+    "schema": "psc1-t01f-same-run-hash-preflight-v1",
+    "harnessSourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "generatedSourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "runId": "40033825281",
+    "runAttempt": "1",
+    "kernel": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "currentScripts": {
+      "string": {
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      "closedCacheAnalysis": {
+        "bytes": 7826,
+        "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+      }
+    },
+    "artifact": {
+      "name": "psc1-t01f-hash-generated-producer",
+      "runId": "40033825281"
+    },
+    "node": "v22.23.3",
+    "mode": "mixed"
+  },
+  "complete_job_log": {
+    "bytes": 205093,
+    "sha256": "2818ce6f6b15481fcc14f23f88260df6240fd8c975dd0e3952ac9f7ecba4f175",
+    "repository_archive": false
+  },
+  "bindings_verified": {
+    "source_run_attempt": true,
+    "same_run_producer": true,
+    "all_detached_bytes": true,
+    "repo_git_blobs": true,
+    "artifact_upload_id_and_digest": true
+  },
+  "independent_admission": {
+    "begun_requests": 294,
+    "ordered_fixture_roots": true,
+    "completion": [
+      {
+        "requests": 294,
+        "admissionMs": 47595.198081999995
+      }
+    ],
+    "metadata_completion": [
+      {
+        "declarations": 377,
+        "milliseconds": 1522.6863359999988
+      }
+    ],
+    "corrupted_ofList_control_completed": true
+  },
+  "sample_markers": {
+    "singleton": [
+      "Aé€😀"
+    ],
+    "complete_case": [
+      "Aé€😀"
+    ]
+  },
+  "trace": {
+    "begun": 440,
+    "completed": 440,
+    "expected_complete": 440,
+    "exact_schedule_prefix": true,
+    "strict_alternation": true,
+    "interrupted_call": null,
+    "last_completed": {
+      "id": 440,
+      "stage": "distinct-strings",
+      "sample": "Aé€😀",
+      "api": "psKernelV1RunDag",
+      "milliseconds": 5938.062816000078
+    },
+    "stage_totals": {
+      "admission:List": {
+        "calls": 1,
+        "milliseconds": 222.258495
+      },
+      "admission:Nat": {
+        "calls": 1,
+        "milliseconds": 255.76443999999998
+      },
+      "admission:LT": {
+        "calls": 1,
+        "milliseconds": 89.62493699999993
+      },
+      "admission:LT.lt": {
+        "calls": 1,
+        "milliseconds": 17.546235999999908
+      },
+      "admission:Nat.le": {
+        "calls": 1,
+        "milliseconds": 219.8669369999999
+      },
+      "admission:Nat.lt": {
+        "calls": 1,
+        "milliseconds": 4.453846999999996
+      },
+      "admission:instLTNat": {
+        "calls": 1,
+        "milliseconds": 4.027467999999999
+      },
+      "admission:Fin": {
+        "calls": 1,
+        "milliseconds": 135.15862300000003
+      },
+      "admission:outParam": {
+        "calls": 1,
+        "milliseconds": 2.4766030000000683
+      },
+      "admission:HPow": {
+        "calls": 1,
+        "milliseconds": 150.49015800000006
+      },
+      "admission:HPow.hPow": {
+        "calls": 1,
+        "milliseconds": 29.547459000000117
+      },
+      "admission:Pow": {
+        "calls": 1,
+        "milliseconds": 141.71219699999983
+      },
+      "admission:Pow.pow": {
+        "calls": 1,
+        "milliseconds": 10.83823899999993
+      },
+      "admission:instHPow": {
+        "calls": 1,
+        "milliseconds": 26.992797999999993
+      },
+      "admission:NatPow": {
+        "calls": 1,
+        "milliseconds": 98.62845599999991
+      },
+      "admission:NatPow.pow": {
+        "calls": 1,
+        "milliseconds": 7.187906000000112
+      },
+      "admission:instPowNat": {
+        "calls": 1,
+        "milliseconds": 10.976126000000022
+      },
+      "admission:PUnit": {
+        "calls": 1,
+        "milliseconds": 84.444211
+      },
+      "admission:PProd": {
+        "calls": 1,
+        "milliseconds": 104.63660400000003
+      },
+      "admission:Nat.below": {
+        "calls": 1,
+        "milliseconds": 20.143569999999954
+      },
+      "admission:Nat.brecOn.go": {
+        "calls": 1,
+        "milliseconds": 188.31093899999973
+      },
+      "admission:Nat.brecOn": {
+        "calls": 1,
+        "milliseconds": 89.45233899999994
+      },
+      "admission:Unit": {
+        "calls": 1,
+        "milliseconds": 2.010244000000057
+      },
+      "admission:OfNat": {
+        "calls": 1,
+        "milliseconds": 89.95178700000042
+      },
+      "admission:OfNat.ofNat": {
+        "calls": 1,
+        "milliseconds": 9.68646200000012
+      },
+      "admission:instOfNatNat": {
+        "calls": 1,
+        "milliseconds": 4.912865000000238
+      },
+      "admission:Nat.casesOn": {
+        "calls": 1,
+        "milliseconds": 19.274617000000035
+      },
+      "admission:Unit.unit": {
+        "calls": 1,
+        "milliseconds": 3.889611999999943
+      },
+      "admission:Nat.pow.match_1": {
+        "calls": 1,
+        "milliseconds": 56.27562899999975
+      },
+      "admission:Nat.mul.match_1": {
+        "calls": 1,
+        "milliseconds": 69.55740700000024
+      },
+      "admission:Nat.add.match_1": {
+        "calls": 1,
+        "milliseconds": 43.34782300000006
+      },
+      "admission:Nat.add._f": {
+        "calls": 1,
+        "milliseconds": 67.85233599999992
+      },
+      "admission:Nat.add": {
+        "calls": 1,
+        "milliseconds": 16.91096299999981
+      },
+      "admission:Nat.mul._f": {
+        "calls": 1,
+        "milliseconds": 82.25644999999986
+      },
+      "admission:Nat.mul": {
+        "calls": 1,
+        "milliseconds": 11.164757999999892
+      },
+      "admission:Nat.pow._f": {
+        "calls": 1,
+        "milliseconds": 124.47547699999996
+      },
+      "admission:Nat.pow": {
+        "calls": 1,
+        "milliseconds": 16.19461900000033
+      },
+      "admission:instNatPowNat": {
+        "calls": 1,
+        "milliseconds": 3.678153999999722
+      },
+      "admission:BitVec": {
+        "calls": 1,
+        "milliseconds": 234.3223509999998
+      },
+      "admission:UInt32": {
+        "calls": 1,
+        "milliseconds": 82.1226200000001
+      },
+      "admission:Or": {
+        "calls": 1,
+        "milliseconds": 155.98309400000016
+      },
+      "admission:And": {
+        "calls": 1,
+        "milliseconds": 128.0806309999998
+      },
+      "admission:Nat.isValidChar": {
+        "calls": 1,
+        "milliseconds": 11.709885000000213
+      },
+      "admission:Fin.val": {
+        "calls": 1,
+        "milliseconds": 12.443386000000373
+      },
+      "admission:BitVec.toFin": {
+        "calls": 1,
+        "milliseconds": 28.893207000000075
+      },
+      "admission:BitVec.toNat": {
+        "calls": 1,
+        "milliseconds": 20.440734999999677
+      },
+      "admission:UInt32.toBitVec": {
+        "calls": 1,
+        "milliseconds": 13.810844999999972
+      },
+      "admission:UInt32.toNat": {
+        "calls": 1,
+        "milliseconds": 6.704060999999911
+      },
+      "admission:UInt32.isValidChar": {
+        "calls": 1,
+        "milliseconds": 3.2472090000001117
+      },
+      "admission:Char": {
+        "calls": 1,
+        "milliseconds": 541.0963379999998
+      },
+      "admission:Array": {
+        "calls": 1,
+        "milliseconds": 96.62231900000006
+      },
+      "admission:UInt8": {
+        "calls": 1,
+        "milliseconds": 98.24322800000027
+      },
+      "admission:ByteArray": {
+        "calls": 1,
+        "milliseconds": 80.41596899999968
+      },
+      "admission:Eq": {
+        "calls": 1,
+        "milliseconds": 114.33387200000016
+      },
+      "admission:List.below": {
+        "calls": 1,
+        "milliseconds": 19.58619500000077
+      },
+      "admission:List.brecOn.go": {
+        "calls": 1,
+        "milliseconds": 191.89096299999983
+      },
+      "admission:List.brecOn": {
+        "calls": 1,
+        "milliseconds": 115.36517899999944
+      },
+      "admission:List.casesOn": {
+        "calls": 1,
+        "milliseconds": 33.02546900000016
+      },
+      "admission:List.toByteArray.match_1": {
+        "calls": 1,
+        "milliseconds": 54.73768300000029
+      },
+      "admission:ByteArray.casesOn": {
+        "calls": 1,
+        "milliseconds": 17.721537000000353
+      },
+      "admission:ByteArray.push.match_1": {
+        "calls": 1,
+        "milliseconds": 31.855654999999388
+      },
+      "admission:List.concat.match_1": {
+        "calls": 1,
+        "milliseconds": 70.1436020000001
+      },
+      "admission:List.concat._f": {
+        "calls": 1,
+        "milliseconds": 93.59997099999964
+      },
+      "admission:List.concat": {
+        "calls": 1,
+        "milliseconds": 23.45056999999997
+      },
+      "admission:Array.toList": {
+        "calls": 1,
+        "milliseconds": 7.844264000000294
+      },
+      "admission:Array.push": {
+        "calls": 1,
+        "milliseconds": 15.66067699999985
+      },
+      "admission:ByteArray.push": {
+        "calls": 1,
+        "milliseconds": 26.278301000000283
+      },
+      "admission:List.toByteArray.loop._f": {
+        "calls": 1,
+        "milliseconds": 154.2079530000001
+      },
+      "admission:List.toByteArray.loop": {
+        "calls": 1,
+        "milliseconds": 22.284921999999824
+      },
+      "admission:Array.emptyWithCapacity": {
+        "calls": 1,
+        "milliseconds": 6.814379000000372
+      },
+      "admission:Array.empty": {
+        "calls": 1,
+        "milliseconds": 15.624883999999838
+      },
+      "admission:ByteArray.emptyWithCapacity": {
+        "calls": 1,
+        "milliseconds": 4.3113860000003115
+      },
+      "admission:ByteArray.empty": {
+        "calls": 1,
+        "milliseconds": 5.113257999999405
+      },
+      "admission:List.toByteArray": {
+        "calls": 1,
+        "milliseconds": 4.416613999999754
+      },
+      "admission:List.flatten.match_1": {
+        "calls": 1,
+        "milliseconds": 71.57932099999925
+      },
+      "admission:List.append.match_1": {
+        "calls": 1,
+        "milliseconds": 65.01348300000063
+      },
+      "admission:List.append._f": {
+        "calls": 1,
+        "milliseconds": 110.83280100000047
+      },
+      "admission:List.append": {
+        "calls": 1,
+        "milliseconds": 22.281235999999808
+      },
+      "admission:List.flatten._f": {
+        "calls": 1,
+        "milliseconds": 103.3053919999993
+      },
+      "admission:List.flatten": {
+        "calls": 1,
+        "milliseconds": 22.332233000000087
+      },
+      "admission:instDecidableEqList.match_1": {
+        "calls": 1,
+        "milliseconds": 55.4121439999999
+      },
+      "admission:List.map._f": {
+        "calls": 1,
+        "milliseconds": 121.1390879999999
+      },
+      "admission:List.map": {
+        "calls": 1,
+        "milliseconds": 23.79008899999917
+      },
+      "admission:List.flatMap": {
+        "calls": 1,
+        "milliseconds": 12.245535000000018
+      },
+      "admission:Char.val": {
+        "calls": 1,
+        "milliseconds": 8.698335000000043
+      },
+      "admission:Bool": {
+        "calls": 1,
+        "milliseconds": 85.593167
+      },
+      "admission:Bool.casesOn": {
+        "calls": 1,
+        "milliseconds": 15.509249999999156
+      },
+      "admission:Bool.Reflects.match_1": {
+        "calls": 1,
+        "milliseconds": 33.189220000000205
+      },
+      "admission:False": {
+        "calls": 1,
+        "milliseconds": 19.67879300000004
+      },
+      "admission:Not": {
+        "calls": 1,
+        "milliseconds": 1.9978069999997388
+      },
+      "admission:Bool.Reflects": {
+        "calls": 1,
+        "milliseconds": 8.417062999999871
+      },
+      "admission:Decidable": {
+        "calls": 1,
+        "milliseconds": 105.7346550000002
+      },
+      "admission:Decidable.decide": {
+        "calls": 1,
+        "milliseconds": 5.781371000000036
+      },
+      "admission:Decidable.reflects_decide": {
+        "calls": 1,
+        "milliseconds": 50.77791399999933
+      },
+      "admission:dite": {
+        "calls": 1,
+        "milliseconds": 103.90303800000038
+      },
+      "admission:ite": {
+        "calls": 1,
+        "milliseconds": 14.928748999999698
+      },
+      "admission:LE": {
+        "calls": 1,
+        "milliseconds": 89.69852499999979
+      },
+      "admission:LE.le": {
+        "calls": 1,
+        "milliseconds": 13.688558999999259
+      },
+      "admission:instLENat": {
+        "calls": 1,
+        "milliseconds": 3.243564999999762
+      },
+      "admission:Nat.ble.match_1": {
+        "calls": 1,
+        "milliseconds": 63.70260700000017
+      },
+      "admission:Nat.ble._f": {
+        "calls": 1,
+        "milliseconds": 64.91644799999995
+      },
+      "admission:Nat.ble": {
+        "calls": 1,
+        "milliseconds": 8.373117999999522
+      },
+      "admission:Nat.decEq.match_1": {
+        "calls": 1,
+        "milliseconds": 31.175054999999702
+      },
+      "admission:False.elim": {
+        "calls": 1,
+        "milliseconds": 21.208387000000585
+      },
+      "admission:Eq.casesOn": {
+        "calls": 1,
+        "milliseconds": 31.16073300000062
+      },
+      "admission:HEq": {
+        "calls": 1,
+        "milliseconds": 115.45685599999979
+      },
+      "admission:True": {
+        "calls": 1,
+        "milliseconds": 70.5730510000003
+      },
+      "admission:Nat.beq.match_1": {
+        "calls": 1,
+        "milliseconds": 84.82669900000019
+      },
+      "admission:Nat.beq._f": {
+        "calls": 1,
+        "milliseconds": 77.63101700000061
+      },
+      "admission:Nat.beq": {
+        "calls": 1,
+        "milliseconds": 8.515120000000024
+      },
+      "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux.match_1_1": {
+        "calls": 1,
+        "milliseconds": 26.63486600000033
+      },
+      "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux._f": {
+        "calls": 1,
+        "milliseconds": 520.4713840000004
+      },
+      "admission:_private.Init.Prelude.0.noConfusion_of_Nat.aux": {
+        "calls": 1,
+        "milliseconds": 97.03622899999937
+      },
+      "admission:rfl": {
+        "calls": 1,
+        "milliseconds": 4.56152099999963
+      },
+      "admission:congrArg": {
+        "calls": 1,
+        "milliseconds": 45.98502600000029
+      },
+      "admission:noConfusion_of_Nat": {
+        "calls": 1,
+        "milliseconds": 123.41958799999975
+      },
+      "admission:Bool.ctorIdx": {
+        "calls": 1,
+        "milliseconds": 20.03877300000022
+      },
+      "admission:_private.Init.Prelude.0.Nat.le_of_ble_eq_true.match_1_1": {
+        "calls": 1,
+        "milliseconds": 375.9066050000001
+      },
+      "admission:_private.Init.Prelude.0.Nat.zero_le.match_1_1": {
+        "calls": 1,
+        "milliseconds": 44.63372899999922
+      },
+      "admission:Nat.zero_le._f": {
+        "calls": 1,
+        "milliseconds": 183.69671799999924
+      },
+      "admission:Nat.zero_le": {
+        "calls": 1,
+        "milliseconds": 50.63291600000048
+      },
+      "admission:Nat.le.below": {
+        "calls": 1,
+        "milliseconds": 516.8039039999985
+      },
+      "admission:Nat.le.brecOn": {
+        "calls": 1,
+        "milliseconds": 91.10321099999965
+      },
+      "admission:Nat.le.below.casesOn": {
+        "calls": 1,
+        "milliseconds": 226.01437299999998
+      },
+      "admission:Eq.ndrec": {
+        "calls": 1,
+        "milliseconds": 45.830565000000206
+      },
+      "admission:Eq.symm": {
+        "calls": 1,
+        "milliseconds": 80.41108600000007
+      },
+      "admission:cast": {
+        "calls": 1,
+        "milliseconds": 28.59939099999974
+      },
+      "admission:eq_of_heq": {
+        "calls": 1,
+        "milliseconds": 197.70171200000004
+      },
+      "admission:_private.Init.Prelude.0.Nat.succ_le_succ.match_1_7": {
+        "calls": 1,
+        "milliseconds": 2525.412436999999
+      },
+      "admission:HAdd": {
+        "calls": 1,
+        "milliseconds": 126.9857119999997
+      },
+      "admission:HAdd.hAdd": {
+        "calls": 1,
+        "milliseconds": 22.99076799999966
+      },
+      "admission:Add": {
+        "calls": 1,
+        "milliseconds": 77.26855400000022
+      },
+      "admission:Add.add": {
+        "calls": 1,
+        "milliseconds": 12.61998499999936
+      },
+      "admission:instHAdd": {
+        "calls": 1,
+        "milliseconds": 14.68783600000097
+      },
+      "admission:instAddNat": {
+        "calls": 1,
+        "milliseconds": 3.429914000000281
+      },
+      "admission:Nat.succ_le_succ": {
+        "calls": 1,
+        "milliseconds": 624.8609390000001
+      },
+      "admission:Nat.le_of_ble_eq_true._f": {
+        "calls": 1,
+        "milliseconds": 396.93298200000027
+      },
+      "admission:Nat.le_of_ble_eq_true": {
+        "calls": 1,
+        "milliseconds": 32.62963200000013
+      },
+      "admission:absurd": {
+        "calls": 1,
+        "milliseconds": 12.16244899999947
+      },
+      "admission:_private.Init.Prelude.0.Nat.ble_eq_true_of_le.match_1_7": {
+        "calls": 1,
+        "milliseconds": 2432.178591
+      },
+      "admission:_private.Init.Prelude.0.Nat.ble_self_eq_true.match_1_1": {
+        "calls": 1,
+        "milliseconds": 54.9545020000005
+      },
+      "admission:Nat.ble_self_eq_true._f": {
+        "calls": 1,
+        "milliseconds": 331.7521349999988
+      },
+      "admission:Nat.ble_self_eq_true": {
+        "calls": 1,
+        "milliseconds": 21.334844000000885
+      },
+      "admission:_private.Init.Prelude.0.Nat.ble_succ_eq_true.match_1_1": {
+        "calls": 1,
+        "milliseconds": 542.6507149999998
+      },
+      "admission:Nat.ble_succ_eq_true._f": {
+        "calls": 1,
+        "milliseconds": 639.331420999999
+      },
+      "admission:Nat.ble_succ_eq_true": {
+        "calls": 1,
+        "milliseconds": 43.31862099999853
+      },
+      "admission:Nat.ble_eq_true_of_le": {
+        "calls": 1,
+        "milliseconds": 233.57370399999854
+      },
+      "admission:Nat.not_le_of_not_ble_eq_true": {
+        "calls": 1,
+        "milliseconds": 46.723769000000175
+      },
+      "admission:Bool.noConfusionType": {
+        "calls": 1,
+        "milliseconds": 13.331051999997726
+      },
+      "admission:Bool.noConfusion": {
+        "calls": 1,
+        "milliseconds": 89.77095299999928
+      },
+      "admission:Nat.decLe._proof_1": {
+        "calls": 1,
+        "milliseconds": 110.66067000000112
+      },
+      "admission:Nat.decLe": {
+        "calls": 1,
+        "milliseconds": 64.02984600000127
+      },
+      "admission:HMod": {
+        "calls": 1,
+        "milliseconds": 141.11769400000048
+      },
+      "admission:HMod.hMod": {
+        "calls": 1,
+        "milliseconds": 20.11433500000203
+      },
+      "admission:Mod": {
+        "calls": 1,
+        "milliseconds": 119.9215269999986
+      },
+      "admission:Mod.mod": {
+        "calls": 1,
+        "milliseconds": 6.597213999997621
+      },
+      "admission:instHMod": {
+        "calls": 1,
+        "milliseconds": 22.838498999997682
+      },
+      "admission:namedPattern": {
+        "calls": 1,
+        "milliseconds": 7.8852850000002945
+      },
+      "admission:Nat.mod.match_1": {
+        "calls": 1,
+        "milliseconds": 94.54582300000038
+      },
+      "admission:Nat.decLt": {
+        "calls": 1,
+        "milliseconds": 47.975384999997914
+      },
+      "admission:Nat.le.casesOn": {
+        "calls": 1,
+        "milliseconds": 46.16881600000124
+      },
+      "admission:Nat.ctorIdx": {
+        "calls": 1,
+        "milliseconds": 5.662230999998428
+      },
+      "admission:Nat.div.go.match_1": {
+        "calls": 1,
+        "milliseconds": 256.0896300000022
+      },
+      "admission:HSub": {
+        "calls": 1,
+        "milliseconds": 124.89876200000072
+      },
+      "admission:HSub.hSub": {
+        "calls": 1,
+        "milliseconds": 21.902184999999008
+      },
+      "admission:Sub": {
+        "calls": 1,
+        "milliseconds": 89.04397299999982
+      },
+      "admission:Sub.sub": {
+        "calls": 1,
+        "milliseconds": 6.212406000002375
+      },
+      "admission:instHSub": {
+        "calls": 1,
+        "milliseconds": 21.09366299999965
+      },
+      "admission:Nat.pred": {
+        "calls": 1,
+        "milliseconds": 8.859866000002512
+      },
+      "admission:Nat.sub._f": {
+        "calls": 1,
+        "milliseconds": 55.30860300000131
+      },
+      "admission:Nat.sub": {
+        "calls": 1,
+        "milliseconds": 13.796760000001086
+      },
+      "admission:instSubNat": {
+        "calls": 1,
+        "milliseconds": 3.3938000000016473
+      },
+      "admission:_private.Init.Prelude.0.Nat.le_trans.match_1_10": {
+        "calls": 1,
+        "milliseconds": 3151.8548109999974
+      },
+      "admission:Nat.le_trans": {
+        "calls": 1,
+        "milliseconds": 379.1844290000008
+      },
+      "admission:Nat.lt_of_lt_of_le": {
+        "calls": 1,
+        "milliseconds": 53.61555899999803
+      },
+      "admission:And.casesOn": {
+        "calls": 1,
+        "milliseconds": 40.81275899999673
+      },
+      "admission:_private.Init.Prelude.0.Nat.div_rec_lemma.match_1_1": {
+        "calls": 1,
+        "milliseconds": 184.8445589999974
+      },
+      "admission:_private.Init.Prelude.0.Nat.sub_lt.match_1_1": {
+        "calls": 1,
+        "milliseconds": 454.0690369999975
+      },
+      "admission:_private.Init.Prelude.0.Nat.not_succ_le_self.match_1_1": {
+        "calls": 1,
+        "milliseconds": 37.71943999999712
+      },
+      "admission:Nat.noConfusionType": {
+        "calls": 1,
+        "milliseconds": 76.72647000000143
+      },
+      "admission:Nat.noConfusion": {
+        "calls": 1,
+        "milliseconds": 73.66999600000054
+      },
+      "admission:Nat.not_succ_le_zero": {
+        "calls": 1,
+        "milliseconds": 171.80357099999674
+      },
+      "admission:_private.Init.Prelude.0.Nat.pred_le_pred.match_1_1": {
+        "calls": 1,
+        "milliseconds": 803.0686550000028
+      },
+      "admission:Nat.le_succ": {
+        "calls": 1,
+        "milliseconds": 16.736536000000342
+      },
+      "admission:Nat.pred_le_pred": {
+        "calls": 1,
+        "milliseconds": 234.73622400000022
+      },
+      "admission:Nat.le_of_succ_le_succ": {
+        "calls": 1,
+        "milliseconds": 118.24700999999914
+      },
+      "admission:Nat.not_succ_le_self._f": {
+        "calls": 1,
+        "milliseconds": 396.435591999998
+      },
+      "admission:Nat.not_succ_le_self": {
+        "calls": 1,
+        "milliseconds": 35.08520900000076
+      },
+      "admission:Nat.lt_irrefl": {
+        "calls": 1,
+        "milliseconds": 30.32423899999776
+      },
+      "admission:Nat.lt_succ_of_le": {
+        "calls": 1,
+        "milliseconds": 31.946000999996613
+      },
+      "admission:Nat.le_refl": {
+        "calls": 1,
+        "milliseconds": 18.350030999998125
+      },
+      "admission:_private.Init.Prelude.0.Nat.pred_le.match_1_1": {
+        "calls": 1,
+        "milliseconds": 26.37695800000074
+      },
+      "admission:Nat.pred_le": {
+        "calls": 1,
+        "milliseconds": 133.5555690000001
+      },
+      "admission:Nat.sub_le": {
+        "calls": 1,
+        "milliseconds": 359.2213199999969
+      },
+      "admission:Nat.succ_sub_succ_eq_sub": {
+        "calls": 1,
+        "milliseconds": 1406.397993999999
+      },
+      "admission:Nat.sub_lt": {
+        "calls": 1,
+        "milliseconds": 477.6864659999992
+      },
+      "admission:Nat.div_rec_lemma": {
+        "calls": 1,
+        "milliseconds": 131.93237999999837
+      },
+      "admission:Nat.le_of_lt_succ": {
+        "calls": 1,
+        "milliseconds": 34.44684100000086
+      },
+      "admission:Nat.div_rec_fuel_lemma": {
+        "calls": 1,
+        "milliseconds": 271.28233199999886
+      },
+      "admission:Nat.modCore.go._f": {
+        "calls": 1,
+        "milliseconds": 318.47761399999945
+      },
+      "admission:Nat.modCore.go": {
+        "calls": 1,
+        "milliseconds": 34.998459000002185
+      },
+      "admission:Nat.lt_add_one": {
+        "calls": 1,
+        "milliseconds": 159.17279100000087
+      },
+      "admission:Nat.lt_succ_self": {
+        "calls": 1,
+        "milliseconds": 239.52640600000086
+      },
+      "admission:Nat.modCore": {
+        "calls": 1,
+        "milliseconds": 36.431258000000525
+      },
+      "admission:Nat.mod": {
+        "calls": 1,
+        "milliseconds": 37.87002500000017
+      },
+      "admission:Nat.instMod": {
+        "calls": 1,
+        "milliseconds": 3.6123069999994186
+      },
+      "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_3": {
+        "calls": 1,
+        "milliseconds": 522.9473029999972
+      },
+      "admission:Nat.zero_lt_succ": {
+        "calls": 1,
+        "milliseconds": 39.911497999997664
+      },
+      "admission:Decidable.casesOn": {
+        "calls": 1,
+        "milliseconds": 41.93702499999927
+      },
+      "admission:_private.Init.Prelude.0.Nat.mod_lt.match_1_1": {
+        "calls": 1,
+        "milliseconds": 270.7835589999995
+      },
+      "admission:_private.Init.Prelude.0.Nat.modCore_lt.match_1_1": {
+        "calls": 1,
+        "milliseconds": 328.066479000001
+      },
+      "admission:Nat.not_lt_zero": {
+        "calls": 1,
+        "milliseconds": 33.39371299999766
+      },
+      "admission:_private.Init.Prelude.0.Nat.modCoreGo_lt.match_1_1": {
+        "calls": 1,
+        "milliseconds": 299.9447230000005
+      },
+      "admission:Decidable.isTrue": {
+        "calls": 1,
+        "milliseconds": 22.23608900000181
+      },
+      "admission:Or.casesOn": {
+        "calls": 1,
+        "milliseconds": 32.24580100000094
+      },
+      "admission:_private.Init.Prelude.0.Or.elim.match_1_1": {
+        "calls": 1,
+        "milliseconds": 57.96460300000035
+      },
+      "admission:Or.elim": {
+        "calls": 1,
+        "milliseconds": 26.19313400000101
+      },
+      "admission:id": {
+        "calls": 1,
+        "milliseconds": 2.2933799999991606
+      },
+      "admission:Or.resolve_right": {
+        "calls": 1,
+        "milliseconds": 19.438132999999652
+      },
+      "admission:GE.ge": {
+        "calls": 1,
+        "milliseconds": 6.529492000001483
+      },
+      "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_5": {
+        "calls": 1,
+        "milliseconds": 34.61485399999947
+      },
+      "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_3": {
+        "calls": 1,
+        "milliseconds": 152.24272700000074
+      },
+      "admission:Nat.le_succ_of_le": {
+        "calls": 1,
+        "milliseconds": 31.282555999998294
+      },
+      "admission:_private.Init.Prelude.0.Nat.lt_or_ge.match_1_1": {
+        "calls": 1,
+        "milliseconds": 132.61249600000156
+      },
+      "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_3": {
+        "calls": 1,
+        "milliseconds": 210.76258300000336
+      },
+      "admission:_private.Init.Prelude.0.Nat.eq_or_lt_of_le.match_1_1": {
+        "calls": 1,
+        "milliseconds": 116.15511400000105
+      },
+      "admission:Nat.eq_or_lt_of_le._f": {
+        "calls": 1,
+        "milliseconds": 901.6669199999997
+      },
+      "admission:Nat.eq_or_lt_of_le": {
+        "calls": 1,
+        "milliseconds": 47.9325319999989
+      },
+      "admission:Nat.lt_or_ge._f": {
+        "calls": 1,
+        "milliseconds": 390.6034099999961
+      },
+      "admission:Nat.lt_or_ge": {
+        "calls": 1,
+        "milliseconds": 33.5951139999961
+      },
+      "admission:Nat.lt_of_not_le": {
+        "calls": 1,
+        "milliseconds": 48.65801500000089
+      },
+      "admission:Decidable.isFalse": {
+        "calls": 1,
+        "milliseconds": 21.35313500000484
+      },
+      "admission:Nat.modCoreGo_lt": {
+        "calls": 1,
+        "milliseconds": 1664.045680000003
+      },
+      "admission:Nat.modCore_lt": {
+        "calls": 1,
+        "milliseconds": 1231.096427999997
+      },
+      "admission:Nat.mod_lt": {
+        "calls": 1,
+        "milliseconds": 815.6316660000011
+      },
+      "admission:Fin.Internal.ofNat": {
+        "calls": 1,
+        "milliseconds": 45.47680599999876
+      },
+      "admission:_private.Init.Prelude.0.Nat.pow_pos.match_1_1": {
+        "calls": 1,
+        "milliseconds": 90.01837700000033
+      },
+      "admission:HMul": {
+        "calls": 1,
+        "milliseconds": 137.46454899999662
+      },
+      "admission:HMul.hMul": {
+        "calls": 1,
+        "milliseconds": 22.63794699999562
+      },
+      "admission:Mul": {
+        "calls": 1,
+        "milliseconds": 85.03443700000207
+      },
+      "admission:Mul.mul": {
+        "calls": 1,
+        "milliseconds": 8.947268999996595
+      },
+      "admission:instHMul": {
+        "calls": 1,
+        "milliseconds": 23.41016600000148
+      },
+      "admission:instMulNat": {
+        "calls": 1,
+        "milliseconds": 5.343699999997625
+      },
+      "admission:_private.Init.Prelude.0.Nat.mul_pos.match_1_1": {
+        "calls": 1,
+        "milliseconds": 293.81467300000077
+      },
+      "admission:_private.Init.Prelude.0.Nat.add_pos_right.match_1_1": {
+        "calls": 1,
+        "milliseconds": 140.66279900000518
+      },
+      "admission:Nat.add_pos_right": {
+        "calls": 1,
+        "milliseconds": 408.03812599999947
+      },
+      "admission:Nat.mul_pos": {
+        "calls": 1,
+        "milliseconds": 523.2849480000004
+      },
+      "admission:Nat.pow_pos._f": {
+        "calls": 1,
+        "milliseconds": 807.3677400000015
+      },
+      "admission:Nat.pow_pos": {
+        "calls": 1,
+        "milliseconds": 91.6077129999976
+      },
+      "admission:BitVec.ofNat._proof_1": {
+        "calls": 1,
+        "milliseconds": 111.66287400000147
+      },
+      "admission:BitVec.ofNat": {
+        "calls": 1,
+        "milliseconds": 28.337360999998054
+      },
+      "admission:UInt8.ofNat": {
+        "calls": 1,
+        "milliseconds": 6.03945499999827
+      },
+      "admission:HDiv": {
+        "calls": 1,
+        "milliseconds": 140.09052999999403
+      },
+      "admission:HDiv.hDiv": {
+        "calls": 1,
+        "milliseconds": 25.012119999999413
+      },
+      "admission:Div": {
+        "calls": 1,
+        "milliseconds": 89.42733099999896
+      },
+      "admission:Div.div": {
+        "calls": 1,
+        "milliseconds": 6.818193000006431
+      },
+      "admission:instHDiv": {
+        "calls": 1,
+        "milliseconds": 20.984275000002526
+      },
+      "admission:Nat.div.go._f": {
+        "calls": 1,
+        "milliseconds": 329.2350860000006
+      },
+      "admission:Nat.div.go": {
+        "calls": 1,
+        "milliseconds": 32.94313400000101
+      },
+      "admission:Nat.div": {
+        "calls": 1,
+        "milliseconds": 107.38855799999874
+      },
+      "admission:Nat.instDiv": {
+        "calls": 1,
+        "milliseconds": 3.9997829999992973
+      },
+      "admission:String.utf8EncodeChar": {
+        "calls": 1,
+        "milliseconds": 268.9957480000012
+      },
+      "admission:List.utf8Encode": {
+        "calls": 1,
+        "milliseconds": 6.764202999998815
+      },
+      "admission:ByteArray.IsValidUTF8": {
+        "calls": 1,
+        "milliseconds": 155.28957199999422
+      },
+      "admission:String": {
+        "calls": 1,
+        "milliseconds": 96.84797399999661
+      },
+      "admission:String.ofList._proof_1": {
+        "calls": 1,
+        "milliseconds": 10.47922799999651
+      },
+      "admission:String.ofList": {
+        "calls": 2,
+        "milliseconds": 16.569598999994923
+      },
+      "admission:Bool.or": {
+        "calls": 1,
+        "milliseconds": 8.137272999993002
+      },
+      "admission:instDecidableOr.match_3": {
+        "calls": 1,
+        "milliseconds": 393.66411200000584
+      },
+      "admission:instDecidableOr.match_1": {
+        "calls": 1,
+        "milliseconds": 90.91100300000107
+      },
+      "admission:instDecidableOr._proof_1": {
+        "calls": 1,
+        "milliseconds": 191.39801699999953
+      },
+      "admission:instDecidableOr": {
+        "calls": 1,
+        "milliseconds": 21.199718000003486
+      },
+      "admission:Bool.and": {
+        "calls": 1,
+        "milliseconds": 6.649229999995441
+      },
+      "admission:instDecidableAnd.match_1": {
+        "calls": 1,
+        "milliseconds": 449.9031360000008
+      },
+      "admission:And.right": {
+        "calls": 1,
+        "milliseconds": 7.806637000001501
+      },
+      "admission:And.left": {
+        "calls": 1,
+        "milliseconds": 7.040256000000227
+      },
+      "admission:instDecidableAnd._proof_1": {
+        "calls": 1,
+        "milliseconds": 188.63673299999937
+      },
+      "admission:instDecidableAnd": {
+        "calls": 1,
+        "milliseconds": 20.636993000000075
+      },
+      "admission:BitVec.ofNatLT": {
+        "calls": 1,
+        "milliseconds": 79.2921090000018
+      },
+      "admission:UInt32.size": {
+        "calls": 1,
+        "milliseconds": 3.989889000004041
+      },
+      "admission:_private.Init.Prelude.0.isValidChar_UInt32.match_1_1": {
+        "calls": 1,
+        "milliseconds": 438.9741220000069
+      },
+      "admission:Nat.lt_trans": {
+        "calls": 1,
+        "milliseconds": 66.30395499999577
+      },
+      "admission:_private.Init.Prelude.0.of_decide_eq_true.match_1_1": {
+        "calls": 1,
+        "milliseconds": 190.9267899999977
+      },
+      "admission:_private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1": {
+        "calls": 1,
+        "milliseconds": 99.75882799999818
+      },
+      "admission:Bool.ne_true_of_eq_false": {
+        "calls": 1,
+        "milliseconds": 107.28990499999782
+      },
+      "admission:_private.Init.Prelude.0.decide_eq_false.match_1_1": {
+        "calls": 1,
+        "milliseconds": 178.02340399999957
+      },
+      "admission:decide_eq_false": {
+        "calls": 1,
+        "milliseconds": 117.22842200000014
+      },
+      "admission:of_decide_eq_true": {
+        "calls": 1,
+        "milliseconds": 55.0828130000009
+      },
+      "admission:_private.Init.Prelude.0.isValidChar_UInt32": {
+        "calls": 1,
+        "milliseconds": 300.4468579999957
+      },
+      "admission:Char.ofNatAux._private_1": {
+        "calls": 1,
+        "milliseconds": 7.070772999999463
+      },
+      "admission:Char.ofNatAux": {
+        "calls": 1,
+        "milliseconds": 352.4029210000008
+      },
+      "admission:Char.ofNat._proof_1": {
+        "calls": 1,
+        "milliseconds": 317.24983500000235
+      },
+      "admission:Char.ofNat._proof_2": {
+        "calls": 1,
+        "milliseconds": 2742.8375490000035
+      },
+      "admission:Char.ofNat": {
+        "calls": 1,
+        "milliseconds": 359.57210399999894
+      },
+      "input-and-owners": {
+        "calls": 2,
+        "milliseconds": 6207.836673999991
+      },
+      "string:defeq": {
+        "calls": 2,
+        "milliseconds": 26563.749643999996
+      },
+      "string-left": {
+        "calls": 14,
+        "milliseconds": 27309.54978199996
+      },
+      "string-right": {
+        "calls": 14,
+        "milliseconds": 131872.93696799997
+      },
+      "ofList-singleton:check": {
+        "calls": 2,
+        "milliseconds": 6429.903403000033
+      },
+      "ofList-singleton:whnf": {
+        "calls": 2,
+        "milliseconds": 34149.68102499997
+      },
+      "ofList-singleton:defeq": {
+        "calls": 1,
+        "milliseconds": 13492.95155399997
+      },
+      "utf8-literal:defeq": {
+        "calls": 2,
+        "milliseconds": 67365.85111600003
+      },
+      "utf8-literal-left": {
+        "calls": 14,
+        "milliseconds": 201712.608885
+      },
+      "utf8-literal-right": {
+        "calls": 14,
+        "milliseconds": 41621.400345000206
+      },
+      "utf8-ofList:defeq": {
+        "calls": 2,
+        "milliseconds": 62206.248979000025
+      },
+      "utf8-ofList-left": {
+        "calls": 14,
+        "milliseconds": 191979.62176400004
+      },
+      "utf8-ofList-right": {
+        "calls": 14,
+        "milliseconds": 41993.19575200009
+      },
+      "validity:defeq": {
+        "calls": 2,
+        "milliseconds": 24544.698297000024
+      },
+      "validity-left": {
+        "calls": 14,
+        "milliseconds": 120923.23178599996
+      },
+      "validity-right": {
+        "calls": 14,
+        "milliseconds": 123863.20108899986
+      },
+      "negative:projection-index": {
+        "calls": 4,
+        "milliseconds": 17563.097760000033
+      },
+      "negative:ofList-argument": {
+        "calls": 4,
+        "milliseconds": 13588.553074999945
+      },
+      "negative:constructor-proof": {
+        "calls": 4,
+        "milliseconds": 18069.643283000216
+      },
+      "negative:ofList-universe": {
+        "calls": 4,
+        "milliseconds": 15638.882435000036
+      },
+      "distinct-strings": {
+        "calls": 2,
+        "milliseconds": 5939.218753000023
+      }
+    },
+    "original_negative_stages": [
+      {
+        "stage": "negative:projection-index",
+        "begun": 4,
+        "completed": 4,
+        "expected_calls": 4
+      },
+      {
+        "stage": "negative:ofList-argument",
+        "begun": 4,
+        "completed": 4,
+        "expected_calls": 4
+      },
+      {
+        "stage": "negative:constructor-proof",
+        "begun": 4,
+        "completed": 4,
+        "expected_calls": 4
+      },
+      {
+        "stage": "negative:ofList-universe",
+        "begun": 4,
+        "completed": 4,
+        "expected_calls": 4
+      },
+      {
+        "stage": "distinct-strings",
+        "begun": 2,
+        "completed": 2,
+        "expected_calls": 2
+      }
+    ]
+  },
+  "shard_receipt": {
+    "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+    "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+    "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+    "requests": 294,
+    "metadata": 377,
+    "declarations": "377",
+    "samples": 1,
+    "availableSamples": 6,
+    "executedSamples": 1,
+    "fuel": 4096,
+    "independentAdmission": true,
+    "assertions": 1400,
+    "constructionMs": 42.794899000000015,
+    "admissionMs": 47595.198081999995,
+    "metadataMs": 1522.6863359999988,
+    "totalMs": 1243130.8615310001,
+    "diagnosticTracing": true,
+    "measurements": [
+      {
+        "sample": "Aé€😀",
+        "utf8Bytes": 10,
+        "owners": 224,
+        "ownerAndConstructionMs": 6218.091425999999,
+        "totalMs": 1193828.076149,
+        "arenaNodes": "288",
+        "ownedArenaNodes": "10476",
+        "memory": {
+          "rss": 1171275776,
+          "heapTotal": 563695616,
+          "heapUsed": 207626496,
+          "external": 4807077,
+          "arrayBuffers": 2809928
+        }
+      }
+    ],
+    "sampleIndex": 5,
+    "sample": "Aé€😀"
+  },
+  "runtime_receipt": {
+    "schema": "psc1-t01f-reused-mixed-diagnostic-receipt-v1",
+    "diagnosticOnly": true,
+    "harnessSourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "generatedSourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "artifact": {
+      "name": "psc1-t01f-hash-generated-producer",
+      "runId": "40033825281"
+    },
+    "node": "v22.23.3",
+    "jobMinutes": 25,
+    "fuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "emptyPATH": true,
+    "result": {
+      "kernelSha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+      "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+      "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+      "requests": 294,
+      "metadata": 377,
+      "declarations": "377",
+      "samples": 1,
+      "availableSamples": 6,
+      "executedSamples": 1,
+      "fuel": 4096,
+      "independentAdmission": true,
+      "assertions": 1400,
+      "constructionMs": 42.794899000000015,
+      "admissionMs": 47595.198081999995,
+      "metadataMs": 1522.6863359999988,
+      "totalMs": 1243130.8615310001,
+      "diagnosticTracing": true,
+      "measurements": [
+        {
+          "sample": "Aé€😀",
+          "utf8Bytes": 10,
+          "owners": 224,
+          "ownerAndConstructionMs": 6218.091425999999,
+          "totalMs": 1193828.076149,
+          "arenaNodes": "288",
+          "ownedArenaNodes": "10476",
+          "memory": {
+            "rss": 1171275776,
+            "heapTotal": 563695616,
+            "heapUsed": 207626496,
+            "external": 4807077,
+            "arrayBuffers": 2809928
+          }
+        }
+      ],
+      "sampleIndex": 5,
+      "sample": "Aé€😀"
+    },
+    "time": "peak_rss_kib=1145236 wall_seconds=1243.28 exit_status=0"
+  },
+  "memory": {
+    "peak_rss_kib": 1145236,
+    "wall_seconds": 1243.28,
+    "exit_status": 0
+  },
+  "memory_text": "peak_rss_kib=1145236 wall_seconds=1243.28 exit_status=0",
+  "limits": {
+    "job_minutes": 25,
+    "fuel": 4096,
+    "node_old_space_mib": 2048,
+    "empty_PATH": true,
+    "node": "v22.23.3",
+    "old_space_is_not_hard_RSS_limit": true
+  },
+  "qualification_limit": "This is one exact-source narrow mixed sample only. It does not establish either final six-shard route, full T01F acceptance, integration, C, D, soundness, or a general speedup. Absent final receipts and completed memory measurements remain unknown."
+}

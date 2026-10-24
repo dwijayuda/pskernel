@@ -1,0 +1,1848 @@
+{
+  "schema": "psc1-t01f-rejected-source-retained-profile-v1",
+  "sourceSha": "ce5747574230e009705372f36da80978060a78ad",
+  "runId": 40032580974,
+  "runAttempt": 1,
+  "run": {
+    "id": 40032580974,
+    "name": "PSC1 authentic Arena timeout diagnostics",
+    "node_id": "WFR_kwLOUlmxxc8AAAAJUiC1bg",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+    "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+    "display_title": "Qualify closed-cache analysis after complete exact-source narrow pass",
+    "run_number": 33,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 391356068,
+    "check_suite_id": 108512453109,
+    "check_suite_node_id": "CS_kwDOUlmxxc8AAAAZQ9ih9Q",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032580974",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032580974",
+    "pull_requests": [],
+    "created_at": "2026-10-23T22:16:56Z",
+    "updated_at": "2026-10-23T22:46:59Z",
+    "actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-23T22:16:56Z",
+    "triggering_actor": {
+      "login": "dwijayuda",
+      "id": 193330113,
+      "node_id": "U_kgDOC4X7wQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/dwijayuda",
+      "html_url": "https://github.com/dwijayuda",
+      "followers_url": "https://api.github.com/users/dwijayuda/followers",
+      "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+      "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+      "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+      "repos_url": "https://api.github.com/users/dwijayuda/repos",
+      "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032580974/jobs",
+    "logs_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032580974/logs",
+    "check_suite_url": "https://api.github.com/repos/dwijayuda/pskernel/check-suites/108512453109",
+    "artifacts_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032580974/artifacts",
+    "cancel_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032580974/cancel",
+    "rerun_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032580974/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/workflows/391356068",
+    "head_commit": {
+      "id": "ce5747574230e009705372f36da80978060a78ad",
+      "tree_id": "2f3e8003a3e909edbb93ad91efd1ce05ab0f98f6",
+      "message": "Qualify closed-cache analysis after complete exact-source narrow pass",
+      "timestamp": "2026-10-23T22:16:47Z",
+      "author": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      },
+      "committer": {
+        "name": "Dwija Yuda",
+        "email": "dwijayuda@gmail.com"
+      }
+    },
+    "repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    },
+    "head_repository": {
+      "id": 1381609925,
+      "node_id": "R_kgDOUlmxxQ",
+      "name": "pskernel",
+      "full_name": "dwijayuda/pskernel",
+      "private": false,
+      "owner": {
+        "login": "dwijayuda",
+        "id": 193330113,
+        "node_id": "U_kgDOC4X7wQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/193330113?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/dwijayuda",
+        "html_url": "https://github.com/dwijayuda",
+        "followers_url": "https://api.github.com/users/dwijayuda/followers",
+        "following_url": "https://api.github.com/users/dwijayuda/following{/other_user}",
+        "gists_url": "https://api.github.com/users/dwijayuda/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/dwijayuda/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/dwijayuda/subscriptions",
+        "organizations_url": "https://api.github.com/users/dwijayuda/orgs",
+        "repos_url": "https://api.github.com/users/dwijayuda/repos",
+        "events_url": "https://api.github.com/users/dwijayuda/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/dwijayuda/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/dwijayuda/pskernel",
+      "description": null,
+      "fork": false,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel",
+      "forks_url": "https://api.github.com/repos/dwijayuda/pskernel/forks",
+      "keys_url": "https://api.github.com/repos/dwijayuda/pskernel/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/dwijayuda/pskernel/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/dwijayuda/pskernel/teams",
+      "hooks_url": "https://api.github.com/repos/dwijayuda/pskernel/hooks",
+      "issue_events_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/dwijayuda/pskernel/events",
+      "assignees_url": "https://api.github.com/repos/dwijayuda/pskernel/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/dwijayuda/pskernel/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/dwijayuda/pskernel/tags",
+      "blobs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/dwijayuda/pskernel/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/dwijayuda/pskernel/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/dwijayuda/pskernel/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/dwijayuda/pskernel/languages",
+      "stargazers_url": "https://api.github.com/repos/dwijayuda/pskernel/stargazers",
+      "contributors_url": "https://api.github.com/repos/dwijayuda/pskernel/contributors",
+      "subscribers_url": "https://api.github.com/repos/dwijayuda/pskernel/subscribers",
+      "subscription_url": "https://api.github.com/repos/dwijayuda/pskernel/subscription",
+      "commits_url": "https://api.github.com/repos/dwijayuda/pskernel/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/dwijayuda/pskernel/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/dwijayuda/pskernel/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/dwijayuda/pskernel/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/dwijayuda/pskernel/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/dwijayuda/pskernel/merges",
+      "archive_url": "https://api.github.com/repos/dwijayuda/pskernel/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/dwijayuda/pskernel/downloads",
+      "issues_url": "https://api.github.com/repos/dwijayuda/pskernel/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/dwijayuda/pskernel/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/dwijayuda/pskernel/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/dwijayuda/pskernel/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/dwijayuda/pskernel/labels{/name}",
+      "releases_url": "https://api.github.com/repos/dwijayuda/pskernel/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/dwijayuda/pskernel/deployments"
+    }
+  },
+  "job": {
+    "id": 120684188291,
+    "run_id": 40032580974,
+    "workflow_name": "PSC1 authentic Arena timeout diagnostics",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032580974",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcGVaSgw",
+    "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120684188291",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032580974/job/120684188291",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-23T22:16:56Z",
+    "started_at": "2026-10-23T22:16:59Z",
+    "completed_at": "2026-10-23T22:46:58Z",
+    "name": "authentic-timeout-diagnostics",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-23T22:17:00Z",
+        "completed_at": "2026-10-23T22:17:01Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-23T22:17:01Z",
+        "completed_at": "2026-10-23T22:17:23Z"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-23T22:17:23Z",
+        "completed_at": "2026-10-23T22:17:24Z"
+      },
+      {
+        "name": "Install pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-23T22:17:24Z",
+        "completed_at": "2026-10-23T22:17:44Z"
+      },
+      {
+        "name": "Authenticate tools and diagnostic harness",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-23T22:17:44Z",
+        "completed_at": "2026-10-23T22:17:44Z"
+      },
+      {
+        "name": "Build authentic compiler and complete canonical source closure",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-23T22:17:44Z",
+        "completed_at": "2026-10-23T22:34:00Z"
+      },
+      {
+        "name": "Generate real JavaScript, declarations and source map",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-23T22:34:00Z",
+        "completed_at": "2026-10-23T22:42:57Z"
+      },
+      {
+        "name": "Check detached positive and adversarial controls",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-23T22:42:57Z",
+        "completed_at": "2026-10-23T22:42:58Z"
+      },
+      {
+        "name": "Collect authentic profiles with unchanged case limits",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-23T22:42:58Z",
+        "completed_at": "2026-10-23T22:46:50Z"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-23T22:46:50Z",
+        "completed_at": "2026-10-23T22:46:56Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19,
+        "started_at": "2026-10-23T22:46:56Z",
+        "completed_at": "2026-10-23T22:46:56Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20,
+        "started_at": "2026-10-23T22:46:56Z",
+        "completed_at": "2026-10-23T22:46:56Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21,
+        "started_at": "2026-10-23T22:46:56Z",
+        "completed_at": "2026-10-23T22:46:56Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120684188291",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000028088,
+    "runner_name": "GitHub Actions 1000028088",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "artifact": {
+    "id": 12536778341,
+    "node_id": "MDg6QXJ0aWZhY3QxMjUzNjc3ODM0MQ==",
+    "name": "psc1-arena435-authentic-diagnostics",
+    "size_in_bytes": 13226879,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12536778341",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12536778341/zip",
+    "expired": false,
+    "digest": "sha256:921ba3e9e4c80cd571e04761295f42a6ecfc7c7c2050adcb6bdbfbe8e5c03b56",
+    "created_at": "2026-10-23T22:46:55Z",
+    "updated_at": "2026-10-23T22:46:55Z",
+    "expires_at": "2026-11-22T22:46:50Z",
+    "workflow_run": {
+      "id": 40032580974,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "head_sha": "ce5747574230e009705372f36da80978060a78ad"
+    }
+  },
+  "artifactInspection": {
+    "artifactId": 12536778341,
+    "name": "psc1-arena435-authentic-diagnostics",
+    "zip": {
+      "bytes": 13226879,
+      "sha256": "921ba3e9e4c80cd571e04761295f42a6ecfc7c7c2050adcb6bdbfbe8e5c03b56"
+    },
+    "files": {
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/case-000-stdout.txt": {
+        "bytes": 1181,
+        "sha256": "62f8e2403058f916054374da8c422fc676446ca1c7f332a591e2abd2cd9ef447"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/case-000-time.txt": {
+        "bytes": 992,
+        "sha256": "8991a46fa42879116984dd1249c6faa665d4b9da782dc54d41b50c77b925f99d"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/case-000-stderr.txt": {
+        "bytes": 2005,
+        "sha256": "fbbedfd997be1720ceb2f2914a216d4e9d3dea3219f45a8575ac922324e1bb77"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/input.ndjson": {
+        "bytes": 11659,
+        "sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/isolate-0x37317000-5603-ticks.v8.log": {
+        "bytes": 15623340,
+        "sha256": "2fb90d223b5952af57279cf631cdbf7a1aa599316b362ae974659b4c1f148fff"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/official.txt": {
+        "bytes": 42,
+        "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/profiled.stderr.txt": {
+        "bytes": 2006,
+        "sha256": "d35a983bd4e747468ab5e62aaac38af916175cffd5e884fd93bf97e2cf787146"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/profiled.stdout.txt": {
+        "bytes": 1181,
+        "sha256": "62f8e2403058f916054374da8c422fc676446ca1c7f332a591e2abd2cd9ef447"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/report.json": {
+        "bytes": 15841,
+        "sha256": "41f1e3fd39348846152fbd78effb0bd73750f0f075501e5c03ba5f753fd3d64f"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/ticks-0.processed.txt": {
+        "bytes": 51559,
+        "sha256": "77bb75eac169e8090b19f2b8afb0783eb0d8e30aad78caa02be95efa7ee1461f"
+      },
+      "_temp/arena435-authentic-profiles/case-00-repeated-subproblem/ticks-0.processing.stderr.txt": {
+        "bytes": 210,
+        "sha256": "c6ce0b0262f6f988c7c18f89f29519723e09e3dc7c0bd8d2bc9fa666d156398e"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/case-001-stderr.txt": {
+        "bytes": 1377,
+        "sha256": "877a422c7b0a63453568747c8eca79af13ba0a7893d392f9fd781192b488adc0"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/case-001-stdout.txt": {
+        "bytes": 442,
+        "sha256": "948ac67e22c44ad7f255d103b33a4eb8b202579a93013e0175c58ecd7fa148ad"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/case-001-time.txt": {
+        "bytes": 994,
+        "sha256": "cbc0e249f1cd97887e9da20e1c420188d7d940a3a93343bf3595556d48278113"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/isolate-0x3553b000-5668-ticks.v8.log": {
+        "bytes": 18274898,
+        "sha256": "1ac24f1af8277d4079df67213febf9e540cd66f81ae627dad31023432ecd84e7"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/input.ndjson": {
+        "bytes": 9849,
+        "sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/official.txt": {
+        "bytes": 42,
+        "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/profiled.stderr.txt": {
+        "bytes": 1380,
+        "sha256": "196f811a0b53d1258917fbdcbb0963f564718e259821cc31916321a20f47caac"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/report.json": {
+        "bytes": 12512,
+        "sha256": "d1900e9dfb960b7068642c6cd9fbe7908253b6e0ccf5a6f67ab41434634e0d34"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/profiled.stdout.txt": {
+        "bytes": 442,
+        "sha256": "948ac67e22c44ad7f255d103b33a4eb8b202579a93013e0175c58ecd7fa148ad"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/ticks-0.processed.txt": {
+        "bytes": 180517,
+        "sha256": "5c9b5ab7f0c4ccdf8f0e5d2f46106c50b0a29681fa44603ef5400652c850104b"
+      },
+      "_temp/arena435-authentic-profiles/case-01-church-numerals/ticks-0.processing.stderr.txt": {
+        "bytes": 210,
+        "sha256": "ff98004c427a3c269ebfe68113d15e119dc06bf418576617cfeccd930d9a5ccd"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/case-002-stderr.txt": {
+        "bytes": 20858,
+        "sha256": "90fa393cd1046ba21bbacaaa0b2d45b0c18ea4640dc7eab663071562681a3758"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/case-002-time.txt": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/case-002-stdout.txt": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/input.ndjson": {
+        "bytes": 3714854,
+        "sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/isolate-0xf767000-5739-ticks.v8.log": {
+        "bytes": 25482572,
+        "sha256": "7c6367f6dcb026debf33d9a33dab585e4365a0a2337b879919722a5d685b6324"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/official.txt": {
+        "bytes": 42,
+        "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/profiled.stderr.txt": {
+        "bytes": 20872,
+        "sha256": "0abfffe2decd3877efcd550854dd59d70333c92c294ceeb38263fb1ea383a749"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/profiled.stdout.txt": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/report.json": {
+        "bytes": 11624,
+        "sha256": "865f276fb89679a7cda987d46cb9b54d7b7ea086d1752dfcaf0a768ef4ea7266"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/ticks-0.processed.txt": {
+        "bytes": 296756,
+        "sha256": "a7557cfc13abb2139fbc22be7d159a33f1241cbb528a243180cff53a69fa1896"
+      },
+      "_temp/arena435-authentic-profiles/case-02-init-prelude/ticks-0.processing.stderr.txt": {
+        "bytes": 210,
+        "sha256": "9f4b36b6faa43795b4913305fe230ef6962b40fac816a38f76cb5d27a86e085e"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/case-003-stderr.txt": {
+        "bytes": 2936,
+        "sha256": "30e37538dfbc95d3fc1ba94f18032b4a1f4df3339a1a33079f219855bc92b66f"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/case-003-stdout.txt": {
+        "bytes": 427,
+        "sha256": "7fe7bfbd6ce829e1f39bc6d07001eb219dabd24f5faca523fd187d301ae73f10"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/case-003-time.txt": {
+        "bytes": 996,
+        "sha256": "b3efbd30aad70f9983da3a01b16e3e78b634a94a0206098a08588009a02c9d58"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/input.ndjson": {
+        "bytes": 282521,
+        "sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/isolate-0x9807000-5813-ticks.v8.log": {
+        "bytes": 22415854,
+        "sha256": "f23310fcd9b75e35bb7b8c5ed37b51ef1a11a56529b14b14da4e18a744f12284"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/official.txt": {
+        "bytes": 157,
+        "sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/profiled.stderr.txt": {
+        "bytes": 2939,
+        "sha256": "7fce79459900f9de9a1253090291f15a8b5deea613747577cc60f7204319095b"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/profiled.stdout.txt": {
+        "bytes": 427,
+        "sha256": "7fe7bfbd6ce829e1f39bc6d07001eb219dabd24f5faca523fd187d301ae73f10"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/report.json": {
+        "bytes": 12724,
+        "sha256": "285413e9ef3e6849ac0b7bf94f2fdb1bc0c66a9ea9fb8ef3c3ceaeecb75c14e0"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/ticks-0.processed.txt": {
+        "bytes": 211880,
+        "sha256": "15e0d731e406df7ed541a1d7e3d60a027d3a430f37cb479364e5fdd3e5427f71"
+      },
+      "_temp/arena435-authentic-profiles/case-03-proj-of-stuck-prop/ticks-0.processing.stderr.txt": {
+        "bytes": 210,
+        "sha256": "727079ee504856d4231debb3b80a44b4f1d9897f626ede371f70ffed3cd35a0e"
+      },
+      "_temp/arena435-authentic-profiles/official-control-accepted.ndjson": {
+        "bytes": 397,
+        "sha256": "6ac16043adc6554428fd76836f532c690fed4c43e1966396d8bec53c81b1be49"
+      },
+      "_temp/arena435-authentic-profiles/official-control-accepted.txt": {
+        "bytes": 42,
+        "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "_temp/arena435-authentic-profiles/official-control-rejected.txt": {
+        "bytes": 221,
+        "sha256": "5f266a28e689668b606e65a790da249eb32716972c059c5bf06c575353c2d20b"
+      },
+      "_temp/arena435-authentic-profiles/official-control-rejected.ndjson": {
+        "bytes": 397,
+        "sha256": "3c1d3e78dd3980afe1023ae0ce6d9c9501c687add25a185351adb74980b04755"
+      },
+      "_temp/arena435-authentic-profiles/report.json": {
+        "bytes": 58263,
+        "sha256": "0d6ab5ad1021631d8c6f8bd984cf09155596496614aa4b7aaa1a8a27533ccbfb"
+      },
+      "_temp/arena435-authentic-profiles/sha256.json": {
+        "bytes": 7284,
+        "sha256": "31eb9272accae52de09d2e804e49fa0ac30aba5f7ddd79efbe646147ba6baa66"
+      },
+      "_temp/arena435-authentic-profile.log": {
+        "bytes": 33088,
+        "sha256": "d7b8208429b6d50709121b7cc59de257eafec91c8ec490bc482db25f238b18d0"
+      },
+      "_temp/arena435-profile-controls.log": {
+        "bytes": 8460,
+        "sha256": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f"
+      },
+      "_temp/arena435-profile-artifacts.sha256": {
+        "bytes": 398,
+        "sha256": "7724e115a584ff24607163471a9aa033a34b462598637a9653cb2a40dbd29018"
+      },
+      "pskernel/pskernel/psc1/dist/arena435-profile/kernel.ts": {
+        "bytes": 9167333,
+        "sha256": "87315bf86765b780566b2b9cb3a943bf22744a5e4cb867a490653b4749f0f9b3"
+      },
+      "pskernel/pskernel/psc1/dist/arena435-profile/kernel.js": {
+        "bytes": 9986116,
+        "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+      },
+      "pskernel/pskernel/psc1/dist/arena435-profile/kernel.d.ts": {
+        "bytes": 369264,
+        "sha256": "c669e86e85078536129cfc2785846d9b67470fdd2c894d3eee99b3751266df58"
+      },
+      "pskernel/pskernel/psc1/dist/arena435-profile/kernel.js.map": {
+        "bytes": 8134536,
+        "sha256": "4d409cdf0f0de3426fa22895c5961f59109a08be0724917c7f4dd3cb04a3562e"
+      },
+      "pskernel/pskernel/psc1/dist/arena435-profile/workspace/.proofscript-bootstrap.json": {
+        "bytes": 11046,
+        "sha256": "dfde6009303c2e45e8db4758e2c3fa61eb6dcb0d8f47f3ed5426f3c1b68026fc"
+      }
+    }
+  },
+  "jobLog": {
+    "bytes": 186100,
+    "sha256": "cc4c68048a4eab82d15fae3bffd6ba01025a797fb191ebce43d75e8abda44c62"
+  },
+  "scope": "Historical rejected ce574 source only; no qualification transfer to e136 or any later final source.",
+  "localInspection": "Static ZIP/hash/source/JSON/log/body inspection only; no repository code, JS, Lean, compiler or kernel execution.",
+  "report": {
+    "format": "psc1-authentic-arena-diagnostics-v1",
+    "source_sha": "ce5747574230e009705372f36da80978060a78ad",
+    "kernel_sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528",
+    "replay_sha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821",
+    "driver_sha256": "3fefac602709edd0cd2aa62d1f60b0c35dd70eb0bea36ac8d2421262cc94a8f3",
+    "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
+    "target_lean": {
+      "version": "4.35.0",
+      "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "kernel_fuel": 4096,
+    "host_wall_seconds_per_case": 60,
+    "node_old_space_limit_mib": 2048,
+    "runtime_path_empty": true,
+    "case_selection": "fixed diagnostic subset; full 193-case qualification is separate",
+    "controls": [
+      {
+        "expected": "accepted",
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.362623006999911,
+        "log": "official-control-accepted.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      {
+        "expected": "rejected",
+        "verdict": "rejected",
+        "reason": "official_kernel_verdict",
+        "returncode": 1,
+        "elapsed_seconds": 0.3843002969999816,
+        "log": "official-control-rejected.txt",
+        "output_sha256": "5f266a28e689668b606e65a790da249eb32716972c059c5bf06c575353c2d20b"
+      }
+    ],
+    "cases": [
+      {
+        "index": 0,
+        "label": "good",
+        "name": "perf/repeated-subproblem.ndjson",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+          "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "body_bytes_identical": true
+        },
+        "official": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.3814705419999882,
+          "log": "official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "unprofiled": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 214,
+          "metadataCounts": {
+            "ctorInfo": 5,
+            "recInfo": 3,
+            "inductInfo": 3,
+            "defnInfo": 1,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false,
+          "elapsed_seconds": 1.182840558999942,
+          "returncode": 0,
+          "stdout": "case-000-stdout.txt",
+          "stderr": "case-000-stderr.txt",
+          "time_log": "case-000-time.txt",
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1080.502789
+          },
+          "peak_rss_kib": 268708
+        },
+        "unprofiled_classification": "matched_acceptance",
+        "profiled": {
+          "observation": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "verdict": "accepted",
+            "stage": "complete",
+            "coreInvoked": true,
+            "records": 214,
+            "metadataCounts": {
+              "ctorInfo": 5,
+              "recInfo": 3,
+              "inductInfo": 3,
+              "defnInfo": 1,
+              "thmInfo": 1
+            },
+            "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+            "sourceMutualBlockMetadata": [
+              {
+                "kind": "defnInfo",
+                "name": {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "32",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "perfect"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "thmInfo",
+                "name": {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "43",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_repeated_subproblem"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": true,
+            "officialReplaySkipsUnsafeOrPartial": false,
+            "returncode": 0,
+            "timed_out": false,
+            "elapsed_seconds": 1.5616770569999971,
+            "observed_vm_hwm_kib_lower_bound": 264580,
+            "progress_snapshots": 7,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "metadata-compare",
+              "coreInvoked": true,
+              "records": 214,
+              "exportedDeclarations": 13,
+              "admissionCommands": 5,
+              "arenaNodes": "162",
+              "fuel": "4096",
+              "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+              "elapsedMilliseconds": 1418.970592
+            }
+          },
+          "streaming_profiles": [
+            {
+              "raw_log": "isolate-0x37317000-5603-ticks.v8.log",
+              "raw_log_sha256": "2fb90d223b5952af57279cf631cdbf7a1aa599316b362ae974659b4c1f148fff",
+              "bytes": 15623340,
+              "tick_records": 1278,
+              "processed": "ticks-0.processed.txt",
+              "processed_sha256": "77bb75eac169e8090b19f2b8afb0783eb0d8e30aad78caa02be95efa7ee1461f",
+              "processing": {
+                "returncode": 0,
+                "timed_out": false,
+                "elapsed_seconds": 12.572393336999994,
+                "observed_vm_hwm_kib_lower_bound": 439136
+              },
+              "hottest_javascript_and_callers": [
+                " [JavaScript]:",
+                "   ticks  total  nonlib   name",
+                "     24    1.9%    6.2%  Builtin: LoadIC",
+                "     15    1.2%    3.9%  Builtin: WeakCollectionSet",
+                "     12    0.9%    3.1%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     12    0.9%    3.1%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:29:22",
+                "     12    0.9%    3.1%  Builtin: LoadIC_Megamorphic",
+                "     12    0.9%    3.1%  Builtin: CompileLazy",
+                "     10    0.8%    2.6%  Builtin: SuspendGeneratorBaseline",
+                "     10    0.8%    2.6%  Builtin: ResumeGeneratorTrampoline",
+                "      9    0.7%    2.3%  Builtin: GeneratorPrototypeNext",
+                "      8    0.6%    2.1%  Builtin: BaselineOutOfLinePrologue",
+                "      7    0.5%    1.8%  Builtin: ResumeGeneratorBaseline",
+                "      7    0.5%    1.8%  Builtin: RecordWriteSaveFP",
+                "      6    0.5%    1.6%  Builtin: FastNewClosure",
+                "      6    0.5%    1.6%  Builtin: CreateGeneratorObject",
+                "      6    0.5%    1.6%  Builtin: Call_ReceiverIsNotNullOrUndefined_Baseline_Compact",
+                "      5    0.4%    1.3%  JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:24:19",
+                "      5    0.4%    1.3%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+                "      5    0.4%    1.3%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+                "      5    0.4%    1.3%  Builtin: BaselineLeaveFrame",
+                "      4    0.3%    1.0%  Builtin: WeakMapLookupHashIndex",
+                "      4    0.3%    1.0%  Builtin: EphemeronKeyBarrierSaveFP",
+                "      4    0.3%    1.0%  Builtin: CallFunction_ReceiverIsAny",
+                "      3    0.2%    0.8%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72175:156",
+                "      3    0.2%    0.8%  Builtin: StrictEqual_Baseline",
+                " [Bottom up (heavy) profile]:",
+                "  Note: percentage shows a share of a particular caller in the total",
+                "  amount of its parent calls.",
+                "  Callers occupying less than 1.0% are not shown.",
+                "",
+                "   ticks parent  name",
+                "    852   66.7%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "    700   82.2%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "    203   29.0%      JS: ~moduleStrategy node:internal/modules/esm/translators:102:50",
+                "    203  100.0%        JS: ~#translate node:internal/modules/esm/loader:550:13",
+                "    203  100.0%          JS: ~afterLoad node:internal/modules/esm/loader:610:23",
+                "    203  100.0%            JS: ~loadAndTranslate node:internal/modules/esm/loader:608:19",
+                "    155   22.1%      JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "    150   96.8%        JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:132629:33",
+                "    150  100.0%          JS: ^replayText file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:105:27",
+                "    150  100.0%            JS: ~replayFile file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:490:33",
+                "      2    1.3%        JS: ~psKernelExprV2DecodeChecked file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72621:44",
+                "      2  100.0%          JS: ^replayText file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:105:27",
+                "      2  100.0%            JS: ~replayFile file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:490:33",
+                "      2    1.3%        JS: ~psKernelEnvironmentFind file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:6248:40",
+                "      2  100.0%          JS: ~infoFor file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:419:21",
+                "      2  100.0%            JS: ^replayText file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:105:27",
+                "     35    5.0%      Builtin: WeakMapPrototypeSet",
+                "     26   74.3%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:24:19",
+                "      8   30.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72283:153",
+                "      8  100.0%            Builtin: GeneratorPrototypeNext",
+                "      4   15.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:75745:45",
+                "      4  100.0%            Builtin: GeneratorPrototypeNext",
+                "      3   11.5%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:66453:585",
+                "      3  100.0%            Builtin: GeneratorPrototypeNext",
+                "      3   11.5%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:66019:325",
+                "      3  100.0%            Builtin: GeneratorPrototypeNext",
+                "      2    7.7%          JS: ^__ps$impl$psKernelEnvironmentIndexFindWorker file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:6071:55",
+                "      2  100.0%            Builtin: GeneratorPrototypeNext",
+                "      2    7.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:85062:354",
+                "      2  100.0%            Builtin: GeneratorPrototypeNext",
+                "      2    7.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77760:73",
+                "      2  100.0%            Builtin: GeneratorPrototypeNext",
+                "      1    3.8%          JS: ~<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:66019:325",
+                "      1  100.0%            Builtin: GeneratorPrototypeNext",
+                "      1    3.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74511:272",
+                "      1  100.0%            Builtin: GeneratorPrototypeNext",
+                "      6   17.1%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:66453:585",
+                "      6  100.0%          Builtin: GeneratorPrototypeNext",
+                "      6  100.0%            JS: *__ps$impl$psKernelOpenSimpleConstructorFieldsWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:66453:64",
+                "      3    8.6%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:431:251",
+                "      3  100.0%          Builtin: GeneratorPrototypeNext",
+                "      3  100.0%            JS: *__ps$impl$psKernelStringEqFromWorkerWithFuel_$psc0SH_0 file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:431:65",
+                "     17    2.4%      JS: *__ps$impl$psKernelOpenSimpleConstructorParamsWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:66019:64",
+                "     17  100.0%        Builtin: GeneratorPrototypeNext",
+                "     17  100.0%          JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     17  100.0%            JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:132629:33",
+                "     10    1.4%      JS: *__ps$impl$psKernelOpenSimpleConstructorFieldsWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:66453:64",
+                "     10  100.0%        Builtin: GeneratorPrototypeNext",
+                "     10  100.0%          JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     10  100.0%            JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:132629:33",
+                "      7    1.0%      JS: *__ps$impl$psKernelStringEqFromWorkerWithFuel_$psc0SH_0 file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:431:65",
+                "      7  100.0%        Builtin: GeneratorPrototypeNext",
+                "      7  100.0%          JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "      7  100.0%            JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:132629:33",
+                "     19    2.2%    Builtin: WeakMapPrototypeSet",
+                "     10   52.6%      JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:24:19",
+                "      2   20.0%        JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:6090:36",
+                "      2  100.0%          Builtin: GeneratorPrototypeNext",
+                "      2  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18"
+              ]
+            }
+          ],
+          "trailing_samples_may_be_lost_on_kill": false,
+          "instrumented_timing_is_not_a_performance_comparison": true,
+          "profile_collection_complete": true
+        },
+        "profiled_classification": "matched_acceptance"
+      },
+      {
+        "index": 1,
+        "label": "good",
+        "name": "perf/church-numerals.ndjson",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+          "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "body_bytes_identical": true
+        },
+        "official": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.37166692200003126,
+          "log": "official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "unprofiled": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "resource_exhausted",
+          "stage": "kernel-admission",
+          "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 15.808612884000013,
+          "returncode": 0,
+          "stdout": "case-001-stdout.txt",
+          "stderr": "case-001-stderr.txt",
+          "time_log": "case-001-time.txt",
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 100.27295
+          },
+          "peak_rss_kib": 1238316
+        },
+        "unprofiled_classification": "pskernel_resource_exhausted",
+        "profiled": {
+          "observation": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "verdict": "resource_exhausted",
+            "stage": "kernel-admission",
+            "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "elapsed_seconds": 17.25315754899998,
+            "observed_vm_hwm_kib_lower_bound": 1132412,
+            "progress_snapshots": 5,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 227,
+              "exportedDeclarations": 6,
+              "admissionCommands": 4,
+              "arenaNodes": "197",
+              "fuel": "4096",
+              "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+              "elapsedMilliseconds": 330.431188
+            }
+          },
+          "streaming_profiles": [
+            {
+              "raw_log": "isolate-0x3553b000-5668-ticks.v8.log",
+              "raw_log_sha256": "1ac24f1af8277d4079df67213febf9e540cd66f81ae627dad31023432ecd84e7",
+              "bytes": 18274898,
+              "tick_records": 14769,
+              "processed": "ticks-0.processed.txt",
+              "processed_sha256": "5c9b5ab7f0c4ccdf8f0e5d2f46106c50b0a29681fa44603ef5400652c850104b",
+              "processing": {
+                "returncode": 0,
+                "timed_out": false,
+                "elapsed_seconds": 4.275106521999987,
+                "observed_vm_hwm_kib_lower_bound": 421216
+              },
+              "hottest_javascript_and_callers": [
+                " [JavaScript]:",
+                "   ticks  total  nonlib   name",
+                "    283    1.9%    6.8%  Builtin: CompileLazy",
+                "    276    1.9%    6.7%  Builtin: LoadIC_Megamorphic",
+                "    257    1.7%    6.2%  Builtin: GeneratorPrototypeNext",
+                "    201    1.4%    4.9%  Builtin: WeakCollectionSet",
+                "    168    1.1%    4.1%  Builtin: ResumeGeneratorTrampoline",
+                "    161    1.1%    3.9%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "    124    0.8%    3.0%  Builtin: LoadIC",
+                "    106    0.7%    2.6%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:29:22",
+                "     94    0.6%    2.3%  Builtin: RecordWriteSaveFP",
+                "     78    0.5%    1.9%  Builtin: SuspendGeneratorBaseline",
+                "     71    0.5%    1.7%  Builtin: WeakMapLookupHashIndex",
+                "     60    0.4%    1.4%  Builtin: CallFunction_ReceiverIsAny",
+                "     56    0.4%    1.4%  Builtin: CreateIterResultObject",
+                "     46    0.3%    1.1%  Builtin: ResumeGeneratorBaseline",
+                "     42    0.3%    1.0%  Builtin: EphemeronKeyBarrierSaveFP",
+                "     41    0.3%    1.0%  Builtin: CreateGeneratorObject",
+                "     41    0.3%    1.0%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+                "     39    0.3%    0.9%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72181:56",
+                "     39    0.3%    0.9%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72175:156",
+                "     38    0.3%    0.9%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+                "     37    0.3%    0.9%  Builtin: BaselineOutOfLinePrologue",
+                "     36    0.2%    0.9%  Builtin: LoadICTrampoline_Megamorphic",
+                "     27    0.2%    0.7%  Builtin: Call_ReceiverIsNotNullOrUndefined",
+                "     27    0.2%    0.7%  Builtin: BaselineLeaveFrame",
+                " [Bottom up (heavy) profile]:",
+                "  Note: percentage shows a share of a particular caller in the total",
+                "  amount of its parent calls.",
+                "  Callers occupying less than 1.0% are not shown.",
+                "",
+                "   ticks parent  name",
+                "  10169   68.9%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "   7457   73.3%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "   1346   18.1%      Builtin: WeakMapPrototypeSet",
+                "    292   21.7%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:24:19",
+                "    117   40.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:89962:50",
+                "    117  100.0%            Builtin: GeneratorPrototypeNext",
+                "     35   12.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72283:153",
+                "     35  100.0%            Builtin: GeneratorPrototypeNext",
+                "     25    8.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:131060:58",
+                "     25  100.0%            Builtin: GeneratorPrototypeNext",
+                "     17    5.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:75742:332",
+                "     17  100.0%            Builtin: GeneratorPrototypeNext",
+                "     13    4.5%          JS: *__ps$impl$psKernelExprV2TransformWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77528:52",
+                "     13  100.0%            Builtin: GeneratorPrototypeNext",
+                "     11    3.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:91126:410",
+                "     11  100.0%            Builtin: GeneratorPrototypeNext",
+                "     10    3.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:85321:120",
+                "     10  100.0%            Builtin: GeneratorPrototypeNext",
+                "     10    3.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74491:94",
+                "     10  100.0%            Builtin: GeneratorPrototypeNext",
+                "      6    2.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:81152:45",
+                "      6  100.0%            Builtin: GeneratorPrototypeNext",
+                "      6    2.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:131069:72",
+                "      6  100.0%            Builtin: GeneratorPrototypeNext",
+                "      5    1.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:87669:41",
+                "      5  100.0%            Builtin: GeneratorPrototypeNext",
+                "      5    1.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76768:106",
+                "      5  100.0%            Builtin: GeneratorPrototypeNext",
+                "      4    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:87879:136",
+                "      4  100.0%            Builtin: GeneratorPrototypeNext",
+                "      4    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:81627:45",
+                "      4  100.0%            Builtin: GeneratorPrototypeNext",
+                "      4    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:131062:106",
+                "      4  100.0%            Builtin: GeneratorPrototypeNext",
+                "      3    1.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:87628:32",
+                "      3  100.0%            Builtin: GeneratorPrototypeNext",
+                "      3    1.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:87599:60",
+                "      3  100.0%            Builtin: GeneratorPrototypeNext",
+                "      3    1.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:81151:68",
+                "      3  100.0%            Builtin: GeneratorPrototypeNext",
+                "    118    8.8%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:75742:332",
+                "    118  100.0%          Builtin: GeneratorPrototypeNext",
+                "    118  100.0%            JS: *__ps$impl$psKernelExprV2PagedPairCompareWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:75742:59",
+                "    113    8.4%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:87880:128",
+                "    113  100.0%          Builtin: GeneratorPrototypeNext",
+                "    113  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     94    7.0%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:85063:45",
+                "     94  100.0%          Builtin: GeneratorPrototypeNext",
+                "     94  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     86    6.4%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:81152:45",
+                "     86  100.0%          Builtin: GeneratorPrototypeNext",
+                "     86  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     68    5.1%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77756:45",
+                "     68  100.0%          Builtin: GeneratorPrototypeNext",
+                "     68  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     63    4.7%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77538:114",
+                "     63  100.0%          Builtin: GeneratorPrototypeNext",
+                "     63  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "     55    4.1%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:557:70"
+              ]
+            }
+          ],
+          "trailing_samples_may_be_lost_on_kill": false,
+          "instrumented_timing_is_not_a_performance_comparison": true,
+          "profile_collection_complete": true
+        },
+        "profiled_classification": "pskernel_resource_exhausted"
+      },
+      {
+        "index": 2,
+        "label": "good",
+        "name": "init-prelude.ndjson",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+          "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "body_bytes_identical": true
+        },
+        "official": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.5677667449999717,
+          "log": "official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "unprofiled": {
+          "elapsed_seconds": 60.1426328309999,
+          "returncode": -9,
+          "stdout": "case-002-stdout.txt",
+          "stderr": "case-002-stderr.txt",
+          "time_log": "case-002-time.txt",
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 1738.918342
+          },
+          "verdict": "timeout",
+          "stage": "host-wall-time",
+          "timeout_seconds": 60
+        },
+        "unprofiled_classification": "pskernel_timeout",
+        "profiled": {
+          "observation": {
+            "returncode": -9,
+            "timed_out": true,
+            "elapsed_seconds": 60.067537969999876,
+            "observed_vm_hwm_kib_lower_bound": 1042880,
+            "progress_snapshots": 67,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 63723,
+              "exportedDeclarations": 2059,
+              "admissionCommands": 1774,
+              "arenaNodes": "54535",
+              "fuel": "4096",
+              "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+              "elapsedMilliseconds": 2035.051706
+            },
+            "verdict": "timeout",
+            "stage": "host-wall-time",
+            "timeout_seconds": 60
+          },
+          "streaming_profiles": [
+            {
+              "raw_log": "isolate-0xf767000-5739-ticks.v8.log",
+              "raw_log_sha256": "7c6367f6dcb026debf33d9a33dab585e4365a0a2337b879919722a5d685b6324",
+              "bytes": 25482572,
+              "tick_records": 51744,
+              "processed": "ticks-0.processed.txt",
+              "processed_sha256": "a7557cfc13abb2139fbc22be7d159a33f1241cbb528a243180cff53a69fa1896",
+              "processing": {
+                "returncode": 0,
+                "timed_out": false,
+                "elapsed_seconds": 4.728255071999911,
+                "observed_vm_hwm_kib_lower_bound": 430024
+              },
+              "hottest_javascript_and_callers": [
+                " [JavaScript]:",
+                "   ticks  total  nonlib   name",
+                "   1040    2.0%    6.9%  Builtin: LoadIC_Megamorphic",
+                "    907    1.8%    6.0%  Builtin: WeakCollectionSet",
+                "    883    1.7%    5.9%  Builtin: GeneratorPrototypeNext",
+                "    816    1.6%    5.4%  Builtin: CompileLazy",
+                "    689    1.3%    4.6%  Builtin: ResumeGeneratorTrampoline",
+                "    524    1.0%    3.5%  Builtin: RecordWriteSaveFP",
+                "    479    0.9%    3.2%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "    420    0.8%    2.8%  Builtin: LoadIC",
+                "    371    0.7%    2.5%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:29:22",
+                "    246    0.5%    1.6%  Builtin: WeakMapLookupHashIndex",
+                "    232    0.4%    1.5%  Builtin: CreateIterResultObject",
+                "    205    0.4%    1.4%  Builtin: CallFunction_ReceiverIsAny",
+                "    196    0.4%    1.3%  Builtin: LoadICTrampoline_Megamorphic",
+                "    195    0.4%    1.3%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72634:108",
+                "    175    0.3%    1.2%  Builtin: SuspendGeneratorBaseline",
+                "    159    0.3%    1.1%  Builtin: CreateGeneratorObject",
+                "    149    0.3%    1.0%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+                "    140    0.3%    0.9%  Builtin: ResumeGeneratorBaseline",
+                "    137    0.3%    0.9%  Builtin: BaselineOutOfLinePrologue",
+                "    131    0.3%    0.9%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+                "    116    0.2%    0.8%  JS: *__ps$utf8 file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:35:19",
+                "    111    0.2%    0.7%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72175:156",
+                "    108    0.2%    0.7%  Builtin: EphemeronKeyBarrierSaveFP",
+                "     93    0.2%    0.6%  Builtin: Call_ReceiverIsNotNullOrUndefined",
+                " [Bottom up (heavy) profile]:",
+                "  Note: percentage shows a share of a particular caller in the total",
+                "  amount of its parent calls.",
+                "  Callers occupying less than 1.0% are not shown.",
+                "",
+                "   ticks parent  name",
+                "  34990   67.6%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "  24330   69.5%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "   3477   14.3%      Builtin: WeakMapPrototypeSet",
+                "    999   28.7%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:24:19",
+                "    183   18.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:13743:60",
+                "    183  100.0%            Builtin: GeneratorPrototypeNext",
+                "     72    7.2%          JS: *__ps$impl$psKernelExprV2TransformWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77528:52",
+                "     72  100.0%            Builtin: GeneratorPrototypeNext",
+                "     58    5.8%          JS: *__ps$impl$psKernelEnvironmentIndexFindWorker file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:6071:55",
+                "     58  100.0%            Builtin: GeneratorPrototypeNext",
+                "     40    4.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74511:272",
+                "     40  100.0%            Builtin: GeneratorPrototypeNext",
+                "     39    3.9%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:131048:364",
+                "     39  100.0%            Builtin: GeneratorPrototypeNext",
+                "     31    3.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76768:106",
+                "     31  100.0%            Builtin: GeneratorPrototypeNext",
+                "     31    3.1%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76768:106",
+                "     31  100.0%            Builtin: GeneratorPrototypeNext",
+                "     29    2.9%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74754:376",
+                "     29  100.0%            Builtin: GeneratorPrototypeNext",
+                "     28    2.8%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:503:91",
+                "     28  100.0%            Builtin: GeneratorPrototypeNext",
+                "     25    2.5%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:81149:494",
+                "     25  100.0%            Builtin: GeneratorPrototypeNext",
+                "     24    2.4%          JS: *__ps$impl$psKernelEnvironmentHashStringWorker file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:6030:56",
+                "     24  100.0%            Builtin: GeneratorPrototypeNext",
+                "     21    2.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77925:35",
+                "     21  100.0%            Builtin: GeneratorPrototypeNext",
+                "     21    2.1%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:557:70",
+                "     21  100.0%            Builtin: GeneratorPrototypeNext",
+                "     20    2.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72289:180",
+                "     20  100.0%            Builtin: GeneratorPrototypeNext",
+                "     20    2.0%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:4589:78",
+                "     20  100.0%            Builtin: GeneratorPrototypeNext",
+                "     18    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77756:45",
+                "     18  100.0%            Builtin: GeneratorPrototypeNext",
+                "     18    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:75854:88",
+                "     18  100.0%            Builtin: GeneratorPrototypeNext",
+                "     16    1.6%          JS: *__ps$impl$psKernelExprV2PagedLiftWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76558:52",
+                "     16  100.0%            Builtin: GeneratorPrototypeNext",
+                "     15    1.5%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:81627:45",
+                "     15  100.0%            Builtin: GeneratorPrototypeNext",
+                "     14    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:82120:32",
+                "     14  100.0%            Builtin: GeneratorPrototypeNext",
+                "     14    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77844:114",
+                "     14  100.0%            Builtin: GeneratorPrototypeNext",
+                "     14    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76867:101",
+                "     14  100.0%            Builtin: GeneratorPrototypeNext",
+                "     14    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:75745:45",
+                "     14  100.0%            Builtin: GeneratorPrototypeNext",
+                "     13    1.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:85063:45",
+                "     13  100.0%            Builtin: GeneratorPrototypeNext",
+                "     13    1.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:81151:144",
+                "     13  100.0%            Builtin: GeneratorPrototypeNext",
+                "     13    1.3%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76867:101",
+                "     13  100.0%            Builtin: GeneratorPrototypeNext",
+                "     12    1.2%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77760:36",
+                "     12  100.0%            Builtin: GeneratorPrototypeNext",
+                "     11    1.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74737:36"
+              ]
+            }
+          ],
+          "trailing_samples_may_be_lost_on_kill": true,
+          "instrumented_timing_is_not_a_performance_comparison": true,
+          "profile_collection_complete": true
+        },
+        "profiled_classification": "pskernel_timeout"
+      },
+      {
+        "index": 3,
+        "label": "bad",
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+          "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "body_bytes_identical": true
+        },
+        "official": {
+          "verdict": "rejected",
+          "reason": "official_kernel_verdict",
+          "returncode": 1,
+          "elapsed_seconds": 0.3846969740000077,
+          "log": "official.txt",
+          "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+        },
+        "unprofiled": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "verdict": "rejected",
+          "stage": "kernel-admission",
+          "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 22.27445994699997,
+          "returncode": 0,
+          "stdout": "case-003-stdout.txt",
+          "stderr": "case-003-stderr.txt",
+          "time_log": "case-003-time.txt",
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 264.689525
+          },
+          "peak_rss_kib": 426480
+        },
+        "unprofiled_classification": "matched_kernel_rejection",
+        "profiled": {
+          "observation": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "verdict": "rejected",
+            "stage": "kernel-admission",
+            "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "elapsed_seconds": 23.958612335999987,
+            "observed_vm_hwm_kib_lower_bound": 434772,
+            "progress_snapshots": 10,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 5272,
+              "exportedDeclarations": 161,
+              "admissionCommands": 117,
+              "arenaNodes": "4392",
+              "fuel": "4096",
+              "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+              "elapsedMilliseconds": 493.694454
+            }
+          },
+          "streaming_profiles": [
+            {
+              "raw_log": "isolate-0x9807000-5813-ticks.v8.log",
+              "raw_log_sha256": "f23310fcd9b75e35bb7b8c5ed37b51ef1a11a56529b14b14da4e18a744f12284",
+              "bytes": 22415854,
+              "tick_records": 20430,
+              "processed": "ticks-0.processed.txt",
+              "processed_sha256": "15e0d731e406df7ed541a1d7e3d60a027d3a430f37cb479364e5fdd3e5427f71",
+              "processing": {
+                "returncode": 0,
+                "timed_out": false,
+                "elapsed_seconds": 4.478950136999856,
+                "observed_vm_hwm_kib_lower_bound": 397764
+              },
+              "hottest_javascript_and_callers": [
+                " [JavaScript]:",
+                "   ticks  total  nonlib   name",
+                "    396    1.9%    6.0%  Builtin: LoadIC_Megamorphic",
+                "    338    1.7%    5.2%  Builtin: CompileLazy",
+                "    336    1.6%    5.1%  Builtin: WeakCollectionSet",
+                "    294    1.4%    4.5%  Builtin: GeneratorPrototypeNext",
+                "    269    1.3%    4.1%  Builtin: ResumeGeneratorTrampoline",
+                "    267    1.3%    4.1%  Builtin: LoadIC",
+                "    232    1.1%    3.5%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "    204    1.0%    3.1%  Builtin: RecordWriteSaveFP",
+                "    165    0.8%    2.5%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:29:22",
+                "    113    0.6%    1.7%  Builtin: SuspendGeneratorBaseline",
+                "    112    0.5%    1.7%  Builtin: ResumeGeneratorBaseline",
+                "    108    0.5%    1.6%  Builtin: CreateIterResultObject",
+                "     92    0.5%    1.4%  Builtin: WeakMapLookupHashIndex",
+                "     90    0.4%    1.4%  Builtin: CallFunction_ReceiverIsAny",
+                "     84    0.4%    1.3%  Builtin: BaselineOutOfLinePrologue",
+                "     82    0.4%    1.3%  Builtin: CreateGeneratorObject",
+                "     78    0.4%    1.2%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+                "     65    0.3%    1.0%  Builtin: LoadICTrampoline_Megamorphic",
+                "     64    0.3%    1.0%  Builtin: BaselineLeaveFrame",
+                "     59    0.3%    0.9%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+                "     54    0.3%    0.8%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72175:156",
+                "     50    0.2%    0.8%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:433:366",
+                "     45    0.2%    0.7%  Builtin: EphemeronKeyBarrierSaveFP",
+                "     43    0.2%    0.7%  Builtin: Call_ReceiverIsNotNullOrUndefined",
+                " [Bottom up (heavy) profile]:",
+                "  Note: percentage shows a share of a particular caller in the total",
+                "  amount of its parent calls.",
+                "  Callers occupying less than 1.0% are not shown.",
+                "",
+                "   ticks parent  name",
+                "  13326   65.2%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "  10433   78.3%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+                "   1622   15.5%      JS: *__ps$run file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2:18",
+                "   1617   99.7%        JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:132629:33",
+                "   1617  100.0%          JS: ^replayText file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:105:27",
+                "   1617  100.0%            JS: ~replayFile file:///tmp/psc1-arena-profile-detached-wbnf8mcj/replay.mjs:490:33",
+                "   1167   11.2%      Builtin: WeakMapPrototypeSet",
+                "    438   37.5%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:24:19",
+                "     66   15.1%          JS: *__ps$impl$psKernelExprV2TransformWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77528:52",
+                "     66  100.0%            Builtin: GeneratorPrototypeNext",
+                "     47   10.7%          JS: *__ps$impl$psKernelExprV2PagedLiftWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76558:52",
+                "     47  100.0%            Builtin: GeneratorPrototypeNext",
+                "     45   10.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2853:70",
+                "     45  100.0%            Builtin: GeneratorPrototypeNext",
+                "     17    3.9%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76934:100",
+                "     17  100.0%            Builtin: GeneratorPrototypeNext",
+                "     16    3.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77169:102",
+                "     16  100.0%            Builtin: GeneratorPrototypeNext",
+                "     13    3.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:2627:87",
+                "     13  100.0%            Builtin: GeneratorPrototypeNext",
+                "     12    2.7%          JS: *__ps$impl$psKernelOpenSimpleHeaderIndicesWithFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:65852:60",
+                "     12  100.0%            Builtin: GeneratorPrototypeNext",
+                "     12    2.7%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:76768:106",
+                "     12  100.0%            Builtin: GeneratorPrototypeNext",
+                "     12    2.7%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:503:91",
+                "     12  100.0%            Builtin: GeneratorPrototypeNext",
+                "     10    2.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77497:116",
+                "     10  100.0%            Builtin: GeneratorPrototypeNext",
+                "     10    2.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74756:32",
+                "     10  100.0%            Builtin: GeneratorPrototypeNext",
+                "      8    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74732:117",
+                "      8  100.0%            Builtin: GeneratorPrototypeNext",
+                "      8    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72289:180",
+                "      8  100.0%            Builtin: GeneratorPrototypeNext",
+                "      8    1.8%          JS: *__ps$impl$psKernelEnvironmentIndexFindWorker file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:6071:55",
+                "      8  100.0%            Builtin: GeneratorPrototypeNext",
+                "      7    1.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:89962:134",
+                "      7  100.0%            Builtin: GeneratorPrototypeNext",
+                "      7    1.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:75745:45",
+                "      7  100.0%            Builtin: GeneratorPrototypeNext",
+                "      7    1.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74493:32",
+                "      7  100.0%            Builtin: GeneratorPrototypeNext",
+                "      6    1.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:85062:113",
+                "      6  100.0%            Builtin: GeneratorPrototypeNext",
+                "      6    1.4%          JS: *__ps$impl$psKernelExprV2AdmissionSeenSet file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:74511:51",
+                "      6  100.0%            Builtin: GeneratorPrototypeNext",
+                "      5    1.1%          JS: ~__ps$impl$psKernelExprV2DecodeCanonicalFuel file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:72595:54",
+                "      5  100.0%            Builtin: GeneratorPrototypeNext",
+                "      5    1.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77753:288",
+                "      5  100.0%            Builtin: GeneratorPrototypeNext",
+                "      5    1.1%          JS: *__ps$impl$psKernelEnvironmentHashStringWorker file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:6030:56",
+                "      5  100.0%            Builtin: GeneratorPrototypeNext",
+                "     85    7.3%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77497:116",
+                "     85  100.0%          Builtin: GeneratorPrototypeNext",
+                "     85  100.0%            JS: *__ps$impl$psKernelExprV2TransformMapChildren_$psc0SH_0 file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77497:65",
+                "     65    5.6%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:557:70",
+                "     65  100.0%          Builtin: GeneratorPrototypeNext",
+                "     65  100.0%            JS: *__ps$impl$psKernelNameEq file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:557:35",
+                "     63    5.4%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-wbnf8mcj/kernel.mjs:77538:36"
+              ]
+            }
+          ],
+          "trailing_samples_may_be_lost_on_kill": false,
+          "instrumented_timing_is_not_a_performance_comparison": true,
+          "profile_collection_complete": true
+        },
+        "profiled_classification": "matched_kernel_rejection"
+      }
+    ],
+    "diagnostics_complete": true,
+    "kernel_qualified": false,
+    "limitations": [
+      "Instrumented timing includes V8 profiler overhead.",
+      "SIGKILL can truncate the final buffered tick-log tail.",
+      "Observed /proc VmHWM is a sampled lower bound on peak RSS.",
+      "Neither profiling nor diagnostic completion establishes kernel conformance."
+    ]
+  },
+  "observations": [
+    {
+      "index": 0,
+      "name": "perf/repeated-subproblem.ndjson",
+      "official": "accepted",
+      "unprofiled": {
+        "verdict": "accepted",
+        "stage": "complete",
+        "returncode": 0,
+        "progress": {
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1080.502789
+          }
+        },
+        "elapsedSeconds": 1.182840558999942,
+        "peakRssKiB": 268708,
+        "observedVmHwmKiBLowerBound": null
+      },
+      "profiled": {
+        "verdict": "accepted",
+        "stage": "complete",
+        "returncode": 0,
+        "progress": {
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1418.970592
+          }
+        },
+        "elapsedSeconds": 1.5616770569999971,
+        "peakRssKiB": null,
+        "observedVmHwmKiBLowerBound": 264580
+      },
+      "unprofiledClassification": "matched_acceptance",
+      "profiledClassification": "matched_acceptance",
+      "ticks": 1278
+    },
+    {
+      "index": 1,
+      "name": "perf/church-numerals.ndjson",
+      "official": "accepted",
+      "unprofiled": {
+        "verdict": "resource_exhausted",
+        "stage": "kernel-admission",
+        "returncode": 0,
+        "progress": {
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 100.27295
+          }
+        },
+        "elapsedSeconds": 15.808612884000013,
+        "peakRssKiB": 1238316,
+        "observedVmHwmKiBLowerBound": null
+      },
+      "profiled": {
+        "verdict": "resource_exhausted",
+        "stage": "kernel-admission",
+        "returncode": 0,
+        "progress": {
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 330.431188
+          }
+        },
+        "elapsedSeconds": 17.25315754899998,
+        "peakRssKiB": null,
+        "observedVmHwmKiBLowerBound": 1132412
+      },
+      "unprofiledClassification": "pskernel_resource_exhausted",
+      "profiledClassification": "pskernel_resource_exhausted",
+      "ticks": 14769
+    },
+    {
+      "index": 2,
+      "name": "init-prelude.ndjson",
+      "official": "accepted",
+      "unprofiled": {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "returncode": -9,
+        "progress": {
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 1738.918342
+          }
+        },
+        "elapsedSeconds": 60.1426328309999,
+        "peakRssKiB": null,
+        "observedVmHwmKiBLowerBound": null
+      },
+      "profiled": {
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "returncode": -9,
+        "progress": {
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 2035.051706
+          }
+        },
+        "elapsedSeconds": 60.067537969999876,
+        "peakRssKiB": null,
+        "observedVmHwmKiBLowerBound": 1042880
+      },
+      "unprofiledClassification": "pskernel_timeout",
+      "profiledClassification": "pskernel_timeout",
+      "ticks": 51744
+    },
+    {
+      "index": 3,
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "official": "rejected",
+      "unprofiled": {
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "returncode": 0,
+        "progress": {
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 264.689525
+          }
+        },
+        "elapsedSeconds": 22.27445994699997,
+        "peakRssKiB": 426480,
+        "observedVmHwmKiBLowerBound": null
+      },
+      "profiled": {
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "returncode": 0,
+        "progress": {
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 493.694454
+          }
+        },
+        "elapsedSeconds": 23.958612335999987,
+        "peakRssKiB": null,
+        "observedVmHwmKiBLowerBound": 434772
+      },
+      "unprofiledClassification": "matched_kernel_rejection",
+      "profiledClassification": "matched_kernel_rejection",
+      "ticks": 20430
+    }
+  ],
+  "artifactManifestEntriesVerified": 49,
+  "allFourCopiedInputsIndependentlyHashed": true,
+  "allRawTicksAndProcessedHashesVerified": true,
+  "totalRawTickRecords": 88221,
+  "diagnosticsComplete": true,
+  "D": "OPEN",
+  "kernelQualified": false,
+  "controlsMarker": "PSC1_ARENA_REPLAY_CONTROLS: PASS count=138",
+  "limitations": [
+    "Instrumented timing includes V8 profiler overhead.",
+    "SIGKILL can truncate the final buffered tick-log tail.",
+    "Observed /proc VmHWM is a sampled lower bound on peak RSS.",
+    "Neither profiling nor diagnostic completion establishes kernel conformance.",
+    "Node old-space is not a hard RSS bound.",
+    "Rejected ce574 diagnostic results do not qualify later source revisions."
+  ]
+}

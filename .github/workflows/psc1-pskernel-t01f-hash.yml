@@ -1,17 +1,6 @@
 name: PSC1 T01F closed-cache analysis preflight
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - work/psc1-pskernel-t01f-string-20261022
-    paths:
-      - psc1/kernel-lakefile.lean
-      - psc1/packages/pskernel-core/src/**
-      - psc1/test/PsKernelScalarHashWorkerRegression.lean
-      - psc1/test/PsKernelClosedCacheAnalysisRegression.lean
-      - psc1/test/PsKernelKnotFuelProofs.lean
-      - psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs
-      - .github/workflows/psc1-pskernel-t01f-hash.yml
 permissions:
   contents: read
   actions: read

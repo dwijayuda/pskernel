@@ -1,0 +1,649 @@
+{
+  "schema": "psc1-t01f-knot-repaired-producer-evidence-v1",
+  "status": "PASS",
+  "sourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+  "runId": 40033825281,
+  "runAttempt": 1,
+  "jobId": 120689204789,
+  "job": {
+    "id": 120689204789,
+    "run_id": 40033825281,
+    "workflow_name": "PSC1 T01F closed-cache analysis preflight",
+    "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+    "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40033825281",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOUlmxxc8AAAAcGaMeNQ",
+    "head_sha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120689204789",
+    "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40033825281/job/120689204789",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-23T22:30:52Z",
+    "started_at": "2026-10-23T22:30:54Z",
+    "completed_at": "2026-10-23T22:46:35Z",
+    "name": "generated-string",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-23T22:30:55Z",
+        "completed_at": "2026-10-23T22:30:56Z"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-23T22:30:56Z",
+        "completed_at": "2026-10-23T22:31:15Z"
+      },
+      {
+        "name": "Install pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-23T22:31:15Z",
+        "completed_at": "2026-10-23T22:31:35Z"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-23T22:31:35Z",
+        "completed_at": "2026-10-23T22:31:35Z"
+      },
+      {
+        "name": "Build authentic PSC1 for the bounded code-generation gate",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-23T22:31:35Z",
+        "completed_at": "2026-10-23T22:32:07Z"
+      },
+      {
+        "name": "Install pinned TypeScript",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-23T22:32:07Z",
+        "completed_at": "2026-10-23T22:32:09Z"
+      },
+      {
+        "name": "Require scalar hash and closed-cache code generation before full kernel build",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-23T22:32:09Z",
+        "completed_at": "2026-10-23T22:32:47Z"
+      },
+      {
+        "name": "Check complete authentic kernel source after the bounded gate",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-23T22:32:47Z",
+        "completed_at": "2026-10-23T22:38:44Z"
+      },
+      {
+        "name": "Compile the complete independent kernel to JavaScript",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-23T22:38:44Z",
+        "completed_at": "2026-10-23T22:45:53Z"
+      },
+      {
+        "name": "Produce authentic T01F inputs for generated independent replay",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-23T22:45:53Z",
+        "completed_at": "2026-10-23T22:46:31Z"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11,
+        "started_at": "2026-10-23T22:46:31Z",
+        "completed_at": "2026-10-23T22:46:33Z"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21,
+        "started_at": "2026-10-23T22:46:33Z",
+        "completed_at": "2026-10-23T22:46:33Z"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22,
+        "started_at": "2026-10-23T22:46:33Z",
+        "completed_at": "2026-10-23T22:46:33Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23,
+        "started_at": "2026-10-23T22:46:33Z",
+        "completed_at": "2026-10-23T22:46:33Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120689204789",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000028109,
+    "runner_name": "GitHub Actions 1000028109",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "artifact": {
+    "id": 12535974274,
+    "node_id": "MDg6QXJ0aWZhY3QxMjUzNTk3NDI3NA==",
+    "name": "psc1-t01f-hash-generated-producer",
+    "size_in_bytes": 1174733,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535974274",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535974274/zip",
+    "expired": false,
+    "digest": "sha256:35c223645deec2fd359da421415d55ee20b7c7bec449ca789a4951a90796ce5f",
+    "created_at": "2026-10-23T22:46:32Z",
+    "updated_at": "2026-10-23T22:46:32Z",
+    "expires_at": "2027-01-21T22:28:23Z",
+    "workflow_run": {
+      "id": 40033825281,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+      "head_sha": "e136c06fb378c7882eaa795366e7a781440588f9"
+    }
+  },
+  "artifactInspection": {
+    "artifactId": 12535974274,
+    "name": "psc1-t01f-hash-generated-producer",
+    "zip": {
+      "bytes": 1174733,
+      "sha256": "35c223645deec2fd359da421415d55ee20b7c7bec449ca789a4951a90796ce5f"
+    },
+    "files": {
+      "_temp/psc1-t01f-generated/fixture.json": {
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      "_temp/psc1-t01f-generated/lean-githash.txt": {
+        "bytes": 41,
+        "sha256": "3210a17608d78e1841a0a504c21167150e6a388cf44a077f06e3fcd3a823fe31"
+      },
+      "_temp/psc1-t01f-generated/lean-version.txt": {
+        "bytes": 106,
+        "sha256": "eb22144228dd41cd51a0c84af4f976cd0cef473102dcf99b60be756b11f2b95a"
+      },
+      "_temp/psc1-t01f-generated/fixture.sha256": {
+        "bytes": 123,
+        "sha256": "d976a1e153065a032dcba986bbefb2b3c262a816811960f6d1541f5ecb44e28a"
+      },
+      "_temp/psc1-t01f-generated/native.log": {
+        "bytes": 25860,
+        "sha256": "8218c1988126cc4930d4f71cb619c5badafe5dab18e6a0e946c9d1813d2dbe82"
+      },
+      "_temp/psc1-t01f-generated/provenance.json": {
+        "bytes": 1199,
+        "sha256": "e9f47f390136e34be80b7fa06732d324b34713404ec295c9cb456a9cf20ab117"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js": {
+        "bytes": 9986116,
+        "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.ts": {
+        "bytes": 9167333,
+        "sha256": "87315bf86765b780566b2b9cb3a943bf22744a5e4cb867a490653b4749f0f9b3"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.d.ts": {
+        "bytes": 369264,
+        "sha256": "c669e86e85078536129cfc2785846d9b67470fdd2c894d3eee99b3751266df58"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js.map": {
+        "bytes": 8134536,
+        "sha256": "4d409cdf0f0de3426fa22895c5961f59109a08be0724917c7f4dd3cb04a3562e"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.d.ts": {
+        "bytes": 24593,
+        "sha256": "90fac28f079e89c571a7d9a770a8d6400e5c88b0b62504a9a206c662797f3ef5"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js": {
+        "bytes": 360259,
+        "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js.map": {
+        "bytes": 377223,
+        "sha256": "d433c339b01d90c773520567e53fcd3f7f80943c081f6bd3d3730c687a8696e2"
+      },
+      "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.ts": {
+        "bytes": 352956,
+        "sha256": "83a7c48a77c29478924d2c4ed43afa3c5aaac6eb960ddca7bcc9e7cb1749f0dc"
+      },
+      "_temp/psc1-scalar-hash-probe.log": {
+        "bytes": 284,
+        "sha256": "94f64394529107ff19b73f0b605673426d523a7f2514b3a525d17c2b84d76553"
+      },
+      "_temp/psc1-closed-cache-analysis-probe.log": {
+        "bytes": 184,
+        "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+      },
+      "_temp/psc1-closed-cache-analysis-codegen.log": {
+        "bytes": 20081,
+        "sha256": "3490e3672b4ba5a67d9176fef54a4ef329c8785b9d0dee604681361d2bb20172"
+      }
+    }
+  },
+  "sourceRecords": {
+    "source": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "files": [
+      {
+        "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+        "blob": "01d2716a6b4876c3e3be5f2dc508f4f7dc4cbee5",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/.github/workflows/psc1-pskernel-t01f-hash.yml",
+        "bytes": 37998,
+        "sha256": "77dcbadfc50b69fcbbf20a2a7015727b62cdd154ce860deb09a1a42592cdce7f"
+      },
+      {
+        "path": "psc1/kernel-lakefile.lean",
+        "blob": "9bffc62528c293a916d5fa194dc52dab3610ca95",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/kernel-lakefile.lean",
+        "bytes": 13757,
+        "sha256": "a757b196a2bdf9920333cc6e3642d664886f12463c94c7565d53da5a385d6a6d"
+      },
+      {
+        "path": "psc1/test/PsKernelCacheScopeProofs.lean",
+        "blob": "45cb58a271695bee0ae05330f39c3c1a86f1801f",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelCacheScopeProofs.lean",
+        "bytes": 36771,
+        "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2SessionProofs.lean",
+        "blob": "d75589d73c3879040d535d638f264ba5f6115a1e",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelExprV2SessionProofs.lean",
+        "bytes": 9724,
+        "sha256": "3a6166709bb4e05239dbce2866f4b52616b554157277a46f3c507d67d0c76f90"
+      },
+      {
+        "path": "psc1/test/PsKernelScalarHashWorkerRegression.lean",
+        "blob": "aa5dd561cdb3df437c21a61c899f57b160289d0f",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelScalarHashWorkerRegression.lean",
+        "bytes": 10872,
+        "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2"
+      },
+      {
+        "path": "psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+        "blob": "010333b5d6ac53c60c558c89906b02d7358fb0c0",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+        "bytes": 5877,
+        "sha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0"
+      },
+      {
+        "path": "psc1/test/PsKernelKnotFuelProofs.lean",
+        "blob": "197da10ed3a5f2aeb1548511db60a618891912f1",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelKnotFuelProofs.lean",
+        "bytes": 131180,
+        "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+        "blob": "4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+        "bytes": 9629,
+        "sha256": "fe26126cae9c7757d29b3b2193d9530a2de0dc7d5e76a591abb6f2a4b35421bf"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2StringEnvironmentRegression.lean",
+        "blob": "154bec1f4350cd948b1451fe6689b9809f05cd11",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/test/PsKernelExprV2StringEnvironmentRegression.lean",
+        "bytes": 39734,
+        "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+        "blob": "68acf28a8b355105e021eb547a4d0b835c40a876",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs",
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      {
+        "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+        "blob": "494647393a3e4b3bdb7ac11115dac470cef6061a",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+        "bytes": 7826,
+        "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+      },
+      {
+        "path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+        "blob": "59fa82e0575b4119aebcf15fe39ed691346f1d06",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+        "bytes": 2546,
+        "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+      },
+      {
+        "path": "psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+        "blob": "11e376e9ea0628aadf9a6f94ddfb2ccf29dcb40c",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+        "bytes": 1126,
+        "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+        "blob": "065ed4d1de1bdded148a2774de9f13bb8b1a406a",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+        "bytes": 244729,
+        "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+        "blob": "529a05c4345983eb96420d17e10415538d645f54",
+        "url": "https://github.com/dwijayuda/pskernel/blob/e136c06fb378c7882eaa795366e7a781440588f9/psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+        "bytes": 28982,
+        "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+      }
+    ]
+  },
+  "artifactId": 12535974274,
+  "artifactZipBytes": 1174733,
+  "artifactZipSha256": "35c223645deec2fd359da421415d55ee20b7c7bec449ca789a4951a90796ce5f",
+  "artifactFileDigests": {
+    "_temp/psc1-t01f-generated/fixture.json": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "_temp/psc1-t01f-generated/lean-githash.txt": {
+      "bytes": 41,
+      "sha256": "3210a17608d78e1841a0a504c21167150e6a388cf44a077f06e3fcd3a823fe31"
+    },
+    "_temp/psc1-t01f-generated/lean-version.txt": {
+      "bytes": 106,
+      "sha256": "eb22144228dd41cd51a0c84af4f976cd0cef473102dcf99b60be756b11f2b95a"
+    },
+    "_temp/psc1-t01f-generated/fixture.sha256": {
+      "bytes": 123,
+      "sha256": "d976a1e153065a032dcba986bbefb2b3c262a816811960f6d1541f5ecb44e28a"
+    },
+    "_temp/psc1-t01f-generated/native.log": {
+      "bytes": 25860,
+      "sha256": "8218c1988126cc4930d4f71cb619c5badafe5dab18e6a0e946c9d1813d2dbe82"
+    },
+    "_temp/psc1-t01f-generated/provenance.json": {
+      "bytes": 1199,
+      "sha256": "e9f47f390136e34be80b7fa06732d324b34713404ec295c9cb456a9cf20ab117"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.ts": {
+      "bytes": 9167333,
+      "sha256": "87315bf86765b780566b2b9cb3a943bf22744a5e4cb867a490653b4749f0f9b3"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.d.ts": {
+      "bytes": 369264,
+      "sha256": "c669e86e85078536129cfc2785846d9b67470fdd2c894d3eee99b3751266df58"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js.map": {
+      "bytes": 8134536,
+      "sha256": "4d409cdf0f0de3426fa22895c5961f59109a08be0724917c7f4dd3cb04a3562e"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.d.ts": {
+      "bytes": 24593,
+      "sha256": "90fac28f079e89c571a7d9a770a8d6400e5c88b0b62504a9a206c662797f3ef5"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js": {
+      "bytes": 360259,
+      "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.js.map": {
+      "bytes": 377223,
+      "sha256": "d433c339b01d90c773520567e53fcd3f7f80943c081f6bd3d3730c687a8696e2"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/scalar-hash/kernel.ts": {
+      "bytes": 352956,
+      "sha256": "83a7c48a77c29478924d2c4ed43afa3c5aaac6eb960ddca7bcc9e7cb1749f0dc"
+    },
+    "_temp/psc1-scalar-hash-probe.log": {
+      "bytes": 284,
+      "sha256": "94f64394529107ff19b73f0b605673426d523a7f2514b3a525d17c2b84d76553"
+    },
+    "_temp/psc1-closed-cache-analysis-probe.log": {
+      "bytes": 184,
+      "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+    },
+    "_temp/psc1-closed-cache-analysis-codegen.log": {
+      "bytes": 20081,
+      "sha256": "3490e3672b4ba5a67d9176fef54a4ef329c8785b9d0dee604681361d2bb20172"
+    }
+  },
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40033825281",
+  "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40033825281/job/120689204789",
+  "producerConclusion": "success",
+  "boundedCompilation": {
+    "success": true,
+    "typescript": "7.0.2"
+  },
+  "wholeMixedQualification": false,
+  "fullT01FQualification": false,
+  "completeJobLog": {
+    "bytes": 254405,
+    "sha256": "9dfffa3a76c9c4ddfb97dc11ab887ebb29cd11578e353b4c6a3a5a4971bf7c85"
+  },
+  "producerProvenance": {
+    "schema": "psc1-t01f-source-provenance-v1",
+    "sourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+    "runId": "40033825281",
+    "runAttempt": "1",
+    "job": "generated-string",
+    "route": "generated",
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "v22.23.3",
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "é",
+      "€",
+      "😀",
+      "Aé€😀"
+    ],
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "kernel": {
+      "bytes": 9986116,
+      "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "generatedRunner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    }
+  },
+  "nativeFixture": {
+    "exactMarkers": [
+      "PSC1_T01F_FULL_STRING: PASS authenticClosure=true independentAdmission=true fuel=4096",
+      "PSC1_T01F_METADATA_PASS declarations=377",
+      "PSC1_T01F_CLOSURE_PASS requests=294 declarations=377"
+    ],
+    "sampleCases": 6,
+    "singletonSequences": 6,
+    "requests": 294,
+    "metadata": 377
+  },
+  "generatedMatrix": {
+    "expressions": 20,
+    "states": 2,
+    "mapQueries": 40,
+    "pairQueries": 800,
+    "inferQueries": 80,
+    "assertions": 1884,
+    "smallAndIndexed": true,
+    "openEntriesSeeded": true
+  },
+  "frozenScalarMatrix": {
+    "cases": 2730,
+    "strings": 12,
+    "stages": 8190,
+    "assertions": 13665,
+    "modulus": "65521",
+    "algorithmChanged": false
+  },
+  "frozenShortMatrix": {
+    "cases": 19,
+    "assertions": 38,
+    "shortMaxPairs": 4,
+    "genericFallback": true
+  },
+  "longCases": 3,
+  "strictCodegenMarkers": [
+    "PSC1_CLOSED_CACHE_ANALYSIS_CODEGEN: PASS dataResult=true recursiveSites=11 oldHashCalls=0 oldHasFVarCalls=0 recurry=false",
+    "PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false",
+    "PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=2",
+    "PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairFallbackSites=1 shortLeafSites=1 exclusiveBranches=true primitiveRemainder=1 structuralGeneratorBlocks=1",
+    "PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true",
+    "PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false"
+  ],
+  "boundedBeforeFullBuild": true,
+  "workerBodies": {
+    "bounded": {
+      "kernel": {
+        "bytes": 360259,
+        "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+      },
+      "body": "function* __ps$impl$psKernelExprClosedCacheAnalysis(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$10]) {\n    case \"bvar\": {\n        const index = __ps$match$0.index;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 21n, index)), snd: false });\n    }\n    case \"fvar\": {\n        const name$1 = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: 0n, snd: true });\n    }\n    case \"mvar\": {\n        const name = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 23n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), snd: false });\n    }\n    case \"sort\": {\n        const level = __ps$match$0.level;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 24n, (yield* __ps$invoke(psKernelCacheLevelHash, level)))), snd: false });\n    }\n    case \"const\": {\n        const name = __ps$match$0.name;\n        const levels = __ps$match$0.levels;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 25n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), (yield* __ps$invoke(psKernelCacheLevelListHash, levels)))), snd: false });\n    }\n    case \"app\": {\n        const fn = __ps$match$0.fn;\n        const arg = __ps$match$0.arg;\n        return (yield* (function* () { {\n            const fnAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, fn));\n            return (fnAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const argAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, arg));\n                return (argAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 26n, fnAnalysis.fst)), argAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"lam\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 27n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"forallE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 28n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"letE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const value = __ps$match$0.value;\n        const body = __ps$match$0.body;\n        const nondep = __ps$match$0.nondep;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const valueAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, value));\n                return (valueAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                    const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                    return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                        const flag = (nondep ? 1n : 0n);\n                        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 29n, typeAnalysis.fst)), valueAnalysis.fst)), bodyAnalysis.fst)), flag)), snd: false });\n                    } })()));\n                } })()));\n            } })()));\n        } })());\n    }\n    case \"lit\": {\n        const literal = __ps$match$0.value;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 30n, (yield* __ps$invoke(psKernelCacheLiteralHash, literal)))), snd: false });\n    }\n    case \"mdata\": {\n        const metadata = __ps$match$0.metadata;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 31n, metadata)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n    case \"proj\": {\n        const typeName = __ps$match$0.typeName;\n        const index = __ps$match$0.index;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 32n, (yield* __ps$invoke(psKernelCacheNameHash, typeName)))), index)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n} throw new Error(\"invalid ProofScript constructor tag\"); })()); }\n__ps$implementations.set(psKernelExprClosedCacheAnalysis, __ps$impl$psKernelExprClosedCacheAnalysis);",
+      "bodyDigest": {
+        "bytes": 6635,
+        "sha256": "39bd34bb1bb5da17cc1d95986a6978862510d8546338d2f4fb1c70abd0ea509a"
+      },
+      "recursiveSites": 11,
+      "oldHashCalls": 0,
+      "oldHasFVarCalls": 0,
+      "recurry": false
+    },
+    "complete": {
+      "kernel": {
+        "bytes": 9986116,
+        "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+      },
+      "body": "function* __ps$impl$psKernelExprClosedCacheAnalysis(expr) { return (yield* (function* () { const __ps$match$0 = expr; switch (__ps$match$0[__ps$tag$13]) {\n    case \"bvar\": {\n        const index = __ps$match$0.index;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 21n, index)), snd: false });\n    }\n    case \"fvar\": {\n        const name$1 = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: 0n, snd: true });\n    }\n    case \"mvar\": {\n        const name = __ps$match$0.name;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 23n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), snd: false });\n    }\n    case \"sort\": {\n        const level = __ps$match$0.level;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 24n, (yield* __ps$invoke(psKernelCacheLevelHash, level)))), snd: false });\n    }\n    case \"const\": {\n        const name = __ps$match$0.name;\n        const levels = __ps$match$0.levels;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 25n, (yield* __ps$invoke(psKernelCacheNameHash, name)))), (yield* __ps$invoke(psKernelCacheLevelListHash, levels)))), snd: false });\n    }\n    case \"app\": {\n        const fn = __ps$match$0.fn;\n        const arg = __ps$match$0.arg;\n        return (yield* (function* () { {\n            const fnAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, fn));\n            return (fnAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const argAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, arg));\n                return (argAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 26n, fnAnalysis.fst)), argAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"lam\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 27n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"forallE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const body = __ps$match$0.body;\n        const binderInfo$4 = __ps$match$0.binderInfo;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 28n, typeAnalysis.fst)), bodyAnalysis.fst)), snd: false }));\n            } })()));\n        } })());\n    }\n    case \"letE\": {\n        const name$1 = __ps$match$0.name;\n        const type = __ps$match$0.type;\n        const value = __ps$match$0.value;\n        const body = __ps$match$0.body;\n        const nondep = __ps$match$0.nondep;\n        return (yield* (function* () { {\n            const typeAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, type));\n            return (typeAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                const valueAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, value));\n                return (valueAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                    const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n                    return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : (yield* (function* () { {\n                        const flag = (nondep ? 1n : 0n);\n                        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 29n, typeAnalysis.fst)), valueAnalysis.fst)), bodyAnalysis.fst)), flag)), snd: false });\n                    } })()));\n                } })()));\n            } })()));\n        } })());\n    }\n    case \"lit\": {\n        const literal = __ps$match$0.value;\n        return ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, 30n, (yield* __ps$invoke(psKernelCacheLiteralHash, literal)))), snd: false });\n    }\n    case \"mdata\": {\n        const metadata = __ps$match$0.metadata;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 31n, metadata)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n    case \"proj\": {\n        const typeName = __ps$match$0.typeName;\n        const index = __ps$match$0.index;\n        const body = __ps$match$0.expr;\n        return (yield* (function* () { {\n            const bodyAnalysis = (yield* __ps$invoke(psKernelExprClosedCacheAnalysis, body));\n            return (bodyAnalysis.snd ? ({ [__ps$brand$0]: true, fst: 0n, snd: true }) : ({ [__ps$brand$0]: true, fst: (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, (yield* __ps$invoke(psKernelCacheMix, 32n, (yield* __ps$invoke(psKernelCacheNameHash, typeName)))), index)), bodyAnalysis.fst)), snd: false }));\n        } })());\n    }\n} throw new Error(\"invalid ProofScript constructor tag\"); })()); }\n__ps$implementations.set(psKernelExprClosedCacheAnalysis, __ps$impl$psKernelExprClosedCacheAnalysis);",
+      "bodyDigest": {
+        "bytes": 6635,
+        "sha256": "acf1ee331fe66a9eedc96f310a92a219068a04f450f9cfdaabc0d06bb7a48f98"
+      },
+      "recursiveSites": 11,
+      "oldHashCalls": 0,
+      "oldHasFVarCalls": 0,
+      "recurry": false
+    }
+  },
+  "limits": {
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "node": "v22.23.3",
+    "fuel": 4096,
+    "oldSpaceMiB": 2048,
+    "oldSpaceIsNotHardRSS": true
+  },
+  "nativeAdmission": {
+    "orderedAdmits": 294,
+    "matchingPasses": 294,
+    "metadata": 377,
+    "samples": 6,
+    "singletonSequences": 6,
+    "originalInvalidDefinition": true
+  },
+  "retainedScalarLoggedBodies": {
+    "psKernelCacheStringHashPairsWithFuel": {
+      "digest": {
+        "bytes": 1312,
+        "sha256": "185994d7bc4b6d75b02acab0d2f63a10a03eb9b5e665876ed7a3e29bf918ebc2"
+      },
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheStringHashStateWithFuel": {
+      "digest": {
+        "bytes": 878,
+        "sha256": "a701430a16d257e4ce0f50e8f785d3bf490d969dcce886928b7b913b35cd74be"
+      },
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheStringHash": {
+      "digest": {
+        "bytes": 1194,
+        "sha256": "d7aae0ab9aca304954890265ad96bf602d3d4f27eb9bbf96f4f42e12cdbe6a29"
+      },
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheStringHashShortPairs": {
+      "digest": {
+        "bytes": 6045,
+        "sha256": "78b97b9e5b286b570b7f79e58e40c4976ef4656781eb40a08f5cb8da295770f3"
+      },
+      "loggedBodyEqualsArtifact": true
+    },
+    "psKernelCacheLevelListHash": {
+      "digest": {
+        "bytes": 2762,
+        "sha256": "ccbb215ce9e8f114d4d50f1ef2870da4415e0fd784da099eaf3b780a1cd69a18"
+      },
+      "loggedBodyEqualsArtifact": true
+    }
+  },
+  "typeScriptBinding": "Exact-source pinned npm install step succeeded; PSC0_TSC points to its installed compiler. Narrow workflow does not print a standalone tsc version.",
+  "producerStepSequence": [
+    {
+      "name": "Install pinned TypeScript",
+      "conclusion": "success",
+      "started_at": "2026-10-23T22:32:07Z",
+      "completed_at": "2026-10-23T22:32:09Z"
+    },
+    {
+      "name": "Require scalar hash and closed-cache code generation before full kernel build",
+      "conclusion": "success",
+      "started_at": "2026-10-23T22:32:09Z",
+      "completed_at": "2026-10-23T22:32:47Z"
+    },
+    {
+      "name": "Check complete authentic kernel source after the bounded gate",
+      "conclusion": "success",
+      "started_at": "2026-10-23T22:32:47Z",
+      "completed_at": "2026-10-23T22:38:44Z"
+    },
+    {
+      "name": "Compile the complete independent kernel to JavaScript",
+      "conclusion": "success",
+      "started_at": "2026-10-23T22:38:44Z",
+      "completed_at": "2026-10-23T22:45:53Z"
+    },
+    {
+      "name": "Produce authentic T01F inputs for generated independent replay",
+      "conclusion": "success",
+      "started_at": "2026-10-23T22:45:53Z",
+      "completed_at": "2026-10-23T22:46:31Z"
+    }
+  ],
+  "fullBodyWorkflowGateExecuted": false,
+  "fullBodyInspection": "Independent static complete-body inspection; bounded workflow body gate executed successfully.",
+  "scope": "Exact-source narrow bounded code generation and complete authentic producer only. No runtime or final-route qualification is inherited.",
+  "localInspection": "Static ZIP/hash/source/JSON/log/body inspection only; no local JS, Lean, compiler, or kernel execution."
+}

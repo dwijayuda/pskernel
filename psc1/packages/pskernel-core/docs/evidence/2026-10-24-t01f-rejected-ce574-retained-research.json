@@ -1,0 +1,1474 @@
+{
+  "schema": "psc1-t01f-rejected-ce574-retained-research-v1",
+  "sourceSha": "ce5747574230e009705372f36da80978060a78ad",
+  "runId": 40032582247,
+  "runAttempt": 1,
+  "terminalSummary": {
+    "schema": "psc1-t01f-rejected-source-retained-research-terminal-v1",
+    "sourceSha": "ce5747574230e009705372f36da80978060a78ad",
+    "runId": 40032582247,
+    "runAttempt": 1,
+    "conclusion": "success",
+    "allSixJobsPassed": true,
+    "jobs": [
+      {
+        "id": 120684192468,
+        "run_id": 40032582247,
+        "workflow_name": "PSC1 PSKernel-Core Expression V2 research",
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032582247",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAcGVai1A",
+        "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120684192468",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032582247/job/120684192468",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-23T22:16:57Z",
+        "started_at": "2026-10-23T22:17:00Z",
+        "completed_at": "2026-10-23T22:34:36Z",
+        "name": "generated-js-full-checker-bridge",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:00Z",
+            "completed_at": "2026-10-23T22:17:01Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:20Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:20Z",
+            "completed_at": "2026-10-23T22:17:39Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:39Z",
+            "completed_at": "2026-10-23T22:17:40Z"
+          },
+          {
+            "name": "Install isolated TypeScript 7.0.2",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:17:40Z",
+            "completed_at": "2026-10-23T22:17:42Z"
+          },
+          {
+            "name": "Build complete real PSC1 compiler and check combined research entry",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:17:42Z",
+            "completed_at": "2026-10-23T22:25:34Z"
+          },
+          {
+            "name": "Generate JavaScript with both complete published kernel and V2 research",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T22:25:34Z",
+            "completed_at": "2026-10-23T22:34:30Z"
+          },
+          {
+            "name": "Compare complete checked JS operations to the restricted V2 head machine",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T22:34:30Z",
+            "completed_at": "2026-10-23T22:34:32Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T22:34:32Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-10-23T22:34:33Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-10-23T22:34:33Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-23T22:34:33Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120684192468",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000028092,
+        "runner_name": "GitHub Actions 1000028092",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 120684192510,
+        "run_id": 40032582247,
+        "workflow_name": "PSC1 PSKernel-Core Expression V2 research",
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032582247",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAcGVai_g",
+        "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120684192510",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032582247/job/120684192510",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-23T22:16:57Z",
+        "started_at": "2026-10-23T22:16:59Z",
+        "completed_at": "2026-10-23T22:21:07Z",
+        "name": "portable-ps-closure",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:00Z",
+            "completed_at": "2026-10-23T22:17:01Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:22Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:22Z",
+            "completed_at": "2026-10-23T22:17:35Z"
+          },
+          {
+            "name": "Build the authentic PSC1 compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:35Z",
+            "completed_at": "2026-10-23T22:18:26Z"
+          },
+          {
+            "name": "Reconstruct complete V2 project closure as canonical ProofScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:18:26Z",
+            "completed_at": "2026-10-23T22:18:47Z"
+          },
+          {
+            "name": "Check complete generated ProofScript V2 source closure",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:18:47Z",
+            "completed_at": "2026-10-23T22:19:44Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T22:19:44Z",
+            "completed_at": "2026-10-23T22:19:45Z"
+          },
+          {
+            "name": "Install isolated TypeScript 7.0.2 for reconstructed source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T22:19:45Z",
+            "completed_at": "2026-10-23T22:19:47Z"
+          },
+          {
+            "name": "Build and execute generated JavaScript from the full PS closure",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T22:19:47Z",
+            "completed_at": "2026-10-23T22:21:04Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-23T22:21:04Z",
+            "completed_at": "2026-10-23T22:21:05Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-23T22:21:05Z",
+            "completed_at": "2026-10-23T22:21:05Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-23T22:21:05Z",
+            "completed_at": "2026-10-23T22:21:05Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-23T22:21:05Z",
+            "completed_at": "2026-10-23T22:21:05Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120684192510",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000028090,
+        "runner_name": "GitHub Actions 1000028090",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 120684192518,
+        "run_id": 40032582247,
+        "workflow_name": "PSC1 PSKernel-Core Expression V2 research",
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032582247",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAcGVajBg",
+        "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120684192518",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032582247/job/120684192518",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-23T22:16:57Z",
+        "started_at": "2026-10-23T22:17:00Z",
+        "completed_at": "2026-10-23T22:18:01Z",
+        "name": "whnf-subset-regression",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:01Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:24Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:24Z",
+            "completed_at": "2026-10-23T22:17:36Z"
+          },
+          {
+            "name": "Compile V2 function-head WHNF subset with original checker",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:36Z",
+            "completed_at": "2026-10-23T22:17:58Z"
+          },
+          {
+            "name": "Guard positive checking, WHNF, DefEq and negative admissions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:17:58Z",
+            "completed_at": "2026-10-23T22:17:58Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:17:58Z",
+            "completed_at": "2026-10-23T22:17:59Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-23T22:17:59Z",
+            "completed_at": "2026-10-23T22:17:59Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-23T22:17:59Z",
+            "completed_at": "2026-10-23T22:17:59Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120684192518",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000028091,
+        "runner_name": "GitHub Actions 1000028091",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 120684192570,
+        "run_id": 40032582247,
+        "workflow_name": "PSC1 PSKernel-Core Expression V2 research",
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032582247",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAcGVajOg",
+        "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120684192570",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032582247/job/120684192570",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-23T22:16:57Z",
+        "started_at": "2026-10-23T22:17:00Z",
+        "completed_at": "2026-10-23T22:18:03Z",
+        "name": "full-checker-bridge",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:02Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:02Z",
+            "completed_at": "2026-10-23T22:17:25Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:25Z",
+            "completed_at": "2026-10-23T22:17:36Z"
+          },
+          {
+            "name": "Compile bridge with the independent production checker and V2",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:36Z",
+            "completed_at": "2026-10-23T22:17:59Z"
+          },
+          {
+            "name": "Compare fully checked positive and negative results, with import-cost timing",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:17:59Z",
+            "completed_at": "2026-10-23T22:18:00Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:18:00Z",
+            "completed_at": "2026-10-23T22:18:01Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-23T22:18:01Z",
+            "completed_at": "2026-10-23T22:18:01Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-23T22:18:01Z",
+            "completed_at": "2026-10-23T22:18:01Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120684192570",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000028093,
+        "runner_name": "GitHub Actions 1000028093",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 120684192597,
+        "run_id": 40032582247,
+        "workflow_name": "PSC1 PSKernel-Core Expression V2 research",
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032582247",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAcGVajVQ",
+        "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120684192597",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032582247/job/120684192597",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-23T22:16:57Z",
+        "started_at": "2026-10-23T22:17:00Z",
+        "completed_at": "2026-10-23T22:18:02Z",
+        "name": "expr-v2-differential",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:02Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:02Z",
+            "completed_at": "2026-10-23T22:17:23Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:23Z",
+            "completed_at": "2026-10-23T22:17:36Z"
+          },
+          {
+            "name": "Verify exact Lean source commit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:36Z",
+            "completed_at": "2026-10-23T22:17:36Z"
+          },
+          {
+            "name": "Build independent Expr V2 DAG and regression",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:17:36Z",
+            "completed_at": "2026-10-23T22:17:58Z"
+          },
+          {
+            "name": "Differential all-constructor checks and metadata validation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:17:58Z",
+            "completed_at": "2026-10-23T22:17:58Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T22:17:58Z",
+            "completed_at": "2026-10-23T22:17:59Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-23T22:17:59Z",
+            "completed_at": "2026-10-23T22:17:59Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-10-23T22:17:59Z",
+            "completed_at": "2026-10-23T22:18:00Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120684192597",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000028094,
+        "runner_name": "GitHub Actions 1000028094",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 120684192723,
+        "run_id": 40032582247,
+        "workflow_name": "PSC1 PSKernel-Core Expression V2 research",
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "run_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/runs/40032582247",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOUlmxxc8AAAAcGVaj0w",
+        "head_sha": "ce5747574230e009705372f36da80978060a78ad",
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/jobs/120684192723",
+        "html_url": "https://github.com/dwijayuda/pskernel/actions/runs/40032582247/job/120684192723",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-23T22:16:57Z",
+        "started_at": "2026-10-23T22:17:00Z",
+        "completed_at": "2026-10-23T22:34:30Z",
+        "name": "portable-v2-check",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:02Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:02Z",
+            "completed_at": "2026-10-23T22:17:25Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:25Z",
+            "completed_at": "2026-10-23T22:17:46Z"
+          },
+          {
+            "name": "Build actual PSC1 compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:46Z",
+            "completed_at": "2026-10-23T22:18:24Z"
+          },
+          {
+            "name": "Check Expression V2 module with portable PSC1 elaborator",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:18:24Z",
+            "completed_at": "2026-10-23T22:19:16Z"
+          },
+          {
+            "name": "Check persistent V2 index under the same portable compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:19:16Z",
+            "completed_at": "2026-10-23T22:20:06Z"
+          },
+          {
+            "name": "Check all V2 indexed smart constructors through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T22:20:06Z",
+            "completed_at": "2026-10-23T22:20:57Z"
+          },
+          {
+            "name": "Check all Expression V2 storage paths through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T22:20:57Z",
+            "completed_at": "2026-10-23T22:21:49Z"
+          },
+          {
+            "name": "Recheck entire V2 portable lifting source through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T22:21:49Z",
+            "completed_at": "2026-10-23T22:22:38Z"
+          },
+          {
+            "name": "Check source for portable V2 capture-avoiding instantiation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-23T22:22:38Z",
+            "completed_at": "2026-10-23T22:23:25Z"
+          },
+          {
+            "name": "Check portable beta, zeta and metadata head steps through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-23T22:23:25Z",
+            "completed_at": "2026-10-23T22:24:13Z"
+          },
+          {
+            "name": "Check portable bounded beta-zeta head reduction sequence through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-23T22:24:13Z",
+            "completed_at": "2026-10-23T22:25:00Z"
+          },
+          {
+            "name": "Check portable validated-once beta-zeta DAG head machine",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-23T22:25:00Z",
+            "completed_at": "2026-10-23T22:25:49Z"
+          },
+          {
+            "name": "Check portable validated structural equality and pair memo",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-23T22:25:49Z",
+            "completed_at": "2026-10-23T22:26:38Z"
+          },
+          {
+            "name": "Check portable scoped batch equality and memo reuse",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-10-23T22:26:38Z",
+            "completed_at": "2026-10-23T22:27:25Z"
+          },
+          {
+            "name": "Check portable checked legacy-expression DAG importer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-10-23T22:27:25Z",
+            "completed_at": "2026-10-23T22:28:14Z"
+          },
+          {
+            "name": "Check portable paged DAG arena and metadata validation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-10-23T22:28:14Z",
+            "completed_at": "2026-10-23T22:29:03Z"
+          },
+          {
+            "name": "Check portable function-head WHNF research subset through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-10-23T22:29:03Z",
+            "completed_at": "2026-10-23T22:29:54Z"
+          },
+          {
+            "name": "Check portable paged sharing-aware binder lift",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-23T22:29:54Z",
+            "completed_at": "2026-10-23T22:30:44Z"
+          },
+          {
+            "name": "Check paged capture-avoiding instantiate1 source and head machine",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-23T22:30:44Z",
+            "completed_at": "2026-10-23T22:31:34Z"
+          },
+          {
+            "name": "Check paged structural equality and scoped batch",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-23T22:31:34Z",
+            "completed_at": "2026-10-23T22:32:24Z"
+          },
+          {
+            "name": "Check paged all-constructor legacy expression importer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-10-23T22:32:24Z",
+            "completed_at": "2026-10-23T22:33:16Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-10-23T22:33:16Z",
+            "completed_at": "2026-10-23T22:33:16Z"
+          },
+          {
+            "name": "Install isolated pinned TypeScript 7.0.2",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-10-23T22:33:16Z",
+            "completed_at": "2026-10-23T22:33:18Z"
+          },
+          {
+            "name": "Compile portable Expression V2 and persistent index to JS",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-10-23T22:33:18Z",
+            "completed_at": "2026-10-23T22:34:11Z"
+          },
+          {
+            "name": "Run generated-JS V2 sharing, hash and indexed-arena smoke",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-10-23T22:34:11Z",
+            "completed_at": "2026-10-23T22:34:26Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-10-23T22:34:26Z",
+            "completed_at": "2026-10-23T22:34:27Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 53,
+            "started_at": "2026-10-23T22:34:27Z",
+            "completed_at": "2026-10-23T22:34:27Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 54,
+            "started_at": "2026-10-23T22:34:27Z",
+            "completed_at": "2026-10-23T22:34:28Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 55,
+            "started_at": "2026-10-23T22:34:28Z",
+            "completed_at": "2026-10-23T22:34:28Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/dwijayuda/pskernel/check-runs/120684192723",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000028095,
+        "runner_name": "GitHub Actions 1000028095",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ],
+    "newTerminalLogChecks": [
+      {
+        "jobId": 120684192468,
+        "log": {
+          "bytes": 114486,
+          "sha256": "b6e4bda6615c255850adc894e7df77c40d465b0483eafe6cdb6ef3ece49ce98f"
+        },
+        "actualOutputMarkers": [
+          "PSC1_V2_JS_FULL_CHECKER_BRIDGE: PASS",
+          "PSC1_V2_JS_BRIDGE_PASS production-checker-rejects-illtyped-application"
+        ],
+        "terminalJobSteps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:00Z",
+            "completed_at": "2026-10-23T22:17:01Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:20Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:20Z",
+            "completed_at": "2026-10-23T22:17:39Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:39Z",
+            "completed_at": "2026-10-23T22:17:40Z"
+          },
+          {
+            "name": "Install isolated TypeScript 7.0.2",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:17:40Z",
+            "completed_at": "2026-10-23T22:17:42Z"
+          },
+          {
+            "name": "Build complete real PSC1 compiler and check combined research entry",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:17:42Z",
+            "completed_at": "2026-10-23T22:25:34Z"
+          },
+          {
+            "name": "Generate JavaScript with both complete published kernel and V2 research",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T22:25:34Z",
+            "completed_at": "2026-10-23T22:34:30Z"
+          },
+          {
+            "name": "Compare complete checked JS operations to the restricted V2 head machine",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T22:34:30Z",
+            "completed_at": "2026-10-23T22:34:32Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T22:34:32Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-10-23T22:34:33Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-10-23T22:34:33Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-23T22:34:33Z",
+            "completed_at": "2026-10-23T22:34:33Z"
+          }
+        ],
+        "artifactInspection": "Not re-downloaded: ce574 source is already rejected for final qualification. Terminal log and source/run/attempt metadata only."
+      },
+      {
+        "jobId": 120684192723,
+        "log": {
+          "bytes": 572092,
+          "sha256": "c4fdf1235d08371d7471069c8aa055904a267f45b3d06816e54883d6822985ea"
+        },
+        "actualOutputMarkers": [
+          "PSC1_EXPR_V2_JS_SMOKE: PASS"
+        ],
+        "terminalJobSteps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T22:17:01Z",
+            "completed_at": "2026-10-23T22:17:02Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T22:17:02Z",
+            "completed_at": "2026-10-23T22:17:25Z"
+          },
+          {
+            "name": "Install pinned Lean 4.35.0",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T22:17:25Z",
+            "completed_at": "2026-10-23T22:17:46Z"
+          },
+          {
+            "name": "Build actual PSC1 compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T22:17:46Z",
+            "completed_at": "2026-10-23T22:18:24Z"
+          },
+          {
+            "name": "Check Expression V2 module with portable PSC1 elaborator",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T22:18:24Z",
+            "completed_at": "2026-10-23T22:19:16Z"
+          },
+          {
+            "name": "Check persistent V2 index under the same portable compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T22:19:16Z",
+            "completed_at": "2026-10-23T22:20:06Z"
+          },
+          {
+            "name": "Check all V2 indexed smart constructors through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T22:20:06Z",
+            "completed_at": "2026-10-23T22:20:57Z"
+          },
+          {
+            "name": "Check all Expression V2 storage paths through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T22:20:57Z",
+            "completed_at": "2026-10-23T22:21:49Z"
+          },
+          {
+            "name": "Recheck entire V2 portable lifting source through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T22:21:49Z",
+            "completed_at": "2026-10-23T22:22:38Z"
+          },
+          {
+            "name": "Check source for portable V2 capture-avoiding instantiation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-23T22:22:38Z",
+            "completed_at": "2026-10-23T22:23:25Z"
+          },
+          {
+            "name": "Check portable beta, zeta and metadata head steps through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-23T22:23:25Z",
+            "completed_at": "2026-10-23T22:24:13Z"
+          },
+          {
+            "name": "Check portable bounded beta-zeta head reduction sequence through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-23T22:24:13Z",
+            "completed_at": "2026-10-23T22:25:00Z"
+          },
+          {
+            "name": "Check portable validated-once beta-zeta DAG head machine",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-23T22:25:00Z",
+            "completed_at": "2026-10-23T22:25:49Z"
+          },
+          {
+            "name": "Check portable validated structural equality and pair memo",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-23T22:25:49Z",
+            "completed_at": "2026-10-23T22:26:38Z"
+          },
+          {
+            "name": "Check portable scoped batch equality and memo reuse",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-10-23T22:26:38Z",
+            "completed_at": "2026-10-23T22:27:25Z"
+          },
+          {
+            "name": "Check portable checked legacy-expression DAG importer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-10-23T22:27:25Z",
+            "completed_at": "2026-10-23T22:28:14Z"
+          },
+          {
+            "name": "Check portable paged DAG arena and metadata validation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-10-23T22:28:14Z",
+            "completed_at": "2026-10-23T22:29:03Z"
+          },
+          {
+            "name": "Check portable function-head WHNF research subset through PSC1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-10-23T22:29:03Z",
+            "completed_at": "2026-10-23T22:29:54Z"
+          },
+          {
+            "name": "Check portable paged sharing-aware binder lift",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-23T22:29:54Z",
+            "completed_at": "2026-10-23T22:30:44Z"
+          },
+          {
+            "name": "Check paged capture-avoiding instantiate1 source and head machine",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-23T22:30:44Z",
+            "completed_at": "2026-10-23T22:31:34Z"
+          },
+          {
+            "name": "Check paged structural equality and scoped batch",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-23T22:31:34Z",
+            "completed_at": "2026-10-23T22:32:24Z"
+          },
+          {
+            "name": "Check paged all-constructor legacy expression importer",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-10-23T22:32:24Z",
+            "completed_at": "2026-10-23T22:33:16Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-10-23T22:33:16Z",
+            "completed_at": "2026-10-23T22:33:16Z"
+          },
+          {
+            "name": "Install isolated pinned TypeScript 7.0.2",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-10-23T22:33:16Z",
+            "completed_at": "2026-10-23T22:33:18Z"
+          },
+          {
+            "name": "Compile portable Expression V2 and persistent index to JS",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-10-23T22:33:18Z",
+            "completed_at": "2026-10-23T22:34:11Z"
+          },
+          {
+            "name": "Run generated-JS V2 sharing, hash and indexed-arena smoke",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-10-23T22:34:11Z",
+            "completed_at": "2026-10-23T22:34:26Z"
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-10-23T22:34:26Z",
+            "completed_at": "2026-10-23T22:34:27Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 53,
+            "started_at": "2026-10-23T22:34:27Z",
+            "completed_at": "2026-10-23T22:34:27Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 54,
+            "started_at": "2026-10-23T22:34:27Z",
+            "completed_at": "2026-10-23T22:34:28Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 55,
+            "started_at": "2026-10-23T22:34:28Z",
+            "completed_at": "2026-10-23T22:34:28Z"
+          }
+        ],
+        "artifactInspection": "Not re-downloaded: ce574 source is already rejected for final qualification. Terminal log and source/run/attempt metadata only."
+      }
+    ],
+    "previousArtifactInspections": [
+      {
+        "path": "t01f-final-retained/research-initial-inspection.json",
+        "digest": {
+          "bytes": 10028,
+          "sha256": "6ef7e2d33d14460985d3d402aea0be3220b95619c3cb2fca8bb96c0080cb0288"
+        }
+      },
+      {
+        "path": "t01f-final-retained/research-second-inspection.json",
+        "digest": {
+          "bytes": 1529,
+          "sha256": "eeea4be5b5a81aab550534f190f25c3a12aca8f3844cff3e8b617309008f7c3c"
+        }
+      }
+    ],
+    "scope": "Historical retained research findings for rejected ce574 source. No e136 or final-route qualification is inherited. First four artifacts independently inspected; remaining two terminal logs and API metadata checked only.",
+    "localInspection": "Static JSON/log/hash inspection only; no local repository executable, compiler, Lean, JavaScript, or kernel execution."
+  },
+  "initialArtifactInspection": [
+    {
+      "artifact": {
+        "id": 12536135237,
+        "node_id": "MDg6QXJ0aWZhY3QxMjUzNjEzNTIzNw==",
+        "name": "psc1-v2-full-checker-bridge-lean435",
+        "size_in_bytes": 714,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12536135237",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12536135237/zip",
+        "expired": false,
+        "digest": "sha256:409ccebc142ae71e56761f7c374df9d26c481b0620360e4a49bbdab6f1f54c62",
+        "created_at": "2026-10-23T22:18:01Z",
+        "updated_at": "2026-10-23T22:18:01Z",
+        "expires_at": "2026-11-22T22:18:00Z",
+        "workflow_run": {
+          "id": 40032582247,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+          "head_sha": "ce5747574230e009705372f36da80978060a78ad"
+        }
+      },
+      "files": [
+        {
+          "path": "psc1-v2-checker-bridge.log",
+          "bytes": 2528,
+          "sha256": "b2f0fafceaede76067bf308dec36306cee627db0e633368b8099eb5736f3772a"
+        },
+        {
+          "path": "psc1-v2-checker-bridge.memory",
+          "bytes": 37,
+          "sha256": "9661181b732898bb83e02a114c6c7aadaaccd53d1e536d9aa4c7056971ad548a"
+        }
+      ],
+      "jobId": 120684192570,
+      "requiredMarkersVerified": [
+        "PSC1_V2_BRIDGE_REJECTION: PASS",
+        "PSC1_V2_FULL_CHECKER_BRIDGE: PASS",
+        "variant=v2_import_head_decode",
+        "variant=v2_import_only",
+        "variant=v2_head_preimported",
+        "variant=trusted_whnf"
+      ],
+      "jobLog": {
+        "bytes": 40339,
+        "sha256": "d1cd728f541af4675404774de93b67dd41cf6dd1dbe0c3999b7ea2e40e0d7636"
+      },
+      "actualPassMarkers": [
+        "PSC1_V2_BRIDGE_VERDICT: PASS depth=1",
+        "PSC1_V2_BRIDGE_VERDICT: PASS depth=8",
+        "PSC1_V2_BRIDGE_VERDICT: PASS depth=32",
+        "PSC1_V2_BRIDGE_VERDICT: PASS depth=96",
+        "PSC1_V2_BRIDGE_REJECTION: PASS",
+        "PSC1_V2_FULL_CHECKER_BRIDGE: PASS"
+      ],
+      "memoryRecords": [
+        "peak_rss_kib=11924 wall_seconds=1.11"
+      ],
+      "measurements": [
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_whnf depth=32 calls=400 ms=27 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head_decode depth=32 calls=400 ms=32 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head_decode depth=32 calls=400 ms=31 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_whnf depth=32 calls=400 ms=21 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_only depth=32 calls=400 ms=8 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head depth=32 calls=400 ms=22 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_head_preimported depth=32 calls=400 ms=13 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_check_type depth=32 calls=400 ms=30 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_defeq_positive depth=32 calls=400 ms=4 checksum=400",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_whnf depth=96 calls=160 ms=63 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head_decode depth=96 calls=160 ms=42 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head_decode depth=96 calls=160 ms=42 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_whnf depth=96 calls=160 ms=62 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_only depth=96 calls=160 ms=11 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head depth=96 calls=160 ms=25 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_head_preimported depth=96 calls=160 ms=15 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_check_type depth=96 calls=160 ms=75 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_defeq_positive depth=96 calls=160 ms=11 checksum=160",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_whnf depth=192 calls=70 ms=104 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head_decode depth=192 calls=70 ms=43 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head_decode depth=192 calls=70 ms=44 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_whnf depth=192 calls=70 ms=104 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_only depth=192 calls=70 ms=9 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_import_head depth=192 calls=70 ms=22 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=v2_head_preimported depth=192 calls=70 ms=13 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_check_type depth=192 calls=70 ms=115 checksum=70",
+        "PSC1_V2_BRIDGE_TIMING variant=trusted_defeq_positive depth=192 calls=70 ms=18 checksum=70"
+      ]
+    },
+    {
+      "artifact": {
+        "id": 12535307438,
+        "node_id": "MDg6QXJ0aWZhY3QxMjUzNTMwNzQzOA==",
+        "name": "psc1-v2-whnf-subset-lean435",
+        "size_in_bytes": 249,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535307438",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535307438/zip",
+        "expired": false,
+        "digest": "sha256:dd1762c1ddadea9a9df4d9893e13e381596f0df7cbe1bce37dac47f54c62134a",
+        "created_at": "2026-10-23T22:17:59Z",
+        "updated_at": "2026-10-23T22:17:59Z",
+        "expires_at": "2026-11-22T22:17:58Z",
+        "workflow_run": {
+          "id": 40032582247,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+          "head_sha": "ce5747574230e009705372f36da80978060a78ad"
+        }
+      },
+      "files": [
+        {
+          "path": "psc1-v2-whnf-subset.log",
+          "bytes": 241,
+          "sha256": "7ba9c5f78c762d576f6ba63968495b825a8bddb8cb33d668b9abeaedb490e809"
+        }
+      ],
+      "jobId": 120684192518,
+      "requiredMarkersVerified": [
+        "PSC1_V2_WHNF_SUBSET: PASS cases=5"
+      ],
+      "jobLog": {
+        "bytes": 36389,
+        "sha256": "efe5675d2fd8d0c1a3346ac2ae41c3bb6aa3a0409c6ec224433e4a4d3d51350e"
+      },
+      "actualPassMarkers": [
+        "PSC1_V2_WHNF_SUBSET: PASS cases=5"
+      ],
+      "memoryRecords": [],
+      "measurements": []
+    },
+    {
+      "artifact": {
+        "id": 12535148990,
+        "node_id": "MDg6QXJ0aWZhY3QxMjUzNTE0ODk5MA==",
+        "name": "psc1-expr-v2-differential-lean435",
+        "size_in_bytes": 5960,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535148990",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12535148990/zip",
+        "expired": false,
+        "digest": "sha256:a9003ba26bfc6f6d9ab7ae6b442b3425161bea4cfcd7441a5e345609eb200e03",
+        "created_at": "2026-10-23T22:17:59Z",
+        "updated_at": "2026-10-23T22:17:59Z",
+        "expires_at": "2026-11-22T22:17:58Z",
+        "workflow_run": {
+          "id": 40032582247,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+          "head_sha": "ce5747574230e009705372f36da80978060a78ad"
+        }
+      },
+      "files": [
+        {
+          "path": "expr-v2.memory",
+          "bytes": 37,
+          "sha256": "3ccf03bd75cd587d0d2d7cf3a6e3fae90e0e7f56ec95586002c756728b131ee5"
+        },
+        {
+          "path": "expr-v2-regression.log",
+          "bytes": 62000,
+          "sha256": "75eb1672c8929f3b7223a02625b0b5f68005c8c334a94a97c925e571b0c2b591"
+        }
+      ],
+      "jobId": 120684192597,
+      "requiredMarkersVerified": [
+        "PSC1_EXPR_V2_REGRESSION: PASS",
+        "PSC1_EXPR_V2_LIFT_DIFFERENTIAL: PASS",
+        "PSC1_EXPR_V2_LIFT_SHARING: PASS",
+        "PSC1_EXPR_V2_INSTANTIATE_DIFFERENTIAL: PASS",
+        "PSC1_EXPR_V2_INSTANTIATE_SHARING: PASS",
+        "PSC1_EXPR_V2_HEAD_REDUCTION: PASS",
+        "PSC1_EXPR_V2_HEAD_SEQUENCE: PASS",
+        "PSC1_EXPR_V2_HEAD_MACHINE: PASS",
+        "PSC1_EXPR_V2_PAIR_EQUALITY: PASS",
+        "PSC1_EXPR_V2_PAIR_SHARING: PASS",
+        "PSC1_EXPR_V2_PAIR_BATCH: PASS",
+        "PSC1_EXPR_V2_PAIR_BATCH_SHARING: PASS",
+        "PSC1_EXPR_V2_PAGED_PAIR_EQUALITY: PASS",
+        "PSC1_EXPR_V2_PAGED_PAIR_BATCH: PASS",
+        "PSC1_EXPR_V2_LEGACY_IMPORT: PASS",
+        "PSC1_EXPR_V2_PAGED_LEGACY_IMPORT: PASS",
+        "PSC1_EXPR_V2_PAGED: PASS",
+        "PSC1_EXPR_V2_PAGED_SPINE: PASS",
+        "PSC1_EXPR_V2_PAGED_LIFT: PASS",
+        "PSC1_EXPR_V2_PAGED_INSTANTIATE: PASS",
+        "PSC1_EXPR_V2_PAGED_HEAD: PASS",
+        "PSC1_EXPR_V2_PAGED_BUILDERS: PASS"
+      ],
+      "jobLog": {
+        "bytes": 132295,
+        "sha256": "ade4d27b7fe7f2d784862434145f522fb3849cb82d1e36e21de9672b3fe26c86"
+      },
+      "actualPassMarkers": [
+        "PSC1_EXPR_V2_INDEXED: PASS nodes=384",
+        "PSC1_EXPR_V2_INDEXED_BUILDERS: PASS",
+        "PSC1_EXPR_V2_CHUNKED_BUILDERS: PASS",
+        "PSC1_EXPR_V2_CHUNKED: PASS nodes=512 limits=5",
+        "PSC1_EXPR_V2_PAGED_BUILDERS: PASS",
+        "PSC1_EXPR_V2_PAGED: PASS nodes=512 capacities=5",
+        "PSC1_EXPR_V2_PAGED_SPINE: PASS nodes=1025",
+        "PSC1_EXPR_V2_PAGED_LIFT: PASS cases=108",
+        "PSC1_EXPR_V2_PAGED_INSTANTIATE: PASS cases=48",
+        "PSC1_EXPR_V2_PAGED_HEAD: PASS depths=1,8,24,48",
+        "PSC1_EXPR_V2_LIFT_DIFFERENTIAL: PASS",
+        "PSC1_EXPR_V2_LIFT_SHARING: PASS input_nodes=21 output_nodes=42",
+        "PSC1_EXPR_V2_INSTANTIATE_DIFFERENTIAL: PASS cases=48",
+        "PSC1_EXPR_V2_INSTANTIATE_SHARING: PASS input_nodes=22 output_nodes=42",
+        "PSC1_EXPR_V2_HEAD_REDUCTION: PASS cases=7",
+        "PSC1_EXPR_V2_HEAD_SEQUENCE: PASS",
+        "PSC1_EXPR_V2_HEAD_MACHINE: PASS",
+        "PSC1_EXPR_V2_PAGED_PAIR_EQUALITY: PASS cases=16",
+        "PSC1_EXPR_V2_PAIR_EQUALITY: PASS cases=16",
+        "PSC1_EXPR_V2_PAIR_SHARING: PASS nodes=49 depth=24",
+        "PSC1_EXPR_V2_PAGED_PAIR_BATCH: PASS cases=5",
+        "PSC1_EXPR_V2_PAIR_BATCH: PASS cases=5",
+        "PSC1_EXPR_V2_PAIR_BATCH_SHARING: PASS nodes=41 comparisons=16",
+        "PSC1_EXPR_V2_PAGED_LEGACY_IMPORT: PASS cases=13",
+        "PSC1_EXPR_V2_LEGACY_IMPORT: PASS cases=13",
+        "PSC1_EXPR_V2_REGRESSION: PASS"
+      ],
+      "memoryRecords": [
+        "peak_rss_kib=11732 wall_seconds=0.03"
+      ],
+      "measurements": []
+    }
+  ],
+  "portableClosureArtifactInspection": {
+    "artifact": {
+      "id": 12536315188,
+      "node_id": "MDg6QXJ0aWZhY3QxMjUzNjMxNTE4OA==",
+      "name": "psc1-v2-canonical-ps-closure-lean435",
+      "size_in_bytes": 4339,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12536315188",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12536315188/zip",
+      "expired": false,
+      "digest": "sha256:4eadaf366bb80fc4e0b000420829a49f1781bf49c0772dd3cf59deb0ecd33886",
+      "created_at": "2026-10-23T22:21:05Z",
+      "updated_at": "2026-10-23T22:21:05Z",
+      "expires_at": "2026-11-22T22:21:04Z",
+      "workflow_run": {
+        "id": 40032582247,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "ce5747574230e009705372f36da80978060a78ad"
+      }
+    },
+    "files": [
+      {
+        "path": "_temp/psc1-v2-ps-js.log",
+        "bytes": 32896,
+        "sha256": "370363d2a5639f41a65f36bb01ee5e5ceabd879e5c45c59b6a84f64c6883a286"
+      }
+    ],
+    "jobId": 120684192510,
+    "jobLog": {
+      "bytes": 165249,
+      "sha256": "81cb606801a09dee3a1d58200555254e5043bc1a9edfc1c814b5d9a02ad8c63d"
+    },
+    "actualPassMarkers": [
+      "PSC1_EXPR_V2_WHNF_SUBSET_JS: PASS",
+      "PSC1_EXPR_V2_JS_SMOKE: PASS"
+    ],
+    "canonicalClosureModules": 38,
+    "manifestArchiveLimitation": "Workflow checked the 38-module bootstrap manifest. Its hidden file is not present in this uploaded artifact; actual archive contains the generated smoke log only."
+  },
+  "scope": "Historical results of the ce574 candidate rejected by native Knot proof-script failures. Research passed all six jobs; first four artifacts inspected, final two terminal logs and metadata inspected. No later source or final-route qualification is inherited."
+}

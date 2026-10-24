@@ -1,0 +1,87 @@
+{
+  "schema": "psc1-t01f-closed-cache-knot-complete-narrow-v1",
+  "status": "PASS",
+  "sourceSha": "e136c06fb378c7882eaa795366e7a781440588f9",
+  "runId": 40033825281,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40033825281",
+  "jobs": [
+    {
+      "id": 120688325037,
+      "scope": "native",
+      "conclusion": "success",
+      "artifactId": 12536152140,
+      "artifactFiles": 9
+    },
+    {
+      "id": 120689204789,
+      "scope": "bounded-and-full-generated-producer",
+      "conclusion": "success",
+      "artifactId": 12535974274,
+      "artifactFiles": 17
+    },
+    {
+      "id": 120694671323,
+      "scope": "retained-controls",
+      "conclusion": "success",
+      "artifactId": 12536932728,
+      "artifactFiles": 15
+    },
+    {
+      "id": 120694671292,
+      "scope": "complete-selected-mixed-sample",
+      "conclusion": "success",
+      "artifactId": 12538410452,
+      "artifactFiles": 11
+    }
+  ],
+  "all52ArtifactFilesIndependentlyVerified": true,
+  "proofReports": 108,
+  "newUniversalEquivalenceReports": 7,
+  "frozenScalarHashProofReports": 11,
+  "retainedKnotReports": 16,
+  "closedCacheMatrixAssertions": 1884,
+  "selectedMixedAssertions": 1400,
+  "selectedMixedTraceBegins": 440,
+  "selectedMixedTraceEnds": 440,
+  "selectedMixedIndependentAdmissions": 294,
+  "selectedMixedMetadataComparisons": 377,
+  "selectedMixedSample": "Aé€😀",
+  "selectedMixedWallSeconds": 1243.28,
+  "selectedMixedPeakRssKiB": 1145236,
+  "selectedMixedWholeJobSeconds": 1273.0,
+  "selectedMixedWholeJobMarginSeconds": 227.0,
+  "unchangedMixedJobCapMinutes": 25,
+  "kernel": {
+    "bytes": 9986116,
+    "sha256": "7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528"
+  },
+  "fixture": {
+    "bytes": 2791525,
+    "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+  },
+  "evidence": [
+    {
+      "path": "docs/evidence/2026-10-24-t01f-closed-cache-knot-native-gates.json",
+      "bytes": 37617,
+      "sha256": "57dce9f17b50c1a601b430e5ab576da5d279201347881bf1adba5cc539e6edd8"
+    },
+    {
+      "path": "docs/evidence/2026-10-24-t01f-closed-cache-knot-generated.json",
+      "bytes": 39487,
+      "sha256": "4ff94ae4f36735d8c752b5db839bc1de8fcb2db9c8d4b37fdd29cafd241935b0"
+    },
+    {
+      "path": "docs/evidence/2026-10-24-t01f-closed-cache-knot-controls.json",
+      "bytes": 11123,
+      "sha256": "8341c14c67454114e826403f200532d81e9e1d94ea4ca5cad0394e1c61b4482d"
+    },
+    {
+      "path": "docs/evidence/2026-10-24-t01f-closed-cache-knot-mixed.json",
+      "bytes": 58157,
+      "sha256": "f36f6caee3fb4dca5043fb5659aaa3f2abe7d9ef009e61b65b7984e456a7c9b6"
+    }
+  ],
+  "qualificationBoundary": "This exact-source complete narrow pass permits one new final-source activation. It does not establish either six-shard final route, full T01F/current A acceptance, integration, complete V2, Lean compatibility C, performance D, backend preservation or soundness. All final receipts must bind to their own exact source/run/attempt.",
+  "localWork": "Static source/log/ZIP/hash/JSON inspection only. All runtime/proof/build execution occurred on GitHub Actions Linux."
+}

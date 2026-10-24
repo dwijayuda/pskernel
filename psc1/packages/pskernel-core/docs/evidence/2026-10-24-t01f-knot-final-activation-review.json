@@ -1,0 +1,55 @@
+{
+  "schema": "psc1-t01f-repaired-final-activation-independent-review-v1",
+  "parentSource": "e136c06fb378c7882eaa795366e7a781440588f9",
+  "lastObservedIntegration": "123c41197950b6761be965fd21c57142ee2b0d1c",
+  "sourceFilesGitAuthenticated": true,
+  "changedWorkflowCount": 6,
+  "fullPushTriggersRestored": 5,
+  "narrowManualOnly": true,
+  "savedDraftByteExact": true,
+  "files": [
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      "gitBlobBefore": "d5a8756ecdc4fe5eda895eaed8d82a8894f777c0",
+      "triggerOnlyOrUnchanged": true,
+      "allJobsByteIdentical": true
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-core-correctness.yml",
+      "gitBlobBefore": "a45831f9ab01dc44cbe8043138b5f0780e3a4272",
+      "triggerOnlyOrUnchanged": true,
+      "allJobsByteIdentical": true
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-expr-v2.yml",
+      "gitBlobBefore": "1396f9a0858e3a7e5067001655126c1ca64532a7",
+      "triggerOnlyOrUnchanged": true,
+      "allJobsByteIdentical": true
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435.yml",
+      "gitBlobBefore": "44565f46ee542a04d9aa73d6448dcfb573b744c3",
+      "triggerOnlyOrUnchanged": true,
+      "allJobsByteIdentical": true
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-arena435-profile.yml",
+      "gitBlobBefore": "d33940085c832a672754e0b12865f35b2b95d3f9",
+      "triggerOnlyOrUnchanged": true,
+      "allJobsByteIdentical": true
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-t01f-hash.yml",
+      "gitBlobBefore": "01d2716a6b4876c3e3be5f2dc508f4f7dc4cbee5",
+      "triggerOnlyOrUnchanged": true,
+      "allJobsByteIdentical": true
+    },
+    {
+      "path": "psc1/packages/pskernel-core/docs/drafts/t01f-final-shards/psc1-pskernel-expr-v2-integration.yml",
+      "gitBlobBefore": "8bb4f05472e6b0a770059449044c81830e514060",
+      "triggerOnlyOrUnchanged": true,
+      "allJobsByteIdentical": true
+    }
+  ],
+  "limits": "Prepared activation only, contingent on complete exact e136 narrow PASS. This does not claim runtime qualification. No local build, Lean, compiler, JavaScript or kernel execution."
+}

@@ -1,3 +1,107 @@
+## 2026-10-24 complete Knot-corrected narrow PASS; one new final source activated
+
+Exact source `e136c06fb378c7882eaa795366e7a781440588f9` completed
+[run 40033825281](https://github.com/dwijayuda/pskernel/actions/runs/40033825281),
+attempt 1, SUCCESS. All four jobs and all 52 files across their four artifacts
+were independently verified against terminal logs, upload/API ZIP digests,
+fresh Git source blobs, source/run/attempt identities and actual producer bytes.
+
+- Native `120688325037` PASS: exactly 108 reports (60 scope + 14 session +
+  11 unchanged scalar-hash + seven new universal cache equivalences +
+  all 16 retained Knot equations), permitted standard axioms only.
+  The four previously failing Knot proofs now close using the universal
+  lookup equivalences. Every original statement and the 102,675-byte frozen
+  reference-worker region remains unchanged. Retained native controls,
+  294 ordered independent admissions, 377 metadata comparisons and all six
+  native String cases/singletons passed.
+- Producer `120689204789` PASS: authentic bounded PSC1 -> TypeScript 7.0.2
+  -> JavaScript; exact 20-expression/two-state/1,884-assertion matrix;
+  frozen 2,730 cases / 8,190 stages / 13,665 assertions / three long cases
+  and 19-case / 38-assertion short controls; all six strict code-generation
+  markers before complete source checking and complete kernel compilation.
+  Independent inspection also verified the complete-kernel worker body.
+  The bounded workflow guard executed; the separate full-body inspection is
+  not described as an executed workflow guard.
+- Controls `120694671323` PASS: all 15 artifact files, exact full-kernel
+  1,884 matrix, frozen scalar controls, all 43 required DAG markers,
+  605 generated-prefix assertions and retained session/owner controls.
+  DAG 136.91 s / 559,984 KiB peak RSS; prefix 30.51 s / 490,716 KiB.
+- Mixed `120694671292` PASS: the complete `Aé€😀` sample, exactly 1,400 assertions,
+  440/440 ordered matching calls, 294 independent admissions, 377 metadata
+  comparisons, singleton and all original negatives. Timed process
+  1,243.28 s / 1,145,236 KiB peak RSS / exit 0. Whole job 1,273 s,
+  leaving 227 s before the unchanged 25-minute cap. This is an observation
+  at this source/attempt, not a controlled performance or general speedup claim.
+
+Complete generated kernel: 9,986,116 bytes, SHA-256
+`7e71b0dbbd62405744454aab66413ccbcd5e797996a9cd68f80a2219c5ebe528`.
+Fixture: 2,791,525 bytes, SHA-256
+`563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d`.
+The fresh producer output is byte-identical to a069's production output.
+This confirms the proof/workflow-only repair; no runtime qualification
+receipt is inherited from a069 or the rejected ce574 source.
+
+Evidence:
+- `docs/evidence/2026-10-24-t01f-closed-cache-knot-native-gates.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-knot-generated.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-knot-controls.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-knot-mixed.json`
+- `docs/evidence/2026-10-24-t01f-closed-cache-knot-narrow.json`
+- `docs/evidence/2026-10-24-t01f-knot-final-activation-review.json`
+
+This containing commit activates one new exact final source by restoring
+exactly five work-branch push triggers and returning the narrow workflow to
+manual-only. Workflow jobs, proof-library ordering, pins, assertions and
+limits are unchanged from the repaired source. The saved integration draft
+already matches the activated workflow byte-for-byte. Follow the five
+containing-source runs, one attempt each; do not launch duplicates or
+transfer the narrow receipt to final qualification.
+
+Require all 232 exact native proof reports, both strict six-shard
+`PSC1_T01F_FULL_STRING_SHARDED_JS: PASS` aggregates, exactly 1,400 executed
+assertions per selected sample and 8,400 per route including repeated
+prefixes, all independent admissions/metadata/original negatives, 24 CLI +
+eight API provider cases per route, frozen 32-worker/384-call owner checks,
+and every retained native/official/research/measurement/Arena/profile gate.
+Retain max-parallel two and the 25-minute shard/mixed cap. Lean 4.35.0 commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, TypeScript 7.0.2, Node 22,
+fuel 4096, old-space 2048 MiB and empty PATH remain fixed. Old-space is not a
+hard RSS limit.
+
+The rejected final source `ce5747574230e009705372f36da80978060a78ad`
+remains unqualified because of its four native Knot proof failures. Its
+later observations stay bound to that source and attempt 1:
+research run `40032582247` completed all six jobs (four artifacts independently
+inspected; the final two terminal logs/API identities checked).
+Full Arena run `40032580865` FAILED C: 173/193 strict matches
+(105 acceptance, 60 kernel rejection, one metadata rejection, seven transport
+rejections), 17 timeouts, one reduction-budget resource exhaustion, and two
+separate unsafe/partial contract-difference agreements. All 193 original
+bodies and all 199 official + 586 generated artifact files were inspected.
+Profile run `40032580974` completed diagnostic collection, not qualification:
+repeated-subproblem accepted; Church resource-exhausted; Init.Prelude timed
+out at the fixed 60-second diagnostic limit; proj-of-stuck-prop rejected.
+All 58 profile files, 49 manifest entries and 88,221 V8 ticks were verified.
+C remains FAIL and D OPEN; there is no whole-kernel speedup claim.
+The ce574 generated/canonical shard outcomes are historical only, and its
+owner comparison was skipped after native failure.
+
+Separate durable receipts:
+`docs/evidence/2026-10-24-t01f-rejected-ce574-retained-research.json`,
+`docs/evidence/2026-10-24-t01f-rejected-ce574-retained-arena.json`,
+`docs/evidence/2026-10-24-t01f-rejected-ce574-retained-profile.json`.
+
+T01F/current A/B/D remain OPEN; C remains FAIL pending its separate findings.
+This narrow pass is not full T01F, broad Lean compatibility, performance,
+complete V2 or soundness qualification. After the exact scoped final gates
+pass, fresh-read both branches and integrate the exact qualified source with
+a non-force expected-SHA update preserving concurrent history, not an untested
+documentation child. Then continue T05 ordinary DAG inductive admission.
+Integration was last observed at
+`123c41197950b6761be965fd21c57142ee2b0d1c`; fetch it again before writes.
+
+---
+
 ## 2026-10-24 final native Knot proof failure; universal-lemma bridge in narrow preflight
 
 Final source `ce5747574230e009705372f36da80978060a78ad`, integration

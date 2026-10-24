@@ -1,0 +1,38 @@
+name: PSC1 read-only Python generated hot-worker source shapes
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-python-worker-shapes.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify immutable Python artifact identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12551829905 > artifact.json
+          python3 - <<'PY'
+          import json
+          a=json.load(open("artifact.json"));assert a["workflow_run"]["id"]==40072853176 and a["workflow_run"]["head_sha"]=="a8def92c857b71344717d92e2260aef25675fabb"
+          assert a["digest"]=="sha256:b6b5b4917f58eaddfac84742287b75865e154ff905544e98c30783f49f65f784" and not a["expired"]
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40072853176'
+          artifact-ids: '12551829905'
+          path: baseline
+      - name: Read source without executing compiler
+        run: python3 .github/diagnostics/psc1-python-worker-shapes.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-python-worker-shapes-${{ github.sha }}
+          path: diagnostics/
+          retention-days: 90

@@ -1,0 +1,85 @@
+name: PSC1 exact Rust compiler optimization study
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-rust-build-profile.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 38
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: mir
+            flags: '-C no-prepopulate-passes'
+          - name: minimal
+            flags: '-C no-prepopulate-passes -C passes=mem2reg,instcombine,simplifycfg'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'f707e037b5f470ceee65891e0c735316ba097444'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.90.0'
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '12576967932'
+          run-id: '40133622389'
+          github-token: ${{ github.token }}
+          path: psc1/dist/rust-study-input
+      - name: Compare exact generated source and full G2 workload with unchanged limits
+        working-directory: psc1
+        env:
+          STUDY_NAME: ${{ matrix.name }}
+          STUDY_FLAGS: ${{ matrix.flags }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
+          import {sha,verifyArtifact,boundedRun} from './host-tools/generated-target-tools.mjs';
+          function find(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory()){const f=find(p);if(f)return f;}else if(e.name==='qualification.json'){const q=JSON.parse(fs.readFileSync(p));if(q.schema==='psc1-generated-target-qualification/1'&&q.mode==='--self-host')return p;}}}
+          const qfile=find('dist/rust-study-input'),q=JSON.parse(fs.readFileSync(qfile)),root=path.dirname(qfile);
+          assert.equal(q.testedCommit,'f707e037b5f470ceee65891e0c735316ba097444');assert.equal(q.status,'failed');assert.equal(q.target,'rust');assert.equal(q.sourceClosureDigest,'e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66');
+          const mf=path.join(root,'G1-service/artifact.json'),m=verifyArtifact(mf,'a3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005');
+          assert.equal(sha(fs.readFileSync(path.join(m.directory,m.executable))),'91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42');
+          const input=path.join(root,'G2-self.request.json');assert.equal(sha(fs.readFileSync(input)),'636624936f655a0412cf5ce0f31df9436bc9f311e63aee25d808f009a76f4118');
+          const dir=path.resolve('dist/rust-build-study-'+process.env.STUDY_NAME);fs.mkdirSync(dir,{recursive:true});
+          const work=path.join(dir,'work');fs.mkdirSync(work);
+          for(const f of ['main.rs','Cargo.lock'])fs.copyFileSync(path.join(m.directory,f),path.join(work,f));
+          const toml=fs.readFileSync(path.join(m.directory,'Cargo.toml'),'utf8');assert.ok(toml.includes('opt-level=0'));fs.writeFileSync(path.join(work,'Cargo.toml'),toml.replace('opt-level=0','opt-level=1'));
+          const env={...process.env,RUSTFLAGS:process.env.STUDY_FLAGS,CARGO_TARGET_DIR:path.join(dir,'target')};
+          const receipt={schema:'psc1-rust-build-study/1',subjectCommit:q.testedCommit,controlCommit:process.env.GITHUB_SHA,sourceClosureDigest:q.sourceClosureDigest,sourceSha256:m.sourceSha256,requestSha256:sha(fs.readFileSync(input)),name:process.env.STUDY_NAME,flags:env.RUSTFLAGS,optimizationLevel:1,codegenUnits:256,qualification:false,admission:'not-run',publication:'not-run'};
+          const save=()=>{fs.writeFileSync(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');console.log('PSC1_RUST_BUILD_STUDY: '+JSON.stringify(receipt));};
+          let build=boundedRun('cargo',['build','--release','--locked','--message-format=short','--manifest-path',path.join(work,'Cargo.toml')],{env,logDirectory:path.join(dir,'build'),timeoutMs:240000});
+          fs.writeFileSync(path.join(dir,'build.txt'),build.stdout+'\n'+build.stderr);delete build.stdout;delete build.stderr;receipt.build=build;save();
+          if(build.error||build.status!==0)throw Error('study build failed');
+          const exe=path.join(dir,'target/release/psc1-generated-target');receipt.executableSha256=sha(fs.readFileSync(exe));save();
+          const output=path.join(dir,'diagnostic-only.candidate.json');
+          let r=boundedRun(exe,[input,output],{logDirectory:path.join(dir,'G2'),timeoutMs:1800000,timeoutPolicy:'g2g3-correctness-1800s'});
+          fs.writeFileSync(path.join(dir,'G2.txt'),r.stdout+'\n'+r.stderr);delete r.stdout;delete r.stderr;receipt.G2=r;
+          if(fs.existsSync(output)){const b=fs.readFileSync(output);receipt.candidateSha256=sha(b);receipt.candidateBytes=b.length;
+           const v=JSON.parse(b),baseline=JSON.parse(fs.readFileSync(path.join(root,'G1-bootstrap.candidate.json')));receipt.candidateStatus=v.status;
+           for(const field of ['source','originalIr','specializedIr','publicNames'])assert.deepEqual(v[field],baseline[field],'exact baseline '+field);
+           assert.equal(v.admissionRequest.admissions,baseline.admissionRequest.admissions);receipt.exactBaselineFields=true;
+          }
+          assert.equal(sha(fs.readFileSync(input)),receipt.requestSha256);verifyArtifact(mf,'a3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005');save();
+          // Keep exact generated executable and diagnostic receipts; omit build caches.
+          fs.copyFileSync(exe,path.join(dir,'service.bin'));fs.rmSync(path.join(dir,'target'),{recursive:true,force:true});fs.rmSync(work,{recursive:true,force:true});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-rust-build-study-${{ matrix.name }}-${{ github.sha }}
+          path: |
+            psc1/dist/rust-build-study-*/receipt.json
+            psc1/dist/rust-build-study-*/build.txt
+            psc1/dist/rust-build-study-*/G2.txt
+            psc1/dist/rust-build-study-*/G2/
+            psc1/dist/rust-build-study-*/service.bin
+          retention-days: 90

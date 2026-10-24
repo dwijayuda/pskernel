@@ -60,3 +60,13 @@ def psBackendSourceZipIndexAcc {Value : Type} (values : List Value)
 
 def psBackendSourceZipIndex {Value : Type} (values : List Value) : List (Prod Value Nat) :=
   psBackendSourceZipIndexAcc values 0 List.nil
+
+def psBackendSourceFlatMapAcc {A B : Type} (convert : A -> List B)
+    (values : List A) (reversed : List B) : List B :=
+  match values with
+  | List.nil => psListReverse reversed
+  | List.cons value rest =>
+      psBackendSourceFlatMapAcc convert rest (psListReverseAcc (convert value) reversed)
+
+def psBackendSourceFlatMap {A B : Type} (convert : A -> List B) (values : List A) : List B :=
+  psBackendSourceFlatMapAcc convert values List.nil

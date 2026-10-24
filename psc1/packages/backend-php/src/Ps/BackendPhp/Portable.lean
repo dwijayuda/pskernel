@@ -1,0 +1,865 @@
+import Ps.CompilerIr.Validate
+import Ps.Bridge.Json
+import Ps.BackendPhp.Runtime
+import Ps.BackendCommon.Plan
+import Ps.BackendCommon.Source
+
+structure PsPhpPortableModule where
+  source : String
+  composer : String
+  runtimeSource : String
+  runtimeVersion : String
+  runtimeRequirements : List String
+  declarations : List (Prod String String)
+  declarationLines : List (Prod String Nat)
+
+namespace PsPhp
+
+def cat (parts : List String) : String := psTextJoin "" parts
+def decimal (value : Nat) : String := Int.repr (Int.ofNat value)
+
+def quoteAcc (chars : List Char) (builder : PsTextBuilder) : String :=
+  match chars with
+  | List.nil => cat [psTextBuilderFinish builder, "\""]
+  | List.cons char rest =>
+      let code : Nat := Char.toNat char;
+      let text : String :=
+        if Nat.beq code 92 then "\\\\"
+        else if Nat.beq code 34 then "\\\""
+        else if Nat.beq code 36 then "\\$"
+        else if Nat.beq code 10 then "\\n"
+        else if Nat.beq code 13 then "\\r"
+        else if Nat.beq code 9 then "\\t"
+        else if Nat.blt code 32 then
+          cat ["\\x", psJsonHexDigit (Nat.div code 16), psJsonHexDigit (Nat.mod code 16)]
+        else String.singleton char;
+      quoteAcc rest (psTextBuilderAppend builder text)
+
+def quote (value : String) : String :=
+  quoteAcc (psJsonStringToChars value) (psTextBuilderAppend psTextBuilderEmpty "\"")
+
+def asciiLetter (code : Nat) : Bool :=
+  (Nat.ble 65 code && Nat.ble code 90) || (Nat.ble 97 code && Nat.ble code 122)
+
+def asciiDigit (code : Nat) : Bool := Nat.ble 48 code && Nat.ble code 57
+
+def stemAcc (chars : List Char) (builder : PsTextBuilder) : String :=
+  match chars with
+  | List.nil => psTextBuilderFinish builder
+  | List.cons char rest =>
+      let code : Nat := Char.toNat char;
+      let text : String :=
+        if asciiLetter code || asciiDigit code || Nat.beq code 95 then String.singleton char
+        else cat ["_u", decimal code, "_"];
+      stemAcc rest (psTextBuilderAppend builder text)
+
+def stem (value : String) : String := stemAcc (psJsonStringToChars value) psTextBuilderEmpty
+
+def typeText (fuel : Nat) : PsVerifiedIrType -> Except String String :=
+  match fuel with
+  | Nat.zero => fun (_type : PsVerifiedIrType) => Except.error "PSC1_PHP_TYPE_BUDGET"
+  | Nat.succ remaining =>
+      fun (type : PsVerifiedIrType) =>
+        let check : PsVerifiedIrType -> Except String String := typeText remaining;
+        match type with
+        | PsVerifiedIrType.primitive scalar =>
+            match scalar with
+            | PsVerifiedIrPrimitiveType.nat => Except.ok "\\GMP"
+            | PsVerifiedIrPrimitiveType.int => Except.ok "\\GMP"
+            | PsVerifiedIrPrimitiveType.bool => Except.ok "bool"
+            | PsVerifiedIrPrimitiveType.string => Except.ok "string"
+            | PsVerifiedIrPrimitiveType.char => Except.ok "string"
+            | PsVerifiedIrPrimitiveType.unit => Except.ok "null"
+            | _ => Except.error "PSC1_PHP_TYPE_UNSUPPORTED: machine scalars, floats and unresolved types are not qualified"
+        | PsVerifiedIrType.function parameters result => do
+            let _ <- psListMapExcept check parameters
+            let _ <- check result
+            Except.ok "\\Closure"
+        | PsVerifiedIrType.named _ arguments => do
+            let _ <- psListMapExcept check arguments
+            Except.ok "array"
+        | _ => Except.error "PSC1_PHP_TYPE_UNSUPPORTED: machine scalars, floats and unresolved types are not qualified"
+
+def typeRequirements (fuel : Nat) : PsVerifiedIrType -> List String :=
+  match fuel with
+  | Nat.zero => fun (_type : PsVerifiedIrType) => List.nil
+  | Nat.succ remaining =>
+      fun (type : PsVerifiedIrType) =>
+        let visit : PsVerifiedIrType -> List String := typeRequirements remaining;
+        match type with
+        | PsVerifiedIrType.primitive scalar =>
+            match scalar with
+            | PsVerifiedIrPrimitiveType.nat => ["gmp"]
+            | PsVerifiedIrPrimitiveType.int => ["gmp"]
+            | _ => List.nil
+        | PsVerifiedIrType.function parameters result =>
+            psListAppend (psBackendSourceFlatMap visit parameters) (visit result)
+        | PsVerifiedIrType.named _ arguments => psBackendSourceFlatMap visit arguments
+        | _ => List.nil
+
+def intrinsicRequirements (operation : PsVerifiedIrIntrinsic) : List String :=
+  match operation with
+  | PsVerifiedIrIntrinsic.boolNot => List.nil
+  | PsVerifiedIrIntrinsic.boolAnd => List.nil
+  | PsVerifiedIrIntrinsic.boolOr => List.nil
+  | PsVerifiedIrIntrinsic.boolEq => List.nil
+  | PsVerifiedIrIntrinsic.boolNe => List.nil
+  | PsVerifiedIrIntrinsic.stringPush => List.nil
+  | PsVerifiedIrIntrinsic.stringSingleton => List.nil
+  | PsVerifiedIrIntrinsic.stringAppend => List.nil
+  | PsVerifiedIrIntrinsic.stringEq => List.nil
+  | PsVerifiedIrIntrinsic.charOfNat => ["charOfNat"]
+  | PsVerifiedIrIntrinsic.charToNat => ["charToNat"]
+  | PsVerifiedIrIntrinsic.stringLength => ["unicodeChars", "gmp"]
+  | PsVerifiedIrIntrinsic.stringGet => ["stringGet"]
+  | PsVerifiedIrIntrinsic.stringNext => ["stringNext"]
+  | PsVerifiedIrIntrinsic.stringExtract => ["stringExtract"]
+  | PsVerifiedIrIntrinsic.arrayMap => ["calls"]
+  | PsVerifiedIrIntrinsic.arrayFoldl => ["calls", "gmp"]
+  | _ => ["gmp"]
+
+def exprRequirements (valueNames : List String) (fuel : Nat) :
+    List String -> PsVerifiedIrExpr -> List String :=
+  match fuel with
+  | Nat.zero => fun (_bound : List String) (_expr : PsVerifiedIrExpr) => List.nil
+  | Nat.succ remaining =>
+      fun (bound : List String) (expr : PsVerifiedIrExpr) =>
+        let visit : PsVerifiedIrExpr -> List String := exprRequirements valueNames remaining bound;
+        match expr with
+        | PsVerifiedIrExpr.literal value =>
+            match value with
+            | PsVerifiedIrLiteral.natural _ => ["gmp"]
+            | PsVerifiedIrLiteral.integer _ => ["gmp"]
+            | _ => List.nil
+        | PsVerifiedIrExpr.var name =>
+            if psBackendNameSeen name valueNames && !psBackendNameSeen name bound then ["calls"] else List.nil
+        | PsVerifiedIrExpr.intrinsic operation types arguments =>
+            psListAppend (intrinsicRequirements operation)
+              (psListAppend (psBackendSourceFlatMap (typeRequirements remaining) types)
+                (psBackendSourceFlatMap visit arguments))
+        | PsVerifiedIrExpr.lambda parameters result body =>
+            psListAppend
+              (psBackendSourceFlatMap (fun (parameter : PsVerifiedIrParameter) =>
+                typeRequirements remaining parameter.type) parameters)
+              (psListAppend (typeRequirements remaining result)
+                (exprRequirements valueNames remaining
+                  (psListAppend (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) bound) body))
+        | PsVerifiedIrExpr.call fn _ arguments =>
+            List.cons "calls" (psListAppend (visit fn) (psBackendSourceFlatMap visit arguments))
+        | PsVerifiedIrExpr.letE name type value body =>
+            psListAppend (typeRequirements remaining type)
+              (psListAppend (visit value) (exprRequirements valueNames remaining (List.cons name bound) body))
+        | PsVerifiedIrExpr.ifE condition yes no =>
+            psListAppend (visit condition) (psListAppend (visit yes) (visit no))
+        | PsVerifiedIrExpr.record _ _ fields =>
+            psBackendSourceFlatMap (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.constructor _ _ _ fields =>
+            psBackendSourceFlatMap (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.projection _ _ target _ => visit target
+        | PsVerifiedIrExpr.matchE _ _ target alternatives =>
+            psListAppend (visit target)
+              (psBackendSourceFlatMap
+                (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                  exprRequirements valueNames remaining
+                    (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name)
+                      alternative.snd.fst) bound) alternative.snd.snd) alternatives)
+
+structure Context where
+  globals : List (Prod String String)
+  valueNames : List String
+  locals : List (Prod String String)
+  helpers : List String
+  scheduled : Bool
+
+structure EmitState where
+  linesRev : List String
+  lineCount : Nat
+  counter : Nat
+  indent : Nat
+
+def Emit (Value : Type) : Type := PsBackendStateExcept EmitState String Value
+
+def withLocals (context : Context) (locals : List (Prod String String)) : Context :=
+  Context.mk context.globals context.valueNames locals context.helpers context.scheduled
+
+def padding (count : Nat) (builder : PsTextBuilder) : String :=
+  match count with
+  | Nat.zero => psTextBuilderFinish builder
+  | Nat.succ remaining => padding remaining (psTextBuilderAppend builder "    ")
+
+def line (text : String) : Emit Unit :=
+  psBackendStateModify (fun (state : EmitState) =>
+    EmitState.mk (List.cons (cat [padding state.indent psTextBuilderEmpty, text]) state.linesRev)
+      (Nat.succ state.lineCount) state.counter state.indent)
+
+def indent (increase : Bool) : Emit Unit :=
+  psBackendStateModify (fun (state : EmitState) =>
+    EmitState.mk state.linesRev state.lineCount state.counter
+      (if increase then Nat.succ state.indent else Nat.sub state.indent 1))
+
+def fresh (hint : String) : Emit String :=
+  psBackendStateBind (psBackendStateGet Unit.unit) (fun (state : EmitState) =>
+    psBackendStateBind
+      (psBackendStateSet (EmitState.mk state.linesRev state.lineCount (Nat.succ state.counter) state.indent))
+      (fun (_unit : Unit) => psBackendStatePure (cat ["$v", decimal state.counter, "_", stem hint])))
+
+def bindValue (expression : String) : Emit String :=
+  psBackendStateBind (fresh "tmp") (fun (name : String) =>
+    psBackendStateBind (line (cat [name, " = ", expression, ";"])) (fun (_unit : Unit) => psBackendStatePure name))
+
+def captureValues (values : List String) (seen : List String) : List String :=
+  match values with
+  | List.nil => seen
+  | List.cons value rest =>
+      captureValues rest (if psBackendNameSeen value seen then seen else psListAppend seen [value])
+
+def capture (context : Context) : String :=
+  let refs : List String := psListMap (fun (pair : Prod String String) => cat ["&", pair.snd]) context.globals;
+  let values : List String := captureValues
+    (psListAppend (psListMap (fun (pair : Prod String String) => pair.snd) context.locals) context.helpers) List.nil;
+  let captures : List String := psListAppend refs values;
+  if psListIsEmpty captures then "" else cat [" use (", psTextJoin ", " captures, ")"]
+
+def guardCondition (context : Context) (name : String) (type : PsVerifiedIrType) : String :=
+  match type with
+  | PsVerifiedIrType.primitive scalar =>
+      match scalar with
+      | PsVerifiedIrPrimitiveType.nat => cat ["!(", name, " instanceof \\GMP) || gmp_cmp(", name, ", 0) < 0"]
+      | PsVerifiedIrPrimitiveType.int => cat ["!(", name, " instanceof \\GMP)"]
+      | PsVerifiedIrPrimitiveType.bool => cat ["!is_bool(", name, ")"]
+      | PsVerifiedIrPrimitiveType.string =>
+          if psBackendNameSeen "$__ps_utf8Valid" context.helpers then
+            cat ["!is_string(", name, ") || !$__ps_utf8Valid(", name, ")"]
+          else cat ["!is_string(", name, ") || preg_match('//u', ", name, ") !== 1"]
+      | PsVerifiedIrPrimitiveType.char => cat ["!is_string(", name, ") || preg_match('/\\A.\\z/us', ", name, ") !== 1"]
+      | PsVerifiedIrPrimitiveType.unit => cat [name, " !== null"]
+      | _ => "true"
+  | PsVerifiedIrType.function _ _ => cat ["!(", name, " instanceof \\Closure)"]
+  | PsVerifiedIrType.named _ _ => cat ["!is_array(", name, ")"]
+  | _ => "true"
+
+def guard (context : Context) (name : String) (type : PsVerifiedIrType) : Emit Unit :=
+  fun (state : EmitState) => do
+    let (_unit, state) <- line (cat ["if (", guardCondition context name type, ") {"]) state
+    let (_unit, state) <- indent true state
+    let (_unit, state) <- line "throw new \\TypeError('PSC1_PHP_ARGUMENT_TYPE');" state
+    let (_unit, state) <- indent false state
+    line "}" state
+
+def invoke (context : Context) (fn : String) (args : List String) : String :=
+  if context.scheduled then cat ["(yield [", fn, ", [", psTextJoin ", " args, "]])"]
+  else cat [fn, "(", psTextJoin ", " args, ")"]
+
+def callText (name : String) (args : List String) : String :=
+  cat [name, "(", psTextJoin ", " args, ")"]
+
+def callBind (name : String) (arity : Nat) (args : List String) : Emit String :=
+  if Nat.beq (psListLength args) arity then bindValue (callText name args)
+  else psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+
+def binary (args : List String) (symbol : String) : Emit String :=
+  match args with
+  | [a, b] => bindValue (cat ["(", a, " ", symbol, " ", b, ")"])
+  | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+
+def intrinsic (context : Context) (operation : PsVerifiedIrIntrinsic)
+    (args : List String) : Emit String :=
+  match operation with
+  | PsVerifiedIrIntrinsic.natAdd => callBind "gmp_add" 2 args
+  | PsVerifiedIrIntrinsic.intAdd => callBind "gmp_add" 2 args
+  | PsVerifiedIrIntrinsic.natMul => callBind "gmp_mul" 2 args
+  | PsVerifiedIrIntrinsic.intMul => callBind "gmp_mul" 2 args
+  | PsVerifiedIrIntrinsic.intSub => callBind "gmp_sub" 2 args
+  | PsVerifiedIrIntrinsic.natSub =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0 ? gmp_init(0) : gmp_sub(", a, ", ", b, "))"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.natDiv =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", b, ", 0) === 0 ? gmp_init(0) : gmp_div_q(", a, ", ", b, ", GMP_ROUND_ZERO))"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.natMod =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", b, ", 0) === 0 ? ", a, " : gmp_mod(", a, ", ", b, "))"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.natEq =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") === 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.intEq =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") === 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.natNe =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") !== 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.natLe =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") <= 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.intLe =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") <= 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.natLt =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.intLt =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", a, ", ", b, ") < 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.intOfNat =>
+      match args with
+      | [a] => psBackendStatePure a
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.intRepr =>
+      match args with
+      | [a] => bindValue (cat ["gmp_strval(", a, ", 10)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.intNegSucc =>
+      match args with
+      | [a] => bindValue (cat ["gmp_neg(gmp_add(", a, ", 1))"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.intNeg => callBind "gmp_neg" 1 args
+  | PsVerifiedIrIntrinsic.boolNot =>
+      match args with
+      | [a] => bindValue (cat ["(!", a, ")"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.boolEq => binary args "==="
+  | PsVerifiedIrIntrinsic.stringEq => binary args "==="
+  | PsVerifiedIrIntrinsic.boolNe => binary args "!=="
+  | PsVerifiedIrIntrinsic.boolAnd => binary args "&&"
+  | PsVerifiedIrIntrinsic.boolOr => binary args "||"
+  | PsVerifiedIrIntrinsic.charOfNat => callBind "$__ps_charOfNat" 1 args
+  | PsVerifiedIrIntrinsic.charToNat => callBind "$__ps_charToNat" 1 args
+  | PsVerifiedIrIntrinsic.stringSingleton =>
+      match args with
+      | [a] => psBackendStatePure a
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.stringPush => binary args "."
+  | PsVerifiedIrIntrinsic.stringAppend => binary args "."
+  | PsVerifiedIrIntrinsic.stringLength =>
+      match args with
+      | [a] => bindValue (cat ["gmp_init(count($__ps_unicodeChars(", a, ")))"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize =>
+      match args with
+      | [a] => bindValue (cat ["gmp_init(strlen(", a, "))"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.stringGet => callBind "$__ps_stringGet" 2 args
+  | PsVerifiedIrIntrinsic.stringNext => callBind "$__ps_stringNext" 2 args
+  | PsVerifiedIrIntrinsic.stringExtract => callBind "$__ps_stringExtract" 3 args
+  | PsVerifiedIrIntrinsic.stringAtEnd =>
+      match args with
+      | [a, b] => bindValue (cat ["(gmp_cmp(", b, ", strlen(", a, ")) >= 0)"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
+      match args with
+      | [_value] => bindValue "[]"
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arraySize =>
+      match args with
+      | [a] => bindValue (cat ["gmp_init(count(", a, "))"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arrayPush =>
+      match args with
+      | [a, value] =>
+          psBackendStateBind (bindValue a) (fun (result : String) =>
+            psBackendStateBind (line (cat [result, "[] = ", value, ";"]))
+              (fun (_unit : Unit) => psBackendStatePure result))
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arrayGet =>
+      match args with
+      | [a, index] =>
+          fun (state : EmitState) => do
+            let (_unit, state) <- line (cat ["if (gmp_cmp(", index, ", 0) < 0 || gmp_cmp(", index, ", count(", a, ")) >= 0) {"]) state
+            let (_unit, state) <- indent true state
+            let (_unit, state) <- line "throw new \\OutOfBoundsException('PSC1_ARRAY_GET_BOUNDS');" state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "}" state
+            bindValue (cat [a, "[gmp_intval(", index, ")]"]) state
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arrayGetD =>
+      match args with
+      | [a, index, fallback] =>
+          bindValue (cat ["(gmp_cmp(", index, ", 0) >= 0 && gmp_cmp(", index, ", count(", a, ")) < 0 ? ", a, "[gmp_intval(", index, ")] : ", fallback, ")"])
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arraySet =>
+      match args with
+      | [a, index, value] =>
+          fun (state : EmitState) => do
+            let (result, state) <- bindValue a state
+            let (_unit, state) <- line (cat ["if (gmp_cmp(", index, ", 0) >= 0 && gmp_cmp(", index, ", count(", a, ")) < 0) {"]) state
+            let (_unit, state) <- indent true state
+            let (_unit, state) <- line (cat [result, "[gmp_intval(", index, ")] = ", value, ";"]) state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "} else {" state
+            let (_unit, state) <- indent true state
+            let (_unit, state) <- line "throw new \\OutOfBoundsException('PSC1_ARRAY_SET_BOUNDS');" state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "}" state
+            Except.ok (Prod.mk result state)
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arraySetIfInBounds =>
+      match args with
+      | [a, index, value] =>
+          fun (state : EmitState) => do
+            let (result, state) <- bindValue a state
+            let (_unit, state) <- line (cat ["if (gmp_cmp(", index, ", 0) >= 0 && gmp_cmp(", index, ", count(", a, ")) < 0) {"]) state
+            let (_unit, state) <- indent true state
+            let (_unit, state) <- line (cat [result, "[gmp_intval(", index, ")] = ", value, ";"]) state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "}" state
+            Except.ok (Prod.mk result state)
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arrayMap =>
+      match args with
+      | [fn, array] =>
+          fun (state : EmitState) => do
+            let (result, state) <- bindValue "[]" state
+            let (item, state) <- fresh "item" state
+            let (_unit, state) <- line (cat ["foreach (", array, " as ", item, ") {"]) state
+            let (_unit, state) <- indent true state
+            let (_unit, state) <- line (cat [result, "[] = ", invoke context fn [item], ";"]) state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "}" state
+            Except.ok (Prod.mk result state)
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | PsVerifiedIrIntrinsic.arrayFoldl =>
+      match args with
+      | [fn, initial, array, start, stop] =>
+          fun (state : EmitState) => do
+            let (result, state) <- bindValue initial state
+            let (index, state) <- fresh "index" state
+            let (limit, state) <- bindValue (cat ["gmp_init(count(", array, "))"]) state
+            let (_unit, state) <- line (cat ["for (", index, " = ", start, "; gmp_cmp(", index, ", ", stop, ") < 0 && gmp_cmp(", index, ", ", limit, ") < 0; ", index, " = gmp_add(", index, ", 1)) {"]) state
+            let (_unit, state) <- indent true state
+            let (_unit, state) <- line (cat [result, " = ",
+              invoke context fn [result, cat [array, "[gmp_intval(", index, ")]"]], ";"]) state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "}" state
+            Except.ok (Prod.mk result state)
+      | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+  | _ => psBackendStateThrow "PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY"
+
+structure ParameterInfo where
+  sourceName : String
+  localName : String
+  printedType : String
+  irType : PsVerifiedIrType
+
+def emitParameter (parameter : PsVerifiedIrParameter) : Emit ParameterInfo :=
+  psBackendStateBind (psBackendStateLift (typeText 4096 parameter.type)) (fun (text : String) =>
+    psBackendStateBind (fresh parameter.name) (fun (name : String) =>
+      psBackendStatePure (ParameterInfo.mk parameter.name name text parameter.type)))
+
+def emitBindings (target : String) (bindings : List PsVerifiedIrMatchBinding)
+    (locals : List (Prod String String)) : Emit (List (Prod String String)) :=
+  fun (state : EmitState) =>
+    match bindings with
+    | List.nil => Except.ok (Prod.mk locals state)
+    | List.cons binding rest => do
+        let _ <- typeText 4096 binding.type
+        let (name, state) <- fresh binding.name state
+        let (_unit, state) <- line (cat [name, " = ", target, "[1][", quote binding.field, "];"]) state
+        emitBindings target rest (List.cons (Prod.mk binding.name name) locals) state
+
+def emitAlternatives
+    (body : Context -> PsVerifiedIrExpr -> Emit Unit)
+    (context : Context) (target : String)
+    (alternatives : List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)))
+    (first : Bool) : Emit Unit :=
+  fun (state : EmitState) =>
+    match alternatives with
+    | List.nil =>
+        if first then line "throw new \\UnexpectedValueException('PSC1_PHP_EMPTY_MATCH');" state
+        else do
+          let (_unit, state) <- line "} else {" state
+          let (_unit, state) <- indent true state
+          let (_unit, state) <- line "throw new \\UnexpectedValueException('PSC1_PHP_CONSTRUCTOR_TAG');" state
+          let (_unit, state) <- indent false state
+          line "}" state
+    | List.cons alternative rest => do
+        let (_unit, state) <- line (cat [if first then "if (" else "} elseif (",
+          target, "[0] === ", quote alternative.fst, ") {"]) state
+        let (_unit, state) <- indent true state
+        let (locals, state) <- emitBindings target alternative.snd.fst context.locals state
+        let (_unit, state) <- body (withLocals context locals) alternative.snd.snd state
+        let (_unit, state) <- indent false state
+        emitAlternatives body context target rest false state
+
+def emitField (emit : PsVerifiedIrExpr -> Emit String) (field : Prod String PsVerifiedIrExpr) : Emit String :=
+  psBackendStateBind (emit field.snd) (fun (value : String) =>
+    psBackendStatePure (cat [quote field.fst, " => ", value]))
+
+def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_context : Context) (_expr : PsVerifiedIrExpr) =>
+        psBackendStateThrow "PSC1_PHP_LOWERING_BUDGET"
+  | Nat.succ remaining =>
+      fun (context : Context) (expr : PsVerifiedIrExpr) (state : EmitState) =>
+        let emit : PsVerifiedIrExpr -> Emit String := expression remaining context;
+        match expr with
+        | PsVerifiedIrExpr.literal value =>
+            match value with
+            | PsVerifiedIrLiteral.natural number =>
+                bindValue (cat ["gmp_init(", quote (decimal number), ", 10)"]) state
+            | PsVerifiedIrLiteral.integer number =>
+                bindValue (cat ["gmp_init(", quote (Int.repr number), ", 10)"]) state
+            | PsVerifiedIrLiteral.bool flag => Except.ok (Prod.mk (if flag then "true" else "false") state)
+            | PsVerifiedIrLiteral.string text => Except.ok (Prod.mk (quote text) state)
+            | PsVerifiedIrLiteral.unit => Except.ok (Prod.mk "null" state)
+            | PsVerifiedIrLiteral.machineInteger _ _ => Except.error "PSC1_PHP_MACHINE_SCALAR_UNSUPPORTED"
+        | PsVerifiedIrExpr.var name =>
+            match psBackendSourceFind (fun (entry : Prod String String) =>
+                psStringEq entry.fst name) context.locals with
+            | Option.some entry => Except.ok (Prod.mk entry.snd state)
+            | Option.none =>
+                match psBackendSourceFind (fun (entry : Prod String String) =>
+                    psStringEq entry.fst name) context.globals with
+                | Option.none => Except.error (cat ["PSC1_PHP_UNKNOWN_SYMBOL: ", name])
+                | Option.some entry =>
+                    if psBackendNameSeen name context.valueNames then
+                      bindValue (invoke context entry.snd List.nil) state
+                    else Except.ok (Prod.mk entry.snd state)
+        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolAnd _ [left, right] =>
+            expression remaining context
+              (PsVerifiedIrExpr.ifE left right (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false))) state
+        | PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.boolOr _ [left, right] =>
+            expression remaining context
+              (PsVerifiedIrExpr.ifE left (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)) right) state
+        | PsVerifiedIrExpr.intrinsic operation _ arguments => do
+            let (printed, state) <- psBackendSourceMapState emit arguments state
+            intrinsic context operation printed state
+        | PsVerifiedIrExpr.call fn _ arguments => do
+            let (value, state) <- emit fn state
+            let (target, state) <- bindValue value state
+            let (printed, state) <- psBackendSourceMapState emit arguments state
+            bindValue (invoke context target printed) state
+        | PsVerifiedIrExpr.letE name type value body => do
+            let _ <- typeText 4096 type
+            let (printed, state) <- emit value state
+            let (localName, state) <- fresh name state
+            let (_unit, state) <- line (cat [localName, " = ", printed, ";"]) state
+            expression remaining (withLocals context (List.cons (Prod.mk name localName) context.locals)) body state
+        | PsVerifiedIrExpr.ifE condition yes no => do
+            let (printedCondition, state) <- emit condition state
+            let (result, state) <- fresh "branch" state
+            let (_unit, state) <- line (cat ["if (", printedCondition, " === true) {"]) state
+            let (_unit, state) <- indent true state
+            let (printedYes, state) <- emit yes state
+            let (_unit, state) <- line (cat [result, " = ", printedYes, ";"]) state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "} else {" state
+            let (_unit, state) <- indent true state
+            let (printedNo, state) <- emit no state
+            let (_unit, state) <- line (cat [result, " = ", printedNo, ";"]) state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line "}" state
+            Except.ok (Prod.mk result state)
+        | PsVerifiedIrExpr.lambda parameters result body => do
+            let (target, state) <- fresh "closure" state
+            let (printedParameters, state) <- psBackendSourceMapState emitParameter parameters state
+            let resultType <- typeText 4096 result
+            let printed : List String := psListMap (fun (parameter : ParameterInfo) =>
+              cat ["mixed ", parameter.localName]) printedParameters
+            let (_unit, state) <- line (cat [target, " = ", if context.scheduled then "$__ps_wrap(" else "",
+              "static function (", psTextJoin ", " printed, ")", capture context, ": ",
+              if context.scheduled then "\\Generator" else resultType, " {"]) state
+            let (_unit, state) <- indent true state
+            let (_unit, state) <- line (cat ["if (func_num_args() !== ", decimal (psListLength parameters),
+              ") { throw new \\ArgumentCountError('PSC1_PHP_ARITY'); }"]) state
+            let action : Emit Unit :=
+              if context.scheduled then line "if (false) { yield; }" else psBackendStatePure Unit.unit
+            let (_unit, state) <- action state
+            let (_unit, state) <- psBackendSourceForState
+              (fun (parameter : ParameterInfo) => guard context parameter.localName parameter.irType) printedParameters state
+            let locals : List (Prod String String) :=
+              psListMap (fun (parameter : ParameterInfo) => Prod.mk parameter.sourceName parameter.localName) printedParameters
+            let (value, state) <- expression remaining
+              (withLocals context (psListAppend locals context.locals)) body state
+            let (_unit, state) <- line (cat ["return ", value, ";"]) state
+            let (_unit, state) <- indent false state
+            let (_unit, state) <- line (if context.scheduled then "});" else "};") state
+            Except.ok (Prod.mk target state)
+        | PsVerifiedIrExpr.record _ _ fields => do
+            let (values, state) <- psBackendSourceMapState (emitField emit) fields state
+            bindValue (cat ["[", psTextJoin ", " values, "]"]) state
+        | PsVerifiedIrExpr.projection _ _ target field => do
+            let (value, state) <- emit target state
+            bindValue (cat [value, "[", quote field, "]"]) state
+        | PsVerifiedIrExpr.constructor _ constructorName _ fields => do
+            let (values, state) <- psBackendSourceMapState (emitField emit) fields state
+            bindValue (cat ["[", quote constructorName, ", [", psTextJoin ", " values, "]]"]) state
+        | PsVerifiedIrExpr.matchE _ _ scrutinee alternatives => do
+            let (target, state) <- emit scrutinee state
+            let (result, state) <- fresh "match" state
+            let body : Context -> PsVerifiedIrExpr -> Emit Unit :=
+              fun (inner : Context) (branch : PsVerifiedIrExpr) =>
+                psBackendStateBind (expression remaining inner branch) (fun (value : String) =>
+                  line (cat [result, " = ", value, ";"]))
+            let (_unit, state) <- emitAlternatives body context target alternatives true state
+            Except.ok (Prod.mk result state)
+
+def directSelfCall (declaration : PsVerifiedIrDeclaration) (bound : List String)
+    (expr : PsVerifiedIrExpr) : Option (List PsVerifiedIrExpr) :=
+  match expr with
+  | PsVerifiedIrExpr.call (PsVerifiedIrExpr.var name) _ arguments =>
+      if !psListIsEmpty declaration.parameters && psStringEq name declaration.name &&
+          !psBackendNameSeen name bound &&
+          Nat.beq (psListLength arguments) (psListLength declaration.parameters) then
+        Option.some arguments else Option.none
+  | _ => Option.none
+
+def hasDirectSelfTail (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
+    List String -> PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_bound : List String) (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining =>
+      fun (bound : List String) (expr : PsVerifiedIrExpr) =>
+        match directSelfCall declaration bound expr with
+        | Option.some _ => true
+        | Option.none =>
+            match expr with
+            | PsVerifiedIrExpr.letE name _ _ body =>
+                hasDirectSelfTail declaration remaining (List.cons name bound) body
+            | PsVerifiedIrExpr.ifE _ yes no =>
+                hasDirectSelfTail declaration remaining bound yes ||
+                  hasDirectSelfTail declaration remaining bound no
+            | PsVerifiedIrExpr.matchE _ _ _ alternatives =>
+                psListAny
+                  (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                    hasDirectSelfTail declaration remaining
+                      (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) =>
+                        binding.name) alternative.snd.fst) bound) alternative.snd.snd) alternatives
+            | _ => false
+
+def assignParameter (pair : Prod String String) : Emit Unit :=
+  line (cat [pair.fst, " = ", pair.snd, ";"])
+
+def directSelfTail (declaration : PsVerifiedIrDeclaration) (parameters : List String)
+    (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit Unit :=
+  match fuel with
+  | Nat.zero =>
+      fun (_context : Context) (_expr : PsVerifiedIrExpr) =>
+        psBackendStateThrow "PSC1_PHP_LOWERING_BUDGET"
+  | Nat.succ remaining =>
+      fun (context : Context) (expr : PsVerifiedIrExpr) (state : EmitState) =>
+        let emit : PsVerifiedIrExpr -> Emit String := expression remaining context;
+        match directSelfCall declaration
+            (psListMap (fun (entry : Prod String String) => entry.fst) context.locals) expr with
+        | Option.some arguments => do
+            let (values, state) <- psBackendSourceMapState
+              (fun (argument : PsVerifiedIrExpr) =>
+                psBackendStateBind (emit argument) (fun (value : String) => bindValue value)) arguments state
+            let (_unit, state) <- psBackendSourceForState assignParameter (psListZip parameters values) state
+            line "continue;" state
+        | Option.none =>
+            match expr with
+            | PsVerifiedIrExpr.letE name type value body => do
+                let _ <- typeText 4096 type
+                let (printed, state) <- emit value state
+                let (localName, state) <- fresh name state
+                let (_unit, state) <- line (cat [localName, " = ", printed, ";"]) state
+                directSelfTail declaration parameters remaining
+                  (withLocals context (List.cons (Prod.mk name localName) context.locals)) body state
+            | PsVerifiedIrExpr.ifE condition yes no => do
+                let (printedCondition, state) <- emit condition state
+                let (_unit, state) <- line (cat ["if (", printedCondition, " === true) {"]) state
+                let (_unit, state) <- indent true state
+                let (_unit, state) <- directSelfTail declaration parameters remaining context yes state
+                let (_unit, state) <- indent false state
+                let (_unit, state) <- line "} else {" state
+                let (_unit, state) <- indent true state
+                let (_unit, state) <- directSelfTail declaration parameters remaining context no state
+                let (_unit, state) <- indent false state
+                line "}" state
+            | PsVerifiedIrExpr.matchE _ _ scrutinee alternatives => do
+                let (target, state) <- emit scrutinee state
+                emitAlternatives (directSelfTail declaration parameters remaining) context target alternatives true state
+            | _ => do
+                let (value, state) <- emit expr state
+                line (cat ["return ", value, ";"]) state
+
+def parameterLocal (parameter : ParameterInfo) : Prod String String :=
+  Prod.mk parameter.sourceName parameter.localName
+
+def emitDeclaration (context : Context) (declaration : PsVerifiedIrDeclaration) : Emit Nat :=
+  fun (state : EmitState) => do
+    let symbol <- match psBackendSourceFind (fun (entry : Prod String String) =>
+        psStringEq entry.fst declaration.name) context.globals with
+      | Option.some entry => Except.ok entry.snd
+      | Option.none => Except.error "PSC1_PHP_INTERNAL_SYMBOL"
+    let (parameters, state) <- psBackendSourceMapState emitParameter declaration.parameters state
+    let resultType <- typeText 4096 declaration.resultType
+    let (_unit, state) <- line (cat ["// declaration ", quote declaration.name]) state
+    let (_unit, state) <- psBackendSourceForState
+      (fun (parameter : ParameterInfo) => line (cat ["/** @param ", parameter.printedType, " ", parameter.localName, " */"]))
+      parameters state
+    let (_unit, state) <- line (cat ["/** @return ",
+      if context.scheduled then cat ["\\Generator<mixed, mixed, mixed, ", resultType, ">"] else resultType, " */"]) state
+    let declarationLine : Nat := Nat.succ state.lineCount
+    let (_unit, state) <- line (cat [symbol, " = ", if context.scheduled then "$__ps_wrap(" else "",
+      "static function (", psTextJoin ", " (psListMap (fun (parameter : ParameterInfo) =>
+        cat ["mixed ", parameter.localName]) parameters), ")", capture context, ": ",
+      if context.scheduled then "\\Generator" else resultType, " {"]) state
+    let (_unit, state) <- indent true state
+    let (_unit, state) <- line (cat ["if (func_num_args() !== ", decimal (psListLength parameters),
+      ") { throw new \\ArgumentCountError('PSC1_PHP_ARITY'); }"]) state
+    let generatorAction : Emit Unit :=
+      if context.scheduled then line "if (false) { yield; }" else psBackendStatePure Unit.unit
+    let (_unit, state) <- generatorAction state
+    let locals : List (Prod String String) := psListMap parameterLocal parameters
+    let hasTail : Bool := hasDirectSelfTail declaration 4096
+      (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.body
+    let loopStart : Emit Unit :=
+      if hasTail then psBackendStateBind (line "while (true) {") (fun (_unit : Unit) => indent true)
+      else psBackendStatePure Unit.unit
+    let (_unit, state) <- loopStart state
+    let (_unit, state) <- psBackendSourceForState
+      (fun (parameter : ParameterInfo) => guard context parameter.localName parameter.irType) parameters state
+    let body : Emit Unit :=
+      if hasTail then
+        directSelfTail declaration (psListMap (fun (parameter : ParameterInfo) => parameter.localName) parameters)
+          4096 (withLocals context locals) declaration.body
+      else psBackendStateBind (expression 4096 (withLocals context locals) declaration.body)
+        (fun (value : String) => line (cat ["return ", value, ";"]))
+    let (_unit, state) <- body state
+    let loopEnd : Emit Unit :=
+      if hasTail then psBackendStateBind (indent false) (fun (_unit : Unit) => line "}")
+      else psBackendStatePure Unit.unit
+    let (_unit, state) <- loopEnd state
+    let (_unit, state) <- indent false state
+    let (_unit, state) <- line (if context.scheduled then "});" else "};") state
+    let (_unit, state) <- line "" state
+    Except.ok (Prod.mk declarationLine state)
+
+def publicScalar (type : PsVerifiedIrType) : Bool :=
+  match type with
+  | PsVerifiedIrType.primitive scalar => psBackendActivePrimitive scalar
+  | _ => false
+
+def checkType (type : PsVerifiedIrType) : Except String Unit :=
+  match typeText 4096 type with
+  | Except.error error => Except.error error
+  | Except.ok _ => Except.ok Unit.unit
+
+def checkDeclaration (declaration : PsVerifiedIrDeclaration) : Except String Unit := do
+  if !psListIsEmpty declaration.typeParameters then throw "PSC1_PHP_SPECIALIZATION_REQUIRED"
+  checkType declaration.resultType
+  psBackendSourceForExcept (fun (parameter : PsVerifiedIrParameter) => checkType parameter.type) declaration.parameters
+
+def checkStructure (info : PsVerifiedIrStructure) : Except String Unit := do
+  if !psListIsEmpty info.typeParameters then throw "PSC1_PHP_SPECIALIZATION_REQUIRED"
+  psBackendSourceForExcept (fun (field : PsVerifiedIrStructureField) => checkType field.type) info.fields
+
+def checkInductive (info : PsVerifiedIrInductive) : Except String Unit := do
+  if !psListIsEmpty info.typeParameters then throw "PSC1_PHP_SPECIALIZATION_REQUIRED"
+  psBackendSourceForExcept (fun (constructor : PsVerifiedIrConstructor) =>
+    psBackendSourceForExcept (fun (field : PsVerifiedIrConstructorField) => checkType field.type) constructor.fields)
+    info.constructors
+
+def checkPublics (module : PsVerifiedIrModule) (ioAbi : Bool) (names seen : List String) : Except String Unit :=
+  match names with
+  | List.nil => Except.ok Unit.unit
+  | List.cons name rest => do
+      if psBackendNameSeen name seen then throw (cat ["PSC1_PHP_DUPLICATE_PUBLIC_DECLARATION: ", name])
+      let declaration <- match psBackendSourceFind (fun (value : PsVerifiedIrDeclaration) =>
+          psStringEq value.name name) module.declarations with
+        | Option.none => Except.error (cat ["PSC1_PHP_UNKNOWN_PUBLIC_DECLARATION: ", name])
+        | Option.some value => Except.ok value
+      if !publicScalar declaration.resultType ||
+          !psBackendSourceAll (fun (parameter : PsVerifiedIrParameter) =>
+            publicScalar parameter.type || (ioAbi && psBackendIoDispatcherType parameter.type)) declaration.parameters then
+        throw (cat ["PSC1_PHP_PUBLIC_ABI_UNSUPPORTED: ", name])
+      checkPublics module ioAbi rest (List.cons name seen)
+
+def globalEntry (entry : Prod PsVerifiedIrDeclaration Nat) : Prod String String :=
+  Prod.mk entry.fst.name (cat ["$g", decimal entry.snd, "_", stem entry.fst.name])
+
+def valueNamesAcc (declarations : List PsVerifiedIrDeclaration) (reversed : List String) : List String :=
+  match declarations with
+  | List.nil => psListReverse reversed
+  | List.cons declaration rest =>
+      valueNamesAcc rest
+        (if psListIsEmpty declaration.parameters then List.cons declaration.name reversed else reversed)
+
+def countNewlines (chars : List Char) (count : Nat) : Nat :=
+  match chars with
+  | List.nil => count
+  | List.cons char rest =>
+      countNewlines rest (if Nat.beq (Char.toNat char) 10 then Nat.succ count else count)
+
+def emitGlobal (entry : Prod String String) : Emit Unit := line (cat [entry.snd, " = null;"])
+
+def emitPublic (context : Context) (name : String) : Emit Unit :=
+  fun (state : EmitState) => do
+    let symbol <- match psBackendSourceFind (fun (entry : Prod String String) =>
+        psStringEq entry.fst name) context.globals with
+      | Option.some entry => Except.ok entry.snd
+      | Option.none => Except.error "PSC1_PHP_INTERNAL_PUBLIC_SYMBOL"
+    line (cat [quote name, " => ", symbol, if psBackendNameSeen name context.valueNames then "()" else "", ","]) state
+
+def emitModule (module : PsVerifiedIrModule) (context : Context) (publicNames : List String) :
+    Emit (List (Prod String Nat)) :=
+  fun (state : EmitState) => do
+    let (_unit, state) <- psBackendSourceForState emitGlobal context.globals state
+    let blank : Emit Unit :=
+      if psListIsEmpty context.globals then psBackendStatePure Unit.unit else line ""
+    let (_unit, state) <- blank state
+    let (positions, state) <- psBackendSourceMapState
+      (fun (declaration : PsVerifiedIrDeclaration) =>
+        psBackendStateBind (emitDeclaration context declaration) (fun (position : Nat) =>
+          psBackendStatePure (Prod.mk declaration.name position))) module.declarations state
+    let (_unit, state) <- line "return [" state
+    let (_unit, state) <- indent true state
+    let (_unit, state) <- psBackendSourceForState (emitPublic context) publicNames state
+    let (_unit, state) <- indent false state
+    let (_unit, state) <- line "];" state
+    let (_unit, state) <- indent false state
+    let (_unit, state) <- line "})();" state
+    Except.ok (Prod.mk positions state)
+
+end PsPhp
+
+def psPhpEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi : Bool) : Except String PsPhpPortableModule := do
+  match psStrictValidateModule validated.raw with
+  | Except.error _ => throw "PSC1_PHP_IR_VALIDATION_FAILED"
+  | Except.ok _ => pure Unit.unit
+  let module : PsVerifiedIrModule := validated.raw
+  if !psListIsEmpty module.imports then throw "PSC1_PHP_EXTERNAL_IMPORT_UNSUPPORTED"
+  psBackendSourceForExcept PsPhp.checkDeclaration module.declarations
+  psBackendSourceForExcept PsPhp.checkStructure module.structures
+  psBackendSourceForExcept PsPhp.checkInductive module.inductives
+  PsPhp.checkPublics module ioAbi publicNames List.nil
+  let valueNames : List String := PsPhp.valueNamesAcc module.declarations List.nil
+  let requested : List String := psBackendSourceFlatMap
+    (fun (declaration : PsVerifiedIrDeclaration) =>
+      psListAppend (PsPhp.typeRequirements 4096 declaration.resultType)
+        (psListAppend (psBackendSourceFlatMap
+          (fun (parameter : PsVerifiedIrParameter) => PsPhp.typeRequirements 4096 parameter.type) declaration.parameters)
+          (PsPhp.exprRequirements valueNames 4096
+            (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.body)))
+    module.declarations
+  let requirements : List String := psPhpRuntimeClosure requested
+  let runtimeSource : String := psPhpSelectedRuntimeSource requirements
+  let globals : List (Prod String String) :=
+    psListMap PsPhp.globalEntry (psBackendSourceZipIndex module.declarations)
+  let context : PsPhp.Context :=
+    PsPhp.Context.mk globals valueNames List.nil (psPhpRuntimeVariables requirements)
+      (psBackendNameSeen "calls" requirements)
+  let sourcePrefix : String := PsPhp.cat ["<?php\n",
+    "// Generated by ProofScript PSC1 DirectPHP. Public API: return value of require.\n",
+    "declare(strict_types=1);\n\nreturn (static function (): array {\n", runtimeSource]
+  let initial : PsPhp.EmitState :=
+    PsPhp.EmitState.mk List.nil (PsPhp.countNewlines (psJsonStringToChars sourcePrefix) 0) 0 1
+  let (positions, state) <- PsPhp.emitModule module context publicNames initial
+  let composer : String := PsPhp.cat ["{\n  \"type\": \"library\",\n  \"require\": {\n    \"php\": \">=8.5\"",
+    if psBackendNameSeen "gmp" requirements then ",\n    \"ext-gmp\": \"*\"" else "", "\n  }\n}\n"]
+  Except.ok (PsPhpPortableModule.mk
+    (PsPhp.cat [sourcePrefix, psTextJoin "\n" (psListReverse state.linesRev), "\n"])
+    composer runtimeSource psPhpRuntimeVersion requirements globals positions)

@@ -17,22 +17,30 @@ inductive PsWasmEncodeError where
 -- is normalized modulo 256. Native UInt8 conversion is a separate boundary.
 namespace Ps.Internal.WasmBinaryBytes
 
-def psListFlatMapExcept {α β ε : Type}
-    (convert : α -> Except ε (List β)) (values : List α) : Except ε (List β) :=
+def psListFlatMapExceptAcc {α β ε : Type}
+    (convert : α -> Except ε (List β)) (values : List α)
+    (reversed : List β) : Except ε (List β) :=
   match values with
-  | List.nil => Except.ok []
+  | List.nil => Except.ok (psListReverse reversed)
   | List.cons value rest =>
       match convert value with
       | Except.error error => Except.error error
       | Except.ok first =>
-          match psListFlatMapExcept convert rest with
-          | Except.error error => Except.error error
-          | Except.ok other => Except.ok (psListAppend first other)
+          psListFlatMapExceptAcc convert rest (psListReverseAcc first reversed)
+
+def psListFlatMapExcept {α β ε : Type}
+    (convert : α -> Except ε (List β)) (values : List α) : Except ε (List β) :=
+  psListFlatMapExceptAcc convert values List.nil
+
+def psWasmEncodeByteChunksAcc
+    (chunks : List (List Nat)) (reversed : List Nat) : List Nat :=
+  match chunks with
+  | List.nil => psListReverse reversed
+  | List.cons chunk rest =>
+      psWasmEncodeByteChunksAcc rest (psListReverseAcc chunk reversed)
 
 def psWasmEncodeByteChunks (chunks : List (List Nat)) : List Nat :=
-  match chunks with
-  | List.nil => []
-  | List.cons chunk rest => psListAppend chunk (psWasmEncodeByteChunks rest)
+  psWasmEncodeByteChunksAcc chunks List.nil
 
 def psWasmByte (value : Nat) : Nat :=
   Nat.mod value 256
@@ -176,15 +184,17 @@ def psWasmEncodeUtf8Char (char : Char) : List Nat :=
       psWasmByte (Nat.add 128 (Nat.mod value 64))
     ]
 
-def psWasmEncodeUtf8Chars
-    (chars : List Char) :
-    List Nat :=
+def psWasmEncodeUtf8CharsAcc
+    (chars : List Char) (reversed : List Nat) : List Nat :=
   match chars with
-  | List.nil => []
+  | List.nil => psListReverse reversed
   | List.cons char rest =>
-      psListAppend
-        (psWasmEncodeUtf8Char char)
-        (psWasmEncodeUtf8Chars rest)
+      psWasmEncodeUtf8CharsAcc rest
+        (psListReverseAcc (psWasmEncodeUtf8Char char) reversed)
+
+def psWasmEncodeUtf8Chars
+    (chars : List Char) : List Nat :=
+  psWasmEncodeUtf8CharsAcc chars List.nil
 
 def psWasmEncodeName (name : String) : List Nat :=
   let bytes := psWasmEncodeUtf8Chars (psWasmStringToList name);

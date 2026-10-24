@@ -523,3 +523,7 @@ lean_lib PsWasmLowerExprPrefixReference where
 lean_lib PsSharedLookupPrefixReference where
   srcDir := "test"
   roots := #[`SharedLookupPrefixReference, `SharedLookupPrefixTests]
+
+lean_lib PsWasmEncodingSpineReference where
+  srcDir := "test"
+  roots := #[`WasmEncodingSpineReference, `WasmEncodingSpineTests]

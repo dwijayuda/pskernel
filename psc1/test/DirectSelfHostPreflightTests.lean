@@ -1,3 +1,4 @@
+import WasmEncodingSpineTests
 import SharedLookupPrefixTests
 import FoundationListTests
 import ErasureSpineTests
@@ -352,6 +353,7 @@ private def fixtureModule : PsVerifiedIrModule :=
   ]
 
 def main : IO Unit := do
+  runWasmEncodingSpineTests
   runSharedLookupPrefixTests
   runFoundationListTests
   runErasureSpineTests

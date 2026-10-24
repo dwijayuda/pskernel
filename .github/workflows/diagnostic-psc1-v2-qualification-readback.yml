@@ -1,0 +1,42 @@
+name: PSC1 immutable v2 qualification readback
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-v2-qualification-readback.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  readback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: '812094c1f5e1e0c0dca516dab1e30ef66f3076f7'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Load reviewed readback programs from diagnostic control
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git show "$GITHUB_SHA:psc1/scripts/diagnostic-v2-download.mjs" > scripts/diagnostic-v2-download.mjs
+          git show "$GITHUB_SHA:psc1/scripts/diagnostic-v2-readback.mjs" > scripts/diagnostic-v2-readback.mjs
+      - name: Verify SHA256 of every immutable ZIP before bounded safe extraction
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        working-directory: psc1
+        run: node scripts/diagnostic-v2-download.mjs
+      - name: Verify exact source, admissions, IR, executable and corpus fixed points
+        working-directory: psc1
+        run: node scripts/diagnostic-v2-readback.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-unified-v2-receipt-readback-${{ github.sha }}
+          path: psc1/dist/unified-v2-receipt-readback/
+          retention-days: 90

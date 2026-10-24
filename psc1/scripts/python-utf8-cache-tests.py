@@ -59,6 +59,13 @@ assert text==other and text is not other
 first=runtime._psc_utf8(text);second=runtime._psc_utf8(other)
 assert first==second and first is not second
 assert runtime._psc_utf8(text) is first
+# Alternating identity hits on the hot pair must reuse the immutable snapshot.
+snapshot=runtime._psc_utf8_cache
+for _ in range(10000):
+ assert runtime._psc_utf8(text) is first
+ assert runtime._psc_utf8(other) is second
+ assert runtime._psc_utf8_cache is snapshot
+invariant()
 for index in range(40):
  value=str(index)+"x"*2048
  assert runtime._psc_utf8(value)==value.encode("utf-8")
@@ -79,4 +86,4 @@ def worker(index):
   assert runtime._psc_string_get(text,0)==text[0]
 with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:list(pool.map(worker,range(32)))
 invariant()
-print("PSC1_PYTHON_UTF8_CACHE: "+json.dumps({"passed":True,"differentialHelperQueries":checks,"publicIntrinsicComparisons":"both retained/current emitted code","unicodeScalarStride":61,"encodedCacheBudget":33554432,"entryLimit":8,"identityAndEviction":True,"oversizedNotRetained":True,"concurrentImmutableSnapshots":True,"surrogateErrorPriority":"retained","globalRecursionAndDigitLimits":"unchanged"}))
+print("PSC1_PYTHON_UTF8_CACHE: "+json.dumps({"passed":True,"differentialHelperQueries":checks,"publicIntrinsicComparisons":"both retained/current emitted code","unicodeScalarStride":61,"encodedCacheBudget":33554432,"entryLimit":8,"identityAndEviction":True,"allocationFreeAlternatingIdentityHits":20000,"oversizedNotRetained":True,"concurrentImmutableSnapshots":True,"surrogateErrorPriority":"retained","globalRecursionAndDigitLimits":"unchanged"}))

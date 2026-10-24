@@ -47,10 +47,10 @@ const results=[];
 for(const target of ['python','php'])for(const grammar of ['lean','ps']){
  const output=path.join(directory,target+'-'+grammar,'module.'+(target==='python'?'py':'php'));
  fs.mkdirSync(path.dirname(output),{recursive:true});
- run('.lake/build/bin/psc1',['build','test/fixtures/ScriptRuntimeProbe.'+grammar,'--target',target,'--assurance','ordinary-checked','--out',output]);
+ run('.lake/build/bin/psc1',['build','test/fixtures/ScriptRuntimeProbe.'+grammar,'--target',target,'--assurance','ordinary','--out',output]);
  const manifest=JSON.parse(fs.readFileSync(output+'.bundle.json'));
  assert.equal(manifest.logicalCheckerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
- assert.equal(manifest.behaviorallyVerified,false);
+ assert.equal(manifest.behaviorallyVerified,false);assert.equal(manifest.assurance,'ordinary-checked');
  const observed=JSON.parse(target==='python'?run('python3',['-I','-c',python,output,oracle]):
   run('php',['-d','memory_limit=1G','-r',php,output,oracle]));
  assert.equal(observed.queries,records.length*4);assert.equal(observed.passed,true);

@@ -573,5 +573,6 @@ lean_exe psc1_direct_call_plan_tests where
   root := `DirectCallPlanTests
 
 lean_exe psc1_php_extract_tests where
+  srcDir := "test"
   root := `PhpExtractTests
   supportInterpreter := true

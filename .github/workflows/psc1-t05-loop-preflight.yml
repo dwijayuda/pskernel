@@ -1,0 +1,337 @@
+name: PSC1 T05 constructor loop native and portable diagnostic
+'on':
+  workflow_dispatch: null
+  push:
+    branches: [work/psc1-pskernel-t05-loop-draft-20261025]
+    paths:
+    - .github/workflows/psc1-t05-loop-preflight.yml
+    - psc1/kernel-lakefile.lean
+    - psc1/packages/pskernel-core/src/**
+    - psc1/test/**
+    - psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs
+    - psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs
+    - psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs
+permissions:
+  contents: read
+jobs:
+  loop-native-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_OPTIONS: ''
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      shell: bash
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Verify syntax and source
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+        node --check scripts/pskernel-ordinary-constructor-fields-smoke.mjs
+        node --check scripts/pskernel-ordinary-constructor-analysis-smoke.mjs
+        node --check scripts/pskernel-ordinary-constructor-loop-smoke.mjs
+        mkdir -p "$RUNNER_TEMP/psc1-t05-loop-native"
+        printf 'PSC1_T05_DIR=%s\n' "$RUNNER_TEMP/psc1-t05-loop-native" >> "$GITHUB_ENV"
+        printf 'PSC1_FIELDS_DIAGNOSTIC source=%s qualification=false\n' "$GITHUB_SHA"
+    - name: Compile private production imports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean build PsKernelCore 2>&1 | tee "$PSC1_T05_DIR/native-build.log"
+    - name: Kernel-check the new constructor field and recursive-argument equations before regressions
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_t05_field_proofs_failed=0
+        : > "$PSC1_T05_DIR/fields-proof-status.log"
+        for PSC1_T05_SPEC in \
+          'PsKernelOrdinaryRecursiveArgumentProofs:24:recursive-argument-proofs.log' \
+          'PsKernelOrdinaryConstructorFieldsProofs:23:constructor-fields-proofs.log'; do
+          IFS=: read -r PSC1_T05_MODULE PSC1_T05_COUNT PSC1_T05_LOG <<< "$PSC1_T05_SPEC"
+          psc1_t05_count_status=0
+          psc1_t05_lean_status=0
+          test "$(grep -c '^#print axioms ' "test/$PSC1_T05_MODULE.lean")" -eq "$PSC1_T05_COUNT" \
+            || psc1_t05_count_status=$?
+          lake -f kernel-lakefile.lean env lean "test/$PSC1_T05_MODULE.lean" \
+            2>&1 | tee "$PSC1_T05_DIR/$PSC1_T05_LOG" || psc1_t05_lean_status=$?
+          printf 'PSC1_T05_FIELDS_PROOF_STATUS module=%s count=%s countStatus=%s leanStatus=%s\n' \
+            "$PSC1_T05_MODULE" "$PSC1_T05_COUNT" "$psc1_t05_count_status" "$psc1_t05_lean_status" \
+            | tee -a "$PSC1_T05_DIR/fields-proof-status.log"
+          if [ "$psc1_t05_count_status" -ne 0 ] || [ "$psc1_t05_lean_status" -ne 0 ]; then
+            psc1_t05_field_proofs_failed=1
+          fi
+        done
+        test "$psc1_t05_field_proofs_failed" -eq 0
+    - name: Kernel-check the private single-constructor analysis equations
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_t05_analysis_count_status=0
+        psc1_t05_analysis_lean_status=0
+        test "$(grep -c '^#print axioms ' test/PsKernelOrdinaryConstructorAnalysisProofs.lean)" -eq 19 \
+          || psc1_t05_analysis_count_status=$?
+        lake -f kernel-lakefile.lean env lean test/PsKernelOrdinaryConstructorAnalysisProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/constructor-analysis-proofs.log" || psc1_t05_analysis_lean_status=$?
+        printf 'PSC1_T05_ANALYSIS_PROOF_STATUS module=PsKernelOrdinaryConstructorAnalysisProofs count=19 countStatus=%s leanStatus=%s\n' \
+          "$psc1_t05_analysis_count_status" "$psc1_t05_analysis_lean_status" \
+          | tee "$PSC1_T05_DIR/analysis-proof-status.log"
+        test "$psc1_t05_analysis_count_status" -eq 0
+        test "$psc1_t05_analysis_lean_status" -eq 0
+    - name: Kernel-check the private constructor loop equations
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_t05_loop_count_status=0
+        psc1_t05_loop_lean_status=0
+        test "$(grep -c '^#print axioms ' test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean)" -eq 14 \
+          || psc1_t05_loop_count_status=$?
+        lake -f kernel-lakefile.lean env lean test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/constructor-loop-proofs.log" || psc1_t05_loop_lean_status=$?
+        printf 'PSC1_T05_LOOP_PROOF_STATUS module=PsKernelExprV2OrdinaryConstructorLoopProofs count=14 countStatus=%s leanStatus=%s\n' \
+          "$psc1_t05_loop_count_status" "$psc1_t05_loop_lean_status" \
+          | tee "$PSC1_T05_DIR/loop-proof-status.log"
+        test "$psc1_t05_loop_count_status" -eq 0
+        test "$psc1_t05_loop_lean_status" -eq 0
+    - name: Run exact268 native constructor field and recursive-argument assertions
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryConstructorFieldsRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/constructor-fields-native.log"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib
+        root=pathlib.Path(os.environ['PSC1_T05_DIR']);raw=(root/'constructor-fields-native.log').read_bytes()
+        lines=raw.decode().splitlines();prefix='PSC1_CONSTRUCTOR_FIELDS_ASSERT '
+        labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+        groups=[('harness',1),('fields',147),('recursive',105),('boundaries',8),('recursorGuard',7)]
+        if len(labels)!=268 or len(set(labels))!=268:raise RuntimeError('268 unique native field labels required')
+        previous=-1
+        for group,count in groups:
+            marker='PSC1_CONSTRUCTOR_FIELDS_SECTION '+group+'='+str(count)
+            if lines.count(marker)!=1:raise RuntimeError('Exact native field group marker required: '+group)
+            end=lines.index(marker)
+            group_labels=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+            if len(group_labels)!=count or not all(label.startswith(group+'/') for label in group_labels):
+                raise RuntimeError('Ordered exact native field group required: '+group)
+            previous=end
+        markers=['PSC1_ORDINARY_CONSTRUCTOR_FIELDS_NATIVE: PASS assertions=268 fieldRows=21 recursiveRows=15 fuelValues=6 fullAdmission=false',
+                 'PSC1_ORDINARY_CONSTRUCTOR_FIELDS_NATIVE_SECTIONS: PASS harness=1 fields=147 recursive=105 boundaries=8 recursorGuard=7']
+        if any(lines.count(marker)!=1 or lines.index(marker)<=previous for marker in markers):
+            raise RuntimeError('Native fields final markers required')
+        report={'schema':'psc1-t05-loop-native-inventory-v1',
+                'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':'native',
+                'assertions':268,'sectionAssertions':dict(groups),'fieldRows':21,'recursiveRows':15,'fuelValues':6,
+                'assertionLabels':labels,'logSha256':hashlib.sha256(raw).hexdigest(),
+                'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'fields-native-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_T05_FIELDS_NATIVE_INVENTORY: PASS assertions=268 groups=5')
+        PY
+    - name: Run exact93 native single-constructor analysis assertions
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelOrdinaryConstructorAnalysisRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/constructor-analysis-native.log"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib
+        root=pathlib.Path(os.environ['PSC1_T05_DIR']);raw=(root/'constructor-analysis-native.log').read_bytes()
+        lines=raw.decode().splitlines();prefix='PSC1_CONSTRUCTOR_ANALYSIS_ASSERT '
+        labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+        groups=[('harness',1),('matrix',84),('protocol',8)]
+        if len(labels)!=93 or len(set(labels))!=93:raise RuntimeError('93 unique native analysis labels required')
+        previous=-1
+        for group,count in groups:
+            marker='PSC1_CONSTRUCTOR_ANALYSIS_SECTION '+group+'='+str(count)
+            if lines.count(marker)!=1:raise RuntimeError('Exact native analysis group marker required: '+group)
+            end=lines.index(marker)
+            group_labels=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+            if len(group_labels)!=count or not all(label.startswith(group+'/') for label in group_labels):
+                raise RuntimeError('Ordered exact native analysis group required: '+group)
+            previous=end
+        marker='PSC1_ORDINARY_CONSTRUCTOR_ANALYSIS_NATIVE: PASS assertions=93 rows=12 fuelValues=6 fullAdmission=false'
+        if lines.count(marker)!=1 or lines.index(marker)<=previous:
+            raise RuntimeError('Native analysis final marker required')
+        report={'schema':'psc1-t05-loop-native-inventory-v1',
+                'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':'native',
+                'assertions':93,'sectionAssertions':dict(groups),'rows':12,'fuelValues':6,
+                'assertionLabels':labels,'logSha256':hashlib.sha256(raw).hexdigest(),
+                'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'analysis-native-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_T05_ANALYSIS_NATIVE_INVENTORY: PASS assertions=93 groups=3')
+        PY
+    - name: Run exact69 native constructor loop assertions
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2OrdinaryConstructorLoopRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/constructor-loop-native.log"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib
+        root=pathlib.Path(os.environ['PSC1_T05_DIR']);raw=(root/'constructor-loop-native.log').read_bytes()
+        lines=raw.decode().splitlines();prefix='PSC1_CONSTRUCTOR_LOOP_ASSERT '
+        labels=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+        groups=[('harness',1),('matrix',56),('protocol',12)]
+        if len(labels)!=69 or len(set(labels))!=69:raise RuntimeError('69 unique native loop labels required')
+        previous=-1
+        for group,count in groups:
+            marker='PSC1_CONSTRUCTOR_LOOP_SECTION '+group+'='+str(count)
+            if lines.count(marker)!=1:raise RuntimeError('Exact native loop group marker required: '+group)
+            end=lines.index(marker)
+            group_labels=[line[len(prefix):] for line in lines[previous+1:end] if line.startswith(prefix)]
+            if len(group_labels)!=count or not all(label.startswith(group+'/') for label in group_labels):
+                raise RuntimeError('Ordered exact native loop group required: '+group)
+            previous=end
+        marker='PSC1_ORDINARY_CONSTRUCTOR_LOOP_NATIVE: PASS assertions=69 rows=8 fuelValues=6 fullAdmission=false'
+        if lines.count(marker)!=1 or lines.index(marker)<=previous:
+            raise RuntimeError('Native loop final marker required')
+        report={'schema':'psc1-t05-loop-native-inventory-v1',
+                'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],'route':'native',
+                'assertions':69,'sectionAssertions':dict(groups),'rows':8,'fuelValues':6,
+                'assertionLabels':labels,'logSha256':hashlib.sha256(raw).hexdigest(),
+                'fullAdmission':False,'publicRoutingChanged':False}
+        (root/'loop-native-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_T05_LOOP_NATIVE_INVENTORY: PASS assertions=69 groups=3')
+        PY
+    - name: Verify exact47 diagnostic proof reports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR']);reports=[]
+        for module,count,filename in [('PsKernelOrdinaryRecursiveArgumentProofs',24,'recursive-argument-proofs.log'),('PsKernelOrdinaryConstructorFieldsProofs',23,'constructor-fields-proofs.log')]:
+            source=pathlib.Path('test')/(module+'.lean')
+            names=[module+'.'+n for n in re.findall(r'^#print axioms ([A-Za-z0-9_]+)\s*$',source.read_text(),re.M)]
+            log=(root/filename).read_text()
+            actual=re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",log)
+            assert len(names)==len(set(names))==count and [n for n,_ in actual]==names
+            assert not any(x in log for x in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler'))
+            assert all({x.strip() for x in axioms.split(',') if x.strip()} <= {'propext','Classical.choice','Quot.sound'} for _,axioms in actual)
+            reports.append({'module':module,'count':count,'names':names,'logSha256':hashlib.sha256((root/filename).read_bytes()).hexdigest()})
+        result={'schema':'psc1-t05-loop-native-diagnostic-v1','sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],'attempt':os.environ['GITHUB_RUN_ATTEMPT'],'proofs':reports,'totalProofs':47,'nativeAssertions':268,'qualified':False,'diagnosticOnly':True}
+        (root/'diagnostic.json').write_text(json.dumps(result,indent=2)+'\n')
+        print('PSC1_T05_FIELDS_DIAGNOSTIC: PASS '+json.dumps(result,separators=(',',':')))
+        PY
+    - name: Verify exact66 diagnostic proof reports and both native inventories
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        retained=json.loads((root/'diagnostic.json').read_text())
+        fields=json.loads((root/'fields-native-inventory.json').read_text())
+        inventory=json.loads((root/'analysis-native-inventory.json').read_text())
+        for value in (retained,fields,inventory):
+            assert value['sourceSha']==os.environ['GITHUB_SHA'] and value['runId']==os.environ['GITHUB_RUN_ID']
+        assert retained['attempt']==os.environ['GITHUB_RUN_ATTEMPT'] and retained['totalProofs']==47 and retained['nativeAssertions']==268
+        assert fields['runAttempt']==inventory['runAttempt']==os.environ['GITHUB_RUN_ATTEMPT']
+        assert fields['assertions']==268 and inventory['assertions']==93
+        module='PsKernelOrdinaryConstructorAnalysisProofs';source=pathlib.Path('test')/(module+'.lean')
+        names=[module+'.'+n for n in re.findall(r'^#print axioms ([A-Za-z0-9_]+)\s*$',source.read_text(),re.M)]
+        raw=(root/'constructor-analysis-proofs.log').read_bytes();log=raw.decode()
+        actual=re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",log)
+        assert len(names)==len(set(names))==19 and [n for n,_ in actual]==names
+        assert not any(x in log for x in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler'))
+        assert all({x.strip() for x in axioms.split(',') if x.strip()} <= {'propext','Classical.choice','Quot.sound'} for _,axioms in actual)
+        report={'module':module,'count':19,'names':names,'logSha256':hashlib.sha256(raw).hexdigest()}
+        result={'schema':'psc1-t05-loop-native-diagnostic-v1','sourceSha':os.environ['GITHUB_SHA'],
+                'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                'proofs':retained['proofs']+[report],'totalProofs':66,
+                'nativeAssertions':{'fields':268,'analysis':93},'qualified':False,'diagnosticOnly':True}
+        (root/'analysis-diagnostic.json').write_text(json.dumps(result,indent=2)+'\n')
+        print('PSC1_T05_CONSTRUCTOR_ANALYSIS_DIAGNOSTIC: PASS '+json.dumps(result,separators=(',',':')))
+        PY
+    - name: Verify exact80 diagnostic proof reports and all430 native assertions
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        root=pathlib.Path(os.environ['PSC1_T05_DIR'])
+        retained=json.loads((root/'analysis-diagnostic.json').read_text())
+        inventory=json.loads((root/'loop-native-inventory.json').read_text())
+        for value in (retained,inventory):
+            assert value['sourceSha']==os.environ['GITHUB_SHA'] and value['runId']==os.environ['GITHUB_RUN_ID']
+            assert value['runAttempt']==os.environ['GITHUB_RUN_ATTEMPT']
+        assert retained['totalProofs']==66 and retained['nativeAssertions']=={'fields':268,'analysis':93}
+        assert inventory['assertions']==69 and inventory['sectionAssertions']=={'harness':1,'matrix':56,'protocol':12}
+        module='PsKernelExprV2OrdinaryConstructorLoopProofs';source=pathlib.Path('test')/(module+'.lean')
+        names=re.findall(r'^#print axioms ([A-Za-z0-9_.$]+)\s*$',source.read_text(),re.M)
+        names=[name if '.' in name else module+'.'+name for name in names]
+        raw=(root/'constructor-loop-proofs.log').read_bytes();log=raw.decode()
+        actual=re.findall(r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",log)
+        assert len(names)==len(set(names))==14 and [n for n,_ in actual]==names
+        assert not any(x in log for x in ('sorryAx','Lean.ofReduceBool','Lean.trustCompiler'))
+        assert all({x.strip() for x in axioms.split(',') if x.strip()} <= {'propext','Classical.choice','Quot.sound'} for _,axioms in actual)
+        assert (root/'loop-proof-status.log').read_text().splitlines()==['PSC1_T05_LOOP_PROOF_STATUS module='+module+' count=14 countStatus=0 leanStatus=0']
+        report={'module':module,'count':14,'names':names,'logSha256':hashlib.sha256(raw).hexdigest()}
+        result={'schema':'psc1-t05-loop-native-diagnostic-v1','sourceSha':os.environ['GITHUB_SHA'],
+                'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                'proofs':retained['proofs']+[report],'totalProofs':80,
+                'nativeAssertions':{'fields':268,'analysis':93,'loop':69},'qualified':False,'diagnosticOnly':True}
+        (root/'loop-diagnostic.json').write_text(json.dumps(result,indent=2)+'\n')
+        print('PSC1_T05_CONSTRUCTOR_LOOP_DIAGNOSTIC: PASS '+json.dumps(result,separators=(',',':')))
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-loop-native-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-t05-loop-native/
+        if-no-files-found: error
+  loop-portable-diagnostic:
+    needs: loop-native-diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Check exact native-passed source through authentic PSC1
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        mkdir -p "$RUNNER_TEMP/psc1-loop-portable"
+        lake build psc1 2>&1 | tee "$RUNNER_TEMP/psc1-loop-portable/compiler-build.log"
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorLoop.lean \
+          2>&1 | tee "$RUNNER_TEMP/psc1-loop-portable/loop-source-check.log"
+        printf 'PSC1_T05_CONSTRUCTOR_LOOP_PORTABLE_DIAGNOSTIC: PASS source=%s fullAdmission=false qualified=false\n' "$GITHUB_SHA"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-loop-portable-diagnostic-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-loop-portable/
+        if-no-files-found: error

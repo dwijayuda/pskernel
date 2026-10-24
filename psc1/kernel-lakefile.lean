@@ -35,6 +35,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagOrdinaryRecursiveArgument,
     `Ps.KernelCore.API.DagOrdinaryConstructorFields,
     `Ps.KernelCore.API.DagOrdinaryConstructorAnalysis,
+    `Ps.KernelCore.API.DagOrdinaryConstructorLoop,
     `Ps.KernelCore.Checker.ExprV2.AdmissionHelpers,
     `Ps.KernelCore.Checker.ExprV2.Quot,
     `Ps.KernelCore.API.DagGenerated,
@@ -387,3 +388,12 @@ lean_lib PsKernelOrdinaryAnalysisNativeProofs where
 lean_exe psc1_kernel_ordinary_constructor_analysis_regression where
   srcDir := "test"
   root := `PsKernelOrdinaryConstructorAnalysisRegression
+
+-- Private constructor sequence and staged metadata owner.
+lean_lib PsKernelOrdinaryLoopNativeProofs where
+  srcDir := "test"
+  roots := #[`PsKernelExprV2OrdinaryConstructorLoopProofs]
+
+lean_exe psc1_kernel_ordinary_constructor_loop_regression where
+  srcDir := "test"
+  root := `PsKernelExprV2OrdinaryConstructorLoopRegression

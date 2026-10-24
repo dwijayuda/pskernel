@@ -1,0 +1,47 @@
+name: PSC1 exact archived Python G2 CPU profile
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-python-g2-profile.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.8'
+      - name: Require exact failed job and immutable artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/dwijayuda/pskernel/actions/jobs/120800177259 > job.json
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12551661211 > artifact.json
+          python3 - <<'PY'
+          import json
+          j=json.load(open("job.json"));a=json.load(open("artifact.json"))
+          assert j["run_id"]==40069631375 and j["status"]=="completed" and j["conclusion"]=="failure"
+          assert a["workflow_run"]["id"]==40069631375
+          assert a["workflow_run"]["head_sha"]=="30389b1f218ec9c2f35321e93104edb7bb19d747"
+          assert a["digest"]=="sha256:140e46b966269b2dfa6c6c1a04711c21818c7a6b2b2fb49ba9c741967bd07e80"
+          assert not a["expired"]
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40069631375'
+          artifact-ids: '12551661211'
+          path: baseline
+      - name: Profile exact generated G1 and G2 request for120 seconds without native tools
+        run: /usr/bin/time -v python3 -I .github/diagnostics/psc1-python-g2-profile.py baseline 30389b1f218ec9c2f35321e93104edb7bb19d747 diagnostics/python-G2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-python-g2-cpu-profile-${{ github.sha }}
+          path: diagnostics/
+          retention-days: 90

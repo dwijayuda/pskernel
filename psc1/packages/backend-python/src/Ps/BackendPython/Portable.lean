@@ -66,7 +66,8 @@ def publicNameAllowed (name : String) : Bool :=
       "break", "class", "continue", "def", "del", "elif", "else", "except", "finally",
       "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal",
       "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"];
-  !reservedPrefix chars && !psStringEq name "__all__" && !psBackendNameSeen name keywords &&
+  if reservedPrefix chars || psStringEq name "__all__" || psBackendNameSeen name keywords then false
+  else
     match chars with
     | List.nil => false
     | List.cons char rest =>

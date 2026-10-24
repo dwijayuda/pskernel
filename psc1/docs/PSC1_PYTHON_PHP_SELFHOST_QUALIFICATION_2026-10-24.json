@@ -1,0 +1,113 @@
+{
+  "schema": "psc1-python-php-selfhost-progress/1",
+  "recordedAtUtc": "2026-10-24 06:08 UTC",
+  "status": "portable-emitter-native-regressions-passed-whole-source-gate-pending",
+  "branch": "feat/psc1-python-php-selfhost-20261024",
+  "pullRequest": 176,
+  "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
+  "sourceCommit": "6f73c9f0bbd04a5577ac90d80f7a0481914cb1f4",
+  "targets": [
+    "python",
+    "php"
+  ],
+  "compilerArchitecture": "one existing frontend/elaborator/checked IR/service and one portable emitter per target; native compatibility adapters only",
+  "profiles": {
+    "g1Ms": 240000,
+    "corpusAndToolsMs": 240000,
+    "checkerMs": 120000,
+    "correctnessG2G3Ms": 1800000,
+    "performanceG2G3Ms": 240000,
+    "phpMemoryLimit": "1G",
+    "otherPolicies": "unchanged"
+  },
+  "checker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "independent": true
+  },
+  "runtimes": {
+    "python": "3.14.8",
+    "php": "8.5.11",
+    "phpExtensions": [
+      "gmp"
+    ],
+    "interpreterHashes": "recorded by genuine qualification harness"
+  },
+  "previousRegressionEvidence": {
+    "runId": 40068694963,
+    "jobId": 120797262656,
+    "commit": "62cd0f1b9bd7aa17dc926c3de16ae6fae8aeef32",
+    "nativeBuild": "passed",
+    "runtimeComparisons": 34816,
+    "stateApiEqualities": 7,
+    "retainedEmitterComparisons": 144,
+    "generatedLibraryExecutions": {
+      "targets": [
+        "python",
+        "php"
+      ],
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "queriesPerCombination": 104,
+      "stateQueriesPerCombination": 8,
+      "independentAdmission": "passed",
+      "scope": "runtime library, not a generated compiler"
+    },
+    "sourceCensus": {
+      "modulesPerTarget": 86,
+      "python": {
+        "parseBothGrammars": "passed",
+        "elaboration": "refused-final-entry-unknownName:throw"
+      },
+      "php": {
+        "parse": "refused-643:13-nested-do-RHS"
+      },
+      "admission": "not-run",
+      "generatedCompiler": "not-run"
+    }
+  },
+  "currentFixes": {
+    "explicitExceptConstructors": true,
+    "nestedDoRhsExtracted": true,
+    "completeArityEqualitiesAdded": 4,
+    "status": "pending-Linux-CI"
+  },
+  "qualification": {
+    "G1": "not-run",
+    "G2": "not-run",
+    "G3": "not-run",
+    "fixedPoint": "not-run",
+    "cleanReproduction": "not-run",
+    "performance240s": "not-qualified"
+  },
+  "preservedDirectEvidence": {
+    "sourceCommit": "133e589288b563e74578b771ec35595beb3a9fe8",
+    "requestCommit": "2d1f8244d8402fbccd5a018890d61d8ed4d20775",
+    "runId": 40062120079,
+    "cleanG1RunId": 40064496804,
+    "receipt": "PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json",
+    "modified": false
+  },
+  "earlierSourceAndWiringRuns": [
+    40065373477,
+    40065397379,
+    40065490672,
+    40065716603,
+    40065872994,
+    40066265713,
+    40066495582,
+    40066640170,
+    40067063937,
+    40067163350,
+    40067306723,
+    40067720303,
+    40067973921,
+    40068379958,
+    40068694963
+  ],
+  "evidenceBoundary": "Native/census/library tests do not qualify compiler self-hosting. Preserve terminal/cancelled distinctions and exact current source; full release/source qualification still required.",
+  "merge": "not-run",
+  "publication": "not-run"
+}

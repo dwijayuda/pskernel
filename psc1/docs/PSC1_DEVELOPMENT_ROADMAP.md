@@ -16,8 +16,12 @@ owns exact source identities and immutable actual results.
 | 4 | Full source regression and reproducibility | Seven backends/both grammars/37 criteria and real apps; clean G1 reproduction separately scoped. Preserve qualified DirectJS/Wasm/Rust/TS snapshots and all old failures. |
 
 Branch feat/psc1-python-php-selfhost-20261024. Existing emitters and shared compiler
-service are reused, with small host transport adapters only. No Python/PHP
-self-host qualification is claimed at this initial source/harness checkpoint.
+service are reused, with small host transport adapters only. No Python/PHP self-host qualification is claimed yet. Both emitters are now
+ported to the supported explicit state/Except source normal form, with native
+compatibility adapters. Seven state API equalities,34816 runtime comparisons,
+144 retained-emitter comparisons and four independently admitted generated
+runtime probes pass40068694963. Source6f73c9f0 addresses the final
+observed contextual-Except/nested-do refusals; whole-source CI must confirm it.
 See [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md).
 The later direct performance queue is deferred while this user-directed mission runs.
 

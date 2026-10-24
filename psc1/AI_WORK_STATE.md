@@ -9,33 +9,53 @@ owns immutable attempts, artifacts, timings and source identities.
 
 ## Active Python/PHP self-hosting mission — 2026-10-24
 
-The user now requests genuine self-hosting with the Python and PHP backends.
-This supersedes the direct-target performance queue as the active work order.
-Branch feat/psc1-python-php-selfhost-20261024 starts from preserved qualified
-direct-target review6393226e5d29ad246e9421fe398d78c43954c6d9.
-DirectJS/Wasm, Rust/TS qualifications below retain their exact source scopes.
+Continue on feat/psc1-python-php-selfhost-20261024, draft
+[PR176](https://github.com/dwijayuda/pskernel/pull/176), based on preserved
+direct-target checkpoint6393226e5d29ad246e9421fe398d78c43954c6d9.
+Latest executable/source checkpoint:6f73c9f0bbd04a5577ac90d80f7a0481914cb1f4; source preflight is pending.
+No Python/PHP G1, G2/G3 or fixed-point qualification is claimed yet.
 
-Thin pure facades call the existing psPythonEmitModule and
-psPhpEmitValidatedModule through Ps.Internal.CompilerService.candidate.
-The shared source/frontend/elaborator/strict IR/admission pipeline is unchanged.
-The generation harness now has hash-bound Python/PHP transport, complete
-ten-case observations and unchanged independent checker/resource boundaries.
-Python3.14.8 and PHP8.5.11/ext-gmp are pinned to existing release CI versions.
-Transport passes unchanged malformed wire to generated refusal logic; it does
-not elaborate, lower or print compiler code. Python global integer-digit and
-recursion settings remain untouched; PHP transport retains1G memory policy.
+The existing emitters now have one portable implementation each:
+Ps.BackendPython.Portable and Ps.BackendPhp.Portable. The old Module paths are
+native compatibility adapters preserving existing APIs/defaults/metadata.
+Both native CLI and generated compiler facades call the same portable emitter.
+There is no second handwritten compiler, alternate frontend or native delegation.
 
-Current source preflight40065397379 atbae72b4b successfully BUILT both facades
-and native seed/checker/census; its source audit is still pending.
-Later harness commitba2a1246 requires the host-target allowlist extension in this
-checkpoint. No Python/PHP G1, G2/G3 or fixed-point claim exists yet.
-Next: verify whole source closure census in both grammars, normalize actual
-unsupported source classes with exact regression evidence, then issue a single
-request-only qualification commit through the new dedicated manual workflow.
-Keep1800s correctness separate from original240s performance and G1/tool limits.
+The proved normal form is State -> Except Error (Prod Value State):
+seven complete operation equalities to StateT (Except) passed official Lean;
+four complete arity-dispatch equalities are added at this checkpoint and await CI.
+The source port uses explicit state/results, flat constructor cases and typed
+workers under dynamic inputs, without extending the frozen language grammar.
+Ordered line/origin accumulators preserve printed output and offsets.
 
-[Python/PHP continuation](docs/PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) owns exact
-execution steps. Do not merge PRs or publish packages.
+Linux40068694963/job120797262656 at62cd0f1b:
+native build,34816 retained runtime catalog/order/duplicate/unknown comparisons,
+seven state API proofs/tests,144 complete retained-emitter output/refusal
+comparisons, and all four independently admitted/generated runtime probes
+(Python/PHP × Lean/PS,104 runtime and8 state queries each) PASSED.
+These are compiler/library regressions, not generated compiler qualification.
+Both closures contain86 modules. Python's entire closure parses in both
+grammars; elaboration reached the final entry and refused contextual throw.
+PHP's remaining parse refusal was the nested do RHS at643:13.
+Current6f73c9f0 replaces contextual pure/throw with explicit Except
+constructors and extracts that RHS into an ordinary typed helper. Re-query CI.
+
+The shared production harness supports both targets, the existing ten cases,
+hash-bound unchanged-wire transport and the same independent admission/IR
+pipeline. Python3.14.8 and PHP8.5.11/ext-gmp are pinned; qualification records
+interpreter binary hashes. Preserve G1/corpus/tools240s,checker120s,
+G2/G3 correctness1800s, separate original performance240s and all other limits.
+PHP retains1G; Python recursion and integer-digit global settings are unchanged.
+
+Next: finish the whole source/negative gate, issue one request-only
+.github/qualification-requests/psc1-python-php-selfhost.json commit from fresh HEAD,
+then execute genuine independent G1→G2→G3/fixed points for both targets. Diagnose
+actual generated requests rather than infer performance from fixtures.
+Obtain full current-source37/37/seven-backend/application evidence and clean
+reproduction separately. No merge or publication.
+[Continuation](docs/PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) and
+[receipt](docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json) own resumption.
+The older direct-target performance queue below is deferred by this user mission.
 
 ## Completed DirectJS and owned DirectWasm mission
 

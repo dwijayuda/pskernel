@@ -1,7 +1,7 @@
 # PSC1 compiler self-host architecture
 
-Current direction: genuine DirectJS and import-free DirectWasm generations after
-Practical Core v1 feature freeze. [Roadmap](PSC1_DEVELOPMENT_ROADMAP.md) orders the
+Current direction: Python and PHP generations from the same frozen compiler,
+after qualified DirectJS and import-free DirectWasm generations. [Roadmap](PSC1_DEVELOPMENT_ROADMAP.md) orders the
 work; [AI work state](../AI_WORK_STATE.md) and the
 [direct-target receipt](PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json) bind
 live status to immutable source/CI identities. Qualified Rust and TypeScript
@@ -356,3 +356,42 @@ old/new APIs, exact output bytes/order and first-error priority, with100000-elem
 cases and the retained96-opcode/native/owned-GC comparisons. The top Nat division
 frame is insufficient evidence for a separate arithmetic defect; no limit was
 raised. This fixes encoding as a class rather than modifying individual inputs.
+
+## Python/PHP source architecture — 2026-10-24
+
+The qualified direct-target pattern separates one portable compiler implementation
+from host transport, native adapters and independent checking. Apply the same
+boundary to Python/PHP: CompilerService imports Portable; native Module preserves
+its existing API and calls Portable. Default-argument/metadata compatibility
+does not enter captured compiler source. Source capture still traverses all
+registered owned imports and excludes test references/host/kernel/CLI code.
+
+Original Python/PHP emitters used StateT, private declarations, default record
+initializers, library methods and nested source patterns outside the supported
+compiler grammar. The port keeps the same semantic operations and target text,
+using ordinary functions State -> Except Error (Prod Value State), explicit
+record constructors, ordered accumulators and flat case analysis. It adds no
+grammar extension or alternate compiler. The source controller continues to
+admit Id, Except and CompilerM; unimplemented StateT elaboration is not bypassed.
+
+Native operation correspondence proofs bind seven complete state APIs.
+Flat arity dispatch is compared with the original exact-list patterns for
+arity1/2/3/5, including shorter, exact and arbitrary longer lists. Retained
+original emitters are native test references only, outside every owned compiler
+closure.144 output/refusal comparisons cover all output fields, not merely
+execution results.34816 runtime selector combinations preserve raw helper text,
+dependency order, duplicates and unknowns. Four actual source library probes
+are independently admitted and executed across both grammars and both targets.
+None of these fixture/proof results alone qualifies a generated compiler.
+
+Full source census now reaches86 modules per target. Recursive workers bind a
+partially applied smaller function below dynamic inputs; effects use explicit
+Except constructors rather than contextual spellings inside match branches.
+Keep exact errors, first-error order, lexical captures, declaration positions,
+source/IR identities and all existing fuel/resource/ABI boundaries.
+
+Next qualification uses the existing one-seed harness with Python3.14.8 and
+PHP8.5.11/ext-gmp, interpreter hashes, unchanged240s G1/tools and120s checker,
+and separate1800s correctness G2/G3. Original240s performance remains separate.
+Generated source equality is distinct from operational manifest event/timing
+hashes, clean-build reproducibility, DDC or formal compiler preservation.

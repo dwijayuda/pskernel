@@ -171,6 +171,7 @@ structure Context where
   locals : List (Prod String String)
   helpers : List String
   scheduled : Bool
+  preciseCaptures : Bool
 
 structure EmitState where
   linesRev : List String
@@ -181,7 +182,7 @@ structure EmitState where
 def Emit (Value : Type) : Type := PsBackendStateExcept EmitState String Value
 
 def withLocals (context : Context) (locals : List (Prod String String)) : Context :=
-  Context.mk context.globals context.valueNames locals context.helpers context.scheduled
+  Context.mk context.globals context.valueNames locals context.helpers context.scheduled context.preciseCaptures
 
 def padding (count : Nat) (builder : PsTextBuilder) : String :=
   match count with
@@ -220,6 +221,87 @@ def capture (context : Context) : String :=
     (psListAppend (psListMap (fun (pair : Prod String String) => pair.snd) context.locals) context.helpers) List.nil;
   let captures : List String := psListAppend refs values;
   if psListIsEmpty captures then "" else cat [" use (", psTextJoin ", " captures, ")"]
+
+
+-- Conservative lexical global-demand analysis. Exhausted analysis retains the
+-- original complete capture set; compiler and source execution fuel are unchanged.
+def collectChunks (chunks : List (List String)) : List String :=
+  psBackendSourceFlatMap (fun (chunk : List String) => chunk) chunks
+
+def collectMany {Value : Type} (visit : Value -> Except Unit (List String))
+    (values : List Value) : Except Unit (List String) :=
+  match psListMapExcept visit values with
+  | Except.error error => Except.error error
+  | Except.ok chunks => Except.ok (collectChunks chunks)
+
+def collectJoin (left right : Except Unit (List String)) : Except Unit (List String) :=
+  match left with
+  | Except.error error => Except.error error
+  | Except.ok names =>
+      match right with
+      | Except.error error => Except.error error
+      | Except.ok others => Except.ok (psListAppend names others)
+
+def freeGlobalNames (fuel : Nat) : List String -> PsVerifiedIrExpr -> Except Unit (List String) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_bound : List String) (_expr : PsVerifiedIrExpr) => Except.error Unit.unit
+  | Nat.succ remaining =>
+      fun (bound : List String) (expr : PsVerifiedIrExpr) =>
+        let smaller : List String -> PsVerifiedIrExpr -> Except Unit (List String) :=
+          freeGlobalNames remaining;
+        let visit : PsVerifiedIrExpr -> Except Unit (List String) := smaller bound;
+        match expr with
+        | PsVerifiedIrExpr.literal _ => Except.ok List.nil
+        | PsVerifiedIrExpr.var name =>
+            Except.ok (if psBackendNameSeen name bound then List.nil else [name])
+        | PsVerifiedIrExpr.intrinsic _ _ arguments => collectMany visit arguments
+        | PsVerifiedIrExpr.lambda parameters _ body =>
+            smaller (psListAppend
+              (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) bound) body
+        | PsVerifiedIrExpr.call fn _ arguments =>
+            collectJoin (visit fn) (collectMany visit arguments)
+        | PsVerifiedIrExpr.letE name _ value body =>
+            collectJoin (visit value) (smaller (List.cons name bound) body)
+        | PsVerifiedIrExpr.ifE condition yes no =>
+            collectJoin (visit condition) (collectJoin (visit yes) (visit no))
+        | PsVerifiedIrExpr.record _ _ fields =>
+            collectMany (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.projection _ _ target _ => visit target
+        | PsVerifiedIrExpr.constructor _ _ _ fields =>
+            collectMany (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+        | PsVerifiedIrExpr.matchE _ _ target alternatives =>
+            collectJoin (visit target)
+              (collectMany
+                (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                  smaller (psListAppend
+                    (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name)
+                      alternative.snd.fst) bound) alternative.snd.snd) alternatives)
+
+def selectedGlobalsAcc (names : List String) (globals : List (Prod String String))
+    (reversed : List (Prod String String)) : List (Prod String String) :=
+  match globals with
+  | List.nil => psListReverse reversed
+  | List.cons entry rest =>
+      selectedGlobalsAcc names rest
+        (if psBackendNameSeen entry.fst names then List.cons entry reversed else reversed)
+
+def captureForWithFuel (fuel : Nat) (context : Context)
+    (parameters : List PsVerifiedIrParameter) (body : PsVerifiedIrExpr) : String :=
+  let bound : List String := psListAppend
+    (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters)
+    (psListMap (fun (entry : Prod String String) => entry.fst) context.locals);
+  if !context.preciseCaptures then capture context
+  else
+    match freeGlobalNames fuel bound body with
+    | Except.error _ => capture context
+    | Except.ok names =>
+        capture (Context.mk (selectedGlobalsAcc names context.globals List.nil)
+          context.valueNames context.locals context.helpers context.scheduled context.preciseCaptures)
+
+def captureFor (context : Context) (parameters : List PsVerifiedIrParameter)
+    (body : PsVerifiedIrExpr) : String :=
+  captureForWithFuel 4096 context parameters body
 
 def guardCondition (context : Context) (name : String) (type : PsVerifiedIrType) : String :=
   match type with
@@ -723,7 +805,7 @@ def expression (fuel : Nat) : Context -> PsVerifiedIrExpr -> Emit String :=
             let printed : List String := psListMap (fun (parameter : ParameterInfo) =>
               cat ["mixed ", parameter.localName]) printedParameters
             let _psc_step_73 <- line (cat [target, " = ", if context.scheduled then "$__ps_wrap(" else "",
-              "static function (", psTextJoin ", " printed, ")", capture context, ": ",
+              "static function (", psTextJoin ", " printed, ")", captureFor context parameters body, ": ",
               if context.scheduled then "\\Generator" else resultType, " {"]) state
             let state := _psc_step_73.snd
             let _psc_step_74 <- indent true state
@@ -913,7 +995,7 @@ def emitDeclaration (context : Context) (declaration : PsVerifiedIrDeclaration) 
     let declarationLine : Nat := Nat.succ state.lineCount
     let _psc_step_108 <- line (cat [symbol, " = ", if context.scheduled then "$__ps_wrap(" else "",
       "static function (", psTextJoin ", " (psListMap (fun (parameter : ParameterInfo) =>
-        cat ["mixed ", parameter.localName]) parameters), ")", capture context, ": ",
+        cat ["mixed ", parameter.localName]) parameters), ")", captureFor context declaration.parameters declaration.body, ": ",
       if context.scheduled then "\\Generator" else resultType, " {"]) state
     let state := _psc_step_108.snd
     let _psc_step_109 <- indent true state
@@ -1056,8 +1138,8 @@ def emitModule (module : PsVerifiedIrModule) (context : Context) (publicNames : 
 
 end PsPhp
 
-def psPhpEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
-    (ioAbi : Bool) : Except String PsPhpPortableModule := do
+def psPhpEmitModuleWithIoAndCapturePolicy (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi preciseCaptures : Bool) : Except String PsPhpPortableModule := do
   match psStrictValidateModule validated.raw with
   | Except.error _ => Except.error "PSC1_PHP_IR_VALIDATION_FAILED"
   | Except.ok _ => Except.ok Unit.unit
@@ -1082,7 +1164,7 @@ def psPhpEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List 
     psListMap PsPhp.globalEntry (psBackendSourceZipIndex module.declarations)
   let context : PsPhp.Context :=
     PsPhp.Context.mk globals valueNames List.nil (psPhpRuntimeVariables requirements)
-      (psBackendNameSeen "calls" requirements)
+      (psBackendNameSeen "calls" requirements) preciseCaptures
   let sourcePrefix : String := PsPhp.cat ["<?php\n",
     "// Generated by ProofScript PSC1 DirectPHP. Public API: return value of require.\n",
     "declare(strict_types=1);\n\nreturn (static function (): array {\n", runtimeSource]
@@ -1096,3 +1178,8 @@ def psPhpEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List 
   Except.ok (PsPhpPortableModule.mk
     (PsPhp.cat [sourcePrefix, psTextJoin "\n" (psListReverse state.linesRev), "\n"])
     composer runtimeSource psPhpRuntimeVersion requirements globals positions)
+
+-- Native compatibility and generated service use the same optimized emitter.
+def psPhpEmitModuleWithIo (validated : PsValidatedIrModule) (publicNames : List String)
+    (ioAbi : Bool) : Except String PsPhpPortableModule :=
+  psPhpEmitModuleWithIoAndCapturePolicy validated publicNames ioAbi true

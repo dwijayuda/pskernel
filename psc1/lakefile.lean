@@ -555,3 +555,7 @@ lean_lib PsScriptEmitterReference where
 lean_exe psc1_script_emitter_normalization_tests where
   srcDir := "test"
   root := `ScriptEmitterNormalizationTests
+
+lean_exe psc1_php_capture_tests where
+  srcDir := "test"
+  root := `PhpCaptureScopeTests

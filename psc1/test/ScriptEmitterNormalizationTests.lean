@@ -102,18 +102,40 @@ private def samePython (raw : PsVerifiedIrModule) (names : List String) (ioAbi :
         throw (IO.userError "Python retained-emitter output identity")
   | _, _ => throw (IO.userError "Python acceptance changed")
 
-private def samePhp (raw : PsVerifiedIrModule) (names : List String) (ioAbi : Bool) : IO Unit := do
-  match psPhpEmitValidatedModule { raw := raw } names ioAbi,
-      PsScriptEmitterReference.Php.psPhpEmitValidatedModule { raw := raw } names ioAbi with
+private def samePhp (raw : PsVerifiedIrModule) (names : List String) (ioAbi : Bool)
+    (label : Nat) : IO Unit := do
+  let reference := PsScriptEmitterReference.Php.psPhpEmitValidatedModule { raw := raw } names ioAbi
+  let legacy := psPhpEmitModuleWithIoAndCapturePolicy { raw := raw } names ioAbi false
+  match legacy, reference with
   | Except.error a, Except.error b =>
-      unless a == b do throw (IO.userError "PHP error identity")
+      unless a == b do throw (IO.userError "PHP legacy error identity")
   | Except.ok a, Except.ok b =>
       unless a.source == b.source && a.composer == b.composer &&
           a.runtimeSource == b.runtimeSource && a.runtimeVersion == b.runtimeVersion &&
           a.runtimeRequirements == b.runtimeRequirements && a.declarations == b.declarations &&
           a.declarationLines == b.declarationLines do
-        throw (IO.userError "PHP retained-emitter output identity")
-  | _, _ => throw (IO.userError "PHP acceptance changed")
+        throw (IO.userError "PHP complete retained-emitter fallback identity")
+  | _, _ => throw (IO.userError "PHP legacy acceptance changed")
+  match psPhpEmitValidatedModule { raw := raw } names ioAbi, reference with
+  | Except.error a, Except.error b =>
+      unless a == b do throw (IO.userError "PHP production error identity")
+  | Except.ok a, Except.ok b =>
+      unless a.composer == b.composer && a.runtimeSource == b.runtimeSource &&
+          a.runtimeVersion == b.runtimeVersion && a.runtimeRequirements == b.runtimeRequirements &&
+          a.declarations == b.declarations && a.declarationLines == b.declarationLines do
+        throw (IO.userError "PHP non-source metadata changed")
+      IO.FS.createDirAll "dist/script-emitter-comparison"
+      let actual := s!"dist/script-emitter-comparison/{label}.actual.php"
+      let expected := s!"dist/script-emitter-comparison/{label}.reference.php"
+      IO.FS.writeFile actual a.source
+      IO.FS.writeFile expected b.source
+      let result <- IO.Process.output {
+        cmd := "php"
+        args := #["scripts/php-capture-token-comparison.php", actual, expected]
+      }
+      unless result.exitCode == 0 do
+        throw (IO.userError ("PHP token/capture delta: " ++ result.stdout ++ result.stderr))
+  | _, _ => throw (IO.userError "PHP production acceptance changed")
 
 def main : IO Unit := do
   let mut cases := 0
@@ -121,6 +143,6 @@ def main : IO Unit := do
     for names in [[], ["answer"], ["readBox"], ["x", "shadow"], ["answer", "answer"], ["missing"]] do
       for ioAbi in [false, true] do
         samePython raw names ioAbi
-        samePhp raw names ioAbi
+        samePhp raw names ioAbi cases
         cases := cases + 2
-  IO.println s!"PSC1_SCRIPT_EMITTER_NORMALIZATION: {cases} complete retained-emitter output/refusal comparisons passed"
+  IO.println s!"PSC1_SCRIPT_EMITTER_NORMALIZATION: {cases} retained-emitter/fallback output/refusal comparisons and production global-capture token boundaries passed"

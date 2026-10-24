@@ -7,74 +7,75 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
-## Active Python/PHP self-hosting mission — 2026-10-24, 3600s profile
+## Active Python/PHP3600s performance retry
 
-Branch feat/psc1-python-php-selfhost-20261024, draft
-[PR176](https://github.com/dwijayuda/pskernel/pull/176), preserved base6393226e.
-Use connected GitHub/Linux Actions only, expected-HEAD non-force updates.
-No merge/publication authorized. The [exact receipt](docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json)
-owns immutable attempts/hashes/artifacts; the roadmap owns the dependency queue.
+Use connected GitHub tools/Linux Actions only, fresh expected-HEAD non-force
+updates, draft [PR176](https://github.com/dwijayuda/pskernel/pull/176).
+No merge into main or package publication authorized.
 
-- Current compiler source e20a11549cdb1d656c05912089730bf2ebeaf933 passed
-  focused40079503171/job120829903883:87 modules/target/both grammars,
-  all retained/API/admitted runtime guards, Python exact self-tail loops and
-  PHP extraction/node reclamation. No compiler source changes in this profile update.
-- **Final current-source full regression40080321500 PASSED37/37**,0 blocked,
-  all seven backends/both grammars/applications/installed package and native IO.
-  Review HEADb8406ab3 and tested merge609ff880 have identical
-  tree6f31dfcaeab9873381f5c2625381e158c7b5abc7. Jobs120834433295/120838887904.
-  Artifact12555143308,sha256:2c4bd74fed182afb01b215858c0b53373d3077024d2e05916435c7f80a8af58c.
-- Latest1800s attempts both passed G1 independent admission, strict original/
-  transformed IR and all ten positive/refusal observations. Python40079719620
-  at e6327cdd: G2 deadline1800057ms, sampled tree peak786232KiB.
-  PHP40078954006 at1174300d: G2 deadline1800042ms, tree1179544KiB.
-  Neither reached G3 or fixed point. Preserve failed artifacts12555068026/
-  12555337743 and exact identities in receipt.
-- Authorized **correctness-3600s** extends ONLY exact G2-self/G3-self requests.
-  G1/corpus/tools240s, checker120s, performance-240s and historical
-  correctness-1800s remain separate and unchanged. Jobs180min and execution
-  step170min accommodate two hour-long requests plus verification, below
-  GitHub-hosted six-hour job limit. Unknown profiles/policies still fail closed.
-- Resource heartbeats once/minute use existing100ms descendant sampling;
-  CPU ticks, resident memory, processes and pipe bytes are diagnostics, not
-  semantic phase progress. Compiler wire/stdout and output caps are unchanged.
-  Supervisor stderr streams to CI; receipts preserve sampled CPU and maxRSS.
-- Profile/supervision implementation451aef056de343b8423a9a2e544d2c3d0d6b1fb4
-  PASSED Linux preflight40083935614/job120842917046, including actual deadline/
-  escaped-session/output-bound tests, profile refusals, transport and both censuses.
-- **Actual3600s BOTH-target run40085445958 ACTIVE**, request
-  a6a399c604e29f62cec1f74d2db49d9c45873ea0 on
-  qualification/psc1-python-php-3600s-20261024; control2b3467f10741e49c4fa1bb3cf371a44828227975.
-  Python job120847425035/PHP120847425075. GitHub compare against451aef05 confirms
-  only workflow branch guard and request JSON differ: compiler and critical host
-  tools are identical. This avoids cancelling primary full regression40083940157,
-  now SUCCESS at451aef05. Both target jobs have entered genuine generated execution.
-  Neither G2/G3 nor fixed point is qualified until terminal evidence passes.
-- **Profile-source full40083940157 PASSED37/37**,0 blocked,releaseReady=true:
-  Linux120845118090/final gate120850001657, all7 backends/both grammars,
-  14 execution bundles/28 scripting groups/24 scripting bundles/11 architecture
-  groups and minimum-Python/installed package/IO/library regressions.
-  Review451aef05 and tested003a85cef05cf894771b67b2dbc648e681e3ca59 share
-  exact tree854147ae65853c0c26612f0c48424c9083e33a46.
+**Current source changes await Linux validation:**
+Python b56da50567ac4051b6bea311c1b960ced1c97869; PHP 13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d.
+Do not call these qualified until actual new gates and generations pass.
+
+- Preserved supervision/profile source451aef056de343b8423a9a2e544d2c3d0d6b1fb4
+  PASSED preflight40083935614/job120842917046 and full40083940157:
+  37/37,0 blocked, all7 backends/both grammars,14 execution bundles/28 scripting
+  groups/24 scripting bundles/11 architecture groups, minimum-Python and installed
+  package/IO/library tests. Linux120845118090/final gate120850001657.
+  Tested003a85ce and review451aef05 share tree854147ae65853c0c26612f0c48424c9083e33a46.
   Artifact12556184945,sha256:da19bedfa3a895b406eb344d3f840652a15fed672173323fe9be9a21b24f02b7.
-- Next: read terminal jobs and immutable artifacts. On failure diagnose the
-  actual workload, implement one measured correctness-preserving optimization,
-  validate and retry. Preserve all previous failures and current-source37/37.
+- **Actual3600s run40085445958 FAILED both G2 deadlines.**
+  Requesta6a399c604e29f62cec1f74d2db49d9c45873ea0 on
+  qualification/psc1-python-php-3600s-20261024; control2b3467f1.
+  GitHub compare confirms only branch guard/request differ from451aef05.
+  Both G1s independently admitted, both strict IR graphs/all ten observations PASS.
+  Python job120847425035:3600060ms/tree peak781180KiB.
+  PHP120847425075:3600056ms/tree1180260KiB.
+  Neither G3 nor fixed point ran. Both are **not qualified**.
+- Immutable artifacts: Python12558152936,
+  sha256:a32295c72c7fcfb7f1013fc6ffe5ddb81aa293d1a4fd0075f2f4dc40234d4286;
+  PHP12558950449,sha256:42516399119bb175b540f59efcc8461c106bbea3f290accd61945a69acdd4f1f.
+  Readbacks40089881019(Python)/40089760678(PHP) PASS without running a compiler.
+  Exact G1 bytes: Python12479408/SHA6170b904c3da1c717689e10f70eb5e99899572776f011b60b21119bec95c00ab;
+  PHP18936874/SHA5c55eeee69ded03bf98939be1b447a5b92f9e23c6509bbdf32aa95ee1f3ab95d.
+- Last inner resource samples at~3543s show CPU3542.65s(Python)/3542.42s(PHP)
+  and RSS537500/845396KiB. These are busy CPU workloads with stable late memory;
+  they do not establish semantic progress. Outer sampled CPU includes supervisors;
+  outer child wait4 RSS is not service peak; tree sums can double-count shared pages.
+- Python now returns the two hot UTF8 identity entries without allocation or
+  promotion. Preserve8 entries/32MiB and immutable snapshots. New20000 alternating
+  hits require the identical snapshot; retain all234895 helper/public/error/
+  eviction/oversize/concurrency comparisons and exact approved-block boundary.
+  Controlled40083320898 already matched five complete frozen candidates; new
+  production source still requires all gates and a genuine chain.
+- PHP checked canonical field reads now use externally readonly public private(set)
+  slots; ArrayAccess and iterative reclamation remain. The same emitter retains
+  indexed reads for exact token/runtime comparison; frozen old node helper permits
+  only five visibility declarations. Add readonly mutation/reference refusals and
+  preserve all2M/shared/weak/cycle/invalid-layout/unsupported-ABI checks.
+- PHP already has self-tail loops. The additional fix only bypasses scheduler
+  requests for existing proven2-layer nonzero pure globals after unchanged callee/
+  argument snapshots. Dynamic calls, shadows, aliases, callbacks and recursive
+  scheduling retain existing behavior. Independent token checks and200k recursion
+  remain mandatory. No handwritten compiler, stack/fuel/memory increase or
+  DirectJS-specific optimization.
 
-Preserve Python3.14.8/PHP8.5.12/ext-gmp/Node22.23.3, official independent
-Lean4.35.0 checker eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
-strict IR/source pairing/negative tests, semantic fuel, response128MiB,
-PHP1G/default stack and Python recursion/digit globals.
-Python120s profile40082137157 attributes20.071s own time to47.7M UTF8 view
-lookups and23.150s to scheduler. Controlled hot-pair cache experiment40083320898
-matches five frozen complete candidates and reduces cache lookup overhead;
-it is not production or qualification. PHP120s samples/label recovery
-40082137206/40082826544 interrupt node field readers25/120 times;
-sampling is not CPU attribution. Node-property diagnostics40083473782/40083961393 failed before real workload
-execution (fragment parsing, then retained tokenizer scratch). Corrected diagnostic
-40084087416 matches all five frozen complete candidates for each variant and
-executes120s each at unchanged1G; this is not production or qualification.
-Keep the fully regression-qualified compiler stable for the longer attempt.
+Preserve G1/corpus/tools240s,checker120s, separate performance-240s and historical
+correctness-1800s. Correctness-3600s only applies to G2-self/G3-self.
+Jobs180min/execution170min fit GitHub-hosted6h. Official independent Lean4.35.0
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict original/transformed IR,
+source pairing, refusals, response128MiB,PHP1G/default stack and Python recursion/
+digit globals are unchanged.
+
+Next: pass fresh Linux source/API/retained/runtime/library/census gates, preserve
+ordinary full CI concurrently, then advance isolated qualification source/tools
+and submit a request-only BOTH-target3600s retry. Require G1→G2→G3/ten cases/
+independent admission and exact source/admission/IR/observation/raw-byte fixed
+points separately for each. On failure inspect the exact new workload and fix a
+demonstrated generic cost. Source gates alone never qualify self-hosting.
+[Receipt](docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json) owns exact
+attempts; [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the single queue;
+[continuation](docs/PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) owns executable steps.
 
 ## Completed DirectJS and owned DirectWasm mission
 

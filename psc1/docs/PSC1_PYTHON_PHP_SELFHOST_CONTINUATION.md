@@ -5,6 +5,14 @@ feat/psc1-python-php-selfhost-20261024 and draft PR176 before expected-HEAD,
 non-force updates. Read AI_WORK_STATE.md, the single roadmap and exact
 Python/PHP qualification receipt. No local checkout/build/tests, merge or publish.
 
+Current retry source: Pythonb56da50567ac4051b6bea311c1b960ced1c97869, PHP13c5d4a60f4fd55dfe6667eca7406b5c5474aa8d; Linux gates pending.
+First3600s run40085445958 is terminal FAILURE: both G1s pass independent
+admission/strictIR/ten cases; Python/PHP G2 deadline3600060/3600056ms.
+Neither reached G3/fixed point. Readbacks40089881019/40089760678 pass.
+Read AI/JSON for immutable artifacts, exact identities and current source gates.
+Validate hot-pair cache and readonly-slot/static-call fixes before a new request.
+The historical baseline below stays preserved; active status is superseded.
+
 1. Compiler source e20a11549cdb1d656c05912089730bf2ebeaf933 passed focused
    40079503171 and full40080321500:37/37,all7 backends,both grammars/apps.
    Reviewb8406ab3 and merge609ff880 have identical Git tree

@@ -12,6 +12,8 @@ The frozen V1 reference is `Admission/Inductive/Common/Elimination.lean`, Git bl
 
 ## Qualification pending
 
-This production draft has not yet been compiled. Add the native component proofs, frozen-reference runtime matrix and corresponding generated harness, then run the isolated native-first diagnostic before promotion. That diagnostic is preflight evidence only; the changed source must pass the complete expanded source-bound qualification before integration.
+The draft now includes 26 named native proof reports and 116 assertions in each native/generated fixture: harness 1, policy 63, raw telescope 28, membership 12 and protocol 12. Nine policy rows first pass the real frozen V1 header and constructor phase; four raw telescope rows are explicitly isolated helper probes. Both use fuels 0, 1, 2, 3, 8 and 4096. Metadata tags use the required Nat representation (1/2/3), matching 1n/2n/3n in JavaScript.
+
+The automatic workflow `.github/workflows/psc1-t05-elimination-preflight.yml` runs native production compilation, all 26 exact source-named proof reports and all 116 unique native assertions before the authentic PSC1 leaf check. It archives exact source inputs and checks the frozen V1 Git blob. At commit creation these checks are pending; follow the single matching-source diagnostic. This is preflight evidence only. The changed source must pass the complete expanded source-bound qualification before integration.
 
 Generated recursor validation and atomic publication wait for the prerequisite constructor phase's complete qualification. Public admission and fallback are unchanged. Full T05 remains incomplete; A is scoped qualified, B and D remain OPEN, and C remains FAIL at the historical strict-compatibility checkpoint.

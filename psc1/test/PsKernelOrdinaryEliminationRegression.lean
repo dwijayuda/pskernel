@@ -149,7 +149,7 @@ private def policyMatrix (counter : IO.Ref Nat) : IO Unit := do
 
 private def rawCases : List (String × PsKernelExpr) :=
   [ ("plain",indexedCtor),
-    ("metadata",.mdata "outer" indexedCtor),
+    ("metadata",.mdata 1 indexedCtor),
     ("let",.letE (nm "unused") s1 s0 indexedCtor true),
     ("beta",.app (.lam (nm "unused") s1 indexedCtor .default) s0) ]
 
@@ -206,7 +206,7 @@ private def memberMatrix (counter : IO.Ref Nat) : IO Unit := do
     (.letE (nm "x") s1 s0 (.bvar 0) false) (.letE (nm "y") s1 s0 (.bvar 0) false) true
   memberPair counter "let-nondep"
     (.letE (nm "x") s1 s0 (.bvar 0) false) (.letE (nm "x") s1 s0 (.bvar 0) true) false
-  memberPair counter "mdata-tags" (.mdata "left" s0) (.mdata "right" s0) false
+  memberPair counter "mdata-tags" (.mdata 2 s0) (.mdata 3 s0) false
   memberPair counter "beta-syntax" (.app (.lam (nm "x") s1 (.bvar 0) .default) s0) s0 false
   require counter "member/nil-boundaries"
     (!psKernelSimpleExprMember s0 [] && psKernelSimpleAllExprsMember [] [s0] &&

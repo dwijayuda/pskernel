@@ -8,6 +8,7 @@ permissions:
 concurrency:
   group: psc1-unified-qualification-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
+jobs:
   generated:
     concurrency:
       group: psc1-unified-engine-${{ github.ref }}-${{ matrix.target }}

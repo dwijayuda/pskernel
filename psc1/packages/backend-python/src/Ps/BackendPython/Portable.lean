@@ -300,8 +300,8 @@ def emitIntrinsic (operation : PsVerifiedIrIntrinsic) (args : List String)
         psBackendSourceArgs2
           (fun (source position : String) =>
             bindValue (cat ["(", position, " >= _psc_b.len(", source, ".encode(\"utf-8\")))"]))
-          (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY"))
-          args
+          (psBackendStateThrow "PSC1_PYTHON_INTRINSIC_ARITY")
+          args)
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => bindValue "()"
   | PsVerifiedIrIntrinsic.arrayPush =>
       psBackendSourceArgs2

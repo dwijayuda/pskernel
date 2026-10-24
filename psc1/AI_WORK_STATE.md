@@ -3,7 +3,37 @@
 Updated 2026-10-25 Asia/Jakarta. GitHub/Linux Actions only; fresh expected-HEAD
 non-force updates. No merge or npm publication authorized.
 
-## Verified unified compiler milestone — stopped as requested
+## Active v2 G2/G3 qualification and measured Rust/Wasm blockers
+
+Resumed from84cc15375e4236a902e8af6658d92a640c6aa22a/PR178 on2026-10-25.
+Explicit request9359f07320eaf84af1e551fb86c38718150291ff launches Rust/Wasm
+[40120346573](https://github.com/dwijayuda/pskernel/actions/runs/40120346573)
+at the existing structured-v2 source. Do not duplicate or cancel its live jobs.
+No current-v2 G2/G3/fixed-point success is claimed while it runs.
+
+Bounded archived-G1 diagnostic766297e1/run40120526852 verifies exact producer
+manifest/executable/captured source identities. Rustjob120950869895 passes
+three default-stack GDB samples at60/120/180s: each is String::clone/memcpy
+inside psJsonStringCharsAccWithFuel$worker, before psJsonParse completes.
+This locates repeated whole-input copies, not the later stack-overflow site.
+Wasmjob120950869762 retains240s V8 samples; Nat binary runtime arithmetic
+dominates the top samples. Mapping exact production function indices is
+separate diagnostic40120639238, not self-host qualification.
+
+The active Rust fix structurally recognizes checked identity-forwarding,
+read-only String intrinsic wrappers, and moves a same-position unchanged
+String after evaluating every other tail argument into ordered temporaries.
+It preserves public String signatures, all wrapper shadow/type/arity/fuel
+guards, eta-capture snapshots, old paths for other arguments and all resource
+limits. Focused Linux CI compares actual old/current Rust observations and
+runs two million-character scans, both source grammars and enlarged G1;
+a bounded G2 stack diagnostic follows. Results remain pending until CI.
+
+Preserve official Lean4.35.0, strict original/transformed IR and all prior
+qualified sources/artifacts. G1/tools240s,checker120s,G2/G3 correctness1800s
+and separate performance240s stay unchanged. No merge/publication.
+
+## Preserved verified unified compiler milestone
 
 Draft [PR178](https://github.com/dwijayuda/pskernel/pull/178), branch
 feat/psc1-unified-selfhost-20261024, preserves PR177/base7cf50ecda689a3771bee0d91086ab43563a5c4d3.

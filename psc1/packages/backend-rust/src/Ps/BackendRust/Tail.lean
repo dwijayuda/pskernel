@@ -68,6 +68,84 @@ def psRustTailLet (name : String) (type : PsVerifiedIrType) (value : PsVerifiedI
         ["{ let ", psRustIdentifier name, printedType, " = ",
          psRustCloneExprPrinted value printedValue, "; ", printedBody, " }"])
 
+-- All nontrivial arguments are evaluated left-to-right before tuple replacement.
+-- An unchanged String parameter can then move into its own next-state slot:
+-- every use in another argument has already observed the old immutable value.
+-- Captured eta-prefix arguments remain frozen, owned snapshots.
+def psRustTailParameterSuffix (count : Nat) (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrParameter :=
+  match count with
+  | Nat.zero => parameters
+  | Nat.succ remaining =>
+      match parameters with
+      | List.nil => List.nil
+      | List.cons _ rest => psRustTailParameterSuffix remaining rest
+
+def psRustTailStringPassthrough (parameter : PsVerifiedIrParameter)
+    (argument : PsVerifiedIrExpr) : Bool :=
+  match parameter.type with
+  | PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string =>
+      match argument with
+      | PsVerifiedIrExpr.var name => psStringEq name parameter.name
+      | _ => false
+  | _ => false
+
+def psRustTailHasStringPassthrough (parameters : List PsVerifiedIrParameter)
+    (arguments : List PsVerifiedIrExpr) : Bool :=
+  match parameters with
+  | List.nil => false
+  | List.cons parameter rest =>
+      match arguments with
+      | List.nil => false
+      | List.cons argument others =>
+          if psRustTailStringPassthrough parameter argument then true
+          else psRustTailHasStringPassthrough rest others
+
+def psRustTailArgumentTemp (index : Nat) : String :=
+  psRustConcat2 "__ps_internal_tail_arg_" (psNatToString index)
+
+def psRustTailPrepareCaptured (captured : List String) (index : Nat) :
+    Prod String (List String) :=
+  match captured with
+  | List.nil => Prod.mk "" List.nil
+  | List.cons printed rest =>
+      let temp := psRustTailArgumentTemp index;
+      let prepared := psRustTailPrepareCaptured rest (Nat.succ index);
+      Prod.mk (psRustJoin "" ["let ", temp, " = ", printed, "; ", prepared.fst])
+        (List.cons temp prepared.snd)
+
+def psRustTailPrepareArguments (parameters : List PsVerifiedIrParameter)
+    (arguments : List PsVerifiedIrExpr) (printed : List String) (index : Nat) :
+    Prod String (List String) :=
+  match parameters with
+  | List.nil => Prod.mk "" List.nil
+  | List.cons parameter rest =>
+      match arguments with
+      | List.nil => Prod.mk "" List.nil
+      | List.cons argument others =>
+          match printed with
+          | List.nil => Prod.mk "" List.nil
+          | List.cons value values =>
+              let prepared := psRustTailPrepareArguments rest others values (Nat.succ index);
+              if psRustTailStringPassthrough parameter argument then
+                Prod.mk prepared.fst (List.cons (psRustIdentifier parameter.name) prepared.snd)
+              else
+                let temp := psRustTailArgumentTemp index;
+                Prod.mk (psRustJoin "" ["let ", temp, " = ", value, "; ", prepared.fst])
+                  (List.cons temp prepared.snd)
+
+def psRustTailTransition (declaration : PsVerifiedIrDeclaration)
+    (call : PsRustTailCall) (printed : List String) : String :=
+  let offset := psListLength call.captured;
+  let parameters := psRustTailParameterSuffix offset declaration.parameters;
+  if psRustTailHasStringPassthrough parameters call.arguments then
+    let captures := psRustTailPrepareCaptured call.captured 0;
+    let arguments := psRustTailPrepareArguments parameters call.arguments printed offset;
+    psRustJoin "" ["{ ", captures.fst, arguments.fst, "__ps_internal_tail_state = ",
+      psRustTailTuple (psListAppend captures.snd arguments.snd), "; continue; }"]
+  else psRustConcat3 "{ __ps_internal_tail_state = "
+    (psRustTailTuple (psListAppend call.captured printed)) "; continue; }"
+
 def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
     (declaration : PsVerifiedIrDeclaration) (fuel : Nat) :
     List String -> List PsRustTailAlias -> PsVerifiedIrExpr -> Except PsRustEmitError String :=
@@ -85,8 +163,7 @@ def psRustEmitTailWorker (declarations : List PsVerifiedIrDeclaration)
             match psRustEmitExprListWith ordinary call.arguments with
             | Except.error error => Except.error error
             | Except.ok printed =>
-                Except.ok (psRustConcat3 "{ __ps_internal_tail_state = "
-                  (psRustTailTuple (psListAppend call.captured printed)) "; continue; }")
+                Except.ok (psRustTailTransition declaration call printed)
         | Option.none =>
             match expr with
             | PsVerifiedIrExpr.letE name type value body =>

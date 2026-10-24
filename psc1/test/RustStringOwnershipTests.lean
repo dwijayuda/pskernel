@@ -1,0 +1,86 @@
+import RustStringOwnershipReference
+
+private def natT : PsVerifiedIrType := .primitive .nat
+private def strT : PsVerifiedIrType := .primitive .string
+private def boolT : PsVerifiedIrType := .primitive .bool
+private def p (name : String) (type : PsVerifiedIrType) : PsVerifiedIrParameter := {name, type}
+private def n (value : Nat) : PsVerifiedIrExpr := .literal (.natural value)
+private def intrinsic (op : PsVerifiedIrIntrinsic) (args : List PsVerifiedIrExpr) : PsVerifiedIrExpr := .intrinsic op [] args
+private def call (name : String) (args : List PsVerifiedIrExpr) : PsVerifiedIrExpr := .call (.var name) [] args
+private def reader (name : String) (op : PsVerifiedIrIntrinsic) (result : PsVerifiedIrType) : PsVerifiedIrDeclaration :=
+  {name, typeParameters := [], parameters := [p "text" strT,p "position" natT],resultType := result,
+   body := intrinsic op [.var "text",.var "position"]}
+private def left : PsVerifiedIrExpr := intrinsic .natSub [.var "fuel",n 1]
+private def next : PsVerifiedIrExpr := call "readNext" [.var "text",.var "position"]
+private def added : PsVerifiedIrExpr := intrinsic .natAdd [.var "count",n 1]
+private def scanner (name : String) (alias : Bool) : PsVerifiedIrDeclaration :=
+  let recur := if alias then
+      .letE "left" natT left
+        (.letE "again" (.function [strT,natT,natT] natT)
+          (.lambda [p "s" strT,p "pos" natT,p "acc" natT] natT
+            (call name [.var "left",.var "s",.var "pos",.var "acc"]))
+          (call "again" [.var "text",next,added]))
+    else call name [left,.var "text",next,added]
+  {name, typeParameters := [], parameters := [p "fuel" natT,p "text" strT,p "position" natT,p "count" natT],
+   resultType := natT,
+   body := .ifE (intrinsic .natEq [.var "fuel",n 0]) (.var "count")
+     (.ifE (call "readEnd" [.var "text",.var "position"]) (.var "count")
+       (.letE "character" (.primitive .char) (call "readGet" [.var "text",.var "position"]) recur))}
+private def pairResult : PsVerifiedIrExpr :=
+  intrinsic .natAdd [intrinsic .natMul [intrinsic .stringLength [.var "a"],n 100],intrinsic .stringLength [.var "b"]]
+private def paired (name : String) (duplicate : Bool) : PsVerifiedIrDeclaration :=
+  {name, typeParameters := [],parameters := [p "fuel" natT,p "a" strT,p "b" strT],resultType := natT,
+   body := .ifE (intrinsic .natEq [.var "fuel",n 0]) pairResult
+     (call name [left, (if duplicate then .var "a" else .var "b"), .var "a"])}
+private def later : PsVerifiedIrDeclaration :=
+  {name := "later",typeParameters := [],parameters := [p "fuel" natT,p "text" strT,p "count" natT],resultType := natT,
+   body := .ifE (intrinsic .natEq [.var "fuel",n 0]) (.var "count")
+     (call "later" [left,.var "text",intrinsic .stringLength [.var "text"]])}
+private def shadow : PsVerifiedIrDeclaration :=
+  {name := "shadow",typeParameters := [],parameters := [p "text" strT],resultType := boolT,
+   body := .letE "readEnd" (.function [strT,natT] boolT)
+     (.lambda [p "s" strT,p "pos" natT] boolT (.literal (.bool true)))
+     (call "readEnd" [.var "text",n 0])}
+private def module : PsVerifiedIrModule :=
+  {imports := [],structures := [],inductives := [],declarations := [
+    reader "readEnd" .stringAtEnd boolT, reader "readNext" .stringNext natT,
+    reader "readGet" .stringGet (.primitive .char),scanner "scan" false,
+    scanner "scanAlias" true,paired "swap" false,paired "duplicate" true,later,shadow]}
+private def require (name : String) (ok : Bool) : IO Unit := do
+  if !ok then throw (IO.userError ("PSC1_RUST_STRING_OWNERSHIP_FAIL: " ++ name))
+private def emit (legacy : Bool) : Except PsRustEmitError String := do
+  if legacy then
+    let declarations <- module.declarations.mapM (RustStringOwnershipReference.psRustEmitDeclarationWithVisibility true module.declarations [])
+    pure (psRustAssembleModuleSource [] [] declarations)
+  else psRustEmitModule module
+def main : IO Unit := do
+  match psStrictValidateModule module with
+  | .error _ => throw (IO.userError "ownership fixture must pass strict IR")
+  | .ok _ => pure ()
+  require "exact reader discovered" ((psRustFindStringReader module.declarations "readEnd").isSome)
+  require "local callee shadow refuses inlining"
+    ((psRustCallStringReader module.declarations ["readEnd"] (.var "readEnd") []).isNone)
+  require "dynamic call refuses inlining"
+    ((psRustCallStringReader module.declarations [] (.lambda [] boolT (.literal (.bool true))) []).isNone)
+  require "type arguments refuse inlining"
+    ((psRustCallStringReader module.declarations [] (.var "readEnd") [strT]).isNone)
+  let bad := { (reader "bad" .stringAtEnd boolT) with body := intrinsic .stringAtEnd [.var "position",.var "text"] }
+  require "reordered forwarding refuses inlining" ((psRustFindStringReader [bad] "bad").isNone)
+  require "allocating intrinsic is not a reader" (!psRustReadOnlyStringIntrinsic .stringAppend)
+  require "same-position String selects move" (psRustTailStringPassthrough (p "text" strT) (.var "text"))
+  require "different variable retains snapshot" (!psRustTailStringPassthrough (p "text" strT) (.var "other"))
+  require "other types retain existing path" (!psRustTailStringPassthrough (p "text" natT) (.var "text"))
+  require "wrapper argument fuel checks retained"
+    (match psRustEmitExprWorker module.declarations 1 ["text","position"]
+      (call "readEnd" [.var "text",.var "position"]) with
+     | .error .fuelExhausted => true | _ => false)
+  require "malformed wrapper arity refused"
+    (match psRustEmitExprWorker module.declarations 8 ["text"] (call "readEnd" [.var "text"]) with
+     | .error .intrinsicArity => true | _ => false)
+  IO.FS.createDirAll "dist/rust-string-ownership"
+  for legacy in [false,true] do
+    match emit legacy with
+    | .error _ => throw (IO.userError "ownership fixture emission refused")
+    | .ok text =>
+        IO.FS.writeFile ("dist/rust-string-ownership/" ++ (if legacy then "legacy.rs" else "current.rs")) text
+  IO.println "PSC1_RUST_STRING_OWNERSHIP_NATIVE: checked structural reader/arity/shadow/type/fuel guards; retained original and current emitters"

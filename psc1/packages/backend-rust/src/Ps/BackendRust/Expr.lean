@@ -1055,6 +1055,64 @@ def psRustEmitAlternativeListWith
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
+-- Inline only exact identity-forwarding wrappers around read-only String
+-- intrinsics. The checked declaration, arity, type arguments and local shadowing
+-- decide this; names and source fixtures never select the optimization.
+def psRustReadOnlyStringIntrinsic (operation : PsVerifiedIrIntrinsic) : Bool :=
+  match operation with
+  | PsVerifiedIrIntrinsic.stringLength => true
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => true
+  | PsVerifiedIrIntrinsic.stringGet => true
+  | PsVerifiedIrIntrinsic.stringNext => true
+  | PsVerifiedIrIntrinsic.stringAtEnd => true
+  | PsVerifiedIrIntrinsic.stringExtract => true
+  | PsVerifiedIrIntrinsic.stringEq => true
+  | _ => false
+
+def psRustIdentityForwardingArguments (parameters : List PsVerifiedIrParameter)
+    (arguments : List PsVerifiedIrExpr) : Bool :=
+  match parameters with
+  | List.nil => psListIsEmpty arguments
+  | List.cons parameter rest =>
+      match arguments with
+      | List.nil => false
+      | List.cons argument others =>
+          match argument with
+          | PsVerifiedIrExpr.var name =>
+              if psStringEq parameter.name name then
+                psRustIdentityForwardingArguments rest others
+              else false
+          | _ => false
+
+def psRustFindStringReader (declarations : List PsVerifiedIrDeclaration)
+    (name : String) : Option PsVerifiedIrIntrinsic :=
+  match declarations with
+  | List.nil => Option.none
+  | List.cons declaration rest =>
+      if psStringEq declaration.name name then
+        if !psListIsEmpty declaration.typeParameters then Option.none
+        else
+          match declaration.body with
+          | PsVerifiedIrExpr.intrinsic operation typeArguments arguments =>
+              if psListIsEmpty typeArguments &&
+                  psRustReadOnlyStringIntrinsic operation &&
+                  psRustIdentityForwardingArguments declaration.parameters arguments then
+                Option.some operation
+              else Option.none
+          | _ => Option.none
+      else psRustFindStringReader rest name
+
+def psRustCallStringReader (declarations : List PsVerifiedIrDeclaration)
+    (locals : List String) (fn : PsVerifiedIrExpr)
+    (typeArguments : List PsVerifiedIrType) : Option PsVerifiedIrIntrinsic :=
+  if !psListIsEmpty typeArguments then Option.none
+  else
+    match fn with
+    | PsVerifiedIrExpr.var name =>
+        if psRustStringListContains locals name then Option.none
+        else psRustFindStringReader declarations name
+    | _ => Option.none
+
 def psRustEmitExprWorker
     (declarations : List PsVerifiedIrDeclaration)
     (fuel : Nat) :
@@ -1119,27 +1177,33 @@ def psRustEmitExprWorker
                                 " = std::rc::Rc::new(move |", psRustJoin ", " printedParameters,
                                 "| -> ", printedResult, " { ", printedBody,
                                 " }); __ps_internal_lambda }"])
-        | PsVerifiedIrExpr.call fn _ arguments =>
-          let emittedFn : Except PsRustEmitError String :=
-            match fn with
-            | PsVerifiedIrExpr.var name => Except.ok (psRustIdentifier name)
-            | _ => emitNested fn;
-          match emittedFn with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedFn =>
-              match psRustEmitExprListWith emitNested arguments with
+        | PsVerifiedIrExpr.call fn typeArguments arguments =>
+          match psRustCallStringReader declarations locals fn typeArguments with
+          | Option.some operation =>
+              match psRustEmitIntrinsicArgumentsWith emitNested locals operation arguments 0 with
+              | Except.error error => Except.error error
+              | Except.ok printed => psRustEmitIntrinsicFromPrinted operation printed
+          | Option.none =>
+              let emittedFn : Except PsRustEmitError String :=
+                match fn with
+                | PsVerifiedIrExpr.var name => Except.ok (psRustIdentifier name)
+                | _ => emitNested fn;
+              match emittedFn with
               | Except.error error =>
                   Except.error error
-              | Except.ok printedArguments =>
-                  Except.ok
-                    (psRustConcat4
-                      "("
-                      printedFn
-                      ")("
-                      (psRustConcat2
-                        (psRustJoin ", " printedArguments)
-                        ")"))
+              | Except.ok printedFn =>
+                  match psRustEmitExprListWith emitNested arguments with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok printedArguments =>
+                      Except.ok
+                        (psRustConcat4
+                          "("
+                          printedFn
+                          ")("
+                          (psRustConcat2
+                            (psRustJoin ", " printedArguments)
+                            ")"))
         | PsVerifiedIrExpr.letE name type value body =>
           match emitNested value with
           | Except.error error => Except.error error

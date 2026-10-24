@@ -1,0 +1,92 @@
+name: PSC1 Rust String ownership regression
+on:
+  push:
+    branches: [feat/psc1-unified-selfhost-20261024]
+    paths:
+      - psc1/packages/backend-rust/src/**
+      - psc1/test/RustStringOwnership*.lean
+      - psc1/scripts/rust-string-ownership-tests.mjs
+      - .github/workflows/psc1-rust-string-ownership.yml
+permissions:
+  contents: read
+jobs:
+  ownership:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-direct-service-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install pinned dependencies and target tools
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gdb
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Check structural guards and emit retained originals
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_rust_string_ownership_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe
+          .lake/build/bin/psc1_rust_string_ownership_tests
+          .lake/build/bin/psc1_unified_service_tests
+      - name: Execute differential Rust, alias snapshots and million-character scans
+        run: node scripts/rust-string-ownership-tests.mjs
+      - name: Audit both grammars and execute enlarged G1
+        run: |
+          set -euo pipefail
+          node scripts/generated-target-source-audit.mjs rust unified
+          node scripts/generated-target-qualification.mjs rust --g1-only correctness-1800s unified
+      - name: Capture bounded actual G2 stack diagnostic after successful G1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
+          import {sha,verifyArtifact,boundedRun} from './host-tools/generated-target-tools.mjs';
+          const root=path.resolve('dist/generated-unified-rust-compiler'),q=JSON.parse(fs.readFileSync(path.join(root,'qualification.json')));
+          assert.equal(q.status,'passed');assert.equal(q.correctnessQualification,'G1-only');
+          const mf=path.join(root,'G1-service/artifact.json'),m=verifyArtifact(mf,q.generations[0].artifactSha256);
+          const wire=JSON.parse(fs.readFileSync(path.join(root,'G1-bootstrap.request.json')));wire[2][1]='G2-self';
+          const dir=path.resolve('dist/rust-string-ownership/g2-diagnostic');fs.mkdirSync(dir,{recursive:true});
+          const input=path.join(dir,'request.json'),output=path.join(dir,'diagnostic.candidate.json'),gdb=path.join(dir,'sample.gdb');
+          fs.writeFileSync(input,JSON.stringify(wire));
+          fs.writeFileSync(gdb,['set pagination off','set confirm off','set print frame-arguments none','python','import threading,time,os,signal','def samples():','  for _ in range(3):','    time.sleep(60)','    os.kill(os.getpid(),signal.SIGINT)','threading.Thread(target=samples,daemon=True).start()','end','run','thread apply all bt 60','continue','thread apply all bt 60','continue','thread apply all bt 60','kill','quit'].join('\n'));
+          const r=boundedRun('gdb',['--batch','-x',gdb,'--args',path.join(m.directory,m.executable),input,output],{logDirectory:dir,timeoutMs:240000});
+          fs.writeFileSync(path.join(dir,'stack.txt'),r.stdout+'\n'+r.stderr);
+          console.log('PSC1_RUST_G2_STACK_DIAGNOSTIC: '+r.stdout.slice(-26000));
+          delete r.stdout;delete r.stderr;
+          console.log('PSC1_RUST_G2_DIAGNOSTIC_RESULT: '+JSON.stringify({testedCommit:process.env.GITHUB_SHA,sourceClosure:q.sourceClosureDigest,requestSha256:sha(fs.readFileSync(input)),executableSha256:q.executableSha256,result:r,qualification:false}));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-rust-string-ownership-${{ github.sha }}
+          path: |
+            psc1/dist/rust-string-ownership/
+            psc1/dist/generated-unified-rust-compiler/
+          retention-days: 90

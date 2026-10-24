@@ -606,3 +606,11 @@ lean_exe psc1_unified_service_seed where
 lean_exe psc1_unified_service_tests where
   srcDir := "test"
   root := `UnifiedServiceTests
+
+lean_lib PsRustStringOwnershipReference where
+  srcDir := "test"
+  roots := #[`RustStringOwnershipReference]
+
+lean_exe psc1_rust_string_ownership_tests where
+  srcDir := "test"
+  root := `RustStringOwnershipTests

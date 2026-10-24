@@ -126,7 +126,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
    'fn main() { '+consumer+' }';
   fs.writeFileSync(path.join(directory,'module.rs'),source);
   fs.writeFileSync(path.join(directory,'main.rs'),source+'\n'+main+'\n');
-  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level='+(serviceKind==='unified'?0:1)+'\n'+(serviceKind==='unified'?'codegen-units=256\n':''));
+  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level='+(serviceKind==='unified'?0:1)+'\n'+(serviceKind==='unified'?'codegen-units=256\n[profile.release.package.\"*\"]\nopt-level=3\n':''));
   const locked=path.resolve('scripts/fixtures/selfhost-rust.Cargo.lock');
   // The first diagnostic records the exact resolver output. Once checked in,
   // every subsequent build uses that repository lock without re-resolution.
@@ -155,6 +155,7 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
   executable,service,publicNames,files,events,nodeVersion:process.version,
   rustOptimizationLevel:target==='rust'?(serviceKind==='unified'?0:1):null,
   rustCodegenUnits:target==='rust'&&serviceKind==='unified'?256:null,
+  rustDependencyOptimizationLevel:target==='rust'&&serviceKind==='unified'?3:null,
   compilerVersion:target==='python'?runTool('python3',['--version']).stdout.trim():target==='php'?runTool('php',['-r','echo PHP_VERSION;']).stdout.trim():target==='js'?process.version:target==='wasm-core'?runTool('wasm-tools',['--version']).stdout.trim():target==='rust'?runTool('rustc',['--version']).stdout.trim():
    runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--version']).stdout.trim()};
  if(serviceKind==='unified')manifest.serviceKind='unified';

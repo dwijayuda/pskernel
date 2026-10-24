@@ -1,4 +1,5 @@
 import Ps.BackendPython.Module
+import Ps.BackendPhp.Module
 import Ps.BackendCommon.DirectCalls
 
 theorem psBackendDirectBudgetFallback (known values : PsStringSet)
@@ -42,7 +43,7 @@ def main : IO Unit := do
   unless psStringSetContains known "leaf" && psStringSetContains known "wrap" do
     throw (IO.userError "two immutable pure layers not selected")
   for name in ["third","self","apply","shadow","alias","useAlias","localShadow","run"] do
-    when psStringSetContains known name do throw (IO.userError ("unsafe direct selection: " ++ name))
+    if psStringSetContains known name then throw (IO.userError ("unsafe direct selection: " ++ name))
   let reversed := psBackendDirectCallNames module.declarations.reverse
   for name in ["leaf","wrap","third","self","alias","useAlias"] do
     unless psStringSetContains known name == psStringSetContains reversed name do
@@ -54,7 +55,7 @@ def main : IO Unit := do
     throw (IO.userError "shadow/dynamic/callback/unsupported direct-call refusal")
   let captured := psBackendDirectSafeWithFuel 32 known PsStringSet.empty []
     (.lambda [p "leaf" fnT] natT (call "leaf" [n 1]))
-  when captured do throw (IO.userError "nested callback shadow incorrectly pure")
+  if captured then throw (IO.userError "nested callback shadow incorrectly pure")
   let checked <- match psStrictValidateModule module with
     | .error _ => throw (IO.userError "direct-call fixture did not strictly validate")
     | .ok checked => pure checked
@@ -78,3 +79,33 @@ def main : IO Unit := do
   }
   unless runtime.exitCode == 0 do throw (IO.userError (runtime.stdout ++ runtime.stderr))
   IO.print runtime.stdout
+
+  let phpActual <- requireOk (psPhpEmitModuleWithIoAndPoliciesAndDirectCalls checked ["run"] false true true true)
+  let phpLegacy <- requireOk (psPhpEmitModuleWithIoAndPoliciesAndDirectCalls checked ["run"] false true true false)
+  unless phpActual.composer == phpLegacy.composer &&
+      phpActual.runtimeSource == phpLegacy.runtimeSource &&
+      phpActual.runtimeRequirements == phpLegacy.runtimeRequirements &&
+      phpActual.declarations == phpLegacy.declarations &&
+      phpActual.declarationLines == phpLegacy.declarationLines do
+    throw (IO.userError "PHP direct-call unrelated metadata changed")
+  for entry in phpActual.declarations do
+    if entry.1 == "leaf" || entry.1 == "wrap" then
+      unless (phpActual.source.splitOn (entry.2 ++ " = static function")).length == 2 &&
+          (phpLegacy.source.splitOn (entry.2 ++ " = $__ps_wrap(static function")).length == 2 do
+        throw (IO.userError "PHP bounded leaf did not bypass generator")
+    else
+      unless (phpActual.source.splitOn (entry.2 ++ " = $__ps_wrap(static function")).length == 2 do
+        throw (IO.userError "PHP dynamic or recursive declaration lost scheduler")
+  IO.FS.writeFile "dist/python-direct/actual.php" phpActual.source
+  IO.FS.writeFile "dist/python-direct/legacy.php" phpLegacy.source
+  IO.FS.writeFile "dist/python-direct/consumer.php"
+    "<?php $api=require $argv[1]; echo gmp_strval($api['run'](gmp_init($argv[2])));"
+  for value in [0,1,7,1000,200000] do
+    let old <- IO.Process.output {
+      cmd := "php", args := #["-d","memory_limit=1G","dist/python-direct/consumer.php","dist/python-direct/legacy.php",toString value] }
+    let current <- IO.Process.output {
+      cmd := "php", args := #["-d","memory_limit=1G","dist/python-direct/consumer.php","dist/python-direct/actual.php",toString value] }
+    unless old.exitCode == 0 && current.exitCode == 0 &&
+        old.stdout == current.stdout && current.stdout == toString (value + 1) do
+      throw (IO.userError ("PHP direct-call retained-scheduler observation differs:" ++ old.stderr ++ current.stderr))
+  IO.println "PSC1_PHP_DIRECT_CALLS: exact metadata/runtime; selected synchronous layers; dynamic alias, local/parameter shadow and 200000 deep recursion agree with retained scheduler under1G/default stack"

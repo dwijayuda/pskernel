@@ -14,8 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: minimal
-            flags: 'mem2reg instcombine simplifycfg'
+          - name: promote
+            flags: 'mem2reg simplifycfg'
     steps:
       - uses: actions/checkout@v4
         with:

@@ -16,6 +16,7 @@ jobs:
     outputs:
       targets: ${{ steps.request.outputs.targets }}
       mode: ${{ steps.request.outputs.mode }}
+      profile: ${{ steps.request.outputs.profile }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,23 +30,18 @@ jobs:
         run: |
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';import fs from 'node:fs';import {spawnSync} from 'node:child_process';
+          import {validateUnifiedSelfhostRequest} from './scripts/unified-selfhost-request.mjs';
           const file='.github/qualification-requests/psc1-unified-selfhost.json';
           const r=JSON.parse(fs.readFileSync('../'+file)),e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
-          assert.equal(r.schema,'psc1-unified-selfhost-request/1');
-          assert.equal(r.branch,'feat/psc1-unified-selfhost-20261024');
+          validateUnifiedSelfhostRequest(r,'feat/psc1-unified-selfhost-20261024');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
-          assert.ok(['--g1-only','--self-host'].includes(r.mode));
-          assert.equal(r.action,r.mode==='--g1-only'?'validate-independent-G1':'qualify-independent-G1-G2-G3');
-          assert.equal(r.profile,'correctness-1800s');
-          assert.equal(r.g1TimeoutMs,240000);assert.equal(r.g2g3TimeoutMs,1800000);
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
-          assert.ok(Array.isArray(r.targets)&&r.targets.length>0&&r.targets.every(t=>['js','ts','rust','wasm-core'].includes(t)));
-          assert.equal(new Set(r.targets).size,r.targets.length);
           const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);
           const d=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});assert.equal(d.status,0);
           assert.deepEqual(d.stdout.split(String.fromCharCode(0)).filter(Boolean),[file]);
           fs.appendFileSync(process.env.GITHUB_OUTPUT,'targets='+JSON.stringify(r.targets)+'\n');
           fs.appendFileSync(process.env.GITHUB_OUTPUT,'mode='+r.mode+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'profile='+r.profile+'\n');
           console.log('PSC1_UNIFIED_EXPLICIT_REQUEST: '+JSON.stringify(r));
           JS
   generated:
@@ -54,7 +50,7 @@ jobs:
       group: psc1-unified-engine-${{ github.ref }}-${{ matrix.target }}-${{ needs.request.outputs.mode }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: ${{ needs.request.outputs.profile == 'correctness-3600s' && 190 || 120 }}
     strategy:
       fail-fast: false
       matrix:
@@ -113,9 +109,10 @@ jobs:
           node scripts/check-wasm-encoding-spines.mjs
           node scripts/check-shared-lookup-prefixes.mjs
           node scripts/check-erasure-declaration-spines.mjs
+          node scripts/unified-selfhost-request-tests.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_codec_static_schema_tests psc1_rust_string_ownership_tests psc1_wasm_nat_divmod_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
+          lake build psc1_rust_nat_literal_tests psc1_codec_static_schema_tests psc1_rust_string_ownership_tests psc1_wasm_nat_divmod_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -133,22 +130,25 @@ jobs:
       - name: Require Rust String ownership and Wasm arbitrary-Nat differential regressions
         run: |
           set -euo pipefail
+          .lake/build/bin/psc1_rust_nat_literal_tests
           .lake/build/bin/psc1_codec_static_schema_tests
           .lake/build/bin/psc1_rust_string_ownership_tests
           .lake/build/bin/psc1_wasm_nat_divmod_tests
+          node scripts/rust-nat-literal-tests.mjs
           node scripts/codec-spine-tests.mjs
           node scripts/rust-string-ownership-tests.mjs
           node scripts/wasm-nat-divmod-tests.mjs
       - name: Census complete owned backend source in both grammars
         run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }} unified
       - name: Execute genuine generated compiler generations and exact fixed point
-        timeout-minutes: 110
-        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} ${{ needs.request.outputs.mode }} correctness-1800s unified
+        timeout-minutes: ${{ needs.request.outputs.profile == 'correctness-3600s' && 170 || 110 }}
+        run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} ${{ needs.request.outputs.mode }} ${{ needs.request.outputs.profile }} unified
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-unified-selfhost-correctness-1800s-${{ matrix.target }}-${{ github.sha }}
+          name: psc1-unified-selfhost-${{ needs.request.outputs.profile }}-${{ matrix.target }}-${{ github.sha }}
           path: |
+            psc1/dist/rust-nat-literal/
             psc1/dist/codec-spine/
             psc1/dist/rust-string-ownership/
             psc1/dist/wasm-nat-divmod/

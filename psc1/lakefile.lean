@@ -627,3 +627,7 @@ lean_lib PsCodecSpineProof where
   srcDir := "test"
   roots := #[`CodecSpineReference, `CodecSpineProof]
 
+
+lean_exe psc1_rust_nat_literal_tests where
+  srcDir := "test"
+  root := `RustNatLiteralTests

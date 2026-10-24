@@ -1,6 +1,28 @@
-# PSC1 native npm package — verified provider/package checkpoint
+# PSC1 npm package work state
 
-## Unified compiler checkpoint — 2026-10-25
+## Generated integration — active 2026-10-25
+
+Primary941d2730/run40138989081 passes offline installed generated CLI with native
+compiler unavailable:26 host boundary checks,10 corpus cases and12 refusal/
+tamper cases. Diagnostic72de82f6/run40139913145 additionally passes12 real
+application builds/44 observations in both grammars under preserved TS/Wasm
+G3 engines. JSON-record and CLI-argument semantics agree across both engines.
+This initial explicit generated path publishes independently admitted JS;
+native JS/TS/Rust/Wasm core/component and optional Python/PHP are retained.
+Engine closure92654df5 is historical and separately recorded from native build.
+No all-four-engine/latest-root release or registry publication is claimed.
+
+Primary941d2730 full40138996117 passes37/37 Practical Core criteria, all seven
+backends/both grammars, native offline installs and matching optional providers.
+Tested merge7606d172 shares tree1c268d41d81ee35aa4182fe59b4b87cfc2421df6.
+Artifact12578274080,ZIPadf631066e56a6fb0617c8132ab14b9ec0ac506a6a125c8e990f9222e8bd04e4.
+Later runtime candidate must pass its own full gate before being called qualified.
+See [generated install guide](docs/PSC1_GENERATED_PACKAGE.md) and the
+[single roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) for current scope and queue.
+
+The sections below preserve prior package milestones.
+
+## Historical unified compiler checkpoint — 2026-10-25
 
 The package split remains the qualified native proofscript@0.1.0-psc1.3 core
 (JS/TS/Rust/Wasm core+component) plus explicit matching Python/PHP add-ons.

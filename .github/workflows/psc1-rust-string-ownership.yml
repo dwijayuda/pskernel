@@ -12,6 +12,8 @@ on:
       - psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean
       - psc1/test/WasmNatDivMod*.lean
       - psc1/scripts/wasm-nat-divmod-tests.mjs
+      - psc1/test/RustNatLiteralTests.lean
+      - psc1/scripts/rust-nat-literal-tests.mjs
       - psc1/test/RustStringOwnership*.lean
       - psc1/scripts/rust-string-ownership-tests.mjs
       - .github/workflows/psc1-rust-string-ownership.yml
@@ -60,8 +62,10 @@ jobs:
       - name: Check structural guards and emit retained originals
         run: |
           set -euo pipefail
+          node scripts/unified-selfhost-request-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_codec_static_schema_tests psc1_wasm_nat_divmod_tests psc1_rust_string_ownership_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe
+          lake build psc1_rust_nat_literal_tests psc1_codec_static_schema_tests psc1_wasm_nat_divmod_tests psc1_rust_string_ownership_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe
+          .lake/build/bin/psc1_rust_nat_literal_tests
           .lake/build/bin/psc1_codec_static_schema_tests
           .lake/build/bin/psc1_wasm_nat_divmod_tests
           .lake/build/bin/psc1_rust_string_ownership_tests
@@ -69,6 +73,7 @@ jobs:
       - name: Execute differential Rust, alias snapshots and million-character scans
         run: |
           set -euo pipefail
+          node scripts/rust-nat-literal-tests.mjs
           node scripts/codec-spine-tests.mjs
           node scripts/rust-string-ownership-tests.mjs
           node scripts/wasm-nat-divmod-tests.mjs
@@ -101,6 +106,7 @@ jobs:
         with:
           name: psc1-rust-string-ownership-${{ github.sha }}
           path: |
+            psc1/dist/rust-nat-literal/
             psc1/dist/codec-spine/
             psc1/dist/wasm-nat-divmod/
             psc1/dist/rust-string-ownership/

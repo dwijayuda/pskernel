@@ -42,7 +42,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.elan/bin:$PATH"
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_independent_checker psc1_js_service_seed
+          lake build psc1_independent_checker psc1_js_service_seed psc1_source_census_probe
           node scripts/generated-session-boundary-tests.mjs
       - name: Verify immutable native and qualified engine archives
         env:
@@ -54,7 +54,7 @@ jobs:
           const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
           async function api(route){const r=await fetch('https://api.github.com/repos/'+repo+route,{headers});assert.equal(r.status,200,route);return r.json();}
           const known=[
-           {id:12576144430,digest:'sha256:fae7c60ccea2162d46a65b547d935f11216c5bfab3d2f5eb1aba4b620bb1ee7c',run:40133272707},
+           {id:12578274080,digest:'sha256:adf631066e56a6fb0617c8132ab14b9ec0ac506a6a125c8e990f9222e8bd04e4',run:40138996117},
            {id:12573999378,digest:'sha256:330a41af351664b86d41791664a3a7a659813963c35b1e24af633ba99d1a9ce3',run:40126488125},
            {id:12575002462,digest:'sha256:77c0e130074807cf538dc9759c656a0ef6fa5ec9c3939cecb0c37922d8205d77',run:40126488125}
           ];

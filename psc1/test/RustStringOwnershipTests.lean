@@ -97,6 +97,22 @@ def main : IO Unit := do
   match psStrictValidateModule module with
   | .error _ => throw (IO.userError "ownership fixture must pass strict IR")
   | .ok _ => pure ()
+  require "String cursor Nat position borrows"
+    (psRustIntrinsicBorrowsNatArgument .stringNext 1 &&
+      psRustIntrinsicBorrowsNatArgument .stringGet 1 &&
+      psRustIntrinsicBorrowsNatArgument .stringAtEnd 1)
+  require "String extraction borrows both Nat bounds"
+    (psRustIntrinsicBorrowsNatArgument .stringExtract 1 &&
+      psRustIntrinsicBorrowsNatArgument .stringExtract 2)
+  require "other slots keep their existing path"
+    (!psRustIntrinsicBorrowsNatArgument .stringExtract 3 &&
+      !psRustIntrinsicBorrowsNatArgument .stringGet 0 &&
+      !psRustIntrinsicBorrowsNatArgument .stringGet 2)
+  require "Nat arithmetic borrows only its two operands"
+    (psRustIntrinsicBorrowsNatArgument .natAdd 0 &&
+      psRustIntrinsicBorrowsNatArgument .natAdd 1 &&
+      !psRustIntrinsicBorrowsNatArgument .natAdd 2 &&
+      !psRustIntrinsicBorrowsNatArgument .stringAppend 0)
   require "exact reader discovered" ((psRustFindStringReader module.declarations "readEnd").isSome)
   require "local callee shadow refuses inlining"
     ((psRustCallStringReader module.declarations ["readEnd"] (.var "readEnd") []).isNone)

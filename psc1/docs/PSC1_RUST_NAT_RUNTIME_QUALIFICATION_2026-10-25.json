@@ -1,0 +1,172 @@
+{
+  "schema": "psc1-measured-rust-runtime-checkpoint/1",
+  "date": "2026-10-25",
+  "sourceControl": "8966261900c7d019553fcef5b04bc9e90593c901",
+  "sourceClosure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+  "status": "focused-G1-qualified-full-G2-G3-pending",
+  "measuredPriorProfile": {
+    "run": 40138165186,
+    "job": 121004032945,
+    "sourceRequest": "f707e037b5f470ceee65891e0c735316ba097444",
+    "sampleSeconds": [
+      300,
+      600,
+      900,
+      1200,
+      1500
+    ],
+    "findings": [
+      "BigUint clone/drop in StringEq",
+      "decimal Nat parsing in JSON/admission and strict IR"
+    ],
+    "qualification": false
+  },
+  "focused": {
+    "run": 40141004793,
+    "job": 121012548777,
+    "conclusion": "success",
+    "artifact": 12578628638,
+    "digest": "sha256:939144dd681f77eaf2e8dfaca88c12044433ffd9770bd272210af59708e3d944",
+    "literalObservations": 14,
+    "ownershipObservations": 120,
+    "grammarModules": {
+      "lean": 120,
+      "ps": 120
+    },
+    "g1Cases": 40,
+    "envelopeRefusals": 9,
+    "qualification": {
+      "target": "rust",
+      "profile": {
+        "name": "correctness-1800s",
+        "g1TimeoutMs": 240000,
+        "corpusTimeoutMs": 240000,
+        "toolTimeoutMs": 240000,
+        "selfCompileTimeoutMs": 1800000,
+        "correctnessAndPerformanceSeparate": true
+      },
+      "correctnessQualification": "G1-only",
+      "performanceQualification": "not-run-in-this-profile",
+      "status": "passed",
+      "sourceModules": 120,
+      "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "generations": [
+        1
+      ],
+      "fixedPoint": "not-requested",
+      "attempts": []
+    },
+    "boundedDiagnostic": {
+      "testedCommit": "8966261900c7d019553fcef5b04bc9e90593c901",
+      "sourceClosure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "requestSha256": "9b52f7d7cad553d96abb4432e6d3906ac92d8e2e2639f229364d168abcbfb3ae",
+      "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+      "result": {
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 181422,
+        "stdoutBytes": 17027,
+        "stderrBytes": 59,
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxBuffer": 33554432,
+        "maxRssKiB": 451916,
+        "sampledCpuSeconds": 180.13,
+        "peakTreeRssKiB": 534864,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "processGroup": 6975
+      },
+      "qualification": false
+    }
+  },
+  "longerRequest": {
+    "commit": "2d27f1428e6a53a6de5006f950fc94f2d471b214",
+    "parent": "9f24e3ac2a21a5faa1bf4a64b9225076fa52e681",
+    "run": 40141718481,
+    "job": 121014751809,
+    "profile": "correctness-3600s",
+    "state": "in-progress",
+    "g1Ms": 240000,
+    "g2g3Ms": 3600000,
+    "jobMinutes": 190,
+    "stepMinutes": 170,
+    "performanceProfile": "performance-240s",
+    "performanceQualification": "not-qualified",
+    "memoryStackFuel": "unchanged"
+  },
+  "preservedFullGate": {
+    "reviewCommit": "941d2730baaafcac8af73f91bdae91ce68210230",
+    "testedCommit": "7606d172333ff77fe7f1645096a39f0bbd422fd3",
+    "equalTree": "1c268d41d81ee35aa4182fe59b4b87cfc2421df6",
+    "run": 40138996117,
+    "job": 121009052875,
+    "finalGate": 121014283162,
+    "conclusion": "success",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "artifact": 12578274080,
+    "digest": "sha256:adf631066e56a6fb0617c8132ab14b9ec0ac506a6a125c8e990f9222e8bd04e4",
+    "coversRuntimeCandidate": false
+  },
+  "installedGenerated": {
+    "control": "4755d000f94451bd565c37e4469906ccb7683835",
+    "run": 40141528871,
+    "job": 121014099532,
+    "conclusion": "success",
+    "artifact": 12578564122,
+    "digest": "sha256:7816afd5ed797150aab3c468e132a1b33b79046752e6c1c31f09bc25d3e23729",
+    "cases": 10,
+    "applicationBuilds": 12,
+    "applicationObservations": 44,
+    "refusals": 14,
+    "tarballSha256": "b866ab29e54a0d8b57e98ba28f32dcd546ed903f8440afae63dea29dbd09f6cf",
+    "engineClosure": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+    "engines": [
+      "ts",
+      "wasm-core"
+    ],
+    "publicationTarget": "js",
+    "nativeCompilerUnavailable": true,
+    "allFourCurrentRootQualified": false
+  },
+  "experimentalBuilds": [
+    {
+      "run": 40138326355,
+      "result": "opt1-no-LLVM-build-240s-deadline"
+    },
+    {
+      "run": 40138435314,
+      "result": "LLVM-own-instcombine-fixed-point-verification-failed-not-bypassed"
+    },
+    {
+      "run": 40138602184,
+      "result": "opt1-promotion-build-240s-deadline"
+    },
+    {
+      "run": 40138873446,
+      "result": "opt0-promotion-build41435ms-G2-1800012ms-deadline"
+    }
+  ],
+  "boundaries": {
+    "lean": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "strictOriginalAndTransformedIr": true,
+    "negativeTests": "preserved",
+    "newAxioms": false,
+    "unsafeRust": false,
+    "publicNatABI": "BigUint unchanged",
+    "g1CorpusToolsMs": 240000,
+    "checkerMs": 120000,
+    "history": "single-parent non-force",
+    "publication": "unpublished",
+    "mergeAuthorized": false
+  }
+}

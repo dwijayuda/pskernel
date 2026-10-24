@@ -319,10 +319,15 @@ def psRustEmitLiteral
     (literal : PsVerifiedIrLiteral) : String :=
   match literal with
   | PsVerifiedIrLiteral.natural value =>
-      psRustConcat3
-        "__ps_nat_lit("
-        (psRustQuote (psNatToString value))
-        ")"
+      -- Preserve arbitrary Nat precision; only exactly bounded literals use
+      -- the numeric constructor instead of reparsing decimal on every call.
+      if Nat.ble value 18446744073709551615 then
+        psRustConcat3 "PsNat::from(" (psNatToString value) "u64)"
+      else
+        psRustConcat3
+          "__ps_nat_lit("
+          (psRustQuote (psNatToString value))
+          ")"
   | PsVerifiedIrLiteral.integer value =>
       psRustConcat3
         "__ps_int_lit("

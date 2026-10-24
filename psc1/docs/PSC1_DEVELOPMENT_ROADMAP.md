@@ -1,5 +1,85 @@
 # PSC1 development roadmap
 
+## Current dependency-ordered work
+
+Updated2026-10-25 Asia/Jakarta. Current control8966261900c7d019553fcef5b04bc9e90593c901
+builds on primary941d2730. Existing qualified JS/TS/Wasm records remain immutable;
+no qualification is inherited by the changed source. Work is continuing.
+
+The exact archived Rust G2 profile40138165186/job121004032945 samples the
+original request at300/600/900/1200/1500s. It measures BigUint cloning/dropping
+in StringEq, decimal Nat literal parsing in JSON/admission encoding and strict
+IR validation. This is a diagnostic, not a successful G2 candidate. The
+archived old executable reaches strict IR validation by1500s. Alternative
+LLVM builds either exceed the existing240s build limit, fail LLVM's own
+verification, or still exceed1800s in G2; none is promoted.
+
+Candidate65bd033b/56fee6b6 emits exact u64-constructible Nat literals through
+BigUint::from and retains arbitrary-precision decimal parsing above u64.
+It borrows immutable local Nat operands only where existing helpers already
+accept references, retaining snapshots for computed operands. Unified Rust's
+main crate staysopt0/256; only pinned numeric dependencies useopt3. Public
+Nat representation, shared algorithms, semantic fuel and ABI are unchanged.
+Retained-emitter comparisons cover14 numeric boundaries through256bits,
+Unicode/String cursor observations, aliasing and computed-operand order.
+
+User authorized a sensible longer timeout. Separate correctness-3600s is
+now accepted for Rust G2-self/G3-self only. Existing correctness-1800s and
+performance-240s remain explicit profiles. G1, corpus and build tools240s,
+independent checker120s, memory/stack/fuel limits and refusals remain unchanged.
+The hour profile uses a190-minute hosted job and170-minute qualification step;
+GitHub's six-hour hosted-job cap permits this. Generated wire cannot choose
+limits: a closed-schema request-only commit and exact parent are required.
+Request-policy tests retain invalid-profile/deadline/target/tool refusals.
+
+Focused40141004793/job121012548777 PASSED at8966261900c7d019553fcef5b04bc9e90593c901:
+14 exact literal boundaries,120 ownership observations, three million-character
+Unicode scans, codec deep-spine proofs/regressions,707 Wasm divmod pairs, both
+120-module grammar censuses and genuine Rust G1/all40 cross-target cases plus9
+envelope refusals. Source closure07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af.
+G1 executable07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6.
+Artifact12578628638,ZIP939144dd681f77eaf2e8dfaca88c12044433ffd9770bd272210af59708e3d944.
+The bounded180s G2 diagnostic is not qualification. Full G2/G3/fixed point and
+240s performance remain PENDING. Exact request2d27f1428e6a53a6de5006f950fc94f2d471b214, parent9f24e3ac,
+run40141718481/job121014751809 uses correctness-3600s. It is RUNNING; no G2/G3
+or fixed point result is available. Do not duplicate or cancel this frozen run.
+
+Primary941d2730 full40138996117 PASSED all selected gates,37/37 criteria,0blocked,
+seven backends/both grammars, practical applications and native core/optional
+packages. Tested merge7606d172 and941d share tree1c268d41d81ee35aa4182fe59b4b87cfc2421df6.
+Full artifact12578274080,ZIPadf631066e56a6fb0617c8132ab14b9ec0ac506a6a125c8e990f9222e8bd04e4.
+This full gate predates the Nat candidate and does not qualify its changed source.
+
+Installed generated package control941d2730/run40138989081 passed26 host
+boundary checks,10 corpus cases and12 refusal/tamper cases with native compiler
+unavailable. Diagnostic72de82f6/run40139913145 additionally passed12 real
+application builds/44 observations: JsonRecords.Transform and PracticalCli.Args
+in both grammars under qualified historical TS/Wasm engines, including Unicode,
+surrogate/duplicate/shape/arity refusals and single-file commands.
+These use historical closure92654df5 and publish independently admitted JS;
+all native targets and optional Python/PHP remain available. No all-four-engine
+or current-source generated release claim. Registry publication/merge remain
+unauthorized.
+
+Immediate queue: complete preflight; issue exact Rust correctness-3600s request;
+record genuine G2/G3 source/admission/IR/executable/observation fixed points;
+promote only verified runtime changes and installed application/adapter tests;
+require full seven-backend/native package gate; update immutable package pins;
+then qualify one frozen shared source under every engine.
+
+Installed hardening4755d000/run40141528871/job121014099532 PASSED:10 corpus
+cases,12 application builds/44 observations,14 refusal/tamper cases and26 host
+boundary checks. Invalid UTF8 and a changed imported Wasm adapter refuse while
+retaining previous output. Artifact12578564122,
+ZIP7816afd5ed797150aab3c468e132a1b33b79046752e6c1c31f09bc25d3e23729.
+Private core tarball SHA256b866ab29e54a0d8b57e98ba28f32dcd546ed903f8440afae63dea29dbd09f6cf.
+Native compiler is unavailable throughout generated cases. This package uses
+the older qualified native core and recorded historical TS/Wasm G3; current
+promotion must pass its own full gate before native package pins are advanced.
+
+
+## Preserved earlier roadmap snapshot
+
 Updated 2026-10-25 Asia/Jakarta. Frozen Practical Core v1 remains14 families/
 37 finite acceptance criteria. [AI state](../AI_WORK_STATE.md) owns continuation;
 [codec qualification receipt](PSC1_UNIFIED_V2_CODEC_QUALIFICATION_2026-10-25.json)

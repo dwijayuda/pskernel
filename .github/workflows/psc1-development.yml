@@ -48,6 +48,7 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          node scripts/unified-selfhost-request-tests.mjs
           node scripts/development-selection-tests.mjs
           node scripts/practical-core-readiness-tests.mjs
           node scripts/while-execution-contract-tests.mjs

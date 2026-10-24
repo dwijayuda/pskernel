@@ -1,0 +1,50 @@
+name: PSC1 exact packed PHP G2 native backtrace
+on:
+  push:
+    branches: [diagnostic/psc1-python-php-artifacts-20261024]
+    paths: [.github/diagnostics/psc1-php-packed-gdb.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  debug:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.12'
+          extensions: gmp
+          tools: none
+          coverage: none
+      - name: Install debugger and verify exact failed artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! command -v gdb; then sudo apt-get update -qq && sudo apt-get install -y gdb; fi
+          ulimit -s
+          gh api repos/dwijayuda/pskernel/actions/jobs/120808252365 > job.json
+          gh api repos/dwijayuda/pskernel/actions/artifacts/12551956561 > artifact.json
+          python3 - <<'PY'
+          import json
+          j=json.load(open("job.json"));a=json.load(open("artifact.json"))
+          assert j["run_id"]==40072293961 and j["conclusion"]=="failure"
+          assert a["workflow_run"]["id"]==40072293961 and a["workflow_run"]["head_sha"]=="c3f53a7bf6f092e118a21a3d37f0b5ab4385c0c7"
+          assert a["digest"]=="sha256:1495d0af41cebd791c4b3f4d25739bed0bebdd3169a76ab4349f5924eb2b8e01" and not a["expired"]
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: '40072293961'
+          artifact-ids: '12551956561'
+          path: baseline
+      - name: Trace exact generated request with unchanged PHP memory and stack
+        run: python3 .github/diagnostics/psc1-php-packed-gdb.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-php-packed-G2-gdb-${{ github.sha }}
+          path: diagnostics/php-packed-gdb/
+          retention-days: 90

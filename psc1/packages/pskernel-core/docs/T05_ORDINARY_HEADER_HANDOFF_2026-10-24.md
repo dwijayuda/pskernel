@@ -1,3 +1,60 @@
+## 2026-10-24 T05 native gate passes; complete PSC1 production exposes recursion arity
+
+Exact source `60fe91758a897d6f8936b28a257baab0057c52b3`, run
+[`40087914982`](https://github.com/dwijayuda/pskernel/actions/runs/40087914982),
+attempt 1, is terminal **FAIL**. Native job `120854503808` passed all 172 exact,
+ordered theorem reports (64 new, 108 retained), with only permitted standard
+axioms, and all six strict header runtime markers. These include the 432-row
+header matrix, 10 required direct positives, 171 occurrence heads, 1,026 fuel
+cases, 171 wrappers, annotation/state controls and four accepted/two rejected
+official Lean controls. All 49 native artifact files and 32 copied source blobs
+were independently verified against the exact source; three review records
+preserve the raw-log, proof, runtime and artifact reconciliation.
+
+Both generated job `120854945313` and canonical job `120854945372` passed the
+retained bounded scalar/cache gates, including 1,884 cache assertions and six
+strict generated-body markers. Their independently checked 146-module Lean
+closures, 146-member source archives and 32 copied inputs match exact Git blobs;
+all 194 files in each artifact were inspected. Both complete PSC1 checks then
+failed at `psKernelExprV2OrdinaryUniformParamArgs` with
+`structuralRecursionArity`. Canonical reconstruction, complete production and
+both 1,992-assertion header runtime matrices were not reached. Executed generated
+header assertions are **zero** on each route. Native success is not a complete
+narrow pass, and this source is not qualified.
+
+The focused correction introduces a partial-self-call `let` inside the original
+successful branch in `UniformParamArgs` and the matching surplus-arity call in
+`UniformOccurrences`. Inlining each let restores the exact previous expression.
+All exported signatures, all 20 occurrence theorem statements and 15 reports,
+all state proofs, runtime matrices, original errors/order/fuel and owner rules
+remain unchanged. The compiler's actual `psElabRecursionChangedArguments` rule
+was inspected at blob `8b1c409244b9669224fc3caff796aea69eac1401`. No compiler
+or trust-base change is proposed.
+
+The narrow workflow adds an early PSC1 check of `DagOrdinaryOccurrence.lean`
+and `DagOrdinaryAnnotations.lean` after the retained bounded gates and before
+the expensive complete closure check. Every previous run block, native172 gate,
+generated1992 matrix, pin, resource limit and trigger is preserved. This new
+source requires its own single push run; inherit no earlier passes.
+
+Evidence: `docs/evidence/2026-10-24-t05-header-60fe-cohort-failure.json`, the
+three `2026-10-24-t05-60fe-native-*.json` reviews, the terminal route observation,
+the structural-arity repair record and the structural-precheck static record.
+T05/B/D remain OPEN and C remains FAIL. Recorded T01F/scoped A qualification
+remains pinned to integrated `0d9f062846d109c362210d441df5fd407ca2cdd7` and its
+original exact cohort; later integration-push cancellation observations remain
+separate. All five full qualification work triggers remain paused.
+
+The next constructor-parameter/result and paged-model drafts are separate,
+uncommitted and unexecuted: 50 new proof reports plus eight retained metadata
+reports are planned alongside the current172; native parameter/result matrices
+are 284/432, and generated parameter/result matrices are 268/432 per route.
+They must not be activated before the current header narrow pass. Their public
+ordinary admission routing is unchanged, and the replay-to-ArenaModel bridge,
+constructor fields/positivity, recursors and atomic publication remain open.
+
+---
+
 ## 2026-10-24 T05 annotation proof: final two branch corrections pending CI
 
 Source `e3666c65701aa64231d9c4c4798f294a91ca10e1`, run

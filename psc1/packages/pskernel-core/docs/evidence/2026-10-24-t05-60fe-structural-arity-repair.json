@@ -1,0 +1,86 @@
+{
+  "schema": "psc1-t05-structural-recursion-arity-repair-v1",
+  "source": "60fe91758a897d6f8936b28a257baab0057c52b3",
+  "runId": 40087914982,
+  "runAttempt": 1,
+  "status": "STAGED_UNCOMPILED_UNTESTED",
+  "observedFailureDeclaration": "psKernelExprV2OrdinaryUniformParamArgs",
+  "compilerRestriction": {
+    "module": "Recursion.lean",
+    "gitBlobSha": "8b1c409244b9669224fc3caff796aea69eac1401",
+    "function": "psElabRecursionChangedArguments",
+    "lines": [
+      91,
+      97
+    ],
+    "binding": "Exact GitHub blob independently fetched by this agent and Git object hash verified locally; original source saved beside this report.",
+    "sourceCopy": {
+      "path": "t05-evidence/60fe-structural-arity-repair/Recursion.lean",
+      "bytes": 35801,
+      "sha256": "e93aed0fe805385ff6dfcaf6ac190894254a34746f4c60002e33fbb561f80efe",
+      "gitBlobSha": "8b1c409244b9669224fc3caff796aea69eac1401"
+    },
+    "errorCases": {
+      "91": "More actual arguments than declared parameter IDs.",
+      "97": "Fewer actual arguments than declared parameter IDs."
+    }
+  },
+  "changes": [
+    {
+      "declaration": "psKernelExprV2OrdinaryUniformParamArgs",
+      "declaredArity": 1,
+      "previousSelfCallArity": 4,
+      "newSelfCallArity": 1,
+      "placement": "Inside existing true bvar-match branch, at the previous recursive-call point."
+    },
+    {
+      "declaration": "psKernelExprV2OrdinaryUniformOccurrences",
+      "declaredArity": 1,
+      "previousSelfCallArity": 5,
+      "newSelfCallArity": 1,
+      "placement": "Inside existing Except.ok branch after the head constructor scan, at the previous recursive-call point.",
+      "discovery": "Static follow-on under the same exact compiler rule; not a separately observed runtime diagnostic."
+    }
+  ],
+  "unfoldingLetBindingsRestoresExactPreviousSource": true,
+  "unchangedExportedHeaders": 6,
+  "after": {
+    "path": "t05-candidate/psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean",
+    "bytes": 9400,
+    "sha256": "3f5ffae4af048991583563f5962dd28e54d2fde18dc7d1bd4f507bb40c8f54f6",
+    "gitBlobSha": "9bdbdf46c32798f3d71132fc94013156713cc80b"
+  },
+  "proof": {
+    "path": "t05-candidate/psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+    "bytes": 29015,
+    "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351",
+    "byteUnchanged": true,
+    "theoremStatements": 20,
+    "axiomReports": 15,
+    "reason": "Both new local bindings zeta-reduce to the exact old recursive applications. Existing simp/unfold and reflexivity proofs normalize these lets; no statement, premise, model, report, or proof-body change is needed by this definitional-equality reasoning. Actions still must kernel-check them at the new source."
+  },
+  "failureLogs": [
+    {
+      "path": "t05-evidence/60fe-runtime-40087914982/generated-job.log",
+      "bytes": 165393,
+      "sha256": "1429b1ee27b2e505665fea7123240f1a7daa97b6d90974a40bd0c58593b5cd44",
+      "observedDiagnostics": [
+        "2026-10-24T11:09:42.2462416Z uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean: declaration=psKernelExprV2OrdinaryUniformParamArgs: structuralRecursionArity"
+      ]
+    },
+    {
+      "path": "t05-evidence/60fe-runtime-40087914982/canonical-job.log",
+      "bytes": 165379,
+      "sha256": "5d26b058e52eb3fd1b8c03931cde89022debcd6eadc0dd41b16bf765e5952f04",
+      "observedDiagnostics": [
+        "2026-10-24T11:09:54.9058225Z uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean: declaration=psKernelExprV2OrdinaryUniformParamArgs: structuralRecursionArity"
+      ]
+    }
+  ],
+  "constraints": {
+    "localProjectExecution": false,
+    "githubMutation": false,
+    "protectedCacheHashFilesChanged": false,
+    "futureBatchFrozen": true
+  }
+}

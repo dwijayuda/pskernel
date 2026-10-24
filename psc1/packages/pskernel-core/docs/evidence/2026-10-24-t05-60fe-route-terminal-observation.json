@@ -1,0 +1,444 @@
+{
+  "schema": "psc1-t05-header-route-terminal-log-observation-v1",
+  "sourceSha": "60fe91758a897d6f8936b28a257baab0057c52b3",
+  "runId": 40087914982,
+  "runAttempt": 1,
+  "observedAtUtc": "2026-10-24T11:12:16.994256+00:00",
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40087914982",
+  "nativeOutcome": {
+    "jobId": 120854503808,
+    "conclusion": "success",
+    "runtimeReceipt": {
+      "path": "t05-evidence/2026-10-24-t05-60fe-native-runtime.json",
+      "bytes": 14964,
+      "sha256": "2ccbfd6e5f9b1abe3c7f08d96ad86937c2e5b2bf560278a7560253395d185087"
+    },
+    "proofAudit": "Recorded separately by controls_receipt for this exact source/run/attempt."
+  },
+  "routes": [
+    {
+      "route": "generated",
+      "jobId": 120854945313,
+      "jobName": "generated-header (generated)",
+      "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40087914982/job/120854945313",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-10-24T10:59:23Z",
+      "completedAt": "2026-10-24T11:09:46Z",
+      "terminalLog": {
+        "path": "t05-evidence/60fe-runtime-40087914982/generated-job.log",
+        "bytes": 165393,
+        "sha256": "1429b1ee27b2e505665fea7123240f1a7daa97b6d90974a40bd0c58593b5cd44"
+      },
+      "actualOutputPassMarkers": [
+        "PSC1_SCALAR_HASH_LONG_JS: PASS cases=3",
+        "PSC1_SCALAR_HASH_WORKER_JS: PASS {\"cases\":2730,\"strings\":12,\"stages\":8190,\"assertions\":13665,\"modulus\":\"65521\",\"algorithmChanged\":false}",
+        "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {\"cases\":19,\"assertions\":38,\"shortMaxPairs\":4,\"genericFallback\":true}",
+        "PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {\"expressions\":20,\"states\":2,\"mapQueries\":40,\"pairQueries\":800,\"inferQueries\":80,\"assertions\":1884,\"smallAndIndexed\":true,\"openEntriesSeeded\":true}",
+        "PSC1_CLOSED_CACHE_ANALYSIS_CODEGEN: PASS dataResult=true recursiveSites=11 oldHashCalls=0 oldHasFVarCalls=0 recurry=false",
+        "PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false",
+        "PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=2",
+        "PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairFallbackSites=1 shortLeafSites=1 exclusiveBranches=true primitiveRemainder=1 structuralGeneratorBlocks=1",
+        "PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true",
+        "PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false",
+        "PSC1_T05_LEAN_SOURCE_CLOSURE: PASS modules=146"
+      ],
+      "failure": {
+        "step": {
+          "name": "Archive actual Lean closure and check complete authentic source after bounded gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 9,
+          "started_at": "2026-10-24T11:01:52Z",
+          "completed_at": "2026-10-24T11:09:42Z"
+        },
+        "command": "lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+        "diagnostic": "uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean: declaration=psKernelExprV2OrdinaryUniformParamArgs: structuralRecursionArity",
+        "exitCode": 1,
+        "module": "Ps.KernelCore.API.DagOrdinaryOccurrence",
+        "declaration": "psKernelExprV2OrdinaryUniformParamArgs",
+        "compilerDiagnostic": "structuralRecursionArity"
+      },
+      "completedScopes": [
+        "exact source/pins/frozen-reference/syntax gate",
+        "authentic PSC1 bounded compiler build",
+        "TypeScript7.0.2 installation",
+        "bounded scalar and closed-cache generation/runtime gates including1884",
+        "146-module Lean closure archive step before complete source check"
+      ],
+      "notReached": [
+        "complete route TypeScript/JavaScript production",
+        "full produced-kernel retained controls",
+        "1992 direct-header runtime matrix",
+        "source-bound successful route receipt"
+      ],
+      "canonicalWorkspaceReconstruction": "not applicable to generated route",
+      "headerAssertionsExecuted": 0,
+      "fullHeaderRuntimePass": false,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T10:59:24Z",
+          "completed_at": "2026-10-24T10:59:25Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T10:59:25Z",
+          "completed_at": "2026-10-24T10:59:46Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T10:59:46Z",
+          "completed_at": "2026-10-24T10:59:47Z"
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T10:59:47Z",
+          "completed_at": "2026-10-24T11:00:01Z"
+        },
+        {
+          "name": "Verify exact route source, pins, frozen references and syntax",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T11:00:01Z",
+          "completed_at": "2026-10-24T11:00:01Z"
+        },
+        {
+          "name": "Build authentic PSC1 for the bounded generation gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T11:00:01Z",
+          "completed_at": "2026-10-24T11:00:49Z"
+        },
+        {
+          "name": "Install pinned TypeScript7.0.2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-24T11:00:49Z",
+          "completed_at": "2026-10-24T11:00:53Z"
+        },
+        {
+          "name": "Require retained bounded scalar and closed-cache strict generation plus1884matrix",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-24T11:00:53Z",
+          "completed_at": "2026-10-24T11:01:52Z"
+        },
+        {
+          "name": "Archive actual Lean closure and check complete authentic source after bounded gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 9,
+          "started_at": "2026-10-24T11:01:52Z",
+          "completed_at": "2026-10-24T11:09:42Z"
+        },
+        {
+          "name": "Reconstruct and authenticate the complete canonical ProofScript closure",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-24T11:09:42Z",
+          "completed_at": "2026-10-24T11:09:42Z"
+        },
+        {
+          "name": "Check and compile the independent complete route through TypeScript to JavaScript",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-24T11:09:42Z",
+          "completed_at": "2026-10-24T11:09:42Z"
+        },
+        {
+          "name": "Retain controls and execute exact1992directheaderassertions with empty PATH",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-24T11:09:42Z",
+          "completed_at": "2026-10-24T11:09:42Z"
+        },
+        {
+          "name": "Retain bounded gate artifacts on success or failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T11:09:42Z",
+          "completed_at": "2026-10-24T11:09:42Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-24T11:09:42Z",
+          "completed_at": "2026-10-24T11:09:44Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 27,
+          "started_at": "2026-10-24T11:09:44Z",
+          "completed_at": "2026-10-24T11:09:44Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-24T11:09:44Z",
+          "completed_at": "2026-10-24T11:09:44Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-24T11:09:44Z",
+          "completed_at": "2026-10-24T11:09:44Z"
+        }
+      ],
+      "artifactVerificationScope": "No route artifact download or archive-body verification was performed for this log observation; root owns the independent artifact/source-closure inspection."
+    },
+    {
+      "route": "canonical",
+      "jobId": 120854945372,
+      "jobName": "generated-header (canonical)",
+      "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40087914982/job/120854945372",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-10-24T10:59:23Z",
+      "completedAt": "2026-10-24T11:09:57Z",
+      "terminalLog": {
+        "path": "t05-evidence/60fe-runtime-40087914982/canonical-job.log",
+        "bytes": 165379,
+        "sha256": "5d26b058e52eb3fd1b8c03931cde89022debcd6eadc0dd41b16bf765e5952f04"
+      },
+      "actualOutputPassMarkers": [
+        "PSC1_SCALAR_HASH_LONG_JS: PASS cases=3",
+        "PSC1_SCALAR_HASH_WORKER_JS: PASS {\"cases\":2730,\"strings\":12,\"stages\":8190,\"assertions\":13665,\"modulus\":\"65521\",\"algorithmChanged\":false}",
+        "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS {\"cases\":19,\"assertions\":38,\"shortMaxPairs\":4,\"genericFallback\":true}",
+        "PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS {\"expressions\":20,\"states\":2,\"mapQueries\":40,\"pairQueries\":800,\"inferQueries\":80,\"assertions\":1884,\"smallAndIndexed\":true,\"openEntriesSeeded\":true}",
+        "PSC1_CLOSED_CACHE_ANALYSIS_CODEGEN: PASS dataResult=true recursiveSites=11 oldHashCalls=0 oldHasFVarCalls=0 recurry=false",
+        "PSC1_HASH_LEAF_CODEGEN: PASS byteStepGenerator=false byteStepStaging=false byteMixDispatch=false stagedFullEntry=false",
+        "PSC1_HASH_DATA_RESULT_CODEGEN: PASS helpers=2",
+        "PSC1_HASH_FUSED_ENTRY_CODEGEN: PASS stateDispatch=false scanDispatch=false resultStaging=0 pairFallbackSites=1 shortLeafSites=1 exclusiveBranches=true primitiveRemainder=1 structuralGeneratorBlocks=1",
+        "PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true",
+        "PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false",
+        "PSC1_T05_LEAN_SOURCE_CLOSURE: PASS modules=146"
+      ],
+      "failure": {
+        "step": {
+          "name": "Archive actual Lean closure and check complete authentic source after bounded gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 9,
+          "started_at": "2026-10-24T11:01:54Z",
+          "completed_at": "2026-10-24T11:09:54Z"
+        },
+        "command": "lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+        "diagnostic": "uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean: declaration=psKernelExprV2OrdinaryUniformParamArgs: structuralRecursionArity",
+        "exitCode": 1,
+        "module": "Ps.KernelCore.API.DagOrdinaryOccurrence",
+        "declaration": "psKernelExprV2OrdinaryUniformParamArgs",
+        "compilerDiagnostic": "structuralRecursionArity"
+      },
+      "completedScopes": [
+        "exact source/pins/frozen-reference/syntax gate",
+        "authentic PSC1 bounded compiler build",
+        "TypeScript7.0.2 installation",
+        "bounded scalar and closed-cache generation/runtime gates including1884",
+        "146-module Lean closure archive step before complete source check"
+      ],
+      "notReached": [
+        "complete route TypeScript/JavaScript production",
+        "full produced-kernel retained controls",
+        "1992 direct-header runtime matrix",
+        "source-bound successful route receipt"
+      ],
+      "canonicalWorkspaceReconstruction": "not reached",
+      "headerAssertionsExecuted": 0,
+      "fullHeaderRuntimePass": false,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-24T10:59:23Z",
+          "completed_at": "2026-10-24T10:59:24Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-24T10:59:24Z",
+          "completed_at": "2026-10-24T10:59:46Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-24T10:59:46Z",
+          "completed_at": "2026-10-24T10:59:47Z"
+        },
+        {
+          "name": "Install pinned Lean",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-24T10:59:47Z",
+          "completed_at": "2026-10-24T10:59:59Z"
+        },
+        {
+          "name": "Verify exact route source, pins, frozen references and syntax",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-24T10:59:59Z",
+          "completed_at": "2026-10-24T11:00:00Z"
+        },
+        {
+          "name": "Build authentic PSC1 for the bounded generation gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-24T11:00:00Z",
+          "completed_at": "2026-10-24T11:00:50Z"
+        },
+        {
+          "name": "Install pinned TypeScript7.0.2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-24T11:00:50Z",
+          "completed_at": "2026-10-24T11:00:54Z"
+        },
+        {
+          "name": "Require retained bounded scalar and closed-cache strict generation plus1884matrix",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-24T11:00:54Z",
+          "completed_at": "2026-10-24T11:01:54Z"
+        },
+        {
+          "name": "Archive actual Lean closure and check complete authentic source after bounded gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 9,
+          "started_at": "2026-10-24T11:01:54Z",
+          "completed_at": "2026-10-24T11:09:54Z"
+        },
+        {
+          "name": "Reconstruct and authenticate the complete canonical ProofScript closure",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-24T11:09:54Z",
+          "completed_at": "2026-10-24T11:09:54Z"
+        },
+        {
+          "name": "Check and compile the independent complete route through TypeScript to JavaScript",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-24T11:09:54Z",
+          "completed_at": "2026-10-24T11:09:54Z"
+        },
+        {
+          "name": "Retain controls and execute exact1992directheaderassertions with empty PATH",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-24T11:09:54Z",
+          "completed_at": "2026-10-24T11:09:54Z"
+        },
+        {
+          "name": "Retain bounded gate artifacts on success or failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-24T11:09:54Z",
+          "completed_at": "2026-10-24T11:09:54Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-24T11:09:54Z",
+          "completed_at": "2026-10-24T11:09:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 27,
+          "started_at": "2026-10-24T11:09:56Z",
+          "completed_at": "2026-10-24T11:09:56Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-24T11:09:56Z",
+          "completed_at": "2026-10-24T11:09:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-24T11:09:56Z",
+          "completed_at": "2026-10-24T11:09:56Z"
+        }
+      ],
+      "artifactVerificationScope": "No route artifact download or archive-body verification was performed for this log observation; root owns the independent artifact/source-closure inspection."
+    }
+  ],
+  "sameDiagnosticBothRoutes": true,
+  "qualificationStatus": "NOT_QUALIFIED",
+  "scope": "Terminal API and decoded job-log inspection. Native/bounded passes are retained as scoped results; they do not establish complete portability or either1992 route result.",
+  "followupArtifactVerificationOwnedByRoot": true,
+  "futureConstructorDraftsFrozen": true,
+  "actions": {
+    "sourceChanges": false,
+    "workflowChanges": false,
+    "githubMutations": false,
+    "ciDispatches": false,
+    "localProjectExecution": false
+  },
+  "rawMetadata": [
+    {
+      "path": "t05-evidence/60fe-runtime-40087914982/run-terminal.json",
+      "bytes": 13740,
+      "sha256": "f55730d65131bc7115b335019df6148e57c2b5f4f3c051c6b98f42bc1eed54ea"
+    },
+    {
+      "path": "t05-evidence/60fe-runtime-40087914982/jobs-terminal.json",
+      "bytes": 16773,
+      "sha256": "bc7deefd779f0125f0f5419111e5a97d993fe38e8737bba00cd7da004867565a"
+    }
+  ]
+}

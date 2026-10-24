@@ -35,7 +35,8 @@ def psKernelExprV2OrdinaryUniformParamArgs
             | PsKernelExprV2Node.bvar bvarIndex =>
                 let expected := Nat.sub (Nat.sub offset 1) index;
                 if Nat.beq bvarIndex expected then
-                  psKernelExprV2OrdinaryUniformParamArgs rest arena offset (Nat.succ index)
+                  let smaller := psKernelExprV2OrdinaryUniformParamArgs rest;
+                  smaller arena offset (Nat.succ index)
                 else
                   Except.ok false
             | _ => Except.ok false
@@ -177,5 +178,5 @@ def psKernelExprV2OrdinaryUniformOccurrences
             arena declaredNames expectedLevels numParams first 0 with
         | Except.error error => Except.error error
         | Except.ok _ =>
-            psKernelExprV2OrdinaryUniformOccurrences rest
-              arena declaredNames expectedLevels numParams
+            let smaller := psKernelExprV2OrdinaryUniformOccurrences rest;
+            smaller arena declaredNames expectedLevels numParams

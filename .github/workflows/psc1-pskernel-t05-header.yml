@@ -397,6 +397,15 @@ jobs:
         print('PSC1_HASH_SHORT_PAIRS_CODEGEN: PASS pure=true generators=0 schedulerCalls=0 staging=0 primitiveTransitions=8 stepDispatches=0 selectedMaxPairs=4 genericFallback=true')
         print('PSC1_HASH_LEVEL_LIST_ENTRY_CODEGEN: PASS empty=575 specializedArities=0,1,2 genericFallback=true stagedResult=false')
         PY
+    - name: Check small structural occurrence and annotation closures before complete source
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean \
+          2>&1 | tee "$PSC1_T05_DIR/structural-occurrence-check.log"
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean \
+          2>&1 | tee "$PSC1_T05_DIR/structural-annotations-check.log"
     - name: Archive actual Lean closure and check complete authentic source after bounded gates
       working-directory: psc1
       shell: bash

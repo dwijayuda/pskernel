@@ -1,0 +1,34 @@
+{
+  "schema": "psc1-t05-structural-precheck-workflow-static-v1",
+  "baselineSourceSha": "60fe91758a897d6f8936b28a257baab0057c52b3",
+  "baselineSha256": "6b5fb8c3951b8bcca95e04b5835bc87bd3ef48225249af5f72926698f15f0a1b",
+  "currentPath": "t05-candidate/.github/workflows/psc1-pskernel-t05-header.yml",
+  "currentBytes": 48741,
+  "currentSha256": "b13ebb9e372e018897fe5368f44ba8af00fb4801817b52a9993f56827e13f419",
+  "currentGitBlobSha": "d83b805b8b25b14abebb0a5abe9342ccd55e996d",
+  "exactlyOneStepAdded": true,
+  "addedStep": {
+    "name": "Check small structural occurrence and annotation closures before complete source",
+    "working-directory": "psc1",
+    "shell": "bash",
+    "run": "set -euo pipefail\nlake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean \\\n  2>&1 | tee \"$PSC1_T05_DIR/structural-occurrence-check.log\"\nlake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean \\\n  2>&1 | tee \"$PSC1_T05_DIR/structural-annotations-check.log\"\n"
+  },
+  "position": "After retained bounded1884 and strict-body gate; before actual complete source closure/check.",
+  "everyOldCurrentStepByteIdenticalAsParsed": true,
+  "allNativeStepsAnd172ReportGateUnchanged": true,
+  "generated1992HeaderAndRetainedRuntimeGateUnchanged": true,
+  "allCurrentPinsLimitsTriggersInventoriesUnchanged": true,
+  "newLogs": [
+    "structural-occurrence-check.log",
+    "structural-annotations-check.log"
+  ],
+  "futureSameStepIdentical": true,
+  "futureWorkflowSha256": "beb8fea239071d9664ddbb0551051fe36f7d70091b7e138e5f365a0a2a992893",
+  "pythonBlocksAstParsed": {
+    "current": 7,
+    "future": 10
+  },
+  "yamlParsed": true,
+  "noLocalProjectExecution": true,
+  "noGitHubMutation": true
+}

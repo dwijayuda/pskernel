@@ -13,6 +13,7 @@ on:
       - psc1/scripts/generated-target-contract-tests.mjs
       - psc1/host-tools/compiler-host-protocol.mjs
       - psc1/test/BackendState*.lean
+      - psc1/test/ScriptEmitter*.lean
       - psc1/test/ScriptRuntime*.lean
       - psc1/test/fixtures/ScriptRuntimeProbe.*
       - psc1/scripts/script-runtime-admission-tests.mjs
@@ -71,7 +72,7 @@ jobs:
           node --check host-tools/generated-target-tools.mjs
           node --check scripts/generated-target-qualification.mjs
           PSC1_SCRIPT_TRANSPORT_TESTS=1 node scripts/generated-target-contract-tests.mjs
-          lake build psc1 psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests
+          lake build psc1 psc1_target_service_seed psc1_independent_checker psc1_source_census_probe psc1_script_runtime_normalization_tests psc1_backend_state_correspondence_tests psc1_script_emitter_normalization_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -81,6 +82,7 @@ jobs:
         run: |
           .lake/build/bin/psc1_script_runtime_normalization_tests
           .lake/build/bin/psc1_backend_state_correspondence_tests
+          .lake/build/bin/psc1_script_emitter_normalization_tests
       - name: Execute independently admitted runtime library in both grammars and targets
         run: node scripts/script-runtime-admission-tests.mjs
       - name: Census both complete source closures in both grammars

@@ -2,6 +2,7 @@ import Ps.CompilerIr.Validate
 import Ps.Bridge.Json
 import Ps.BackendPython.Runtime
 import Ps.BackendCommon.Plan
+import Ps.BackendCommon.StateExcept
 
 /-- Source output is data, not admission evidence. The host retains the checked closure. -/
 structure PsPythonOutput where
@@ -85,29 +86,32 @@ private structure EmitState where
 private abbrev Emit := StateT EmitState (Except String)
 private abbrev Scope := List (String × String)
 
-private def line (text : String) : Emit Unit := do
-  let s ← get
-  let padding := String.join (List.replicate s.indent "    ")
-  set { s with lines := s.lines.push (padding ++ text) }
+-- The action representation is the existing StateT function. These ordinary
+-- state/Except operations have complete retained StateT correspondence proofs.
+private def line (text : String) : Emit Unit :=
+  psBackendStateModify fun s =>
+    let padding := String.join (List.replicate s.indent "    ")
+    { s with lines := s.lines.push (padding ++ text) }
 
-private def fresh (hint : String := "tmp") : Emit String := do
-  let s ← get
-  set { s with nextIndex := s.nextIndex + 1 }
-  pure ("_psc_l" ++ toString s.nextIndex ++ "_" ++ encodePart hint)
+private def fresh (hint : String := "tmp") : Emit String :=
+  psBackendStateBind (psBackendStateGet Unit.unit) fun s =>
+    psBackendStateBind (psBackendStateSet { s with nextIndex := s.nextIndex + 1 }) fun _ =>
+      psBackendStatePure ("_psc_l" ++ toString s.nextIndex ++ "_" ++ encodePart hint)
 
 private def helper (id : String) : Emit Unit :=
-  modify fun s => { s with helpers := if s.helpers.contains id then s.helpers else s.helpers ++ [id] }
+  psBackendStateModify fun s =>
+    { s with helpers := if s.helpers.contains id then s.helpers else s.helpers ++ [id] }
 
-private def withIndent (action : Emit α) : Emit α := do
-  modify fun s => { s with indent := s.indent + 1 }
-  let result ← action
-  modify fun s => { s with indent := s.indent - 1 }
-  pure result
+private def withIndent (action : Emit α) : Emit α :=
+  psBackendStateBind (psBackendStateModify (fun s => { s with indent := s.indent + 1 })) fun _ =>
+    psBackendStateBind action fun result =>
+      psBackendStateBind (psBackendStateModify (fun s => { s with indent := s.indent - 1 })) fun _ =>
+        psBackendStatePure result
 
-private def bindValue (value : String) : Emit String := do
-  let name ← fresh
-  line (name ++ " = " ++ value)
-  pure name
+private def bindValue (value : String) : Emit String :=
+  psBackendStateBind (fresh "tmp") fun name =>
+    psBackendStateBind (line (name ++ " = " ++ value)) fun _ =>
+      psBackendStatePure name
 
 private def tuple (values : List String) : String :=
   match values with

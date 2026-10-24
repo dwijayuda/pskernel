@@ -547,3 +547,11 @@ lean_lib PsBackendStateReference where
 lean_exe psc1_backend_state_correspondence_tests where
   srcDir := "test"
   root := `BackendStateCorrespondenceTests
+
+lean_lib PsScriptEmitterReference where
+  srcDir := "test"
+  roots := #[`ScriptEmitterReference]
+
+lean_exe psc1_script_emitter_normalization_tests where
+  srcDir := "test"
+  root := `ScriptEmitterNormalizationTests

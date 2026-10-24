@@ -1,6 +1,7 @@
 import Ps.CompilerIr.Validate
 import Ps.BackendPhp.Runtime
 import Ps.BackendCommon.Plan
+import Ps.BackendCommon.StateExcept
 
 structure PsPhpPrintedModule where
   source : String
@@ -108,28 +109,27 @@ private structure PhpState where
 
 private abbrev PhpEmit := StateT PhpState (Except String)
 
+-- The existing state/error action is normalized to ordinary checked functions.
 private def phpLift (value : Except String α) : PhpEmit α :=
-  fun state => do
-    let item ← value
-    return (item, state)
+  psBackendStateLift value
 
-private def phpLine (line : String) : PhpEmit Unit := do
-  let state ← get
-  let padding := String.join (List.replicate state.indent "    ")
-  set { state with lines := state.lines.push (padding ++ line) }
+private def phpLine (line : String) : PhpEmit Unit :=
+  psBackendStateModify fun state =>
+    let padding := String.join (List.replicate state.indent "    ")
+    { state with lines := state.lines.push (padding ++ line) }
 
-private def phpIndent (delta : Int) : PhpEmit Unit := do
-  modify fun s => { s with indent := (Int.ofNat s.indent + delta).toNat }
+private def phpIndent (delta : Int) : PhpEmit Unit :=
+  psBackendStateModify fun s => { s with indent := (Int.ofNat s.indent + delta).toNat }
 
-private def phpFresh (stem : String := "tmp") : PhpEmit String := do
-  let state ← get
-  set { state with counter := state.counter + 1 }
-  return "$v" ++ toString state.counter ++ "_" ++ phpStem stem
+private def phpFresh (stem : String := "tmp") : PhpEmit String :=
+  psBackendStateBind (psBackendStateGet Unit.unit) fun state =>
+    psBackendStateBind (psBackendStateSet { state with counter := state.counter + 1 }) fun _ =>
+      psBackendStatePure ("$v" ++ toString state.counter ++ "_" ++ phpStem stem)
 
-private def phpBind (expression : String) : PhpEmit String := do
-  let name ← phpFresh
-  phpLine (name ++ " = " ++ expression ++ ";")
-  return name
+private def phpBind (expression : String) : PhpEmit String :=
+  psBackendStateBind (phpFresh "tmp") fun name =>
+    psBackendStateBind (phpLine (name ++ " = " ++ expression ++ ";")) fun _ =>
+      psBackendStatePure name
 
 private def phpCapture (context : PhpContext) : String :=
   let refs := context.globals.map (fun p => "&" ++ p.2)

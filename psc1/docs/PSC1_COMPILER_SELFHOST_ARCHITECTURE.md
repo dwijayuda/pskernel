@@ -21,6 +21,36 @@ complete state and four arity equalities. No handwritten second compiler exists.
 | Python repeated UTF8 encoding | Old G2 hits1800s; exact archived-G1 profile40071913715 spends118.890/120s in106950 encodes. | Shared get/next/extract/byte-size/end views use immutable identity snapshots:8 entries/32MiB encoded content, oversized views not retained.234895 retained-helper comparisons, retained/current emitted intrinsics, errors/eviction/identity/concurrency and AST/origin boundaries pass. |
 | Unlisted Python bytecode | SourceFileLoader may execute a timestamp/hash .pyc absent from the artifact manifest. | Source-only617004ce compiles exact bound source bytes for service/probe/consumer. A matching poisoned cache executes under standard loader but is ignored by production. Compiler semantics stay generated; no native delegation. |
 
+The post-UTF8 Python profile40075153915 measures str.encode0.132s/120s,
+_psc_run own44.239s and56.67M generator sends. Shared DirectCalls.lean therefore
+classifies exactly two immutable layers of synchronous nonzero-parameter global
+functions. The intrinsic whitelist excludes callbacks; implicit zero-argument
+value forcing, dynamic calls, shadows, recursion and exhausted analysis keep
+the scheduler. Full names are checked after hash lookup. The direct source
+call depth is at most3, independent of declaration order. Python's independent
+AST guard checks saved callee/arguments, actual non-generator flags and acyclic
+depth before restoring old yield nodes for exact remaining-AST comparison.
+PHP compares direct and retained schedulers with identical runtime/carrier.
+Both targets pass200000-deep dynamic alias/local/parameter-shadow recursion.
+Gate40077267520 passes87 modules per target in both grammars and all admitted
+library/retained regression guards. Genuine request809070eb/run40077476210 is
+active; this source gate does not establish G2/G3 or fixed points.
+
+PHP extraction separately allocates a full character array even for a short
+substring. Exact archived compiler-source diagnostic40077973238 compares25100
+valid/malformed/boundary/huge-index cases and16 slices from18804166 source bytes:
+retained22.741s, proposed0.0243s. This is an actual compiler-source runtime
+operation, not a whole-compiler speedup. New source9c4a9b38/8a99b06d is under
+validation: use the existing two-key UTF8 validity cache, check full input before
+bounds as required, compare GMP positions against native size before conversion,
+then slice bytes. Preserve early empty-range behavior, invalid/non-boundary start,
+and the historical rule that a mid-codepoint stop extends through the string end.
+No extra retained cache or stack/memory limit is introduced. The same emitter's
+legacy layout policy keeps exact old extraction runtime bytes and dependencies
+for differential tests; the default catalog permits only this complete helper
+block and its utf8Valid dependency to differ. PHP-only source changes leave the
+Python owned compiler closure unchanged.
+
 Strict IR already requires canonical constructor field order; the PHP emitter
 evaluates in that order. Reordered construction remains refused, while match
 bindings resolve indices by owner/constructor/field. Native legacy layout is a

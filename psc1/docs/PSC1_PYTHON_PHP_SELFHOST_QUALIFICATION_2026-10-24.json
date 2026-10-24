@@ -1,11 +1,11 @@
 {
   "schema": "psc1-python-php-selfhost-progress/1",
-  "recordedAtUtc": "2026-10-24 08:14 UTC",
-  "status": "current-Python-PHP-G1-pass-G2-timeouts-measured-bounded-direct-call-optimization-under-validation",
+  "recordedAtUtc": "2026-10-24 08:32 UTC",
+  "status": "bounded-call-both-target-genuine-active-PHP-extraction-fix-under-validation",
   "branch": "feat/psc1-python-php-selfhost-20261024",
   "pullRequest": 176,
   "baseCommit": "6393226e5d29ad246e9421fe398d78c43954c6d9",
-  "sourceCommit": "b749995073f091b03f32ea6c811d9c1a5c4a3b35",
+  "sourceCommit": "8a99b06d834d8366e95f29b6ea4046d4cdfeb51f",
   "targets": [
     "python",
     "php"
@@ -157,7 +157,7 @@
       }
     }
   },
-  "nextAction": "Bounded direct-call gate40077267520 PASSED. Issue isolated BOTH-target genuine qualification request, then read terminal G1/G2/G3/fixed points. Require final current-source37/37 and independently clean G1 reproduction.",
+  "nextAction": "Read bounded-call qualification40077476210 terminal results. Validate PHP extraction source8a99b06d with complete native/source/admitted-library gates, then isolated PHP-only genuine request (per-target concurrency queues it behind preserved809 baseline). Preserve Python809 because its owned source is unchanged. Require final full37/37 and clean G1 reproduction once qualified.",
   "activeQualification": {
     "requestCommit": "30389b1f218ec9c2f35321e93104edb7bb19d747",
     "parentCommit": "a685da2c6c4090d103d09a855accfcda674b3cf6",
@@ -1033,6 +1033,48 @@
           "digest": "sha256:6da7d28e269d2fe15e2672e6376262da82f458156144627d70b99b67fa4015c4"
         }
       ]
+    }
+  },
+  "boundedQualification": {
+    "requestCommit": "809070eb6c2f794ea962b1f00324d263367ab2e9",
+    "parentCommit": "f1ca58a92045514da39c3d105dc54d18becc17ac",
+    "runId": 40077476210,
+    "status": "in_progress",
+    "jobs": {
+      "php": 120823970819,
+      "python": 120823970885
+    },
+    "scope": "genuine current bounded-call G1/G2/G3/fixed-point attempt with source-only Python host; terminal generations not yet read",
+    "sourceEvolution": "Later PHP-only extraction edits do not alter Python owned closure. PHP request809 remains immutable bounded-call baseline; changed PHP source requires new qualification."
+  },
+  "phpExtraction": {
+    "sourceCommit": "9c4a9b38c8d1e15e3cd9a09247b9fa28d8b0e663",
+    "testOrderFixCommit": "8a99b06d834d8366e95f29b6ea4046d4cdfeb51f",
+    "status": "under-source-native-validation",
+    "mechanism": "validate with existing two-key UTF8 cache, bound GMP indices before native conversion, validate codepoint boundaries, native byte substring; no whole-source character array for extraction",
+    "preserved": "early empty-range before invalid-UTF8 error; invalid/negative/outside/mid-codepoint start behavior; mid-codepoint stop extends through end exactly as retained helper; huge indices; no extra retained cache; PHP1G/defaultstack unchanged",
+    "legacyPolicy": "same emitter retains exact old runtime closure/source for legacy layout policy; default catalog checked outside exact extraction block and approved utf8Valid dependency",
+    "diagnostic": {
+      "runId": 40077973238,
+      "jobId": 120825359512,
+      "controlCommit": "61b3756d8a3c6504b9c0bca1dfc0440665be611b",
+      "status": "success",
+      "differentialCases": 25100,
+      "compilerSourceSha256": "5752bf05f37aec0a920d84b5dfb9a202666bb9729c84a8a53b27b1e5687b532a",
+      "compilerSourceBytes": 18804166,
+      "actualCompilerSlices": 16,
+      "elapsedSeconds": {
+        "proposed": 0.024312403,
+        "retained": 22.741032979
+      },
+      "peakPhpAllocatedBytes": 965677056,
+      "artifacts": [
+        {
+          "id": 12553882942,
+          "digest": "sha256:6e5192d77e4aaa8b7299af9cc5ff130e8bfeef9561d86bb85e492f73a060eafc"
+        }
+      ],
+      "scope": "retained helper differential and exact generated compiler-source operation; not G2/G3/fixed-point success"
     }
   }
 }

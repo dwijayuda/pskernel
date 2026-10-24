@@ -7,7 +7,7 @@ publication authorized. Practical Core v1 remains 14 families / 37 finite criter
 [canonical receipt](docs/PSC1_DIRECT_SELFHOST_QUALIFICATION_2026-10-24.json)
 owns immutable attempts, artifacts, timings and source identities.
 
-## Active Python/PHP self-hosting mission — 2026-10-24 08:18 UTC
+## Active Python/PHP self-hosting mission — 2026-10-24 08:32 UTC
 
 Branch feat/psc1-python-php-selfhost-20261024, draft
 [PR176](https://github.com/dwijayuda/pskernel/pull/176), preserved base
@@ -28,6 +28,8 @@ owns exact immutable attempts, hashes, artifacts, measurements and boundaries;
 | Actual PHP diagnostics | Run40076097853: exact18804166-byte compiler-source extraction0..32 PASSES1.542s/maxRSS736912KiB.120s G2 phase sample has80 pending generators/646971392 allocated bytes; it is yield-boundary sampling, not CPU attribution. Read-only owner recovery6010eafb reuses samples, without rerunning compiler. |
 | Next measured implementation | Bounded direct-call source3232294d, import fix36ff105c, dual-target differential/deep-recursion sourceb7499950 PASSED gate40077267520/job120823225254:87 modules/target, both grammars and all retained/admitted/deep-recursion guards. Shared conservative intrinsic whitelist and exactly2 immutable call layers, full-name membership; zero-fuel fallback, dynamic/shadow/recursive/implicit-value calls retain scheduler. No unbounded native recursion promotion. |
 | Artifact integrity | Source-only host617004ce executes exact hash-bound Python source; poisoned unlisted .pyc controls pass. Earlier Python retry used old transport, so current hardened pipeline needs fresh genuine qualification. |
+| Bounded-call genuine execution | Request809070eb/run40077476210 ACTIVE: Python120823970885 and PHP120823970819. Read terminal logs; do not infer generation success from an active step. Later PHP-only edits leave Python closure unchanged. |
+| PHP extraction follow-on | Actual source16 slices cost22.741s retained versus0.0243s proposed;25100 malformed/boundary/huge-index cases pass in diagnostic40077973238. Source9c4a9b38/test-order8a99b06d UNDER VALIDATION; reuse existing2-key UTF8 validity cache, exact boundary/error behavior, no extra retained cache. Legacy runtime policy remains exact differential reference. After source gate pass, isolated PHP-only genuine request; retain immutable809 baseline and current Python attempt. |
 | Qualification remaining | Passed new direct-call native/source gate; next isolated BOTH-target G1→G2→G3/fixed points; final current-source37/37 and independent clean G1 reproduction. No active successful G2/G3 evidence yet. |
 
 Preserve all failed artifacts and qualified Rust/TS/DirectJS/Wasm snapshots.

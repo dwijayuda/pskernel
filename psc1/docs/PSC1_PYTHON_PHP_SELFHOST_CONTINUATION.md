@@ -39,15 +39,24 @@ No local checkout/build/test, force push, merge or package publication.
    PHP tests compare same carrier/runtime with direct-calls flag off/on, exact
    metadata, selected ordinary closures and200000-deep recursive aliases/
    parameter/local shadows. Preserve old APIs and strict pre-emission validation.
-6. Source preflight b7499950/run40077267520 is SUCCESS.
+6. Bounded-call source preflight b7499950/run40077267520 is SUCCESS. Find extraction preflight by exact8a99b06d SHA; require native,87-module/both-grammar and admitted runtime-library tests.
    Read completed logs only. Fix demonstrated classes, preserving every existing
    source/runtime/admission/negative test. Both complete source censuses and
    independent admitted libraries must pass; no native-only exemption.
-7. Once gate passes, create isolated request-only child changing
+7. Bounded-call request809070eb6c2f794ea962b1f00324d263367ab2e9 is ACTIVE in
+   run40077476210: Python120823970885/PHP120823970819. Preserve terminal evidence.
+   PHP-only extraction source9c4a9b38/test-order8a99b06d is UNDER VALIDATION.
+   Diagnostic40077973238 passes25100 exact helper cases;16 actual compiler-source
+   slices improve22.741s→0.0243s. Existing UTF8 validity cache, full input/error
+   priority, huge/negative indices and byte-boundary behavior are preserved.
+   The same emitter's legacy runtime policy keeps old exact bytes; default
+   catalog changes only extraction block/validity dependency. Python closure is
+   unchanged, so retain active809 Python attempt. After new PHP source gate
+   passes, create isolated PHP-only request-only child changing
    .github/qualification-requests/psc1-python-php-selfhost.json:
    schema psc1-python-php-selfhost-request/1; exact branch/parentCommit;
    action qualify-independent-G1-G2-G3; profile correctness-1800s;
-   targets [python,php]; g2g3TimeoutMs1800000;g1TimeoutMs240000;
+   targets [php] for this PHP-only source change; g2g3TimeoutMs1800000;g1TimeoutMs240000;
    resourcePolicy only-G2-G3-wall-clock-extended;all-other-policies-unchanged.
    No source/docs in request commit. Native seed once, then remove native
    compiler tools; independently check/admit every G1/G2/G3, both strict IR

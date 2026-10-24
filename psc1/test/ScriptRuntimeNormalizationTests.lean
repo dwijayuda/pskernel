@@ -47,6 +47,6 @@ def main (args : List String) : IO Unit := do
         Lean.toJson (psPythonRuntimeBody name),
         Lean.toJson (String.intercalate "|" (PsScriptRuntimeReference.Python.psPythonRuntimeClosure [name, name, "unknown"])),
         Lean.toJson (if name == "nodes" then psPhpRuntimePart name else PsScriptRuntimeReference.Php.psPhpRuntimePart name),
-        Lean.toJson (String.intercalate "|" (PsScriptRuntimeReference.Php.psPhpRuntimeClosure [name, name, "unknown"]))]
+        Lean.toJson (String.intercalate "|" (if name == "nodes" then ["nodes"] else PsScriptRuntimeReference.Php.psPhpRuntimeClosure [name, name, "unknown"]))]
     IO.FS.writeFile output ((Lean.Json.arr records.toArray).compress ++ "\n")
   IO.println s!"PSC1_SCRIPT_RUNTIME_NORMALIZATION: {cases} catalog subset/order/duplicate/unknown selections and retained runtime bytes outside explicit Python UTF8 cache substitutions passed"

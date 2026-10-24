@@ -84,9 +84,12 @@ def psRustTailParameterSuffix (count : Nat) (parameters : List PsVerifiedIrParam
 def psRustTailStringPassthrough (parameter : PsVerifiedIrParameter)
     (argument : PsVerifiedIrExpr) : Bool :=
   match parameter.type with
-  | PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string =>
-      match argument with
-      | PsVerifiedIrExpr.var name => psStringEq name parameter.name
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.string =>
+          match argument with
+          | PsVerifiedIrExpr.var name => psStringEq name parameter.name
+          | _ => false
       | _ => false
   | _ => false
 

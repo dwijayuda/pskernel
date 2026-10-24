@@ -9,6 +9,9 @@ import Ps.KernelCore.API.DagOrdinaryConstructorFields
 import Ps.KernelCore.API.DagOrdinaryConstructorAnalysis
 import Ps.KernelCore.API.DagOrdinaryConstructorLoop
 import Ps.KernelCore.API.DagOrdinaryElimination
+import Ps.KernelCore.API.DagOrdinaryGenerated
+import Ps.KernelCore.API.DagOrdinaryRecursorValidation
+import Ps.KernelCore.API.DagOrdinaryAdmission
 import Ps.KernelCore.Core.ExprV2.TransformSpine
 import Ps.KernelCore.Admission.Quot.Admission
 import Ps.KernelCore.Admission.Inductive.Common.Parameters

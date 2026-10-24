@@ -1,15 +1,14 @@
 {
   "schema": "psc1-python-php-selfhost-request/1",
   "branch": "feat/psc1-python-php-selfhost-20261024",
-  "parentCommit": "f1ca58a92045514da39c3d105dc54d18becc17ac",
+  "parentCommit": "94ea0e84af36ae6fd39e7174214a41f0436b06d1",
   "action": "qualify-independent-G1-G2-G3",
   "profile": "correctness-1800s",
   "targets": [
-    "python",
     "php"
   ],
   "g2g3TimeoutMs": 1800000,
   "g1TimeoutMs": 240000,
   "resourcePolicy": "only-G2-G3-wall-clock-extended;all-other-policies-unchanged",
-  "reason": "Genuine both-target qualification after measured UTF8/allocation/destruction fixes and shared bounded direct-call layers; source gate40077267520 passes87modules/bothgrammars and retained/admitted/deep-recursion tests. Current hash-bound Python source-only transport; original independent checking, strict IR, ten cases, fixed points and all resource limits unchanged."
+  "reason": "PHP-only qualification after measured whole-source extraction allocation fix. Gate40078556459/job120827082248 passed all87-module/both-grammar/admitted/retained guards and25100helper+25100emittedAPI cases at1G/defaultstack. Python809 source unchanged; preserve both active809 attempts; target concurrency queues this PHP behind its immutable bounded-call baseline."
 }

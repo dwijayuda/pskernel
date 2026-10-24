@@ -1,0 +1,82 @@
+name: PSC1 backend provider boundary
+on:
+  push:
+    branches: [feat/psc1-backend-provider-packages-20261024]
+    paths:
+      - psc1/host/**
+      - psc1/packages/cli/**
+      - psc1/packages/backend-python/src/Ps/BackendPython/ProviderMain.lean
+      - psc1/packages/backend-php/src/Ps/BackendPhp/ProviderMain.lean
+      - psc1/host-tools/backend-providers.mjs
+      - psc1/host-tools/artifacts.mjs
+      - psc1/scripts/backend-provider-tests.mjs
+      - psc1/test/BackendProviderTests.lean
+      - psc1/lakefile.lean
+      - .github/workflows/diagnostic-psc1-backend-providers.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-backend-provider-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.8'
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.12'
+          extensions: gmp
+          tools: none
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native_cache
+        with:
+          path: psc1/.lake
+          key: psc1-provider-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-provider-native-v1-${{ runner.os }}-
+            psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install official pinned Lean and locked dependencies
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+          npm ci --prefix host-tools --ignore-scripts --include=optional
+      - name: Build core, separate optional emitters and retained protocol tests
+        id: native_build
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          node --check host-tools/backend-providers.mjs
+          node --check scripts/backend-provider-tests.mjs
+          lake build psc1 psc1_backend_python psc1_backend_php psc1_backend_provider_tests
+      - uses: actions/cache/save@v4
+        if: steps.native_build.outcome == 'success'
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Execute retained payloads, actual admitted outputs and refusal boundaries
+        run: node scripts/backend-provider-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-provider-${{ github.sha }}
+          path: psc1/dist/backend-providers/
+          retention-days: 90

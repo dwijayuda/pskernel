@@ -1,9 +1,8 @@
 import Ps.Host.DirectBackend
-import Ps.BackendPython.Module
-import Ps.BackendPhp.Module
+import Ps.Host.BackendProviderProtocol
 
-/-- Python/PHP share the existing checked input and closed specialization plan.
-Their public scalar ABI does not silently widen when a host runtime has extra types. -/
+/-- Core retains admission, strict planning, ABI policy and atomic publication.
+Python/PHP emitters are separate optional processes with no source/checker access. -/
 private def scriptPlan (target : PsBackendTarget) (session : PsHostDirectPrepared) :
     IO PsValidatedIrModule := do
   match psHostDirectCheckPublicApi target session with
@@ -13,38 +12,59 @@ private def scriptPlan (target : PsBackendTarget) (session : PsHostDirectPrepare
   | .ok plan => return plan
   | .error reason => throw (IO.userError reason)
 
-def psHostDirectEmitPython (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
-  if !outputPath.endsWith ".py" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .py")
-  let plan ← scriptPlan .python session
-  let printed ← match psPythonEmitModule plan session.publicNames session.ioDispatcherAbi with
-    | .ok value => pure value
-    | .error reason => throw (IO.userError ("PSC1_PYTHON_TARGET_UNSUPPORTED: " ++ reason))
-  let name := psHostArtifactFileName outputPath "module.py"
+private def emitProvider (target : PsBackendTarget) (session : PsHostDirectPrepared)
+    (outputPath : String) : IO Unit := do
+  let python := target == .python
+  let extension := if python then ".py" else ".php"
+  if !outputPath.endsWith extension then
+    throw (IO.userError ("PSC1_OUTPUT_EXTENSION: expected " ++ extension))
+  let plan ← scriptPlan target session
+  let name := psHostArtifactFileName outputPath ("module" ++ extension)
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteProvenance session stage
-    IO.FS.writeFile (stage / name) printed.source
-    IO.FS.writeFile (stage / ((name.dropEnd 3).toString ++ ".pyi")) printed.stub
+    let request : PsBackendProviderRequest := {
+      protocol := psBackendProviderProtocol
+      target := psBackendTargetName target
+      leanVersion := Lean.versionString
+      leanCommit := Lean.githash
+      ir := plan.raw
+      publicNames := session.publicNames
+      ioDispatcherAbi := session.ioDispatcherAbi
+    }
+    let requestPath := stage / "backend-request.json"
+    let encoded := (Lean.toJson request).compress
+    if encoded.utf8ByteSize > psBackendProviderMaxBytes then
+      throw (IO.userError "PSC1_PROVIDER_REQUEST_LIMIT")
+    IO.FS.writeFile requestPath encoded
+    let result ← psHostArtifactTool #["provider", stage.toString,
+      psBackendTargetName target, requestPath.toString, session.captured.entryPath]
+    IO.FS.removeFile requestPath
+    let parsed ← match Lean.Json.parse result with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "PSC1_PROVIDER_RESPONSE_JSON")
+    let response : PsBackendProviderResponse ← match Lean.fromJson? parsed with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "PSC1_PROVIDER_RESPONSE_SCHEMA")
+    if parsed != Lean.toJson response || response.protocol != psBackendProviderProtocol ||
+        response.target != request.target || response.leanVersion != Lean.versionString ||
+        response.leanCommit != Lean.githash || !response.candidateOnly ||
+        response.publicNames != request.publicNames ||
+        response.ioDispatcherAbi != request.ioDispatcherAbi ||
+        response.runtimeVersion != "psc1-" ++ request.target ++ "-runtime/1" then
+      throw (IO.userError "PSC1_PROVIDER_RESPONSE_IDENTITY")
+    IO.FS.writeFile (stage / name) response.source
+    let auxiliaryName := (name.dropEnd extension.length).toString ++
+      (if python then ".pyi" else ".composer.json")
+    IO.FS.writeFile (stage / auxiliaryName) response.auxiliary
     psHostWriteArtifactTargetPlans stage [
-      psHostArtifactTargetPlanJson "python" name "psc1-python-runtime/1"
-        printed.runtimeSource printed.runtimeHelpers printed.declarationLines]
-    let _ ← psHostArtifactTool #["script", stage.toString, "python", name]
-    psHostPublishArtifactStage stage outputPath "python"
-  IO.println ("PSC1_DIRECT_PYTHON: " ++ outputPath)
+      psHostArtifactTargetPlanJson request.target name response.runtimeVersion
+        response.runtimeSource response.runtimeRequirements response.declarationLines]
+    let _ ← psHostArtifactTool #["script", stage.toString, request.target, name]
+    psHostPublishArtifactStage stage outputPath request.target
+  IO.println ("PSC1_DIRECT_" ++ (if python then "PYTHON" else "PHP") ++ ": " ++ outputPath)
 
-def psHostDirectEmitPhp (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
-  if !outputPath.endsWith ".php" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .php")
-  let plan ← scriptPlan .php session
-  let printed ← match psPhpEmitValidatedModule plan session.publicNames session.ioDispatcherAbi with
-    | .ok value => pure value
-    | .error reason => throw (IO.userError ("PSC1_PHP_TARGET_UNSUPPORTED: " ++ reason))
-  let name := psHostArtifactFileName outputPath "module.php"
-  psHostWithArtifactStage outputPath fun stage => do
-    psHostDirectWriteProvenance session stage
-    IO.FS.writeFile (stage / name) printed.source
-    IO.FS.writeFile (stage / ((name.dropEnd 4).toString ++ ".composer.json")) printed.composer
-    psHostWriteArtifactTargetPlans stage [
-      psHostArtifactTargetPlanJson "php" name "psc1-php-runtime/1"
-        printed.runtimeSource printed.runtimeRequirements printed.declarationLines]
-    let _ ← psHostArtifactTool #["script", stage.toString, "php", name]
-    psHostPublishArtifactStage stage outputPath "php"
-  IO.println ("PSC1_DIRECT_PHP: " ++ outputPath)
+def psHostDirectEmitPython (session : PsHostDirectPrepared) (outputPath : String) : IO Unit :=
+  emitProvider .python session outputPath
+
+def psHostDirectEmitPhp (session : PsHostDirectPrepared) (outputPath : String) : IO Unit :=
+  emitProvider .php session outputPath

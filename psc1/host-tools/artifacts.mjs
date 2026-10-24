@@ -10,6 +10,7 @@ import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 import { parse } from '@babel/parser';
 import * as prettier from 'prettier';
+import {emitBackendProvider} from './backend-providers.mjs';
 
 const require = createRequire(import.meta.url);
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -559,6 +560,7 @@ export function publish(stage, output, kind) {
     kernelAdmissionSha256: sha256(admissions),
     sourceClosureSha256: sha256(json(sourceRecords.map(({ path, sha256, bytes }) => ({ path, sha256, bytes })))),
     compiler: info.compiler ?? 'PSC1 native', publicNames: info.publicNames,
+    ...(info.backendProvider ? {backendProvider: info.backendProvider} : {}),
     formatter: ['js', 'ts', 'ecma'].includes(kind) ? { prettier: '3.6.2', babelParser: '7.28.0' } : null,
     ...(targetPlan ? { runtimeContract: targetPlan.runtimeContract, targetPlans: targetPlan.plans } : {}),
     claim: 'source admission and bounded IR validation; not a backend-preservation proof',
@@ -619,6 +621,7 @@ async function main(args) {
   if (command === 'stage' && rest.length === 1) console.log(createStage(rest[0]));
   else if (command === 'format' && rest.length === 3) await formatTarget(rest[0], rest[1], rest[2]);
   else if (command === 'rust' && rest.length === 2) prepareRust(rest[0], rest[1]);
+  else if (command === 'provider' && rest.length === 4) console.log(JSON.stringify(emitBackendProvider(...rest)));
   else if (command === 'script' && rest.length === 3) prepareScript(rest[0], rest[1], rest[2]);
   else if (command === 'wit-check' && rest.length === 2) checkWit(rest[0], rest[1]);
   else if (command === 'wit-string-check' && rest.length === 3) checkWit(rest[0], rest[1], rest[2]);

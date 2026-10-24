@@ -21,7 +21,7 @@ def psCliUsage : String :=
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
   "  psc1 wat <input.wasm> --out <output.wat>\n" ++
-  "Direct builds require installed PSC1 host-tools; Rust also requires cargo/rustfmt, Wasm requires wasm-tools, Python requires Python >=3.14, PHP requires PHP >=8.5 with ext-gmp only for exact integers."
+  "Python/PHP require separately installed @proofscript/backend-python or @proofscript/backend-php. Direct builds require installed PSC1 host-tools; Rust also requires cargo/rustfmt, Wasm requires wasm-tools, Python requires Python >=3.14, PHP requires PHP >=8.5 with ext-gmp only for exact integers."
 
 private def buildDefault (inputPath outputPath : String) : IO Unit := do
   if outputPath.endsWith ".js" then psHostDirectJavaScript inputPath outputPath
@@ -101,7 +101,7 @@ private def psCliCheckedExecution (args : List String) : IO Unit := do
   | [] | ["--help"] | ["-h"] => IO.println psCliUsage
   | ["--version"] => IO.println ("PSC1 0.1.0-psc1.2 (checked native; Lean " ++ Lean.versionString ++ ")")
   | ["--identity"] =>
-      IO.println ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++ Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\",\"targets\":" ++ psJsonArray (psBackendTargets.map (fun target => psJsonQuote (psBackendTargetName target))) ++ "}")
+      IO.println ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++ Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\",\"targets\":" ++ psJsonArray (([PsBackendTarget.js, .ts, .rust, .wasmCore, .wasmComponent]).map (fun target => psJsonQuote (psBackendTargetName target))) ++ "}")
   | ["check", inputPath] => psHostDirectCheck inputPath
   | ["admissions", inputPath] => psHostDirectAdmissions inputPath
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSource inputPath)

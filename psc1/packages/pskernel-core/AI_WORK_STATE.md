@@ -1,3 +1,17 @@
+## 2026-10-25 — Broader retained-proof blocker; prior component receipts are scoped evidence
+
+Broader integration run [40147424295](https://github.com/dwijayuda/pskernel/actions/runs/40147424295) at `10144e2f9e8d223b5dcde275bd1f48d25df113b3` exposed two unsolved goals in `PsKernelExprV2RecursorProofs.lean` (native job `121031648333`, lines 242 and 265). Those historical batch-atomicity theorems still describe the old command result and unconditional generated bridge. The production batch now consumes an owned command result and then performs demand synchronization. The focused T05 proof inventory did not compile this module.
+
+The recorded `10144e2f` admission-profile371/native/generated/canonical/archive receipts remain valid evidence of those configured gates. They do **not** establish that every applicable retained native proof compiles. Likewise, `d0ee3dd0`'s374-profile cohort/audit is diagnostic and is **not adoption-ready** while this blocker is open. Integration is held at its existing `10144e2f` head while a sound forward repair is qualified.
+
+The repair adapts both batch equations to the actual complete owner and adds explicit fallback-generated-import failure plus generic owned-command error propagation. It retains the import-failure link instead of merely assuming the batch fails. All21 old report names/order remain, with2 companion reports appended. No production behavior, fuel, or trust dependency changes. A focused native preflight must check the repaired23-report module plus the other retained integration proof modules before another expensive complete qualification.
+
+The next complete gate will include all ten previously omitted integration proof modules:118 reports (116 historical plus2 companions), in addition to the current374. Require **492 reports across29 modules and92 exact source inputs**, with17 detached scripts and all existing generated controls. New proof obligations require a new exact-source full cohort and archive audit; do not inheritD0 receipts.
+
+The older A/B cohort [40146310517](https://github.com/dwijayuda/pskernel/actions/runs/40146310517) is now terminal failure: both producers passed raw23 on the small and complete kernels plus the full DAG controls, then attempted a research flat-arena harness against SelfHost and encountered missing export `psKernelExprV2Empty`. No A/B measurements exist. The correction will retain that harness on its intended small `Research/ExprV2ResearchAll.lean` entry before full generation and bind its distinct output honestly, alongside the shared bootstrap translator correction. Do not add unused production exports or discard controls.
+
+A remains scoped T01F qualified; B OPEN, C FAIL, D OPEN. Existing broader Arena/correctness/research runs on10144 are still tracked separately.
+
 ## 2026-10-25 — Deferred-transform complete native gate passed; full routes and audit pending
 
 Exact candidate **`d0ee3dd0450278251cbe3c24a2c5b3e465ce524a`** passed native job `121032998114` in [40147870357](https://github.com/dwijayuda/pskernel/actions/runs/40147870357), attempt 1. The actual log contains **374 ordered unique reports across 19 modules**, all required retained native controls, and **82 authenticated source inputs**. The new three universal equality reports use only the standard allowed axioms. Whole-file and frozen-body authentication confirms exactly the three intended binding moves against qualified baseline `10144e2f`.

@@ -4,14 +4,16 @@
   "recordedDate": "2026-10-25",
   "qualifiedSourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
   "scope": {
-    "completeOrdinaryInductiveDagAdmissionQualified": true,
+    "completeOrdinaryInductiveDagAdmissionQualified": false,
     "pagedStructuralProofsRetained": true,
     "publicRoutingQualified": true,
     "safeFallbackRetained": true,
     "fullKernelQualified": false,
     "performanceQualified": false,
     "replayArenaModelBridgeEstablished": false,
-    "externalDecoderLayoutBridgeEstablished": false
+    "externalDecoderLayoutBridgeEstablished": false,
+    "configuredAdmissionProfileQualified": true,
+    "completeApplicableNativeInventoryQualified": false
   },
   "integration": {
     "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
@@ -3123,5 +3125,24 @@
     "preparedBootstrapAdapterCommit": "7bd3303c49bd48b17ce70fa42e7dda389a35732c",
     "productionIntegrationAllowed": false,
     "note": "The isolated transform experiment has fresh native equality and shared-compiler receipts, but its current stock bootstrap invocation does not authenticate one translator for every translation. Complete source qualification, archive audit and performance evidence are still required."
+  },
+  "postIntegrationFinding": {
+    "status": "blocked",
+    "runId": 40147424295,
+    "jobId": 121031648333,
+    "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+    "module": "PsKernelExprV2RecursorProofs",
+    "lines": [
+      242,
+      265
+    ],
+    "reason": "Two retained batch atomicity proof statements still describe the replaced dispatcher/bridge boundary; this module was absent from the focused admission-profile inventory.",
+    "requiredNextGate": {
+      "nativeReports": 492,
+      "proofModules": 29,
+      "sourceInputs": 92,
+      "detachedScripts": 17
+    },
+    "priorReceipts": "Preserved verbatim as source-bound evidence for the configured admission profile. They are insufficient for all applicable retained proof obligations."
   }
 }

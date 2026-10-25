@@ -74,7 +74,7 @@ theorem contains_const_with_fuel_correspondence
             Nat.succ_le_succ_iff, Nat.max_le] at bound
           have fnEqual := ih fn fnValid bound.1
           have argEqual := ih arg argValid bound.2
-          cases hit : psKernelSimpleMutualContainsConst targets (decode fn) <;>
+          cases hit : psKernelSimpleMutualContainsConstWorker (decode fn) targets <;>
             simp [psKernelExprV2MutualContainsConstWithFuel,
               psKernelExprV2PagedRequire, lookup, node, shape, nodeExpr,
               psKernelSimpleMutualContainsConst, psKernelSimpleMutualContainsConstWorker, fnEqual, argEqual, hit]
@@ -87,7 +87,7 @@ theorem contains_const_with_fuel_correspondence
             Nat.succ_le_succ_iff, Nat.max_le] at bound
           have typeEqual := ih type typeValid bound.1
           have bodyEqual := ih body bodyValid bound.2
-          cases hit : psKernelSimpleMutualContainsConst targets (decode type) <;>
+          cases hit : psKernelSimpleMutualContainsConstWorker (decode type) targets <;>
             simp [psKernelExprV2MutualContainsConstWithFuel,
               psKernelExprV2PagedRequire, lookup, node, shape, nodeExpr,
               psKernelSimpleMutualContainsConst, psKernelSimpleMutualContainsConstWorker, typeEqual, bodyEqual, hit]
@@ -100,7 +100,7 @@ theorem contains_const_with_fuel_correspondence
             Nat.succ_le_succ_iff, Nat.max_le] at bound
           have typeEqual := ih type typeValid bound.1
           have bodyEqual := ih body bodyValid bound.2
-          cases hit : psKernelSimpleMutualContainsConst targets (decode type) <;>
+          cases hit : psKernelSimpleMutualContainsConstWorker (decode type) targets <;>
             simp [psKernelExprV2MutualContainsConstWithFuel,
               psKernelExprV2PagedRequire, lookup, node, shape, nodeExpr,
               psKernelSimpleMutualContainsConst, psKernelSimpleMutualContainsConstWorker, typeEqual, bodyEqual, hit]
@@ -116,8 +116,8 @@ theorem contains_const_with_fuel_correspondence
           have typeEqual := ih type typeValid bound.1.1
           have valueEqual := ih value valueValid bound.1.2
           have bodyEqual := ih body bodyValid bound.2
-          cases typeHit : psKernelSimpleMutualContainsConst targets (decode type) <;>
-            cases valueHit : psKernelSimpleMutualContainsConst targets (decode value) <;>
+          cases typeHit : psKernelSimpleMutualContainsConstWorker (decode type) targets <;>
+            cases valueHit : psKernelSimpleMutualContainsConstWorker (decode value) targets <;>
             simp [psKernelExprV2MutualContainsConstWithFuel,
               psKernelExprV2PagedRequire, lookup, node, shape, nodeExpr,
               psKernelSimpleMutualContainsConst, psKernelSimpleMutualContainsConstWorker, typeEqual, valueEqual, bodyEqual,
@@ -175,9 +175,9 @@ theorem indices_contain_target_correspondence
         exact indicesValid id (by simp [member])
       have firstEqual := contains_const_on_canonical_correspondence
         arena decode model targets first firstValid
-      cases hit : psKernelSimpleMutualContainsConst targets (decode first) <;>
+      cases hit : psKernelSimpleMutualContainsConstWorker (decode first) targets <;>
         simp [psKernelExprV2MutualIndicesContainTarget, List.map_cons,
-          psKernelSimpleMutualIndicesContainTarget, firstEqual, ih restValid, hit]
+          psKernelSimpleMutualIndicesContainTarget, psKernelSimpleMutualContainsConst, firstEqual, ih restValid, hit]
 
 
 #print axioms contains_zero_precedes_lookup

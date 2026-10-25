@@ -1,0 +1,1543 @@
+{
+  "schema": "psc1-validator-decoder-arena-model-qualified-v1",
+  "sourceSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+  "productionSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+  "productionSourceTree": "e567685e5c441a5b0a78d8241f7bae151b48b5ca",
+  "productionChanges": false,
+  "qualifiedScope": "Actual public paged validation, production decoding and existing ordinary-inductive ArenaModel bridge; retained complete T05 qualification",
+  "native": {
+    "runId": 40191895625,
+    "runAttempt": 1,
+    "jobId": 121164457415,
+    "reports": 532,
+    "proofModules": 36,
+    "retainedReports": 499,
+    "addedReports": 33,
+    "receipt": {
+      "schema": "psc1-validator-native-v1",
+      "sourceSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+      "runId": "40191895625",
+      "runAttempt": "1",
+      "status": "pass",
+      "retainedProofs": 499,
+      "newProofs": 33,
+      "totalProofs": 532,
+      "proofModules": 36,
+      "proofs": [
+        {
+          "module": "PsKernelOrdinaryHeaderStateProofs",
+          "proofs": 49,
+          "names": [
+            "PsKernelOrdinaryHeaderStateProofs.reverse_worker_eq",
+            "PsKernelOrdinaryHeaderStateProofs.reverse_eq",
+            "PsKernelOrdinaryHeaderStateProofs.finish_keeps_complete_returned_owner",
+            "PsKernelOrdinaryHeaderStateProofs.finish_decline",
+            "PsKernelOrdinaryHeaderStateProofs.finish_error",
+            "PsKernelOrdinaryHeaderStateProofs.mandatory_sort_keeps_complete_returned_owner",
+            "PsKernelOrdinaryHeaderStateProofs.binder_check_decline_precedes_whnf_and_opening",
+            "PsKernelOrdinaryHeaderStateProofs.binder_check_error_precedes_whnf_and_opening",
+            "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_decline_precedes_annotations",
+            "PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_error_precedes_annotations",
+            "PsKernelOrdinaryHeaderStateProofs.binder_annotation_error_precedes_allocation",
+            "PsKernelOrdinaryHeaderStateProofs.binder_opening_error_preserved",
+            "PsKernelOrdinaryHeaderStateProofs.binder_success_keeps_post_opening_owner_and_original_domain",
+            "PsKernelOrdinaryHeaderStateProofs.binder_allocation_preserves_every_semantic_field",
+            "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_decline_precedes_lookup",
+            "PsKernelOrdinaryHeaderStateProofs.param_step_whnf_error_precedes_lookup",
+            "PsKernelOrdinaryHeaderStateProofs.param_step_lookup_error_precedes_check",
+            "PsKernelOrdinaryHeaderStateProofs.param_step_uses_returned_owner_and_original_fuel",
+            "PsKernelOrdinaryHeaderStateProofs.params_zero_still_performs_final_whnf",
+            "PsKernelOrdinaryHeaderStateProofs.params_successor_keeps_original_fuel",
+            "PsKernelOrdinaryHeaderStateProofs.params_successor_decline",
+            "PsKernelOrdinaryHeaderStateProofs.params_successor_error",
+            "PsKernelOrdinaryHeaderStateProofs.params_wrapper_starts_empty",
+            "PsKernelOrdinaryHeaderStateProofs.indices_zero_precedes_callbacks_and_lookup",
+            "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_decline_uses_predecessor",
+            "PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_error_uses_predecessor",
+            "PsKernelOrdinaryHeaderStateProofs.indices_successor_lookup_error_precedes_check",
+            "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_threads_post_opening_owner",
+            "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_decline",
+            "PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_error",
+            "PsKernelOrdinaryHeaderStateProofs.indices_terminal_sort_keeps_complete_returned_owner",
+            "PsKernelOrdinaryHeaderStateProofs.indices_wrapper_adds_one_before_callbacks",
+            "PsKernelOrdinaryHeaderStateProofs.constructor_context_is_parameter_context",
+            "PsKernelOrdinaryHeaderStateProofs.constructor_fork_preserves_parameter_semantics_and_freshness",
+            "PsKernelOrdinaryHeaderStateProofs.constructor_fork_ignores_index_semantic_state",
+            "PsKernelOrdinaryHeaderStateProofs.header_finish_sort_keeps_both_owners",
+            "PsKernelOrdinaryHeaderStateProofs.header_finish_lookup_error",
+            "PsKernelOrdinaryHeaderStateProofs.header_finish_nonsort_error",
+            "PsKernelOrdinaryHeaderStateProofs.header_check_decline_precedes_whnf",
+            "PsKernelOrdinaryHeaderStateProofs.header_check_error_precedes_whnf",
+            "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_decline_precedes_opening",
+            "PsKernelOrdinaryHeaderStateProofs.header_public_whnf_error_precedes_opening",
+            "PsKernelOrdinaryHeaderStateProofs.header_after_sort_composition",
+            "PsKernelOrdinaryHeaderStateProofs.header_guard_error_precedes_callbacks",
+            "PsKernelOrdinaryHeaderStateProofs.header_duplicate_levels_precede_all_other_guards",
+            "PsKernelOrdinaryHeaderStateProofs.header_duplicate_names_precede_freshness_and_types",
+            "PsKernelOrdinaryHeaderStateProofs.header_freshness_error_precedes_uniform_and_header",
+            "PsKernelOrdinaryHeaderStateProofs.header_uniform_error_precedes_static_header",
+            "PsKernelOrdinaryHeaderStateProofs.header_successful_guards_initialize_one_fresh_owner"
+          ],
+          "source": {
+            "bytes": 31818,
+            "sha256": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e"
+          },
+          "log": {
+            "bytes": 6319,
+            "sha256": "6e5fa413d81b15224e8853ecd55f1ee492b1a3a6e9255e2e93a6e6c4038a1e00"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryOccurrenceProofs",
+          "proofs": 15,
+          "names": [
+            "PsKernelOrdinaryOccurrenceProofs.app_spine_with_fuel_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.app_spine_on_canonical_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.uniform_argument_count_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.uniform_arguments_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.declared_names_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_head_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_with_fuel_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_structural_adequacy",
+            "PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_on_canonical_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.uniform_occurrences_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.legacy_depth_le_expanded_count",
+            "PsKernelOrdinaryOccurrenceProofs.annotation_target_depth",
+            "PsKernelOrdinaryOccurrenceProofs.annotation_structural_adequacy",
+            "PsKernelOrdinaryOccurrenceProofs.annotations_with_fuel_correspondence",
+            "PsKernelOrdinaryOccurrenceProofs.annotations_on_canonical_correspondence"
+          ],
+          "source": {
+            "bytes": 29015,
+            "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351"
+          },
+          "log": {
+            "bytes": 5048,
+            "sha256": "d7ed04f8a65d342f2e8c64d27ff708687008e86903f8c1c30838b7b5892357f8"
+          }
+        },
+        {
+          "module": "PsKernelCacheScopeProofs",
+          "proofs": 60,
+          "names": [
+            "PsKernelCacheScopeProofs.exit_scope_restores_all_caches",
+            "PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child",
+            "PsKernelCacheScopeProofs.exit_scope_counter_exact",
+            "PsKernelCacheScopeProofs.exit_scope_counter_ge_parent",
+            "PsKernelCacheScopeProofs.exit_scope_counter_ge_child",
+            "PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child",
+            "PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag",
+            "PsKernelCacheScopeProofs.semantic_fvar_ineligible",
+            "PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags",
+            "PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag",
+            "PsKernelCacheScopeProofs.dag_whnf_starts_without_cache",
+            "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup",
+            "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication",
+            "PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache",
+            "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup",
+            "PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication",
+            "PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax",
+            "PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax",
+            "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache",
+            "PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache",
+            "PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references",
+            "PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena",
+            "PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches",
+            "PsKernelCacheScopeProofs.dag_check_scope_counter_exact",
+            "PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache",
+            "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup",
+            "PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication",
+            "PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache",
+            "PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment",
+            "PsKernelCacheScopeProofs.constant_reference_factorization_preserves",
+            "PsKernelCacheScopeProofs.constant_reference_factorization_extensional",
+            "PsKernelCacheScopeProofs.dag_check_starts_without_success_cache",
+            "PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache",
+            "PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache",
+            "PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish",
+            "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup",
+            "PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication",
+            "PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache",
+            "PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache",
+            "PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache",
+            "PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache",
+            "PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache",
+            "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup",
+            "PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication",
+            "PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache",
+            "PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache",
+            "PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache",
+            "PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment",
+            "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before",
+            "PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before",
+            "PsKernelCacheScopeProofs.inference_cache_eligibility_preserves",
+            "PsKernelCacheScopeProofs.inference_cache_eligibility_extensional",
+            "PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks",
+            "PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner",
+            "PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure",
+            "PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches",
+            "PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks",
+            "PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks",
+            "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before",
+            "PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before"
+          ],
+          "source": {
+            "bytes": 36771,
+            "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5"
+          },
+          "log": {
+            "bytes": 9311,
+            "sha256": "d6f86aa750b5d93f9c42fea60153aac1f8457d8ef868e314632b6f7c83b566ae"
+          }
+        },
+        {
+          "module": "PsKernelExprV2SessionProofs",
+          "proofs": 14,
+          "names": [
+            "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+            "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+            "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+            "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+            "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+            "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+            "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+            "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+            "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+            "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+            "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+            "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+            "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+            "PsKernelExprV2SessionProofs.append_demands_preserves_order"
+          ],
+          "source": {
+            "bytes": 9567,
+            "sha256": "33b73b9333eea849e44a096a886fdee549504e820072305f9438361ecabb0dd3"
+          },
+          "log": {
+            "bytes": 1774,
+            "sha256": "6252fcd741c45297f1a7e0fb9e2699d3fe7783add8a224076453a801a73a101a"
+          }
+        },
+        {
+          "module": "PsKernelScalarHashWorkerRegression",
+          "proofs": 11,
+          "names": [
+            "PsKernelScalarHashWorkerRegression.short_pairs_eq",
+            "PsKernelScalarHashWorkerRegression.entry_pairs_eq",
+            "PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker",
+            "PsKernelScalarHashWorkerRegression.pairs_eq_before",
+            "PsKernelScalarHashWorkerRegression.state_eq_before",
+            "PsKernelScalarHashWorkerRegression.state_succ",
+            "PsKernelScalarHashWorkerRegression.state_step_commutes",
+            "PsKernelScalarHashWorkerRegression.state_fixed",
+            "PsKernelScalarHashWorkerRegression.scan_eq_before",
+            "PsKernelScalarHashWorkerRegression.worker_eq_before",
+            "PsKernelScalarHashWorkerRegression.hash_eq_before"
+          ],
+          "source": {
+            "bytes": 10872,
+            "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2"
+          },
+          "log": {
+            "bytes": 1338,
+            "sha256": "03beaf46178d8d4a50e9f7e59cb19ab827655d608f7ea34ded4348e7bc6d2ccb"
+          }
+        },
+        {
+          "module": "PsKernelClosedCacheAnalysisRegression",
+          "proofs": 7,
+          "names": [
+            "PsKernelClosedCacheAnalysisRegression.analysis_eq",
+            "PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq",
+            "PsKernelClosedCacheAnalysisRegression.semantic_map_insert_eq",
+            "PsKernelClosedCacheAnalysisRegression.semantic_pair_contains_eq",
+            "PsKernelClosedCacheAnalysisRegression.semantic_pair_insert_eq",
+            "PsKernelClosedCacheAnalysisRegression.infer_map_get_eq",
+            "PsKernelClosedCacheAnalysisRegression.infer_map_insert_eq"
+          ],
+          "source": {
+            "bytes": 6106,
+            "sha256": "ecb1da642bacc61f60806bf0875d4461ac1b6090058edff9d9cd9b94d7d1c61c"
+          },
+          "log": {
+            "bytes": 1150,
+            "sha256": "b746149a52202f619ae47573875540cb5550c03673429cedbc371ba6efecdd10"
+          }
+        },
+        {
+          "module": "PsKernelKnotFuelProofs",
+          "proofs": 16,
+          "names": [
+            "PsKernelKnotFuelProofs.ReduceRecursorBoundedWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.IsDefEqWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.WhnfWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.WhnfCoreWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.WhnfCoreWithFuel_full_mode_preserves_historical",
+            "PsKernelKnotFuelProofs.InferCoreWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.InferAppOnlyLoopWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.DefEqLazyReductionWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.DefEqLazyProjReductionWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.DefEqArgsWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.DefEqLambdaSpineWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.DefEqForallSpineWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.DefEqCompareExprListsWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.WhnfCountLambdasWithFuel_delayed_recursion_preserves",
+            "PsKernelKnotFuelProofs.StringConstructorDataWithFuel_delayed_recursion_preserves"
+          ],
+          "source": {
+            "bytes": 131180,
+            "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b"
+          },
+          "log": {
+            "bytes": 2190,
+            "sha256": "5c71d5b3f7f63b1cf56cf60c6dcf82f436503ea3bd78f5ee56daaa8dbe8febd0"
+          }
+        },
+        {
+          "module": "PsKernelExprV2MetadataProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelExprV2MetadataProofs.app_preserves",
+            "PsKernelExprV2MetadataProofs.lam_preserves",
+            "PsKernelExprV2MetadataProofs.forall_preserves",
+            "PsKernelExprV2MetadataProofs.let_preserves",
+            "PsKernelExprV2MetadataProofs.mdata_preserves",
+            "PsKernelExprV2MetadataProofs.proj_preserves",
+            "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+            "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth"
+          ],
+          "source": {
+            "bytes": 7319,
+            "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+          },
+          "log": {
+            "bytes": 870,
+            "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+          }
+        },
+        {
+          "module": "PsKernelExprV2PagedModelProofs",
+          "proofs": 17,
+          "names": [
+            "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+            "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+            "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+            "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+            "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+            "PsKernelExprV2PagedModelProofs.empty_layout",
+            "PsKernelExprV2PagedModelProofs.push_id_and_size",
+            "PsKernelExprV2PagedModelProofs.push_layout",
+            "PsKernelExprV2PagedModelProofs.valid_id_location",
+            "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+            "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+            "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+            "PsKernelExprV2PagedModelProofs.push_find_old",
+            "PsKernelExprV2PagedModelProofs.push_find_new",
+            "PsKernelExprV2PagedModelProofs.push_find",
+            "PsKernelExprV2PagedModelProofs.push_require_old",
+            "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+          ],
+          "source": {
+            "bytes": 16916,
+            "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+          },
+          "log": {
+            "bytes": 2900,
+            "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryConstructorParamsProofs",
+          "proofs": 17,
+          "names": [
+            "PsKernelOrdinaryConstructorParamsProofs.worker_zero_precedes_parameters_lookup_and_callbacks",
+            "PsKernelOrdinaryConstructorParamsProofs.successor_empty_keeps_complete_owner_without_lookup",
+            "PsKernelOrdinaryConstructorParamsProofs.lookup_error_precedes_defeq",
+            "PsKernelOrdinaryConstructorParamsProofs.syntactic_nonforall_precedes_defeq",
+            "PsKernelOrdinaryConstructorParamsProofs.forall_uses_predecessor_fuel_and_constructor_domain_left",
+            "PsKernelOrdinaryConstructorParamsProofs.defeq_decline_precedes_fvar_and_instantiation",
+            "PsKernelOrdinaryConstructorParamsProofs.defeq_error_precedes_fvar_and_instantiation",
+            "PsKernelOrdinaryConstructorParamsProofs.defeq_false_precedes_fvar_and_instantiation",
+            "PsKernelOrdinaryConstructorParamsProofs.fvar_error_uses_returned_owner_and_existing_parameter_name",
+            "PsKernelOrdinaryConstructorParamsProofs.instantiation_error_precedes_recursive_continuation",
+            "PsKernelOrdinaryConstructorParamsProofs.success_keeps_context_and_complete_returned_owner",
+            "PsKernelOrdinaryConstructorParamsProofs.success_preserves_every_semantic_field_and_freshness",
+            "PsKernelOrdinaryConstructorParamsProofs.one_unit_successful_step_still_reaches_zero_before_empty_tail",
+            "PsKernelOrdinaryConstructorParamsProofs.two_or_more_units_finish_one_parameter_with_returned_owner",
+            "PsKernelOrdinaryConstructorParamsProofs.wrapper_adds_one_before_empty_or_callbacks",
+            "PsKernelOrdinaryConstructorParamsProofs.wrapper_zero_empty_is_identity",
+            "PsKernelOrdinaryConstructorParamsProofs.with_fuel_uses_full_owner_defeq_without_fallback"
+          ],
+          "source": {
+            "bytes": 15184,
+            "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019"
+          },
+          "log": {
+            "bytes": 2568,
+            "sha256": "85bf7e5709218d3fe82d4f7c797a74eaccd623d4cd6d916c9be7437afc180f08"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryConstructorResultProofs",
+          "proofs": 16,
+          "names": [
+            "PsKernelOrdinaryConstructorResultProofs.consume_empty_preserves_exact_tail",
+            "PsKernelOrdinaryConstructorResultProofs.consume_missing_argument_is_mismatch",
+            "PsKernelOrdinaryConstructorResultProofs.consume_fvar_compares_only_internal_name",
+            "PsKernelOrdinaryConstructorResultProofs.contains_zero_precedes_lookup",
+            "PsKernelOrdinaryConstructorResultProofs.contains_projection_name_precedes_receiver",
+            "PsKernelOrdinaryConstructorResultProofs.contains_application_hit_precedes_argument",
+            "PsKernelOrdinaryConstructorResultProofs.contains_application_error_precedes_argument",
+            "PsKernelOrdinaryConstructorResultProofs.contains_const_with_fuel_correspondence",
+            "PsKernelOrdinaryConstructorResultProofs.contains_const_on_canonical_correspondence",
+            "PsKernelOrdinaryConstructorResultProofs.indices_contain_target_correspondence",
+            "PsKernelOrdinaryConstructorResultProofs.validate_shape_mismatch_precedes_occurrence",
+            "PsKernelOrdinaryConstructorResultProofs.validate_recursive_index_rejected",
+            "PsKernelOrdinaryConstructorResultProofs.validate_preserves_exact_index_ids",
+            "PsKernelOrdinaryConstructorResultProofs.consume_result_params_correspondence",
+            "PsKernelOrdinaryConstructorResultProofs.inductive_app_indices_correspondence",
+            "PsKernelOrdinaryConstructorResultProofs.validate_constructor_result_correspondence"
+          ],
+          "source": {
+            "bytes": 25543,
+            "sha256": "5fb21b0e72978a520a5528f1177825cae4f3b7b5ed1871787b0c34db6cbfced4"
+          },
+          "log": {
+            "bytes": 2273,
+            "sha256": "94ce33596ed7d530cb563ced409a7b8764af088b5228c99bbd3d14e93646d26a"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryRecursiveArgumentProofs",
+          "proofs": 24,
+          "names": [
+            "PsKernelOrdinaryRecursiveArgumentProofs.zero_precedes_lookup_and_callbacks",
+            "PsKernelOrdinaryRecursiveArgumentProofs.wrapper_adds_one_and_starts_empty_arguments",
+            "PsKernelOrdinaryRecursiveArgumentProofs.with_fuel_uses_full_owner_callbacks",
+            "PsKernelOrdinaryRecursiveArgumentProofs.whnf_decline_stops_before_selector",
+            "PsKernelOrdinaryRecursiveArgumentProofs.whnf_error_stops_before_selector",
+            "PsKernelOrdinaryRecursiveArgumentProofs.selector_error_uses_whnf_owner",
+            "PsKernelOrdinaryRecursiveArgumentProofs.selected_branch_retains_complete_whnf_owner",
+            "PsKernelOrdinaryRecursiveArgumentProofs.lookup_error_after_selector_miss",
+            "PsKernelOrdinaryRecursiveArgumentProofs.original_occurrence_error_precedes_reduced_scan",
+            "PsKernelOrdinaryRecursiveArgumentProofs.original_occurrence_hit_skips_reduced_scan",
+            "PsKernelOrdinaryRecursiveArgumentProofs.original_occurrence_miss_uses_reduced_scan",
+            "PsKernelOrdinaryRecursiveArgumentProofs.unsafe_recursion_guard_skips_arena_and_environment",
+            "PsKernelOrdinaryRecursiveArgumentProofs.absent_reduced_occurrence_skips_head_metadata",
+            "PsKernelOrdinaryRecursiveArgumentProofs.terminal_nonrecursive_preserves_context_and_complete_owner",
+            "PsKernelOrdinaryRecursiveArgumentProofs.terminal_safe_invalid_rec_head_rejects",
+            "PsKernelOrdinaryRecursiveArgumentProofs.terminal_other_occurrence_retains_nested_error",
+            "PsKernelOrdinaryRecursiveArgumentProofs.selected_success_preserves_owner_names_and_exact_indices",
+            "PsKernelOrdinaryRecursiveArgumentProofs.selected_recursive_index_rejects",
+            "PsKernelOrdinaryRecursiveArgumentProofs.forall_domain_whnf_decline_precedes_occurrence_and_check",
+            "PsKernelOrdinaryRecursiveArgumentProofs.forall_domain_whnf_error_precedes_occurrence_and_check",
+            "PsKernelOrdinaryRecursiveArgumentProofs.negative_domain_precedes_check_sort_allocation_and_recursion",
+            "PsKernelOrdinaryRecursiveArgumentProofs.binder_decline_uses_domain_whnf_owner",
+            "PsKernelOrdinaryRecursiveArgumentProofs.binder_error_stops_before_recursion",
+            "PsKernelOrdinaryRecursiveArgumentProofs.binder_success_threads_complete_owner_body_name_and_predecessor"
+          ],
+          "source": {
+            "bytes": 17353,
+            "sha256": "035c86cec63c50ea0da4ae83f81f0a03144121ea57fe22638a4816107f895bed"
+          },
+          "log": {
+            "bytes": 3540,
+            "sha256": "3382baca55a2e94c5a9ffed82df7d97cbe5df85197eec007eabfec378a0a7d26"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryConstructorFieldsProofs",
+          "proofs": 23,
+          "names": [
+            "PsKernelOrdinaryConstructorFieldsProofs.zero_fuel_precedes_lookup_and_every_callback",
+            "PsKernelOrdinaryConstructorFieldsProofs.lookup_error_precedes_field_callbacks",
+            "PsKernelOrdinaryConstructorFieldsProofs.syntactic_nonforall_finishes_without_whnf_or_body_change",
+            "PsKernelOrdinaryConstructorFieldsProofs.field_step_decline_uses_predecessor_fuel",
+            "PsKernelOrdinaryConstructorFieldsProofs.field_step_error_precedes_next_field",
+            "PsKernelOrdinaryConstructorFieldsProofs.field_step_success_threads_complete_owner_and_ordered_descriptors",
+            "PsKernelOrdinaryConstructorFieldsProofs.prepare_check_decline_precedes_whnf_and_local_allocation",
+            "PsKernelOrdinaryConstructorFieldsProofs.prepare_check_error_precedes_whnf_and_local_allocation",
+            "PsKernelOrdinaryConstructorFieldsProofs.prepare_mandatory_sort_uses_checked_owner_and_type",
+            "PsKernelOrdinaryConstructorFieldsProofs.prepare_sort_decline_precedes_universe_and_annotations",
+            "PsKernelOrdinaryConstructorFieldsProofs.prepare_sort_error_precedes_universe_and_annotations",
+            "PsKernelOrdinaryConstructorFieldsProofs.universe_rejection_precedes_annotations_and_freshness",
+            "PsKernelOrdinaryConstructorFieldsProofs.annotation_error_precedes_local_allocation",
+            "PsKernelOrdinaryConstructorFieldsProofs.prop_universe_exception_still_consumes_annotations",
+            "PsKernelOrdinaryConstructorFieldsProofs.preparation_allocates_only_local_and_freshness_before_analysis",
+            "PsKernelOrdinaryConstructorFieldsProofs.analysis_decline_precedes_body_instantiation",
+            "PsKernelOrdinaryConstructorFieldsProofs.analysis_error_precedes_body_instantiation",
+            "PsKernelOrdinaryConstructorFieldsProofs.analysis_success_uses_post_field_owner_original_domain_and_original_body",
+            "PsKernelOrdinaryConstructorFieldsProofs.body_instantiation_error_uses_retained_child_arena_and_field_name",
+            "PsKernelOrdinaryConstructorFieldsProofs.finish_restores_post_field_semantics_and_keeps_child_arena_freshness",
+            "PsKernelOrdinaryConstructorFieldsProofs.successful_last_field_still_reaches_zero_fuel",
+            "PsKernelOrdinaryConstructorFieldsProofs.wrapper_adds_one_and_uses_owned_recursive_analysis",
+            "PsKernelOrdinaryConstructorFieldsProofs.with_fuel_uses_actual_complete_owner_callbacks"
+          ],
+          "source": {
+            "bytes": 19729,
+            "sha256": "b11d2b31b94a3d7eeeaf36325a533ae90b11a817c811d931f3b6c26f4820de98"
+          },
+          "log": {
+            "bytes": 3575,
+            "sha256": "eb84e84e2c13bc124cc3cace79f9f8f3d2d06ef21b8bcb521c56e024b45b176f"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryConstructorAnalysisProofs",
+          "proofs": 19,
+          "names": [
+            "PsKernelOrdinaryConstructorAnalysisProofs.closed_context_is_fresh_and_retains_established_declaration_inputs",
+            "PsKernelOrdinaryConstructorAnalysisProofs.closed_state_is_fresh_with_same_arena_and_owned_references",
+            "PsKernelOrdinaryConstructorAnalysisProofs.resume_retains_only_closed_arena_and_every_original_semantic_field",
+            "PsKernelOrdinaryConstructorAnalysisProofs.resume_discards_closed_freshness_even_when_it_grew",
+            "PsKernelOrdinaryConstructorAnalysisProofs.result_validation_error_precedes_shape_return",
+            "PsKernelOrdinaryConstructorAnalysisProofs.result_validation_success_retains_exact_shape_and_complete_owner",
+            "PsKernelOrdinaryConstructorAnalysisProofs.static_error_precedes_fresh_owner_and_all_callbacks",
+            "PsKernelOrdinaryConstructorAnalysisProofs.closed_check_decline_precedes_sort_and_opening",
+            "PsKernelOrdinaryConstructorAnalysisProofs.closed_check_error_precedes_sort_and_opening",
+            "PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_uses_closed_returned_owner_and_unchanged_phase_fuel",
+            "PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_decline_precedes_parameter_owner_resume",
+            "PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_error_precedes_parameter_owner_resume",
+            "PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_success_resumes_header_against_final_closed_owner",
+            "PsKernelOrdinaryConstructorAnalysisProofs.parameter_decline_uses_resumed_owner_and_original_constructor_type",
+            "PsKernelOrdinaryConstructorAnalysisProofs.parameter_error_precedes_fields_and_result_validation",
+            "PsKernelOrdinaryConstructorAnalysisProofs.field_decline_uses_complete_parameter_owner_and_same_phase_fuel",
+            "PsKernelOrdinaryConstructorAnalysisProofs.field_error_precedes_result_validation",
+            "PsKernelOrdinaryConstructorAnalysisProofs.field_success_validates_original_result_with_final_field_owner",
+            "PsKernelOrdinaryConstructorAnalysisProofs.actual_wrapper_selects_checked_callbacks_without_outer_fuel_change"
+          ],
+          "source": {
+            "bytes": 16155,
+            "sha256": "bdbbea7b33e26e73d0c68ed0c7c549a7243c5e4b045be468c18a1fb5f9353c1b"
+          },
+          "log": {
+            "bytes": 2964,
+            "sha256": "b016857c48a70c4210e1eba6df79a5c4275b5283743e656def21d5e4b7fc6cfb"
+          }
+        },
+        {
+          "module": "PsKernelExprV2OrdinaryConstructorLoopProofs",
+          "proofs": 14,
+          "names": [
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.zero",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.successor_nil",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.successor_cons_equation",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.analysis_decline",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.analysis_error",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.installation_error",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.tail_decline",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.tail_error",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.tail_success_order",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.fuel_one_tail_exhausted",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.singleton_success",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.install_lookup_error",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.install_owner_and_original_root",
+            "PsKernelExprV2OrdinaryConstructorLoopProofs.binder_count_length"
+          ],
+          "source": {
+            "bytes": 14890,
+            "sha256": "0998daa5578bb7a49a500a27e546882a7ef60e3924d77afac1d44225dcb366d5"
+          },
+          "log": {
+            "bytes": 1709,
+            "sha256": "7d2496e58134243f6f0aa2c4e3173be1fce4a4600a83fac90df9fc0308644182"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryEliminationProofs",
+          "proofs": 26,
+          "names": [
+            "PsKernelOrdinaryEliminationProofs.member_nil",
+            "PsKernelOrdinaryEliminationProofs.member_cons_equation",
+            "PsKernelOrdinaryEliminationProofs.all_members_nil",
+            "PsKernelOrdinaryEliminationProofs.all_members_cons_equation",
+            "PsKernelOrdinaryEliminationProofs.member_lifts_pointwise_structural_equality",
+            "PsKernelOrdinaryEliminationProofs.all_members_lifts_pointwise_membership",
+            "PsKernelOrdinaryEliminationProofs.after_sort_annotation_error_precedes_allocation",
+            "PsKernelOrdinaryEliminationProofs.after_sort_keeps_owner_actual_fvar_and_original_body",
+            "PsKernelOrdinaryEliminationProofs.step_check_decline_precedes_sort",
+            "PsKernelOrdinaryEliminationProofs.step_check_error_precedes_sort",
+            "PsKernelOrdinaryEliminationProofs.step_sort_decline_uses_complete_checked_owner",
+            "PsKernelOrdinaryEliminationProofs.step_sort_error_uses_complete_checked_owner",
+            "PsKernelOrdinaryEliminationProofs.step_success_passes_sorted_owner_and_original_domain",
+            "PsKernelOrdinaryEliminationProofs.worker_zero_precedes_every_callback",
+            "PsKernelOrdinaryEliminationProofs.worker_whnf_decline_uses_predecessor",
+            "PsKernelOrdinaryEliminationProofs.worker_whnf_error_precedes_lookup",
+            "PsKernelOrdinaryEliminationProofs.worker_lookup_error_uses_returned_arena",
+            "PsKernelOrdinaryEliminationProofs.worker_forall_composes_predecessor_step_and_complete_owner",
+            "PsKernelOrdinaryEliminationProofs.worker_terminal_membership_uses_reduced_owner_and_all_arguments",
+            "PsKernelOrdinaryEliminationProofs.parameter_decline_precedes_telescope_whnf",
+            "PsKernelOrdinaryEliminationProofs.parameter_error_precedes_telescope_whnf",
+            "PsKernelOrdinaryEliminationProofs.parameter_success_preserves_owner_and_adds_one_worker_step",
+            "PsKernelOrdinaryEliminationProofs.policy_nonprop_shortcut",
+            "PsKernelOrdinaryEliminationProofs.policy_empty_shortcut",
+            "PsKernelOrdinaryEliminationProofs.policy_multiple_shortcut",
+            "PsKernelOrdinaryEliminationProofs.policy_singleton_composition_preserves_decline_error_and_negation"
+          ],
+          "source": {
+            "bytes": 19349,
+            "sha256": "20c41005810df740fea003b18477dd1b499fb6e83b81a6a8e644638618b733a2"
+          },
+          "log": {
+            "bytes": 3520,
+            "sha256": "cd1ca9609301c74ec5f32937d98eb255c59d1b3ef85b15a8a053cd6fa0b0bfa0"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryAdmissionProofs",
+          "proofs": 27,
+          "names": [
+            "PsKernelOrdinaryAdmissionProofs.rules_empty_identity_at_any_fuel",
+            "PsKernelOrdinaryAdmissionProofs.rules_excess_precedes_callbacks",
+            "PsKernelOrdinaryAdmissionProofs.rules_missing_precedes_callbacks",
+            "PsKernelOrdinaryAdmissionProofs.rule_check_decline_precedes_import",
+            "PsKernelOrdinaryAdmissionProofs.rule_check_error_precedes_import",
+            "PsKernelOrdinaryAdmissionProofs.expected_import_error_uses_complete_checked_owner",
+            "PsKernelOrdinaryAdmissionProofs.rule_defeq_decline_uses_complete_imported_owner",
+            "PsKernelOrdinaryAdmissionProofs.rule_defeq_error_uses_complete_imported_owner",
+            "PsKernelOrdinaryAdmissionProofs.rule_defeq_false_prevents_tail_and_publication",
+            "PsKernelOrdinaryAdmissionProofs.rule_success_returns_tail_with_same_fuel_and_full_owner",
+            "PsKernelOrdinaryAdmissionProofs.synchronize_returns_current_arena_and_references",
+            "PsKernelOrdinaryAdmissionProofs.generated_import_preserves_complete_semantic_owner",
+            "PsKernelOrdinaryAdmissionProofs.recursor_staging_ignores_type_phase_semantic_and_reference_mutations",
+            "PsKernelOrdinaryAdmissionProofs.recursor_staging_uses_parent_owner_and_adds_generated_reference",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_decline_prevents_publication",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_error_prevents_publication",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_success_still_requires_final_synchronization",
+            "PsKernelOrdinaryAdmissionProofs.final_synchronization_error_prevents_success",
+            "PsKernelOrdinaryAdmissionProofs.final_success_contains_only_synchronized_owner",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_state_resets_every_semantic_collection",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_check_decline_precedes_sort",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_check_error_precedes_sort",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_sort_decline_uses_complete_checked_owner",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_sort_error_uses_complete_checked_owner",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_success_hands_off_only_after_sort_and_staging",
+            "PsKernelOrdinaryAdmissionProofs.unsynchronized_input_owner_rejects_before_decoding",
+            "PsKernelOrdinaryAdmissionProofs.original_namespace_error_precedes_header_check"
+          ],
+          "source": {
+            "bytes": 19187,
+            "sha256": "c1d2e9bb559c4a3e049daa59a371a668502b09adcc463d9e08135352c9f0db35"
+          },
+          "log": {
+            "bytes": 3409,
+            "sha256": "30e1a952f0e4c9b29d06144056b73c8b4bd24e9c2bbed026b5491b4284d687e3"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryAdmissionPublicProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelOrdinaryAdmissionPublicProofs.preflight_error_precedes_private_worker",
+            "PsKernelOrdinaryAdmissionPublicProofs.decline_restarts_original_session_arena_input_and_request",
+            "PsKernelOrdinaryAdmissionPublicProofs.private_error_returns_no_owner_or_environment",
+            "PsKernelOrdinaryAdmissionPublicProofs.private_success_reaches_resource_gate_with_complete_result",
+            "PsKernelOrdinaryAdmissionPublicProofs.declaration_limit_returns_no_checked_owner",
+            "PsKernelOrdinaryAdmissionPublicProofs.successful_publication_retains_exact_owner_and_clears_evaluator",
+            "PsKernelOrdinaryAdmissionPublicProofs.fallback_failure_precedes_generated_metadata_import",
+            "PsKernelOrdinaryAdmissionPublicProofs.original_input_decode_failure_precedes_ordinary_admission"
+          ],
+          "source": {
+            "bytes": 6077,
+            "sha256": "a1ea7689f2583e73290c167eca8d872d0830a6c5cbce68829d5eec78cc719941"
+          },
+          "log": {
+            "bytes": 1164,
+            "sha256": "b81c0cb22369fb1b934811f0baabbba93b58d3fd807eb18226a5461edc8b1de8"
+          }
+        },
+        {
+          "module": "PsKernelDeferredTransformProofs",
+          "proofs": 3,
+          "names": [
+            "PsKernelDeferredTransformProofs.transform_with_fuel_eq",
+            "PsKernelDeferredTransformProofs.count_with_fuel_eq",
+            "PsKernelDeferredTransformProofs.lift_with_fuel_eq"
+          ],
+          "source": {
+            "bytes": 10587,
+            "sha256": "7325c591fc9ad1692100d7cb59ce298188d6555a4ddbc3fa3653c3eac7dc22ce"
+          },
+          "log": {
+            "bytes": 321,
+            "sha256": "d4149b5e52dd64256bfc68acb407fe110a436dbcfccd4faa72d26d0aa170cc4c"
+          }
+        },
+        {
+          "module": "PsKernelNatFuelProofs",
+          "proofs": 5,
+          "names": [
+            "PsKernelNatFuelProofs.NatGcdWithFuel_delayed_recursion_preserves",
+            "PsKernelNatFuelProofs.NatHeapWordCountWithFuel_delayed_recursion_preserves",
+            "PsKernelNatFuelProofs.NatPowWithFuel_delayed_recursion_preserves",
+            "PsKernelNatFuelProofs.NatBitwiseWithFuel_delayed_recursion_preserves",
+            "PsKernelNatFuelProofs.NatShiftRightWithFuel_delayed_recursion_preserves"
+          ],
+          "source": {
+            "bytes": 7545,
+            "sha256": "890171f8907b872ec79286cc06cadc611525d7ee685aedf3d1f73730a28b0bcc"
+          },
+          "log": {
+            "bytes": 593,
+            "sha256": "d802991be34a34714004f1c49c67ce59ff350dbb5b98f5545c0ccf1cb69edb4f"
+          }
+        },
+        {
+          "module": "PsKernelExprEqualityProofs",
+          "proofs": 4,
+          "names": [
+            "PsKernelExprEqualityProofs.exprEq_delayed_recursion_preserves",
+            "PsKernelExprEqualityProofs.exprEqual_delayed_recursion_preserves",
+            "PsKernelExprEqualityProofs.exprEq_pointwise_preserves",
+            "PsKernelExprEqualityProofs.exprEqual_pointwise_preserves"
+          ],
+          "source": {
+            "bytes": 13698,
+            "sha256": "6e15d29e67b0125182e449eca9f22e6adaa1cf99892198c1a9a4b6af5c828664"
+          },
+          "log": {
+            "bytes": 564,
+            "sha256": "5f89bbacb64bb25b0ea67037e25e7417121c781ac4944398e4d82be9ce720447"
+          }
+        },
+        {
+          "module": "PsKernelExprV2AdmissionGuardProofs",
+          "proofs": 18,
+          "names": [
+            "PsKernelExprV2AdmissionGuardProofs.id_member_exact",
+            "PsKernelExprV2AdmissionGuardProofs.bucket_set_same",
+            "PsKernelExprV2AdmissionGuardProofs.inserted_id_is_found",
+            "PsKernelExprV2AdmissionGuardProofs.hit_requires_exact_id",
+            "PsKernelExprV2AdmissionGuardProofs.empty_owner_has_no_hits",
+            "PsKernelExprV2AdmissionGuardProofs.first_undef_kept",
+            "PsKernelExprV2AdmissionGuardProofs.first_undef_from_next",
+            "PsKernelExprV2AdmissionGuardProofs.expression_mvar_implies_full_mvar",
+            "PsKernelExprV2AdmissionGuardProofs.sort_universe_mvar_precedes_param",
+            "PsKernelExprV2AdmissionGuardProofs.constant_universe_mvar_precedes_param",
+            "PsKernelExprV2AdmissionGuardProofs.free_variable_precedes_undefined_param",
+            "PsKernelExprV2AdmissionGuardProofs.finish_matches_reference",
+            "PsKernelExprV2AdmissionGuardProofs.scan_zero_precedes_memo",
+            "PsKernelExprV2AdmissionGuardProofs.validated_root_expression_mvar",
+            "PsKernelExprV2AdmissionGuardProofs.canonical_guard_matches_reference_conditionally",
+            "PsKernelExprV2AdmissionGuardProofs.checked_boundary_preserves_validation_error",
+            "PsKernelExprV2AdmissionGuardProofs.header_existing_name_precedes_arena",
+            "PsKernelExprV2AdmissionGuardProofs.header_duplicate_params_precedes_arena"
+          ],
+          "source": {
+            "bytes": 10427,
+            "sha256": "c61033f08eb98c70a05a81261e276740d113c012a0104ece7882072fe625c3ba"
+          },
+          "log": {
+            "bytes": 2005,
+            "sha256": "1c5ac9ba0ccd1dbe9c76cc54f994f58fce2dbb0b4165740f244f07ed48267cd1"
+          }
+        },
+        {
+          "module": "PsKernelExprV2RecursorProofs",
+          "proofs": 23,
+          "names": [
+            "PsKernelExprV2RecursorProofs.generated_type_reuses_current_command_ref",
+            "PsKernelExprV2RecursorProofs.generated_prefix_empty",
+            "PsKernelExprV2RecursorProofs.generated_prefix_stops_at_old_name",
+            "PsKernelExprV2RecursorProofs.generated_prefix_first_import_error",
+            "PsKernelExprV2RecursorProofs.generated_prefix_threads_complete_state",
+            "PsKernelExprV2RecursorProofs.generated_import_error_prevents_batch_publication",
+            "PsKernelExprV2RecursorProofs.generated_late_command_error_prevents_batch_publication",
+            "PsKernelExprV2RecursorProofs.check_uses_input_namespace",
+            "PsKernelExprV2RecursorProofs.whnf_uses_input_namespace",
+            "PsKernelExprV2RecursorProofs.defeq_left_uses_input_namespace_first",
+            "PsKernelExprV2RecursorProofs.admission_uses_input_namespace",
+            "PsKernelExprV2RecursorProofs.generated_finish_synchronizes_append",
+            "PsKernelExprV2RecursorProofs.generated_finish_refuses_wrong_root",
+            "PsKernelExprV2RecursorProofs.no_owner_from_empty_batch",
+            "PsKernelExprV2RecursorProofs.insufficient_fields_precede_owner",
+            "PsKernelExprV2RecursorProofs.wrong_universe_arity_precedes_owner",
+            "PsKernelExprV2RecursorProofs.missing_owner_never_claims_reduction",
+            "PsKernelExprV2RecursorProofs.K_refuses_before_callbacks",
+            "PsKernelExprV2RecursorProofs.constructor_skips_major_callback",
+            "PsKernelExprV2RecursorProofs.nonconstructor_callback_error_precedes_normalization",
+            "PsKernelExprV2RecursorProofs.recursor_zero_before_syntax",
+            "PsKernelExprV2RecursorProofs.generated_fallback_import_error_returns_no_owner",
+            "PsKernelExprV2RecursorProofs.owned_command_error_prevents_batch_publication"
+          ],
+          "source": {
+            "bytes": 17392,
+            "sha256": "7269e054a0a7fe2731de7fa0720ec9eefbe5be0eafa0efee34ec0e0254a118e4"
+          },
+          "log": {
+            "bytes": 3346,
+            "sha256": "0ffed70e5ca824534f8d2b4edcfbfa02df4ae7e30a4135fdb7f91b508e990129"
+          }
+        },
+        {
+          "module": "PsKernelExprV2RecursorMajorProofs",
+          "proofs": 10,
+          "names": [
+            "PsKernelExprV2RecursorMajorProofs.major_family_zero_precedes_root",
+            "PsKernelExprV2RecursorMajorProofs.structure_fields_zero_preserves_arena",
+            "PsKernelExprV2RecursorMajorProofs.no_type_owner_in_empty_index",
+            "PsKernelExprV2RecursorMajorProofs.constructor_shortcut_precedes_owner_and_callbacks",
+            "PsKernelExprV2RecursorMajorProofs.missing_family_owner_declines",
+            "PsKernelExprV2RecursorMajorProofs.non_structure_major_is_supported_unchanged",
+            "PsKernelExprV2RecursorMajorProofs.structure_inference_decline_preserved",
+            "PsKernelExprV2RecursorMajorProofs.structure_inference_error_precedes_type_whnf",
+            "PsKernelExprV2RecursorMajorProofs.string_uses_public_callback_after_exact_construction",
+            "PsKernelExprV2RecursorMajorProofs.is_prop_retains_complete_last_callback_state"
+          ],
+          "source": {
+            "bytes": 6659,
+            "sha256": "a387dba1a82dbc13897a59373625754e1edb42ec75b99392c0ecba71c48de5e7"
+          },
+          "log": {
+            "bytes": 1309,
+            "sha256": "c8ac84786350f495ab0af3949b493467db9ad1a0151028742e963ba74ff2fd25"
+          }
+        },
+        {
+          "module": "PsKernelExprV2RecursorKProofs",
+          "proofs": 6,
+          "names": [
+            "PsKernelExprV2RecursorKProofs.inferNone",
+            "PsKernelExprV2RecursorKProofs.inferError",
+            "PsKernelExprV2RecursorKProofs.whnfNone",
+            "PsKernelExprV2RecursorKProofs.whnfError",
+            "PsKernelExprV2RecursorKProofs.candidateDecisionRetainsFullState",
+            "PsKernelExprV2RecursorKProofs.candidateFalseRetainsFullState"
+          ],
+          "source": {
+            "bytes": 4804,
+            "sha256": "de842c5700f96c1b472d6ca2a3f572ae7b0a2f954cdd79b3ee3ad2f20c85913d"
+          },
+          "log": {
+            "bytes": 655,
+            "sha256": "b4614290d24d35bb97286d4e07ec144f4696b55dfd85ab45e123c6bf124a0ee8"
+          }
+        },
+        {
+          "module": "PsKernelNameWorkerProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelNameWorkerProofs.raw_worker_exact",
+            "PsKernelNameWorkerProofs.raw_public_exact",
+            "PsKernelNameWorkerProofs.string_public_exact",
+            "PsKernelNameWorkerProofs.name_worker_exact",
+            "PsKernelNameWorkerProofs.name_public_exact",
+            "PsKernelNameWorkerProofs.raw_partial_application_exact",
+            "PsKernelNameWorkerProofs.name_partial_application_exact",
+            "PsKernelNameWorkerProofs.raw_zero_fuel_exact"
+          ],
+          "source": {
+            "bytes": 5799,
+            "sha256": "a70448dc4a1572ea8d772399d95fd815b155acf68bd66554c6e9544b9b7fbe41"
+          },
+          "log": {
+            "bytes": 859,
+            "sha256": "999a5006eecdde13b397c9569a9c2b41895b01f70025a2ae771b98a55fc8e927"
+          }
+        },
+        {
+          "module": "PsKernelExprV2QuotOwnerProofs",
+          "proofs": 21,
+          "names": [
+            "PsKernelExprV2QuotOwnerProofs.kind_reflexive",
+            "PsKernelExprV2QuotOwnerProofs.quotient_kind_matches_exact",
+            "PsKernelExprV2QuotOwnerProofs.quotient_kind_refuses_axiom",
+            "PsKernelExprV2QuotOwnerProofs.find_missing",
+            "PsKernelExprV2QuotOwnerProofs.find_wrong_kind",
+            "PsKernelExprV2QuotOwnerProofs.plan_uninitialized",
+            "PsKernelExprV2QuotOwnerProofs.plan_missing_first",
+            "PsKernelExprV2QuotOwnerProofs.plan_incomplete_last",
+            "PsKernelExprV2QuotOwnerProofs.plan_complete",
+            "PsKernelExprV2QuotOwnerProofs.owner_missing",
+            "PsKernelExprV2QuotOwnerProofs.owner_delta_refused",
+            "PsKernelExprV2QuotOwnerProofs.owner_type_error_refused",
+            "PsKernelExprV2QuotOwnerProofs.owner_type_exact_comparison",
+            "PsKernelExprV2QuotOwnerProofs.install_missing_plan",
+            "PsKernelExprV2QuotOwnerProofs.install_existing_plan",
+            "PsKernelExprV2QuotOwnerProofs.install_incomplete_owners",
+            "PsKernelExprV2QuotOwnerProofs.quotient_info_imports_only_header",
+            "PsKernelExprV2QuotOwnerProofs.quotient_command_uses_checked_plan",
+            "PsKernelExprV2QuotOwnerProofs.quotient_previous_command_uses_checked_plan",
+            "PsKernelExprV2QuotOwnerProofs.private_check_reference_stays_invalid",
+            "PsKernelExprV2QuotOwnerProofs.private_whnf_reference_stays_invalid"
+          ],
+          "source": {
+            "bytes": 9332,
+            "sha256": "c3f91b5a10bb38d9e5a06bbf0a8d86d485a3a0725fd0429e06a2743ee913bb99"
+          },
+          "log": {
+            "bytes": 2348,
+            "sha256": "ed03aee82672c602bf9490d543bd8d5477e3c2bf91c4df165abac1324a6410e8"
+          }
+        },
+        {
+          "module": "PsKernelExprV2WhnfABIProofs",
+          "proofs": 2,
+          "names": [
+            "PsKernelExprV2WhnfABIProofs.core_wrapper_keeps_exact_operation",
+            "PsKernelExprV2WhnfABIProofs.public_wrapper_keeps_exact_operation"
+          ],
+          "source": {
+            "bytes": 2300,
+            "sha256": "69f3b43a2a3e7dc6c8105df907fadfac33d7cfa57bb79e16bf9d65857070109c"
+          },
+          "log": {
+            "bytes": 254,
+            "sha256": "b81f7d506112ca3ae56ce733500f7bfab355dc53b2c0308a690e148cc32f9950"
+          }
+        },
+        {
+          "module": "PsKernelExprV2OwnedStateProofs",
+          "proofs": 21,
+          "names": [
+            "PsKernelExprV2OwnedStateProofs.lift_success_preserves_six_outer_fields",
+            "PsKernelExprV2OwnedStateProofs.optional_lift_success_preserves_six_outer_fields",
+            "PsKernelExprV2OwnedStateProofs.lower_lift_identity",
+            "PsKernelExprV2OwnedStateProofs.optional_lower_lift_identity",
+            "PsKernelExprV2OwnedStateProofs.lift_decline_and_error_preserved",
+            "PsKernelExprV2OwnedStateProofs.owned_core_zero_precedes_callbacks_and_syntax",
+            "PsKernelExprV2OwnedStateProofs.owned_public_zero_precedes_callbacks_and_syntax",
+            "PsKernelExprV2OwnedStateProofs.owned_recursor_zero_precedes_callbacks_and_syntax",
+            "PsKernelExprV2OwnedStateProofs.owned_inference_zero_precedes_callbacks_and_cache",
+            "PsKernelExprV2OwnedStateProofs.owned_defeq_zero_precedes_syntax_and_cache",
+            "PsKernelExprV2OwnedStateProofs.admission_sort_keeps_complete_returned_owner",
+            "PsKernelExprV2OwnedStateProofs.admission_sort_decline_precedes_lookup",
+            "PsKernelExprV2OwnedStateProofs.admission_sort_error_precedes_lookup",
+            "PsKernelExprV2OwnedStateProofs.admission_prop_keeps_both_callback_owners",
+            "PsKernelExprV2OwnedStateProofs.admission_prop_inference_decline_precedes_whnf",
+            "PsKernelExprV2OwnedStateProofs.admission_prop_inference_error_precedes_whnf",
+            "PsKernelExprV2OwnedStateProofs.admission_prop_whnf_decline_keeps_order",
+            "PsKernelExprV2OwnedStateProofs.admission_prop_whnf_error_keeps_order",
+            "PsKernelExprV2OwnedStateProofs.full_state_whnf_zero_precedes_syntax_and_cache",
+            "PsKernelExprV2OwnedStateProofs.admission_sort_zero_precedes_syntactic_sort",
+            "PsKernelExprV2OwnedStateProofs.admission_prop_zero_preserves_inference_failure"
+          ],
+          "source": {
+            "bytes": 14451,
+            "sha256": "81771cc44028e58b161fb8745c64d6eebfaf83c66113d3cb87112ee119652716"
+          },
+          "log": {
+            "bytes": 2443,
+            "sha256": "6060a02faa1b8d6d6aac97ba3d1ae8eeabce4d08d240022e4f0c7a579966e775"
+          }
+        },
+        {
+          "module": "PsKernelExprV2LayoutBoundaryProofs",
+          "proofs": 5,
+          "names": [
+            "PsKernelExprV2LayoutBoundaryProofs.shape_valid_establishes_layout",
+            "PsKernelExprV2LayoutBoundaryProofs.validate_ok_establishes_source_layout",
+            "PsKernelExprV2LayoutBoundaryProofs.replay_node_ok_preserves_layout",
+            "PsKernelExprV2LayoutBoundaryProofs.validate_fuel_ok_preserves_layout",
+            "PsKernelExprV2LayoutBoundaryProofs.validate_ok_establishes_canonical_layout"
+          ],
+          "source": {
+            "bytes": 11733,
+            "sha256": "7a56146d72dcd6b6ea8515be962eaba49a1af392d868e76eff6f68ca9fa03c3b"
+          },
+          "log": {
+            "bytes": 646,
+            "sha256": "ef0e9193e9aedb332c31cc617cc428d0c3d1c8648a08c6bbbd9cca5c437bd714"
+          }
+        },
+        {
+          "module": "PsKernelEmptySemanticCacheProofs",
+          "proofs": 2,
+          "names": [
+            "PsKernelEmptySemanticCacheProofs.semantic_map_get_eq_before",
+            "PsKernelEmptySemanticCacheProofs.empty_lookup_ignores_expression"
+          ],
+          "source": {
+            "bytes": 1917,
+            "sha256": "abb7e3dd6b93dec51f9e315e6bd6289ce1869c75744da3beb8a9627edac9606d"
+          },
+          "log": {
+            "bytes": 249,
+            "sha256": "d7e0c6becb572011aaafce0c2b232914376c96d5e2ef4c524e9e996ceefbd4e9"
+          }
+        },
+        {
+          "module": "PsKernelExprV2ReplayMetadataProofs",
+          "proofs": 4,
+          "names": [
+            "PsKernelExprV2ReplayMetadataProofs.replay_node_builds_corresponding_entry",
+            "PsKernelExprV2ReplayMetadataProofs.replay_node_preserves_layout_and_metadata",
+            "PsKernelExprV2ReplayMetadataProofs.bool_eq_true_iff",
+            "PsKernelExprV2ReplayMetadataProofs.portable_same_metadata_transfers_correspondence"
+          ],
+          "source": {
+            "bytes": 12159,
+            "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46"
+          },
+          "log": {
+            "bytes": 506,
+            "sha256": "34c611bc04bdbb747b6c022b21d88ca7c6f4e05eabe61afd4cd181a1f08bbdc4"
+          }
+        },
+        {
+          "module": "PsKernelExprV2SemanticPrefixProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelExprV2SemanticPrefixProofs.interpret_congr_below",
+            "PsKernelExprV2SemanticPrefixProofs.extend_meaning_preserves_old",
+            "PsKernelExprV2SemanticPrefixProofs.empty_semantic_prefix",
+            "PsKernelExprV2SemanticPrefixProofs.replay_success_inputs",
+            "PsKernelExprV2SemanticPrefixProofs.replay_preserves_semantic_prefix",
+            "PsKernelExprV2SemanticPrefixProofs.aligned_prefix_transfers_semantics",
+            "PsKernelExprV2SemanticPrefixProofs.validate_fuel_preserves_semantic_prefix",
+            "PsKernelExprV2SemanticPrefixProofs.validate_ok_establishes_semantic_prefixes"
+          ],
+          "source": {
+            "bytes": 24408,
+            "sha256": "358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e"
+          },
+          "log": {
+            "bytes": 1173,
+            "sha256": "42c67f7eb4e22270877a5c4a6fccf69e8874a2881b9452b97799cbcf90c7abae"
+          }
+        },
+        {
+          "module": "PsKernelExprV2DecodedNodeProofs",
+          "proofs": 2,
+          "names": [
+            "PsKernelExprV2DecodedNodeProofs.decoded_node_interprets",
+            "PsKernelExprV2DecodedNodeProofs.decoded_entry_interprets"
+          ],
+          "source": {
+            "bytes": 4253,
+            "sha256": "0720db5abc1922656c47d1f2b251efa9f4b23fafc8d12932dbaec0a822a25d27"
+          },
+          "log": {
+            "bytes": 205,
+            "sha256": "0f29d930b5d103791e88f7fe07584112a57a651d3ead8ecd6cc9ff004e864d42"
+          }
+        },
+        {
+          "module": "PsKernelExprV2DecodedBridgeProofs",
+          "proofs": 12,
+          "names": [
+            "PsKernelExprV2DecodedBridgeProofs.decoded_empty_layout",
+            "PsKernelExprV2DecodedBridgeProofs.decoded_push_size",
+            "PsKernelExprV2DecodedBridgeProofs.decoded_push_layout",
+            "PsKernelExprV2DecodedBridgeProofs.decoded_push_require_old",
+            "PsKernelExprV2DecodedBridgeProofs.decoded_push_require_new",
+            "PsKernelExprV2DecodedBridgeProofs.decoded_empty_prefix",
+            "PsKernelExprV2DecodedBridgeProofs.decoded_prefix_push",
+            "PsKernelExprV2DecodedBridgeProofs.decoded_prefix_metadata",
+            "PsKernelExprV2DecodedBridgeProofs.decode_canonical_fuel_ok_preserves",
+            "PsKernelExprV2DecodedBridgeProofs.decode_canonical_fuel_succeeds",
+            "PsKernelExprV2DecodedBridgeProofs.decode_checked_succeeds_after_validate",
+            "PsKernelExprV2DecodedBridgeProofs.decode_checked_ok_corresponds"
+          ],
+          "source": {
+            "bytes": 22069,
+            "sha256": "c97baa13eea76cd5ef5076a4277f517a1748014ee3a49d06f4b5ef68765085b3"
+          },
+          "log": {
+            "bytes": 1350,
+            "sha256": "7e084bd896db1e99ae687eef064521f9ed49c911085f78a3edc230ca9495d21b"
+          }
+        },
+        {
+          "module": "PsKernelExprV2ArenaModelBridgeProofs",
+          "proofs": 7,
+          "names": [
+            "PsKernelExprV2ArenaModelBridgeProofs.interpret_eq_node_expr",
+            "PsKernelExprV2ArenaModelBridgeProofs.children_before_child_ids",
+            "PsKernelExprV2ArenaModelBridgeProofs.semantic_prefix_establishes_arena_model",
+            "PsKernelExprV2ArenaModelBridgeProofs.validate_ok_establishes_arena_models",
+            "PsKernelExprV2ArenaModelBridgeProofs.decode_checked_ok_establishes_arena_model",
+            "PsKernelExprV2ArenaModelBridgeProofs.validated_uniform_occurrence_correspondence",
+            "PsKernelExprV2ArenaModelBridgeProofs.decoded_annotations_correspondence"
+          ],
+          "source": {
+            "bytes": 7663,
+            "sha256": "2699f6a6bd9d8d0d793a8eb2d398293f43255d79bd8f5c84d1033be393d72af3"
+          },
+          "log": {
+            "bytes": 896,
+            "sha256": "ab2968ce4d8d47d7efd3b34d8b43d721dbda0e43dd8b7d4ec7d8a375c7c0e9ef"
+          }
+        }
+      ],
+      "retainedLayers": {
+        "constructor-native-receipt.json": {
+          "bytes": 23558,
+          "sha256": "d45bcbb65bfff0fea559d37d2d172c757ea81a943c673e648e22bb5737058afd"
+        },
+        "fields-native-receipt.json": {
+          "bytes": 6406,
+          "sha256": "187bae567d8c0d942c8e252b64ba2f3b194e1d60b12fa3585d55e7fdae44ccaf"
+        },
+        "analysis-native-receipt.json": {
+          "bytes": 3452,
+          "sha256": "9557fc58ef18ea2f99d376e44ed982fb376ed71a0e2e7462f9ff47c47ffad7b6"
+        },
+        "loop-native-receipt.json": {
+          "bytes": 2368,
+          "sha256": "2a80bbd6fd9a0f9e824eae2261fccce5c67738bcda5cfd0ffbb2cbc649886c08"
+        },
+        "ordinary-admission-native-receipt.json": {
+          "bytes": 9463,
+          "sha256": "79d6d379d0783ffe4f8f4bdc39c4c7ed3868f0e01f623433f5a208e7983fae95"
+        },
+        "deferred-transform-native-receipt.json": {
+          "bytes": 1560,
+          "sha256": "5651ff25ea49ae0218e6deff02ace68c3f5e966d4495a8d7d5994e62d54e0883"
+        },
+        "retained-native-receipt.json": {
+          "bytes": 13482,
+          "sha256": "e35989d78565be89a76f4176ba5d21018c3a0bbc15310b34cd177f42bae34c04"
+        },
+        "layout-boundary-native-receipt.json": {
+          "bytes": 2439,
+          "sha256": "7f2276d72e8c4b31d1329d827482e73cbbb2dd0e5b67eb873c9edcef63bae1be"
+        },
+        "empty-semantic-cache-native-receipt.json": {
+          "bytes": 2105,
+          "sha256": "5c12193720ba45819bab40d44b558c17fca2548d59b0b891f4c3e1035d050671"
+        }
+      },
+      "sourceInventory": {
+        "bytes": 3288,
+        "sha256": "4d36ad4d05914435cf7cb4f3660f142c121750247c63bccb2e96ca3c2b1720e1"
+      },
+      "proofStatuses": {
+        "bytes": 477,
+        "sha256": "37d0e43727d0557c11de4411129fc2321c604aa70d03b5c3bea504d0c36e7349"
+      },
+      "productionTree": "e567685e5c441a5b0a78d8241f7bae151b48b5ca",
+      "productionChanges": false,
+      "metadataCorrespondenceEstablished": true,
+      "decoderCorrespondenceEstablished": true,
+      "untrustedSourceValidityAssumed": false,
+      "replayArenaModelBridgeEstablished": true,
+      "fullKernel": false,
+      "performanceQualified": false
+    }
+  },
+  "routes": {
+    "generated": {
+      "schema": "psc1-validator-route-v1",
+      "sourceSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+      "runId": "40191895625",
+      "runAttempt": "1",
+      "status": "pass",
+      "route": "generated",
+      "nativeProofs": 532,
+      "nativeReceipt": {
+        "bytes": 59243,
+        "sha256": "220357dd7f6411eecc1f63a57eb055bd6da13d4002e330150634edaef35c29ae"
+      },
+      "retainedRouteReceipt": {
+        "bytes": 9083,
+        "sha256": "df2d83a1d1067544a92ace911cfb2e6f5946fa2f49e738238719ba531463f632"
+      },
+      "kernel": {
+        "bytes": 10298226,
+        "sha256": "281995846a8499c2da42a512893c0ceb86bacfa1e80d7d272300937aee6498aa"
+      },
+      "productionChanges": false,
+      "metadataCorrespondenceEstablished": true,
+      "decoderCorrespondenceEstablished": true,
+      "replayArenaModelBridgeEstablished": true,
+      "fullKernel": false,
+      "performanceQualified": false
+    },
+    "canonical": {
+      "schema": "psc1-validator-route-v1",
+      "sourceSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+      "runId": "40191895625",
+      "runAttempt": "1",
+      "status": "pass",
+      "route": "canonical",
+      "nativeProofs": 532,
+      "nativeReceipt": {
+        "bytes": 59243,
+        "sha256": "220357dd7f6411eecc1f63a57eb055bd6da13d4002e330150634edaef35c29ae"
+      },
+      "retainedRouteReceipt": {
+        "bytes": 9511,
+        "sha256": "898ae99a72f7658b285a1dd02f7dacade295e3fd1fd59f79479bb882c4f38f76"
+      },
+      "kernel": {
+        "bytes": 10298233,
+        "sha256": "8c5bc9a2e783aa5d704c5254dfefa561f2eb8b92ac01dc55d440ee92616385de"
+      },
+      "productionChanges": false,
+      "metadataCorrespondenceEstablished": true,
+      "decoderCorrespondenceEstablished": true,
+      "replayArenaModelBridgeEstablished": true,
+      "fullKernel": false,
+      "performanceQualified": false
+    }
+  },
+  "independentArtifactAudit": {
+    "runId": 40191990906,
+    "jobId": 121164739028,
+    "sourceSha": "e09a7917705f94770bea3ecb3992064eb25dcffb",
+    "artifactId": 12599995182,
+    "artifactZip": {
+      "bytes": 91237,
+      "sha256": "11c0f89da4a44654f6ca841f5be42bb9ea2478eefa58a8788a87816d996b213c"
+    },
+    "report": {
+      "bytes": 377139,
+      "sha256": "f7e0b7041f2f3336c2f58a793fac80f1ccbe489d4ae7802e07bc0d3ba2f5ac4c"
+    },
+    "verifiedActualReport": {
+      "sourceSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+      "runId": 40191895625,
+      "runAttempt": 1,
+      "auditSourceSha": "e09a7917705f94770bea3ecb3992064eb25dcffb",
+      "auditRunId": "40191990906",
+      "errors": [],
+      "actualLeanClosureCount": 157,
+      "jobs": [
+        {
+          "id": 121164457415,
+          "name": "native-header",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40191895625,
+          "head_sha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+          "started_at": "2026-10-25T12:09:43Z",
+          "completed_at": "2026-10-25T12:13:09Z"
+        },
+        {
+          "id": 121165214370,
+          "name": "generated-header (generated)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40191895625,
+          "head_sha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+          "started_at": "2026-10-25T12:13:12Z",
+          "completed_at": "2026-10-25T12:45:05Z"
+        },
+        {
+          "id": 121165214422,
+          "name": "generated-header (canonical)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 40191895625,
+          "head_sha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+          "started_at": "2026-10-25T12:13:11Z",
+          "completed_at": "2026-10-25T12:54:10Z"
+        }
+      ],
+      "routes": {
+        "native": {
+          "status": "pass",
+          "artifactId": 12598406815,
+          "artifactName": "psc1-t05-header-native-attempt-1",
+          "archive": {
+            "bytes": 563497,
+            "sha256": "898d98c9c850345d29e4703354ed2a8dccf19e8c1cd5d97ec13afbb836bb5494"
+          },
+          "apiDigest": "sha256:898d98c9c850345d29e4703354ed2a8dccf19e8c1cd5d97ec13afbb836bb5494",
+          "crcVerified": true,
+          "safeUniqueArchivePaths": true,
+          "jobId": 121164457415,
+          "terminalLog": {
+            "bytes": 719396,
+            "sha256": "ce78c82c6a0fda8be3cc86ce1f707cc70e2558ebbfed99a493f26a6426d02d65"
+          },
+          "fileCount": 195,
+          "validatorQualification": {
+            "status": "pass",
+            "nativeReports": 532,
+            "nativeModules": 36,
+            "additionalSourceInputs": 15,
+            "addedReports": 33,
+            "crossRouteNativeBytesVerified": false,
+            "metadataCorrespondenceEstablished": true,
+            "decoderCorrespondenceEstablished": true,
+            "replayArenaModelBridgeEstablished": true,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        },
+        "generated": {
+          "status": "pass",
+          "artifactId": 12599457242,
+          "artifactName": "psc1-t05-header-generated-attempt-1",
+          "archive": {
+            "bytes": 2848152,
+            "sha256": "86b06d46315edadbbccafef6f2c3f92dee027cd67cd0c3539520d19981251d9c"
+          },
+          "apiDigest": "sha256:86b06d46315edadbbccafef6f2c3f92dee027cd67cd0c3539520d19981251d9c",
+          "crcVerified": true,
+          "safeUniqueArchivePaths": true,
+          "jobId": 121165214370,
+          "terminalLog": {
+            "bytes": 441853,
+            "sha256": "52385df4d45550000f34b647b675fa77cb0ffb4ca00fc6aa828f458c2678b10e"
+          },
+          "fileCount": 361,
+          "validatorQualification": {
+            "status": "pass",
+            "nativeReports": 532,
+            "nativeModules": 36,
+            "additionalSourceInputs": 15,
+            "addedReports": 33,
+            "crossRouteNativeBytesVerified": true,
+            "metadataCorrespondenceEstablished": true,
+            "decoderCorrespondenceEstablished": true,
+            "replayArenaModelBridgeEstablished": true,
+            "fullKernel": false,
+            "performanceQualified": false
+          },
+          "runtime": {
+            "assertions": {
+              "header": 1992,
+              "cache": 1884,
+              "params": 268,
+              "result": 432,
+              "retainedControls": true,
+              "boundedCodegenMarkers": 6
+            },
+            "kernel": {
+              "bytes": 10298226,
+              "sha256": "281995846a8499c2da42a512893c0ceb86bacfa1e80d7d272300937aee6498aa"
+            },
+            "headerMeasurement": {
+              "measurement": "peak_rss_kib=448768 wall_seconds=2.82 exit_status=0",
+              "peakRssKiB": 448768,
+              "wallSeconds": 2.82
+            },
+            "paramsMeasurement": {
+              "measurement": "peak_rss_kib=285108 wall_seconds=1.42 exit_status=0",
+              "peakRssKiB": 285108,
+              "wallSeconds": 1.42
+            },
+            "resultMeasurement": {
+              "measurement": "peak_rss_kib=120224 wall_seconds=0.25 exit_status=0",
+              "peakRssKiB": 120224,
+              "wallSeconds": 0.25
+            },
+            "allReceiptLogDigestsMatched": true,
+            "allPrintedReceiptsMatched": true
+          }
+        },
+        "canonical": {
+          "status": "pass",
+          "artifactId": 12599563079,
+          "artifactName": "psc1-t05-header-canonical-attempt-1",
+          "archive": {
+            "bytes": 2987869,
+            "sha256": "4f0ed70946fa5a71379a5100d53a44c3bd65bed60c6fadcbe4c427738b132214"
+          },
+          "apiDigest": "sha256:4f0ed70946fa5a71379a5100d53a44c3bd65bed60c6fadcbe4c427738b132214",
+          "crcVerified": true,
+          "safeUniqueArchivePaths": true,
+          "jobId": 121165214422,
+          "terminalLog": {
+            "bytes": 474129,
+            "sha256": "013b03ad9f982a8f0dc9105201e9a1bac057b92a7af2ea29c3ec961b3a99f6aa"
+          },
+          "fileCount": 364,
+          "validatorQualification": {
+            "status": "pass",
+            "nativeReports": 532,
+            "nativeModules": 36,
+            "additionalSourceInputs": 15,
+            "addedReports": 33,
+            "crossRouteNativeBytesVerified": true,
+            "metadataCorrespondenceEstablished": true,
+            "decoderCorrespondenceEstablished": true,
+            "replayArenaModelBridgeEstablished": true,
+            "fullKernel": false,
+            "performanceQualified": false
+          },
+          "runtime": {
+            "assertions": {
+              "header": 1992,
+              "cache": 1884,
+              "params": 268,
+              "result": 432,
+              "retainedControls": true,
+              "boundedCodegenMarkers": 6
+            },
+            "kernel": {
+              "bytes": 10298233,
+              "sha256": "8c5bc9a2e783aa5d704c5254dfefa561f2eb8b92ac01dc55d440ee92616385de"
+            },
+            "headerMeasurement": {
+              "measurement": "peak_rss_kib=308032 wall_seconds=4.37 exit_status=0",
+              "peakRssKiB": 308032,
+              "wallSeconds": 4.37
+            },
+            "paramsMeasurement": {
+              "measurement": "peak_rss_kib=295348 wall_seconds=2.47 exit_status=0",
+              "peakRssKiB": 295348,
+              "wallSeconds": 2.47
+            },
+            "resultMeasurement": {
+              "measurement": "peak_rss_kib=120460 wall_seconds=0.35 exit_status=0",
+              "peakRssKiB": 120460,
+              "wallSeconds": 0.35
+            },
+            "allReceiptLogDigestsMatched": true,
+            "allPrintedReceiptsMatched": true
+          }
+        }
+      }
+    },
+    "legacySummaryScope": "The retained empty-cache summary remains499/31 and preserves its historical false proof-layer flags. The complete532/36 scope is under each actual audit.json routes.*.validatorQualification; those records and all actual source/log/receipt bytes were independently verified."
+  },
+  "prerequisite525": {
+    "sourceSha": "a38a20a2c814ec0cdf4abdbfc790cf5cea61cd08",
+    "qualificationRun": 40191053491,
+    "auditRun": 40191315388,
+    "auditSourceSha": "d285d46111987760044b1524d55d5918ead74848",
+    "report": {
+      "bytes": 374949,
+      "sha256": "c6f5044d87be5aba1ea1426eccfffb866c73967a8acc6ff15e4954290a42a05c"
+    },
+    "verifiedActualReport": {
+      "sourceSha": "a38a20a2c814ec0cdf4abdbfc790cf5cea61cd08",
+      "runId": 40191053491,
+      "runAttempt": 1,
+      "errors": [],
+      "routes": {
+        "native": {
+          "status": "pass",
+          "artifactId": 12598351431,
+          "artifactName": "psc1-t05-header-native-attempt-1",
+          "archive": {
+            "bytes": 555241,
+            "sha256": "c04a23d242c0cdcdf8ad722dcc43adbe34a3bb97712fc9b34c3491cb5d7ded53"
+          },
+          "apiDigest": "sha256:c04a23d242c0cdcdf8ad722dcc43adbe34a3bb97712fc9b34c3491cb5d7ded53",
+          "crcVerified": true,
+          "safeUniqueArchivePaths": true,
+          "jobId": 121161958020,
+          "terminalLog": {
+            "bytes": 716569,
+            "sha256": "6e235d6899ff98004a92ca8a1e507d0f596386202596c193577a79e0acb54595"
+          },
+          "fileCount": 192,
+          "validatorQualification": {
+            "status": "pass",
+            "nativeReports": 525,
+            "nativeModules": 35,
+            "additionalSourceInputs": 13,
+            "addedReports": 26,
+            "crossRouteNativeBytesVerified": false,
+            "metadataCorrespondenceEstablished": true,
+            "decoderCorrespondenceEstablished": true,
+            "replayArenaModelBridgeEstablished": false,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        },
+        "generated": {
+          "status": "pass",
+          "artifactId": 12598174886,
+          "artifactName": "psc1-t05-header-generated-attempt-1",
+          "archive": {
+            "bytes": 2839911,
+            "sha256": "188de95261e2dd939e8839113910b7913e5965277c3ba0e043040d53d5c90976"
+          },
+          "apiDigest": "sha256:188de95261e2dd939e8839113910b7913e5965277c3ba0e043040d53d5c90976",
+          "crcVerified": true,
+          "safeUniqueArchivePaths": true,
+          "jobId": 121162674734,
+          "terminalLog": {
+            "bytes": 441697,
+            "sha256": "684b3bac5318dc189a5ae6c88964736382d7aefb68934f86b26a943692ca9c34"
+          },
+          "fileCount": 358,
+          "validatorQualification": {
+            "status": "pass",
+            "nativeReports": 525,
+            "nativeModules": 35,
+            "additionalSourceInputs": 13,
+            "addedReports": 26,
+            "crossRouteNativeBytesVerified": true,
+            "metadataCorrespondenceEstablished": true,
+            "decoderCorrespondenceEstablished": true,
+            "replayArenaModelBridgeEstablished": false,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        },
+        "canonical": {
+          "status": "pass",
+          "artifactId": 12599476316,
+          "artifactName": "psc1-t05-header-canonical-attempt-1",
+          "archive": {
+            "bytes": 2979549,
+            "sha256": "6fa99f6b14b3f37dea688e2529dac4f1f6d7838ae0098a9458e478430bf79a98"
+          },
+          "apiDigest": "sha256:6fa99f6b14b3f37dea688e2529dac4f1f6d7838ae0098a9458e478430bf79a98",
+          "crcVerified": true,
+          "safeUniqueArchivePaths": true,
+          "jobId": 121162674618,
+          "terminalLog": {
+            "bytes": 474127,
+            "sha256": "7815e402f875d8091288dbd45bbccb3bed6a2404dc2075bfc35a2d26b98ee4e9"
+          },
+          "fileCount": 361,
+          "validatorQualification": {
+            "status": "pass",
+            "nativeReports": 525,
+            "nativeModules": 35,
+            "additionalSourceInputs": 13,
+            "addedReports": 26,
+            "crossRouteNativeBytesVerified": true,
+            "metadataCorrespondenceEstablished": true,
+            "decoderCorrespondenceEstablished": true,
+            "replayArenaModelBridgeEstablished": false,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        }
+      }
+    }
+  },
+  "prerequisiteArenaModel73": {
+    "sourceSha": "150123e5fb8e17d8fab4d737a043705727ee1bcc",
+    "nativeRun": 40191428231,
+    "auditRun": 40191660252,
+    "recordPath": "psc1/packages/pskernel-core/docs/qualification/T05_ARENA_MODEL_BRIDGE_NATIVE73_150123e5.json"
+  },
+  "scope": {
+    "physicalSourceAndCanonicalLayoutEstablished": true,
+    "wholeValidatorMetadataCorrespondenceEstablished": true,
+    "productionDecoderCorrespondenceEstablished": true,
+    "ordinaryArenaModelBridgeEstablished": true,
+    "untrustedSourceValidityAssumed": false,
+    "allNativeReportsRecheckedAtThisExactSource": true,
+    "bothCompleteGeneratedRoutesRecheckedAtThisExactSource": true,
+    "actualArchiveContentsAudited": true,
+    "globalKernelSoundness": false,
+    "compilerPreservation": false,
+    "fullKernel": false,
+    "performanceQualified": false
+  },
+  "latestFullArena": {
+    "sourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+    "runId": 40167644370,
+    "total": 193,
+    "strictMatches": 173,
+    "hostTimeouts": 17,
+    "kernelBudgetExhaustion": 1,
+    "separateUnsafePartialAgreements": 2,
+    "newSourceArenaResultClaimed": false
+  },
+  "obligations": {
+    "A": "historically scoped qualified; no new full String-cohort claim",
+    "B": "OPEN",
+    "C": "FAIL at last measured source",
+    "D": "OPEN"
+  },
+  "integrationPlan": {
+    "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+    "expectedPriorSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+    "qualifiedTargetSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+    "force": false,
+    "applied": false
+  }
+}

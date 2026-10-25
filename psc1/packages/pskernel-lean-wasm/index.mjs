@@ -7,9 +7,9 @@ import {verifyWasmPrebuiltManifest} from './host/prebuilt.mjs';
 
 export const leanKernelProviderProtocol='pskernel-lean/1';
 export const leanKernelProviderName='lean4-cpp';
-export const leanKernelProviderVersion='4.34.0';
-export const leanKernelProviderCommit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
-export const leanKernelProviderProfile='lean4.34-core';
+export const leanKernelProviderVersion='4.35.0';
+export const leanKernelProviderCommit='eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
+export const leanKernelProviderProfile='lean4.35-core';
 
 const bundledLauncherPath=fileURLToPath(
   new URL('./wasm/pskernel-lean.cjs',import.meta.url),

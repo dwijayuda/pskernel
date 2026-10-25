@@ -17,12 +17,12 @@ export const supportedLeanKernelProviderTargets=Object.freeze([
 const expectedManifestIdentity=Object.freeze({
   schema:1,
   package:'@proofscript/pskernel-lean',
-  packageVersion:'4.34.0',
+  packageVersion:'4.35.0',
   protocol:'pskernel-lean/1',
   provider:'lean4-cpp',
-  leanVersion:'4.34.0',
-  leanCommit:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
-  profile:'lean4.34-core',
+  leanVersion:'4.35.0',
+  leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
+  profile:'lean4.35-core',
 });
 
 const defaultPackageRoot=path.resolve(
@@ -60,7 +60,7 @@ export function leanKernelProviderTargetKey({
   const key=`${platform}-${arch}`;
   if(!supportedLeanKernelProviderTargets.includes(key)){
     throw new Error(
-      `@proofscript/pskernel-lean@4.34.0 has no bundled provider for ${key}; `+
+      `@proofscript/pskernel-lean@4.35.0 has no bundled provider for ${key}; `+
       `supported targets: ${supportedLeanKernelProviderTargets.join(', ')}`,
     );
   }

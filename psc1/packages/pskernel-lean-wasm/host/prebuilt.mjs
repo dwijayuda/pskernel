@@ -13,11 +13,11 @@ export const wasmPrebuiltModulePath='wasm/pskernel-lean.wasm';
 const expected={
   schemaVersion:1,
   packageName:'@proofscript/pskernel-lean-wasm',
-  packageVersion:'4.34.0',
+  packageVersion:'4.35.0',
   protocol:'pskernel-lean/1',
   provider:'lean4-cpp',
-  leanVersion:'4.34.0',
-  leanCommit:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
+  leanVersion:'4.35.0',
+  leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
   emscriptenVersion:'6.0.9',
 };
 

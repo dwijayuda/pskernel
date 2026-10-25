@@ -71,7 +71,7 @@ def authenticate(root, variant, source, baseline):
         or native.get("sourceSha") != source or native.get("baselineSha") != baseline
         or native.get("runId") != os.environ["GITHUB_RUN_ID"]
         or native.get("runAttempt") != os.environ["GITHUB_RUN_ATTEMPT"]
-        or native.get("proofs") != 9):
+        or native.get("proofs") != 10):
         raise ValueError("native proof/compiler receipt mismatch")
     if (digest(root / "native-proofs.log") != native.get("proofLogSha256")
         or digest(root / "native-source-audit.json") != native.get("sourceAuditSha256")):

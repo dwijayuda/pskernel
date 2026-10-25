@@ -1,10 +1,10 @@
-name: PSC1 unary congruence bounded A-B-B-A diagnostic
+name: PSC1 lazy-transform bounded frozen-f091 A-B-B-A diagnostic
 
 'on':
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-unary-spines-abba-20261025
+    - work/psc1-pskernel-transform-lazy-abba-20261025
     paths:
     - .github/workflows/psc1-pskernel-transform-delay-abba.yml
     - psc1/scripts/pskernel-transform-delay-abba.py
@@ -14,7 +14,7 @@ permissions:
   actions: read
 
 env:
-  BASELINE_SHA: 'dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5'
+  BASELINE_SHA: 'f091db586dcbe4a31905d6edf1c8c7957082527d'
 
 jobs:
   native:
@@ -39,26 +39,28 @@ jobs:
           test "$(cat psc1/lean-toolchain)" = "leanprover/lean4:v4.35.0"
           (cd psc1 && test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc")
           mkdir -p "$RUNNER_TEMP/transform-delay-preflight"
-      - name: Authenticate exact unary production delta and original comparison drivers
+      - name: Authenticate exact lazy-transform production delta and original comparison drivers
         shell: bash
         run: |
           set -euo pipefail
+          python3 psc1/scripts/pskernel-transform-lazy-qualification.py source "$RUNNER_TEMP/transform-delay-preflight/lazy"
           python3 psc1/scripts/pskernel-unary-spine-qualification.py source \
             --out "$RUNNER_TEMP/transform-delay-preflight/unary"
           python3 - <<'PY'
           import hashlib,json,os,pathlib,subprocess
           out=pathlib.Path(os.environ["RUNNER_TEMP"])/"transform-delay-preflight"
-          source=json.loads((out/"unary/source-inventory.json").read_text())
-          paths=[row["path"] for row in source["files"]]+[
+          retained=json.loads((out/"unary/source-inventory.json").read_text())
+          source=json.loads((out/"lazy/source.json").read_text())
+          paths=list(dict.fromkeys([row["path"] for row in retained["files"]]+[row["path"] for row in source["sourceSnapshots"]]+[
               "psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs",
               ".github/workflows/psc1-pskernel-transform-delay-abba.yml",
-              "psc1/scripts/pskernel-transform-delay-abba.py"]
+              "psc1/scripts/pskernel-transform-delay-abba.py"]))
           audit={"schema":"psc1-transform-delay-source-v1","sourceSha":os.environ["GITHUB_SHA"],
               "baselineSha":os.environ["BASELINE_SHA"],"runId":os.environ["GITHUB_RUN_ID"],
               "runAttempt":os.environ["GITHUB_RUN_ATTEMPT"],
-              "baselineProductionTree":source["baselineProductionTree"],
+              "baselineProductionTree":"62d48691ff7d9680878cf668862017d1061f2ebd",
               "productionTree":source["productionTree"],"productionChanges":source["productionChanges"],
-              "positiveUnaryCongruenceShortcut":True,"exactBindingMovesOnly":False,
+              "retainedPositiveUnaryCongruenceShortcut":True,"exactBindingMovesOnly":True,"transformWorkerConstructionDeferred":True,
               "sourceFiles":{p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths},
               "fullQualification":False,"performanceQualified":False}
           (out/"source-audit.json").write_text(json.dumps(audit,indent=2)+"\n")
@@ -76,12 +78,14 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/transform-delay-preflight/native-build.log"
           lake -f kernel-lakefile.lean env lean test/PsKernelUnarySpineProofs.lean \
             2>&1 | tee "$RUNNER_TEMP/transform-delay-preflight/proofs.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelTransformLazyProofs.lean \
+            2>&1 | tee -a "$RUNNER_TEMP/transform-delay-preflight/proofs.log"
           python3 - <<'PY'
           import hashlib, json, os, pathlib, re
           out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-preflight"
-          proof = pathlib.Path("test/PsKernelUnarySpineProofs.lean").read_text()
+          proof = pathlib.Path("test/PsKernelUnarySpineProofs.lean").read_text()+"\n"+pathlib.Path("test/PsKernelTransformLazyProofs.lean").read_text()
           expected = re.findall(r"(?m)^#print axioms (\S+)\s*$", proof)
-          assert len(expected) == len(set(expected)) == 9, expected
+          assert len(expected) == len(set(expected)) == 10, expected
           log = (out / "proofs.log").read_text()
           reports = re.findall(
               r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)", log)
@@ -95,7 +99,7 @@ jobs:
               "schema": "psc1-transform-delay-native-v1",
               "sourceSha": os.environ["GITHUB_SHA"], "baselineSha": os.environ["BASELINE_SHA"],
               "runId": os.environ["GITHUB_RUN_ID"], "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
-              "proofs": 9, "names": expected,
+              "proofs": 10, "names": expected,
               "proofLogSha256": hashlib.sha256((out / "proofs.log").read_bytes()).hexdigest(),
               "sourceAuditSha256": hashlib.sha256((out / "source-audit.json").read_bytes()).hexdigest(),
               "fullQualification": False, "performanceQualified": False,
@@ -163,7 +167,7 @@ jobs:
           assert native["baselineSha"] == audit["baselineSha"] == os.environ["BASELINE_SHA"]
           assert native["runId"] == os.environ["GITHUB_RUN_ID"]
           assert native["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
-          assert native["proofs"] == 9
+          assert native["proofs"] == 10
           assert native["proofLogSha256"] == digest(out / "proofs.log")
           assert native["sourceAuditSha256"] == digest(out / "source-audit.json")
           scripts = [

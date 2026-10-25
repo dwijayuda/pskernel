@@ -138,8 +138,8 @@ const built=build(group(s1,s1)),root=array(built.value.types)[0].type;
 const context=get('psKernelExprV2MutualClosedContext')(environment,built.value,0n,0n);
 const shared={...get('psKernelExprV2CheckStateEmpty')(built.arena),nextFresh:17n};
 const parameters={context,state:shared,binders:nil,result:root};
-const check=_fuel=>_context=>state=>_root=>ok(prod({...state,nextFresh:999n},root));
-const whnf=_fuel=>_context=>state=>root=>ok(prod(state,root));
+const check=_fuel=>_context=>state=>_root=>get('Option').some(ok(prod({...state,nextFresh:999n},root)));
+const whnf=_fuel=>_context=>state=>root=>get('Option').some(ok(prod(state,root)));
 const defeq=_fuel=>_context=>_state=>_left=>_right=>none;
 const indices=direct(get('psKernelExprV2MutualRemainingPhasesWith')(check,whnf,defeq,16n,context,
  get('psKernelExprV2MutualClosedState')(built.arena,nil),parameters,root,one));

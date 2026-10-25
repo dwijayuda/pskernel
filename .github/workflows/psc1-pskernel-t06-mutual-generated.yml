@@ -1,4 +1,4 @@
-name: PSC1 combined private mutual stages complete-program generated preflight
+name: PSC1 combined mutual private-stage authenticated runtime preflight
 'on':
   workflow_dispatch: null
   push:
@@ -15,7 +15,7 @@ permissions:
 jobs:
   generated:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v4
       with:
@@ -58,33 +58,30 @@ jobs:
         \    data=pathlib.Path(p).read_bytes();assert data==subprocess.check_output(['git','show','HEAD:'+p]);dest=out/'sources'/p;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);snapshots.append({'path':p,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})\n\
         record={'schema':'psc1-mutual-header-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40230310206,'nativeReports':22,'nativeAssertions':147,'all307NativeSourceSnapshotsMatchActualGit':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelMutualHeaderSelfHost.lean','snapshots':snapshots,'scope':'complete-program\
         \ private-header preflight only; not full mutual admission or final public-route qualification','runtimeFuel':256,'runtimeDeadlineSeconds':600,'oldSpaceMiB':2048,'emptyPATH':True}\n\
+        (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\n\n# The prior\
+        \ full program compiled successfully; its new injected JS callback\n# omitted Option.some. Preserve that\
+        \ failure and authenticate the exact bytes.\nprogram_source='2f7d65dfcec867ea362156eefb73dc61fee9f560'\n\
+        pr=json.loads(get('/actions/runs/40230651007'));assert pr['head_sha']==program_source and pr['status']=='completed'\
+        \ and pr['conclusion']=='failure'\na=json.loads(get('/actions/artifacts/12613286624'));sha='23bf61fe77288e18329bdd6528abf2416096673f6b68e842baecbeb8c722e86e'\n\
+        assert a['workflow_run']['id']==40230651007 and a['workflow_run']['head_sha']==program_source and not a['expired']\n\
+        assert a['size_in_bytes']==4829425 and a['digest']=='sha256:'+sha\nraw=get('/actions/artifacts/12613286624/zip');assert\
+        \ len(raw)==4829425 and hashlib.sha256(raw).hexdigest()==sha\n(out/'authenticated-program.zip').write_bytes(raw)\n\
+        z=zipfile.ZipFile(io.BytesIO(raw));assert len(z.namelist())==len(set(z.namelist()))==18 and z.testzip()\
+        \ is None\nfm=json.loads(z.read('files.json'));assert fm['source']==program_source\nfor name,pin in fm['files'].items():\n\
+        \    data=z.read(name);assert len(data)==pin['bytes'] and hashlib.sha256(data).hexdigest()==pin['sha256'],name\n\
+        assert b'PSC2_TYPESCRIPT: 7.0.2' in z.read('build.log') and b'PSC2_COMPILE: dist/t06-mutual/kernel.ts ->\
+        \ dist/t06-mutual/kernel.js' in z.read('build.log')\nassert b'Error: invalid ProofScript constructor tag'\
+        \ in z.read('runtime.log')\nfor path in ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualHeader.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorResult.lean','psc1/test/PsKernelMutualHeaderSelfHost.lean']:\n\
+        \    assert z.read('sources/'+path)==pathlib.Path(path).read_bytes(),path\nold=z.read('pskernel-mutual-header-smoke.mjs').decode()\n\
+        expected=old.replace('state=>_root=>ok(prod({...state,nextFresh:999n},root))',\"state=>_root=>get('Option').some(ok(prod({...state,nextFresh:999n},root)))\"\
+        ).replace('state=>root=>ok(prod(state,root))',\"state=>root=>get('Option').some(ok(prod(state,root)))\"\
+        )\nhelper=pathlib.Path('psc1/scripts/pskernel-mutual-header-smoke.mjs').read_text();assert expected!=old\
+        \ and helper==expected\nkernel=z.read('kernel.mjs');assert kernel==z.read('production/kernel.js')\nassert\
+        \ len(kernel)==10444855 and hashlib.sha256(kernel).hexdigest()=='f55fb2190a5a6204c61894992ca7fa7f6d3538d5c1a22418205e26ed06a860fc'\n\
+        (out/'kernel.mjs').write_bytes(kernel);(out/'pskernel-mutual-header-smoke.mjs').write_text(helper)\n(out/'original-build.log').write_bytes(z.read('build.log'));(out/'original-runtime-failure.log').write_bytes(z.read('runtime.log'))\n\
+        record.update({'programSource':program_source,'programProducerRun':40230651007,'programProducerJob':121281442024,'programArtifact':12613286624,'programArchiveSha256':sha,'programBytes':len(kernel),'programSha256':hashlib.sha256(kernel).hexdigest(),'freshProgramBuild':False,'completePriorCompilerBuildAndCurrentProductionSourcesAuthenticated':True,'onlyTwoInjectedCallbackOptionWrappersChanged':True,'previousRuntimeFailurePreserved':True,'scope':'reused\
+        \ complete-program private-stage runtime preflight; not fresh complete-source cohort or full mutual admission'})\n\
         (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
-    - name: Install exact retained TypeScript7.0.2
-      shell: bash
-      run: 'set -euo pipefail
-
-        mkdir -p "$RUNNER_TEMP/mutual-ts"
-
-        printf ''%s\n'' ''{"name":"psc1-mutual-ts","private":true,"version":"0.0.0"}'' > "$RUNNER_TEMP/mutual-ts/package.json"
-
-        npm install --prefix "$RUNNER_TEMP/mutual-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
-
-        TSC_PATH="$RUNNER_TEMP/mutual-ts/node_modules/typescript/bin/tsc"
-
-        test "$(node "$TSC_PATH" --version)" = ''Version 7.0.2''
-
-        printf ''PSC0_TSC=%s\n'' "$TSC_PATH" >> "$GITHUB_ENV"
-
-        '
-    - name: Build complete unchanged kernel plus private mutual-header entry
-      working-directory: psc1
-      shell: bash
-      run: "set -euo pipefail\ntimeout --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" build test/PsKernelMutualHeaderSelfHost.lean\
-        \ --out dist/t06-mutual/kernel.js \\\n  2>&1 | tee \"$RUNNER_TEMP/mutual-generated/build.log\"\ntest -s\
-        \ dist/t06-mutual/kernel.js\ntest -s dist/t06-mutual/kernel.ts\ntest -s dist/t06-mutual/kernel.d.ts\ntest\
-        \ -s dist/t06-mutual/kernel.js.map\nmkdir -p \"$RUNNER_TEMP/mutual-generated/production\"\ncp dist/t06-mutual/kernel.{js,ts,d.ts,js.map}\
-        \ \"$RUNNER_TEMP/mutual-generated/production/\"\ncp dist/t06-mutual/kernel.js \"$RUNNER_TEMP/mutual-generated/kernel.mjs\"\
-        \ncp scripts/pskernel-mutual-header-smoke.mjs \"$RUNNER_TEMP/mutual-generated/\"\n"
     - name: Compare all147 private header and family controls with complete retained V1 prefix
       shell: bash
       run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\"\

@@ -1,0 +1,49 @@
+name: PSC1 empty-cache ABBA archived evidence audit
+
+on:
+  push:
+    branches:
+      - work/psc1-pskernel-empty-cache-abba-audit-20261025
+    paths:
+      - '.github/psc1-empty-cache-abba-audit/**'
+      - '.github/workflows/psc1-empty-cache-abba-artifact-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: auditor
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 054edfce56eda28a166624ddc92dfac5af8499c0
+          path: source
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Parse the read-only artifact auditor
+        shell: bash
+        run: python3 -m py_compile auditor/.github/psc1-empty-cache-abba-audit/audit.py
+      - name: Verify actual archives without executing workloads
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 auditor/.github/psc1-empty-cache-abba-audit/audit.py \
+            auditor/.github/psc1-empty-cache-abba-audit/target.json \
+            source "$RUNNER_TEMP/empty-cache-abba-audit"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-empty-cache-abba-artifact-audit-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/empty-cache-abba-audit/
+          if-no-files-found: error
+          retention-days: 30

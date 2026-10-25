@@ -101,7 +101,7 @@ export function commonPins(distribution = loadDistribution()) {
 function packagePins(descriptor) {
   if (
     !descriptor ||
-    !/^@proofscript\/[a-z0-9-]+$/.test(descriptor.package || '') ||
+    (descriptor.package !== 'typescript' && !/^@proofscript\/[a-z0-9-]+$/.test(descriptor.package || '')) ||
     !Array.isArray(descriptor.files) ||
     !descriptor.files.length
   )
@@ -178,6 +178,13 @@ export function resolveEngine(engine = 'js', distribution = loadDistribution()) 
     candidateKind: 'bundle',
     pins: [...common, ...resolved.pins, verifyFile(installationRoot, descriptor.adapter)],
   };
+}
+export function resolveCheckedTarget(target, distribution = loadDistribution()) {
+  if (target === 'js' || target === 'wasm-core') return {};
+  if (target !== 'ts' || distribution.targetConsumers?.ts?.package !== 'typescript' ||
+      distribution.targetConsumers.ts.version !== '7.0.2') fail('CHECKED_TARGET_CONSUMER');
+  const resolved = packagePins(distribution.targetConsumers.ts);
+  return { typescript: { entry: resolved.entry.path, pins: resolved.pins } };
 }
 export function resolveKernel(provider = 'wasm', distribution = loadDistribution()) {
   if (!['wasm', 'native'].includes(provider)) fail('UNKNOWN_KERNEL');
@@ -265,7 +272,8 @@ export function describeInstallation() {
     leanVersion: '4.35.0',
     leanCommit,
     engines,
-    checkedTargets: ['js'],
+    checkedTargets: ['js','ts','wasm-core'],
+    publicationProtocols: ['legacy-symlink','portable-file'],
     candidateTargets: ['js', 'ts', 'rust', 'wasm-core'],
     publicationPlatforms: ['linux'],
     finalCrossPlatformRelease: false,

@@ -1,3 +1,16 @@
+# PSC1 publication work in progress
+
+Continues qualified PR #187 at 563ee855. New branch: feat/psc1-portable-checked-publication-20261026.
+Portable file-pointer transaction phase 5c6b64af passes Linux run40236426372/job121298892084,
+including actual SIGKILL, stale writer, immutable readers, faults and sealed tamper.
+Other-platform qualification is not run; runtime guards stay fail-closed.
+Checked TS and Wasm publication integration is now implemented for qualification;
+Rust target publication remains next. No compiler source/G3, kernel, IR or resource
+policy changes. Source closure073e5156 and all four qualified G3 chains are reused.
+No merge/publication is authorized. This is not a completion receipt.
+
+Previous complete checkpoint preserved below.
+
 # PSC1 AI work state
 
 Updated 2026-10-26 Asia/Jakarta. Active work: PR #187,

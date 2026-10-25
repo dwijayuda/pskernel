@@ -31,6 +31,7 @@ function project(args) {
           '--assurance',
           '--target',
           '--output-abi',
+          '--publication-protocol',
           '--project',
         ].includes(a) ||
         Object.hasOwn(options, a) ||
@@ -72,6 +73,7 @@ function project(args) {
     ...(options['--output-abi'] ? { outputAbi: options['--output-abi'] } : {}),
     ...(options['--target'] ? { target: options['--target'] } : {}),
     ...(options['--out'] ? { out: options['--out'] } : {}),
+    ...(options['--publication-protocol'] ? {publicationProtocol:options['--publication-protocol']} : {}),
   };
 }
 try {

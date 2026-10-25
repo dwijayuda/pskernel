@@ -11,12 +11,14 @@ import {
   loadDistribution,
   resolveEngine,
   resolveKernel,
+  resolveCheckedTarget,
   commonPins,
   checkInstalledAdmissions,
   describeInstallation,
   kernelHandle,
   hash,
 } from '../host-tools/installed-engine-resolver.mjs';
+import {readPublication as readPublishedGeneration} from '../host-tools/transactional-publication.mjs';
 const fail = (message) => {
   throw Error('PSC1_UNIVERSAL_' + message);
 };
@@ -28,12 +30,14 @@ function selection(options = {}) {
   const engine = options.engine || 'js',
     kernel = options.kernel || 'wasm',
     assurance = options.assurance || 'checked',
-    outputAbi = options.outputAbi ?? 'scalar';
+    outputAbi = options.outputAbi ?? 'scalar',
+    target = options.target ?? 'js',
+    publicationProtocol = options.publicationProtocol ?? 'legacy-symlink';
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
   if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['wasm', 'native', 'both'].includes(kernel)) fail('KERNEL');
-  if (options.target !== undefined && options.target !== 'js')
-    fail('CHECKED_TARGET_UNSUPPORTED: generated checked publication currently supports js');
+  if (!['js','ts','wasm-core'].includes(target)) fail('CHECKED_TARGET_UNSUPPORTED');
+  if (!['legacy-symlink','portable-file'].includes(publicationProtocol)) fail('PUBLICATION_PROTOCOL');
   const sources = clone(options.sources);
   compilerSourceClosureDigest(sources);
   if (
@@ -41,7 +45,7 @@ function selection(options = {}) {
     !sources.some((s) => s.module === options.entryModule)
   )
     fail('ENTRY');
-  return { engine, kernel, assurance, outputAbi, sources, entryModule: options.entryModule };
+  return { engine, kernel, assurance, outputAbi, target, publicationProtocol, sources, entryModule: options.entryModule };
 }
 // Only the installed host composes tool paths, pins and independent checkers.
 // Source/project/wire data never supplies these capabilities.
@@ -74,10 +78,14 @@ function sessionFor(selected, publicationRoot) {
     entryModule: selected.entryModule,
     assurance: selected.assurance,
     outputAbi: selected.outputAbi,
-    serviceFile: engine.service.path,
-    serviceSha256: engine.service.sha256,
-    runnerFile: path.join(installationRoot, 'scripts/generated-compiler-runner.mjs'),
-    runnerSha256: d.runner.sha256,
+    target: selected.target,
+    publicationProtocol: selected.publicationProtocol,
+    serviceKind: selected.target==='js'?'js-adapter':(engine.candidateKind==='embedded'?'unified-embedded':'unified-bundle'),
+    ...resolveCheckedTarget(selected.target,d),
+    serviceFile: selected.target==='js'?engine.service.path:engine.candidate.path,
+    serviceSha256: selected.target==='js'?engine.service.sha256:engine.candidate.sha256,
+    runnerFile: path.join(installationRoot,selected.target==='js'?'scripts/generated-compiler-runner.mjs':'scripts/universal-candidate-runner.mjs'),
+    runnerSha256: selected.target==='js'?d.runner.sha256:d.hostFiles.find(row=>row.path==='scripts/universal-candidate-runner.mjs').sha256,
     checkerExecutable: process.execPath,
     checkerSha256: hash(fs.readFileSync(process.execPath)),
     checkerScriptFile: script,
@@ -101,12 +109,13 @@ export function compile(options) {
   try {
     const session = sessionFor(selected, path.join(temporary, 'store')),
       receipt = session.execute();
-    const source = fs.readFileSync(path.join(session.stagingDirectory, 'target.mjs'), 'utf8');
+    const sourceFile=selected.target==='ts'?'target.ts':selected.target==='wasm-core'?'target.wasm.hex':'target.mjs';
+    const source = fs.readFileSync(path.join(session.stagingDirectory, sourceFile), 'utf8');
     if (hash(source) !== receipt.sourceSha256) fail('CHECKED_SOURCE_CHANGED');
     return Object.freeze({
       status: 'accepted',
       engine: selected.engine,
-      target: 'js',
+      target: selected.target,
       outputAbi: selected.outputAbi,
       kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
       compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
@@ -133,18 +142,25 @@ export function build(options) {
   return Object.freeze({
     status: 'accepted',
     engine: selected.engine,
-    target: 'js',
+    target: selected.target,
     outputAbi: selected.outputAbi,
     kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
     compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
     logicalAdmission: 'accepted',
     sourceClosureDigest: receipt.sourceClosureDigest,
-    artifact: published.target,
+    artifact: published.immutableTarget,
+    runtimeArtifact: published.runtimeTarget,
+    publicationProtocol: selected.publicationProtocol,
+    durability: published.durability,
     generation: published.generation,
     manifestSha256: published.manifestSha256,
     receipt,
     formalPreservation: 'not-provided',
   });
+}
+export function readPublication({out,publicationProtocol='legacy-symlink'}) {
+  if(typeof out!=='string'||!out)fail('OUTPUT_DIRECTORY');
+  return readPublishedGeneration(path.resolve(out),publicationProtocol);
 }
 export function compileCandidate(options) {
   // Explicit low-level candidate API. It never admits proofs or publishes files.

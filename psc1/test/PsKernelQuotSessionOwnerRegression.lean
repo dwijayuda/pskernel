@@ -8,9 +8,9 @@ private def expect {α : Type} : Except String α -> IO α
   | .ok value => pure value
   | .error message => throw (IO.userError message)
 
-private def public {α : Type} : Except PsKernelError α -> IO α
+private def expectPublic {α : Type} : Except PsKernelError α -> IO α
   | .ok value => pure value
-  | .error _ => throw (IO.userError "unexpected public failure")
+  | .error _ => throw (IO.userError "unexpected expectPublic failure")
 
 private def nm (name : String) := PsKernelName.str .anonymous name
 private def invalidReference {α : Type} : Except PsKernelError α -> Bool
@@ -28,13 +28,13 @@ private def sameReply (left right : PsKernelDagReply) : Bool :=
   | _,_ => false
 
 def main : IO Unit := do
-  let empty ← public
+  let empty ← expectPublic
     (psKernelKernelSessionEmpty psKernelResourcePolicyDefault psKernelProviderDefault)
   let u := nm "u"
   let reflName := PsKernelName.str psKernelEqName "refl"
   let eq := PsKernelSimpleInductiveDecl.mk [u] psKernelEqName (psKernelExpectedEqType u)
     [.mk reflName (psKernelExpectedEqReflType u)] false 2
-  let withEq ← public (psKernelV1AdmitDeclaration empty (.ordinaryInductive eq))
+  let withEq ← expectPublic (psKernelV1AdmitDeclaration empty (.ordinaryInductive eq))
   let session := withEq.session
   let owner0 := PsKernelDagGeneratedState.mk
     psKernelExprV2PagedEmpty psKernelExprV2DecodedEmpty []
@@ -49,9 +49,9 @@ def main : IO Unit := do
     | throw (IO.userError "preexisting Eq did not enter direct admission")
   require "preexisting-owner-admission-direct-success" checked.quotInitialized
   let execution := PsKernelDagExecutionState.mk session []
-  let direct ← public (psKernelDagRunOwnedCommandWithSource psKernelExprV2DecodedEmpty
+  let direct ← expectPublic (psKernelDagRunOwnedCommandWithSource psKernelExprV2DecodedEmpty
     execution [] .safe owner0.arena owner0.built (.admit .quot))
-  let fallback ← public (psKernelDagRunFallbackOwnedCommandWithSource psKernelExprV2DecodedEmpty
+  let fallback ← expectPublic (psKernelDagRunFallbackOwnedCommandWithSource psKernelExprV2DecodedEmpty
     execution [] .safe owner0.arena owner0.built (.admit .quot))
   require "direct-and-original-receipts-match" (sameReply direct.reply fallback.reply)
   require "direct-carries-prepared-Eq-owner"
@@ -62,9 +62,9 @@ def main : IO Unit := do
       ((psKernelExprV2DeclarationRefFind direct.owner.declarations name).isSome &&
        psKernelEnvironmentContains direct.execution.session.environment name)
 
-  let result ← public (psKernelV1RunDag session [] .safe psKernelExprV2PagedEmpty
+  let result ← expectPublic (psKernelV1RunDag session [] .safe psKernelExprV2PagedEmpty
     [.admit .quot,.admit .quot])
-  require "public-empty-input-cross-call-and-repeat"
+  require "expectPublic-empty-input-cross-call-and-repeat"
     (result.replies.length == 2 && result.session.environment.quotInitialized &&
       psKernelEnvironmentSize result.session.environment == psKernelEnvironmentSize checked)
   let some quotient := psKernelExprV2DeclarationRefFind direct.owner.declarations psKernelQuotName
@@ -74,7 +74,7 @@ def main : IO Unit := do
       [.admit .quot,.check quotient.type]))
 
   let marked ← expect (psKernelDagGeneratedImport (.sort (.succ (.succ (.succ .zero)))) prepared)
-  let declined ← public (psKernelDagRunQuotOwnedWith (fun _ _ => .ok marked.fst)
+  let declined ← expectPublic (psKernelDagRunQuotOwnedWith (fun _ _ => .ok marked.fst)
     (fun _ _ _ => none) psKernelExprV2DecodedEmpty execution [] .safe owner0.arena owner0.built)
   require "decline-discards-prepared-suffix-and-restarts-original"
     (sameReply declined.reply fallback.reply &&
@@ -99,5 +99,5 @@ def main : IO Unit := do
   let original ← expect (psKernelDagGeneratedPrepareQuot checked owner0)
   require "initialized-preparation-does-not-import-Eq"
     (original.arena.size == 0 && original.built.size == 0 && original.declarations.isEmpty)
-  require "failed-public-batches-do-not-mark-original-environment" (!session.environment.quotInitialized)
+  require "failed-expectPublic-batches-do-not-mark-original-environment" (!session.environment.quotInitialized)
   IO.println "PSC1_QUOT_SESSION_OWNER_PASS"

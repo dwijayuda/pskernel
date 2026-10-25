@@ -108,10 +108,15 @@ def psKernelExprV2DefEqFullShapeAppWith
     (left right : Nat) :
     Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
   match psKernelExprV2TryUnarySpineWith defeq context state left right with
-  | Option.some (Except.ok result) =>
-      if Prod.snd result then Option.some (Except.ok result)
-      else psKernelExprV2DefEqFullShapeAppOriginalWith defeq context state left right
-  | _ => psKernelExprV2DefEqFullShapeAppOriginalWith defeq context state left right
+  | Option.none =>
+      psKernelExprV2DefEqFullShapeAppOriginalWith defeq context state left right
+  | Option.some attempted =>
+      match attempted with
+      | Except.error _ =>
+          psKernelExprV2DefEqFullShapeAppOriginalWith defeq context state left right
+      | Except.ok result =>
+          if Prod.snd result then Option.some (Except.ok result)
+          else psKernelExprV2DefEqFullShapeAppOriginalWith defeq context state left right
 
 
 def psKernelExprV2DefEqFullShapeEtaOwnedWith

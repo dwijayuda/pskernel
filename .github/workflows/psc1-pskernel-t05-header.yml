@@ -131,7 +131,7 @@ jobs:
         baseline_tree=git('rev-parse',BASE+':'+ROOT).decode().strip()
         target_tree=git('rev-parse','HEAD:'+ROOT).decode().strip()
         require(baseline_tree=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff','complete qualified baseline production tree')
-        require(target_tree=='7e92ffc478e060d282844c00f4d91e767a9894ef','complete pinned candidate production tree')
+        require(target_tree=='62d48691ff7d9680878cf668862017d1061f2ebd','complete pinned candidate production tree')
         changed=git('diff','--name-only',BASE,'HEAD','--',ROOT).decode().splitlines()
         require(changed==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact authenticated cache and unary-spine changes')
         baseline=git('show',BASE+':'+PROD)
@@ -250,7 +250,7 @@ jobs:
         assert cache_audit["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
         assert cache_audit["job"] == os.environ["GITHUB_JOB"] and cache_audit["route"] == os.environ["PSC1_T05_ROUTE"]
         assert cache_audit["baselineSha"] == "20224a295359abb201f56c72395690bf0bfac9fa"
-        assert cache_audit["targetProductionTree"] == "7e92ffc478e060d282844c00f4d91e767a9894ef"
+        assert cache_audit["targetProductionTree"] == "62d48691ff7d9680878cf668862017d1061f2ebd"
         assert cache_audit["exactCacheLookupGuardAndCommentOnly"] is True
         assert changed == cache_audit["productionChanges"] == ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"], "only the independently authenticated cache and unary-spine deltas are allowed: " + repr(changed)
         proof_path = pathlib.Path("psc1/test/PsKernelDeferredTransformProofs.lean")
@@ -1358,7 +1358,7 @@ jobs:
                 and all(source[k]==v for k,v in identity.items()),'authenticated helper source identity')
         require(source['baselineSha']=='20224a295359abb201f56c72395690bf0bfac9fa'
                 and source['baselineProductionTree']=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff'
-                and source['targetProductionTree']=='7e92ffc478e060d282844c00f4d91e767a9894ef'
+                and source['targetProductionTree']=='62d48691ff7d9680878cf668862017d1061f2ebd'
                 and source['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact complete production trees and delta')
         require(all(source[k] is True for k in ['exactCacheLookupGuardAndCommentOnly','frozenLookupByteExact',
                 'retainedProofStatementAndOtherBodiesUnchanged','allOtherRetainedInputsUnchanged']),

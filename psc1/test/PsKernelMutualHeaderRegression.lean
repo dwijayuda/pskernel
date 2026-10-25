@@ -1,4 +1,5 @@
 import Ps.KernelCore.API.DagMutualHeader
+import Ps.KernelCore.Core.ExprV2.Decode
 import Ps.KernelCore.Research.ExprV2PagedImport
 import Lean
 
@@ -193,8 +194,9 @@ private def injectedScope : IO Unit := do
       (_ : PsKernelExprV2CheckState) (_ _ : Nat) => none
   match psKernelExprV2MutualRemainingPhasesWith check whnf defeq 16 context
       (psKernelExprV2MutualClosedState arena []) parameters root (.succ .zero) with
-  | some (.ok indices) => require "injected-closed-freshness-discarded"
-      (indices.state.nextFresh == 17 && indices.context.locals.isEmpty)
+  | some (.ok indices) =>
+      require "injected-closed-freshness-discarded"
+        (indices.state.nextFresh == 17 && indices.context.locals.isEmpty)
   | _ => throw (IO.userError "injected owner did not finish")
 
 def main : IO Unit := do

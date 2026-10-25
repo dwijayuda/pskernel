@@ -71,7 +71,7 @@ def authenticate(root, variant, source, baseline):
         or native.get("sourceSha") != source or native.get("baselineSha") != baseline
         or native.get("runId") != os.environ["GITHUB_RUN_ID"]
         or native.get("runAttempt") != os.environ["GITHUB_RUN_ATTEMPT"]
-        or native.get("proofs") != 3):
+        or native.get("proofs") != 9):
         raise ValueError("native proof/compiler receipt mismatch")
     if (digest(root / "native-proofs.log") != native.get("proofLogSha256")
         or digest(root / "native-source-audit.json") != native.get("sourceAuditSha256")):
@@ -194,10 +194,13 @@ def main():
                 if observed.get("verdict") == "driver_error" or classification in ("false_accept", "false_reject"):
                     errors.append(variant + ":" + name + ":" + classification)
                 if name == "perf/church-numerals.ndjson":
-                    if (observed.get("verdict") != "resource_exhausted"
-                        or observed.get("stage") != "kernel-admission"
-                        or "kernel reduction budget exhausted" not in observed.get("reason", "")):
-                        errors.append("original Church fuel error changed: " + variant)
+                    if variant == "baseline":
+                        if (observed.get("verdict") != "resource_exhausted"
+                            or observed.get("stage") != "kernel-admission"
+                            or "kernel reduction budget exhausted" not in observed.get("reason", "")):
+                            errors.append("frozen Church baseline error changed")
+                    elif observed.get("verdict") != "accepted" or observed.get("metadataValidated") is not True:
+                        errors.append("candidate did not restore original official Church acceptance")
                 if name in ("perf/repeated-subproblem.ndjson", "bugs/proj-of-stuck-prop.ndjson"):
                     if observed.get("verdict") != reference.get("verdict"):
                         errors.append("retained complete control regressed: " + variant + ":" + name)
@@ -222,7 +225,10 @@ def main():
                     for v, xs in groups.items()}
         for left in complete["baseline"]:
             for right in complete["candidate"]:
-                if {k: left.get(k) for k in SEMANTIC_KEYS} != {k: right.get(k) for k in SEMANTIC_KEYS}:
+                keys = (("format","sourceSha256","fuel","coreInvoked","records","admissionCommands","arenaNodes",
+                         "containsUnsafeOrPartial","officialReplaySkipsUnsafeOrPartial")
+                        if name == "perf/church-numerals.ndjson" else SEMANTIC_KEYS)
+                if {k: left.get(k) for k in keys} != {k: right.get(k) for k in keys}:
                     errors.append("complete result mismatch: " + name)
         if len(complete["baseline"]) == 2 and len(complete["candidate"]) < 2:
             errors.append("new candidate host resource failure: " + name)
@@ -234,17 +240,19 @@ def main():
                    for v, xs in groups.items()}
         rss = {v: [o["peak_rss_kib"] for o in xs if "peak_rss_kib" in o]
                for v, xs in groups.items()}
-        ratio = elapsed["candidate"] / elapsed["baseline"] if bounded else None
+        comparable = bounded and name != "perf/church-numerals.ndjson"
+        ratio = elapsed["candidate"] / elapsed["baseline"] if comparable else None
         rss_ratio = (statistics.median(rss["candidate"]) / statistics.median(rss["baseline"])
-                     if bounded and all(len(xs) == 2 for xs in rss.values()) else None)
+                     if comparable and all(len(xs) == 2 for xs in rss.values()) else None)
         summaries.append({"name": name,
             "verdicts": {v: [o["verdict"] for o in xs] for v, xs in groups.items()},
             "elapsedSeconds": {v: [o["elapsed_seconds"] for o in xs] for v, xs in groups.items()},
-            "peakRssKiB": rss, "uncensoredPair": bounded,
+            "peakRssKiB": rss, "uncensoredPair": bounded, "performanceComparable": comparable,
+            "intendedChurchRecovery": name == "perf/church-numerals.ndjson",
             "candidateMedianTimeRatio": ratio, "candidateMedianRssRatio": rss_ratio,
             "timeRegressionOver10Percent": ratio is not None and ratio > 1.10,
             "rssRegressionOver15Percent": rss_ratio is not None and rss_ratio > 1.15})
-    report = {"schema": "psc1-transform-delay-abba-v1", "sourceSha": source,
+    report = {"schema": "psc1-unary-spine-abba-v1", "sourceSha": source,
               "baselineSha": baseline, "runId": os.environ["GITHUB_RUN_ID"],
               "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"], "producerReceipts": receipts,
               "archiveSha256": ORACLE.ARCHIVE_SHA256, "targetLean": ORACLE.TARGET,

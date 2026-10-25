@@ -80,8 +80,8 @@ for (const source of ['\tx', 'x\r', 'x\uFEFF']) {
 }
 // Deterministic mixtures expose delimiter and trivia adjacency classes.
 let seed = 0x5eed;
-const fragments = ['x', ' ', '\\r\\n', '-- tail\\n', '/- a /- b -/ c -/',
-  '"-- /- \\\\""', "'😀'", 'α', '\\t', '\\uFEFF', '/-', '"unfinished'];
+const fragments = ['x', ' ', '\r\n', '-- tail\n', '/- a /- b -/ c -/',
+  '"-- /- \\""', "'😀'", 'α', '\t', '\uFEFF', '/-', '"unfinished'];
 for (let i = 0; i < 32; i++) {
   let source = '';
   for (let j = 0; j < 12; j++) {

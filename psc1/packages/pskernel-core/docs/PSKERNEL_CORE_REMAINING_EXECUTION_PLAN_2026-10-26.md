@@ -23,8 +23,8 @@ the fixed resource policy.
 | Work | Current state | Completion evidence |
 |---|---|---|
 | Scoped String and local worker batches | Qualified within recorded sources | Actual receipts and independent archives |
-| Quot ID admission | Implemented; native551/39 at70e28ef2 PASS, complete routes failed portable syntax | Corrected d82a4962 complete routes and audit required |
-| Cross-session Quot owners | Implemented on212c2aa0; native preflight pending |10new local protocol reports and public/negative/runtime parity |
+| Quot ID admission | Implemented; combined cb0 native561/40 PASS | Current complete generated/canonical routes and independent561 audit pending |
+| Cross-session Quot owners | Implemented, exact-tree9f native19/43controls PASS, included in cb0 native561 |10local protocol reports; complete public/negative/runtime parity pending |
 | Mutual/nested ID admission | Open | Complete checked bundle and recursor ownership |
 | Whole-operation restart removal | Open | Four public routes without supported original-operation restart |
 | Eager decode/metadata import removal | Open | Demand-based output decode and bounded owning worklist import |
@@ -45,27 +45,11 @@ psKernelExprEq's binder erasure, metadata and other fields. Shared installation
 has a complete frozen-function refinement theorem. It reads no expanded input
 type and imports no input expression.
 
-Corrected cohort: d82a4962f6d778b2e157211fb7f9d70c8919a4ae /
-40222096378. Auditor9768e8d2 targets this exact source. Native70e28ef2 qualification
-does not qualify a changed source. The earlier generated/canonical failure was
-an inline-if syntax accepted by native Lean but rejected by PSC1; corrected
-source binds the condition through a portable let. Recheck all original gates.
+Current combined cohort: **cb0bbaeb332a9fa3655f0c852496d96b2f722416 /40225115416**, production tree65d5b9c3d0431a8b86961b6d1aec398f7169d223. Native561/40 PASS with actual273-member archive independently read. Generated/canonical remain pending; independent9790802b /40225293570 targets exact current source. Isolated9f130bbc /40223744958 passes all19 reports and26+17 new assertions; all301 archived source files match immutable Git blobs. Portable893a9af1 diagnostic passes all3modules with authenticated reused compiler, not complete-source qualification.
 
-Cross-session follow-up:212c2aa008b400a5238fb76438fd1b41fcd5e35c /
-40222100229. Explicit Quot with an empty input graph demands only the checked
-Eq and constructor metadata from the same immutable environment. It preflights
-first, preserves the original external-ID table, discards prepared suffixes on
-decline, and checks declaration limits before generated-header import.
-The four live Quot owners are published atomically. Initial d6ba83c5 passed
-all10protocol reports but its runtime helper used the reserved Lean keyword
-public; corrected test helper is expectPublic. This is not a passing runtime
-result for that earlier source.
+Earlier70e andd82 complete routes failed portable inline-if and flat singleton syntax.67f diagnostic failed structural recursion staging; all11calls now use explicit partial let bindings at arity1.92055998 failed before build on an inherited source guard, fixed without production changes. Preserve each failure.
 
-Finish the first cohort and audit before adopting it. Qualify the cross-session
-follow-up as a separate changed source; then verify same-batch/cross-call,
-repeated initialization, exact errors, malformed/missing owners, resource
-limits, private-ID rejection, late failure and official Quot fixtures in both
-complete generated routes.
+Explicit Quot with an empty input graph demands only checked Eq and constructor metadata from the same immutable environment. Preflight runs first, prepared suffixes are discarded on decline, original external-ID bounds are retained, declaration limits precede generated import, and all4 live owners publish atomically. Complete same-batch/cross-call/repeat/errors/private-ID/limits/official controls must finish in both rebuilt routes before adoption. Read actual archives and independent audit; authenticate exact-tree193 replay and preserve all classifications before non-force integration.
 
 ## 2. Implement shared mutual headers
 
@@ -151,6 +135,8 @@ The observed Prelude prefix spends most checked-command time in body inference;
 earlier ingress decode alone was not the demonstrated dominant cost. Original
 generated profiling showed allocation/GC and generator dispatch overhead.
 Retain these observations as diagnostics, not whole-batch attribution.
+
+Fresh ecafaab production40218506599 generated String shard5 hard-times out at1500seconds (exit137) without its1400assertion receipt. Admission54.655s and metadata1.847s complete; singleton control passed. Canonical all6 pass; generated0–4 pass, aggregate remains FAIL. Do not raise1500seconds, remove assertions/samples or weaken collector. Read bounded exact-program V8/API trace to locate remaining expensive operation, then prove and qualify an isolated implementation fix.
 
 Profile exact current complete programs before each performance change.
 Separate native semantics, generated construction, generator/closure overhead,

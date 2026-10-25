@@ -26,6 +26,18 @@ jobs:
           node --check scripts/kernel435-core-package.mjs
           node --check scripts/kernel435-core-installed.mjs
           node scripts/kernel435-core-package.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-kernel435-integrated-candidate-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435-core/tarballs/
+            psc1/dist/kernel435-core/package-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Independently recheck the exact frozen compiler graph with both kernels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/kernel435-frozen-compiler.mjs dist/kernel435-core/work/package
       - name: Real installed native and four generated compiler engines with dual admission
         run: node scripts/kernel435-core-installed.mjs dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz
       - name: Typecheck actual installed core and kernel public APIs
@@ -48,10 +60,6 @@ jobs:
           {"compilerOptions":{"noEmit":true,"strict":true,"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022"},"files":["consumer.mts"]}
           JSON
           node "$RUNNER_TEMP/psc1-core-types/node_modules/typescript/bin/tsc" --project "$RUNNER_TEMP/psc1-core-types/tsconfig.json"
-      - name: Independently recheck the exact frozen compiler graph with both kernels
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/kernel435-frozen-compiler.mjs dist/kernel435-core/work/package
       - uses: actions/upload-artifact@v4
         with:
           name: psc1-kernel435-integrated-toolchain-qualified-${{ github.sha }}
@@ -66,6 +74,7 @@ jobs:
         with:
           name: psc1-kernel435-integrated-diagnostics-${{ github.sha }}
           path: |
+            psc1/dist/kernel435-core/tarballs/
             psc1/dist/kernel435-core/package-receipt.json
             psc1/dist/kernel435-core-installed/
           retention-days: 90

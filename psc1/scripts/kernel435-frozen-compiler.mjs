@@ -10,7 +10,7 @@ function findStrings(value){
  }
 }
 function visit(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,e.name);if(e.isDirectory())visit(file);else if(e.isFile()&&e.name.endsWith('.json')){const st=fs.statSync(file);if(st.size>128*1024*1024)continue;const bytes=fs.readFileSync(file);if(sha256(bytes)===expected)canonical=bytes.toString('utf8');let data;try{data=JSON.parse(bytes.toString('utf8'));}catch{continue;}
- if(data.schema==='psc1-generated-target-qualification/1'&&data.target==='rust'&&data.status==='passed'&&data.mode==='--self-host'&&data.sourceClosureDigest==='07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af'&&data.testedCommit===input.commit)qualified=true;
+ if(data?.schema==='psc1-generated-target-qualification/1'&&data.target==='rust'&&data.status==='passed'&&data.mode==='--self-host'&&data.sourceClosureDigest==='07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af'&&data.testedCommit===input.commit)qualified=true;
  findStrings(data);
  }}}
 visit(archive);assert.equal(qualified,true,'frozen genuine self-host qualification missing');assert.equal(typeof canonical,'string','exact admitted compiler graph missing');assert.equal(sha256(canonical),expected);

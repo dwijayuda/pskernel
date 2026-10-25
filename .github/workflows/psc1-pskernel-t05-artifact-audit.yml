@@ -1,0 +1,60 @@
+name: PSC1 T05 artifact-only cohort audit
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-validator-artifact-audit-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-t05-artifact-audit.yml
+    - .github/psc1-t05-audit/**
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: audit-tools
+        persist-credentials: false
+    - name: Validate configured source and cohort
+      id: target
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import json, os, pathlib, re
+        config = json.loads(pathlib.Path('audit-tools/.github/psc1-t05-audit/target.json').read_text())
+        assert config['repository'] == 'dwijayuda/pskernel'
+        assert re.fullmatch(r'[0-9a-f]{40}', config['sourceSha'])
+        assert type(config['runId']) is int and config['runId'] > 0
+        assert type(config['runAttempt']) is int and config['runAttempt'] > 0
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+            stream.write('source_sha=' + config['sourceSha'] + '\n')
+        print('Artifact-only audit target: ' + json.dumps(config, separators=(',', ':')))
+        PY
+    - uses: actions/checkout@v4
+      with:
+        repository: dwijayuda/pskernel
+        ref: ${{ steps.target.outputs.source_sha }}
+        path: cohort-source
+        persist-credentials: false
+    - name: Verify exact Git inputs, archive members and qualification receipts
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PSC1_AUDIT_SOURCE_ROOT: ${{ github.workspace }}/cohort-source
+        PSC1_AUDIT_OUTPUT: ${{ runner.temp }}/psc1-t05-audit
+      run: |
+        set -euo pipefail
+        python3 audit-tools/.github/psc1-t05-audit/audit.py audit-tools/.github/psc1-t05-audit/target.json
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t05-artifact-audit-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/psc1-t05-audit/
+        if-no-files-found: error
+        include-hidden-files: true

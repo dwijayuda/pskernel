@@ -47,39 +47,8 @@ def execute(out,native):
             status=subprocess.run(proof_command,cwd=ROOT,stdout=handle,stderr=subprocess.STDOUT).returncode
         proof_log=(out/'proof.log').read_text();print(proof_log,flush=True)
         assert status==0
-        expected=re.findall(r'(?m)^#print axioms (\\S+)\\s*
-        results={}
-        for mode in ['baseline','stages']:
-            text=ci.bounded(out,'candidate-native-'+mode,[native,mode],out,dict(os.environ,PATH='',NODE_OPTIONS=''))
-            rows=[json.loads(line.split(' ',1)[1]) for line in text.splitlines() if line.startswith('PSC1_CHURCH_RESULT ')]
-            assert len(rows)==1 and rows[0]['verdict']=='accepted' and rows[0]['fuel']==4096
-            results[mode]=rows[0]
-            if mode=='stages':
-                stages=[json.loads(line.split(' ',1)[1]) for line in text.splitlines() if line.startswith('PSC1_CHURCH_STAGE ')]
-                assert [x['stage'] for x in stages]==['header','is-prop','body-static','body-check','final-defeq']
-                assert all(x['status']=='ok' for x in stages)
-                prefix=[json.loads(line.split(' ',1)[1]) for line in text.splitlines() if line.startswith('PSC1_CHURCH_PREFIX ')]
-                baseline=json.loads((out.parent/'report.json').read_text())
-                assert len(prefix)==1 and {k:str(v) for k,v in prefix[0].items()}==baseline['prefixes']['native']
-        ci.write(out/'candidate-report.json',{'schema':'psc1-unary-spine-native-prototype-v1',
-            'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],'status':'pass',
-            'diagnosticOnly':True,'productionAdopted':False,'generatedQualified':False,'fuel':4096,
-            'unchangedProcessLimitSeconds':60,'results':results,'stages':stages,
-            'originalSource':ci.digest((out/'FullShape.lean.original').read_bytes()),
-            'candidateSource':ci.digest((out/'FullShape.lean.candidate').read_bytes())})
-        print('PSC1_UNARY_SPINE_NATIVE_PROTOTYPE: PASS '+json.dumps(results))
-    finally:
-        PATH.write_bytes((out/'FullShape.lean.original').read_bytes())
-        subprocess.run(['git','diff','--exit-code','--','packages/pskernel-core/src'],cwd=ROOT,check=True)
-
-if __name__=='__main__':
-    assert os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('RUNNER_OS')=='Linux'
-    p=argparse.ArgumentParser();p.add_argument('command',choices=['instrument','execute']);p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--native')
-    args=p.parse_args()
-    if args.command=='instrument':instrument(args.out.resolve())
-    else:execute(args.out.resolve(),args.native)
-,PROOFS)
-        found=re.findall(r"'([^']+)' (?:depends on axioms:\\s*\\[([^\\]]*)\\]|does not depend on any axioms)",proof_log)
+        expected=re.findall(r'(?m)^#print axioms (\S+)\s*$',PROOFS)
+        found=re.findall(r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)",proof_log)
         assert len(expected)==9 and [name for name,_ in found]==expected
         assert not any(token in proof_log for token in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])
         for _,used in found:

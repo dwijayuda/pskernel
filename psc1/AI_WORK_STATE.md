@@ -1,83 +1,81 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Draft PR #178; branch
-`feat/psc1-unified-selfhost-20261024`. GitHub tools/cloud Actions only; routine development stays Linux.
-Use fresh expected-HEAD, single-parent non-force updates. No merge/npm publication.
+Updated2026-10-25 Asia/Jakarta. Draft PR #179, branch
+`integration/psc1-lean435-kernel-packages-20261025`, stacked on #178/
+qualified55f9327e. Connected GitHub and cloud Actions only; routine development
+is Linux. Explicitly requested macOS/Windows builds are separate release
+qualification. Fetch live HEAD, use single-parent expected-HEAD non-force updates.
+No merge or npm publication is authorized.
 
-## Latest user requirement: default Wasm kernel and separate execution bundles
+## Verified Wasm-default kernel and compiled-bundle milestone
 
-The final/default independent checker is now required to be
-@proofscript/pskernel-lean-wasm4.35.0 (official C++/Emscripten linear memory).
-Native Lean is explicit --kernel native|both; no silent native fallback is allowed.
-The reference proofscript-psc0-ps-npm-packages.zip was read only as nested package
-metadata/layout, with no scripts executed. Its old4.34/candidate-JS trust metadata,
-mismatched .js/.mjs exports and Linux-only bundled TypeScript tool are not release
-patterns to inherit. [Authoritative distribution contract](NPM_DISTRIBUTION_CONTRACT.json).
+Code/package checkpoint `3c9fae34d8a8912cce638777611942327b67ca35` passes
+integrated run40160064167/job121069555210. Fresh global install at
+`d269846a50e33f15e18abe96b653735c0a93cf3e` passes40160640974/job121071261017.
+The real installed CLI uses official Lean4.35 C++/Emscripten6.0.9 **linear-memory
+Wasm by default**. Native is an explicit comparison; missing/corrupt/refusing
+Wasm cannot fall back. Preserved native publication also checks its exact staged
+admission graph with Wasm before commit, retaining original native checking.
 
-Root proofscript will provide qualified generated JS/TS execution, default Wasm
-checking and JS/TS/Rust/Wasm output capabilities. Separate optional compiler-rust,
-compiler-wasm and platform-native execution bundles reuse the existing compiler;
-Python/PHP remain optional output providers. Compiler execution, output backend
-and independent kernel are distinct. Modular source/API packages must ship real
-working exports/types, not pretend independently compiled facades. The package
-split is a final-release queue item; current integration bundles retain old assets.
+The integrated seven-tarball artifact12585887196 has ZIP SHA256
+`064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a`.
+Core tgz62180617 bytes, SHA256
+`b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346`.
+Actual installed tests pass14 native/Wasm cases,20 compiler cases,24 CLI/JSON
+application builds/88 observations,24 generated refusal/tamper cases,8 explicit
+dual checks,2 native publication checks and public TypeScript API checks.
+Default generated cases run with native compiler AND native checker unavailable.
+Fresh global install executes8 builds, all engines/both grammars, offline empty
+cache, native payloads unavailable, previous outputs preserved, corrupt Wasm refused.
 
-Default selection implementation now uses a pinned Node/Wasm primary checker,
-with explicit native/both comparison. Preserved native publication adds default
-Wasm checking of the exact captured staged admissions before commit; its original
-native internal checking is retained. The updated host-boundary/native-publisher
-and installed-package tests must pass before this implementation is qualified.
-The long real Wasm build remains40154206987; do not substitute4.34 bytes.
+The unchanged qualified120-module compiler admission graph
+`4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39`
+passes BOTH real kernels in6222ms combined. This is independent logical rechecking,
+not full-generation replay, formal preservation or DDC.
 
-Native compiler source-admission release run40157017833 has PASSED all four new
-platforms (Linux arm64, macOS x64/arm64, Windows x64), with SDK absent from execution
-PATH. These are source/check/admission binary gates, not complete backend
-publication or whole-toolchain npm qualification. The existing Linux publication
-boundary remains a final cross-platform blocker.
+Both kernel packages are now genuinely install-qualified on Linux x64/arm64 glibc,
+macOS x64/arm64 and Windows x64: Native40155475188, Wasm40158859386.
+Each platform passes28 offline local/global acceptance/rejection cases plus tamper
+refusal without SDK/install scripts. Native binaries are2.77–4.62MB, all below7MB;
+the complete five-platform native tgz is6446239 bytes. Wasm tgz582533 bytes contains
+the real2212007-byte module. Genuine Wasm build40154206987 passed in1:08:25,
+peak1521832KiB; retain the sealed toolchain cache and documented compatibility
+patches, including native-equivalent finite task-heartbeat reset.
 
-## Active kernel and platform integration mission
+Separate genuine frozen G3 execution bundles are also implemented and qualified:
+`@proofscript/compiler-wasm` (1370182-byte tgz, five platforms) and
+`@proofscript/compiler-rust-linux-x64` (12917609-byte tgz, Linux x64/glibc),
+run40158598464. They verify exact compiler/transport pins and expose candidate
+APIs, with no admission/publication authority. Root CLI optional-bundle discovery
+is still pending; the transitional root continues to embed all four engines.
+The compiler Wasm GC architecture remains distinct from the linear-memory kernel.
 
-Latest development continues on `integration/psc1-lean435-kernel-packages-20261025`,
-branched from qualified55f9327e. Routine development is Linux-only. The user
-explicitly requested final native macOS/Windows builds and installed release tests;
-those run in a separate release matrix. No merge or npm publication is authorized.
+Native compiler binaries pass real .lean/.ps source/admission checks on Linux
+arm64/macOS x64+arm64/Windows x64 in40157017833. This narrower gate does not qualify
+backend publication or the whole installed toolchain on those platforms.
 
-Both existing kernel packages are being upgraded to official Lean4.35.0/current
-canonical admissions v2. The official C++ Wasm checker remains Emscripten linear
-memory, separate from PSC1's Wasm backend. Archive branch0408f18b established the
-slim kernel-only initialization/narrow-import/-Os/remove-unused-Lake strategy.
-Current25-module provider closure retains all finite kernel checks and semantic
-bodies. Linux x64/arm64 run40154010946 PASS14 real reference-parity cases and
-standalone execution; raw binaries4079232/4160016 bytes. macOS x64/arm64 jobs
-121053490973/121053490842 in40154709416 PASS equivalent gates,2771584/2798528 bytes.
-That matrix's overall failure is Windows setup, not a macOS success override.
-Windows-only retry40155170697 has PASSED after fixing Bash-path export to native
-Elan PATH. Linear Wasm build40154206987 is active at630fa363; do not restart it.
-The native4.35 package is qualified on all five platforms as recorded below; linear Wasm and the full cross-platform compiler toolchain remain unqualified.
+[Install guide](docs/PSC1_KERNEL_PACKAGES.md),
+[machine-readable evidence](docs/PSC1_KERNEL435_QUALIFICATION_2026-10-25.json) and
+[executable continuation](docs/PSC1_KERNEL435_CONTINUATION.md) contain exact identities.
+The latest normal PR source regression gate must be terminal before recording it;
+prior cancelled runs are not successes. Parent55's37/37 is historical baseline
+evidence, not an automatic qualification of this integration branch.
 
-Next: assemble only pinned successful artifacts, match exact25-module source
-closure, pack and install offline locally/globally, execute public API acceptance/
-rejection/tamper tests on every platform; finish actual linear Wasm differential
-checking and package integration before claiming release readiness. Preserve
-qualified120-module compilers and all four G3 artifacts. Whole toolchain platform
-selection/native compiler/Rust executable transport and generated output parity
-remain separate release blockers. See scripts/kernel435-* and kernel435 workflows.
+## Final distribution contract and reference archive
 
-## Native kernel package milestone
+[NPM_DISTRIBUTION_CONTRACT.json](NPM_DISTRIBUTION_CONTRACT.json) is authoritative.
+Final root: qualified generated JS/TS execution, required default Wasm kernel and
+all JS/TS/Rust/Wasm output capabilities. Optional compiled Rust/Wasm/native
+execution bundles are separate from optional Python/PHP output providers.
+Current integrated root is transitional Linux x64/glibc with native/four-engine
+assets retained; allFourEngineSelfHostQualified=true,
+allFourEngineReleaseQualified=false. Generated CLI publishes JS only today.
 
-Native package commit4deb99de/run40155475188 PASSES all five platform installed
-jobs, same tarballc8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371,
-6446239 bytes for all five prebuilts combined. Native source closure25 modules,
-f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b.
-Windows retry40155170697 passed,4616704-byte standalone binary. All native
-binaries are below7000000 raw bytes. [Install guide](docs/PSC1_KERNEL_PACKAGES.md)
-and [exact receipts](docs/PSC1_KERNEL435_QUALIFICATION_2026-10-25.json).
-
-Host kernel CLI/pre-publication additional checking is implemented; run40155831321
-passes32 boundary checks and10 Rust transport regressions. Its additional accepted
-provider is a real native reference; it does not claim genuine Wasm acceptance.
-Real linear Wasm40154206987 remains active; preserve the run/cache. Whole toolchain
-cross-platform and integrated dual-check npm qualification remain INCOMPLETE.
+The supplied proofscript-psc0-ps-npm-packages.zip was inspected read-only for nested
+tarball metadata/layout, with no archived code executed. Its old4.34/candidate-JS
+trust policy, nonexistent .js exports where payloads are .mjs, and Linux-only
+TypeScript tool are not inherited. New source/API scopes require actual working
+runtime/type exports; partial .ps translations cannot be labeled full parity.
 
 ## Four-engine correctness milestone and package promotion
 
@@ -133,52 +131,36 @@ Ordinary requests remain240s.
 
 Production55f9327ee738b5b2bf5d623c96280cb97de828b2 PASSED package40152769340/job121047594235 (20 compiler cases,24 application builds/88 observations,26 negatives) and full40152772905/job121049906606/final gate121055266402 (37/37 criteria,0 blocked,seven backends,both grammars). Tested mergef9713323bb3beed393255ff755da3dd2023febdc shares treed884c41c8097ac59c91081f019481f60625ba793 with review55. Production artifact12582649787 ZIPda6a88220337c601fcf401ea7e06a55c45988f96c0a5692d28e958ed07c61916, core29a837faedaabb8c7e6ae30cec19ac53680084b5188de0eef2b7eabbd4f09198. Full artifact12583743977 ZIP8b10c96a59fab176c0cf7dcc967720c8384870d97745859f0a3a99a71cc17194. All package artifacts remain unpublished.
 
-## Executable kernel continuation and platform boundary
+## Single dependency-ordered remaining queue
 
-Draft PR #179 now owns this integration branch, stacked on the qualified #178
-checkpoint55f9327e. [Executable continuation](docs/PSC1_KERNEL435_CONTINUATION.md)
-contains exact inputs, triggers and remaining acceptance gates. Prepared package
-workflows execute only after explicit successful artifact identities are committed;
-old4.34 bytes cannot satisfy their checks. Core compiler/G3 assets are reused.
+| Order | Work | Status and finite acceptance |
+| --- | --- | --- |
+| 0 | Final source regression gate | Run normal dependency-selected source CI through every selected check; preserve failed/cancelled debt. Exact successful final source/package identities required. Current kernel/default-Wasm installed gates above are passed. |
+| 1 | Portable publication and final npm split | PENDING. Preserve Linux immutable generations/atomic prior-output behavior; implement and execute equivalent Windows/macOS publication. Slim universal JS/TS root requires genuine default Wasm checking, optional compiled bundle discovery with pins, no wrong-platform bundled default tools, real exports/types/bin, and all five platforms' actual offline local/global compilation. Keep existing working root available until replacement qualifies. |
+| 2 | Generated TS publication | PENDING. Reuse shared admission/strict IR/publication; pinned independent TS consumer, equivalent observations, both grammars/all four engines, refusal/ABI/tamper and prior-output preservation. No native compiler fallback. |
+| 3 | Generated Rust/Wasm output, components and optional providers | PENDING. Reuse existing checked emitters/runtime adapters; finish all relevant backend mappings and consumer tests. Additional Rust execution platforms need genuine binaries and bounded supervisors. Keep native CLI/Python/PHP providers working. |
+| 4 | Clean reproduction and final release | PENDING. Immutable readbacks, installed tests and frozen graph checks are narrower than a clean full-generation replay. Exact final source/package/platform qualification and authorization required before merge or publication. |
+| 5 | Original240-second performance target | UNQUALIFIED. Optimize measured real compiler workloads, preserve G1/checker/fuel/memory/stack limits. The isolated proved lexer candidate is stage-tested and unpromoted. Source changes require new-root qualification. |
+| 6 | Broader language/extensions/readability | DEFERRED beyond frozen v1. Preserve all working features/source libraries. Optional packages grant no kernel/host/FFI authority. |
 
-Static/installed public types40156453697 and40156780118 pass. New CLI source
-transport selects Windows .exe and platform-specific library paths; release source-
-admission run40157017833 is active on Linux arm64/macOS/Windows. This does not
-qualify backend publication: host-tools/artifacts.mjs explicitly requires Linux,
-and generated atomic pointer/fsync behavior also needs a portable contract.
-The integrated compiler tarball remains Linux x64 until full platform qualification.
-Latest PR normal CI must be checked after actual code changes; cancelled earlier
-snapshots are not passing evidence. The long Wasm build40154206987 remains active.
+## Preserved policies and continuation
 
-## Scope and remaining queue
+Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trustlevel0,
+finite2000000-heartbeat/20000-recursion kernel bounds, exact source/logical pairing,
+strict original/transformed IR, semantic fuel, memory/stack, negative tests and
+unsupported ABI refusals remain required. G1/corpus/buildtools240s, checker120s,
+original1800s correctness and240s performance remain unchanged. Rust-only3600s
+applies only to G2/G3 compiler requests,190-minute job/170-minute step.
 
-The core provides native JS/TS/Rust/Wasm core/component output and all four
-qualified generated execution engines. Python/PHP output remains optional.
-Explicit `psc generated build --engine js|ts|rust|wasm-core` currently publishes
-JS. Other generated publication targets, component/provider dispatch and final
-release qualification remain incomplete; allFourEngineSelfHostQualified=true
-does not imply allFourEngineReleaseQualified=true. No registry release is claimed.
+Resolved package-only failures remain in the qualification receipt and Git:
+Windows Elan PATH setup (retry40155170697 passed); absent upstream shrinkwrap
+(fixed using only exact pinned dependency lock/inventory); frozen JSON-null reader
+(fixed3c9, integrated40160064167 passed). These do not change qualified compiler
+source or kernel semantics. Earlier cancelled gates remain cancelled.
 
-1. Complete the active Lean4.35 native/linear-Wasm kernel package and cross-platform release integration described above.
-2. Complete generated publication targets/components/optional-provider dispatch
-   through existing admission, strict IR, target validation and transactional
-   publication. Engine selection and output-target selection are separate.
-3. Complete clean full-generation reproduction/final release qualification.
-   Optimize measured costs toward the separate240s performance profile.
-4. Defer broader language/extensions/readability beyond frozen Practical Core v1;
-   preserve every working language feature, both grammars and seven backends.
-
-Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, strict original/
-transformed IR, exact source/logical pairing, semantic fuel, memory/stack,
-negative tests and unsupported-ABI refusals remain unchanged.
-G1/corpus/build tools240s,checker120s stay unchanged; separate Rust-only
-correctness3600s changes only G2-self/G3-self (190-minute job/170-minute step).
-Existing1800s correctness and240s performance are preserved.
-
-The measured Nat constructors/borrowing/dependency optimization is promoted;
-experimental LLVM flags are not. Isolated lexer code31e10263/run40143764706 is
-proved/stage-tested but NOT promoted or whole-compiler qualified. Preserve the
-frozen root and all historical qualification evidence.
-The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the finite remaining queue.
-[Earlier detailed work state](docs/history/AI_WORK_STATE_BEFORE_RUST_G3_PACKAGE_2026-10-25.md)
-is preserved verbatim; its pending snapshots do not override these results.
+The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining queue.
+[Execute the continuation](docs/PSC1_KERNEL435_CONTINUATION.md) after fetching
+live HEAD/CI. Preserve original self-hosting and slim native evidence; do not
+repeat successful long frozen chains for packaging/docs.
+[Earlier detailed state](docs/history/AI_WORK_STATE_BEFORE_RUST_G3_PACKAGE_2026-10-25.md)
+is preserved; its pending snapshots do not override current exact receipts.

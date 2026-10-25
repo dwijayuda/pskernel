@@ -96,43 +96,53 @@
   "acceptance": [
     {
       "id": "default-wasm-real",
-      "required": "Unconfigured installed CLI/API uses genuine4.35 Wasm checking; missing/corrupt/refusing Wasm never falls back to native."
+      "required": "Unconfigured installed CLI/API uses genuine4.35 Wasm checking; missing/corrupt/refusing Wasm never falls back to native.",
+      "status": "qualified-Linux-integrated-and-global"
     },
     {
       "id": "native-explicit",
-      "required": "Explicit native/both comparison performs actual pinned native checks of identical canonical bytes."
+      "required": "Explicit native/both comparison performs actual pinned native checks of identical canonical bytes.",
+      "status": "qualified-Linux-integrated"
     },
     {
       "id": "no-native-default",
-      "required": "Default generated compilation succeeds with native compiler/checker payloads unavailable."
+      "required": "Default generated compilation succeeds with native compiler/checker payloads unavailable.",
+      "status": "qualified-Linux-integrated-and-global"
     },
     {
       "id": "native-publisher-wasm",
-      "required": "Preserved native compiler publication adds default Wasm checking of its exact captured/staged admissions before commit."
+      "required": "Preserved native compiler publication adds default Wasm checking of its exact captured/staged admissions before commit.",
+      "status": "qualified-Linux-integrated"
     },
     {
       "id": "engine-output-separation",
-      "required": "Removing optional Rust/Wasm execution bundles does not remove core JS/TS/Rust/Wasm emission capabilities."
+      "required": "Removing optional Rust/Wasm execution bundles does not remove core JS/TS/Rust/Wasm emission capabilities.",
+      "status": "pending-final-root-split-and-generated-output-publication"
     },
     {
       "id": "real-runtime-exports",
-      "required": "Every packaged main/exports/types/bin target exists and is imported/typechecked/executed from the packed tarball."
+      "required": "Every packaged main/exports/types/bin target exists and is imported/typechecked/executed from the packed tarball.",
+      "status": "qualified-current-core-kernels-and-compiled-bundles; future-source-packages-pending"
     },
     {
       "id": "all-platform-installs",
-      "required": "Offline local/global final toolchain installs and actual compilation/consumption on every release platform."
+      "required": "Offline local/global final toolchain installs and actual compilation/consumption on every release platform.",
+      "status": "kernels-and-compiler-Wasm-candidate-qualified; final-toolchain-pending"
     },
     {
       "id": "portable-publication",
-      "required": "Platform publication preserves complete immutable generations, integrity and prior outputs on every failure; existing Linux guarantees retained."
+      "required": "Platform publication preserves complete immutable generations, integrity and prior outputs on every failure; existing Linux guarantees retained.",
+      "status": "pending"
     },
     {
       "id": "reproducible-artifacts",
-      "required": "Exact source/IR/admission/compiler/toolchain/platform/package hashes and genuine existing G1/G2/G3/fixed-point evidence."
+      "required": "Exact source/IR/admission/compiler/toolchain/platform/package hashes and genuine existing G1/G2/G3/fixed-point evidence.",
+      "status": "qualified-frozen-compilers-and-current-artifact-identities; final-clean-release-replay-pending"
     },
     {
       "id": "seven-backends-both-grammars",
-      "required": "Frozen Practical Core v1 and seven-backend regression/final release qualification remain passing."
+      "required": "Frozen Practical Core v1 and seven-backend regression/final release qualification remain passing.",
+      "status": "qualified-parent55; latest-source-regression-CI-must-be-recorded"
     }
   ],
   "referenceArchive": {
@@ -146,5 +156,57 @@
       "reference root bundles a Linux x64 TypeScript tool; final universal package must use portable or correctly selected tools"
     ]
   },
-  "publication": "requires exact release qualification and user authorization"
+  "publication": "requires exact release qualification and user authorization",
+  "qualifiedCheckpoint": {
+    "date": "2026-10-25",
+    "codeCommit": "3c9fae34d8a8912cce638777611942327b67ca35",
+    "core": {
+      "status": "qualified-Linux-x64-glibc",
+      "run": 40160064167,
+      "artifact": 12585887196,
+      "globalRun": 40160640974,
+      "defaultKernel": "wasm",
+      "nativeUnavailableDuringDefaultGeneratedCases": true,
+      "transitionalEmbeddedEngines": true,
+      "finalUniversalSlimRoot": false
+    },
+    "kernels": {
+      "native": {
+        "status": "qualified-five-platform-installed",
+        "run": 40155475188
+      },
+      "wasm": {
+        "status": "qualified-five-platform-installed",
+        "run": 40158859386,
+        "memoryModel": "linear"
+      }
+    },
+    "executionBundles": {
+      "rust": {
+        "status": "qualified-candidate-API-linux-x64-glibc",
+        "package": "@proofscript/compiler-rust-linux-x64",
+        "run": 40158598464,
+        "rootOptionalDiscoveryIntegrated": false
+      },
+      "wasm": {
+        "status": "qualified-candidate-API-five-platform",
+        "package": "@proofscript/compiler-wasm",
+        "run": 40158598464,
+        "rootOptionalDiscoveryIntegrated": false
+      }
+    },
+    "generatedPublicationTargets": [
+      "js"
+    ],
+    "nativePublicationTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python-optional",
+      "php-optional"
+    ],
+    "fullCrossPlatformRelease": false
+  }
 }

@@ -1,67 +1,151 @@
-# Lean4.35 independent kernel packages
+# ProofScript and independent Lean 4.35 kernel packages
 
-The native `@proofscript/pskernel-lean@4.35.0` candidate is install-qualified on
-Linux x64/glibc, Linux arm64/glibc, macOS x64, macOS arm64 and Windows x64.
-Routine development remains Linux; these macOS/Windows jobs are separate release
-qualification. The same tarball passes offline local/global installs on all five.
-No package has been published to npm.
+The integrated, unpublished Linux x64/glibc package uses
+`@proofscript/pskernel-lean-wasm@4.35.0` as the default independent checker.
+It is the official Lean C++ kernel compiled with Emscripten 6.0.9 and linear
+memory. Native checking is an explicit `native` or `both` choice; an absent,
+corrupt or refusing Wasm checker never causes a native fallback. PSC1's separate
+compiler Wasm bundle retains its existing GC architecture.
 
-Download [artifact12584263337](https://github.com/dwijayuda/pskernel/actions/runs/40155475188/artifacts/12584263337)
-and extract `proofscript-pskernel-lean-4.35.0.tgz`.
-The tarball is6446239 bytes, SHA256
-`c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371`.
-Artifact ZIP SHA256
-`a5cefb58f4eaf4a558b390294d24c555b763c3a0ef7f7e68aab7cfc324f58b2f`.
+## Download and install the qualified integration
+
+[Download the seven-package artifact](https://github.com/dwijayuda/pskernel/actions/runs/40160064167/artifacts/12585887196)
+from successful run 40160064167, source
+`3c9fae34d8a8912cce638777611942327b67ca35`.
+Artifact ZIP SHA256:
+`064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a`.
+After extracting, enter `kernel435-core/tarballs/`.
+
+| Package | Tarball | Bytes |
+| --- | --- | ---: |
+| proofscript | proofscript-0.1.0-psc1.3.tgz | 62180617 |
+| @proofscript/pskernel-lean-wasm | proofscript-pskernel-lean-wasm-4.35.0.tgz | 582533 |
+| @proofscript/pskernel-lean | proofscript-pskernel-lean-4.35.0.tgz | 6446239 |
+| @proofscript/compiler-wasm | proofscript-compiler-wasm-0.1.0-psc1.3.tgz | 1370182 |
+| @proofscript/compiler-rust-linux-x64 | proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz | 12917609 |
+| @proofscript/backend-python | proofscript-backend-python-0.1.0-psc1.3.tgz | matching optional output provider |
+| @proofscript/backend-php | proofscript-backend-php-0.1.0-psc1.3.tgz | matching optional output provider |
+
+Core tarball SHA256:
+`b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346`.
+Use Node **22.23.3** for the currently qualified compiler transports.
+Core includes both matching kernel packages offline; installation builds nothing
+and downloads no compiler SDK. It still embeds the four compiler engines and
+native compiler assets during the transition to a slim final package split.
 
 ```sh
-npm install ./proofscript-pskernel-lean-4.35.0.tgz
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.3.tgz
+npx --no-install psc kernel --identity
+npx --no-install psc kernel check admissions.json
+npx --no-install psc kernel check admissions.json --provider both
+npx --no-install psc check Main.lean
+npx --no-install psc generated build Main.ps --engine ts --out dist/generated
+npx --no-install psc generated build Main.lean --engine wasm-core --out dist/wasm-executor --kernel both
 ```
 
+`--engine js|ts|rust|wasm-core` chooses the executing compiler. Generated CLI
+publication currently emits **JS**. The preserved native `psc build` path retains
+JS/TS/Rust/Wasm core/component and matching optional Python/PHP output providers.
+Engine qualification is separate from output-target coverage. Source checking
+captures canonical admissions once; native publication also checks its exact
+staged graph with default Wasm before committing the generation.
+
+For optional Python/PHP output, install the matching tarball alongside the root
+tarball. These providers are not default dependencies.
+
+```sh
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.3.tgz ./proofscript-backend-python-0.1.0-psc1.3.tgz
+```
+
+Integrated run 40160064167 passes 14 real native/Wasm acceptance/rejection
+comparisons, 20 compiler cases, 24 CLI/JSON application builds and 88 observations,
+24 generated refusal/tamper cases with previous-output preservation, eight
+explicit dual checks, two native publication cases, missing-policy refusal and
+installed public TypeScript API checks. The native compiler and native checker
+are unavailable during default generated cases. Both actual kernels also accept
+the unchanged frozen 120-module compiler admission graph in 6222 ms combined.
+This is logical rechecking of an already qualified graph, not a new full-chain
+replay or formal compiler-preservation proof.
+
+Fresh global install [run 40160640974](https://github.com/dwijayuda/pskernel/actions/runs/40160640974)
+also passes eight actual global-bin builds (all four engines and both grammars),
+offline with an empty cache, native compiler/checker unavailable, prior outputs
+preserved after bad source and corrupt default Wasm refused.
+
+## Kernel APIs and five-platform evidence
+
+Both kernel tarballs separately pass offline local/global installation on Linux
+x64/arm64 glibc, macOS x64/arm64 and Windows x64. Each platform executes 28 actual
+acceptance/rejection API cases and corruption refusal without a Lean SDK.
+Native checks cover synchronous and asynchronous APIs. Wasm checks use the
+asynchronous API.
+
 ```js
-import {createKernel} from '@proofscript/pskernel-lean';
+import {createKernel} from '@proofscript/pskernel-lean-wasm';
 const kernel = await createKernel();
-console.log(kernel.metadata);
 const result = await kernel.checkCanonicalAdmissions(canonicalAdmissionsJson);
 if (!result.accepted) throw new Error(result.errorKind);
 ```
 
-The input is PSC1 canonical checked admissions v2, not Lean/ProofScript source.
-A rejected admission returns `accepted:false`; integrity, identity, process and
-resource failures throw. Node22.23.3 or newer is required. No SDK, downloads or
-compilation run at installation. An absent architecture fails explicitly.
+The input is canonical checked admissions v2, not source code. Logical rejection
+returns `accepted:false`; resource, process and integrity failures throw.
+The standalone native package exposes the same `createKernel` pattern.
 
-| Native target | Uncompressed binary bytes |
-| --- | ---: |
-| linux-x64 | 4079232 |
-| linux-arm64 | 4160016 |
-| darwin-x64 | 2771584 |
-| darwin-arm64 | 2798528 |
-| win32-x64 | 4616704 |
+The root's typed `proofscript/kernel` API
+`createIndependentKernelToolchain({root: installedProofscriptDirectory})`
+defaults to Wasm. Explicit `provider:'both'` checks the identical captured bytes
+with both independently pinned providers and requires agreement.
 
-Every binary passes14 actual acceptance/rejection cases against the same-source
-official Lean4.35 reference, and standalone execution without the Lean SDK/build
-tree. Every packed platform passes28 local/global cases through both public APIs,
-plus corruption refusal. Exact commits, source closure, binary/archive hashes and
-job IDs are in [the receipt](PSC1_KERNEL435_QUALIFICATION_2026-10-25.json).
-The native initialization/link strategy reuses archived branch0408f18b; it removes
-unused compiler initialization/Lake linkage, retaining official kernel code,
-trustlevel0, finite2000000-heartbeat/20000-recursion checks and all provider tests.
+| Kernel tarball | SHA256 | Qualification |
+| --- | --- | --- |
+| Wasm | b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511 | run 40158859386, all five platforms |
+| Native | c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371 | run 40155475188, all five platforms |
 
-The `@proofscript/pskernel-lean-wasm@4.35.0` upgrade remains INCOMPLETE:
-[real C++ linear-memory build40154206987](https://github.com/dwijayuda/pskernel/actions/runs/40154206987)
-is active. Do not install the repository's old4.34 bytes as4.35. The new package
-must pass genuine native/Wasm parity and offline installed platform gates first.
-Emscripten6.0.9 and linear memory remain required; this kernel does not use Wasm GC.
+The genuine Wasm build took 1:08:25, peak RSS 1521832 KiB; its sealed toolchain
+cache avoids repeating that build for unchanged source. Module size is 2212007
+bytes. Native binary sizes are 4079232/4160016 bytes for Linux x64/arm64,
+2771584/2798528 for macOS x64/arm64, and 4616704 for Windows x64, all below
+7000000 bytes. The slim build reuses the archived narrow-import/kernel-only-init
+strategy; it retains official kernel semantics, trust level 0, finite 2000000
+heartbeat/20000 recursion limits and real official-reference parity checks.
 
-Core host integration is implemented and passes32 host-boundary regressions plus
-10 Rust transport regressions in40155831321. It adds pinned kernel commands and
-an optional Wasm check of identical captured admissions before generated output
-publication. Those changes await actual integrated native/Wasm package execution;
-they are not a Wasm qualification claim.
+## Separate compiled compiler bundles
 
-The existing [four-engine compiler package](PSC1_GENERATED_PACKAGE.md) remains a
-qualified Linux x64 candidate. Five-platform kernel qualification does not qualify
-the complete compiler toolchain on those platforms. Native compiler/Rust engine
-assets, launcher/publication behavior and installed backend tests remain required
-for the final cross-platform release. Do not merge or publish without qualification
-and authorization.
+The artifact also includes genuine frozen G3 execution bundles, produced from
+the same compiler source; neither is a handwritten replacement compiler.
+
+```sh
+npm install --offline --ignore-scripts ./proofscript-compiler-wasm-0.1.0-psc1.3.tgz
+# Linux x64/glibc only:
+npm install --offline --ignore-scripts ./proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz
+```
+
+Both export typed `compileCandidate(unifiedCompilerServiceV2Json)` and
+`psCompilerJsServiceCandidate(capturedJsServiceRequestJson)`. These return
+candidate data with **no proof admission or publication authority**.
+Use the root toolchain's independent checker, strict IR and publication boundary.
+Their standalone API is not yet a root CLI optional-bundle discovery mechanism.
+
+Run 40158598464 executes five genuine corpus cases and two refusal cases on each
+of five platforms for the Wasm bundle, and both bundles on Linux x64 (ten cases,
+four refusals). Compiler Wasm is portable; the Rust bundle currently refuses
+unsupported platforms. Every payload and bounded transport is pinned and verified.
+
+## Remaining release boundary
+
+The complete compiler tarball is still Linux x64/glibc; five-platform kernels
+and Wasm candidate execution do not qualify the whole toolchain there.
+Native compiler binaries also pass source/admission checks on Linux arm64,
+macOS x64/arm64 and Windows x64 (run 40157017833), a narrower result than backend
+publication or installed toolchain release.
+
+The final release still requires portable transactional publication, a slim
+universal JS/TS root with optional execution-bundle selection, Rust payloads and
+supervision on additional platforms, generated non-JS output publication and
+complete platform release tests. Every exported file/type/bin must actually
+exist. No package is published and neither PR is merged.
+
+[Machine-readable qualification](PSC1_KERNEL435_QUALIFICATION_2026-10-25.json),
+[distribution contract](../NPM_DISTRIBUTION_CONTRACT.json),
+[roadmap](PSC1_DEVELOPMENT_ROADMAP.md) and
+[executable continuation](PSC1_KERNEL435_CONTINUATION.md) record exact boundaries.

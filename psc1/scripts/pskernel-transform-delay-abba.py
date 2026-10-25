@@ -194,14 +194,9 @@ def main():
                 if observed.get("verdict") == "driver_error" or classification in ("false_accept", "false_reject"):
                     errors.append(variant + ":" + name + ":" + classification)
                 if name == "perf/church-numerals.ndjson":
-                    if variant == "baseline":
-                        if (observed.get("verdict") != "resource_exhausted"
-                            or observed.get("stage") != "kernel-admission"
-                            or "kernel reduction budget exhausted" not in observed.get("reason", "")):
-                            errors.append("frozen Church baseline error changed")
-                    elif (observed.get("verdict") != "accepted" or observed.get("metadataValidated") is not True
+                    if (observed.get("verdict") != "accepted" or observed.get("metadataValidated") is not True
                         or observed.get("officialReplaySkipsUnsafeOrPartial") is not False):
-                        errors.append("candidate did not restore original official Church acceptance")
+                        errors.append("retained complete Church acceptance regressed: " + variant)
                 if name in ("perf/repeated-subproblem.ndjson", "bugs/proj-of-stuck-prop.ndjson"):
                     if observed.get("verdict") != reference.get("verdict"):
                         errors.append("retained complete control regressed: " + variant + ":" + name)
@@ -226,9 +221,7 @@ def main():
                     for v, xs in groups.items()}
         for left in complete["baseline"]:
             for right in complete["candidate"]:
-                keys = (("format","sourceSha256","fuel","coreInvoked","records","admissionCommands","arenaNodes",
-                         "containsUnsafeOrPartial","exportedDeclarations")
-                        if name == "perf/church-numerals.ndjson" else SEMANTIC_KEYS)
+                keys = SEMANTIC_KEYS
                 if {k: left.get(k) for k in keys} != {k: right.get(k) for k in keys}:
                     errors.append("complete result mismatch: " + name)
         if len(complete["baseline"]) == 2 and len(complete["candidate"]) < 2:
@@ -241,7 +234,9 @@ def main():
                    for v, xs in groups.items()}
         rss = {v: [o["peak_rss_kib"] for o in xs if "peak_rss_kib" in o]
                for v, xs in groups.items()}
-        comparable = bounded and name != "perf/church-numerals.ndjson"
+        completed_verdicts = [o.get("verdict") for xs in complete.values() for o in xs]
+        comparable = (bounded and len(set(completed_verdicts)) == 1
+                      and all(v in ("accepted", "rejected", "malformed") for v in completed_verdicts))
         ratio = elapsed["candidate"] / elapsed["baseline"] if comparable else None
         rss_ratio = (statistics.median(rss["candidate"]) / statistics.median(rss["baseline"])
                      if comparable and all(len(xs) == 2 for xs in rss.values()) else None)
@@ -249,11 +244,11 @@ def main():
             "verdicts": {v: [o["verdict"] for o in xs] for v, xs in groups.items()},
             "elapsedSeconds": {v: [o["elapsed_seconds"] for o in xs] for v, xs in groups.items()},
             "peakRssKiB": rss, "uncensoredPair": bounded, "performanceComparable": comparable,
-            "intendedChurchRecovery": name == "perf/church-numerals.ndjson",
+            "retainedChurchAcceptance": name == "perf/church-numerals.ndjson",
             "candidateMedianTimeRatio": ratio, "candidateMedianRssRatio": rss_ratio,
             "timeRegressionOver10Percent": ratio is not None and ratio > 1.10,
             "rssRegressionOver15Percent": rss_ratio is not None and rss_ratio > 1.15})
-    report = {"schema": "psc1-unary-spine-abba-v1", "sourceSha": source,
+    report = {"schema": "psc1-lazy-transform-abba-v1", "sourceSha": source,
               "baselineSha": baseline, "runId": os.environ["GITHUB_RUN_ID"],
               "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"], "producerReceipts": receipts,
               "archiveSha256": ORACLE.ARCHIVE_SHA256, "targetLean": ORACLE.TARGET,

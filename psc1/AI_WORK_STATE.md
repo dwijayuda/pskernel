@@ -102,6 +102,23 @@ Ordinary requests remain240s.
 
 Production55f9327ee738b5b2bf5d623c96280cb97de828b2 PASSED package40152769340/job121047594235 (20 compiler cases,24 application builds/88 observations,26 negatives) and full40152772905/job121049906606/final gate121055266402 (37/37 criteria,0 blocked,seven backends,both grammars). Tested mergef9713323bb3beed393255ff755da3dd2023febdc shares treed884c41c8097ac59c91081f019481f60625ba793 with review55. Production artifact12582649787 ZIPda6a88220337c601fcf401ea7e06a55c45988f96c0a5692d28e958ed07c61916, core29a837faedaabb8c7e6ae30cec19ac53680084b5188de0eef2b7eabbd4f09198. Full artifact12583743977 ZIP8b10c96a59fab176c0cf7dcc967720c8384870d97745859f0a3a99a71cc17194. All package artifacts remain unpublished.
 
+## Executable kernel continuation and platform boundary
+
+Draft PR #179 now owns this integration branch, stacked on the qualified #178
+checkpoint55f9327e. [Executable continuation](docs/PSC1_KERNEL435_CONTINUATION.md)
+contains exact inputs, triggers and remaining acceptance gates. Prepared package
+workflows execute only after explicit successful artifact identities are committed;
+old4.34 bytes cannot satisfy their checks. Core compiler/G3 assets are reused.
+
+Static/installed public types40156453697 and40156780118 pass. New CLI source
+transport selects Windows .exe and platform-specific library paths; release source-
+admission run40157017833 is active on Linux arm64/macOS/Windows. This does not
+qualify backend publication: host-tools/artifacts.mjs explicitly requires Linux,
+and generated atomic pointer/fsync behavior also needs a portable contract.
+The integrated compiler tarball remains Linux x64 until full platform qualification.
+Latest PR normal CI must be checked after actual code changes; cancelled earlier
+snapshots are not passing evidence. The long Wasm build40154206987 remains active.
+
 ## Scope and remaining queue
 
 The core provides native JS/TS/Rust/Wasm core/component output and all four

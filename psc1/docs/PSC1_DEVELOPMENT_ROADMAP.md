@@ -59,9 +59,9 @@ bodies. Linux x64/arm64 run40154010946 PASS14 real reference-parity cases and
 standalone execution; raw binaries4079232/4160016 bytes. macOS x64/arm64 jobs
 121053490973/121053490842 in40154709416 PASS equivalent gates,2771584/2798528 bytes.
 That matrix's overall failure is Windows setup, not a macOS success override.
-Windows-only retry40155170697 is active after fixing Bash-path export to native
+Windows-only retry40155170697 has PASSED after fixing Bash-path export to native
 Elan PATH. Linear Wasm build40154206987 is active at630fa363; do not restart it.
-No new4.35 npm package or full cross-platform toolchain is qualified yet.
+Native package40155475188 is qualified on all five platforms (same6,446,239-byte tgz); the linear Wasm package and complete cross-platform compiler toolchain remain unqualified.
 
 Next: assemble only pinned successful artifacts, match exact25-module source
 closure, pack and install offline locally/globally, execute public API acceptance/
@@ -70,6 +70,12 @@ checking and package integration before claiming release readiness. Preserve
 qualified120-module compilers and all four G3 artifacts. Whole toolchain platform
 selection/native compiler/Rust executable transport and generated output parity
 remain separate release blockers. See scripts/kernel435-* and kernel435 workflows.
+
+Native kernel package completion and pending Wasm/core gates are recorded in
+[the exact receipt](PSC1_KERNEL435_QUALIFICATION_2026-10-25.json) and
+[executable kernel continuation](PSC1_KERNEL435_CONTINUATION.md). Static/types
+40156780118 and host-boundary40155831321 pass. Native compiler platform source-
+admission checks are running separately; publication remains Linux-specific.
 
 ## Single dependency-ordered remaining queue
 

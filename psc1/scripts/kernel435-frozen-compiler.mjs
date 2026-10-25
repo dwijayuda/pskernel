@@ -2,10 +2,11 @@
 import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {createIndependentKernelToolchain} from '../host-tools/kernel-toolchain.mjs';import {readQualifiedArtifact,sha256} from './kernel435-qualified-artifact.mjs';
 const input=JSON.parse(fs.readFileSync('scripts/kernel435-frozen-compiler-input.json','utf8')),archive=await readQualifiedArtifact(input,'dist/kernel435-frozen-input'),root=path.resolve(process.argv[2]),expected='4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39';let canonical,qualified=false;
 function findStrings(value){
- if(!value||typeof value!=='object')return;
- for(const [key,v]of Object.entries(value)){
-  if(key==='admissions'&&typeof v==='string'&&sha256(v)===expected)canonical=v;
-  else if(v&&typeof v==='object')findStrings(v);
+ const todo=[value];while(todo.length){const next=todo.pop();if(!next||typeof next!=='object')continue;
+  for(const [key,v]of Object.entries(next)){
+   if(key==='admissions'&&typeof v==='string'&&sha256(v)===expected)canonical=v;
+   else if(v&&typeof v==='object')todo.push(v);
+  }
  }
 }
 function visit(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,e.name);if(e.isDirectory())visit(file);else if(e.isFile()&&e.name.endsWith('.json')){const st=fs.statSync(file);if(st.size>128*1024*1024)continue;const bytes=fs.readFileSync(file);if(sha256(bytes)===expected)canonical=bytes.toString('utf8');let data;try{data=JSON.parse(bytes.toString('utf8'));}catch{continue;}

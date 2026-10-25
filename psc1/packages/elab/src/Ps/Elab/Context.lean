@@ -145,3 +145,13 @@ def psElabContextRestoreScope (outer inner : PsElabContext) : PsElabContext :=
   PsElabContext.mk outer.environment outer.localContext outer.instances
     inner.metaContext outer.structuralRecursion outer.whileHelper outer.currentNamespace
     (psElabSourceTraceRestore outer.sourceTrace inner.sourceTrace)
+
+-- Some existing special forms resolve structural arguments directly rather than
+-- through term elaboration. Refuse editing until every source edge is recorded.
+def psElabContextSourceIncomplete (context : PsElabContext) : PsElabContext :=
+  if context.sourceTrace.enabled then
+    let trace := context.sourceTrace;
+    PsElabContext.mk context.environment context.localContext context.instances
+      context.metaContext context.structuralRecursion context.whileHelper context.currentNamespace
+      (PsElabSourceTrace.mk true trace.nextId trace.bindersRev trace.referencesRev trace.active false)
+  else context

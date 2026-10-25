@@ -4,6 +4,8 @@ on:
     branches: [feat/psc1-binding-trace-20261025]
     paths:
       - psc1/**/*.lean
+      - psc1/host-tools/**
+      - psc1/scripts/source-binding-tests.mjs
       - psc1/lakefile.lean
       - psc1/lean-toolchain
       - .github/workflows/psc1-source-trace.yml
@@ -88,10 +90,15 @@ jobs:
         run: |
           lake build psc1_source_trace_tests
           .lake/build/bin/psc1_source_trace_tests
+      - name: Validate actual checked local rename and capture refusals
+        working-directory: psc1
+        run: node scripts/source-binding-tests.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-source-trace-${{ github.sha }}
-          path: psc1/dist/source-conversion/
+          path: |
+            psc1/dist/source-conversion/
+            psc1/dist/source-bindings/
           if-no-files-found: warn
           retention-days: 90

@@ -2956,7 +2956,7 @@ def psTryElabStructuralSelfCall
                     | Except.ok _ =>
                         match
                             psElabResolvedTerm
-                              context
+                              (psElabContextSourceIncomplete context)
                               (PsExpr.fvar hypothesisId)
                               expected with
                         | Except.error error => Except.error error

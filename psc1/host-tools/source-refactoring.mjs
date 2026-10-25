@@ -1,5 +1,7 @@
 // Exact lexical snapshots and read-only semantic ownership. No edit publication authority.
 import crypto from 'node:crypto';
+import { validateSourceBindingModule, planSourceBinderRename,
+  requireRenameBindingCorrespondence } from './source-binding-graph.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -372,20 +374,20 @@ export function createSourceOwnershipTool({
         refuse('OWNERSHIP_POSITION');
     }
   }
-  const tool = Object.freeze({
-    analyze({ snapshots, entry, assurance = 'checked' }) {
+  const analyzeWithMode = ({ snapshots, entry, assurance = 'checked' }, mode) => {
       const rows = select(snapshots);
       if (!['checked', 'ordinary-checked'].includes(assurance) ||
           typeof entry !== 'string' || !rows.some(row => row.module === entry) ||
           rows.some(row => row.kind !== rows[0].kind)) refuse('OWNERSHIP_REQUEST');
       const grammar = rows[0].kind;
       const sourceClosureDigest = compilerSourceClosureDigest(rows);
-      const requestId = hash(JSON.stringify([protocol, sourceClosureDigest, entry, assurance]));
+      const requestId = hash(JSON.stringify([mode === 'bindings' ? 'psc1-source-bindings/1' : protocol,
+        sourceClosureDigest, entry, assurance]));
       const encoded = JSON.stringify(['psc1-compiler-service/1', requestId,
         sourceClosureDigest, grammar, assurance, entry, rows.map(row => [row.module, row.text])]);
       if (Buffer.byteLength(encoded) > losslessLimits.responseBytes) refuse('OWNERSHIP_REQUEST_LIMIT');
       pinnedTool(executable, sha256); pinnedTool(checkerExecutable, checkerSha256);
-      return runSourceHelper({ executable, sha256 }, 'index', encoded,
+      return runSourceHelper({ executable, sha256 }, mode, encoded,
         ({ wire, admissionsFile, irFile, metrics }) => {
           if (wire?.status === 'refused') {
             exactKeys(wire, ['protocol', 'status', 'requestId', 'sourceClosureDigest', 'error']);
@@ -408,7 +410,8 @@ export function createSourceOwnershipTool({
           let members = 0;
           const modules = wire.modules.map((module, moduleIndex) => {
             const row = rows[moduleIndex], snapshot = row.snapshot;
-            exactKeys(module, ['module', 'byteLength', 'imports', 'sourceDeclarations', 'origins']);
+            exactKeys(module, ['module', 'byteLength', 'imports', 'sourceDeclarations', 'origins',
+              ...(mode === 'bindings' ? ['bindings'] : [])]);
             if (module.module !== row.module || module.byteLength !== row.bytes.length ||
                 !Array.isArray(module.imports) || module.imports.some(n => typeof n !== 'string') ||
                 !Array.isArray(module.origins) || module.origins.length !== module.sourceDeclarations)
@@ -457,8 +460,11 @@ export function createSourceOwnershipTool({
               return { ...origin, id: sourceOwnerId, sourceId: snapshot.sourceId,
                 namePieceIds: tokens.map(p => p.id), members: outputMembers };
             });
-            return { ...module, sourceId: snapshot.sourceId, sourceSha256: snapshot.sourceSha256,
+            const result = { ...module, sourceId: snapshot.sourceId, sourceSha256: snapshot.sourceSha256,
               profile: snapshot.profile, grammar: snapshot.grammar, origins };
+            if (mode === 'bindings') result.bindings = validateSourceBindingModule(module.bindings,
+              result, row, { exactKeys, spanInSource, coreName, hash, refuse });
+            return result;
           });
           if (members !== wire.sourceCoreDeclarations) refuse('OWNERSHIP_COVERAGE');
           const admissions = decoder.decode(regularFile(admissionsFile, losslessLimits.responseBytes));
@@ -467,7 +473,8 @@ export function createSourceOwnershipTool({
           const checker = runIndependentChecker(checkerExecutable, admissions);
           pinnedTool(checkerExecutable, checkerSha256);
           const admissionsSha256 = hash(admissions), originalIrSha256 = hash(ir);
-          const id = hash(JSON.stringify([protocol, sha256, sourceClosureDigest,
+          const id = hash(JSON.stringify([mode === 'bindings' ? 'psc1-source-bindings/1' : protocol,
+            sha256, sourceClosureDigest,
             admissionsSha256, originalIrSha256, rows.map(r => r.snapshot.sourceId)]));
           const index = deepFreeze({ protocol, id, sourceClosureDigest, entry, grammar, assurance,
             modules, sourceCoreDeclarations: members, logicalCoreDeclarations: wire.logicalCoreDeclarations,
@@ -475,13 +482,15 @@ export function createSourceOwnershipTool({
             checker: { ...checker, executableSha256: checkerSha256, accepted: true },
             metrics: { elapsedMs: metrics.elapsedMs, maxRssKiB: metrics.maxRssKiB,
               peakTreeRssKiB: metrics.peakTreeRssKiB, timeoutMs: metrics.timeoutMs },
-            authority: { readOnlyOwnership: true, referenceResolution: false,
+            authority: { readOnlyOwnership: true, referenceResolution: mode === 'bindings' ? 'recorded-term-bases' : false,
               semanticEquivalence: 'not-claimed', publication: false } });
-          indexes.set(index, { sourceIds: rows.map(r => r.snapshot.sourceId), admissions, ir });
+          indexes.set(index, { sourceIds: rows.map(r => r.snapshot.sourceId), admissions, ir, encoded, mode });
           return index;
 
       });
-    },
+  };
+  const tool = Object.freeze({
+    analyze(args) { return analyzeWithMode(args, 'index'); },
     assertCurrent(index, snapshots) {
       const record = indexes.get(index);
       if (!record) refuse('OWNERSHIP_INDEX');
@@ -492,6 +501,12 @@ export function createSourceOwnershipTool({
   });
   ownershipTools.set(tool, {
     lexicalTool, executable, sha256,
+    analyzeBindings(args) { return analyzeWithMode(args, 'bindings'); },
+    requestOf(index) {
+      const record = indexes.get(index);
+      if (!record || record.mode !== 'bindings') refuse('BINDING_INDEX');
+      return JSON.parse(record.encoded);
+    },
     sameGraphs(left, right) {
       const before = indexes.get(left), after = indexes.get(right);
       return !!before && !!after && before.admissions === after.admissions && before.ir.equals(after.ir);
@@ -693,6 +708,131 @@ export function createCheckedSourceConverter({ ownershipTool }) {
       const record = conversions.get(report);
       if (!record) refuse('CONVERSION_REPORT');
       return ownershipTool.assertCurrent(record.original, snapshots);
+    },
+  });
+}
+
+/** Source-bound, capture-avoiding local rename candidates. No source files are
+ * written. Independent admission checks both real endpoints; the native helper
+ * compares one body modulo bound names and keeps public API/other Core exact.
+ * The initial boundary deliberately refuses unlocated, header, normalized,
+ * partial, generated-only and ambiguous binders.
+ */
+export function createSourceBindingTool({ ownershipTool }) {
+  const configuration = ownershipTools.get(ownershipTool);
+  if (!configuration) refuse('BINDING_OWNERSHIP_TOOL');
+  const { lexicalTool, executable, sha256 } = configuration;
+  const indexes = new WeakMap(), binders = new WeakMap(), candidates = new WeakMap();
+  const protocol = 'psc1-source-bindings/1';
+  const saved = index => {
+    const record = indexes.get(index);
+    if (!record) refuse('BINDING_INDEX');
+    return record;
+  };
+  const candidate = report => {
+    const record = candidates.get(report);
+    if (!record) refuse('BINDING_REPORT');
+    return record;
+  };
+  function analyze(args) {
+    const ownership = configuration.analyzeBindings(args);
+    const index = deepFreeze({ ...ownership, protocol });
+    indexes.set(index, { ownership });
+    for (const [moduleIndex, module] of index.modules.entries())
+      for (const [sourceIndex, batch] of module.bindings.entries())
+        for (const [traceIndex, trace] of batch.traces.entries())
+          for (const binder of trace.binders)
+            binders.set(binder, { index, moduleIndex, sourceIndex, traceIndex });
+    return index;
+  }
+  function assertCurrent(index, snapshots) {
+    return ownershipTool.assertCurrent(saved(index).ownership, snapshots);
+  }
+  return Object.freeze({
+    analyze, assertCurrent,
+    rename({ index, snapshots, binder, newName }) {
+      const started = Date.now();
+      assertCurrent(index, snapshots);
+      const selected = binders.get(binder);
+      if (!selected || selected.index !== index) refuse('BINDING_HANDLE');
+      const { moduleIndex, sourceIndex, traceIndex } = selected;
+      const module = index.modules[moduleIndex], batch = module.bindings[sourceIndex];
+      const trace = batch.traces[traceIndex];
+      const edits = planSourceBinderRename(module, batch, trace, binder, newName, { refuse });
+      const source = snapshots[moduleIndex];
+      const staged = lexicalTool.stageTextEdits(source, lexicalTool.reconstruct(source), edits);
+      const changed = lexicalTool.capture({ module: source.module, grammar: source.grammar,
+        bytes: staged.bytes, uri: source.uri });
+      const retained = snapshots.map((snapshot, i) => i === moduleIndex ? changed : snapshot);
+      // Ordinary mode still requires exact logical/body pairing and strict IR.
+      const checked = analyze({ snapshots: retained, entry: index.entry, assurance: index.assurance });
+      requireRenameBindingCorrespondence(index, checked, moduleIndex, sourceIndex,
+        traceIndex, binder.index, newName, edits, { refuse });
+      const target = { module: module.module, name: trace.name };
+      const comparisonProtocol = 'psc1-source-binding-comparison/1';
+      const encoded = JSON.stringify({
+        protocol: comparisonProtocol,
+        before: configuration.requestOf(saved(index).ownership),
+        after: configuration.requestOf(saved(checked).ownership), target,
+      });
+      if (Buffer.byteLength(encoded) > losslessLimits.responseBytes) refuse('BINDING_REQUEST_LIMIT');
+      const comparison = runSourceHelper({ executable, sha256 }, 'compare-bindings', encoded,
+        ({ wire, metrics }) => {
+          if (wire?.status === 'refused') {
+            exactKeys(wire, ['protocol', 'status', 'code']);
+            if (wire.protocol !== comparisonProtocol || typeof wire.code !== 'string')
+              refuse('BINDING_COMPARISON_RESPONSE');
+            throw new Error('PSC1_LOSSLESS_BINDING_COMPARISON_REFUSED', { cause: wire.code });
+          }
+          exactKeys(wire, ['protocol', 'status', 'beforeRequestId', 'afterRequestId',
+            'beforeDigest', 'afterDigest', 'target', 'relation', 'sourceFilesWritten', 'publication']);
+          exactKeys(wire.target, ['module', 'name']);
+          if (wire.protocol !== comparisonProtocol || wire.status !== 'equivalent' ||
+              wire.beforeRequestId !== configuration.requestOf(saved(index).ownership)[1] ||
+              wire.afterRequestId !== configuration.requestOf(saved(checked).ownership)[1] ||
+              wire.beforeDigest !== index.sourceClosureDigest ||
+              wire.afterDigest !== checked.sourceClosureDigest ||
+              wire.target?.module !== target.module ||
+              JSON.stringify(wire.target?.name) !== JSON.stringify(target.name) ||
+              wire.relation !== 'one stable definition value alpha-equal; exact public type and all other declarations' ||
+              wire.sourceFilesWritten !== false || wire.publication !== false)
+            refuse('BINDING_COMPARISON_IDENTITY');
+          return { ...wire, metrics: { elapsedMs: metrics.elapsedMs,
+            maxRssKiB: metrics.maxRssKiB, peakTreeRssKiB: metrics.peakTreeRssKiB,
+            timeoutMs: metrics.timeoutMs } };
+        });
+      const nextTrace = checked.modules[moduleIndex].bindings[sourceIndex].traces[traceIndex];
+      const nextBinder = nextTrace.binders.find(item => item.index === binder.index);
+      const report = deepFreeze({
+        protocol: 'psc1-source-rename/1',
+        id: hash(JSON.stringify(['psc1-source-rename/1', index.id, checked.id, binder.id, newName])),
+        sourceIndexId: index.id, candidateIndexId: checked.id,
+        sourceClosureDigest: index.sourceClosureDigest,
+        candidateClosureDigest: checked.sourceClosureDigest,
+        module: module.module, owner: trace.name,
+        binderMap: { before: binder.id, after: nextBinder.id },
+        edits: edits.map(edit => ({ startByte: edit.startByte, endByte: edit.endByte,
+          replacement: newName })),
+        admissions: { before: index.admissionsSha256, after: checked.admissionsSha256,
+          beforeChecker: index.checker, afterChecker: checked.checker },
+        strictIr: { before: index.originalIrSha256, after: checked.originalIrSha256 },
+        comparison, elapsedMs: Date.now() - started,
+        authority: { candidateOnly: true, sourceFilesWritten: false, publication: false,
+          relation: comparison.relation, formalSourcePreservation: false },
+      });
+      candidates.set(report, { original: index, checked, snapshots: retained });
+      return report;
+    },
+    readCandidate(report, module) {
+      const record = candidate(report);
+      const snapshot = record.snapshots.find(item => item.module === module);
+      if (!snapshot) refuse('BINDING_MODULE');
+      return lexicalTool.reconstruct(snapshot);
+    },
+    candidateIndex(report) { return candidate(report).checked; },
+    candidateSnapshots(report) { return Object.freeze([...candidate(report).snapshots]); },
+    assertCandidateCurrent(report, snapshots) {
+      return assertCurrent(candidate(report).original, snapshots);
     },
   });
 }

@@ -11,7 +11,7 @@ BASE='f091db586dcbe4a31905d6edf1c8c7957082527d'
 PROD='psc1/packages/pskernel-core/src'
 PATH=PROD+'/Ps/KernelCore/Core/ExprV2/Transform.lean'
 PINS={PATH:{'bytes':16680,'sha256':'2e6ef5ba46eedfc9317a871ef56854a30ee55502bf7f73c07b41d0af2825cd55'},
- 'psc1/test/PsKernelTransformLazyProofs.lean':{'bytes':3551,'sha256':'04d73aab875e64bd932ec1852cd842475d62e7eca30a7ab018f098f18162d1ab'}}
+ 'psc1/test/PsKernelTransformLazyProofs.lean':{'bytes':3561,'sha256':'a45275e5ef37d0c49dd70ae06cfdd28760351d61ef54895604f10a5a18efbdee'}}
 def require(ok,message):
  if not ok:raise RuntimeError(message)
 def digest(raw):return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}

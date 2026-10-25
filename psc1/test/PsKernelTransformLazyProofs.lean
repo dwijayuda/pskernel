@@ -61,5 +61,6 @@ theorem psKernelTransformLazyPreservesAllInputs (fuel : Nat) :
   | zero => rfl
   | succ remaining ih =>
       rw [psKernelExprV2TransformWithFuel, psKernelTransformEagerReference, ih]
+      rfl
 
 #print axioms psKernelTransformLazyPreservesAllInputs

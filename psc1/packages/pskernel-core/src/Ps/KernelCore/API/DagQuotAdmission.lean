@@ -172,33 +172,45 @@ def psKernelDagCheckEqForQuot
       match eqValue with
       | PsKernelConstantInfo.inductInfo eqInfo =>
           match eqInfo.base.levelParams with
-          | List.cons universeName List.nil =>
-              match eqInfo.ctors with
-              | List.cons reflName List.nil =>
-                  match psKernelDagQuotMatchInfo arena declarations eqValue
-                      (psKernelExpectedEqType universeName) with
-                  | Option.none => Option.none
-                  | Option.some equal =>
-                      if equal then
-                        match psKernelEnvironmentFind environment reflName with
-                        | Option.none => Option.some (Except.error
-                            "failed to initialize quot module, missing Eq constructor")
-                        | Option.some reflInfo =>
-                            match psKernelConstantInfoLevelParams reflInfo with
-                            | List.cons reflUniverse List.nil =>
-                                match psKernelDagQuotMatchInfo arena declarations reflInfo
-                                    (psKernelExpectedEqReflType reflUniverse) with
-                                | Option.none => Option.none
-                                | Option.some reflEqual =>
-                                    if reflEqual then Option.some (Except.ok Unit.unit)
-                                    else Option.some (Except.error
-                                      "failed to initialize quot module, unexpected type for Eq constructor")
-                            | _ => Option.some (Except.error
-                                "failed to initialize quot module, unexpected universe params at Eq constructor")
-                      else Option.some (Except.error
-                        "failed to initialize quot module, Eq has an unexpected type")
-              | _ => Option.some (Except.error
-                  "failed to initialize quot module, unexpected number of constructors for Eq type")
+          | List.cons universeName quotSingletonTail2 =>
+              match quotSingletonTail2 with
+              | List.cons _ _ => Option.some (Except.error
+                  "failed to initialize quot module, unexpected number of universe params at Eq type")
+              | List.nil =>
+                  match eqInfo.ctors with
+                  | List.cons reflName quotSingletonTail1 =>
+                      match quotSingletonTail1 with
+                      | List.cons _ _ => Option.some (Except.error
+                          "failed to initialize quot module, unexpected number of constructors for Eq type")
+                      | List.nil =>
+                          match psKernelDagQuotMatchInfo arena declarations eqValue
+                              (psKernelExpectedEqType universeName) with
+                          | Option.none => Option.none
+                          | Option.some equal =>
+                              if equal then
+                                match psKernelEnvironmentFind environment reflName with
+                                | Option.none => Option.some (Except.error
+                                    "failed to initialize quot module, missing Eq constructor")
+                                | Option.some reflInfo =>
+                                    match psKernelConstantInfoLevelParams reflInfo with
+                                    | List.cons reflUniverse quotSingletonTail0 =>
+                                        match quotSingletonTail0 with
+                                        | List.cons _ _ => Option.some (Except.error
+                                            "failed to initialize quot module, unexpected universe params at Eq constructor")
+                                        | List.nil =>
+                                            match psKernelDagQuotMatchInfo arena declarations reflInfo
+                                                (psKernelExpectedEqReflType reflUniverse) with
+                                            | Option.none => Option.none
+                                            | Option.some reflEqual =>
+                                                if reflEqual then Option.some (Except.ok Unit.unit)
+                                                else Option.some (Except.error
+                                                  "failed to initialize quot module, unexpected type for Eq constructor")
+                                    | _ => Option.some (Except.error
+                                        "failed to initialize quot module, unexpected universe params at Eq constructor")
+                              else Option.some (Except.error
+                                "failed to initialize quot module, Eq has an unexpected type")
+                  | _ => Option.some (Except.error
+                      "failed to initialize quot module, unexpected number of constructors for Eq type")
           | _ => Option.some (Except.error
               "failed to initialize quot module, unexpected number of universe params at Eq type")
       | _ => Option.some (Except.error

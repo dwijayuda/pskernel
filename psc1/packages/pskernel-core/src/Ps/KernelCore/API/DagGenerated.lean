@@ -618,11 +618,17 @@ def psKernelDagGeneratedPrepareQuot
         match info with
         | PsKernelConstantInfo.inductInfo value =>
             match value.base.levelParams with
-            | List.cons _ List.nil =>
-                match value.ctors with
-                | List.cons reflName List.nil =>
-                    psKernelDagGeneratedCompleteDemands environment.constants environment
-                      (List.cons psKernelEqName (List.cons reflName List.nil)) state
-                | _ => Except.ok state
+            | List.cons _ quotSingletonTail1 =>
+                match quotSingletonTail1 with
+                | List.cons _ _ => Except.ok state
+                | List.nil =>
+                    match value.ctors with
+                    | List.cons reflName quotSingletonTail0 =>
+                        match quotSingletonTail0 with
+                        | List.cons _ _ => Except.ok state
+                        | List.nil =>
+                            psKernelDagGeneratedCompleteDemands environment.constants environment
+                              (List.cons psKernelEqName (List.cons reflName List.nil)) state
+                    | _ => Except.ok state
             | _ => Except.ok state
         | _ => Except.ok state

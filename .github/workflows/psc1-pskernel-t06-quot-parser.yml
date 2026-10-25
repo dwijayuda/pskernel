@@ -1,0 +1,85 @@
+name: PSC1 quotient portable parser diagnostic
+'on':
+  workflow_dispatch:
+  push:
+    branches:
+    - work/psc1-pskernel-t06-quot-parser-20261026
+    paths:
+    - psc1/packages/pskernel-core/src/**
+    - .github/workflows/psc1-pskernel-t06-quot-parser.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  parser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Authenticate existing qualified compiler bytes and current sources
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(cat psc1/lean-toolchain)" = leanprover/lean4:v4.35.0
+        python3 - <<'PY'
+        import os,pathlib,urllib.request,urllib.error,zipfile,io,hashlib,json
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,req,fp,code,msg,headers,newurl):return None
+        req=urllib.request.Request('https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12606866673/zip',
+            headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+        try:
+            response=urllib.request.build_opener(NoRedirect()).open(req,timeout=120)
+            raw=response.read()
+        except urllib.error.HTTPError as error:
+            assert error.code in (301,302,303,307,308)
+            location=error.headers['Location'];assert location.startswith('https://')
+            raw=urllib.request.urlopen(urllib.request.Request(location),timeout=120).read()
+        assert len(raw)==2561674 and hashlib.sha256(raw).hexdigest()=='c28da8d4d57a5a59a1ff686b2ce671102b20073bd00bf32450fae37cf2ab8dec'
+        z=zipfile.ZipFile(io.BytesIO(raw));assert z.testzip() is None
+        assert len(z.namelist())==len(set(z.namelist()))==40
+        binary=z.read('psc1');assert hashlib.sha256(binary).hexdigest()=='13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c'
+        receipt=json.loads(z.read('compiler-receipt.json'))
+        assert receipt['sourceSha']=='14dad2ce6eaef9fa71170f28650a5c626eca4a76'
+        assert receipt['compilerSha256']==hashlib.sha256(binary).hexdigest()
+        out=pathlib.Path(os.environ['RUNNER_TEMP'])/'quot-parser-results';out.mkdir()
+        executable=pathlib.Path(os.environ['RUNNER_TEMP'])/'quot-parser-psc1'
+        executable.write_bytes(binary);executable.chmod(0o700)
+        paths=['psc1/packages/pskernel-core/src/Ps/KernelCore/API/'+x+'.lean' for x in ['DagQuotAdmission','DagGenerated','Dag']]
+        rows=[]
+        for path in paths:
+            data=pathlib.Path(path).read_bytes();dest=out/'sources'/path
+            dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data)
+            rows.append({'path':path,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+        report={'schema':'psc1-quot-parser-diagnostic-v1','sourceSha':os.environ['GITHUB_SHA'],
+            'runId':os.environ['GITHUB_RUN_ID'],'compilerSource':receipt['sourceSha'],
+            'compilerSha256':receipt['compilerSha256'],'actualCompilerArtifact':12606866673,
+            'actualArchiveSha256':hashlib.sha256(raw).hexdigest(),'snapshots':rows,
+            'diagnosticOnly':True,'fullQualification':False}
+        (out/'source.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_QUOT_PARSER_COMPILER_AUTHENTICATED '+json.dumps(report,separators=(',',':')))
+        PY
+    - name: Check all three changed portable modules using the exact prior compiler
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        for module in DagQuotAdmission DagGenerated Dag; do
+          timeout --signal=KILL 600s "$RUNNER_TEMP/quot-parser-psc1" check \
+            "packages/pskernel-core/src/Ps/KernelCore/API/$module.lean" \
+            2>&1 | tee "$RUNNER_TEMP/quot-parser-results/$module.log"
+        done
+        printf 'PSC1_QUOT_PARSER_DIAGNOSTIC_PASS\n' > "$RUNNER_TEMP/quot-parser-results/status.txt"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-quot-parser-diagnostic-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/quot-parser-results/
+        include-hidden-files: true
+        if-no-files-found: error

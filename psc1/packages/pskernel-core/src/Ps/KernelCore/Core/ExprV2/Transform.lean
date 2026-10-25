@@ -6,6 +6,9 @@ No legacy expression is imported or materialized. Bounded zero-fuel calls
 retain the original subtree, matching existing bounded transformations.
 Default calls derive the original expanded-node budget, then cap actual
 execution to the sufficient validated depth before creating recursive workers.
+The recursive worker is formed only after root, memo and leaf guards require
+child traversal. This changes closure allocation only: the original fuel,
+result, arena and memo behavior are preserved for every input.
 Memo keys include source, binder offset and effective budget; all memo state
 belongs to one operation and one immutable arena lineage.
 -/
@@ -203,7 +206,6 @@ def psKernelExprV2TransformWithFuel
         | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"
         | Option.some _ => Except.ok (Prod.mk state source)
   | Nat.succ remaining =>
-      let smaller := psKernelExprV2TransformWithFuel remaining;
       fun (operation : PsKernelExprV2Transform)
         (state : PsKernelExprV2TransformState) (source offset : Nat) =>
         match psKernelExprV2PagedFind state.arena source with
@@ -227,6 +229,7 @@ def psKernelExprV2TransformWithFuel
                         Except.ok (psKernelExprV2TransformRebuilt state source depth effective
                           (Prod.mk (Prod.fst leaf) result))
                     | Option.none =>
+                        let smaller := psKernelExprV2TransformWithFuel remaining;
                         let children := psKernelExprV2TransformChildren entry.node depth;
                         match psKernelExprV2TransformMapChildren children
                             (smaller operation) state with

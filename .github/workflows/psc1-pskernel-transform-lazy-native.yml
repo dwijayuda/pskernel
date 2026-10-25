@@ -1,0 +1,56 @@
+name: PSC1 lazy transform exact native refinement preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-transform-lazy-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-transform-lazy-native.yml
+    - psc1/scripts/pskernel-transform-lazy-qualification.py
+    - psc1/test/PsKernelTransformLazyProofs.lean
+    - psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate Lean and exact one-path source delta
+      shell: bash
+      run: |
+        set -euo pipefail
+        bash psc1/scripts/install-lean435-ci.sh
+        export PATH="$HOME/.elan/bin:$PATH"
+        test "$(cat psc1/lean-toolchain)" = leanprover/lean4:v4.35.0
+        (cd psc1 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+        python3 psc1/scripts/pskernel-transform-lazy-qualification.py source
+        (cd psc1 && node check-psc1-source.mjs --all-portable)
+    - name: Build actual native production closure and prove all-input equality
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean build PsKernelCore \
+          2>&1 | tee "$RUNNER_TEMP/transform-lazy/native-build.log"
+        lake -f kernel-lakefile.lean env lean test/PsKernelTransformLazyProofs.lean \
+          2>&1 | tee "$RUNNER_TEMP/transform-lazy/proofs.log"
+        python3 scripts/pskernel-transform-lazy-qualification.py proofs
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-transform-lazy-native-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/transform-lazy/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

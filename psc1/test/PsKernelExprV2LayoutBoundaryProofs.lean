@@ -32,7 +32,8 @@ theorem shape_valid_establishes_layout
         Nat.add (Nat.mul source.pages.size source.pageLimit) source.active.size
     · exact exactSize
     · simp [psKernelExprV2PagedShapeValid, Nat.beq_eq, Nat.ble_eq,
-        nonzero, active, exactSize] at accepted
+        nonzero, active] at accepted
+      exact accepted.1
   have fullFromScan :
       ∀ fuel index,
         psKernelExprV2PagedFullPagesFuel
@@ -64,7 +65,9 @@ theorem shape_valid_establishes_layout
                 (source.pages.getD index (Array.emptyWithCapacity 0)).size =
                   source.pageLimit
             · exact full
-            · simp [Nat.beq_eq, finished, full] at acceptedScan
+            · simp [Nat.beq_eq, finished] at acceptedScan
+              simpa only [Array.getD_eq_getD_getElem?, Array.emptyWithCapacity_eq]
+                using acceptedScan.1
           have tailAccepted :
               psKernelExprV2PagedFullPagesFuel
                 remaining source.pages source.pageLimit (Nat.succ index) = true := by

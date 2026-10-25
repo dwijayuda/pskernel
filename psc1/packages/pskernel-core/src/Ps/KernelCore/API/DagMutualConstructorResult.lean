@@ -131,8 +131,9 @@ def psKernelExprV2MutualAppInfoOnCanonical
                         match attempted with
                         | Option.none => Except.ok Option.none
                         | Option.some indices =>
+                            let shape := Prod.snd selected;
                             if Nat.beq (psKernelExprV2TransformNatLength indices)
-                                (psKernelExprV2MutualOpenBinderCount (Prod.snd selected).indices.binders) then
+                                (psKernelExprV2MutualOpenBinderCount shape.indices.binders) then
                               match psKernelExprV2MutualIndicesContainTarget arena targets indices with
                               | Except.error error => Except.error error
                               | Except.ok recursive =>

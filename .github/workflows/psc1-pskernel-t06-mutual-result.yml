@@ -45,7 +45,7 @@ jobs:
 
         out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-result''
 
-        assert (out/''production-delta.txt'').read_text().splitlines()==[''psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorResult.lean'']
+        assert (out/''production-delta.txt'').read_text().splitlines()==[''psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorResult.lean'',''psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualHeader.lean'']
 
         p=''psc1/kernel-lakefile.lean'';old=subprocess.check_output([''git'',''show'',''ed45802269907009be8872e1188d93567b1c87df:''+p]).decode();current=pathlib.Path(p).read_text()
 
@@ -71,6 +71,8 @@ jobs:
 
         lake -f kernel-lakefile.lean build PsKernelCore PsKernelOrdinaryHeaderProofs 2>&1 | tee "$RUNNER_TEMP/t06-mutual-result/build.log"
 
+        lake -f kernel-lakefile.lean env lean test/PsKernelMutualHeaderProofs.lean 2>&1 | tee "$RUNNER_TEMP/t06-mutual-result/header-proofs.log"
+
         lake -f kernel-lakefile.lean env lean test/PsKernelMutualConstructorResultProofs.lean 2>&1 | tee "$RUNNER_TEMP/t06-mutual-result/proofs.log"
 
         python3 - <<''PYCODE''
@@ -79,16 +81,23 @@ jobs:
 
         text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-result/proofs.log'').read_text()
 
-        reports=re.findall(r"''(PsKernelMutualConstructorResultProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does not
-        depend on any axioms)",text)
+        reports=re.findall(r"''(PsKernelMutualConstructorResultProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does
+        not depend on any axioms)",text)
 
         assert len(reports)==10 and len({name for name,_ in reports})==10,reports
 
-        assert not any(x in text for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+        header=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-result/header-proofs.log'').read_text()
 
-        for name,axioms in reports:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+        header_reports=re.findall(r"''(PsKernelMutualHeaderProofs\.[^'']+)'' (?:depends on axioms:\s*\[([^\]]*)\]|does
+        not depend on any axioms)",header)
 
-        print(''PSC1_MUTUAL_RESULT_PROOFS_PASS reports=10'')
+        assert len(header_reports)==len({name for name,_ in header_reports})==12
+
+        assert not any(x in text+header for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in reports+header_reports:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        print(''PSC1_MUTUAL_RESULT_PROOFS_PASS reports=22 header=12 result=10'')
 
         PYCODE
 
@@ -97,6 +106,9 @@ jobs:
       working-directory: psc1
       shell: bash
       run: 'set -euo pipefail
+
+        timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelMutualHeaderRegression.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-mutual-result/header-regression.log"
 
         timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelMutualConstructorResultRegression.lean
         2>&1 | tee "$RUNNER_TEMP/t06-mutual-result/native.log"
@@ -110,10 +122,20 @@ jobs:
         labels=[line.removeprefix(''PSC1_MUTUAL_RESULT_ASSERT '') for line in text.splitlines() if line.startswith(''PSC1_MUTUAL_RESULT_ASSERT
         '')]
 
+        header=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-result/header-regression.log'').read_text()
+
+        header_labels=[l.removeprefix(''PSC1_MUTUAL_HEADER_ASSERT '') for l in header.splitlines() if l.startswith(''PSC1_MUTUAL_HEADER_ASSERT
+        '')]
+
+        assert len(header_labels)==len(set(header_labels))==33
+
+        assert ''PSC1_MUTUAL_HEADER_NATIVE: PASS assertions=33 positive=11 negative=16 budgets=5 injected=1'' in
+        header
+
         assert len(labels)==114 and len(set(labels))==114,labels
 
-        assert ''PSC1_MUTUAL_RESULT_NATIVE: PASS assertions=114 occurrence=90 application=20 boundary=3 headers=1'' in
-        text
+        assert ''PSC1_MUTUAL_RESULT_NATIVE: PASS assertions=114 occurrence=90 application=20 boundary=3 headers=1''
+        in text
 
         PYCODE
 

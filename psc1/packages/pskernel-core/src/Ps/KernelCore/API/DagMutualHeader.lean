@@ -145,8 +145,9 @@ def psKernelExprV2MutualRemainingPhasesWith
               match attemptedSort with
               | Except.error error => Option.some (Except.error error)
               | Except.ok sorted =>
+                  let closed := Prod.fst sorted;
                   let state := psKernelExprV2MutualResumeParameters
-                    parameters (Prod.fst sorted).whnf.arena;
+                    parameters closed.whnf.arena;
                   match psKernelExprV2OrdinaryOpenConstructorParamsWith defeq fuel
                       parameters.context state parameters.binders type with
                   | Option.none => Option.none

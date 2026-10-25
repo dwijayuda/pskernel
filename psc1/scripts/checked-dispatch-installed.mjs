@@ -89,6 +89,27 @@ for(const row of actual.components){
  assert.match(run(wasmTime,['run','--invoke','negate(true)',row.artifact]),/false/);
  row.runtime='executed';
 }
+
+const cliRecords=[];
+for(const kind of ['lean','ps'])for(const target of ['wasm-component','python','php']){
+ const file=path.join(work,'Cli.'+kind);fs.writeFileSync(file,'def truth : Bool := true\n');
+ const cli=path.join(work,'node_modules/proofscript/npm-cli/universal-cli.mjs');
+ const result=JSON.parse(run(process.execPath,[cli,'build',file,'--target',target,'--publication-protocol','portable-file','--out',path.join(work,'cli',kind,target)]));
+ assert.equal(result.target,target);assert.equal(result.logicalAdmission,'accepted');
+ if(target==='wasm-component')assert.match(run(process.env.PSC1_WASMTIME,['run','--invoke','truth()',result.artifact]),/true/);
+ else assert.deepEqual(JSON.parse(run(tool(target),[target+'-run',target==='python'?pythonDriver:phpDriver,result.artifact,target==='python'?'{"truth":m.truth}':'["truth"=>$m["truth"]]'])),{truth:true});
+ cliRecords.push({kind,target,executed:true});
+}
+// Global installation resolves explicit add-ons as sibling packages, never from the checkout.
+const prefix=path.join(work,'global');
+run(process.execPath,[npm,'install','--global','--prefix',prefix,'--cache',path.join(work,'global-empty-cache'),'--offline','--registry','http://127.0.0.1:9','--ignore-scripts','--no-audit','--no-fund',...[assembly.tarball,...Object.values(assembly.dispatchPackages).map(d=>d.tarball)].map(f=>path.join(tarballs,f))]);
+for(const target of ['wasm-component','python','php']){
+ const cli=path.join(prefix,'lib/node_modules/proofscript/npm-cli/universal-cli.mjs');
+ const result=JSON.parse(run(process.execPath,[cli,'build',path.join(work,'Cli.lean'),'--target',target,'--publication-protocol','portable-file','--out',path.join(work,'global-stores',target)]));
+ assert.equal(result.target,target);assert.equal(result.logicalAdmission,'accepted');
+ cliRecords.push({kind:'global-lean',target,accepted:true});
+}
+
 for(const target of Object.keys(assembly.dispatchPackages)){
  const root=path.join(work,'node_modules',assembly.dispatchPackages[target].package),metaFile=path.join(root,'package.json'),original=fs.readFileSync(metaFile);
  const options={target,entryModule:'Entry',sources:[{module:'Entry',kind:'lean',text:'def truth : Bool := true\n'}]};
@@ -122,6 +143,6 @@ assert.equal(actual.rows.length,40);assert.equal(actual.io.length,16);assert.equ
 const receipt={schema:'psc1-checked-dispatch-qualification/1',testedCommit:process.env.GITHUB_SHA,status:'passed',compilerSourceClosureDigest:assembly.compilerSourceClosureDigest,rootSha256:assembly.sha256,
  unchangedG3:true,independentAdmission:true,strictOriginalAndTransformedIr:true,optionalEmitterNativeRevalidation:true,
  offline:true,installScripts:false,executorPath:'Node-only',platform:'Linux x64 only',formalPreservation:'not-provided',
- ...actual,refusals:[...actual.negatives,...refusals]};
+ ...actual,cliRecords,refusals:[...actual.negatives,...refusals]};
 fs.writeFileSync(path.join(out,'checked-dispatch.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_CHECKED_DISPATCH: '+JSON.stringify({source:receipt.compilerSourceClosureDigest,providers:40,io:16,components:8,refusals:receipt.refusals.length}));

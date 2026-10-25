@@ -30,6 +30,13 @@
       "job": 121324671513,
       "status": "failed",
       "reason": "C launcher signed comparison diagnosed by -Werror"
+    },
+    {
+      "head": "7062f6823b434657e433caae21a03238f6bbb685",
+      "run": 40245181668,
+      "job": 121325281157,
+      "status": "failed",
+      "reason": "nm symbol audit exhausted the 32MiB capture buffer; replaced full-buffer collection with bounded line streaming, preserving all forbidden-symbol checks and runtime limits"
     }
   ],
   "scope": {

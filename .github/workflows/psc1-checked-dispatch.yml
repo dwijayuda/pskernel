@@ -134,10 +134,10 @@ jobs:
           node --input-type=module <<'JS'
           import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
           const out=path.resolve('dist/slim-universal');fs.mkdirSync(out,{recursive:true});
-          const roots=fs.readdirSync(os.tmpdir()).filter(name=>name.startsWith('psc1-checked-publication-')).sort();
+          const roots=fs.readdirSync(os.tmpdir()).filter(name=>(name.startsWith('psc1-checked-publication-')||name.startsWith('psc1-dispatch-installed-'))).sort();
           for(const [index,name]of roots.entries()){
            const root=path.join(os.tmpdir(),name),stat=fs.lstatSync(root);assert.ok(stat.isDirectory()&&!stat.isSymbolicLink());
-           const names=fs.readdirSync(root).filter(name=>['stores','io-stores','sdk-negative','rust-sdk-negative','consumer.mjs'].includes(name)||/^rust-(io-)?consumer-.*\\.rs$/.test(name));
+           const names=fs.readdirSync(root).filter(name=>['stores','io-stores','io','components','cli','global-stores','records.json','sdk-negative','rust-sdk-negative','consumer.mjs'].includes(name)||/^rust-(io-)?consumer-.*\\.rs$/.test(name));
            if(names.length){const r=spawnSync('tar',['czf',path.join(out,'checked-publication-evidence-'+index+'.tar.gz'),'-C',root,...names],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(r.status,0,r.stderr);}
           }
           const applications=path.join(out,'installed-applications');

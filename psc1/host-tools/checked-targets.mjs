@@ -9,9 +9,14 @@ const fail = (code) => {
   throw Error('PSC1_SERVICE_' + code);
 };
 const ownWasmTransport = fileURLToPath(new URL('./generated-wasm-transport.mjs', import.meta.url));
-export function prepareCheckedTarget(stage, candidate, { target, typescript, rust, componentTools, optionalProvider, outputAbi }, run) {
+export function prepareCheckedTarget(
+  stage,
+  candidate,
+  { target, typescript, rust, componentTools, optionalProvider, outputAbi },
+  run,
+) {
   if (target === 'wasm-component') {
-    const core = prepareCheckedTarget(stage, candidate, {target:'wasm-core'}, run);
+    const core = prepareCheckedTarget(stage, candidate, { target: 'wasm-core' }, run);
     return prepareComponent(stage, candidate, core, componentTools, run);
   }
   if (['python', 'php'].includes(target))
@@ -48,7 +53,11 @@ export function prepareCheckedTarget(stage, candidate, { target, typescript, rus
         files: ['./target.ts'],
       };
       fs.writeFileSync(path.join(work, 'tsconfig.json'), JSON.stringify(config));
-      run('target-typescript', ['--project', path.join(work, 'tsconfig.json')], typescript.executable);
+      run(
+        'target-typescript',
+        ['--project', path.join(work, 'tsconfig.json')],
+        typescript.executable,
+      );
       for (const [from, to] of [
         ['target.js', 'target.mjs'],
         ['target.d.ts', 'target.d.ts'],

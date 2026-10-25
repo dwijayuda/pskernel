@@ -1,5 +1,5 @@
 // CI-only assembly: exact shared emitters, isolated target runtimes and pinned tools.
-import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {createHash} from 'node:crypto';
+import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync,spawn} from 'node:child_process';import {createHash} from 'node:crypto';
 const version='0.1.0-psc1.7',out=path.resolve('dist/dispatch-tools');fs.mkdirSync(out,{recursive:true});
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const run=(exe,args)=>{const r=spawnSync(exe,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(r.error,undefined,String(r.error));assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout.trim();};
@@ -8,6 +8,20 @@ function inventory(root,prefix=''){return fs.readdirSync(path.join(root,prefix))
 function libraries(binary,destination){
  const text=run('ldd',[binary]);assert.doesNotMatch(text,/not found/);
  for(const line of text.split('\n')){const file=line.match(/=>\s+(\/\S+)/)?.[1]||line.trim().match(/^(\/\S+)/)?.[1];if(file)copy(file,path.join(destination,path.basename(file)));}
+}
+async function auditSymbols(binary,target){
+ const forbidden=/initialize_Ps_Compiler_Api|initialize_Ps_Elab_Term|initialize_PsKernelLean_|initialize_Ps_Host_DirectBackend/;
+ const other=target==='python'?/initialize_Ps_BackendPhp/:/initialize_Ps_BackendPython/;
+ await new Promise((resolve,reject)=>{
+   const child=spawn('nm',['--defined-only','--extern-only','-j',binary],{stdio:['ignore','pipe','pipe']});
+   let pending='',stderr='',failure=null,owned=0,count=0;
+   const inspect=line=>{count++;if(line.includes('initialize_Ps_Backend'))owned++;if(forbidden.test(line)||other.test(line))failure='PSC1_PROVIDER_FORBIDDEN_SYMBOL';};
+   const timer=setTimeout(()=>{failure='PSC1_PROVIDER_SYMBOL_AUDIT_DEADLINE';child.kill('SIGKILL');},240000);
+   child.stdout.on('data',bytes=>{pending+=bytes.toString('utf8');let index;while((index=pending.indexOf('\n'))!==-1){inspect(pending.slice(0,index));pending=pending.slice(index+1);}if(pending.length>1048576){failure='PSC1_PROVIDER_SYMBOL_LINE_LIMIT';child.kill('SIGKILL');}});
+   child.stderr.on('data',bytes=>{stderr=(stderr+bytes.toString('utf8')).slice(-8192);});
+   child.once('error',error=>{failure=error.message;});
+   child.once('close',status=>{clearTimeout(timer);if(pending)inspect(pending);if(status!==0||failure||!owned)reject(Error(failure||stderr||'PSC1_PROVIDER_SYMBOL_AUDIT_EMPTY'));else{console.log('PSC1_PROVIDER_SYMBOL_AUDIT '+JSON.stringify({target,count,owned,streamed:true,frontendCheckerPublisherAbsent:true}));resolve();}});
+ });
 }
 const descriptors={};
 for(const target of ['python','php','wasm-component']){
@@ -20,9 +34,8 @@ for(const target of ['python','php','wasm-component']){
    libraries(process.env.PSC1_WASM_TOOLS,path.join(stage,'lib'));
  }else{
    const worker=path.resolve('.lake/build/bin/psc1_backend_'+target);copy(worker,path.join(stage,'worker'));libraries(worker,path.join(stage,'lib'));
-   const symbols=run('nm',['--defined-only',worker]);
-   assert.doesNotMatch(symbols,/initialize_Ps_Compiler_Api|initialize_Ps_Elab_Term|initialize_PsKernelLean_|initialize_Ps_Host_DirectBackend/);
-   assert.doesNotMatch(symbols,target==='python'?/initialize_Ps_BackendPhp/:/initialize_Ps_BackendPython/);
+   await auditSymbols(worker,target);
+   run('strip',['--strip-debug',path.join(stage,'worker')]);
    const resources=target==='python'?['typed_io.py','generated-python-transport.py']:['typed-io.php','generated-php-transport.php'];
    for(const resource of resources)copy('host-tools/'+resource,path.join(stage,'resources',resource));
    if(target==='python'){

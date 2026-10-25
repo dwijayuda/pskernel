@@ -15,6 +15,7 @@ from immutable evidence; dated records remain preserved.
 | How do optional backends work? | [Provider contract](../BACKEND_PROVIDER_CONTRACT.json), [provider design](PSC1_BACKEND_PROVIDERS.md) |
 | Where does installed host authority live? | [Host tools](../host-tools/README.md) |
 | How are exact bytes, tokens and comments retained? | [Lossless capture contract](PSC1_LOSSLESS_SOURCE.md) |
+| How was the malformed-character location defect repaired? | [Correction and scoped proof](PSC1_CHARACTER_DIAGNOSTICS.md) |
 | Which refactor operations can be justified? | [Checked source-refactoring design](PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) |
 | How can an engineering session continue? | [AI work state](../AI_WORK_STATE.md), [package continuation](PSC1_SLIM_UNIVERSAL_CONTINUATION.md) |
 
@@ -23,6 +24,11 @@ results to exact source/artifact identities. Work state and this index point to
 those authorities; they do not create qualification.
 
 ## Exact existing qualification
+
+- [Character diagnostic correction](PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json):
+  implementation d70221c9, focused 40195964028 (664 position cases, 359 captures,
+  49 refusals), genuine new-source Wasm G1 40196021448, ordinary source 40196244138
+  (37/37 finite criteria, zero blocked). Scoped leaf proofs; separate current/frozen source identities.
 
 - [Lossless R1 capture](PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json):
   implementation c577d498, focused 40191237137 (358 captures, 49 refusals),

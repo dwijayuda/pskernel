@@ -41,12 +41,14 @@ with the original error. No partial token acceptance is invented. The status
 "accepted" means only lexical acceptance; neither status runs a parser or checker.
 Capture failures (including piece exhaustion) produce no snapshot.
 
-Diagnostics are advisory data copied from the original lexer, never edit ranges.
-The existing malformed-character branch can compute a location inside a UTF-8
-scalar (for example, the refused input apostrophe–emoji–alpha). Such a location
-is retained verbatim and marked diagnosticCoordinatesVerified false. Verified
-locations still grant no editing authority. Token/trivia/edit spans always require
-exact UTF-8 boundaries; this diagnostic distinction never grants lexical acceptance.
+Diagnostics are advisory data copied from the selected lexer helper, never edit
+ranges. The pre-correction helper can report malformed-character locations inside
+a UTF-8 scalar (for example, apostrophe–emoji–alpha stops at byte 3). The host
+preserves such older diagnostics verbatim and marks diagnosticCoordinatesVerified
+false. The [separately qualified lexer correction](PSC1_CHARACTER_DIAGNOSTICS.md)
+reports the actual consumed prefix end at byte 7 with verified coordinates.
+Verified locations still grant no editing authority. Token/trivia/edit spans always
+require exact UTF-8 boundaries; this distinction never grants lexical acceptance.
 
 The host checks the closed response shape, piece order, complete byte coverage,
 raw slices, UTF-8 boundaries, position progression, EOF and exact token projection.
@@ -132,6 +134,9 @@ under both lexers; it is not .ps parser translation or a new self-hosting chain.
 Focused run 40191237137 passes 358 captures and 49 negative cases; normal run
 40191245319 passes all selected dependencies and 37/37 finite release criteria.
 The previously qualified compiler generations and npm artifacts remain unchanged.
+The subsequent [diagnostic correction receipt](PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json)
+records the current helper/lexer source qualification, 359 captures and positive
+older advisory-wire compatibility separately from the original R1 results.
 
 R2 still requires resolved declarations/binders, capture-avoiding rename,
 whole affected-closure elaboration and independent admission, public API and

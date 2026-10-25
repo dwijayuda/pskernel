@@ -1,12 +1,63 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #182, branch
-`feat/psc1-lossless-source-20261025`, based on qualified PR #181 HEAD
-`d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
+Updated 2026-10-25 Asia/Jakarta. Active stacked draft PR #183, branch
+`fix/psc1-character-diagnostics-20261025`, based on qualified PR #182 HEAD
+`4c977654b8ca39b5fb3568ca9ebea03eee9d4339`.
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
 
-## Qualified R1 lossless foundation
+## Qualified character-diagnostic prerequisite
+
+Implementation `d70221c9b26827fba48ff5e85224f6a170fc0904`, tested merge
+`cffaa232709d3b49061bd04a06eea7761fb364d4`, identical tree
+`4362ebb25ae7070e64ef4402cc7be9d0a7234f17`.
+
+The sole production expression in Lexer.lean now advances actual body then
+following scalar before refusing a malformed unescaped character. Apostrophe,
+U+1F600 and U+03B1 stops at byte 7 instead of byte 3 inside the emoji. All other
+120 unified module bytes and frozen package/resource inputs retain their identities.
+The corrected 121-module closure is
+`60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a`.
+
+Two ordinary Lean 4.35 kernel checked leaf theorems preserve exact successful
+results and error constructor/reason after erasing diagnostic spans, and establish
+actual-prefix cursor advancement. An immutable baseline-leaf byte guard runs in
+the selected development lossless job with the theorem target. No axiom, unsafe
+shortcut, admission exemption or budget increase is introduced. This is scoped
+leaf evidence, not whole-compiler formal preservation or a universal position theorem.
+
+[Correction guide](docs/PSC1_CHARACTER_DIAGNOSTICS.md),
+[exact receipt](docs/PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json).
+Focused run 40195964028/job 121176735555 PASSED: 664 position cases, 359 native
+helper captures and 49 refusals, plus positive older advisory-wire compatibility.
+Maximum helper wall time 360ms, RSS 159,684 KiB. Old unverified diagnostics remain
+advisory and cannot become token/trivia/edit ranges. Snapshot authority is unchanged.
+
+Genuine new-source Wasm G1 run 40196021448/job 121177024041 PASSED: 121 modules
+under both grammar censuses, 40 cross-target cases and nine envelope refusals.
+Request `029b66ba18badad54172e22825f8e299bcc6b050` differs from implementation
+only in the manual workflow branch guard and request. All G1/tool/corpus limits
+remain 240s. No new G2/G3, fixed point, package promotion or performance-target
+qualification is claimed.
+
+Ordinary development run 40196244138 passes every selected dependency and 37/37 finite Practical Core criteria, zero blocked (releaseReady=true).
+The receipt records exact selected jobs, artifacts and finite-contract evidence.
+Documentation-only descendants carry this successful source baseline through the existing dependency selector. Verify their final static gate before reporting HEAD complete.
+
+## Immediate continuation
+
+The location prerequisite is complete. Next R2a attaches existing actual
+`PsElabBatchOrigin` / `PsElabMemberOrigin` to exact source snapshots through
+`psCompilerPreparationStepParsedWithOrigins`; do not add a second elaborator.
+Finite criteria are in the refactoring architecture and the roadmap owns the
+single dependency-ordered queue. R2a is read-only ownership, not rename.
+Then R2b must trace local binders/references at actual resolution sites; context-local
+raw IDs are not stable global source identities. Only after that implement
+capture-avoiding edits with affected-closure elaboration, independent admission
+and explicit public API/identity correspondence. R2a/R2b are still pending.
+Preserve all previous generation/package identities and existing source proof guards.
+
+## Preserved qualified R1 lossless foundation
 
 Implementation `c577d49888493857199fa3dc26f7ff78ed157def`, stacked draft PR #182 on PR #181
 HEAD `d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`. Tested merge `e0b14e376f0231877b4c03321842f4eeaad97f5a` shares tree
@@ -51,13 +102,13 @@ Run 40190581290 diagnoses official runtime mandatory libuv thread initialization
 1/2 GiB address-space probes fail while 4 GiB starts. Virtual stack reservation
 does not represent resident memory. Existing compiler/checker limits are unchanged.
 
-Tracked diagnostic defect: psLexReadCharacterBody's malformed-literal branch
-advances the close character without first advancing the body character.
-Apostrophe/U+1F600/U+03B1 retains an unterminatedCharacter stop offset 3 inside the
-emoji. Run 40190697846 exposed the class through delimiter mixtures. R1 preserves
-the original diagnostic as advisory metadata and marks its coordinates unverified.
-Token/trivia/edit spans always require exact boundaries. Correcting the production
-lexer needs its own source qualification; it is not silently changed here.
+Historical R1 diagnostic defect: run 40190697846 exposed
+psLexReadCharacterBody advancing the close character without first advancing
+the body. Its original apostrophe/U+1F600/U+03B1 stop is byte 3 inside the emoji.
+The separately qualified correction at the top of this document repairs the
+current lexer; the original R1 receipt still describes its unchanged baseline.
+Older-helper diagnostics remain advisory with coordinates marked unverified.
+Token/trivia/edit spans always require exact boundaries.
 
 Remaining R2: resolved declaration/binder identities and capture-avoiding rename,
 affected-closure elaboration, independent admission, public API/identity comparison.
@@ -91,7 +142,7 @@ That checkpoint was the first maintenance slice. The additive R1 lexical
 foundation is described above; binding-aware rename, semantic source editing,
 broad language extensions and a generalized plugin framework remain unimplemented.
 
-## Actual validation
+## Preserved PR #181 validation
 
 - Correspondence run 40184892095/job 121143498849 PASSED: three formatted,
   baseline-equivalent executable ASTs; exact 27-definition extraction; all 52
@@ -110,7 +161,7 @@ broad language extensions and a generalized plugin framework remain unimplemente
   corpus and 120s checker limits remain. This is G1-only, with no new G2/G3,
   fixed point or 240s self-compilation performance qualification.
 
-New source closure:
+PR #181 source closure (before the current diagnostic correction):
 `7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000`.
 G1 qualification branch `qualification/psc1-readable-wasm-g1-20261025`,
 control 1114d60b, request `b0cf4895a8ad3ec97be45e7382d5dbf690acb340`.
@@ -183,7 +234,7 @@ queue. Preserve the completed readability slice and its exact evidence.
 For further maintenance, prefer independent helper/module boundaries and recorded
 invariants; use the qualified R1 byte capture and establish resolved identities
 before broad automatic source conversion or rename. Preserve the advisory
-legacy-diagnostic boundary until its production fix has separate qualification. Do not replace workers with shorter forms
+legacy-helper diagnostic boundary after the separately qualified production fix. Do not replace workers with shorter forms
 without correspondence/resource evidence. Existing source-shape guards remain
 required until equivalent protection is explicitly qualified.
 

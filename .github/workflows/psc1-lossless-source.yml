@@ -42,8 +42,10 @@ jobs:
         working-directory: psc1
         run: |
           lean --version
-          lake build psc1_lossless_source psc1_lossless_tests
+          node scripts/character-diagnostic-correspondence.mjs --reference-only
+          lake build psc1_lossless_source psc1_lossless_tests psc1_character_diagnostic_tests
           .lake/build/bin/psc1_lossless_tests
+          .lake/build/bin/psc1_character_diagnostic_tests
       - name: Exercise snapshots, trivia and staged edits
         working-directory: psc1
         run: |

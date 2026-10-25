@@ -94,8 +94,8 @@ for (const grammar of ['lean', 'ps']) {
   const malformedCharacter = capture("'😀α", grammar);
   assert.equal(malformedCharacter.status, 'lexically-refused');
   assert.equal(malformedCharacter.diagnostic.code, 'unterminatedCharacter');
-  assert.equal(malformedCharacter.diagnostic.span.stop.byteOffset, 3);
-  assert.equal(malformedCharacter.diagnosticCoordinatesVerified, false);
+  assert.equal(malformedCharacter.diagnostic.span.stop.byteOffset, 7);
+  assert.equal(malformedCharacter.diagnosticCoordinatesVerified, true);
 }
 const original = bytes('-- keep\r\ndef α := 1 -- 😀\r\n');
 const snapshot = capture(original, 'lean', 'A.Module', '/first/location.lean');
@@ -174,6 +174,19 @@ try {
     w => { w.status = 'lexically-refused'; }, w => { w.diagnostic = { code: 'approved' }; },
     w => { w.pieces[1].kind = 'lineComment'; },
   ];
+  // Retain the qualified old transport's advisory-location compatibility. A
+  // bad diagnostic location is never promoted into a token/trivia/edit span.
+  const oldDiagnosticWire = structuredClone(wireOf(capture("'😀α")));
+  oldDiagnosticWire.diagnostic.span.stop = { byteOffset: 3, line: 1, column: 3 };
+  const oldHelper = path.join(directory, 'qualified-old-location');
+  fs.writeFileSync(oldHelper, '#!/usr/bin/python3\nimport json,sys\nwire=json.loads(' +
+    JSON.stringify(JSON.stringify(oldDiagnosticWire)) +
+    ')\nopen(sys.argv[3],"w").write(json.dumps(wire))\n', { mode: 0o700 });
+  const oldTool = createLosslessSourceTool({ executable: oldHelper, sha256: hash(fs.readFileSync(oldHelper)) });
+  const oldSnapshot = oldTool.capture({ module: 'OldDiagnostic', grammar: 'lean', bytes: bytes("'😀α") });
+  assert.equal(oldSnapshot.diagnosticCoordinatesVerified, false);
+  assert.deepEqual(oldTool.reconstruct(oldSnapshot), bytes("'😀α"));
+  assert.equal(oldSnapshot.authority.publication, false);
   const refusedWire = wireOf(capture("'😀α"));
   const refusedMutations = [
     w => { w.diagnostic.span.stop.byteOffset = 999; },

@@ -642,3 +642,7 @@ lean_exe psc1_lossless_source where
 lean_exe psc1_lossless_tests where
   srcDir := "test"
   root := `LosslessSourceTests
+
+lean_exe psc1_character_diagnostic_tests where
+  srcDir := "test"
+  root := `CharacterDiagnosticTests

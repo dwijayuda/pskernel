@@ -1,17 +1,35 @@
 # PSC1 development roadmap
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #182 follows qualified PR #181.
+Updated 2026-10-25 Asia/Jakarta. Active draft PR #183 follows qualified PR #182.
 Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
-## Qualified R1 lossless capture
+## Qualified malformed-character diagnostic correction
+
+PR #183 changes one production lexer expression to advance body then following
+scalar before reporting malformed unescaped-character spans. Two ordinary Lean
+4.35 kernel checked theorems preserve exact accepted leaf results and error
+classification, and establish the corrected prefix cursor. They are scoped leaf
+properties, not whole-compiler preservation.
+
+Focused run 40195964028 passes 664 position cases, 359 lossless captures and 49
+refusals, including positive older advisory-wire compatibility. New-source Wasm
+G1 run 40196021448 passes both grammar censuses, 40 cross-target cases and nine
+envelope refusals. The corrected 121-module closure is
+`60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a`.
+Ordinary source run 40196244138: passes every selected dependency and 37/37 finite Practical Core criteria, zero blocked (releaseReady=true).
+[Correction and evidence boundaries](PSC1_CHARACTER_DIAGNOSTICS.md),
+[exact qualification receipt](PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json).
+Frozen npm payloads and prior generation qualifications retain their identities.
+
+## Preserved qualified R1 lossless capture
 
 The additive token/trivia tape, opaque exact-byte source snapshots and stale-safe
 candidate edits are implemented outside the unified compiler import closure.
-The original lexer is reused without modification. Linux focused run 40191237137 passes 358 captures and 49 refusal cases. Ordinary
+R1 reused the original lexer without modification; the later diagnostic correction above has separate source evidence. Linux focused run 40191237137 passes 358 captures and 49 refusal cases. Ordinary
 run 40191245319 passes every selected dependency and 37/37 finite release criteria.
-The 121-module compiler closure and frozen npm payload inputs remain unchanged.
+The R1 closure identity and frozen npm payload inputs are preserved in its receipt; the later production correction has the distinct closure above.
 No semantic rename, automatic file edit or publication is claimed.
 [Exact R1 receipt](PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json).
 [Capture contract](PSC1_LOSSLESS_SOURCE.md),
@@ -31,7 +49,7 @@ bodies. Earlier documents and qualifications remain preserved.
 [Contributor guide](../CONTRIBUTING.md), [documentation index](README.md),
 [exact receipt](PSC1_READABILITY_QUALIFICATION_2026-10-25.json).
 
-The refactored source contains 121 modules, closure
+The preserved pre-correction refactored source contains 121 modules, closure
 `7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000`.
 It has actual Wasm G1 evidence in run 40184951724: both grammar censuses, 40
 cross-target cases and nine envelope refusals. This is not new G2/G3 or fixed-point
@@ -81,7 +99,9 @@ qualification receipts supply exact CI evidence.
 | --- | --- | --- |
 | 0 | Documentation, host readability and one compiler-module extraction | First slice qualified in the linked receipt. Preserve current entry points, invariants, correspondence and exact evidence. |
 | 0a | Lossless lexical capture (R1) | Qualified in 40191237137 and normal source run 40191245319. Exact bytes/trivia/tokens, snapshot identity, immutable capture, stale-safe candidate edits and malformed-transport refusal. No semantic or publication authority. |
-| 0b | Binding-aware source editing (R2–R4) | Pending. Preserve the tracked advisory malformed-character diagnostic boundary; a production lexer correction needs separate source evidence. Resolve declaration/binder identities before capture-avoiding rename. Require affected-closure elaboration, independent admission, public API and explicit equivalence checks before publication. Do not expand the frozen language merely to shorten compiler code. |
+| 0b | Malformed-character location prerequisite | Qualified in focused 40195964028, new-source Wasm G1 40196021448 and ordinary 40196244138. Scoped correspondence, 664 position cases and preserved older advisory-wire compatibility; frozen package identities unchanged. |
+| 0c | Declaration ownership (R2a) | Next. Bind existing actual elaboration batch/member origins to exact module/snapshot identities. Preserve prepared declarations/admission bytes, synthesized ownership and refusals under both grammars. Read-only ownership index; finite criteria in the refactoring architecture. |
+| 0d | Binding-aware source editing (R2b–R4) | Pending. Record local binder/reference origins at actual resolution points; context-local raw IDs are not global source identities. Then require capture-avoiding rename, affected-closure elaboration, independent admission, public API and explicit equivalence checks before publication. Do not expand the frozen language merely to shorten compiler code. |
 | 1 | Slim real applications and source-package coverage | Pending. Compile/consume CLI, JSON/file and multi-module applications through the slim APIs in both grammars. Source closure resolution must not grant host/FFI authority. Retain the previous native package. |
 | 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |
 | 3 | Checked generated TS publication | Pending. Reuse existing emitter, IR/admission/runtime and publication machinery; require independent pinned TS consumers, four executors, both grammars and negative/ABI/tamper/prior-output checks. |

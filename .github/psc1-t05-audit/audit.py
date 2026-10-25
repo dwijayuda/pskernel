@@ -75,12 +75,13 @@ SHA = CONFIG["sourceSha"]
 RUN = CONFIG["runId"]
 ATTEMPT = CONFIG["runAttempt"]
 PROFILE = CONFIG.get("profile", "helpers")
-ADMISSION = PROFILE == "admission"
-FIELDS = PROFILE in ("fields", "analysis", "loop", "admission")
-ANALYSIS = PROFILE in ("analysis", "loop", "admission")
-LOOP = PROFILE in ("loop", "admission")
-SOURCE_INPUT_COUNT = 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
-NATIVE_PROOF_TOTAL = 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
+DEFERRED = PROFILE == "deferred"
+ADMISSION = PROFILE in ("admission", "deferred")
+FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred")
+ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred")
+LOOP = PROFILE in ("loop", "admission", "deferred")
+SOURCE_INPUT_COUNT = 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
+NATIVE_PROOF_TOTAL = 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
 FIELDS_SECTIONS = {"harness":1,"fields":147,"recursive":105,"boundaries":8,"recursorGuard":7}
 ANALYSIS_SECTIONS = {"harness":1,"matrix":84,"protocol":8}
 LOOP_SECTIONS = {"harness":1,"matrix":56,"protocol":12}
@@ -96,7 +97,10 @@ if LOOP:
 if ADMISSION:
     SCRIPT_NAMES.extend(["pskernel-ordinary-elimination-smoke.mjs",
         "pskernel-ordinary-admission-private-smoke.mjs","pskernel-ordinary-admission-public-smoke.mjs"])
-ADMISSION_LATER_LOGS = {"elimination.log","ordinary-admission-private.log","ordinary-admission-public.log"} if ADMISSION else set()
+if DEFERRED:
+    SCRIPT_NAMES.append("pskernel-expr-v2-transform-delay-smoke.mjs")
+DEFERRED_LATER_LOGS = {"deferred-transform.log"} if DEFERRED else set()
+ADMISSION_LATER_LOGS = ({"elimination.log","ordinary-admission-private.log","ordinary-admission-public.log"} if ADMISSION else set()) | DEFERRED_LATER_LOGS
 ELIMINATION_SECTIONS = {"harness":1,"policy":63,"raw":28,"member":12,"protocol":12}
 PRIVATE_ADMISSION_SECTIONS = {"harness":1,"matrix":126,"protocol":16}
 PUBLIC_ADMISSION_SECTIONS = {"harness":1,"routing":7,"boundary":4}
@@ -119,6 +123,59 @@ PUBLIC_ADMISSION_LABELS = [
     "routing/same-batch-recursor-check","routing/cross-call-checked-recursor",
     "boundary/private-generated-id-not-external","boundary/later-command-failure-atomic",
     "boundary/fallback-original-bounds","boundary/preflight-precedence"]
+DEFERRED_BASELINE = "10144e2f9e8d223b5dcde275bd1f48d25df113b3"
+DEFERRED_PREFIX = "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/"
+DEFERRED_MODULE = "PsKernelDeferredTransformProofs"
+DEFERRED_PROOF = "psc1/test/" + DEFERRED_MODULE + ".lean"
+DEFERRED_HARNESS = "pskernel-expr-v2-transform-delay-smoke.mjs"
+DEFERRED_NAMES = [DEFERRED_MODULE+"."+name for name in
+    ("transform_with_fuel_eq","count_with_fuel_eq","lift_with_fuel_eq")]
+DEFERRED_WORKERS = [
+    ("Transform.lean","8f50a74edf1d00288efee9c559a05a75b755acbf",
+     "psKernelExprV2TransformWithFuel",
+     "      let smaller := psKernelExprV2TransformWithFuel remaining;\n",
+     "        (state : PsKernelExprV2TransformState) (source offset : Nat) =>\n",
+     "        let smaller := psKernelExprV2TransformWithFuel remaining;\n"),
+    ("TransformSupport.lean","7957a3aaf87f440b6fb09c2ee98eb574aeab6c72",
+     "psKernelExprV2TransformCountWithFuel",
+     "      let smaller := psKernelExprV2TransformCountWithFuel remaining;\n",
+     "          (memo : List PsKernelExprV2TransformCountMemo) (root : Nat) =>\n",
+     "        let smaller := psKernelExprV2TransformCountWithFuel remaining;\n"),
+    ("Lift.lean","50a63d2729088039a3b01f75eda5c6e83f91e036",
+     "psKernelExprV2PagedLiftWithFuel",
+     "      let smaller :\n          PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n          Except String (PsKernelExprV2PagedLiftState × Nat) :=\n        psKernelExprV2PagedLiftWithFuel remaining;\n",
+     "            fun (amount : Nat) =>\n",
+     "              let smaller :\n                  PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n                  Except String (PsKernelExprV2PagedLiftState × Nat) :=\n                psKernelExprV2PagedLiftWithFuel remaining;\n"),
+]
+DEFERRED_BLOBS = {DEFERRED_PREFIX+short:oid for short,oid,*_ in DEFERRED_WORKERS}
+DEFERRED_INPUTS = list(DEFERRED_BLOBS) + [DEFERRED_PROOF,"psc1/scripts/"+DEFERRED_HARNESS]
+DEFERRED_SECTIONS = {"harness":1,"staged":3,"transform":6,"count":6,"lift":7}
+DEFERRED_LABELS = [
+    "harness-real-canonical-shared-app",
+    "staged-transform-all-four-arrows",
+    "staged-count-all-three-arrows",
+    "staged-lift-all-four-arrows",
+    "raw-transform-zero-preserves-owner-and-id",
+    "raw-transform-zero-still-requires-root",
+    "raw-transform-successor-root-before-memo",
+    "raw-transform-successor-memo-preserves-full-owner",
+    "raw-transform-one-retains-zero-budget-children",
+    "raw-transform-two-threads-shared-child-memo-and-ids",
+    "raw-count-zero-before-memo",
+    "raw-count-zero-before-root-validation",
+    "raw-count-one-leaf",
+    "raw-count-one-child-exhaustion",
+    "raw-count-one-invalid-root",
+    "raw-count-successor-internal-memo-before-root",
+    "raw-lift-zero-before-zero-amount",
+    "raw-lift-successor-zero-amount-before-root",
+    "raw-lift-successor-root-before-memo",
+    "raw-lift-loose-range-prune-before-memo",
+    "raw-lift-valid-memo-preserves-full-owner",
+    "raw-lift-one-child-exhaustion",
+    "raw-lift-two-threads-shared-child-memo-and-ids"
+]
+
 BLOBS = {}
 REPORT = {
     "schema":"psc1-t05-artifact-audit-v1",
@@ -1276,12 +1333,114 @@ def admission_route_audit(e):
                 line_marker(log,"PSC1_ADMISSION_PUBLIC_SECTION "+group+"="+str(count))
         timing=measurement(e,name+".memory")
         for key,value in timing.items(): same(r.get(key),value,name+" measured resource "+key)
-        e.log_digests(r["logs"],top_logs)
+        e.log_digests(r["logs"],top_logs-DEFERRED_LATER_LOGS)
         logged_json(e.terminal,spec["receiptMarker"],r)
         results[name]={"assertions":spec["result"]["assertions"],
             "sections":spec["result"]["sectionAssertions"],"measurement":timing,
             "receipt":digest(e.raw(path)),"allReceiptLogDigestsMatched":True}
     return results
+
+def deferred_production_sources():
+    """Reconstruct the entire authenticated predecessor file from each sole move."""
+    proof=git_bytes(DEFERRED_PROOF).decode("utf-8")
+    require(proof.count("namespace Frozen\n")==1 and proof.count("\nend Frozen")==1,
+            "exact frozen worker namespace")
+    frozen=proof.split("namespace Frozen\n",1)[1].split("\nend Frozen",1)[0]
+    def worker(text,name):
+        found=re.search(r"(?ms)^def "+re.escape(name)+r"\n.*?(?=^def |\Z)",text)
+        require(found is not None,"missing frozen worker "+name)
+        return found
+    records=[]
+    for short,oid,name,remove,anchor,insert in DEFERRED_WORKERS:
+        path=DEFERRED_PREFIX+short
+        raw=git_bytes(path); after=raw.decode("utf-8")
+        match=worker(after,name); body=match.group(0)
+        successor="  | Nat.succ remaining =>\n"
+        require(body.count(insert)==1 and body.count(successor)==1 and body.count(anchor)==1,
+                "unique deferred worker relocation "+name)
+        restored=body.replace(insert,"").replace(successor,successor+remove)
+        before=after[:match.start()]+restored+after[match.end():]
+        same(git_blob_sha(before.encode("utf-8")),oid,
+             "reconstructed entire qualified predecessor file "+path)
+        require(before.count(remove)==1 and before.count(anchor)==1,
+                "unique predecessor relocation anchors "+path)
+        same(before.replace(remove,"").replace(anchor,anchor+insert),after,
+             "exact whole-file binding move "+path)
+        predecessor=worker(before,name).group(0).rstrip()
+        same(worker(frozen,name).group(0).rstrip(),predecessor,
+             "frozen proof worker byte identity "+name)
+        records.append({"path":path,"baselineGitBlob":oid,"targetGitBlob":git_blob_sha(raw),
+            "target":digest(raw),"frozenWorker":digest(predecessor.encode("utf-8"))})
+    return {"baselineSha":DEFERRED_BASELINE,"baselineBlobs":DEFERRED_BLOBS,
+        "wholeFilesReconstructed":True,"exactBindingMovesOnly":True,
+        "frozenBodiesMatch":True,"workers":records,"proof":digest(git_bytes(DEFERRED_PROOF))}
+
+
+def deferred_native_audit(e):
+    source=e.json("deferred-transform-source-audit.json"); e.identity(source)
+    for key,value in {"schema":"psc1-t08-deferred-transform-source-v1",
+        "baselineSha":DEFERRED_BASELINE,"baselineBlobs":DEFERRED_BLOBS,
+        "frozenBodiesMatch":True,"exactBindingMovesOnly":True,
+        "fullQualification":False,"performanceQualified":False}.items():
+        same(source.get(key),value,"deferred source audit "+key)
+    same(sorted(source["productionChanges"]),sorted(DEFERRED_BLOBS),
+         "exact three production delta paths")
+    files=DEFERRED_INPUTS+[WORKFLOW]
+    same(source["sourceFiles"],{path:digest(git_bytes(path))["sha256"] for path in files},
+         "six exact deferred source audit hashes")
+    logged_json(e.terminal,"PSC1_T08_DEFERRED_TRANSFORM_SOURCE: PASS ",source)
+    r=e.json("deferred-transform-native-receipt.json"); e.identity(r)
+    for key,value in {"schema":"psc1-t08-deferred-transform-native-receipt-v1",
+        "status":"pass","retainedProofs":371,"newProofs":3,"totalProofs":374,
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "productionSemanticEquality":True,"deferredTransformConstruction":True,
+        "fullOrdinaryAdmission":True,"fullKernel":False,"performanceQualified":False}.items():
+        same(r.get(key),value,"deferred native receipt "+key)
+    raw=e.raw("deferred-transform-proofs.log")
+    names=proof_reports(git_bytes(DEFERRED_PROOF),raw,DEFERRED_MODULE,3)
+    same(names,DEFERRED_NAMES,"three fixed worker equality proof names")
+    same(r["proofs"],[{"module":DEFERRED_MODULE,"proofs":3,"names":names,
+        "source":digest(git_bytes(DEFERRED_PROOF)),"log":digest(raw)}],
+        "three exact deferred native proof records")
+    e.check_digest("ordinary-admission-native-receipt.json",r["retainedAdmissionReceipt"])
+    e.check_digest("deferred-transform-source-audit.json",r["sourceAudit"])
+    e.check_digest("source-inventory.json",r["sourceInventory"])
+    logged_json(e.terminal,"PSC1_T08_DEFERRED_TRANSFORM_NATIVE: PASS ",r)
+    return {"retainedReports":371,"newReports":3,"totalReports":374,"proofNames":names,
+        "sourceAudit":digest(e.raw("deferred-transform-source-audit.json")),
+        "receipt":digest(e.raw("deferred-transform-native-receipt.json"))}
+
+
+def deferred_route_audit(e):
+    r=e.json("deferred-transform-receipt.json")
+    prov=e.json("provenance.json")
+    same(r.get("identity"),prov,"deferred route full provenance"); e.identity(r["identity"])
+    for key,value in {"schema":"psc1-t08-deferred-transform-route-receipt-v1","status":"pass",
+        "deferredTransformConstruction":True,"fullKernel":False,"performanceQualified":False}.items():
+        same(r.get(key),value,"deferred route receipt "+key)
+    e.check_digest("ordinary-admission-public-receipt.json",r["retainedPublicReceipt"])
+    e.check_digest("deferred-transform.log",r["log"])
+    e.check_digest("detached/"+DEFERRED_HARNESS,r["harness"])
+    result={"assertions":23,"exports":3,"stagedArrows":11,
+        "sectionAssertions":DEFERRED_SECTIONS,"assertionLabels":DEFERRED_LABELS}
+    same(r["result"],result,"exact deferred23 runtime inventory")
+    marker="PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11"
+    prefix="PSC1_TRANSFORM_DELAY_ASSERT "
+    expected=[prefix+label for label in DEFERRED_LABELS]+[marker]
+    same(e.text("deferred-transform.log").splitlines(),expected,
+         "exact complete deferred23 assertion transcript")
+    same([line for line in e.terminal.splitlines() if line.startswith(prefix)],
+         expected[:-1],"exact executed deferred23 terminal labels")
+    line_marker(e.terminal,marker)
+    timing=measurement(e,"deferred-transform.memory")
+    for key,value in timing.items(): same(r.get(key),value,"deferred measured resource "+key)
+    e.log_digests(r["logs"],{name for name in e.files if "/" not in name and name.endswith(".log")})
+    logged_json(e.terminal,"PSC1_T08_DEFERRED_TRANSFORM_ROUTE: PASS ",r)
+    return {"assertions":23,"exports":3,"stagedArrows":11,"sections":DEFERRED_SECTIONS,
+        "assertionLabels":DEFERRED_LABELS,"measurement":timing,
+        "receipt":digest(e.raw("deferred-transform-receipt.json")),
+        "allReceiptLogDigestsMatched":True}
+
 
 def wait_for_cohort():
     deadline = time.monotonic() + 75 * 60
@@ -1306,7 +1465,7 @@ def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
-    require(PROFILE in ("helpers","fields","analysis","loop","admission"),"Unknown audit profile")
+    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
             "Exact numeric run and attempt required")
@@ -1320,6 +1479,9 @@ def main():
     require(len(path_lists) == 2 and path_lists[0] == path_lists[1],
             "Native and route source inventory definitions agree")
     expected_paths = path_lists[0]
+    if DEFERRED:
+        require(set(DEFERRED_INPUTS) <= set(expected_paths),"five explicit deferred production/proof/harness inputs")
+        REPORT["deferredTransformSources"] = deferred_production_sources()
     require(len(expected_paths) == SOURCE_INPUT_COUNT and len(set(expected_paths)) == SOURCE_INPUT_COUNT,
             "Expected exact configured source input count")
     frozen_lists = [ast.literal_eval(x) for x in
@@ -1404,6 +1566,8 @@ def main():
                 result["loopQualification"] = loop_native_audit(evidence) if route == "native" else loop_route_audit(evidence)
             if ADMISSION:
                 result["ordinaryAdmissionQualification"] = admission_native_audit(evidence) if route == "native" else admission_route_audit(evidence)
+            if DEFERRED:
+                result["deferredTransformQualification"] = deferred_native_audit(evidence) if route == "native" else deferred_route_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -1429,9 +1593,11 @@ def main():
         "eachGeneratedRouteAssertions":{"header":1992,"cache":1884,"params":268,"result":432,
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
             **({"loop":69} if LOOP else {}),
-            **({"elimination":116,"privateAdmission":143,"publicRouting":12} if ADMISSION else {})},
+            **({"elimination":116,"privateAdmission":143,"publicRouting":12} if ADMISSION else {}),
+            **({"deferredTransform":23} if DEFERRED else {})},
         "constructorFieldsQualified":FIELDS,"singleConstructorAnalysisQualified":ANALYSIS,
         "constructorLoopQualified":LOOP,"profile":PROFILE,
+        "deferredTransformQualified":DEFERRED,
         **({"independentLeanControls":{"controls":18,"accepted":14,"rejected":4,
                 "safeGenerated":13,"unsafeContract":1}} if ADMISSION else {}),
     }
@@ -1460,6 +1626,7 @@ if __name__ == "__main__":
                       for r,v in REPORT["routes"].items()},
             "nativeReports":NATIVE_PROOF_TOTAL if REPORT["status"] == "pass" else None,
             "profile":PROFILE,
+            **({"deferredTransformQualified":REPORT["status"] == "pass"} if DEFERRED else {}),
             "report":digest(payload.encode()),
             "errors":REPORT["errors"],
             **({"ordinaryAdmissionQualified":REPORT["status"] == "pass",

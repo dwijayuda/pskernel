@@ -18,7 +18,7 @@ import {
   kernelHandle,
   hash,
 } from '../host-tools/installed-engine-resolver.mjs';
-import {readPublication as readPublishedGeneration} from '../host-tools/transactional-publication.mjs';
+import { readPublication as readPublishedGeneration } from '../host-tools/transactional-publication.mjs';
 const fail = (message) => {
   throw Error('PSC1_UNIVERSAL_' + message);
 };
@@ -36,8 +36,9 @@ function selection(options = {}) {
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
   if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['wasm', 'native', 'both'].includes(kernel)) fail('KERNEL');
-  if (!['js','ts','rust','wasm-core'].includes(target)) fail('CHECKED_TARGET_UNSUPPORTED');
-  if (!['legacy-symlink','portable-file'].includes(publicationProtocol)) fail('PUBLICATION_PROTOCOL');
+  if (!['js', 'ts', 'rust', 'wasm-core'].includes(target)) fail('CHECKED_TARGET_UNSUPPORTED');
+  if (!['legacy-symlink', 'portable-file'].includes(publicationProtocol))
+    fail('PUBLICATION_PROTOCOL');
   const sources = clone(options.sources);
   compilerSourceClosureDigest(sources);
   if (
@@ -45,8 +46,22 @@ function selection(options = {}) {
     !sources.some((s) => s.module === options.entryModule)
   )
     fail('ENTRY');
-  if(options.rustToolchainRoot!==undefined&&(typeof options.rustToolchainRoot!=='string'||!path.isAbsolute(options.rustToolchainRoot)))fail('RUST_SDK_ROOT');
-  return { engine, kernel, assurance, outputAbi, target, publicationProtocol, sources, rustToolchainRoot:options.rustToolchainRoot, entryModule: options.entryModule };
+  if (
+    options.rustToolchainRoot !== undefined &&
+    (typeof options.rustToolchainRoot !== 'string' || !path.isAbsolute(options.rustToolchainRoot))
+  )
+    fail('RUST_SDK_ROOT');
+  return {
+    engine,
+    kernel,
+    assurance,
+    outputAbi,
+    target,
+    publicationProtocol,
+    sources,
+    rustToolchainRoot: options.rustToolchainRoot,
+    entryModule: options.entryModule,
+  };
 }
 // Only the installed host composes tool paths, pins and independent checkers.
 // Source/project/wire data never supplies these capabilities.
@@ -81,12 +96,25 @@ function sessionFor(selected, publicationRoot) {
     outputAbi: selected.outputAbi,
     target: selected.target,
     publicationProtocol: selected.publicationProtocol,
-    serviceKind: selected.target==='js'?'js-adapter':(engine.candidateKind==='embedded'?'unified-embedded':'unified-bundle'),
-    ...resolveCheckedTarget(selected.target,d,{rustToolchainRoot:selected.rustToolchainRoot}),
-    serviceFile: selected.target==='js'?engine.service.path:engine.candidate.path,
-    serviceSha256: selected.target==='js'?engine.service.sha256:engine.candidate.sha256,
-    runnerFile: path.join(installationRoot,selected.target==='js'?'scripts/generated-compiler-runner.mjs':'scripts/universal-candidate-runner.mjs'),
-    runnerSha256: selected.target==='js'?d.runner.sha256:d.hostFiles.find(row=>row.path==='scripts/universal-candidate-runner.mjs').sha256,
+    serviceKind:
+      selected.target === 'js'
+        ? 'js-adapter'
+        : engine.candidateKind === 'embedded'
+          ? 'unified-embedded'
+          : 'unified-bundle',
+    ...resolveCheckedTarget(selected.target, d, { rustToolchainRoot: selected.rustToolchainRoot }),
+    serviceFile: selected.target === 'js' ? engine.service.path : engine.candidate.path,
+    serviceSha256: selected.target === 'js' ? engine.service.sha256 : engine.candidate.sha256,
+    runnerFile: path.join(
+      installationRoot,
+      selected.target === 'js'
+        ? 'scripts/generated-compiler-runner.mjs'
+        : 'scripts/universal-candidate-runner.mjs',
+    ),
+    runnerSha256:
+      selected.target === 'js'
+        ? d.runner.sha256
+        : d.hostFiles.find((row) => row.path === 'scripts/universal-candidate-runner.mjs').sha256,
     checkerExecutable: process.execPath,
     checkerSha256: hash(fs.readFileSync(process.execPath)),
     checkerScriptFile: script,
@@ -110,7 +138,14 @@ export function compile(options) {
   try {
     const session = sessionFor(selected, path.join(temporary, 'store')),
       receipt = session.execute();
-    const sourceFile=selected.target==='ts'?'target.ts':selected.target==='rust'?'target.rs':selected.target==='wasm-core'?'target.wasm.hex':'target.mjs';
+    const sourceFile =
+      selected.target === 'ts'
+        ? 'target.ts'
+        : selected.target === 'rust'
+          ? 'target.rs'
+          : selected.target === 'wasm-core'
+            ? 'target.wasm.hex'
+            : 'target.mjs';
     const source = fs.readFileSync(path.join(session.stagingDirectory, sourceFile), 'utf8');
     if (hash(source) !== receipt.sourceSha256) fail('CHECKED_SOURCE_CHANGED');
     return Object.freeze({
@@ -121,7 +156,7 @@ export function compile(options) {
       kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
       compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
       source,
-      sourceEncoding:selected.target==='wasm-core'?'psc1-wasm-hex/1':'utf8',
+      sourceEncoding: selected.target === 'wasm-core' ? 'psc1-wasm-hex/1' : 'utf8',
       receipt,
       logicalAdmission: 'accepted',
       irValidation: 'original-and-transformed-by-pinned-compiler',
@@ -160,9 +195,9 @@ export function build(options) {
     formalPreservation: 'not-provided',
   });
 }
-export function readPublication({out,publicationProtocol='legacy-symlink'}) {
-  if(typeof out!=='string'||!out)fail('OUTPUT_DIRECTORY');
-  return readPublishedGeneration(path.resolve(out),publicationProtocol);
+export function readPublication({ out, publicationProtocol = 'legacy-symlink' }) {
+  if (typeof out !== 'string' || !out) fail('OUTPUT_DIRECTORY');
+  return readPublishedGeneration(path.resolve(out), publicationProtocol);
 }
 export function compileCandidate(options) {
   // Explicit low-level candidate API. It never admits proofs or publishes files.

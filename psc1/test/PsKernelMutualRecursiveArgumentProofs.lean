@@ -123,7 +123,7 @@ theorem opened_binder_keeps_exact_owner
     (step : psKernelExprV2CheckOpenBinder context state userName localDomain body binderInfo = .ok opened) :
     psKernelExprV2MutualRecursiveOpenBinder context state targets userName domain body binderInfo =
       .ok (opened, PsKernelExprV2OrdinaryOpenBinder.mk opened.fresh userName localDomain binderInfo) := by
-  simp only [psKernelExprV2MutualRecursiveOpenBinder, positive, ↓reduceIte, annotations, step]
+  simp only [psKernelExprV2MutualRecursiveOpenBinder, positive, ↓reduceIte, annotations, step] <;> rfl
 
 theorem terminal_original_hit_precedes_reduced
     (reduced : Nat)
@@ -138,7 +138,7 @@ theorem terminal_no_occurrences_keeps_owner
     (reducedClean : psKernelExprV2MutualContainsConstOnCanonical state.whnf.arena targets reduced = .ok false) :
     psKernelExprV2MutualRecursiveTerminal context state targets domain reduced =
       .ok (PsKernelExprV2MutualRecursiveArgumentResult.mk context state none) := by
-  simp only [psKernelExprV2MutualRecursiveTerminal, originalClean, reducedClean, ↓reduceIte]
+  simp only [psKernelExprV2MutualRecursiveTerminal, originalClean, reducedClean, ↓reduceIte] <;> rfl
 
 theorem selected_retains_field_and_index_ids
     (info : PsKernelExprV2MutualAppInfo) :

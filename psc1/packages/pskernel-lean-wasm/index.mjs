@@ -25,6 +25,7 @@ function providerOptions(options={}){
   if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0){
     throw new TypeError('timeoutMs must be a positive integer');
   }
+  if(!Number.isSafeInteger(maxBuffer)||maxBuffer<=0)throw new TypeError('maxBuffer must be a positive integer');
   return {
     launcherPath,
     nodePath,
@@ -65,6 +66,7 @@ function runProviderCommand(command,options,input){
     if(directory!==undefined)rmSync(directory,{recursive:true,force:true});
   }
 
+  if(options.verifyBundledPrebuilt)verifyWasmPrebuiltManifest();
   if(run.error){
     throw new Error(
       `failed to start Lean WASM kernel provider: ${run.error.message}`,

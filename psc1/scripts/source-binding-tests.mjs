@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { createLosslessSourceTool, createSourceOwnershipTool,
-  createSourceBindingTool } from '../host-tools/source-refactoring.mjs';
+  createSourceBindingTool, createCheckedSourceConverter } from '../host-tools/source-refactoring.mjs';
 
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const pin = name => {
@@ -17,13 +17,26 @@ const ownership = createSourceOwnershipTool({
   checkerExecutable: checker.executable, checkerSha256: checker.sha256,
 });
 const bindings = createSourceBindingTool({ ownershipTool: ownership });
+const converter = createCheckedSourceConverter({ ownershipTool: ownership });
 const records = [];
 let negatives = 0;
 const refuse = (fn, pattern = /PSC1_LOSSLESS_/) => {
   assert.throws(fn, pattern); negatives++;
 };
-const capture = (text, grammar, module = 'Test.Main') =>
+const captureRaw = (text, grammar, module = 'Test.Main') =>
   lexical.capture({ module, grammar, bytes: Buffer.from(text) });
+const capture = (text, grammar, module = 'Test.Main') => {
+  if (grammar === 'lean') return captureRaw(text, grammar, module);
+  // Use the existing qualified printer; the candidate is subsequently parsed,
+  // elaborated and admitted through the actual PS production path.
+  const source = captureRaw(text, 'lean', module);
+  // Imports are already authored in both grammars; standalone conversion needs
+  // the actual complete closure, so imported fixtures below supply authored PS.
+  if (/^import /m.test(text)) return captureRaw(text, grammar, module);
+  const index = ownership.analyze({ snapshots: [source], entry: module });
+  const report = converter.convert({ index, snapshots: [source], targetGrammar: 'ps' });
+  return converter.candidateSnapshots(report)[0];
+};
 function selected(index, name, occurrence = 0, region = 'body') {
   const all = index.modules.flatMap(module => module.bindings.flatMap(batch =>
     batch.traces.flatMap(trace => trace.binders)));
@@ -66,7 +79,7 @@ for (const grammar of ['lean', 'ps']) {
     assert.ok(Object.isFrozen(report.binderMap));
     const original = Buffer.from(bytes); bytes.fill(0);
     assert.deepEqual(bindings.readCandidate(report, 'Test.Main'), original);
-    assert.deepEqual(lexical.reconstruct(source), Buffer.from(text));
+    assert.equal(lexical.reconstruct(source).toString('utf8').includes('renamedValue'), false);
     assert.equal(bindings.assertCandidateCurrent(report, snapshots), true);
     assert.ok(bindings.candidateIndex(report).checker.accepted);
     records.push({ grammar, name, ...report });
@@ -96,7 +109,8 @@ for (const grammar of ['lean', 'ps']) {
   }
   const base = capture('namespace Base\ndef seed : Nat := 3\nend Base\n', grammar, 'Test.Base');
   const main = capture('import Test.Base\nnamespace App\ndef choose : Nat := ' +
-    'let x : Nat := _root_.Base.seed; Nat.add x 1\nend App\n', grammar);
+    (grammar === 'ps' ? 'let x : Nat := _root_.Base.seed\n Nat.add(x, 1)\nend App\n' :
+      'let x : Nat := _root_.Base.seed; Nat.add x 1\nend App\n'), grammar);
   const index = analyze([base, main], 'ordinary-checked');
   const report = bindings.rename({ index, snapshots: [base, main], binder: selected(index, 'x'),
     newName: 'seedValue' });

@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createLosslessSourceTool, createSourceOwnershipTool,
-  createCheckedSourceConverter } from '../host-tools/source-refactoring.mjs';
+  createCheckedSourceConverter, createSourceBindingTool } from '../host-tools/source-refactoring.mjs';
 
 function fail(code) { throw new Error('PSC1_REFACTOR_' + code); }
 function keys(value, names) {
@@ -16,12 +16,12 @@ function file(name, limit) {
   return fs.readFileSync(name);
 }
 function argumentsOf(args) {
-  const result = { sources: [], assurance: 'checked', comments: 'preserve' };
+  const result = { sources: [], assurance: 'checked', comments: 'preserve', operation: 'convert' };
   const seen = new Set();
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i], value = args[i + 1];
     if (!value || !['--manifest', '--entry', '--grammar', '--to', '--source',
-      '--assurance', '--comments'].includes(flag)) fail('ARGUMENTS');
+      '--assurance', '--comments', '--operation', '--module', '--offset', '--new-name'].includes(flag)) fail('ARGUMENTS');
     if (flag === '--source') {
       const split = value.indexOf('=');
       if (split < 1 || split === value.length - 1) fail('SOURCE');
@@ -34,7 +34,12 @@ function argumentsOf(args) {
     }
   }
   if (!result.manifest || !result.entry || !['lean', 'ps'].includes(result.grammar) ||
-      !['lean', 'ps'].includes(result.to) || !result.sources.length ||
+      !['convert', 'bindings', 'rename'].includes(result.operation) || !result.sources.length ||
+      (result.operation === 'convert' && !['lean', 'ps'].includes(result.to)) ||
+      (result.operation !== 'convert' && result.to !== undefined) ||
+      (result.operation === 'rename' && (!result.module || !/^(0|[1-9][0-9]*)$/.test(result.offset ?? '') ||
+        !Number.isSafeInteger(Number(result.offset)) || !result['new-name'])) ||
+      (result.operation !== 'rename' && [result.module, result.offset, result['new-name']].some(x => x !== undefined)) ||
       !['checked', 'ordinary-checked'].includes(result.assurance) ||
       !['preserve', 'owner-notes'].includes(result.comments)) fail('ARGUMENTS');
   return result;
@@ -43,7 +48,7 @@ function argumentsOf(args) {
 try {
   const args = process.argv.slice(2);
   if (args.length === 1 && args[0] === '--help') {
-    process.stdout.write('usage: node refactor-source.mjs --manifest TOOLS.json --entry MODULE --grammar lean|ps --to lean|ps --source MODULE=FILE [--source MODULE=FILE ...] [--assurance checked|ordinary-checked] [--comments preserve|owner-notes]\n');
+    process.stdout.write('usage: node refactor-source.mjs --manifest TOOLS.json --entry MODULE --grammar lean|ps --to lean|ps --source MODULE=FILE [--source MODULE=FILE ...] [--assurance checked|ordinary-checked] [--comments preserve|owner-notes] [--operation convert|bindings|rename] [--module MODULE --offset BYTE --new-name NAME]\n');
   } else {
     const options = argumentsOf(args);
     const manifest = JSON.parse(file(path.resolve(options.manifest), 16384).toString('utf8'));
@@ -61,20 +66,49 @@ try {
       checkerExecutable: manifest.checker.path, checkerSha256: manifest.checker.sha256,
     });
     const converter = createCheckedSourceConverter({ ownershipTool: ownership });
+    const bindings = createSourceBindingTool({ ownershipTool: ownership });
     const snapshots = options.sources.map(source => lexical.capture({
       module: source.module, grammar: options.grammar, uri: source.path, bytes: file(source.path, 1048576),
     }));
-    const index = ownership.analyze({ snapshots, entry: options.entry, assurance: options.assurance });
-    const report = converter.convert({
-      index, snapshots, targetGrammar: options.to, commentPolicy: options.comments,
-    });
-    const output = JSON.stringify({
-      schema: 'psc1-source-conversion-candidate/1', report,
-      modules: snapshots.map(source => ({
-        module: source.module, grammar: options.to,
-        text: converter.readCandidate(report, source.module).toString('utf8'),
-      })),
-    });
+    let response;
+    if (options.operation === 'convert') {
+      const index = ownership.analyze({ snapshots, entry: options.entry, assurance: options.assurance });
+      const report = converter.convert({
+        index, snapshots, targetGrammar: options.to, commentPolicy: options.comments,
+      });
+      response = {
+        schema: 'psc1-source-conversion-candidate/1', report,
+        modules: snapshots.map(source => ({
+          module: source.module, grammar: options.to,
+          text: converter.readCandidate(report, source.module).toString('utf8'),
+        })),
+      };
+    } else {
+      const index = bindings.analyze({ snapshots, entry: options.entry, assurance: options.assurance });
+      if (options.operation === 'bindings') response = {
+        schema: 'psc1-source-bindings-view/1', index,
+        authority: { serializedHandles: false, publication: false },
+      };
+      else {
+        const module = index.modules.find(item => item.module === options.module);
+        if (!module) fail('MODULE');
+        const choices = module.bindings.flatMap(batch => batch.traces.flatMap(trace =>
+          trace.binders.filter(binder => binder.sourceBacked &&
+            binder.span?.start.byteOffset === Number(options.offset))));
+        if (choices.length !== 1) fail('BINDER_SELECTION');
+        const report = bindings.rename({
+          index, snapshots, binder: choices[0], newName: options['new-name'],
+        });
+        response = {
+          schema: 'psc1-source-rename-candidate/1', report,
+          modules: snapshots.map(source => ({
+            module: source.module, grammar: source.grammar,
+            text: bindings.readCandidate(report, source.module).toString('utf8'),
+          })),
+        };
+      }
+    }
+    const output = JSON.stringify(response);
     if (Buffer.byteLength(output) > 33554432) fail('RESPONSE_LIMIT');
     process.stdout.write(output + '\n');
   }

@@ -24,11 +24,11 @@ private def traceDeclaration (enabled : Bool) (source : PsSyntaxDeclaration) :
   | _ => .error .unsupportedTerm
 
 private def check (label source : String) (reuse : Bool := false) : IO Unit := do
-  let syntax ← extract source
-  let before ← match traceDeclaration false syntax with
+  let parsedDecl ← extract source
+  let before ← match traceDeclaration false parsedDecl with
     | .ok result => pure result
     | .error error => throw (IO.userError (label ++ ": " ++ psHostElabErrorText error))
-  let after ← match traceDeclaration true syntax with
+  let after ← match traceDeclaration true parsedDecl with
     | .ok result => pure result
     | .error error => throw (IO.userError (label ++ ": traced: " ++ psHostElabErrorText error))
   let encode (declaration : PsDeclaration) := psEncodeCheckedAdmissionsCanonical [declaration]

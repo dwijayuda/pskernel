@@ -33,6 +33,7 @@ jobs:
           path: psc1/.lake/build
           key: psc1-trace-native-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
           restore-keys: |
+            psc1-trace-native-v1-${{ runner.os }}-
             psc1-source-tools-native-v1-ubuntu2404-
       - name: Install repository-pinned Lean
         run: |
@@ -43,15 +44,12 @@ jobs:
         working-directory: psc1
         run: |
           lean --version
-          lake build psc1_source_trace_tests psc1_source_census_probe
+          lake build psc1_source_census_probe
       - uses: actions/cache/save@v4
         if: steps.native-cache.outputs.cache-hit != 'true'
         with:
           path: psc1/.lake/build
           key: psc1-trace-native-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
-      - name: Compare actual traced/untraced declarations and official admission
-        working-directory: psc1
-        run: .lake/build/bin/psc1_source_trace_tests
       - name: Census both whole compiler grammars
         working-directory: psc1
         run: |
@@ -84,6 +82,11 @@ jobs:
           }));
           
           JS
+      - name: Compare actual traced/untraced declarations and official admission
+        working-directory: psc1
+        run: |
+          lake build psc1_source_trace_tests
+          .lake/build/bin/psc1_source_trace_tests
       - uses: actions/upload-artifact@v4
         if: always()
         with:

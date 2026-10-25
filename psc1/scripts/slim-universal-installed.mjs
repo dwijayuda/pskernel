@@ -1,5 +1,6 @@
 // Linux installed-root qualification. No checkout, SDK, native compiler or fallback on PATH.
 import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {pathToFileURL} from 'node:url';
+import {compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
 import {corpus,observedExpressions,expectedObservations,refusals} from './generated-target-corpus.mjs';import {fixtures} from './kernel435-fixtures.mjs';import {sha256} from './kernel435-qualified-artifact.mjs';
 const out=path.resolve('dist/slim-universal'),assembly=JSON.parse(fs.readFileSync(path.join(out,'package-receipt.json'),'utf8')),tarballs=path.join(out,'tarballs'),tar=path.join(tarballs,assembly.tarball);
 assert.equal(sha256(fs.readFileSync(tar)),assembly.sha256);
@@ -31,7 +32,7 @@ const main=path.join(consumer,'Main.lean');fs.writeFileSync(main,'def answer : N
 for(const engine of ['rust','wasm-core']){
  const missing=call(cli,['build',main,'--engine',engine,'--out',path.join(consumer,'missing-'+engine)]);assert.notEqual(missing.status,0);assert.match(missing.stderr,/OPTIONAL_PACKAGE_MISSING/);
 }
-const cases=[],negativeCases=[],candidateCases=[],globalCases=[];
+const cases=[],negativeCases=[],candidateCases=[],globalCases=[],byteCaptureCases=[];
 function exercise(engine,bin=cli,scope='local'){
  for(const item of corpus){
   const project=path.join(consumer,scope+'-'+engine+'-'+item.id+'.json'),store=path.join(consumer,scope+'-'+engine+'-'+item.id);
@@ -49,6 +50,14 @@ for(const bin of [cli,globalCli])for(const grammar of ['lean','ps']){
  const checked=JSON.parse(run(bin,['check',source]));assert.equal(checked.engine,'js');assert.equal(checked.logicalAdmission,'accepted');assert.equal(checked.source,undefined);
  const compiled=JSON.parse(run(bin,['compile',source,'--engine','ts']));assert.equal(compiled.engine,'ts');assert.equal(compiled.logicalAdmission,'accepted');assert.equal(compiled.publication,'not-requested');assert.ok(compiled.source.includes('42'));globalCases.push({scope:bin===cli?'local':'global',grammar,checkedStdout:true});
 }
+
+
+const bomFile=path.join(consumer,'Bom.lean'),bomText=String.fromCharCode(0xfeff)+'def answer : Nat := 42\n',bomStore=path.join(consumer,'bom-capture');fs.writeFileSync(bomFile,bomText);
+const bomResult=call(cli,['build',bomFile,'--out',bomStore]),expectedBom=compilerSourceClosureDigest([{module:'Bom',kind:'lean',text:bomText}]);
+if(bomResult.status===0)assert.equal(JSON.parse(bomResult.stdout).receipt.sourceClosureDigest,expectedBom);
+else{const generations=path.join(bomStore,'generations'),attempt=fs.readdirSync(generations).find(n=>n.startsWith('failed-'));assert.ok(attempt,bomResult.stderr);const captured=JSON.parse(fs.readFileSync(path.join(generations,attempt,'request.json'),'utf8'));assert.equal(captured[2],expectedBom);assert.equal(captured[6][0][1],bomText);}
+byteCaptureCases.push({id:'utf8-bom-preserved-in-captured-source',compilerAccepted:bomResult.status===0,sourceClosureDigest:expectedBom});
+const invalidUtf8=path.join(consumer,'InvalidUtf8.lean');fs.writeFileSync(invalidUtf8,Buffer.from([0xc0,0xaf]));const badEncoding=call(cli,['compile',invalidUtf8]);assert.notEqual(badEncoding.status,0);negativeCases.push({id:'invalid-utf8-refused'});
 
 const rootOnlyApi=path.join(consumer,'root-only-api.mjs');
 fs.writeFileSync(rootOnlyApi,"import {compileCandidate,getCompilerMetadata} from 'proofscript';\n"+
@@ -96,5 +105,5 @@ for(const [engine,key]of [['rust','compiler-rust-linux-x64'],['wasm-core','compi
  const meta=path.join(dir,'package.json'),bytes=fs.readFileSync(meta);
  try{const d=JSON.parse(bytes);d.version='0.0.0-wrong';fs.writeFileSync(meta,JSON.stringify(d));const result=call(cli,['check',main,'--engine',engine]);assert.notEqual(result.status,0);negativeCases.push({engine,id:'optional-executor-version-refusal'});}finally{fs.writeFileSync(meta,bytes);}
 }
-const receipt={schema:'psc1-slim-universal-installed/1',sourceCommit:process.env.GITHUB_SHA,status:'passed',tarballSha256:assembly.sha256,tarballBytes:assembly.bytes,sizeRatio:assembly.sizeRatio,compilerSourceClosureDigest:metadata.compilerSourceClosureDigest,defaultKernel:'wasm',defaultEngine:'js',cases,globalCases,candidateCases,kernelCases,negativeCases,rootOnlyWithoutOptionalPayloads:true,noCompilerSdkOnExecutionPath:true,offlineEmptyCache:true,installScriptsDisabled:true,optionalBundlesInstalledExplicitly:true,allFourQualifiedPayloadsPreserved:true,linuxPublicationQualified:true,otherPlatformPublicationPolicy:'explicit-runtime-guard; other OS execution not qualified',actualPlatform:'linux-x64',fullCrossPlatformRelease:false,scope:'universal package format and checked compile API, real Linux local/global JS publication; no macOS/Windows release execution claim'};
+const receipt={schema:'psc1-slim-universal-installed/1',sourceCommit:process.env.GITHUB_SHA,status:'passed',tarballSha256:assembly.sha256,tarballBytes:assembly.bytes,sizeRatio:assembly.sizeRatio,compilerSourceClosureDigest:metadata.compilerSourceClosureDigest,defaultKernel:'wasm',defaultEngine:'js',cases,globalCases,candidateCases,kernelCases,negativeCases,byteCaptureCases,rootOnlyWithoutOptionalPayloads:true,noCompilerSdkOnExecutionPath:true,offlineEmptyCache:true,installScriptsDisabled:true,optionalBundlesInstalledExplicitly:true,allFourQualifiedPayloadsPreserved:true,linuxPublicationQualified:true,otherPlatformPublicationPolicy:'explicit-runtime-guard; other OS execution not qualified',actualPlatform:'linux-x64',fullCrossPlatformRelease:false,scope:'universal package format and checked compile API, real Linux local/global JS publication; no macOS/Windows release execution claim'};
 fs.writeFileSync(path.join(out,'installed-qualification.json'),JSON.stringify(receipt,null,2)+'\n');console.log('PSC1_SLIM_UNIVERSAL_INSTALLED: '+JSON.stringify(receipt));

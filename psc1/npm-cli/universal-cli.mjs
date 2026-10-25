@@ -3,7 +3,7 @@ import fs from 'node:fs';import path from 'node:path';
 import {getCompilerMetadata,compile,build,checkCanonicalAdmissions} from './universal.mjs';
 import {kernelHandle} from '../host-tools/installed-engine-resolver.mjs';
 const fail=message=>{throw Error('PSC1_CLI_'+message);};
-function text(file){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>128*1024*1024)fail('INPUT_KIND_SIZE');return new TextDecoder('utf-8',{fatal:true}).decode(fs.readFileSync(file));}
+function text(file){const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>128*1024*1024)fail('INPUT_KIND_SIZE');return new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(fs.readFileSync(file));}
 function project(args){
  const options={};let file;
  for(let i=0;i<args.length;i++){const a=args[i];if(a.startsWith('--')){if(!['--engine','--kernel','--provider','--out','--assurance','--target','--project'].includes(a)||Object.hasOwn(options,a)||!args[i+1]||args[i+1].startsWith('--'))fail('ARGUMENT');options[a]=args[++i];}else if(file)fail('ARGUMENT');else file=a;}

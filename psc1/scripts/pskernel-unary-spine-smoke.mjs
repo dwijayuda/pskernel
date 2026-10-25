@@ -13,16 +13,17 @@ const copy=x=>{if(!x||typeof x!=='object')return x;const y=Array.isArray(x)?[]:{
 let count=0;const labels=[];
 const must=(truth,label)=>{if(truth!==true||labels.includes(label))throw Error('PSC1_UNARY_SPINE_FAIL '+label);count++;labels.push(label);console.log('PSC1_UNARY_SPINE_ASSERT '+label);};
 let deliberate=false;try{must(false,'deliberate');}catch{deliberate=true;}must(deliberate,'harness/rejection');
-let arena=unit(get('psKernelExprV2PagedEmpty'));
-const build=(kind,...args)=>{const p=take(get('psKernelExprV2PagedMk'+kind)(arena,...args));arena=p.fst;return p.snd;};
+let arena=unit(get('psKernelExprV2PagedEmpty')),pairTemplate;
+const build=(kind,...args)=>{const p=take(get('psKernelExprV2PagedMk'+kind)(arena,...args));pairTemplate??=p;arena=p.fst;return p.snd;};
 const name=x=>N.str(unit(N.anonymous),x),f=build('FVar',name('f')),g=build('FVar',name('g'));
 const f2=build('FVar',name('f')),s0=build('Sort',unit(L.zero)),s1=build('Sort',L.succ(unit(L.zero)));
 const constant=build('Const',name('C'),nil),u=build('App',f,s0),v=build('App',f,s1);
 const different=build('App',g,s1),duplicate=build('App',f2,s1),closed=build('App',constant,s0);
 let left=s0,right=s1;for(let i=0;i<64;i++){left=build('App',f,left);right=build('App',f,right);}
+const prod=(fst,snd)=>({...pairTemplate,fst,snd});
 const before=copy(arena),view=get('psKernelExprV2UnarySpineView'),plan=get('psKernelExprV2UnarySpinePlanWithFuel');
 must(same(take(get('psKernelExprV2PagedValidate')(arena)),arena),'arena/canonical');
-must(same(view(arena,u,v),O.some({fst:s0,snd:s1})),'view/shared-head');
+must(same(view(arena,u,v),O.some(prod(s0,s1))),'view/shared-head');
 must(same(view(arena,u,different),none),'view/different-head');
 must(same(view(arena,u,duplicate),none),'view/distinct-id-conservative');
 must(same(view(arena,closed,closed),none),'view/non-fvar');
@@ -39,14 +40,14 @@ const stateBefore=copy(state),contextBefore=copy(context),attempt=get('psKernelE
 const full=get('psKernelExprV2DefEqFullShapeAppWith'),original=get('psKernelExprV2DefEqFullShapeAppOriginalWith');
 let calls=[];
 const callback=answer=>ctx=>owner=>l=>r=>{calls.push({ctx,owner,l,r});return answer(owner);};
-let cb=callback(owner=>O.some(ok({fst:owner,snd:true}))),result=take(take(attempt(cb,context,state,left,right)));
+let cb=callback(owner=>O.some(ok(prod(owner,true)))),result=take(take(attempt(cb,context,state,left,right)));
 must(result.snd===true&&result.fst===state&&calls.length===1&&calls[0].owner===state&&calls[0].l===s0&&calls[0].r===s1,'callback/exact-owner-once');
 calls=[];result=take(take(full(cb,context,state,left,right)));
 must(result.snd===true&&result.fst===state&&calls.length===1,'shortcut/positive-only');
-for(const [label,first] of [['false',owner=>O.some(ok({fst:owner,snd:false}))],['decline',()=>none],['error',()=>O.some(X.error('deliberate candidate failure'))]]){
- calls=[];let seen=0;const fallback=ctx=>owner=>l=>r=>{calls.push({ctx,owner,l,r});return seen++===0?first(owner):O.some(ok({fst:owner,snd:false}));};
+for(const [label,first] of [['false',owner=>O.some(ok(prod(owner,false)))],['decline',()=>none],['error',()=>O.some(X.error('deliberate candidate failure'))]]){
+ calls=[];let seen=0;const fallback=ctx=>owner=>l=>r=>{calls.push({ctx,owner,l,r});return seen++===0?first(owner):O.some(ok(prod(owner,false)));};
  const actual=full(fallback,context,state,left,right);
- const expected=original(callback(owner=>O.some(ok({fst:owner,snd:false}))),context,state,left,right);
+ const expected=original(callback(owner=>O.some(ok(prod(owner,false)))),context,state,left,right);
  must(same(actual,expected)&&calls[0].l===s0&&calls[0].r===s1,'fallback/'+label);
 }
 calls=[];must(same(attempt(cb,context,state,u,v),none)&&calls.length===0,'shortcut/one-layer-declines');

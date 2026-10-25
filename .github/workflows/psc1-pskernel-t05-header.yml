@@ -3,7 +3,7 @@ name: PSC1 complete validator and decoder qualification
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-validator-qualification-20261025
+    - work/psc1-pskernel-complete-validator-20261025
     paths:
     - psc1/kernel-lakefile.lean
     - psc1/lean-toolchain
@@ -1416,7 +1416,7 @@ jobs:
         (root/'empty-semantic-cache-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T09_EMPTY_SEMANTIC_CACHE_NATIVE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
-    - name: Qualify all 525 native reports including the production validator and decoder
+    - name: Qualify all 532 native reports including the production validator and decoder
       working-directory: psc1
       shell: bash
       run: |
@@ -2505,7 +2505,7 @@ jobs:
       with:
         name: psc1-t05-header-native-attempt-${{ github.run_attempt }}
         path: ${{ runner.temp }}/validator-native
-    - name: Bind the complete generated route to all 525 native reports
+    - name: Bind the complete generated route to all 532 native reports
       working-directory: psc1
       shell: bash
       run: |

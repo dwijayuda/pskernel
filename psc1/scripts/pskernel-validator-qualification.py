@@ -17,8 +17,9 @@ SPECS = [
     ("PsKernelExprV2SemanticPrefixProofs", 8, "prefix.lean"),
     ("PsKernelExprV2DecodedNodeProofs", 2, "node.lean"),
     ("PsKernelExprV2DecodedBridgeProofs", 12, "bridge.lean"),
+    ("PsKernelExprV2ArenaModelBridgeProofs", 7, "arena-model-bridge.lean"),
 ]
-PINS = {'psc1/test/PsKernelExprV2ReplayMetadataProofs.lean': 'bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46', 'psc1/test/PsKernelExprV2SemanticPrefixProofs.lean': '358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e', 'psc1/test/PsKernelExprV2DecodedNodeProofs.lean': '0720db5abc1922656c47d1f2b251efa9f4b23fafc8d12932dbaec0a822a25d27', 'psc1/test/PsKernelExprV2DecodedBridgeProofs.lean': 'c97baa13eea76cd5ef5076a4277f517a1748014ee3a49d06f4b5ef68765085b3', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean': '2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Decode.lean': 'efa439588f6b4b80eb6ab25c8311fa221d74971f7e8ad572abd4a6aa57b77d5e', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.lean': '2257f156a0b713802ada3b0397b92db747cea44477b767224a9eec494d3e895d', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean': '831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean': '8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089', 'psc1/test/PsKernelExprV2MetadataProofs.lean': '5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20', 'psc1/test/PsKernelExprV2PagedModelProofs.lean': 'a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8'}
+PINS = {'psc1/test/PsKernelExprV2ReplayMetadataProofs.lean': 'bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46', 'psc1/test/PsKernelExprV2SemanticPrefixProofs.lean': '358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e', 'psc1/test/PsKernelExprV2DecodedNodeProofs.lean': '0720db5abc1922656c47d1f2b251efa9f4b23fafc8d12932dbaec0a822a25d27', 'psc1/test/PsKernelExprV2DecodedBridgeProofs.lean': 'c97baa13eea76cd5ef5076a4277f517a1748014ee3a49d06f4b5ef68765085b3', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean': '2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Decode.lean': 'efa439588f6b4b80eb6ab25c8311fa221d74971f7e8ad572abd4a6aa57b77d5e', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.lean': '2257f156a0b713802ada3b0397b92db747cea44477b767224a9eec494d3e895d', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean': '831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean': '8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089', 'psc1/test/PsKernelExprV2MetadataProofs.lean': '5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20', 'psc1/test/PsKernelExprV2PagedModelProofs.lean': 'a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8', 'psc1/test/PsKernelExprV2ArenaModelBridgeProofs.lean': '2699f6a6bd9d8d0d793a8eb2d398293f43255d79bd8f5c84d1033be393d72af3', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean': 'd5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351'}
 PRODUCTION_TREE = "e567685e5c441a5b0a78d8241f7bae151b48b5ca"
 RETAINED_LAYERS = [
     "constructor-native-receipt.json", "fields-native-receipt.json",
@@ -90,6 +91,7 @@ def authenticate(repo, out):
         rows.append({"path": name, **digest(path)})
     record = {"schema": "psc1-validator-source-v1", **identity(),
               "isolatedProofSource": "e652d02a69ebcaaeb5b4fe0b391e368efebf18e7",
+              "arenaModelProofSource": "150123e5fb8e17d8fab4d737a043705727ee1bcc",
               "productionSource": "054edfce56eda28a166624ddc92dfac5af8499c0",
               "productionTree": PRODUCTION_TREE, "files": rows}
     write(out / "source-inventory.json", record)
@@ -154,22 +156,22 @@ def native(repo, root):
         reports(matches[0], row["names"])
     all_records = prior_records + records
     names = [name for row in all_records for name in row["names"]]
-    require(len(all_records) == len({r["module"] for r in all_records}) == 35,
-            "35 distinct native proof modules")
-    require(len(names) == len(set(names)) == sum(r["proofs"] for r in all_records) == 525,
-            "525 distinct actual native reports")
+    require(len(all_records) == len({r["module"] for r in all_records}) == 36,
+            "36 distinct native proof modules")
+    require(len(names) == len(set(names)) == sum(r["proofs"] for r in all_records) == 532,
+            "532 distinct actual native reports")
     verify_sources(repo, out)
     receipt = {"schema": "psc1-validator-native-v1", **identity(), "status": "pass",
-               "retainedProofs": 499, "newProofs": 26, "totalProofs": 525,
-               "proofModules": 35, "proofs": all_records, "retainedLayers": layers,
+               "retainedProofs": 499, "newProofs": 33, "totalProofs": 532,
+               "proofModules": 36, "proofs": all_records, "retainedLayers": layers,
                "sourceInventory": digest(out / "source-inventory.json"),
                "proofStatuses": digest(out / "proof-status.json"),
                "productionTree": PRODUCTION_TREE, "productionChanges": False,
                "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
-               "untrustedSourceValidityAssumed": False, "replayArenaModelBridgeEstablished": False,
+               "untrustedSourceValidityAssumed": False, "replayArenaModelBridgeEstablished": True,
                "fullKernel": False, "performanceQualified": False}
     write(out / "native-receipt.json", receipt)
-    print("PSC1_VALIDATOR_NATIVE525: PASS " + json.dumps(receipt, separators=(",", ":")))
+    print("PSC1_VALIDATOR_NATIVE532: PASS " + json.dumps(receipt, separators=(",", ":")))
 
 
 def route(repo, root, native_root):
@@ -179,7 +181,7 @@ def route(repo, root, native_root):
     require(all(proof[k] == v for k, v in identity().items()) and proof["status"] == "pass",
             "Same-source native proof result")
     require((proof["retainedProofs"], proof["newProofs"], proof["totalProofs"], proof["proofModules"])
-            == (499, 26, 525, 35), "Complete native inventory")
+            == (499, 33, 532, 36), "Complete native inventory")
     require(proof["sourceInventory"] == digest(native_out / "source-inventory.json"),
             "Native source inventory digest")
     require(proof["proofStatuses"] == digest(native_out / "proof-status.json"), "Native command statuses")
@@ -204,15 +206,15 @@ def route(repo, root, native_root):
     out = root / "validator"
     shutil.copytree(native_out, out)
     receipt = {"schema": "psc1-validator-route-v1", **identity(), "status": "pass",
-               "route": provenance["route"], "nativeProofs": 525,
+               "route": provenance["route"], "nativeProofs": 532,
                "nativeReceipt": digest(out / "native-receipt.json"),
                "retainedRouteReceipt": digest(root / "empty-semantic-cache-receipt.json"),
                "kernel": provenance["kernel"], "productionChanges": False,
                "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
-               "replayArenaModelBridgeEstablished": False, "fullKernel": False,
+               "replayArenaModelBridgeEstablished": True, "fullKernel": False,
                "performanceQualified": False}
     write(out / "route-receipt.json", receipt)
-    print("PSC1_VALIDATOR_ROUTE525: PASS " + json.dumps(receipt, separators=(",", ":")))
+    print("PSC1_VALIDATOR_ROUTE532: PASS " + json.dumps(receipt, separators=(",", ":")))
 
 
 if __name__ == "__main__":

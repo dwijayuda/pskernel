@@ -659,7 +659,7 @@
   "scope": {
     "actualNativeLogReviewed": true,
     "sourceDeclarationsMatchedExactly": true,
-    "independentArchiveAudit": false,
+    "independentArchiveAudit": true,
     "productionChanges": false,
     "conditionalLocalMetadataCorrespondence": true,
     "wholeValidatorCorrespondence": false,
@@ -667,5 +667,313 @@
     "replayArenaModelBridge": false,
     "fullQualification": false,
     "performanceQualified": false
+  },
+  "artifactContentAudit": {
+    "sourceSha": "8a74a9282c699e56b9be3cc63c45a8a3835a318a",
+    "runId": 40163643807,
+    "runAttempt": 1,
+    "jobId": 121080155365,
+    "result": {
+      "schema": "psc1-replay-metadata-artifact-content-audit-v1",
+      "status": "pass",
+      "auditIdentity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "8a74a9282c699e56b9be3cc63c45a8a3835a318a",
+        "runId": "40163643807",
+        "runAttempt": "1",
+        "job": "audit",
+        "workflow": ".github/workflows/psc1-pskernel-replay-metadata-artifact-audit.yml",
+        "files": {
+          ".github/workflows/psc1-pskernel-replay-metadata-artifact-audit.yml": {
+            "bytes": 2385,
+            "sha256": "192da992f0ed7259a6d2986b771b927ea3e72299d6a031c8429832a6cf532fc5"
+          },
+          ".github/psc1-replay-metadata-audit/audit.py": {
+            "bytes": 24024,
+            "sha256": "da6d74ae30adc9d0471eacaa79962096aba96b0a3a461e93f0410ad3e8678225"
+          }
+        }
+      },
+      "targetSourceSha": "0b9d2086382cedddc8b8d9b9ab798e9525bf6ba1",
+      "targetRunId": 40162263921,
+      "targetRunAttempt": 1,
+      "targetJobId": 121076100189,
+      "artifactId": 12586363288,
+      "artifactName": "psc1-replay-metadata-preflight-attempt-1",
+      "artifactZip": {
+        "bytes": 31562,
+        "sha256": "8ebf69b14652e8c3f63aaf06eb12ca50b7cadb305b07262b67ed721cb4ba718c"
+      },
+      "officialDownloadAction": "actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+      "rawZipSha256Verified": true,
+      "zipReader": "python-stdlib-zipfile",
+      "crcVerified": true,
+      "safeUniqueRegularPaths": true,
+      "independentZipAudit": true,
+      "officialExtractionBytesMatched": true,
+      "extractedFiles": 19,
+      "sourceFiles": 12,
+      "proofModules": 3,
+      "proofReports": 29,
+      "productionAndRetainedProofsUnchanged": true,
+      "scope": {
+        "localReplayMetadataCorrespondenceEstablished": true,
+        "replayNodeBranchesCovered": 12,
+        "successfulReplayPreservesLayoutAndPriorLookups": true,
+        "actualMetadataGuardTransfersCorrespondence": true,
+        "wholeValidatorMetadataCorrespondenceEstablished": false,
+        "decoderCorrespondenceEstablished": false,
+        "replayArenaModelBridgeEstablished": false,
+        "productionChanges": false,
+        "fullQualification": false,
+        "performanceQualified": false
+      },
+      "producerJobEvidence": {
+        "bytes": 140880,
+        "sha256": "826eedfd3f9093100ecf406d059008c6f8156f39b0e7470450549744e1f085f5",
+        "orderedProofReports": 29,
+        "proofCommandStatuses": 3,
+        "sourceAndNativeReceiptsMatched": true,
+        "artifactUploadMatched": true
+      },
+      "proofInventory": [
+        {
+          "module": "PsKernelExprV2MetadataProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelExprV2MetadataProofs.app_preserves",
+            "PsKernelExprV2MetadataProofs.lam_preserves",
+            "PsKernelExprV2MetadataProofs.forall_preserves",
+            "PsKernelExprV2MetadataProofs.let_preserves",
+            "PsKernelExprV2MetadataProofs.mdata_preserves",
+            "PsKernelExprV2MetadataProofs.proj_preserves",
+            "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+            "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth"
+          ],
+          "source": {
+            "bytes": 7319,
+            "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+          },
+          "log": {
+            "bytes": 870,
+            "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+          }
+        },
+        {
+          "module": "PsKernelExprV2PagedModelProofs",
+          "proofs": 17,
+          "names": [
+            "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+            "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+            "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+            "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+            "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+            "PsKernelExprV2PagedModelProofs.empty_layout",
+            "PsKernelExprV2PagedModelProofs.push_id_and_size",
+            "PsKernelExprV2PagedModelProofs.push_layout",
+            "PsKernelExprV2PagedModelProofs.valid_id_location",
+            "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+            "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+            "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+            "PsKernelExprV2PagedModelProofs.push_find_old",
+            "PsKernelExprV2PagedModelProofs.push_find_new",
+            "PsKernelExprV2PagedModelProofs.push_find",
+            "PsKernelExprV2PagedModelProofs.push_require_old",
+            "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+          ],
+          "source": {
+            "bytes": 16916,
+            "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+          },
+          "log": {
+            "bytes": 2900,
+            "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+          }
+        },
+        {
+          "module": "PsKernelExprV2ReplayMetadataProofs",
+          "proofs": 4,
+          "names": [
+            "PsKernelExprV2ReplayMetadataProofs.replay_node_builds_corresponding_entry",
+            "PsKernelExprV2ReplayMetadataProofs.replay_node_preserves_layout_and_metadata",
+            "PsKernelExprV2ReplayMetadataProofs.bool_eq_true_iff",
+            "PsKernelExprV2ReplayMetadataProofs.portable_same_metadata_transfers_correspondence"
+          ],
+          "source": {
+            "bytes": 12159,
+            "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46"
+          },
+          "log": {
+            "bytes": 506,
+            "sha256": "34c611bc04bdbb747b6c022b21d88ca7c6f4e05eabe61afd4cd181a1f08bbdc4"
+          }
+        }
+      ],
+      "nativeReceipt": {
+        "bytes": 3956,
+        "sha256": "3993b02c1e9030c47e6a9f58c37e1d7eaea119ab813fcd6669a8c6a3097e806d"
+      },
+      "sourceInventory": {
+        "bytes": 3439,
+        "sha256": "e7f1057bcc424b2d5adf4a71f3dd26b5332fd03ab75edcb26a9cf5c8f1fa9fd9"
+      },
+      "manifest": [
+        {
+          "path": "native-build.log",
+          "compressedBytes": 1021,
+          "crc32": "ac6dce87",
+          "bytes": 6016,
+          "sha256": "a5d7ab4bbd5a40b5ff6fcf9bc8f28607cb166314e1372917701534984b11a625"
+        },
+        {
+          "path": "native-receipt.json",
+          "compressedBytes": 1196,
+          "crc32": "4bf86307",
+          "bytes": 3956,
+          "sha256": "3993b02c1e9030c47e6a9f58c37e1d7eaea119ab813fcd6669a8c6a3097e806d"
+        },
+        {
+          "path": "proof-status.log",
+          "compressedBytes": 128,
+          "crc32": "0a81e205",
+          "bytes": 324,
+          "sha256": "61c5c17de25e0101e500fad63eb4112b2585d130f0fab40d01085bd9189b634c"
+        },
+        {
+          "path": "replay-PsKernelExprV2MetadataProofs.log",
+          "compressedBytes": 168,
+          "crc32": "a64ce478",
+          "bytes": 870,
+          "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+        },
+        {
+          "path": "replay-PsKernelExprV2PagedModelProofs.log",
+          "compressedBytes": 543,
+          "crc32": "609f074f",
+          "bytes": 2900,
+          "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+        },
+        {
+          "path": "replay-PsKernelExprV2ReplayMetadataProofs.log",
+          "compressedBytes": 187,
+          "crc32": "02154d3d",
+          "bytes": 506,
+          "sha256": "34c611bc04bdbb747b6c022b21d88ca7c6f4e05eabe61afd4cd181a1f08bbdc4"
+        },
+        {
+          "path": "source-inventory.json",
+          "compressedBytes": 1345,
+          "crc32": "715f3976",
+          "bytes": 3439,
+          "sha256": "e7f1057bcc424b2d5adf4a71f3dd26b5332fd03ab75edcb26a9cf5c8f1fa9fd9"
+        },
+        {
+          "path": "sources/.github/workflows/psc1-pskernel-replay-metadata-preflight.yml",
+          "compressedBytes": 3126,
+          "crc32": "7e7012d7",
+          "bytes": 10155,
+          "sha256": "fc03e67636ce07180d55307ffcc57f1212fe6036e9803e1eb4aab5e10ad245e5"
+        },
+        {
+          "path": "sources/psc1/kernel-lakefile.lean",
+          "compressedBytes": 3279,
+          "crc32": "130cc2e1",
+          "bytes": 17793,
+          "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170"
+        },
+        {
+          "path": "sources/psc1/lean-toolchain",
+          "compressedBytes": 27,
+          "crc32": "284dedd0",
+          "bytes": 25,
+          "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean",
+          "compressedBytes": 1236,
+          "crc32": "f39aa129",
+          "bytes": 6820,
+          "sha256": "2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.lean",
+          "compressedBytes": 1048,
+          "crc32": "42c2ee2b",
+          "bytes": 4842,
+          "sha256": "2257f156a0b713802ada3b0397b92db747cea44477b767224a9eec494d3e895d"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean",
+          "compressedBytes": 1233,
+          "crc32": "3ccf6fa3",
+          "bytes": 3522,
+          "sha256": "831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean",
+          "compressedBytes": 1579,
+          "crc32": "775897d7",
+          "bytes": 6143,
+          "sha256": "8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Validation.lean",
+          "compressedBytes": 3589,
+          "crc32": "a1d1b311",
+          "bytes": 14281,
+          "sha256": "f90f326e5c2bc4f614f327bf31838b279ab12cf4fc14cd49c1024a3ed6fcf657"
+        },
+        {
+          "path": "sources/psc1/scripts/install-lean435-ci.sh",
+          "compressedBytes": 579,
+          "crc32": "370712ca",
+          "bytes": 1051,
+          "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2MetadataProofs.lean",
+          "compressedBytes": 1446,
+          "crc32": "f17173e9",
+          "bytes": 7319,
+          "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+          "compressedBytes": 3497,
+          "crc32": "0972db0a",
+          "bytes": 16916,
+          "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2ReplayMetadataProofs.lean",
+          "compressedBytes": 2719,
+          "crc32": "6fd433e9",
+          "bytes": 12159,
+          "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46"
+        }
+      ],
+      "errors": []
+    },
+    "artifacts": [
+      {
+        "id": 12587117906,
+        "name": "psc1-replay-metadata-content-audit-attempt-1",
+        "size_in_bytes": 104008,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12587117906",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12587117906/zip",
+        "expired": false,
+        "created_at": "2026-10-25T04:56:15Z",
+        "expires_at": "2026-11-24T04:56:14Z",
+        "updated_at": "2026-10-25T04:56:15Z",
+        "digest": "sha256:ae2cb8f5b9256a271d25adcd3698e13db8632e020e8a05021bca4ac38f723774",
+        "workflow_run": {
+          "id": 40163643807,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "work/psc1-pskernel-replay-metadata-artifact-audit-20261025",
+          "head_sha": "8a74a9282c699e56b9be3cc63c45a8a3835a318a"
+        }
+      }
+    ]
   }
 }

@@ -1,0 +1,2770 @@
+{
+  "schema": "psc1-empty-cache-original-abba-qualified-evidence-v1",
+  "sourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+  "baselineSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+  "runId": 40163474950,
+  "runAttempt": 1,
+  "status": "complete actual outputs and all five ZIP archives verified",
+  "experimentReport": {
+    "bytes": 62212,
+    "sha256": "0eaf7b67976f319cd587a1e52255776294be4f5d3b9f1ca74a228e5e19c5423a",
+    "data": {
+      "schema": "psc1-empty-cache-abba-v1",
+      "sourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+      "baselineSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+      "runId": "40163474950",
+      "runAttempt": "1",
+      "producerReceipts": {
+        "baseline": {
+          "schema": "psc1-empty-cache-abba-producer-v1",
+          "variant": "baseline",
+          "sourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "baselineSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+          "kernelSourceSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+          "compilerSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+          "runId": "40163474950",
+          "runAttempt": "1",
+          "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "tools": {
+            "nodeVersion": "v22.23.3",
+            "typescriptVersion": "Version 7.0.2",
+            "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "kernelSourceSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+            "kernelSourceTree": "57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff",
+            "compilerSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+            "experimentSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+            "workflowPath": ".github/workflows/psc1-pskernel-empty-semantic-cache-abba.yml",
+            "workflowSha256": "66cf586538bd232b61427626d433aeebb6ad9bfeae44cb314bcfbcacfeac6226",
+            "driverSha256": "f51335a43e0466088dfbcd43e5721c2f4db93e77af77e1141c7ee633462b314d",
+            "nativeSourceAuditSha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593",
+            "bootstrap": {
+              "sourceGitBlob": "734db05bccdd777f3cb1fa95aa9904e36caa9926",
+              "sourceSha256": "57dd414323fa1c2e88b0e19929012f011032ba795b6c46913ece7d0df3500376",
+              "adapterSha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+              "translatorSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+              "translatorSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+              "replacementCount": 4
+            },
+            "research": {
+              "entry": "packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean",
+              "entryGitBlob": "3349d6d3b453297123095354bf25dcdcc4efa625",
+              "entrySha256": "a58a341335fe13c8200146be0b676f14169b86748824ccdec2315fb15131b5ce",
+              "sourceSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+              "compilerSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+              "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+              "kernelFile": "research-kernel.mjs",
+              "kernelSha256": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7",
+              "buildLogSha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4",
+              "smokeLogSha256": "0cec7d2adef17fe71ca2b5b53c4288edf59e5f1b460092c958eaca0fe82c62ec",
+              "harnessSha256": "9cf5f24aa79b314bb6165fccd9c4df6ca0a0d791493472792da20a97a9cb38d8",
+              "validatesSelfHost": false
+            }
+          },
+          "files": {
+            "kernel.js": "51e0b4397a105a6198f6f5554b416e98d34d71230ed50630626f106fdc5f1375",
+            "kernel.ts": "a2a99f4af68c9817a7d77309e8c86b3d9d71b83f96bc4052b940f507483fb890",
+            "kernel.d.ts": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622",
+            "kernel.js.map": "d13a0df1b84d56f4d75782b132f29c317d4238fb426ea6c3e49e7fcae3be3f83",
+            "bootstrap-manifest.json": "09ca116d4f55ebc4ec01b22e9d26e839509c4bb84bbf975d1d267668d30eadb3",
+            "raw-abi.log": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d",
+            "dag-smoke.log": "cfd780b455d126d7f765c00b7412a48e6bebbe8f21be339f45ef2cdd7e67b330",
+            "paged-smoke.log": "0cec7d2adef17fe71ca2b5b53c4288edf59e5f1b460092c958eaca0fe82c62ec",
+            "arena-controls.log": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f",
+            "native-receipt.json": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa",
+            "native-source-audit.json": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593",
+            "native-proofs.log": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25",
+            "compiler-receipt.json": "333aa9b2de1e891c36b152523fc641843e74a0ff2aa9d3992bc4c8030e5e4abe",
+            "authentic-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+            "canonical-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+            "generated-build.log": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175",
+            "producer-tools.json": "6bb498bcd60f2cd89dd83a5af28c2ec9116389ef57837dd300cc50419ce3ef31",
+            "bootstrap-shared.mjs": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+            "research-kernel.mjs": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7",
+            "research-build.log": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+          },
+          "fullQualification": false,
+          "performanceQualified": false
+        },
+        "candidate": {
+          "schema": "psc1-empty-cache-abba-producer-v1",
+          "variant": "candidate",
+          "sourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "baselineSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+          "kernelSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "compilerSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+          "runId": "40163474950",
+          "runAttempt": "1",
+          "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "tools": {
+            "nodeVersion": "v22.23.3",
+            "typescriptVersion": "Version 7.0.2",
+            "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "kernelSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+            "kernelSourceTree": "e567685e5c441a5b0a78d8241f7bae151b48b5ca",
+            "compilerSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+            "experimentSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+            "workflowPath": ".github/workflows/psc1-pskernel-empty-semantic-cache-abba.yml",
+            "workflowSha256": "66cf586538bd232b61427626d433aeebb6ad9bfeae44cb314bcfbcacfeac6226",
+            "driverSha256": "f51335a43e0466088dfbcd43e5721c2f4db93e77af77e1141c7ee633462b314d",
+            "nativeSourceAuditSha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593",
+            "bootstrap": {
+              "sourceGitBlob": "734db05bccdd777f3cb1fa95aa9904e36caa9926",
+              "sourceSha256": "57dd414323fa1c2e88b0e19929012f011032ba795b6c46913ece7d0df3500376",
+              "adapterSha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+              "translatorSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+              "translatorSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+              "replacementCount": 4
+            },
+            "research": {
+              "entry": "packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean",
+              "entryGitBlob": "3349d6d3b453297123095354bf25dcdcc4efa625",
+              "entrySha256": "a58a341335fe13c8200146be0b676f14169b86748824ccdec2315fb15131b5ce",
+              "sourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+              "compilerSourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+              "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+              "kernelFile": "research-kernel.mjs",
+              "kernelSha256": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7",
+              "buildLogSha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4",
+              "smokeLogSha256": "1527238c9101a642e87e7765d4e6e0e8d4acde2412de8253cc492fc8d9706930",
+              "harnessSha256": "9cf5f24aa79b314bb6165fccd9c4df6ca0a0d791493472792da20a97a9cb38d8",
+              "validatesSelfHost": false
+            }
+          },
+          "files": {
+            "kernel.js": "281995846a8499c2da42a512893c0ceb86bacfa1e80d7d272300937aee6498aa",
+            "kernel.ts": "3e10a474318cb136c2f7a2c6bda324673d19a48fa7581883a9710ebedccc950e",
+            "kernel.d.ts": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622",
+            "kernel.js.map": "19c908db18f060011131b6539f8e4e1fbc52bcfccd14a9317045e2e0a26612e9",
+            "bootstrap-manifest.json": "e8121869397a66e071c0250976b2874b67438fdf4d98925238f3bb19fe01c988",
+            "raw-abi.log": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d",
+            "dag-smoke.log": "19f4458e766633a6d5b6494cedb90e7e343a9d035e02a690b314dc069db26dbc",
+            "paged-smoke.log": "1527238c9101a642e87e7765d4e6e0e8d4acde2412de8253cc492fc8d9706930",
+            "arena-controls.log": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f",
+            "native-receipt.json": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa",
+            "native-source-audit.json": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593",
+            "native-proofs.log": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25",
+            "compiler-receipt.json": "333aa9b2de1e891c36b152523fc641843e74a0ff2aa9d3992bc4c8030e5e4abe",
+            "authentic-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+            "canonical-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+            "generated-build.log": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175",
+            "producer-tools.json": "7d6eb870317688d3c06cbc160a99a6df4dae1f5aff5c287fce4a0a9e6b75f729",
+            "bootstrap-shared.mjs": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+            "research-kernel.mjs": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7",
+            "research-build.log": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+          },
+          "fullQualification": false,
+          "performanceQualified": false
+        }
+      },
+      "archiveSha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
+      "targetLean": {
+        "version": "4.35.0",
+        "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      "driverSha256": "f51335a43e0466088dfbcd43e5721c2f4db93e77af77e1141c7ee633462b314d",
+      "comparisonDriverSha256": "490c510b6509bd775dc52539224a573a267f83e9cd0cabe4bec85626baeb9c9a",
+      "oracleSha256": "5deb39b9245b05305837cb1a79826c26e7ab05028c7bc489308170eab672f26e",
+      "replaySha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821",
+      "sequence": [
+        "A",
+        "B",
+        "B",
+        "A"
+      ],
+      "freshProcessEachCase": true,
+      "kernelFuel": 4096,
+      "hostWallSeconds": 60,
+      "nodeOldSpaceMiB": 2048,
+      "runtimePathEmpty": true,
+      "nodeVersion": "v22.23.3",
+      "nodeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+      "controls": [
+        {
+          "expected": "accepted",
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 1.2559491140000034,
+          "log": "accepted.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        {
+          "expected": "rejected",
+          "verdict": "rejected",
+          "reason": "official_kernel_verdict",
+          "returncode": 1,
+          "elapsed_seconds": 0.39522996300000557,
+          "log": "rejected.official.txt",
+          "output_sha256": "5f266a28e689668b606e65a790da249eb32716972c059c5bf06c575353c2d20b"
+        }
+      ],
+      "records": [
+        {
+          "round": 0,
+          "variant": "baseline",
+          "index": 0,
+          "label": "good",
+          "name": "perf/repeated-subproblem.ndjson",
+          "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+            "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.3882155659999995,
+            "log": "case-0.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "verdict": "accepted",
+            "stage": "complete",
+            "coreInvoked": true,
+            "records": 214,
+            "metadataCounts": {
+              "ctorInfo": 5,
+              "recInfo": 3,
+              "inductInfo": 3,
+              "defnInfo": 1,
+              "thmInfo": 1
+            },
+            "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+            "sourceMutualBlockMetadata": [
+              {
+                "kind": "defnInfo",
+                "name": {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "32",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "perfect"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "thmInfo",
+                "name": {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "43",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_repeated_subproblem"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": true,
+            "officialReplaySkipsUnsafeOrPartial": false,
+            "elapsed_seconds": 1.9213268250000084,
+            "returncode": 0,
+            "stdout": "case-000-stdout.txt",
+            "stderr": "case-000-stderr.txt",
+            "time_log": "case-000-time.txt",
+            "progress_snapshots": 7,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "metadata-compare",
+              "coreInvoked": true,
+              "records": 214,
+              "exportedDeclarations": 13,
+              "admissionCommands": 5,
+              "arenaNodes": "162",
+              "fuel": "4096",
+              "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+              "elapsedMilliseconds": 1627.39665
+            },
+            "peak_rss_kib": 282616
+          },
+          "classification": "matched_acceptance"
+        },
+        {
+          "round": 0,
+          "variant": "baseline",
+          "index": 1,
+          "label": "good",
+          "name": "perf/church-numerals.ndjson",
+          "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+            "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.4114438069999977,
+            "log": "case-1.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "verdict": "resource_exhausted",
+            "stage": "kernel-admission",
+            "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 22.241769617999992,
+            "returncode": 0,
+            "stdout": "case-001-stdout.txt",
+            "stderr": "case-001-stderr.txt",
+            "time_log": "case-001-time.txt",
+            "progress_snapshots": 5,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 227,
+              "exportedDeclarations": 6,
+              "admissionCommands": 4,
+              "arenaNodes": "197",
+              "fuel": "4096",
+              "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+              "elapsedMilliseconds": 142.848769
+            },
+            "peak_rss_kib": 1138508
+          },
+          "classification": "pskernel_resource_exhausted"
+        },
+        {
+          "round": 0,
+          "variant": "baseline",
+          "index": 2,
+          "label": "good",
+          "name": "init-prelude.ndjson",
+          "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+            "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.652662907000007,
+            "log": "case-2.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "elapsed_seconds": 60.071372081999996,
+            "returncode": -9,
+            "stdout": "case-002-stdout.txt",
+            "stderr": "case-002-stderr.txt",
+            "time_log": "case-002-time.txt",
+            "progress_snapshots": 67,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 63723,
+              "exportedDeclarations": 2059,
+              "admissionCommands": 1774,
+              "arenaNodes": "54535",
+              "fuel": "4096",
+              "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+              "elapsedMilliseconds": 2390.166786
+            },
+            "verdict": "timeout",
+            "stage": "host-wall-time",
+            "timeout_seconds": 60
+          },
+          "classification": "pskernel_timeout"
+        },
+        {
+          "round": 0,
+          "variant": "baseline",
+          "index": 3,
+          "label": "bad",
+          "name": "bugs/proj-of-stuck-prop.ndjson",
+          "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+            "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "rejected",
+            "reason": "official_kernel_verdict",
+            "returncode": 1,
+            "elapsed_seconds": 0.42674498899999946,
+            "log": "case-3.official.txt",
+            "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "verdict": "rejected",
+            "stage": "kernel-admission",
+            "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 34.715429185000005,
+            "returncode": 0,
+            "stdout": "case-003-stdout.txt",
+            "stderr": "case-003-stderr.txt",
+            "time_log": "case-003-time.txt",
+            "progress_snapshots": 10,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 5272,
+              "exportedDeclarations": 161,
+              "admissionCommands": 117,
+              "arenaNodes": "4392",
+              "fuel": "4096",
+              "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+              "elapsedMilliseconds": 341.623399
+            },
+            "peak_rss_kib": 613776
+          },
+          "classification": "matched_kernel_rejection"
+        },
+        {
+          "round": 1,
+          "variant": "candidate",
+          "index": 0,
+          "label": "good",
+          "name": "perf/repeated-subproblem.ndjson",
+          "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+            "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.3882155659999995,
+            "log": "case-0.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "verdict": "accepted",
+            "stage": "complete",
+            "coreInvoked": true,
+            "records": 214,
+            "metadataCounts": {
+              "ctorInfo": 5,
+              "recInfo": 3,
+              "inductInfo": 3,
+              "defnInfo": 1,
+              "thmInfo": 1
+            },
+            "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+            "sourceMutualBlockMetadata": [
+              {
+                "kind": "defnInfo",
+                "name": {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "32",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "perfect"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "thmInfo",
+                "name": {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "43",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_repeated_subproblem"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": true,
+            "officialReplaySkipsUnsafeOrPartial": false,
+            "elapsed_seconds": 1.7207100050000008,
+            "returncode": 0,
+            "stdout": "case-000-stdout.txt",
+            "stderr": "case-000-stderr.txt",
+            "time_log": "case-000-time.txt",
+            "progress_snapshots": 7,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "metadata-compare",
+              "coreInvoked": true,
+              "records": 214,
+              "exportedDeclarations": 13,
+              "admissionCommands": 5,
+              "arenaNodes": "162",
+              "fuel": "4096",
+              "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+              "elapsedMilliseconds": 1610.505013
+            },
+            "peak_rss_kib": 289652
+          },
+          "classification": "matched_acceptance"
+        },
+        {
+          "round": 1,
+          "variant": "candidate",
+          "index": 1,
+          "label": "good",
+          "name": "perf/church-numerals.ndjson",
+          "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+            "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.4114438069999977,
+            "log": "case-1.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "verdict": "resource_exhausted",
+            "stage": "kernel-admission",
+            "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 22.062103957000005,
+            "returncode": 0,
+            "stdout": "case-001-stdout.txt",
+            "stderr": "case-001-stderr.txt",
+            "time_log": "case-001-time.txt",
+            "progress_snapshots": 5,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 227,
+              "exportedDeclarations": 6,
+              "admissionCommands": 4,
+              "arenaNodes": "197",
+              "fuel": "4096",
+              "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+              "elapsedMilliseconds": 127.79307
+            },
+            "peak_rss_kib": 1162272
+          },
+          "classification": "pskernel_resource_exhausted"
+        },
+        {
+          "round": 1,
+          "variant": "candidate",
+          "index": 2,
+          "label": "good",
+          "name": "init-prelude.ndjson",
+          "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+            "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.652662907000007,
+            "log": "case-2.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "elapsed_seconds": 60.09859592699999,
+            "returncode": -9,
+            "stdout": "case-002-stdout.txt",
+            "stderr": "case-002-stderr.txt",
+            "time_log": "case-002-time.txt",
+            "progress_snapshots": 67,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 63723,
+              "exportedDeclarations": 2059,
+              "admissionCommands": 1774,
+              "arenaNodes": "54535",
+              "fuel": "4096",
+              "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+              "elapsedMilliseconds": 2365.03821
+            },
+            "verdict": "timeout",
+            "stage": "host-wall-time",
+            "timeout_seconds": 60
+          },
+          "classification": "pskernel_timeout"
+        },
+        {
+          "round": 1,
+          "variant": "candidate",
+          "index": 3,
+          "label": "bad",
+          "name": "bugs/proj-of-stuck-prop.ndjson",
+          "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+            "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "rejected",
+            "reason": "official_kernel_verdict",
+            "returncode": 1,
+            "elapsed_seconds": 0.42674498899999946,
+            "log": "case-3.official.txt",
+            "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "verdict": "rejected",
+            "stage": "kernel-admission",
+            "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 33.87936096300001,
+            "returncode": 0,
+            "stdout": "case-003-stdout.txt",
+            "stderr": "case-003-stderr.txt",
+            "time_log": "case-003-time.txt",
+            "progress_snapshots": 10,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 5272,
+              "exportedDeclarations": 161,
+              "admissionCommands": 117,
+              "arenaNodes": "4392",
+              "fuel": "4096",
+              "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+              "elapsedMilliseconds": 356.88889
+            },
+            "peak_rss_kib": 429216
+          },
+          "classification": "matched_kernel_rejection"
+        },
+        {
+          "round": 2,
+          "variant": "candidate",
+          "index": 0,
+          "label": "good",
+          "name": "perf/repeated-subproblem.ndjson",
+          "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+            "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.3882155659999995,
+            "log": "case-0.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "verdict": "accepted",
+            "stage": "complete",
+            "coreInvoked": true,
+            "records": 214,
+            "metadataCounts": {
+              "ctorInfo": 5,
+              "recInfo": 3,
+              "inductInfo": 3,
+              "defnInfo": 1,
+              "thmInfo": 1
+            },
+            "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+            "sourceMutualBlockMetadata": [
+              {
+                "kind": "defnInfo",
+                "name": {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "32",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "perfect"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "thmInfo",
+                "name": {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "43",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_repeated_subproblem"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": true,
+            "officialReplaySkipsUnsafeOrPartial": false,
+            "elapsed_seconds": 1.754580130000022,
+            "returncode": 0,
+            "stdout": "case-000-stdout.txt",
+            "stderr": "case-000-stderr.txt",
+            "time_log": "case-000-time.txt",
+            "progress_snapshots": 7,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "metadata-compare",
+              "coreInvoked": true,
+              "records": 214,
+              "exportedDeclarations": 13,
+              "admissionCommands": 5,
+              "arenaNodes": "162",
+              "fuel": "4096",
+              "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+              "elapsedMilliseconds": 1639.321395
+            },
+            "peak_rss_kib": 289420
+          },
+          "classification": "matched_acceptance"
+        },
+        {
+          "round": 2,
+          "variant": "candidate",
+          "index": 1,
+          "label": "good",
+          "name": "perf/church-numerals.ndjson",
+          "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+            "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.4114438069999977,
+            "log": "case-1.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "verdict": "resource_exhausted",
+            "stage": "kernel-admission",
+            "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 21.923585877999983,
+            "returncode": 0,
+            "stdout": "case-001-stdout.txt",
+            "stderr": "case-001-stderr.txt",
+            "time_log": "case-001-time.txt",
+            "progress_snapshots": 5,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 227,
+              "exportedDeclarations": 6,
+              "admissionCommands": 4,
+              "arenaNodes": "197",
+              "fuel": "4096",
+              "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+              "elapsedMilliseconds": 132.947113
+            },
+            "peak_rss_kib": 1074480
+          },
+          "classification": "pskernel_resource_exhausted"
+        },
+        {
+          "round": 2,
+          "variant": "candidate",
+          "index": 2,
+          "label": "good",
+          "name": "init-prelude.ndjson",
+          "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+            "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.652662907000007,
+            "log": "case-2.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "elapsed_seconds": 60.11250132699996,
+            "returncode": -9,
+            "stdout": "case-002-stdout.txt",
+            "stderr": "case-002-stderr.txt",
+            "time_log": "case-002-time.txt",
+            "progress_snapshots": 67,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 63723,
+              "exportedDeclarations": 2059,
+              "admissionCommands": 1774,
+              "arenaNodes": "54535",
+              "fuel": "4096",
+              "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+              "elapsedMilliseconds": 2339.938551
+            },
+            "verdict": "timeout",
+            "stage": "host-wall-time",
+            "timeout_seconds": 60
+          },
+          "classification": "pskernel_timeout"
+        },
+        {
+          "round": 2,
+          "variant": "candidate",
+          "index": 3,
+          "label": "bad",
+          "name": "bugs/proj-of-stuck-prop.ndjson",
+          "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+            "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "rejected",
+            "reason": "official_kernel_verdict",
+            "returncode": 1,
+            "elapsed_seconds": 0.42674498899999946,
+            "log": "case-3.official.txt",
+            "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "verdict": "rejected",
+            "stage": "kernel-admission",
+            "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 33.11299046800002,
+            "returncode": 0,
+            "stdout": "case-003-stdout.txt",
+            "stderr": "case-003-stderr.txt",
+            "time_log": "case-003-time.txt",
+            "progress_snapshots": 10,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 5272,
+              "exportedDeclarations": 161,
+              "admissionCommands": 117,
+              "arenaNodes": "4392",
+              "fuel": "4096",
+              "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+              "elapsedMilliseconds": 348.124147
+            },
+            "peak_rss_kib": 430736
+          },
+          "classification": "matched_kernel_rejection"
+        },
+        {
+          "round": 3,
+          "variant": "baseline",
+          "index": 0,
+          "label": "good",
+          "name": "perf/repeated-subproblem.ndjson",
+          "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+            "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.3882155659999995,
+            "log": "case-0.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "verdict": "accepted",
+            "stage": "complete",
+            "coreInvoked": true,
+            "records": 214,
+            "metadataCounts": {
+              "ctorInfo": 5,
+              "recInfo": 3,
+              "inductInfo": 3,
+              "defnInfo": 1,
+              "thmInfo": 1
+            },
+            "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+            "sourceMutualBlockMetadata": [
+              {
+                "kind": "defnInfo",
+                "name": {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "32",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "perfect"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "thmInfo",
+                "name": {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                },
+                "all": [
+                  {
+                    "tableId": "43",
+                    "segments": [
+                      {
+                        "kind": "str",
+                        "value": "kernel_repeated_subproblem"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": true,
+            "officialReplaySkipsUnsafeOrPartial": false,
+            "elapsed_seconds": 1.7027115829999957,
+            "returncode": 0,
+            "stdout": "case-000-stdout.txt",
+            "stderr": "case-000-stderr.txt",
+            "time_log": "case-000-time.txt",
+            "progress_snapshots": 7,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "metadata-compare",
+              "coreInvoked": true,
+              "records": 214,
+              "exportedDeclarations": 13,
+              "admissionCommands": 5,
+              "arenaNodes": "162",
+              "fuel": "4096",
+              "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+              "elapsedMilliseconds": 1593.404165
+            },
+            "peak_rss_kib": 289524
+          },
+          "classification": "matched_acceptance"
+        },
+        {
+          "round": 3,
+          "variant": "baseline",
+          "index": 1,
+          "label": "good",
+          "name": "perf/church-numerals.ndjson",
+          "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+            "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.4114438069999977,
+            "log": "case-1.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "verdict": "resource_exhausted",
+            "stage": "kernel-admission",
+            "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 22.191214473000002,
+            "returncode": 0,
+            "stdout": "case-001-stdout.txt",
+            "stderr": "case-001-stderr.txt",
+            "time_log": "case-001-time.txt",
+            "progress_snapshots": 5,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 227,
+              "exportedDeclarations": 6,
+              "admissionCommands": 4,
+              "arenaNodes": "197",
+              "fuel": "4096",
+              "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+              "elapsedMilliseconds": 124.524481
+            },
+            "peak_rss_kib": 1460300
+          },
+          "classification": "pskernel_resource_exhausted"
+        },
+        {
+          "round": 3,
+          "variant": "baseline",
+          "index": 2,
+          "label": "good",
+          "name": "init-prelude.ndjson",
+          "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+            "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "accepted",
+            "reason": "official_kernel_verdict",
+            "returncode": 0,
+            "elapsed_seconds": 0.652662907000007,
+            "log": "case-2.official.txt",
+            "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "observed": {
+            "elapsed_seconds": 60.10098457500004,
+            "returncode": -9,
+            "stdout": "case-002-stdout.txt",
+            "stderr": "case-002-stderr.txt",
+            "time_log": "case-002-time.txt",
+            "progress_snapshots": 67,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 63723,
+              "exportedDeclarations": 2059,
+              "admissionCommands": 1774,
+              "arenaNodes": "54535",
+              "fuel": "4096",
+              "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+              "elapsedMilliseconds": 2310.893658
+            },
+            "verdict": "timeout",
+            "stage": "host-wall-time",
+            "timeout_seconds": 60
+          },
+          "classification": "pskernel_timeout"
+        },
+        {
+          "round": 3,
+          "variant": "baseline",
+          "index": 3,
+          "label": "bad",
+          "name": "bugs/proj-of-stuck-prop.ndjson",
+          "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adaptation": {
+            "method": "header_only_compatibility_NOT_native_435_reexport",
+            "original_lean": {
+              "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+              "version": "4.29.1"
+            },
+            "target_lean": {
+              "version": "4.35.0",
+              "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+            },
+            "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+            "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+            "body_bytes_identical": true
+          },
+          "reference": {
+            "verdict": "rejected",
+            "reason": "official_kernel_verdict",
+            "returncode": 1,
+            "elapsed_seconds": 0.42674498899999946,
+            "log": "case-3.official.txt",
+            "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+          },
+          "observed": {
+            "format": "psc1-arena-replay-v1",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "verdict": "rejected",
+            "stage": "kernel-admission",
+            "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+            "fuel": "4096",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "containsUnsafeOrPartial": false,
+            "metadataValidated": false,
+            "elapsed_seconds": 33.64174159899994,
+            "returncode": 0,
+            "stdout": "case-003-stdout.txt",
+            "stderr": "case-003-stderr.txt",
+            "time_log": "case-003-time.txt",
+            "progress_snapshots": 10,
+            "invalid_progress_snapshots": 0,
+            "last_progress": {
+              "stage": "kernel-admission",
+              "coreInvoked": true,
+              "records": 5272,
+              "exportedDeclarations": 161,
+              "admissionCommands": 117,
+              "arenaNodes": "4392",
+              "fuel": "4096",
+              "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+              "elapsedMilliseconds": 338.805079
+            },
+            "peak_rss_kib": 430400
+          },
+          "classification": "matched_kernel_rejection"
+        }
+      ],
+      "summaries": [
+        {
+          "name": "perf/repeated-subproblem.ndjson",
+          "verdicts": {
+            "baseline": [
+              "accepted",
+              "accepted"
+            ],
+            "candidate": [
+              "accepted",
+              "accepted"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              1.9213268250000084,
+              1.7027115829999957
+            ],
+            "candidate": [
+              1.7207100050000008,
+              1.754580130000022
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [
+              282616,
+              289524
+            ],
+            "candidate": [
+              289652,
+              289420
+            ]
+          },
+          "uncensoredPair": true,
+          "candidateMedianTimeRatio": 0.9589551058091377,
+          "candidateMedianRssRatio": 1.0121159156849722,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        },
+        {
+          "name": "perf/church-numerals.ndjson",
+          "verdicts": {
+            "baseline": [
+              "resource_exhausted",
+              "resource_exhausted"
+            ],
+            "candidate": [
+              "resource_exhausted",
+              "resource_exhausted"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              22.241769617999992,
+              22.191214473000002
+            ],
+            "candidate": [
+              22.062103957000005,
+              21.923585877999983
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [
+              1138508,
+              1460300
+            ],
+            "candidate": [
+              1162272,
+              1074480
+            ]
+          },
+          "uncensoredPair": true,
+          "candidateMedianTimeRatio": 0.9899332834570836,
+          "candidateMedianRssRatio": 0.8606838211980262,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        },
+        {
+          "name": "init-prelude.ndjson",
+          "verdicts": {
+            "baseline": [
+              "timeout",
+              "timeout"
+            ],
+            "candidate": [
+              "timeout",
+              "timeout"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              60.071372081999996,
+              60.10098457500004
+            ],
+            "candidate": [
+              60.09859592699999,
+              60.11250132699996
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [],
+            "candidate": []
+          },
+          "uncensoredPair": false,
+          "candidateMedianTimeRatio": null,
+          "candidateMedianRssRatio": null,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        },
+        {
+          "name": "bugs/proj-of-stuck-prop.ndjson",
+          "verdicts": {
+            "baseline": [
+              "rejected",
+              "rejected"
+            ],
+            "candidate": [
+              "rejected",
+              "rejected"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              34.715429185000005,
+              33.64174159899994
+            ],
+            "candidate": [
+              33.87936096300001,
+              33.11299046800002
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [
+              613776,
+              430400
+            ],
+            "candidate": [
+              429216,
+              430736
+            ]
+          },
+          "uncensoredPair": true,
+          "candidateMedianTimeRatio": 0.9800339988131959,
+          "candidateMedianRssRatio": 0.8235699728781355,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        }
+      ],
+      "diagnosticsComplete": true,
+      "errors": [],
+      "fullArenaQualification": false,
+      "performanceQualified": false
+    }
+  },
+  "artifactApiPins": [
+    {
+      "id": 12588731752,
+      "name": "psc1-empty-cache-abba-results-attempt-1",
+      "sizeInBytes": 3242630,
+      "sha256": "401ba4209269cd2bb5a5c04dc988894e8ef996b4ee2f92c04f9d70f2aa751539",
+      "expired": false,
+      "workflowRun": {
+        "id": 40163474950,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t09-empty-cache-abba-20261025",
+        "head_sha": "054edfce56eda28a166624ddc92dfac5af8499c0"
+      }
+    },
+    {
+      "id": 12588276582,
+      "name": "psc1-empty-cache-abba-baseline-attempt-1",
+      "sizeInBytes": 1269145,
+      "sha256": "bbb548ad50ad9d45bcbeb60c6cdf36c4fdfde9652b7b11b74cc5c73a865aaee4",
+      "expired": false,
+      "workflowRun": {
+        "id": 40163474950,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t09-empty-cache-abba-20261025",
+        "head_sha": "054edfce56eda28a166624ddc92dfac5af8499c0"
+      }
+    },
+    {
+      "id": 12588225717,
+      "name": "psc1-empty-cache-abba-candidate-attempt-1",
+      "sizeInBytes": 1269221,
+      "sha256": "6c013b92ac8ad6202d8fc11292a1ee9758c873b2a1e7ddf2e034954d9078bac8",
+      "expired": false,
+      "workflowRun": {
+        "id": 40163474950,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t09-empty-cache-abba-20261025",
+        "head_sha": "054edfce56eda28a166624ddc92dfac5af8499c0"
+      }
+    },
+    {
+      "id": 12587497429,
+      "name": "psc1-empty-cache-abba-compiler-attempt-1",
+      "sizeInBytes": 2421040,
+      "sha256": "7c31b51daa818d2c73a33463e047073bd7f29161a4ec58b7583550fbbec19993",
+      "expired": false,
+      "workflowRun": {
+        "id": 40163474950,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t09-empty-cache-abba-20261025",
+        "head_sha": "054edfce56eda28a166624ddc92dfac5af8499c0"
+      }
+    },
+    {
+      "id": 12586614912,
+      "name": "psc1-empty-cache-abba-native-preflight-attempt-1",
+      "sizeInBytes": 5381,
+      "sha256": "024f126b242ab25343d8df4090d5ec11a85179b09efa319dbbb121eaa5ae1d68",
+      "expired": false,
+      "workflowRun": {
+        "id": 40163474950,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t09-empty-cache-abba-20261025",
+        "head_sha": "054edfce56eda28a166624ddc92dfac5af8499c0"
+      }
+    }
+  ],
+  "independentArchiveAudit": {
+    "auditorSha": "9533d8ef02cea6bfef985131bf2e1718a802713c",
+    "runId": 40166924023,
+    "runAttempt": 1,
+    "jobId": 121089779779,
+    "report": {
+      "bytes": 36044,
+      "sha256": "56d9662b901baee3e84675b95c81d3eb2e58c68bbd31b489b9d14f36f375358e"
+    },
+    "result": {
+      "schema": "psc1-empty-cache-abba-artifact-audit-v1",
+      "sourceSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+      "baselineSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+      "runId": "40163474950",
+      "runAttempt": "1",
+      "status": "pass",
+      "errors": [],
+      "workloadsExecuted": false,
+      "fullKernelQualified": false,
+      "performanceQualified": false,
+      "jobs": {
+        "native": {
+          "id": 121079663331,
+          "name": "native",
+          "runId": 40163474950,
+          "runAttempt": 1,
+          "headSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "conclusion": "success"
+        },
+        "compiler": {
+          "id": 121079934005,
+          "name": "compiler",
+          "runId": 40163474950,
+          "runAttempt": 1,
+          "headSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "conclusion": "success"
+        },
+        "baseline": {
+          "id": 121080377420,
+          "name": "generated (baseline)",
+          "runId": 40163474950,
+          "runAttempt": 1,
+          "headSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "conclusion": "success"
+        },
+        "candidate": {
+          "id": 121080377455,
+          "name": "generated (candidate)",
+          "runId": 40163474950,
+          "runAttempt": 1,
+          "headSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "conclusion": "success"
+        },
+        "results": {
+          "id": 121086249147,
+          "name": "abba",
+          "runId": 40163474950,
+          "runAttempt": 1,
+          "headSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+          "conclusion": "success"
+        }
+      },
+      "artifacts": {
+        "native": {
+          "artifactId": 12586614912,
+          "name": "psc1-empty-cache-abba-native-preflight-attempt-1",
+          "archive": {
+            "bytes": 5381,
+            "sha256": "024f126b242ab25343d8df4090d5ec11a85179b09efa319dbbb121eaa5ae1d68"
+          },
+          "files": 4,
+          "apiDigestMatches": true,
+          "crcChecked": true,
+          "uniqueSafePaths": true
+        },
+        "compiler": {
+          "artifactId": 12587497429,
+          "name": "psc1-empty-cache-abba-compiler-attempt-1",
+          "archive": {
+            "bytes": 2421040,
+            "sha256": "7c31b51daa818d2c73a33463e047073bd7f29161a4ec58b7583550fbbec19993"
+          },
+          "files": 13,
+          "apiDigestMatches": true,
+          "crcChecked": true,
+          "uniqueSafePaths": true
+        },
+        "baseline": {
+          "artifactId": 12588276582,
+          "name": "psc1-empty-cache-abba-baseline-attempt-1",
+          "archive": {
+            "bytes": 1269145,
+            "sha256": "bbb548ad50ad9d45bcbeb60c6cdf36c4fdfde9652b7b11b74cc5c73a865aaee4"
+          },
+          "files": 21,
+          "apiDigestMatches": true,
+          "crcChecked": true,
+          "uniqueSafePaths": true
+        },
+        "candidate": {
+          "artifactId": 12588225717,
+          "name": "psc1-empty-cache-abba-candidate-attempt-1",
+          "archive": {
+            "bytes": 1269221,
+            "sha256": "6c013b92ac8ad6202d8fc11292a1ee9758c873b2a1e7ddf2e034954d9078bac8"
+          },
+          "files": 21,
+          "apiDigestMatches": true,
+          "crcChecked": true,
+          "uniqueSafePaths": true
+        },
+        "results": {
+          "artifactId": 12588731752,
+          "name": "psc1-empty-cache-abba-results-attempt-1",
+          "archive": {
+            "bytes": 3242630,
+            "sha256": "401ba4209269cd2bb5a5c04dc988894e8ef996b4ee2f92c04f9d70f2aa751539"
+          },
+          "files": 121,
+          "apiDigestMatches": true,
+          "crcChecked": true,
+          "uniqueSafePaths": true
+        }
+      },
+      "nativeReports": 5,
+      "sourceInputs": 10,
+      "compilerBinaryVerified": true,
+      "producerFileInventory": 20,
+      "observations": 16,
+      "cases": 4,
+      "originalBodyBytesVerified": true,
+      "officialVerdictsFromActualLogs": true,
+      "actualRuntimeLogsReconstructed": true,
+      "semanticDiagnosticsPassed": true,
+      "summaries": [
+        {
+          "name": "perf/repeated-subproblem.ndjson",
+          "verdicts": {
+            "baseline": [
+              "accepted",
+              "accepted"
+            ],
+            "candidate": [
+              "accepted",
+              "accepted"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              1.9213268250000084,
+              1.7027115829999957
+            ],
+            "candidate": [
+              1.7207100050000008,
+              1.754580130000022
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [
+              282616,
+              289524
+            ],
+            "candidate": [
+              289652,
+              289420
+            ]
+          },
+          "uncensoredPair": true,
+          "candidateMedianTimeRatio": 0.9589551058091377,
+          "candidateMedianRssRatio": 1.0121159156849722,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        },
+        {
+          "name": "perf/church-numerals.ndjson",
+          "verdicts": {
+            "baseline": [
+              "resource_exhausted",
+              "resource_exhausted"
+            ],
+            "candidate": [
+              "resource_exhausted",
+              "resource_exhausted"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              22.241769617999992,
+              22.191214473000002
+            ],
+            "candidate": [
+              22.062103957000005,
+              21.923585877999983
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [
+              1138508,
+              1460300
+            ],
+            "candidate": [
+              1162272,
+              1074480
+            ]
+          },
+          "uncensoredPair": true,
+          "candidateMedianTimeRatio": 0.9899332834570836,
+          "candidateMedianRssRatio": 0.8606838211980262,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        },
+        {
+          "name": "init-prelude.ndjson",
+          "verdicts": {
+            "baseline": [
+              "timeout",
+              "timeout"
+            ],
+            "candidate": [
+              "timeout",
+              "timeout"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              60.071372081999996,
+              60.10098457500004
+            ],
+            "candidate": [
+              60.09859592699999,
+              60.11250132699996
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [],
+            "candidate": []
+          },
+          "uncensoredPair": false,
+          "candidateMedianTimeRatio": null,
+          "candidateMedianRssRatio": null,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        },
+        {
+          "name": "bugs/proj-of-stuck-prop.ndjson",
+          "verdicts": {
+            "baseline": [
+              "rejected",
+              "rejected"
+            ],
+            "candidate": [
+              "rejected",
+              "rejected"
+            ]
+          },
+          "elapsedSeconds": {
+            "baseline": [
+              34.715429185000005,
+              33.64174159899994
+            ],
+            "candidate": [
+              33.87936096300001,
+              33.11299046800002
+            ]
+          },
+          "peakRssKiB": {
+            "baseline": [
+              613776,
+              430400
+            ],
+            "candidate": [
+              429216,
+              430736
+            ]
+          },
+          "uncensoredPair": true,
+          "candidateMedianTimeRatio": 0.9800339988131959,
+          "candidateMedianRssRatio": 0.8235699728781355,
+          "timeRegressionOver10Percent": false,
+          "rssRegressionOver15Percent": false
+        }
+      ],
+      "experimentReport": {
+        "bytes": 62212,
+        "sha256": "0eaf7b67976f319cd587a1e52255776294be4f5d3b9f1ca74a228e5e19c5423a"
+      },
+      "rawRuntimeKernels": {
+        "baseline": {
+          "bytes": 10297874,
+          "sha256": "51e0b4397a105a6198f6f5554b416e98d34d71230ed50630626f106fdc5f1375"
+        },
+        "candidate": {
+          "bytes": 10298226,
+          "sha256": "281995846a8499c2da42a512893c0ceb86bacfa1e80d7d272300937aee6498aa"
+        }
+      },
+      "canonicalManifestStructuralOnly": true,
+      "canonicalSourceBodiesArchived": false,
+      "nodeBinaryArchived": false,
+      "performanceFlagsAreDiagnostic": true,
+      "globalPerformanceQualified": false,
+      "artifactMembers": {
+        "native": {
+          "native-build.log": {
+            "bytes": 14539,
+            "sha256": "994a9ddbe74e95e150c9a7590c9dd6f3e6a3634e4581ca4adf637fb630fe264d"
+          },
+          "native-receipt.json": {
+            "bytes": 955,
+            "sha256": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa"
+          },
+          "proofs.log": {
+            "bytes": 570,
+            "sha256": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25"
+          },
+          "source-audit.json": {
+            "bytes": 3542,
+            "sha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593"
+          }
+        },
+        "compiler": {
+          "compiler-build.log": {
+            "bytes": 25004,
+            "sha256": "c6dbd7c990be3488d82bfd30f73bcd719a7927c3a8517e77eb6c6ffbd2e79988"
+          },
+          "compiler-receipt.json": {
+            "bytes": 1833,
+            "sha256": "333aa9b2de1e891c36b152523fc641843e74a0ff2aa9d3992bc4c8030e5e4abe"
+          },
+          "native-build.log": {
+            "bytes": 14539,
+            "sha256": "994a9ddbe74e95e150c9a7590c9dd6f3e6a3634e4581ca4adf637fb630fe264d"
+          },
+          "native-receipt.json": {
+            "bytes": 955,
+            "sha256": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa"
+          },
+          "portable-leaf.log": {
+            "bytes": 15890,
+            "sha256": "d24923e70c58d86ec09061581eb8efebec5162327f7eb5d0620570930e365609"
+          },
+          "proofs.log": {
+            "bytes": 570,
+            "sha256": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25"
+          },
+          "psc1": {
+            "bytes": 8153536,
+            "sha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c"
+          },
+          "runtime/pskernel-arena-replay-controls.mjs": {
+            "bytes": 17512,
+            "sha256": "28e8ea79d5557a8bb7f5b7d5afa4f69741884c1ee31c3c0a3d7c245de3ca144a"
+          },
+          "runtime/pskernel-arena-replay.mjs": {
+            "bytes": 29464,
+            "sha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821"
+          },
+          "runtime/pskernel-expr-v2-dag-smoke.mjs": {
+            "bytes": 244729,
+            "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+          },
+          "runtime/pskernel-expr-v2-generated-smoke.mjs": {
+            "bytes": 38574,
+            "sha256": "9cf5f24aa79b314bb6165fccd9c4df6ca0a0d791493472792da20a97a9cb38d8"
+          },
+          "runtime/pskernel-expr-v2-transform-delay-smoke.mjs": {
+            "bytes": 8829,
+            "sha256": "6d37adba950f4d77cde78c9c82ef9607f641e25ced9a7e275e005595c1aa8421"
+          },
+          "source-audit.json": {
+            "bytes": 3542,
+            "sha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593"
+          }
+        },
+        "baseline": {
+          "arena-controls.log": {
+            "bytes": 8460,
+            "sha256": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f"
+          },
+          "authentic-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "bootstrap-manifest.json": {
+            "bytes": 12414,
+            "sha256": "09ca116d4f55ebc4ec01b22e9d26e839509c4bb84bbf975d1d267668d30eadb3"
+          },
+          "bootstrap-shared.mjs": {
+            "bytes": 5128,
+            "sha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8"
+          },
+          "canonical-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "compiler-receipt.json": {
+            "bytes": 1833,
+            "sha256": "333aa9b2de1e891c36b152523fc641843e74a0ff2aa9d3992bc4c8030e5e4abe"
+          },
+          "dag-smoke.log": {
+            "bytes": 2287879,
+            "sha256": "cfd780b455d126d7f765c00b7412a48e6bebbe8f21be339f45ef2cdd7e67b330"
+          },
+          "generated-build.log": {
+            "bytes": 205,
+            "sha256": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175"
+          },
+          "kernel.d.ts": {
+            "bytes": 417017,
+            "sha256": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622"
+          },
+          "kernel.js": {
+            "bytes": 10297874,
+            "sha256": "51e0b4397a105a6198f6f5554b416e98d34d71230ed50630626f106fdc5f1375"
+          },
+          "kernel.js.map": {
+            "bytes": 8405053,
+            "sha256": "d13a0df1b84d56f4d75782b132f29c317d4238fb426ea6c3e49e7fcae3be3f83"
+          },
+          "kernel.ts": {
+            "bytes": 9576318,
+            "sha256": "a2a99f4af68c9817a7d77309e8c86b3d9d71b83f96bc4052b940f507483fb890"
+          },
+          "native-proofs.log": {
+            "bytes": 570,
+            "sha256": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25"
+          },
+          "native-receipt.json": {
+            "bytes": 955,
+            "sha256": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa"
+          },
+          "native-source-audit.json": {
+            "bytes": 3542,
+            "sha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593"
+          },
+          "paged-smoke.log": {
+            "bytes": 32892,
+            "sha256": "0cec7d2adef17fe71ca2b5b53c4288edf59e5f1b460092c958eaca0fe82c62ec"
+          },
+          "producer-tools.json": {
+            "bytes": 2117,
+            "sha256": "6bb498bcd60f2cd89dd83a5af28c2ec9116389ef57837dd300cc50419ce3ef31"
+          },
+          "raw-abi.log": {
+            "bytes": 1571,
+            "sha256": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d"
+          },
+          "receipt.json": {
+            "bytes": 4660,
+            "sha256": "7a03d6465fe4c8fc6ea53ecede181a1abe4a92a8bb67175963b5bc6bb43b05ec"
+          },
+          "research-build.log": {
+            "bytes": 241,
+            "sha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+          },
+          "research-kernel.mjs": {
+            "bytes": 732963,
+            "sha256": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7"
+          }
+        },
+        "candidate": {
+          "arena-controls.log": {
+            "bytes": 8460,
+            "sha256": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f"
+          },
+          "authentic-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "bootstrap-manifest.json": {
+            "bytes": 12414,
+            "sha256": "e8121869397a66e071c0250976b2874b67438fdf4d98925238f3bb19fe01c988"
+          },
+          "bootstrap-shared.mjs": {
+            "bytes": 5128,
+            "sha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8"
+          },
+          "canonical-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "compiler-receipt.json": {
+            "bytes": 1833,
+            "sha256": "333aa9b2de1e891c36b152523fc641843e74a0ff2aa9d3992bc4c8030e5e4abe"
+          },
+          "dag-smoke.log": {
+            "bytes": 2287879,
+            "sha256": "19f4458e766633a6d5b6494cedb90e7e343a9d035e02a690b314dc069db26dbc"
+          },
+          "generated-build.log": {
+            "bytes": 205,
+            "sha256": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175"
+          },
+          "kernel.d.ts": {
+            "bytes": 417017,
+            "sha256": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622"
+          },
+          "kernel.js": {
+            "bytes": 10298226,
+            "sha256": "281995846a8499c2da42a512893c0ceb86bacfa1e80d7d272300937aee6498aa"
+          },
+          "kernel.js.map": {
+            "bytes": 8405433,
+            "sha256": "19c908db18f060011131b6539f8e4e1fbc52bcfccd14a9317045e2e0a26612e9"
+          },
+          "kernel.ts": {
+            "bytes": 9576693,
+            "sha256": "3e10a474318cb136c2f7a2c6bda324673d19a48fa7581883a9710ebedccc950e"
+          },
+          "native-proofs.log": {
+            "bytes": 570,
+            "sha256": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25"
+          },
+          "native-receipt.json": {
+            "bytes": 955,
+            "sha256": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa"
+          },
+          "native-source-audit.json": {
+            "bytes": 3542,
+            "sha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593"
+          },
+          "paged-smoke.log": {
+            "bytes": 32887,
+            "sha256": "1527238c9101a642e87e7765d4e6e0e8d4acde2412de8253cc492fc8d9706930"
+          },
+          "producer-tools.json": {
+            "bytes": 2117,
+            "sha256": "7d6eb870317688d3c06cbc160a99a6df4dae1f5aff5c287fce4a0a9e6b75f729"
+          },
+          "raw-abi.log": {
+            "bytes": 1571,
+            "sha256": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d"
+          },
+          "receipt.json": {
+            "bytes": 4661,
+            "sha256": "da8c3b4aa8fe8eca7c04648948d6d78bfbf3d026eb778de5cc074d5f71f5f9b4"
+          },
+          "research-build.log": {
+            "bytes": 241,
+            "sha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+          },
+          "research-kernel.mjs": {
+            "bytes": 732963,
+            "sha256": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7"
+          }
+        },
+        "results": {
+          "abba.log": {
+            "bytes": 7940,
+            "sha256": "8615b57064a38fecf008eac3af1033bd03e47eeeb95233db70da77fd3f351165"
+          },
+          "baseline/arena-controls.log": {
+            "bytes": 8460,
+            "sha256": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f"
+          },
+          "baseline/authentic-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "baseline/bootstrap-manifest.json": {
+            "bytes": 12414,
+            "sha256": "09ca116d4f55ebc4ec01b22e9d26e839509c4bb84bbf975d1d267668d30eadb3"
+          },
+          "baseline/bootstrap-shared.mjs": {
+            "bytes": 5128,
+            "sha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8"
+          },
+          "baseline/canonical-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "baseline/compiler-receipt.json": {
+            "bytes": 1833,
+            "sha256": "333aa9b2de1e891c36b152523fc641843e74a0ff2aa9d3992bc4c8030e5e4abe"
+          },
+          "baseline/dag-smoke.log": {
+            "bytes": 2287879,
+            "sha256": "cfd780b455d126d7f765c00b7412a48e6bebbe8f21be339f45ef2cdd7e67b330"
+          },
+          "baseline/generated-build.log": {
+            "bytes": 205,
+            "sha256": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175"
+          },
+          "baseline/kernel.d.ts": {
+            "bytes": 417017,
+            "sha256": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622"
+          },
+          "baseline/kernel.js": {
+            "bytes": 10297874,
+            "sha256": "51e0b4397a105a6198f6f5554b416e98d34d71230ed50630626f106fdc5f1375"
+          },
+          "baseline/kernel.js.map": {
+            "bytes": 8405053,
+            "sha256": "d13a0df1b84d56f4d75782b132f29c317d4238fb426ea6c3e49e7fcae3be3f83"
+          },
+          "baseline/kernel.ts": {
+            "bytes": 9576318,
+            "sha256": "a2a99f4af68c9817a7d77309e8c86b3d9d71b83f96bc4052b940f507483fb890"
+          },
+          "baseline/native-proofs.log": {
+            "bytes": 570,
+            "sha256": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25"
+          },
+          "baseline/native-receipt.json": {
+            "bytes": 955,
+            "sha256": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa"
+          },
+          "baseline/native-source-audit.json": {
+            "bytes": 3542,
+            "sha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593"
+          },
+          "baseline/paged-smoke.log": {
+            "bytes": 32892,
+            "sha256": "0cec7d2adef17fe71ca2b5b53c4288edf59e5f1b460092c958eaca0fe82c62ec"
+          },
+          "baseline/producer-tools.json": {
+            "bytes": 2117,
+            "sha256": "6bb498bcd60f2cd89dd83a5af28c2ec9116389ef57837dd300cc50419ce3ef31"
+          },
+          "baseline/raw-abi.log": {
+            "bytes": 1571,
+            "sha256": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d"
+          },
+          "baseline/receipt.json": {
+            "bytes": 4660,
+            "sha256": "7a03d6465fe4c8fc6ea53ecede181a1abe4a92a8bb67175963b5bc6bb43b05ec"
+          },
+          "baseline/research-build.log": {
+            "bytes": 241,
+            "sha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+          },
+          "baseline/research-kernel.mjs": {
+            "bytes": 732963,
+            "sha256": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7"
+          },
+          "candidate/arena-controls.log": {
+            "bytes": 8460,
+            "sha256": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f"
+          },
+          "candidate/authentic-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "candidate/bootstrap-manifest.json": {
+            "bytes": 12414,
+            "sha256": "e8121869397a66e071c0250976b2874b67438fdf4d98925238f3bb19fe01c988"
+          },
+          "candidate/bootstrap-shared.mjs": {
+            "bytes": 5128,
+            "sha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8"
+          },
+          "candidate/canonical-source.log": {
+            "bytes": 37,
+            "sha256": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9"
+          },
+          "candidate/compiler-receipt.json": {
+            "bytes": 1833,
+            "sha256": "333aa9b2de1e891c36b152523fc641843e74a0ff2aa9d3992bc4c8030e5e4abe"
+          },
+          "candidate/dag-smoke.log": {
+            "bytes": 2287879,
+            "sha256": "19f4458e766633a6d5b6494cedb90e7e343a9d035e02a690b314dc069db26dbc"
+          },
+          "candidate/generated-build.log": {
+            "bytes": 205,
+            "sha256": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175"
+          },
+          "candidate/kernel.d.ts": {
+            "bytes": 417017,
+            "sha256": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622"
+          },
+          "candidate/kernel.js": {
+            "bytes": 10298226,
+            "sha256": "281995846a8499c2da42a512893c0ceb86bacfa1e80d7d272300937aee6498aa"
+          },
+          "candidate/kernel.js.map": {
+            "bytes": 8405433,
+            "sha256": "19c908db18f060011131b6539f8e4e1fbc52bcfccd14a9317045e2e0a26612e9"
+          },
+          "candidate/kernel.ts": {
+            "bytes": 9576693,
+            "sha256": "3e10a474318cb136c2f7a2c6bda324673d19a48fa7581883a9710ebedccc950e"
+          },
+          "candidate/native-proofs.log": {
+            "bytes": 570,
+            "sha256": "02c2a1325c53a5395f07ff33507cd321968eda422f497129fd0b5c35fbb12a25"
+          },
+          "candidate/native-receipt.json": {
+            "bytes": 955,
+            "sha256": "dc3d5af8eb1bd38e7f5e0a7fc7b8ce6ab9e18ff2c64e9a3124f24ec7c0c2e5aa"
+          },
+          "candidate/native-source-audit.json": {
+            "bytes": 3542,
+            "sha256": "90325669259a6ddc0b908803d679f420c0d575d3eddc429858929687b56d3593"
+          },
+          "candidate/paged-smoke.log": {
+            "bytes": 32887,
+            "sha256": "1527238c9101a642e87e7765d4e6e0e8d4acde2412de8253cc492fc8d9706930"
+          },
+          "candidate/producer-tools.json": {
+            "bytes": 2117,
+            "sha256": "7d6eb870317688d3c06cbc160a99a6df4dae1f5aff5c287fce4a0a9e6b75f729"
+          },
+          "candidate/raw-abi.log": {
+            "bytes": 1571,
+            "sha256": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d"
+          },
+          "candidate/receipt.json": {
+            "bytes": 4661,
+            "sha256": "da8c3b4aa8fe8eca7c04648948d6d78bfbf3d026eb778de5cc074d5f71f5f9b4"
+          },
+          "candidate/research-build.log": {
+            "bytes": 241,
+            "sha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+          },
+          "candidate/research-kernel.mjs": {
+            "bytes": 732963,
+            "sha256": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7"
+          },
+          "results/accepted.official.txt": {
+            "bytes": 42,
+            "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "results/case-0.official.txt": {
+            "bytes": 42,
+            "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "results/case-1.official.txt": {
+            "bytes": 42,
+            "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "results/case-2.official.txt": {
+            "bytes": 42,
+            "sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+          },
+          "results/case-3.official.txt": {
+            "bytes": 157,
+            "sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+          },
+          "results/input-0.ndjson": {
+            "bytes": 11659,
+            "sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a"
+          },
+          "results/input-1.ndjson": {
+            "bytes": 9849,
+            "sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1"
+          },
+          "results/input-2.ndjson": {
+            "bytes": 3714854,
+            "sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c"
+          },
+          "results/input-3.ndjson": {
+            "bytes": 282521,
+            "sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee"
+          },
+          "results/official-control-accepted.ndjson": {
+            "bytes": 397,
+            "sha256": "6ac16043adc6554428fd76836f532c690fed4c43e1966396d8bec53c81b1be49"
+          },
+          "results/official-control-rejected.ndjson": {
+            "bytes": 397,
+            "sha256": "3c1d3e78dd3980afe1023ae0ce6d9c9501c687add25a185351adb74980b04755"
+          },
+          "results/rejected.official.txt": {
+            "bytes": 221,
+            "sha256": "5f266a28e689668b606e65a790da249eb32716972c059c5bf06c575353c2d20b"
+          },
+          "results/report.json": {
+            "bytes": 62212,
+            "sha256": "0eaf7b67976f319cd587a1e52255776294be4f5d3b9f1ca74a228e5e19c5423a"
+          },
+          "results/round-0/case-0/case-000-stderr.txt": {
+            "bytes": 2005,
+            "sha256": "b5e1e5ef111c7af4f49893d8900ce31f25803770f854f24b8532793446259d8c"
+          },
+          "results/round-0/case-0/case-000-stdout.txt": {
+            "bytes": 1181,
+            "sha256": "62f8e2403058f916054374da8c422fc676446ca1c7f332a591e2abd2cd9ef447"
+          },
+          "results/round-0/case-0/case-000-time.txt": {
+            "bytes": 985,
+            "sha256": "99216990149453e644b97376131c334b2111db3cc5e9eb5d31c86b3607e0cd4a"
+          },
+          "results/round-0/case-0/record.json": {
+            "bytes": 3776,
+            "sha256": "7c23552d35270ab875c2e9ac9f0d4502879788d3732a644d4a8eb356859814d4"
+          },
+          "results/round-0/case-1/case-001-stderr.txt": {
+            "bytes": 1377,
+            "sha256": "ea72f64b893ce73f96d25d40643b046fede18c47fd4bc5e01472f548bb314e46"
+          },
+          "results/round-0/case-1/case-001-stdout.txt": {
+            "bytes": 442,
+            "sha256": "948ac67e22c44ad7f255d103b33a4eb8b202579a93013e0175c58ecd7fa148ad"
+          },
+          "results/round-0/case-1/case-001-time.txt": {
+            "bytes": 987,
+            "sha256": "46c44dc70d0730f6d9790056dace67dc69f6c28ef59311ad3a255229d9aadc5b"
+          },
+          "results/round-0/case-1/record.json": {
+            "bytes": 2400,
+            "sha256": "00932294a2e269f8f87dea73d11fe1c2ede4230ab9c608bcea184700253e1f76"
+          },
+          "results/round-0/case-2/case-002-stderr.txt": {
+            "bytes": 20872,
+            "sha256": "a619dd65b7bb7683e0a2308848159e6abab0580e5a8f4424a1d82db362eb4510"
+          },
+          "results/round-0/case-2/case-002-stdout.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-0/case-2/case-002-time.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-0/case-2/record.json": {
+            "bytes": 1948,
+            "sha256": "173338a6462d6f8689f64d276070c69c53ec9c5e85452a4f776e3b66c52ab110"
+          },
+          "results/round-0/case-3/case-003-stderr.txt": {
+            "bytes": 2939,
+            "sha256": "d7eebe52196422dd7a95e262753b9ce60571513b2134a518759f7c61e6d62e92"
+          },
+          "results/round-0/case-3/case-003-stdout.txt": {
+            "bytes": 427,
+            "sha256": "7fe7bfbd6ce829e1f39bc6d07001eb219dabd24f5faca523fd187d301ae73f10"
+          },
+          "results/round-0/case-3/case-003-time.txt": {
+            "bytes": 987,
+            "sha256": "d329a6808998f4de832631413427f4fdcc48885d2c5ce5255b7fa7cdeba2c0b5"
+          },
+          "results/round-0/case-3/record.json": {
+            "bytes": 2391,
+            "sha256": "257dce766843eaeb3ca08033c5a7f64a86f9894bc8efbd06012aee957e52de1e"
+          },
+          "results/round-1/case-0/case-000-stderr.txt": {
+            "bytes": 2007,
+            "sha256": "194c7d99dcf49a1bb6312398387d362efb891b02d980d8c8d4fa9c4ff53f8380"
+          },
+          "results/round-1/case-0/case-000-stdout.txt": {
+            "bytes": 1181,
+            "sha256": "62f8e2403058f916054374da8c422fc676446ca1c7f332a591e2abd2cd9ef447"
+          },
+          "results/round-1/case-0/case-000-time.txt": {
+            "bytes": 984,
+            "sha256": "ff3c8d75912df21698633dc3af8a8b8661910a7fc70070969c5fac9b7b0b23b3"
+          },
+          "results/round-1/case-0/record.json": {
+            "bytes": 3778,
+            "sha256": "d4b9d434e0c0105e975e0a63b9a851b8b3ffa7c78911b4bfdde9480ea41390cb"
+          },
+          "results/round-1/case-1/case-001-stderr.txt": {
+            "bytes": 1378,
+            "sha256": "401de7bd3b696e37360d2addca89e43170922b62189f2a5dafef2d4e0cd0b5b5"
+          },
+          "results/round-1/case-1/case-001-stdout.txt": {
+            "bytes": 442,
+            "sha256": "948ac67e22c44ad7f255d103b33a4eb8b202579a93013e0175c58ecd7fa148ad"
+          },
+          "results/round-1/case-1/case-001-time.txt": {
+            "bytes": 989,
+            "sha256": "c1ffb848ee1a51de1b69efa9a30263160173e95bab52c766b14256d82adb3c07"
+          },
+          "results/round-1/case-1/record.json": {
+            "bytes": 2400,
+            "sha256": "3777e374386e46c128959954299225a9cb0e730fe9f86e439ddf1e5d18d5271e"
+          },
+          "results/round-1/case-2/case-002-stderr.txt": {
+            "bytes": 20872,
+            "sha256": "ad1674cf4b9b1ebf6796cdaccd51a041a58d71aa1d99cf354b16490fbb3be3bd"
+          },
+          "results/round-1/case-2/case-002-stdout.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-1/case-2/case-002-time.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-1/case-2/record.json": {
+            "bytes": 1947,
+            "sha256": "5710458684a88cb157efdb66d68bfce65e86846b183ee12bdc150e21b15cece9"
+          },
+          "results/round-1/case-3/case-003-stderr.txt": {
+            "bytes": 2938,
+            "sha256": "14eb7b45dcd5eaf3c4cd3a98f5d41ee3bd8b6aa5c706d79c1450a9b464ca918a"
+          },
+          "results/round-1/case-3/case-003-stdout.txt": {
+            "bytes": 427,
+            "sha256": "7fe7bfbd6ce829e1f39bc6d07001eb219dabd24f5faca523fd187d301ae73f10"
+          },
+          "results/round-1/case-3/case-003-time.txt": {
+            "bytes": 988,
+            "sha256": "f38ac20d7597eb0164000c14e9480356209bddd09b3bc743f62d2e4349137268"
+          },
+          "results/round-1/case-3/record.json": {
+            "bytes": 2390,
+            "sha256": "4fcb6592e059e55ce99031fa479b642c7f50c8889eeff17c412f98482b0d0bc9"
+          },
+          "results/round-2/case-0/case-000-stderr.txt": {
+            "bytes": 2007,
+            "sha256": "927ff92600d002675a5977f8301ed5ae26edd75d5bf98ab0dd941856dfe3278c"
+          },
+          "results/round-2/case-0/case-000-stdout.txt": {
+            "bytes": 1181,
+            "sha256": "62f8e2403058f916054374da8c422fc676446ca1c7f332a591e2abd2cd9ef447"
+          },
+          "results/round-2/case-0/case-000-time.txt": {
+            "bytes": 984,
+            "sha256": "0b9afdf26f4ca6f739ba96eab5aa6fccff015176f0d6c97fe60f8a444eee2242"
+          },
+          "results/round-2/case-0/record.json": {
+            "bytes": 3777,
+            "sha256": "eae0dd16b61dd898892173a9f093ed8d1347b842b63c8e0a358f09ca104f61c3"
+          },
+          "results/round-2/case-1/case-001-stderr.txt": {
+            "bytes": 1380,
+            "sha256": "9d0b697c2a01989d20cb797a4b7022dfe0abbd65f3fd02f562099ef904fcbce9"
+          },
+          "results/round-2/case-1/case-001-stdout.txt": {
+            "bytes": 442,
+            "sha256": "948ac67e22c44ad7f255d103b33a4eb8b202579a93013e0175c58ecd7fa148ad"
+          },
+          "results/round-2/case-1/case-001-time.txt": {
+            "bytes": 989,
+            "sha256": "325931b7c73180c39e9b55121f56c67da2da0dd827705faab2975a0a4723f1b7"
+          },
+          "results/round-2/case-1/record.json": {
+            "bytes": 2401,
+            "sha256": "8dc30cafebdefdc52a0b3f9b9a0834608f063a6bd7f8ee2770eefe494bc98ff9"
+          },
+          "results/round-2/case-2/case-002-stderr.txt": {
+            "bytes": 20878,
+            "sha256": "ea6f1808c75a3acbd25ec9cd4d542719ba01e94b441ea44741819faeaa801c21"
+          },
+          "results/round-2/case-2/case-002-stdout.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-2/case-2/case-002-time.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-2/case-2/record.json": {
+            "bytes": 1948,
+            "sha256": "f3b05c9397befce3a7e4a07b60e3e647934cc179eea15e450b486a62c0e953b1"
+          },
+          "results/round-2/case-3/case-003-stderr.txt": {
+            "bytes": 2938,
+            "sha256": "8e84dc5d55741e1e7cf48133f71dc14725b91ded9a7ec408d1c6091b1da141d4"
+          },
+          "results/round-2/case-3/case-003-stdout.txt": {
+            "bytes": 427,
+            "sha256": "7fe7bfbd6ce829e1f39bc6d07001eb219dabd24f5faca523fd187d301ae73f10"
+          },
+          "results/round-2/case-3/case-003-time.txt": {
+            "bytes": 988,
+            "sha256": "eea0a171aaa5b1c70cffcef8a6ec7a82ce620ad380e9355143bcc0df6ea2bc0f"
+          },
+          "results/round-2/case-3/record.json": {
+            "bytes": 2391,
+            "sha256": "2698975372e590cc167b068f5372feebea3a641506613c362cc0455f10e3e2d4"
+          },
+          "results/round-3/case-0/case-000-stderr.txt": {
+            "bytes": 2007,
+            "sha256": "194c74b245b6b234dd27156ef19c5adb690840da4bf4446da0956b53e3af6b45"
+          },
+          "results/round-3/case-0/case-000-stdout.txt": {
+            "bytes": 1181,
+            "sha256": "62f8e2403058f916054374da8c422fc676446ca1c7f332a591e2abd2cd9ef447"
+          },
+          "results/round-3/case-0/case-000-time.txt": {
+            "bytes": 982,
+            "sha256": "1b4d20d07843d4b7370f234533892f5faa12236a85c4f824660d1ca367cee922"
+          },
+          "results/round-3/case-0/record.json": {
+            "bytes": 3777,
+            "sha256": "33d586a03c812eb6e8264365fa99d749307cf862f3750182c4a8ba40ef6ef6c2"
+          },
+          "results/round-3/case-1/case-001-stderr.txt": {
+            "bytes": 1380,
+            "sha256": "2b9f8cbc298d47d5d599027510bee0fbfb33dfe64e6b3c578388f0bc2475c155"
+          },
+          "results/round-3/case-1/case-001-stdout.txt": {
+            "bytes": 442,
+            "sha256": "948ac67e22c44ad7f255d103b33a4eb8b202579a93013e0175c58ecd7fa148ad"
+          },
+          "results/round-3/case-1/case-001-time.txt": {
+            "bytes": 987,
+            "sha256": "888927649e01ed376e4291edeac30e5368512c8f13826fac62133514f14b9e9f"
+          },
+          "results/round-3/case-1/record.json": {
+            "bytes": 2400,
+            "sha256": "82fa8087b9636ba4081beaaf5b695cbe6d96f6fa4e2f62cfbe6311a1e5498b19"
+          },
+          "results/round-3/case-2/case-002-stderr.txt": {
+            "bytes": 20878,
+            "sha256": "4ef569aec307d872efbac7a90f2d5deecc2d8a2acf0725d5f1309e2cbf1c1173"
+          },
+          "results/round-3/case-2/case-002-stdout.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-3/case-2/case-002-time.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "results/round-3/case-2/record.json": {
+            "bytes": 1947,
+            "sha256": "a3b02f399dfb307d2ff45b5886ca58cad18ea8eb8744c74436c1b887dcd7baf0"
+          },
+          "results/round-3/case-3/case-003-stderr.txt": {
+            "bytes": 2940,
+            "sha256": "222f9d48b0cf72f772f44b3f4cb609f64fa83512fcda9d74db4cc88d8468a163"
+          },
+          "results/round-3/case-3/case-003-stdout.txt": {
+            "bytes": 427,
+            "sha256": "7fe7bfbd6ce829e1f39bc6d07001eb219dabd24f5faca523fd187d301ae73f10"
+          },
+          "results/round-3/case-3/case-003-time.txt": {
+            "bytes": 986,
+            "sha256": "067406e0a09544eeb2dfa2f67afbcb3d25b8dc9b1824296954f4df654aadefa5"
+          },
+          "results/round-3/case-3/record.json": {
+            "bytes": 2390,
+            "sha256": "bd8aa1e837d61ce6fbbadae0133f03f26541aa277bd383df7e6d853ee07a8ed4"
+          },
+          "results/sha256.json": {
+            "bytes": 10430,
+            "sha256": "88d4ff3b6657b21c581d9df674fd9b16826c044b74a01f44962be77bc4840332"
+          }
+        }
+      }
+    },
+    "outputArtifact": {
+      "id": 12588563472,
+      "name": "psc1-empty-cache-abba-artifact-audit-attempt-1",
+      "sizeInBytes": 390458,
+      "sha256": "10f8ae045e6f5a4a63f9eaca9230b8e116fbba2baa26fa92b914b09c64313125",
+      "expired": false,
+      "workflowRun": {
+        "id": 40166924023,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-empty-cache-abba-audit-20261025",
+        "head_sha": "9533d8ef02cea6bfef985131bf2e1718a802713c"
+      }
+    },
+    "rootActualTerminalAndApiVerified": true,
+    "independentPeerVerified": true,
+    "priorAuditFailure": {
+      "runId": 40166589775,
+      "auditorSha": "41dd499d13e8dda058240ac416c7706c0274e588",
+      "reason": "Whole terminal forbidden-token scan matched echoed guard literals; scoped to parsed proof reports while retaining all five exact ordered names and standard-axiom checks. No experiment, workload, resource, or source was changed."
+    }
+  },
+  "rootRecomputation": {
+    "records": 16,
+    "semanticKeys": 18,
+    "summaries": 4,
+    "archiveMembers": 180,
+    "orderedABBA": true,
+    "mediansAndCensoringRecomputed": true,
+    "reportBytesAndSha256Reconstructed": true
+  },
+  "decision": {
+    "scope": "Adopt only the universally equivalent empty-small semantic-cache guard after the expected-SHA integration update.",
+    "full499Evidence": "T09_EMPTY_SEMANTIC_CACHE_FULL499_054edfce.json",
+    "integrationPending": true,
+    "diagnostics": "None of the three uncensored whole-kernel comparisons exceeded the preset10%time/15%RSS flags. Two observations per variant per case support a scoped descriptive comparison, not broad performance qualification.",
+    "microbenchmark": "Frozen microv1 remains incomplete32/56. Baseline indexed/hit timed out60s before any candidate indexed/hit. Completed small/early-open helper medians2864283795→3623180799.5ns regressed26.495%; retain this known tradeoff.",
+    "church": "All four still exhausted kernel reduction budget at fuel4096.",
+    "initPrelude": "All four timed out at60seconds; time/RSS ratios are null.",
+    "fullArenaRequalified": false,
+    "performanceQualified": false,
+    "fullKernelQualified": false
+  },
+  "projectStatus": {
+    "A": "scoped qualified",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN"
+  }
+}

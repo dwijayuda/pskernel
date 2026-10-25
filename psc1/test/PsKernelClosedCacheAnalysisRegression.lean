@@ -59,7 +59,13 @@ theorem semantic_map_get_eq
         Option.none := by
   rcases cache with ⟨small, index⟩
   cases index with
-  | none => rfl
+  | none =>
+      cases small with
+      | nil =>
+          cases h : psKernelSemanticCacheEligible expr <;>
+            simp [psKernelSemanticExprMapGet, psKernelExprMapGet,
+              psKernelExprMapGetIn, h]
+      | cons entry rest => rfl
   | some index =>
       cases h : psKernelExprHasFVar expr <;>
         simp [psKernelSemanticExprMapGet, analysis_eq,

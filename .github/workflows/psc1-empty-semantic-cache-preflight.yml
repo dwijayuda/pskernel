@@ -1,0 +1,299 @@
+name: PSC1 empty semantic cache native preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-empty-semantic-cache-20261025
+    paths:
+    - .github/workflows/psc1-empty-semantic-cache-preflight.yml
+    - psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean
+    - psc1/test/PsKernelClosedCacheAnalysisRegression.lean
+    - psc1/test/PsKernelEmptySemanticCacheProofs.lean
+    - psc1/test/PsKernelCacheScopeProofs.lean
+    - psc1/kernel-lakefile.lean
+    - psc1/lean-toolchain
+    - psc1/scripts/install-lean435-ci.sh
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Authenticate the exact helper change and preserved proof obligations
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re,subprocess
+        BASE='ae47fa0ca776980890c20c730d00a4f11c73b6c4'
+        BRANCH_BASE='20224a295359abb201f56c72395690bf0bfac9fa'
+        TREE='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff'
+        ROOT='psc1/packages/pskernel-core/src'
+        PROD=ROOT+'/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean'
+        RETAINED='psc1/test/PsKernelClosedCacheAnalysisRegression.lean'
+        SCOPE='psc1/test/PsKernelCacheScopeProofs.lean'
+        NEW='psc1/test/PsKernelEmptySemanticCacheProofs.lean'
+        WORKFLOW='.github/workflows/psc1-empty-semantic-cache-preflight.yml'
+        def require(ok,message):
+            if not ok: raise RuntimeError(message)
+        def git(*args):
+            return subprocess.check_output(['git',*args])
+        def digest(raw):
+            return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        def blob(raw):
+            return hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+        def section(text,begin,end):
+            require(text.count(begin)==1,'unique section start: '+begin)
+            start=text.index(begin); finish=text.index(end,start)
+            return text[start:finish]
+        def replace_once(text,before,after):
+            require(text.count(before)==1,'unique exact replacement required')
+            return text.replace(before,after,1)
+        require(git('rev-parse','HEAD').decode().strip()==os.environ['GITHUB_SHA'],'exact target checkout')
+        subprocess.run(['git','merge-base','--is-ancestor',BRANCH_BASE,'HEAD'],check=True)
+        require(git('status','--porcelain').strip()==b'','clean exact source checkout')
+        for ref in [BASE,BRANCH_BASE]:
+            require(git('rev-parse',ref+':'+ROOT).decode().strip()==TREE,'restored baseline production tree')
+        changed=git('diff','--name-only',BASE,'HEAD','--',ROOT).decode().splitlines()
+        require(changed==[PROD],'exactly one changed production file')
+        baseline=git('show',BASE+':'+PROD)
+        require(blob(baseline)=='4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b','pinned full baseline CacheAnalysis')
+        before=baseline.decode()
+        old=section(before,'def psKernelSemanticExprMapGet\n','\n/- None means')
+        require(len(old.encode())==546,'exact 546-byte predecessor lookup')
+        old_branch="""  | Option.none =>
+              if psKernelSemanticCacheEligible expr then
+                psKernelExprMapGetIn expr cache.small
+              else
+                Option.none"""
+        new_branch="""  | Option.none =>
+              match cache.small with
+              | List.nil => Option.none
+              | List.cons _ _ =>
+                  if psKernelSemanticCacheEligible expr then
+                    psKernelExprMapGetIn expr cache.small
+                  else
+                    Option.none"""
+        updated=replace_once(old,old_branch,new_branch)
+        expected=replace_once(before,old,updated)
+        expected=replace_once(expected,
+            '/- Small caches retain their original eligibility scan and promotion path.',
+            '/- Nonempty small caches retain their original eligibility scan and promotion path.')
+        actual=pathlib.Path(PROD).read_bytes()
+        require(actual==expected.encode() and len(actual)==9740,'only exact lookup guard and comment change')
+        prior=git('show',BASE+':'+RETAINED)
+        require(blob(prior)=='010333b5d6ac53c60c558c89906b02d7358fb0c0','pinned retained seven-proof source')
+        prior_text=prior.decode()
+        old_theorem=section(prior_text,'theorem semantic_map_get_eq\n','\ntheorem semantic_map_insert_eq\n')
+        fixed_theorem=replace_once(old_theorem,'  | none => rfl\n  | some index =>',
+        """  | none =>
+              cases small with
+              | nil =>
+                  cases h : psKernelSemanticCacheEligible expr <;>
+                    simp [psKernelSemanticExprMapGet, psKernelExprMapGet,
+                      psKernelExprMapGetIn, h]
+              | cons entry rest => rfl
+          | some index =>""")
+        expected_retained=replace_once(prior_text,old_theorem,fixed_theorem)
+        require(pathlib.Path(RETAINED).read_bytes()==expected_retained.encode(),
+                'only the existing semantic_map_get_eq proof body may change')
+        require(old_theorem.split(':= by',1)[0]==fixed_theorem.split(':= by',1)[0],
+                'retained universal statement unchanged')
+        protected={SCOPE:'45cb58a271695bee0ae05330f39c3c1a86f1801f',
+            'psc1/kernel-lakefile.lean':'6b1f3747b1fc6e4d391fc31fa6196851d31a5a24',
+            'psc1/lean-toolchain':'a6aff065db2882c535684f8c5bcd4f16e9a23915',
+            'psc1/scripts/install-lean435-ci.sh':'b53f59db9e2fbb45feeedea659244cae7e77b64b'}
+        for name,oid in protected.items():
+            require(blob(pathlib.Path(name).read_bytes())==oid,'unchanged protected source: '+name)
+        proof=pathlib.Path(NEW).read_text()
+        require(proof.count('namespace Frozen\n\n')==1 and proof.count('\nend Frozen')==1,
+                'one exact frozen namespace')
+        frozen=proof.split('namespace Frozen\n\n',1)[1].split('\nend Frozen',1)[0]
+        require(frozen==old,'frozen lookup body exactly matches pinned predecessor')
+        require(not re.search(r'\b(?:sorry|admit|unsafe|axiom)\b',proof),'no proof escape declarations')
+        specs=[{'module':'PsKernelCacheScopeProofs','count':60,'log':'cache-scope-proofs.log'},
+               {'module':'PsKernelClosedCacheAnalysisRegression','count':7,'log':'closed-cache-analysis-proofs.log'},
+               {'module':'PsKernelEmptySemanticCacheProofs','count':2,'log':'empty-semantic-cache-proofs.log'}]
+        all_names=[]
+        for spec in specs:
+            text=pathlib.Path('psc1/test/'+spec['module']+'.lean').read_text()
+            names=re.findall(r'(?m)^#print axioms (\S+)\s*$',text)
+            names=[name if '.' in name else spec['module']+'.'+name for name in names]
+            require(len(names)==spec['count'] and len(set(names))==spec['count'],'fixed source report count')
+            spec['names']=names;all_names.extend(names)
+        require(specs[-1]['names']==[
+            'PsKernelEmptySemanticCacheProofs.semantic_map_get_eq_before',
+            'PsKernelEmptySemanticCacheProofs.empty_lookup_ignores_expression'],'two exact new universal reports')
+        require(len(all_names)==69 and len(set(all_names))==69,'69 distinct source proof names')
+        paths=[SCOPE,RETAINED,NEW,WORKFLOW,PROD,
+               ROOT+'/Ps/KernelCore/Runtime/Acceleration/Cache.lean',
+               ROOT+'/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean',
+               ROOT+'/Ps/KernelCore/Core/Expr.lean',
+               'psc1/kernel-lakefile.lean','psc1/lean-toolchain','psc1/scripts/install-lean435-ci.sh']
+        require(len(paths)==11 and len(set(paths))==11,'exact eleven source inputs')
+        out=pathlib.Path(os.environ['RUNNER_TEMP'])/'empty-semantic-cache-preflight'
+        out.mkdir(parents=True,exist_ok=False)
+        records=[]
+        for name in paths:
+            raw=pathlib.Path(name).read_bytes()
+            require(raw==git('show','HEAD:'+name),'working source equals exact Git input')
+            target=out/'sources'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
+            records.append({'path':name,**digest(raw),'gitBlobSha':blob(raw)})
+        report={'schema':'psc1-empty-semantic-cache-source-v1','sourceSha':os.environ['GITHUB_SHA'],
+            'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
+            'leanGitHash':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
+            'baselineSha':BASE,'branchBaseSha':BRANCH_BASE,'baselineProductionTree':TREE,
+            'targetProductionTree':git('rev-parse','HEAD:'+ROOT).decode().strip(),
+            'productionChanges':changed,'exactLookupGuardAndCommentOnly':True,
+            'baselineProduction':{'path':PROD,**digest(baseline),'gitBlobSha':blob(baseline)},
+            'predecessorLookup':digest(old.encode()),'candidateLookup':digest(updated.encode()),
+            'frozenLookupByteExact':True,'retainedProofStatementAndOtherBodiesUnchanged':True,
+            'retainedProofBaseline':{'path':RETAINED,**digest(prior),'gitBlobSha':blob(prior)},
+            'cacheScopeSourceUnchanged':True,'proofInventories':specs,'files':records,
+            'generatedQualification':False,'runtimeQualification':False,
+            'fullQualification':False,'performanceQualified':False}
+        (out/'source-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_EMPTY_SEMANTIC_CACHE_SOURCE: PASS '+json.dumps(report,separators=(',',':')))
+        PY
+    - name: Install and authenticate pinned Lean
+      shell: bash
+      run: |
+        set -euo pipefail
+        bash psc1/scripts/install-lean435-ci.sh
+        export PATH="$HOME/.elan/bin:$PATH"
+        test "$(cat psc1/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+        (cd psc1 && test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc")
+    - name: Build native production imports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        export PATH="$HOME/.elan/bin:$PATH"
+        lake -f kernel-lakefile.lean build PsKernelCore \
+          2>&1 | tee "$RUNNER_TEMP/empty-semantic-cache-preflight/native-build.log"
+    - name: Compile all 69 retained and new universal proof reports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        export PATH="$HOME/.elan/bin:$PATH"
+        psc1_empty_failed=0
+        : > "$RUNNER_TEMP/empty-semantic-cache-preflight/proof-status.log"
+        for PSC1_EMPTY_SPEC in \
+          'PsKernelCacheScopeProofs:60:cache-scope-proofs.log' \
+          'PsKernelClosedCacheAnalysisRegression:7:closed-cache-analysis-proofs.log' \
+          'PsKernelEmptySemanticCacheProofs:2:empty-semantic-cache-proofs.log'; do
+          IFS=: read -r PSC1_EMPTY_MODULE PSC1_EMPTY_COUNT PSC1_EMPTY_LOG <<< "$PSC1_EMPTY_SPEC"
+          psc1_empty_count_status=0
+          psc1_empty_lean_status=0
+          test "$(grep -c '^#print axioms ' "test/$PSC1_EMPTY_MODULE.lean")" -eq "$PSC1_EMPTY_COUNT" \
+            || psc1_empty_count_status=$?
+          lake -f kernel-lakefile.lean env lean "test/$PSC1_EMPTY_MODULE.lean" \
+            2>&1 | tee "$RUNNER_TEMP/empty-semantic-cache-preflight/$PSC1_EMPTY_LOG" \
+            || psc1_empty_lean_status=$?
+          printf 'PSC1_EMPTY_SEMANTIC_CACHE_PROOF_STATUS module=%s count=%s countStatus=%s leanStatus=%s\n' \
+            "$PSC1_EMPTY_MODULE" "$PSC1_EMPTY_COUNT" "$psc1_empty_count_status" "$psc1_empty_lean_status" \
+            | tee -a "$RUNNER_TEMP/empty-semantic-cache-preflight/proof-status.log"
+          if [ "$psc1_empty_count_status" -ne 0 ] || [ "$psc1_empty_lean_status" -ne 0 ]; then
+            psc1_empty_failed=1
+          fi
+        done
+        test "$psc1_empty_failed" -eq 0
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re,stat,subprocess
+        root=pathlib.Path(os.environ['RUNNER_TEMP'])/'empty-semantic-cache-preflight'
+        repo=pathlib.Path.cwd().parent
+        def require(ok,message):
+            if not ok: raise RuntimeError(message)
+        def digest(raw):
+            return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        def file_digest(path):
+            return digest(path.read_bytes())
+        inventory=root/'source-inventory.json'
+        source_record=json.loads(inventory.read_text())
+        identity={'sourceSha':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],
+                  'runAttempt':os.environ['GITHUB_RUN_ATTEMPT']}
+        require(all(source_record.get(key)==value for key,value in identity.items()),'source-bound inventory identity')
+        lean_hash=subprocess.check_output(['lean','--githash'],text=True).strip()
+        lean_version=subprocess.check_output(['lean','--version'],text=True).strip()
+        require(lean_hash=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc' and '4.35.0' in lean_version,
+                'actual native compiler remains pinned')
+        for item in source_record['files']:
+            raw=(repo/item['path']).read_bytes()
+            require(digest(raw)=={'bytes':item['bytes'],'sha256':item['sha256']},'source changed after authentication')
+            require(raw==(root/'sources'/item['path']).read_bytes(),'archived source byte mismatch')
+        records=[];all_names=[];statuses=[]
+        allowed={'propext','Classical.choice','Quot.sound'}
+        for spec in source_record['proofInventories']:
+            module,count,filename=spec['module'],spec['count'],spec['log']
+            proof=repo/'psc1/test'/(module+'.lean');log=root/filename
+            names=re.findall(r'(?m)^#print axioms (\S+)\s*$',proof.read_text())
+            names=[name if '.' in name else module+'.'+name for name in names]
+            require(names==spec['names'] and len(names)==count,'exact frozen source proof-name order')
+            text=log.read_text()
+            reports=re.findall(r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)",text)
+            require([name for name,_ in reports]==names,'exact actual ordered proof reports: '+module)
+            require(not any(token in text for token in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])
+                    and not re.search(r'\.lean:\d+:\d+: error:',text),'forbidden proof diagnostic')
+            for name,used in reports:
+                require({axiom.strip() for axiom in used.split(',') if axiom.strip()} <= allowed,
+                        'unexpected proof axiom: '+name)
+            all_names.extend(names)
+            records.append({'module':module,'proofs':count,'names':names,
+                            'source':file_digest(proof),'log':file_digest(log)})
+            statuses.append('PSC1_EMPTY_SEMANTIC_CACHE_PROOF_STATUS module='+module+
+                            ' count='+str(count)+' countStatus=0 leanStatus=0')
+        require(len(all_names)==69 and len(set(all_names))==69,'exact69 distinct native reports')
+        require((root/'proof-status.log').read_text()=='\n'.join(statuses)+'\n','exact three successful command statuses')
+        build=(root/'native-build.log').read_text()
+        require('Build completed successfully' in build and not re.search(r'\.lean:\d+:\d+: error:',build),
+                'native production import build must succeed')
+        expected={'sources/'+item['path'] for item in source_record['files']} | {
+            'source-inventory.json','native-build.log','proof-status.log',
+            *(spec['log'] for spec in source_record['proofInventories'])}
+        directories=set()
+        for name in expected:
+            p=pathlib.PurePosixPath(name).parent
+            while str(p)!='.':
+                directories.add(str(p));p=p.parent
+        actual=set()
+        for path in root.rglob('*'):
+            require(not path.is_symlink(),'no artifact source symlinks')
+            name=path.relative_to(root).as_posix()
+            if path.is_dir():
+                require(name in directories,'unexpected evidence directory')
+            else:
+                require(stat.S_ISREG(path.stat().st_mode),'nonregular evidence file')
+                actual.add(name)
+        require(actual==expected,'exact17 evidence files before final receipt')
+        receipt={'schema':'psc1-empty-semantic-cache-preflight-v1',**identity,'status':'pass',
+            'leanGitHash':lean_hash,'leanVersion':lean_version,'proofModules':3,
+            'retainedProofs':67,'newProofs':2,'totalProofs':69,'proofs':records,
+            'sourceInventory':file_digest(inventory),'proofStatuses':file_digest(root/'proof-status.log'),
+            'nativeBuild':file_digest(root/'native-build.log'),
+            'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
+            'emptySmallMapLookupGuard':True,'allRawCacheLookupResultsPreserved':True,
+            'retainedProofStatementsUnchanged':True,'cachePolicyUnchanged':True,
+            'cachePublicationUnchanged':True,'checkerFuelPolicyUnchanged':True,
+            'productionChanges':source_record['productionChanges'],
+            'heldTransformOptimizationAdopted':False,'churchAcceptanceFixed':False,
+            'generatedQualification':False,'runtimeQualification':False,
+            'fullQualification':False,'fullKernel':False,'performanceQualified':False,
+            'archiveFiles':18,'archiveMembers':sorted(expected|{'native-receipt.json'})}
+        (root/'native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_EMPTY_SEMANTIC_CACHE_PREFLIGHT: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-empty-semantic-cache-preflight-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/empty-semantic-cache-preflight/
+        if-no-files-found: error
+        include-hidden-files: true
+        retention-days: 30

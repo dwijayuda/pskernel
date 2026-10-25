@@ -119,7 +119,7 @@ def psKernelExprClosedCacheAnalysis
             (Prod.fst bodyAnalysis))
           false
 
-/- Small caches retain their original eligibility scan and promotion path.
+/- Nonempty small caches retain their original eligibility scan and promotion path.
    Indexed caches share the scan/hash traversal and retain exact collisions. -/
 def psKernelSemanticExprMapGet
     (cache : PsKernelExprMap)
@@ -127,10 +127,13 @@ def psKernelSemanticExprMapGet
     Option PsKernelExpr :=
   match cache.index with
   | Option.none =>
-      if psKernelSemanticCacheEligible expr then
-        psKernelExprMapGetIn expr cache.small
-      else
-        Option.none
+      match cache.small with
+      | List.nil => Option.none
+      | List.cons _ _ =>
+          if psKernelSemanticCacheEligible expr then
+            psKernelExprMapGetIn expr cache.small
+          else
+            Option.none
   | Option.some index =>
       let analysis := psKernelExprClosedCacheAnalysis expr;
       if Prod.snd analysis then

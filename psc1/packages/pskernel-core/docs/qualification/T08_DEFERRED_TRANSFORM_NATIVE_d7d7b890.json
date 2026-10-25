@@ -1,0 +1,100 @@
+{
+  "schema": "psc1-deferred-transform-native-checkpoint-v1",
+  "sourceSha": "d7d7b8905d6f7bb6e0044a2fcae4a33fe1424ed5",
+  "baselineSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+  "run": {
+    "id": 40145171697,
+    "attempt": 1,
+    "jobId": 121024847987,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40145171697"
+  },
+  "scope": {
+    "nativeUniversalEquationsPassed": true,
+    "generatedRawControlsPassed": false,
+    "fullQualification": false,
+    "performanceQualified": false,
+    "fullArenaQualification": false
+  },
+  "sourceAudit": {
+    "schema": "psc1-transform-delay-source-v1",
+    "sourceSha": "d7d7b8905d6f7bb6e0044a2fcae4a33fe1424ed5",
+    "baselineSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+    "runId": "40145171697",
+    "runAttempt": "1",
+    "baselineBlobs": {
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean": "8f50a74edf1d00288efee9c559a05a75b755acbf",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSupport.lean": "7957a3aaf87f440b6fb09c2ee98eb574aeab6c72",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Lift.lean": "50a63d2729088039a3b01f75eda5c6e83f91e036"
+    },
+    "frozenBodiesMatch": true,
+    "exactBindingMovesOnly": true,
+    "productionChanges": [
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Lift.lean",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSupport.lean"
+    ],
+    "sourceFiles": {
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean": "ede83a49880a4343a3402f3e930b73da46da01f4faf253b5e6797791f6442867",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSupport.lean": "55829bb3786d81829cda2e4e09fc854519425998a032bcd252471e86eb44f52a",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Lift.lean": "65e4ee15c47d55e720a635c0f4e0fec01fe4fdfc121128f81a67564a5d8d4c5d",
+      "psc1/test/PsKernelDeferredTransformProofs.lean": "7325c591fc9ad1692100d7cb59ce298188d6555a4ddbc3fa3653c3eac7dc22ce",
+      "psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs": "6d37adba950f4d77cde78c9c82ef9607f641e25ced9a7e275e005595c1aa8421",
+      ".github/workflows/psc1-pskernel-transform-delay-preflight.yml": "8a380c546fe9da7ed96e6b7a54375da324aa9e6ff80892a3d28013c47353a477"
+    },
+    "fullQualification": false,
+    "performanceQualified": false
+  },
+  "nativeReceipt": {
+    "schema": "psc1-transform-delay-native-v1",
+    "sourceSha": "d7d7b8905d6f7bb6e0044a2fcae4a33fe1424ed5",
+    "baselineSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+    "runId": "40145171697",
+    "runAttempt": "1",
+    "proofs": 3,
+    "names": [
+      "PsKernelDeferredTransformProofs.transform_with_fuel_eq",
+      "PsKernelDeferredTransformProofs.count_with_fuel_eq",
+      "PsKernelDeferredTransformProofs.lift_with_fuel_eq"
+    ],
+    "proofLogSha256": "d4149b5e52dd64256bfc68acb407fe110a436dbcfccd4faa72d26d0aa170cc4c",
+    "sourceAuditSha256": "6e37efc791958cf18ef5d4c4b640f73994cebe7cc4d2911ad73ddaea9c09a9fd",
+    "fullQualification": false,
+    "performanceQualified": false
+  },
+  "artifacts": [
+    {
+      "id": 12580094440,
+      "name": "psc1-transform-delay-native-preflight-attempt-1",
+      "size_in_bytes": 4525,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12580094440",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12580094440/zip",
+      "expired": false,
+      "created_at": "2026-10-25T00:04:38Z",
+      "expires_at": "2026-11-24T00:04:37Z",
+      "updated_at": "2026-10-25T00:04:38Z",
+      "digest": "sha256:04f193a1c779d458ef82a921be9a560e5eb5ce86dbf8b962b79ea095d9b6e4d4",
+      "workflow_run": {
+        "id": 40145171697,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t08-deferred-transform-20261025",
+        "head_sha": "d7d7b8905d6f7bb6e0044a2fcae4a33fe1424ed5"
+      }
+    }
+  ],
+  "inspection": {
+    "actualJobLog": true,
+    "orderedAxiomReports": true,
+    "onlyStandardAllowedAxioms": true,
+    "exactFrozenBodies": true,
+    "exactProductionBindingMoves": true,
+    "artifactApiDigest": true,
+    "independentZipAudit": false
+  },
+  "remaining": [
+    "Run the 23 raw and staged ABI assertions on authentic generated kernels.",
+    "Run complete native/generated/canonical qualification on any adopted exact source.",
+    "Measure the same-source compiler A/B variants under existing fuel and host resource policies.",
+    "Retain full Arena and performance obligations as open unless separately qualified."
+  ]
+}

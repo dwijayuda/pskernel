@@ -1,3 +1,11 @@
+## Native equality checkpoint — passed, generated/performance pending
+
+Exact draft `d7d7b8905d6f7bb6e0044a2fcae4a33fe1424ed5` passed the native-only preflight in [40145171697](https://github.com/dwijayuda/pskernel/actions/runs/40145171697), attempt 1, job `121024847987`. The actual log contains all three ordered universal equality reports with only `propext`, `Classical.choice`, and `Quot.sound` as applicable. Source authentication confirms the three frozen bodies and exact full-file binding moves; all 186 native build jobs passed.
+
+The proof log SHA256 is `d4149b5e52dd64256bfc68acb407fe110a436dbcfccd4faa72d26d0aa170cc4c`; the source-audit SHA256 is `6e37efc791958cf18ef5d4c4b640f73994cebe7cc4d2911ad73ddaea9c09a9fd`. The API-reported archive is `12580094440`, 4,525 bytes, SHA256 `04f193a1c779d458ef82a921be9a560e5eb5ce86dbf8b962b79ea095d9b6e4d4`; this checkpoint has not independently audited that ZIP. Exact terminal receipts and scope are recorded in `docs/qualification/T08_DEFERRED_TRANSFORM_NATIVE_d7d7b890.json`.
+
+This is a scoped native equality result. Generated23, complete source qualification, and bounded A/B observations remain pending. Production integration is not authorized by this preflight result alone.
+
 # T08 deferred transform workers — prepared draft, 2026-10-25
 
 ## Status

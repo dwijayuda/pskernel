@@ -1,4 +1,4 @@
-name: PSC1 external layout boundary proof preflight
+name: PSC1 source and canonical layout boundary proof preflight
 'on':
   workflow_dispatch: null
   push:
@@ -35,10 +35,11 @@ jobs:
         mkdir -p "$RUNNER_TEMP/layout-boundary-preflight"
         python3 - <<'PY'
         import hashlib,json,os,pathlib,re,subprocess
-        specs=[{"module":"PsKernelExprV2MetadataProofs","count":8,"log":"layout-PsKernelExprV2MetadataProofs.log"},{"module":"PsKernelExprV2PagedModelProofs","count":17,"log":"layout-PsKernelExprV2PagedModelProofs.log"},{"module":"PsKernelExprV2LayoutBoundaryProofs","count":2,"log":"layout-PsKernelExprV2LayoutBoundaryProofs.log"}]
+        specs=[{"module":"PsKernelExprV2MetadataProofs","count":8,"log":"layout-PsKernelExprV2MetadataProofs.log"},{"module":"PsKernelExprV2PagedModelProofs","count":17,"log":"layout-PsKernelExprV2PagedModelProofs.log"},{"module":"PsKernelExprV2LayoutBoundaryProofs","count":5,"log":"layout-PsKernelExprV2LayoutBoundaryProofs.log"}]
         paths=['psc1/test/'+s['module']+'.lean' for s in specs]+[
           '.github/workflows/psc1-pskernel-layout-boundary-preflight.yml',
           'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean',
+          'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean',
           'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean',
           'psc1/kernel-lakefile.lean','psc1/lean-toolchain','psc1/scripts/install-lean435-ci.sh']
         out=pathlib.Path(os.environ['RUNNER_TEMP'])/'layout-boundary-preflight'
@@ -67,7 +68,7 @@ jobs:
         lake -f kernel-lakefile.lean build PsKernelExprV2PagedModelNativeProofs \
           Ps.KernelCore.Core.ExprV2.Validation \
           2>&1 | tee "$RUNNER_TEMP/layout-boundary-preflight/native-build.log"
-    - name: Compile 27 metadata, storage and external layout reports
+    - name: Compile 30 metadata, storage and source/canonical layout reports
       working-directory: psc1
       shell: bash
       run: |
@@ -77,7 +78,7 @@ jobs:
         for PSC1_LAYOUT_SPEC in \
           'PsKernelExprV2MetadataProofs:8:layout-PsKernelExprV2MetadataProofs.log' \
           'PsKernelExprV2PagedModelProofs:17:layout-PsKernelExprV2PagedModelProofs.log' \
-          'PsKernelExprV2LayoutBoundaryProofs:2:layout-PsKernelExprV2LayoutBoundaryProofs.log'; do
+          'PsKernelExprV2LayoutBoundaryProofs:5:layout-PsKernelExprV2LayoutBoundaryProofs.log'; do
           IFS=: read -r PSC1_LAYOUT_MODULE PSC1_LAYOUT_COUNT PSC1_LAYOUT_LOG <<< "$PSC1_LAYOUT_SPEC"
           psc1_layout_count_status=0
           psc1_layout_lean_status=0
@@ -96,7 +97,7 @@ jobs:
         test "$psc1_layout_failed" -eq 0
         python3 - <<'PY'
         import hashlib,json,os,pathlib,re
-        specs=[{"module":"PsKernelExprV2MetadataProofs","count":8,"log":"layout-PsKernelExprV2MetadataProofs.log"},{"module":"PsKernelExprV2PagedModelProofs","count":17,"log":"layout-PsKernelExprV2PagedModelProofs.log"},{"module":"PsKernelExprV2LayoutBoundaryProofs","count":2,"log":"layout-PsKernelExprV2LayoutBoundaryProofs.log"}]
+        specs=[{"module":"PsKernelExprV2MetadataProofs","count":8,"log":"layout-PsKernelExprV2MetadataProofs.log"},{"module":"PsKernelExprV2PagedModelProofs","count":17,"log":"layout-PsKernelExprV2PagedModelProofs.log"},{"module":"PsKernelExprV2LayoutBoundaryProofs","count":5,"log":"layout-PsKernelExprV2LayoutBoundaryProofs.log"}]
         root=pathlib.Path(os.environ['RUNNER_TEMP'])/'layout-boundary-preflight'
         def digest(path):
             raw=path.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
@@ -125,8 +126,8 @@ jobs:
             records.append({'module':module,'proofs':count,'names':names,
                             'source':digest(source),'log':digest(root/filename)})
             statuses.append('PSC1_LAYOUT_BOUNDARY_PROOF_STATUS module='+module+' count='+str(count)+' countStatus=0 leanStatus=0')
-        if len(all_names)!=27 or len(set(all_names))!=27:
-            raise RuntimeError('Exact27 distinct metadata/storage/layout reports required')
+        if len(all_names)!=30 or len(set(all_names))!=30:
+            raise RuntimeError('Exact30 distinct metadata/storage/layout reports required')
         if (root/'proof-status.log').read_text().splitlines()!=statuses:
             raise RuntimeError('Exact three successful proof command statuses required')
         inventory=root/'source-inventory.json'
@@ -137,12 +138,14 @@ jobs:
                 raise RuntimeError('Source changed after authentication: '+item['path'])
         receipt={'schema':'psc1-layout-boundary-preflight-v1','sourceSha':os.environ['GITHUB_SHA'],
                  'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
-                 'status':'pass','proofModules':3,'totalProofs':27,'proofs':records,
+                 'status':'pass','proofModules':3,'totalProofs':30,'proofs':records,
                  'sourceInventory':digest(inventory),'proofStatuses':digest(root/'proof-status.log'),
                  'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
                  'shapeGuardEstablishesSourceLayout':True,
                  'successfulValidatorEstablishesSourceLayout':True,
-                 'canonicalOutputLayoutEstablished':False,
+                 'replayNodePreservesCanonicalLayout':True,
+                 'validateFuelPreservesCanonicalLayout':True,
+                 'canonicalOutputLayoutEstablished':True,
                  'metadataCorrespondenceEstablished':False,'decoderCorrespondenceEstablished':False,
                  'replayArenaModelBridgeEstablished':False,
                  'productionChanges':False,'fullQualification':False,'performanceQualified':False}

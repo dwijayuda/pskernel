@@ -1,0 +1,71 @@
+name: PSC1 actual G1 IO target mappings
+on:
+  push:
+    branches: [qualification/psc1-io-mappings-g1-20261026]
+    paths:
+      - .github/workflows/psc1-io-mappings-g1.yml
+      - psc1/scripts/generated-io-mappings-tests.mjs
+      - psc1/scripts/io-candidate-consumers.mjs
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-io-mappings-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  mappings:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Check package acceptance script syntax
+        run: |
+          node --check scripts/generated-io-installed-applications.mjs
+          node --check scripts/generated-io-installed-candidates.mjs
+          node --check scripts/io-candidate-consumers.mjs
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake/build
+          key: psc1-output-abi-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-output-abi-v1-${{ runner.os }}-
+            psc1-trace-native-v1-${{ runner.os }}-
+      - name: Install official checker and pinned independent target consumers
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_independent_checker
+          npm ci --prefix .. --ignore-scripts --include=optional
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+      - name: Execute genuine G1 emission independent admission and JS TS Rust consumers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/generated-io-mappings-tests.mjs
+      - name: Archive arbitrary source and fixture names without changing them
+        if: always()
+        run: |
+          if [ -d dist/generated-io-mappings ]; then
+            tar --exclude='*/input' -czf dist/generated-io-mappings-evidence.tar.gz -C dist generated-io-mappings
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-g1-io-mappings-${{ github.sha }}
+          path: psc1/dist/generated-io-mappings-evidence.tar.gz
+          if-no-files-found: warn
+          retention-days: 90

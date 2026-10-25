@@ -7,9 +7,9 @@ import {verifyWasmPrebuiltManifest} from './host/prebuilt.mjs';
 
 export const leanKernelProviderProtocol='pskernel-lean/1';
 export const leanKernelProviderName='lean4-cpp';
-export const leanKernelProviderVersion='4.34.0';
-export const leanKernelProviderCommit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
-export const leanKernelProviderProfile='lean4.34-core';
+export const leanKernelProviderVersion='4.35.0';
+export const leanKernelProviderCommit='eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
+export const leanKernelProviderProfile='lean4.35-core';
 
 const bundledLauncherPath=fileURLToPath(
   new URL('./wasm/pskernel-lean.cjs',import.meta.url),
@@ -25,6 +25,7 @@ function providerOptions(options={}){
   if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0){
     throw new TypeError('timeoutMs must be a positive integer');
   }
+  if(!Number.isSafeInteger(maxBuffer)||maxBuffer<=0)throw new TypeError('maxBuffer must be a positive integer');
   return {
     launcherPath,
     nodePath,
@@ -65,6 +66,7 @@ function runProviderCommand(command,options,input){
     if(directory!==undefined)rmSync(directory,{recursive:true,force:true});
   }
 
+  if(options.verifyBundledPrebuilt)verifyWasmPrebuiltManifest();
   if(run.error){
     throw new Error(
       `failed to start Lean WASM kernel provider: ${run.error.message}`,

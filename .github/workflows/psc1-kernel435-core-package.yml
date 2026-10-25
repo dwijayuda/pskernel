@@ -1,0 +1,84 @@
+name: PSC1 integrated independent kernel compiler packages
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [psc1/scripts/kernel435-integrated-inputs.json, .github/workflows/psc1-kernel435-core-package.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  integrated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Assemble pinned compiler and independently qualified kernel packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --check scripts/kernel435-core-package.mjs
+          node --check scripts/kernel435-core-installed.mjs
+          node scripts/kernel435-core-package.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-kernel435-integrated-candidate-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435-core/tarballs/
+            psc1/dist/kernel435-core/package-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Independently recheck the exact frozen compiler graph with both kernels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/kernel435-frozen-compiler.mjs dist/kernel435-core/work/package
+      - name: Real installed native and four generated compiler engines with dual admission
+        run: node scripts/kernel435-core-installed.mjs dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz
+      - name: Typecheck actual installed core and kernel public APIs
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc1-core-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          npm install --prefix "$RUNNER_TEMP/psc1-core-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz" "$GITHUB_WORKSPACE/psc1/dist/kernel435-core/tarballs/proofscript-pskernel-lean-4.35.0.tgz" "$GITHUB_WORKSPACE/psc1/dist/kernel435-core/tarballs/proofscript-pskernel-lean-wasm-4.35.0.tgz"
+          cat > "$RUNNER_TEMP/psc1-core-types/consumer.mts" <<'TS'
+          import {createIndependentKernelToolchain,type KernelToolchainResult} from 'proofscript/kernel';
+          import {createKernel as nativeKernel} from '@proofscript/pskernel-lean';
+          import {createKernel as wasmKernel} from '@proofscript/pskernel-lean-wasm';
+          const checker=await createIndependentKernelToolchain({root:'.'});
+          const result:KernelToolchainResult=await checker.checkCanonicalAdmissions('{}');
+          const native=await nativeKernel();const wasm=await wasmKernel();
+          const accepted:boolean=result.accepted&&(await native.checkCanonicalAdmissions('{}')).accepted&&(await wasm.checkCanonicalAdmissions('{}')).accepted;
+          // @ts-expect-error public result is readonly
+          result.accepted=true;
+          console.log(accepted);
+          TS
+          cat > "$RUNNER_TEMP/psc1-core-types/tsconfig.json" <<'JSON'
+          {"compilerOptions":{"noEmit":true,"strict":true,"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022"},"files":["consumer.mts"]}
+          JSON
+          node "$RUNNER_TEMP/psc1-core-types/node_modules/typescript/bin/tsc" --project "$RUNNER_TEMP/psc1-core-types/tsconfig.json"
+      - name: Fresh offline global install of the same candidate before qualification
+        run: node scripts/kernel435-global-installed.mjs dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-kernel435-integrated-toolchain-qualified-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435-core/tarballs/
+            psc1/dist/kernel435-core/package-receipt.json
+            psc1/dist/kernel435-core-installed/
+            psc1/dist/kernel435-global/
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: psc1-kernel435-integrated-diagnostics-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435-core/tarballs/
+            psc1/dist/kernel435-core/package-receipt.json
+            psc1/dist/kernel435-core-installed/
+            psc1/dist/kernel435-global/
+          retention-days: 90

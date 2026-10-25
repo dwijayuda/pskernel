@@ -1,5 +1,5 @@
 import {createHash} from 'node:crypto';
-import {readFileSync,statSync} from 'node:fs';
+import {readFileSync,lstatSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -13,12 +13,15 @@ export const wasmPrebuiltModulePath='wasm/pskernel-lean.wasm';
 const expected={
   schemaVersion:1,
   packageName:'@proofscript/pskernel-lean-wasm',
-  packageVersion:'4.34.0',
+  packageVersion:'4.35.0',
   protocol:'pskernel-lean/1',
   provider:'lean4-cpp',
-  leanVersion:'4.34.0',
-  leanCommit:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
+  leanVersion:'4.35.0',
+  leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
   emscriptenVersion:'6.0.9',
+  profile:'lean4.35-core',
+  canonicalAdmissionsVersion:2,
+  memoryModel:'linear',
 };
 
 function sha256File(filePath){
@@ -27,8 +30,8 @@ function sha256File(filePath){
 
 function artifactRecord(packageRoot,relativePath){
   const filePath=path.resolve(packageRoot,...relativePath.split('/'));
-  const stat=statSync(filePath);
-  if(!stat.isFile()||stat.size<=0){
+  const stat=lstatSync(filePath);
+  if(!stat.isFile()||stat.isSymbolicLink()||stat.size<=0){
     throw new Error(`Lean WASM prebuilt artifact missing or empty: ${relativePath}`);
   }
   return Object.freeze({
@@ -68,7 +71,8 @@ function verifyArtifact(packageRoot,record,expectedPath,label){
     throw new Error(`Lean WASM prebuilt ${label} path mismatch: ${String(record?.path)}`);
   }
   const filePath=path.resolve(packageRoot,...expectedPath.split('/'));
-  const stat=statSync(filePath);
+  const stat=lstatSync(filePath);
+  if(!stat.isFile()||stat.isSymbolicLink())throw new Error('Lean WASM prebuilt artifact must be a regular file');
   if(stat.size!==record.bytes){
     throw new Error(
       `Lean WASM prebuilt ${label} size mismatch: expected ${String(record.bytes)}, got ${String(stat.size)}`,

@@ -1,0 +1,12 @@
+{
+  "schema": "psc1-kernel435-typed-input/1",
+  "native": {
+    "run": 40155475188,
+    "job": 121055846346,
+    "artifact": 12584263337,
+    "zipSha256": "a5cefb58f4eaf4a558b390294d24c555b763c3a0ef7f7e68aab7cfc324f58b2f",
+    "commit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+    "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+    "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+  }
+}

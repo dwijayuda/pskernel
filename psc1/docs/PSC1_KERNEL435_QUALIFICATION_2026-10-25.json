@@ -1,0 +1,3995 @@
+{
+  "schema": "psc1-independent-kernel435-qualification/1",
+  "date": "2026-10-25",
+  "compilerBaseline": {
+    "commit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+    "fullGate": {
+      "run": 40152772905,
+      "fullJob": 121049906606,
+      "finalGate": 121055266402,
+      "reviewCommit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+      "testedCommit": "f9713323bb3beed393255ff755da3dd2023febdc",
+      "treeSha": "d884c41c8097ac59c91081f019481f60625ba793",
+      "status": "passed",
+      "criteria": 37,
+      "blocked": 0,
+      "artifact": 12583743977,
+      "zipSha256": "8b10c96a59fab176c0cf7dcc967720c8384870d97745859f0a3a99a71cc17194",
+      "readiness": {
+        "counts": {
+          "implemented": 0,
+          "tested": 0,
+          "qualified": 37,
+          "blocked": 0
+        },
+        "releaseReady": true
+      }
+    },
+    "frozenCompilerSourceClosure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
+  },
+  "officialLean": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "protocol": "pskernel-lean/1",
+    "profile": "lean4.35-core",
+    "canonicalAdmissionsVersion": 2,
+    "trustLevel": 0,
+    "heartbeatLimit": 2000000,
+    "recursionLimit": 20000
+  },
+  "sourceClosureDigest": "f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b",
+  "providerModules": 25,
+  "native": {
+    "status": "qualified-packed-five-platform-installed",
+    "packageCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+    "run": 40155475188,
+    "assembly": {
+      "schema": "psc1-kernel435-native-package/1",
+      "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+      "status": "assembled-qualified-binaries-not-yet-installed",
+      "package": "@proofscript/pskernel-lean",
+      "version": "4.35.0",
+      "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+      "bytes": 6446239,
+      "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+      "sourceClosureDigest": "f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b",
+      "targets": {
+        "linux-x64": {
+          "path": "prebuilt/linux-x64/psc2_lean_kernel_provider",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "size": 4079232,
+          "sourceCommit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6",
+          "qualification": {
+            "run": 40154010946,
+            "job": 121051344145,
+            "artifact": 12583552650,
+            "zipSha256": "01f025c2a073e45d7401455fd8af111bf10695a4115119a0a01ce4e5c40c2ffa",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "linux-arm64": {
+          "path": "prebuilt/linux-arm64/psc2_lean_kernel_provider",
+          "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+          "size": 4160016,
+          "sourceCommit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6",
+          "qualification": {
+            "run": 40154010946,
+            "job": 121051344263,
+            "artifact": 12583702369,
+            "zipSha256": "0e1a49679bfdedfda7ad6ca4c0edeca18dce65209722b145cc25aad4b90c6dcf",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "darwin-x64": {
+          "path": "prebuilt/darwin-x64/psc2_lean_kernel_provider",
+          "sha256": "eb4c6d21bbfb32afbf6470b1a678198842b4ebdb7c0920e0461bf3a44d961af6",
+          "size": 2771584,
+          "sourceCommit": "fdee7795c0736cf0acca9dddca4ebbc1c86bd0d4",
+          "qualification": {
+            "run": 40154709416,
+            "job": 121053490973,
+            "artifact": 12584087448,
+            "zipSha256": "42cac3fdd355fec25ce759e0ad15ce221235a050d3ddbde19e5311e01ffcb146",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "darwin-arm64": {
+          "path": "prebuilt/darwin-arm64/psc2_lean_kernel_provider",
+          "sha256": "9a572fd4bfc6e0697d1b18589d6bbc80579b26cd495a79e30e72d263b7454183",
+          "size": 2798528,
+          "sourceCommit": "fdee7795c0736cf0acca9dddca4ebbc1c86bd0d4",
+          "qualification": {
+            "run": 40154709416,
+            "job": 121053490842,
+            "artifact": 12584237016,
+            "zipSha256": "50d1a9105c7c1e04f62ca9851a4bdbdd2415c5e7c88eb7011c1384e01a1111a7",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "win32-x64": {
+          "path": "prebuilt/win32-x64/psc2_lean_kernel_provider.exe",
+          "sha256": "5a8cd5adb4cd8a8295e27e7be7c3295c360e41cf85b8d2b9922d1c52730fb6d8",
+          "size": 4616704,
+          "sourceCommit": "546bb0f84e86e4d09876f24b036711368fe01635",
+          "qualification": {
+            "run": 40155170697,
+            "job": 121054915634,
+            "artifact": 12583923425,
+            "zipSha256": "fd08b0114b4bd5f4f2d1344e2d9178b6eb81896cb1462c9e0c9fa91878996d19",
+            "standalone": true,
+            "parityCases": 14
+          }
+        }
+      }
+    },
+    "artifact": 12584263337,
+    "artifactZipSha256": "a5cefb58f4eaf4a558b390294d24c555b763c3a0ef7f7e68aab7cfc324f58b2f",
+    "installed": [
+      {
+        "job": 121056236215,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "darwin-arm64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236219,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "darwin-x64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236235,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "linux-x64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236281,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "win32-x64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236294,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "linux-arm64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      }
+    ],
+    "optimization": {
+      "referenceBranch": "archive/local-slim-prebuilt-3c49f7d8-20261004",
+      "referenceHead": "0408f18b47e6cf9b42fce023d24fd73ba79c95af",
+      "strategy": [
+        "narrow Lean.Environment imports without changing provider bodies",
+        "official static SDK archives",
+        "kernel/util initialization plus generated module initializers",
+        "remove only unused Lake linker library",
+        "Os and platform strip/ad-hoc macOS signature"
+      ],
+      "compilerOrCheckerSemanticBypass": false
+    }
+  },
+  "wasm": {
+    "status": "qualified-packed-five-platform-installed",
+    "run": 40158859386,
+    "assemblyJob": 121065949141,
+    "commit": "a037d13c352d0b65290abc6127c883c05732d42d",
+    "assembly": {
+      "schema": "psc1-kernel435-wasm-package/1",
+      "sourceCommit": "a037d13c352d0b65290abc6127c883c05732d42d",
+      "status": "assembled-qualified-kernel-not-yet-installed",
+      "package": "@proofscript/pskernel-lean-wasm",
+      "version": "4.35.0",
+      "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+      "sha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511",
+      "bytes": 582533,
+      "memoryModel": "linear",
+      "sourceClosureDigest": "f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b",
+      "qualifiedInput": {
+        "run": 40154206987,
+        "job": 121051950567,
+        "artifact": 12584808379,
+        "zipSha256": "1207abbb895b88cb6ab62962109cb9906e20de1c135a3e757e8fe372a01d8c4f",
+        "commit": "630fa36343cd1e8d19178cae200f2ad98cf017c0"
+      },
+      "artifacts": {
+        "launcher": {
+          "path": "wasm/pskernel-lean.cjs",
+          "bytes": 69410,
+          "sha256": "ec9b2d7c95d10d69a337c5dd9dff4484d022a63c83cd1db3b67588f090a3e667"
+        },
+        "wasm": {
+          "path": "wasm/pskernel-lean.wasm",
+          "bytes": 2212007,
+          "sha256": "7412659c1089f230bfaed020e82c04fc57b88c242baa3d365def1aa2a390baac"
+        }
+      }
+    },
+    "artifact": 12585319493,
+    "artifactZipSha256": "df0491ab0d69c9913f8f13a4482084e8b1e42d78d84330743e3b70b1a3de7b4c",
+    "installed": [
+      {
+        "job": 121066333326,
+        "schema": "psc1-kernel435-wasm-installed/1",
+        "sourceCommit": "a037d13c352d0b65290abc6127c883c05732d42d",
+        "status": "passed",
+        "target": "linux-x64",
+        "tarballSha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "publicAsyncApis": true,
+        "memoryModel": "linear",
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121066333333,
+        "schema": "psc1-kernel435-wasm-installed/1",
+        "sourceCommit": "a037d13c352d0b65290abc6127c883c05732d42d",
+        "status": "passed",
+        "target": "win32-x64",
+        "tarballSha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "publicAsyncApis": true,
+        "memoryModel": "linear",
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121066333349,
+        "schema": "psc1-kernel435-wasm-installed/1",
+        "sourceCommit": "a037d13c352d0b65290abc6127c883c05732d42d",
+        "status": "passed",
+        "target": "darwin-x64",
+        "tarballSha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "publicAsyncApis": true,
+        "memoryModel": "linear",
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121066333363,
+        "schema": "psc1-kernel435-wasm-installed/1",
+        "sourceCommit": "a037d13c352d0b65290abc6127c883c05732d42d",
+        "status": "passed",
+        "target": "darwin-arm64",
+        "tarballSha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "publicAsyncApis": true,
+        "memoryModel": "linear",
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121066333364,
+        "schema": "psc1-kernel435-wasm-installed/1",
+        "sourceCommit": "a037d13c352d0b65290abc6127c883c05732d42d",
+        "status": "passed",
+        "target": "linux-arm64",
+        "tarballSha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "publicAsyncApis": true,
+        "memoryModel": "linear",
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      }
+    ],
+    "build": {
+      "run": 40154206987,
+      "job": 121051950567,
+      "commit": "630fa36343cd1e8d19178cae200f2ad98cf017c0",
+      "status": "passed",
+      "artifact": 12584808379,
+      "artifactZipSha256": "1207abbb895b88cb6ab62962109cb9906e20de1c135a3e757e8fe372a01d8c4f",
+      "memoryModel": "linear",
+      "wasmGc": false,
+      "emscripten": "6.0.9",
+      "officialLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "wallSeconds": 4105,
+      "userSeconds": 8597.09,
+      "systemSeconds": 851.23,
+      "peakRssKiB": 1521832,
+      "differentialCases": 14,
+      "cache": "sealed target-width stage1 toolchain; retain for exact-source reuse",
+      "compatibility": [
+        "32-bit stage0/target-width oleans and ABI",
+        "single-thread Emscripten runtime",
+        "Unit/RealWorld erased ABI and UInt32 shell status",
+        "no-libuv uint64 group fallback",
+        "native-equivalent task heartbeat reset; finite 2000000/20000 limits retained"
+      ]
+    }
+  },
+  "hostIntegration": {
+    "status": "passed",
+    "implementationCommit": "62638bef977344889c0394533f6c8bd1099130f4",
+    "boundary": {
+      "run": 40157932317,
+      "job": 121063205602,
+      "status": "passed",
+      "hostBoundaryChecks": 36,
+      "artifactPublisherRegressions": 17,
+      "rustTransportRegressions": 10,
+      "acceptedTestProvider": "real native reference; actual Wasm tested by integrated package run"
+    },
+    "run": 40161362270,
+    "job": 121073432577,
+    "commit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+    "artifact": 12586394254,
+    "artifactZipSha256": "426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52",
+    "package": {
+      "schema": "psc1-integrated-kernel-package/1",
+      "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+      "status": "assembled-not-yet-qualified",
+      "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "kernelSourceClosureDigest": "f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b",
+      "tarball": "proofscript-0.1.0-psc1.3.tgz",
+      "sha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a",
+      "bytes": 62181083,
+      "kernelVersions": {
+        "native": "4.35.0",
+        "wasm": "4.35.0"
+      },
+      "defaultKernel": "wasm",
+      "nativeKernelRole": "explicit-comparison",
+      "wasmMemoryModel": "linear",
+      "qualifiedInputs": {
+        "schema": "psc1-kernel435-integrated-package-inputs/1",
+        "core": {
+          "run": 40152769340,
+          "job": 121047594235,
+          "artifact": 12582649787,
+          "zipSha256": "da6a88220337c601fcf401ea7e06a55c45988f96c0a5692d28e958ed07c61916",
+          "commit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+          "tarball": "npm-generated/run-IjpP9o/tarballs/proofscript-0.1.0-psc1.3.tgz",
+          "tarballSha256": "29a837faedaabb8c7e6ae30cec19ac53680084b5188de0eef2b7eabbd4f09198",
+          "optional": {
+            "python": {
+              "file": "npm-generated/run-IjpP9o/tarballs/proofscript-backend-python-0.1.0-psc1.3.tgz",
+              "sha256": "a9e26065a916ba53405897a29bdcb6b0cb4b750fef516e2948ad0c30a1a3e1bd"
+            },
+            "php": {
+              "file": "npm-generated/run-IjpP9o/tarballs/proofscript-backend-php-0.1.0-psc1.3.tgz",
+              "sha256": "7eaaa1f667e9783803e2402ce5d1adb6bd0d867faf665dbb8c5e406a260afaec"
+            }
+          }
+        },
+        "native": {
+          "run": 40155475188,
+          "job": 121055846346,
+          "artifact": 12584263337,
+          "zipSha256": "a5cefb58f4eaf4a558b390294d24c555b763c3a0ef7f7e68aab7cfc324f58b2f",
+          "commit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+          "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+          "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+        },
+        "wasm": {
+          "run": 40158859386,
+          "job": 121065949141,
+          "artifact": 12585319493,
+          "zipSha256": "df0491ab0d69c9913f8f13a4482084e8b1e42d78d84330743e3b70b1a3de7b4c",
+          "commit": "a037d13c352d0b65290abc6127c883c05732d42d",
+          "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+          "tarballSha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511"
+        },
+        "compiledExecutionBundles": {
+          "run": 40158598464,
+          "job": 121065159833,
+          "artifact": 12585698132,
+          "zipSha256": "178106f3d9329cf3b4ba576110cb96b0790e62351bf8756e3fbab77720dd25be",
+          "commit": "c228c7135e2cb816614c396c595b49bb7e4c4e50",
+          "packages": [
+            {
+              "package": "@proofscript/compiler-rust-linux-x64",
+              "engine": "rust",
+              "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz",
+              "bytes": 12917609,
+              "sha256": "551f150d09d98fe48312c40cdaa793522534c84fff250097199ff75b467530f7",
+              "manifestSha256": "21b6798cf00249adb7f6b7bcb37eafc1fdc8790b07451c5985b348c735df0b05",
+              "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+              "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
+            },
+            {
+              "package": "@proofscript/compiler-wasm",
+              "engine": "wasm-core",
+              "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
+              "bytes": 1370182,
+              "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83",
+              "manifestSha256": "31e4fb0b03833eb85dee282ae67c0c948f7b9f89d88609638696d38445cf83ad",
+              "executableSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d",
+              "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
+            }
+          ]
+        }
+      },
+      "allFourEngineSelfHostQualified": true,
+      "allFourEngineReleaseQualified": false,
+      "corePlatformScope": "linux-x64-glibc; kernel packages separately qualified on five platforms"
+    },
+    "installed": {
+      "schema": "psc1-integrated-kernel-installed/1",
+      "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+      "status": "passed",
+      "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a",
+      "platform": "linux-x64",
+      "kernelCases": [
+        {
+          "id": "nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "large-nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "kernel-type-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "duplicate-declaration-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-constant-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unsafe-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "metavariable-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "height-overflow-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "malformed-json",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-format",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "string-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-admission",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "truncated-structured-name",
+          "accepted": false,
+          "agreement": true
+        }
+      ],
+      "sourceCases": [
+        {
+          "kind": "lean",
+          "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+        },
+        {
+          "kind": "ps",
+          "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+        }
+      ],
+      "cases": [
+        {
+          "engine": "js",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 465,
+          "manifestSha256": "22481061d9fffaf24ff24c035556fe06fe2996db502230e0a78ba1dbc341ffc4",
+          "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
+        },
+        {
+          "engine": "js",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 433,
+          "manifestSha256": "9565ef216049bdd7af090c94149ed44256b673c5f4415f4033a3d2e581106cf8",
+          "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
+        },
+        {
+          "engine": "js",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 574,
+          "manifestSha256": "c3cb6ad39d54dd86395a02810737aaad6f53f82a9163d64cfad76c552d53221a",
+          "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
+        },
+        {
+          "engine": "js",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 826,
+          "manifestSha256": "d6ae3f1bbbd7502782d351204dbde19a876e4c0cfca4a1388d65622062b92ff0",
+          "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
+        },
+        {
+          "engine": "js",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 840,
+          "manifestSha256": "40dfea38ac43e32c96b638654753f8f5b1ed4dd0c570cc9e4fa18af4b27a8f9c",
+          "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
+        },
+        {
+          "engine": "ts",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 474,
+          "manifestSha256": "9d1c046053e429096283712c84faa6337d3e3653115b3d429d4f8d86f38e954d",
+          "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
+        },
+        {
+          "engine": "ts",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 436,
+          "manifestSha256": "b3fcda333abc6321524b347fe2c57a13c6b1cfe619ec1c4971ca088b2a5599cd",
+          "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
+        },
+        {
+          "engine": "ts",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 589,
+          "manifestSha256": "82271432e6a2d76128fdfdabb1876b54696297ce27fa18e354f1d2c8f61bf324",
+          "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
+        },
+        {
+          "engine": "ts",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 878,
+          "manifestSha256": "83288761b81f6eb365b2a80b486b1bb08983bdc461560df5df9c99b1817cf4fe",
+          "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
+        },
+        {
+          "engine": "ts",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 900,
+          "manifestSha256": "a522e2cfa001fdcb0baf6b9d00a395ee9efdf35e3c464ccc6d40cb96849663e9",
+          "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
+        },
+        {
+          "engine": "rust",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 470,
+          "manifestSha256": "69a64349c96fbb0b591172bb5d14cd2687084fdb1fa5f1673563df83dd1b24af",
+          "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
+        },
+        {
+          "engine": "rust",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 457,
+          "manifestSha256": "f33608242a88fd22a2e7ff35b0de3e4b9eaebf4e718b7c3aa67ca84c45abafa9",
+          "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
+        },
+        {
+          "engine": "rust",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 505,
+          "manifestSha256": "10cfafd36af05dc9ee473721ce398716b399aeaa1840c2382063cbc394a89f0c",
+          "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
+        },
+        {
+          "engine": "rust",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 641,
+          "manifestSha256": "a7383e96e07b3b2bf35c787185eb8490c95b194db3330ba8d8fbe032c86365fe",
+          "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
+        },
+        {
+          "engine": "rust",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 755,
+          "manifestSha256": "3c9ac9ab76a2c89f616efd0c47e7e4895df3604396d854fe22c629f03aa7726f",
+          "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 345,
+          "manifestSha256": "350e1dbad1d3d58bda7f7dbc9ccfb8b0b39bd6024df36d87b471b5e1da3a0d9d",
+          "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 345,
+          "manifestSha256": "712dace2c59542502a453dcd13c16194f14c1536a06303ea4a4dd8f74cd62bac",
+          "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "passed": true,
+          "compilerExecutionMs": 357,
+          "manifestSha256": "e1aff3f84bb2f036ebdf0bee3597c17719a91b97308af3ea02764622d8f89300",
+          "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 417,
+          "manifestSha256": "8073215817fce4e930b2dafc14d39e8d5b547dde340a7edc767bedb54334c657",
+          "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "passed": true,
+          "compilerExecutionMs": 483,
+          "manifestSha256": "0f854c21efef9f76cfe979e76895bf1f39b99748e5aa7a42674d29a48486ec43",
+          "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
+        }
+      ],
+      "applicationCases": [
+        {
+          "engine": "js",
+          "grammar": "lean",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+          "compilerExecutionMs": 11580,
+          "manifestSha256": "219390c74f47af04300d1f8d007782ccb462cb316eeefbaca7c8aeaa0e4b2bc8",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "grammar": "lean",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+          "compilerExecutionMs": 13102,
+          "manifestSha256": "079bd90195c977fddf9d9c5b914d1027b59baee2dc86342e011de29a8e30f092",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "grammar": "lean",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+          "compilerExecutionMs": 11665,
+          "manifestSha256": "2b72d4dcef0bd3dde6e24b07bd52199aa1e57b90194de5742aac9a6ecb7b2c5b",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "lean",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+          "compilerExecutionMs": 5159,
+          "manifestSha256": "81fa6635129da1538523e25be557e6c471306c8d363e12426dc8e1aa6cce706d",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "grammar": "lean",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+          "compilerExecutionMs": 15339,
+          "manifestSha256": "a44401ecdc0e300461790e725c13874a8010b784b64eac0c1229095de07e3623",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "grammar": "lean",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+          "compilerExecutionMs": 17607,
+          "manifestSha256": "d0208d7a7b1fd0fe9d2ce4865fcbba3c4d7f0c497d1fa13af61ca163bb88df62",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "grammar": "lean",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+          "compilerExecutionMs": 15572,
+          "manifestSha256": "1ac7459a81eeed7b0b6e16af35ac299c20bf791a30bc3926085a61c184366242",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "lean",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+          "compilerExecutionMs": 6940,
+          "manifestSha256": "c9ccd61a5e3bcd4e65bf98feab34c934e9057dee538091defb1bcd9741885e90",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "grammar": "lean",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 401,
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "grammar": "lean",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 401,
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "grammar": "lean",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 454,
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "lean",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 333,
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "grammar": "ps",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+          "compilerExecutionMs": 11949,
+          "manifestSha256": "31b71920215dd3c273721aadeddbba45d1c0d20dda5dd8233dfb798fc9633065",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "grammar": "ps",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+          "compilerExecutionMs": 13418,
+          "manifestSha256": "7665b71bc86056dc94287afe524d83ebc5a5fb1277c2a6a71491d0cbf46e9642",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "grammar": "ps",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+          "compilerExecutionMs": 11727,
+          "manifestSha256": "c7650bc41e0f1262ab2a9409ba428eda43de5541f7eb4d8b9428f6fa3b9d22d9",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "ps",
+          "app": "json-records",
+          "modules": 7,
+          "observations": 5,
+          "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+          "compilerExecutionMs": 5170,
+          "manifestSha256": "87b8621a4ddcd216384757970c049f174145282da9b71a1d8795e57e1ac3fb28",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "grammar": "ps",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+          "compilerExecutionMs": 15897,
+          "manifestSha256": "c428d055bd55978922ec93d9bf18ed3c3e3177cfddc6008ef865ae72e29f5a36",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "grammar": "ps",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+          "compilerExecutionMs": 17812,
+          "manifestSha256": "9d18611bd65024c153b367b0bf7018f9e2571d66be0779f901ef97aaef66e9be",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "grammar": "ps",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+          "compilerExecutionMs": 15657,
+          "manifestSha256": "2aee4ff5141dc6802f9bc9e0321661b23e436fea350e332ab4424b57b5a4e3f5",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "ps",
+          "app": "cli-arguments",
+          "modules": 9,
+          "observations": 5,
+          "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+          "compilerExecutionMs": 6875,
+          "manifestSha256": "f085db0a5a5dfddf6c284ceec0db29dcfe3ef368964000d286725445d779f45d",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "grammar": "ps",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 400,
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "grammar": "ps",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 398,
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "grammar": "ps",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 453,
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "ps",
+          "app": "single-file",
+          "observations": 1,
+          "compilerExecutionMs": 331,
+          "passed": true
+        }
+      ],
+      "negatives": [
+        {
+          "engine": "js",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "Wasm-kernel-tamper",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "Wasm-kernel-tamper",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "Wasm-kernel-tamper",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "Wasm-kernel-tamper",
+          "priorPreserved": true
+        }
+      ],
+      "crossChecks": [
+        {
+          "engine": "js",
+          "grammar": "lean",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        },
+        {
+          "engine": "js",
+          "grammar": "ps",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        },
+        {
+          "engine": "ts",
+          "grammar": "lean",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        },
+        {
+          "engine": "ts",
+          "grammar": "ps",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        },
+        {
+          "engine": "rust",
+          "grammar": "lean",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        },
+        {
+          "engine": "rust",
+          "grammar": "ps",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "lean",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        },
+        {
+          "engine": "wasm-core",
+          "grammar": "ps",
+          "passed": true,
+          "primary": "wasm",
+          "additional": "native"
+        }
+      ],
+      "nativePublication": [
+        {
+          "kind": "lean",
+          "defaultKernel": "wasm",
+          "actualResult": "42",
+          "corruptWasmPreservesPrior": true,
+          "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+        },
+        {
+          "kind": "ps",
+          "defaultKernel": "wasm",
+          "actualResult": "42",
+          "corruptWasmPreservesPrior": true,
+          "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+        }
+      ],
+      "policyDeclarations": [
+        {
+          "id": "missing-generated-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        },
+        {
+          "id": "conflicting-generated-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        },
+        {
+          "id": "missing-root-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        },
+        {
+          "id": "conflicting-root-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        }
+      ],
+      "missingPolicyRefused": true,
+      "nativeCompilerUnavailableDuringGeneratedCases": true,
+      "defaultIndependentWasm": true,
+      "nativeCheckerUnavailableDuringDefaultGeneratedCases": true,
+      "wasmMemoryModel": "linear",
+      "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "finalCrossPlatformRelease": false,
+      "scope": "installed Linux integration; kernel packages carry their separate five-platform qualification"
+    },
+    "frozenCompiler": {
+      "schema": "psc1-kernel435-frozen-compiler-admission/1",
+      "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+      "status": "passed",
+      "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
+      "qualifiedInput": {
+        "run": 40141718481,
+        "job": 121014751809,
+        "artifact": 12580184355,
+        "zipSha256": "c294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0",
+        "commit": "2d27f1428e6a53a6de5006f950fc94f2d471b214"
+      },
+      "providers": [
+        "native",
+        "wasm"
+      ],
+      "wasmMemoryModel": "linear",
+      "elapsedMs": 10734,
+      "checkerRequestLimitMs": 120000,
+      "fullGenerationReplayed": false,
+      "scope": "exact frozen admitted graph shared across independently qualified JS/TS/Rust/Wasm chains; independent logical rechecking only"
+    },
+    "installedPublicTypes": "passed; actual packed proofscript/kernel and both kernel package APIs",
+    "global": {
+      "run": 40161362270,
+      "job": 121073432577,
+      "status": "passed",
+      "receipt": {
+        "schema": "psc1-wasm-default-global-package/1",
+        "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+        "status": "passed",
+        "qualifiedInput": {
+          "mode": "same-job-candidate",
+          "commit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+          "tarball": "proofscript-0.1.0-psc1.3.tgz",
+          "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a"
+        },
+        "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a",
+        "cases": [
+          {
+            "engine": "js",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "5018ad6e7c12cae79398b53d99e43708095c7127962dc84baa09af1e389ce1e6",
+            "priorPreserved": true
+          },
+          {
+            "engine": "js",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "bf17e3e640f7da7f1cbe6852c05b3cc85f2244b0594d4fc5116591ee0bc48016",
+            "priorPreserved": true
+          },
+          {
+            "engine": "ts",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "75636b56e22ea838ca28087b05afae2876517893585ca173ebdb4b8bbd130ecd",
+            "priorPreserved": true
+          },
+          {
+            "engine": "ts",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "9150460579bff69f70e377edfb06865f01854db271bdbb1891fc3866cc75c5d6",
+            "priorPreserved": true
+          },
+          {
+            "engine": "rust",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "1ef4fb323d984cda971fc6a9a3a5a0277009225c9c3215b71d22b54a3538fd68",
+            "priorPreserved": true
+          },
+          {
+            "engine": "rust",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "75e6c6bf1727d38499625c88261644603d315975fe86cc8e34233063b5144a64",
+            "priorPreserved": true
+          },
+          {
+            "engine": "wasm-core",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "47d154a8c73823c12ed76b529b0d57696d064edc1df3e5a754803c2ab77d438a",
+            "priorPreserved": true
+          },
+          {
+            "engine": "wasm-core",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "35d5cef4f13a1214349d97df1d72ae39c5a04e70808121ef2524ed963c997b3a",
+            "priorPreserved": true
+          }
+        ],
+        "globalBinExecuted": true,
+        "offlineFreshCache": true,
+        "installScriptsDisabled": true,
+        "noCheckoutOrCompilerSdkOnExecutionPath": true,
+        "nativeCompilerUnavailable": true,
+        "nativeCheckerUnavailable": true,
+        "corruptWasmRefused": true,
+        "defaultKernel": "wasm",
+        "scope": "fresh global Linux installed toolchain; full cross-platform publication remains separate"
+      }
+    },
+    "implementationCommits": [
+      "62638bef977344889c0394533f6c8bd1099130f4",
+      "77e9067469db8c3863127c927b9ede53d9ec7c58",
+      "65eb9bf1de2548e1506fad8785e3df8772399dc1",
+      "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad"
+    ],
+    "policyConsistency": {
+      "status": "passed",
+      "configurations": 4,
+      "refusingCommandsPerConfiguration": 3,
+      "priorOutputPreserved": true,
+      "nativeCheckerAvailableDuringRefusals": true
+    },
+    "scope": "qualified current exact package local/global on Linux; unchanged kernels and standalone compiler bundles retain their own five-platform evidence",
+    "currentBoundary": {
+      "run": 40161364575,
+      "job": 121074979011,
+      "testedCommit": "460a2f7057cd39bbc7489552ce2785c92c3de717",
+      "status": "passed",
+      "hostBoundaryChecks": 36,
+      "rustTransportRegressions": 10,
+      "artifact": 12586179741,
+      "artifactZipSha256": "c89b70a531e7c848bf7f070012578eb1fc658d2fa47dff0b55ca9094ef8b376d"
+    }
+  },
+  "fullToolchainCrossPlatformRelease": {
+    "status": "incomplete",
+    "existingCorePackagePlatform": "linux-x64-glibc",
+    "coreAllFourEngineReleaseQualified": false,
+    "remaining": [
+      "portable transactional publication preserving immutable generations and prior pointer on failure",
+      "slim universal root with JS/TS default execution and required Wasm kernel; optional platform execution payloads",
+      "Rust executor platform payloads and bounded supervisors beyond Linux x64",
+      "all generated output targets/components/optional providers through independent checking and strict IR",
+      "whole toolchain offline local/global actual platform release gates",
+      "required final exact source/package/platform qualification and user merge/publication authorization"
+    ]
+  },
+  "publication": "not published; user authorization required",
+  "merge": "not merged; user authorization required",
+  "status": "qualified-kernels-and-linux-integrated-toolchain; final-cross-platform-release-incomplete",
+  "defaultKernel": {
+    "package": "@proofscript/pskernel-lean-wasm",
+    "version": "4.35.0",
+    "memoryModel": "linear",
+    "nativeSelection": "explicit native|both",
+    "silentFallback": false
+  },
+  "compiledExecutionBundles": {
+    "status": "qualified-candidate-APIs",
+    "run": 40158598464,
+    "commit": "c228c7135e2cb816614c396c595b49bb7e4c4e50",
+    "assemblyJob": 121065159833,
+    "artifact": 12585698132,
+    "artifactZipSha256": "178106f3d9329cf3b4ba576110cb96b0790e62351bf8756e3fbab77720dd25be",
+    "packages": [
+      {
+        "package": "@proofscript/compiler-rust-linux-x64",
+        "engine": "rust",
+        "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz",
+        "bytes": 12917609,
+        "sha256": "551f150d09d98fe48312c40cdaa793522534c84fff250097199ff75b467530f7",
+        "manifestSha256": "21b6798cf00249adb7f6b7bcb37eafc1fdc8790b07451c5985b348c735df0b05",
+        "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+        "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
+      },
+      {
+        "package": "@proofscript/compiler-wasm",
+        "engine": "wasm-core",
+        "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
+        "bytes": 1370182,
+        "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83",
+        "manifestSha256": "31e4fb0b03833eb85dee282ae67c0c948f7b9f89d88609638696d38445cf83ad",
+        "executableSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d",
+        "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
+      }
+    ],
+    "installed": [
+      {
+        "job": 121065378438,
+        "schema": "psc1-installed-compiler-execution-bundles/1",
+        "sourceCommit": "c228c7135e2cb816614c396c595b49bb7e4c4e50",
+        "status": "passed",
+        "target": "darwin-arm64",
+        "cases": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-modules",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+            "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-integer-unicode",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+            "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-list-literal",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+            "sourceSha256": "4224fc5d51d086d4875dea3715a7704e233c0f1d3e111f3f7dc1f54ed29fb828",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-handler-pattern",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+            "sourceSha256": "1ce1b730f93388c8f97caef9bd30edadc6c160bb63ce3c5fbc562fc4f0c09720",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-ordinary-loop",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+            "sourceSha256": "5bb25c4080b290bf0d03be693d0f8487e99c9a68ed71ac7266317f58461dddb1",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          }
+        ],
+        "negatives": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "compiled-payload-corruption",
+            "refused": true
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "ill-typed-source",
+            "refused": true
+          }
+        ],
+        "offlineInstall": true,
+        "installScriptsDisabled": true,
+        "noCompilerSdkOnExecutionPath": true,
+        "independentCheckerTestReference": "explicit official Lean4.35 native package",
+        "rootDefaultKernelPolicy": "linear Wasm, qualified separately",
+        "publicationAuthority": false,
+        "scope": "genuine G3 execution payloads and candidate API; not whole-toolchain publication/default-Wasm qualification"
+      },
+      {
+        "job": 121065378439,
+        "schema": "psc1-installed-compiler-execution-bundles/1",
+        "sourceCommit": "c228c7135e2cb816614c396c595b49bb7e4c4e50",
+        "status": "passed",
+        "target": "win32-x64",
+        "cases": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-modules",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+            "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-integer-unicode",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+            "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-list-literal",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+            "sourceSha256": "4224fc5d51d086d4875dea3715a7704e233c0f1d3e111f3f7dc1f54ed29fb828",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-handler-pattern",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+            "sourceSha256": "1ce1b730f93388c8f97caef9bd30edadc6c160bb63ce3c5fbc562fc4f0c09720",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-ordinary-loop",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+            "sourceSha256": "5bb25c4080b290bf0d03be693d0f8487e99c9a68ed71ac7266317f58461dddb1",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          }
+        ],
+        "negatives": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "compiled-payload-corruption",
+            "refused": true
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "ill-typed-source",
+            "refused": true
+          }
+        ],
+        "offlineInstall": true,
+        "installScriptsDisabled": true,
+        "noCompilerSdkOnExecutionPath": true,
+        "independentCheckerTestReference": "explicit official Lean4.35 native package",
+        "rootDefaultKernelPolicy": "linear Wasm, qualified separately",
+        "publicationAuthority": false,
+        "scope": "genuine G3 execution payloads and candidate API; not whole-toolchain publication/default-Wasm qualification"
+      },
+      {
+        "job": 121065378462,
+        "schema": "psc1-installed-compiler-execution-bundles/1",
+        "sourceCommit": "c228c7135e2cb816614c396c595b49bb7e4c4e50",
+        "status": "passed",
+        "target": "linux-x64",
+        "cases": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-modules",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+            "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-integer-unicode",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+            "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-list-literal",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+            "sourceSha256": "4224fc5d51d086d4875dea3715a7704e233c0f1d3e111f3f7dc1f54ed29fb828",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-handler-pattern",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+            "sourceSha256": "1ce1b730f93388c8f97caef9bd30edadc6c160bb63ce3c5fbc562fc4f0c09720",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-ordinary-loop",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+            "sourceSha256": "5bb25c4080b290bf0d03be693d0f8487e99c9a68ed71ac7266317f58461dddb1",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "engine": "rust",
+            "case": "lean-modules",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+            "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+            "executionArtifactSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6"
+          },
+          {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "engine": "rust",
+            "case": "ps-integer-unicode",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+            "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+            "executionArtifactSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6"
+          },
+          {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "engine": "rust",
+            "case": "ps-list-literal",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+            "sourceSha256": "4224fc5d51d086d4875dea3715a7704e233c0f1d3e111f3f7dc1f54ed29fb828",
+            "executionArtifactSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6"
+          },
+          {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "engine": "rust",
+            "case": "lean-handler-pattern",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+            "sourceSha256": "1ce1b730f93388c8f97caef9bd30edadc6c160bb63ce3c5fbc562fc4f0c09720",
+            "executionArtifactSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6"
+          },
+          {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "engine": "rust",
+            "case": "lean-ordinary-loop",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+            "sourceSha256": "5bb25c4080b290bf0d03be693d0f8487e99c9a68ed71ac7266317f58461dddb1",
+            "executionArtifactSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6"
+          }
+        ],
+        "negatives": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "compiled-payload-corruption",
+            "refused": true
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "ill-typed-source",
+            "refused": true
+          },
+          {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "case": "compiled-payload-corruption",
+            "refused": true
+          },
+          {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "case": "ill-typed-source",
+            "refused": true
+          }
+        ],
+        "offlineInstall": true,
+        "installScriptsDisabled": true,
+        "noCompilerSdkOnExecutionPath": true,
+        "independentCheckerTestReference": "explicit official Lean4.35 native package",
+        "rootDefaultKernelPolicy": "linear Wasm, qualified separately",
+        "publicationAuthority": false,
+        "scope": "genuine G3 execution payloads and candidate API; not whole-toolchain publication/default-Wasm qualification"
+      },
+      {
+        "job": 121065378473,
+        "schema": "psc1-installed-compiler-execution-bundles/1",
+        "sourceCommit": "c228c7135e2cb816614c396c595b49bb7e4c4e50",
+        "status": "passed",
+        "target": "linux-arm64",
+        "cases": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-modules",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+            "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-integer-unicode",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+            "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-list-literal",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+            "sourceSha256": "4224fc5d51d086d4875dea3715a7704e233c0f1d3e111f3f7dc1f54ed29fb828",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-handler-pattern",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+            "sourceSha256": "1ce1b730f93388c8f97caef9bd30edadc6c160bb63ce3c5fbc562fc4f0c09720",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-ordinary-loop",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+            "sourceSha256": "5bb25c4080b290bf0d03be693d0f8487e99c9a68ed71ac7266317f58461dddb1",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          }
+        ],
+        "negatives": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "compiled-payload-corruption",
+            "refused": true
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "ill-typed-source",
+            "refused": true
+          }
+        ],
+        "offlineInstall": true,
+        "installScriptsDisabled": true,
+        "noCompilerSdkOnExecutionPath": true,
+        "independentCheckerTestReference": "explicit official Lean4.35 native package",
+        "rootDefaultKernelPolicy": "linear Wasm, qualified separately",
+        "publicationAuthority": false,
+        "scope": "genuine G3 execution payloads and candidate API; not whole-toolchain publication/default-Wasm qualification"
+      },
+      {
+        "job": 121065378689,
+        "schema": "psc1-installed-compiler-execution-bundles/1",
+        "sourceCommit": "c228c7135e2cb816614c396c595b49bb7e4c4e50",
+        "status": "passed",
+        "target": "darwin-x64",
+        "cases": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-modules",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4",
+            "sourceSha256": "08da667cecf30862eb53647876b7ddce3662066fa68f11701c06d78156ea37ec",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-integer-unicode",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365",
+            "sourceSha256": "b91bef72081d8a7b7787666aa7e4ee4f1767de4d0adcd8f6a1cdae96558da8c4",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "ps-list-literal",
+            "grammar": "ps",
+            "passed": true,
+            "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31",
+            "sourceSha256": "4224fc5d51d086d4875dea3715a7704e233c0f1d3e111f3f7dc1f54ed29fb828",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-handler-pattern",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f",
+            "sourceSha256": "1ce1b730f93388c8f97caef9bd30edadc6c160bb63ce3c5fbc562fc4f0c09720",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "engine": "wasm-core",
+            "case": "lean-ordinary-loop",
+            "grammar": "lean",
+            "passed": true,
+            "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be",
+            "sourceSha256": "5bb25c4080b290bf0d03be693d0f8487e99c9a68ed71ac7266317f58461dddb1",
+            "executionArtifactSha256": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+          }
+        ],
+        "negatives": [
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "compiled-payload-corruption",
+            "refused": true
+          },
+          {
+            "package": "@proofscript/compiler-wasm",
+            "case": "ill-typed-source",
+            "refused": true
+          }
+        ],
+        "offlineInstall": true,
+        "installScriptsDisabled": true,
+        "noCompilerSdkOnExecutionPath": true,
+        "independentCheckerTestReference": "explicit official Lean4.35 native package",
+        "rootDefaultKernelPolicy": "linear Wasm, qualified separately",
+        "publicationAuthority": false,
+        "scope": "genuine G3 execution payloads and candidate API; not whole-toolchain publication/default-Wasm qualification"
+      }
+    ],
+    "publicationAuthority": false,
+    "rustPlatformScope": "linux-x64-glibc",
+    "wasmPlatformScope": "linux-x64,linux-arm64,darwin-x64,darwin-arm64,win32-x64",
+    "compilerImplementationChanged": false
+  },
+  "platformNativeCompiler": {
+    "run": 40157017833,
+    "commit": "e2351c25715852090c2621401ff4243567ab1e3f",
+    "status": "passed-source-admission-only",
+    "platforms": [
+      {
+        "job": 121060450738,
+        "schema": "psc1-platform-native-source-check/1",
+        "sourceCommit": "e2351c25715852090c2621401ff4243567ab1e3f",
+        "status": "passed-source-check-only",
+        "target": "linux-arm64",
+        "bytes": 137193952,
+        "sha256": "f9e3e54ef6dcb441f43de734d94af45be0ba095b6afca1ac5caf3a5fe767649b",
+        "identity": {
+          "protocol": "psc1-native/1",
+          "profile": "psc1-checked-direct/1",
+          "lean": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "targets": [
+            "js",
+            "ts",
+            "rust",
+            "wasm-core",
+            "wasm-component"
+          ],
+          "optionalTargets": [
+            "python",
+            "php"
+          ],
+          "backendProviderProtocol": "psc1-backend-provider/1"
+        },
+        "cases": [
+          {
+            "kind": "lean",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          }
+        ],
+        "noLeanSdkOnExecutionPath": true,
+        "sourceCheckoutOnExecutionPath": false,
+        "sourceGrammars": [
+          "lean",
+          "ps"
+        ],
+        "independentKernel": "official4.35-in-process",
+        "publicationQualification": "incomplete; existing transactional artifact publisher requires Linux",
+        "npmWholeToolchainQualification": "incomplete",
+        "scope": "genuine compiler binary and Node transport frontend/admission execution; not backend publication qualification"
+      },
+      {
+        "job": 121060450675,
+        "schema": "psc1-platform-native-source-check/1",
+        "sourceCommit": "e2351c25715852090c2621401ff4243567ab1e3f",
+        "status": "passed-source-check-only",
+        "target": "darwin-x64",
+        "bytes": 114986752,
+        "sha256": "6d24a30937c038a99eb8fcf118aab9dcbc0bef6bef535b9d592b734fc1985ead",
+        "identity": {
+          "protocol": "psc1-native/1",
+          "profile": "psc1-checked-direct/1",
+          "lean": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "targets": [
+            "js",
+            "ts",
+            "rust",
+            "wasm-core",
+            "wasm-component"
+          ],
+          "optionalTargets": [
+            "python",
+            "php"
+          ],
+          "backendProviderProtocol": "psc1-backend-provider/1"
+        },
+        "cases": [
+          {
+            "kind": "lean",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          }
+        ],
+        "noLeanSdkOnExecutionPath": true,
+        "sourceCheckoutOnExecutionPath": false,
+        "sourceGrammars": [
+          "lean",
+          "ps"
+        ],
+        "independentKernel": "official4.35-in-process",
+        "publicationQualification": "incomplete; existing transactional artifact publisher requires Linux",
+        "npmWholeToolchainQualification": "incomplete",
+        "scope": "genuine compiler binary and Node transport frontend/admission execution; not backend publication qualification"
+      },
+      {
+        "job": 121060450385,
+        "schema": "psc1-platform-native-source-check/1",
+        "sourceCommit": "e2351c25715852090c2621401ff4243567ab1e3f",
+        "status": "passed-source-check-only",
+        "target": "darwin-arm64",
+        "bytes": 106728496,
+        "sha256": "1cb976bd29cff3a09045b0c8859779f85d51d27175f7315b5eb1e828abf60369",
+        "identity": {
+          "protocol": "psc1-native/1",
+          "profile": "psc1-checked-direct/1",
+          "lean": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "targets": [
+            "js",
+            "ts",
+            "rust",
+            "wasm-core",
+            "wasm-component"
+          ],
+          "optionalTargets": [
+            "python",
+            "php"
+          ],
+          "backendProviderProtocol": "psc1-backend-provider/1"
+        },
+        "cases": [
+          {
+            "kind": "lean",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          }
+        ],
+        "noLeanSdkOnExecutionPath": true,
+        "sourceCheckoutOnExecutionPath": false,
+        "sourceGrammars": [
+          "lean",
+          "ps"
+        ],
+        "independentKernel": "official4.35-in-process",
+        "publicationQualification": "incomplete; existing transactional artifact publisher requires Linux",
+        "npmWholeToolchainQualification": "incomplete",
+        "scope": "genuine compiler binary and Node transport frontend/admission execution; not backend publication qualification"
+      },
+      {
+        "job": 121060450801,
+        "schema": "psc1-platform-native-source-check/1",
+        "sourceCommit": "e2351c25715852090c2621401ff4243567ab1e3f",
+        "status": "passed-source-check-only",
+        "target": "win32-x64",
+        "bytes": 112516096,
+        "sha256": "b71a7d26bc11e9ecad7f4e12e84f43fcd8191cc1ff550869fb102c1c737b5116",
+        "identity": {
+          "protocol": "psc1-native/1",
+          "profile": "psc1-checked-direct/1",
+          "lean": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "targets": [
+            "js",
+            "ts",
+            "rust",
+            "wasm-core",
+            "wasm-component"
+          ],
+          "optionalTargets": [
+            "python",
+            "php"
+          ],
+          "backendProviderProtocol": "psc1-backend-provider/1"
+        },
+        "cases": [
+          {
+            "kind": "lean",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "checked": true,
+            "canonicalAdmissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          }
+        ],
+        "noLeanSdkOnExecutionPath": true,
+        "sourceCheckoutOnExecutionPath": false,
+        "sourceGrammars": [
+          "lean",
+          "ps"
+        ],
+        "independentKernel": "official4.35-in-process",
+        "publicationQualification": "incomplete; existing transactional artifact publisher requires Linux",
+        "npmWholeToolchainQualification": "incomplete",
+        "scope": "genuine compiler binary and Node transport frontend/admission execution; not backend publication qualification"
+      }
+    ],
+    "backendPublicationQualified": false,
+    "wholeToolchainQualified": false
+  },
+  "resolvedFailures": [
+    {
+      "run": 40154709416,
+      "scope": "Windows setup only; Mac jobs passed",
+      "fix": "546bb0f84e86e4d09876f24b036711368fe01635",
+      "verifiedRun": 40155170697
+    },
+    {
+      "run": 40159171993,
+      "job": 121066898469,
+      "scope": "core assembly expected a shrinkwrap absent from original qualified tarball",
+      "fix": "e48c5865f5af7ef4b449da2de296e70acfe0a403",
+      "resolution": "reconstruct only from original pinned host dependency lock and installed version inventory"
+    },
+    {
+      "run": 40159353477,
+      "job": 121067446944,
+      "scope": "frozen graph reader dereferenced valid JSON null after installed tests passed",
+      "fix": "3c9fae34d8a8912cce638777611942327b67ca35",
+      "verifiedRun": 40160064167,
+      "resolution": "null-safe graph discovery; no kernel or compiler semantic change"
+    },
+    {
+      "class": "missing-or-conflicting-default-kernel-declarations",
+      "discovery": "review; older package default behavior passed but removing generated policy could select legacy native checking",
+      "fixes": [
+        "77e9067469db8c3863127c927b9ede53d9ec7c58",
+        "65eb9bf1de2548e1506fad8785e3df8772399dc1"
+      ],
+      "verifiedRun": 40161362270,
+      "policyNegativeCases": 12
+    }
+  ],
+  "sourceRegression": {
+    "status": "passed",
+    "workflow": ".github/workflows/psc1-development.yml",
+    "run": 40161364575,
+    "fullJob": 121075449014,
+    "finalGate": 121080510772,
+    "headCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+    "testedCommit": "460a2f7057cd39bbc7489552ce2785c92c3de717",
+    "treeSha": "55cf04f9c8d50738f77cef82dded1e97478c6d3d",
+    "headAndTestedTreesEqual": true,
+    "artifact": 12586859725,
+    "artifactZipSha256": "48b75a7a58b25e145423c3584b54d2f5c296c91ab1c1a4930077a63f8275cd0d",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "sevenBackends": {
+      "qualification": "passed-scoped-execution",
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "targetExecutionBundles": 14,
+      "scriptingRegressionGroups": 28,
+      "architectureRegressionGroups": 11,
+      "minimumPython": {
+        "targetExecutionBundles": 2,
+        "scriptingRegressionGroups": 14,
+        "artifactBundles": 12,
+        "runtimeEvidence": "runtime-conformance-python314/results.json",
+        "scriptingEvidence": "script-backends-python314/results.json"
+      },
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      },
+      "versions": {
+        "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+        "node": "v22.23.3",
+        "npm": "10.9.9",
+        "typescriptConsumer": "Version 7.0.2",
+        "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+        "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+        "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+        "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+        "python": "Python 3.15.0",
+        "pythonMinimum": "Python 3.14.8",
+        "php": "PHP 8.5.12 (cli) (built: Oct 24 2026 12:34:32) (NTS)"
+      }
+    },
+    "nativeNpm": {
+      "qualification": "passed",
+      "compilerIdentity": {
+        "protocol": "psc1-native/1",
+        "profile": "psc1-checked-direct/1",
+        "lean": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "targets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "backendProviderProtocol": "psc1-backend-provider/1"
+      },
+      "platform": {
+        "os": "linux",
+        "cpu": "x64",
+        "libc": "glibc",
+        "qualifiedGlibc": "2.39"
+      },
+      "optionalPackagesAbsentByDefault": true,
+      "optionalResourcesAbsentByDefault": true,
+      "noSelfHostQualification": true
+    },
+    "scope": "exact-commit native seven-backend Practical Core regression and installed native npm/source-library qualification; separate integrated artifact qualifies default-Wasm G3 engines; not a final universal release"
+  },
+  "previousIntegratedCheckpoint": {
+    "run": 40160064167,
+    "job": 121069555210,
+    "commit": "3c9fae34d8a8912cce638777611942327b67ca35",
+    "artifact": 12585887196,
+    "artifactZipSha256": "064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a",
+    "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346",
+    "global": {
+      "run": 40160640974,
+      "job": 121071261017,
+      "commit": "d269846a50e33f15e18abe96b653735c0a93cf3e",
+      "status": "passed",
+      "artifact": 12586541184,
+      "artifactZipSha256": "e997fd9835ae91176a2a1d6d542713d92b39985fcdbc724397e6f894b680d89b",
+      "receipt": {
+        "schema": "psc1-wasm-default-global-package/1",
+        "sourceCommit": "d269846a50e33f15e18abe96b653735c0a93cf3e",
+        "status": "passed",
+        "qualifiedInput": {
+          "run": 40160064167,
+          "job": 121069555210,
+          "artifact": 12585887196,
+          "zipSha256": "064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a",
+          "commit": "3c9fae34d8a8912cce638777611942327b67ca35",
+          "tarball": "kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz",
+          "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346"
+        },
+        "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346",
+        "cases": [
+          {
+            "engine": "js",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "936042eca7bcc3065f47cdddcaa73b4bfc5a8a30c29cfe371ab22ac8f912db47",
+            "priorPreserved": true
+          },
+          {
+            "engine": "js",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "17b861c2fb7fcaad0b6f5a8d2c519899555b9d2555ed132326ff0b00d1af1202",
+            "priorPreserved": true
+          },
+          {
+            "engine": "ts",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "181f3cba9f1c6a7a43c46abc74179247af0ccc7af4a94b9babdb44aebd98bbd5",
+            "priorPreserved": true
+          },
+          {
+            "engine": "ts",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "02af9960e17f70bafb3ce56dbc15bd3b6f41e079cd323099bdc4ae47c42fe661",
+            "priorPreserved": true
+          },
+          {
+            "engine": "rust",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "4bb46991ccce0f1bd0404228390c6ab191a164104dadbe9fafafdcfcca58f190",
+            "priorPreserved": true
+          },
+          {
+            "engine": "rust",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "9b17a708795bbd340cd0242cf95d8764185f13fdffa7b0dfb4bfbe4e38450b51",
+            "priorPreserved": true
+          },
+          {
+            "engine": "wasm-core",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "0ff77f10f6d9d7f0d22ffbac86bfbcc1976532a73f4f112bd78535523e26438d",
+            "priorPreserved": true
+          },
+          {
+            "engine": "wasm-core",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "737886d0da637afe2b161ea01473ac333a8a4403004aa300d534b33bd1bc4d02",
+            "priorPreserved": true
+          }
+        ],
+        "globalBinExecuted": true,
+        "offlineFreshCache": true,
+        "installScriptsDisabled": true,
+        "noCheckoutOrCompilerSdkOnExecutionPath": true,
+        "nativeCompilerUnavailable": true,
+        "nativeCheckerUnavailable": true,
+        "corruptWasmRefused": true,
+        "defaultKernel": "wasm",
+        "scope": "fresh global Linux installed toolchain; full cross-platform publication remains separate"
+      }
+    }
+  }
+}

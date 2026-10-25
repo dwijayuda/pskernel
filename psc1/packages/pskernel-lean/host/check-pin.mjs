@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 
 const pin=JSON.parse(
-  readFileSync(new URL('../../../NATIVE_SOURCE_PIN.json',import.meta.url),'utf8'),
+  readFileSync(new URL('../LEAN_SOURCE_PIN.json',import.meta.url),'utf8'),
 );
 const leanExecutable=process.platform==='win32'?'lean.exe':'lean';
 
@@ -49,5 +49,5 @@ if(pin.providerProfile!=='lean4.35-core'){
 }
 
 console.log(
-  `PSC2_LEAN_KERNEL_PIN: PASS ${pin.version} ${pin.commit}`,
+  `PSC1_LEAN_KERNEL_PIN: PASS ${pin.version} ${pin.commit}`,
 );

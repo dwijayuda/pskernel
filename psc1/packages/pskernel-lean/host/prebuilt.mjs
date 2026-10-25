@@ -2,6 +2,7 @@ import {createHash} from 'node:crypto';
 import {
   existsSync,
   readFileSync,
+  lstatSync,
 } from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -17,12 +18,12 @@ export const supportedLeanKernelProviderTargets=Object.freeze([
 const expectedManifestIdentity=Object.freeze({
   schema:1,
   package:'@proofscript/pskernel-lean',
-  packageVersion:'4.34.0',
+  packageVersion:'4.35.0',
   protocol:'pskernel-lean/1',
   provider:'lean4-cpp',
-  leanVersion:'4.34.0',
-  leanCommit:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
-  profile:'lean4.34-core',
+  leanVersion:'4.35.0',
+  leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
+  profile:'lean4.35-core',
 });
 
 const defaultPackageRoot=path.resolve(
@@ -60,7 +61,7 @@ export function leanKernelProviderTargetKey({
   const key=`${platform}-${arch}`;
   if(!supportedLeanKernelProviderTargets.includes(key)){
     throw new Error(
-      `@proofscript/pskernel-lean@4.34.0 has no bundled provider for ${key}; `+
+      `@proofscript/pskernel-lean@4.35.0 has no bundled provider for ${key}; `+
       `supported targets: ${supportedLeanKernelProviderTargets.join(', ')}`,
     );
   }
@@ -86,13 +87,13 @@ export function loadLeanKernelPrebuiltManifest({
   }
   const actualTargets=Object.keys(manifest.targets).sort();
   const expectedTargets=[...supportedLeanKernelProviderTargets].sort();
-  if(JSON.stringify(actualTargets)!==JSON.stringify(expectedTargets)){
+  if(actualTargets.length===0||actualTargets.some(target=>!expectedTargets.includes(target))){
     throw new Error(
       `Lean kernel prebuilt manifest target set mismatch: ${actualTargets.join(', ')}`,
     );
   }
 
-  for(const target of supportedLeanKernelProviderTargets){
+  for(const target of actualTargets){
     const entry=manifest.targets[target];
     if(!entry||typeof entry!=='object'){
       throw new Error(`Lean kernel prebuilt manifest missing target ${target}`);
@@ -131,6 +132,8 @@ export function verifyLeanKernelPrebuiltBinary({
   if(path.resolve(binaryPath)!==expectedPath){
     throw new Error(`Lean kernel prebuilt path mismatch for ${target}`);
   }
+  const stat=lstatSync(binaryPath);
+  if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==(entry.size??entry.bytes))throw Error('Lean kernel prebuilt size or file kind mismatch');
   const actual=createHash('sha256')
     .update(readFileSync(binaryPath))
     .digest('hex');
@@ -166,6 +169,7 @@ export function resolveLeanKernelProviderBinary({
   }
 
   if(manifest){
+    if(!Object.hasOwn(manifest.targets,target))throw new Error('No qualified Lean4.35.0 provider is bundled for '+target);
     const bundledPath=assertInsidePackageRoot(
       packageRoot,
       manifest.targets[target].path,

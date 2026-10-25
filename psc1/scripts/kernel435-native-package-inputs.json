@@ -1,0 +1,45 @@
+{
+  "schema": "psc1-kernel435-native-package-inputs/1",
+  "sources": [
+    {
+      "target": "linux-x64",
+      "run": 40154010946,
+      "job": 121051344145,
+      "artifact": 12583552650,
+      "zipSha256": "01f025c2a073e45d7401455fd8af111bf10695a4115119a0a01ce4e5c40c2ffa",
+      "commit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6"
+    },
+    {
+      "target": "linux-arm64",
+      "run": 40154010946,
+      "job": 121051344263,
+      "artifact": 12583702369,
+      "zipSha256": "0e1a49679bfdedfda7ad6ca4c0edeca18dce65209722b145cc25aad4b90c6dcf",
+      "commit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6"
+    },
+    {
+      "target": "darwin-x64",
+      "run": 40154709416,
+      "job": 121053490973,
+      "artifact": 12584087448,
+      "zipSha256": "42cac3fdd355fec25ce759e0ad15ce221235a050d3ddbde19e5311e01ffcb146",
+      "commit": "fdee7795c0736cf0acca9dddca4ebbc1c86bd0d4"
+    },
+    {
+      "target": "darwin-arm64",
+      "run": 40154709416,
+      "job": 121053490842,
+      "artifact": 12584237016,
+      "zipSha256": "50d1a9105c7c1e04f62ca9851a4bdbdd2415c5e7c88eb7011c1384e01a1111a7",
+      "commit": "fdee7795c0736cf0acca9dddca4ebbc1c86bd0d4"
+    },
+    {
+      "target": "win32-x64",
+      "run": 40155170697,
+      "job": 121054915634,
+      "artifact": 12583923425,
+      "zipSha256": "fd08b0114b4bd5f4f2d1344e2d9178b6eb81896cb1462c9e0c9fa91878996d19",
+      "commit": "546bb0f84e86e4d09876f24b036711368fe01635"
+    }
+  ]
+}

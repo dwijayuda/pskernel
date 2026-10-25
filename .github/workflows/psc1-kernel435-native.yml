@@ -1,0 +1,63 @@
+name: PSC1 Lean435 slim native kernel
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [.github/workflows/psc1-kernel435-native.yml]
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Exact official toolchain and reference checker
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_independent_checker psc1_lean_kernel_provider_tests
+          .lake/build/bin/psc1_lean_kernel_provider_tests
+      - name: Build archived kernel-only slim strategy against current435 source
+        run: |
+          node --check packages/pskernel-lean/scripts/build-native-slim.mjs
+          node packages/pskernel-lean/scripts/build-native-slim.mjs
+          candidate=packages/pskernel-lean/.lake/build/bin/psc2_lean_kernel_provider
+          strip --strip-unneeded "$candidate"
+          test "$(stat -c %s "$candidate")" -lt 7000000
+          ldd "$candidate"
+          node scripts/kernel435-differential.mjs .lake/build/bin/psc1_independent_checker "$candidate"
+      - name: Require standalone execution without the Lean build tree
+        run: |
+          candidate=packages/pskernel-lean/.lake/build/bin/psc2_lean_kernel_provider
+          cp "$candidate" "$RUNNER_TEMP/kernel435"
+          mv .lake/build .lake/build.hidden
+          "$RUNNER_TEMP/kernel435" --health
+          node -e 'const{spawnSync}=require("node:child_process");const p=spawnSync(process.argv[1],["--health"],{encoding:"utf8",env:{PATH:"/usr/bin:/bin"}});if(p.status!==0||JSON.parse(p.stdout).leanVersion!=="4.35.0")process.exit(1)' "$RUNNER_TEMP/kernel435"
+          mv .lake/build.hidden .lake/build
+          cp "$candidate" dist/kernel435/
+          node -e 'const fs=require("node:fs"),c=require("node:crypto");const p=process.argv[1],b=fs.readFileSync(p);const r={sourceCommit:process.env.GITHUB_SHA,platform:process.platform,arch:process.arch,bytes:b.length,sha256:c.createHash("sha256").update(b).digest("hex"),standalone:true,under7000000Bytes:b.length<7000000};fs.writeFileSync("dist/kernel435/native-size-"+process.arch+".json",JSON.stringify(r,null,2));console.log("PSC1_KERNEL435_NATIVE_SIZE: "+JSON.stringify(r));' "$candidate"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-lean435-slim-${{ runner.arch }}-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435/
+            psc1/packages/pskernel-lean/.native-slim-build/source.json
+          retention-days: 90

@@ -1,0 +1,109 @@
+name: PSC1 Lean435 official Cpp linear-memory kernel
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [.github/workflows/psc1-kernel435-linear-build.yml]
+permissions:
+  contents: read
+concurrency:
+  group: psc1-lean435-linear-build
+  cancel-in-progress: false
+jobs:
+  wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install exact native Lean for source identity and reference
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          node packages/pskernel-lean/host/check-pin.mjs
+          node --check packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs
+          node scripts/kernel-provider-source.mjs . "$RUNNER_TEMP/kernel435-overlay" "$RUNNER_TEMP/kernel435-source.json"
+      - name: Install native i386 prerequisites
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake git make clang gcc-multilib g++-multilib libc6-dev-i386 libuv1-dev:i386 libssl-dev:i386 pkgconf:i386
+          test -x /usr/bin/i386-linux-gnu-pkg-config
+      - name: Native host compiler cache fingerprint
+        id: fingerprint
+        run: |
+          compiler_hash="$(clang++ --version | head -1 | sha256sum | cut -d ' ' -f1)"
+          echo "clangKey=$compiler_hash" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v4
+        id: stage1
+        with:
+          path: psc1/packages/pskernel-lean-wasm/.wasm-build/lean4-build
+          key: psc1-lean435-eb6caf-emsdk609-i386-wasm32-v1-${{ steps.fingerprint.outputs.clangKey }}-${{ hashFiles('psc1/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json','psc1/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json','psc1/packages/pskernel-lean-wasm/scripts/build-wasm.sh','psc1/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs','psc1/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs','psc1/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
+      - name: Compile official Lean435 Cpp kernel and target-width provider
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          cd "$RUNNER_TEMP/emsdk"
+          ./emsdk install 6.0.9
+          ./emsdk activate 6.0.9
+          source ./emsdk_env.sh
+          cd "$GITHUB_WORKSPACE/psc1"
+          /usr/bin/time -v bash packages/pskernel-lean-wasm/scripts/build-wasm.sh 2>&1 | tee "$RUNNER_TEMP/kernel435-wasm-build.log"
+      - name: Inspect sealed stage1 cache
+        id: cache-state
+        if: always()
+        run: |
+          if [[ -s packages/pskernel-lean-wasm/.wasm-build/lean4-build/.psc1-stage1-cache-manifest.json ]]; then
+            echo ready=true >> "$GITHUB_OUTPUT"
+          else
+            echo ready=false >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/cache/save@v4
+        if: always() && steps.cache-state.outputs.ready == 'true' && steps.stage1.outputs.cache-hit != 'true'
+        continue-on-error: true
+        with:
+          path: psc1/packages/pskernel-lean-wasm/.wasm-build/lean4-build
+          key: psc1-lean435-eb6caf-emsdk609-i386-wasm32-v1-${{ steps.fingerprint.outputs.clangKey }}-${{ hashFiles('psc1/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json','psc1/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json','psc1/packages/pskernel-lean-wasm/scripts/build-wasm.sh','psc1/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs','psc1/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs','psc1/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
+      - name: Native reference and genuine kernel differential gates
+        run: |
+          lake build psc1_independent_checker psc1_lean_kernel_provider_tests
+          .lake/build/bin/psc1_lean_kernel_provider_tests
+          node scripts/kernel435-differential.mjs .lake/build/bin/psc1_independent_checker packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs wasm
+          node packages/pskernel-lean-wasm/scripts/write-prebuilt-manifest.mjs
+          node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-lean435-linear-kernel-qualified-${{ github.sha }}
+          path: |
+            psc1/packages/pskernel-lean-wasm/wasm/
+            psc1/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json
+            psc1/packages/pskernel-lean-wasm/.wasm-build/overlay/closure.json
+            psc1/dist/kernel435/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Preserve exact build diagnostics
+        if: always()
+        run: |
+          mkdir -p dist/kernel435-build
+          if [[ -f "$RUNNER_TEMP/kernel435-wasm-build.log" ]]; then
+            cp "$RUNNER_TEMP/kernel435-wasm-build.log" dist/kernel435-build/build.log
+          fi
+          if [[ -d packages/pskernel-lean-wasm/.wasm-build/lean4-src/.git ]]; then
+            git -C packages/pskernel-lean-wasm/.wasm-build/lean4-src diff > dist/kernel435-build/compatibility.patch
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-lean435-linear-build-diagnostics-${{ github.sha }}
+          path: psc1/dist/kernel435-build/
+          retention-days: 90

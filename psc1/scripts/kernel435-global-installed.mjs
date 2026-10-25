@@ -1,0 +1,31 @@
+// Fresh global install of the qualified Wasm-default candidate; no checkout/SDK execution.
+import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {readQualifiedArtifact,sha256} from './kernel435-qualified-artifact.mjs';
+let input,tar;
+if(process.argv[2]){
+ // A same-job package is still a candidate; this global test helps qualify it.
+ tar=path.resolve(process.argv[2]);assert.equal(tar,path.resolve('dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz'));
+ const receipt=JSON.parse(fs.readFileSync('dist/kernel435-core/package-receipt.json','utf8'));assert.equal(receipt.sourceCommit,process.env.GITHUB_SHA);
+ input={mode:'same-job-candidate',commit:receipt.sourceCommit,tarball:receipt.tarball,tarballSha256:receipt.sha256};
+}else{
+ input=JSON.parse(fs.readFileSync('scripts/kernel435-global-input.json','utf8'));
+ const archive=await readQualifiedArtifact(input,'dist/kernel435-global-input');tar=path.join(archive,input.tarball);
+}
+assert.equal(sha256(fs.readFileSync(tar)),input.tarballSha256);
+const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-wasm-default-global-')),prefix=path.join(tmp,'prefix'),consumer=path.join(tmp,'consumer'),cache=path.join(tmp,'cache');fs.mkdirSync(consumer);
+const env={...process.env,PATH:path.dirname(process.execPath)};for(const k of ['LEAN_PATH','ELAN_TOOLCHAIN','LD_LIBRARY_PATH','DYLD_LIBRARY_PATH','PSC1_NATIVE','PSC1_HOST_TOOLS','PSC1_LIBRARY_RESOLVER','PSC_LEAN_KERNEL_PROVIDER_BIN'])delete env[k];
+const npm=path.resolve(path.dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js');assert.ok(fs.existsSync(npm));
+const run=(exe,args,opts={})=>{const r=spawnSync(exe,args,{cwd:consumer,env,encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024,...opts});assert.equal(r.error,undefined,String(r.error));assert.equal(r.status,0,(r.stdout||'')+(r.stderr||''));return r.stdout;};
+run(process.execPath,[npm,'install','--global','--prefix',prefix,'--cache',cache,'--registry','http://127.0.0.1:9','--offline','--ignore-scripts','--no-audit','--no-fund',tar]);
+const root=path.join(prefix,'lib/node_modules/proofscript'),cli=path.join(prefix,'bin/psc'),dist=JSON.parse(fs.readFileSync(path.join(root,'SELFHOST_DISTRIBUTION.json'),'utf8'));assert.equal(dist.defaultKernel,'wasm');assert.equal(dist.allFourEngineSelfHostQualified,true);
+const native=path.join(root,'native/bin/psc1'),nativeChecker=path.join(root,dist.checker.path);fs.renameSync(native,native+'.disabled');fs.renameSync(nativeChecker,nativeChecker+'.disabled');
+const cases=[];for(const engine of Object.keys(dist.engines))for(const grammar of ['lean','ps']){
+ const file=path.join(consumer,'Main.'+grammar),store=path.join(consumer,engine+'-'+grammar);fs.writeFileSync(file,'def answer : Nat := 42\n');
+ const r=JSON.parse(run(cli,['generated','build',file,'--engine',engine,'--out',store]));assert.deepEqual(r.kernelProviders,['wasm']);assert.equal(r.logicalAdmission,'accepted');assert.equal(r.engineSourceClosureDigest,dist.sharedSourceClosureDigest);
+ assert.equal(run(process.execPath,['--input-type=module','-e','const m=await import('+JSON.stringify('file://'+r.artifact)+');console.log(String(m.answer));']).trim(),'42');
+ const pointer=fs.readlinkSync(path.join(store,'current'));fs.writeFileSync(file,'def bad : Nat := true\n');const bad=spawnSync(cli,['generated','build',file,'--engine',engine,'--out',store],{cwd:consumer,env,encoding:'utf8',timeout:240000});assert.notEqual(bad.status,0);assert.equal(fs.readlinkSync(path.join(store,'current')),pointer);
+ cases.push({engine,grammar,defaultKernel:'wasm',result:'42',sourceClosureDigest:r.sourceClosureDigest,manifestSha256:r.manifestSha256,priorPreserved:true});
+}
+const wasm=path.join(root,'node_modules/@proofscript/pskernel-lean-wasm/wasm/pskernel-lean.wasm'),bytes=fs.readFileSync(wasm),changed=Buffer.from(bytes);changed[changed.length-1]^=1;fs.writeFileSync(wasm,changed);
+try{const bad=spawnSync(cli,['kernel','--identity'],{cwd:consumer,env,encoding:'utf8',timeout:120000});assert.notEqual(bad.status,0,'corrupt default Wasm must fail with native unavailable');}finally{fs.writeFileSync(wasm,bytes);}
+const report={schema:'psc1-wasm-default-global-package/1',sourceCommit:process.env.GITHUB_SHA,status:'passed',qualifiedInput:input,tarballSha256:input.tarballSha256,cases,globalBinExecuted:true,offlineFreshCache:true,installScriptsDisabled:true,noCheckoutOrCompilerSdkOnExecutionPath:true,nativeCompilerUnavailable:true,nativeCheckerUnavailable:true,corruptWasmRefused:true,defaultKernel:'wasm',scope:'fresh global Linux installed toolchain; full cross-platform publication remains separate'};
+fs.mkdirSync('dist/kernel435-global',{recursive:true});fs.writeFileSync('dist/kernel435-global/qualification.json',JSON.stringify(report,null,2)+'\n');console.log('PSC1_WASM_DEFAULT_GLOBAL: '+JSON.stringify(report));

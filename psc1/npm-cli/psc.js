@@ -9,13 +9,15 @@ import { spawn, spawnSync } from 'node:child_process';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const workspace = path.resolve(here, '..');
 const pin = JSON.parse(fs.readFileSync(path.join(workspace, 'NATIVE_SOURCE_PIN.json'), 'utf8'));
-const installedNative = path.join(workspace, 'native', 'bin', 'psc1');
+const nativeName = process.platform === 'win32' ? 'psc1.exe' : 'psc1';
+const installedNative = path.join(workspace, 'native', 'bin', nativeName);
 const native = process.env.PSC1_NATIVE || (fs.existsSync(installedNative)
-  ? installedNative : path.join(workspace, '.lake', 'build', 'bin', 'psc1'));
+  ? installedNative : path.join(workspace, '.lake', 'build', 'bin', nativeName));
 const resolver = process.env.PSC1_LIBRARY_RESOLVER || path.join(workspace, 'npm-cli', 'libraries.mjs');
 const nativeLibrary = path.join(workspace, 'native', 'lib');
+const libraryVariable = process.platform === 'win32' ? 'PATH' : process.platform === 'darwin' ? 'DYLD_LIBRARY_PATH' : 'LD_LIBRARY_PATH';
 const nativeEnv = { ...process.env, PSC1_LIBRARY_RESOLVER: resolver,
-  LD_LIBRARY_PATH: [nativeLibrary, process.env.LD_LIBRARY_PATH].filter(Boolean).join(path.delimiter) };
+  [libraryVariable]: [nativeLibrary, process.env[libraryVariable]].filter(Boolean).join(path.delimiter) };
 const tools = process.env.PSC1_HOST_TOOLS || path.join(workspace, 'host-tools', 'artifacts.mjs');
 const report = message => { console.error(message); process.exitCode = 1; };
 

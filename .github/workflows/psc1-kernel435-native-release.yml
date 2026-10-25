@@ -1,0 +1,56 @@
+name: PSC1 Lean435 native platform release qualification
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [.github/workflows/psc1-kernel435-native-release.yml]
+permissions:
+  contents: read
+jobs:
+  platform:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15-intel
+            target: darwin-x64
+          - os: macos-15
+            target: darwin-arm64
+          - os: windows-2022
+            target: win32-x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      PSC1_RELEASE_TARGET: ${{ matrix.target }}
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc1
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Build exact official kernel reference and slim provider
+        run: |
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_independent_checker psc1_lean_kernel_provider_tests
+          lake exe psc1_lean_kernel_provider_tests
+          node packages/pskernel-lean/scripts/build-native-slim.mjs
+      - name: Size independence and genuine native acceptance rejection
+        run: node scripts/kernel435-native-release.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-lean435-slim-${{ matrix.target }}-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435/
+            psc1/packages/pskernel-lean/.native-slim-build/source.json
+          retention-days: 90

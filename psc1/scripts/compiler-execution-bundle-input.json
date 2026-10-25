@@ -1,0 +1,9 @@
+{
+  "run": 40152769340,
+  "job": 121047594235,
+  "artifact": 12582649787,
+  "zipSha256": "da6a88220337c601fcf401ea7e06a55c45988f96c0a5692d28e958ed07c61916",
+  "commit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+  "tarball": "npm-generated/run-IjpP9o/tarballs/proofscript-0.1.0-psc1.3.tgz",
+  "tarballSha256": "29a837faedaabb8c7e6ae30cec19ac53680084b5188de0eef2b7eabbd4f09198"
+}

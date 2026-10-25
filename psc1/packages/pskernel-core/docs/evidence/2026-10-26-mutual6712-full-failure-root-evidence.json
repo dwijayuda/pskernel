@@ -1,0 +1,56 @@
+{
+  "source": "6712f170e5107d7d37caf83032dd2aad4f6a2ff3",
+  "run": 40244824924,
+  "result": "both routes failed before compile at retained-harness digest assertion",
+  "rootReadArchives": [
+    {
+      "route": "generated",
+      "artifact": 12618445788,
+      "bytes": 3451659,
+      "sha256": "f6acd90013a0f2cbb77a769aaa56c5c5665c94f6cd09512904700b7dd0d540c2",
+      "members": 4,
+      "manifestEntriesVerified": 3,
+      "nestedNative738AndCompilerArchivesMatchActualRootReadOriginals": true,
+      "stoppedBeforeCompile": true
+    },
+    {
+      "route": "canonical",
+      "artifact": 12618435973,
+      "bytes": 3451659,
+      "sha256": "9ffd9c34abc5546f9b1a4ff13c036ee6a5b7c52f949be7a831d53e8b9c93a882",
+      "members": 4,
+      "manifestEntriesVerified": 3,
+      "nestedNative738AndCompilerArchivesMatchActualRootReadOriginals": true,
+      "stoppedBeforeCompile": true
+    }
+  ],
+  "all249ActualGitBindingsCompared": true,
+  "intentionalDifferences": [
+    "psc1/kernel-lakefile.lean",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean"
+  ],
+  "staleLegacyFiles": [
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs",
+      "current": "002d9f831ce8b04628ee18ad95a44d7f1eb69b56",
+      "qualified": "546ee7d03720bc0f476459d1c337b3b4c3137f08"
+    },
+    {
+      "path": "psc1/scripts/pskernel-quot-admission-qualification.py",
+      "current": "39dfeb31779fe9c84977283cf5b2e4f440514e93",
+      "qualified": "f2527fe5f654b124da26c374dc32c7084eb7087b"
+    },
+    {
+      "path": "psc1/scripts/pskernel-quot-session-owner-qualification.py",
+      "current": "ca72da711b8f8091904a72156240f55ef0211c39",
+      "qualified": "c6f3ae743bee392c23fb10d6982461fd0c0d9f30"
+    },
+    {
+      "path": "psc1/scripts/pskernel-quot-session-owner-smoke.mjs",
+      "current": "17392f9d94920dfde2586fcc8e9c6b796e049e08",
+      "qualified": "9be2484e659982b6784704d2609b9667b3daa7e0"
+    }
+  ],
+  "repair": "6ec70ae75c1d501e71280a25d7fd201d44f268e1 restores4exactqualifiedGitblobs and requiresall249bindings",
+  "productionAndProofsChangedByRepair": false
+}

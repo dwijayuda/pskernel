@@ -36,7 +36,7 @@ function selection(options = {}) {
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
   if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['wasm', 'native', 'both'].includes(kernel)) fail('KERNEL');
-  if (!['js', 'ts', 'rust', 'wasm-core'].includes(target)) fail('CHECKED_TARGET_UNSUPPORTED');
+  if (!['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'].includes(target)) fail('CHECKED_TARGET_UNSUPPORTED');
   if (!['legacy-symlink', 'portable-file'].includes(publicationProtocol))
     fail('PUBLICATION_PROTOCOL');
   const sources = clone(options.sources);
@@ -138,14 +138,14 @@ export function compile(options) {
   try {
     const session = sessionFor(selected, path.join(temporary, 'store')),
       receipt = session.execute();
-    const sourceFile =
+    const sourceFile = receipt.targetArtifact.sourceFile || (
       selected.target === 'ts'
         ? 'target.ts'
         : selected.target === 'rust'
           ? 'target.rs'
           : selected.target === 'wasm-core'
             ? 'target.wasm.hex'
-            : 'target.mjs';
+            : 'target.mjs');
     const source = fs.readFileSync(path.join(session.stagingDirectory, sourceFile), 'utf8');
     if (hash(source) !== receipt.sourceSha256) fail('CHECKED_SOURCE_CHANGED');
     return Object.freeze({
@@ -156,7 +156,7 @@ export function compile(options) {
       kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
       compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
       source,
-      sourceEncoding: selected.target === 'wasm-core' ? 'psc1-wasm-hex/1' : 'utf8',
+      sourceEncoding: selected.target === 'wasm-component' ? 'psc1-wasm-component-hex/1' : selected.target === 'wasm-core' ? 'psc1-wasm-hex/1' : 'utf8',
       receipt,
       logicalAdmission: 'accepted',
       irValidation: 'original-and-transformed-by-pinned-compiler',

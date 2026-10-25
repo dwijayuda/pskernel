@@ -3,11 +3,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { prepareComponent } from './checked-component.mjs';
+import { prepareOptionalProvider } from './checked-optional-provider.mjs';
 const fail = (code) => {
   throw Error('PSC1_SERVICE_' + code);
 };
 const ownWasmTransport = fileURLToPath(new URL('./generated-wasm-transport.mjs', import.meta.url));
-export function prepareCheckedTarget(stage, candidate, { target, typescript, rust }, run) {
+export function prepareCheckedTarget(stage, candidate, { target, typescript, rust, componentTools, optionalProvider, outputAbi }, run) {
+  if (target === 'wasm-component') {
+    const core = prepareCheckedTarget(stage, candidate, {target:'wasm-core'}, run);
+    return prepareComponent(stage, candidate, core, componentTools, run);
+  }
+  if (['python', 'php'].includes(target))
+    return prepareOptionalProvider(stage, candidate, target, optionalProvider, outputAbi, run);
   if (target === 'js') {
     fs.writeFileSync(path.join(stage, 'target.mjs'), candidate.source);
     return {

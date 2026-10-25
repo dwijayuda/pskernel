@@ -11,9 +11,9 @@ import {compile,build,compileCandidate,readPublication,type Source,type CheckedT
 import {createTypedIo,type TypedIoConfiguration} from 'proofscript/io';
 const sources:readonly Source[]=[{module:'Entry',kind:'lean',text:'def answer : Nat := 42'}];
 const protocol:PublicationProtocol='portable-file';
-for(const target of ['js','ts','rust','wasm-core'] as const){
+for(const target of ['js','ts','rust','wasm-core','wasm-component','python','php'] as const){
  const checked=compile({sources,entryModule:'Entry',target});
- const encoding:'utf8'|'psc1-wasm-hex/1'=checked.sourceEncoding;
+ const encoding:'utf8'|'psc1-wasm-hex/1'|'psc1-wasm-component-hex/1'=checked.sourceEncoding;
  const built=build({sources,entryModule:'Entry',target,publicationProtocol:protocol,out:'out',rustToolchainRoot:'/sdk'});
  const file:string=built.runtimeArtifact; const selected:CheckedTarget=built.target;
  const current=readPublication({out:'out',publicationProtocol:protocol});
@@ -23,7 +23,7 @@ const candidate=compileCandidate({sources,entryModule:'Entry',target:'rust'});co
 const config:TypedIoConfiguration={abi:'psc1-node-linux-string-io/1',capabilities:['readUtf8'],required:['readUtf8'],root:'/tmp',maxFileBytes:512,maxLineBytes:128,inputFd:0,outputFd:1};
 const io=createTypedIo(config);io.close();
 // @ts-expect-error unsupported checked target
-compile({sources,entryModule:'Entry',target:'php'});
+compile({sources,entryModule:'Entry',target:'ruby'});
 // @ts-expect-error closed protocol
 build({sources,entryModule:'Entry',out:'out',publicationProtocol:'arbitrary'});
 // @ts-expect-error no metadata authority

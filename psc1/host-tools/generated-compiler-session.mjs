@@ -76,6 +76,8 @@ export function createGeneratedJsCompilerSession({
   serviceKind = 'js-adapter',
   typescript,
   rust,
+  componentTools,
+  optionalProvider,
   serviceFile,
   serviceSha256,
   runnerFile,
@@ -95,12 +97,13 @@ export function createGeneratedJsCompilerSession({
     typeof entryModule !== 'string' ||
     !['checked', 'ordinary-checked'].includes(assurance) ||
     !['scalar', 'io-dispatcher'].includes(outputAbi) ||
-    !['js', 'ts', 'rust', 'wasm-core'].includes(target) ||
+    !['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'].includes(target) ||
     !['js-adapter', 'unified-embedded', 'unified-bundle'].includes(serviceKind) ||
     (target !== 'js' && serviceKind === 'js-adapter') ||
     !path.isAbsolute(publicationRoot || '')
   )
     fail('PSC1_SERVICE_REQUEST_INVALID');
+  const compilerTarget = target === 'wasm-component' ? 'wasm-core' : ['python', 'php'].includes(target) ? 'js' : target;
   const captured = clone(sources);
   const sourceClosureDigest = compilerSourceClosureDigest(captured);
   const grammar = captured[0].kind;
@@ -154,6 +157,17 @@ export function createGeneratedJsCompilerSession({
     if (![rust.rustc, rust.inspector].every((file) => rust.pins.some((pin) => pin.path === file)))
       fail('PSC1_SERVICE_RUST_ENTRY');
   }
+  for (const [label, consumer] of [['component', componentTools], ['provider', optionalProvider]]) {
+    if (!consumer) continue;
+    if (!Array.isArray(consumer.pins) ||
+        (label === 'component' ? target !== 'wasm-component' : !['python', 'php'].includes(target)))
+      fail('PSC1_SERVICE_DISPATCH_CONSUMER');
+    consumer.pins.forEach((pin, index) => {
+      tools[label + '-' + index] = identity(pin.path, pin.sha256);
+    });
+    if (!consumer.pins.some(pin => pin.path === consumer.executable))
+      fail('PSC1_SERVICE_DISPATCH_ENTRY');
+  }
   const additionalAdmissions = [];
   const verifyTools = () =>
     Object.values(tools).forEach((tool) => identity(tool.path, tool.sha256));
@@ -171,7 +185,7 @@ export function createGeneratedJsCompilerSession({
       ? scalarRequest
       : ['psc1-compiler-service/2', ...scalarRequest.slice(1), 'io-dispatcher'];
   const requestText = JSON.stringify(
-    serviceKind === 'js-adapter' ? inner : ['psc1-unified-compiler-service/2', target, inner],
+    serviceKind === 'js-adapter' ? inner : ['psc1-unified-compiler-service/2', compilerTarget, inner],
   );
   const request = Object.freeze({
     requestId,
@@ -180,6 +194,7 @@ export function createGeneratedJsCompilerSession({
     assurance,
     entryModule,
     target,
+    ...(compilerTarget === target ? {} : { compilerTarget }),
     ...(outputAbi === 'scalar' ? {} : { outputAbi }),
     requestSha256: sha(requestText),
     serviceSha256,
@@ -232,11 +247,13 @@ export function createGeneratedJsCompilerSession({
       events.push({ role: 'host-diagnostic', error: loggingError.message });
     }
   }
-  const run = (role, args, executable = process.execPath) => {
+  const run = (role, args, executable = process.execPath, digestEnv) => {
     if (![
       process.execPath,
       ...(typescript ? [typescript.executable] : []),
       ...(rust ? [rust.rustc, rust.inspector] : []),
+      ...(componentTools ? [componentTools.executable] : []),
+      ...(optionalProvider ? [optionalProvider.executable] : []),
     ].includes(executable))
       fail('PSC1_SERVICE_EXECUTABLE');
     const started = Date.now();
@@ -251,6 +268,13 @@ export function createGeneratedJsCompilerSession({
         key.startsWith('DYLD_')
       )
         delete env[key];
+    if (digestEnv !== undefined) {
+      if (role !== 'optional-provider' || Object.keys(digestEnv).join(',') !== 'PSC1_BACKEND_REQUEST_SHA256' ||
+          !/^[a-f0-9]{64}$/.test(digestEnv.PSC1_BACKEND_REQUEST_SHA256))
+        fail('PSC1_SERVICE_PROVIDER_ENV');
+      env.PSC1_BACKEND_REQUEST_SHA256 = digestEnv.PSC1_BACKEND_REQUEST_SHA256;
+    } else delete env.PSC1_BACKEND_REQUEST_SHA256;
+    verifyTools();
     const result = spawnSync(executable, args, {
       encoding: 'utf8',
       env,
@@ -259,6 +283,7 @@ export function createGeneratedJsCompilerSession({
       killSignal: 'SIGKILL',
       windowsHide: true,
     });
+    verifyTools();
     events.push({
       role,
       executable,
@@ -360,7 +385,7 @@ export function createGeneratedJsCompilerSession({
           sourceClosureDigest,
           grammar,
           assurance,
-          target,
+          target: compilerTarget,
           candidateOnly: true,
           admission: 'not-run',
         })) {
@@ -429,7 +454,7 @@ export function createGeneratedJsCompilerSession({
         const admissions = candidate.admissionRequest?.admissions;
         const checkerSession = createCompilerHostSession({
           requestId,
-          target,
+          target: compilerTarget,
           sources: captured,
           canonicalAdmissions: admissions,
           checkerExecutable,
@@ -501,8 +526,8 @@ export function createGeneratedJsCompilerSession({
             responseSha256: sha(checked.stdout),
           });
         }
-        targetArtifact = prepareCheckedTarget(stage, candidate, { target, typescript, rust }, run);
-        if (target !== 'rust') {
+        targetArtifact = prepareCheckedTarget(stage, candidate, { target, typescript, rust, componentTools, optionalProvider, outputAbi }, run);
+        if (['js', 'ts', 'wasm-core'].includes(target)) {
           if (target !== 'wasm-core')
             run('target-syntax', ['--check', path.join(stage, targetArtifact.runtimeFile)]);
           const apiCode =
@@ -540,7 +565,8 @@ export function createGeneratedJsCompilerSession({
             events,
             ...(extraChecks.length ? { additionalAdmissions } : {}),
             candidateSha256: sha(raw),
-            sourceSha256: sha(candidate.source),
+            candidateSourceSha256: sha(candidate.source),
+            sourceSha256: sha(boundedRead(path.join(stage, targetArtifact.sourceFile || (target === 'rust' ? 'target.rs' : target === 'ts' ? 'target.ts' : target === 'wasm-core' ? 'target.wasm.hex' : 'target.mjs')))),
             publicNames: candidate.publicNames,
             runtimeRequirements: candidate.runtimeRequirements,
             targetArtifact,
@@ -568,7 +594,8 @@ export function createGeneratedJsCompilerSession({
         return Object.freeze({
           ...request,
           candidateSha256: sha(raw),
-          sourceSha256: sha(candidate.source),
+          candidateSourceSha256: sha(candidate.source),
+          sourceSha256: sha(boundedRead(path.join(stage, targetArtifact.sourceFile || (target === 'rust' ? 'target.rs' : target === 'ts' ? 'target.ts' : target === 'wasm-core' ? 'target.wasm.hex' : 'target.mjs')))),
           admissionsSha256: receipt.admissionsDigest,
           originalIrSha256: sha(JSON.stringify(candidate.originalIr)),
           specializedIrSha256: sha(JSON.stringify(candidate.specializedIr)),

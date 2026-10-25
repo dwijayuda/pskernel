@@ -1,5 +1,22 @@
 # PSC1 AI work state
 
+## Active PR #189 checked dispatch implementation
+
+Branch `feat/psc1-checked-component-providers-20261026`, based on PR #188 at
+`9c13f2f2f11bda05a9274e27453d1e275bef1222`; its final CI40241992576 is successful.
+The new component/provider slice is in progress, not yet qualified.
+Component packaging consumes the unchanged qualified G3 Wasm-core candidate;
+Python/PHP workers consume only already admitted portable specialized IR and
+recheck canonical round-trip identity, strict IR and their own target ABI.
+Receipts distinguish generated compilerTarget from the final target. No compiler
+source closure or G3 payload is changed. Optional emit-only workers remain outside
+the default root and contain no frontend/checker/publisher. New native tool/runtime
+packages require actual Linux x64 evidence; other-platform dispatch is refused.
+Initial transport run40244572685 found native record-layout parse errors, fixed
+atdfb26a02. Linux execution, negative and offline package qualification is pending.
+The complete preceding qualified PR #188 checkpoint is retained below.
+
+
 Updated2026-10-26 Asia/Jakarta. Active draft **PR #188**,
 `feat/psc1-portable-checked-publication-20261026`, stacked on qualified PR #187 at
 `563ee855407581d0d34adcbc450ad77863f39f94`.

@@ -50,4 +50,7 @@ jobs:
           result.accepted=true;
           console.log(accepted);
           TS
-          node "$RUNNER_TEMP/kernel-types/node_modules/typescript/bin/tsc" --noEmit --strict --module NodeNext --moduleResolution NodeNext --target ES2022 "$RUNNER_TEMP/kernel-types/consumer.mts"
+          cat > "$RUNNER_TEMP/kernel-types/tsconfig.json" <<'JSON'
+          {"compilerOptions":{"noEmit":true,"strict":true,"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022"},"files":["consumer.mts"]}
+          JSON
+          node "$RUNNER_TEMP/kernel-types/node_modules/typescript/bin/tsc" --project "$RUNNER_TEMP/kernel-types/tsconfig.json"

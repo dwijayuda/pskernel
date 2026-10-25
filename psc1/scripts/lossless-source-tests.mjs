@@ -176,7 +176,7 @@ try {
   ];
   // Retain the qualified old transport's advisory-location compatibility. A
   // bad diagnostic location is never promoted into a token/trivia/edit span.
-  const oldDiagnosticWire = wireOf(capture("'😀α"));
+  const oldDiagnosticWire = structuredClone(wireOf(capture("'😀α")));
   oldDiagnosticWire.diagnostic.span.stop = { byteOffset: 3, line: 1, column: 3 };
   const oldHelper = path.join(directory, 'qualified-old-location');
   fs.writeFileSync(oldHelper, '#!/usr/bin/python3\nimport json,sys\nwire=json.loads(' +

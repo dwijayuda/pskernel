@@ -85,19 +85,30 @@ theorem match_shape_correspondence
 
 theorem expected_eq_supported (universeName : PsKernelName) :
     BootstrapShape (psKernelExpectedEqType universeName) := by
-  change BootstrapShape
-    (.forallE (.str .anonymous "α") (.sort (.param universeName))
-      (.forallE .anonymous (.bvar 0)
-        (.forallE .anonymous (.bvar 1) (.sort .zero) .default) .default) .implicit)
+  have same : psKernelNameEq (psKernelQuotInternalName "eq.alpha")
+      (psKernelQuotInternalName "eq.alpha") = true := by decide
+  simp [psKernelExpectedEqType, psKernelCloseOpenBinders, psKernelMkArrow,
+    psKernelExprAbstractFVars, psKernelExprAbstractFVarsAt,
+    psKernelExprAbstractFVarsAtChanged, psKernelExprAbstractFVarsAtChangedWithFuel,
+    psKernelExprNodeCount, psKernelNameLastIndex, psKernelNameLastIndexWorker,
+    psKernelNameListLength, psKernelApplyArgs, same]
   repeat constructor
 
 theorem expected_refl_supported (universeName : PsKernelName) :
     BootstrapShape (psKernelExpectedEqReflType universeName) := by
-  change BootstrapShape
-    (.forallE (.str .anonymous "α") (.sort (.param universeName))
-      (.forallE (.str .anonymous "a") (.bvar 0)
-        (.app (.app (.app (.const psKernelEqName [.param universeName])
-          (.bvar 1)) (.bvar 0)) (.bvar 0)) .default) .implicit)
+  have aa : psKernelNameEq (psKernelQuotInternalName "eqRefl.alpha")
+      (psKernelQuotInternalName "eqRefl.alpha") = true := by decide
+  have av : psKernelNameEq (psKernelQuotInternalName "eqRefl.alpha")
+      (psKernelQuotInternalName "eqRefl.a") = false := by decide
+  have va : psKernelNameEq (psKernelQuotInternalName "eqRefl.a")
+      (psKernelQuotInternalName "eqRefl.alpha") = false := by decide
+  have vv : psKernelNameEq (psKernelQuotInternalName "eqRefl.a")
+      (psKernelQuotInternalName "eqRefl.a") = true := by decide
+  simp [psKernelExpectedEqReflType, psKernelCloseOpenBinders, psKernelMkArrow,
+    psKernelExprAbstractFVars, psKernelExprAbstractFVarsAt,
+    psKernelExprAbstractFVarsAtChanged, psKernelExprAbstractFVarsAtChangedWithFuel,
+    psKernelExprNodeCount, psKernelNameLastIndex, psKernelNameLastIndexWorker,
+    psKernelNameListLength, psKernelApplyArgs, aa, av, va, vv]
   repeat constructor
 
 theorem eq_shape_correspondence

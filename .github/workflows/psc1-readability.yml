@@ -27,6 +27,8 @@ jobs:
         run: npm ci --prefix psc1/host-tools --ignore-scripts --no-audit --no-fund
       - name: Check scoped formatting and executable AST correspondence
         run: node psc1/scripts/readability-host-check.mjs
+      - name: Check verbatim Wasm type-inventory extraction
+        run: node psc1/scripts/readability-module-check.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

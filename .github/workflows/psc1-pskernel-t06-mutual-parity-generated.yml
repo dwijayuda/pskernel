@@ -1,0 +1,143 @@
+name: PSC1 corrected mutual original parity complete-program generated preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t06-mutual-parity-generated-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-t06-mutual-parity-generated.yml
+    - psc1/test/PsKernelMutualParitySelfHost.lean
+    - psc1/scripts/pskernel-mutual-parity-smoke.mjs
+    - psc1/packages/pskernel-core/src/**
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate matching actual native109/601 plus unchanged compiler sources
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: "set -euo pipefail\npython3 - <<'PYCODE'\nimport hashlib,io,json,os,pathlib,subprocess,urllib.request,urllib.error,zipfile\n\
+        out=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-generated';out.mkdir()\nbase='https://api.github.com/repos/dwijayuda/pskernel'\n\
+        class NoRedirect(urllib.request.HTTPRedirectHandler):\n    def redirect_request(self,req,fp,code,msg,headers,newurl):return\
+        \ None\ndef get(route):\n    req=urllib.request.Request(base+route,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})\n\
+        \    try:return urllib.request.build_opener(NoRedirect()).open(req,timeout=120).read()\n    except urllib.error.HTTPError\
+        \ as error:\n        assert error.code in (301,302,303,307,308)\n        url=error.headers['Location'];assert\
+        \ url.startswith('https://')\n        return urllib.request.urlopen(urllib.request.Request(url),timeout=120).read()\n\
+        def archive(source,run,artifact,size,sha,members,name):\n    r=json.loads(get('/actions/runs/'+str(run)));assert\
+        \ r['head_sha']==source and r['status']=='completed' and r['conclusion']=='success' and r['run_attempt']==1\n\
+        \    a=json.loads(get('/actions/artifacts/'+str(artifact)));assert a['workflow_run']['id']==run and a['workflow_run']['head_sha']==source\
+        \ and not a['expired']\n    assert a['size_in_bytes']==size and a['digest']=='sha256:'+sha\n    raw=get('/actions/artifacts/'+str(artifact)+'/zip');assert\
+        \ len(raw)==size and hashlib.sha256(raw).hexdigest()==sha\n    z=zipfile.ZipFile(io.BytesIO(raw));assert\
+        \ len(z.namelist())==len(set(z.namelist()))==members and z.testzip() is None\n    (out/name).write_bytes(raw);return\
+        \ z\nnative_source='6d534e2f277cc92462f0f4da1742d3397b472b83'\nn=archive(native_source,40238079902,12615683384,880184,'98618b2685b25eb4857dec1a14e37fdfc107bb6c7dd7e5c760870c48dd07aba2',340,'authenticated-native109.zip')\n\
+        manifest=json.loads(n.read('files.json'));assert manifest['source']==native_source\nsources=0\nfor path,pin\
+        \ in manifest['files'].items():\n    data=n.read(path);assert len(data)==pin['bytes'] and hashlib.sha256(data).hexdigest()==pin['sha256']\n\
+        \    if path.startswith('source/'):\n        p=path.removeprefix('source/');assert data==subprocess.check_output(['git','show','HEAD:'+p]),p\n\
+        \        sources+=1\nassert sources==322\nsubprocess.run(['git','diff','--exit-code',native_source,'HEAD','--','psc1/packages/pskernel-core/src','psc1/kernel-lakefile.lean','psc1/lean-toolchain'],check=True)\n\
+        import re\nproofs=[('proofs.log','PsKernelMutualConstructorLoopProofs',16),('retained-constructor-proofs.log','PsKernelMutualConstructorAnalysisProofs',22),('retained-fields-proofs.log','PsKernelMutualConstructorFieldsProofs',18),('retained-recursive-proofs.log','PsKernelMutualRecursiveArgumentProofs',15),('retained-count-proofs.log','PsKernelExpandedSizeProofs',11),('header-proofs.log','PsKernelMutualHeaderProofs',17),('family-proofs.log','PsKernelMutualConstructorResultProofs',10)]\n\
+        for filename,namespace,count in proofs:\n    text=n.read(filename).decode();assert not any(x in text for\
+        \ x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\n    rows=re.findall(r\"'(\"+namespace+r\"\
+        \\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not depend on any axioms)\",text)\n    assert len(rows)==len({name\
+        \ for name,_ in rows})==count,(filename,rows)\n    for name,axioms in rows:assert set(x.strip() for x in\
+        \ axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\ncontrols=[('native.log','PSC1_MUTUAL_LOOP_ASSERT\
+        \ ',52),('retained-constructor-native.log','PSC1_MUTUAL_CONSTRUCTOR_ASSERT ',189),('retained-fields-native.log','PSC1_MUTUAL_FIELDS_ASSERT\
+        \ ',83),('retained-recursive-native.log','PSC1_MUTUAL_RECURSIVE_ASSERT ',88),('count-native.log','PSC1_EXPANDED_SIZE_ASSERT\
+        \ ',26),('header-native.log','PSC1_MUTUAL_HEADER_ASSERT ',49),('family-native.log','PSC1_MUTUAL_RESULT_ASSERT\
+        \ ',114)]\nnative_labels={}\nfor filename,tag,count in controls:\n    text=n.read(filename).decode();labels=[line[len(tag):]\
+        \ for line in text.splitlines() if line.startswith(tag)]\n    assert len(labels)==len(set(labels))==count\n\
+        \    native_labels[tag.split('_ASSERT')[0]]=labels\nassert sum(map(len,native_labels.values()))==601\nassert\
+        \ len([label for label in native_labels['PSC1_MUTUAL_HEADER'] if label.startswith('actual-retained-mutual-error-')])==16\n\
+        (out/'native-labels.json').write_text(json.dumps(native_labels,indent=2)+'\\n')\ncompiler_source='14dad2ce6eaef9fa71170f28650a5c626eca4a76'\n\
+        c=archive(compiler_source,40213489105,12606866673,2561674,'c28da8d4d57a5a59a1ff686b2ce671102b20073bd00bf32450fae37cf2ab8dec',40,'authenticated-compiler.zip')\n\
+        receipt=json.loads(c.read('compiler-receipt.json'));assert receipt['sourceSha']==compiler_source\nfor path,sha\
+        \ in receipt['files'].items():assert hashlib.sha256(c.read(path)).hexdigest()==sha,path\nbinary=c.read('psc1');assert\
+        \ hashlib.sha256(binary).hexdigest()==receipt['compilerSha256']=='13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c'\n\
+        packages=[str(p) for p in pathlib.Path('psc1/packages').iterdir() if p.is_dir() and p.name!='pskernel-core']\n\
+        stable=packages+['psc1/lakefile.lean','psc1/lake-manifest.json','psc1/lean-toolchain','psc1/host','psc1/stdlib','psc1/psconfig.json']\n\
+        subprocess.run(['git','diff','--exit-code',compiler_source,'HEAD','--',*stable],check=True)\nexe=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-psc1';exe.write_bytes(binary);exe.chmod(0o700)\n\
+        snapshots=[]\npaths=['psc1/test/PsKernelMutualParitySelfHost.lean','psc1/scripts/pskernel-mutual-parity-smoke.mjs','.github/workflows/psc1-pskernel-t06-mutual-parity-generated.yml']\n\
+        paths+=['psc1/packages/pskernel-core/src/Ps/KernelCore/'+p+'.lean' for p in ['API/DagMutualHeader','API/DagMutualConstructorResult','Core/ExprV2/ExpandedSize','API/DagMutualRecursiveArgument','API/DagMutualConstructorFields','API/DagMutualConstructorAnalysis','API/DagMutualConstructorLoop']]\n\
+        for p in paths:\n    data=pathlib.Path(p).read_bytes();assert data==subprocess.check_output(['git','show','HEAD:'+p]);dest=out/'sources'/p;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);snapshots.append({'path':p,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})\n\
+        record={'schema':'psc1-corrected-mutual-parity-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40238079902,'nativeReports':109,'nativeAssertions':601,'all322NativeSourceSnapshotsMatchActualGit':True,'all16NegativeErrorsCompareActualOriginalAdmission':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelMutualParitySelfHost.lean','snapshots':snapshots,'scope':'fresh\
+        \ complete-program private7stage preflight; corrected actual original header errors plus private constructor\
+        \ list loops; not complete mutual admission or final public route cohort','runtimeFuel':256,'runtimeDeadlineSeconds':600,'oldSpaceMiB':2048,'emptyPATH':True,'priorCopiedReferenceErrorClaimsSuperseded':True}\n\
+        (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
+    - name: Install exact retained TypeScript7.0.2
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p "$RUNNER_TEMP/mutual-ts"
+
+        printf ''%s\n'' ''{"name":"psc1-mutual-ts","private":true,"version":"0.0.0"}'' > "$RUNNER_TEMP/mutual-ts/package.json"
+
+        npm install --prefix "$RUNNER_TEMP/mutual-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+
+        TSC_PATH="$RUNNER_TEMP/mutual-ts/node_modules/typescript/bin/tsc"
+
+        test "$(node "$TSC_PATH" --version)" = ''Version 7.0.2''
+
+        printf ''PSC0_TSC=%s\n'' "$TSC_PATH" >> "$GITHUB_ENV"
+
+        '
+    - name: Build complete unchanged kernel plus private mutual-header entry
+      working-directory: psc1
+      shell: bash
+      run: "set -euo pipefail\ntimeout --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" build test/PsKernelMutualParitySelfHost.lean\
+        \ --out dist/t06-mutual/kernel.js \\\n  2>&1 | tee \"$RUNNER_TEMP/mutual-generated/build.log\"\ntest -s\
+        \ dist/t06-mutual/kernel.js\ntest -s dist/t06-mutual/kernel.ts\ntest -s dist/t06-mutual/kernel.d.ts\ntest\
+        \ -s dist/t06-mutual/kernel.js.map\nmkdir -p \"$RUNNER_TEMP/mutual-generated/production\"\ncp dist/t06-mutual/kernel.{js,ts,d.ts,js.map}\
+        \ \"$RUNNER_TEMP/mutual-generated/production/\"\ncp dist/t06-mutual/kernel.js \"$RUNNER_TEMP/mutual-generated/kernel.mjs\"\
+        \ncp scripts/pskernel-mutual-parity-smoke.mjs \"$RUNNER_TEMP/mutual-generated/\"\n"
+    - name: Require all601 native-equal direct controls including actual original errors
+      shell: bash
+      run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\"\
+        \ --check kernel.mjs\n\"$NODE_BIN\" --check pskernel-mutual-parity-smoke.mjs\nset +e\n/usr/bin/time -f 'peak_rss_kib=%M\
+        \ wall_seconds=%e exit_status=%x' -o runtime.memory \\\n timeout --signal=KILL 600s env -i PATH= \"$NODE_BIN\"\
+        \ --max-old-space-size=2048 \\\n pskernel-mutual-parity-smoke.mjs ./kernel.mjs > runtime.log 2>&1\nstatus=$?\n\
+        set -e\ncat runtime.log\ntest \"$status\" -eq 0\npython3 - <<'PYCODE'\nimport pathlib,json\ntext=pathlib.Path('runtime.log').read_text();native=json.loads(pathlib.Path('native-labels.json').read_text());total=0\n\
+        for prefix,labels in native.items():\n    marker=prefix+'_JS: PASS '\n    r,=[json.loads(line[len(marker):])\
+        \ for line in text.splitlines() if line.startswith(marker)]\n    assert r['assertions']==len(r['labels'])==len(set(r['labels']))==len(labels)\n\
+        \    assert r['labels']==labels,(prefix,'actual native labels')\n    assert not r['fullAdmission'] and not\
+        \ r['fullKernel'] and not r['performanceQualified']\n    total+=r['assertions']\nassert total==601\nmarker='PSC1_MUTUAL_HEADER_JS:\
+        \ PASS ';r,=[json.loads(line[len(marker):]) for line in text.splitlines() if line.startswith(marker)]\n\
+        assert r['assertions']==49 and r['originalErrors']==16\nprint('PSC1_MUTUAL_PARITY_JS_ALL: PASS controls=601\
+        \ actualOriginalErrors=16')\nPYCODE\n"
+    - name: Preserve exact actual generated evidence
+      if: always()
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os,json,hashlib
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''mutual-generated''
+
+        files={str(p.relative_to(out)):{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in out.rglob(''*'') if p.is_file()}
+
+        (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''files'':files},indent=2)+''\n'')
+
+        PYCODE
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-mutual-header-complete-generated-preflight
+        include-hidden-files: true
+        path: ${{ runner.temp }}/mutual-generated/
+        retention-days: 90

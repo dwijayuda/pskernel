@@ -78,3 +78,5 @@ jobs:
             psc1/dist/kernel435-core/package-receipt.json
             psc1/dist/kernel435-core-installed/
           retention-days: 90
+
+# Requalify consistent root/generated default-kernel policy declarations.

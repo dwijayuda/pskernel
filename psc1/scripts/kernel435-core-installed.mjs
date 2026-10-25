@@ -119,5 +119,23 @@ for(const kind of ['lean','ps']){
 const policy=path.join(root,'KERNEL_DISTRIBUTION.json'),policyBytes=fs.readFileSync(policy);fs.renameSync(policy,policy+'.disabled');
 try{const missing=spawnSync(process.execPath,[cli,'check',path.join(consumer,'Native.lean')],{cwd:consumer,encoding:'utf8',timeout:240000});assert.notEqual(missing.status,0,'missing Wasm policy must not fall back to native');}finally{fs.renameSync(policy+'.disabled',policy);}
 
-const report={schema:'psc1-integrated-kernel-installed/1',sourceCommit:process.env.GITHUB_SHA,status:'passed',tarballSha256:sha256(fs.readFileSync(tar)),platform:process.platform+'-'+process.arch,kernelCases,sourceCases,cases,applicationCases,negatives,crossChecks,nativePublication,missingPolicyRefused:true,nativeCompilerUnavailableDuringGeneratedCases:true,defaultIndependentWasm:true,nativeCheckerUnavailableDuringDefaultGeneratedCases:true,wasmMemoryModel:'linear',compilerSourceClosureDigest:distribution.sharedSourceClosureDigest,finalCrossPlatformRelease:false,scope:'installed Linux integration; kernel packages carry their separate five-platform qualification'};
+
+const policyDeclarations=[];
+const selfFile=path.join(root,'SELFHOST_DISTRIBUTION.json'),packageFile=path.join(root,'package.json'),selfBytes=fs.readFileSync(selfFile),packageBytes=fs.readFileSync(packageFile);
+const prior=path.join(consumer,'js-'+corpus[0].id),beforePointer=fs.readlinkSync(path.join(prior,'current')),project=path.join(consumer,'js-'+corpus[0].id+'.json');
+for(const [id,file,original,change]of [
+ ['missing-generated-default',selfFile,selfBytes,d=>{delete d.defaultKernel;}],
+ ['conflicting-generated-default',selfFile,selfBytes,d=>{d.defaultKernel='native';}],
+ ['missing-root-default',packageFile,packageBytes,d=>{delete d.proofscript.defaultKernel;}],
+ ['conflicting-root-default',packageFile,packageBytes,d=>{d.proofscript.defaultKernel='native';}]
+]){
+ const data=JSON.parse(original);change(data);fs.writeFileSync(file,JSON.stringify(data));
+ try{
+  const refused=spawnSync(process.execPath,[cli,'generated','build','--project',project,'--engine','js','--out',prior],{cwd:consumer,encoding:'utf8',timeout:240000});
+  assert.notEqual(refused.status,0,id);assert.match(refused.stderr,/DEFAULT_KERNEL_POLICY/,id);assert.equal(fs.readlinkSync(path.join(prior,'current')),beforePointer);
+  policyDeclarations.push({id,refused:true,priorPreserved:true,nativeCheckerAvailable:true});
+ }finally{fs.writeFileSync(file,original);}
+}
+
+const report={schema:'psc1-integrated-kernel-installed/1',sourceCommit:process.env.GITHUB_SHA,status:'passed',tarballSha256:sha256(fs.readFileSync(tar)),platform:process.platform+'-'+process.arch,kernelCases,sourceCases,cases,applicationCases,negatives,crossChecks,nativePublication,policyDeclarations,missingPolicyRefused:true,nativeCompilerUnavailableDuringGeneratedCases:true,defaultIndependentWasm:true,nativeCheckerUnavailableDuringDefaultGeneratedCases:true,wasmMemoryModel:'linear',compilerSourceClosureDigest:distribution.sharedSourceClosureDigest,finalCrossPlatformRelease:false,scope:'installed Linux integration; kernel packages carry their separate five-platform qualification'};
 fs.mkdirSync('dist/kernel435-core-installed',{recursive:true});fs.writeFileSync('dist/kernel435-core-installed/qualification.json',JSON.stringify(report,null,2)+'\n');console.log('PSC1_KERNEL435_CORE_INSTALLED: '+JSON.stringify(report));

@@ -7,6 +7,13 @@ const fail=code=>{throw Error('PSC1_GENERATED_CLI_'+code);};
 export async function generatedMain(args,root){
  const meta=JSON.parse(fs.readFileSync(path.join(root,'SELFHOST_DISTRIBUTION.json'),'utf8'));
  if(meta.schema!=='psc1-installed-generated-engines/1')fail('DISTRIBUTION');
+ // New packages must agree on their default. Legacy packages declare neither.
+ const packageDefault=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8')).proofscript?.defaultKernel;
+ if(packageDefault!==undefined||meta.defaultKernel!==undefined){
+  if(packageDefault!=='wasm'||meta.defaultKernel!=='wasm')fail('DEFAULT_KERNEL_POLICY');
+  const policy=JSON.parse(fs.readFileSync(path.join(root,'KERNEL_DISTRIBUTION.json'),'utf8'));
+  if(policy.schema!=='psc1-installed-independent-kernels/1'||policy.defaultProvider!=='wasm'||policy.leanVersion!=='4.35.0'||policy.canonicalAdmissionsVersion!==2)fail('DEFAULT_KERNEL_POLICY');
+ }
  const engines=Object.keys(meta.engines);
  if(args.length===1&&args[0]==='--identity'){console.log(JSON.stringify(meta));return;}
  if(args[0]!=='build')fail('USAGE: psc generated build Main.ps --engine ts --out dist/generated [--project sources.json]');

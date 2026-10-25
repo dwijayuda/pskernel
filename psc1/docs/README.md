@@ -9,6 +9,7 @@ from immutable evidence; dated records remain preserved.
 | Question | Read |
 | --- | --- |
 | How do I install/use the current slim toolchain? | [Slim package guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
+| How do checked targets and transactions work? | [Checked publication](PSC1_CHECKED_PUBLICATION.md), [exact receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json) |
 | What remains unfinished? | [One development roadmap](PSC1_DEVELOPMENT_ROADMAP.md) |
 | What must Practical Core v1 support? | [Finite language contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json) |
 | What must npm distribution qualify? | [Finite distribution contract](../NPM_DISTRIBUTION_CONTRACT.json) |

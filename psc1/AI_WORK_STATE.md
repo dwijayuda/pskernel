@@ -64,6 +64,14 @@ checker120s; manual G2/G3 profiles and original240s performance target unchanged
 Default kernel remains official C++/Emscripten linear-memory Wasm. Compiler Wasm
 retains GC. Python/PHP and all seven native mappings remain preserved.
 
+The later scalar expansion found an integration delimiter defect in Rust public
+value inventory parsing (40237884483): literal backslash-n instead of newline.
+Fixed1b0e695e with the same exact expected API comparison, live per-case output
+and archived immutable stores. Direct pinned native TypeScript execution9c9e8ef4
+keeps its whole compiler invocation inside240 seconds. Current qualification is
+still active; the first Nat-only four-target/engine/grammar and actual Rust link
+suite in40237499042 has passed, with full existing applications still active.
+
 ## Next steps and explicit bounds
 
 Finish active installed and normal dependency-selected source CI, fix actual

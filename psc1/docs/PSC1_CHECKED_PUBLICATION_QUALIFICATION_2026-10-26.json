@@ -1,0 +1,69 @@
+{
+  "schema": "psc1-checked-publication-qualification/1",
+  "status": "in-progress",
+  "date": "2026-10-26",
+  "pr": 188,
+  "baseCommit": "563ee855407581d0d34adcbc450ad77863f39f94",
+  "implementation": {
+    "head": "1b0e695e67fd76bfd8bb43901eebc35058a0fc1a",
+    "tree": "e963601d74978807dfabcbf8774c33c7d4599571"
+  },
+  "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+  "compilerSourceUnchanged": true,
+  "priorSourceGate": {
+    "run": 40230721977,
+    "criteria": 37,
+    "blocked": 0
+  },
+  "qualifiedGenerations": {
+    "js-ts-wasm": 40223062370,
+    "rust": 40223086966
+  },
+  "tests": {
+    "firstTransaction": {
+      "run": 40236426372,
+      "job": 121298892084,
+      "status": "passed"
+    },
+    "firstInstalledFourTargets": {
+      "run": 40237499042,
+      "job": 121302072701,
+      "targetSuite": "passed",
+      "fullJob": "in-progress-at-checkpoint"
+    }
+  },
+  "diagnostics": [
+    {
+      "run": 40236689438,
+      "result": "old installed regressions pass; TS native SDK missing from offline package set"
+    },
+    {
+      "run": 40237315097,
+      "job": 121301530073,
+      "result": "actual SDK launcher diagnoses @typescript/typescript-linux-x64 requirement"
+    },
+    {
+      "run": 40237646865,
+      "result": "reader helper shadowing, fixed e3266f82"
+    },
+    {
+      "run": 40237884483,
+      "result": "multiple Rust exports require actual newline delimiter, fixed 1b0e695e"
+    }
+  ],
+  "qualificationBoundary": {
+    "platform": "linux-x64",
+    "otherPlatformCommits": "refused-unqualified",
+    "fullCrossPlatformRelease": false,
+    "formalPreservation": "not-provided",
+    "npmPublication": false
+  },
+  "remaining": [
+    "terminal final installed consumer/application/type and ordinary selected source CI",
+    "actual macOS/Windows publication evidence",
+    "additional SDK/Rust platforms",
+    "component/optional-provider checked dispatch",
+    "automatic source-package resolution",
+    "final clean release reproduction and authorization"
+  ]
+}

@@ -23,9 +23,9 @@ the fixed resource policy.
 | Work | Current state | Completion evidence |
 |---|---|---|
 | Scoped String and local worker batches | Qualified within recorded sources | Actual receipts and independent archives |
-| Quot ID admission | Implemented; combined cb0 native561/40 PASS | Current complete generated/canonical routes and independent561 audit pending |
-| Cross-session Quot owners | Implemented, exact-tree9f native19/43controls PASS, included in cb0 native561 |10local protocol reports; complete public/negative/runtime parity pending |
-| Mutual/nested ID admission | Open | Complete checked bundle and recursor ownership |
+| Quot ID admission | Implemented; exact-tree native561 and complete-program helper1368 PASS | Final2f7 complete561/audit and unchanged193 pending |
+| Cross-session Quot owners | Implemented, native19/43 and actual complete-program17sessioncontrols PASS | Final source-bound complete561 and audit pending |
+| Mutual/nested ID admission | Private mutual-header native12proofs/33controls PASS; full admission open | Complete checked bundle, constructors and recursor ownership |
 | Whole-operation restart removal | Open | Four public routes without supported original-operation restart |
 | Eager decode/metadata import removal | Open | Demand-based output decode and bounded owning worklist import |
 | Arena performance |17timeouts; two separately classified agreements | All193 preserved original bodies and pinned official controls |
@@ -45,11 +45,11 @@ psKernelExprEq's binder erasure, metadata and other fields. Shared installation
 has a complete frozen-function refinement theorem. It reads no expanded input
 type and imports no input expression.
 
-Current combined cohort: **cb0bbaeb332a9fa3655f0c852496d96b2f722416 /40225115416**, production tree65d5b9c3d0431a8b86961b6d1aec398f7169d223. Native561/40 PASS with actual273-member archive independently read. Generated/canonical remain pending; independent9790802b /40225293570 targets exact current source. Isolated9f130bbc /40223744958 passes all19 reports and26+17 new assertions; all301 archived source files match immutable Git blobs. Portable893a9af1 diagnostic passes all3modules with authenticated reused compiler, not complete-source qualification.
+Current final cohort: **2f7ee0af /40228598527**, exact production65d5b9c3d0431a8b86961b6d1aec398f7169d223. Independent417578e4 /40228636222 and unchanged193 replay146e3d4e /40228699303 target this source. No adoption. Actual same-tree native561 is proven and corrected complete-program helper8af5e3b3 /40228452649 passes all1368retained+17sessioncontrols at30.95s/413244KiB. Its actual7-member ZIP and complete program7087dca9 were read. This reused-program diagnostic does not replace the final rebuilt-source cohort.
 
-Earlier70e andd82 complete routes failed portable inline-if and flat singleton syntax.67f diagnostic failed structural recursion staging; all11calls now use explicit partial let bindings at arity1.92055998 failed before build on an inherited source guard, fixed without production changes. Preserve each failure.
+Preserve cb0 external curried-call failure,7ec BigInt missing-root literal failure,45d flat injected-callback failure and earlier portable syntax/structural/source-guard failures.2f7 changes only the passed JS helper ABI and reviewed pins; production and all native proof statements are unchanged. Exact live owners, original input-ID bounds, preflight/error/limit order, initialized identity, atomic publication and full-original restart on genuine decline remain required in both rebuilt routes.
 
-Explicit Quot with an empty input graph demands only checked Eq and constructor metadata from the same immutable environment. Preflight runs first, prepared suffixes are discarded on decline, original external-ID bounds are retained, declaration limits precede generated import, and all4 live owners publish atomically. Complete same-batch/cross-call/repeat/errors/private-ID/limits/official controls must finish in both rebuilt routes before adoption. Read actual archives and independent audit; authenticate exact-tree193 replay and preserve all classifications before non-force integration.
+Private mutual-header ed458022 /40227506926 now passes192production jobs,12local proofs and33frozen-V1 comparisons. All304source snapshots match immutable Git blobs. It adds API/DagMutualHeader.lean and no public route. Complete group validation uses all names/constructor occurrences, later closed checks have fresh state, alignment resumes the first parameter owner, only the arena crosses scopes, indices retain owning IDs and result universes are compared with the original equivalent-level worker. This does not implement mutual constructors/recursors/publication or nested admission.
 
 ## 2. Implement shared mutual headers
 

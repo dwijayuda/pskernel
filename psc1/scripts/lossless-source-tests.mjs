@@ -208,7 +208,7 @@ for (const grammar of ['lean', 'ps']) {
 }
 fs.mkdirSync('dist/lossless', { recursive: true });
 const receipt = {
-  schema: 'psc1-lossless-qualification/1', commit: process.env.GITHUB_SHA ?? null,
+  schema: 'psc1-lossless-qualification/1', result: 'passed', commit: process.env.GITHUB_SHA ?? null,
   runtime: process.version, profile: losslessProfile, limits: losslessLimits,
   helperSha256: sha256, captures, negativeCases: negatives,
   sourceClosure: { modules: sources.length, sha256: closure },

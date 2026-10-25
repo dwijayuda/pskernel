@@ -10,7 +10,7 @@ import { supervisorLimit } from '../scripts/selfhost-qualification-profiles.mjs'
 export const losslessProfile = 'psc1-practical-core-v1/lean4.35.0/lossless-1';
 export const losslessLimits = Object.freeze({
   sourceBytes: 1048576, responseBytes: 33554432, pieces: 262144,
-  edits: 4096, timeoutMs: 240000, addressSpaceBytes: 2147483648, stackBytes: 8388608,
+  edits: 4096, timeoutMs: 240000, addressSpaceBytes: 4294967296, stackBytes: 8388608,
 });
 const protocol = 'psc1-lossless-capture/1';
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');

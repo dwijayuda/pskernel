@@ -44,26 +44,6 @@ jobs:
           lean --version
           lake build psc1_lossless_source psc1_lossless_tests
           .lake/build/bin/psc1_lossless_tests
-      - name: Inspect bounded native startup
-        working-directory: psc1
-        run: |
-          python3 - <<'PY'
-          import os, subprocess, tempfile, json
-          for line in open('.lake/build/ir/LosslessSourceMain.c'):
-              if any(word in line for word in ['lean_run_main', 'task_manager', 'initialize_runtime', 'set_thread', 'int main']):
-                  print('PSC1_NATIVE_MAIN: ' + line.rstrip())
-          with tempfile.TemporaryDirectory() as directory:
-              source = directory + '/source'
-              open(source, 'wb').close()
-              environment = dict(os.environ, LEAN_MAIN_USE_THREAD='0', LEAN_NUM_THREADS='0', LEAN_STACK_SIZE_KB='8192')
-              for cap in [1073741824, 2147483648, 4294967296]:
-                  command = ['prlimit', '--as=' + str(cap), '--stack=8388608', '--',
-                             os.path.abspath('.lake/build/bin/psc1_lossless_source'),
-                             'lean', source, directory + '/output']
-                  result = subprocess.run(command, env=environment, capture_output=True, timeout=5)
-                  print('PSC1_LEXICAL_STARTUP_PROBE: ' + json.dumps({'addressSpaceBytes': cap,
-                        'status': result.returncode, 'stderr': result.stderr.decode(errors='replace')[:1024]}))
-          PY
       - name: Exercise snapshots, trivia and staged edits
         working-directory: psc1
         run: |

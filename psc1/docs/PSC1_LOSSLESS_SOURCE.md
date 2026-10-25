@@ -98,13 +98,15 @@ records wall time and sampled/wait4 peak RSS. Host configuration cannot enlarge
 these limits through source input. Capture refuses unsupported host platforms;
 only Linux development tooling is qualified here.
 
-The helper has a 2 GiB address-space cap and an 8 MiB process-stack cap. Pinned
+The helper has a 4 GiB virtual address-space cap and an 8 MiB process-stack cap. Pinned
 Lean runtime controls select the main process stack and disable the unused task
 worker pool, avoiding the default large thread-stack reservations. The lexical
 helper performs no parallel task operations. Lean initializes a mandatory libuv
 loop thread before applying the main-thread environment controls; its default
 stack reserves virtual address space independently of resident memory. The
-helper-specific address-space envelope accommodates that initialization. These settings affect only the new lexical helper.
+helper-specific address-space envelope accommodates that initialization. Linux
+startup probes in run 40190581290 refuse at 1/2 GiB and succeed at 4 GiB. This
+virtual reservation is not a 4 GiB resident-memory measurement. These settings affect only the new lexical helper.
 The pinned runtime documents these controls in
 [thread.cpp](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/runtime/thread.cpp)
 and [object.cpp](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/runtime/object.cpp).

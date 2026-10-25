@@ -1,0 +1,35 @@
+{
+  "schema": "psc1-generated-io-g1-inputs/1",
+  "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+  "qualification": "G1-only; not fixed-point or npm qualification",
+  "engines": {
+    "js": {
+      "run": 40222325020,
+      "job": 121256498745,
+      "artifact": 12610241874,
+      "zipSha256": "2e86233e840f7224960b9834a1a68617d5762f4b6ca0cdb483def6027ccf2905",
+      "commit": "67fd1dcae5554aea06b089be228c7eeb46fa82c1"
+    },
+    "ts": {
+      "run": 40222325020,
+      "job": 121256498823,
+      "artifact": 12609732530,
+      "zipSha256": "e17c8ff1a6a6c4dbda8321a141f4ce737b22b65b1bcf0b8fa516fad818063158",
+      "commit": "67fd1dcae5554aea06b089be228c7eeb46fa82c1"
+    },
+    "rust": {
+      "run": 40222325020,
+      "job": 121256498713,
+      "artifact": 12609862548,
+      "zipSha256": "192d7ddfe78c4b60093d7dd6ca2d8cc6693dfa26defb123b46ab8ecd4ef8b5b8",
+      "commit": "67fd1dcae5554aea06b089be228c7eeb46fa82c1"
+    },
+    "wasm-core": {
+      "run": 40222325020,
+      "job": 121256498751,
+      "artifact": 12610700009,
+      "zipSha256": "93255b3f4289f1da5329bc9d14f0fb2bcaed96461fb24bf9a041d51864509462",
+      "commit": "67fd1dcae5554aea06b089be228c7eeb46fa82c1"
+    }
+  }
+}

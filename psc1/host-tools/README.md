@@ -35,12 +35,14 @@ The CLI accepts a single source file or a project object with only
 
 ## Host readability checks
 
-The scoped Prettier/Babel AST check compares the installed resolver, API and CLI
-against immutable baseline 3089cbc369bc8a11f540c13140c7003c9dadf4a8.
-Comments, positions and literal spelling metadata are ignored in that comparison;
-executable AST structure is retained. Installed package tests still exercise actual
-behavior, integrity refusals and publication failures.
+The pinned Prettier/Babel check preserves the original formatting-only cleanup:
+immutable cleanup 446a0f21 is compared with original baseline 3089cbc3. Live API,
+CLI and resolver ASTs are compared with explicit qualified IO/source-pin feature
+snapshots in Git ancestry. The guard records both relationships, rather than
+calling intentional behavior changes formatting. See the dated generated IO
+qualification receipt and installed application/package tests.
 
-The baseline comparison is a bounded guard for this cleanup, not a permanent ban
-on behavior changes or a proof of JavaScript semantics. A future behavior change
-must explicitly update its contract and evidence rather than silently repinning it.
+Comments, positions and literal spelling metadata are ignored; executable AST
+structure is retained. This bounded correspondence check is not a semantic proof.
+An intentional behavior change needs its own contract and actual behavior
+qualification before an explicit reviewed feature baseline update.

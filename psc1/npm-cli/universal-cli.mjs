@@ -30,6 +30,7 @@ function project(args) {
           '--out',
           '--assurance',
           '--target',
+          '--output-abi',
           '--project',
         ].includes(a) ||
         Object.hasOwn(options, a) ||
@@ -68,6 +69,7 @@ function project(args) {
     engine: options['--engine'] || 'js',
     kernel: options['--kernel'] || options['--provider'] || 'wasm',
     assurance: options['--assurance'] || source.assurance || 'checked',
+    ...(options['--output-abi'] ? { outputAbi: options['--output-abi'] } : {}),
     ...(options['--target'] ? { target: options['--target'] } : {}),
     ...(options['--out'] ? { out: options['--out'] } : {}),
   };
@@ -115,7 +117,7 @@ try {
     console.log(JSON.stringify(args[0] === 'check' ? { ...result, source: undefined } : result));
   } else
     fail(
-      'USAGE: psc check|compile|build Main.lean|ps [--engine js|ts|rust|wasm-core] [--kernel wasm|native|both] [--out directory]; psc kernel --identity|check admissions.json',
+      'USAGE: psc check|compile|build Main.lean|ps [--engine js|ts|rust|wasm-core] [--kernel wasm|native|both] [--output-abi scalar|io-dispatcher] [--out directory]; psc kernel --identity|check admissions.json',
     );
 } catch (error) {
   console.error(String(error?.message || error));

@@ -4,10 +4,13 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { expectedDistributionSha256 } from '../DISTRIBUTION_PIN.mjs';
+import {
+  expectedDistributionSha256,
+  expectedCompilerSourceClosureDigest,
+} from '../DISTRIBUTION_PIN.mjs';
 
 export const installationRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const compilerRoot = '07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af';
+export const compilerRoot = expectedCompilerSourceClosureDigest;
 export const leanCommit = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
 export const hash = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const fail = (message) => {
@@ -49,6 +52,7 @@ function manifestPin() {
 }
 export function loadDistribution() {
   if (process.version !== 'v22.23.3') fail('NODE_PIN');
+  if (!/^[a-f0-9]{64}$/.test(compilerRoot)) fail('COMPILER_SOURCE_PIN');
   const { bytes } = manifestPin(),
     d = JSON.parse(bytes);
   if (

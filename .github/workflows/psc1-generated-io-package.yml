@@ -1,0 +1,130 @@
+name: PSC1 qualified generated IO npm release candidate
+on:
+  push:
+    branches: [feat/psc1-generated-io-applications-20261026, qualification/psc1-io-package-20261026]
+    paths: [.github/qualification-requests/psc1-generated-io-package.json]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-generated-io-package-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  package:
+    if: ${{ github.event.commits[1] == null }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Require an explicit request-only commit and qualified compiler inputs
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';import fs from 'node:fs';import {spawnSync} from 'node:child_process';
+          const file='.github/qualification-requests/psc1-generated-io-package.json';
+          const r=JSON.parse(fs.readFileSync('../'+file)),e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
+          assert.deepEqual(Object.keys(r).sort(),['schema','branch','parentCommit','action','qualifiedCompilerGenerations'].sort());
+          assert.equal(r.schema,'psc1-generated-io-package-request/1');
+          assert.equal(r.action,'qualify-unpublished-generated-io');
+          assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
+          assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
+          const parent=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(parent.status,0);assert.equal(parent.stdout.trim(),r.parentCommit);
+          const diff=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});assert.equal(diff.status,0);
+          assert.deepEqual(diff.stdout.split(String.fromCharCode(0)).filter(Boolean),[file]);
+          const g=r.qualifiedCompilerGenerations;
+          assert.equal(g.schema,'psc1-qualified-compiler-generation-inputs/1');
+          assert.equal(g.sourceClosureDigest,'073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9');
+          assert.equal(Object.keys(g.engines).sort().join(','),'js,rust,ts,wasm-core');
+          const base=JSON.parse(fs.readFileSync('scripts/slim-universal-input.json'));
+          fs.writeFileSync('scripts/slim-universal-input.json',JSON.stringify({...base,qualifiedCompilerGenerations:g},null,2)+'\n');
+          console.log('PSC1_EXPLICIT_GENERATED_IO_PACKAGE_REQUEST: '+JSON.stringify(r));
+          JS
+      - name: Require historical cleanup correspondence and approved feature ASTs
+        run: |
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+          node scripts/readability-host-check.mjs
+      - name: Require artifact integrity and actual G1 promotion refusal
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/kernel435-qualified-artifact-tests.mjs
+          node scripts/qualified-compiler-assets-tests.mjs
+      - name: Assemble exact G3 root and optional bundles and cross-check full compiler admission
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/slim-universal-package.mjs
+      - name: Qualify offline local global optional and independent-kernel regressions
+        run: |
+          node scripts/slim-universal-installed.mjs
+          node scripts/slim-universal-io-preflight.mjs
+      - name: Require installed real IO applications and source fixture data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/generated-io-installed-applications.mjs
+      - name: Install isolated pinned target consumers
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+      - name: Require installed generated IO mappings through real pinned consumers
+        run: node scripts/generated-io-installed-candidates.mjs
+      - name: Typecheck the actual packed public API and IO entry
+        run: |
+          npm install --prefix "$RUNNER_TEMP/io-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          npm install --prefix "$RUNNER_TEMP/io-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.5.tgz"
+          cat > "$RUNNER_TEMP/io-types/consumer.mts" <<'TS'
+          import {compile,build,compileCandidate,getCompilerMetadata,createIndependentKernelToolchain,type Source,type OutputAbi} from 'proofscript';
+          import {createTypedIo,withTypedIo,type TypedIoConfiguration} from 'proofscript/io';
+          const sources:readonly Source[]=[{module:'Entry',kind:'lean',text:'def run (input : String) (dispatch : String -> String) : String := dispatch input\n'}];
+          const checked=compile({sources,entryModule:'Entry',outputAbi:'io-dispatcher'});
+          const text:string=checked.source; const abi:OutputAbi=checked.outputAbi;
+          const built=build({sources,entryModule:'Entry',outputAbi:'io-dispatcher',out:'out',engine:'wasm-core'});
+          const candidate=compileCandidate({sources,entryModule:'Entry',target:'rust',outputAbi:'io-dispatcher'});
+          const authority:false=candidate.publicationAuthority;
+          const config:TypedIoConfiguration={abi:'psc1-node-linux-string-io/1',capabilities:['readUtf8'],required:['readUtf8'],root:'/tmp/example',maxFileBytes:512,maxLineBytes:128,inputFd:0,outputFd:1};
+          const io=createTypedIo(config); const response:string=io.execute('{}'); io.close();
+          await withTypedIo(config,()=>({run:()=>true}),program=>program.run());
+          const kernel=await createIndependentKernelToolchain();
+          // @ts-expect-error checked results are readonly
+          checked.logicalAdmission='not-run';
+          // @ts-expect-error source cannot select an arbitrary output ABI
+          compile({sources,entryModule:'Entry',outputAbi:'arbitrary'});
+          // @ts-expect-error arbitrary operations are not capabilities
+          const invalid:TypedIoConfiguration={...config,capabilities:['shell']};
+          console.log(text,abi,built.artifact,authority,response,kernel,getCompilerMetadata());
+          TS
+          cat > "$RUNNER_TEMP/io-types/tsconfig.json" <<'JSON'
+          {"compilerOptions":{"noEmit":true,"strict":true,"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022"},"files":["consumer.mts"]}
+          JSON
+          node "$RUNNER_TEMP/io-types/node_modules/typescript/bin/tsc" --project "$RUNNER_TEMP/io-types/tsconfig.json"
+      - name: Archive arbitrary valid application fixture filenames
+        if: always()
+        run: |
+          if [ -d dist/slim-universal/installed-applications ]; then
+            tar -czf dist/slim-universal/installed-applications-evidence.tar.gz -C dist/slim-universal installed-applications
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-generated-io-toolchain-${{ github.sha }}
+          path: |
+            psc1/dist/slim-universal/tarballs/
+            psc1/dist/slim-universal/package-receipt.json
+            psc1/dist/slim-universal/installed-qualification.json
+            psc1/dist/slim-universal/io-adapter-preflight.json
+            psc1/dist/slim-universal/application-qualification.json
+            psc1/dist/slim-universal/io-candidate-qualification.json
+            psc1/dist/slim-universal/compiler-kernel-admission.json
+            psc1/dist/slim-universal/current-compiler/promotion-receipt.json
+            psc1/dist/slim-universal/installed-applications-evidence.tar.gz
+            psc1/dist/readability/host.json
+          if-no-files-found: warn
+          retention-days: 90

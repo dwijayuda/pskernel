@@ -11,6 +11,15 @@ const require = createRequire(path.join(root, 'host-tools/package.json'));
 const prettier = require('prettier');
 const {parse} = require('@babel/parser');
 const baseline = '3089cbc369bc8a11f540c13140c7003c9dadf4a8';
+const cleanupCommit = '446a0f21c6288a7c20b843bbeadcd18ba1460fa2';
+// Intentional IO/qualified-source features have separate behavior qualification.
+// Preserve the original cleanup proof; do not call these features formatting.
+const featureBaselines = {
+  'host-tools/installed-engine-resolver.mjs': '2a6626246a4d2be8953c017f5b5d6d19375aee0b',
+  'npm-cli/universal.mjs': '4174fefe50fccc0bd68e3882c069c784bc5f3a7e',
+  'npm-cli/universal-cli.mjs': '4174fefe50fccc0bd68e3882c069c784bc5f3a7e',
+};
+const featureQualification = 'docs/PSC1_GENERATED_IO_QUALIFICATION_2026-10-26.json';
 const files = [
   'host-tools/installed-engine-resolver.mjs',
   'npm-cli/universal.mjs',
@@ -37,22 +46,34 @@ for (const file of files) {
     cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
   });
   assert.equal(original.status, 0, file + '\n' + original.stderr);
+  const cleanup = spawnSync('git', ['show', cleanupCommit + ':psc1/' + file], {
+    cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
+  });
+  assert.equal(cleanup.status, 0, file + '\n' + cleanup.stderr);
+  assert.deepEqual(executableAst(cleanup.stdout), executableAst(original.stdout),
+    file + ': original cleanup correspondence changed');
+  const feature = spawnSync('git', ['show', featureBaselines[file] + ':psc1/' + file], {
+    cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
+  });
+  assert.equal(feature.status, 0, file + '\n' + feature.stderr);
   const source = fs.readFileSync(path.join(root, file), 'utf8');
-  assert.deepEqual(executableAst(source), executableAst(original.stdout),
-    file + ': executable AST changed from the immutable cleanup baseline');
+  assert.deepEqual(executableAst(source), executableAst(feature.stdout),
+    file + ': executable AST changed from the explicit feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),
     file + ': formatter changed executable AST');
   if (propose) proposal[file] = formatted;
   else assert.equal(source, formatted, file + ': run pinned scoped formatter');
-  results.push({file, executableAstMatchesBaseline: true,
+  results.push({file, originalCleanupAstCorrespondence: true, featureBaseline: featureBaselines[file],
+    featureQualification, executableAstMatchesBaseline: true,
     formatted: source === formatted, lines: source.split('\n').length});
 }
 const out = path.join(root, 'dist/readability');
 fs.mkdirSync(out, {recursive: true});
 fs.writeFileSync(path.join(out, 'host.json'), JSON.stringify({
   schema: 'psc1-readability-host/1', commit: process.env.GITHUB_SHA,
-  baseline, mode: propose ? 'proposal-not-qualification' : 'check',
+  baseline, cleanupCommit, featureBaselines, featureQualification,
+  mode: propose ? 'proposal-not-qualification' : 'check',
   formatter: 'prettier@3.6.2', parser: '@babel/parser@7.28.0', results,
 }, null, 2) + '\n');
 if (propose) console.log('PSC1_HOST_FORMAT_PROPOSAL=' + JSON.stringify(proposal));

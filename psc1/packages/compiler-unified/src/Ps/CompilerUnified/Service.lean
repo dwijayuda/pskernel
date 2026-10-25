@@ -28,13 +28,7 @@ def run (target : PsBackendTarget)
     (emit : PsValidatedIrModule -> List String ->
       Except Ps.Internal.CompilerService.Error (Prod String (List String)))
     (values : List PsJsonValue) : String :=
-  match Ps.Internal.CompilerService.decodeRequestFields values with
-  | Except.error error => Ps.Internal.CompilerService.refused target "" "" error
-  | Except.ok request =>
-      match Ps.Internal.CompilerService.compile target emit request with
-      | Except.error error =>
-          Ps.Internal.CompilerService.refused target request.requestId request.sourceClosureDigest error
-      | Except.ok output => output
+  Ps.Internal.CompilerService.candidateFields target emit values
 
 def dispatch (target : String) (values : List PsJsonValue) : String :=
   if psStringEq target "js" then

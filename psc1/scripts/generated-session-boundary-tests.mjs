@@ -35,7 +35,7 @@ const runnerHash = sha(fs.readFileSync(runner));
 const publicationRoot = path.join(directory, 'publication');
 let serial = 0;
 const records = [];
-function fixtureSession(mutate = '', capture = source, serviceDependencies = []) {
+function fixtureSession(mutate = '', capture = source, serviceDependencies = [], additionalCheckers = []) {
   const id = 'host-fixture-' + serial++;
   const file = path.join(directory, id + '.mjs');
   fs.writeFileSync(file, 'const template=' + JSON.stringify(base) + ';\n' +
@@ -49,7 +49,7 @@ function fixtureSession(mutate = '', capture = source, serviceDependencies = [])
   const session = createGeneratedJsCompilerSession({ requestId: id, sources: capture,
     entryModule: 'Entry', assurance: 'checked', serviceFile: file,
     serviceSha256: sha(fs.readFileSync(file)), runnerFile: runner, runnerSha256: runnerHash,
-    checkerExecutable: checker, checkerSha256: checkerHash, publicationRoot, serviceDependencies });
+    checkerExecutable: checker, checkerSha256: checkerHash, publicationRoot, serviceDependencies, additionalCheckers });
   return { session, file };
 }
 function pointer() {
@@ -177,6 +177,31 @@ failClosed('imported engine changed after admission',()=>{
 });
 assert.throws(()=>fixtureSession('',source,{}),/PSC1_SERVICE_DEPENDENCIES_INVALID/);
 assert.throws(()=>fixtureSession('',source,[{path:dependency,sha256:'0'.repeat(64)}]),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);
+// Additional providers are trusted host-selected tools, never generated selectors.
+const extraScript=path.join(directory,'additional-real-checker.mjs');
+const realExtra="import fs from 'node:fs';import {spawnSync} from 'node:child_process';"+
+ "const r=spawnSync("+JSON.stringify(checker)+",['--check'],{input:fs.readFileSync(0),encoding:'utf8',timeout:120000,maxBuffer:32*1024*1024});"+
+ "if(r.error||r.status!==0)process.exit(1);process.stdout.write(r.stdout);";
+fs.writeFileSync(extraScript,realExtra);
+const extraDescriptor=()=>[{name:'second-native-reference',scriptFile:extraScript,scriptSha256:sha(fs.readFileSync(extraScript))}];
+const additionalGood=fixtureSession('',source,[],extraDescriptor()),additionalPrepared=additionalGood.session.execute();
+assert.equal(additionalPrepared.additionalAdmissions.length,1);
+assert.equal(additionalPrepared.additionalAdmissions[0].admissionsSha256,additionalPrepared.admissionsSha256);
+additionalGood.session.publish();
+records.push({name:'additional real native checker receives identical captured admissions',status:'passed',wasmAcceptanceClaim:false});
+for(const [name,program,error] of [
+ ['additional checker rejects',"console.log(JSON.stringify({protocol:'pskernel-lean/1',provider:'lean4-cpp',leanVersion:'4.35.0',leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',profile:'lean4.35-core',accepted:false}));",/PSC1_SERVICE_ADDITIONAL_CHECKER_REFUSED/],
+ ['additional checker wrong identity',"console.log(JSON.stringify({accepted:true,leanCommit:'wrong'}));",/PSC1_SERVICE_ADDITIONAL_CHECKER_REFUSED/],
+ ['additional checker malformed response',"console.log('{');",/PSC1_SERVICE_ADDITIONAL_CHECKER_JSON/],
+ ['additional checker process failure',"process.exit(1);",/PSC1_SERVICE_ADDITIONAL_CHECKER_PROCESS/]
+]){
+ fs.writeFileSync(extraScript,program);
+ failClosed(name,()=>{const {session}=fixtureSession('',source,[],extraDescriptor());assert.throws(()=>session.execute(),error);assert.throws(()=>session.publish(),/PSC1_SERVICE_NOT_ADMITTED/);});
+}
+fs.writeFileSync(extraScript,realExtra);
+failClosed('additional checker changed after admission',()=>{const {session}=fixtureSession('',source,[],extraDescriptor());session.execute();fs.appendFileSync(extraScript,' ');assert.throws(()=>session.publish(),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);fs.writeFileSync(extraScript,realExtra);});
+assert.throws(()=>fixtureSession('',source,[],{}),/PSC1_SERVICE_ADDITIONAL_CHECKERS_INVALID/);
+
 fs.unlinkSync(checker); // retain the exact binary hash, not a duplicate checker executable
 fs.writeFileSync(path.join(directory, 'results.json'), JSON.stringify({
   schema: 'psc1-generated-session-boundary/1', commit: process.env.GITHUB_SHA,

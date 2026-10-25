@@ -3,7 +3,7 @@ name: PSC1 Quot external curried ABI runtime diagnostic
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-t06-quot-owner-full-20261026
+    - work/psc1-pskernel-t06-quot-runtime-20261026
     paths:
     - .github/workflows/psc1-pskernel-t06-quot-runtime.yml
 permissions:
@@ -46,10 +46,10 @@ jobs:
         \ and hashlib.sha256(kernel).hexdigest()=='7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4'\n\
         assert 'Error: PSC1_QUOT_OWNER_FAIL Quot-valid-bounded-pattern' in z.read('quot/runtime.log').decode()\n\
         (out/'kernel.mjs').write_bytes(kernel)\ninputs={}\nfor path in ['psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs','psc1/scripts/pskernel-quot-session-owner-smoke.mjs']:\n\
-        \    old=subprocess.check_output(['git','show',source+':'+path]).decode();expected=old.replace('(pattern.term)(generated.arena,pattern.id)','(pattern.term)(generated.arena)(pattern.id)').replace('(pattern.term)(generated.arena,generated.arena.size+1)','(pattern.term)(generated.arena)(generated.arena.size+1)').replace('(pattern.term)(generated.arena,s1.id)','(pattern.term)(generated.arena)(s1.id)')\n\
+        \    old=subprocess.check_output(['git','show',source+':'+path]).decode();expected=old.replace('(pattern.term)(generated.arena,pattern.id)','(pattern.term)(generated.arena)(pattern.id)').replace('(pattern.term)(generated.arena,generated.arena.size+1)','(pattern.term)(generated.arena)(generated.arena.size+1)').replace('(pattern.term)(generated.arena,s1.id)','(pattern.term)(generated.arena)(s1.id)').replace('generated.arena.size+1)','generated.arena.size+1n)')\n\
         \    actual=pathlib.Path(path).read_text();assert expected!=old and actual==expected\n    name=pathlib.Path(path).name;(out/name).write_text(actual);inputs[path]={'bytes':len(actual.encode()),'sha256':hashlib.sha256(actual.encode()).hexdigest()}\n\
         record={'schema':'psc1-quot-runtime-ABI-diagnostic-v1','harnessSource':os.environ['GITHUB_SHA'],'programSource':source,'programProducerRun':40225115416,'programProducerJob':121265677693,'producerJobConclusion':'failure','failurePreserved':'new\
-        \ external ABI test call applied both curried arguments in one JS call','programBytes':len(kernel),'programSha256':hashlib.sha256(kernel).hexdigest(),'producerArchiveSha256':sha,'inputs':inputs,'onlyThreeExternalCallsPerHelperChanged':True,'productionAndNativeProofInputsUnchanged':True,'fullQualification':False,'fuel':4096,'oldSpaceMiB':2048,'emptyPATH':True,'eachDeadlineSeconds':1500}\n\
+        \ external ABI test call applied both curried arguments in one JS call','programBytes':len(kernel),'programSha256':hashlib.sha256(kernel).hexdigest(),'producerArchiveSha256':sha,'inputs':inputs,'onlyThreeExternalCallsAndBigIntLiteralPerHelperChanged':True,'productionAndNativeProofInputsUnchanged':True,'fullQualification':False,'fuel':4096,'oldSpaceMiB':2048,'emptyPATH':True,'eachDeadlineSeconds':1500}\n\
         (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
     - name: Run both complete retained Quot helpers through actual compiled program
       shell: bash

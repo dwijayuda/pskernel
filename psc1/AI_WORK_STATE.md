@@ -1,10 +1,20 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #180, branch
-`feat/psc1-slim-universal-npm-20261025`, from PR #179 HEAD
-`ba3bfb045619ceb2948820f874357b2058f79868`. Use connected GitHub and Linux Actions
+Updated 2026-10-25 Asia/Jakarta. Active readability work branch
+`refactor/psc1-readability-20261025`, from qualified PR #180 HEAD
+`3089cbc369bc8a11f540c13140c7003c9dadf4a8`. Use connected GitHub and Linux Actions
 only. Fetch live HEAD before writes; single-parent expected-HEAD non-force updates.
 No merge or npm publication is authorized.
+
+## Active readability implementation
+
+User-authorized scope: current documentation and handwritten installed host code,
+then one coherent compiler-module extraction. Documentation now separates current
+contracts/guides from immutable receipts/history. Host cleanup will use pinned
+Prettier and baseline Babel AST comparison. The compiler pilot extracts bounded
+Wasm type discovery without rewriting algorithms, declaration names, fuel or limits.
+No new source/package/refactor qualification is claimed until actual Linux CI passes.
+Frozen generated compiler/kernel artifacts and their qualifications remain unchanged.
 
 ## Current verified package milestone
 
@@ -122,7 +132,8 @@ for package/host/doc changes.
 5. Additional Rust executor platform payloads/bounded supervisors; final exact
    source/package/platform qualification and clean reproduction.
 6. Optimize the separate240s performance target from measured compiler workloads.
-   Broader language/extensions/readability remain deferred beyond frozen v1.
+   Broader language/extensions remain deferred beyond frozen v1. The current
+   user-authorized readability slice proceeds without expanding language semantics.
 
 Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trustlevel0,
 finite2000000-heartbeat/20000-recursion kernel bounds, source/logical pairing,

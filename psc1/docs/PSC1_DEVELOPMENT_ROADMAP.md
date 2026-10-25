@@ -5,6 +5,16 @@ Core v1 remains frozen at14 feature families/37 finite criteria. One existing
 compiler source/frontend/elaborator/checked IR/verification pipeline serves all
 seven backend mappings and both source grammars. No merge or npm publication.
 
+## Active maintainability slice
+
+User-authorized work after PR #180: reconcile current entry points and evidence,
+format/document the handwritten installed host with executable-AST correspondence,
+then extract one Wasm type-discovery module with retained bodies and full Linux
+source/package gates. This changes maintenance priorities for this slice without
+expanding frozen Practical Core v1 or relabeling frozen self-host artifacts.
+Implementation and qualification must be recorded separately in AI_WORK_STATE.md.
+[Contributor guide](../CONTRIBUTING.md), [documentation index](README.md).
+
 ## Current package result
 
 Slim universal-format `proofscript@0.1.0-psc1.4` passes actual Linux package

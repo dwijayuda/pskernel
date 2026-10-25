@@ -158,4 +158,5 @@ jobs:
         name: psc1-layout-boundary-preflight-attempt-${{ github.run_attempt }}
         path: ${{ runner.temp }}/layout-boundary-preflight/
         if-no-files-found: error
+        include-hidden-files: true
         retention-days: 30

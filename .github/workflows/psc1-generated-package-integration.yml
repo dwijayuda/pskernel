@@ -7,6 +7,7 @@ on:
       - psc1/scripts/npm-generated-distribution.mjs
       - psc1/npm-cli/generated*.mjs
       - psc1/host-tools/generated-compiler-session.mjs
+      - psc1/host-tools/generated-rust-*.mjs
 permissions:
   contents: read
   actions: read
@@ -38,12 +39,15 @@ jobs:
       - name: Build pinned independent checker and host boundary fixtures
         run: |
           set -euo pipefail
+          node --check scripts/npm-generated-distribution.mjs
+          node --check npm-cli/generated.mjs
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.elan/bin:$PATH"
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1_independent_checker psc1_js_service_seed psc1_source_census_probe
           node scripts/generated-session-boundary-tests.mjs
+          node scripts/generated-rust-transport-tests.mjs
       - name: Verify immutable native and qualified engine archives
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -54,7 +58,8 @@ jobs:
           const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
           async function api(route){const r=await fetch('https://api.github.com/repos/'+repo+route,{headers});assert.equal(r.status,200,route);return r.json();}
           const known=[
-           {id:12578274080,digest:'sha256:adf631066e56a6fb0617c8132ab14b9ec0ac506a6a125c8e990f9222e8bd04e4',run:40138996117},
+           {id:12581184979,digest:'sha256:2bf7d0fadd0bacd45c1b645ad9f15ba400a67236d9720c55f21391470e12fda3',run:40145805549},
+           {id:12580184355,digest:'sha256:c294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0',run:40141718481},
            {id:12573999378,digest:'sha256:330a41af351664b86d41791664a3a7a659813963c35b1e24af633ba99d1a9ce3',run:40126488125},
            {id:12575002462,digest:'sha256:77c0e130074807cf538dc9759c656a0ef6fa5ec9c3939cecb0c37922d8205d77',run:40126488125}
           ];
@@ -96,12 +101,24 @@ jobs:
           const base=path.resolve('dist/generated-package-input'),files=[];
           function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else files.push(p);}}walk(base);
           const qs=files.filter(p=>path.basename(p)==='qualification.json').map(p=>{try{return {path:p,value:JSON.parse(fs.readFileSync(p))};}catch{return null;}}).filter(Boolean);
-          const qfiles=['ts','wasm-core'].map(target=>{const a=qs.filter(x=>x.value.schema==='psc1-generated-target-qualification/1'&&x.value.mode==='--self-host'&&x.value.target===target&&x.value.testedCommit==='812094c1f5e1e0c0dca516dab1e30ef66f3076f7');assert.equal(a.length,1);return a[0].path;});
-          const native=qs.filter(x=>x.value.qualification==='passed'&&x.value.tarballSha256&&x.value.nativeNpmIdentityAgreement===true);assert.equal(native.length,1);
+          const qfiles=['ts','wasm-core','rust'].map(target=>{const a=qs.filter(x=>x.value.schema==='psc1-generated-target-qualification/1'&&x.value.mode==='--self-host'&&x.value.target===target&&x.value.testedCommit===(target==='rust'?'2d27f1428e6a53a6de5006f950fc94f2d471b214':'812094c1f5e1e0c0dca516dab1e30ef66f3076f7'));assert.equal(a.length,1);return a[0].path;});
+          const native=qs.filter(x=>x.value.qualification==='passed'&&x.value.tarballSha256&&x.value.nativeNpmIdentityAgreement===true);assert.equal(native.length,1);assert.equal(native[0].value.sourceCommit,'348746f32e7fe04b3402eb22030054375eb9ebcd');assert.equal(native[0].value.branchHeadCommit,'14cb3e30503d0c5e6b1e007598b0bde7ad77befb');
           const tarballs=files.filter(p=>path.basename(p)===path.basename(native[0].value.tarball));assert.equal(tarballs.length,1);
           assert.equal(sha(fs.readFileSync(tarballs[0])),native[0].value.tarballSha256);
           const r=spawnSync(process.execPath,['scripts/npm-generated-distribution.mjs',tarballs[0],...qfiles],{stdio:'inherit',timeout:1800000});
           assert.equal(r.error,undefined);assert.equal(r.status,0);
+          const packed=JSON.parse(fs.readFileSync('dist/npm-generated/qualification.json'));
+          assert.equal(packed.nativeInputTarballSha256,native[0].value.tarballSha256);
+          const optional={};
+          for(const [target,row]of Object.entries(native[0].value.addonTarballs)){
+           const matches=files.filter(p=>path.basename(p)===path.basename(row.path));assert.equal(matches.length,1);
+           const source=matches[0];assert.equal(sha(fs.readFileSync(source)),row.sha256);assert.equal(fs.statSync(source).size,row.bytes);
+           const output=path.join(path.dirname(packed.tarball),path.basename(source));fs.copyFileSync(source,output);
+           optional[target]={file:output,sha256:row.sha256,bytes:row.bytes};
+          }
+          const receipt={schema:'psc1-current-package-inputs/1',controlCommit:process.env.GITHUB_SHA,packagingSourceCommit:process.env.GITHUB_SHA,nativeSourceCommit:native[0].value.sourceCommit,nativeQualificationRun:40145805549,nativeArtifact:12581184979,core:{file:packed.tarball,sha256:packed.tarballSha256},optional,publication:'unpublished'};
+          fs.writeFileSync('dist/npm-generated/package-inputs.json',JSON.stringify(receipt,null,2)+'\n');
+          console.log('PSC1_CURRENT_PACKAGE_INPUTS: '+JSON.stringify(receipt));
           JS
       - uses: actions/upload-artifact@v4
         if: always()
@@ -109,6 +126,7 @@ jobs:
           name: psc1-generated-installed-package-${{ github.sha }}
           path: |
             psc1/dist/npm-generated/qualification.json
+            psc1/dist/npm-generated/package-inputs.json
             psc1/dist/npm-generated/run-*/tarballs/
             psc1/dist/generated-package-input/archives.json
             psc1/dist/generated-session-boundary/results.json

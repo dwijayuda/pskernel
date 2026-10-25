@@ -5,6 +5,31 @@ non-force branch HEAD. Implementation `daa735017e34ee94da79d747c363237b4adbc4ef`
 is the current frozen compiler; packaging and documentation commits do not change its source.
 GitHub tools/Linux Actions only. No merge or registry publication authorized.
 
+## Installed Rust G3 integration promoted; final full gate pending
+
+Candidate47db4f83/run40149384939/job121037495375 PASSED offline installation,
+15 corpus cases,18 application builds/66 observations,20 refusal/tamper checks
+under Rust/TS/Wasm and both grammars. The qualified Rust G3 manifest is33a22e78
+and raw executable07f58b1f; no Lean-native compiler is available during generated
+compilation. Ordinary requests remain240s. The Node-only Linux guard requires
+no Python/Rust SDK for generated JS output and passes10 real integrity/lifetime
+tests, including timeout, parent death and descendant cleanup. Source/IR/kernel
+checking and atomic publication policies are unchanged.
+
+Artifact12581373839,ZIP8409dd64fe0fc41a8bd829c385290c4839f11ed1e9d54b866f2c556f04677638,
+contains the three-engine core plus matching optional Python/PHP tarballs.
+Core SHA25635f0077d9a9b4e80f13c4fdaf86c6ce976e17e54e85f3f1fe0c4ca0451da174e.
+TS/Wasm still use their historical92654df5 root; Rust uses frozen07eedac1.
+The shared-root JS/TS/Wasm request40147825207 remains active. No all-four-engine
+or new-root JS/TS/Wasm qualification is claimed before its terminal records.
+
+The package sources/CLI/transport are now promoted to the primary branch.
+Fresh production package and required full CI are PENDING for this integration.
+The finite native compiler source stays frozen. Performance measurements are
+single-run compiler execution including cold engine startup: JSON modules
+Rust12.4s/TS12.3-12.7s/Wasm5.1s; CLI modulesRust16.9s/TS16.0-16.8s/Wasm6.7-6.8s.
+These do not grant240s whole-compiler performance qualification.
+
 ## Latest qualification results
 
 Rust request2d27f142/run40141718481/job121014751809 PASSED genuine G1/G2/G3 and

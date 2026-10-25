@@ -41,7 +41,7 @@ export async function generatedMain(args,root){
   serviceDependencies:[...deps,sessionCode]});
  const result=session.execute(),published=session.publish();
  console.log(JSON.stringify({status:'accepted',engine:options['--engine'],engineSourceClosureDigest:engine.sourceClosureDigest,
-  engineQualification:engine.qualification,target:'js',artifact:published.target,manifestSha256:published.manifestSha256,
+  engineQualification:engine.qualification,compilerExecutionMs:session.events.find(e=>e.role==='generated-compiler').elapsedMs,target:'js',artifact:published.target,manifestSha256:published.manifestSha256,
   sourceClosureDigest:result.sourceClosureDigest,logicalAdmission:result.logicalAdmission,checkerCommit:meta.checkerCommit,
   performanceQualification:engine.performanceQualification,behaviorallyVerified:false,formalPreservation:'not-provided'}));
 }

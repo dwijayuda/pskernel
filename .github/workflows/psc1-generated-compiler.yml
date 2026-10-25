@@ -152,11 +152,14 @@ jobs:
           node --check host-tools/generated-compiler-session.mjs
           node --check scripts/generated-session-boundary-tests.mjs
           node scripts/generated-session-boundary-tests.mjs
+          node scripts/generated-rust-transport-tests.mjs
       - name: Retain boundary fixtures and immutable generation manifests
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: psc1-generated-session-boundary-${{ github.sha }}
-          path: psc1/dist/generated-session-boundary/
+          path: |
+            psc1/dist/generated-session-boundary/
+            psc1/dist/generated-rust-transport/
           if-no-files-found: warn
           retention-days: 90

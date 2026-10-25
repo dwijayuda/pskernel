@@ -9,16 +9,16 @@ compiler Wasm bundle retains its existing GC architecture.
 
 ## Download and install the qualified integration
 
-[Download the seven-package artifact](https://github.com/dwijayuda/pskernel/actions/runs/40160064167/artifacts/12585887196)
-from successful run 40160064167, source
-`3c9fae34d8a8912cce638777611942327b67ca35`.
+[Download the seven-package artifact](https://github.com/dwijayuda/pskernel/actions/runs/40161362270/artifacts/12586394254)
+from successful run 40161362270, source
+`cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad`.
 Artifact ZIP SHA256:
-`064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a`.
+`426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52`.
 After extracting, enter `kernel435-core/tarballs/`.
 
 | Package | Tarball | Bytes |
 | --- | --- | ---: |
-| proofscript | proofscript-0.1.0-psc1.3.tgz | 62180617 |
+| proofscript | proofscript-0.1.0-psc1.3.tgz | 62181083 |
 | @proofscript/pskernel-lean-wasm | proofscript-pskernel-lean-wasm-4.35.0.tgz | 582533 |
 | @proofscript/pskernel-lean | proofscript-pskernel-lean-4.35.0.tgz | 6446239 |
 | @proofscript/compiler-wasm | proofscript-compiler-wasm-0.1.0-psc1.3.tgz | 1370182 |
@@ -27,7 +27,7 @@ After extracting, enter `kernel435-core/tarballs/`.
 | @proofscript/backend-php | proofscript-backend-php-0.1.0-psc1.3.tgz | matching optional output provider |
 
 Core tarball SHA256:
-`b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346`.
+`02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a`.
 Use Node **22.23.3** for the currently qualified compiler transports.
 Core includes both matching kernel packages offline; installation builds nothing
 and downloads no compiler SDK. It still embeds the four compiler engines and
@@ -57,13 +57,13 @@ tarball. These providers are not default dependencies.
 npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.3.tgz ./proofscript-backend-python-0.1.0-psc1.3.tgz
 ```
 
-Integrated run 40160064167 passes 14 real native/Wasm acceptance/rejection
+Integrated run 40161362270 passes 14 real native/Wasm acceptance/rejection
 comparisons, 20 compiler cases, 24 CLI/JSON application builds and 88 observations,
 24 generated refusal/tamper cases with previous-output preservation, eight
 explicit dual checks, two native publication cases, missing-policy refusal and
 installed public TypeScript API checks. The native compiler and native checker
 are unavailable during default generated cases. Both actual kernels also accept
-the unchanged frozen 120-module compiler admission graph in 6222 ms combined.
+the unchanged frozen 120-module compiler admission graph in 10734 ms combined.
 This is logical rechecking of an already qualified graph, not a new full-chain
 replay or formal compiler-preservation proof.
 
@@ -71,6 +71,11 @@ Fresh global install [run 40160640974](https://github.com/dwijayuda/pskernel/act
 also passes eight actual global-bin builds (all four engines and both grammars),
 offline with an empty cache, native compiler/checker unavailable, prior outputs
 preserved after bad source and corrupt default Wasm refused.
+
+The latest run also refuses four missing/conflicting default-policy declarations
+across generated builds, source checks and native publication (12 refusals), with
+the native checker available and previous outputs preserved. Both installed local
+and fresh global tests execute inside the same package qualification job.
 
 ## Kernel APIs and five-platform evidence
 
@@ -130,6 +135,12 @@ Run 40158598464 executes five genuine corpus cases and two refusal cases on each
 of five platforms for the Wasm bundle, and both bundles on Linux x64 (ten cases,
 four refusals). Compiler Wasm is portable; the Rust bundle currently refuses
 unsupported platforms. Every payload and bounded transport is pinned and verified.
+
+The exact code checkpoint also passes the full Linux source gate
+[40161364575](https://github.com/dwijayuda/pskernel/actions/runs/40161364575):
+37/37 Practical Core criteria, zero blocked, all seven backends/both grammars,
+minimum Python and installed native npm/source-library tests. This is separate
+from the new integrated G3/default-Wasm artifact qualification above.
 
 ## Remaining release boundary
 

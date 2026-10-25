@@ -9,28 +9,32 @@ No merge or npm publication is authorized.
 
 ## Verified Wasm-default kernel and compiled-bundle milestone
 
-Code/package checkpoint `3c9fae34d8a8912cce638777611942327b67ca35` passes
-integrated run40160064167/job121069555210. Fresh global install at
-`d269846a50e33f15e18abe96b653735c0a93cf3e` passes40160640974/job121071261017.
+Code/package checkpoint `cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad` passes
+integrated run40161362270/job121073432577. Fresh global installation now passes inside the same integrated job. Earlier
+standalone global run40160640974/job121071261017 also passed atd269846a.
 The real installed CLI uses official Lean4.35 C++/Emscripten6.0.9 **linear-memory
 Wasm by default**. Native is an explicit comparison; missing/corrupt/refusing
 Wasm cannot fall back. Preserved native publication also checks its exact staged
 admission graph with Wasm before commit, retaining original native checking.
 
-The integrated seven-tarball artifact12585887196 has ZIP SHA256
-`064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a`.
-Core tgz62180617 bytes, SHA256
-`b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346`.
-Actual installed tests pass14 native/Wasm cases,20 compiler cases,24 CLI/JSON
+The integrated seven-tarball artifact12586394254 has ZIP SHA256
+`426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52`.
+Core tgz62181083 bytes, SHA256
+`02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a`.
+Four missing/conflicting root/generated kernel declarations are refused by
+all three CLI paths (12 cases), with the native checker available and prior output
+preserved. Actual installed tests pass14 native/Wasm cases,20 compiler cases,24 CLI/JSON
 application builds/88 observations,24 generated refusal/tamper cases,8 explicit
 dual checks,2 native publication checks and public TypeScript API checks.
 Default generated cases run with native compiler AND native checker unavailable.
 Fresh global install executes8 builds, all engines/both grammars, offline empty
 cache, native payloads unavailable, previous outputs preserved, corrupt Wasm refused.
 
+The integrated workflow now qualifies fresh global installation before artifact
+promotion, avoiding a second input commit and redundant source CI cancellation.
 The unchanged qualified120-module compiler admission graph
 `4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39`
-passes BOTH real kernels in6222ms combined. This is independent logical rechecking,
+passes BOTH real kernels in10734ms combined. This is independent logical rechecking,
 not full-generation replay, formal preservation or DDC.
 
 Both kernel packages are now genuinely install-qualified on Linux x64/arm64 glibc,
@@ -57,9 +61,19 @@ backend publication or the whole installed toolchain on those platforms.
 [Install guide](docs/PSC1_KERNEL_PACKAGES.md),
 [machine-readable evidence](docs/PSC1_KERNEL435_QUALIFICATION_2026-10-25.json) and
 [executable continuation](docs/PSC1_KERNEL435_CONTINUATION.md) contain exact identities.
-The latest normal PR source regression gate must be terminal before recording it;
-prior cancelled runs are not successes. Parent55's37/37 is historical baseline
-evidence, not an automatic qualification of this integration branch.
+The final code/source regression run40161364575 PASSED at
+`cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad`: full job121075449014 and final
+gate121080510772,37/37 Practical Core criteria,0 blocked,seven backends/both
+grammars, minimum Python and installed native npm/source libraries.
+Tested merge`460a2f7057cd39bbc7489552ce2785c92c3de717` and branch HEAD have
+identical tree`55cf04f9c8d50738f77cef82dded1e97478c6d3d`.
+Full evidence artifact12586859725 ZIP SHA256
+`48b75a7a58b25e145423c3584b54d2f5c296c91ab1c1a4930077a63f8275cd0d`.
+This current source result supersedes pending/cancelled snapshots; all earlier
+evidence remains historical. The installable integrated artifact remains the
+separately qualified40161362270 package described above. Whole-toolchain final
+cross-platform release is still incomplete.
+
 
 ## Final distribution contract and reference archive
 
@@ -135,7 +149,7 @@ Production55f9327ee738b5b2bf5d623c96280cb97de828b2 PASSED package40152769340/job
 
 | Order | Work | Status and finite acceptance |
 | --- | --- | --- |
-| 0 | Final source regression gate | Run normal dependency-selected source CI through every selected check; preserve failed/cancelled debt. Exact successful final source/package identities required. Current kernel/default-Wasm installed gates above are passed. |
+| 0 | Final source regression gate | QUALIFIED atcd6a16ba:40161364575,37/37,0 blocked, all selected gates passed. Default-Wasm installed local/global qualification40161362270 also passed. Final universal release remains incomplete. |
 | 1 | Portable publication and final npm split | PENDING. Preserve Linux immutable generations/atomic prior-output behavior; implement and execute equivalent Windows/macOS publication. Slim universal JS/TS root requires genuine default Wasm checking, optional compiled bundle discovery with pins, no wrong-platform bundled default tools, real exports/types/bin, and all five platforms' actual offline local/global compilation. Keep existing working root available until replacement qualifies. |
 | 2 | Generated TS publication | PENDING. Reuse shared admission/strict IR/publication; pinned independent TS consumer, equivalent observations, both grammars/all four engines, refusal/ABI/tamper and prior-output preservation. No native compiler fallback. |
 | 3 | Generated Rust/Wasm output, components and optional providers | PENDING. Reuse existing checked emitters/runtime adapters; finish all relevant backend mappings and consumer tests. Additional Rust execution platforms need genuine binaries and bounded supervisors. Keep native CLI/Python/PHP providers working. |
@@ -155,7 +169,7 @@ applies only to G2/G3 compiler requests,190-minute job/170-minute step.
 Resolved package-only failures remain in the qualification receipt and Git:
 Windows Elan PATH setup (retry40155170697 passed); absent upstream shrinkwrap
 (fixed using only exact pinned dependency lock/inventory); frozen JSON-null reader
-(fixed3c9, integrated40160064167 passed). These do not change qualified compiler
+(fixed3c9, integrated40161362270 passed). These do not change qualified compiler
 source or kernel semantics. Earlier cancelled gates remain cancelled.
 
 The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining queue.

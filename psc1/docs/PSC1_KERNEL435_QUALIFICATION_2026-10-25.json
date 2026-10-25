@@ -2036,20 +2036,20 @@
       "rustTransportRegressions": 10,
       "acceptedTestProvider": "real native reference; actual Wasm tested by integrated package run"
     },
-    "run": 40160064167,
-    "job": 121069555210,
-    "commit": "3c9fae34d8a8912cce638777611942327b67ca35",
-    "artifact": 12585887196,
-    "artifactZipSha256": "064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a",
+    "run": 40161362270,
+    "job": 121073432577,
+    "commit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+    "artifact": 12586394254,
+    "artifactZipSha256": "426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52",
     "package": {
       "schema": "psc1-integrated-kernel-package/1",
-      "sourceCommit": "3c9fae34d8a8912cce638777611942327b67ca35",
+      "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
       "status": "assembled-not-yet-qualified",
       "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
       "kernelSourceClosureDigest": "f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b",
       "tarball": "proofscript-0.1.0-psc1.3.tgz",
-      "sha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346",
-      "bytes": 62180617,
+      "sha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a",
+      "bytes": 62181083,
       "kernelVersions": {
         "native": "4.35.0",
         "wasm": "4.35.0"
@@ -2132,9 +2132,9 @@
     },
     "installed": {
       "schema": "psc1-integrated-kernel-installed/1",
-      "sourceCommit": "3c9fae34d8a8912cce638777611942327b67ca35",
+      "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
       "status": "passed",
-      "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346",
+      "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a",
       "platform": "linux-x64",
       "kernelCases": [
         {
@@ -2224,8 +2224,8 @@
           "id": "lean-modules",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 274,
-          "manifestSha256": "472534a3bbcac2f9f8fb554d5cf9790c7351b4cfa0e93f4909d2fbf591a90868",
+          "compilerExecutionMs": 465,
+          "manifestSha256": "22481061d9fffaf24ff24c035556fe06fe2996db502230e0a78ba1dbc341ffc4",
           "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
         },
         {
@@ -2233,8 +2233,8 @@
           "id": "ps-integer-unicode",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 261,
-          "manifestSha256": "4419ff3356c1d3740737f5a3588c84b2fcee713a1cd40981cd866ae2ece29b75",
+          "compilerExecutionMs": 433,
+          "manifestSha256": "9565ef216049bdd7af090c94149ed44256b673c5f4415f4033a3d2e581106cf8",
           "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
         },
         {
@@ -2242,8 +2242,8 @@
           "id": "ps-list-literal",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 344,
-          "manifestSha256": "78f23c14a137fc08449b5853b4352fe8911f1655624bf2cc0e6948bbdf6238c7",
+          "compilerExecutionMs": 574,
+          "manifestSha256": "c3cb6ad39d54dd86395a02810737aaad6f53f82a9163d64cfad76c552d53221a",
           "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
         },
         {
@@ -2251,8 +2251,8 @@
           "id": "lean-handler-pattern",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 524,
-          "manifestSha256": "d26ee5377fe027b3ccb6b1878e1c7d6636b2eb091111652a5fa7215d5e0a2aa2",
+          "compilerExecutionMs": 826,
+          "manifestSha256": "d6ae3f1bbbd7502782d351204dbde19a876e4c0cfca4a1388d65622062b92ff0",
           "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
         },
         {
@@ -2260,8 +2260,8 @@
           "id": "lean-ordinary-loop",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 481,
-          "manifestSha256": "8ac03c0dbe585621c3f08ba9ca7b8a9d124aee4d3bee26589b0ca2f62d930a2a",
+          "compilerExecutionMs": 840,
+          "manifestSha256": "40dfea38ac43e32c96b638654753f8f5b1ed4dd0c570cc9e4fa18af4b27a8f9c",
           "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
         },
         {
@@ -2269,8 +2269,8 @@
           "id": "lean-modules",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 284,
-          "manifestSha256": "7304cb66119a12467644d46e1c88af55a74919acb9d0a5136182d1878f94f221",
+          "compilerExecutionMs": 474,
+          "manifestSha256": "9d1c046053e429096283712c84faa6337d3e3653115b3d429d4f8d86f38e954d",
           "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
         },
         {
@@ -2278,8 +2278,8 @@
           "id": "ps-integer-unicode",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 258,
-          "manifestSha256": "2d6383e233fce12c84b0dd226a2c6433344475cb83a9cd189a40026e6a53067b",
+          "compilerExecutionMs": 436,
+          "manifestSha256": "b3fcda333abc6321524b347fe2c57a13c6b1cfe619ec1c4971ca088b2a5599cd",
           "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
         },
         {
@@ -2287,8 +2287,8 @@
           "id": "ps-list-literal",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 339,
-          "manifestSha256": "1aa3371b5a9f165fdda3c112b1b7ba5bd0214bd53a482f781089f24d79b7a745",
+          "compilerExecutionMs": 589,
+          "manifestSha256": "82271432e6a2d76128fdfdabb1876b54696297ce27fa18e354f1d2c8f61bf324",
           "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
         },
         {
@@ -2296,8 +2296,8 @@
           "id": "lean-handler-pattern",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 497,
-          "manifestSha256": "6564747b33bb40f31ee409b351b7359c47a00e5915fd17401e9bd6342e5c9832",
+          "compilerExecutionMs": 878,
+          "manifestSha256": "83288761b81f6eb365b2a80b486b1bb08983bdc461560df5df9c99b1817cf4fe",
           "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
         },
         {
@@ -2305,8 +2305,8 @@
           "id": "lean-ordinary-loop",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 513,
-          "manifestSha256": "314f961081e957746cf757340539007708ed8adede6035dd4ab262cb02262605",
+          "compilerExecutionMs": 900,
+          "manifestSha256": "a522e2cfa001fdcb0baf6b9d00a395ee9efdf35e3c464ccc6d40cb96849663e9",
           "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
         },
         {
@@ -2314,8 +2314,8 @@
           "id": "lean-modules",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 296,
-          "manifestSha256": "994cf6ff87a2248654d76e6ac3cff53e005cd8b218073c16b80b45192b868084",
+          "compilerExecutionMs": 470,
+          "manifestSha256": "69a64349c96fbb0b591172bb5d14cd2687084fdb1fa5f1673563df83dd1b24af",
           "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
         },
         {
@@ -2323,8 +2323,8 @@
           "id": "ps-integer-unicode",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 295,
-          "manifestSha256": "95c8a15ec99a97b065980c670e8adfd2721f0c0f2a439d5f625a6cb546de623d",
+          "compilerExecutionMs": 457,
+          "manifestSha256": "f33608242a88fd22a2e7ff35b0de3e4b9eaebf4e718b7c3aa67ca84c45abafa9",
           "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
         },
         {
@@ -2332,8 +2332,8 @@
           "id": "ps-list-literal",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 329,
-          "manifestSha256": "35ee3138573f17172b2ce34adc3ec8e92c882072aba8ed9dd6e8f660b16e0f39",
+          "compilerExecutionMs": 505,
+          "manifestSha256": "10cfafd36af05dc9ee473721ce398716b399aeaa1840c2382063cbc394a89f0c",
           "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
         },
         {
@@ -2341,8 +2341,8 @@
           "id": "lean-handler-pattern",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 416,
-          "manifestSha256": "1fb1b41e1b5f480f7844f836282b1468c710ae103ea3fe25c731118d7b7df183",
+          "compilerExecutionMs": 641,
+          "manifestSha256": "a7383e96e07b3b2bf35c787185eb8490c95b194db3330ba8d8fbe032c86365fe",
           "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
         },
         {
@@ -2350,8 +2350,8 @@
           "id": "lean-ordinary-loop",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 490,
-          "manifestSha256": "de3a97b19f70aca42f0f6850dab93aed3c3d89215ca84fdb1e4cbb038aaea8d1",
+          "compilerExecutionMs": 755,
+          "manifestSha256": "3c9ac9ab76a2c89f616efd0c47e7e4895df3604396d854fe22c629f03aa7726f",
           "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
         },
         {
@@ -2359,8 +2359,8 @@
           "id": "lean-modules",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 195,
-          "manifestSha256": "4bc4807a1e3221c5b3532a862790ef18cd9c3d338f569b7289b9d3754d862101",
+          "compilerExecutionMs": 345,
+          "manifestSha256": "350e1dbad1d3d58bda7f7dbc9ccfb8b0b39bd6024df36d87b471b5e1da3a0d9d",
           "admissionsSha256": "136955120147031654d6277abd03dd3c6fac53136d1eab94c29fd05ffcf0fad4"
         },
         {
@@ -2368,8 +2368,8 @@
           "id": "ps-integer-unicode",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 193,
-          "manifestSha256": "291282c9d8640aeccfdaa480126e580e80d7fd5c3036e8e8daa0f5e4723944d9",
+          "compilerExecutionMs": 345,
+          "manifestSha256": "712dace2c59542502a453dcd13c16194f14c1536a06303ea4a4dd8f74cd62bac",
           "admissionsSha256": "41e724d443d127dab6f77922c810be318cf2742e89023354d07b4e4622985365"
         },
         {
@@ -2377,8 +2377,8 @@
           "id": "ps-list-literal",
           "grammar": "ps",
           "passed": true,
-          "compilerExecutionMs": 201,
-          "manifestSha256": "bf6a320029d584d93597189ce0c2f412f798459b8aacff74ab7e9cb60e1a9815",
+          "compilerExecutionMs": 357,
+          "manifestSha256": "e1aff3f84bb2f036ebdf0bee3597c17719a91b97308af3ea02764622d8f89300",
           "admissionsSha256": "118644ff56851185466e90b761b11e77b57df8de18ecab75c59ac6cbe1ff2a31"
         },
         {
@@ -2386,8 +2386,8 @@
           "id": "lean-handler-pattern",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 247,
-          "manifestSha256": "4df2cf2c7932b94239716b58dcd861a0e2b0db447b6969337ed71c94ba3af7d8",
+          "compilerExecutionMs": 417,
+          "manifestSha256": "8073215817fce4e930b2dafc14d39e8d5b547dde340a7edc767bedb54334c657",
           "admissionsSha256": "20da752232146be13e6dc11f5f4841b35bbb6c6ff3be3cd4f57d458c75244d7f"
         },
         {
@@ -2395,8 +2395,8 @@
           "id": "lean-ordinary-loop",
           "grammar": "lean",
           "passed": true,
-          "compilerExecutionMs": 292,
-          "manifestSha256": "aaa644b145d0758716086583c93ca6b08467c2738d65da8e007e9c8677de5cba",
+          "compilerExecutionMs": 483,
+          "manifestSha256": "0f854c21efef9f76cfe979e76895bf1f39b99748e5aa7a42674d29a48486ec43",
           "admissionsSha256": "83de3442bfa247f8ec8e447f4b8b7a291809783b8e0850f3c0232434cc49f0be"
         }
       ],
@@ -2408,8 +2408,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
-          "compilerExecutionMs": 6480,
-          "manifestSha256": "d0e2d3cb9d4fd6c473eaa1b10bf8e59c6328d4ac882ed22488ebc4e5741ee45f",
+          "compilerExecutionMs": 11580,
+          "manifestSha256": "219390c74f47af04300d1f8d007782ccb462cb316eeefbaca7c8aeaa0e4b2bc8",
           "passed": true
         },
         {
@@ -2419,8 +2419,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
-          "compilerExecutionMs": 7138,
-          "manifestSha256": "bc5fe210161c29c374ab60ff53719000be515e82e7cbd2a51b43b08f42494842",
+          "compilerExecutionMs": 13102,
+          "manifestSha256": "079bd90195c977fddf9d9c5b914d1027b59baee2dc86342e011de29a8e30f092",
           "passed": true
         },
         {
@@ -2430,8 +2430,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
-          "compilerExecutionMs": 7283,
-          "manifestSha256": "6b5404487bb8c6c2740908deb0ad3415f42523f9e1c52ba3f043865b5e5c9bfc",
+          "compilerExecutionMs": 11665,
+          "manifestSha256": "2b72d4dcef0bd3dde6e24b07bd52199aa1e57b90194de5742aac9a6ecb7b2c5b",
           "passed": true
         },
         {
@@ -2441,8 +2441,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
-          "compilerExecutionMs": 3115,
-          "manifestSha256": "3210b5ab86052ccd0af44bb202508083927fdbcd9c34f308444bb2e7317c2e7f",
+          "compilerExecutionMs": 5159,
+          "manifestSha256": "81fa6635129da1538523e25be557e6c471306c8d363e12426dc8e1aa6cce706d",
           "passed": true
         },
         {
@@ -2452,8 +2452,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
-          "compilerExecutionMs": 8579,
-          "manifestSha256": "8c67d687207da6a6640a6a66607ee759a0577da030470ad054e8810ac595beff",
+          "compilerExecutionMs": 15339,
+          "manifestSha256": "a44401ecdc0e300461790e725c13874a8010b784b64eac0c1229095de07e3623",
           "passed": true
         },
         {
@@ -2463,8 +2463,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
-          "compilerExecutionMs": 9142,
-          "manifestSha256": "2df4c2555729939ad39ad62a5bc7aaf2a42292f68addd31a1e72da0636956f3a",
+          "compilerExecutionMs": 17607,
+          "manifestSha256": "d0208d7a7b1fd0fe9d2ce4865fcbba3c4d7f0c497d1fa13af61ca163bb88df62",
           "passed": true
         },
         {
@@ -2474,8 +2474,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
-          "compilerExecutionMs": 9447,
-          "manifestSha256": "2a1017e107f03375682739533864268733ea753086d3ce541600f840431da2a9",
+          "compilerExecutionMs": 15572,
+          "manifestSha256": "1ac7459a81eeed7b0b6e16af35ac299c20bf791a30bc3926085a61c184366242",
           "passed": true
         },
         {
@@ -2485,8 +2485,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
-          "compilerExecutionMs": 4031,
-          "manifestSha256": "c2f34dcd839c3ff0184d0cab2a761e8d1b7e5223889daad05a03953ed855bf48",
+          "compilerExecutionMs": 6940,
+          "manifestSha256": "c9ccd61a5e3bcd4e65bf98feab34c934e9057dee538091defb1bcd9741885e90",
           "passed": true
         },
         {
@@ -2494,7 +2494,7 @@
           "grammar": "lean",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 235,
+          "compilerExecutionMs": 401,
           "passed": true
         },
         {
@@ -2502,7 +2502,7 @@
           "grammar": "lean",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 233,
+          "compilerExecutionMs": 401,
           "passed": true
         },
         {
@@ -2510,7 +2510,7 @@
           "grammar": "lean",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 296,
+          "compilerExecutionMs": 454,
           "passed": true
         },
         {
@@ -2518,7 +2518,7 @@
           "grammar": "lean",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 187,
+          "compilerExecutionMs": 333,
           "passed": true
         },
         {
@@ -2528,8 +2528,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
-          "compilerExecutionMs": 6654,
-          "manifestSha256": "4ea77d1b3be11740b5bf693f86936706256e2219bb3ce2a437debd4ae60ba9e9",
+          "compilerExecutionMs": 11949,
+          "manifestSha256": "31b71920215dd3c273721aadeddbba45d1c0d20dda5dd8233dfb798fc9633065",
           "passed": true
         },
         {
@@ -2539,8 +2539,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
-          "compilerExecutionMs": 7024,
-          "manifestSha256": "484e6f1569f58b864e1e3acb9468be7e339be5541547bd22f73d099b325ea1ea",
+          "compilerExecutionMs": 13418,
+          "manifestSha256": "7665b71bc86056dc94287afe524d83ebc5a5fb1277c2a6a71491d0cbf46e9642",
           "passed": true
         },
         {
@@ -2550,8 +2550,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
-          "compilerExecutionMs": 6960,
-          "manifestSha256": "4b554e1adc97a93714d5d8bb836cfd3e3eb5b44114c15410346ceb93f795daf8",
+          "compilerExecutionMs": 11727,
+          "manifestSha256": "c7650bc41e0f1262ab2a9409ba428eda43de5541f7eb4d8b9428f6fa3b9d22d9",
           "passed": true
         },
         {
@@ -2561,8 +2561,8 @@
           "modules": 7,
           "observations": 5,
           "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
-          "compilerExecutionMs": 3081,
-          "manifestSha256": "8b4550fff3870404b8372a3615d429d421f97d5c97516b9524cfc189edaa41e2",
+          "compilerExecutionMs": 5170,
+          "manifestSha256": "87b8621a4ddcd216384757970c049f174145282da9b71a1d8795e57e1ac3fb28",
           "passed": true
         },
         {
@@ -2572,8 +2572,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
-          "compilerExecutionMs": 8610,
-          "manifestSha256": "6221c7a83d82d016da487da43692baccb2e3871102e914da097639f706cfbf73",
+          "compilerExecutionMs": 15897,
+          "manifestSha256": "c428d055bd55978922ec93d9bf18ed3c3e3177cfddc6008ef865ae72e29f5a36",
           "passed": true
         },
         {
@@ -2583,8 +2583,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
-          "compilerExecutionMs": 9583,
-          "manifestSha256": "03776ee4448e542bbc047acf1e8a6aeb4d90049f355d1f8f4fd8e83301bb87ab",
+          "compilerExecutionMs": 17812,
+          "manifestSha256": "9d18611bd65024c153b367b0bf7018f9e2571d66be0779f901ef97aaef66e9be",
           "passed": true
         },
         {
@@ -2594,8 +2594,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
-          "compilerExecutionMs": 9480,
-          "manifestSha256": "7d02f0ee665b66c32cf87dbcba28011ee4b45faa81b5e06002c5845b5d85aa08",
+          "compilerExecutionMs": 15657,
+          "manifestSha256": "2aee4ff5141dc6802f9bc9e0321661b23e436fea350e332ab4424b57b5a4e3f5",
           "passed": true
         },
         {
@@ -2605,8 +2605,8 @@
           "modules": 9,
           "observations": 5,
           "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
-          "compilerExecutionMs": 4107,
-          "manifestSha256": "db2ed00f94ace512fac2648440c1bd321bb4c13545c1f145f52550c575407101",
+          "compilerExecutionMs": 6875,
+          "manifestSha256": "f085db0a5a5dfddf6c284ceec0db29dcfe3ef368964000d286725445d779f45d",
           "passed": true
         },
         {
@@ -2614,7 +2614,7 @@
           "grammar": "ps",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 234,
+          "compilerExecutionMs": 400,
           "passed": true
         },
         {
@@ -2622,7 +2622,7 @@
           "grammar": "ps",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 228,
+          "compilerExecutionMs": 398,
           "passed": true
         },
         {
@@ -2630,7 +2630,7 @@
           "grammar": "ps",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 289,
+          "compilerExecutionMs": 453,
           "passed": true
         },
         {
@@ -2638,7 +2638,7 @@
           "grammar": "ps",
           "app": "single-file",
           "observations": 1,
-          "compilerExecutionMs": 189,
+          "compilerExecutionMs": 331,
           "passed": true
         }
       ],
@@ -2838,6 +2838,52 @@
           "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
         }
       ],
+      "policyDeclarations": [
+        {
+          "id": "missing-generated-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        },
+        {
+          "id": "conflicting-generated-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        },
+        {
+          "id": "missing-root-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        },
+        {
+          "id": "conflicting-root-default",
+          "refused": true,
+          "priorPreserved": true,
+          "nativeCheckerAvailable": true,
+          "commands": [
+            "generated-build",
+            "source-check",
+            "native-build"
+          ]
+        }
+      ],
       "missingPolicyRefused": true,
       "nativeCompilerUnavailableDuringGeneratedCases": true,
       "defaultIndependentWasm": true,
@@ -2849,7 +2895,7 @@
     },
     "frozenCompiler": {
       "schema": "psc1-kernel435-frozen-compiler-admission/1",
-      "sourceCommit": "3c9fae34d8a8912cce638777611942327b67ca35",
+      "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
       "status": "passed",
       "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
       "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
@@ -2865,33 +2911,27 @@
         "wasm"
       ],
       "wasmMemoryModel": "linear",
-      "elapsedMs": 6222,
+      "elapsedMs": 10734,
       "checkerRequestLimitMs": 120000,
       "fullGenerationReplayed": false,
       "scope": "exact frozen admitted graph shared across independently qualified JS/TS/Rust/Wasm chains; independent logical rechecking only"
     },
     "installedPublicTypes": "passed; actual packed proofscript/kernel and both kernel package APIs",
     "global": {
-      "run": 40160640974,
-      "job": 121071261017,
-      "commit": "d269846a50e33f15e18abe96b653735c0a93cf3e",
+      "run": 40161362270,
+      "job": 121073432577,
       "status": "passed",
-      "artifact": 12586541184,
-      "artifactZipSha256": "e997fd9835ae91176a2a1d6d542713d92b39985fcdbc724397e6f894b680d89b",
       "receipt": {
         "schema": "psc1-wasm-default-global-package/1",
-        "sourceCommit": "d269846a50e33f15e18abe96b653735c0a93cf3e",
+        "sourceCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
         "status": "passed",
         "qualifiedInput": {
-          "run": 40160064167,
-          "job": 121069555210,
-          "artifact": 12585887196,
-          "zipSha256": "064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a",
-          "commit": "3c9fae34d8a8912cce638777611942327b67ca35",
-          "tarball": "kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz",
-          "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346"
+          "mode": "same-job-candidate",
+          "commit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+          "tarball": "proofscript-0.1.0-psc1.3.tgz",
+          "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a"
         },
-        "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346",
+        "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a",
         "cases": [
           {
             "engine": "js",
@@ -2899,7 +2939,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
-            "manifestSha256": "936042eca7bcc3065f47cdddcaa73b4bfc5a8a30c29cfe371ab22ac8f912db47",
+            "manifestSha256": "5018ad6e7c12cae79398b53d99e43708095c7127962dc84baa09af1e389ce1e6",
             "priorPreserved": true
           },
           {
@@ -2908,7 +2948,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
-            "manifestSha256": "17b861c2fb7fcaad0b6f5a8d2c519899555b9d2555ed132326ff0b00d1af1202",
+            "manifestSha256": "bf17e3e640f7da7f1cbe6852c05b3cc85f2244b0594d4fc5116591ee0bc48016",
             "priorPreserved": true
           },
           {
@@ -2917,7 +2957,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
-            "manifestSha256": "181f3cba9f1c6a7a43c46abc74179247af0ccc7af4a94b9babdb44aebd98bbd5",
+            "manifestSha256": "75636b56e22ea838ca28087b05afae2876517893585ca173ebdb4b8bbd130ecd",
             "priorPreserved": true
           },
           {
@@ -2926,7 +2966,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
-            "manifestSha256": "02af9960e17f70bafb3ce56dbc15bd3b6f41e079cd323099bdc4ae47c42fe661",
+            "manifestSha256": "9150460579bff69f70e377edfb06865f01854db271bdbb1891fc3866cc75c5d6",
             "priorPreserved": true
           },
           {
@@ -2935,7 +2975,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
-            "manifestSha256": "4bb46991ccce0f1bd0404228390c6ab191a164104dadbe9fafafdcfcca58f190",
+            "manifestSha256": "1ef4fb323d984cda971fc6a9a3a5a0277009225c9c3215b71d22b54a3538fd68",
             "priorPreserved": true
           },
           {
@@ -2944,7 +2984,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
-            "manifestSha256": "9b17a708795bbd340cd0242cf95d8764185f13fdffa7b0dfb4bfbe4e38450b51",
+            "manifestSha256": "75e6c6bf1727d38499625c88261644603d315975fe86cc8e34233063b5144a64",
             "priorPreserved": true
           },
           {
@@ -2953,7 +2993,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
-            "manifestSha256": "0ff77f10f6d9d7f0d22ffbac86bfbcc1976532a73f4f112bd78535523e26438d",
+            "manifestSha256": "47d154a8c73823c12ed76b529b0d57696d064edc1df3e5a754803c2ab77d438a",
             "priorPreserved": true
           },
           {
@@ -2962,7 +3002,7 @@
             "defaultKernel": "wasm",
             "result": "42",
             "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
-            "manifestSha256": "737886d0da637afe2b161ea01473ac333a8a4403004aa300d534b33bd1bc4d02",
+            "manifestSha256": "35d5cef4f13a1214349d97df1d72ae39c5a04e70808121ef2524ed963c997b3a",
             "priorPreserved": true
           }
         ],
@@ -2976,6 +3016,30 @@
         "defaultKernel": "wasm",
         "scope": "fresh global Linux installed toolchain; full cross-platform publication remains separate"
       }
+    },
+    "implementationCommits": [
+      "62638bef977344889c0394533f6c8bd1099130f4",
+      "77e9067469db8c3863127c927b9ede53d9ec7c58",
+      "65eb9bf1de2548e1506fad8785e3df8772399dc1",
+      "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad"
+    ],
+    "policyConsistency": {
+      "status": "passed",
+      "configurations": 4,
+      "refusingCommandsPerConfiguration": 3,
+      "priorOutputPreserved": true,
+      "nativeCheckerAvailableDuringRefusals": true
+    },
+    "scope": "qualified current exact package local/global on Linux; unchanged kernels and standalone compiler bundles retain their own five-platform evidence",
+    "currentBoundary": {
+      "run": 40161364575,
+      "job": 121074979011,
+      "testedCommit": "460a2f7057cd39bbc7489552ce2785c92c3de717",
+      "status": "passed",
+      "hostBoundaryChecks": 36,
+      "rustTransportRegressions": 10,
+      "artifact": 12586179741,
+      "artifactZipSha256": "c89b70a531e7c848bf7f070012578eb1fc658d2fa47dff0b55ca9094ef8b376d"
     }
   },
   "fullToolchainCrossPlatformRelease": {
@@ -3713,13 +3777,219 @@
       "fix": "3c9fae34d8a8912cce638777611942327b67ca35",
       "verifiedRun": 40160064167,
       "resolution": "null-safe graph discovery; no kernel or compiler semantic change"
+    },
+    {
+      "class": "missing-or-conflicting-default-kernel-declarations",
+      "discovery": "review; older package default behavior passed but removing generated policy could select legacy native checking",
+      "fixes": [
+        "77e9067469db8c3863127c927b9ede53d9ec7c58",
+        "65eb9bf1de2548e1506fad8785e3df8772399dc1"
+      ],
+      "verifiedRun": 40161362270,
+      "policyNegativeCases": 12
     }
   ],
   "sourceRegression": {
-    "status": "pending-final-reconciliation-HEAD",
+    "status": "passed",
     "workflow": ".github/workflows/psc1-development.yml",
-    "qualifiedBaseline": 55,
-    "priorSourceRun": 40160644824,
-    "note": "A docs/contract reconciliation commit selects the existing complete dependency gate; no latest-source success claimed until terminal."
+    "run": 40161364575,
+    "fullJob": 121075449014,
+    "finalGate": 121080510772,
+    "headCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+    "testedCommit": "460a2f7057cd39bbc7489552ce2785c92c3de717",
+    "treeSha": "55cf04f9c8d50738f77cef82dded1e97478c6d3d",
+    "headAndTestedTreesEqual": true,
+    "artifact": 12586859725,
+    "artifactZipSha256": "48b75a7a58b25e145423c3584b54d2f5c296c91ab1c1a4930077a63f8275cd0d",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "sevenBackends": {
+      "qualification": "passed-scoped-execution",
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "targetExecutionBundles": 14,
+      "scriptingRegressionGroups": 28,
+      "architectureRegressionGroups": 11,
+      "minimumPython": {
+        "targetExecutionBundles": 2,
+        "scriptingRegressionGroups": 14,
+        "artifactBundles": 12,
+        "runtimeEvidence": "runtime-conformance-python314/results.json",
+        "scriptingEvidence": "script-backends-python314/results.json"
+      },
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      },
+      "versions": {
+        "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+        "node": "v22.23.3",
+        "npm": "10.9.9",
+        "typescriptConsumer": "Version 7.0.2",
+        "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+        "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+        "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+        "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+        "python": "Python 3.15.0",
+        "pythonMinimum": "Python 3.14.8",
+        "php": "PHP 8.5.12 (cli) (built: Oct 24 2026 12:34:32) (NTS)"
+      }
+    },
+    "nativeNpm": {
+      "qualification": "passed",
+      "compilerIdentity": {
+        "protocol": "psc1-native/1",
+        "profile": "psc1-checked-direct/1",
+        "lean": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "targets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "backendProviderProtocol": "psc1-backend-provider/1"
+      },
+      "platform": {
+        "os": "linux",
+        "cpu": "x64",
+        "libc": "glibc",
+        "qualifiedGlibc": "2.39"
+      },
+      "optionalPackagesAbsentByDefault": true,
+      "optionalResourcesAbsentByDefault": true,
+      "noSelfHostQualification": true
+    },
+    "scope": "exact-commit native seven-backend Practical Core regression and installed native npm/source-library qualification; separate integrated artifact qualifies default-Wasm G3 engines; not a final universal release"
+  },
+  "previousIntegratedCheckpoint": {
+    "run": 40160064167,
+    "job": 121069555210,
+    "commit": "3c9fae34d8a8912cce638777611942327b67ca35",
+    "artifact": 12585887196,
+    "artifactZipSha256": "064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a",
+    "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346",
+    "global": {
+      "run": 40160640974,
+      "job": 121071261017,
+      "commit": "d269846a50e33f15e18abe96b653735c0a93cf3e",
+      "status": "passed",
+      "artifact": 12586541184,
+      "artifactZipSha256": "e997fd9835ae91176a2a1d6d542713d92b39985fcdbc724397e6f894b680d89b",
+      "receipt": {
+        "schema": "psc1-wasm-default-global-package/1",
+        "sourceCommit": "d269846a50e33f15e18abe96b653735c0a93cf3e",
+        "status": "passed",
+        "qualifiedInput": {
+          "run": 40160064167,
+          "job": 121069555210,
+          "artifact": 12585887196,
+          "zipSha256": "064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a",
+          "commit": "3c9fae34d8a8912cce638777611942327b67ca35",
+          "tarball": "kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz",
+          "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346"
+        },
+        "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346",
+        "cases": [
+          {
+            "engine": "js",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "936042eca7bcc3065f47cdddcaa73b4bfc5a8a30c29cfe371ab22ac8f912db47",
+            "priorPreserved": true
+          },
+          {
+            "engine": "js",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "17b861c2fb7fcaad0b6f5a8d2c519899555b9d2555ed132326ff0b00d1af1202",
+            "priorPreserved": true
+          },
+          {
+            "engine": "ts",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "181f3cba9f1c6a7a43c46abc74179247af0ccc7af4a94b9babdb44aebd98bbd5",
+            "priorPreserved": true
+          },
+          {
+            "engine": "ts",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "02af9960e17f70bafb3ce56dbc15bd3b6f41e079cd323099bdc4ae47c42fe661",
+            "priorPreserved": true
+          },
+          {
+            "engine": "rust",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "4bb46991ccce0f1bd0404228390c6ab191a164104dadbe9fafafdcfcca58f190",
+            "priorPreserved": true
+          },
+          {
+            "engine": "rust",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "9b17a708795bbd340cd0242cf95d8764185f13fdffa7b0dfb4bfbe4e38450b51",
+            "priorPreserved": true
+          },
+          {
+            "engine": "wasm-core",
+            "grammar": "lean",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "596853ad9d5510e96944c32dc3635e9a2f9af1d723e072305c1c512735f134be",
+            "manifestSha256": "0ff77f10f6d9d7f0d22ffbac86bfbcc1976532a73f4f112bd78535523e26438d",
+            "priorPreserved": true
+          },
+          {
+            "engine": "wasm-core",
+            "grammar": "ps",
+            "defaultKernel": "wasm",
+            "result": "42",
+            "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+            "manifestSha256": "737886d0da637afe2b161ea01473ac333a8a4403004aa300d534b33bd1bc4d02",
+            "priorPreserved": true
+          }
+        ],
+        "globalBinExecuted": true,
+        "offlineFreshCache": true,
+        "installScriptsDisabled": true,
+        "noCheckoutOrCompilerSdkOnExecutionPath": true,
+        "nativeCompilerUnavailable": true,
+        "nativeCheckerUnavailable": true,
+        "corruptWasmRefused": true,
+        "defaultKernel": "wasm",
+        "scope": "fresh global Linux installed toolchain; full cross-platform publication remains separate"
+      }
+    }
   }
 }

@@ -15,19 +15,19 @@ Distinguish exact qualified artifacts, current source CI and final release gates
 
 ## Completed artifact checkpoint — preserve and reuse
 
-Integrated code `3c9fae34d8a8912cce638777611942327b67ca35`:
-run40160064167/job121069555210 SUCCESS.
-Seven-tarball artifact12585887196 ZIP SHA256
-064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a.
+Integrated code `cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad`:
+run40161362270/job121073432577 SUCCESS.
+Seven-tarball artifact12586394254 ZIP SHA256
+426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52.
 Inside: kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz,
-62180617 bytes, SHA256
-b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346.
+62181083 bytes, SHA256
+02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a.
 This candidate is installable on Linux x64/glibc, default genuine Wasm checker,
 with20 compiler cases,24 app builds/88 observations,24 refusal/tamper cases,
 eight explicit dual checks, two native staged-publication checks and installed
 public types all passed. Native compiler and checker are unavailable in default
 generated cases; no native fallback. BOTH actual kernels also accept the exact
-frozen compiler graph in6222ms combined; fullGenerationReplayed=false.
+frozen compiler graph in10734ms combined; fullGenerationReplayed=false.
 
 Fresh global test `d269846a50e33f15e18abe96b653735c0a93cf3e`:
 run40160640974/job121071261017 SUCCESS, eight global-bin builds,
@@ -63,10 +63,32 @@ Native compiler platform run40157017833 also PASSED .lean/.ps source/admission
 checks on Linux arm64/macOS x64+arm64/Windows x64 with SDK absent from PATH.
 These are not full backend publication/npm release gates.
 
+The latest integrated run also includes fresh offline global installation before
+qualified artifact upload: eight builds/all engines/both grammars, native payloads
+unavailable, prior output preserved and corrupt Wasm refused. It additionally
+refuses four missing/conflicting root/generated policy declarations across three
+commands (12 refusals), with a working native checker available. The assembled
+package and global tests now finish in one run; do not create another input-only
+commit just to repeat the same global qualification.
+
+The final code/source regression run40161364575 PASSED at
+`cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad`: full job121075449014 and final
+gate121080510772,37/37 Practical Core criteria,0 blocked,seven backends/both
+grammars, minimum Python and installed native npm/source libraries.
+Tested merge`460a2f7057cd39bbc7489552ce2785c92c3de717` and branch HEAD have
+identical tree`55cf04f9c8d50738f77cef82dded1e97478c6d3d`.
+Full evidence artifact12586859725 ZIP SHA256
+`48b75a7a58b25e145423c3584b54d2f5c296c91ab1c1a4930077a63f8275cd0d`.
+This current source result supersedes pending/cancelled snapshots; all earlier
+evidence remains historical. The installable integrated artifact remains the
+separately qualified40161362270 package described above. Whole-toolchain final
+cross-platform release is still incomplete.
+
 ## Execute next work in dependency order
 
 1. Query live PR #179 normal source CI and the receipt's sourceRegression field.
-   Finish every selected gate; carry failed/cancelled test debt forward.
+   Code checkpointcd6a16ba is now fully passed in40161364575; check any newer HEAD.
+   Finish every newly selected gate; carry failed/cancelled test debt forward.
    Parent55f9327e's37/37 and the package tests above cannot be substituted for a
    changed-source gate. Read completed logs to fix actual failures only.
    Preserve exact tested merge/head/tree identities in the receipt.
@@ -109,7 +131,8 @@ commit/tarball identities, not placeholders:
 - scripts/kernel435-integrated-inputs.json
 - scripts/kernel435-frozen-compiler-input.json
 - scripts/compiler-execution-bundle-input.json
-- scripts/kernel435-global-input.json
+- scripts/kernel435-global-input.json (historical standalone replay; current package
+  run executes global tests directly on its same-job tarball)
 
 Read corresponding workflows before triggering; relevant input-only changes
 activate existing Actions jobs. scripts/kernel435-qualified-artifact.mjs checks

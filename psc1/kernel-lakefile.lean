@@ -19,6 +19,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Core.ExprV2.Equality,
     `Ps.KernelCore.Core.ExprV2.Lift,
     `Ps.KernelCore.Core.ExprV2.TransformSupport,
+    `Ps.KernelCore.Core.ExprV2.ExpandedSize,
     `Ps.KernelCore.Core.ExprV2.Transform,
     `Ps.KernelCore.Core.ExprV2.TransformSpine,
     `Ps.KernelCore.API.DagTypes,

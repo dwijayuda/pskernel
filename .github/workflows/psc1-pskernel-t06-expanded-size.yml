@@ -1,0 +1,147 @@
+name: PSC1 exact expanded size native preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t06-expanded-size-20261026
+    paths:
+    - psc1/**
+    - .github/workflows/psc1-pskernel-t06-expanded-size.yml
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Authenticate private header delta and archive actual source
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p "$RUNNER_TEMP/t06-expanded-size/source"
+
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+        test "$(cat psc1/lean-toolchain)" = leanprover/lean4:v4.35.0
+
+        (cd psc1 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+
+        git diff --name-only c673885bd8da7443a266fae06051a5bdd51a02f3 HEAD -- psc1/packages/pskernel-core/src >
+        "$RUNNER_TEMP/t06-expanded-size/production-delta.txt"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib,subprocess,json,hashlib
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-expanded-size''
+
+        assert (out/''production-delta.txt'').read_text().splitlines()==[''psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/ExpandedSize.lean'']
+
+        p=''psc1/kernel-lakefile.lean'';old=subprocess.check_output([''git'',''show'',''c673885bd8da7443a266fae06051a5bdd51a02f3:''+p]).decode();current=pathlib.Path(p).read_text()
+
+        assert current.replace(''    `Ps.KernelCore.Core.ExprV2.ExpandedSize,\n'','''')==old
+
+        source=pathlib.Path(''psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/ExpandedSize.lean'').read_text()
+
+        assert not any(token in source for token in [''psKernelAddSimpleMutualInductive'',''psKernelDagGeneratedImport'',''psKernelExprV2DecodeChecked'',''sorry'',''axiom
+        ''])
+
+        PYCODE
+
+        git archive HEAD psc1/packages/pskernel-core/src psc1/test psc1/kernel-lakefile.lean psc1/lean-toolchain
+        .github/workflows/psc1-pskernel-t06-expanded-size.yml | tar -x -C "$RUNNER_TEMP/t06-expanded-size/source"
+
+        (cd psc1 && node check-psc1-source.mjs --all-portable) 2>&1 | tee "$RUNNER_TEMP/t06-expanded-size/portable.log"
+
+        '
+    - name: Build complete native closure and prove private scope equations
+      working-directory: psc1
+      shell: bash
+      run: 'set -euo pipefail
+
+        lake -f kernel-lakefile.lean build PsKernelCore PsKernelOrdinaryHeaderProofs 2>&1 | tee "$RUNNER_TEMP/t06-expanded-size/build.log"
+
+        lake -f kernel-lakefile.lean env lean test/PsKernelExpandedSizeProofs.lean 2>&1 | tee "$RUNNER_TEMP/t06-expanded-size/proofs.log"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib,re
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-expanded-size/proofs.log'').read_text()
+
+        reports=re.findall(r"''(PsKernelExpandedSizeProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does not
+        depend on any axioms)",text)
+
+        assert len(reports)==11 and len({name for name,_ in reports})==11,reports
+
+        assert not any(x in text for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in reports:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        print(''PSC1_EXPANDED_SIZE_PROOFS_PASS reports=11'')
+
+        PYCODE
+
+        '
+    - name: Compare direct header stage with frozen V1 prefix
+      working-directory: psc1
+      shell: bash
+      run: 'set -euo pipefail
+
+        timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelExpandedSizeRegression.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-expanded-size/native.log"
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-expanded-size/native.log'').read_text()
+
+        labels=[line.removeprefix(''PSC1_EXPANDED_SIZE_ASSERT '') for line in text.splitlines() if line.startswith(''PSC1_EXPANDED_SIZE_ASSERT
+        '')]
+
+        assert len(labels)==26 and len(set(labels))==26,labels
+
+        assert ''PSC1_EXPANDED_SIZE_NATIVE: PASS assertions=26 shapes=18 sharing=5 boundaries=3'' in
+        text
+
+        PYCODE
+
+        '
+    - name: Bind every actual source snapshot and log
+      if: always()
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os,hashlib,json
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-expanded-size''
+
+        files={str(p.relative_to(out)):{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in sorted(out.rglob(''*'')) if p.is_file()}
+
+        (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''run'':os.environ[''GITHUB_RUN_ID''],''attempt'':os.environ[''GITHUB_RUN_ATTEMPT''],''scope'':''private
+        mutual header only; not admission or global soundness'',''files'':files},indent=2)+''\n'')
+
+        PYCODE
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-expanded-size-native-attempt-${{ github.run_attempt }}
+        include-hidden-files: true
+        path: ${{ runner.temp }}/t06-expanded-size/
+        retention-days: 90

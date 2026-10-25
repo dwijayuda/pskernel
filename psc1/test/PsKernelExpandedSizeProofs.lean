@@ -33,25 +33,25 @@ theorem child_depth_bound (decode : Nat → PsKernelExpr) (node : PsKernelExprV2
     psKernelExprV2LegacyDepth (decode child) ≤ remaining := by
   cases node with
   | app fn arg =>
-      simp only [psKernelExprV2ExpandedSizeChildIds, List.mem_cons, List.mem_singleton] at member
+      simp [psKernelExprV2ExpandedSizeChildIds] at member
       simp only [nodeExpr, psKernelExprV2LegacyDepth, Nat.succ_le_succ_iff, Nat.max_le] at bound
       rcases member with rfl | rfl
       · exact bound.1
       · exact bound.2
   | lam name type body info =>
-      simp only [psKernelExprV2ExpandedSizeChildIds, List.mem_cons, List.mem_singleton] at member
+      simp [psKernelExprV2ExpandedSizeChildIds] at member
       simp only [nodeExpr, psKernelExprV2LegacyDepth, Nat.succ_le_succ_iff, Nat.max_le] at bound
       rcases member with rfl | rfl
       · exact bound.1
       · exact bound.2
   | forallE name type body info =>
-      simp only [psKernelExprV2ExpandedSizeChildIds, List.mem_cons, List.mem_singleton] at member
+      simp [psKernelExprV2ExpandedSizeChildIds] at member
       simp only [nodeExpr, psKernelExprV2LegacyDepth, Nat.succ_le_succ_iff, Nat.max_le] at bound
       rcases member with rfl | rfl
       · exact bound.1
       · exact bound.2
   | letE name type value body nondep =>
-      simp only [psKernelExprV2ExpandedSizeChildIds, List.mem_cons, List.mem_singleton] at member
+      simp [psKernelExprV2ExpandedSizeChildIds] at member
       simp only [nodeExpr, psKernelExprV2LegacyDepth, Nat.succ_le_succ_iff, Nat.max_le] at bound
       rcases member with rfl | rfl | rfl
       · exact bound.1.1
@@ -118,6 +118,7 @@ theorem children_correspondence
       rcases ih tailGood afterHead headSound with ⟨next,tailStep,nextSound⟩
       refine ⟨next,?_,nextSound⟩
       simp only [psKernelExprV2ExpandedSizeChildren, headStep, tailStep, sizeSum]
+      rfl
 
 theorem worker_correspondence
     (arena : PsKernelExprV2PagedArena) (decode : Nat → PsKernelExpr)
@@ -152,6 +153,7 @@ theorem worker_correspondence
             exact ih child childValid childBound entries entriesSound
           rcases children_correspondence decode visit
             (psKernelExprV2ExpandedSizeChildIds entry.node) good memo sound with ⟨next,steps,nextSound⟩
+          simp only [visit] at steps
           have countEq : Nat.succ (sizeSum decode (psKernelExprV2ExpandedSizeChildIds entry.node)) =
               psKernelExprNodeCount (decode root) := by
             rw [shape]

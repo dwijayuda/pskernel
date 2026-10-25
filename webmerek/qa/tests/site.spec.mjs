@@ -31,14 +31,18 @@ for (const slug of manifest.pages) {
 
 test('navigation and keyboard menu', async ({page}) => {
   await page.goto('index.html');
-  const menu = page.getByRole('button', {name: /Menu/});
-  if (await menu.isVisible()) {
+  const menu = page.locator('.menu-toggle');
+  const compact = await page.evaluate(() => matchMedia('(max-width: 900px)').matches);
+  if (compact) {
+    await expect(menu).toBeVisible();
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded', 'true');
     await page.keyboard.press('Escape');
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
     await expect(menu).toBeFocused();
     await menu.click();
+  } else {
+    await expect(menu).toBeHidden();
   }
   await page.locator('#main-nav').getByRole('link', {name: 'Layanan', exact: true}).click();
   await expect(page).toHaveURL(/layanan.html$/);
@@ -73,6 +77,7 @@ test('brief: local generation, literal input, download and invalidation', async 
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
   await page.locator('#tujuan').fill('Tujuan berubah');
   await expect(page.locator('#brief-output')).toBeHidden();
+  await expect(page.locator('#brief-text')).toHaveText('');
 });
 
 test('blank required fields never create brief', async ({page}) => {
@@ -115,7 +120,12 @@ test('without JavaScript navigation and copy survive; forms stay inert', async (
   const page = await context.newPage();
   await page.goto('http://127.0.0.1:4173/webmerek/kontak.html');
   await expect(page.locator('#main-nav')).toBeVisible();
-  await expect(page.locator('#brief-form fieldset')).toBeDisabled();
+  // Check the fieldset attribute and actual controls. Playwright's disabled
+  // assertion is intended for controls, not the fieldset grouping element.
+  await expect(page.locator('#brief-form fieldset')).toHaveAttribute('disabled', '');
+  const controls = page.locator('#brief-form input, #brief-form select, #brief-form textarea, #brief-form button');
+  expect(await controls.count()).toBe(7);
+  for (const control of await controls.all()) await expect(control).toBeDisabled();
   await expect(page.locator('noscript')).toBeVisible();
   await expect(page.getByRole('link', {name: /Unduh template kosong/})).toBeVisible();
   await context.close();

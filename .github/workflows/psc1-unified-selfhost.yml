@@ -1,7 +1,7 @@
 name: PSC1 unified generated compiler qualification
 on:
   push:
-    branches: [feat/psc1-unified-selfhost-20261024]
+    branches: [qualification/psc1-conversion-wasm-g1-v2-20261025]
     paths: [.github/qualification-requests/psc1-unified-selfhost.json]
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
           import {validateUnifiedSelfhostRequest} from './scripts/unified-selfhost-request.mjs';
           const file='.github/qualification-requests/psc1-unified-selfhost.json';
           const r=JSON.parse(fs.readFileSync('../'+file)),e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
-          validateUnifiedSelfhostRequest(r,'feat/psc1-unified-selfhost-20261024');
+          validateUnifiedSelfhostRequest(r,'qualification/psc1-conversion-wasm-g1-v2-20261025');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
           const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);

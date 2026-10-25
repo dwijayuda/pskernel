@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { compilerSourceClosureDigest, runIndependentChecker } from '../host-tools/compiler-host-protocol.mjs';
 import { createLosslessSourceTool, createSourceOwnershipTool } from '../host-tools/source-refactoring.mjs';
+import { applicationFixtures, executeApplication } from './output-abi-applications.mjs';
 import { boundedRun } from '../host-tools/generated-target-tools.mjs';
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const file = name => path.resolve('.lake/build/bin/' + name);
@@ -21,6 +22,7 @@ const ownership = createSourceOwnershipTool({
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-output-abi-'));
 fs.writeFileSync(path.join(work, 'package.json'), '{"type":"module"}\n');
 const records = [];
+const requestInventory = [];
 let negatives = 0;
 function native(target, request) {
   const input = path.join(work, 'request.json'), output = path.join(work, 'response.json');
@@ -30,7 +32,10 @@ function native(target, request) {
     env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0', LEAN_STACK_SIZE_KB: '8192' } });
   assert.equal(result.error, null, result.stderr);
   assert.equal(result.status, 0, result.stderr);
-  return JSON.parse(fs.readFileSync(output, 'utf8'));
+  const candidate = JSON.parse(fs.readFileSync(output, 'utf8'));
+  requestInventory.push({ target, request, candidateSha256: hash(JSON.stringify(candidate)),
+    status: candidate.status, protocol: candidate.protocol, outputAbi: candidate.outputAbi ?? null });
+  return candidate;
 }
 try {
   for (const grammar of ['lean', 'ps']) for (const assurance of ['checked', 'ordinary-checked']) {
@@ -104,10 +109,35 @@ try {
   const invalid = ['psc1-compiler-service/2', 'invalid-body', 'invalid-body', 'lean', 'checked',
     'Entry', [['Entry', 'def bad : Nat := true\n']], 'io-dispatcher'];
   assert.equal(native('js', invalid).status, 'refused'); negatives++;
+  const applications = [];
+  for (const fixture of applicationFixtures()) {
+    const snapshots = fixture.sources.map(source => lexical.capture({
+      module: source.module, grammar: fixture.grammar, bytes: Buffer.from(source.text),
+    }));
+    const index = ownership.analyze({ snapshots, entry: fixture.entry, assurance: 'ordinary-checked' });
+    const digest = compilerSourceClosureDigest(fixture.sources);
+    const request = ['psc1-compiler-service/2', fixture.id, digest, fixture.grammar,
+      'ordinary-checked', fixture.entry, fixture.sources.map(source => [source.module, source.text]),
+      'io-dispatcher'];
+    const candidate = native('js', request);
+    assert.equal(candidate.status, 'candidate', JSON.stringify(candidate));
+    assert.equal(candidate.outputAbi, 'io-dispatcher');
+    assert.equal(hash(candidate.admissionRequest.admissions), index.admissionsSha256);
+    assert.equal(hash(JSON.stringify(candidate.originalIr)), index.originalIrSha256);
+    assert.equal(runIndependentChecker(checker, candidate.admissionRequest.admissions).leanVersion, '4.35.0');
+    const modulePath = path.join(work, fixture.id + '.mjs');
+    fs.writeFileSync(modulePath, candidate.source);
+    const cases = executeApplication(fixture, modulePath, path.join(work, fixture.id));
+    applications.push({ id: fixture.id, modules: fixture.sources.length,
+      sourceClosureDigest: digest, admissionsSha256: index.admissionsSha256,
+      originalIrSha256: index.originalIrSha256, sourceSha256: hash(candidate.source),
+      contractSha256: fixture.contractSha256, cases });
+    console.log('PSC1_OUTPUT_ABI_NATIVE_APPLICATION: ' + JSON.stringify(applications.at(-1)));
+  }
   fs.mkdirSync('dist/output-abi', { recursive: true });
   fs.writeFileSync('dist/output-abi/native-reference.json', JSON.stringify({
     schema: 'psc1-output-abi-native-reference/1', testedCommit: process.env.GITHUB_SHA,
-    records, negatives, generatedSelfHosting: 'not-run', publication: false,
+    records, requestInventory, applications, negatives, generatedSelfHosting: 'not-run', publication: false,
   }, null, 2) + '\n');
   console.log('PSC1_OUTPUT_ABI_NATIVE: PASS', JSON.stringify({ cases: records.length, negatives }));
 } finally { fs.rmSync(work, { recursive: true, force: true }); }

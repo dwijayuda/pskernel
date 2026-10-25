@@ -46,18 +46,18 @@ jobs:
         \ and hashlib.sha256(kernel).hexdigest()=='7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4'\n\
         assert 'Error: PSC1_QUOT_OWNER_FAIL Quot-valid-bounded-pattern' in z.read('quot/runtime.log').decode()\n\
         (out/'kernel.mjs').write_bytes(kernel)\ninputs={}\nfor path in ['psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs','psc1/scripts/pskernel-quot-session-owner-smoke.mjs']:\n\
-        \    old=subprocess.check_output(['git','show',source+':'+path]).decode();expected=old.replace('(pattern.term)(generated.arena,pattern.id)','(pattern.term)(generated.arena)(pattern.id)').replace('(pattern.term)(generated.arena,generated.arena.size+1)','(pattern.term)(generated.arena)(generated.arena.size+1)').replace('(pattern.term)(generated.arena,s1.id)','(pattern.term)(generated.arena)(s1.id)').replace('generated.arena.size+1)','generated.arena.size+1n)')\n\
+        \    old=subprocess.check_output(['git','show',source+':'+path]).decode();expected=old.replace('(pattern.term)(generated.arena,pattern.id)','(pattern.term)(generated.arena)(pattern.id)').replace('(pattern.term)(generated.arena,generated.arena.size+1)','(pattern.term)(generated.arena)(generated.arena.size+1)').replace('(pattern.term)(generated.arena,s1.id)','(pattern.term)(generated.arena)(s1.id)').replace('generated.arena.size+1)','generated.arena.size+1n)').replace('(_env,_owner)=>','_env=>_owner=>').replace('(_env,_arena,_refs)=>','_env=>_arena=>_refs=>')\n\
         \    actual=pathlib.Path(path).read_text();assert expected!=old and actual==expected\n    name=pathlib.Path(path).name;(out/name).write_text(actual);inputs[path]={'bytes':len(actual.encode()),'sha256':hashlib.sha256(actual.encode()).hexdigest()}\n\
         record={'schema':'psc1-quot-runtime-ABI-diagnostic-v1','harnessSource':os.environ['GITHUB_SHA'],'programSource':source,'programProducerRun':40225115416,'programProducerJob':121265677693,'producerJobConclusion':'failure','failurePreserved':'new\
-        \ external ABI test call applied both curried arguments in one JS call','programBytes':len(kernel),'programSha256':hashlib.sha256(kernel).hexdigest(),'producerArchiveSha256':sha,'inputs':inputs,'onlyThreeExternalCallsAndBigIntLiteralPerHelperChanged':True,'productionAndNativeProofInputsUnchanged':True,'fullQualification':False,'fuel':4096,'oldSpaceMiB':2048,'emptyPATH':True,'eachDeadlineSeconds':1500}\n\
+        \ external ABI test call applied both curried arguments in one JS call','programBytes':len(kernel),'programSha256':hashlib.sha256(kernel).hexdigest(),'producerArchiveSha256':sha,'inputs':inputs,'onlyExternalCurriedCallsBigIntLiteralAndInjectedCallbackABIChanged':True,'productionAndNativeProofInputsUnchanged':True,'fullQualification':False,'retainedNormalHelperAlreadyPassAt':'45d4a23b07ae5a1141df39192658743b1052885b/40228120079','fuel':4096,'oldSpaceMiB':2048,'emptyPATH':True,'eachDeadlineSeconds':1500}\n\
         (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
-    - name: Run both complete retained Quot helpers through actual compiled program
+    - name: Run complete owning-session helper through actual compiled program
       shell: bash
       run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/quot-runtime-repair\"\nfor helper\
-        \ in pskernel-expr-v2-quot-owner-smoke.mjs pskernel-quot-session-owner-smoke.mjs; do\n  \"$NODE_BIN\" --check\
-        \ \"$helper\"\n  /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o \"$helper.memory\"\
-        \ \\\n    timeout --signal=KILL 1500s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n    \"$helper\"\
-        \ ./kernel.mjs > \"$helper.log\" 2>&1\n  cat \"$helper.log\"\ndone\n"
+        \ in pskernel-quot-session-owner-smoke.mjs; do\n  \"$NODE_BIN\" --check \"$helper\"\n  set +e\n  /usr/bin/time\
+        \ -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o \"$helper.memory\" \\\n    timeout --signal=KILL\
+        \ 1500s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n    \"$helper\" ./kernel.mjs > \"$helper.log\"\
+        \ 2>&1\n  status=$?\n  set -e\n  cat \"$helper.log\"\n  test \"$status\" -eq 0\ndone\n"
     - uses: actions/upload-artifact@v4
       if: always()
       with:

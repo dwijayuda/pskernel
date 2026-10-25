@@ -13,4 +13,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: Inventory actual syntax-name construction and grouping
         run: |
-          rg -n -C 3 'PsSyntaxName|segments\s*:=' psc1 --glob '*.lean' --glob '!legacy/**' --glob '!**/pskernel-lean-wasm/source/**'
+          grep -R -n -E -C 3 'PsSyntaxName|segments[[:space:]]*:=' psc1 --include='*.lean' --exclude-dir=legacy --exclude-dir=pskernel-lean-wasm

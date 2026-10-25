@@ -1,7 +1,7 @@
 name: PSC1 slim universal npm and optional execution qualification
 on:
   push:
-    branches: [feat/psc1-slim-universal-npm-20261025, refactor/psc1-readability-20261025]
+    branches: [qualification/psc1-io-package-preflight-20261026]
     paths:
       - .github/workflows/psc1-slim-universal.yml
       - psc1/scripts/slim-universal-*
@@ -24,6 +24,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
+      - name: Require bounded artifact transport and actual G1 promotion refusal
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/kernel435-qualified-artifact-tests.mjs
+          node scripts/qualified-compiler-assets-tests.mjs
       - name: Assemble a fresh slim root from exact qualified compiler and kernel payloads
         env:
           GH_TOKEN: ${{ github.token }}
@@ -41,14 +47,25 @@ jobs:
           retention-days: 90
       - name: Execute offline local/global root and optional compiler bundles without SDKs
         run: node scripts/slim-universal-installed.mjs
+      - name: Require installed IO adapter and fail-closed ABI preflight
+        run: node scripts/slim-universal-io-preflight.mjs
       - name: Typecheck the actual packed public API
         run: |
           npm install --prefix "$RUNNER_TEMP/slim-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           npm install --prefix "$RUNNER_TEMP/slim-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.4.tgz"
           cat > "$RUNNER_TEMP/slim-types/consumer.mts" <<'TS'
           import {compile,build,compileCandidate,getCompilerMetadata,createIndependentKernelToolchain,checkCanonicalAdmissions,type Source,type CompilerEngine} from 'proofscript';
+          import {createTypedIo,withTypedIo,type TypedIoConfiguration} from 'proofscript/io';
+          const config:TypedIoConfiguration={abi:'psc1-node-linux-string-io/1',capabilities:['readUtf8'],required:['readUtf8'],root:'/tmp/example',maxFileBytes:512,maxLineBytes:128,inputFd:0,outputFd:1};
+          const io=createTypedIo(config); const response:string=io.execute('{}'); io.close();
+          await withTypedIo(config,()=>({run:()=>true}),program=>program.run());
+          // @ts-expect-error metadata cannot select an arbitrary IO operation
+          const invalid:TypedIoConfiguration={...config,capabilities:['shell']};
           const sources:readonly Source[]=[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}];
           const checked=compile({sources,entryModule:'Entry'});
+          compile({sources,entryModule:'Entry',outputAbi:'io-dispatcher'});
+          // @ts-expect-error unknown output ABIs are refused by the public type surface
+          compile({sources,entryModule:'Entry',outputAbi:'arbitrary'});
           const text:string=checked.source; const admission:'accepted'=checked.logicalAdmission;
           const built=build({sources,entryModule:'Entry',out:'out',engine:'wasm-core'});
           const candidate=compileCandidate({sources,entryModule:'Entry',target:'rust',engine:'ts'});
@@ -72,6 +89,7 @@ jobs:
             psc1/dist/slim-universal/tarballs/
             psc1/dist/slim-universal/package-receipt.json
             psc1/dist/slim-universal/installed-qualification.json
+            psc1/dist/slim-universal/io-adapter-preflight.json
           if-no-files-found: error
           retention-days: 90
       - uses: actions/upload-artifact@v4
@@ -81,5 +99,6 @@ jobs:
           path: |
             psc1/dist/slim-universal/package-receipt.json
             psc1/dist/slim-universal/installed-qualification.json
+            psc1/dist/slim-universal/io-adapter-preflight.json
             psc1/dist/slim-universal/tarballs/
           retention-days: 90

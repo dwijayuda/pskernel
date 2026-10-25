@@ -3,10 +3,10 @@ import hashlib,json,os,pathlib,re,shutil,subprocess,sys
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 REPO=ROOT.parent
 BASE='79031362b401f85d3c7f324cc3aa7dbf91c1bf0e'
-TREE='2b0f061ef9e211df46b6dda8266b4b975823fab7'
+TREE='65d5b9c3d0431a8b86961b6d1aec398f7169d223'
 PROD='psc1/packages/pskernel-core/src'
-DELTA=["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean"]
-PINS={"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean":{"bytes":3326,"sha256":"528860b30e49a78930ab497b72900dba1afc047d2989964e6d88316b8cbebd68"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean":{"bytes":11106,"sha256":"f92312807e5eebf143682fb1b0adb25042f6f64fb9ba9ab856df925e6f416594"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean":{"bytes":23775,"sha256":"be61803c61760b15d3f6674b0174d93692858a788f182676282e4b0a0a13980a"},"psc1/kernel-lakefile.lean":{"bytes":17834,"sha256":"2d8397ccfbd42bffa0a1cd64af2d3863494b7011f144800b8bbfb41cd59ba461"},"psc1/test/PsKernelQuotAdmissionProofs.lean":{"bytes":15698,"sha256":"9ed76158b819bfccf856c7e46f199a796dd7e5c015e364ffb5bfcc629483a3cd"},"psc1/test/PsKernelQuotAdmissionRegression.lean":{"bytes":5011,"sha256":"3ebdac6dde2d600f4c370a6d9e558a5d9477f6adfc5acb15f01c1cac110963c6"},"psc1/test/PsKernelExprV2QuotOwnerRegression.lean":{"bytes":37053,"sha256":"b967ec021389288500a2a5db9ea6c71cb4675971bec6815b8011984bcccc4cf1"},"psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs":{"bytes":28062,"sha256":"0117beadc375cb1d93734334bf7d1aa956af8f3862da210c9acec8117c2ffc89"}}
+DELTA = ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean']
+PINS = {'psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean': {'bytes': 3326, 'sha256': '528860b30e49a78930ab497b72900dba1afc047d2989964e6d88316b8cbebd68'}, 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean': {'bytes': 12993, 'sha256': '624697322e578ef620a9a5bbf68f67a46e27c45e240ef29de76296892794c16b'}, 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean': {'bytes': 23775, 'sha256': 'be61803c61760b15d3f6674b0174d93692858a788f182676282e4b0a0a13980a'}, 'psc1/kernel-lakefile.lean': {'bytes': 17834, 'sha256': '2d8397ccfbd42bffa0a1cd64af2d3863494b7011f144800b8bbfb41cd59ba461'}, 'psc1/test/PsKernelQuotAdmissionProofs.lean': {'bytes': 15698, 'sha256': '9ed76158b819bfccf856c7e46f199a796dd7e5c015e364ffb5bfcc629483a3cd'}, 'psc1/test/PsKernelQuotAdmissionRegression.lean': {'bytes': 5011, 'sha256': '3ebdac6dde2d600f4c370a6d9e558a5d9477f6adfc5acb15f01c1cac110963c6'}, 'psc1/test/PsKernelExprV2QuotOwnerRegression.lean': {'bytes': 37053, 'sha256': 'b967ec021389288500a2a5db9ea6c71cb4675971bec6815b8011984bcccc4cf1'}, 'psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs': {'bytes': 28062, 'sha256': '0117beadc375cb1d93734334bf7d1aa956af8f3862da210c9acec8117c2ffc89'}}
 ALLOWED={'propext','Classical.choice','Quot.sound'}
 PROOFS=['match_shape_correspondence','eq_shape_correspondence','refl_shape_correspondence','initialized_returns_exact_environment',
 'declined_check_does_not_install','failed_check_does_not_install','shared_install_preserves_frozen_admission','missing_owner_declines','wrong_owner_declines']
@@ -21,7 +21,7 @@ def source(out):
  out.mkdir(parents=True,exist_ok=True)
  require(git('rev-parse','HEAD').decode().strip()==identity()['sourceSha'],'Exact checkout')
  require(git('rev-parse','HEAD:'+PROD).decode().strip()==TREE,'Exact complete production tree')
- require(git('diff','--name-only',BASE,'HEAD','--',PROD).decode().splitlines()==DELTA,'Exact three-path T06 change')
+ require(git('diff','--name-only',BASE,'HEAD','--',PROD).decode().splitlines()==DELTA,'Exact five-path combined quotient change')
  paths=list(PINS)+['psc1/scripts/pskernel-quot-admission-qualification.py',
   'psc1/scripts/pskernel-transform-lazy-qualification.py','psc1/scripts/pskernel-unary-spine-qualification.py',
   'psc1/scripts/pskernel-validator-qualification.py','.github/workflows/psc1-pskernel-t05-header.yml',

@@ -78,6 +78,11 @@ jobs:
           path: psc1/dist/development/
           retention-days: 30
 
+  lossless:
+    needs: static
+    if: needs.static.outputs.focused == 'true'
+    uses: ./.github/workflows/psc1-lossless-source.yml
+
   native:
     needs: static
     if: needs.static.outputs.focused == 'true'
@@ -114,7 +119,7 @@ jobs:
 
   gate:
     if: always()
-    needs: [static, native, focused, closures, g1, full, benchmark]
+    needs: [static, lossless, native, focused, closures, g1, full, benchmark]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -127,7 +132,7 @@ jobs:
           const jobs=JSON.parse(process.env.RESULTS);
           assert.equal(jobs.static.result,'success');
           const selection=jobs.static.outputs;
-          for(const [job,tier] of Object.entries({native:'focused',focused:'focused',closures:'integration',g1:'integration',full:'release',benchmark:'benchmark'}))
+          for(const [job,tier] of Object.entries({lossless:'focused',native:'focused',focused:'focused',closures:'integration',g1:'integration',full:'release',benchmark:'benchmark'}))
             assert.equal(jobs[job].result,selection[tier]==='true'?'success':'skipped',job);
           console.log('Every selected PSC1 dependency passed. Release readiness is reported separately.');
           JS

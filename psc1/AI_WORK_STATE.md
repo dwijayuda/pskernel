@@ -1,12 +1,71 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #181, branch
-`refactor/psc1-readability-20261025`, based on qualified PR #180 HEAD
-`3089cbc369bc8a11f540c13140c7003c9dadf4a8`.
+Updated 2026-10-25 Asia/Jakarta. Active draft PR #182, branch
+`feat/psc1-lossless-source-20261025`, based on qualified PR #181 HEAD
+`d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
 
-## Readability slice
+## Qualified R1 lossless foundation
+
+Implementation `c577d49888493857199fa3dc26f7ff78ed157def`, stacked draft PR #182 on PR #181
+HEAD `d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`. Tested merge `e0b14e376f0231877b4c03321842f4eeaad97f5a` shares tree
+`424e725cde95312d2b5cac9e87aa36df1fc3a676` with the implementation.
+
+The additive Ps.Syntax.Lossless tape reuses the original lexers and comment/cursor
+helpers. Native transport and the host source-refactoring API retain exact UTF-8
+bytes, token/trivia spans, raw spellings and per-snapshot piece IDs. Logical module,
+grammar/profile and exact-byte digests define source identity; URI is provenance.
+Opaque, deeply frozen snapshots and copied buffers prevent forged/mutable edit
+handles. Staged old-coordinate edits require exact current bytes, valid UTF-8
+boundaries and sorted non-overlapping ranges. Nothing is written or published.
+Capture is lexical only; parse/admission and semantic equivalence are not claimed.
+
+[Contract/API](docs/PSC1_LOSSLESS_SOURCE.md),
+[exact qualification receipt](docs/PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json).
+Linux focused run 40191237137/job 121162499744 PASSED: 358 captures, 49 refusal
+cases, deterministic delimiter mixtures, bounded large trivia and exact capture
+of all 121 compiler modules under both lexers. Helper maximum wall time is 355ms;
+max RSS is 160,280 KiB. Artifact 12598640604 ZIP SHA256
+ecd89e8f997ae1b78dd30f453f2099ba1c3800b6867786e781aba59b18192517
+contains helper SHA256 and per-source identities/measurements.
+The required development dependency independently passes at the identical PR
+merge tree (job 121162707713; 359ms, 159,444 KiB).
+
+[Ordinary development run 40191245319](https://github.com/dwijayuda/pskernel/actions/runs/40191245319)
+PASSED, including every selected dependency and full finite-contract qualification:
+37/37 qualified, zero blocked. Seven native backend mappings, both grammars,
+independent official checking, strict IR, negative/resource policies, minimum Python
+and installed native/source-library regressions remain required and pass.
+The receipt owns job IDs, artifact identities and the exact tested tree.
+
+The 121-module unified closure remains exactly
+7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000.
+The new sidecar is outside that import closure; all existing semantic source,
+packaged host/payload inputs and original supervisor/profile files are unchanged.
+No frozen generation chain, npm tarball or compiler-source promotion is relabeled.
+
+The new helper alone uses 1 MiB input, 262,144 pieces, 32 MiB response, 4,096 edits,
+240s, 4 GiB virtual address space, an 8 MiB main process stack and no task workers.
+Run 40190581290 diagnoses official runtime mandatory libuv thread initialization:
+1/2 GiB address-space probes fail while 4 GiB starts. Virtual stack reservation
+does not represent resident memory. Existing compiler/checker limits are unchanged.
+
+Tracked diagnostic defect: psLexReadCharacterBody's malformed-literal branch
+advances the close character without first advancing the body character.
+Apostrophe/U+1F600/U+03B1 retains an unterminatedCharacter stop offset 3 inside the
+emoji. Run 40190697846 exposed the class through delimiter mixtures. R1 preserves
+the original diagnostic as advisory metadata and marks its coordinates unverified.
+Token/trivia/edit spans always require exact boundaries. Correcting the production
+lexer needs its own source qualification; it is not silently changed here.
+
+Remaining R2: resolved declaration/binder identities and capture-avoiding rename,
+affected-closure elaboration, independent admission, public API/identity comparison.
+R3/R4 keep explicit conversion/equivalence and behavioral obligations. No installed
+refactoring CLI, automatic filesystem edit, semantic equivalence or non-Linux
+developer-tool qualification is claimed.
+
+## Preserved PR #181 readability slice
 
 Implementation: `446a0f21c6288a7c20b843bbeadcd18ba1460fa2`.
 Documentation commit 40bd3bb3 establishes current README/architecture/contributor,
@@ -28,8 +87,9 @@ Commit 446a0f21 relocates five prefix-guard paths without dropping assertions.
 
 [Contributor guide](CONTRIBUTING.md), [docs index](docs/README.md),
 [exact readability receipt](docs/PSC1_READABILITY_QUALIFICATION_2026-10-25.json).
-This is the first maintenance slice; lossless source editing, binding-aware rename,
-broad language extensions and a generalized plugin framework are not implemented.
+That checkpoint was the first maintenance slice. The additive R1 lexical
+foundation is described above; binding-aware rename, semantic source editing,
+broad language extensions and a generalized plugin framework remain unimplemented.
 
 ## Actual validation
 
@@ -121,8 +181,9 @@ reproduction are not claimed.
 The [single development roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining
 queue. Preserve the completed readability slice and its exact evidence.
 For further maintenance, prefer independent helper/module boundaries and recorded
-invariants; build lossless token/trivia and resolved identities before broad
-automatic source conversion or rename. Do not replace workers with shorter forms
+invariants; use the qualified R1 byte capture and establish resolved identities
+before broad automatic source conversion or rename. Preserve the advisory
+legacy-diagnostic boundary until its production fix has separate qualification. Do not replace workers with shorter forms
 without correspondence/resource evidence. Existing source-shape guards remain
 required until equivalent protection is explicitly qualified.
 

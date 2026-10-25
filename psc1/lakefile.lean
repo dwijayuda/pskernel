@@ -20,6 +20,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.Token,
     `Ps.Syntax.Cursor,
     `Ps.Syntax.Lexer,
+    `Ps.Syntax.Lossless,
     `Ps.Syntax.Ast,
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,
@@ -632,3 +633,12 @@ lean_lib PsCodecSpineProof where
 lean_exe psc1_rust_nat_literal_tests where
   srcDir := "test"
   root := `RustNatLiteralTests
+
+-- Read-only lexical sidecar; outside every unified compiler import closure.
+lean_exe psc1_lossless_source where
+  srcDir := "scripts"
+  root := `LosslessSourceMain
+
+lean_exe psc1_lossless_tests where
+  srcDir := "test"
+  root := `LosslessSourceTests

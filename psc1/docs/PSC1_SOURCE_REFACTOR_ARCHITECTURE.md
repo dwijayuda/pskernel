@@ -1,6 +1,8 @@
 # PSC1 checked source-refactoring architecture
 
-Status: selected future design; no semantics-preserving automatic refactoring qualification is claimed. Inspected baseline: `da880d864ca5f9e35729255fd7e4f8a17953cd39`.
+Status: R1 lexical capture and staged byte edits qualified in Linux runs 40191237137 and 40191245319. No semantics-preserving automatic refactoring qualification is claimed. The original architectural inspection used `da880d864ca5f9e35729255fd7e4f8a17953cd39`; the additive R1 implementation follows PR #181 HEAD `d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
+
+[Lossless capture contract and API](PSC1_LOSSLESS_SOURCE.md). The original lexer and semantic AST remain unchanged. Resolved identities and independent before/after admission remain R2 work.
 
 ## Current source evidence
 
@@ -42,7 +44,7 @@ Exact raw graph-byte equality is a useful strong gate when expected, but may rej
 
 ## Milestones
 
-R1 (later, small foundation): capture source IDs/digests and lossless token/trivia tape. Tests reconstruct exact bytes including nested comments, Unicode, CRLF, escaped literals and EOF trivia; reject stale edits. No semantic graph change.
+R1 (qualified; see the lossless capture receipt): capture source IDs/digests and lossless token/trivia tape. Tests reconstruct exact bytes including nested comments, Unicode, CRLF, escaped literals and EOF trivia; reject stale edits. No semantic graph change.
 
 R2: resolved binder/declaration side tables and one lexical rename. Test shadowing, namespaces, qualified/root names, imported private ownership, multiple modules and capture refusal. Independent admission and public API correspondence mandatory.
 

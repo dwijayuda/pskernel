@@ -1,3 +1,9 @@
+## 2026-10-25 — native51 focused proof-body repair
+
+Initial source `c12162dbb22df2d4671b50ea8625761b7f6af24f` failed native51 run40167395475/job121091144045 at lines317 and351: `No goals to be solved`. In each nextPosition proof, `rw [decoded_push_size, position]` already closed the equality. This checkpoint removes only the two subsequent redundant `rfl` tactics. All theorem statements,12 print directives, retained39 proofs, production and workflow remain unchanged. The first run is not qualification: the exact repaired source must pass a fresh native51 run and independent archive audit. Do not rerun the obsolete source or inherit qualification from the retained reports.
+
+---
+
 # T05 production decoder storage and semantic bridge
 
 ## 2026-10-25 — actual production decoder bridge: native51 qualification pending

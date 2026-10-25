@@ -314,7 +314,6 @@ theorem decode_canonical_fuel_ok_preserves
             have nextPosition :
                 (psKernelExprV2DecodedPush built (meaning id)).size = Nat.succ id := by
               rw [decoded_push_size, position]
-              rfl
             exact ih (psKernelExprV2DecodedPush built (meaning id)) (Nat.succ id)
               nextLayout nextDecoded nextPosition accepted
 
@@ -348,7 +347,6 @@ theorem decode_canonical_fuel_succeeds
         have nextPosition :
             (psKernelExprV2DecodedPush built (meaning id)).size = Nat.succ id := by
           rw [decoded_push_size, position]
-          rfl
         have nextWithin : Nat.succ id ≤ source.size := by omega
         have nextEnough : source.size - Nat.succ id < remaining := by omega
         rcases ih (psKernelExprV2DecodedPush built (meaning id)) (Nat.succ id)

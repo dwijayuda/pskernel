@@ -1,0 +1,64 @@
+name: PSC1 production decoder bridge artifact content audit
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-decoder-bridge-artifact-audit-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-decoder-bridge-artifact-audit.yml
+    - .github/psc1-decoder-bridge-audit/audit.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: Check out exact audit implementation
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: audit-source
+        persist-credentials: false
+    - name: Check out exact native proof target separately
+      uses: actions/checkout@v4
+      with:
+        repository: dwijayuda/pskernel
+        ref: e652d02a69ebcaaeb5b4fe0b391e368efebf18e7
+        path: target-source
+        persist-credentials: false
+    - name: Bind exact API metadata, raw ZIP CRCs and producer job log
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        python3 audit-source/.github/psc1-decoder-bridge-audit/audit.py prepare \
+          target-source audit-source "$RUNNER_TEMP/decoder-bridge-artifact-audit"
+    - name: Download and extract the exact existing artifact with the official action
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        artifact-ids: '12589175265'
+        run-id: '40167568667'
+        repository: dwijayuda/pskernel
+        github-token: ${{ github.token }}
+        merge-multiple: true
+        path: ${{ runner.temp }}/decoder-bridge-artifact-audit/extracted
+    - name: Verify all ZIP members, exact source bytes and 51 actual proof reports
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 audit-source/.github/psc1-decoder-bridge-audit/audit.py verify \
+          target-source audit-source "$RUNNER_TEMP/decoder-bridge-artifact-audit"
+    - name: Retain the raw archive, complete extracted evidence and audit sources
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: psc1-decoder-bridge-content-audit-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/decoder-bridge-artifact-audit/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

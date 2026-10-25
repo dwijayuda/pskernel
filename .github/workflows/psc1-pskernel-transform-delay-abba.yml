@@ -1,10 +1,10 @@
-name: PSC1 deferred transform bounded A-B-B-A diagnostic
+name: PSC1 unary congruence bounded A-B-B-A diagnostic
 
 'on':
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-t08-deferred-transform-20261025
+    - work/psc1-pskernel-unary-spines-abba-20261025
     paths:
     - .github/workflows/psc1-pskernel-transform-delay-abba.yml
     - psc1/scripts/pskernel-transform-delay-abba.py
@@ -14,7 +14,7 @@ permissions:
   actions: read
 
 env:
-  BASELINE_SHA: '10144e2f9e8d223b5dcde275bd1f48d25df113b3'
+  BASELINE_SHA: 'dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5'
 
 jobs:
   native:
@@ -39,78 +39,30 @@ jobs:
           test "$(cat psc1/lean-toolchain)" = "leanprover/lean4:v4.35.0"
           (cd psc1 && test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc")
           mkdir -p "$RUNNER_TEMP/transform-delay-preflight"
-      - name: Authenticate exact frozen bodies and focused production delta
+      - name: Authenticate exact unary production delta and original comparison drivers
         shell: bash
         run: |
           set -euo pipefail
+          python3 psc1/scripts/pskernel-unary-spine-qualification.py source \
+            --out "$RUNNER_TEMP/transform-delay-preflight/unary"
           python3 - <<'PY'
-          import hashlib, json, os, pathlib, re, subprocess
-          base, source = os.environ["BASELINE_SHA"], os.environ["GITHUB_SHA"]
-          assert re.fullmatch(r"[0-9a-f]{40}", base)
-          assert re.fullmatch(r"[0-9a-f]{40}", source)
-          prefix = "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/"
-          pinned = {
-              "Transform.lean": ("8f50a74edf1d00288efee9c559a05a75b755acbf", "psKernelExprV2TransformWithFuel"),
-              "TransformSupport.lean": ("7957a3aaf87f440b6fb09c2ee98eb574aeab6c72", "psKernelExprV2TransformCountWithFuel"),
-              "Lift.lean": ("50a63d2729088039a3b01f75eda5c6e83f91e036", "psKernelExprV2PagedLiftWithFuel"),
-          }
-          moves = {
-              "Transform.lean": (
-                  "      let smaller := psKernelExprV2TransformWithFuel remaining;\n",
-                  "        (state : PsKernelExprV2TransformState) (source offset : Nat) =>\n",
-                  "        let smaller := psKernelExprV2TransformWithFuel remaining;\n"),
-              "TransformSupport.lean": (
-                  "      let smaller := psKernelExprV2TransformCountWithFuel remaining;\n",
-                  "          (memo : List PsKernelExprV2TransformCountMemo) (root : Nat) =>\n",
-                  "        let smaller := psKernelExprV2TransformCountWithFuel remaining;\n"),
-              "Lift.lean": (
-                  "      let smaller :\n          PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n          Except String (PsKernelExprV2PagedLiftState × Nat) :=\n        psKernelExprV2PagedLiftWithFuel remaining;\n",
-                  "            fun (amount : Nat) =>\n",
-                  "              let smaller :\n                  PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n                  Except String (PsKernelExprV2PagedLiftState × Nat) :=\n                psKernelExprV2PagedLiftWithFuel remaining;\n"),
-          }
-          changed = subprocess.check_output([
-              "git", "diff", "--name-only", base, source, "--",
-              "psc1/packages/pskernel-core/src"], text=True).splitlines()
-          assert set(changed) == {prefix + path for path in pinned}, changed
-          proof_path = pathlib.Path("psc1/test/PsKernelDeferredTransformProofs.lean")
-          proof = proof_path.read_text()
-          assert proof.count("namespace Frozen\n") == 1
-          assert proof.count("\nend Frozen") == 1
-          frozen = proof.split("namespace Frozen\n", 1)[1].split("\nend Frozen", 1)[0]
-          def body(text, name):
-              found = re.search(r"(?ms)^def " + re.escape(name) + r"\n.*?(?=^def |\Z)", text)
-              assert found, name
-              return found.group(0).rstrip()
-          baseline_blobs = {}
-          for short, (expected_blob, name) in pinned.items():
-              path = prefix + short
-              blob = subprocess.check_output(["git", "rev-parse", base + ":" + path], text=True).strip()
-              assert blob == expected_blob, (path, blob)
-              before = subprocess.check_output(["git", "show", base + ":" + path], text=True)
-              assert body(before, name) == body(frozen, name), "frozen body mismatch: " + name
-              remove, anchor, insert = moves[short]
-              assert before.count(remove) == before.count(anchor) == 1, short
-              expected = before.replace(remove, "").replace(anchor, anchor + insert)
-              assert pathlib.Path(path).read_text() == expected, "extra production change: " + short
-              baseline_blobs[path] = blob
-          paths = [prefix + short for short in pinned] + [
-              str(proof_path),
+          import hashlib,json,os,pathlib,subprocess
+          out=pathlib.Path(os.environ["RUNNER_TEMP"])/"transform-delay-preflight"
+          source=json.loads((out/"unary/source-inventory.json").read_text())
+          paths=[row["path"] for row in source["files"]]+[
               "psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs",
               ".github/workflows/psc1-pskernel-transform-delay-abba.yml",
-              "psc1/scripts/pskernel-transform-delay-abba.py",
-          ]
-          audit = {
-              "schema": "psc1-transform-delay-source-v1", "sourceSha": source,
-              "baselineSha": base, "runId": os.environ["GITHUB_RUN_ID"],
-              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
-              "baselineBlobs": baseline_blobs, "frozenBodiesMatch": True,
-              "exactBindingMovesOnly": True, "productionChanges": changed,
-              "sourceFiles": {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths},
-              "fullQualification": False, "performanceQualified": False,
-          }
-          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-preflight"
-          (out / "source-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
-          print("PSC1_TRANSFORM_DELAY_SOURCE: PASS " + json.dumps(audit, separators=(",", ":")))
+              "psc1/scripts/pskernel-transform-delay-abba.py"]
+          audit={"schema":"psc1-transform-delay-source-v1","sourceSha":os.environ["GITHUB_SHA"],
+              "baselineSha":os.environ["BASELINE_SHA"],"runId":os.environ["GITHUB_RUN_ID"],
+              "runAttempt":os.environ["GITHUB_RUN_ATTEMPT"],
+              "baselineProductionTree":source["baselineProductionTree"],
+              "productionTree":source["productionTree"],"productionChanges":source["productionChanges"],
+              "positiveUnaryCongruenceShortcut":True,"exactBindingMovesOnly":False,
+              "sourceFiles":{p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths},
+              "fullQualification":False,"performanceQualified":False}
+          (out/"source-audit.json").write_text(json.dumps(audit,indent=2)+"\n")
+          print("PSC1_TRANSFORM_DELAY_SOURCE: PASS "+json.dumps(audit,separators=(",",":")))
           PY
           node --check psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs
           python3 -m py_compile psc1/scripts/pskernel-transform-delay-abba.py
@@ -122,14 +74,14 @@ jobs:
           set -euo pipefail
           lake -f kernel-lakefile.lean build PsKernelCore \
             2>&1 | tee "$RUNNER_TEMP/transform-delay-preflight/native-build.log"
-          lake -f kernel-lakefile.lean env lean test/PsKernelDeferredTransformProofs.lean \
+          lake -f kernel-lakefile.lean env lean test/PsKernelUnarySpineProofs.lean \
             2>&1 | tee "$RUNNER_TEMP/transform-delay-preflight/proofs.log"
           python3 - <<'PY'
           import hashlib, json, os, pathlib, re
           out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-preflight"
-          proof = pathlib.Path("test/PsKernelDeferredTransformProofs.lean").read_text()
+          proof = pathlib.Path("test/PsKernelUnarySpineProofs.lean").read_text()
           expected = re.findall(r"(?m)^#print axioms (\S+)\s*$", proof)
-          assert len(expected) == len(set(expected)) == 3, expected
+          assert len(expected) == len(set(expected)) == 9, expected
           log = (out / "proofs.log").read_text()
           reports = re.findall(
               r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)", log)
@@ -143,7 +95,7 @@ jobs:
               "schema": "psc1-transform-delay-native-v1",
               "sourceSha": os.environ["GITHUB_SHA"], "baselineSha": os.environ["BASELINE_SHA"],
               "runId": os.environ["GITHUB_RUN_ID"], "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
-              "proofs": 3, "names": expected,
+              "proofs": 9, "names": expected,
               "proofLogSha256": hashlib.sha256((out / "proofs.log").read_bytes()).hexdigest(),
               "sourceAuditSha256": hashlib.sha256((out / "source-audit.json").read_bytes()).hexdigest(),
               "fullQualification": False, "performanceQualified": False,
@@ -157,6 +109,7 @@ jobs:
           name: psc1-transform-delay-native-preflight-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/transform-delay-preflight/
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
 
   compiler:
@@ -181,7 +134,7 @@ jobs:
       - name: Install pinned Lean
         shell: bash
         run: bash psc1/scripts/install-lean435-ci.sh
-      - name: Build one exact compiler and check portable transformation closure
+      - name: Build one exact compiler and check portable unary helper closure
         working-directory: psc1
         shell: bash
         run: |
@@ -190,7 +143,7 @@ jobs:
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           PSC1_DELAY_SHARED="$RUNNER_TEMP/transform-delay-shared"
           lake build psc1 2>&1 | tee "$PSC1_DELAY_SHARED/compiler-build.log"
-          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean \
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean \
             2>&1 | tee "$PSC1_DELAY_SHARED/portable-leaf.log"
           cp .lake/build/bin/psc1 "$PSC1_DELAY_SHARED/psc1"
           mkdir -p "$PSC1_DELAY_SHARED/runtime"
@@ -210,7 +163,7 @@ jobs:
           assert native["baselineSha"] == audit["baselineSha"] == os.environ["BASELINE_SHA"]
           assert native["runId"] == os.environ["GITHUB_RUN_ID"]
           assert native["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
-          assert native["proofs"] == 3
+          assert native["proofs"] == 9
           assert native["proofLogSha256"] == digest(out / "proofs.log")
           assert native["sourceAuditSha256"] == digest(out / "source-audit.json")
           scripts = [
@@ -248,6 +201,7 @@ jobs:
           name: psc1-transform-delay-compiler-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/transform-delay-shared/
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
 
 
@@ -547,6 +501,7 @@ jobs:
           name: psc1-transform-delay-${{ matrix.variant }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/transform-delay-producer/
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
 
   abba:
@@ -611,5 +566,6 @@ jobs:
           name: psc1-transform-delay-abba-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/transform-delay-pair/
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
 

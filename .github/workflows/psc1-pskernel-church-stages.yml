@@ -1,0 +1,105 @@
+name: PSC1 authentic Church native and generated stage diagnosis
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-church-stages-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-church-stages.yml
+    - psc1/scripts/pskernel-church-*.py
+    - psc1/scripts/pskernel-church-stages.mjs
+    - psc1/test/PsKernelChurch*.lean
+permissions:
+  contents: read
+  actions: read
+jobs:
+  stages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install and authenticate pinned Lean
+      shell: bash
+      run: |
+        set -euo pipefail
+        bash psc1/scripts/install-lean435-ci.sh
+        export PATH="$HOME/.elan/bin:$PATH"
+        test "$(cat psc1/lean-toolchain)" = leanprover/lean4:v4.35.0
+        (cd psc1 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+        node --check psc1/scripts/pskernel-church-stages.mjs
+        printf 'PSC1_CHURCH_NODE=%s\n' "$(command -v node)" >> "$GITHUB_ENV"
+    - name: Authenticate original corpus, exact generated artifact and native transcription
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        curl -fL --retry 3 --retry-delay 2 \
+          -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+          https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+        python3 psc1/scripts/pskernel-church-stage-ci.py prepare \
+          --out "$RUNNER_TEMP/church-stages" --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz"
+    - name: Build native probe using an exact append-only diagnostic Lake configuration
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        cp kernel-lakefile.lean .church-stage-lakefile.lean
+        cat >> .church-stage-lakefile.lean <<'LEAN'
+
+        lean_lib PsKernelChurchLiteralSource where
+          srcDir := "test"
+          roots := #[`PsKernelChurchSource]
+
+        lean_exe psc1_kernel_church_stages where
+          srcDir := "test"
+          root := `PsKernelChurchStageProbe
+        LEAN
+        cp .church-stage-lakefile.lean "$RUNNER_TEMP/church-stages/native-lakefile.lean"
+        lake -f .church-stage-lakefile.lean build psc1_kernel_church_stages \
+          2>&1 | tee "$RUNNER_TEMP/church-stages/native-build.log"
+    - name: Compare cold unmodified and staged checking in separate unchanged bounded processes
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-church-stage-ci.py execute --out "$RUNNER_TEMP/church-stages" \
+          --node "$PSC1_CHURCH_NODE" --native "$PWD/.lake/build/bin/psc1_kernel_church_stages" \
+          2>&1 | tee "$RUNNER_TEMP/church-stages/diagnosis.log"
+    - name: Trace the actual native failure with ephemeral diagnostic source
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-church-trace-ci.py instrument --out "$RUNNER_TEMP/church-stages/trace"
+        lake -f .church-stage-lakefile.lean build psc1_kernel_church_stages \
+          2>&1 | tee "$RUNNER_TEMP/church-stages/trace/native-build.log"
+        python3 scripts/pskernel-church-trace-ci.py execute --out "$RUNNER_TEMP/church-stages/trace" \
+          --native "$PWD/.lake/build/bin/psc1_kernel_church_stages"
+    - name: Test generic unary congruence prototype natively without adoption
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-church-congruence-ci.py instrument --out "$RUNNER_TEMP/church-stages/candidate"
+        lake -f .church-stage-lakefile.lean build psc1_kernel_church_stages \
+          2>&1 | tee "$RUNNER_TEMP/church-stages/candidate/native-build.log"
+        python3 scripts/pskernel-church-congruence-ci.py execute --out "$RUNNER_TEMP/church-stages/candidate" \
+          --native "$PWD/.lake/build/bin/psc1_kernel_church_stages"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-church-stages-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/church-stages/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

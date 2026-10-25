@@ -44,16 +44,16 @@ theorem whnf_scan_four_preserves_every_arena_error_hash_and_first_hit
     | ind n ih =>
       intro xs lengthEq owner root key
       cases xs with
-      | nil => by simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
+      | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
       | cons a as =>
         cases as with
-        | nil => by simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
+        | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
         | cons b bs =>
           cases bs with
-          | nil => by simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
+          | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
           | cons c cs =>
             cases cs with
-            | nil => by simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
+            | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
             | cons d tail =>
               have smaller : tail.length < n := by simp_all; omega
               have recurse := ih tail.length smaller tail rfl owner root key

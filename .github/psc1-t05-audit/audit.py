@@ -75,12 +75,13 @@ SHA = CONFIG["sourceSha"]
 RUN = CONFIG["runId"]
 ATTEMPT = CONFIG["runAttempt"]
 PROFILE = CONFIG.get("profile", "helpers")
-RETAINED = PROFILE == "retained"
-DEFERRED = PROFILE in ("deferred", "retained")
-ADMISSION = PROFILE in ("admission", "deferred", "retained")
-FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred", "retained")
-ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred", "retained")
-LOOP = PROFILE in ("loop", "admission", "deferred", "retained")
+RESTORED = PROFILE == "restored"
+RETAINED = PROFILE in ("retained", "restored")
+DEFERRED = PROFILE in ("deferred", "retained", "restored")
+ADMISSION = PROFILE in ("admission", "deferred", "retained", "restored")
+FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred", "retained", "restored")
+ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred", "retained", "restored")
+LOOP = PROFILE in ("loop", "admission", "deferred", "retained", "restored")
 SOURCE_INPUT_COUNT = 92 if RETAINED else 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
 NATIVE_PROOF_TOTAL = 492 if RETAINED else 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
 NATIVE_PROOF_MODULES = len(EXPECTED_PROOFS) + (2 if FIELDS else 0) + (1 if ANALYSIS else 0) + (1 if LOOP else 0) + (3 if ADMISSION else 0) + (1 if DEFERRED else 0) + (10 if RETAINED else 0)
@@ -126,6 +127,8 @@ PUBLIC_ADMISSION_LABELS = [
     "boundary/private-generated-id-not-external","boundary/later-command-failure-atomic",
     "boundary/fallback-original-bounds","boundary/preflight-precedence"]
 DEFERRED_BASELINE = "10144e2f9e8d223b5dcde275bd1f48d25df113b3"
+RESTORED_PRODUCTION_ROOT = "psc1/packages/pskernel-core/src"
+RESTORED_PRODUCTION_TREE = "57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff"
 DEFERRED_PREFIX = "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/"
 DEFERRED_MODULE = "PsKernelDeferredTransformProofs"
 DEFERRED_PROOF = "psc1/test/" + DEFERRED_MODULE + ".lean"
@@ -1350,6 +1353,44 @@ def admission_route_audit(e):
             "receipt":digest(e.raw(path)),"allReceiptLogDigestsMatched":True}
     return results
 
+def restored_receipt_flags(value,label):
+    if RESTORED:
+        same(value.get("baselineTransformConstructionRestored"),True,label+" restoration flag")
+        same(value.get("deferredTransformConstruction"),False,label+" deferred flag")
+
+
+def restored_production_sources():
+    """Require the complete qualified production tree and exact frozen workers."""
+    actual_tree=subprocess.check_output(
+        ["git","-C",str(SOURCE_ROOT),"rev-parse",SHA+":"+RESTORED_PRODUCTION_ROOT],
+        text=True).strip()
+    same(actual_tree,RESTORED_PRODUCTION_TREE,
+         "entire restored production tree equals qualified10144")
+    proof=git_bytes(DEFERRED_PROOF).decode("utf-8")
+    require(proof.count("namespace Frozen\n")==1 and proof.count("\nend Frozen")==1,
+            "exact frozen worker namespace")
+    frozen=proof.split("namespace Frozen\n",1)[1].split("\nend Frozen",1)[0]
+    def worker(text,name):
+        found=re.search(r"(?ms)^def "+re.escape(name)+r"\n.*?(?=^def |\Z)",text)
+        require(found is not None,"missing restored/frozen worker "+name)
+        return found.group(0).rstrip()
+    records=[]
+    for short,oid,name,*_ in DEFERRED_WORKERS:
+        path=DEFERRED_PREFIX+short
+        raw=git_bytes(path)
+        same(git_blob_sha(raw),oid,"entire restored qualified predecessor file "+path)
+        body=worker(raw.decode("utf-8"),name)
+        same(worker(frozen,name),body,"frozen proof worker byte identity "+name)
+        records.append({"path":path,"baselineGitBlob":oid,"targetGitBlob":git_blob_sha(raw),
+            "target":digest(raw),"frozenWorker":digest(body.encode("utf-8"))})
+    return {"baselineSha":DEFERRED_BASELINE,"baselineBlobs":DEFERRED_BLOBS,
+        "productionRoot":RESTORED_PRODUCTION_ROOT,"baselineProductionTree":RESTORED_PRODUCTION_TREE,
+        "targetProductionTree":actual_tree,"wholeFilesMatch":True,
+        "baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
+        "productionChanges":[],"exactBindingMovesOnly":False,"frozenBodiesMatch":True,
+        "workers":records,"proof":digest(git_bytes(DEFERRED_PROOF))}
+
+
 def deferred_production_sources():
     """Reconstruct the entire authenticated predecessor file from each sole move."""
     proof=git_bytes(DEFERRED_PROOF).decode("utf-8")
@@ -1390,11 +1431,15 @@ def deferred_native_audit(e):
     source=e.json("deferred-transform-source-audit.json"); e.identity(source)
     for key,value in {"schema":"psc1-t08-deferred-transform-source-v1",
         "baselineSha":DEFERRED_BASELINE,"baselineBlobs":DEFERRED_BLOBS,
-        "frozenBodiesMatch":True,"exactBindingMovesOnly":True,
+        "frozenBodiesMatch":True,"exactBindingMovesOnly":not RESTORED,
         "fullQualification":False,"performanceQualified":False}.items():
         same(source.get(key),value,"deferred source audit "+key)
-    same(sorted(source["productionChanges"]),sorted(DEFERRED_BLOBS),
-         "exact three production delta paths")
+    if RESTORED:
+        restored_receipt_flags(source,"restored source audit")
+        same(source["productionChanges"],[],"no production delta paths after restoration")
+    else:
+        same(sorted(source["productionChanges"]),sorted(DEFERRED_BLOBS),
+             "exact three production delta paths")
     files=DEFERRED_INPUTS+[WORKFLOW]
     same(source["sourceFiles"],{path:digest(git_bytes(path))["sha256"] for path in files},
          "six exact deferred source audit hashes")
@@ -1403,9 +1448,10 @@ def deferred_native_audit(e):
     for key,value in {"schema":"psc1-t08-deferred-transform-native-receipt-v1",
         "status":"pass","retainedProofs":371,"newProofs":3,"totalProofs":374,
         "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
-        "productionSemanticEquality":True,"deferredTransformConstruction":True,
+        "productionSemanticEquality":True,"deferredTransformConstruction":not RESTORED,
         "fullOrdinaryAdmission":True,"fullKernel":False,"performanceQualified":False}.items():
         same(r.get(key),value,"deferred native receipt "+key)
+    restored_receipt_flags(r,"restored native374 receipt")
     raw=e.raw("deferred-transform-proofs.log")
     names=proof_reports(git_bytes(DEFERRED_PROOF),raw,DEFERRED_MODULE,3)
     same(names,DEFERRED_NAMES,"three fixed worker equality proof names")
@@ -1426,8 +1472,9 @@ def deferred_route_audit(e):
     prov=e.json("provenance.json")
     same(r.get("identity"),prov,"deferred route full provenance"); e.identity(r["identity"])
     for key,value in {"schema":"psc1-t08-deferred-transform-route-receipt-v1","status":"pass",
-        "deferredTransformConstruction":True,"fullKernel":False,"performanceQualified":False}.items():
+        "deferredTransformConstruction":not RESTORED,"fullKernel":False,"performanceQualified":False}.items():
         same(r.get(key),value,"deferred route receipt "+key)
+    restored_receipt_flags(r,"restored route receipt")
     e.check_digest("ordinary-admission-public-receipt.json",r["retainedPublicReceipt"])
     e.check_digest("deferred-transform.log",r["log"])
     e.check_digest("detached/"+DEFERRED_HARNESS,r["harness"])
@@ -1458,9 +1505,10 @@ def retained_native_audit(e):
         "retainedProofs":374,"addedReports":118,"historicalReports":116,
         "newCompanionReports":2,"totalProofs":492,
         "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
-        "fullOrdinaryAdmission":True,"deferredTransformConstruction":True,
+        "fullOrdinaryAdmission":True,"deferredTransformConstruction":not RESTORED,
         "fullKernel":False,"performanceQualified":False}.items():
         same(r.get(key),value,"retained native receipt "+key)
+    restored_receipt_flags(r,"restored native492 receipt")
     records=[]
     for module,count,filename in RETAINED_PROOFS:
         source=git_bytes("psc1/test/"+module+".lean"); raw=e.raw(filename)
@@ -1514,7 +1562,7 @@ def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
-    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained"),"Unknown audit profile")
+    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained","restored"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
             "Exact numeric run and attempt required")
@@ -1532,7 +1580,10 @@ def main():
         require(set(RETAINED_INPUTS) <= set(expected_paths),"ten explicit retained native proof inputs")
     if DEFERRED:
         require(set(DEFERRED_INPUTS) <= set(expected_paths),"five explicit deferred production/proof/harness inputs")
-        REPORT["deferredTransformSources"] = deferred_production_sources()
+        if RESTORED:
+            REPORT["baselineTransformSources"] = restored_production_sources()
+        else:
+            REPORT["deferredTransformSources"] = deferred_production_sources()
     require(len(expected_paths) == SOURCE_INPUT_COUNT and len(set(expected_paths)) == SOURCE_INPUT_COUNT,
             "Expected exact configured source input count")
     frozen_lists = [ast.literal_eval(x) for x in
@@ -1618,7 +1669,8 @@ def main():
             if ADMISSION:
                 result["ordinaryAdmissionQualification"] = admission_native_audit(evidence) if route == "native" else admission_route_audit(evidence)
             if DEFERRED:
-                result["deferredTransformQualification"] = deferred_native_audit(evidence) if route == "native" else deferred_route_audit(evidence)
+                label = "baselineTransformQualification" if RESTORED else "deferredTransformQualification"
+                result[label] = deferred_native_audit(evidence) if route == "native" else deferred_route_audit(evidence)
             if RETAINED and route == "native":
                 result["retainedNativeQualification"] = retained_native_audit(evidence)
             result["status"] = "pass"
@@ -1647,10 +1699,12 @@ def main():
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
             **({"loop":69} if LOOP else {}),
             **({"elimination":116,"privateAdmission":143,"publicRouting":12} if ADMISSION else {}),
-            **({"deferredTransform":23} if DEFERRED else {})},
+            **({("rawTransform" if RESTORED else "deferredTransform"):23} if DEFERRED else {})},
         "constructorFieldsQualified":FIELDS,"singleConstructorAnalysisQualified":ANALYSIS,
         "constructorLoopQualified":LOOP,"profile":PROFILE,
-        "deferredTransformQualified":DEFERRED,"retainedNativeProofsQualified":RETAINED,
+        "deferredTransformQualified":DEFERRED and not RESTORED,"retainedNativeProofsQualified":RETAINED,
+        **({"baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
+            "baselineTransformRestorationQualified":True} if RESTORED else {}),
         **({"independentLeanControls":{"controls":18,"accepted":14,"rejected":4,
                 "safeGenerated":13,"unsafeContract":1}} if ADMISSION else {}),
     }
@@ -1680,7 +1734,9 @@ if __name__ == "__main__":
             "nativeReports":NATIVE_PROOF_TOTAL if REPORT["status"] == "pass" else None,
             "nativeModules":NATIVE_PROOF_MODULES if REPORT["status"] == "pass" else None,
             "profile":PROFILE,
-            **({"deferredTransformQualified":REPORT["status"] == "pass"} if DEFERRED else {}),
+            **({"deferredTransformQualified":REPORT["status"] == "pass" and not RESTORED} if DEFERRED else {}),
+            **({"baselineTransformConstructionRestored":REPORT["status"] == "pass",
+                "baselineTransformRestorationQualified":REPORT["status"] == "pass"} if RESTORED else {}),
             **({"retainedNativeProofsQualified":REPORT["status"] == "pass"} if RETAINED else {}),
             "report":digest(payload.encode()),
             "errors":REPORT["errors"],

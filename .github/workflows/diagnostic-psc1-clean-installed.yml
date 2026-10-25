@@ -40,9 +40,25 @@ jobs:
       - name: Exercise offline local and global CLI with native compiler unavailable
         run: |
           node --input-type=module <<'JS'
-          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {pathToFileURL} from 'node:url';
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import crypto from 'node:crypto';import {pathToFileURL} from 'node:url';
           const tarballs=JSON.parse(fs.readFileSync('tarballs.json')),core=tarballs['proofscript-0.1.0-psc1.3.tgz'];
           const run=(exe,args,options={})=>{const r=spawnSync(exe,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024,...options});assert.equal(r.error,undefined,String(r.error));assert.equal(r.status,0,(r.stdout||'')+(r.stderr||''));return r.stdout;};
+          const patched=[];
+          const fileInventory=d=>{const rows=[];function visit(p,relative=''){for(const e of fs.readdirSync(p,{withFileTypes:true})){const next=path.join(p,e.name),name=relative?relative+'/'+e.name:e.name;if(e.isDirectory())visit(next,name);else{assert.ok(e.isFile());rows.push({path:name,sha256:crypto.createHash('sha256').update(fs.readFileSync(next)).digest('hex')});}}}visit(d);return rows.sort((a,b)=>a.path.localeCompare(b.path));};
+          fs.mkdirSync('repacked');
+          for(const target of ['python','php']){
+           const name='proofscript-backend-'+target+'-0.1.0-psc1.3.tgz',dir=path.resolve('metadata-'+target);fs.mkdirSync(dir);
+           run('tar',['xzf',tarballs[name],'-C',dir]);const stage=path.join(dir,'package'),file=path.join(stage,'package.json');
+           const before=fileInventory(stage),meta=JSON.parse(fs.readFileSync(file)),original=structuredClone(meta);
+           assert.equal(meta.peerDependencies.proofscript,'0.1.0-psc1.3');meta.peerDependenciesMeta={proofscript:{optional:true}};
+           fs.writeFileSync(file,JSON.stringify(meta,null,2)+'\n');
+           const result=JSON.parse(run('npm',['pack',stage,'--pack-destination',path.resolve('repacked'),'--ignore-scripts','--json']));
+           const output=path.resolve('repacked',result[0].filename),check=path.resolve('check-'+target);fs.mkdirSync(check);run('tar',['xzf',output,'-C',check]);
+           const after=fileInventory(path.join(check,'package'));assert.deepEqual(before.filter(r=>r.path!=='package.json'),after.filter(r=>r.path!=='package.json'));
+           assert.deepEqual(JSON.parse(fs.readFileSync(path.join(check,'package/package.json'))),{...original,peerDependenciesMeta:{proofscript:{optional:true}}});
+           patched.push({target,tarball:output,sha256:crypto.createHash('sha256').update(fs.readFileSync(output)).digest('hex'),nativeDescriptorUnchanged:true,nonMetadataInventoryUnchanged:true});
+           tarballs[name]=output;
+          }
           const cases=[];
           for(const mode of ['local','global']){
            const prefix=path.resolve(mode),cache=path.resolve('cache-'+mode);fs.mkdirSync(prefix);
@@ -65,12 +81,14 @@ jobs:
            fs.renameSync(path.join(installed,'native/bin/psc1.disabled'),path.join(installed,'native/bin/psc1'));run(cli,['--identity'],{cwd:prefix});
           }
           assert.equal(fs.existsSync('.lake'),false);assert.equal(fs.existsSync('psc1'),false);
-          const q={schema:'psc1-clean-installed-generated/1',controlCommit:process.env.GITHUB_SHA,status:'passed',inputArtifact:12579329783,coreSha256:'203c7b58ec8e1b3c6aaa0cdaa5ead0aff942a9b4beb7ed1e865f83779ae5e3f0',noRepositoryCheckout:true,noLakeBuildTree:true,offlineLocalAndGlobal:true,matchingOptionalPackagesInstalled:true,optionalEmitterExecution:'covered by exact native full40141923929, not repeated here',nativeCompilerUnavailableDuringGeneratedCases:true,checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',cases};
+          const q={patchedOptionalPeerMetadata:patched,schema:'psc1-clean-installed-generated/1',controlCommit:process.env.GITHUB_SHA,status:'passed',inputArtifact:12579329783,coreSha256:'203c7b58ec8e1b3c6aaa0cdaa5ead0aff942a9b4beb7ed1e865f83779ae5e3f0',noRepositoryCheckout:true,noLakeBuildTree:true,offlineLocalAndGlobal:true,matchingOptionalPackagesInstalled:true,optionalEmitterExecution:'covered by exact native full40141923929, not repeated here',nativeCompilerUnavailableDuringGeneratedCases:true,checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',cases};
           fs.writeFileSync('clean-installed.json',JSON.stringify(q,null,2)+'\n');console.log('PSC1_CLEAN_INSTALLED_GENERATED: '+JSON.stringify(q));
           JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-clean-installed-generated-${{ github.sha }}
-          path: clean-installed.json
+          path: |
+            clean-installed.json
+            repacked/
           retention-days: 90

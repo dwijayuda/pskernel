@@ -203,9 +203,9 @@ def psKernelExprV2TransformWithFuel
         | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"
         | Option.some _ => Except.ok (Prod.mk state source)
   | Nat.succ remaining =>
+      let smaller := psKernelExprV2TransformWithFuel remaining;
       fun (operation : PsKernelExprV2Transform)
         (state : PsKernelExprV2TransformState) (source offset : Nat) =>
-        let smaller := psKernelExprV2TransformWithFuel remaining;
         match psKernelExprV2PagedFind state.arena source with
         | Option.none => Except.error "PSKERNEL_V2_TRANSFORM_BAD_ROOT"
         | Option.some entry =>

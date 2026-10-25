@@ -1,0 +1,1727 @@
+{
+  "schema": "psc1-deferred-transform-adoption-review-v1",
+  "repository": "dwijayuda/pskernel",
+  "sourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+  "runId": 40149637831,
+  "runAttempt": 1,
+  "jobId": 121043396984,
+  "diagnosticCompleted": true,
+  "adoptionApproved": false,
+  "decision": "Restore all three original complete production files before T05 integration. Keep this experiment and its correctness receipts as source-bound historical evidence.",
+  "reason": "Both candidate stuck-projection timings exceed both baseline timings; median time +14.3322%, median RSS +21.3806%. Two repetitions per variant and one high candidate RSS sample limit generalization.",
+  "actualInlineReport": {
+    "schema": "psc1-transform-delay-abba-v1",
+    "sourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+    "baselineSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+    "runId": "40149637831",
+    "runAttempt": "1",
+    "producerReceipts": {
+      "baseline": {
+        "schema": "psc1-transform-delay-producer-v1",
+        "variant": "baseline",
+        "sourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+        "baselineSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+        "kernelSourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+        "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+        "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+        "runId": "40149637831",
+        "runAttempt": "1",
+        "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "tools": {
+          "nodeVersion": "v22.23.3",
+          "typescriptVersion": "Version 7.0.2",
+          "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelSourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+          "kernelSourceTree": "57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff",
+          "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+          "experimentSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+          "workflowPath": ".github/workflows/psc1-pskernel-transform-delay-abba.yml",
+          "workflowSha256": "bbb9bb8afb462c1187be5f08fdf365cad1f66ff2936e9f4d31d3945af5ff4cfb",
+          "driverSha256": "c08cc889892f1db771834454cb87ab239c600ef5a26aabd51170250bd8342f76",
+          "nativeSourceAuditSha256": "446b17e32dc08159b3a2fd3bc23699a339375a320f1dd80e6d5e3604b356057e",
+          "bootstrap": {
+            "sourceGitBlob": "734db05bccdd777f3cb1fa95aa9904e36caa9926",
+            "sourceSha256": "57dd414323fa1c2e88b0e19929012f011032ba795b6c46913ece7d0df3500376",
+            "adapterSha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+            "translatorSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+            "translatorSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+            "replacementCount": 4
+          },
+          "research": {
+            "entry": "packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean",
+            "entryGitBlob": "3349d6d3b453297123095354bf25dcdcc4efa625",
+            "entrySha256": "a58a341335fe13c8200146be0b676f14169b86748824ccdec2315fb15131b5ce",
+            "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+            "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+            "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+            "kernelFile": "research-kernel.mjs",
+            "kernelSha256": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7",
+            "buildLogSha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4",
+            "smokeLogSha256": "04eaa1b37152d26d061486ac5fce40ed4a4b21906e4de6513c329866b074e5ff",
+            "harnessSha256": "9cf5f24aa79b314bb6165fccd9c4df6ca0a0d791493472792da20a97a9cb38d8",
+            "validatesSelfHost": false
+          }
+        },
+        "files": {
+          "kernel.js": "51e0b4397a105a6198f6f5554b416e98d34d71230ed50630626f106fdc5f1375",
+          "kernel.ts": "a2a99f4af68c9817a7d77309e8c86b3d9d71b83f96bc4052b940f507483fb890",
+          "kernel.d.ts": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622",
+          "kernel.js.map": "d13a0df1b84d56f4d75782b132f29c317d4238fb426ea6c3e49e7fcae3be3f83",
+          "bootstrap-manifest.json": "09ca116d4f55ebc4ec01b22e9d26e839509c4bb84bbf975d1d267668d30eadb3",
+          "raw-abi.log": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d",
+          "dag-smoke.log": "f169e7961496ab78f63de22987ba5da3b7613ca7fea6aa988174567f16d4fe59",
+          "paged-smoke.log": "04eaa1b37152d26d061486ac5fce40ed4a4b21906e4de6513c329866b074e5ff",
+          "arena-controls.log": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f",
+          "native-receipt.json": "e16e8b3518e57723149c0a121b2eb43c28e50513c84b9da268fa2449e84073bd",
+          "native-source-audit.json": "446b17e32dc08159b3a2fd3bc23699a339375a320f1dd80e6d5e3604b356057e",
+          "native-proofs.log": "d4149b5e52dd64256bfc68acb407fe110a436dbcfccd4faa72d26d0aa170cc4c",
+          "compiler-receipt.json": "0c852d2948bf0310823bade83253a391977a10a7184d466a7b5245c1e0499b3b",
+          "authentic-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+          "canonical-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+          "generated-build.log": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175",
+          "producer-tools.json": "473bbfe50342b81dc2f2bd3dd4b316dc7e7457bb39da32720ea3c04168933151",
+          "bootstrap-shared.mjs": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+          "research-kernel.mjs": "88d5c61dc9c36a6f779226e6ca911ce0fcb5fbfa8a165e187871d6212a1fb1c7",
+          "research-build.log": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+        },
+        "fullQualification": false,
+        "performanceQualified": false
+      },
+      "candidate": {
+        "schema": "psc1-transform-delay-producer-v1",
+        "variant": "candidate",
+        "sourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+        "baselineSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+        "kernelSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+        "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+        "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+        "runId": "40149637831",
+        "runAttempt": "1",
+        "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "tools": {
+          "nodeVersion": "v22.23.3",
+          "typescriptVersion": "Version 7.0.2",
+          "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "kernelSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+          "kernelSourceTree": "aa634d87ef51856bf0aaf68363836d2fb9cf215a",
+          "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+          "experimentSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+          "workflowPath": ".github/workflows/psc1-pskernel-transform-delay-abba.yml",
+          "workflowSha256": "bbb9bb8afb462c1187be5f08fdf365cad1f66ff2936e9f4d31d3945af5ff4cfb",
+          "driverSha256": "c08cc889892f1db771834454cb87ab239c600ef5a26aabd51170250bd8342f76",
+          "nativeSourceAuditSha256": "446b17e32dc08159b3a2fd3bc23699a339375a320f1dd80e6d5e3604b356057e",
+          "bootstrap": {
+            "sourceGitBlob": "734db05bccdd777f3cb1fa95aa9904e36caa9926",
+            "sourceSha256": "57dd414323fa1c2e88b0e19929012f011032ba795b6c46913ece7d0df3500376",
+            "adapterSha256": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+            "translatorSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+            "translatorSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+            "replacementCount": 4
+          },
+          "research": {
+            "entry": "packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean",
+            "entryGitBlob": "3349d6d3b453297123095354bf25dcdcc4efa625",
+            "entrySha256": "a58a341335fe13c8200146be0b676f14169b86748824ccdec2315fb15131b5ce",
+            "sourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+            "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+            "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+            "kernelFile": "research-kernel.mjs",
+            "kernelSha256": "8433c272c6a5931bb24ce75734fb6520fb32920554c828fec26310f4ea20ce41",
+            "buildLogSha256": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4",
+            "smokeLogSha256": "79fa64bef6644279612aa6b655da7d3db0b42bff1bc29a49f485b5d634a50018",
+            "harnessSha256": "9cf5f24aa79b314bb6165fccd9c4df6ca0a0d791493472792da20a97a9cb38d8",
+            "validatesSelfHost": false
+          }
+        },
+        "files": {
+          "kernel.js": "ed50af664a1ffa93712dc120f1283ea7110c375a8e7cede7bc98c50affa6862e",
+          "kernel.ts": "942b0c5fcba5ec779f5e01243f4ffa96b064d2d4cbc0b09c7cda9bc094669673",
+          "kernel.d.ts": "210527ed5bbe768150385f685fa6f185cc9b049ab010e38efeb109eceae63622",
+          "kernel.js.map": "10a6776e4400d5dca9b149182a270b31ba24a48230d7c8e35c25e3e7fd3d6916",
+          "bootstrap-manifest.json": "d103881745754f2386233b39dfbddfd834a5a93e31988b3ebbf8e059054912de",
+          "raw-abi.log": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d",
+          "dag-smoke.log": "a6a0691f70bc7af4d3e500eeb0d0476ba178cd36e06e8767c9e04fe861718eeb",
+          "paged-smoke.log": "79fa64bef6644279612aa6b655da7d3db0b42bff1bc29a49f485b5d634a50018",
+          "arena-controls.log": "ce47b6e4f2c037da6f07c1a456c1b7e8d518559f1a987381cda6c9ce830e9c4f",
+          "native-receipt.json": "e16e8b3518e57723149c0a121b2eb43c28e50513c84b9da268fa2449e84073bd",
+          "native-source-audit.json": "446b17e32dc08159b3a2fd3bc23699a339375a320f1dd80e6d5e3604b356057e",
+          "native-proofs.log": "d4149b5e52dd64256bfc68acb407fe110a436dbcfccd4faa72d26d0aa170cc4c",
+          "compiler-receipt.json": "0c852d2948bf0310823bade83253a391977a10a7184d466a7b5245c1e0499b3b",
+          "authentic-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+          "canonical-source.log": "6cb481c6d7f47856e30f841ceeaacb3bfb19240c7ded7533df67af53305417a9",
+          "generated-build.log": "c781febf39acfbf928b9bdd4884bd47a000c758e1880234c34c4dcbd69fe4175",
+          "producer-tools.json": "4811672c40f14fc59bac4f3aad00e60eaeab5e05fb387176e7de3e58dc200834",
+          "bootstrap-shared.mjs": "447ba5da45765883417d9c1910cf44e2a654708864545b1a74bf0144056b04b8",
+          "research-kernel.mjs": "8433c272c6a5931bb24ce75734fb6520fb32920554c828fec26310f4ea20ce41",
+          "research-build.log": "1cbdefd3ff12042593b97be199685b4b661933bbe6e02a934f3504271d7cecf4"
+        },
+        "fullQualification": false,
+        "performanceQualified": false
+      }
+    },
+    "archiveSha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
+    "targetLean": {
+      "version": "4.35.0",
+      "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "driverSha256": "c08cc889892f1db771834454cb87ab239c600ef5a26aabd51170250bd8342f76",
+    "comparisonDriverSha256": "490c510b6509bd775dc52539224a573a267f83e9cd0cabe4bec85626baeb9c9a",
+    "oracleSha256": "5deb39b9245b05305837cb1a79826c26e7ab05028c7bc489308170eab672f26e",
+    "replaySha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821",
+    "sequence": [
+      "A",
+      "B",
+      "B",
+      "A"
+    ],
+    "freshProcessEachCase": true,
+    "kernelFuel": 4096,
+    "hostWallSeconds": 60,
+    "nodeOldSpaceMiB": 2048,
+    "runtimePathEmpty": true,
+    "nodeVersion": "v22.23.3",
+    "nodeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+    "controls": [
+      {
+        "expected": "accepted",
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 1.283129530999986,
+        "log": "accepted.official.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      {
+        "expected": "rejected",
+        "verdict": "rejected",
+        "reason": "official_kernel_verdict",
+        "returncode": 1,
+        "elapsed_seconds": 0.42853971200000274,
+        "log": "rejected.official.txt",
+        "output_sha256": "5f266a28e689668b606e65a790da249eb32716972c059c5bf06c575353c2d20b"
+      }
+    ],
+    "records": [
+      {
+        "round": 0,
+        "variant": "baseline",
+        "index": 0,
+        "label": "good",
+        "name": "perf/repeated-subproblem.ndjson",
+        "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+          "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.43431271899999047,
+          "log": "case-0.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 214,
+          "metadataCounts": {
+            "ctorInfo": 5,
+            "recInfo": 3,
+            "inductInfo": 3,
+            "defnInfo": 1,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false,
+          "elapsed_seconds": 1.9503550280000184,
+          "returncode": 0,
+          "stdout": "case-000-stdout.txt",
+          "stderr": "case-000-stderr.txt",
+          "time_log": "case-000-time.txt",
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1586.997587
+          },
+          "peak_rss_kib": 287560
+        },
+        "classification": "matched_acceptance"
+      },
+      {
+        "round": 0,
+        "variant": "baseline",
+        "index": 1,
+        "label": "good",
+        "name": "perf/church-numerals.ndjson",
+        "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+          "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.4657316759999901,
+          "log": "case-1.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "resource_exhausted",
+          "stage": "kernel-admission",
+          "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 20.579660808,
+          "returncode": 0,
+          "stdout": "case-001-stdout.txt",
+          "stderr": "case-001-stderr.txt",
+          "time_log": "case-001-time.txt",
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 136.433052
+          },
+          "peak_rss_kib": 1061700
+        },
+        "classification": "pskernel_resource_exhausted"
+      },
+      {
+        "round": 0,
+        "variant": "baseline",
+        "index": 2,
+        "label": "good",
+        "name": "init-prelude.ndjson",
+        "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+          "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.7074171980000017,
+          "log": "case-2.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "elapsed_seconds": 60.149588807000015,
+          "returncode": -9,
+          "stdout": "case-002-stdout.txt",
+          "stderr": "case-002-stderr.txt",
+          "time_log": "case-002-time.txt",
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 2430.911171
+          },
+          "verdict": "timeout",
+          "stage": "host-wall-time",
+          "timeout_seconds": 60
+        },
+        "classification": "pskernel_timeout"
+      },
+      {
+        "round": 0,
+        "variant": "baseline",
+        "index": 3,
+        "label": "bad",
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+          "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "rejected",
+          "reason": "official_kernel_verdict",
+          "returncode": 1,
+          "elapsed_seconds": 0.4553628710000055,
+          "log": "case-3.official.txt",
+          "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "verdict": "rejected",
+          "stage": "kernel-admission",
+          "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 30.89258593599999,
+          "returncode": 0,
+          "stdout": "case-003-stdout.txt",
+          "stderr": "case-003-stderr.txt",
+          "time_log": "case-003-time.txt",
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 371.409187
+          },
+          "peak_rss_kib": 471492
+        },
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "round": 1,
+        "variant": "candidate",
+        "index": 0,
+        "label": "good",
+        "name": "perf/repeated-subproblem.ndjson",
+        "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+          "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.43431271899999047,
+          "log": "case-0.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 214,
+          "metadataCounts": {
+            "ctorInfo": 5,
+            "recInfo": 3,
+            "inductInfo": 3,
+            "defnInfo": 1,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false,
+          "elapsed_seconds": 1.7363992559999986,
+          "returncode": 0,
+          "stdout": "case-000-stdout.txt",
+          "stderr": "case-000-stderr.txt",
+          "time_log": "case-000-time.txt",
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1616.869378
+          },
+          "peak_rss_kib": 293436
+        },
+        "classification": "matched_acceptance"
+      },
+      {
+        "round": 1,
+        "variant": "candidate",
+        "index": 1,
+        "label": "good",
+        "name": "perf/church-numerals.ndjson",
+        "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+          "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.4657316759999901,
+          "log": "case-1.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "resource_exhausted",
+          "stage": "kernel-admission",
+          "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 20.273428869000014,
+          "returncode": 0,
+          "stdout": "case-001-stdout.txt",
+          "stderr": "case-001-stderr.txt",
+          "time_log": "case-001-time.txt",
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 135.454261
+          },
+          "peak_rss_kib": 1154320
+        },
+        "classification": "pskernel_resource_exhausted"
+      },
+      {
+        "round": 1,
+        "variant": "candidate",
+        "index": 2,
+        "label": "good",
+        "name": "init-prelude.ndjson",
+        "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+          "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.7074171980000017,
+          "log": "case-2.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "elapsed_seconds": 60.12650839600002,
+          "returncode": -9,
+          "stdout": "case-002-stdout.txt",
+          "stderr": "case-002-stderr.txt",
+          "time_log": "case-002-time.txt",
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 2408.15649
+          },
+          "verdict": "timeout",
+          "stage": "host-wall-time",
+          "timeout_seconds": 60
+        },
+        "classification": "pskernel_timeout"
+      },
+      {
+        "round": 1,
+        "variant": "candidate",
+        "index": 3,
+        "label": "bad",
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+          "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "rejected",
+          "reason": "official_kernel_verdict",
+          "returncode": 1,
+          "elapsed_seconds": 0.4553628710000055,
+          "log": "case-3.official.txt",
+          "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "verdict": "rejected",
+          "stage": "kernel-admission",
+          "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 35.38524661700001,
+          "returncode": 0,
+          "stdout": "case-003-stdout.txt",
+          "stderr": "case-003-stderr.txt",
+          "time_log": "case-003-time.txt",
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 393.172003
+          },
+          "peak_rss_kib": 662696
+        },
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "round": 2,
+        "variant": "candidate",
+        "index": 0,
+        "label": "good",
+        "name": "perf/repeated-subproblem.ndjson",
+        "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+          "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.43431271899999047,
+          "log": "case-0.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 214,
+          "metadataCounts": {
+            "ctorInfo": 5,
+            "recInfo": 3,
+            "inductInfo": 3,
+            "defnInfo": 1,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false,
+          "elapsed_seconds": 1.754312604000006,
+          "returncode": 0,
+          "stdout": "case-000-stdout.txt",
+          "stderr": "case-000-stderr.txt",
+          "time_log": "case-000-time.txt",
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1633.633986
+          },
+          "peak_rss_kib": 292064
+        },
+        "classification": "matched_acceptance"
+      },
+      {
+        "round": 2,
+        "variant": "candidate",
+        "index": 1,
+        "label": "good",
+        "name": "perf/church-numerals.ndjson",
+        "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+          "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.4657316759999901,
+          "log": "case-1.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "resource_exhausted",
+          "stage": "kernel-admission",
+          "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 21.194766180000045,
+          "returncode": 0,
+          "stdout": "case-001-stdout.txt",
+          "stderr": "case-001-stderr.txt",
+          "time_log": "case-001-time.txt",
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 137.587744
+          },
+          "peak_rss_kib": 1131192
+        },
+        "classification": "pskernel_resource_exhausted"
+      },
+      {
+        "round": 2,
+        "variant": "candidate",
+        "index": 2,
+        "label": "good",
+        "name": "init-prelude.ndjson",
+        "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+          "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.7074171980000017,
+          "log": "case-2.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "elapsed_seconds": 60.160653999999965,
+          "returncode": -9,
+          "stdout": "case-002-stdout.txt",
+          "stderr": "case-002-stderr.txt",
+          "time_log": "case-002-time.txt",
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 2506.010056
+          },
+          "verdict": "timeout",
+          "stage": "host-wall-time",
+          "timeout_seconds": 60
+        },
+        "classification": "pskernel_timeout"
+      },
+      {
+        "round": 2,
+        "variant": "candidate",
+        "index": 3,
+        "label": "bad",
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+          "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "rejected",
+          "reason": "official_kernel_verdict",
+          "returncode": 1,
+          "elapsed_seconds": 0.4553628710000055,
+          "log": "case-3.official.txt",
+          "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "verdict": "rejected",
+          "stage": "kernel-admission",
+          "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 35.54402150499999,
+          "returncode": 0,
+          "stdout": "case-003-stdout.txt",
+          "stderr": "case-003-stderr.txt",
+          "time_log": "case-003-time.txt",
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 385.340062
+          },
+          "peak_rss_kib": 428860
+        },
+        "classification": "matched_kernel_rejection"
+      },
+      {
+        "round": 3,
+        "variant": "baseline",
+        "index": 0,
+        "label": "good",
+        "name": "perf/repeated-subproblem.ndjson",
+        "bodySha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+          "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.43431271899999047,
+          "log": "case-0.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 214,
+          "metadataCounts": {
+            "ctorInfo": 5,
+            "recInfo": 3,
+            "inductInfo": 3,
+            "defnInfo": 1,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false,
+          "elapsed_seconds": 1.7646903780000116,
+          "returncode": 0,
+          "stdout": "case-000-stdout.txt",
+          "stderr": "case-000-stderr.txt",
+          "time_log": "case-000-time.txt",
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1639.11096
+          },
+          "peak_rss_kib": 290048
+        },
+        "classification": "matched_acceptance"
+      },
+      {
+        "round": 3,
+        "variant": "baseline",
+        "index": 1,
+        "label": "good",
+        "name": "perf/church-numerals.ndjson",
+        "bodySha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+          "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.4657316759999901,
+          "log": "case-1.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "resource_exhausted",
+          "stage": "kernel-admission",
+          "reason": "{\"resource\":{},\"message\":\"kernel reduction budget exhausted\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 21.214292408999995,
+          "returncode": 0,
+          "stdout": "case-001-stdout.txt",
+          "stderr": "case-001-stderr.txt",
+          "time_log": "case-001-time.txt",
+          "progress_snapshots": 5,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 135.514347
+          },
+          "peak_rss_kib": 1101292
+        },
+        "classification": "pskernel_resource_exhausted"
+      },
+      {
+        "round": 3,
+        "variant": "baseline",
+        "index": 2,
+        "label": "good",
+        "name": "init-prelude.ndjson",
+        "bodySha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+          "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "accepted",
+          "reason": "official_kernel_verdict",
+          "returncode": 0,
+          "elapsed_seconds": 0.7074171980000017,
+          "log": "case-2.official.txt",
+          "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+        },
+        "observed": {
+          "elapsed_seconds": 60.154007987,
+          "returncode": -9,
+          "stdout": "case-002-stdout.txt",
+          "stderr": "case-002-stderr.txt",
+          "time_log": "case-002-time.txt",
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 2610.159218
+          },
+          "verdict": "timeout",
+          "stage": "host-wall-time",
+          "timeout_seconds": 60
+        },
+        "classification": "pskernel_timeout"
+      },
+      {
+        "round": 3,
+        "variant": "baseline",
+        "index": 3,
+        "label": "bad",
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "bodySha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adaptation": {
+          "method": "header_only_compatibility_NOT_native_435_reexport",
+          "original_lean": {
+            "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+            "version": "4.29.1"
+          },
+          "target_lean": {
+            "version": "4.35.0",
+            "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+          "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+          "body_bytes_identical": true
+        },
+        "reference": {
+          "verdict": "rejected",
+          "reason": "official_kernel_verdict",
+          "returncode": 1,
+          "elapsed_seconds": 0.4553628710000055,
+          "log": "case-3.official.txt",
+          "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+        },
+        "observed": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "verdict": "rejected",
+          "stage": "kernel-admission",
+          "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "elapsed_seconds": 31.14528209399998,
+          "returncode": 0,
+          "stdout": "case-003-stdout.txt",
+          "stderr": "case-003-stderr.txt",
+          "time_log": "case-003-time.txt",
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 361.346672
+          },
+          "peak_rss_kib": 427792
+        },
+        "classification": "matched_kernel_rejection"
+      }
+    ],
+    "summaries": [
+      {
+        "name": "perf/repeated-subproblem.ndjson",
+        "verdicts": {
+          "baseline": [
+            "accepted",
+            "accepted"
+          ],
+          "candidate": [
+            "accepted",
+            "accepted"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            1.9503550280000184,
+            1.7646903780000116
+          ],
+          "candidate": [
+            1.7363992559999986,
+            1.754312604000006
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            287560,
+            290048
+          ],
+          "candidate": [
+            293436,
+            292064
+          ]
+        },
+        "uncensoredPair": true,
+        "candidateMedianTimeRatio": 0.9396148575633254,
+        "candidateMedianRssRatio": 1.0136632456614174,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "perf/church-numerals.ndjson",
+        "verdicts": {
+          "baseline": [
+            "resource_exhausted",
+            "resource_exhausted"
+          ],
+          "candidate": [
+            "resource_exhausted",
+            "resource_exhausted"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            20.579660808,
+            21.214292408999995
+          ],
+          "candidate": [
+            20.273428869000014,
+            21.194766180000045
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            1061700,
+            1101292
+          ],
+          "candidate": [
+            1154320,
+            1131192
+          ]
+        },
+        "uncensoredPair": true,
+        "candidateMedianTimeRatio": 0.9922056148575237,
+        "candidateMedianRssRatio": 1.0566437601248642,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "init-prelude.ndjson",
+        "verdicts": {
+          "baseline": [
+            "timeout",
+            "timeout"
+          ],
+          "candidate": [
+            "timeout",
+            "timeout"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            60.149588807000015,
+            60.154007987
+          ],
+          "candidate": [
+            60.12650839600002,
+            60.160653999999965
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [],
+          "candidate": []
+        },
+        "uncensoredPair": false,
+        "candidateMedianTimeRatio": null,
+        "candidateMedianRssRatio": null,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "verdicts": {
+          "baseline": [
+            "rejected",
+            "rejected"
+          ],
+          "candidate": [
+            "rejected",
+            "rejected"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            30.89258593599999,
+            31.14528209399998
+          ],
+          "candidate": [
+            35.38524661700001,
+            35.54402150499999
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            471492,
+            427792
+          ],
+          "candidate": [
+            662696,
+            428860
+          ]
+        },
+        "uncensoredPair": true,
+        "candidateMedianTimeRatio": 1.1433221413685648,
+        "candidateMedianRssRatio": 1.2138056498280854,
+        "timeRegressionOver10Percent": true,
+        "rssRegressionOver15Percent": true
+      }
+    ],
+    "diagnosticsComplete": true,
+    "errors": [],
+    "fullArenaQualification": false,
+    "performanceQualified": false
+  },
+  "artifacts": [
+    {
+      "id": 12583226297,
+      "name": "psc1-transform-delay-abba-attempt-1",
+      "size_in_bytes": 3240966,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583226297",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583226297/zip",
+      "expired": false,
+      "created_at": "2026-10-25T01:45:54Z",
+      "expires_at": "2026-11-24T01:45:53Z",
+      "updated_at": "2026-10-25T01:45:54Z",
+      "digest": "sha256:2b1c7e48d8d23a89c761172367b2b2297adff0ec61c3976d6a0b9a70361a0068",
+      "workflow_run": {
+        "id": 40149637831,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t08-deferred-transform-20261025",
+        "head_sha": "80005bb250a7324772db76d51684d23fbf0fe6ed"
+      }
+    },
+    {
+      "id": 12583130502,
+      "name": "psc1-transform-delay-baseline-attempt-1",
+      "size_in_bytes": 1268313,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583130502",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583130502/zip",
+      "expired": false,
+      "created_at": "2026-10-25T01:37:22Z",
+      "expires_at": "2026-11-24T01:37:21Z",
+      "updated_at": "2026-10-25T01:37:22Z",
+      "digest": "sha256:2dee97cf4896f8c8a7de84724cadd92107599f1216aa14b6c7e0f29f57353316",
+      "workflow_run": {
+        "id": 40149637831,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t08-deferred-transform-20261025",
+        "head_sha": "80005bb250a7324772db76d51684d23fbf0fe6ed"
+      }
+    },
+    {
+      "id": 12582975645,
+      "name": "psc1-transform-delay-candidate-attempt-1",
+      "size_in_bytes": 1268367,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12582975645",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12582975645/zip",
+      "expired": false,
+      "created_at": "2026-10-25T01:36:52Z",
+      "expires_at": "2026-11-24T01:36:51Z",
+      "updated_at": "2026-10-25T01:36:52Z",
+      "digest": "sha256:ceca80fb5e9425b996370fe6e8b737b108521002c029e419cf26bb23b88747ff",
+      "workflow_run": {
+        "id": 40149637831,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t08-deferred-transform-20261025",
+        "head_sha": "80005bb250a7324772db76d51684d23fbf0fe6ed"
+      }
+    },
+    {
+      "id": 12581763079,
+      "name": "psc1-transform-delay-native-preflight-attempt-1",
+      "size_in_bytes": 4578,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581763079",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581763079/zip",
+      "expired": false,
+      "created_at": "2026-10-25T01:12:39Z",
+      "expires_at": "2026-11-24T01:12:39Z",
+      "updated_at": "2026-10-25T01:12:39Z",
+      "digest": "sha256:48b3814ea56576fc3555952644d53003e9d93ada174f2c19d990b466162a3f96",
+      "workflow_run": {
+        "id": 40149637831,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t08-deferred-transform-20261025",
+        "head_sha": "80005bb250a7324772db76d51684d23fbf0fe6ed"
+      }
+    },
+    {
+      "id": 12581708293,
+      "name": "psc1-transform-delay-compiler-attempt-1",
+      "size_in_bytes": 2420207,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581708293",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581708293/zip",
+      "expired": false,
+      "created_at": "2026-10-25T01:15:09Z",
+      "expires_at": "2026-11-24T01:15:08Z",
+      "updated_at": "2026-10-25T01:15:09Z",
+      "digest": "sha256:c2d97da78b427c0f675c72568badb2897f041dabf1de82d145ada4cb9467c361",
+      "workflow_run": {
+        "id": 40149637831,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t08-deferred-transform-20261025",
+        "head_sha": "80005bb250a7324772db76d51684d23fbf0fe6ed"
+      }
+    }
+  ],
+  "verification": {
+    "actual16RecordsAndSeparatelyPrintedObservations": true,
+    "originalBodiesAndOfficialReferences": true,
+    "completedSemanticPayloadsEqual": true,
+    "commonRunner20FileProducerDigestChecks": true,
+    "apiAndActualUploadDownloadZipDigestsMatch": true,
+    "independentFinalZipAudit": false
+  },
+  "fullArenaQualification": false,
+  "performanceQualified": false,
+  "obligations": {
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN"
+  }
+}

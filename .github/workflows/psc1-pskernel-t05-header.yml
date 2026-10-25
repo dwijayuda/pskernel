@@ -1,4 +1,4 @@
-name: PSC1 complete retained ownership and transform native-first qualification
+name: PSC1 baseline-restored ordinary admission and retained ownership qualification
 'on':
   workflow_dispatch: null
   push:
@@ -87,7 +87,7 @@ jobs:
         (out/'source-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
         print('PSC1_T05_SOURCE_INVENTORY '+json.dumps(report,separators=(',',':')))
         PY
-    - name: Authenticate exact transform binding moves and frozen universal references
+    - name: Authenticate restored baseline transforms and frozen universal references
       shell: bash
       run: |
         set -euo pipefail
@@ -102,26 +102,12 @@ jobs:
             "TransformSupport.lean": ("7957a3aaf87f440b6fb09c2ee98eb574aeab6c72", "psKernelExprV2TransformCountWithFuel"),
             "Lift.lean": ("50a63d2729088039a3b01f75eda5c6e83f91e036", "psKernelExprV2PagedLiftWithFuel"),
         }
-        moves = {
-            "Transform.lean": (
-                "      let smaller := psKernelExprV2TransformWithFuel remaining;\n",
-                "        (state : PsKernelExprV2TransformState) (source offset : Nat) =>\n",
-                "        let smaller := psKernelExprV2TransformWithFuel remaining;\n"),
-            "TransformSupport.lean": (
-                "      let smaller := psKernelExprV2TransformCountWithFuel remaining;\n",
-                "          (memo : List PsKernelExprV2TransformCountMemo) (root : Nat) =>\n",
-                "        let smaller := psKernelExprV2TransformCountWithFuel remaining;\n"),
-            "Lift.lean": (
-                "      let smaller :\n          PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n          Except String (PsKernelExprV2PagedLiftState × Nat) :=\n        psKernelExprV2PagedLiftWithFuel remaining;\n",
-                "            fun (amount : Nat) =>\n",
-                "              let smaller :\n                  PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n                  Except String (PsKernelExprV2PagedLiftState × Nat) :=\n                psKernelExprV2PagedLiftWithFuel remaining;\n"),
-        }
         changed = subprocess.check_output([
             "git", "diff", "--name-only", base, source, "--",
             "psc1/packages/pskernel-core/src"], text=True).splitlines()
-        assert set(changed) == {prefix + path for path in pinned}, changed
+        assert changed == [], "restored baseline must have no production changes: " + repr(changed)
         proof_path = pathlib.Path("psc1/test/PsKernelDeferredTransformProofs.lean")
-        proof = proof_path.read_text()
+        proof = proof_path.read_bytes().decode("utf-8")
         assert proof.count("namespace Frozen\n") == 1
         assert proof.count("\nend Frozen") == 1
         frozen = proof.split("namespace Frozen\n", 1)[1].split("\nend Frozen", 1)[0]
@@ -134,12 +120,12 @@ jobs:
             path = prefix + short
             blob = subprocess.check_output(["git", "rev-parse", base + ":" + path], text=True).strip()
             assert blob == expected_blob, (path, blob)
-            before = subprocess.check_output(["git", "show", base + ":" + path], text=True)
-            assert body(before, name) == body(frozen, name), "frozen body mismatch: " + name
-            remove, anchor, insert = moves[short]
-            assert before.count(remove) == before.count(anchor) == 1, short
-            expected = before.replace(remove, "").replace(anchor, anchor + insert)
-            assert pathlib.Path(path).read_text() == expected, "extra production change: " + short
+            before = subprocess.check_output(["git", "show", base + ":" + path])
+            current = pathlib.Path(path).read_bytes()
+            actual_blob = hashlib.sha1(b"blob " + str(len(current)).encode() + b"\0" + current).hexdigest()
+            assert actual_blob == expected_blob, "restored production blob mismatch: " + short
+            assert current == before, "complete baseline production bytes required: " + short
+            assert body(current.decode("utf-8"), name) == body(frozen, name), "frozen body mismatch: " + name
             baseline_blobs[path] = blob
         paths = [prefix + short for short in pinned] + [
             str(proof_path),
@@ -152,7 +138,8 @@ jobs:
             "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
             "job": os.environ["GITHUB_JOB"], "route": os.environ["PSC1_T05_ROUTE"],
             "baselineBlobs": baseline_blobs, "frozenBodiesMatch": True,
-            "exactBindingMovesOnly": True, "productionChanges": changed,
+            "exactBindingMovesOnly": False, "productionChanges": changed,
+            "baselineTransformConstructionRestored": True, "deferredTransformConstruction": False,
             "sourceFiles": {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths},
             "fullQualification": False, "performanceQualified": False,
         }
@@ -905,7 +892,7 @@ jobs:
         (root/'ordinary-admission-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T05_ORDINARY_ADMISSION_NATIVE_PROOFS: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
-    - name: Check three universal deferred-transform equalities and seal the 374-report extension
+    - name: Check three universal current-versus-frozen equalities and seal the 374-report extension
       working-directory: psc1
       shell: bash
       run: |
@@ -936,8 +923,11 @@ jobs:
             raise RuntimeError('Deferred transform source authentication identity mismatch')
         if source['baselineSha']!='10144e2f9e8d223b5dcde275bd1f48d25df113b3':
             raise RuntimeError('Deferred transform qualified baseline changed')
-        if source['frozenBodiesMatch'] is not True or source['exactBindingMovesOnly'] is not True:
-            raise RuntimeError('Exact source and frozen-body authentication required')
+        if (source['frozenBodiesMatch'] is not True or source['exactBindingMovesOnly'] is not False
+            or source['productionChanges'] != []
+            or source['baselineTransformConstructionRestored'] is not True
+            or source['deferredTransformConstruction'] is not False):
+            raise RuntimeError('Complete baseline restoration and frozen-body authentication required')
         inventory=root/'source-inventory.json'
         if retained['sourceInventory']!=digest(inventory):
             raise RuntimeError('Retained371 source inventory changed')
@@ -973,7 +963,7 @@ jobs:
                  'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
                  'retainedAdmissionReceipt':digest(parent),'sourceAudit':digest(source_audit),
                  'sourceInventory':digest(inventory),'productionSemanticEquality':True,
-                 'deferredTransformConstruction':True,'fullOrdinaryAdmission':True,
+                 'deferredTransformConstruction':False,'baselineTransformConstructionRestored':True,'fullOrdinaryAdmission':True,
                  'fullKernel':False,'performanceQualified':False}
         (root/'deferred-transform-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T08_DEFERRED_TRANSFORM_NATIVE: PASS '+json.dumps(receipt,separators=(',',':')))
@@ -1001,6 +991,10 @@ jobs:
             raise RuntimeError('Retained374 native inventory changed')
         if retained['orderedUniqueReports'] is not True or retained['allowedStandardAxiomsOnly'] is not True:
             raise RuntimeError('Retained374 report verification required')
+        if (retained['productionSemanticEquality'] is not True
+            or retained['baselineTransformConstructionRestored'] is not True
+            or retained['deferredTransformConstruction'] is not False):
+            raise RuntimeError('Retained374 baseline restoration verification required')
         specs=[{"module":"PsKernelNatFuelProofs","count":5,"log":"retained-PsKernelNatFuelProofs.log"},{"module":"PsKernelExprEqualityProofs","count":4,"log":"retained-PsKernelExprEqualityProofs.log"},{"module":"PsKernelExprV2AdmissionGuardProofs","count":18,"log":"retained-PsKernelExprV2AdmissionGuardProofs.log"},{"module":"PsKernelExprV2RecursorProofs","count":23,"log":"retained-PsKernelExprV2RecursorProofs.log"},{"module":"PsKernelExprV2RecursorMajorProofs","count":10,"log":"retained-PsKernelExprV2RecursorMajorProofs.log"},{"module":"PsKernelExprV2RecursorKProofs","count":6,"log":"retained-PsKernelExprV2RecursorKProofs.log"},{"module":"PsKernelNameWorkerProofs","count":8,"log":"retained-PsKernelNameWorkerProofs.log"},{"module":"PsKernelExprV2QuotOwnerProofs","count":21,"log":"retained-PsKernelExprV2QuotOwnerProofs.log"},{"module":"PsKernelExprV2WhnfABIProofs","count":2,"log":"retained-PsKernelExprV2WhnfABIProofs.log"},{"module":"PsKernelExprV2OwnedStateProofs","count":21,"log":"retained-PsKernelExprV2OwnedStateProofs.log"}]
         records=[];names_all=[];statuses=[]
         allowed={'propext','Classical.choice','Quot.sound'}
@@ -1046,7 +1040,7 @@ jobs:
                  'totalProofs':492,'proofs':records,'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
                  'retainedDeferredReceipt':digest(parent),'sourceInventory':digest(inventory),
                  'proofStatuses':digest(status_file),'fullOrdinaryAdmission':True,
-                 'deferredTransformConstruction':True,'fullKernel':False,'performanceQualified':False}
+                 'deferredTransformConstruction':False,'baselineTransformConstructionRestored':True,'fullKernel':False,'performanceQualified':False}
         (root/'retained-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_RETAINED_NATIVE_PROOFS: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
@@ -2016,7 +2010,7 @@ jobs:
                  'result':result,'log':digest(log),'harness':digest(harness),
                  'measurement':measurement,'peakRssKiB':int(timed[1]),'wallSeconds':float(timed[2]),
                  'logs':{p.name:digest(p) for p in sorted(root.glob('*.log'))},
-                 'deferredTransformConstruction':True,'fullKernel':False,'performanceQualified':False}
+                 'deferredTransformConstruction':False,'baselineTransformConstructionRestored':True,'fullKernel':False,'performanceQualified':False}
         (root/'deferred-transform-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T08_DEFERRED_TRANSFORM_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY

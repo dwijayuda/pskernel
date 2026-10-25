@@ -167,9 +167,9 @@ def psKernelExprV2TransformCountWithFuel
           (_memo : List PsKernelExprV2TransformCountMemo) (_root : Nat) =>
         Except.error "PSKERNEL_V2_TRANSFORM_COUNT_FUEL"
   | Nat.succ remaining =>
+      let smaller := psKernelExprV2TransformCountWithFuel remaining;
       fun (arena : PsKernelExprV2PagedArena)
           (memo : List PsKernelExprV2TransformCountMemo) (root : Nat) =>
-        let smaller := psKernelExprV2TransformCountWithFuel remaining;
         match psKernelExprV2TransformCountFind memo root with
         | Option.some count => Except.ok (Prod.mk memo count)
         | Option.none =>

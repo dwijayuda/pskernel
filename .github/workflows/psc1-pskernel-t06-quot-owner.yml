@@ -1,0 +1,75 @@
+name: PSC1 quotient cross-session owner native preflight
+'on':
+  workflow_dispatch:
+  push:
+    branches:
+    - work/psc1-pskernel-t06-quot-owner-20261026
+    paths:
+    - psc1/**
+    - .github/workflows/psc1-pskernel-t06-quot-owner.yml
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Authenticate source and preserve snapshots
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/t06-quot-owner/source"
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(cat psc1/lean-toolchain)" = leanprover/lean4:v4.35.0
+        (cd psc1 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+        git diff --name-only 70e28ef2275dcd83ad79294cbb7262c640a096ab HEAD -- psc1/packages/pskernel-core/src > "$RUNNER_TEMP/t06-quot-owner/production-delta.txt"
+        git archive HEAD psc1/packages/pskernel-core/src psc1/test psc1/kernel-lakefile.lean psc1/lean-toolchain .github/workflows/psc1-pskernel-t06-quot-owner.yml | tar -x -C "$RUNNER_TEMP/t06-quot-owner/source"
+        (cd psc1 && node check-psc1-source.mjs --all-portable) 2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/portable.log"
+    - name: Build complete native production closure and model
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean build PsKernelCore PsKernelOrdinaryHeaderProofs \
+          2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/build.log"
+        lake -f kernel-lakefile.lean env lean test/PsKernelQuotSessionOwnerProofs.lean \
+          2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/proofs.log"
+        python3 - <<'PY'
+        import os, pathlib, re
+        text = (pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-quot-owner/proofs.log').read_text()
+        reports = re.findall(r"'(PsKernelQuotSessionOwnerProofs\.[^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)", text)
+        assert len(reports) == 10, reports
+        assert len({name for name, _ in reports}) == 10
+        for name, axioms in reports:
+            assert set(x.strip() for x in axioms.split(',') if x.strip()) <= {'propext','Classical.choice','Quot.sound'}, (name, axioms)
+        print('PSC1_QUOT_ADMISSION_PROOFS_PASS reports=10')
+        PY
+    - name: Actual native direct and retained official parity controls
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelQuotSessionOwnerRegression.lean \
+          2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/regression.log"
+        grep -qx PSC1_QUOT_SESSION_OWNER_PASS "$RUNNER_TEMP/t06-quot-owner/regression.log"
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2QuotOwnerRegression.lean \
+          2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/retained-quot-owner.log"
+        grep -q '^PSC1_V2_QUOT_OWNER_PASS ' "$RUNNER_TEMP/t06-quot-owner/retained-quot-owner.log"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-t06-quot-owner-native-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/t06-quot-owner/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

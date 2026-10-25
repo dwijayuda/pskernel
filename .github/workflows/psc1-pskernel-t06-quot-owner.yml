@@ -42,6 +42,8 @@ jobs:
         set -euo pipefail
         lake -f kernel-lakefile.lean build PsKernelCore PsKernelOrdinaryHeaderProofs \
           2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/build.log"
+        lake -f kernel-lakefile.lean env lean test/PsKernelQuotAdmissionProofs.lean \
+          2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/bootstrap-proofs.log"
         lake -f kernel-lakefile.lean env lean test/PsKernelQuotSessionOwnerProofs.lean \
           2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/proofs.log"
         python3 - <<'PY'
@@ -50,15 +52,22 @@ jobs:
         reports = re.findall(r"'(PsKernelQuotSessionOwnerProofs\.[^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)", text)
         assert len(reports) == 10, reports
         assert len({name for name, _ in reports}) == 10
-        for name, axioms in reports:
+        bootstrap = (pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-quot-owner/bootstrap-proofs.log').read_text()
+        bootstrap_reports = re.findall(r"'(PsKernelQuotAdmissionProofs\.[^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)", bootstrap)
+        assert len(bootstrap_reports) == 9 and len({name for name,_ in bootstrap_reports}) == 9
+        assert not any(x in text+bootstrap for x in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])
+        for name, axioms in reports+bootstrap_reports:
             assert set(x.strip() for x in axioms.split(',') if x.strip()) <= {'propext','Classical.choice','Quot.sound'}, (name, axioms)
-        print('PSC1_QUOT_ADMISSION_PROOFS_PASS reports=10')
+        print('PSC1_QUOT_SESSION_OWNERS_PROOFS_PASS reports=19 bootstrap=9 session=10')
         PY
     - name: Actual native direct and retained official parity controls
       working-directory: psc1
       shell: bash
       run: |
         set -euo pipefail
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelQuotAdmissionRegression.lean \
+          2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/bootstrap-regression.log"
+        grep -qx PSC1_QUOT_ADMISSION_PASS "$RUNNER_TEMP/t06-quot-owner/bootstrap-regression.log"
         lake -f kernel-lakefile.lean env lean --run test/PsKernelQuotSessionOwnerRegression.lean \
           2>&1 | tee "$RUNNER_TEMP/t06-quot-owner/regression.log"
         grep -qx PSC1_QUOT_SESSION_OWNER_PASS "$RUNNER_TEMP/t06-quot-owner/regression.log"

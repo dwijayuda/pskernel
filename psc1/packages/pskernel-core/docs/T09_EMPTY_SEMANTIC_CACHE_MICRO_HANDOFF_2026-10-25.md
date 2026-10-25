@@ -1,3 +1,7 @@
+## 2026-10-25 — independent333-member partial archive audit completed
+
+Run40162335707/a1, source0e8a231f7eefbc085659142da84738f32fc866e7, job121076318277 passed. Actual ordinal32 process-status.json confirms a60-second baseline indexed/hit host timeout, with no stdout/stderr and no candidate attempt. The audit verifies32completed observations,33statuses, every actual333ZIP member and nested producer/compiler/native archives. Its report is125254bytes, SHA256df82a862e616563374186090800a87d9d882119c8899dc91285a3cf4ce6acfcd. This remains an incomplete32/56measurement protocol; no measurements were rerun and no optimization/performance qualification was established. See the updated source-bound evidence JSON and the current full499/ABBA handoff. The following text records the earlier pre-audit checkpoint.
+
 # Current execution result: INCOMPLETE
 
 [Run40161243172](https://github.com/dwijayuda/pskernel/actions/runs/40161243172), job121073067656, passed the independent136-member producer audit and then completed observations0-31. Observation32, indexed/hit baseline, ended as an incomplete bounded process. Its command-status file must distinguish timeout from a nonzero exit; do not infer that distinction from the generic exception. No complete56 aggregate was produced.

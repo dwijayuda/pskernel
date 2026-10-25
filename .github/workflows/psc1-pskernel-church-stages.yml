@@ -85,6 +85,16 @@ jobs:
           2>&1 | tee "$RUNNER_TEMP/church-stages/trace/native-build.log"
         python3 scripts/pskernel-church-trace-ci.py execute --out "$RUNNER_TEMP/church-stages/trace" \
           --native "$PWD/.lake/build/bin/psc1_kernel_church_stages"
+    - name: Test generic unary congruence prototype natively without adoption
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-church-congruence-ci.py instrument --out "$RUNNER_TEMP/church-stages/candidate"
+        lake -f .church-stage-lakefile.lean build psc1_kernel_church_stages \
+          2>&1 | tee "$RUNNER_TEMP/church-stages/candidate/native-build.log"
+        python3 scripts/pskernel-church-congruence-ci.py execute --out "$RUNNER_TEMP/church-stages/candidate" \
+          --native "$PWD/.lake/build/bin/psc1_kernel_church_stages"
     - uses: actions/upload-artifact@v4
       if: always()
       with:

@@ -1,34 +1,32 @@
 import Ps.KernelCore.API.DagQuotAdmission
 import PsKernelOrdinaryOccurrenceProofs
 
-/- Local structural correspondence and atomic installation refinement.
-   ArenaModel is the existing internal owning-arena invariant. The separately
-   qualified replay/decoder bridge establishes it at the public boundary.
-   These theorems are not global checker soundness or backend preservation. -/
+/- Local all-pattern structural correspondence over the actual owning-arena
+   model. The qualified replay/decoder bridge establishes that model separately.
+   This proves neither global checker soundness nor backend preservation. -/
 namespace PsKernelQuotAdmissionProofs
 open PsKernelOrdinaryOccurrenceProofs
 
-inductive BootstrapShape : PsKernelExpr -> Prop where
-  | bvar (index : Nat) : BootstrapShape (.bvar index)
-  | sort (level : PsKernelLevel) : BootstrapShape (.sort level)
-  | const (name : PsKernelName) (levels : List PsKernelLevel) :
-      BootstrapShape (.const name levels)
-  | app {fn arg : PsKernelExpr} :
-      BootstrapShape fn -> BootstrapShape arg -> BootstrapShape (.app fn arg)
-  | forallE (name : PsKernelName) (info : PsKernelBinderInfo)
-      {domain body : PsKernelExpr} :
-      BootstrapShape domain -> BootstrapShape body ->
-      BootstrapShape (.forallE name domain body info)
-
 theorem match_shape_correspondence
     (arena : PsKernelExprV2PagedArena) (meaning : Nat -> PsKernelExpr)
-    (model : ArenaModel arena meaning)
-    (expected : PsKernelExpr) (supported : BootstrapShape expected) :
+    (model : ArenaModel arena meaning) (expected : PsKernelExpr) :
     forall root, validId arena root ->
       psKernelDagQuotMatchShape expected arena root =
         Option.some (psKernelExprEq (meaning root) expected) := by
-  induction supported with
+  induction expected with
   | bvar index =>
+      intro root valid
+      rcases valid with ⟨entry, found⟩
+      have shape := model.shape root entry found
+      cases node : entry.node <;>
+        simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
+  | fvar name =>
+      intro root valid
+      rcases valid with ⟨entry, found⟩
+      have shape := model.shape root entry found
+      cases node : entry.node <;>
+        simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
+  | mvar name =>
       intro root valid
       rcases valid with ⟨entry, found⟩
       have shape := model.shape root entry found
@@ -46,78 +44,124 @@ theorem match_shape_correspondence
       have shape := model.shape root entry found
       cases node : entry.node <;>
         simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
-  | @app fn arg _ _ ihFn ihArg =>
+  | lit value =>
+      intro root valid
+      rcases valid with ⟨entry, found⟩
+      have shape := model.shape root entry found
+      cases node : entry.node <;>
+        simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
+  | app fn arg ihFn ihArg =>
       intro root valid
       rcases valid with ⟨entry, found⟩
       have shape := model.shape root entry found
       have children := model.children root entry found
       cases node : entry.node
       case app actualFn actualArg =>
-        have fnValid : validId arena actualFn :=
+        have leftValid : validId arena actualFn :=
           children actualFn (by simp [childIds, node, psKernelExprV2TransformChildren])
-        have argValid : validId arena actualArg :=
+        have rightValid : validId arena actualArg :=
           children actualArg (by simp [childIds, node, psKernelExprV2TransformChildren])
-        have first := ihFn actualFn fnValid
-        have second := ihArg actualArg argValid
+        have first := ihFn actualFn leftValid
+        have second := ihArg actualArg rightValid
         simp only [psKernelDagQuotMatchShape, found, node, first, second,
           shape, nodeExpr, psKernelExprEq]
         cases psKernelExprEq (meaning actualFn) fn <;> rfl
       all_goals
         simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
-  | @forallE name info domain body _ _ ihDomain ihBody =>
+  | lam name domain body info ihDomain ihBody =>
+      intro root valid
+      rcases valid with ⟨entry, found⟩
+      have shape := model.shape root entry found
+      have children := model.children root entry found
+      cases node : entry.node
+      case lam actualName actualDomain actualBody actualInfo =>
+        have leftValid : validId arena actualDomain :=
+          children actualDomain (by simp [childIds, node, psKernelExprV2TransformChildren])
+        have rightValid : validId arena actualBody :=
+          children actualBody (by simp [childIds, node, psKernelExprV2TransformChildren])
+        have first := ihDomain actualDomain leftValid
+        have second := ihBody actualBody rightValid
+        simp only [psKernelDagQuotMatchShape, found, node, first, second,
+          shape, nodeExpr, psKernelExprEq]
+        cases psKernelExprEq (meaning actualDomain) domain <;> rfl
+      all_goals
+        simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
+  | forallE name domain body info ihDomain ihBody =>
       intro root valid
       rcases valid with ⟨entry, found⟩
       have shape := model.shape root entry found
       have children := model.children root entry found
       cases node : entry.node
       case forallE actualName actualDomain actualBody actualInfo =>
-        have domainValid : validId arena actualDomain :=
+        have leftValid : validId arena actualDomain :=
           children actualDomain (by simp [childIds, node, psKernelExprV2TransformChildren])
-        have bodyValid : validId arena actualBody :=
+        have rightValid : validId arena actualBody :=
           children actualBody (by simp [childIds, node, psKernelExprV2TransformChildren])
-        have first := ihDomain actualDomain domainValid
-        have second := ihBody actualBody bodyValid
+        have first := ihDomain actualDomain leftValid
+        have second := ihBody actualBody rightValid
         simp only [psKernelDagQuotMatchShape, found, node, first, second,
           shape, nodeExpr, psKernelExprEq]
         cases psKernelExprEq (meaning actualDomain) domain <;> rfl
       all_goals
         simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
-
-theorem expected_eq_supported (universeName : PsKernelName) :
-    BootstrapShape (psKernelExpectedEqType universeName) := by
-  have same : psKernelNameEq (psKernelQuotInternalName "eq.alpha")
-      (psKernelQuotInternalName "eq.alpha") = true := by decide
-  simp [psKernelExpectedEqType, psKernelCloseOpenBinders, psKernelMkArrow,
-    psKernelExprAbstractFVars, psKernelExprAbstractFVarsAt,
-    psKernelExprAbstractFVarsAtChanged, psKernelExprAbstractFVarsAtChangedWithFuel,
-    psKernelExprNodeCount, psKernelNameLastIndex, psKernelNameLastIndexWorker,
-    psKernelNameListLength, psKernelApplyArgs, same]
-  repeat constructor
-
-theorem expected_refl_supported (universeName : PsKernelName) :
-    BootstrapShape (psKernelExpectedEqReflType universeName) := by
-  have aa : psKernelNameEq (psKernelQuotInternalName "eqRefl.alpha")
-      (psKernelQuotInternalName "eqRefl.alpha") = true := by decide
-  have av : psKernelNameEq (psKernelQuotInternalName "eqRefl.alpha")
-      (psKernelQuotInternalName "eqRefl.a") = false := by decide
-  have va : psKernelNameEq (psKernelQuotInternalName "eqRefl.a")
-      (psKernelQuotInternalName "eqRefl.alpha") = false := by decide
-  have vv : psKernelNameEq (psKernelQuotInternalName "eqRefl.a")
-      (psKernelQuotInternalName "eqRefl.a") = true := by decide
-  simp [psKernelExpectedEqReflType, psKernelCloseOpenBinders, psKernelMkArrow,
-    psKernelExprAbstractFVars, psKernelExprAbstractFVarsAt,
-    psKernelExprAbstractFVarsAtChanged, psKernelExprAbstractFVarsAtChangedWithFuel,
-    psKernelExprNodeCount, psKernelNameLastIndex, psKernelNameLastIndexWorker,
-    psKernelNameListLength, psKernelApplyArgs, aa, av, va, vv]
-  repeat constructor
-
+  | letE name type value body nondep ihType ihValue ihBody =>
+      intro root valid
+      rcases valid with ⟨entry, found⟩
+      have shape := model.shape root entry found
+      have children := model.children root entry found
+      cases node : entry.node
+      case letE actualName actualType actualValue actualBody actualNondep =>
+        have typeValid : validId arena actualType :=
+          children actualType (by simp [childIds, node, psKernelExprV2TransformChildren])
+        have valueValid : validId arena actualValue :=
+          children actualValue (by simp [childIds, node, psKernelExprV2TransformChildren])
+        have bodyValid : validId arena actualBody :=
+          children actualBody (by simp [childIds, node, psKernelExprV2TransformChildren])
+        have ht := ihType actualType typeValid
+        have hv := ihValue actualValue valueValid
+        have hb := ihBody actualBody bodyValid
+        simp only [psKernelDagQuotMatchShape, found, node, ht, hv, hb,
+          shape, nodeExpr, psKernelExprEq]
+        cases psKernelExprEq (meaning actualType) type <;>
+          cases psKernelExprEq (meaning actualValue) value <;>
+          cases psKernelExprEq (meaning actualBody) body <;> rfl
+      all_goals
+        simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
+  | mdata tag body ihBody =>
+      intro root valid
+      rcases valid with ⟨entry, found⟩
+      have shape := model.shape root entry found
+      have children := model.children root entry found
+      cases node : entry.node
+      case mdata actualTag actualBody =>
+        have bodyValid : validId arena actualBody :=
+          children actualBody (by simp [childIds, node, psKernelExprV2TransformChildren])
+        have next := ihBody actualBody bodyValid
+        simp only [psKernelDagQuotMatchShape, found, node, next, shape, nodeExpr, psKernelExprEq]
+        cases Nat.beq actualTag tag <;> rfl
+      all_goals
+        simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
+  | proj name index body ihBody =>
+      intro root valid
+      rcases valid with ⟨entry, found⟩
+      have shape := model.shape root entry found
+      have children := model.children root entry found
+      cases node : entry.node
+      case proj actualName actualIndex actualBody =>
+        have bodyValid : validId arena actualBody :=
+          children actualBody (by simp [childIds, node, psKernelExprV2TransformChildren])
+        have next := ihBody actualBody bodyValid
+        simp only [psKernelDagQuotMatchShape, found, node, next, shape, nodeExpr, psKernelExprEq]
+        cases psKernelNameEq actualName name <;> cases Nat.beq actualIndex index <;> rfl
+      all_goals
+        simp [psKernelDagQuotMatchShape, found, shape, node, nodeExpr, psKernelExprEq]
 theorem eq_shape_correspondence
     (arena : PsKernelExprV2PagedArena) (meaning : Nat -> PsKernelExpr)
     (model : ArenaModel arena meaning) (root : Nat) (valid : validId arena root)
     (universeName : PsKernelName) :
     psKernelDagQuotMatchShape (psKernelExpectedEqType universeName) arena root =
       Option.some (psKernelExprEq (meaning root) (psKernelExpectedEqType universeName)) :=
-  match_shape_correspondence arena meaning model _ (expected_eq_supported universeName) root valid
+  match_shape_correspondence arena meaning model _ root valid
 
 theorem refl_shape_correspondence
     (arena : PsKernelExprV2PagedArena) (meaning : Nat -> PsKernelExpr)
@@ -125,7 +169,7 @@ theorem refl_shape_correspondence
     (universeName : PsKernelName) :
     psKernelDagQuotMatchShape (psKernelExpectedEqReflType universeName) arena root =
       Option.some (psKernelExprEq (meaning root) (psKernelExpectedEqReflType universeName)) :=
-  match_shape_correspondence arena meaning model _ (expected_refl_supported universeName) root valid
+  match_shape_correspondence arena meaning model _ root valid
 
 theorem initialized_returns_exact_environment
     (environment : PsKernelEnvironment) (arena : PsKernelExprV2PagedArena)
@@ -267,14 +311,29 @@ theorem shared_install_preserves_frozen_admission (environment : PsKernelEnviron
     psKernelAddQuot environment = frozenAddQuot environment := by
   rfl
 
+theorem missing_owner_declines
+    (arena : PsKernelExprV2PagedArena) (declarations : List PsKernelExprV2DeclarationRef)
+    (info : PsKernelConstantInfo) (expected : PsKernelExpr)
+    (missing : psKernelExprV2DeclarationRefFind declarations (psKernelConstantInfoName info) = none) :
+    psKernelDagQuotMatchInfo arena declarations info expected = none := by
+  simp only [psKernelDagQuotMatchInfo, missing]
+
+theorem wrong_owner_declines
+    (arena : PsKernelExprV2PagedArena) (declarations : List PsKernelExprV2DeclarationRef)
+    (info : PsKernelConstantInfo) (expected : PsKernelExpr) (owner : PsKernelExprV2DeclarationRef)
+    (found : psKernelExprV2DeclarationRefFind declarations (psKernelConstantInfoName info) = some owner)
+    (wrong : psKernelExprV2DeclarationRefMatches owner info = false) :
+    psKernelDagQuotMatchInfo arena declarations info expected = none := by
+  simp only [psKernelDagQuotMatchInfo, found, wrong, Bool.false_eq_true, ite_false]
+
 end PsKernelQuotAdmissionProofs
 
 #print axioms PsKernelQuotAdmissionProofs.match_shape_correspondence
-#print axioms PsKernelQuotAdmissionProofs.expected_eq_supported
-#print axioms PsKernelQuotAdmissionProofs.expected_refl_supported
 #print axioms PsKernelQuotAdmissionProofs.eq_shape_correspondence
 #print axioms PsKernelQuotAdmissionProofs.refl_shape_correspondence
 #print axioms PsKernelQuotAdmissionProofs.initialized_returns_exact_environment
 #print axioms PsKernelQuotAdmissionProofs.declined_check_does_not_install
 #print axioms PsKernelQuotAdmissionProofs.failed_check_does_not_install
 #print axioms PsKernelQuotAdmissionProofs.shared_install_preserves_frozen_admission
+#print axioms PsKernelQuotAdmissionProofs.missing_owner_declines
+#print axioms PsKernelQuotAdmissionProofs.wrong_owner_declines

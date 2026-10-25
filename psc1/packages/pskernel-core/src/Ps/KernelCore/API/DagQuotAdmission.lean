@@ -1,10 +1,11 @@
 import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.Admission.Quot.Admission
 
-/- Match only the fixed Eq bootstrap patterns. Recursion follows the bounded
-   expected pattern; input types are read by ID without expanded-tree traversal.
-   Binder names/info are erased exactly as psKernelExprEq. Metadata is not erased.
-   Missing owner/child declines. This is an internal canonical-owner worker. -/
+/- Structural comparison against a fixed bootstrap pattern. Recursion follows
+   expected syntax; the input is read only by IDs in its owning canonical arena.
+   All constructor fields follow psKernelExprEq, including binder erasure and
+   metadata sensitivity. No hashes or input expansion decide equality. Quot uses
+   only the two bounded ExpectedEq patterns. Missing children decline. -/
 def psKernelDagQuotMatchShape
     (expected : PsKernelExpr) :
     PsKernelExprV2PagedArena -> Nat -> Option Bool :=
@@ -16,6 +17,22 @@ def psKernelDagQuotMatchShape
         | Option.some entry =>
             match entry.node with
             | PsKernelExprV2Node.bvar actual => Option.some (Nat.beq actual index)
+            | _ => Option.some false
+  | PsKernelExpr.fvar name =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.fvar actual => Option.some (psKernelNameEq actual name)
+            | _ => Option.some false
+  | PsKernelExpr.mvar name =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.mvar actual => Option.some (psKernelNameEq actual name)
             | _ => Option.some false
   | PsKernelExpr.sort level =>
       fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
@@ -33,6 +50,14 @@ def psKernelDagQuotMatchShape
             match entry.node with
             | PsKernelExprV2Node.const actual actualLevels => Option.some (if psKernelNameEq actual name then psKernelLevelListEq actualLevels levels else false)
             | _ => Option.some false
+  | PsKernelExpr.lit value =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.lit actual => Option.some (psKernelLiteralEq actual value)
+            | _ => Option.some false
   | PsKernelExpr.app fn arg =>
       fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
         match psKernelExprV2PagedFind arena root with
@@ -44,6 +69,19 @@ def psKernelDagQuotMatchShape
                 | Option.none => Option.none
                 | Option.some equal =>
                     if equal then psKernelDagQuotMatchShape arg arena actualArg
+                    else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.lam _ domain body _ =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.lam _ actualDomain actualBody _ =>
+                match psKernelDagQuotMatchShape domain arena actualDomain with
+                | Option.none => Option.none
+                | Option.some equal =>
+                    if equal then psKernelDagQuotMatchShape body arena actualBody
                     else Option.some false
             | _ => Option.some false
   | PsKernelExpr.forallE _ domain body _ =>
@@ -59,8 +97,51 @@ def psKernelDagQuotMatchShape
                     if equal then psKernelDagQuotMatchShape body arena actualBody
                     else Option.some false
             | _ => Option.some false
-  | _ =>
-      fun (_arena : PsKernelExprV2PagedArena) (_root : Nat) => Option.some false
+  | PsKernelExpr.letE _ type value body nondep =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.letE _ actualType actualValue actualBody actualNondep =>
+                match psKernelDagQuotMatchShape type arena actualType with
+                | Option.none => Option.none
+                | Option.some typeEqual =>
+                    if typeEqual then
+                      match psKernelDagQuotMatchShape value arena actualValue with
+                      | Option.none => Option.none
+                      | Option.some valueEqual =>
+                          if valueEqual then
+                            match psKernelDagQuotMatchShape body arena actualBody with
+                            | Option.none => Option.none
+                            | Option.some bodyEqual =>
+                                if bodyEqual then Option.some (psKernelBoolEq actualNondep nondep)
+                                else Option.some false
+                          else Option.some false
+                    else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.mdata tag body =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.mdata actualTag actualBody =>
+                if Nat.beq actualTag tag then psKernelDagQuotMatchShape body arena actualBody
+                else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.proj name index body =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.proj actualName actualIndex actualBody =>
+                if psKernelNameEq actualName name then
+                  if Nat.beq actualIndex index then psKernelDagQuotMatchShape body arena actualBody
+                  else Option.some false
+                else Option.some false
+            | _ => Option.some false
 
 /- Only private references derived in this immutable batch/session are used.
    Live environment kind and universe arity remain authoritative. -/

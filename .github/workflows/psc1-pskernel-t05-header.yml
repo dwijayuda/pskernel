@@ -211,7 +211,16 @@ jobs:
                     'source inventory byte binding: '+name)
             require((out/'sources'/name).read_bytes()==raw,'archived source byte binding: '+name)
             if name in previous_lists[0] and name not in [WORKFLOW,RETAINED]:
-                if name in ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean','psc1/kernel-lakefile.lean']:
+                if name in ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean']:
+                    owners = json.loads((out/'quot-owner/source.json').read_text())
+                    require(owners['sourceSha']==identity['sourceSha'] and str(owners['runId'])==identity['runId']
+                            and owners['baseSource']=='79031362b401f85d3c7f324cc3aa7dbf91c1bf0e'
+                            and owners['allOtherPublicDagAndMetadataCodeUnchanged'] is True,
+                            'same-source exact checked session-owner migration')
+                    pin, = [item for item in owners['sourceSnapshots'] if item['path']==name]
+                    require(digest(raw)=={'bytes':pin['bytes'],'sha256':pin['sha256']},
+                            'actual owning-session source snapshot')
+                elif name in ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean','psc1/kernel-lakefile.lean']:
                     quot = json.loads((out/'quot/source.json').read_text())
                     require(quot['sourceSha']==identity['sourceSha'] and str(quot['runId'])==identity['runId']
                             and quot['baseSource']=='79031362b401f85d3c7f324cc3aa7dbf91c1bf0e'

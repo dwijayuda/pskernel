@@ -207,6 +207,7 @@ lean_lib PsHost where
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
     `Ps.Host.SourceSnapshot,
+    `Ps.Host.SourceOwnership,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,
     `Ps.Host.LeanChecked,
@@ -646,3 +647,8 @@ lean_exe psc1_lossless_tests where
 lean_exe psc1_character_diagnostic_tests where
   srcDir := "test"
   root := `CharacterDiagnosticTests
+
+-- Read-only semantic provenance; not a portable compiler source dependency.
+lean_exe psc1_source_ownership where
+  srcDir := "scripts"
+  root := `SourceOwnershipMain

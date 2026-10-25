@@ -1,0 +1,29 @@
+name: PSC1 Rust target consumer diagnostic
+on:
+  push:
+    branches: [feat/psc1-portable-checked-publication-20261026]
+    paths: [psc1/scripts/prepare-rust-target-consumer.mjs, 'psc1/scripts/rust-api-inspector/**', .github/workflows/psc1-rust-target-consumer.yml]
+permissions:
+  contents: read
+jobs:
+  consumer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - run: rustup toolchain install 1.90.0 --profile minimal
+      - run: node scripts/prepare-rust-target-consumer.mjs
+        env:
+          PSC1_RUST_CONSUMER_DIAGNOSTIC: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-rust-target-consumer-${{ github.sha }}
+          path: psc1/dist/rust-target-consumer/
+          retention-days: 90

@@ -3,7 +3,7 @@
   "date": "2026-10-25",
   "sourceControl": "8966261900c7d019553fcef5b04bc9e90593c901",
   "sourceClosure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
-  "status": "native-full-and-G1-qualified-long-selfhost-pending",
+  "status": "Rust-G1-G2-G3-and-exact-fixed-point-qualified",
   "measuredPriorProfile": {
     "run": 40138165186,
     "job": 121004032945,
@@ -86,14 +86,92 @@
     "run": 40141718481,
     "job": 121014751809,
     "profile": "correctness-3600s",
-    "state": "in-progress",
+    "state": "completed-success",
     "g1Ms": 240000,
     "g2g3Ms": 3600000,
     "jobMinutes": 190,
     "stepMinutes": 170,
     "performanceProfile": "performance-240s",
     "performanceQualification": "not-qualified",
-    "memoryStackFuel": "unchanged"
+    "memoryStackFuel": "unchanged",
+    "summary": {
+      "target": "rust",
+      "profile": {
+        "name": "correctness-3600s",
+        "g1TimeoutMs": 240000,
+        "corpusTimeoutMs": 240000,
+        "toolTimeoutMs": 240000,
+        "selfCompileTimeoutMs": 3600000,
+        "correctnessAndPerformanceSeparate": true
+      },
+      "correctnessQualification": "qualified",
+      "performanceQualification": "not-run-in-this-profile",
+      "status": "passed",
+      "sourceModules": 120,
+      "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "generations": [
+        1,
+        2,
+        3
+      ],
+      "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+      "attempts": [
+        {
+          "generation": 2,
+          "producer": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+          "startedAt": "2026-10-24T23:19:42.412Z",
+          "status": "passed",
+          "completedAt": "2026-10-24T23:58:41.332Z"
+        },
+        {
+          "generation": 3,
+          "producer": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+          "startedAt": "2026-10-24T23:58:41.374Z",
+          "status": "passed",
+          "completedAt": "2026-10-25T00:38:00.970Z"
+        }
+      ]
+    },
+    "metrics": [
+      {
+        "role": "generated-compiler",
+        "target": "rust",
+        "id": "G2-self",
+        "serviceSha256": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+        "requestSha256": "9b52f7d7cad553d96abb4432e6d3906ac92d8e2e2639f229364d168abcbfb3ae",
+        "timeoutMs": 3600000,
+        "timeoutPolicy": "g2g3-correctness-3600s",
+        "maxRssKiB": 1197260,
+        "peakTreeRssKiB": 1225916,
+        "sampledCpuSeconds": 2254.48,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 2139961,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 1197260
+      },
+      {
+        "role": "generated-compiler",
+        "target": "rust",
+        "id": "G3-self",
+        "serviceSha256": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+        "requestSha256": "ef8c56a368042b61c549ffbb5775056e923f3729d30d4acf4b76087af20f6283",
+        "timeoutMs": 3600000,
+        "timeoutPolicy": "g2g3-correctness-3600s",
+        "maxRssKiB": 1197296,
+        "peakTreeRssKiB": 1182824,
+        "sampledCpuSeconds": 2277.3,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 2160767,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 1197296
+      }
+    ],
+    "artifact": 12580184355,
+    "digest": "sha256:c294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0"
   },
   "preservedFullGate": {
     "reviewCommit": "941d2730baaafcac8af73f91bdae91ce68210230",
@@ -171,12 +249,12 @@
   },
   "promotedCommit": "daa735017e34ee94da79d747c363237b4adbc4ef",
   "currentFullGate": {
-    "reviewCommit": "daa735017e34ee94da79d747c363237b4adbc4ef",
-    "testedCommit": "ec90dc1280b395de4d64532517e6ddca727ee07e",
-    "equalTree": "b58461d31dd53d217c1353b4373d4a87bf5e9d65",
-    "run": 40141923929,
-    "job": 121017656399,
-    "finalGate": 121021324743,
+    "reviewCommit": "14cb3e30503d0c5e6b1e007598b0bde7ad77befb",
+    "testedCommit": "348746f32e7fe04b3402eb22030054375eb9ebcd",
+    "equalTree": "c57b723e3809ec591920b326dece50b0903d4aa4",
+    "run": 40145805549,
+    "job": 121029022566,
+    "finalGate": 121034253918,
     "conclusion": "success",
     "readiness": {
       "counts": {
@@ -187,8 +265,42 @@
       },
       "releaseReady": true
     },
-    "artifact": 12579757745,
-    "digest": "sha256:98ce6b18472cf9d8d994fd16773d959a18ab3f9989a165ac0c8c84db2258dcf6"
+    "globalProviderCases": [
+      {
+        "syntax": "lean",
+        "target": "python",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "275bec1728faeb34e53f77adece2a252d0a15be2e6add78884d76a336d0a623a"
+      },
+      {
+        "syntax": "lean",
+        "target": "php",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "d63428bc023255b5fc79580ed60c8061143a706f25735d87151922b5cf85fa24"
+      },
+      {
+        "syntax": "ps",
+        "target": "python",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "275bec1728faeb34e53f77adece2a252d0a15be2e6add78884d76a336d0a623a"
+      },
+      {
+        "syntax": "ps",
+        "target": "php",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "d63428bc023255b5fc79580ed60c8061143a706f25735d87151922b5cf85fa24"
+      }
+    ],
+    "artifact": 12581184979,
+    "digest": "sha256:2bf7d0fadd0bacd45c1b645ad9f15ba400a67236d9720c55f21391470e12fda3"
   },
   "sourceTreeComparison": [
     {
@@ -920,5 +1032,160 @@
       "qualification": false,
       "scope": "Rust generated lexer stage on real compiler source files and malformed literals; not whole G2 or a fixed point"
     }
+  },
+  "immutableReadback": {
+    "run": 40147896149,
+    "job": 121033075668,
+    "artifact": 12580414636,
+    "digest": "sha256:e3ea66b3c9ac19d3139c1cfd8b0a572798a2156d90e7f9f635b4600073186889",
+    "receipt": {
+      "schema": "psc1-rust-hour-immutable-readback/1",
+      "controlCommit": "91896ad1c6e6c048d159b59a710c38723afe3d61",
+      "producerRun": 40141718481,
+      "producerRequest": "2d27f1428e6a53a6de5006f950fc94f2d471b214",
+      "sourceClosure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "generations": [
+        {
+          "generation": 1,
+          "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+          "sourceSha256": "5cc6017a178bb902f7cba7b4631efb7ff87b0fd4ffaa8009452b2866ef3a5bea",
+          "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
+          "originalIrSha256": "cbed7390ddadcb9adb2694aa72d7e67a0bbc010520750f2353161661d91a8815",
+          "specializedIrSha256": "6a78d47394e1955a1e588250eb6ad344a21dc9f763486f273d95755123f22b54",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ],
+          "artifactSha256": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+          "observations": "40 retained cross-target cases plus9 envelope refusals",
+          "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+          "rustOptimizationLevel": 0,
+          "rustDependencyOptimizationLevel": 3
+        },
+        {
+          "generation": 2,
+          "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+          "sourceSha256": "5cc6017a178bb902f7cba7b4631efb7ff87b0fd4ffaa8009452b2866ef3a5bea",
+          "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
+          "originalIrSha256": "cbed7390ddadcb9adb2694aa72d7e67a0bbc010520750f2353161661d91a8815",
+          "specializedIrSha256": "6a78d47394e1955a1e588250eb6ad344a21dc9f763486f273d95755123f22b54",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ],
+          "artifactSha256": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+          "observations": "40 retained cross-target cases plus9 envelope refusals",
+          "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+          "rustOptimizationLevel": 0,
+          "rustDependencyOptimizationLevel": 3
+        },
+        {
+          "generation": 3,
+          "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+          "sourceSha256": "5cc6017a178bb902f7cba7b4631efb7ff87b0fd4ffaa8009452b2866ef3a5bea",
+          "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
+          "originalIrSha256": "cbed7390ddadcb9adb2694aa72d7e67a0bbc010520750f2353161661d91a8815",
+          "specializedIrSha256": "6a78d47394e1955a1e588250eb6ad344a21dc9f763486f273d95755123f22b54",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ],
+          "artifactSha256": "33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a",
+          "observations": "40 retained cross-target cases plus9 envelope refusals",
+          "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+          "rustOptimizationLevel": 0,
+          "rustDependencyOptimizationLevel": 3
+        }
+      ],
+      "metrics": [
+        {
+          "role": "generated-compiler",
+          "target": "rust",
+          "id": "G2-self",
+          "serviceSha256": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+          "requestSha256": "9b52f7d7cad553d96abb4432e6d3906ac92d8e2e2639f229364d168abcbfb3ae",
+          "timeoutMs": 3600000,
+          "timeoutPolicy": "g2g3-correctness-3600s",
+          "maxRssKiB": 1197260,
+          "peakTreeRssKiB": 1225916,
+          "sampledCpuSeconds": 2254.48,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 2139961,
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "serviceMaxRssKiB": 1197260
+        },
+        {
+          "role": "generated-compiler",
+          "target": "rust",
+          "id": "G3-self",
+          "serviceSha256": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+          "requestSha256": "ef8c56a368042b61c549ffbb5775056e923f3729d30d4acf4b76087af20f6283",
+          "timeoutMs": 3600000,
+          "timeoutPolicy": "g2g3-correctness-3600s",
+          "maxRssKiB": 1197296,
+          "peakTreeRssKiB": 1182824,
+          "sampledCpuSeconds": 2277.3,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 2160767,
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "serviceMaxRssKiB": 1197296
+        }
+      ],
+      "manifestG3": "33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a",
+      "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+      "status": "passed",
+      "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+      "performanceQualification": "not-run-in-this-profile",
+      "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+      "scope": "immutable source/admission/IR/executable inventory verification; not a clean full-generation replay or a formal compiler preservation proof"
+    }
+  },
+  "otherFrozenEngines": {
+    "request": "0cabb7edef8fbce76d966487fcf37ac030dc2e3b",
+    "control": "f14e0c9dccacbb8421bfcd0ebcb0713ae6de2df6",
+    "run": 40147825207,
+    "targets": [
+      "js",
+      "ts",
+      "wasm-core"
+    ],
+    "profile": "correctness-1800s",
+    "state": "in-progress",
+    "qualificationsInherited": false
+  },
+  "installedRustIntegration": {
+    "state": "candidate-CI-in-progress",
+    "run": 40149384939,
+    "source": "47db4f83090df292f9ba9358b6de8f1f0bc4007b",
+    "transportRegression": {
+      "schema": "psc1-rust-host-transport-regression/1",
+      "testedCommit": "fa763381e8d9325287d50116f7bd86679d0d9fc9",
+      "status": "passed",
+      "checks": 10,
+      "normalRequestMs": 240000,
+      "requestAndResponseMaxBytes": 134217728,
+      "streamMaxBytes": 33554432,
+      "tested": [
+        "execution",
+        "binary-integrity",
+        "timeout-policy-refusals",
+        "request-mutation",
+        "response-symlink",
+        "output-limit",
+        "deadline-process-group-cleanup",
+        "success-descendant-cleanup",
+        "caller-death-group-cleanup"
+      ],
+      "compilerQualification": false,
+      "scope": "Node-only Linux process/integrity boundary; compiler qualification is independent"
+    },
+    "transportRun": 40148605606
   }
 }

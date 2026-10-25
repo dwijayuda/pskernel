@@ -4,6 +4,26 @@ Updated 2026-10-25 Asia/Jakarta. Practical Core v1 remains frozen at fourteen
 families and37 finite criteria. The current implementation is
 `daa735017e34ee94da79d747c363237b4adbc4ef` on draft PR178.
 
+## Current qualification update
+
+Rust2d27f142/run40141718481 PASSED genuine G1/G2/G3 and exact fixed point on
+closure07eedac1. G2/G3=2139961/2160767ms; peak service RSS1197260/1197296KiB.
+The separate3600s correctness profile was required;240s performance is unqualified.
+Immutable readback40147896149 verifies all generation byte inventories.
+JS/TS/Wasm request0cabb7ed/run40147825207 is RUNNING on the same frozen root
+under unchanged1800s profiles. Preserve it.
+
+Global provider fix14cb3e30/full40145805549 PASSED37/37 criteria and actual
+global Python/PHP execution in both grammars. Candidate Rust CLI integration
+47db4f83/40149384939 is still pending installed qualification. Node-only transport
+passes10 lifetime/integrity tests; do not claim package integration before CI.
+
+The earlier evidence/queue snapshot below is retained for context. Its pending
+Rust row is superseded by the qualified result above. The immediate queue is:
+finish installed Rust integration and full regression promotion; reconcile the
+three active frozen-root engines; clean release reproduction and separate240s
+performance. No merge or registry publication is authorized.
+
 ## Evidence and release boundaries
 
 Full [40141923929](https://github.com/dwijayuda/pskernel/actions/runs/40141923929)

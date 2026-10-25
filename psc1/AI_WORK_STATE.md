@@ -5,19 +5,39 @@ non-force branch HEAD. Implementation `daa735017e34ee94da79d747c363237b4adbc4ef`
 is the current frozen compiler; packaging and documentation commits do not change its source.
 GitHub tools/Linux Actions only. No merge or registry publication authorized.
 
-## Package installation fix in progress
+## Latest qualification results
 
-The clean runner40145246949 exposed npm's global automatic-peer registry lookup
-for optional providers. Diagnostic40145577407/job121026066810 passes after adding
-standard optional-peer metadata, preserving the peer version and every native/
-resource/descriptor byte. It executes8 generated builds across local/global
-installs, both grammars and TS/Wasm, with no checkout or lake build tree and the
-native compiler disabled. Patched add-on receipt/artifact12580715967 has ZIP
-eee8bbfc8c4aa80d063411b998c4663db4fccc56b006c5e39b654796a297fa7d.
-The production builder now declares this metadata and adds actual global Python/
-PHP compilation/execution in both grammars with a separate empty npm cache.
-Full production CI is PENDING for this packaging change. The compiler source,
-frozen Rust request and host provider identity/refusal policy are unchanged.
+Rust request2d27f142/run40141718481/job121014751809 PASSED genuine G1/G2/G3 and
+exact source/admission/original+transformed IR/raw-executable/four-output fixed
+points on frozen closure07eedac1 (120 modules,120 cases+27 envelope refusals).
+G2=2139961ms,service peak1197260KiB;G3=2160767ms,1197296KiB.
+These exceed1800s; the separate3600s correctness profile enabled qualification.
+Performance240s remains unqualified. Immutable readback40147896149 passes every
+generation inventory and exact source/admission/IR/binary comparison.
+G3 manifest33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a;
+raw executable07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6.
+
+Request0cabb7ed/run40147825207 now independently qualifies JS/TS/Wasm on that
+same frozen root using their unchanged1800s profiles. All three are RUNNING;
+do not duplicate/cancel or transfer historical qualifications. Rust is not rerun.
+
+The global optional-provider fix14cb3e30 passes full40145805549/
+job121029022566/final gate121034253918,37/37 criteria/seven targets/both grammars,
+and actual global Python/PHP execution in both grammars. Review14cb3e30 and
+tested merge348746f3 share treec57b723e3809ec591920b326dece50b0903d4aa4.
+Optional-peer metadata prevents registry/nested-core installation while retaining
+the declared version and all exact provider source/native/resource checks.
+The earlier clean-runner test40145577407 passes8 local/global generated builds
+without checkout/lake tree, with the Lean-native compiler disabled.
+
+Installed Rust integration is IN PROGRESS: candidate47db4f83/run40149384939.
+It uses the qualified G3 Rust bytes alongside historical TS/Wasm engines,
+standard240s ordinary requests and Node-only process-group/caller-death cleanup.
+Transport40148605606 passes10 real process/integrity regressions; the package
+candidate must still pass installed corpus/app/refusal tests before promotion.
+No new runtime dependency on Python is introduced. Compiler source stays frozen.
+The older verified package and historical records below remain valid only in
+their recorded scopes; the latest results above govern active continuation.
 
 ## Current verified state
 
@@ -37,7 +57,7 @@ frozen Rust request and host provider identity/refusal policy are unchanged.
   `07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af`,
   raw G1 `07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6`
   and G2 request `9b52f7d7cad553d96abb4432e6d3906ac92d8e2e2639f229364d168abcbfb3ae`.
-- **Rust G2/G3/fixed point: running, not yet qualified.** Frozen request
+- **Historical pre-result Rust status (superseded above).** Frozen request
   `2d27f1428e6a53a6de5006f950fc94f2d471b214`, parent9f24e3ac, branch
   qualification/psc1-rust-nat-runtime-20261025,
   [40141718481](https://github.com/dwijayuda/pskernel/actions/runs/40141718481)/

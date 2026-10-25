@@ -101,6 +101,59 @@
     }
   },
   "productionBuilderFix": "optional peer metadata; same exact peer version and provider source/native/resource contract",
-  "fullProductionQualification": "pending",
+  "fullProductionQualification": {
+    "reviewCommit": "14cb3e30503d0c5e6b1e007598b0bde7ad77befb",
+    "testedCommit": "348746f32e7fe04b3402eb22030054375eb9ebcd",
+    "equalTree": "c57b723e3809ec591920b326dece50b0903d4aa4",
+    "run": 40145805549,
+    "job": 121029022566,
+    "finalGate": 121034253918,
+    "conclusion": "success",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "globalProviderCases": [
+      {
+        "syntax": "lean",
+        "target": "python",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "275bec1728faeb34e53f77adece2a252d0a15be2e6add78884d76a336d0a623a"
+      },
+      {
+        "syntax": "lean",
+        "target": "php",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "d63428bc023255b5fc79580ed60c8061143a706f25735d87151922b5cf85fa24"
+      },
+      {
+        "syntax": "ps",
+        "target": "python",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "275bec1728faeb34e53f77adece2a252d0a15be2e6add78884d76a336d0a623a"
+      },
+      {
+        "syntax": "ps",
+        "target": "php",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "d63428bc023255b5fc79580ed60c8061143a706f25735d87151922b5cf85fa24"
+      }
+    ],
+    "artifact": 12581184979,
+    "digest": "sha256:2bf7d0fadd0bacd45c1b645ad9f15ba400a67236d9720c55f21391470e12fda3"
+  },
   "compilerClosureUnchanged": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
 }

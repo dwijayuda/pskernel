@@ -1,0 +1,57 @@
+name: PSC1 exact Prelude generated ingress stages
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-prelude-ingress-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-prelude-ingress.yml
+    - psc1/scripts/pskernel-prelude-ingress-ci.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  ingress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate previously qualified complete kernel and original corpus
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        python3 psc1/scripts/pskernel-unary-arena-artifact.py
+        curl -fL --retry 3 --retry-delay 2 \
+          -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+          https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+        python3 psc1/scripts/pskernel-prelude-ingress-ci.py prepare \
+          --out "$RUNNER_TEMP/prelude-ingress" --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz"
+        node --check "$RUNNER_TEMP/prelude-ingress/detached/diagnostic-kernel.mjs"
+    - name: Observe unchanged public and diagnostic cold processes
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 psc1/scripts/pskernel-prelude-ingress-ci.py execute \
+          --out "$RUNNER_TEMP/prelude-ingress" --node "$(command -v node)" \
+          2>&1 | tee "$RUNNER_TEMP/prelude-ingress/run.log"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-prelude-ingress-attempt-${{ github.run_attempt }}
+        path: |
+          ${{ runner.temp }}/prelude-ingress/
+          ${{ runner.temp }}/arena435-independent/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

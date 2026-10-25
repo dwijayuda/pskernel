@@ -1,0 +1,90 @@
+name: PSC1 empty semantic cache bounded helper microbenchmark
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-empty-semantic-cache-micro-20261025
+    paths:
+    - .github/workflows/psc1-empty-semantic-cache-micro.yml
+    - .github/psc1-empty-semantic-cache/micro.py
+    - psc1/scripts/pskernel-empty-semantic-cache-micro.mjs
+    - psc1/packages/pskernel-core/docs/T09_EMPTY_SEMANTIC_CACHE_MICROBENCH_PROTOCOL.md
+permissions:
+  contents: read
+  actions: read
+jobs:
+  micro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      NODE_OPTIONS: ''
+    steps:
+    - name: Check out exact timing implementation
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: experiment-source
+        persist-credentials: false
+    - name: Check out exact qualified producer implementation
+      uses: actions/checkout@v4
+      with:
+        ref: 80182d1b95894fc3daa5c7fbcfe8b1a7adb687d9
+        path: producer-source
+        persist-credentials: false
+    - name: Check out fixed baseline source for archive correspondence
+      uses: actions/checkout@v4
+      with:
+        ref: 20224a295359abb201f56c72395690bf0bfac9fa
+        path: baseline-source
+        persist-credentials: false
+    - name: Check out fixed candidate source for archive correspondence
+      uses: actions/checkout@v4
+      with:
+        ref: e503972553ae2d41d5ba7a26d7739fb32ee86b96
+        path: candidate-source
+        persist-credentials: false
+    - name: Authenticate exact producer API metadata and raw archive digest
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        python3 experiment-source/.github/psc1-empty-semantic-cache/micro.py prepare \
+          baseline-source candidate-source producer-source experiment-source \
+          "$RUNNER_TEMP/empty-semantic-cache-micro"
+    - name: Extract the exact paired leaf artifact with the official action
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        artifact-ids: '12585423993'
+        run-id: '40158333460'
+        repository: dwijayuda/pskernel
+        github-token: ${{ github.token }}
+        merge-multiple: true
+        path: ${{ runner.temp }}/empty-semantic-cache-micro/producer
+    - name: Independently verify all136 raw and extracted members and complete receipt chains
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 experiment-source/.github/psc1-empty-semantic-cache/micro.py audit \
+          baseline-source candidate-source producer-source experiment-source \
+          "$RUNNER_TEMP/empty-semantic-cache-micro"
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22.23.3'
+    - name: Recheck semantic controls and execute the frozen14-case56-process protocol
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 experiment-source/.github/psc1-empty-semantic-cache/micro.py measure \
+          baseline-source candidate-source producer-source experiment-source \
+          "$RUNNER_TEMP/empty-semantic-cache-micro"
+    - name: Retain every observation, status, source pin and complete producer evidence
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: psc1-empty-semantic-cache-micro-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/empty-semantic-cache-micro/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

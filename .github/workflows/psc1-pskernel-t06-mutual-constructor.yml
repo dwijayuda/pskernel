@@ -1,0 +1,228 @@
+name: PSC1 private mutual complete constructor native preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t06-mutual-constructor-20261026
+    paths:
+    - psc1/**
+    - .github/workflows/psc1-pskernel-t06-mutual-constructor.yml
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Authenticate one private production delta and preserve exact source
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p "$RUNNER_TEMP/t06-mutual-constructor/source"
+
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+        test "$(cat psc1/lean-toolchain)" = leanprover/lean4:v4.35.0
+
+        (cd psc1 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+
+        git diff --name-only f1cfd69e2e873b3121b1d3080676fd87d2660208 HEAD -- psc1/packages/pskernel-core/src >
+        "$RUNNER_TEMP/t06-mutual-constructor/production-delta.txt"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib,subprocess,json,hashlib
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor''
+
+        assert (out/''production-delta.txt'').read_text().splitlines()==[''psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorAnalysis.lean'']
+
+        p=''psc1/kernel-lakefile.lean'';old=subprocess.check_output([''git'',''show'',''f1cfd69e2e873b3121b1d3080676fd87d2660208:''+p]).decode();current=pathlib.Path(p).read_text()
+
+        assert current.replace(''    `Ps.KernelCore.API.DagMutualConstructorAnalysis,\n'','''')==old
+
+        source=pathlib.Path(''psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorAnalysis.lean'').read_text()
+
+        assert not any(token in source for token in [''psKernelAddSimpleMutualInductive'',''psKernelDagGeneratedImport'',''psKernelExprV2DecodeChecked'',''sorry'',''axiom
+        ''])
+
+        PYCODE
+
+        git archive HEAD psc1/packages/pskernel-core/src psc1/test psc1/kernel-lakefile.lean psc1/lean-toolchain
+        .github/workflows/psc1-pskernel-t06-mutual-constructor.yml | tar -x -C "$RUNNER_TEMP/t06-mutual-constructor/source"
+
+        (cd psc1 && node check-psc1-source.mjs --all-portable) 2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/portable.log"
+
+        '
+    - name: Build complete native closure and prove exact recursive worker protocol
+      working-directory: psc1
+      shell: bash
+      run: 'set -euo pipefail
+
+        lake -f kernel-lakefile.lean build PsKernelCore PsKernelOrdinaryHeaderProofs 2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/build.log"
+
+        lake -f kernel-lakefile.lean env lean -o .lake/build/lib/lean/PsKernelExpandedSizeProofs.olean test/PsKernelExpandedSizeProofs.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/retained-count-proofs.log"
+
+        lake -f kernel-lakefile.lean env lean test/PsKernelMutualRecursiveArgumentProofs.lean 2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/retained-recursive-proofs.log"
+
+        lake -f kernel-lakefile.lean env lean test/PsKernelMutualConstructorFieldsProofs.lean 2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/retained-fields-proofs.log"
+
+        lake -f kernel-lakefile.lean env lean test/PsKernelMutualConstructorAnalysisProofs.lean 2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/proofs.log"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib,re
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor/proofs.log'').read_text()
+
+        reports=re.findall(r"''(PsKernelMutualConstructorAnalysisProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does
+        not depend on any axioms)",text)
+
+        assert len(reports)==22 and len({name for name,_ in reports})==22,reports
+
+        assert not any(x in text for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in reports:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        retained=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor/retained-count-proofs.log'').read_text()
+
+        old=re.findall(r"''(PsKernelExpandedSizeProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does not depend
+        on any axioms)",retained)
+
+        assert len(old)==11 and len({name for name,_ in old})==11,old
+
+        assert not any(x in retained for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in old:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        retained=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor/retained-recursive-proofs.log'').read_text()
+
+        old=re.findall(r"''(PsKernelMutualRecursiveArgumentProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does
+        not depend on any axioms)",retained)
+
+        assert len(old)==15 and len({name for name,_ in old})==15,old
+
+        assert not any(x in retained for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in old:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        retained=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor/retained-fields-proofs.log'').read_text()
+
+        old=re.findall(r"''(PsKernelMutualConstructorFieldsProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does
+        not depend on any axioms)",retained)
+
+        assert len(old)==18 and len({name for name,_ in old})==18,old
+
+        assert not any(x in retained for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in old:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        print(''PSC1_MUTUAL_CONSTRUCTOR_PROOFS_PASS reports=22 retained=44'')
+
+        PYCODE
+
+        '
+    - name: Require all171 retained controls and189 closed constructor controls
+      working-directory: psc1
+      shell: bash
+      run: 'set -euo pipefail
+
+        timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelMutualRecursiveArgumentRegression.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/retained-recursive-native.log"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor/retained-recursive-native.log'').read_text()
+
+        labels=[line.removeprefix(''PSC1_MUTUAL_RECURSIVE_ASSERT '') for line in text.splitlines() if line.startswith(''PSC1_MUTUAL_RECURSIVE_ASSERT
+        '')]
+
+        assert len(labels)==len(set(labels))==88
+
+        assert ''PSC1_MUTUAL_RECURSIVE_NATIVE: PASS assertions=88 frozen=80 direct=3 boundaries=4 header=1'' in
+        text
+
+        PYCODE
+
+        set -euo pipefail
+
+        timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelMutualConstructorFieldsRegression.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/retained-fields-native.log"
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor/retained-fields-native.log'').read_text()
+
+        labels=[line.removeprefix(''PSC1_MUTUAL_FIELDS_ASSERT '') for line in text.splitlines() if line.startswith(''PSC1_MUTUAL_FIELDS_ASSERT
+        '')]
+
+        assert len(labels)==83 and len(set(labels))==83,labels
+
+        assert ''PSC1_MUTUAL_FIELDS_NATIVE: PASS assertions=83 frozen=80 boundaries=2 header=1'' in text
+
+        PYCODE
+
+
+        timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelMutualConstructorAnalysisRegression.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-mutual-constructor/native.log"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor/native.log'').read_text()
+
+        labels=[line.removeprefix(''PSC1_MUTUAL_CONSTRUCTOR_ASSERT '') for line in text.splitlines() if line.startswith(''PSC1_MUTUAL_CONSTRUCTOR_ASSERT
+        '')]
+
+        assert len(labels)==len(set(labels))==189
+
+        assert ''PSC1_MUTUAL_CONSTRUCTOR_NATIVE: PASS assertions=189 frozen=180 correct=3 wrong=3 boundaries=2 header=1''
+        in text
+
+        PYCODE
+
+        '
+    - name: Bind every actual source snapshot and log
+      if: always()
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os,hashlib,json
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-constructor''
+
+        files={str(p.relative_to(out)):{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in sorted(out.rglob(''*'')) if p.is_file()}
+
+        (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''run'':os.environ[''GITHUB_RUN_ID''],''attempt'':os.environ[''GITHUB_RUN_ATTEMPT''],''scope'':''private
+        complete constructor analysis plus retained recursive argument/fields;66local reports and360controls required;not
+        constructor publication/recursor admission/complete mutual or global soundness'',''files'':files},indent=2)+''\n'')
+
+        PYCODE
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-mutual-constructor-native-attempt-${{ github.run_attempt }}
+        include-hidden-files: true
+        path: ${{ runner.temp }}/t06-mutual-constructor/
+        retention-days: 90

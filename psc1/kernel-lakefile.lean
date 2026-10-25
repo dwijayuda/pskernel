@@ -34,6 +34,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagMutualConstructorResult,
     `Ps.KernelCore.API.DagMutualRecursiveArgument,
     `Ps.KernelCore.API.DagMutualConstructorFields,
+    `Ps.KernelCore.API.DagMutualConstructorAnalysis,
     `Ps.KernelCore.API.DagOrdinaryConstructorParams,
     `Ps.KernelCore.API.DagOrdinaryConstructorResult,
     `Ps.KernelCore.API.DagOrdinaryConstructorTypes,

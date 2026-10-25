@@ -1,0 +1,40 @@
+name: PSC1 unary ABBA independent archive audit
+'on':
+  push:
+    branches:
+    - work/psc1-pskernel-unary-spines-abba-audit-20261025
+    paths:
+    - .github/psc1-unary-abba-audit/**
+    - .github/workflows/psc1-pskernel-unary-abba-audit.yml
+  workflow_dispatch: null
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: audit-tools
+        persist-credentials: false
+    - uses: actions/checkout@v4
+      with:
+        ref: a6a1e1fd4a1558df36a51e5be43a33a15047da22
+        path: cohort-source
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Independently inspect actual producers, original inputs and sixteen cold measurements
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PSC1_AUDIT_SOURCE_ROOT: ${{ github.workspace }}/cohort-source
+        PSC1_AUDIT_OUTPUT: ${{ runner.temp }}/unary-abba-audit
+      run: python3 audit-tools/.github/psc1-unary-abba-audit/audit.py audit-tools/.github/psc1-unary-abba-audit/target.json
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-unary-abba-independent-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/unary-abba-audit/
+        if-no-files-found: error

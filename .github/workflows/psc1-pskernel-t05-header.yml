@@ -209,7 +209,18 @@ jobs:
                     'source inventory byte binding: '+name)
             require((out/'sources'/name).read_bytes()==raw,'archived source byte binding: '+name)
             if name in previous_lists[0] and name not in [WORKFLOW,RETAINED]:
-                require(raw==git('show',BASE+':'+name),'all other retained source inputs unchanged: '+name)
+                if name == 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean':
+                    lazy = json.loads((out/'lazy/source.json').read_text())
+                    require(lazy['sourceSha']==identity['sourceSha'] and str(lazy['runId'])==identity['runId']
+                            and lazy['productionChanges']==[name] and lazy['exactLetMotionOnly'] is True,
+                            'same-source exact one-path lazy-transform authentication')
+                    pin, = [item for item in lazy['sourceSnapshots'] if item['path']==name]
+                    require(digest(raw)=={'bytes':pin['bytes'],'sha256':pin['sha256']},
+                            'actual lazy-transform source snapshot')
+                    require(git('show','f091db586dcbe4a31905d6edf1c8c7957082527d:'+name)==git('show',BASE+':'+name),
+                            'same frozen Transform predecessor across qualification baselines')
+                else:
+                    require(raw==git('show',BASE+':'+name),'all other retained source inputs unchanged: '+name)
         report={'schema':'psc1-t09-empty-semantic-cache-source-v1',**identity,
                 'baselineSha':BASE,'baselineProductionTree':baseline_tree,'targetProductionTree':target_tree,
                 'productionChanges':changed,'exactCacheLookupGuardAndCommentOnly':True,
@@ -217,7 +228,7 @@ jobs:
                 'predecessorLookup':digest(old.encode()),'candidateLookup':digest(updated.encode()),
                 'frozenLookupByteExact':True,'retainedProofStatementAndOtherBodiesUnchanged':True,
                 'retainedProofBaseline':{'path':RETAINED,**digest(prior),'gitBlobSha':blob(prior)},
-                'allOtherRetainedInputsUnchanged':True,'sourceInputs':96,'proofNames':names,
+                'otherRetainedInputsExceptAuthenticatedTransformUnchanged':True,'sourceInputs':96,'proofNames':names,
                 'files':records,'sourceInventory':digest(inventory.read_bytes()),
                 'retainedLiftAndCountSourceBytesMatch':True,'liftAndCountWorkersDeferred':False,
                 'fullQualification':False,'performanceQualified':False}
@@ -1372,7 +1383,7 @@ jobs:
                 and source['targetProductionTree']=='bccb72769d4f20def35f2064363fbc94fcc7e54a'
                 and source['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact complete production trees and delta')
         require(all(source[k] is True for k in ['exactCacheLookupGuardAndCommentOnly','frozenLookupByteExact',
-                'retainedProofStatementAndOtherBodiesUnchanged','allOtherRetainedInputsUnchanged']),
+                'retainedProofStatementAndOtherBodiesUnchanged','otherRetainedInputsExceptAuthenticatedTransformUnchanged']),
                 'exact helper and retained source authentication')
         require(retained['emptySemanticCacheSourceAudit']==digest(source_path),'retained source-authentication digest')
         inventory=root/'source-inventory.json';inv=json.loads(inventory.read_text())

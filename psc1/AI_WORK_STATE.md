@@ -324,3 +324,11 @@ refusal from the pre-Practical-Core grammar. The same Nat-result/non-effect case
 is now required to refuse with doUnsupportedEffect during elaboration. Typed Id
 do and ordinary explicit higher-order calls keep separate roundtrip tests.
 No unsupported effect is admitted and no production parser/elaborator changes.
+
+Whole-source run 40205234865 exposes structuralRecursionArity in the new printer
+worker, despite passing the official-Lean/layout fixtures and real application.
+The fix applies the structurally recursive fold to fuel alone, then passes
+indentation through its returned worker. This retains the existing PSC1 arity
+restriction instead of widening the language. Dedicated CI now checks both
+real source censuses before long conversion workloads. New source identity and
+fresh generated G1 must pass before qualification; prior receipts remain scoped.

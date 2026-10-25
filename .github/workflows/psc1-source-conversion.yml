@@ -64,6 +64,38 @@ jobs:
             lake env lean "$source"
           done
           .lake/build/bin/psc1_translation_tests
+      - name: Census both real compiler source grammars before long workloads
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { readOwnedCompilerSources } from './host-tools/compiler-source-inputs.mjs';
+          import { compilerSourceClosureDigest } from './host-tools/compiler-host-protocol.mjs';
+          import { boundedRun } from './host-tools/generated-target-tools.mjs';
+          const rows = readOwnedCompilerSources('Ps.CompilerUnified.Service');
+          fs.mkdirSync('dist/source-conversion', { recursive: true });
+          for (const grammar of ['lean', 'ps']) {
+            const output = path.resolve('dist/source-conversion/census-' + grammar + '.json');
+            const result = boundedRun('prlimit', ['--as=4294967296', '--stack=8388608', '--',
+              path.resolve('.lake/build/bin/psc1_source_census_probe'), '--grammar', grammar,
+              '--out', output, '--modules', ...rows.flatMap(row => [row.module, path.resolve(row.path)])], {
+              timeoutMs: 240000, timeoutPolicy: 'standard-240s',
+              env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0', LEAN_STACK_SIZE_KB: '8192' },
+            });
+            assert.equal(result.status, 0, result.stderr);
+            const records = JSON.parse(fs.readFileSync(output, 'utf8')).records;
+            const failures = records.filter(row => row.parse !== 'accepted' || row.elaboration !== 'accepted');
+            assert.deepEqual(failures, [], 'actual source census: ' + JSON.stringify(failures));
+          }
+          console.log('PSC1_CONVERSION_SOURCE_CENSUS:', JSON.stringify({
+            modules: rows.length,
+            sourceClosureDigest: compilerSourceClosureDigest(rows.map(row => ({ ...row, kind: 'lean' }))),
+            grammars: ['lean', 'ps'], status: 'passed',
+          }));
+          
+          JS
       - name: Check candidate conversion host syntax
         working-directory: psc1
         run: |

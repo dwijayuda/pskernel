@@ -210,10 +210,14 @@ def psPrintLeanTermAtWithFuel
       fun (_indent : String) (_term : PsSyntaxTerm) =>
         Except.error PsSourcePrintError.fuelExhausted
   | remaining + 1 =>
+      -- Apply the recursive fold only to its decreasing fuel argument.
+      -- Indentation is state of the returned worker, not an extra recursive call.
+      let step : String -> PsSyntaxTerm -> Except PsSourcePrintError String :=
+        psPrintLeanTermAtWithFuel remaining;
       fun (indent : String) (term : PsSyntaxTerm) =>
       let smaller :
           PsSyntaxTerm -> Except PsSourcePrintError String :=
-        psPrintLeanTermAtWithFuel remaining indent;
+        step indent;
       match term with
       | PsSyntaxTerm.reference name =>
           psPrintSyntaxName name
@@ -463,8 +467,7 @@ def psPrintLeanTermAtWithFuel
                           | Except.error error => Except.error error
                           | Except.ok printedPattern =>
                               match
-                                  psPrintLeanTermAtWithFuel remaining
-                                    (psPrintLeanConcat2 indent "  ") body with
+                                  step (psPrintLeanConcat2 indent "  ") body with
                               | Except.error error => Except.error error
                               | Except.ok printedBody =>
                                   Except.ok

@@ -54,12 +54,13 @@ function checkFiles(stage, expected) {
  * generated-process result and independent-checker state. A copied receipt or
  * hash, generated JSON field, or fabricated wrapper cannot publish a session.
  */
-export function createGeneratedJsCompilerSession({ requestId, sources, entryModule, assurance,
+export function createGeneratedJsCompilerSession({ requestId, sources, entryModule, assurance, outputAbi = 'scalar',
     serviceFile, serviceSha256, runnerFile, runnerSha256,
     checkerExecutable, checkerSha256, checkerScriptFile, checkerScriptSha256, publicationRoot, serviceDependencies = [], additionalCheckers = [] }) {
   if (process.version !== 'v22.23.3') fail('PSC1_SERVICE_NODE_PIN');
   if (typeof requestId !== 'string' || !requestId || typeof entryModule !== 'string' ||
       !['checked', 'ordinary-checked'].includes(assurance) ||
+      !['scalar', 'io-dispatcher'].includes(outputAbi) ||
       !path.isAbsolute(publicationRoot || '')) fail('PSC1_SERVICE_REQUEST_INVALID');
   const captured = clone(sources);
   const sourceClosureDigest = compilerSourceClosureDigest(captured);
@@ -89,10 +90,12 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
   });
   const additionalAdmissions=[];
   const verifyTools = () => Object.values(tools).forEach(tool => identity(tool.path, tool.sha256));
-  const requestText = JSON.stringify(['psc1-compiler-service/1', requestId, sourceClosureDigest,
-    grammar, assurance, entryModule, captured.map(row => [row.module, row.text])]);
+  const scalarRequest = ['psc1-compiler-service/1', requestId, sourceClosureDigest,
+    grammar, assurance, entryModule, captured.map(row => [row.module, row.text])];
+  const requestText = JSON.stringify(outputAbi === 'scalar' ? scalarRequest :
+    ['psc1-compiler-service/2', ...scalarRequest.slice(1), 'io-dispatcher']);
   const request = Object.freeze({ requestId, sourceClosureDigest, grammar, assurance,
-    entryModule, target: 'js', requestSha256: sha(requestText), serviceSha256,
+    entryModule, target: 'js', ...(outputAbi === 'scalar' ? {} : { outputAbi }), requestSha256: sha(requestText), serviceSha256,
     runnerSha256, checkerSha256, nodeVersion: process.version, nodeSha256: tools.node.sha256,
     ...(checkerScriptFile?{checkerScriptSha256}:{}),
     ...(extraChecks.length?{additionalCheckers:extraChecks.map(c=>({name:c.name,scriptSha256:c.script.sha256}))}:{}) });
@@ -167,11 +170,12 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         const fields = ['admission','admissionRequest','assurance','candidateOnly','grammar',
           'logicalDeclarations','originalIr','origins','partialNames','protocol','publicNames',
           'requestId','runtimeRequirements','source','sourceClosureDigest','sourceDeclarations',
-          'specializedIr','status','target'];
+          'specializedIr','status','target', ...(outputAbi === 'scalar' ? [] : ['outputAbi'])];
         if (Object.keys(candidate).sort().join(',') !== fields.sort().join(','))
           fail('PSC1_SERVICE_RESPONSE_FIELDS');
         if (candidate.status !== 'candidate') fail('PSC1_SERVICE_COMPILER_REFUSED:' + candidate.phase);
-        for (const [key, value] of Object.entries({ protocol: 'psc1-compiler-service/1',
+        for (const [key, value] of Object.entries({ protocol: outputAbi === 'scalar' ? 'psc1-compiler-service/1' : 'psc1-compiler-service/2',
+          ...(outputAbi === 'scalar' ? {} : { outputAbi }),
           requestId, sourceClosureDigest, grammar, assurance, target: 'js',
           candidateOnly: true, admission: 'not-run' })) {
           if (candidate[key] !== value) fail('PSC1_SERVICE_RESPONSE_MISMATCH:' + key);

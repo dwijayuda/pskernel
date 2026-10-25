@@ -27,8 +27,10 @@ function selection(options = {}) {
   if (!options || typeof options !== 'object' || Array.isArray(options)) fail('OPTIONS');
   const engine = options.engine || 'js',
     kernel = options.kernel || 'wasm',
-    assurance = options.assurance || 'checked';
+    assurance = options.assurance || 'checked',
+    outputAbi = options.outputAbi ?? 'scalar';
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
+  if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['wasm', 'native', 'both'].includes(kernel)) fail('KERNEL');
   if (options.target !== undefined && options.target !== 'js')
     fail('CHECKED_TARGET_UNSUPPORTED: generated checked publication currently supports js');
@@ -39,7 +41,7 @@ function selection(options = {}) {
     !sources.some((s) => s.module === options.entryModule)
   )
     fail('ENTRY');
-  return { engine, kernel, assurance, sources, entryModule: options.entryModule };
+  return { engine, kernel, assurance, outputAbi, sources, entryModule: options.entryModule };
 }
 // Only the installed host composes tool paths, pins and independent checkers.
 // Source/project/wire data never supplies these capabilities.
@@ -71,6 +73,7 @@ function sessionFor(selected, publicationRoot) {
     sources: selected.sources,
     entryModule: selected.entryModule,
     assurance: selected.assurance,
+    outputAbi: selected.outputAbi,
     serviceFile: engine.service.path,
     serviceSha256: engine.service.sha256,
     runnerFile: path.join(installationRoot, 'scripts/generated-compiler-runner.mjs'),
@@ -104,6 +107,7 @@ export function compile(options) {
       status: 'accepted',
       engine: selected.engine,
       target: 'js',
+      outputAbi: selected.outputAbi,
       kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
       compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
       source,
@@ -130,6 +134,7 @@ export function build(options) {
     status: 'accepted',
     engine: selected.engine,
     target: 'js',
+    outputAbi: selected.outputAbi,
     kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
     compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
     logicalAdmission: 'accepted',
@@ -150,25 +155,25 @@ export function compileCandidate(options) {
     sources = clone(options.sources),
     digest = compilerSourceClosureDigest(sources);
   const assurance = options.assurance || 'checked';
+  const outputAbi = options.outputAbi ?? 'scalar';
+  if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
   if (
     !sources.every((s) => s.kind === sources[0].kind) ||
     !sources.some((s) => s.module === options.entryModule)
   )
     fail('SOURCE_CAPTURE');
-  const request = JSON.stringify([
-    'psc1-unified-compiler-service/2',
-    options.target,
-    [
-      'psc1-compiler-service/1',
+  const inner = [
+      outputAbi === 'scalar' ? 'psc1-compiler-service/1' : 'psc1-compiler-service/2',
       'candidate-' + crypto.randomUUID(),
       digest,
       sources[0].kind,
       assurance,
       options.entryModule,
       sources.map((s) => [s.module, s.text]),
-    ],
-  ]);
+      ...(outputAbi === 'scalar' ? [] : ['io-dispatcher']),
+    ];
+  const request = JSON.stringify(['psc1-unified-compiler-service/2', options.target, inner]);
   if (Buffer.byteLength(request) > 128 * 1024 * 1024) fail('REQUEST_LIMIT');
   const verify = () =>
     engine.pins.forEach((p) => {

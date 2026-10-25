@@ -73,13 +73,14 @@ def decodeSource (value : PsJsonValue) : Except Error Source :=
               | Except.error error => Except.error error
               | Except.ok text => Except.ok (Source.mk name text)
 
-def decodeRequestFields (fields : List PsJsonValue) : Except Error Request :=
-  if !(Nat.beq (psListLength fields) 7) then Except.error (failure "wire" "request-arity")
+def decodeRequestFieldsForProtocol (expectedProtocol : String) (arity : Nat)
+    (fields : List PsJsonValue) : Except Error Request :=
+  if !(Nat.beq (psListLength fields) arity) then Except.error (failure "wire" "request-arity")
   else
     match stringAt fields 0 with
     | Except.error error => Except.error error
     | Except.ok protocol =>
-        if !psStringEq protocol "psc1-compiler-service/1" then
+        if !psStringEq protocol expectedProtocol then
           Except.error (failure "wire" "protocol")
         else
           match stringAt fields 1 with
@@ -121,6 +122,31 @@ def decodeRequestFields (fields : List PsJsonValue) : Except Error Request :=
                                                   Except.error (failure "wire" "empty-request-identity")
                                                 else Except.ok (Request.mk requestId digest sourceKind
                                                   grammar assurance entry sources)
+
+
+-- Keep the seven-cell scalar protocol exact. IO is a closed, explicit new
+-- request variant; it selects an existing signature ABI, never host authority.
+def decodeRequestFields (fields : List PsJsonValue) : Except Error Request :=
+  decodeRequestFieldsForProtocol "psc1-compiler-service/1" 7 fields
+
+def decodeOutputRequestFields (fields : List PsJsonValue) :
+    Except Error (Prod Request Bool) :=
+  let ioProtocol : Bool := match stringAt fields 0 with
+    | Except.ok protocol => psStringEq protocol "psc1-compiler-service/2"
+    | Except.error _ => false;
+  if ioProtocol then
+    match decodeRequestFieldsForProtocol "psc1-compiler-service/2" 8 fields with
+    | Except.error error => Except.error error
+    | Except.ok request =>
+        match stringAt fields 7 with
+        | Except.error error => Except.error error
+        | Except.ok abi =>
+            if psStringEq abi "io-dispatcher" then Except.ok (Prod.mk request true)
+            else Except.error (failure "wire" "output-abi-unavailable")
+  else
+    match decodeRequestFields fields with
+    | Except.error error => Except.error error
+    | Except.ok request => Except.ok (Prod.mk request false)
 
 def decode (text : String) : Except Error Request :=
   match psJsonParse text with
@@ -306,7 +332,20 @@ def targetPlan (target : PsBackendTarget) (source : PsValidatedIrModule)
     | Except.error diagnostic => Except.error (planFailure diagnostic)
     | Except.ok result => Except.ok result
 
-def compilePrepared (target : PsBackendTarget)
+def checkOutputPublicApi (ioDispatcher : Bool) (target : PsBackendTarget)
+    (source : PsValidatedIrModule) (selected : List String) : Except String Unit :=
+  if ioDispatcher then psBackendCheckIoPublicApi target source selected
+  else psBackendCheckPublicApi target source selected
+
+def outputTargetPlan (ioDispatcher : Bool) (target : PsBackendTarget)
+    (source : PsValidatedIrModule) (selected : List String) : Except Error PsValidatedIrModule :=
+  if ioDispatcher then
+    match psBackendClosedPlanDetailed source selected with
+    | Except.error diagnostic => Except.error (planFailure diagnostic)
+    | Except.ok result => Except.ok result
+  else targetPlan target source selected
+
+def compilePreparedWithOutputAbi (ioDispatcher : Bool) (target : PsBackendTarget)
     (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
     (request : Request) (captured : Captured)
     (entry : PsSyntaxModule) (work : Semantic) : Except Error String :=
@@ -316,13 +355,13 @@ def compilePrepared (target : PsBackendTarget)
       let names : List (Prod PsName String) := psErasureDeclarationNames
         (psErasureRuntimeDeclarations psSelfHostRuntimePreludeDeclarationsWithProd work.source);
       let selected : List String := publicValues (authoredNames names entry.declarations) work.raw.declarations;
-      match psBackendCheckPublicApi target validated selected with
+      match checkOutputPublicApi ioDispatcher target validated selected with
       | Except.error code => Except.error (failure "public-api" code)
       | Except.ok _ =>
-          match targetPlan target validated selected with
+          match outputTargetPlan ioDispatcher target validated selected with
           | Except.error error => Except.error error
           | Except.ok closed =>
-              match psBackendCheckPublicApi target closed selected with
+              match checkOutputPublicApi ioDispatcher target closed selected with
               | Except.error code => Except.error (failure "public-api" code)
               | Except.ok _ =>
                   match psIrEncodeModule work.raw with
@@ -334,7 +373,7 @@ def compilePrepared (target : PsBackendTarget)
                           match emit closed selected with
                           | Except.error error => Except.error error
                           | Except.ok printed =>
-                              Except.ok (psJsonObject [
+                              let fields : List (Prod String String) := [
                                 ("admission", psJsonQuote "not-run"),
                                 ("admissionRequest", psCompilerHostAdmissionRequest
                                   request.requestId request.sourceClosureDigest (psBackendTargetName target) work.admissions),
@@ -346,7 +385,8 @@ def compilePrepared (target : PsBackendTarget)
                                 ("origins", psJsonArray (psListReverse captured.originsRev)),
                                 ("partialNames", psJsonArray (psListMap
                                   (fun (name : PsName) => psJsonQuote (psNameToString name)) work.partialNames)),
-                                ("protocol", psJsonQuote "psc1-compiler-service/1"),
+                                ("protocol", psJsonQuote
+                                  (if ioDispatcher then "psc1-compiler-service/2" else "psc1-compiler-service/1")),
                                 ("publicNames", psJsonArray (psListMap psJsonQuote selected)),
                                 ("requestId", psJsonQuote request.requestId),
                                 ("runtimeRequirements", psJsonArray (psListMap psJsonQuote printed.snd)),
@@ -356,9 +396,20 @@ def compilePrepared (target : PsBackendTarget)
                                 ("specializedIr", specializedIr),
                                 ("status", psJsonQuote "candidate"),
                                 ("target", psJsonQuote (psBackendTargetName target))
-                              ])
+                              ];
+                              let fields : List (Prod String String) :=
+                                if ioDispatcher then
+                                  List.cons (Prod.mk "outputAbi" (psJsonQuote "io-dispatcher")) fields
+                                else fields;
+                              Except.ok (psJsonObject fields)
 
-def compile (target : PsBackendTarget)
+def compilePrepared (target : PsBackendTarget)
+    (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
+    (request : Request) (captured : Captured)
+    (entry : PsSyntaxModule) (work : Semantic) : Except Error String :=
+  compilePreparedWithOutputAbi false target emit request captured entry work
+
+def compileWithOutputAbi (ioDispatcher : Bool) (target : PsBackendTarget)
     (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
     (request : Request) : Except Error String :=
   let initial : Captured :=
@@ -374,7 +425,12 @@ def compile (target : PsBackendTarget)
           | Except.ok _ =>
               match prepare request captured with
               | Except.error error => Except.error error
-              | Except.ok work => compilePrepared target emit request captured entry work
+              | Except.ok work => compilePreparedWithOutputAbi ioDispatcher target emit request captured entry work
+
+def compile (target : PsBackendTarget)
+    (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
+    (request : Request) : Except Error String :=
+  compileWithOutputAbi false target emit request
 
 def refused (target : PsBackendTarget) (requestId digest : String) (error : Error) : String :=
   psJsonObject [
@@ -393,14 +449,25 @@ def refused (target : PsBackendTarget) (requestId digest : String) (error : Erro
     ("target", psJsonQuote (psBackendTargetName target))
   ]
 
+def candidateFields (target : PsBackendTarget)
+    (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
+    (fields : List PsJsonValue) : String :=
+  match decodeOutputRequestFields fields with
+  | Except.error error => refused target "" "" error
+  | Except.ok selected =>
+      let request := selected.fst;
+      match compileWithOutputAbi selected.snd target emit request with
+      | Except.error error => refused target request.requestId request.sourceClosureDigest error
+      | Except.ok output => output
+
 def candidate (target : PsBackendTarget)
     (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
     (input : String) : String :=
-  match decode input with
-  | Except.error error => refused target "" "" error
-  | Except.ok request =>
-      match compile target emit request with
-      | Except.error error => refused target request.requestId request.sourceClosureDigest error
-      | Except.ok output => output
+  match psJsonParse input with
+  | Except.error _ => refused target "" "" (failure "wire" "invalid-json")
+  | Except.ok value =>
+      match readArray value with
+      | Except.error error => refused target "" "" error
+      | Except.ok fields => candidateFields target emit fields
 
 end Ps.Internal.CompilerService

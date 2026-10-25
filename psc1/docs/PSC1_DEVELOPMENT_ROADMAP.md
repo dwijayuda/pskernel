@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-26 Asia/Jakarta. Active bounded source-binding PR #186 follows qualified PR #185.
+Updated 2026-10-26 Asia/Jakarta. Practical generated-IO development follows qualified PR #186.
 Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
@@ -26,9 +26,9 @@ not final universal-platform publication or new G2/G3 generations.
 [receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json).
 
 Item1 now has a native-reference IO request probe at 6e27116a/source 073e5156:
-40221444236 passes 4 grammar/assurance cases and 30 negatives. Four generated G1
-IO engines are running40222325020; this is separate unpromoted source, not npm
-or G2/G3 qualification. Preserve frozen distributions until new generations pass.
+40221444236 passes 4 grammar/assurance cases and 30 negatives. All four generated G1 IO engines pass 40222325020; native real-application run
+40222933046 passes 66 cases. New host-session integration and genuine fixed-point
+runs 40223062370/40223086966 are active; npm promotion remains unqualified. Preserve frozen distributions until new generations pass.
 
 ## Preserved checked conversion
 

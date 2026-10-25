@@ -1,14 +1,69 @@
 # PSC1 AI work state
 
-Updated 2026-10-26 Asia/Jakarta. Active branch feat/psc1-binding-trace-20261025,
-stacked on qualified PR #185 HEAD583f795f91f8ee83dc59556dc886a71de7950f6d.
-Bounded R2b source-binding/rename evidence is recorded below; retain its finite scope.
-The following R3 evidence retains its original source identity.
-Use connected GitHub and Linux Actions only. Fetch HEAD before every write and
-use single-parent expected-HEAD non-force updates. No merge or npm publication.
-The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining-work queue;
-dated receipts own evidence. [Prior work-state snapshot](docs/history/AI_WORK_STATE_BEFORE_R3_QUALIFICATION_2026-10-25.md)
-preserves previous progress/failures without treating historical claims as current.
+Updated 2026-10-26 Asia/Jakarta. Active branch feat/psc1-generated-io-applications-20261026,
+a single-parent child of PR #186 documentation HEAD 2f756e48b7e6c611bbfb44f3488a679830187ed6.
+Use connected GitHub and Linux Actions only; fresh HEAD and expected-HEAD non-force
+updates before writes. No merge or npm publication is authorized.
+The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining queue.
+
+## Practical generated IO applications: implementation and qualification
+
+The explicit output ABI uses existing compiler semantics and IO signature/backend
+validation. Legacy seven-cell service/1 scalar requests remain unchanged; opt-in
+eight-cell service/2 requests end in io-dispatcher. Both feed the same frontend,
+elaborator, checked IR and independent admission pipeline. Callback IO output to
+Wasm-core/component explicitly refuses this ABI; existing native Wasm String/IO
+support remains intact. One compiler source still supports all seven mappings;
+Python/PHP remain optional. No handwritten semantic compiler or implicit filesystem
+capability is added.
+
+Portable source: 122 modules, distinct closure
+073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
+Four genuine G1 engines pass run 40222325020: each preserves the existing 40
+cross-target cases/9 envelope negatives, then passes 35 exact native/generated
+IO/scalar/refusal candidate comparisons, independent admission of five positives
+and actual Unicode/dispatcher/trap execution. Jobs: JS 121256498745,
+TS 121256498823, Rust 121256498713, Wasm 121256498751.
+Request 67fd1dcae5554aea06b089be228c7eeb46fa82c1 records the source and limits.
+Native frontend/emitter executables are removed after the sole seed.
+These are G1-only results, not G2/G3, fixed points or new npm qualification.
+
+Actual native application run 40222933046/job 121258228484 PASSED from
+ef385af4f933b30601b7587ad6269ea4d476cb61: four 11-module application closures,
+both grammars, all 66 CLI/JSON/file/compiler-like contract cases including real
+permissions/capability refusals and the 100,000-statement workload. PS source uses
+existing checked conversion with exact admission/original-IR equality; no second
+translator. The first experiment 40222770758 correctly failed fixture capture for
+a transitive PS library absent as an authored file; that failure is preserved.
+
+The host session/API/CLI now accept explicit outputAbi:io-dispatcher, with exact
+protocol/field/ABI response validation and scalar defaults retained. Project JSON
+still carries sources/entry/assurance only. The explicit proofscript/io export
+reuses typed-io.mjs with host-owned Linux ABI/capabilities/root/byte/fd limits and
+packed public types. It does not load or admit programs. These host/package
+changes are in qualification; frozen installed payloads do not gain the new
+request semantics until separately qualified changed-source promotion.
+Current integration reuses exact G1 artifacts, removes native compiler tools and
+executes the checked host session, actual independent admission, Linux publication
+and all 264 application cases across four generated engines. Results pending.
+
+Genuine new-source G1/G2/G3 fixed-point runs are independently active:
+40223062370 (JS/TS/Wasm, existing 1800s G2/G3 correctness profile), request
+4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98;
+40223086966 (Rust, existing 3600s G2/G3 profile), request
+4c88681f6fef70e6dcac7e990ffaac83b78b45be.
+Each retains G1/tools/corpus 240s, checker 120s, exact source/admission/IR/executable
+fixed points, all existing negatives and memory/stack/fuel/lifetime policies.
+No new chain success is claimed while running. Frozen packages remain untouched.
+
+## Preserved qualified source-binding checkpoint
+
+PR #186 implementation 9d07ae36 and documentation HEAD 2f756e48 are qualified.
+Terminal source/release run 40219590598 passes every selected dependency and
+37/37 finite Practical Core criteria, zero blocked; final docs run 40222854445
+passes static job 121257985187 and gate 121258167474, with no heavy jobs selected.
+The dated R2b receipt, source closure 1714b8cf and actual artifacts remain distinct
+from the changed source above.
 
 ## Qualified bounded source binding and rename (R2b)
 

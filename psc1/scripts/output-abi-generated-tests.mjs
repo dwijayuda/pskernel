@@ -11,12 +11,15 @@ assert.ok(['js', 'ts', 'rust', 'wasm-core'].includes(engine));
 const directory = path.resolve('dist/generated-unified-' + engine + '-compiler');
 const qualification = JSON.parse(fs.readFileSync(path.join(directory, 'qualification.json')));
 assert.equal(qualification.status, 'passed');
-assert.equal(qualification.correctnessQualification, 'G1-only');
+assert.ok(['G1-only', 'qualified'].includes(qualification.correctnessQualification));
 assert.deepEqual(fs.readdirSync('.lake/build/bin').filter(name =>
   fs.statSync(path.join('.lake/build/bin', name)).isFile()), ['psc1_independent_checker']);
 const checker = path.resolve('.lake/build/bin/psc1_independent_checker');
 const checkerSha256 = sha(fs.readFileSync(checker));
-const artifact = qualification.serviceArtifact;
+const generation = qualification.generations.at(-1).generation;
+const artifactFile = path.join(directory, 'G' + generation + '-service/artifact.json');
+const artifact = { file: artifactFile, sha256: sha(fs.readFileSync(artifactFile)) };
+assert.equal(artifact.sha256, qualification.generations.at(-1).artifactSha256);
 const referenceFile = path.resolve('dist/output-abi/native-reference.json');
 const referenceBytes = fs.readFileSync(referenceFile), reference = JSON.parse(referenceBytes);
 assert.equal(reference.schema, 'psc1-output-abi-native-reference/1');
@@ -32,7 +35,7 @@ const report = { schema: 'psc1-output-abi-generated/1', testedCommit: process.en
   sourceModules: qualification.sourceModules, serviceSha256: artifact.sha256,
   nativeReferenceSha256: sha(referenceBytes), checkerSha256,
   nativeDelegationBoundary: qualification.nativeDelegationBoundary,
-  status: 'running', cases, events, publication: false, fixedPoint: 'not-requested' };
+  status: 'running', cases, events, publication: false, fixedPoint: qualification.fixedPoint, generation };
 const checkpoint = () => fs.writeFileSync(path.join(destination, 'qualification.json'),
   JSON.stringify(report, null, 2) + '\n');
 try {

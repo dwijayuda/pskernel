@@ -1,7 +1,7 @@
 name: PSC1 unified generated compiler qualification
 on:
   push:
-    branches: [qualification/psc1-output-abi-g1-20261026]
+    branches: [qualification/psc1-output-abi-fixed-js-ts-wasm-20261026]
     paths: [.github/qualification-requests/psc1-unified-selfhost.json]
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
           import {validateUnifiedSelfhostRequest} from './scripts/unified-selfhost-request.mjs';
           const file='.github/qualification-requests/psc1-unified-selfhost.json';
           const r=JSON.parse(fs.readFileSync('../'+file)),e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
-          validateUnifiedSelfhostRequest(r,'qualification/psc1-output-abi-g1-20261026');
+          validateUnifiedSelfhostRequest(r,'qualification/psc1-output-abi-fixed-js-ts-wasm-20261026');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
           const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);
@@ -145,7 +145,7 @@ jobs:
       - name: Execute genuine generated compiler generations and exact fixed point
         timeout-minutes: ${{ needs.request.outputs.profile == 'correctness-3600s' && 170 || 110 }}
         run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} ${{ needs.request.outputs.mode }} ${{ needs.request.outputs.profile }} unified
-      - name: Execute IO requests using only the genuine generated G1 compiler
+      - name: Execute IO requests using only the qualified generated compiler
         run: node scripts/output-abi-generated-tests.mjs ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         if: always()

@@ -243,7 +243,13 @@ export function resolveCheckedTarget(
   )
     fail('TYPESCRIPT_CONSUMER_PLATFORM');
   const native = packagePins(distribution.targetConsumers.ts.dependencies[0]);
-  return { typescript: { entry: resolved.entry.path, pins: [...resolved.pins, ...native.pins] } };
+  return {
+    typescript: {
+      entry: resolved.entry.path,
+      executable: native.entry.path,
+      pins: [...resolved.pins, ...native.pins],
+    },
+  };
 }
 export function resolveKernel(provider = 'wasm', distribution = loadDistribution()) {
   if (!['wasm', 'native'].includes(provider)) fail('UNKNOWN_KERNEL');

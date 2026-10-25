@@ -57,6 +57,11 @@ jobs:
         run: |
           node scripts/kernel435-qualified-artifact-tests.mjs
           node scripts/qualified-compiler-assets-tests.mjs
+      - name: Prepare locked optional output consumers for package assembly
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional
+          rustup toolchain install 1.90.0 --profile minimal
+          node scripts/prepare-rust-target-consumer.mjs
       - name: Assemble exact G3 root and optional bundles and cross-check full compiler admission
         env:
           GH_TOKEN: ${{ github.token }}
@@ -79,7 +84,7 @@ jobs:
       - name: Typecheck the actual packed public API and IO entry
         run: |
           npm install --prefix "$RUNNER_TEMP/io-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
-          npm install --prefix "$RUNNER_TEMP/io-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.5.tgz"
+          npm install --prefix "$RUNNER_TEMP/io-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.6.tgz"
           cat > "$RUNNER_TEMP/io-types/consumer.mts" <<'TS'
           import {compile,build,compileCandidate,getCompilerMetadata,createIndependentKernelToolchain,type Source,type OutputAbi} from 'proofscript';
           import {createTypedIo,withTypedIo,type TypedIoConfiguration} from 'proofscript/io';

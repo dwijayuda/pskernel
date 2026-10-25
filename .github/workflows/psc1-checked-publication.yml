@@ -29,6 +29,7 @@ jobs:
           path: psc1/dist/transactional-publication/
           retention-days: 90
   installed:
+    needs: transactions
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     defaults:

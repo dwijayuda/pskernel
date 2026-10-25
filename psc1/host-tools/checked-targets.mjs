@@ -18,7 +18,7 @@ export function prepareCheckedTarget(stage, candidate, { target, typescript, rus
     };
   }
   if (target === 'ts') {
-    if (!typescript || !path.isAbsolute(typescript.entry || ''))
+    if (!typescript || !path.isAbsolute(typescript.executable || ''))
       fail('TYPESCRIPT_CONSUMER_UNAVAILABLE');
     fs.writeFileSync(path.join(stage, 'target.ts'), candidate.source);
     const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-ts-consumer-'));
@@ -40,7 +40,7 @@ export function prepareCheckedTarget(stage, candidate, { target, typescript, rus
         files: ['./target.ts'],
       };
       fs.writeFileSync(path.join(work, 'tsconfig.json'), JSON.stringify(config));
-      run('target-typescript', [typescript.entry, '--project', path.join(work, 'tsconfig.json')]);
+      run('target-typescript', ['--project', path.join(work, 'tsconfig.json')], typescript.executable);
       for (const [from, to] of [
         ['target.js', 'target.mjs'],
         ['target.d.ts', 'target.d.ts'],

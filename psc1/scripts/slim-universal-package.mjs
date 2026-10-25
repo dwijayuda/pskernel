@@ -64,7 +64,7 @@ const tsNativeMeta=JSON.parse(fs.readFileSync(path.join(tsNativeRoot,'package.js
 assert.equal(tsNativeMeta.name,'@typescript/typescript-linux-x64');assert.equal(tsNativeMeta.version,'7.0.2');
 const tsNativePack=JSON.parse(run('npm',['pack',tsNativeRoot,'--ignore-scripts','--json','--pack-destination',tarballs]));assert.equal(tsNativePack.length,1);
 targetConsumers.ts.platform='linux-x64';
-targetConsumers.ts.dependencies=[{package:tsNativeMeta.name,version:tsNativeMeta.version,entry:'package.json',
+targetConsumers.ts.dependencies=[{package:tsNativeMeta.name,version:tsNativeMeta.version,entry:'lib/tsc',
  tarball:tsNativePack[0].filename,tarballSha256:sha256(fs.readFileSync(path.join(tarballs,tsNativePack[0].filename))),files:inventory(tsNativeRoot)}];
 const rustConsumer=JSON.parse(fs.readFileSync('dist/rust-target-consumer/descriptor.json'));
 assert.equal(rustConsumer.schema,'psc1-rust-target-consumer/1');assert.equal(rustConsumer.locked,true,'diagnostic resolver output cannot qualify a target consumer');

@@ -143,7 +143,7 @@ export function createGeneratedJsCompilerSession({
     typescript.pins.forEach((pin, index) => {
       tools['typescript-' + index] = identity(pin.path, pin.sha256);
     });
-    if (!typescript.pins.some((pin) => pin.path === typescript.entry))
+    if (![typescript.entry, typescript.executable].every((file) => typescript.pins.some((pin) => pin.path === file)))
       fail('PSC1_SERVICE_TYPESCRIPT_ENTRY');
   }
   if (rust) {
@@ -233,7 +233,11 @@ export function createGeneratedJsCompilerSession({
     }
   }
   const run = (role, args, executable = process.execPath) => {
-    if (![process.execPath, ...(rust ? [rust.rustc, rust.inspector] : [])].includes(executable))
+    if (![
+      process.execPath,
+      ...(typescript ? [typescript.executable] : []),
+      ...(rust ? [rust.rustc, rust.inspector] : []),
+    ].includes(executable))
       fail('PSC1_SERVICE_EXECUTABLE');
     const started = Date.now();
     const env = { ...process.env };

@@ -47,9 +47,11 @@ jobs:
       - name: Inspect bounded native startup
         working-directory: psc1
         run: |
-          rg -n 'lean_run_main|task_manager|initialize_runtime|set_thread|int main' .lake/build/ir/LosslessSourceMain.c
           python3 - <<'PY'
           import os, subprocess, tempfile, json
+          for line in open('.lake/build/ir/LosslessSourceMain.c'):
+              if any(word in line for word in ['lean_run_main', 'task_manager', 'initialize_runtime', 'set_thread', 'int main']):
+                  print('PSC1_NATIVE_MAIN: ' + line.rstrip())
           with tempfile.TemporaryDirectory() as directory:
               source = directory + '/source'
               open(source, 'wb').close()

@@ -39,11 +39,11 @@ jobs:
       - name: Exercise snapshots, trivia and staged edits
         working-directory: psc1
         run: |
-          if test -f scripts/lossless-source-tests.mjs; then node scripts/lossless-source-tests.mjs; fi
+          node scripts/lossless-source-tests.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-lossless-${{ github.sha }}
           path: psc1/dist/lossless/
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 90

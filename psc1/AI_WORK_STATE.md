@@ -6,6 +6,17 @@ Updated 2026-10-25 Asia/Jakarta. Active draft PR #181, branch
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
 
+## Active R1 lossless capture (in progress)
+
+Branch `feat/psc1-lossless-source-20261025` follows PR #181 HEAD
+`d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`. Additive lexer sidecar and
+native capture helper compile on official Lean 4.35.0 in Linux run 40189711916.
+The original lexer/parser/compiler and packaged artifacts remain unchanged.
+Opaque host snapshots retain exact bytes, logical identity, grammar/profile and
+per-snapshot piece IDs. Candidate edits require the exact current bytes and are
+never published or labeled semantically equivalent. Host, negative, corpus and
+resource tests are being added; this is not yet a qualified R1 result.
+
 ## Readability slice
 
 Implementation: `446a0f21c6288a7c20b843bbeadcd18ba1460fa2`.

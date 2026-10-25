@@ -145,40 +145,40 @@ theorem missing_original_prefix_rejected_before_decode_and_all_callbacks
 
 theorem boundary_group_decode_error_precedes_header_attempt
     (synchronized : Nat.beq owner.built.size owner.arena.size = true)
-    (prefix : Nat.ble input.size owner.built.size = true)
+    (prefixBound : Nat.ble input.size owner.built.size = true)
     (error : String) (bad : psKernelDagDecodeGroup input value = .error error) :
     psKernelExprV2MutualAdmitWith check whnf defeq fuel environment depth maxNat input owner value = some (.error error) := by
-  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefix, bad] <;> rfl
+  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefixBound, bad] <;> rfl
 
 theorem header_decline_preserves_original_transaction_order
     (synchronized : Nat.beq owner.built.size owner.arena.size = true)
-    (prefix : Nat.ble input.size owner.built.size = true)
+    (prefixBound : Nat.ble input.size owner.built.size = true)
     
     (decoded : psKernelDagDecodeGroup input value = .ok decl)
     (checked : psKernelExprV2MutualAnalyzeHeaderWith check whnf defeq fuel environment depth maxNat
       owner.arena owner.declarations value = none) :
     psKernelExprV2MutualAdmitWith check whnf defeq fuel environment depth maxNat input owner value = none := by
-  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefix, decoded, checked] <;> rfl
+  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefixBound, decoded, checked] <;> rfl
 
 theorem header_error_preserves_original_transaction_order
     (synchronized : Nat.beq owner.built.size owner.arena.size = true)
-    (prefix : Nat.ble input.size owner.built.size = true)
+    (prefixBound : Nat.ble input.size owner.built.size = true)
     (error : String)
     (decoded : psKernelDagDecodeGroup input value = .ok decl)
     (checked : psKernelExprV2MutualAnalyzeHeaderWith check whnf defeq fuel environment depth maxNat
       owner.arena owner.declarations value = some (.error error)) :
     psKernelExprV2MutualAdmitWith check whnf defeq fuel environment depth maxNat input owner value = some (.error error) := by
-  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefix, decoded, checked] <;> rfl
+  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefixBound, decoded, checked] <;> rfl
 
 theorem header_success_preserves_original_transaction_order
     (synchronized : Nat.beq owner.built.size owner.arena.size = true)
-    (prefix : Nat.ble input.size owner.built.size = true)
+    (prefixBound : Nat.ble input.size owner.built.size = true)
     
     (decoded : psKernelDagDecodeGroup input value = .ok decl)
     (checked : psKernelExprV2MutualAnalyzeHeaderWith check whnf defeq fuel environment depth maxNat
       owner.arena owner.declarations value = some (.ok header)) :
     psKernelExprV2MutualAdmitWith check whnf defeq fuel environment depth maxNat input owner value = psKernelExprV2MutualAfterHeaderWith check whnf defeq fuel input owner.built decl value header := by
-  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefix, decoded, checked] <;> rfl
+  simp only [psKernelExprV2MutualAdmitWith, synchronized, prefixBound, decoded, checked] <;> rfl
 
 theorem actual_wrapper_uses_owned_callbacks_at_unchanged_entry_fuel
     : psKernelExprV2MutualAdmitWithFuel fuel environment depth maxNat input owner value =

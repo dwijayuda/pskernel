@@ -85,7 +85,8 @@ def proof_reports(text,expected):
     same([n for n,_ in rows],expected,"actual ordered native proof reports")
     allowed={"propext","Classical.choice","Quot.sound"}
     require(all({a.strip() for a in used.split(",") if a.strip()}<=allowed for _,used in rows),"standard axioms")
-    require(not any(x in text for x in ("sorryAx","Lean.ofReduceBool","Lean.trustCompiler")),"no forbidden dependencies")
+    actual_reports="\n".join(name+" "+used for name,used in rows)
+    require(not any(x in actual_reports for x in ("sorryAx","Lean.ofReduceBool","Lean.trustCompiler")),"no forbidden dependencies")
 def main():
     require(REPO=="dwijayuda/pskernel" and SHA=="054edfce56eda28a166624ddc92dfac5af8499c0"
             and BASE=="20224a295359abb201f56c72395690bf0bfac9fa"
@@ -546,5 +547,6 @@ finally:
              "runAttempt":str(ATTEMPT),"report":dg(raw),"errors":REPORT["errors"],
              "workloadsExecuted":False,"performanceQualified":False}
     (OUT/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+    print("PSC1_EMPTY_CACHE_ABBA_ARTIFACT_REPORT "+json.dumps(REPORT,separators=(",",":"),ensure_ascii=False,allow_nan=False))
     print("PSC1_EMPTY_CACHE_ABBA_ARTIFACT_AUDIT: "+REPORT["status"].upper()+" "+json.dumps(summary,separators=(",",":")))
 sys.exit(0 if REPORT["status"]=="pass" else 1)

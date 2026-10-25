@@ -13,7 +13,8 @@ function command(command,input,options={}){
  if(!Number.isSafeInteger(maxBuffer)||maxBuffer<=0)throw new TypeError('maxBuffer must be a positive integer');
  const resolved=explicitBinaryPath?{binaryPath:explicitBinaryPath,source:'explicit'}:resolveLeanKernelProviderBinary(resolverOptions);
  if(resolved.source==='bundled')verifyLeanKernelPrebuiltBinary({binaryPath:resolved.binaryPath,target:resolved.target,manifest:resolved.manifest,packageRoot:resolverOptions.packageRoot});
- const run=spawnSync(resolved.binaryPath,[command],{input,encoding:'utf8',maxBuffer,windowsHide:true,timeout:timeoutMs,killSignal:'SIGKILL'});
+ const run=spawnSync(resolved.binaryPath,[command],{input,encoding:'utf8',maxBuffer,env:resolverOptions.env??process.env,windowsHide:true,timeout:timeoutMs,killSignal:'SIGKILL'});
+ if(resolved.source==='bundled')verifyLeanKernelPrebuiltBinary({binaryPath:resolved.binaryPath,target:resolved.target,manifest:resolved.manifest,packageRoot:resolverOptions.packageRoot});
  if(run.error)throw new Error('failed to start Lean kernel provider: '+run.error.message,{cause:run.error});
  if(run.status!==0)throw new Error('Lean kernel provider exited '+run.status+': '+(run.stderr||'').trim());
  let result;try{result=JSON.parse((run.stdout||'').trim());}catch(cause){throw new Error('Lean kernel provider returned invalid JSON',{cause});}

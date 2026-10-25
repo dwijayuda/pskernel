@@ -222,7 +222,7 @@ LAYOUT_SCOPE = {
 }
 
 EMPTY_BASELINE = "20224a295359abb201f56c72395690bf0bfac9fa"
-EMPTY_PRODUCTION_TREE = "2b0f061ef9e211df46b6dda8266b4b975823fab7"
+EMPTY_PRODUCTION_TREE = "3acf8530793b6ed01d310bb06fc7fd5fea2285e1"
 EMPTY_PRODUCTION = RESTORED_PRODUCTION_ROOT + "/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
 EMPTY_RETAINED = "psc1/test/PsKernelClosedCacheAnalysisRegression.lean"
 EMPTY_MODULE = "PsKernelEmptySemanticCacheProofs"
@@ -1991,7 +1991,7 @@ def validator_audit(e):
         "arenaModelProofSource": "150123e5fb8e17d8fab4d737a043705727ee1bcc",
         "productionBaselineSource": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
         "qualifiedPredecessorSource": "f091db586dcbe4a31905d6edf1c8c7957082527d",
-        "productionTree": "2b0f061ef9e211df46b6dda8266b4b975823fab7", "files": rows}
+        "productionTree": "3acf8530793b6ed01d310bb06fc7fd5fea2285e1", "files": rows}
     same(source_inventory, expected_inventory, "entire independent validator source inventory")
     statuses = [{"module": module, "count": count, "exitCode": 0}
                 for module, count in VALIDATOR_MODULES]
@@ -2023,7 +2023,7 @@ def validator_audit(e):
             "proofs": retained + added, "retainedLayers": layers,
             "sourceInventory": digest(e.raw("validator/source-inventory.json")),
             "proofStatuses": digest(e.raw("validator/proof-status.json")),
-            "productionTree": "2b0f061ef9e211df46b6dda8266b4b975823fab7", "productionChanges": UNARY_DELTA,
+            "productionTree": "3acf8530793b6ed01d310bb06fc7fd5fea2285e1", "productionChanges": UNARY_DELTA,
             "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
             "untrustedSourceValidityAssumed": False, "replayArenaModelBridgeEstablished": True,
             "fullKernel": False, "performanceQualified": False}
@@ -2331,7 +2331,7 @@ QUOT_BASE="79031362b401f85d3c7f324cc3aa7dbf91c1bf0e"
 QUOT_DAG="psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean"
 QUOT_DELTA=["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean"]
 QUOT_LAZY_DELTA=sorted(QUOT_DELTA+[LAZY_PATH])
-QUOT_PINS={"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean":{"bytes":3326,"sha256":"528860b30e49a78930ab497b72900dba1afc047d2989964e6d88316b8cbebd68"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean":{"bytes":11106,"sha256":"f92312807e5eebf143682fb1b0adb25042f6f64fb9ba9ab856df925e6f416594"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean":{"bytes":23775,"sha256":"be61803c61760b15d3f6674b0174d93692858a788f182676282e4b0a0a13980a"},"psc1/kernel-lakefile.lean":{"bytes":17834,"sha256":"2d8397ccfbd42bffa0a1cd64af2d3863494b7011f144800b8bbfb41cd59ba461"},"psc1/test/PsKernelQuotAdmissionProofs.lean":{"bytes":15698,"sha256":"9ed76158b819bfccf856c7e46f199a796dd7e5c015e364ffb5bfcc629483a3cd"},"psc1/test/PsKernelQuotAdmissionRegression.lean":{"bytes":5011,"sha256":"3ebdac6dde2d600f4c370a6d9e558a5d9477f6adfc5acb15f01c1cac110963c6"},"psc1/test/PsKernelExprV2QuotOwnerRegression.lean":{"bytes":37053,"sha256":"b967ec021389288500a2a5db9ea6c71cb4675971bec6815b8011984bcccc4cf1"},"psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs":{"bytes":28062,"sha256":"0117beadc375cb1d93734334bf7d1aa956af8f3862da210c9acec8117c2ffc89"}}
+QUOT_PINS={"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean":{"bytes":3326,"sha256":"528860b30e49a78930ab497b72900dba1afc047d2989964e6d88316b8cbebd68"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean":{"bytes":11212,"sha256":"bc8c7c7f935443aba8bb87dc0a4110c85205f714c5ea94957f83a7b58012c4d1"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean":{"bytes":23775,"sha256":"be61803c61760b15d3f6674b0174d93692858a788f182676282e4b0a0a13980a"},"psc1/kernel-lakefile.lean":{"bytes":17834,"sha256":"2d8397ccfbd42bffa0a1cd64af2d3863494b7011f144800b8bbfb41cd59ba461"},"psc1/test/PsKernelQuotAdmissionProofs.lean":{"bytes":15698,"sha256":"9ed76158b819bfccf856c7e46f199a796dd7e5c015e364ffb5bfcc629483a3cd"},"psc1/test/PsKernelQuotAdmissionRegression.lean":{"bytes":5011,"sha256":"3ebdac6dde2d600f4c370a6d9e558a5d9477f6adfc5acb15f01c1cac110963c6"},"psc1/test/PsKernelExprV2QuotOwnerRegression.lean":{"bytes":37053,"sha256":"b967ec021389288500a2a5db9ea6c71cb4675971bec6815b8011984bcccc4cf1"},"psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs":{"bytes":28062,"sha256":"0117beadc375cb1d93734334bf7d1aa956af8f3862da210c9acec8117c2ffc89"}}
 QUOT_EXTRA_PATHS=["psc1/scripts/pskernel-quot-admission-qualification.py",
     "psc1/scripts/pskernel-transform-lazy-qualification.py",
     "psc1/scripts/pskernel-unary-spine-qualification.py",

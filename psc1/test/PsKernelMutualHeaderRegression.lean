@@ -1,4 +1,5 @@
 import Ps.KernelCore.API.DagMutualHeader
+import Ps.KernelCore.Admission.Inductive.Mutual.Admission
 import Ps.KernelCore.Core.ExprV2.Decode
 import Ps.KernelCore.Research.ExprV2PagedImport
 import Lean
@@ -65,7 +66,7 @@ private def frozenHeader (fuel : Nat) (environment : PsKernelEnvironment)
     (psKernelMutualNameListAppend (psKernelSimpleMutualRecNames value.types)
       (psKernelSimpleMutualCtorNames value.types))
   if !psKernelSimpleNameListUnique allNames then
-    throw "duplicate inductive, constructor, or recursor name"
+    throw "duplicate mutual inductive, constructor, or recursor name"
   psKernelCheckFreshInductiveNames allNames environment
   psKernelSimpleCheckUniformOccurrences names value.levelParams value.numParams
     (psKernelSimpleMutualCtorTypes value.types)
@@ -83,7 +84,7 @@ private def frozenHeader (fuel : Nat) (environment : PsKernelEnvironment)
       match indices.result with
       | .sort level => pure ⟨parameters,⟨first,indices⟩ ::
           (← frozenRemaining fuel environment value depth maxNat parameters level remaining),level⟩
-      | _ => throw "simple inductive result must be a sort"
+      | _ => throw "mutual inductive result must be a sort"
 
 private def build (value : PsKernelSimpleMutualInductiveDecl) :
     IO (PsKernelExprV2PagedArena × PsKernelDagInductiveGroup) := do
@@ -201,9 +202,18 @@ private def injectedScope : IO Unit := do
 
 def main : IO Unit := do
   for (label,value) in positives do compare label 256 value
-  for (label,value) in negatives do compare label 256 value
+  for (label,value) in negatives do
+    compare label 256 value
+    let (arena,dag) ← build value
+    let original := psKernelAddSimpleMutualInductive 256 psKernelEnvironmentEmpty value 0 psKernelLeanNatMaxSizeDefault
+    let actual := psKernelExprV2MutualAnalyzeHeaderWithFuel 256 psKernelEnvironmentEmpty
+      0 psKernelLeanNatMaxSizeDefault arena [] dag
+    require ("actual-retained-mutual-error-" ++ label)
+      (match original,actual with
+       | .error left,some (.error right) => left == right
+       | _,_ => false)
   for fuel in [0,1,2,4,16] do
     compare ("fuel-" ++ toString fuel) fuel
       (group (all "A" s1 s1) (all "B" s1 s1) 1)
   injectedScope
-  IO.println "PSC1_MUTUAL_HEADER_NATIVE: PASS assertions=33 positive=11 negative=16 budgets=5 injected=1"
+  IO.println "PSC1_MUTUAL_HEADER_NATIVE: PASS assertions=49 positive=11 negative=16 budgets=5 injected=1 originalErrors=16"

@@ -1,5 +1,6 @@
 import Lean
 import Ps.KernelCore.API.DagMutualHeader
+import Ps.KernelCore.Admission.Inductive.Mutual.Admission
 
 /- Universal scope/protocol equations for the private mutual-header stage.
    These do not claim complete mutual admission or global soundness. -/
@@ -103,6 +104,58 @@ theorem group_error_precedes_first_check
       arena declarations value = some (.error error) := by
   simp only [psKernelExprV2MutualAnalyzeHeaderWith, guard]
 
+theorem first_finish_preserves_original_mutual_non_sort_error
+    (parameters indices : PsKernelExprV2OrdinaryOpenResult) (entry : PsKernelExprV2Entry)
+    (found : psKernelExprV2PagedRequire indices.state.whnf.arena indices.result = .ok entry)
+    (notSort : ∀ universe, entry.node ≠ PsKernelExprV2Node.sort universe) :
+    psKernelExprV2MutualFirstHeaderFinish parameters indices =
+      .error "mutual inductive result must be a sort" := by
+  cases node : entry.node <;> first
+  | exact False.elim (notSort _ node)
+  | simp only [psKernelExprV2MutualFirstHeaderFinish, found, node]
+
+theorem first_finish_retains_exact_parameter_index_owners
+    (parameters indices : PsKernelExprV2OrdinaryOpenResult) (entry : PsKernelExprV2Entry)
+    (universe : PsKernelLevel)
+    (found : psKernelExprV2PagedRequire indices.state.whnf.arena indices.result = .ok entry)
+    (node : entry.node = .sort universe) :
+    psKernelExprV2MutualFirstHeaderFinish parameters indices =
+      .ok (PsKernelExprV2OrdinaryHeaderAnalysis.mk parameters indices universe) := by
+  simp only [psKernelExprV2MutualFirstHeaderFinish, found, node]
+
+theorem retained_original_duplicate_bundle_error
+    (fuel : Nat) (environment : PsKernelEnvironment) (decl : PsKernelSimpleMutualInductiveDecl)
+    (depth maxNat : Nat)
+    (levelsUnique : psKernelNameHasDuplicates decl.levelParams = false)
+    (enough : psKernelNatLt (psKernelSimpleMutualTypeCount decl.types) 2 = false)
+    (duplicates : psKernelSimpleNameListUnique
+      (psKernelMutualNameListAppend (psKernelSimpleMutualNames decl.types)
+        (psKernelMutualNameListAppend (psKernelSimpleMutualRecNames decl.types)
+          (psKernelSimpleMutualCtorNames decl.types))) = false) :
+    psKernelAddSimpleMutualInductive fuel environment decl depth maxNat =
+      .error "duplicate mutual inductive, constructor, or recursor name" := by
+  simp only [psKernelAddSimpleMutualInductive, levelsUnique, enough, duplicates] <;> rfl
+
+theorem direct_duplicate_bundle_retains_original_error
+    (arena : PsKernelExprV2PagedArena) (environment : PsKernelEnvironment)
+    (value : PsKernelDagInductiveGroup)
+    (levelsUnique : psKernelNameHasDuplicates value.levelParams = false)
+    (enough : psKernelNatLt (psKernelExprV2MutualTypeCount value.types) 2 = false)
+    (duplicates : psKernelSimpleNameListUnique
+      (psKernelMutualNameListAppend (psKernelExprV2MutualTypeNames value.types)
+        (psKernelMutualNameListAppend (psKernelExprV2MutualRecNames value.types)
+          (psKernelExprV2MutualCtorNames value.types))) = false) :
+    psKernelExprV2MutualHeaderGuardsOnCanonical arena environment value =
+      .error "duplicate mutual inductive, constructor, or recursor name" := by
+  simp only [psKernelExprV2MutualHeaderGuardsOnCanonical, levelsUnique, enough, duplicates] <;> rfl
+
+theorem first_phase_check_error_precedes_sort_and_opening
+    (error : String) (numParams : Nat)
+    (failed : check fuel context state type = some (.error error)) :
+    psKernelExprV2MutualFirstHeaderPhasesWith check whnf fuel context state type numParams =
+      some (.error error) := by
+  simp only [psKernelExprV2MutualFirstHeaderPhasesWith, failed]
+
 #print axioms closed_state_resets_all_semantic_fields
 #print axioms closed_context_has_no_shared_locals
 #print axioms resume_keeps_every_shared_semantic_field
@@ -115,4 +168,9 @@ theorem group_error_precedes_first_check
 #print axioms finish_universe_mismatch_preserves_exact_error
 #print axioms empty_tail_keeps_exact_arena
 #print axioms group_error_precedes_first_check
+#print axioms first_finish_preserves_original_mutual_non_sort_error
+#print axioms first_finish_retains_exact_parameter_index_owners
+#print axioms retained_original_duplicate_bundle_error
+#print axioms direct_duplicate_bundle_retains_original_error
+#print axioms first_phase_check_error_precedes_sort_and_opening
 end PsKernelMutualHeaderProofs

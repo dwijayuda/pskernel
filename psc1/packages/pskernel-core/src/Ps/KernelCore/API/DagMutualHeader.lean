@@ -84,7 +84,7 @@ def psKernelExprV2MutualHeaderGuardsOnCanonical
       | Except.ok _ =>
           psKernelExprV2MutualUniformOccurrences value.types arena typeNames
             (psKernelLevelParamsToLevels value.levelParams) value.numParams
-    else Except.error "duplicate inductive, constructor, or recursor name"
+    else Except.error "duplicate mutual inductive, constructor, or recursor name"
 
 def psKernelExprV2MutualClosedContext
     (environment : PsKernelEnvironment) (value : PsKernelDagInductiveGroup)
@@ -222,6 +222,64 @@ def psKernelExprV2MutualRemainingHeadersWith
                                 (PsKernelExprV2MutualTypeHeader.mk value indices) (Prod.fst tail))
                                 (Prod.snd tail)))
 
+def psKernelExprV2MutualFirstHeaderFinish
+    (parameters indices : PsKernelExprV2OrdinaryOpenResult) :
+    Except String PsKernelExprV2OrdinaryHeaderAnalysis :=
+  match psKernelExprV2PagedRequire indices.state.whnf.arena indices.result with
+  | Except.error error => Except.error error
+  | Except.ok entry =>
+      match entry.node with
+      | PsKernelExprV2Node.sort resultLevel =>
+          Except.ok
+            (PsKernelExprV2OrdinaryHeaderAnalysis.mk parameters indices resultLevel)
+      | _ => Except.error "mutual inductive result must be a sort"
+
+/- Both callbacks receive the complete current owner and the exact checker
+   fuel for their phase. Admission EnsureSort always calls public WHNF. -/
+def psKernelExprV2MutualFirstHeaderPhasesWith
+    (check : Nat -> PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (whnf : Nat -> PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Nat)))
+    (fuel : Nat) (context : PsKernelExprV2CheckContext)
+    (state : PsKernelExprV2CheckState) (type numParams : Nat) :
+    Option (Except String PsKernelExprV2OrdinaryHeaderAnalysis) :=
+  match check fuel context state type with
+  | Option.none => Option.none
+  | Option.some attemptedCheck =>
+      match attemptedCheck with
+      | Except.error error => Option.some (Except.error error)
+      | Except.ok checked =>
+          let publicWhnf :=
+            fun (nextContext : PsKernelExprV2CheckContext)
+                (nextState : PsKernelExprV2CheckState) (nextRoot : Nat) =>
+              whnf fuel nextContext nextState nextRoot;
+          match psKernelExprV2AdmissionEnsureSortOwnedWith
+              publicWhnf context (Prod.fst checked) (Prod.snd checked) with
+          | Option.none => Option.none
+          | Option.some attemptedSort =>
+              match attemptedSort with
+              | Except.error error => Option.some (Except.error error)
+              | Except.ok sorted =>
+                  match psKernelExprV2OrdinaryOpenHeaderParamsWith
+                      check whnf fuel context (Prod.fst sorted) type numParams with
+                  | Option.none => Option.none
+                  | Option.some attemptedParameters =>
+                      match attemptedParameters with
+                      | Except.error error => Option.some (Except.error error)
+                      | Except.ok parameters =>
+                          match psKernelExprV2OrdinaryOpenHeaderIndicesWith
+                              check whnf fuel parameters.context parameters.state
+                              parameters.result with
+                          | Option.none => Option.none
+                          | Option.some attemptedIndices =>
+                              match attemptedIndices with
+                              | Except.error error => Option.some (Except.error error)
+                              | Except.ok indices =>
+                                  Option.some
+                                    (psKernelExprV2MutualFirstHeaderFinish parameters indices)
+
+
 def psKernelExprV2MutualAnalyzeHeaderWith
     (check whnf : Nat -> PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Nat)))
@@ -242,7 +300,7 @@ def psKernelExprV2MutualAnalyzeHeaderWith
           | Except.ok _ =>
               let context := psKernelExprV2MutualClosedContext
                 environment value maxRecDepth maxNatSize;
-              match psKernelExprV2OrdinaryHeaderPhasesWith check whnf fuel context
+              match psKernelExprV2MutualFirstHeaderPhasesWith check whnf fuel context
                   (psKernelExprV2MutualClosedState arena declarations) first.type value.numParams with
               | Option.none => Option.none
               | Option.some attemptedFirst =>

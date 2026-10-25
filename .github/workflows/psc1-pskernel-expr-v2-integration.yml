@@ -1352,7 +1352,8 @@ jobs:
   t01f-generated-shards:
     needs: [generated-dag-integration]
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Setup/artifact handling has separate grace; the whole runtime helper stays capped at25 minutes.
+    timeout-minutes: 35
     permissions:
       contents: read
       actions: read
@@ -1379,7 +1380,7 @@ jobs:
           set -euo pipefail
           node --check scripts/pskernel-t01f-shards.mjs
           node --check scripts/pskernel-expr-v2-string-environment-smoke.mjs
-          node scripts/pskernel-t01f-shards.mjs run generated \
+          timeout --signal=KILL 1500s node scripts/pskernel-t01f-shards.mjs run generated \
             "$RUNNER_TEMP/psc1-t01f-generated-producer" \
             "$RUNNER_TEMP/psc1-t01f-generated-${{ matrix.sample }}" "${{ matrix.sample }}"
       - uses: actions/upload-artifact@v4

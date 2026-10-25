@@ -1,0 +1,16 @@
+name: PSC1 source-name provenance audit
+on:
+  push:
+    branches: [qualification/psc1-name-origin-audit-20261026]
+    paths: [.github/workflows/psc1-name-origin-audit.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inventory actual syntax-name construction and grouping
+        run: |
+          rg -n -C 3 'PsSyntaxName|segments\s*:=' psc1 --glob '*.lean' --glob '!legacy/**' --glob '!**/pskernel-lean-wasm/source/**'

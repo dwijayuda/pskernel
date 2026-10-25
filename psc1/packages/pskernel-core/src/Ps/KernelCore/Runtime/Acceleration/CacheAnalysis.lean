@@ -131,7 +131,7 @@ def psKernelSemanticExprMapGet
       | List.nil => Option.none
       | List.cons _ _ =>
           if psKernelSemanticCacheEligible expr then
-            psKernelExprMapGetIn expr cache.small
+            psKernelExprMapGetIn4 expr cache.small
           else
             Option.none
   | Option.some index =>
@@ -139,7 +139,7 @@ def psKernelSemanticExprMapGet
       if Prod.snd analysis then
         Option.none
       else
-        psKernelExprMapGetIn
+        psKernelExprMapGetIn4
           expr
           (psKernelExprMapIndexBucket 16 index (Prod.fst analysis))
 

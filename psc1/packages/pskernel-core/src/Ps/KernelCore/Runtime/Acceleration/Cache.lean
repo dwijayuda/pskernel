@@ -264,9 +264,9 @@ def psKernelExprMapGet
     Option PsKernelExpr :=
   match cache.index with
   | Option.none =>
-      psKernelExprMapGetIn4
-        expr
-        cache.small
+      match cache.small with
+      | List.nil => Option.none
+      | List.cons _ _ => psKernelExprMapGetIn4 expr cache.small
   | Option.some index =>
       psKernelExprMapGetIn4
         expr

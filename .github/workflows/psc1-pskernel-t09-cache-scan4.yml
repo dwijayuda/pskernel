@@ -31,7 +31,7 @@ jobs:
         $(lean --githash)\" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)\ngit diff --name-only 6ec70ae75c1d501e71280a25d7fd201d44f268e1\
         \ HEAD -- psc1/packages/pskernel-core/src > \"$RUNNER_TEMP/t09-cache-scan4/production-delta.txt\"\npython3\
         \ - <<'PYCODE'\nimport os,pathlib,subprocess\nout=pathlib.Path(os.environ['RUNNER_TEMP'])/'t09-cache-scan4'\n\
-        assert (out/'production-delta.txt').read_text().splitlines()==['psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean']\n\
+        assert (out/'production-delta.txt').read_text().splitlines()==['psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean']\n\
         base='6ec70ae75c1d501e71280a25d7fd201d44f268e1'\nfor path in ['psc1/kernel-lakefile.lean','psc1/lean-toolchain']:\n\
         \    assert pathlib.Path(path).read_bytes()==subprocess.check_output(['git','show',base+':'+path])\npath='psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean'\n\
         old=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
@@ -43,11 +43,20 @@ jobs:
         \ Scan at most four','def psKernelExprMapGet\\n','psKernelExprMapGetIn4','psKernelExprMapGetIn'),\n    ('psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.lean','/-\
         \ Scan at most four','/-\\nKeep the existing generated curried entry point.','psKernelExprV2WhnfCacheFindWorker4','psKernelExprV2WhnfCacheFindWorker')]:\n\
         \    original=subprocess.check_output(['git','show',base+':'+path]).decode()\n    changed=pathlib.Path(path).read_text();a=changed.index(start);b=changed.index(end,a)\n\
-        \    reconstructed=(changed[:a]+changed[b:]).replace(new,oldName)\n    assert reconstructed==original,(path,'retained\
-        \ original worker or unrelated bytes changed')\nPYCODE\ngit archive HEAD psc1/packages/pskernel-core/src\
-        \ psc1/test psc1/kernel-lakefile.lean psc1/lean-toolchain .github/workflows/psc1-pskernel-t09-cache-scan4.yml\
-        \ | tar -x -C \"$RUNNER_TEMP/t09-cache-scan4/source\"\n(cd psc1 && node check-psc1-source.mjs --all-portable)\
-        \ 2>&1 | tee \"$RUNNER_TEMP/t09-cache-scan4/portable.log\"\n"
+        \    reconstructed=(changed[:a]+changed[b:]).replace(new,oldName)\n    if path.endswith('/Cache.lean'):\n\
+        \        a=reconstructed.index('def psKernelExprMapGet\\n');b=reconstructed.index('\\ndef psKernelExprMapInsertIn',a)\n\
+        \        oldA=original.index('def psKernelExprMapGet\\n');oldB=original.index('\\ndef psKernelExprMapInsertIn',oldA)\n\
+        \        oldRead=\"  | Option.none =>\\n      psKernelExprMapGetIn\\n        expr\\n        cache.small\"\
+        \n        newRead=\"  | Option.none =>\\n      match cache.small with\\n      | List.nil => Option.none\\\
+        n      | List.cons _ _ => psKernelExprMapGetIn expr cache.small\"\n        expected=original[oldA:oldB].replace(oldRead,newRead,1)\n\
+        \        assert reconstructed[a:b]==expected,(path,'unexpected map wrapper change')\n        reconstructed=reconstructed[:a]+original[oldA:oldB]+reconstructed[b:]\n\
+        \    assert reconstructed==original,(path,'retained original worker or unrelated bytes changed')\npath='psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean'\n\
+        original=subprocess.check_output(['git','show',base+':'+path]).decode()\nchanged=pathlib.Path(path).read_text()\n\
+        assert changed.count('psKernelExprMapGetIn4')==2\nassert changed.replace('psKernelExprMapGetIn4','psKernelExprMapGetIn')==original\n\
+        PYCODE\ngit archive HEAD psc1/packages/pskernel-core/src psc1/test psc1/kernel-lakefile.lean psc1/lean-toolchain\
+        \ .github/workflows/psc1-pskernel-t09-cache-scan4.yml | tar -x -C \"$RUNNER_TEMP/t09-cache-scan4/source\"\
+        \n(cd psc1 && node check-psc1-source.mjs --all-portable) 2>&1 | tee \"$RUNNER_TEMP/t09-cache-scan4/portable.log\"\
+        \n"
     - name: Build complete native closure and prove exact recursive worker protocol
       working-directory: psc1
       shell: bash

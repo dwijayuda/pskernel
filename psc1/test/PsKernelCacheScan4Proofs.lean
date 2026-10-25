@@ -71,7 +71,11 @@ theorem map_get_wrapper_preserves_small_and_all_index_bucket_shapes
        | none => psKernelExprMapGetIn expr cache.small
        | some index => psKernelExprMapGetIn expr
            (psKernelExprMapIndexBucket 16 index (psKernelExprHash expr))) := by
-  cases h : cache.index <;> simp only [psKernelExprMapGet, h, map_scan_four_preserves_every_expression_list_and_order]
+  cases h : cache.index with
+  | none =>
+      cases hs : cache.small <;> simp only [psKernelExprMapGet, h, hs,
+        map_scan_four_preserves_every_expression_list_and_order, psKernelExprMapGetIn]
+  | some index => simp only [psKernelExprMapGet, h, map_scan_four_preserves_every_expression_list_and_order]
 
 theorem whnf_curried_wrapper_preserves_all_inputs_and_exact_errors
     (entries : List PsKernelExprV2WhnfCacheEntry)

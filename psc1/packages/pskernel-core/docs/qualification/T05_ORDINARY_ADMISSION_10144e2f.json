@@ -1,0 +1,3127 @@
+{
+  "schema": "psc1-t05-ordinary-admission-qualified-checkpoint-v1",
+  "repository": "dwijayuda/pskernel",
+  "recordedDate": "2026-10-25",
+  "qualifiedSourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+  "scope": {
+    "completeOrdinaryInductiveDagAdmissionQualified": true,
+    "pagedStructuralProofsRetained": true,
+    "publicRoutingQualified": true,
+    "safeFallbackRetained": true,
+    "fullKernelQualified": false,
+    "performanceQualified": false,
+    "replayArenaModelBridgeEstablished": false,
+    "externalDecoderLayoutBridgeEstablished": false
+  },
+  "integration": {
+    "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+    "previousSha": "a49d64ae494d51fdc80b688dab0922dd96403e5e",
+    "qualifiedSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+    "historyPreserved": true,
+    "nonForceExpectedShaUpdate": true,
+    "aheadBy": 21,
+    "behindBy": 0
+  },
+  "qualification": {
+    "workflow": ".github/workflows/psc1-pskernel-t05-header.yml",
+    "runId": 40144186958,
+    "runAttempt": 1,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40144186958",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": {
+      "native": 121021932365,
+      "generated": 121022487261,
+      "canonical": 121022487308
+    }
+  },
+  "toolchain": {
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "typescript": "7.0.2",
+    "node": "v22.23.3",
+    "fuel": 4096,
+    "oldSpaceMiB": 2048,
+    "oldSpaceIsHardRssLimit": false,
+    "emptyPATH": true
+  },
+  "native": {
+    "sourceInputs": 77,
+    "proofModules": 18,
+    "totalOrderedUniqueReports": 371,
+    "allowedAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "finalReceipt": {
+      "schema": "psc1-t05-ordinary-admission-native-receipt-v1",
+      "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+      "runId": "40144186958",
+      "runAttempt": "1",
+      "job": "native-header",
+      "route": "native",
+      "status": "pass",
+      "retainedProofs": 310,
+      "newProofs": 61,
+      "totalProofs": 371,
+      "proofs": [
+        {
+          "module": "PsKernelOrdinaryEliminationProofs",
+          "proofs": 26,
+          "names": [
+            "PsKernelOrdinaryEliminationProofs.member_nil",
+            "PsKernelOrdinaryEliminationProofs.member_cons_equation",
+            "PsKernelOrdinaryEliminationProofs.all_members_nil",
+            "PsKernelOrdinaryEliminationProofs.all_members_cons_equation",
+            "PsKernelOrdinaryEliminationProofs.member_lifts_pointwise_structural_equality",
+            "PsKernelOrdinaryEliminationProofs.all_members_lifts_pointwise_membership",
+            "PsKernelOrdinaryEliminationProofs.after_sort_annotation_error_precedes_allocation",
+            "PsKernelOrdinaryEliminationProofs.after_sort_keeps_owner_actual_fvar_and_original_body",
+            "PsKernelOrdinaryEliminationProofs.step_check_decline_precedes_sort",
+            "PsKernelOrdinaryEliminationProofs.step_check_error_precedes_sort",
+            "PsKernelOrdinaryEliminationProofs.step_sort_decline_uses_complete_checked_owner",
+            "PsKernelOrdinaryEliminationProofs.step_sort_error_uses_complete_checked_owner",
+            "PsKernelOrdinaryEliminationProofs.step_success_passes_sorted_owner_and_original_domain",
+            "PsKernelOrdinaryEliminationProofs.worker_zero_precedes_every_callback",
+            "PsKernelOrdinaryEliminationProofs.worker_whnf_decline_uses_predecessor",
+            "PsKernelOrdinaryEliminationProofs.worker_whnf_error_precedes_lookup",
+            "PsKernelOrdinaryEliminationProofs.worker_lookup_error_uses_returned_arena",
+            "PsKernelOrdinaryEliminationProofs.worker_forall_composes_predecessor_step_and_complete_owner",
+            "PsKernelOrdinaryEliminationProofs.worker_terminal_membership_uses_reduced_owner_and_all_arguments",
+            "PsKernelOrdinaryEliminationProofs.parameter_decline_precedes_telescope_whnf",
+            "PsKernelOrdinaryEliminationProofs.parameter_error_precedes_telescope_whnf",
+            "PsKernelOrdinaryEliminationProofs.parameter_success_preserves_owner_and_adds_one_worker_step",
+            "PsKernelOrdinaryEliminationProofs.policy_nonprop_shortcut",
+            "PsKernelOrdinaryEliminationProofs.policy_empty_shortcut",
+            "PsKernelOrdinaryEliminationProofs.policy_multiple_shortcut",
+            "PsKernelOrdinaryEliminationProofs.policy_singleton_composition_preserves_decline_error_and_negation"
+          ],
+          "source": {
+            "bytes": 19349,
+            "sha256": "20c41005810df740fea003b18477dd1b499fb6e83b81a6a8e644638618b733a2"
+          },
+          "log": {
+            "bytes": 3520,
+            "sha256": "cd1ca9609301c74ec5f32937d98eb255c59d1b3ef85b15a8a053cd6fa0b0bfa0"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryAdmissionProofs",
+          "proofs": 27,
+          "names": [
+            "PsKernelOrdinaryAdmissionProofs.rules_empty_identity_at_any_fuel",
+            "PsKernelOrdinaryAdmissionProofs.rules_excess_precedes_callbacks",
+            "PsKernelOrdinaryAdmissionProofs.rules_missing_precedes_callbacks",
+            "PsKernelOrdinaryAdmissionProofs.rule_check_decline_precedes_import",
+            "PsKernelOrdinaryAdmissionProofs.rule_check_error_precedes_import",
+            "PsKernelOrdinaryAdmissionProofs.expected_import_error_uses_complete_checked_owner",
+            "PsKernelOrdinaryAdmissionProofs.rule_defeq_decline_uses_complete_imported_owner",
+            "PsKernelOrdinaryAdmissionProofs.rule_defeq_error_uses_complete_imported_owner",
+            "PsKernelOrdinaryAdmissionProofs.rule_defeq_false_prevents_tail_and_publication",
+            "PsKernelOrdinaryAdmissionProofs.rule_success_returns_tail_with_same_fuel_and_full_owner",
+            "PsKernelOrdinaryAdmissionProofs.synchronize_returns_current_arena_and_references",
+            "PsKernelOrdinaryAdmissionProofs.generated_import_preserves_complete_semantic_owner",
+            "PsKernelOrdinaryAdmissionProofs.recursor_staging_ignores_type_phase_semantic_and_reference_mutations",
+            "PsKernelOrdinaryAdmissionProofs.recursor_staging_uses_parent_owner_and_adds_generated_reference",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_decline_prevents_publication",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_error_prevents_publication",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_success_still_requires_final_synchronization",
+            "PsKernelOrdinaryAdmissionProofs.final_synchronization_error_prevents_success",
+            "PsKernelOrdinaryAdmissionProofs.final_success_contains_only_synchronized_owner",
+            "PsKernelOrdinaryAdmissionProofs.fresh_rule_state_resets_every_semantic_collection",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_check_decline_precedes_sort",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_check_error_precedes_sort",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_sort_decline_uses_complete_checked_owner",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_sort_error_uses_complete_checked_owner",
+            "PsKernelOrdinaryAdmissionProofs.recursor_type_success_hands_off_only_after_sort_and_staging",
+            "PsKernelOrdinaryAdmissionProofs.unsynchronized_input_owner_rejects_before_decoding",
+            "PsKernelOrdinaryAdmissionProofs.original_namespace_error_precedes_header_check"
+          ],
+          "source": {
+            "bytes": 19187,
+            "sha256": "c1d2e9bb559c4a3e049daa59a371a668502b09adcc463d9e08135352c9f0db35"
+          },
+          "log": {
+            "bytes": 3409,
+            "sha256": "30e1a952f0e4c9b29d06144056b73c8b4bd24e9c2bbed026b5491b4284d687e3"
+          }
+        },
+        {
+          "module": "PsKernelOrdinaryAdmissionPublicProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelOrdinaryAdmissionPublicProofs.preflight_error_precedes_private_worker",
+            "PsKernelOrdinaryAdmissionPublicProofs.decline_restarts_original_session_arena_input_and_request",
+            "PsKernelOrdinaryAdmissionPublicProofs.private_error_returns_no_owner_or_environment",
+            "PsKernelOrdinaryAdmissionPublicProofs.private_success_reaches_resource_gate_with_complete_result",
+            "PsKernelOrdinaryAdmissionPublicProofs.declaration_limit_returns_no_checked_owner",
+            "PsKernelOrdinaryAdmissionPublicProofs.successful_publication_retains_exact_owner_and_clears_evaluator",
+            "PsKernelOrdinaryAdmissionPublicProofs.fallback_failure_precedes_generated_metadata_import",
+            "PsKernelOrdinaryAdmissionPublicProofs.original_input_decode_failure_precedes_ordinary_admission"
+          ],
+          "source": {
+            "bytes": 6077,
+            "sha256": "a1ea7689f2583e73290c167eca8d872d0830a6c5cbce68829d5eec78cc719941"
+          },
+          "log": {
+            "bytes": 1164,
+            "sha256": "b81c0cb22369fb1b934811f0baabbba93b58d3fd807eb18226a5461edc8b1de8"
+          }
+        }
+      ],
+      "orderedUniqueReports": true,
+      "allowedStandardAxiomsOnly": true,
+      "retainedLoopReceipt": {
+        "bytes": 2368,
+        "sha256": "4bdca4182887ded64222c0535ec5ee80084ea4f8a9635e18208cfecbb5c0f1f4"
+      },
+      "sourceInventory": {
+        "bytes": 20462,
+        "sha256": "bd8be4b6996dc46e2eb0edc1ec9b44710c72e7e099d2d93ad95c67f8b9488869"
+      },
+      "nativeAssertions": {
+        "elimination": 116,
+        "privateAdmission": 143,
+        "publicRouting": 12
+      },
+      "nativeInventories": {
+        "elimination": {
+          "bytes": 4409,
+          "sha256": "4d1b648293bb36ce69df63cf5114935e177b678fcbe6a90ad66ea5e3bcabc78e"
+        },
+        "ordinary-admission-private": {
+          "bytes": 6010,
+          "sha256": "af5f0538643521b150b630b341faf72665192bc3e93de0e48b4171199ad52586"
+        },
+        "ordinary-admission-public": {
+          "bytes": 1019,
+          "sha256": "f6606afd0c91cff7ae8a9b29d4a8758328855dff9d57b4e9c5c80de0e2ac365b"
+        }
+      },
+      "nativeLogs": {
+        "elimination": {
+          "bytes": 6091,
+          "sha256": "8d5176e55963a7200ac3541dd0cb00ca7987273ba7784f8a78f045bdf1efc63e"
+        },
+        "ordinary-admission-private": {
+          "bytes": 10158,
+          "sha256": "363a53e670d57e98444d1075ea70c6a87ef570dd1592e81b5a4ca78c301f3231"
+        },
+        "ordinary-admission-public": {
+          "bytes": 987,
+          "sha256": "6bd00bbe02daa7f2488a452c2460e12f53d8e5d7f508ef64cf093f6ac88a6715"
+        }
+      },
+      "officialOracle": {
+        "controls": 18,
+        "accepted": 14,
+        "rejected": 4,
+        "safeGenerated": 13,
+        "unsafeContract": 1,
+        "assertionLabels": [
+          "type-empty",
+          "enum-two",
+          "direct-recursive",
+          "reflexive",
+          "parameterized",
+          "dependent-index",
+          "universe",
+          "prop-empty",
+          "prop-unit",
+          "prop-proof-field",
+          "prop-data-field",
+          "prop-two",
+          "unsafe-reference",
+          "safe-prior-reference",
+          "duplicate-level-before-mvar",
+          "late-wrong-result",
+          "negative-function",
+          "safe-unsafe-reference"
+        ],
+        "log": {
+          "bytes": 10158,
+          "sha256": "363a53e670d57e98444d1075ea70c6a87ef570dd1592e81b5a4ca78c301f3231"
+        }
+      },
+      "retainedNativeControls": {
+        "dag-native.log": {
+          "bytes": 2197,
+          "sha256": "dd8027463b01693baa8afb677bd585c757df0b69b775c7b1aa035ea6d58c8d35"
+        },
+        "prefix-native.log": {
+          "bytes": 274,
+          "sha256": "c18249a75aba7c6b63bd487422f47331623f02ace878be3d3f8ec0da17493f21"
+        }
+      },
+      "ordinaryAdmission": true,
+      "fullOrdinaryAdmission": true,
+      "publicRoutingChanged": true,
+      "fullKernel": false,
+      "performanceQualified": false,
+      "replayArenaModelBridgeEstablished": false
+    },
+    "sourceInventory": {
+      "schema": "psc1-t05-header-source-inventory-v1",
+      "repository": "dwijayuda/pskernel",
+      "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+      "runId": "40144186958",
+      "runAttempt": "1",
+      "job": "native-header",
+      "route": "native",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "files": [
+        {
+          "path": ".github/workflows/psc1-pskernel-t05-header.yml",
+          "bytes": 129475,
+          "sha256": "386ec103be42565fe85aa098275fded455c12ac54aabe2adef6615934ea854bc",
+          "gitBlobSha": "c09479a1dc48c943584122a40bd7c9e136d10ae4"
+        },
+        {
+          "path": "psc1/kernel-lakefile.lean",
+          "bytes": 17793,
+          "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170",
+          "gitBlobSha": "6b1f3747b1fc6e4d391fc31fa6196851d31a5a24"
+        },
+        {
+          "path": "psc1/lean-toolchain",
+          "bytes": 25,
+          "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+          "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915"
+        },
+        {
+          "path": "psc1/scripts/install-lean435-ci.sh",
+          "bytes": 1051,
+          "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9",
+          "gitBlobSha": "b53f59db9e2fbb45feeedea659244cae7e77b64b"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+          "bytes": 1139,
+          "sha256": "4c0b8ee068921e16b5c823b48b5234cea8ae34f87ec26d8551754f0bbda1e117",
+          "gitBlobSha": "132b2567465c49291fc3cde00feb699c197b18ea"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+          "bytes": 23509,
+          "sha256": "fc4a87bab4aaf9adf73956e7263c819629fa998a3d226f9c059c7bd1deec6eef",
+          "gitBlobSha": "ac2bbc8d42b93e4c00e8e96f706cc901d3bcc9ac"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean",
+          "bytes": 1418,
+          "sha256": "147627ac8160e681c57a21c12fd3320868b29abbebd7416d51f2d3cc6ec34056",
+          "gitBlobSha": "f811255bd32a6a1b4d644d8a4545a1b2bf6c87f9"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean",
+          "bytes": 9400,
+          "sha256": "3f5ffae4af048991583563f5962dd28e54d2fde18dc7d1bd4f507bb40c8f54f6",
+          "gitBlobSha": "9bdbdf46c32798f3d71132fc94013156713cc80b"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean",
+          "bytes": 3151,
+          "sha256": "de60bb221d618ab944edd2cca4f6c8158fbf2a4de50ab5fc1f52ad48c1093e95",
+          "gitBlobSha": "a02db21d57591bea86dffadbc598e22c0b77c7e4"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean",
+          "bytes": 13054,
+          "sha256": "e8d676b29d83502c15dff6ffe9eddc926673f8e74612adce420a389b3fb0b680",
+          "gitBlobSha": "953963f466f9c3f86311cfbd1e9121c45f3de4eb"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean",
+          "bytes": 8213,
+          "sha256": "11d056e95b93bafaac73d0a713bba688aee12f88e9d3478af9c2487f79b6edc9",
+          "gitBlobSha": "0a6682c5f7926da926e0d2d659a66fae57f5ba88"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean",
+          "bytes": 1946,
+          "sha256": "4532206f0bc5fd06fb7b69bcea3c832919dea46f6019ef8cdce2bc0385bbda2b",
+          "gitBlobSha": "0a1209c2406d07c96d4cca1b241ee377c49f28c0"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryHeaderStateProofs.lean",
+          "bytes": 31818,
+          "sha256": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e",
+          "gitBlobSha": "5a6050deb77d66d7440c976a815e5ae8c29f5b0a"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+          "bytes": 29015,
+          "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351",
+          "gitBlobSha": "2034798a4de1b4ca25b2e6366a88020b97beed27"
+        },
+        {
+          "path": "psc1/test/PsKernelCacheScopeProofs.lean",
+          "bytes": 36771,
+          "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5",
+          "gitBlobSha": "45cb58a271695bee0ae05330f39c3c1a86f1801f"
+        },
+        {
+          "path": "psc1/test/PsKernelExprV2SessionProofs.lean",
+          "bytes": 9567,
+          "sha256": "33b73b9333eea849e44a096a886fdee549504e820072305f9438361ecabb0dd3",
+          "gitBlobSha": "48541d207b6853088c88a61ad0f50ec4b5422232"
+        },
+        {
+          "path": "psc1/test/PsKernelScalarHashWorkerRegression.lean",
+          "bytes": 10872,
+          "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2",
+          "gitBlobSha": "aa5dd561cdb3df437c21a61c899f57b160289d0f"
+        },
+        {
+          "path": "psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+          "bytes": 5877,
+          "sha256": "56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0",
+          "gitBlobSha": "010333b5d6ac53c60c558c89906b02d7358fb0c0"
+        },
+        {
+          "path": "psc1/test/PsKernelKnotFuelProofs.lean",
+          "bytes": 131180,
+          "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b",
+          "gitBlobSha": "197da10ed3a5f2aeb1548511db60a618891912f1"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryHeaderRegression.lean",
+          "bytes": 26890,
+          "sha256": "9f9522e7f14c9a62703ca59dc2ab11b1c5c49cde9dadb1b39599802c7356cad6",
+          "gitBlobSha": "4c0ada09c1b5f7404e0c8c5672049aed75bcbc77"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+          "bytes": 25991,
+          "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153",
+          "gitBlobSha": "98b68b82566c4171c5fe110f11c9ff72b9e00992"
+        },
+        {
+          "path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+          "bytes": 2546,
+          "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c",
+          "gitBlobSha": "59fa82e0575b4119aebcf15fe39ed691346f1d06"
+        },
+        {
+          "path": "psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+          "bytes": 1126,
+          "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff",
+          "gitBlobSha": "11e376e9ea0628aadf9a6f94ddfb2ccf29dcb40c"
+        },
+        {
+          "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+          "bytes": 7826,
+          "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736",
+          "gitBlobSha": "494647393a3e4b3bdb7ac11115dac470cef6061a"
+        },
+        {
+          "path": "psc1/scripts/pskernel-generated-smoke.mjs",
+          "bytes": 12610,
+          "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab",
+          "gitBlobSha": "604773a240086eec60997c5e140c95b9e3316cda"
+        },
+        {
+          "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+          "bytes": 244729,
+          "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0",
+          "gitBlobSha": "065ed4d1de1bdded148a2774de9f13bb8b1a406a"
+        },
+        {
+          "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+          "bytes": 28982,
+          "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db",
+          "gitBlobSha": "529a05c4345983eb96420d17e10415538d645f54"
+        },
+        {
+          "path": "psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs",
+          "bytes": 5956,
+          "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b",
+          "gitBlobSha": "120af542b9c1218f732e1c75faadcdbc66620aa4"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean",
+          "bytes": 22765,
+          "sha256": "63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05",
+          "gitBlobSha": "cb2e3a74cbf9ccc8a8484d1bc31d5ed82eda6490"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean",
+          "bytes": 9757,
+          "sha256": "7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3",
+          "gitBlobSha": "918753c154f2ed96d65702494c7374dcd5ec5001"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean",
+          "bytes": 10620,
+          "sha256": "cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0",
+          "gitBlobSha": "a8b911d20a603b46edcc63a0bf000c1bacec5341"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean",
+          "bytes": 27573,
+          "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51",
+          "gitBlobSha": "44d01196e8cdbb6d67db8a860dc73827c8cb206c"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean",
+          "bytes": 5194,
+          "sha256": "b681c1a2751f15f66edcbba043fc6af83ac13147ff06360fc459f5405fb483d1",
+          "gitBlobSha": "aa451845d1c0c452d49a96f44caa5b5985f8284c"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean",
+          "bytes": 7877,
+          "sha256": "a44e0ebb823e4cb00a8a9d0b2d6017270ff869e1ebd38a1d344d87b8ac378b91",
+          "gitBlobSha": "632ab0da062959eceeaff28a9f3a420dc89b923f"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean",
+          "bytes": 21914,
+          "sha256": "8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145",
+          "gitBlobSha": "56a70b8ac94283694bf375a8d5c8e7adfd3859b7"
+        },
+        {
+          "path": "psc1/test/PsKernelExprV2MetadataProofs.lean",
+          "bytes": 7319,
+          "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20",
+          "gitBlobSha": "c97466b70bddb9867d05ab4282990a3f3e417779"
+        },
+        {
+          "path": "psc1/test/PsKernelExprV2PagedModelProofs.lean",
+          "bytes": 16916,
+          "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8",
+          "gitBlobSha": "e9ed760c2394b908fd5632633572fb557261756a"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean",
+          "bytes": 15184,
+          "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019",
+          "gitBlobSha": "72168cc434bed09b9cd5624a470d1f672c558354"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+          "bytes": 25543,
+          "sha256": "5fb21b0e72978a520a5528f1177825cae4f3b7b5ed1871787b0c34db6cbfced4",
+          "gitBlobSha": "d61dabc38bfb1b8e29da05053c41b96414794ba0"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean",
+          "bytes": 32897,
+          "sha256": "2146408a28b974c4d3992b702e33b205b141d85d99f5f354c02900b896ef4933",
+          "gitBlobSha": "e1705f524315190b2408df86e904ac0bad5ae362"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorResultRegression.lean",
+          "bytes": 20510,
+          "sha256": "e9a10eeae8030cc687607956edf631cf5f723538cedc696f5a15eb1ac1474bff",
+          "gitBlobSha": "cca28763c968bae0d3cc68f20ef7030556da0792"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs",
+          "bytes": 18519,
+          "sha256": "05da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660",
+          "gitBlobSha": "e414e0d728c05d99e98c53545e20f2514563ee19"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+          "bytes": 13348,
+          "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a",
+          "gitBlobSha": "3d2129860909bdc4dcff16a162bf168badcf1aa7"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean",
+          "bytes": 1670,
+          "sha256": "c23a76852e6546be680e84721c50597c6f2ba5619463ed5727746431c88648b4",
+          "gitBlobSha": "9912bba04804ab636b3be47b0c5de5c4f5b3d14d"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean",
+          "bytes": 12184,
+          "sha256": "b17434e2360adfdbcf12870bbd91fc353e3bbde277f058373730bee38e23e1c8",
+          "gitBlobSha": "6f6cf075a12c72aab1b898625c638c880bc73cd2"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean",
+          "bytes": 13332,
+          "sha256": "23a06affee65521b775ce67078068ba89cdedabad7fee80f142d796aaf4ad991",
+          "gitBlobSha": "725af49893a367aa561f37dddd4f007579144cff"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean",
+          "bytes": 17353,
+          "sha256": "035c86cec63c50ea0da4ae83f81f0a03144121ea57fe22638a4816107f895bed",
+          "gitBlobSha": "977d7f669d44647e6164ab645f7f5bd9a360b5b3"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean",
+          "bytes": 19729,
+          "sha256": "b11d2b31b94a3d7eeeaf36325a533ae90b11a817c811d931f3b6c26f4820de98",
+          "gitBlobSha": "82a42c38aaf2b003333cd0701df2131b229f1b66"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean",
+          "bytes": 23456,
+          "sha256": "131657ccbe294ac7aab4224c00df6ea878b6f088d7f4db78bc2ed893b08fd159",
+          "gitBlobSha": "06a20e4d1f61a66fc11c699caba42245ce37c3bc"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs",
+          "bytes": 22405,
+          "sha256": "0b7ee568b7d26bc13691fd85aca6ae73ae70ca164f58386ddeaaafbb6e094a6e",
+          "gitBlobSha": "bb688cc04759d072be3cca7366fed549ecc2c5a9"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorAnalysis.lean",
+          "bytes": 8414,
+          "sha256": "88669b3dafd4aa88dd1e0a6c12564f24330e61710e16e39ed65400fd2e5ea906",
+          "gitBlobSha": "153c74713bf236a400e7f4e3bbd8313bb2f63be9"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorAnalysisProofs.lean",
+          "bytes": 16155,
+          "sha256": "bdbbea7b33e26e73d0c68ed0c7c549a7243c5e4b045be468c18a1fb5f9353c1b",
+          "gitBlobSha": "7c07f9561dd843514b04dda016026c76835946a9"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryConstructorAnalysisRegression.lean",
+          "bytes": 22679,
+          "sha256": "2ad5d9eec2e33b3e48798ac98cd5c11e683d73ea5ee39125239053f55334e18a",
+          "gitBlobSha": "c7bf86980cce136911ab2f9ea967586debe15e5f"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs",
+          "bytes": 17928,
+          "sha256": "940aefac2570888ea49b9146d7a3c487d47d51b9b31d896c4bdfd037699c04d5",
+          "gitBlobSha": "0e2a582617454659ef4dbe52ee7ce95bc533d143"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean",
+          "bytes": 8245,
+          "sha256": "16cce0a367dfa144a56770f76bcb0605d3a370b360175c4f26583387cf2a1723",
+          "gitBlobSha": "cd3b659ad1e597b95a4ac7b69a1ebf126cab4a17"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorLoop.lean",
+          "bytes": 10026,
+          "sha256": "ffd94899878c473a64f621860e76a1ae10b6b07759430381c98ce222091ad1b3",
+          "gitBlobSha": "1a466a222f973a8ab365f89324fca8cb641fee9e"
+        },
+        {
+          "path": "psc1/test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean",
+          "bytes": 14890,
+          "sha256": "0998daa5578bb7a49a500a27e546882a7ef60e3924d77afac1d44225dcb366d5",
+          "gitBlobSha": "1d473c1c107b244bbb5ca9cf2b2041e2f4da9a8d"
+        },
+        {
+          "path": "psc1/test/PsKernelExprV2OrdinaryConstructorLoopRegression.lean",
+          "bytes": 26623,
+          "sha256": "a3adc8d1efb7409eabec5ca9a56db3d3c7c5a29024af4da70838655344d3737b",
+          "gitBlobSha": "a72253765966dfd701334d2fa027af280b67b7d8"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs",
+          "bytes": 24687,
+          "sha256": "24bc0276b4fc75a68f3c54ab7fd4fc7e6b50c14d90ec5e9ad5b1f4bb55c9c08e",
+          "gitBlobSha": "68cad3d3e9cc847911cf6101dce1f7f59311d695"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryElimination.lean",
+          "bytes": 13587,
+          "sha256": "9dd0799b13f78f52f1ac5b5d18de9fadb94e9396e536b0fde5408dcb184d6e97",
+          "gitBlobSha": "b0c3915f8cc64026ecc281178d7fa4a14b78fb9f"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryGenerated.lean",
+          "bytes": 12837,
+          "sha256": "761ae589a4256a7808dff1883a835ac1f4ef709484c7e256774e48a721ff06c5",
+          "gitBlobSha": "f1fe7793d6d4b255509b6d1271d6d8ac555b25a7"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursorValidation.lean",
+          "bytes": 7115,
+          "sha256": "ce27b9f03c298abd2159461341d7aeae8444a6eaf40899f89128160194a9440e",
+          "gitBlobSha": "9b985ee8599e42ca3d9227c523e38eac53b34d9a"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAdmission.lean",
+          "bytes": 15270,
+          "sha256": "1fbfe6cf734fc169a3bec981309216c29339f543384b20704b597987ed0d596b",
+          "gitBlobSha": "a624ed1ca728df4b418b756341c04e8faf54fe8c"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean",
+          "bytes": 22751,
+          "sha256": "48ff1c3f3eab626fb11c8afe34b8b8359b69dba76acde768987ee997b494aea6",
+          "gitBlobSha": "585e4d12f1682c5478da382ee3f6b2d20a3e25d8"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean",
+          "bytes": 29421,
+          "sha256": "1babb04ac9dc0abe38ac32344453dc9e14fef894706cdcd49ccb2dff341c3209",
+          "gitBlobSha": "663cf09fa9ef305bea30f0758bac7aac164ec096"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryEliminationProofs.lean",
+          "bytes": 19349,
+          "sha256": "20c41005810df740fea003b18477dd1b499fb6e83b81a6a8e644638618b733a2",
+          "gitBlobSha": "0ef74e1f891cf489e3cd78c8622155b4bc11d087"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryEliminationRegression.lean",
+          "bytes": 29450,
+          "sha256": "e6e3b89aef58201b91d9fd0e683fd4f3e6971d47b9d909f32f9eb1e5f45c4a3c",
+          "gitBlobSha": "70290a4d5b24ad4f63f0428367eb35eaf0c704a4"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryAdmissionProofs.lean",
+          "bytes": 19187,
+          "sha256": "c1d2e9bb559c4a3e049daa59a371a668502b09adcc463d9e08135352c9f0db35",
+          "gitBlobSha": "2aa6d6b4ff6361a1bf97593b09e8f3bf4536bd21"
+        },
+        {
+          "path": "psc1/test/PsKernelExprV2OrdinaryAdmissionRegression.lean",
+          "bytes": 35460,
+          "sha256": "dfbd6eadde415e0cc43c76c943d5770f2861b036eea3699f98a26725fc10383f",
+          "gitBlobSha": "92af6565e5ccc200fdae222ae171c55013670011"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryAdmissionPublicProofs.lean",
+          "bytes": 6077,
+          "sha256": "a1ea7689f2583e73290c167eca8d872d0830a6c5cbce68829d5eec78cc719941",
+          "gitBlobSha": "b069f4fb9b80a0d402278cda9b692c93372ff105"
+        },
+        {
+          "path": "psc1/test/PsKernelOrdinaryAdmissionPublicRegression.lean",
+          "bytes": 8508,
+          "sha256": "c6923431382bcef5e2168dd948a428679886e7161e47c53201a7e777bbe9e827",
+          "gitBlobSha": "e94df5316c9ea52496099fdb3cbfc68836dedc3c"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-elimination-smoke.mjs",
+          "bytes": 27645,
+          "sha256": "6197194c3b7fef20c621e071ffc0df44fb877121a8ec557eba368cc60dbfc248",
+          "gitBlobSha": "6ca4c68e3266d9b5fd557fcdd0669672eabc460b"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-admission-private-smoke.mjs",
+          "bytes": 27529,
+          "sha256": "c05a5dd714c719aa6d75d7b8b0f5d88ac98afb4dfb6bd6b930d2a608a00f707c",
+          "gitBlobSha": "7cf383baf83d7e21a7ab8aff95375a3a78f55060"
+        },
+        {
+          "path": "psc1/scripts/pskernel-ordinary-admission-public-smoke.mjs",
+          "bytes": 9402,
+          "sha256": "19216cf873cdc48228da2775c5b6643bc41f66540574fdce19adaf89c7c15128",
+          "gitBlobSha": "266304aee99b2847fd17220b713c6ba0dc437c0f"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean",
+          "bytes": 5909,
+          "sha256": "d238bac7563798b22cf025caf3d4c95fb54ede7b11159988d7e205fc94392949",
+          "gitBlobSha": "7b896a50da30370d3a185b79f9ffeeaa379bbb9b"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.lean",
+          "bytes": 3730,
+          "sha256": "a7b7893b50aaef173b736b09cd506afee63ecbd505649f25b28116a66a809fcd",
+          "gitBlobSha": "ae0d498305cab3f253bd53f40d66ae0919420027"
+        },
+        {
+          "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.lean",
+          "bytes": 11571,
+          "sha256": "4c607bc336cc56a981feaacbb381b770acb602ba30e331d1a5220c96859a61c6",
+          "gitBlobSha": "0db1095805c4e6bc4d0025b073fec1807ebf2206"
+        }
+      ]
+    }
+  },
+  "routes": {
+    "generated": {
+      "modules": 157,
+      "declarations": 1901,
+      "sourceInputs": 77,
+      "detachedScripts": 16,
+      "provenance": {
+        "schema": "psc1-t05-header-provenance-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+        "runId": "40144186958",
+        "runAttempt": "1",
+        "job": "generated-header",
+        "route": "generated",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "fuel": 4096,
+        "oldSpaceMiB": 2048,
+        "oldSpaceIsHardRssLimit": false,
+        "emptyPATH": true,
+        "kernel": {
+          "bytes": 10297874,
+          "sha256": "51e0b4397a105a6198f6f5554b416e98d34d71230ed50630626f106fdc5f1375"
+        },
+        "harness": {
+          "bytes": 25991,
+          "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+        },
+        "sourceInventory": {
+          "bytes": 20468,
+          "sha256": "86eca68943c01e53561bf6839887288430758810215f659eae54c26eb40857e2"
+        },
+        "leanSourceManifest": {
+          "bytes": 32764,
+          "sha256": "2c5de7cfada7fd0c34539e23d63328fc512ee5d6724c9e18ca891248e9421321"
+        },
+        "scripts": {
+          "pskernel-ordinary-elimination-smoke.mjs": {
+            "bytes": 27645,
+            "sha256": "6197194c3b7fef20c621e071ffc0df44fb877121a8ec557eba368cc60dbfc248"
+          },
+          "pskernel-ordinary-admission-private-smoke.mjs": {
+            "bytes": 27529,
+            "sha256": "c05a5dd714c719aa6d75d7b8b0f5d88ac98afb4dfb6bd6b930d2a608a00f707c"
+          },
+          "pskernel-ordinary-admission-public-smoke.mjs": {
+            "bytes": 9402,
+            "sha256": "19216cf873cdc48228da2775c5b6643bc41f66540574fdce19adaf89c7c15128"
+          },
+          "pskernel-ordinary-constructor-loop-smoke.mjs": {
+            "bytes": 24687,
+            "sha256": "24bc0276b4fc75a68f3c54ab7fd4fc7e6b50c14d90ec5e9ad5b1f4bb55c9c08e"
+          },
+          "pskernel-ordinary-constructor-analysis-smoke.mjs": {
+            "bytes": 17928,
+            "sha256": "940aefac2570888ea49b9146d7a3c487d47d51b9b31d896c4bdfd037699c04d5"
+          },
+          "pskernel-ordinary-constructor-fields-smoke.mjs": {
+            "bytes": 22405,
+            "sha256": "0b7ee568b7d26bc13691fd85aca6ae73ae70ca164f58386ddeaaafbb6e094a6e"
+          },
+          "pskernel-ordinary-header-smoke.mjs": {
+            "bytes": 25991,
+            "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+          },
+          "pskernel-ordinary-constructor-params-smoke.mjs": {
+            "bytes": 18519,
+            "sha256": "05da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660"
+          },
+          "pskernel-ordinary-constructor-result-smoke.mjs": {
+            "bytes": 13348,
+            "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+          },
+          "pskernel-scalar-hash-worker-smoke.mjs": {
+            "bytes": 2546,
+            "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+          },
+          "pskernel-scalar-hash-short-entry-smoke.mjs": {
+            "bytes": 1126,
+            "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff"
+          },
+          "pskernel-closed-cache-analysis-smoke.mjs": {
+            "bytes": 7826,
+            "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+          },
+          "pskernel-generated-smoke.mjs": {
+            "bytes": 12610,
+            "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab"
+          },
+          "pskernel-expr-v2-dag-smoke.mjs": {
+            "bytes": 244729,
+            "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+          },
+          "pskernel-expr-v2-generated-prefix-smoke.mjs": {
+            "bytes": 28982,
+            "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+          },
+          "pskernel-invalid-recursor-occurrence-smoke.mjs": {
+            "bytes": 5956,
+            "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b"
+          }
+        },
+        "headerOnly": false,
+        "constructorHelpersOnly": false,
+        "ordinaryAdmission": true,
+        "fullOrdinaryAdmission": true,
+        "fullKernel": false,
+        "publicRoutingChanged": true,
+        "publicFallbackRetained": true
+      },
+      "receiptChain": [
+        {
+          "marker": "PSC1_T05_HEADER_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-header-route-receipt-v1",
+            "status": "pass",
+            "result": {
+              "assertions": 1992,
+              "sectionAssertions": {
+                "harness": 1,
+                "header": 444,
+                "occurrence": 1378,
+                "annotations": 94,
+                "state": 47,
+                "phases": 20,
+                "topCallbacks": 8
+              },
+              "headerCases": 432,
+              "positiveDirect": 10,
+              "occurrenceFuelCases": 1026,
+              "annotationFuelCases": 75,
+              "callbackSequences": 3,
+              "callbackFailures": 24,
+              "headerOnly": true,
+              "fullAdmission": false,
+              "publicFallbackUsed": false
+            },
+            "measurement": "peak_rss_kib=308296 wall_seconds=2.23 exit_status=0",
+            "peakRssKiB": 308296,
+            "wallSeconds": 2.23,
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "headerOnly": true,
+            "fullAdmission": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_CONSTRUCTOR_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-constructor-route-receipt-v1",
+            "status": "pass",
+            "retainedHeaderReceipt": {
+              "bytes": 6600,
+              "sha256": "85ded6b9fd23fdc3d54fc2add6265e1c715b952a5aef9b56e60a88d0ea251e9a"
+            },
+            "retainedHeaderAssertions": 1992,
+            "results": {
+              "params": {
+                "result": {
+                  "schema": "psc1-ordinary-constructor-params-v1",
+                  "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+                  "assertions": 268,
+                  "sectionAssertions": {
+                    "harness": 1,
+                    "direct": 227,
+                    "protocol": 20,
+                    "boundaries": 14,
+                    "faults": 6
+                  },
+                  "directFixtures": 18,
+                  "fuelValues": 6,
+                  "interfaces": 2,
+                  "directComparisons": 216,
+                  "positiveDirect": 11,
+                  "fullAdmission": false,
+                  "publicRoutingChanged": false
+                },
+                "log": {
+                  "bytes": 450,
+                  "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+                },
+                "harness": {
+                  "bytes": 18519,
+                  "sha256": "05da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660"
+                },
+                "measurement": "peak_rss_kib=292792 wall_seconds=1.20 exit_status=0",
+                "peakRssKiB": 292792,
+                "wallSeconds": 1.2
+              },
+              "result": {
+                "result": {
+                  "schema": "psc1-ordinary-constructor-result-v1",
+                  "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+                  "assertions": 432,
+                  "sectionAssertions": {
+                    "harness": 1,
+                    "selector": 138,
+                    "consumer": 26,
+                    "occurrence": 240,
+                    "bounds": 16,
+                    "indexLists": 7,
+                    "precedence": 4
+                  },
+                  "selectorRows": 46,
+                  "occurrenceTerms": 30,
+                  "targetsPerOccurrence": 2,
+                  "fullAdmission": false,
+                  "publicRoutingChanged": false
+                },
+                "log": {
+                  "bytes": 454,
+                  "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+                },
+                "harness": {
+                  "bytes": 13348,
+                  "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+                },
+                "measurement": "peak_rss_kib=120400 wall_seconds=0.18 exit_status=0",
+                "peakRssKiB": 120400,
+                "wallSeconds": 0.18
+              }
+            },
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "headerOnly": false,
+            "constructorHelpersOnly": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_FIELDS_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-fields-route-receipt-v1",
+            "status": "pass",
+            "retainedConstructorReceipt": {
+              "bytes": 8542,
+              "sha256": "6f52a9396defa62d9812b9b7d87ab3262c9234dfdfb228fec05d9b6dbd5f7be7"
+            },
+            "result": {
+              "schema": "psc1-ordinary-constructor-fields-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+              "assertions": 268,
+              "sectionAssertions": {
+                "harness": 1,
+                "fields": 147,
+                "recursive": 105,
+                "boundaries": 8,
+                "recursorGuard": 7
+              },
+              "fieldRows": 21,
+              "recursiveRows": 15,
+              "fuelValues": 6,
+              "positiveFields": 16,
+              "negativeFields": 5,
+              "positiveRecursive": 10,
+              "negativeRecursive": 5,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 497,
+              "sha256": "968b52acfc81b605bdfdd8f749d2a91e27858211150e3cd1466bbef22e5b8a5b"
+            },
+            "harness": {
+              "bytes": 22405,
+              "sha256": "0b7ee568b7d26bc13691fd85aca6ae73ae70ca164f58386ddeaaafbb6e094a6e"
+            },
+            "measurement": "peak_rss_kib=332488 wall_seconds=2.93 exit_status=0",
+            "peakRssKiB": 332488,
+            "wallSeconds": 2.93,
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "968b52acfc81b605bdfdd8f749d2a91e27858211150e3cd1466bbef22e5b8a5b"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "constructorHelpersOnly": true,
+            "fieldsAndPositivity": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ANALYSIS_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-analysis-route-receipt-v1",
+            "status": "pass",
+            "retainedFieldsReceipt": {
+              "bytes": 7550,
+              "sha256": "342f1ff9e8b9a29dba7e1ad323e3aec69dcc0d4d155fcd86434cd6f0f3d8e9ca"
+            },
+            "result": {
+              "schema": "psc1-ordinary-constructor-analysis-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+              "assertions": 93,
+              "sectionAssertions": {
+                "harness": 1,
+                "matrix": 84,
+                "protocol": 8
+              },
+              "rows": 12,
+              "fuelValues": 6,
+              "positive": 6,
+              "negative": 6,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 380,
+              "sha256": "07ce760fd6faf7767a738f8c46a0fa250cae72c1566e524c928103e85b824f7f"
+            },
+            "harness": {
+              "bytes": 17928,
+              "sha256": "940aefac2570888ea49b9146d7a3c487d47d51b9b31d896c4bdfd037699c04d5"
+            },
+            "measurement": "peak_rss_kib=301400 wall_seconds=1.40 exit_status=0",
+            "peakRssKiB": 301400,
+            "wallSeconds": 1.4,
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "07ce760fd6faf7767a738f8c46a0fa250cae72c1566e524c928103e85b824f7f"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "968b52acfc81b605bdfdd8f749d2a91e27858211150e3cd1466bbef22e5b8a5b"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "constructorHelpersOnly": true,
+            "singleConstructorAnalysis": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_LOOP_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-loop-route-receipt-v1",
+            "status": "pass",
+            "retainedAnalysisReceipt": {
+              "bytes": 7544,
+              "sha256": "2dd3b06d3fd77ec45664017b6baba6e0ba24168f2a95b93b92e4f59bcd982c0b"
+            },
+            "result": {
+              "schema": "psc1-ordinary-constructor-loop-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+              "assertions": 69,
+              "sectionAssertions": {
+                "harness": 1,
+                "matrix": 56,
+                "protocol": 12
+              },
+              "rows": 8,
+              "fuelValues": 6,
+              "positive": 5,
+              "negative": 3,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 372,
+              "sha256": "a817ef816df8d1806fe6e88255b67eb3c7087945b77c15eaafb394c92e79d5b4"
+            },
+            "harness": {
+              "bytes": 24687,
+              "sha256": "24bc0276b4fc75a68f3c54ab7fd4fc7e6b50c14d90ec5e9ad5b1f4bb55c9c08e"
+            },
+            "measurement": "peak_rss_kib=309540 wall_seconds=1.46 exit_status=0",
+            "peakRssKiB": 309540,
+            "wallSeconds": 1.46,
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "07ce760fd6faf7767a738f8c46a0fa250cae72c1566e524c928103e85b824f7f"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "968b52acfc81b605bdfdd8f749d2a91e27858211150e3cd1466bbef22e5b8a5b"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "a817ef816df8d1806fe6e88255b67eb3c7087945b77c15eaafb394c92e79d5b4"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "constructorHelpersOnly": true,
+            "constructorLoopOnly": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ELIMINATION_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-elimination-route-receipt-v1",
+            "status": "pass",
+            "retainedLoopReceipt": {
+              "bytes": 7673,
+              "sha256": "fdb5ec62c5e08ff1b478eb4282e816211824de4c08b6edeecdaa7656bd2fbb7e"
+            },
+            "result": {
+              "schema": "psc1-ordinary-elimination-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+              "assertions": 116,
+              "sectionAssertions": {
+                "harness": 1,
+                "policy": 63,
+                "raw": 28,
+                "member": 12,
+                "protocol": 12
+              },
+              "policyRows": 9,
+              "rawRows": 4,
+              "fuelValues": 6,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 377,
+              "sha256": "68d0f92f7c71254a60ee686b03c2da6beaf231c1430f76a07a75159820a8f5a4"
+            },
+            "harness": {
+              "bytes": 27645,
+              "sha256": "6197194c3b7fef20c621e071ffc0df44fb877121a8ec557eba368cc60dbfc248"
+            },
+            "measurement": "peak_rss_kib=279732 wall_seconds=1.21 exit_status=0",
+            "peakRssKiB": 279732,
+            "wallSeconds": 1.21,
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "07ce760fd6faf7767a738f8c46a0fa250cae72c1566e524c928103e85b824f7f"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "968b52acfc81b605bdfdd8f749d2a91e27858211150e3cd1466bbef22e5b8a5b"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "a817ef816df8d1806fe6e88255b67eb3c7087945b77c15eaafb394c92e79d5b4"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "elimination.log": {
+                "bytes": 377,
+                "sha256": "68d0f92f7c71254a60ee686b03c2da6beaf231c1430f76a07a75159820a8f5a4"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "ordinary-admission-private.log": {
+                "bytes": 425,
+                "sha256": "eb21dd02c724e020655918bf82929c44d515e0b12239a7b3685eb9c65548bda3"
+              },
+              "ordinary-admission-public.log": {
+                "bytes": 1735,
+                "sha256": "2a566037ceb749ebdaa9daa13e53558b4cb657086516cbdf82f000f02ed8fb7c"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "ordinaryAdmission": false,
+            "fullOrdinaryAdmission": false,
+            "publicRoutingChanged": false,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ORDINARY_ADMISSION_PRIVATE_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-ordinary-admission-private-route-receipt-v1",
+            "status": "pass",
+            "retainedEliminationReceipt": {
+              "bytes": 8126,
+              "sha256": "0d61c8b16a5c3e2d9f5b45fc364a3570de1aef933ee1d541c094616a827f4983"
+            },
+            "result": {
+              "schema": "psc1-ordinary-admission-private-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+              "assertions": 143,
+              "sectionAssertions": {
+                "harness": 1,
+                "matrix": 126,
+                "protocol": 16
+              },
+              "rows": 18,
+              "fuelValues": 6,
+              "positive": 14,
+              "negative": 4,
+              "privateAdmission": true,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 425,
+              "sha256": "eb21dd02c724e020655918bf82929c44d515e0b12239a7b3685eb9c65548bda3"
+            },
+            "harness": {
+              "bytes": 27529,
+              "sha256": "c05a5dd714c719aa6d75d7b8b0f5d88ac98afb4dfb6bd6b930d2a608a00f707c"
+            },
+            "measurement": "peak_rss_kib=356564 wall_seconds=9.12 exit_status=0",
+            "peakRssKiB": 356564,
+            "wallSeconds": 9.12,
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "07ce760fd6faf7767a738f8c46a0fa250cae72c1566e524c928103e85b824f7f"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "968b52acfc81b605bdfdd8f749d2a91e27858211150e3cd1466bbef22e5b8a5b"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "a817ef816df8d1806fe6e88255b67eb3c7087945b77c15eaafb394c92e79d5b4"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "elimination.log": {
+                "bytes": 377,
+                "sha256": "68d0f92f7c71254a60ee686b03c2da6beaf231c1430f76a07a75159820a8f5a4"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "ordinary-admission-private.log": {
+                "bytes": 425,
+                "sha256": "eb21dd02c724e020655918bf82929c44d515e0b12239a7b3685eb9c65548bda3"
+              },
+              "ordinary-admission-public.log": {
+                "bytes": 1735,
+                "sha256": "2a566037ceb749ebdaa9daa13e53558b4cb657086516cbdf82f000f02ed8fb7c"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "ordinaryAdmission": false,
+            "fullOrdinaryAdmission": false,
+            "publicRoutingChanged": false,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ORDINARY_ADMISSION_PUBLIC_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-ordinary-admission-public-route-receipt-v1",
+            "status": "pass",
+            "retainedPrivateAdmissionReceipt": {
+              "bytes": 8164,
+              "sha256": "92ffdddbfc81e19a8a8191cdc4c07315da016e87fa278b91b7006f36dd4c95b8"
+            },
+            "result": {
+              "schema": "psc1-ordinary-admission-public-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-generated/detached/kernel.mjs",
+              "assertions": 12,
+              "sectionAssertions": {
+                "harness": 1,
+                "routing": 7,
+                "boundary": 4
+              },
+              "assertionLabels": [
+                "harness/rejection-active",
+                "routing/direct-owner-retained",
+                "routing/finish-carries-injected-suffix",
+                "routing/decline-restarts-original",
+                "routing/hard-error-does-not-fallback",
+                "routing/resource-limit-failure",
+                "routing/same-batch-recursor-check",
+                "routing/cross-call-checked-recursor",
+                "boundary/private-generated-id-not-external",
+                "boundary/later-command-failure-atomic",
+                "boundary/fallback-original-bounds",
+                "boundary/preflight-precedence"
+              ],
+              "publicRoutingChanged": true,
+              "ordinaryAdmission": true,
+              "fullKernel": false,
+              "performanceQualified": false
+            },
+            "log": {
+              "bytes": 1735,
+              "sha256": "2a566037ceb749ebdaa9daa13e53558b4cb657086516cbdf82f000f02ed8fb7c"
+            },
+            "harness": {
+              "bytes": 9402,
+              "sha256": "19216cf873cdc48228da2775c5b6643bc41f66540574fdce19adaf89c7c15128"
+            },
+            "measurement": "peak_rss_kib=230672 wall_seconds=0.48 exit_status=0",
+            "peakRssKiB": 230672,
+            "wallSeconds": 0.48,
+            "logs": {
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25031,
+                "sha256": "d2b77b7b6aa2da085dca9f8d62a02e2db436656f3d71035580dd4157d3d1eb78"
+              },
+              "complete-build.log": {
+                "bytes": 16075,
+                "sha256": "05505aa8b1ed87d8da349fada6e1e51bfd7349968f881aad80bda64447790eac"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "07ce760fd6faf7767a738f8c46a0fa250cae72c1566e524c928103e85b824f7f"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "968b52acfc81b605bdfdd8f749d2a91e27858211150e3cd1466bbef22e5b8a5b"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "a817ef816df8d1806fe6e88255b67eb3c7087945b77c15eaafb394c92e79d5b4"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "2bcd6ff2fc17e5e05f7b906742d7162f26028e6da70ecace80383b2e6d8aa33f"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "649ea8a28ffb1335024d8644d61d773e918215d3996fef7ac10ceb82a75f42d5"
+              },
+              "dag.log": {
+                "bytes": 2287878,
+                "sha256": "797fc17c23a7e121cc4259b1306d46e26700535f0592f7e75211a4ddfe2b3f19"
+              },
+              "elimination.log": {
+                "bytes": 377,
+                "sha256": "68d0f92f7c71254a60ee686b03c2da6beaf231c1430f76a07a75159820a8f5a4"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "ordinary-admission-private.log": {
+                "bytes": 425,
+                "sha256": "eb21dd02c724e020655918bf82929c44d515e0b12239a7b3685eb9c65548bda3"
+              },
+              "ordinary-admission-public.log": {
+                "bytes": 1735,
+                "sha256": "2a566037ceb749ebdaa9daa13e53558b4cb657086516cbdf82f000f02ed8fb7c"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "ordinaryAdmission": true,
+            "fullOrdinaryAdmission": true,
+            "publicRoutingChanged": true,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        }
+      ]
+    },
+    "canonical": {
+      "modules": 157,
+      "declarations": 1901,
+      "sourceInputs": 77,
+      "detachedScripts": 16,
+      "provenance": {
+        "schema": "psc1-t05-header-provenance-v1",
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+        "runId": "40144186958",
+        "runAttempt": "1",
+        "job": "generated-header",
+        "route": "canonical",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "typescript": "7.0.2",
+        "node": "v22.23.3",
+        "fuel": 4096,
+        "oldSpaceMiB": 2048,
+        "oldSpaceIsHardRssLimit": false,
+        "emptyPATH": true,
+        "kernel": {
+          "bytes": 10297881,
+          "sha256": "2e74db56033ca269dcf5248768c5f2046425272188b7fde370a62ca9905bb333"
+        },
+        "harness": {
+          "bytes": 25991,
+          "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+        },
+        "sourceInventory": {
+          "bytes": 20468,
+          "sha256": "3a2d0c91320803f894f11d8213fa19a742e2c3c183ca072aa5cb7ee8f408fac8"
+        },
+        "leanSourceManifest": {
+          "bytes": 32764,
+          "sha256": "0651953964fdc478a56e0559564e12823086d89d9dbc7fb51de2ba7214c9225f"
+        },
+        "scripts": {
+          "pskernel-ordinary-elimination-smoke.mjs": {
+            "bytes": 27645,
+            "sha256": "6197194c3b7fef20c621e071ffc0df44fb877121a8ec557eba368cc60dbfc248"
+          },
+          "pskernel-ordinary-admission-private-smoke.mjs": {
+            "bytes": 27529,
+            "sha256": "c05a5dd714c719aa6d75d7b8b0f5d88ac98afb4dfb6bd6b930d2a608a00f707c"
+          },
+          "pskernel-ordinary-admission-public-smoke.mjs": {
+            "bytes": 9402,
+            "sha256": "19216cf873cdc48228da2775c5b6643bc41f66540574fdce19adaf89c7c15128"
+          },
+          "pskernel-ordinary-constructor-loop-smoke.mjs": {
+            "bytes": 24687,
+            "sha256": "24bc0276b4fc75a68f3c54ab7fd4fc7e6b50c14d90ec5e9ad5b1f4bb55c9c08e"
+          },
+          "pskernel-ordinary-constructor-analysis-smoke.mjs": {
+            "bytes": 17928,
+            "sha256": "940aefac2570888ea49b9146d7a3c487d47d51b9b31d896c4bdfd037699c04d5"
+          },
+          "pskernel-ordinary-constructor-fields-smoke.mjs": {
+            "bytes": 22405,
+            "sha256": "0b7ee568b7d26bc13691fd85aca6ae73ae70ca164f58386ddeaaafbb6e094a6e"
+          },
+          "pskernel-ordinary-header-smoke.mjs": {
+            "bytes": 25991,
+            "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+          },
+          "pskernel-ordinary-constructor-params-smoke.mjs": {
+            "bytes": 18519,
+            "sha256": "05da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660"
+          },
+          "pskernel-ordinary-constructor-result-smoke.mjs": {
+            "bytes": 13348,
+            "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+          },
+          "pskernel-scalar-hash-worker-smoke.mjs": {
+            "bytes": 2546,
+            "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+          },
+          "pskernel-scalar-hash-short-entry-smoke.mjs": {
+            "bytes": 1126,
+            "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff"
+          },
+          "pskernel-closed-cache-analysis-smoke.mjs": {
+            "bytes": 7826,
+            "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+          },
+          "pskernel-generated-smoke.mjs": {
+            "bytes": 12610,
+            "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab"
+          },
+          "pskernel-expr-v2-dag-smoke.mjs": {
+            "bytes": 244729,
+            "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+          },
+          "pskernel-expr-v2-generated-prefix-smoke.mjs": {
+            "bytes": 28982,
+            "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+          },
+          "pskernel-invalid-recursor-occurrence-smoke.mjs": {
+            "bytes": 5956,
+            "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b"
+          }
+        },
+        "headerOnly": false,
+        "constructorHelpersOnly": false,
+        "ordinaryAdmission": true,
+        "fullOrdinaryAdmission": true,
+        "fullKernel": false,
+        "publicRoutingChanged": true,
+        "publicFallbackRetained": true,
+        "canonicalManifest": {
+          "bytes": 12414,
+          "sha256": "09ca116d4f55ebc4ec01b22e9d26e839509c4bb84bbf975d1d267668d30eadb3"
+        },
+        "canonicalSourceArchive": {
+          "bytes": 135424,
+          "sha256": "4942bb8d5136730372d7888db5589710604f71c11b72692941314b249830b8f3"
+        }
+      },
+      "receiptChain": [
+        {
+          "marker": "PSC1_T05_HEADER_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-header-route-receipt-v1",
+            "status": "pass",
+            "result": {
+              "assertions": 1992,
+              "sectionAssertions": {
+                "harness": 1,
+                "header": 444,
+                "occurrence": 1378,
+                "annotations": 94,
+                "state": 47,
+                "phases": 20,
+                "topCallbacks": 8
+              },
+              "headerCases": 432,
+              "positiveDirect": 10,
+              "occurrenceFuelCases": 1026,
+              "annotationFuelCases": 75,
+              "callbackSequences": 3,
+              "callbackFailures": 24,
+              "headerOnly": true,
+              "fullAdmission": false,
+              "publicFallbackUsed": false
+            },
+            "measurement": "peak_rss_kib=448264 wall_seconds=2.68 exit_status=0",
+            "peakRssKiB": 448264,
+            "wallSeconds": 2.68,
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "headerOnly": true,
+            "fullAdmission": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_CONSTRUCTOR_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-constructor-route-receipt-v1",
+            "status": "pass",
+            "retainedHeaderReceipt": {
+              "bytes": 7028,
+              "sha256": "54119c51804f614f6bb9ec78eef1ad917a747eac0ab1eca726ec093be7712555"
+            },
+            "retainedHeaderAssertions": 1992,
+            "results": {
+              "params": {
+                "result": {
+                  "schema": "psc1-ordinary-constructor-params-v1",
+                  "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+                  "assertions": 268,
+                  "sectionAssertions": {
+                    "harness": 1,
+                    "direct": 227,
+                    "protocol": 20,
+                    "boundaries": 14,
+                    "faults": 6
+                  },
+                  "directFixtures": 18,
+                  "fuelValues": 6,
+                  "interfaces": 2,
+                  "directComparisons": 216,
+                  "positiveDirect": 11,
+                  "fullAdmission": false,
+                  "publicRoutingChanged": false
+                },
+                "log": {
+                  "bytes": 450,
+                  "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+                },
+                "harness": {
+                  "bytes": 18519,
+                  "sha256": "05da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660"
+                },
+                "measurement": "peak_rss_kib=295132 wall_seconds=1.42 exit_status=0",
+                "peakRssKiB": 295132,
+                "wallSeconds": 1.42
+              },
+              "result": {
+                "result": {
+                  "schema": "psc1-ordinary-constructor-result-v1",
+                  "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+                  "assertions": 432,
+                  "sectionAssertions": {
+                    "harness": 1,
+                    "selector": 138,
+                    "consumer": 26,
+                    "occurrence": 240,
+                    "bounds": 16,
+                    "indexLists": 7,
+                    "precedence": 4
+                  },
+                  "selectorRows": 46,
+                  "occurrenceTerms": 30,
+                  "targetsPerOccurrence": 2,
+                  "fullAdmission": false,
+                  "publicRoutingChanged": false
+                },
+                "log": {
+                  "bytes": 454,
+                  "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+                },
+                "harness": {
+                  "bytes": 13348,
+                  "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+                },
+                "measurement": "peak_rss_kib=120484 wall_seconds=0.22 exit_status=0",
+                "peakRssKiB": 120484,
+                "wallSeconds": 0.22
+              }
+            },
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "headerOnly": false,
+            "constructorHelpersOnly": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_FIELDS_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-fields-route-receipt-v1",
+            "status": "pass",
+            "retainedConstructorReceipt": {
+              "bytes": 8971,
+              "sha256": "da5a22029aaaa4189b7f09131aacfc2e9ace50d088db22b7677d8244fb600fa2"
+            },
+            "result": {
+              "schema": "psc1-ordinary-constructor-fields-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+              "assertions": 268,
+              "sectionAssertions": {
+                "harness": 1,
+                "fields": 147,
+                "recursive": 105,
+                "boundaries": 8,
+                "recursorGuard": 7
+              },
+              "fieldRows": 21,
+              "recursiveRows": 15,
+              "fuelValues": 6,
+              "positiveFields": 16,
+              "negativeFields": 5,
+              "positiveRecursive": 10,
+              "negativeRecursive": 5,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 497,
+              "sha256": "a1ca4ab56eca36f767b2375f88a04a5fc4a1d7cc202f286d49bc558e1655ab0e"
+            },
+            "harness": {
+              "bytes": 22405,
+              "sha256": "0b7ee568b7d26bc13691fd85aca6ae73ae70ca164f58386ddeaaafbb6e094a6e"
+            },
+            "measurement": "peak_rss_kib=337004 wall_seconds=3.34 exit_status=0",
+            "peakRssKiB": 337004,
+            "wallSeconds": 3.34,
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "a1ca4ab56eca36f767b2375f88a04a5fc4a1d7cc202f286d49bc558e1655ab0e"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "constructorHelpersOnly": true,
+            "fieldsAndPositivity": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ANALYSIS_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-analysis-route-receipt-v1",
+            "status": "pass",
+            "retainedFieldsReceipt": {
+              "bytes": 7978,
+              "sha256": "653750735d152669e5427bc48c2358ffc9f2a12dda8ac28f48ce47036aefa4fd"
+            },
+            "result": {
+              "schema": "psc1-ordinary-constructor-analysis-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+              "assertions": 93,
+              "sectionAssertions": {
+                "harness": 1,
+                "matrix": 84,
+                "protocol": 8
+              },
+              "rows": 12,
+              "fuelValues": 6,
+              "positive": 6,
+              "negative": 6,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 380,
+              "sha256": "6a18c7e7514fcd5ccb2f580a7b5d862e6daad403552b4149fdce65a57203a368"
+            },
+            "harness": {
+              "bytes": 17928,
+              "sha256": "940aefac2570888ea49b9146d7a3c487d47d51b9b31d896c4bdfd037699c04d5"
+            },
+            "measurement": "peak_rss_kib=332408 wall_seconds=1.56 exit_status=0",
+            "peakRssKiB": 332408,
+            "wallSeconds": 1.56,
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "6a18c7e7514fcd5ccb2f580a7b5d862e6daad403552b4149fdce65a57203a368"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "a1ca4ab56eca36f767b2375f88a04a5fc4a1d7cc202f286d49bc558e1655ab0e"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "constructorHelpersOnly": true,
+            "singleConstructorAnalysis": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_LOOP_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-loop-route-receipt-v1",
+            "status": "pass",
+            "retainedAnalysisReceipt": {
+              "bytes": 7973,
+              "sha256": "97ac6fa5c6d669c4b6b4166fd47df456c398b6a2342c2dba2f900d9391e0cba6"
+            },
+            "result": {
+              "schema": "psc1-ordinary-constructor-loop-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+              "assertions": 69,
+              "sectionAssertions": {
+                "harness": 1,
+                "matrix": 56,
+                "protocol": 12
+              },
+              "rows": 8,
+              "fuelValues": 6,
+              "positive": 5,
+              "negative": 3,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 372,
+              "sha256": "c55cf7ce566e952633771def4c218a24b6c5ea69a40ed259cb43de4cbeed217e"
+            },
+            "harness": {
+              "bytes": 24687,
+              "sha256": "24bc0276b4fc75a68f3c54ab7fd4fc7e6b50c14d90ec5e9ad5b1f4bb55c9c08e"
+            },
+            "measurement": "peak_rss_kib=306612 wall_seconds=1.58 exit_status=0",
+            "peakRssKiB": 306612,
+            "wallSeconds": 1.58,
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "6a18c7e7514fcd5ccb2f580a7b5d862e6daad403552b4149fdce65a57203a368"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "a1ca4ab56eca36f767b2375f88a04a5fc4a1d7cc202f286d49bc558e1655ab0e"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "c55cf7ce566e952633771def4c218a24b6c5ea69a40ed259cb43de4cbeed217e"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "constructorHelpersOnly": true,
+            "constructorLoopOnly": true,
+            "fullAdmission": false,
+            "publicRoutingChanged": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ELIMINATION_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-elimination-route-receipt-v1",
+            "status": "pass",
+            "retainedLoopReceipt": {
+              "bytes": 8101,
+              "sha256": "7a819a3df0acfde3baac9021df1317560e305ef7a3892a042815bc191ee51942"
+            },
+            "result": {
+              "schema": "psc1-ordinary-elimination-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+              "assertions": 116,
+              "sectionAssertions": {
+                "harness": 1,
+                "policy": 63,
+                "raw": 28,
+                "member": 12,
+                "protocol": 12
+              },
+              "policyRows": 9,
+              "rawRows": 4,
+              "fuelValues": 6,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 377,
+              "sha256": "c438fe8bd7015eb4572a0546f31cf860d4c83f9c6472547563b74fda0c2dfe61"
+            },
+            "harness": {
+              "bytes": 27645,
+              "sha256": "6197194c3b7fef20c621e071ffc0df44fb877121a8ec557eba368cc60dbfc248"
+            },
+            "measurement": "peak_rss_kib=293480 wall_seconds=1.28 exit_status=0",
+            "peakRssKiB": 293480,
+            "wallSeconds": 1.28,
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "6a18c7e7514fcd5ccb2f580a7b5d862e6daad403552b4149fdce65a57203a368"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "a1ca4ab56eca36f767b2375f88a04a5fc4a1d7cc202f286d49bc558e1655ab0e"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "c55cf7ce566e952633771def4c218a24b6c5ea69a40ed259cb43de4cbeed217e"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "elimination.log": {
+                "bytes": 377,
+                "sha256": "c438fe8bd7015eb4572a0546f31cf860d4c83f9c6472547563b74fda0c2dfe61"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "ordinary-admission-private.log": {
+                "bytes": 425,
+                "sha256": "5447b3d7496e00525dbe7395bacf99045622d35a58f348f8b4ca86b3a644de54"
+              },
+              "ordinary-admission-public.log": {
+                "bytes": 1735,
+                "sha256": "6493c65939b29751aae8a0d13f1148993b18f1442408af161b875a55f68de1f8"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "ordinaryAdmission": false,
+            "fullOrdinaryAdmission": false,
+            "publicRoutingChanged": false,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ORDINARY_ADMISSION_PRIVATE_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-ordinary-admission-private-route-receipt-v1",
+            "status": "pass",
+            "retainedEliminationReceipt": {
+              "bytes": 8554,
+              "sha256": "49f88f8eed7f954dc1e69c083114332d4a3c61c60cc86994fea372bac75cdbb5"
+            },
+            "result": {
+              "schema": "psc1-ordinary-admission-private-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+              "assertions": 143,
+              "sectionAssertions": {
+                "harness": 1,
+                "matrix": 126,
+                "protocol": 16
+              },
+              "rows": 18,
+              "fuelValues": 6,
+              "positive": 14,
+              "negative": 4,
+              "privateAdmission": true,
+              "fullAdmission": false,
+              "publicRoutingChanged": false
+            },
+            "log": {
+              "bytes": 425,
+              "sha256": "5447b3d7496e00525dbe7395bacf99045622d35a58f348f8b4ca86b3a644de54"
+            },
+            "harness": {
+              "bytes": 27529,
+              "sha256": "c05a5dd714c719aa6d75d7b8b0f5d88ac98afb4dfb6bd6b930d2a608a00f707c"
+            },
+            "measurement": "peak_rss_kib=356592 wall_seconds=10.01 exit_status=0",
+            "peakRssKiB": 356592,
+            "wallSeconds": 10.01,
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "6a18c7e7514fcd5ccb2f580a7b5d862e6daad403552b4149fdce65a57203a368"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "a1ca4ab56eca36f767b2375f88a04a5fc4a1d7cc202f286d49bc558e1655ab0e"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "c55cf7ce566e952633771def4c218a24b6c5ea69a40ed259cb43de4cbeed217e"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "elimination.log": {
+                "bytes": 377,
+                "sha256": "c438fe8bd7015eb4572a0546f31cf860d4c83f9c6472547563b74fda0c2dfe61"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "ordinary-admission-private.log": {
+                "bytes": 425,
+                "sha256": "5447b3d7496e00525dbe7395bacf99045622d35a58f348f8b4ca86b3a644de54"
+              },
+              "ordinary-admission-public.log": {
+                "bytes": 1735,
+                "sha256": "6493c65939b29751aae8a0d13f1148993b18f1442408af161b875a55f68de1f8"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "ordinaryAdmission": false,
+            "fullOrdinaryAdmission": false,
+            "publicRoutingChanged": false,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        },
+        {
+          "marker": "PSC1_T05_ORDINARY_ADMISSION_PUBLIC_ROUTE: PASS ",
+          "receipt": {
+            "schema": "psc1-t05-ordinary-admission-public-route-receipt-v1",
+            "status": "pass",
+            "retainedPrivateAdmissionReceipt": {
+              "bytes": 8594,
+              "sha256": "d3b26ba4498c67db18e5c7321da340868d1833f2e42a5163fd9f194df1141278"
+            },
+            "result": {
+              "schema": "psc1-ordinary-admission-public-v1",
+              "kernel": "/home/runner/work/_temp/psc1-t05-canonical/detached/kernel.mjs",
+              "assertions": 12,
+              "sectionAssertions": {
+                "harness": 1,
+                "routing": 7,
+                "boundary": 4
+              },
+              "assertionLabels": [
+                "harness/rejection-active",
+                "routing/direct-owner-retained",
+                "routing/finish-carries-injected-suffix",
+                "routing/decline-restarts-original",
+                "routing/hard-error-does-not-fallback",
+                "routing/resource-limit-failure",
+                "routing/same-batch-recursor-check",
+                "routing/cross-call-checked-recursor",
+                "boundary/private-generated-id-not-external",
+                "boundary/later-command-failure-atomic",
+                "boundary/fallback-original-bounds",
+                "boundary/preflight-precedence"
+              ],
+              "publicRoutingChanged": true,
+              "ordinaryAdmission": true,
+              "fullKernel": false,
+              "performanceQualified": false
+            },
+            "log": {
+              "bytes": 1735,
+              "sha256": "6493c65939b29751aae8a0d13f1148993b18f1442408af161b875a55f68de1f8"
+            },
+            "harness": {
+              "bytes": 9402,
+              "sha256": "19216cf873cdc48228da2775c5b6643bc41f66540574fdce19adaf89c7c15128"
+            },
+            "measurement": "peak_rss_kib=228580 wall_seconds=0.57 exit_status=0",
+            "peakRssKiB": 228580,
+            "wallSeconds": 0.57,
+            "logs": {
+              "canonical-ps-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "closed-cache-analysis.log": {
+                "bytes": 184,
+                "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+              },
+              "compiler-build.log": {
+                "bytes": 25017,
+                "sha256": "0fa13baac2da58e034b599a81f512111b88b7f6bdd4210872235c4db27f32daf"
+              },
+              "complete-build.log": {
+                "bytes": 16095,
+                "sha256": "ecf8116b03f5222c4f7983a229e1fe2777e5ef6c314391f2f9b16e355975f085"
+              },
+              "complete-lean-check.log": {
+                "bytes": 15891,
+                "sha256": "db20a1f0a4f7c50eadf927efbb84bdff59c61c3af2ce87651ec3efd88c4149ac"
+              },
+              "constructor-analysis.log": {
+                "bytes": 380,
+                "sha256": "6a18c7e7514fcd5ccb2f580a7b5d862e6daad403552b4149fdce65a57203a368"
+              },
+              "constructor-fields.log": {
+                "bytes": 497,
+                "sha256": "a1ca4ab56eca36f767b2375f88a04a5fc4a1d7cc202f286d49bc558e1655ab0e"
+              },
+              "constructor-loop.log": {
+                "bytes": 372,
+                "sha256": "c55cf7ce566e952633771def4c218a24b6c5ea69a40ed259cb43de4cbeed217e"
+              },
+              "constructor-params.log": {
+                "bytes": 450,
+                "sha256": "71047bbc68af870cb9391d83f3c433779c0d4e9ea51339314b1161a0b8c39d59"
+              },
+              "constructor-result.log": {
+                "bytes": 454,
+                "sha256": "ffac15d741dabbf35ad0e3a5cce898661f5230fde9a4d7072f92c1cd987eb3fa"
+              },
+              "dag.log": {
+                "bytes": 2287879,
+                "sha256": "1e450c3ca286704e4ddb9c2606c4f7452c3e4ca62171874d50958fb719047923"
+              },
+              "elimination.log": {
+                "bytes": 377,
+                "sha256": "c438fe8bd7015eb4572a0546f31cf860d4c83f9c6472547563b74fda0c2dfe61"
+              },
+              "generated-smoke.log": {
+                "bytes": 4855,
+                "sha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+              },
+              "header.log": {
+                "bytes": 373,
+                "sha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+              },
+              "invalid-recursor.log": {
+                "bytes": 126,
+                "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+              },
+              "ordinary-admission-private.log": {
+                "bytes": 425,
+                "sha256": "5447b3d7496e00525dbe7395bacf99045622d35a58f348f8b4ca86b3a644de54"
+              },
+              "ordinary-admission-public.log": {
+                "bytes": 1735,
+                "sha256": "6493c65939b29751aae8a0d13f1148993b18f1442408af161b875a55f68de1f8"
+              },
+              "prefix.log": {
+                "bytes": 225,
+                "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+              },
+              "scalar-hash.log": {
+                "bytes": 176,
+                "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+              },
+              "short-entry.log": {
+                "bytes": 108,
+                "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+              },
+              "structural-annotations-check.log": {
+                "bytes": 15890,
+                "sha256": "f017f00b6f51c70f6c6be57c3e329974b3f9beff7aa0906fb393409978ec3f9e"
+              },
+              "structural-occurrence-check.log": {
+                "bytes": 15890,
+                "sha256": "d5bed7f4fa9cd6d79d90dff30ece625ece11646f536e5fbc30eceec42187c74c"
+              }
+            },
+            "ordinaryAdmission": true,
+            "fullOrdinaryAdmission": true,
+            "publicRoutingChanged": true,
+            "fullKernel": false,
+            "performanceQualified": false
+          }
+        }
+      ]
+    }
+  },
+  "artifactAudit": {
+    "sourceSha": "9e56533b719c849f8bdc728979ba3ba4ba75a3b9",
+    "runId": 40144403625,
+    "runAttempt": 1,
+    "jobId": 121022561346,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40144403625",
+    "status": "completed",
+    "conclusion": "success",
+    "summary": {
+      "schema": "psc1-t05-artifact-audit-v1",
+      "status": "pass",
+      "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+      "runId": 40144186958,
+      "runAttempt": 1,
+      "routes": {
+        "native": {
+          "status": "pass",
+          "artifactId": 12579563795,
+          "files": 131,
+          "error": null
+        },
+        "generated": {
+          "status": "pass",
+          "artifactId": 12580109705,
+          "files": 310,
+          "error": null
+        },
+        "canonical": {
+          "status": "pass",
+          "artifactId": 12581327946,
+          "files": 313,
+          "error": null
+        }
+      },
+      "nativeReports": 371,
+      "profile": "admission",
+      "report": {
+        "bytes": 292257,
+        "sha256": "0c8d635caf43c624d8f3beac0451cfca990c032bd1542d57983435210a2f13c5"
+      },
+      "errors": [],
+      "ordinaryAdmissionQualified": true,
+      "fullOrdinaryAdmission": true,
+      "fullKernel": false,
+      "performanceQualified": false
+    },
+    "artifact": {
+      "id": 12581173633,
+      "name": "psc1-t05-artifact-audit-attempt-1",
+      "size_in_bytes": 69081,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581173633",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581173633/zip",
+      "expired": false,
+      "created_at": "2026-10-25T00:36:34Z",
+      "expires_at": "2027-01-22T23:51:14Z",
+      "updated_at": "2026-10-25T00:36:34Z",
+      "digest": "sha256:9e07a142b4945cfb6dfd4c1746416b47dfc3fdf3f210a49dd59fec2fda73b64a",
+      "workflow_run": {
+        "id": 40144403625,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t05-audit-20261025",
+        "head_sha": "9e56533b719c849f8bdc728979ba3ba4ba75a3b9"
+      }
+    },
+    "validation": [
+      "Actual ZIP archives and API archive digests",
+      "Safe unique archive paths and exact Git source bytes",
+      "Exact native ordered reports and allowed axiom inventory",
+      "All generated receipt chains, harness and runtime log hashes",
+      "Authentic complete Lean and canonical reconstructed source closures",
+      "Negative controls, original namespace boundaries and atomic publication",
+      "Exact source SHA, run ID and attempt checked again after audit"
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 12581327946,
+      "name": "psc1-t05-header-canonical-attempt-1",
+      "size_in_bytes": 2831599,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581327946",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581327946/zip",
+      "expired": false,
+      "created_at": "2026-10-25T00:35:54Z",
+      "expires_at": "2027-01-22T23:47:57Z",
+      "updated_at": "2026-10-25T00:35:54Z",
+      "digest": "sha256:ea1ed7e3d614960c61df3e72446c3ca7afe66e609ec644232e0b08eeee58238d",
+      "workflow_run": {
+        "id": 40144186958,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3"
+      }
+    },
+    {
+      "id": 12580109705,
+      "name": "psc1-t05-header-generated-attempt-1",
+      "size_in_bytes": 2692258,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12580109705",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12580109705/zip",
+      "expired": false,
+      "created_at": "2026-10-25T00:08:05Z",
+      "expires_at": "2027-01-22T23:47:57Z",
+      "updated_at": "2026-10-25T00:08:05Z",
+      "digest": "sha256:b85307cb30da5e0c3124c9e05f1d67c68c18e595b371e86d807179d60152d650",
+      "workflow_run": {
+        "id": 40144186958,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3"
+      }
+    },
+    {
+      "id": 12579563795,
+      "name": "psc1-t05-header-native-attempt-1",
+      "size_in_bytes": 405974,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12579563795",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12579563795/zip",
+      "expired": false,
+      "created_at": "2026-10-24T23:50:48Z",
+      "expires_at": "2027-01-22T23:47:57Z",
+      "updated_at": "2026-10-24T23:50:48Z",
+      "digest": "sha256:80c02f89dd0d3bd0011e80f112e37b41b67dfd7b5d48024f3e43e6bca2a37a51",
+      "workflow_run": {
+        "id": 40144186958,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-t01f-string-20261022",
+        "head_sha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3"
+      }
+    }
+  ],
+  "implementation": {
+    "headerAndConstructors": "DAG-native header, parameter, result, field, recursive-argument, analysis and constructor-loop workers retained from the qualified prerequisite.",
+    "elimination": "DAG-native singleton-elimination policy preserving structural membership and raw fuel and binder ordering.",
+    "recursorValidation": "Independently check generated recursor type and sort, then every generated rule body and expected type, threading the complete owner through the final synchronization.",
+    "publication": "Publish only a complete checked owner/environment; preserve original external IDs and restart the safe fallback from the original state on supported decline.",
+    "proofRepair": "Checked array indexing is rewritten to Array.getD under the established in-bounds hypothesis; no theorem weakening or trust escape.",
+    "compatibilityRepair": "Retained forged-owner rejection keeps the existing PSKERNEL_V2_GENERATED_OWNER_MISMATCH diagnostic and ordering."
+  },
+  "separateObligations": {
+    "A": "T01F scoped implementation qualified on its recorded source.",
+    "B": "OPEN: broader completion.",
+    "C": {
+      "status": "FAIL",
+      "historicalStrictMatches": 173,
+      "total": 193,
+      "timeouts": 17,
+      "reductionBudgetExhaustions": 1,
+      "separatelyClassifiedUnsafeOrPartialContractAgreements": 2,
+      "newFullArenaQualification": false
+    },
+    "D": "OPEN: Church fuel exhaustion and Init.Prelude timeout remain unresolved."
+  },
+  "continuation": {
+    "transformBranch": "work/psc1-pskernel-t08-deferred-transform-20261025",
+    "runningDiagnosticSource": "c5f0050747a2c34cabbc711305bc975c77fc6d2d",
+    "runningDiagnosticRun": 40146310517,
+    "preparedBootstrapAdapterCommit": "7bd3303c49bd48b17ce70fa42e7dda389a35732c",
+    "productionIntegrationAllowed": false,
+    "note": "The isolated transform experiment has fresh native equality and shared-compiler receipts, but its current stock bootstrap invocation does not authenticate one translator for every translation. Complete source qualification, archive audit and performance evidence are still required."
+  }
+}

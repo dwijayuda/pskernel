@@ -1,0 +1,146 @@
+name: PSC1 qualified Rust TS Wasm installed compiler candidate
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-rust-package.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-generated-package-integration-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: '14cb3e30503d0c5e6b1e007598b0bde7ad77befb'
+      - uses: actions/checkout@v4
+        with:
+          path: control
+          sparse-checkout: |
+            psc1/scripts/diagnostic-npm-generated-rust.mjs
+            psc1/npm-cli/diagnostic-generated-rust.mjs
+            psc1/host-tools/generated-rust-guard.mjs
+            psc1/host-tools/generated-rust-transport.mjs
+            psc1/scripts/generated-rust-transport-tests.mjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Install exact candidate host transport CLI and packaging sources
+        run: |
+          cp ../control/psc1/scripts/diagnostic-npm-generated-rust.mjs scripts/npm-generated-distribution.mjs
+          cp ../control/psc1/npm-cli/diagnostic-generated-rust.mjs npm-cli/generated.mjs
+          cp ../control/psc1/host-tools/generated-rust-guard.mjs host-tools/generated-rust-guard.mjs
+          cp ../control/psc1/host-tools/generated-rust-transport.mjs host-tools/generated-rust-transport.mjs
+          cp ../control/psc1/scripts/generated-rust-transport-tests.mjs scripts/generated-rust-transport-tests.mjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-direct-service-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/lake-manifest.json','psc1/**/*.lean') }}
+          restore-keys: psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Build pinned independent checker and host boundary fixtures
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_independent_checker psc1_js_service_seed psc1_source_census_probe
+          node scripts/generated-session-boundary-tests.mjs
+          node scripts/generated-rust-transport-tests.mjs
+      - name: Verify immutable native and qualified engine archives
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import crypto from 'node:crypto';import {spawnSync} from 'node:child_process';
+          const repo='dwijayuda/pskernel',root=path.resolve('dist/generated-package-input');fs.mkdirSync(root,{recursive:true});
+          const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+          async function api(route){const r=await fetch('https://api.github.com/repos/'+repo+route,{headers});assert.equal(r.status,200,route);return r.json();}
+          const known=[
+           {id:12581184979,digest:'sha256:2bf7d0fadd0bacd45c1b645ad9f15ba400a67236d9720c55f21391470e12fda3',run:40145805549},
+           {id:12580184355,digest:'sha256:c294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0',run:40141718481},
+           {id:12573999378,digest:'sha256:330a41af351664b86d41791664a3a7a659813963c35b1e24af633ba99d1a9ce3',run:40126488125},
+           {id:12575002462,digest:'sha256:77c0e130074807cf538dc9759c656a0ef6fa5ec9c3939cecb0c37922d8205d77',run:40126488125}
+          ];
+          const metadata=[];
+          for(const item of known){
+           const a=await api('/actions/artifacts/'+item.id);assert.equal(a.id,item.id);assert.equal(a.workflow_run.id,item.run);assert.equal(a.expired,false);
+           if(item.digest)assert.equal(a.digest,item.digest);assert.match(a.digest,/^sha256:[a-f0-9]{64}$/);assert.ok(a.size_in_bytes<=256*1024*1024);
+           const response=await fetch('https://api.github.com/repos/'+repo+'/actions/artifacts/'+a.id+'/zip',{headers,redirect:'manual'});
+           assert.ok([301,302,303,307].includes(response.status));
+           const location=new URL(response.headers.get('location'));assert.equal(location.protocol,'https:');
+           assert.ok(location.hostname.endsWith('.blob.core.windows.net')||location.hostname.endsWith('.actions.githubusercontent.com'));
+           const zipped=await fetch(location,{redirect:'error'});assert.equal(zipped.status,200);
+           const bytes=Buffer.from(await zipped.arrayBuffer());assert.equal('sha256:'+crypto.createHash('sha256').update(bytes).digest('hex'),a.digest);
+           const zip=path.join(root,a.id+'.zip'),out=path.join(root,String(a.id));fs.writeFileSync(zip,bytes);
+           const python=`import pathlib,zipfile,stat,sys
+          root=pathlib.Path(sys.argv[2]).resolve();root.mkdir()
+          with zipfile.ZipFile(sys.argv[1]) as z:
+              rows=z.infolist();assert len(rows)<50000
+              assert sum(i.file_size for i in rows)<=2*1024*1024*1024
+              for i in rows:
+                  p=pathlib.PurePosixPath(i.filename)
+                  assert not p.is_absolute() and '..' not in p.parts and '\\\\' not in i.filename
+                  assert stat.S_IFMT(i.external_attr>>16)!=stat.S_IFLNK
+                  assert (root/pathlib.Path(*p.parts)).resolve().is_relative_to(root)
+              z.extractall(root)
+          `;
+           const run=spawnSync('python3',['-c',python,zip,out],{encoding:'utf8',timeout:120000});assert.equal(run.status,0,run.stderr);fs.unlinkSync(zip);
+           metadata.push({id:a.id,name:a.name,digest:a.digest,workflowRun:a.workflow_run,directory:out});
+           console.log('PSC1_VERIFIED_ARCHIVE: '+JSON.stringify(metadata.at(-1)));
+          }
+          fs.writeFileSync(path.join(root,'archives.json'),JSON.stringify(metadata,null,2)+'\n');
+          
+          JS
+      - name: Pack and test actual offline installed generated CLI
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
+          import {sha} from './host-tools/generated-target-tools.mjs';
+          const base=path.resolve('dist/generated-package-input'),files=[];
+          function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else files.push(p);}}walk(base);
+          const qs=files.filter(p=>path.basename(p)==='qualification.json').map(p=>{try{return {path:p,value:JSON.parse(fs.readFileSync(p))};}catch{return null;}}).filter(Boolean);
+          const qfiles=['ts','wasm-core','rust'].map(target=>{const a=qs.filter(x=>x.value.schema==='psc1-generated-target-qualification/1'&&x.value.mode==='--self-host'&&x.value.target===target&&x.value.testedCommit===(target==='rust'?'2d27f1428e6a53a6de5006f950fc94f2d471b214':'812094c1f5e1e0c0dca516dab1e30ef66f3076f7'));assert.equal(a.length,1);return a[0].path;});
+          const native=qs.filter(x=>x.value.qualification==='passed'&&x.value.tarballSha256&&x.value.nativeNpmIdentityAgreement===true);assert.equal(native.length,1);assert.equal(native[0].value.sourceCommit,'348746f32e7fe04b3402eb22030054375eb9ebcd');assert.equal(native[0].value.branchHeadCommit,'14cb3e30503d0c5e6b1e007598b0bde7ad77befb');
+          const tarballs=files.filter(p=>path.basename(p)===path.basename(native[0].value.tarball));assert.equal(tarballs.length,1);
+          assert.equal(sha(fs.readFileSync(tarballs[0])),native[0].value.tarballSha256);
+          const r=spawnSync(process.execPath,['scripts/npm-generated-distribution.mjs',tarballs[0],...qfiles],{stdio:'inherit',timeout:1800000});
+          assert.equal(r.error,undefined);assert.equal(r.status,0);
+          const packed=JSON.parse(fs.readFileSync('dist/npm-generated/qualification.json'));
+          assert.equal(packed.nativeInputTarballSha256,native[0].value.tarballSha256);
+          const optional={};
+          for(const [target,row]of Object.entries(native[0].value.addonTarballs)){
+           const matches=files.filter(p=>path.basename(p)===path.basename(row.path));assert.equal(matches.length,1);
+           const source=matches[0];assert.equal(sha(fs.readFileSync(source)),row.sha256);assert.equal(fs.statSync(source).size,row.bytes);
+           const output=path.join(path.dirname(packed.tarball),path.basename(source));fs.copyFileSync(source,output);
+           optional[target]={file:output,sha256:row.sha256,bytes:row.bytes};
+          }
+          const receipt={schema:'psc1-current-package-inputs/1',controlCommit:process.env.GITHUB_SHA,packagingSourceCommit:'14cb3e30503d0c5e6b1e007598b0bde7ad77befb',nativeSourceCommit:native[0].value.sourceCommit,nativeQualificationRun:40145805549,nativeArtifact:12581184979,core:{file:packed.tarball,sha256:packed.tarballSha256},optional,publication:'unpublished'};
+          fs.writeFileSync('dist/npm-generated/package-inputs.json',JSON.stringify(receipt,null,2)+'\n');
+          console.log('PSC1_CURRENT_PACKAGE_INPUTS: '+JSON.stringify(receipt));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-rust-generated-installed-package-${{ github.sha }}
+          path: |
+            psc1/dist/npm-generated/qualification.json
+            psc1/dist/npm-generated/package-inputs.json
+            psc1/dist/npm-generated/run-*/tarballs/
+            psc1/dist/generated-package-input/archives.json
+            psc1/dist/generated-session-boundary/results.json
+          retention-days: 90

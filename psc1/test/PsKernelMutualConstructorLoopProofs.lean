@@ -118,7 +118,10 @@ theorem type_empty_constructors_keep_same_fuel
     psKernelExprV2MutualAddTypesWorker (first :: later) analyze fuel input numParams context state owner =
       psKernelExprV2MutualAddTypesWorker later analyze fuel input numParams context state (Nat.succ owner) := by
   simp only [psKernelExprV2MutualAddTypesWorker, empty,
-    psKernelExprV2MutualAddConstructorsForTypeWorker] <;> rfl
+    psKernelExprV2MutualAddConstructorsForTypeWorker]
+  cases result : psKernelExprV2MutualAddTypesWorker later analyze fuel input numParams context state (Nat.succ owner) with
+  | none => rfl
+  | some attempted => cases attempted <;> rfl
 
 theorem type_decline_precedes_later_family
     (first : PsKernelExprV2MutualTypeHeader) (later : List PsKernelExprV2MutualTypeHeader)

@@ -40,8 +40,7 @@ function* __psc1Probe(stage,iterator,metadata={}){const id=++__psc1Sequence,star
   body=text[start:end]
   require(body.count(old)==1,'Single exact diagnostic call site: '+label)
   require(old.startswith('(yield* ') and old.endswith(')'),'Expected yield expression')
-  inner=old[len('(yield* '):-1]
-  new="(yield* __psc1Probe("+repr(label)+","+inner+","+metadata+"))"
+  new="(yield* __psc1Probe("+repr(label)+",(function* () { return "+old+"; })(),"+metadata+"))"
   text=text[:start]+body.replace(old,new)+text[end:]
   replacements.append({'function':function,'original':old,'instrumented':new,'stage':label})
  patch('psKernelV1RunDag','(yield* __ps$invoke(psKernelKernelSessionPreflight, session))','preflight')
@@ -50,6 +49,15 @@ function* __psc1Probe(stage,iterator,metadata={}){const id=++__psc1Sequence,star
  patch('psKernelDagRunSessionCommands','(yield* __ps$invoke(psKernelDagGeneratedFromSession, session, arena, built))','session-owner','{arenaNodes:arena.size,decodedNodes:built.size}')
  patch('psKernelDagRunCommandsWithSource','(yield* __ps$invoke(psKernelDagRunOwnedCommandWithSource, input, execution, levelParams, safety, arena, built, command))','command','__psc1Meta(command,arena,built)')
  patch('psKernelDagRunCommandsWithSource','(yield* __ps$invoke(psKernelDagGeneratedDemandRange, result.execution.session.environment, built.size, result.owner))','post-command-owner','{commandIndex:__psc1Command-1,arenaNodes:result.owner.arena.size,decodedNodes:result.owner.built.size}')
+ patch('psKernelDagTryAdmitSimpleWithFuel','(yield* __ps$invoke(psKernelExprV2AdmissionCheckHeaderWithFuel, fuel, context, initial, plan.base, plan.typeRoot))','admission-header','{commandIndex:__psc1Command-1,fuel,typeRoot:plan.typeRoot}')
+ patch('psKernelDagTryAdmitSimpleWithFuel','(yield* __ps$invoke(psKernelExprV2AdmissionPrepareBodyWithFuel, fuel, context, afterHeader, plan))','admission-prepare-body','{commandIndex:__psc1Command-1,fuel,typeRoot:plan.typeRoot}')
+ patch('psKernelDagTryAdmitSimpleWithFuel','(yield* __ps$invoke(psKernelExprV2AdmissionCheckBodyWithFuel, fuel, context, prepared, plan.base, plan.typeRoot, body.fst, body.snd, plan.mismatch))','admission-body','{commandIndex:__psc1Command-1,fuel,typeRoot:plan.typeRoot,bodyRoot:body.snd}')
+ patch('psKernelExprV2AdmissionCheckHeaderWithFuel','(yield* __ps$invoke(psKernelExprV2AdmissionStaticOnCanonical, state.whnf.arena, typeRoot, base.levelParams))','header-static','{commandIndex:__psc1Command-1,fuel,root:typeRoot}')
+ patch('psKernelExprV2AdmissionCheckHeaderWithFuel','(yield* __ps$invoke(psKernelExprV2TryCheckStateWithFuel, fuel, context, state, typeRoot))','header-infer','{commandIndex:__psc1Command-1,fuel,root:typeRoot}')
+ patch('psKernelExprV2AdmissionCheckHeaderWithFuel','(yield* __ps$invoke(psKernelExprV2AdmissionEnsureSortWithFuel, fuel, context, checked.fst, checked.snd))','header-sort','{commandIndex:__psc1Command-1,fuel,root:checked.snd}')
+ patch('psKernelExprV2AdmissionCheckBodyWithFuel','(yield* __ps$invoke(psKernelExprV2AdmissionStaticOnCanonical, state.whnf.arena, bodyRoot, base.levelParams))','body-static','{commandIndex:__psc1Command-1,fuel,root:bodyRoot}')
+ patch('psKernelExprV2AdmissionCheckBodyWithFuel','(yield* __ps$invoke(psKernelExprV2TryCheckStateWithFuel, fuel, context, state, bodyRoot))','body-infer','{commandIndex:__psc1Command-1,fuel,root:bodyRoot}')
+ patch('psKernelExprV2AdmissionCheckBodyWithFuel','(yield* __ps$invoke((yield* __ps$invoke((yield* __ps$invoke((yield* __ps$invoke((yield* __ps$invoke(psKernelExprV2TryDefEqStateWithFuel, fuel)), context)), checked.fst)), checked.snd)), typeRoot))','body-final-defeq','{commandIndex:__psc1Command-1,fuel,left:checked.snd,right:typeRoot}')
  restored=text
  for row in reversed(replacements):
   require(restored.count(row['instrumented'])==1,'Unique reversible instrumentation')
@@ -88,7 +96,7 @@ def prepare(out,archive):
  write(out/'source.json',{'schema':'psc1-prelude-ingress-source-v1','workflowSourceSha':os.environ['GITHUB_SHA'],
   'runId':os.environ['GITHUB_RUN_ID'],'attempt':os.environ['GITHUB_RUN_ATTEMPT'],'kernelSourceSha':SOURCE,
   'productionTree':TREE,'kernel':digest(kernel),'diagnosticKernel':digest(probe),'driver':digest(driver),
-  'reversibleWholeKernelInstrumentation':True,'patches':replacements,'inputs':inputs,'sourceSnapshots':snapshots,
+  'reversibleWholeKernelInstrumentation':True,'includesCurriedSetup':True,'patches':replacements,'inputs':inputs,'sourceSnapshots':snapshots,
   'diagnosticOnly':True,'nativeProbe':False,'productionChanged':False,'fullQualification':False})
  print('PSC1_PRELUDE_INGRESS_PREPARE: PASS exactBody=true exactQualifiedKernel=true reversibleInstrumentation=true')
 def bounded(out,label,node,kernel,case):

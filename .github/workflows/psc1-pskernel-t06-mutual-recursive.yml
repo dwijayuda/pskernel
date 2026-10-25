@@ -1,0 +1,162 @@
+name: PSC1 private mutual recursive argument native preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t06-mutual-recursive-20261026
+    paths:
+    - psc1/**
+    - .github/workflows/psc1-pskernel-t06-mutual-recursive.yml
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Authenticate one private production delta and preserve exact source
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p "$RUNNER_TEMP/t06-mutual-recursive/source"
+
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+        test "$(cat psc1/lean-toolchain)" = leanprover/lean4:v4.35.0
+
+        (cd psc1 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+
+        git diff --name-only 30aeb03451a6c243c1303e048e2acb478bb9369d HEAD -- psc1/packages/pskernel-core/src >
+        "$RUNNER_TEMP/t06-mutual-recursive/production-delta.txt"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib,subprocess,json,hashlib
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-recursive''
+
+        assert (out/''production-delta.txt'').read_text().splitlines()==[''psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualRecursiveArgument.lean'']
+
+        p=''psc1/kernel-lakefile.lean'';old=subprocess.check_output([''git'',''show'',''30aeb03451a6c243c1303e048e2acb478bb9369d:''+p]).decode();current=pathlib.Path(p).read_text()
+
+        assert current.replace(''    `Ps.KernelCore.API.DagMutualRecursiveArgument,\n'','''')==old
+
+        source=pathlib.Path(''psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualRecursiveArgument.lean'').read_text()
+
+        assert not any(token in source for token in [''psKernelAddSimpleMutualInductive'',''psKernelDagGeneratedImport'',''psKernelExprV2DecodeChecked'',''sorry'',''axiom
+        ''])
+
+        PYCODE
+
+        git archive HEAD psc1/packages/pskernel-core/src psc1/test psc1/kernel-lakefile.lean psc1/lean-toolchain
+        .github/workflows/psc1-pskernel-t06-mutual-recursive.yml | tar -x -C "$RUNNER_TEMP/t06-mutual-recursive/source"
+
+        (cd psc1 && node check-psc1-source.mjs --all-portable) 2>&1 | tee "$RUNNER_TEMP/t06-mutual-recursive/portable.log"
+
+        '
+    - name: Build complete native closure and prove exact recursive worker protocol
+      working-directory: psc1
+      shell: bash
+      run: 'set -euo pipefail
+
+        lake -f kernel-lakefile.lean build PsKernelCore PsKernelOrdinaryHeaderProofs 2>&1 | tee "$RUNNER_TEMP/t06-mutual-recursive/build.log"
+
+        lake -f kernel-lakefile.lean env lean -o .lake/build/lib/lean/PsKernelExpandedSizeProofs.olean test/PsKernelExpandedSizeProofs.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-mutual-recursive/retained-count-proofs.log"
+
+        lake -f kernel-lakefile.lean env lean test/PsKernelMutualRecursiveArgumentProofs.lean 2>&1 | tee "$RUNNER_TEMP/t06-mutual-recursive/proofs.log"
+
+        python3 - <<''PYCODE''
+
+        import os,pathlib,re
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-recursive/proofs.log'').read_text()
+
+        reports=re.findall(r"''(PsKernelMutualRecursiveArgumentProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does
+        not depend on any axioms)",text)
+
+        assert len(reports)==15 and len({name for name,_ in reports})==15,reports
+
+        assert not any(x in text for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in reports:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        retained=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-recursive/retained-count-proofs.log'').read_text()
+
+        old=re.findall(r"''(PsKernelExpandedSizeProofs\.[^'']+)'' (?:depends on axioms: \[([^\]]*)\]|does not depend
+        on any axioms)",retained)
+
+        assert len(old)==11 and len({name for name,_ in old})==11,old
+
+        assert not any(x in retained for x in [''sorryAx'',''Lean.ofReduceBool'',''Lean.trustCompiler''])
+
+        for name,axioms in old:assert set(x.strip() for x in axioms.split('','') if x.strip())<={''propext'',''Classical.choice'',''Quot.sound''},(name,axioms)
+
+        print(''PSC1_MUTUAL_RECURSIVE_PROOFS_PASS reports=15'')
+
+        PYCODE
+
+        '
+    - name: Compare all88 controls with exact retained original recursive worker
+      working-directory: psc1
+      shell: bash
+      run: 'set -euo pipefail
+
+        timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelMutualRecursiveArgumentRegression.lean
+        2>&1 | tee "$RUNNER_TEMP/t06-mutual-recursive/native.log"
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os
+
+        text=(pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-recursive/native.log'').read_text()
+
+        labels=[line.removeprefix(''PSC1_MUTUAL_RECURSIVE_ASSERT '') for line in text.splitlines() if line.startswith(''PSC1_MUTUAL_RECURSIVE_ASSERT
+        '')]
+
+        assert len(labels)==88 and len(set(labels))==88,labels
+
+        assert ''PSC1_MUTUAL_RECURSIVE_NATIVE: PASS assertions=88 frozen=80 direct=3 boundaries=4 header=1'' in
+        text
+
+        PYCODE
+
+        '
+    - name: Bind every actual source snapshot and log
+      if: always()
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os,hashlib,json
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''t06-mutual-recursive''
+
+        files={str(p.relative_to(out)):{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in sorted(out.rglob(''*'')) if p.is_file()}
+
+        (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''run'':os.environ[''GITHUB_RUN_ID''],''attempt'':os.environ[''GITHUB_RUN_ATTEMPT''],''scope'':''private
+        recursive argument stage only; original accumulator irrelevance and exact structural budget under ArenaModel;
+        not complete mutual admission or global soundness'',''files'':files},indent=2)+''\n'')
+
+        PYCODE
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-mutual-recursive-native-attempt-${{ github.run_attempt }}
+        include-hidden-files: true
+        path: ${{ runner.temp }}/t06-mutual-recursive/
+        retention-days: 90

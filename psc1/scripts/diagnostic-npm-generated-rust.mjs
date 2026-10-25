@@ -62,10 +62,10 @@ for(const qfile of qfiles){
   ? "import {loadWasmArtifact} from '../../host-tools/generated-wasm-transport.mjs';\nimport {fileURLToPath} from 'node:url';\nconst {psCompilerServiceCandidate}=loadWasmArtifact(fileURLToPath(new URL('./artifact.json',import.meta.url)));\n"
   : "import {runGeneratedRustCompiler} from '../../host-tools/generated-rust-transport.mjs';\nimport {fileURLToPath} from 'node:url';\n";
  if(engine==='rust')fs.chmodSync(path.join(stage,prefix,m.executable),0o755);
- const wire="JSON.stringify(['psc1-unified-compiler-service/2','js',JSON.parse(request)])";
+ const adapterRequestExpression="JSON.stringify(['psc1-unified-compiler-service/2','js',JSON.parse(request)])";
  const invocation=engine==='rust'
-  ? "runGeneratedRustCompiler({executable:fileURLToPath(new URL('./"+m.executable+"',import.meta.url)),executableSha256:'"+pins[engine].executable+"',request:"+wire+"})"
-  : "psCompilerServiceCandidate("+wire+")";
+  ? "runGeneratedRustCompiler({executable:fileURLToPath(new URL('./"+m.executable+"',import.meta.url)),executableSha256:'"+pins[engine].executable+"',request:"+adapterRequestExpression+"})"
+  : "psCompilerServiceCandidate("+adapterRequestExpression+")";
  write(path.join(stage,prefix,'adapter.mjs'),adapter+
   "export function psCompilerJsServiceCandidate(request){return "+invocation+";}\n");
  write(path.join(stage,prefix,'qualification.json'),fs.readFileSync(qfile));

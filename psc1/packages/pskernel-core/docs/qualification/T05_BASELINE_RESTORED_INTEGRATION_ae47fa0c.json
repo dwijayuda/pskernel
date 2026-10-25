@@ -1,0 +1,18 @@
+{
+  "schema": "psc1-exact-qualified-fast-forward-v1",
+  "repository": "dwijayuda/pskernel",
+  "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "expectedSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+  "targetSha": "ae47fa0ca776980890c20c730d00a4f11c73b6c4",
+  "force": false,
+  "result": {
+    "success": true
+  },
+  "qualificationRunId": 40153400857,
+  "qualificationRunAttempt": 1,
+  "auditRunId": 40153551854,
+  "auditRunAttempt": 1,
+  "preUpdateEvidenceCommit": "cbe0623ede0581b911a2aa637fb5d30f47afc163",
+  "scope": "T05 ordinary admission and retained492 proof inventory; not full kernel, Arena or performance qualification",
+  "postUpdateRefVerified": true
+}

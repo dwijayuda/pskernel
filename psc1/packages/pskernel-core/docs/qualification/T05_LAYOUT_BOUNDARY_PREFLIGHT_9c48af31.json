@@ -1,0 +1,393 @@
+{
+  "schema": "psc1-layout-boundary-native-checkpoint-v2",
+  "repository": "dwijayuda/pskernel",
+  "sourceSha": "9c48af315d254b0263f4013eb3f0183e27b662af",
+  "runId": 40154659804,
+  "runAttempt": 1,
+  "jobId": 121053355557,
+  "scope": "Native proof checkpoint for physical source and returned canonical layouts; separate from the main T05 qualification.",
+  "sourceInventory": {
+    "schema": "psc1-layout-boundary-proof-source-v1",
+    "sourceSha": "9c48af315d254b0263f4013eb3f0183e27b662af",
+    "runId": "40154659804",
+    "runAttempt": "1",
+    "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "baselineSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+    "productionSourceTree": "aa634d87ef51856bf0aaf68363836d2fb9cf215a",
+    "productionAndRetainedProofsUnchanged": true,
+    "files": [
+      {
+        "path": "psc1/test/PsKernelExprV2MetadataProofs.lean",
+        "bytes": 7319,
+        "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20",
+        "gitBlobSha": "c97466b70bddb9867d05ab4282990a3f3e417779"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2PagedModelProofs.lean",
+        "bytes": 16916,
+        "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8",
+        "gitBlobSha": "e9ed760c2394b908fd5632633572fb557261756a"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2LayoutBoundaryProofs.lean",
+        "bytes": 11733,
+        "sha256": "7a56146d72dcd6b6ea8515be962eaba49a1af392d868e76eff6f68ca9fa03c3b",
+        "gitBlobSha": "923d74270fdc307e58922ad78c44887eaf4041a7"
+      },
+      {
+        "path": ".github/workflows/psc1-pskernel-layout-boundary-preflight.yml",
+        "bytes": 10008,
+        "sha256": "4d7363d154052852a89702a48bb1450010f39b5cb4347f7084df65bde2bb7cbd",
+        "gitBlobSha": "70c4ff14e2c53bd5aa355a38a46075ff4fea6233"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean",
+        "bytes": 6143,
+        "sha256": "8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089",
+        "gitBlobSha": "b4b2855cc93ff7b886e283257203c7a4a3ef27ad"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean",
+        "bytes": 3522,
+        "sha256": "831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f",
+        "gitBlobSha": "26ba0ae6bfef59a8cedec846f1164c73e468e86c"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean",
+        "bytes": 6820,
+        "sha256": "2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5",
+        "gitBlobSha": "1e2a03c2a7cbdcca944e59957fab43166f184002"
+      },
+      {
+        "path": "psc1/kernel-lakefile.lean",
+        "bytes": 17793,
+        "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170",
+        "gitBlobSha": "6b1f3747b1fc6e4d391fc31fa6196851d31a5a24"
+      },
+      {
+        "path": "psc1/lean-toolchain",
+        "bytes": 25,
+        "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+        "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915"
+      },
+      {
+        "path": "psc1/scripts/install-lean435-ci.sh",
+        "bytes": 1051,
+        "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9",
+        "gitBlobSha": "b53f59db9e2fbb45feeedea659244cae7e77b64b"
+      }
+    ]
+  },
+  "receipt": {
+    "schema": "psc1-layout-boundary-preflight-v1",
+    "sourceSha": "9c48af315d254b0263f4013eb3f0183e27b662af",
+    "runId": "40154659804",
+    "runAttempt": "1",
+    "status": "pass",
+    "proofModules": 3,
+    "totalProofs": 30,
+    "proofs": [
+      {
+        "module": "PsKernelExprV2MetadataProofs",
+        "proofs": 8,
+        "names": [
+          "PsKernelExprV2MetadataProofs.app_preserves",
+          "PsKernelExprV2MetadataProofs.lam_preserves",
+          "PsKernelExprV2MetadataProofs.forall_preserves",
+          "PsKernelExprV2MetadataProofs.let_preserves",
+          "PsKernelExprV2MetadataProofs.mdata_preserves",
+          "PsKernelExprV2MetadataProofs.proj_preserves",
+          "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+          "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth"
+        ],
+        "source": {
+          "bytes": 7319,
+          "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+        },
+        "log": {
+          "bytes": 870,
+          "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+        }
+      },
+      {
+        "module": "PsKernelExprV2PagedModelProofs",
+        "proofs": 17,
+        "names": [
+          "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+          "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+          "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+          "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+          "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+          "PsKernelExprV2PagedModelProofs.empty_layout",
+          "PsKernelExprV2PagedModelProofs.push_id_and_size",
+          "PsKernelExprV2PagedModelProofs.push_layout",
+          "PsKernelExprV2PagedModelProofs.valid_id_location",
+          "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+          "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+          "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+          "PsKernelExprV2PagedModelProofs.push_find_old",
+          "PsKernelExprV2PagedModelProofs.push_find_new",
+          "PsKernelExprV2PagedModelProofs.push_find",
+          "PsKernelExprV2PagedModelProofs.push_require_old",
+          "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+        ],
+        "source": {
+          "bytes": 16916,
+          "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+        },
+        "log": {
+          "bytes": 2900,
+          "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+        }
+      },
+      {
+        "module": "PsKernelExprV2LayoutBoundaryProofs",
+        "proofs": 5,
+        "names": [
+          "PsKernelExprV2LayoutBoundaryProofs.shape_valid_establishes_layout",
+          "PsKernelExprV2LayoutBoundaryProofs.validate_ok_establishes_source_layout",
+          "PsKernelExprV2LayoutBoundaryProofs.replay_node_ok_preserves_layout",
+          "PsKernelExprV2LayoutBoundaryProofs.validate_fuel_ok_preserves_layout",
+          "PsKernelExprV2LayoutBoundaryProofs.validate_ok_establishes_canonical_layout"
+        ],
+        "source": {
+          "bytes": 11733,
+          "sha256": "7a56146d72dcd6b6ea8515be962eaba49a1af392d868e76eff6f68ca9fa03c3b"
+        },
+        "log": {
+          "bytes": 646,
+          "sha256": "ef0e9193e9aedb332c31cc617cc428d0c3d1c8648a08c6bbbd9cca5c437bd714"
+        }
+      }
+    ],
+    "sourceInventory": {
+      "bytes": 2897,
+      "sha256": "5e623530978ac529eff9d62d835605af8a506b80fe4633a87286f85edbbe0bd8"
+    },
+    "proofStatuses": {
+      "bytes": 324,
+      "sha256": "f63022e2fe987c0fc7ea7815f00f6767f14a2ea5df074be5cec575a2fec781eb"
+    },
+    "orderedUniqueReports": true,
+    "allowedStandardAxiomsOnly": true,
+    "shapeGuardEstablishesSourceLayout": true,
+    "successfulValidatorEstablishesSourceLayout": true,
+    "replayNodePreservesCanonicalLayout": true,
+    "validateFuelPreservesCanonicalLayout": true,
+    "canonicalOutputLayoutEstablished": true,
+    "metadataCorrespondenceEstablished": false,
+    "decoderCorrespondenceEstablished": false,
+    "replayArenaModelBridgeEstablished": false,
+    "productionChanges": false,
+    "fullQualification": false,
+    "performanceQualified": false
+  },
+  "artifacts": [
+    {
+      "id": 12583768183,
+      "name": "psc1-layout-boundary-preflight-attempt-1",
+      "size_in_bytes": 26125,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583768183",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583768183/zip",
+      "expired": false,
+      "created_at": "2026-10-25T02:30:51Z",
+      "expires_at": "2026-11-24T02:30:50Z",
+      "updated_at": "2026-10-25T02:30:51Z",
+      "digest": "sha256:c601465fd3b980775d7c8cb03e29479df68d5130b1aa605eca148eca0aacd9be",
+      "workflow_run": {
+        "id": 40154659804,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-layout-boundary-20261025",
+        "head_sha": "9c48af315d254b0263f4013eb3f0183e27b662af"
+      }
+    }
+  ],
+  "actualLogReviewed": true,
+  "sourceAndReceiptIdentitiesVerified": true,
+  "uploadedFiles": 17,
+  "includeHiddenFiles": true,
+  "apiAndUploadDigestMatch": true,
+  "independentArtifactContentAudit": true,
+  "independentRawZipAudit": false,
+  "mainIntegrationIncluded": false,
+  "rawZipSha256IndependentlyVerified": true,
+  "officialExtractionActualDigestVerified": true,
+  "audit": {
+    "sourceSha": "fe01b4709b86d24cdb81b694ed7073a1054642d4",
+    "runId": 40155650832,
+    "runAttempt": 1,
+    "jobId": 121056378892,
+    "actualReport": {
+      "schema": "psc1-layout-boundary-artifact-content-audit-v1",
+      "status": "pass",
+      "auditIdentity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "fe01b4709b86d24cdb81b694ed7073a1054642d4",
+        "runId": "40155650832",
+        "runAttempt": "1",
+        "job": "audit",
+        "workflow": ".github/workflows/psc1-pskernel-layout-boundary-artifact-audit.yml",
+        "files": {
+          ".github/workflows/psc1-pskernel-layout-boundary-artifact-audit.yml": {
+            "bytes": 2381,
+            "sha256": "974971acfeb7fa084312e5f6420b2a7dfcbef190e786c833d3f6f5d290077d61"
+          },
+          ".github/psc1-layout-boundary-audit/audit.py": {
+            "bytes": 16967,
+            "sha256": "d1788287a34eb746adae421ad8a459b5d91f3e7d5a88975603c5e890e197079c"
+          }
+        }
+      },
+      "targetSourceSha": "9c48af315d254b0263f4013eb3f0183e27b662af",
+      "targetRunId": 40154659804,
+      "targetRunAttempt": 1,
+      "targetJobId": 121053355557,
+      "artifactId": 12583768183,
+      "artifactName": "psc1-layout-boundary-preflight-attempt-1",
+      "artifactZip": {
+        "bytes": 26125,
+        "sha256": "c601465fd3b980775d7c8cb03e29479df68d5130b1aa605eca148eca0aacd9be"
+      },
+      "officialDownloadAction": "actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+      "rawZipSha256Verified": true,
+      "independentArtifactContentAudit": true,
+      "independentRawZipParser": false,
+      "independentZipAudit": false,
+      "extractedFiles": 17,
+      "sourceFiles": 10,
+      "proofReports": 30,
+      "productionAndRetainedProofsUnchanged": true,
+      "scope": {
+        "shapeGuardEstablishesSourceLayout": true,
+        "successfulValidatorEstablishesSourceLayout": true,
+        "replayNodePreservesCanonicalLayout": true,
+        "validateFuelPreservesCanonicalLayout": true,
+        "canonicalOutputLayoutEstablished": true,
+        "metadataCorrespondenceEstablished": false,
+        "decoderCorrespondenceEstablished": false,
+        "replayArenaModelBridgeEstablished": false,
+        "productionChanges": false,
+        "fullQualification": false,
+        "performanceQualified": false
+      },
+      "nativeReceipt": {
+        "bytes": 4052,
+        "sha256": "ebb08d36fc9183b0fd529dcb333a155df7bb91035bee6915ab93a2686cea21c6"
+      },
+      "sourceInventory": {
+        "bytes": 2897,
+        "sha256": "5e623530978ac529eff9d62d835605af8a506b80fe4633a87286f85edbbe0bd8"
+      },
+      "manifest": [
+        {
+          "path": "layout-PsKernelExprV2LayoutBoundaryProofs.log",
+          "bytes": 646,
+          "sha256": "ef0e9193e9aedb332c31cc617cc428d0c3d1c8648a08c6bbbd9cca5c437bd714"
+        },
+        {
+          "path": "layout-PsKernelExprV2MetadataProofs.log",
+          "bytes": 870,
+          "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+        },
+        {
+          "path": "layout-PsKernelExprV2PagedModelProofs.log",
+          "bytes": 2900,
+          "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+        },
+        {
+          "path": "native-build.log",
+          "bytes": 6017,
+          "sha256": "f1f1b68a6f4f4beff8695e43bda3c089d1827266cae17e0fed67710deb60a7b6"
+        },
+        {
+          "path": "native-receipt.json",
+          "bytes": 4052,
+          "sha256": "ebb08d36fc9183b0fd529dcb333a155df7bb91035bee6915ab93a2686cea21c6"
+        },
+        {
+          "path": "proof-status.log",
+          "bytes": 324,
+          "sha256": "f63022e2fe987c0fc7ea7815f00f6767f14a2ea5df074be5cec575a2fec781eb"
+        },
+        {
+          "path": "source-inventory.json",
+          "bytes": 2897,
+          "sha256": "5e623530978ac529eff9d62d835605af8a506b80fe4633a87286f85edbbe0bd8"
+        },
+        {
+          "path": "sources/.github/workflows/psc1-pskernel-layout-boundary-preflight.yml",
+          "bytes": 10008,
+          "sha256": "4d7363d154052852a89702a48bb1450010f39b5cb4347f7084df65bde2bb7cbd"
+        },
+        {
+          "path": "sources/psc1/kernel-lakefile.lean",
+          "bytes": 17793,
+          "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170"
+        },
+        {
+          "path": "sources/psc1/lean-toolchain",
+          "bytes": 25,
+          "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean",
+          "bytes": 6820,
+          "sha256": "2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean",
+          "bytes": 3522,
+          "sha256": "831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean",
+          "bytes": 6143,
+          "sha256": "8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089"
+        },
+        {
+          "path": "sources/psc1/scripts/install-lean435-ci.sh",
+          "bytes": 1051,
+          "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2LayoutBoundaryProofs.lean",
+          "bytes": 11733,
+          "sha256": "7a56146d72dcd6b6ea8515be962eaba49a1af392d868e76eff6f68ca9fa03c3b"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2MetadataProofs.lean",
+          "bytes": 7319,
+          "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+          "bytes": 16916,
+          "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": 12583759407,
+        "name": "psc1-layout-boundary-content-audit-attempt-1",
+        "size_in_bytes": 63157,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583759407",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583759407/zip",
+        "expired": false,
+        "created_at": "2026-10-25T02:46:03Z",
+        "expires_at": "2026-11-24T02:46:02Z",
+        "updated_at": "2026-10-25T02:46:03Z",
+        "digest": "sha256:b43f0726b24ec8b42035fea5e5b57e492118df281efc271283b8ca471f752c52",
+        "workflow_run": {
+          "id": 40155650832,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "work/psc1-pskernel-layout-boundary-artifact-audit-20261025",
+          "head_sha": "fe01b4709b86d24cdb81b694ed7073a1054642d4"
+        }
+      }
+    ],
+    "actualReportLogReviewed": true
+  }
+}

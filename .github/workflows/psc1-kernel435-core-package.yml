@@ -60,6 +60,8 @@ jobs:
           {"compilerOptions":{"noEmit":true,"strict":true,"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022"},"files":["consumer.mts"]}
           JSON
           node "$RUNNER_TEMP/psc1-core-types/node_modules/typescript/bin/tsc" --project "$RUNNER_TEMP/psc1-core-types/tsconfig.json"
+      - name: Fresh offline global install of the same candidate before qualification
+        run: node scripts/kernel435-global-installed.mjs dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz
       - uses: actions/upload-artifact@v4
         with:
           name: psc1-kernel435-integrated-toolchain-qualified-${{ github.sha }}
@@ -67,6 +69,7 @@ jobs:
             psc1/dist/kernel435-core/tarballs/
             psc1/dist/kernel435-core/package-receipt.json
             psc1/dist/kernel435-core-installed/
+            psc1/dist/kernel435-global/
           if-no-files-found: error
           retention-days: 90
       - uses: actions/upload-artifact@v4
@@ -77,6 +80,5 @@ jobs:
             psc1/dist/kernel435-core/tarballs/
             psc1/dist/kernel435-core/package-receipt.json
             psc1/dist/kernel435-core-installed/
+            psc1/dist/kernel435-global/
           retention-days: 90
-
-# Requalify consistent kernel policy across CLI and publication entry points.

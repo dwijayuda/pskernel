@@ -1,6 +1,16 @@
 // Fresh global install of the qualified Wasm-default candidate; no checkout/SDK execution.
 import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {readQualifiedArtifact,sha256} from './kernel435-qualified-artifact.mjs';
-const input=JSON.parse(fs.readFileSync('scripts/kernel435-global-input.json','utf8')),archive=await readQualifiedArtifact(input,'dist/kernel435-global-input'),tar=path.join(archive,input.tarball);assert.equal(sha256(fs.readFileSync(tar)),input.tarballSha256);
+let input,tar;
+if(process.argv[2]){
+ // A same-job package is still a candidate; this global test helps qualify it.
+ tar=path.resolve(process.argv[2]);assert.equal(tar,path.resolve('dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz'));
+ const receipt=JSON.parse(fs.readFileSync('dist/kernel435-core/package-receipt.json','utf8'));assert.equal(receipt.sourceCommit,process.env.GITHUB_SHA);
+ input={mode:'same-job-candidate',commit:receipt.sourceCommit,tarball:receipt.tarball,tarballSha256:receipt.sha256};
+}else{
+ input=JSON.parse(fs.readFileSync('scripts/kernel435-global-input.json','utf8'));
+ const archive=await readQualifiedArtifact(input,'dist/kernel435-global-input');tar=path.join(archive,input.tarball);
+}
+assert.equal(sha256(fs.readFileSync(tar)),input.tarballSha256);
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-wasm-default-global-')),prefix=path.join(tmp,'prefix'),consumer=path.join(tmp,'consumer'),cache=path.join(tmp,'cache');fs.mkdirSync(consumer);
 const env={...process.env,PATH:path.dirname(process.execPath)};for(const k of ['LEAN_PATH','ELAN_TOOLCHAIN','LD_LIBRARY_PATH','DYLD_LIBRARY_PATH','PSC1_NATIVE','PSC1_HOST_TOOLS','PSC1_LIBRARY_RESOLVER','PSC_LEAN_KERNEL_PROVIDER_BIN'])delete env[k];
 const npm=path.resolve(path.dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js');assert.ok(fs.existsSync(npm));

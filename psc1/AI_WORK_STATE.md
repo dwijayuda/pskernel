@@ -20,9 +20,9 @@ bodies. Linux x64/arm64 run40154010946 PASS14 real reference-parity cases and
 standalone execution; raw binaries4079232/4160016 bytes. macOS x64/arm64 jobs
 121053490973/121053490842 in40154709416 PASS equivalent gates,2771584/2798528 bytes.
 That matrix's overall failure is Windows setup, not a macOS success override.
-Windows-only retry40155170697 is active after fixing Bash-path export to native
+Windows-only retry40155170697 has PASSED after fixing Bash-path export to native
 Elan PATH. Linear Wasm build40154206987 is active at630fa363; do not restart it.
-No new4.35 npm package or full cross-platform toolchain is qualified yet.
+The native4.35 package is qualified on all five platforms as recorded below; linear Wasm and the full cross-platform compiler toolchain remain unqualified.
 
 Next: assemble only pinned successful artifacts, match exact25-module source
 closure, pack and install offline locally/globally, execute public API acceptance/
@@ -31,6 +31,22 @@ checking and package integration before claiming release readiness. Preserve
 qualified120-module compilers and all four G3 artifacts. Whole toolchain platform
 selection/native compiler/Rust executable transport and generated output parity
 remain separate release blockers. See scripts/kernel435-* and kernel435 workflows.
+
+## Native kernel package milestone
+
+Native package commit4deb99de/run40155475188 PASSES all five platform installed
+jobs, same tarballc8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371,
+6446239 bytes for all five prebuilts combined. Native source closure25 modules,
+f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b.
+Windows retry40155170697 passed,4616704-byte standalone binary. All native
+binaries are below7000000 raw bytes. [Install guide](docs/PSC1_KERNEL_PACKAGES.md)
+and [exact receipts](docs/PSC1_KERNEL435_QUALIFICATION_2026-10-25.json).
+
+Host kernel CLI/pre-publication additional checking is implemented; run40155831321
+passes32 boundary checks and10 Rust transport regressions. Its additional accepted
+provider is a real native reference; it does not claim genuine Wasm acceptance.
+Real linear Wasm40154206987 remains active; preserve the run/cache. Whole toolchain
+cross-platform and integrated dual-check npm qualification remain INCOMPLETE.
 
 ## Four-engine correctness milestone and package promotion
 

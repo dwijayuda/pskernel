@@ -1,0 +1,1092 @@
+{
+  "schema": "psc1-independent-kernel435-qualification/1",
+  "date": "2026-10-25",
+  "compilerBaseline": {
+    "commit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+    "fullGate": {
+      "run": 40152772905,
+      "fullJob": 121049906606,
+      "finalGate": 121055266402,
+      "reviewCommit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+      "testedCommit": "f9713323bb3beed393255ff755da3dd2023febdc",
+      "treeSha": "d884c41c8097ac59c91081f019481f60625ba793",
+      "status": "passed",
+      "criteria": 37,
+      "blocked": 0,
+      "artifact": 12583743977,
+      "zipSha256": "8b10c96a59fab176c0cf7dcc967720c8384870d97745859f0a3a99a71cc17194",
+      "readiness": {
+        "counts": {
+          "implemented": 0,
+          "tested": 0,
+          "qualified": 37,
+          "blocked": 0
+        },
+        "releaseReady": true
+      }
+    },
+    "frozenCompilerSourceClosure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
+  },
+  "officialLean": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "protocol": "pskernel-lean/1",
+    "profile": "lean4.35-core",
+    "canonicalAdmissionsVersion": 2,
+    "trustLevel": 0,
+    "heartbeatLimit": 2000000,
+    "recursionLimit": 20000
+  },
+  "sourceClosureDigest": "f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b",
+  "providerModules": 25,
+  "native": {
+    "status": "qualified-packed-five-platform-installed",
+    "packageCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+    "run": 40155475188,
+    "assembly": {
+      "schema": "psc1-kernel435-native-package/1",
+      "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+      "status": "assembled-qualified-binaries-not-yet-installed",
+      "package": "@proofscript/pskernel-lean",
+      "version": "4.35.0",
+      "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+      "bytes": 6446239,
+      "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+      "sourceClosureDigest": "f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b",
+      "targets": {
+        "linux-x64": {
+          "path": "prebuilt/linux-x64/psc2_lean_kernel_provider",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "size": 4079232,
+          "sourceCommit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6",
+          "qualification": {
+            "run": 40154010946,
+            "job": 121051344145,
+            "artifact": 12583552650,
+            "zipSha256": "01f025c2a073e45d7401455fd8af111bf10695a4115119a0a01ce4e5c40c2ffa",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "linux-arm64": {
+          "path": "prebuilt/linux-arm64/psc2_lean_kernel_provider",
+          "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+          "size": 4160016,
+          "sourceCommit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6",
+          "qualification": {
+            "run": 40154010946,
+            "job": 121051344263,
+            "artifact": 12583702369,
+            "zipSha256": "0e1a49679bfdedfda7ad6ca4c0edeca18dce65209722b145cc25aad4b90c6dcf",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "darwin-x64": {
+          "path": "prebuilt/darwin-x64/psc2_lean_kernel_provider",
+          "sha256": "eb4c6d21bbfb32afbf6470b1a678198842b4ebdb7c0920e0461bf3a44d961af6",
+          "size": 2771584,
+          "sourceCommit": "fdee7795c0736cf0acca9dddca4ebbc1c86bd0d4",
+          "qualification": {
+            "run": 40154709416,
+            "job": 121053490973,
+            "artifact": 12584087448,
+            "zipSha256": "42cac3fdd355fec25ce759e0ad15ce221235a050d3ddbde19e5311e01ffcb146",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "darwin-arm64": {
+          "path": "prebuilt/darwin-arm64/psc2_lean_kernel_provider",
+          "sha256": "9a572fd4bfc6e0697d1b18589d6bbc80579b26cd495a79e30e72d263b7454183",
+          "size": 2798528,
+          "sourceCommit": "fdee7795c0736cf0acca9dddca4ebbc1c86bd0d4",
+          "qualification": {
+            "run": 40154709416,
+            "job": 121053490842,
+            "artifact": 12584237016,
+            "zipSha256": "50d1a9105c7c1e04f62ca9851a4bdbdd2415c5e7c88eb7011c1384e01a1111a7",
+            "standalone": true,
+            "parityCases": 14
+          }
+        },
+        "win32-x64": {
+          "path": "prebuilt/win32-x64/psc2_lean_kernel_provider.exe",
+          "sha256": "5a8cd5adb4cd8a8295e27e7be7c3295c360e41cf85b8d2b9922d1c52730fb6d8",
+          "size": 4616704,
+          "sourceCommit": "546bb0f84e86e4d09876f24b036711368fe01635",
+          "qualification": {
+            "run": 40155170697,
+            "job": 121054915634,
+            "artifact": 12583923425,
+            "zipSha256": "fd08b0114b4bd5f4f2d1344e2d9178b6eb81896cb1462c9e0c9fa91878996d19",
+            "standalone": true,
+            "parityCases": 14
+          }
+        }
+      }
+    },
+    "artifact": 12584263337,
+    "artifactZipSha256": "a5cefb58f4eaf4a558b390294d24c555b763c3a0ef7f7e68aab7cfc324f58b2f",
+    "installed": [
+      {
+        "job": 121056236215,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "darwin-arm64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236219,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "darwin-x64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236235,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "linux-x64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236281,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "win32-x64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      },
+      {
+        "job": 121056236294,
+        "schema": "psc1-kernel435-native-installed/1",
+        "sourceCommit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+        "status": "passed",
+        "target": "linux-arm64",
+        "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+        "localAndGlobal": true,
+        "offline": true,
+        "installScriptsDisabled": true,
+        "noLeanSdkOnExecutionPath": true,
+        "apiCases": 28,
+        "syncAndAsync": true,
+        "tamperRefusal": true,
+        "observations": [
+          {
+            "install": "local",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "local",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "local",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "local",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "local",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "large-nat-accept",
+            "accepted": true
+          },
+          {
+            "install": "global",
+            "id": "kernel-type-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "duplicate-declaration-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unknown-constant-rejection",
+            "accepted": false,
+            "errorKind": "kernel-rejection"
+          },
+          {
+            "install": "global",
+            "id": "unsafe-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "metavariable-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "height-overflow-refusal",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "malformed-json",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-format",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "wrong-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "string-version",
+            "accepted": false,
+            "errorKind": "protocol-version"
+          },
+          {
+            "install": "global",
+            "id": "unknown-admission",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          },
+          {
+            "install": "global",
+            "id": "truncated-structured-name",
+            "accepted": false,
+            "errorKind": "malformed-request"
+          }
+        ]
+      }
+    ],
+    "optimization": {
+      "referenceBranch": "archive/local-slim-prebuilt-3c49f7d8-20261004",
+      "referenceHead": "0408f18b47e6cf9b42fce023d24fd73ba79c95af",
+      "strategy": [
+        "narrow Lean.Environment imports without changing provider bodies",
+        "official static SDK archives",
+        "kernel/util initialization plus generated module initializers",
+        "remove only unused Lake linker library",
+        "Os and platform strip/ad-hoc macOS signature"
+      ],
+      "compilerOrCheckerSemanticBypass": false
+    }
+  },
+  "wasm": {
+    "status": "build-in-progress-not-qualified",
+    "run": 40154206987,
+    "job": 121051950567,
+    "commit": "630fa36343cd1e8d19178cae200f2ad98cf017c0",
+    "memoryModel": "linear",
+    "implementation": "official Lean C++ with documented Emscripten compatibility patches",
+    "emscripten": "6.0.9",
+    "wasmGc": false,
+    "old434ArtifactsNotRelabeled": true
+  },
+  "hostIntegration": {
+    "status": "implemented-boundary-tested-not-installed-qualified",
+    "commit": "759a8d2f3de0ad2a6c22d0e59adf79a7208382d5",
+    "run": 40155831321,
+    "job": 121056923930,
+    "boundaryChecks": 32,
+    "rustTransportRegressions": 10,
+    "additionalAcceptedTestProvider": "real native reference, not a Wasm success claim",
+    "newCommands": [
+      "psc kernel --identity",
+      "psc kernel check admissions.json --provider native|wasm|both",
+      "psc kernel check-source Main.lean|ps --provider native|wasm|both",
+      "psc generated build --kernel both"
+    ],
+    "mandatoryNativeAdmissionPreserved": true,
+    "wasmAdmissionBeforePublication": true
+  },
+  "fullToolchainCrossPlatformRelease": {
+    "status": "incomplete",
+    "existingCorePackagePlatform": "linux-x64-glibc",
+    "remaining": [
+      "linear Wasm build and five-platform installed package gates",
+      "integrated core tarball and actual native/generated dual admission tests",
+      "platform-specific native compiler and generated Rust runtime assets/transports",
+      "whole toolchain platform-aware launcher/publication/optional-provider installation gates",
+      "required final source/package/platform qualification and user release authorization"
+    ]
+  },
+  "publication": "unpublished",
+  "merge": "not-performed"
+}

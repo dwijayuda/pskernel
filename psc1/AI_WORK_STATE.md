@@ -1,12 +1,29 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #182, branch
-`feat/psc1-lossless-source-20261025`, based on qualified PR #181 HEAD
-`d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
+Updated 2026-10-25 Asia/Jakarta. Active diagnostic-fix branch
+`fix/psc1-character-diagnostics-20261025`, based on qualified PR #182 HEAD
+`4c977654b8ca39b5fb3568ca9ebea03eee9d4339`.
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
 
-## Qualified R1 lossless foundation
+## Character diagnostic correction (in progress)
+
+The sole production change in Lexer.lean replaces advancing only the unexpected
+close character with advancing the actual body character followed by that close.
+This repairs UTF-8 offsets and line/column progression for the entire malformed
+unescaped-character class. Existing lexical acceptance, proof checking, IR and
+resource policies are unchanged; qualification is in progress.
+
+New 121-module source closure:
+60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a.
+The frozen packaged compiler and old R1 source keep their own exact identities.
+Run 40195466611 establishes the one-change/source-correspondence guard but fails
+the new proof/test source build; no successful correction qualification is claimed.
+The scoped universal character-lexer correspondence and actual-prefix theorem are
+being repaired and will remain axiom-free. R1 snapshots keep old advisory-location
+compatibility, and future development gates build these new regressions.
+
+## Preserved qualified R1 lossless foundation
 
 Implementation `c577d49888493857199fa3dc26f7ff78ed157def`, stacked draft PR #182 on PR #181
 HEAD `d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`. Tested merge `e0b14e376f0231877b4c03321842f4eeaad97f5a` shares tree

@@ -103,11 +103,21 @@ theorem characterDiagnostic_preserves_observation
     (remaining : List Char) (position start : PsSourcePos) (charsRev : List Char) :
     characterObservation (psLexReadCharacterBody remaining position start charsRev) =
       characterObservation (legacyPsLexReadCharacterBody remaining position start charsRev) := by
-  unfold psLexReadCharacterBody legacyPsLexReadCharacterBody
-  repeat
-    first
-    | rfl
-    | split
+  cases remaining with
+  | nil => rfl
+  | cons first rest =>
+    by_cases newline : psLexCharEq first '\n' = true
+    · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline]
+    · by_cases slash : psLexCharEq first '\\' = true
+      · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash]
+      · cases rest with
+        | nil =>
+          simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash]
+        | cons close tail =>
+          by_cases quote : psLexCharEq close '\'' = true
+          · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash, quote]
+          · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash, quote,
+              characterObservation, psLexCharacterError, characterErrorClass]
 
 /-- Malformed unescaped characters report the end of the actual consumed prefix,
 including both scalar widths and LF/column effects in their original order. -/
@@ -153,11 +163,11 @@ def main : IO Unit := do
   let prefixes := ["", "-- before\r\n", "/- before 😀 -/\n", "def value := "]
   let mut checked := 0
   for grammar in [PsLosslessGrammar.lean, PsLosslessGrammar.proofScript] do
-    for prefix in prefixes do
+    for leading in prefixes do
       for body in bodies do
         for close in closes do
           characterCheck grammar
-            (prefix ++ "'" ++ String.singleton body ++ String.singleton close ++ " tail")
+            (leading ++ "'" ++ String.singleton body ++ String.singleton close ++ " tail")
           checked := checked + 1
     for source in ["'a'", "'α'", "'😀'", "'\\n'", "'\\x41'", "'\\u03B1'",
       "'\\uD800'", "'\\xGG'", "'\\uGGGG'", "'\\'", "'\n", "'", "'😀",

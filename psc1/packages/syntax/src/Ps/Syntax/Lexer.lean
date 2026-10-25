@@ -694,7 +694,7 @@ def psLexReadCharacterBody
             else
               psLexCharacterError
                 start
-                (psLexAdvanceChar position close)
+                (psLexAdvanceTwo position first close)
 
 def psLexPairEq
     (first second expectedFirst expectedSecond : Char) : Bool :=

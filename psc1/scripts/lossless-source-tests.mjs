@@ -94,8 +94,8 @@ for (const grammar of ['lean', 'ps']) {
   const malformedCharacter = capture("'😀α", grammar);
   assert.equal(malformedCharacter.status, 'lexically-refused');
   assert.equal(malformedCharacter.diagnostic.code, 'unterminatedCharacter');
-  assert.equal(malformedCharacter.diagnostic.span.stop.byteOffset, 3);
-  assert.equal(malformedCharacter.diagnosticCoordinatesVerified, false);
+  assert.equal(malformedCharacter.diagnostic.span.stop.byteOffset, 7);
+  assert.equal(malformedCharacter.diagnosticCoordinatesVerified, true);
 }
 const original = bytes('-- keep\r\ndef α := 1 -- 😀\r\n');
 const snapshot = capture(original, 'lean', 'A.Module', '/first/location.lean');

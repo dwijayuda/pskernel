@@ -1,0 +1,60 @@
+name: PSC1 character diagnostic qualification
+on:
+  workflow_call:
+  push:
+    branches: [fix/psc1-character-diagnostics-20261025]
+    paths:
+      - psc1/**/*.lean
+      - psc1/host-tools/source-refactoring.mjs
+      - psc1/scripts/lossless-source-tests.mjs
+      - psc1/scripts/bounded-process.py
+      - psc1/scripts/selfhost-qualification-profiles.mjs
+      - psc1/lean-toolchain
+      - .github/workflows/psc1-character-diagnostics.yml
+      - psc1/scripts/character-diagnostic-correspondence.mjs
+permissions:
+  contents: read
+concurrency:
+  group: psc1-character-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  lossless:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile additive lexical capture and regressions
+        working-directory: psc1
+        run: |
+          lean --version
+          node scripts/character-diagnostic-correspondence.mjs
+          lake build psc1_lossless_source psc1_lossless_tests psc1_character_diagnostic_tests
+          .lake/build/bin/psc1_lossless_tests
+          .lake/build/bin/psc1_character_diagnostic_tests
+      - name: Exercise snapshots, trivia and staged edits
+        working-directory: psc1
+        run: |
+          node scripts/lossless-source-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-character-${{ github.sha }}
+          path: |
+            psc1/dist/lossless/
+            psc1/dist/character-diagnostics/
+          if-no-files-found: error
+          retention-days: 90

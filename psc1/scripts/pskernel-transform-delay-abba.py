@@ -199,7 +199,8 @@ def main():
                             or observed.get("stage") != "kernel-admission"
                             or "kernel reduction budget exhausted" not in observed.get("reason", "")):
                             errors.append("frozen Church baseline error changed")
-                    elif observed.get("verdict") != "accepted" or observed.get("metadataValidated") is not True:
+                    elif (observed.get("verdict") != "accepted" or observed.get("metadataValidated") is not True
+                        or observed.get("officialReplaySkipsUnsafeOrPartial") is not False):
                         errors.append("candidate did not restore original official Church acceptance")
                 if name in ("perf/repeated-subproblem.ndjson", "bugs/proj-of-stuck-prop.ndjson"):
                     if observed.get("verdict") != reference.get("verdict"):
@@ -226,7 +227,7 @@ def main():
         for left in complete["baseline"]:
             for right in complete["candidate"]:
                 keys = (("format","sourceSha256","fuel","coreInvoked","records","admissionCommands","arenaNodes",
-                         "containsUnsafeOrPartial","officialReplaySkipsUnsafeOrPartial")
+                         "containsUnsafeOrPartial","exportedDeclarations")
                         if name == "perf/church-numerals.ndjson" else SEMANTIC_KEYS)
                 if {k: left.get(k) for k in keys} != {k: right.get(k) for k in keys}:
                     errors.append("complete result mismatch: " + name)

@@ -1,0 +1,107 @@
+// Exact Lean 4.35.0-only compatibility fixes. Never patch the PSC1 working
+// tree. The caller fetches a clean pinned upstream Lean checkout first.
+import {readFile,writeFile} from 'node:fs/promises';
+import path from 'node:path';
+const root=process.argv[2];
+if(!root)throw new Error('usage: node apply-lean435-compat.mjs <exact-lean4-src>');
+async function modify(rel,changes){
+  const file=path.join(root,rel);
+  let data=await readFile(file,'utf8');
+  for(const [label,from,to] of changes){
+    const count=data.split(from).length-1;
+    const newCount=data.split(to).length-1;
+    if(count===0&&newCount===1)continue;
+    if(count!==1)throw new Error(rel+': exact Lean 4.35 source mismatch for '+label+' (found '+count+')');
+    data=data.replace(from,to);
+  }
+  await writeFile(file,data);
+}
+const emscriptenSettings='  set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -pthread -flto")\n  string(APPEND LEANC_EXTRA_CC_FLAGS " -pthread")';
+await modify('src/CMakeLists.txt',[
+  ['single-threaded kernel-only Emscripten',emscriptenSettings,
+   '  set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions")\n  if(MULTI_THREAD)\n    string(APPEND EMSCRIPTEN_SETTINGS " -pthread")\n    string(APPEND LEANC_EXTRA_CC_FLAGS " -pthread")\n  endif()'],
+  ['Leanc target cannot cross execute','  LeanExport\n  Leanc\n  LeanIR\n)\nif(NOT CMAKE_SYSTEM_NAME MATCHES "Emscripten")\n  list(APPEND STDLIBS Lake LeanChecker)',
+   '  LeanExport\n  LeanIR\n)\nif(NOT CMAKE_SYSTEM_NAME MATCHES "Emscripten")\n  list(APPEND STDLIBS Leanc Lake LeanChecker)'],
+]);
+await modify('src/runtime/thread.h',[
+  ['no-thread mutex include','#include <utility>\n#include <cstdlib>\n#define LEAN_THREAD_LOCAL',
+   '#include <utility>\n#include <cstdlib>\n#include <mutex>\n#define LEAN_THREAD_LOCAL'],
+]);
+for(const rel of ['src/include/lean/lean.h','stage0/src/include/lean/lean.h']){
+  await modify(rel,[['32bit scalar literals','#ifdef LEAN_EMSCRIPTEN\n#define LEAN_SCALAR_PTR_LITERAL',
+    '#if UINTPTR_MAX == UINT32_MAX\n#define LEAN_SCALAR_PTR_LITERAL']]);
+}
+for(const rel of ['src/util/shell.cpp','stage0/src/util/shell.cpp']){
+  await modify(rel,[
+    ['boxed UInt32 shell status','    return get_io_scalar_result<uint32>(lean_shell_main(\n        args.steal(),\n        shell_opts.to_obj_arg()\n    ));',
+     '    object_ref result = get_io_result<object_ref>(lean_shell_main(\n        args.steal(),\n        shell_opts.to_obj_arg()\n    ));\n    return lean_unbox_uint32(result.raw());'],
+    ['boxed shell option error','        rc = unbox(io_result_get_error(r));',
+     '        rc = lean_unbox_uint32(io_result_get_error(r));'],
+  ]);
+}
+await modify('src/kernel/init_module.cpp',[
+  ['explicit kernel-only init','#include "kernel/init_module.h"',
+    '#if defined(LEAN_EMSCRIPTEN)\n#include "runtime/stackinfo.h"\n#include "util/init_module.h"\n#endif\n#include "kernel/init_module.h"'],
+  ['kernel-only lean_initialize','namespace lean {\nvoid initialize_kernel_module() {',
+    'namespace lean {\n#if defined(LEAN_EMSCRIPTEN)\nstatic bool g_pskernel_initialized = false;\nextern "C" LEAN_EXPORT void lean_initialize() {\n    if (g_pskernel_initialized) return;\n    g_pskernel_initialized = true;\n    save_stack_info();\n    initialize_util_module();\n    initialize_kernel_module();\n}\n#endif\nvoid initialize_kernel_module() {'],
+]);
+await modify('src/runtime/io.cpp',[
+  ['tempfile erased world','extern "C" LEAN_EXPORT obj_res lean_io_create_tempfile(lean_object * /* w */) {',
+    '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT obj_res lean_io_create_tempfile() {\n#else\nextern "C" LEAN_EXPORT obj_res lean_io_create_tempfile(lean_object * /* w */) {\n#endif'],
+  ['tempdir erased world','extern "C" LEAN_EXPORT obj_res lean_io_create_tempdir(lean_object * /* w */) {',
+    '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT obj_res lean_io_create_tempdir() {\n#else\nextern "C" LEAN_EXPORT obj_res lean_io_create_tempdir(lean_object * /* w */) {\n#endif'],
+]);
+await modify('src/runtime/memory.cpp',[
+  ['default max memory Unit ABI','extern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory() {',
+    '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory(lean_obj_arg) {\n#else\nextern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory() {\n#endif'],
+]);
+// Lean 4.35.0 src/runtime/uv/system.h declares a uint64_t gid, but its
+// no-libuv fallback in system.cpp accidentally omits that argument. Native
+// libuv builds use the other implementation and do not expose this mismatch.
+// Fix ONLY that exact fallback signature, without altering behavior, while
+// retaining the official header contract. GitHub CI run #39122290519.
+await modify('src/runtime/uv/system.cpp',[
+  ['no-libuv osGetGroup ABI matches header',
+   'extern "C" LEAN_EXPORT lean_obj_res lean_uv_os_get_group() {',
+   'extern "C" LEAN_EXPORT lean_obj_res lean_uv_os_get_group(uint64_t /* gid */) {'],
+]);
+
+await modify('src/runtime/interrupt.cpp',[
+  ['default heartbeat Unit ABI','extern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat() {',
+    '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat(lean_obj_arg) {\n#else\nextern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat() {\n#endif'],
+]);
+await modify('src/library/ir_interpreter.cpp',[
+  ['run-init erased world','extern "C" LEAN_EXPORT object * lean_run_init(object * env, object * opts, object * decl, object * init_decl, object *) {',
+   '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT object * lean_run_init(object * env, object * opts, object * decl, object * init_decl) {\n#else\nextern "C" LEAN_EXPORT object * lean_run_init(object * env, object * opts, object * decl, object * init_decl, object *) {\n#endif'],
+]);
+await modify('src/library/module.cpp',[
+  ['region save ABI','extern "C" LEAN_EXPORT object * lean_compacted_region_save(b_obj_arg ofname, b_obj_arg mod, b_obj_arg odata,\n                                                           b_obj_arg odep_regions, obj_arg oprev,\n                                                           uint8 allow_closures_u8, object *) {',
+    '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT object * lean_compacted_region_save(b_obj_arg ofname, b_obj_arg mod, b_obj_arg odata,\n                                                           b_obj_arg odep_regions, obj_arg oprev,\n                                                           uint8 allow_closures_u8) {\n#else\nextern "C" LEAN_EXPORT object * lean_compacted_region_save(b_obj_arg ofname, b_obj_arg mod, b_obj_arg odata,\n                                                           b_obj_arg odep_regions, obj_arg oprev,\n                                                           uint8 allow_closures_u8, object *) {\n#endif'],
+  ['region read ABI','extern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions, object *) {',
+   '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions) {\n#else\nextern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions, object *) {\n#endif'],
+  ['region free ABI','extern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region, object *) {',
+   '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region) {\n#else\nextern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region, object *) {\n#endif'],
+]);
+// Lean 4.35.0 has one exceptional executable link recipe that omits
+// LEANC_OPTS. A native i386 stage0 needs -m32 here as well.
+for(const relative of ['src/stdlib.make.in','stage0/src/stdlib.make.in']){
+  await modify(relative,[[
+    'native 32-bit leanir link flag propagation',
+    "\"${CMAKE_BINARY_DIR}/leanc.sh\" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${CMAKE_DYN_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} -o $@",
+    "\"${CMAKE_BINARY_DIR}/leanc.sh\" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${CMAKE_DYN_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} ${LEANC_OPTS} -o $@",
+  ]]);
+}
+
+// A wasm32 single-threaded runtime has no task manager, so a spawned task
+// runs inline in lean_task_spawn_core. Native task_manager::run_task resets
+// the *C++ kernel* heartbeat on task entry, whereas the inline fallback
+// otherwise inherits the completed Standard replay's counter and can reject
+// even Nat := 1 as deterministic-timeout. Preserve that native resource
+// boundary only under Emscripten; do NOT disable kernel finite budgets.
+await modify('src/runtime/object.cpp',[
+  ['single-threaded wasm32 fresh task kernel heartbeat',
+   'extern "C" LEAN_EXPORT obj_res lean_task_spawn_core(obj_arg c, unsigned prio, bool keep_alive) {\n    if (!g_task_manager) {\n        return lean_task_pure(apply_1(c, box(0)));',
+   'extern "C" LEAN_EXPORT obj_res lean_task_spawn_core(obj_arg c, unsigned prio, bool keep_alive) {\n    if (!g_task_manager) {\n#if defined(LEAN_EMSCRIPTEN)\n        // Match task_manager::run_task: reset only the C++ kernel counter.\n        reset_heartbeat();\n#endif\n        return lean_task_pure(apply_1(c, box(0)));'],
+]);
+
+console.log('PSC1_LEAN435_EMSCRIPTEN_COMPAT: exact source rewrites applied');

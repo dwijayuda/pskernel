@@ -32,17 +32,12 @@ jobs:
           test "$(git -C "$RUNNER_TEMP/lean435" rev-parse HEAD)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
       - name: Check retained Cpp Emscripten compatibility transformations against435
         run: |
-          status=0
-          if ! git -C "$RUNNER_TEMP/lean435" apply --check "$GITHUB_WORKSPACE/psc1/packages/pskernel-lean-wasm/patches/lean435-compat-preflight.patch"; then
-            status=1
-          fi
-          if ! node psc1/packages/pskernel-lean-wasm/scripts/apply-wasm-abi.mjs "$RUNNER_TEMP/lean435"; then
-            status=1
-          fi
-          if ! node psc1/packages/pskernel-lean-wasm/scripts/apply-shell-exit-code.mjs "$RUNNER_TEMP/lean435"; then
-            status=1
-          fi
-          exit "$status"
+          node psc1/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs "$RUNNER_TEMP/lean435"
+          node psc1/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs "$RUNNER_TEMP/lean435"
+          node psc1/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs "$RUNNER_TEMP/lean435"
+          git -C "$RUNNER_TEMP/lean435" diff --check
+          node --check psc1/packages/pskernel-lean/scripts/build-native-slim.mjs
+          node psc1/scripts/kernel-provider-source.mjs psc1 "$RUNNER_TEMP/current-kernel-overlay" "$RUNNER_TEMP/current-kernel-source.json"
       - name: Retain compatibility logs and exact upstream delta
         if: always()
         run: |

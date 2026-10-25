@@ -8,7 +8,7 @@ private def demand (condition : Bool) (code : String) : IO Unit :=
 def main (args : List String) : IO Unit := do
   let [mode, input, output, admissionsPath, irPath] := args
     | throw (IO.userError "PSC1_OWNERSHIP_USAGE")
-  demand (mode == "index" || mode == "reference") "MODE"
+  demand (["index", "reference", "to-lean", "to-ps"].contains mode) "MODE"
   let bytes ← IO.FS.readBinFile input
   demand (bytes.size ≤ 33554432) "REQUEST_LIMIT"
   let some text := String.fromUTF8? bytes | throw (IO.userError "PSC1_OWNERSHIP_UTF8")
@@ -17,6 +17,18 @@ def main (args : List String) : IO Unit := do
     | .error error => throw (IO.userError ("PSC1_OWNERSHIP_WIRE:" ++ error.phase ++ ":" ++ error.code))
   demand (request.sources.length ≤ 256) "MODULE_LIMIT"
   demand (request.sources.all (fun s => s.text.utf8ByteSize ≤ 1048576)) "SOURCE_LIMIT"
+  if mode == "to-lean" || mode == "to-ps" then
+    let grammar := if mode == "to-lean" then "lean" else "ps"
+    let target := if mode == "to-lean" then PsCompilerSourceKind.lean else .proofScript
+    let response := match psOwnershipConvert request target grammar with
+      | .ok value => value
+      | .error error => Lean.Json.mkObj [
+          ("protocol", .str "psc1-source-conversion/1"), ("status", .str "refused"),
+          ("requestId", .str request.requestId), ("sourceClosureDigest", .str request.sourceClosureDigest),
+          ("error", error)]
+    demand (response.compress.utf8ByteSize ≤ 33554432) "RESPONSE_LIMIT"
+    IO.FS.writeFile output response.compress
+    return
   let outcome := if mode == "reference" then do
       let c ← (captureWorker request request.sources
         (Captured.mk (psCompilerPreparationStart request.kind) [] [] [] none)).mapError

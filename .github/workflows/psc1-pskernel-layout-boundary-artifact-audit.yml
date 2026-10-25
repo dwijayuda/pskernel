@@ -1,0 +1,64 @@
+name: PSC1 layout boundary artifact content audit
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-layout-boundary-artifact-audit-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-layout-boundary-artifact-audit.yml
+    - .github/psc1-layout-boundary-audit/audit.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: Check out exact audit implementation
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: audit-source
+        persist-credentials: false
+    - name: Check out exact native proof target separately
+      uses: actions/checkout@v4
+      with:
+        repository: dwijayuda/pskernel
+        ref: 9c48af315d254b0263f4013eb3f0183e27b662af
+        path: target-source
+        persist-credentials: false
+    - name: Bind target API metadata and independently verify raw ZIP SHA256
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        python3 audit-source/.github/psc1-layout-boundary-audit/audit.py prepare \
+          target-source audit-source "$RUNNER_TEMP/layout-boundary-artifact-audit"
+    - name: Download and extract the exact existing artifact with the official action
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        artifact-ids: '12583768183'
+        run-id: '40154659804'
+        repository: dwijayuda/pskernel
+        github-token: ${{ github.token }}
+        merge-multiple: true
+        path: ${{ runner.temp }}/layout-boundary-artifact-audit/extracted
+    - name: Independently verify all extracted source and proof evidence
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 audit-source/.github/psc1-layout-boundary-audit/audit.py verify \
+          target-source audit-source "$RUNNER_TEMP/layout-boundary-artifact-audit"
+    - name: Retain the raw archive, complete extracted evidence and audit sources
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: psc1-layout-boundary-content-audit-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/layout-boundary-artifact-audit/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

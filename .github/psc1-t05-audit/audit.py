@@ -75,17 +75,18 @@ SHA = CONFIG["sourceSha"]
 RUN = CONFIG["runId"]
 ATTEMPT = CONFIG["runAttempt"]
 PROFILE = CONFIG.get("profile", "helpers")
-LAYOUT = PROFILE == "layout"
-RESTORED = PROFILE in ("restored", "layout")
-RETAINED = PROFILE in ("retained", "restored", "layout")
-DEFERRED = PROFILE in ("deferred", "retained", "restored", "layout")
-ADMISSION = PROFILE in ("admission", "deferred", "retained", "restored", "layout")
-FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred", "retained", "restored", "layout")
-ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred", "retained", "restored", "layout")
-LOOP = PROFILE in ("loop", "admission", "deferred", "retained", "restored", "layout")
-SOURCE_INPUT_COUNT = 93 if LAYOUT else 92 if RETAINED else 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
-NATIVE_PROOF_TOTAL = 497 if LAYOUT else 492 if RETAINED else 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
-NATIVE_PROOF_MODULES = len(EXPECTED_PROOFS) + (2 if FIELDS else 0) + (1 if ANALYSIS else 0) + (1 if LOOP else 0) + (3 if ADMISSION else 0) + (1 if DEFERRED else 0) + (10 if RETAINED else 0) + (1 if LAYOUT else 0)
+EMPTY_CACHE = PROFILE == "empty-cache"
+LAYOUT = PROFILE in ("layout", "empty-cache")
+RESTORED = PROFILE in ("restored", "layout", "empty-cache")
+RETAINED = PROFILE in ("retained", "restored", "layout", "empty-cache")
+DEFERRED = PROFILE in ("deferred", "retained", "restored", "layout", "empty-cache")
+ADMISSION = PROFILE in ("admission", "deferred", "retained", "restored", "layout", "empty-cache")
+FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred", "retained", "restored", "layout", "empty-cache")
+ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred", "retained", "restored", "layout", "empty-cache")
+LOOP = PROFILE in ("loop", "admission", "deferred", "retained", "restored", "layout", "empty-cache")
+SOURCE_INPUT_COUNT = 96 if EMPTY_CACHE else 93 if LAYOUT else 92 if RETAINED else 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
+NATIVE_PROOF_TOTAL = 499 if EMPTY_CACHE else 497 if LAYOUT else 492 if RETAINED else 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
+NATIVE_PROOF_MODULES = len(EXPECTED_PROOFS) + (2 if FIELDS else 0) + (1 if ANALYSIS else 0) + (1 if LOOP else 0) + (3 if ADMISSION else 0) + (1 if DEFERRED else 0) + (10 if RETAINED else 0) + (1 if LAYOUT else 0) + (1 if EMPTY_CACHE else 0)
 FIELDS_SECTIONS = {"harness":1,"fields":147,"recursive":105,"boundaries":8,"recursorGuard":7}
 ANALYSIS_SECTIONS = {"harness":1,"matrix":84,"protocol":8}
 LOOP_SECTIONS = {"harness":1,"matrix":56,"protocol":12}
@@ -103,7 +104,10 @@ if ADMISSION:
         "pskernel-ordinary-admission-private-smoke.mjs","pskernel-ordinary-admission-public-smoke.mjs"])
 if DEFERRED:
     SCRIPT_NAMES.append("pskernel-expr-v2-transform-delay-smoke.mjs")
-DEFERRED_LATER_LOGS = {"deferred-transform.log"} if DEFERRED else set()
+if EMPTY_CACHE:
+    SCRIPT_NAMES.append("pskernel-empty-semantic-cache-smoke.mjs")
+EMPTY_LATER_LOGS = {"empty-semantic-cache.log"} if EMPTY_CACHE else set()
+DEFERRED_LATER_LOGS = ({"deferred-transform.log"} if DEFERRED else set()) | EMPTY_LATER_LOGS
 ADMISSION_LATER_LOGS = ({"elimination.log","ordinary-admission-private.log","ordinary-admission-public.log"} if ADMISSION else set()) | DEFERRED_LATER_LOGS
 ELIMINATION_SECTIONS = {"harness":1,"policy":63,"raw":28,"member":12,"protocol":12}
 PRIVATE_ADMISSION_SECTIONS = {"harness":1,"matrix":126,"protocol":16}
@@ -211,6 +215,42 @@ LAYOUT_SCOPE = {
     "decoderCorrespondenceEstablished":False,
     "replayArenaModelBridgeEstablished":False,
 }
+
+EMPTY_BASELINE = "20224a295359abb201f56c72395690bf0bfac9fa"
+EMPTY_PRODUCTION_TREE = "e567685e5c441a5b0a78d8241f7bae151b48b5ca"
+EMPTY_PRODUCTION = RESTORED_PRODUCTION_ROOT + "/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
+EMPTY_RETAINED = "psc1/test/PsKernelClosedCacheAnalysisRegression.lean"
+EMPTY_MODULE = "PsKernelEmptySemanticCacheProofs"
+EMPTY_PROOF = "psc1/test/" + EMPTY_MODULE + ".lean"
+EMPTY_HARNESS = "pskernel-empty-semantic-cache-smoke.mjs"
+EMPTY_INPUTS = [EMPTY_PRODUCTION,EMPTY_PROOF,"psc1/scripts/"+EMPTY_HARNESS]
+EMPTY_NAMES = [EMPTY_MODULE+"."+name for name in
+    ("semantic_map_get_eq_before","empty_lookup_ignores_expression")]
+EMPTY_PINS = {
+    EMPTY_PRODUCTION:(9740,"462d8d839b1e5fd5b5f0620cb18b860d789247aabb4d14c677a0bc69cbc3c16e",
+        "d8f8fd5731d0473370a0028d4f484bcb845d9e57"),
+    EMPTY_RETAINED:(6106,"ecb1da642bacc61f60806bf0875d4461ac1b6090058edff9d9cd9b94d7d1c61c",
+        "0e137de5672d6b63dd8a157cfadc398ca1691d59"),
+    EMPTY_PROOF:(1917,"abb7e3dd6b93dec51f9e315e6bd6289ce1869c75744da3beb8a9627edac9606d",
+        "57a6e6f2a339fdfddb077baa28e344309812cfc5"),
+    "psc1/scripts/"+EMPTY_HARNESS:(4508,"0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721",
+        "8791063bc6850dec0af726afad8563f78cb63d7e")}
+EMPTY_OLD_PRODUCTION = {"path":EMPTY_PRODUCTION,"bytes":9629,
+    "sha256":"fe26126cae9c7757d29b3b2193d9530a2de0dc7d5e76a591abb6f2a4b35421bf",
+    "gitBlobSha":"4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b"}
+EMPTY_OLD_RETAINED = {"path":EMPTY_RETAINED,"bytes":5877,
+    "sha256":"56589278e2918e58b86e7f8d0fe49fe6363a12a71e64ac2c7f44190b4d2406b0",
+    "gitBlobSha":"010333b5d6ac53c60c558c89906b02d7358fb0c0"}
+EMPTY_OLD_LOOKUP = {"bytes":546,
+    "sha256":"d069d0935b36278cf9bcebeeaa23136be12705c23fd68225e4a5aadc01373a22"}
+EMPTY_NEW_LOOKUP = {"bytes":648,
+    "sha256":"ac51a9646a111fc01442391b53543ea60b778b90e2eb167c956f779f18f22f5a"}
+EMPTY_RESULT = {"schema":"psc1-empty-semantic-cache-v1","assertions":21,
+    "sectionAssertions":{"harness":1,"empty":20},"coldQueries":20,
+    "actualGeneratedConstructors":True,"inputsUnchanged":True,
+    "helperOnly":True,"fullKernel":False,"performanceQualified":False}
+EMPTY_LABELS = ["harness/rejection"]+["empty/"+str(i).zfill(2) for i in range(20)]
+EMPTY_FILE_COUNTS = {"native":172,"generated":337,"canonical":340}
 
 BLOBS = {}
 REPORT = {
@@ -1387,7 +1427,8 @@ def restored_production_sources():
     actual_tree=subprocess.check_output(
         ["git","-C",str(SOURCE_ROOT),"rev-parse",SHA+":"+RESTORED_PRODUCTION_ROOT],
         text=True).strip()
-    same(actual_tree,RESTORED_PRODUCTION_TREE,
+    same(actual_tree,EMPTY_PRODUCTION_TREE if EMPTY_CACHE else RESTORED_PRODUCTION_TREE,
+         "entire reviewed empty-cache production tree" if EMPTY_CACHE else
          "entire restored production tree equals qualified10144")
     proof=git_bytes(DEFERRED_PROOF).decode("utf-8")
     require(proof.count("namespace Frozen\n")==1 and proof.count("\nend Frozen")==1,
@@ -1410,7 +1451,9 @@ def restored_production_sources():
         "productionRoot":RESTORED_PRODUCTION_ROOT,"baselineProductionTree":RESTORED_PRODUCTION_TREE,
         "targetProductionTree":actual_tree,"wholeFilesMatch":True,
         "baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
-        "productionChanges":[],"exactBindingMovesOnly":False,"frozenBodiesMatch":True,
+        "productionChanges":[EMPTY_PRODUCTION] if EMPTY_CACHE else [],
+        **({"productionChangePolicy":"empty-semantic-cache-only"} if EMPTY_CACHE else {}),
+        "exactBindingMovesOnly":False,"frozenBodiesMatch":True,
         "workers":records,"proof":digest(git_bytes(DEFERRED_PROOF))}
 
 
@@ -1459,7 +1502,12 @@ def deferred_native_audit(e):
         same(source.get(key),value,"deferred source audit "+key)
     if RESTORED:
         restored_receipt_flags(source,"restored source audit")
-        same(source["productionChanges"],[],"no production delta paths after restoration")
+        if EMPTY_CACHE:
+            same(source["productionChanges"],[EMPTY_PRODUCTION],"only authenticated cache production delta")
+            same(source.get("productionChangePolicy"),"empty-semantic-cache-only","explicit cache change policy")
+            e.check_digest("empty-semantic-cache-source-audit.json",source["emptySemanticCacheSourceAudit"])
+        else:
+            same(source["productionChanges"],[],"no production delta paths after restoration")
     else:
         same(sorted(source["productionChanges"]),sorted(DEFERRED_BLOBS),
              "exact three production delta paths")
@@ -1514,7 +1562,8 @@ def deferred_route_audit(e):
     line_marker(e.terminal,marker)
     timing=measurement(e,"deferred-transform.memory")
     for key,value in timing.items(): same(r.get(key),value,"deferred measured resource "+key)
-    e.log_digests(r["logs"],{name for name in e.files if "/" not in name and name.endswith(".log")})
+    e.log_digests(r["logs"],{name for name in e.files
+        if "/" not in name and name.endswith(".log")} - EMPTY_LATER_LOGS)
     logged_json(e.terminal,"PSC1_T08_DEFERRED_TRANSFORM_ROUTE: PASS ",r)
     return {"assertions":23,"exports":3,"stagedArrows":11,"sections":DEFERRED_SECTIONS,
         "assertionLabels":DEFERRED_LABELS,"measurement":timing,
@@ -1608,7 +1657,11 @@ def layout_boundary_native_audit(e):
         "proofStatuses":digest(e.raw("layout-boundary-proof-status.log")),
         **LAYOUT_SCOPE,"fullOrdinaryAdmission":True,
         "baselineTransformConstructionRestored":True,
-        "deferredTransformConstruction":False,"productionChanges":False,
+        "deferredTransformConstruction":False,
+        "productionChanges":[EMPTY_PRODUCTION] if EMPTY_CACHE else False,
+        **({"layoutProofProductionChanges":False,
+            "emptySemanticCacheSourceAudit":digest(e.raw("empty-semantic-cache-source-audit.json"))}
+           if EMPTY_CACHE else {}),
         "fullKernel":False,"performanceQualified":False}
     same(r,expected,"exact layout497 receipt and truthful physical-layout scope")
     logged_json(e.terminal,"PSC1_T05_LAYOUT_BOUNDARY_NATIVE: PASS ",r)
@@ -1619,6 +1672,228 @@ def layout_boundary_native_audit(e):
         "sourceInventory":digest(e.raw("source-inventory.json")),
         "proofStatuses":digest(e.raw("layout-boundary-proof-status.log")),
         "receipt":digest(e.raw("layout-boundary-native-receipt.json"))}
+
+
+def empty_cache_sources(expected_paths):
+    """Authenticate the sole cache change against exact baseline Git bytes."""
+    def git(*args):
+        return subprocess.check_output(["git","-C",str(SOURCE_ROOT),*args])
+    baseline_available=subprocess.run(
+        ["git","-C",str(SOURCE_ROOT),"cat-file","-e",EMPTY_BASELINE+"^{commit}"],
+        stdout=subprocess.PIPE,stderr=subprocess.PIPE).returncode==0
+    if not baseline_available:
+        fetched=subprocess.run(["git","-C",str(SOURCE_ROOT),"fetch","--no-tags","--depth=1",
+            "origin",EMPTY_BASELINE],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        require(fetched.returncode==0,"fetch exact baseline Git objects without changing the checkout")
+    same(git("rev-parse","HEAD").decode().strip(),SHA,"target HEAD preserved by baseline object fetch")
+    same(git("status","--porcelain"),b"","audit target checkout remains clean")
+    same(git("rev-parse",EMPTY_BASELINE+"^{commit}").decode().strip(),EMPTY_BASELINE,
+         "exact baseline commit object")
+    baseline_tree=git("rev-parse",EMPTY_BASELINE+":"+RESTORED_PRODUCTION_ROOT).decode().strip()
+    target_tree=git("rev-parse",SHA+":"+RESTORED_PRODUCTION_ROOT).decode().strip()
+    same(baseline_tree,RESTORED_PRODUCTION_TREE,"complete qualified20224 production tree")
+    same(target_tree,EMPTY_PRODUCTION_TREE,"complete reviewed empty-cache production tree")
+    changed=git("diff","--name-only",EMPTY_BASELINE,SHA,"--",RESTORED_PRODUCTION_ROOT).decode().splitlines()
+    same(changed,[EMPTY_PRODUCTION],"exact one-path production difference")
+    baseline=git("show",EMPTY_BASELINE+":"+EMPTY_PRODUCTION)
+    prior=git("show",EMPTY_BASELINE+":"+EMPTY_RETAINED)
+    same({"path":EMPTY_PRODUCTION,**digest(baseline),"gitBlobSha":git_blob_sha(baseline)},
+         EMPTY_OLD_PRODUCTION,"complete qualified predecessor cache file")
+    same({"path":EMPTY_RETAINED,**digest(prior),"gitBlobSha":git_blob_sha(prior)},
+         EMPTY_OLD_RETAINED,"complete qualified predecessor seven-proof file")
+    def section(text,start,end):
+        require(text.count(start)==1 and text.count(end)==1,"unique authenticated source section")
+        return text[text.index(start):text.index(end,text.index(start))]
+    before=baseline.decode("utf-8")
+    old=section(before,"def psKernelSemanticExprMapGet\n","\n/- None means")
+    after=git_bytes(EMPTY_PRODUCTION).decode("utf-8")
+    current=section(after,"def psKernelSemanticExprMapGet\n","\n/- None means")
+    old_branch=("  | Option.none =>\n"
+        "      if psKernelSemanticCacheEligible expr then\n"
+        "        psKernelExprMapGetIn expr cache.small\n"
+        "      else\n"
+        "        Option.none")
+    new_branch=("  | Option.none =>\n"
+        "      match cache.small with\n"
+        "      | List.nil => Option.none\n"
+        "      | List.cons _ _ =>\n"
+        "          if psKernelSemanticCacheEligible expr then\n"
+        "            psKernelExprMapGetIn expr cache.small\n"
+        "          else\n"
+        "            Option.none")
+    require(old.count(old_branch)==1,"unique old lookup eligibility branch")
+    same(current,old.replace(old_branch,new_branch,1),"exact empty-small early-return body")
+    same(digest(old.encode()),EMPTY_OLD_LOOKUP,"exact546-byte predecessor lookup")
+    same(digest(current.encode()),EMPTY_NEW_LOOKUP,"exact648-byte current lookup")
+    expected=before.replace(old,current,1)
+    old_comment="/- Small caches retain their original eligibility scan and promotion path."
+    new_comment="/- Nonempty small caches retain their original eligibility scan and promotion path."
+    require(expected.count(old_comment)==1,"unique reviewed comment correction")
+    same(after,expected.replace(old_comment,new_comment,1),"whole production file has only guard and comment changes")
+    prior_text=prior.decode("utf-8")
+    prior_theorem=section(prior_text,"theorem semantic_map_get_eq\n","\ntheorem semantic_map_insert_eq\n")
+    current_proof=git_bytes(EMPTY_RETAINED).decode("utf-8")
+    current_theorem=section(current_proof,"theorem semantic_map_get_eq\n","\ntheorem semantic_map_insert_eq\n")
+    old_case="  | none => rfl\n  | some index =>"
+    new_case=("  | none =>\n"
+        "      cases small with\n"
+        "      | nil =>\n"
+        "          cases h : psKernelSemanticCacheEligible expr <;>\n"
+        "            simp [psKernelSemanticExprMapGet, psKernelExprMapGet,\n"
+        "              psKernelExprMapGetIn, h]\n"
+        "      | cons entry rest => rfl\n"
+        "  | some index =>")
+    require(prior_theorem.count(old_case)==1,"one retained proof-body case split")
+    same(current_theorem,prior_theorem.replace(old_case,new_case,1),"exact sound retained proof repair")
+    same(current_theorem.split(":= by",1)[0],prior_theorem.split(":= by",1)[0],
+         "retained universal theorem statement unchanged")
+    same(current_proof,prior_text.replace(prior_theorem,current_theorem,1),
+         "all six other retained proof bodies and declarations unchanged")
+    records=[]
+    for path,(size,sha,oid) in EMPTY_PINS.items():
+        raw=git_bytes(path)
+        same(digest(raw),{"bytes":size,"sha256":sha},"pinned empty-cache source "+path)
+        same(git_blob_sha(raw),oid,"pinned empty-cache Git blob "+path)
+        records.append({"path":path,**digest(raw),"gitBlobSha":oid})
+    proof=git_bytes(EMPTY_PROOF).decode("utf-8")
+    require(proof.count("namespace Frozen\n\n")==1 and proof.count("\nend Frozen")==1,
+            "one literal frozen predecessor helper")
+    same(proof.split("namespace Frozen\n\n",1)[1].split("\nend Frozen",1)[0],old,
+         "frozen helper byte-identical to authenticated predecessor")
+    require(not re.search(r"\b(?:sorry|admit|unsafe|axiom)\b",proof),"no proof escape declarations")
+    same(re.findall(r"(?m)^#print axioms (\S+)\s*$",proof),EMPTY_NAMES,
+         "two exact universal source declarations")
+    baseline_workflow=git("show",EMPTY_BASELINE+":"+WORKFLOW)
+    same(git_blob_sha(baseline_workflow),"93ee11a6d2cbb2ffd1188843f01101067fb0b4d1",
+         "qualified497 baseline workflow Git blob")
+    lists=[ast.literal_eval(value) for value in
+        re.findall(r"(?m)^\s*paths = (\[.*\])$",baseline_workflow.decode())]
+    require(len(lists)==2 and lists[0]==lists[1] and len(lists[0])==93,
+            "qualified93 source inventory definitions")
+    same(expected_paths,lists[0]+EMPTY_INPUTS,"exact ordered96 source inventory extension")
+    unchanged=[]
+    for path in lists[0]:
+        if path not in (WORKFLOW,EMPTY_RETAINED):
+            old_raw=git("show",EMPTY_BASELINE+":"+path)
+            same(git_bytes(path),old_raw,"every other retained source input unchanged "+path)
+            unchanged.append({"path":path,"gitBlobSha":git_blob_sha(old_raw),**digest(old_raw)})
+    return {"baselineSha":EMPTY_BASELINE,"baselineProductionTree":baseline_tree,
+        "targetProductionTree":target_tree,"productionChanges":changed,
+        "exactLookupGuardAndCommentOnly":True,"baselineProduction":EMPTY_OLD_PRODUCTION,
+        "predecessorLookup":EMPTY_OLD_LOOKUP,"candidateLookup":EMPTY_NEW_LOOKUP,
+        "frozenLookupByteExact":True,"retainedProofStatementAndOtherBodiesUnchanged":True,
+        "retainedProofBaseline":EMPTY_OLD_RETAINED,"allOtherRetainedInputsUnchanged":True,
+        "sourceInputs":96,"proofNames":EMPTY_NAMES,"files":records,
+        "otherRetainedInputs":unchanged,"baselineWorkflow":digest(baseline_workflow),
+        "baselineObjectsFetched":not baseline_available}
+
+
+def empty_cache_source_receipt(e):
+    require(e.route=="native","empty-cache source authentication is a native receipt")
+    checked=REPORT["emptySemanticCacheSources"]
+    expected={"schema":"psc1-t09-empty-semantic-cache-source-v1",
+        "sourceSha":SHA,"runId":str(RUN),"runAttempt":str(ATTEMPT),
+        "job":"native-header","route":"native",
+        **{key:checked[key] for key in (
+            "baselineSha","baselineProductionTree","targetProductionTree","productionChanges",
+            "exactLookupGuardAndCommentOnly","baselineProduction","predecessorLookup","candidateLookup",
+            "frozenLookupByteExact","retainedProofStatementAndOtherBodiesUnchanged",
+            "retainedProofBaseline","allOtherRetainedInputsUnchanged","sourceInputs","proofNames","files")},
+        "sourceInventory":digest(e.raw("source-inventory.json")),
+        "baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
+        "fullQualification":False,"performanceQualified":False}
+    source=e.json("empty-semantic-cache-source-audit.json");e.identity(source)
+    same(source,expected,"whole empty-cache source audit matches independent Git authentication")
+    logged_json(e.terminal,"PSC1_T09_EMPTY_SEMANTIC_CACHE_SOURCE: PASS ",source)
+    return {"exactOneProductionPath":True,"allOtherRetainedInputsUnchanged":True,
+        "frozenLookupByteExact":True,"sourceInputs":96,
+        "receipt":digest(e.raw("empty-semantic-cache-source-audit.json"))}
+
+
+def empty_cache_native_audit(e):
+    source=git_bytes(EMPTY_PROOF);raw=e.raw("empty-semantic-cache-proofs.log")
+    names=proof_reports(source,raw,EMPTY_MODULE,2)
+    same(names,EMPTY_NAMES,"two actual ordered empty-cache equations")
+    terminal_names=[name for name,_ in re.findall(
+        r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",
+        e.terminal) if name.startswith(EMPTY_MODULE+".")]
+    same(terminal_names,EMPTY_NAMES,"two actual executed terminal proof reports")
+    status="PSC1_EMPTY_SEMANTIC_CACHE_PROOF_STATUS module="+EMPTY_MODULE+" count=2 countStatus=0 leanStatus=0"
+    same(e.raw("empty-semantic-cache-proof-status.log"),(status+"\n").encode(),
+         "exact successful empty-cache proof command status")
+    line_marker(e.terminal,status)
+    records=[]
+    for path in ("constructor-native-receipt.json","fields-native-receipt.json",
+        "analysis-native-receipt.json","loop-native-receipt.json",
+        "ordinary-admission-native-receipt.json","deferred-transform-native-receipt.json",
+        "retained-native-receipt.json","layout-boundary-native-receipt.json"):
+        previous=e.json(path);e.identity(previous)
+        records.extend(previous["proofs"])
+    same(len(records),30,"all30 retained proof modules")
+    same(sum(row["proofs"] for row in records),497,"all497 retained proof reports")
+    prior_names=[name for row in records for name in row["names"]]
+    require(len(prior_names)==497 and len(set(prior_names))==497,"497 distinct retained theorem names")
+    require(len({row["module"] for row in records}|{EMPTY_MODULE})==31
+        and len(set(prior_names+names))==499,"31 distinct modules and499 distinct theorem names")
+    expected={"schema":"psc1-t09-empty-semantic-cache-native-receipt-v1",
+        "sourceSha":SHA,"runId":str(RUN),"runAttempt":str(ATTEMPT),
+        "job":"native-header","route":"native","status":"pass",
+        "retainedProofs":497,"newProofs":2,"totalProofs":499,"proofModules":31,
+        "proofs":[{"module":EMPTY_MODULE,"proofs":2,"names":names,"source":digest(source),"log":digest(raw)}],
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "retainedLayoutReceipt":digest(e.raw("layout-boundary-native-receipt.json")),
+        "sourceAudit":digest(e.raw("empty-semantic-cache-source-audit.json")),
+        "sourceInventory":digest(e.raw("source-inventory.json")),
+        "proofStatuses":digest(e.raw("empty-semantic-cache-proof-status.log")),
+        "productionChanges":[EMPTY_PRODUCTION],"emptySemanticCacheSemanticEquality":True,
+        "frozenLookupByteExact":True,"retainedProofStatementAndOtherBodiesUnchanged":True,
+        "emptySemanticCacheHelperOnly":True,"fullOrdinaryAdmission":True,
+        "baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
+        "canonicalOutputLayoutEstablished":True,"metadataCorrespondenceEstablished":False,
+        "decoderCorrespondenceEstablished":False,"replayArenaModelBridgeEstablished":False,
+        "fullKernel":False,"performanceQualified":False}
+    r=e.json("empty-semantic-cache-native-receipt.json");e.identity(r)
+    same(r,expected,"exact499 native receipt and unchanged scope limits")
+    logged_json(e.terminal,"PSC1_T09_EMPTY_SEMANTIC_CACHE_NATIVE: PASS ",r)
+    return {"retainedReports":497,"newReports":2,"totalReports":499,"totalModules":31,
+        "allTheoremNamesDistinct":True,"proofNames":names,
+        "sourceAudit":digest(e.raw("empty-semantic-cache-source-audit.json")),
+        "retainedLayoutReceipt":digest(e.raw("layout-boundary-native-receipt.json")),
+        "receipt":digest(e.raw("empty-semantic-cache-native-receipt.json"))}
+
+
+def empty_cache_route_audit(e):
+    r=e.json("empty-semantic-cache-receipt.json")
+    provenance=e.json("provenance.json");e.identity(provenance)
+    raw=e.raw("empty-semantic-cache.log")
+    prefix="PSC1_EMPTY_SEMANTIC_CACHE_ASSERT ";marker="PSC1_EMPTY_SEMANTIC_CACHE_JS: PASS "
+    lines=raw.decode("utf-8").splitlines()
+    expected_lines=[prefix+EMPTY_LABELS[0],"PSC1_EMPTY_SEMANTIC_CACHE_SECTION harness=1"]
+    expected_lines.extend(prefix+name for name in EMPTY_LABELS[1:])
+    expected_lines.append("PSC1_EMPTY_SEMANTIC_CACHE_SECTION empty=20")
+    same(lines[:-1],expected_lines,"exact ordered21 labels and2 section markers")
+    require(len(lines)==24 and lines[-1].startswith(marker),"exact24-line empty-cache runtime transcript")
+    same(one_json_line(raw.decode("utf-8"),marker),EMPTY_RESULT,"actual exact21 runtime result")
+    same([line for line in e.terminal.splitlines() if line.startswith(prefix)],
+         [prefix+name for name in EMPTY_LABELS],"all21 actual terminal labels")
+    logged_json(e.terminal,marker,EMPTY_RESULT)
+    timing=measurement(e,"empty-semantic-cache.memory")
+    logs={name:digest(content) for name,content in sorted(e.files.items())
+          if "/" not in name and name.endswith(".log")}
+    expected={"schema":"psc1-t09-empty-semantic-cache-route-receipt-v1","status":"pass",
+        "identity":provenance,"retainedDeferredReceipt":digest(e.raw("deferred-transform-receipt.json")),
+        "result":EMPTY_RESULT,"assertionLabels":EMPTY_LABELS,
+        "log":digest(raw),"harness":digest(e.raw("detached/"+EMPTY_HARNESS)),
+        **timing,"logs":logs,"emptySemanticCacheHelperOnly":True,
+        "baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
+        "fullKernel":False,"performanceQualified":False}
+    same(r,expected,"whole final empty-cache route receipt and resource/log chains")
+    e.log_digests(r["logs"],set(logs))
+    logged_json(e.terminal,"PSC1_T09_EMPTY_SEMANTIC_CACHE_ROUTE: PASS ",r)
+    return {"assertions":21,"sections":EMPTY_RESULT["sectionAssertions"],
+        "assertionLabels":EMPTY_LABELS,"measurement":timing,"allReceiptLogDigestsMatched":True,
+        "receipt":digest(e.raw("empty-semantic-cache-receipt.json")),
+        "semanticQualificationOnly":True,"performanceQualified":False}
 
 
 def wait_for_cohort():
@@ -1644,7 +1919,7 @@ def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
-    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained","restored","layout"),"Unknown audit profile")
+    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained","restored","layout","empty-cache"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
             "Exact numeric run and attempt required")
@@ -1658,6 +1933,8 @@ def main():
     require(len(path_lists) == 2 and path_lists[0] == path_lists[1],
             "Native and route source inventory definitions agree")
     expected_paths = path_lists[0]
+    if EMPTY_CACHE:
+        REPORT["emptySemanticCacheSources"] = empty_cache_sources(expected_paths)
     if LAYOUT:
         require(LAYOUT_PROOF in expected_paths,"explicit layout proof source inventory member")
         same(git_blob_sha(git_bytes(LAYOUT_PROOF)),LAYOUT_PROOF_BLOB,"pinned five-report layout proof Git blob")
@@ -1731,6 +2008,8 @@ def main():
             same(len(raw),artifact["size_in_bytes"],"archive download length")
             same("sha256:" + digest(raw)["sha256"],artifact.get("digest"),"API archive SHA256")
             files = unzip(raw)
+            if EMPTY_CACHE:
+                same(len(files),EMPTY_FILE_COUNTS[route],"exact empty-cache profile archive member count")
             job = job_map[route]
             same(job.get("run_id"),RUN,"job source run")
             same(job.get("head_sha"),SHA,"job source SHA")
@@ -1747,6 +2026,8 @@ def main():
             })
             evidence = Evidence(files,route,terminal)
             result["sourceInventory"] = source_inventory(evidence,expected_paths,frozen)
+            if EMPTY_CACHE and route == "native":
+                result["emptySemanticCacheSourceAuthentication"] = empty_cache_source_receipt(evidence)
             result["qualification"] = native_audit(evidence) if route == "native" else route_audit(evidence,closure)
             if FIELDS:
                 result["fieldsQualification"] = fields_native_audit(evidence) if route == "native" else fields_route_audit(evidence)
@@ -1763,6 +2044,8 @@ def main():
                 result["retainedNativeQualification"] = retained_native_audit(evidence)
             if LAYOUT and route == "native":
                 result["layoutBoundaryQualification"] = layout_boundary_native_audit(evidence)
+            if EMPTY_CACHE:
+                result["emptySemanticCacheQualification"] = empty_cache_native_audit(evidence) if route == "native" else empty_cache_route_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -1789,13 +2072,17 @@ def main():
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
             **({"loop":69} if LOOP else {}),
             **({"elimination":116,"privateAdmission":143,"publicRouting":12} if ADMISSION else {}),
-            **({("rawTransform" if RESTORED else "deferredTransform"):23} if DEFERRED else {})},
+            **({("rawTransform" if RESTORED else "deferredTransform"):23} if DEFERRED else {}),
+            **({"emptySemanticCache":21} if EMPTY_CACHE else {})},
         "constructorFieldsQualified":FIELDS,"singleConstructorAnalysisQualified":ANALYSIS,
         "constructorLoopQualified":LOOP,"profile":PROFILE,
         "deferredTransformQualified":DEFERRED and not RESTORED,"retainedNativeProofsQualified":RETAINED,
         **({"baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
             "baselineTransformRestorationQualified":True} if RESTORED else {}),
         **({"layoutBoundaryQualified":True,**LAYOUT_SCOPE} if LAYOUT else {}),
+        **({"emptySemanticCacheSemanticQualification":True,"emptySemanticCacheHelperOnly":True,
+            "productionChanges":[EMPTY_PRODUCTION],"optimizationAdopted":False,
+            "emptySemanticCachePerformanceQualified":False} if EMPTY_CACHE else {}),
         **({"independentLeanControls":{"controls":18,"accepted":14,"rejected":4,
                 "safeGenerated":13,"unsafeContract":1}} if ADMISSION else {}),
     }
@@ -1833,6 +2120,10 @@ if __name__ == "__main__":
                 "canonicalOutputLayoutEstablished":REPORT["status"] == "pass",
                 "metadataCorrespondenceEstablished":False,"decoderCorrespondenceEstablished":False,
                 "replayArenaModelBridgeEstablished":False} if LAYOUT else {}),
+            **({"emptySemanticCacheSemanticQualification":REPORT["status"] == "pass",
+                "emptySemanticCacheHelperOnly":True,"productionChanges":[EMPTY_PRODUCTION],
+                "optimizationAdopted":False,"emptySemanticCachePerformanceQualified":False}
+               if EMPTY_CACHE else {}),
             "report":digest(payload.encode()),
             "errors":REPORT["errors"],
             **({"ordinaryAdmissionQualified":REPORT["status"] == "pass",

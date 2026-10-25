@@ -224,17 +224,51 @@ def psKernelExprMapGetIn
           expr
           rest
 
+/- Scan at most four ordered entries per recursive call. Representation,
+   first-match semantics, comparisons and error ordering are unchanged.
+   Exact all-input equality is an independent native proof obligation. -/
+def psKernelExprMapGetIn4
+    (expr : PsKernelExpr)
+    (entries :
+      List (Prod PsKernelExpr PsKernelExpr)) :
+    Option PsKernelExpr :=
+  match entries with
+  | List.nil => Option.none
+  | List.cons entry0 rest0 =>
+      if psKernelExprEq (Prod.fst entry0) expr then
+        Option.some (Prod.snd entry0)
+      else
+        match rest0 with
+        | List.nil => Option.none
+        | List.cons entry1 rest1 =>
+            if psKernelExprEq (Prod.fst entry1) expr then
+              Option.some (Prod.snd entry1)
+            else
+              match rest1 with
+              | List.nil => Option.none
+              | List.cons entry2 rest2 =>
+                  if psKernelExprEq (Prod.fst entry2) expr then
+                    Option.some (Prod.snd entry2)
+                  else
+                    match rest2 with
+                    | List.nil => Option.none
+                    | List.cons entry3 rest3 =>
+                        if psKernelExprEq (Prod.fst entry3) expr then
+                          Option.some (Prod.snd entry3)
+                        else
+                          psKernelExprMapGetIn4 expr rest3
+
 def psKernelExprMapGet
     (cache : PsKernelExprMap)
     (expr : PsKernelExpr) :
     Option PsKernelExpr :=
   match cache.index with
   | Option.none =>
-      psKernelExprMapGetIn
+      psKernelExprMapGetIn4
         expr
         cache.small
   | Option.some index =>
-      psKernelExprMapGetIn
+      psKernelExprMapGetIn4
         expr
         (psKernelExprMapIndexBucket
           16

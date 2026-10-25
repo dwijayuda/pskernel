@@ -18,7 +18,13 @@
       }
     });
     nav.addEventListener('click', (event) => { if (event.target.closest('a')) closeMenu(); });
-    menu.hidden = false;
+    const compactNavigation = window.matchMedia('(max-width: 900px)');
+    const syncMenu = () => {
+      menu.hidden = !compactNavigation.matches;
+      if (!compactNavigation.matches) closeMenu();
+    };
+    compactNavigation.addEventListener('change', syncMenu);
+    syncMenu();
     document.documentElement.classList.add('nav-enhanced');
   }
 
@@ -38,7 +44,7 @@
       return select.selectedOptions[0]?.textContent || '';
     };
     const invalidate = () => {
-      brief = ''; output.hidden = true; consent.checked = false; share.disabled = true;
+      brief = ''; text.textContent = ''; output.hidden = true; consent.checked = false; share.disabled = true;
     };
     form.addEventListener('input', invalidate);
     form.addEventListener('change', invalidate);
@@ -46,6 +52,7 @@
       event.preventDefault();
       if (!form.reportValidity()) return;
       if (!value('bisnis') || !value('tujuan')) {
+        brief = ''; text.textContent = '';
         status.textContent = 'Nama bisnis dan tujuan tidak boleh hanya berisi spasi.';
         output.hidden = false; output.focus(); return;
       }

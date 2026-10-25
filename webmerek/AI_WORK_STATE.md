@@ -4,21 +4,24 @@ Date: 25 October 2026. Scope: business adaptation + static website, not ProofScr
 
 ## Branch and base
 
-Branch `webmerek/indonesia-launch-20261025`, branched from live main `7d3e220e495f5d82178a3e66f191255045862bd5`. Only `webmerek/**` and `.github/workflows/webmerek-quality.yml` are authorized write scope. Preserve other histories. No main merge, force push, public deployment or spending.
+Branch `webmerek/indonesia-launch-20261025`, branched from main `7d3e220e495f5d82178a3e66f191255045862bd5`. Only `webmerek/**` and `.github/workflows/webmerek-quality.yml` are authorized write scope. Preserve other histories. No main merge, force push, public deployment or spending.
 
-## Implementation checkpoint
+## Implemented
 
-Research and strategy documents, original design/content for 15 HTML pages, deterministic generator, original SVG/social artwork, functional local brief/self-check, scoped QA and packaging are implemented in source. Generated HTML and OG PNG are materialized and committed by the first Actions run, with a non-force live-head check.
+Fifteen complete Bahasa Indonesia HTML pages; original identity and concept artwork; local-only brief builder and self-check; deterministic generation; 15 research/strategy/operating documents; ten Indonesian competitors; explicit pricing and financial hypotheses; scoped Linux QA and website/project packaging. The full project archive includes the standalone workflow as well as source and research. Generated HTML, social PNG and dependency lockfile are committed, not merely promised.
 
-**At creation of this checkpoint, qualification has not yet been observed.** Do not inherit a pass from the mere existence of a workflow. Inspect the latest run and actual tested SHA. A run-trigger SHA may differ from its generated/tested commit; read the summary and SOURCE_REVISION.txt.
+## Qualification history and evidence rule
+
+First run: https://github.com/dwijayuda/pskernel/actions/runs/40173190119
+Trigger `e547a371e7610b536fe62598e24db2453c6c52dd`; tested generated source `f34b3ae1d6f7d344020b450bca2909eb70714e4f`.
+
+Strict HTML/link/metadata/scope checks, deterministic output, JavaScript syntax and financial arithmetic passed. Browser matrix: **84 passed, 4 failed**. All four failures were the same homepage accessibility issue: an aria-label on a generic artwork div without a permissible role. This source correction gives the composite artwork role=img, restricts the menu control to compact viewports and clears stale brief text on edits. A new run must qualify these changes; no pass is inferred in advance.
+
+For the latest qualification, inspect the matching WebMerek quality run's conclusion and actual tested SHA. The run-trigger SHA can differ from the generated/tested commit; the run summary and packaged SOURCE_REVISION.txt are authoritative. Packaging only runs after all required checks pass. Browser screenshots are evidence to inspect, not an automatic claim of human visual review.
 
 ## Business decision
 
 Branding-first productized service for established expert service businesses; consultants and training providers first. Original tagline “Biar kualitasnya terlihat.” Pricing and financials are explicit hypotheses. No client proof, contact details, operator identity, mark/domain clearance or business availability has been fabricated.
-
-## Required verification
-
-Run deterministic rendering, strict HTML/link/scope checks, syntax checks, model arithmetic and Playwright/axe browser matrix. Retrieve artifacts and inspect desktop/mobile screenshots. Correct issues in source and rerun against the exact new revision. Package only after actual required checks pass.
 
 ## Persistent launch blockers
 

@@ -75,6 +75,8 @@ def shell(page: dict, config: dict) -> str:
             extra += '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False).replace('<', '\\u003c') + '</script>\n'
     status = 'Prapeluncuran · harga usulan, belum menerima pemesanan' if preview else 'Studio branding & website untuk bisnis jasa'
     body = page['body'].replace('{{PACKAGES}}', package_cards(config)).replace('{{FAQ}}', faq_block()).replace('{{FAQ_SHORT}}', faq_block(3))
+    # CSS-built artwork is one labeled image, not an unnamed generic ARIA container.
+    body = body.replace('<div class="hero-art" aria-label=', '<div class="hero-art" role="img" aria-label=')
     return f'''<!doctype html>
 <html lang="id">
 <head>

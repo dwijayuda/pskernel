@@ -662,3 +662,7 @@ lean_exe psc1_lean_printer_scope_tests where
 lean_exe psc1_source_trace_tests where
   root := `test.SourceTraceTests
   srcDir := "."
+
+lean_exe psc1_output_abi_probe where
+  srcDir := "scripts"
+  root := `OutputAbiProbe

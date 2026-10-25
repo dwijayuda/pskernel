@@ -1,0 +1,95 @@
+name: PSC1 explicit output ABI native probe
+on:
+  push:
+    branches: [qualification/psc1-output-abi-probe-20261026]
+    paths:
+      - .github/workflows/psc1-output-abi-probe.yml
+      - psc1/packages/compiler/src/Ps/Compiler/Service.lean
+      - psc1/packages/compiler-unified/src/Ps/CompilerUnified/Service.lean
+      - psc1/scripts/OutputAbiProbe.lean
+      - psc1/scripts/output-abi-native-tests.mjs
+      - psc1/lakefile.lean
+permissions:
+  contents: read
+concurrency:
+  group: psc1-output-abi-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-output-abi-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-output-abi-v1-${{ runner.os }}-
+            psc1-trace-native-v1-${{ runner.os }}-
+      - name: Install pinned Lean and build the actual production compiler
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake build psc1_output_abi_probe psc1_source_census_probe psc1_source_ownership psc1_lossless_source psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: psc1-output-abi-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Census both whole compiler grammars
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { readOwnedCompilerSources } from './host-tools/compiler-source-inputs.mjs';
+          import { compilerSourceClosureDigest } from './host-tools/compiler-host-protocol.mjs';
+          import { boundedRun } from './host-tools/generated-target-tools.mjs';
+          const rows = readOwnedCompilerSources('Ps.CompilerUnified.Service');
+          fs.mkdirSync('dist/source-conversion', { recursive: true });
+          for (const grammar of ['lean', 'ps']) {
+            const output = path.resolve('dist/source-conversion/census-' + grammar + '.json');
+            const result = boundedRun('prlimit', ['--as=4294967296', '--stack=8388608', '--',
+              path.resolve('.lake/build/bin/psc1_source_census_probe'), '--grammar', grammar,
+              '--out', output, '--modules', ...rows.flatMap(row => [row.module, path.resolve(row.path)])], {
+              timeoutMs: 240000, timeoutPolicy: 'standard-240s',
+              env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0', LEAN_STACK_SIZE_KB: '8192' },
+            });
+            assert.equal(result.status, 0, result.stderr);
+            const records = JSON.parse(fs.readFileSync(output, 'utf8')).records;
+            const failures = records.filter(row => row.parse !== 'accepted' || row.elaboration !== 'accepted');
+            assert.equal(failures.length, 0, 'actual source census roots: ' +
+            JSON.stringify(failures.filter(row => !row.blockedImports)) + '; affected modules=' + failures.length);
+          }
+          console.log('PSC1_CONVERSION_SOURCE_CENSUS:', JSON.stringify({
+            modules: rows.length,
+            sourceClosureDigest: compilerSourceClosureDigest(rows.map(row => ({ ...row, kind: 'lean' }))),
+            grammars: ['lean', 'ps'], status: 'passed',
+          }));
+          
+          JS
+      - name: Require actual native IO ABI, independent admission and unchanged scalar/negative boundaries
+        working-directory: psc1
+        run: node scripts/output-abi-native-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-output-abi-native-${{ github.sha }}
+          path: |
+            psc1/dist/output-abi/
+            psc1/dist/source-conversion/
+          if-no-files-found: warn
+          retention-days: 90

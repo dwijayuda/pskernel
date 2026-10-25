@@ -12,8 +12,8 @@ theorem map_scan_four_preserves_every_expression_list_and_order
   have allLengths : ∀ n, ∀ (xs : List (Prod PsKernelExpr PsKernelExpr)),
       xs.length = n → ∀ query, psKernelExprMapGetIn4 query xs = psKernelExprMapGetIn query xs := by
     intro n
-    induction n using Nat.strong_induction_on with
-    | h n ih =>
+    induction n using Nat.strongRecOn with
+    | ind n ih =>
       intro xs lengthEq query
       cases xs with
       | nil => rfl
@@ -40,8 +40,8 @@ theorem whnf_scan_four_preserves_every_arena_error_hash_and_first_hit
   have allLengths : ∀ n, ∀ (xs : List PsKernelExprV2WhnfCacheEntry), xs.length = n →
       ∀ owner root key, psKernelExprV2WhnfCacheFindWorker4 xs owner root key = psKernelExprV2WhnfCacheFindWorker xs owner root key := by
     intro n
-    induction n using Nat.strong_induction_on with
-    | h n ih =>
+    induction n using Nat.strongRecOn with
+    | ind n ih =>
       intro xs lengthEq owner root key
       cases xs with
       | nil => rfl

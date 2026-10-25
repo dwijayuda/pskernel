@@ -1,0 +1,9 @@
+{
+  "run": 40160064167,
+  "job": 121069555210,
+  "artifact": 12585887196,
+  "zipSha256": "064d226b8dcc9d5275f801b6ed9791519f053b1ae3e80a04fe804c798357261a",
+  "commit": "3c9fae34d8a8912cce638777611942327b67ca35",
+  "tarball": "kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz",
+  "tarballSha256": "b2bf12d1d05c1f92361893411d761ff7b1418117f0e06c9985856768616b9346"
+}

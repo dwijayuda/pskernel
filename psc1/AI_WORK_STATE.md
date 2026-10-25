@@ -1,8 +1,36 @@
 # PSC1 AI work state
 
 Updated 2026-10-25 Asia/Jakarta. Draft PR #178; branch
-`feat/psc1-unified-selfhost-20261024`. GitHub tools/Linux Actions only.
+`feat/psc1-unified-selfhost-20261024`. GitHub tools/cloud Actions only; routine development stays Linux.
 Use fresh expected-HEAD, single-parent non-force updates. No merge/npm publication.
+
+## Active kernel and platform integration mission
+
+Latest development continues on `integration/psc1-lean435-kernel-packages-20261025`,
+branched from qualified55f9327e. Routine development is Linux-only. The user
+explicitly requested final native macOS/Windows builds and installed release tests;
+those run in a separate release matrix. No merge or npm publication is authorized.
+
+Both existing kernel packages are being upgraded to official Lean4.35.0/current
+canonical admissions v2. The official C++ Wasm checker remains Emscripten linear
+memory, separate from PSC1's Wasm backend. Archive branch0408f18b established the
+slim kernel-only initialization/narrow-import/-Os/remove-unused-Lake strategy.
+Current25-module provider closure retains all finite kernel checks and semantic
+bodies. Linux x64/arm64 run40154010946 PASS14 real reference-parity cases and
+standalone execution; raw binaries4079232/4160016 bytes. macOS x64/arm64 jobs
+121053490973/121053490842 in40154709416 PASS equivalent gates,2771584/2798528 bytes.
+That matrix's overall failure is Windows setup, not a macOS success override.
+Windows-only retry40155170697 is active after fixing Bash-path export to native
+Elan PATH. Linear Wasm build40154206987 is active at630fa363; do not restart it.
+No new4.35 npm package or full cross-platform toolchain is qualified yet.
+
+Next: assemble only pinned successful artifacts, match exact25-module source
+closure, pack and install offline locally/globally, execute public API acceptance/
+rejection/tamper tests on every platform; finish actual linear Wasm differential
+checking and package integration before claiming release readiness. Preserve
+qualified120-module compilers and all four G3 artifacts. Whole toolchain platform
+selection/native compiler/Rust executable transport and generated output parity
+remain separate release blockers. See scripts/kernel435-* and kernel435 workflows.
 
 ## Four-engine correctness milestone and package promotion
 
@@ -31,7 +59,7 @@ See the [exact four-engine receipt](docs/PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_
 Performance240s is unqualified; clean full-chain replay and formal preservation/DDC
 remain separate unfinished claims.
 
-## Tested installed candidate; production promotion pending CI
+## Installed four-engine qualification
 
 Candidate `a32eef485c9067b4245b530af31c7b44eaa3d955`,
 [40152198370](https://github.com/dwijayuda/pskernel/actions/runs/40152198370)/
@@ -56,14 +84,7 @@ grammars, without checkout/build tree or compiler SDK/Python on execution PATH.
 The Node-only Rust guard retains ten real integrity/lifetime regressions.
 Ordinary requests remain240s.
 
-The exact tested package builder is now promoted. New primary production package
-and required full CI are PENDING for this promotion. The last full source/host
-checkpoint `c4f4c4b3` PASSED [40150264075](https://github.com/dwijayuda/pskernel/actions/runs/40150264075),
-job121042005233/final gate121047122405:37/37 criteria,0 blocked, all seven backends,
-both grammars, real applications, minimumPython, installed native/core/provider/
-IO/library tests and actual globalPython/PHP execution. Reviewc4f4c4b3 and tested
-mergeb15ea969 share tree411f21746dba916ecda147d63a8758f20a11035a.
-Full artifact12583665578,ZIP34f59b0f33db0645a902561aa7fe2988676c0713bf614388a2e48354e0ecf4ce.
+Production55f9327ee738b5b2bf5d623c96280cb97de828b2 PASSED package40152769340/job121047594235 (20 compiler cases,24 application builds/88 observations,26 negatives) and full40152772905/job121049906606/final gate121055266402 (37/37 criteria,0 blocked,seven backends,both grammars). Tested mergef9713323bb3beed393255ff755da3dd2023febdc shares treed884c41c8097ac59c91081f019481f60625ba793 with review55. Production artifact12582649787 ZIPda6a88220337c601fcf401ea7e06a55c45988f96c0a5692d28e958ed07c61916, core29a837faedaabb8c7e6ae30cec19ac53680084b5188de0eef2b7eabbd4f09198. Full artifact12583743977 ZIP8b10c96a59fab176c0cf7dcc967720c8384870d97745859f0a3a99a71cc17194. All package artifacts remain unpublished.
 
 ## Scope and remaining queue
 
@@ -74,8 +95,7 @@ JS. Other generated publication targets, component/provider dispatch and final
 release qualification remain incomplete; allFourEngineSelfHostQualified=true
 does not imply allFourEngineReleaseQualified=true. No registry release is claimed.
 
-1. Reconcile the promoted package/full CI, record exact production commits,
-   artifact/tarball hashes and successful gate; fix an actual failure if any.
+1. Complete the active Lean4.35 native/linear-Wasm kernel package and cross-platform release integration described above.
 2. Complete generated publication targets/components/optional-provider dispatch
    through existing admission, strict IR, target validation and transactional
    publication. Engine selection and output-target selection are separate.

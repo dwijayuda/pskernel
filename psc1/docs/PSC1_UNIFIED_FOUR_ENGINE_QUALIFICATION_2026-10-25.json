@@ -1295,7 +1295,47 @@
         ]
       }
     },
-    "productionPromotion": "pending-primary-full-and-package-CI"
+    "productionPromotion": {
+      "commit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+      "packageRun": 40152769340,
+      "fullRun": 40152772905,
+      "status": "pending"
+    },
+    "production": {
+      "run": 40152769340,
+      "job": 121047594235,
+      "commit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+      "artifact": 12582649787,
+      "zipSha256": "da6a88220337c601fcf401ea7e06a55c45988f96c0a5692d28e958ed07c61916",
+      "coreSha256": "29a837faedaabb8c7e6ae30cec19ac53680084b5188de0eef2b7eabbd4f09198",
+      "status": "passed",
+      "compilerCases": 20,
+      "applicationBuilds": 24,
+      "applicationObservations": 88,
+      "negatives": 26
+    },
+    "fullGate": {
+      "run": 40152772905,
+      "fullJob": 121049906606,
+      "finalGate": 121055266402,
+      "reviewCommit": "55f9327ee738b5b2bf5d623c96280cb97de828b2",
+      "testedCommit": "f9713323bb3beed393255ff755da3dd2023febdc",
+      "treeSha": "d884c41c8097ac59c91081f019481f60625ba793",
+      "status": "passed",
+      "criteria": 37,
+      "blocked": 0,
+      "artifact": 12583743977,
+      "zipSha256": "8b10c96a59fab176c0cf7dcc967720c8384870d97745859f0a3a99a71cc17194",
+      "readiness": {
+        "counts": {
+          "implemented": 0,
+          "tested": 0,
+          "qualified": 37,
+          "blocked": 0
+        },
+        "releaseReady": true
+      }
+    }
   },
   "generatedPublicationTargets": [
     "js"

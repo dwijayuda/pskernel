@@ -3,6 +3,7 @@ import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.API.DagGenerated
 import Ps.KernelCore.API.DagAdmission
 import Ps.KernelCore.API.DagOrdinaryAdmission
+import Ps.KernelCore.API.DagMutualAdmission
 import Ps.KernelCore.Checker.ExprV2.Terminal
 import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.Whnf
@@ -24,8 +25,9 @@ header checking, inference-only proposition testing, body checking and terminal
 comparison share one fresh DAG checking state with separate inference caches.
 Mutual members use fresh private checking owners and publish the completed
 batch atomically. Ordinary inductives use the complete private DAG header,
-constructor, elimination and recursor validation path. Mutual/nested inductives
-and unsupported rules use complete original admission.
+constructor, elimination and recursor validation path. Mutual inductives use
+the complete private shared-header, constructor and recursor path. Nested
+inductives and unsupported rules use complete original admission.
 Successful ordinary admission carries its synchronized checked generated owner;
 its recursor type and rules are not imported a second time. Other successful
 admission records original same-batch type IDs and transparent
@@ -394,6 +396,18 @@ def psKernelDagRunOwnedCommandWithSource
                     (psKernelKernelSessionEnvironment execution.session)
                     execution.session.resources.maxRecDepth execution.session.resources.maxNatSize
                     input owner levels numParams value isUnsafe;
+              psKernelDagRunOrdinaryOwnedWith admit input execution
+                levelParams safety arena built request declaration
+      | PsKernelDagDeclarationRequest.mutualInductive value =>
+          match psKernelDagDecodeDeclaration input request with
+          | Except.error error => Except.error (PsKernelError.rejectedInvalid error)
+          | Except.ok declaration =>
+              let admit :=
+                fun (owner : PsKernelDagGeneratedState) =>
+                  psKernelExprV2MutualAdmitWithFuel execution.session.resources.fuel
+                    (psKernelKernelSessionEnvironment execution.session)
+                    execution.session.resources.maxRecDepth execution.session.resources.maxNatSize
+                    input owner value;
               psKernelDagRunOrdinaryOwnedWith admit input execution
                 levelParams safety arena built request declaration
       | PsKernelDagDeclarationRequest.quot =>

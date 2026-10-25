@@ -44,12 +44,34 @@ explicitly mark incomplete coverage. R3 literal graph/IR equality is unchanged.
 Expanded focused run40214590580/job121232875557 PASSED:14 actual checked renames
 and54 negatives, including malformed trace/target/event/span wire, tampered native
 comparison identities, actual independent checker rejection, changed tool pins,
-and candidate/read-only CLI execution from outside the repository cwd. The workflow's
-separate all-seven-backend/compiler-source integration job is still in progress.
-Changed-source Wasm G1 controller99f8c708dae6061210cf24dfbba32068387a0d73 uses
-source82322ec8f3a22f50562d81368986defafcf3a09e and portable closure
-5957bdf24a1b2b1d5799f1f743e9c35e947b174d936181ed5a818ad163ea860e;
-run40214655849 is in progress. This is G1-only, not a new generation-chain claim.
+and candidate/read-only CLI execution from outside the repository cwd. The full PR run40215046405 executes28 before/after artifacts across both grammars
+and all seven backends, then refuses the compiler trace at the existing32MiB wire
+bound. Compact transport99bf6047/b14ec90a preserves every coordinate, event and
+tagged name without increasing limits; focused40215894458/job121237125649 passes
+14 renames/58 negatives. Its full job121237825151 confirms all28 runtime artifacts,
+then exposes generated-reference/source-span ambiguity in actual compiler input.
+No whole-compiler binding or rename qualification is yet claimed.
+
+The systematic fix adds optional sourceSpan to PsSyntaxName: actual source-name
+factories retain exact lexical spans, generated-name factories explicitly retain
+only diagnostic anchors, and grouping preserves the original source-name span
+while keeping legacy term spans/adjacency. All production construction/copy sites
+and manual test constructors are updated using the Linux source inventory
+40217518231. Actual allocation/resolution tracing transports both anchor and optional
+source span. Generated references remain attributed read-only; a selected binder
+with a generated/unlocated use refuses edits. Full token/span checks, actual target
+correspondence, endpoint admission and Core comparison remain mandatory. New
+list/projection/grouped-reference/grouped-call tests are pending Linux qualification.
+
+Preserved development-source Wasm G1 PASSED40214655849/job121233194023:
+source82322ec8f3a22f50562d81368986defafcf3a09e, closure
+5957bdf24a1b2b1d5799f1f743e9c35e947b174d936181ed5a818ad163ea860e,
+122 modules under both grammar audits,40 cross-target cases and9 envelope negatives.
+Controller99f8c708dae6061210cf24dfbba32068387a0d73; G1 service SHA
+40d08715f93aab248a73926417a6046c488a8ec1692d81e9fa2b5e4c51616c31.
+Artifact12607570362 ZIPccd69fec152ea6d95601a4bc46ef23ef9e55b00e03741c9948df00e2dbc72548.
+This evidence predates the new syntax-name provenance field; that changed source
+needs its own census/G1/ordinary gates. Frozen package generations remain unchanged.
 [Binding API and exact limits](docs/PSC1_SOURCE_BINDINGS.md).
 
 This is not yet qualified R2b, complete source tracing or rename. Structured

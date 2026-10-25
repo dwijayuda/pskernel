@@ -4,6 +4,18 @@ import Ps.Foundation.Name
 structure PsSyntaxName where
   segments : List String
   span : PsSourceSpan
+  -- Source leaf locations survive grouping. None explicitly identifies generated
+  -- names; their legacy span remains a diagnostic/desugaring anchor.
+  sourceSpan : Option PsSourceSpan
+
+def psSyntaxSourceName (segments : List String) (span : PsSourceSpan) : PsSyntaxName :=
+  PsSyntaxName.mk segments span (Option.some span)
+
+def psSyntaxGeneratedName (segments : List String) (span : PsSourceSpan) : PsSyntaxName :=
+  PsSyntaxName.mk segments span Option.none
+
+def psSyntaxNameWithSpan (name : PsSyntaxName) (span : PsSourceSpan) : PsSyntaxName :=
+  PsSyntaxName.mk name.segments span name.sourceSpan
 
 inductive PsSyntaxBinderKind where
   | explicit
@@ -186,7 +198,7 @@ def psSyntaxNamespaceAppend (left : List String) (right : List String) : List St
   | List.cons first rest => List.cons first (psSyntaxNamespaceAppend rest right)
 
 def psSyntaxNamespaceName (namespacePrefix : List String) (name : PsSyntaxName) : PsSyntaxName :=
-  PsSyntaxName.mk (psSyntaxNamespaceAppend namespacePrefix name.segments) name.span
+  PsSyntaxName.mk (psSyntaxNamespaceAppend namespacePrefix name.segments) name.span name.sourceSpan
 
 -- Recurse structurally on the declaration before supplying the namespace.
 def psSyntaxDeclarationQualifyWorker (source : PsSyntaxDeclaration) :

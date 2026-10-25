@@ -85,7 +85,7 @@ def psOwnershipBindingTrace (member : PsElabSourceMemberTrace) : Lean.Json :=
       | .partialDefinition => "partialDefinition"
       | .theoremDeclaration => "theorem")),
     ("phase", .str "source-elaboration-before-lifts"),
-    ("encoding", .str "psc1-source-bindings-compact/1"),
+    ("encoding", .str "psc1-source-bindings-compact/2"),
     ("bodyStart", Lean.toJson member.bodyStart),
     ("enabled", Lean.toJson trace.enabled), ("complete", Lean.toJson trace.complete),
     ("events", Lean.toJson trace.nextId),
@@ -98,7 +98,10 @@ def psOwnershipBindingTrace (member : PsElabSourceMemberTrace) : Lean.Json :=
     ("references", Lean.toJson (trace.referencesRev.reverse.map fun reference => Lean.Json.arr #[
       Lean.toJson reference.index, Lean.toJson (psOwnershipName reference.sourceName),
       psOwnershipBindingSpan reference.span, Lean.toJson reference.baseSegments,
-      psOwnershipBindingTarget reference.target]))]
+      psOwnershipBindingTarget reference.target,
+      match reference.sourceSpan with
+        | .none => .null
+        | .some span => psOwnershipBindingSpan span]))]
 
 /-- One actual elaboration per module. No second resolver, parser or compiler. -/
 def psOwnershipCaptureWithSourceTrace (request : Request) (tracing : Bool) :

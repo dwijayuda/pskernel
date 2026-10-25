@@ -107,7 +107,7 @@ def psParseBindingPatternWithFuel (fuel : Nat) :
           | Except.ok name =>
               Except.ok
                 { value := PsSyntaxBindingPattern.name
-                    { segments := List.cons name.token.text List.nil, span := name.token.span }
+                    (psSyntaxSourceName (List.cons name.token.text List.nil) name.token.span)
                   cursor := name.cursor }
 
 structure PsParsedBindingPattern where

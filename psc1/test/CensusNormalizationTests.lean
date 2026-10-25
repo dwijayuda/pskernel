@@ -9,9 +9,9 @@ private def require (label : String) (condition : Bool) : IO Unit := do
 private def testPatternNames : IO Unit := do
   let spanA := PsSourceSpan.mk (PsSourcePos.mk 2 1 3) (PsSourcePos.mk 3 1 4)
   let spanB := PsSourceSpan.mk (PsSourcePos.mk 5 1 6) (PsSourcePos.mk 6 1 7)
-  let a := PsSyntaxName.mk ["same"] spanA
-  let b := PsSyntaxName.mk ["same"] spanB
-  let c := PsSyntaxName.mk ["last"] spanA
+  let a := psSyntaxGeneratedName ["same"] spanA
+  let b := psSyntaxGeneratedName ["same"] spanB
+  let c := psSyntaxGeneratedName ["last"] spanA
   let pattern := PsSyntaxBindingPattern.pair
     (.pair (.name a) (.wildcard spanA) spanA)
     (.pair (.unit spanB) (.pair (.name b) (.name c) spanB) spanB) spanA
@@ -29,7 +29,7 @@ private def testPatternNames : IO Unit := do
 
 private def testScopedDeclaration : IO Unit := do
   let span := PsSourceSpan.mk (PsSourcePos.mk 10 2 1) (PsSourcePos.mk 40 3 1)
-  let name := PsSyntaxName.mk ["value"] span
+  let name := psSyntaxGeneratedName ["value"] span
   let term := PsSyntaxTerm.natural "1" span
   let source := PsSyntaxDeclaration.scopedDecl ["Outer"]
     (.scopedDecl ["Inner"] (.definition name [] term term span))
@@ -47,7 +47,7 @@ private def testScopedDeclaration : IO Unit := do
 
 private def testParseCommon : IO Unit := do
   let span := PsSourceSpan.mk (PsSourcePos.mk 0 1 1) (PsSourcePos.mk 1 1 2)
-  let name := fun segments => PsSyntaxName.mk segments span
+  let name := fun segments => psSyntaxGeneratedName segments span
   require "namespace text handles empty singleton and compound paths"
     (psParseNamespaceText [] == "" && psParseNamespaceText ["Outer"] == "Outer" &&
       psParseNamespaceText ["Outer", "Inner"] == "Outer.Inner")

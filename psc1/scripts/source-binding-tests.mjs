@@ -64,6 +64,9 @@ for (const grammar of ['lean', 'ps']) {
     ['reuse', 'def choose : Nat := Nat.add (let x : Nat := 1; x) (let x : Nat := 2; x)\n', 'x', 1],
     ['lambda', 'def choose : Nat := (fun (x : Nat) => Nat.add x 1) 2\n', 'x', 0],
     ['branch', 'def choose : Nat := if true then (let x : Nat := 1; x) else (let x : Nat := 2; x)\n', 'x', 1],
+    ['list-generated', 'def choose : Nat := let x : Nat := 7; ' +
+      'let values : List Nat := [x, x]; match values with | List.nil => 0 | List.cons head tail => head\n', 'x', 0],
+    ['projection', 'def choose : Nat := let pair : Prod Nat Bool := Prod.mk 7 true; pair.fst\n', 'pair', 0],
     ['unicode', '/- 😀 value stays -/\r\ndef choose : Nat := let α : Nat := 7; α\n' +
       'def text : String := "α -- untouched"\n', 'α', 0],
   ];
@@ -119,6 +122,23 @@ for (const grammar of ['lean', 'ps']) {
   assert.deepEqual(bindings.readCandidate(report, 'Test.Base'), lexical.reconstruct(base));
   records.push({ grammar, name: 'import-namespace-root-ordinary', ...report });
 }
+
+{
+  // Group spans remain available for adjacency while source-name spans stay
+  // exactly on identifiers. This tests actual authored PS, not printer output.
+  for (const [name, text, binderName] of [
+    ['grouped-reference', 'def choose : Nat := let value : Nat := 7\n ((value))\n', 'value'],
+    ['adjacent-grouped-call', 'def choose : Nat := let fn : Nat -> Nat := fun(value : Nat) => value\n (fn)(7)\n', 'fn'],
+  ]) {
+    const source = captureRaw(text, 'ps'), snapshots = [source], index = analyze(snapshots);
+    const binder = selected(index, binderName);
+    const report = bindings.rename({ index, snapshots, binder, newName: 'renamedValue' });
+    assert.equal(report.admissions.afterChecker.accepted, true);
+    assert.match(bindings.readCandidate(report, 'Test.Main').toString('utf8'), /renamedValue/);
+    records.push({ grammar: 'ps', name, ...report });
+  }
+}
+
 refuse(() => createSourceBindingTool({ ownershipTool: { ...ownership } }), /BINDING_OWNERSHIP_TOOL/);
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-bindings-negative-'));
@@ -157,6 +177,8 @@ try {
     'trace["binders"][0].append("extra")',
     'trace["references"][-1][4].append("extra")',
     'trace["references"][-1][2].append(0)',
+    'trace["references"][-1][5].append(0)',
+    'trace["references"][-1][5][2]+=1',
     'trace["enabled"]=False',
     'trace["authority"]="publish"',
     'value["modules"][0]["bindings"]=[]',
@@ -179,6 +201,13 @@ try {
     refuse(() => bad.rename({ index: before, snapshots: [source],
       binder: selected(before, 'local'), newName: 'renamed' }), /BINDING_COMPARISON_IDENTITY/);
   }
+  const generatedUse = fixture('generated-use',
+    prefix + '  trace["references"][-1][5]=None');
+  const generatedIndex = generatedUse.analyze({ snapshots: [source], entry: 'Test.Main' });
+  refuse(() => generatedUse.rename({
+    index: generatedIndex, snapshots: [source], binder: selected(generatedIndex, 'local'),
+    newName: 'renamed',
+  }), /BINDING_GENERATED_USE/);
   const badGraph = fixture('bad-admission',
     'if sys.argv[1]=="bindings":\n  open(sys.argv[4],"w").write("{}")');
   refuse(() => badGraph.analyze({ snapshots: [source], entry: 'Test.Main' }), /PSC1_CHECKER_/);

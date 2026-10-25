@@ -135,10 +135,7 @@ def psParseDoNamedBinding
   match psTokenCursorExpectKind cursor PsTokenKind.identifier with
   | Except.error error => Except.error error
   | Except.ok name =>
-      let sourceName : PsSyntaxName := {
-        segments := [name.token.text]
-        span := name.token.span
-      };
+      let sourceName : PsSyntaxName := psSyntaxSourceName ([name.token.text]) (name.token.span);
       if psTokenCursorAtText name.cursor ":" then
         match psTokenCursorAdvance name.cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "binding type")
@@ -224,7 +221,7 @@ def psParseDoStatement
                 | Except.error error => Except.error error
                 | Except.ok value =>
                     Except.ok (PsParseDoHead.assignment
-                      (PsSyntaxName.mk [name.token.text] name.token.span) value
+                      (psSyntaxSourceName [name.token.text] name.token.span) value
                       { start := name.token.span.start, stop := (psParseDoTermStop value) })
           else action
         else action
@@ -625,7 +622,7 @@ def psParseDoFor
           match psTokenCursorExpectText name.cursor "in" with
           | Except.error error => Except.error error
           | Except.ok separator =>
-              let sourceName := PsSyntaxName.mk [name.token.text] name.token.span;
+              let sourceName := psSyntaxSourceName [name.token.text] name.token.span;
               let delimiter := if native then "do" else "{";
               match psParseDoTakeHeader delimiter
                   (Nat.succ (psTokenCursorLength separator.cursor))
@@ -742,7 +739,7 @@ def psParseDoTry
                         match psParseDoBranch parseBody native separator.cursor with
                         | Except.error error => Except.error error
                         | Except.ok recovery =>
-                            let name := PsSyntaxName.mk [binder.token.text] binder.token.span;
+                            let name := psSyntaxSourceName [binder.token.text] binder.token.span;
                             let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan recovery.value);
                             Except.ok (PsParseResult.mk
                               (PsParseDoHead.handler body.value name recovery.value span) recovery.cursor)

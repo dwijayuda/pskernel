@@ -562,7 +562,7 @@ def psParseLeanBinderTypeWithFuel
                                   | Except.error error => Except.error error
                                   | Except.ok codomain =>
                                       let binderName :=
-                                        PsSyntaxName.mk
+                                        psSyntaxSourceName
                                           (List.cons name.token.text List.nil)
                                           name.token.span;
                                       let binder :=
@@ -606,10 +606,7 @@ def psParseLeanBinderNamesWithFuel
             PsTokenKind.identifier with
       | Except.error error => Except.error error
       | Except.ok name =>
-          let sourceName : PsSyntaxName := {
-            segments := List.cons name.token.text List.nil
-            span := name.token.span
-          };
+          let sourceName : PsSyntaxName := psSyntaxSourceName (List.cons name.token.text List.nil) (name.token.span);
           let nextNames :=
             List.cons sourceName namesRev;
           if psTokenCursorAtText name.cursor ":" then
@@ -754,10 +751,7 @@ def psParseLeanBinder
                   match psParseBinderClosing opening type.cursor with
                   | Except.error error => Except.error error
                   | Except.ok closing =>
-                      let binderName : PsSyntaxName := {
-                        segments := List.cons name.token.text List.nil
-                        span := name.token.span
-                      };
+                      let binderName : PsSyntaxName := psSyntaxSourceName (List.cons name.token.text List.nil) (name.token.span);
                       let binder : PsSyntaxBinderHead := {
                         name := binderName
                         kind := opening.kind
@@ -888,11 +882,7 @@ def psLeanPatternBinderName
       fallback
     else
       token.text;
-  {
-    segments :=
-      List.cons segment List.nil
-    span := token.span
-  }
+  psSyntaxSourceName (List.cons segment List.nil) (token.span)
 
 def psParseLeanListPattern
     (cursor : PsTokenCursor) :
@@ -1417,10 +1407,7 @@ def psParseLeanTermWithFuel
                 PsTokenKind.identifier with
             | Except.error error => Except.error error
             | Except.ok name =>
-                let sourceName : PsSyntaxName := {
-                  segments := [name.token.text]
-                  span := name.token.span
-                };
+                let sourceName : PsSyntaxName := psSyntaxSourceName ([name.token.text]) (name.token.span);
                 if psTokenCursorAtText name.cursor ":" then
                   match psTokenCursorAdvance name.cursor with
                   | Option.none =>
@@ -1615,10 +1602,7 @@ def psParseLeanInductiveConstructorsWithFuel
                       [] with
                   | Except.error error => Except.error error
                   | Except.ok fields =>
-                      let sourceName : PsSyntaxName := {
-                        segments := List.cons name.token.text List.nil
-                        span := name.token.span
-                      };
+                      let sourceName : PsSyntaxName := psSyntaxSourceName (List.cons name.token.text List.nil) (name.token.span);
                       let stop : PsSourcePos :=
                         match psParseListReverse fields.value with
                         | List.nil => name.token.span.stop
@@ -1708,13 +1692,9 @@ def psParseLeanStructureField
                 | Except.error error => Except.error error
                 | Except.ok type =>
                     if psTokenCursorDone type.cursor then
-                      let fieldName : PsSyntaxName := {
-                        segments :=
-                          List.cons
+                      let fieldName : PsSyntaxName := psSyntaxSourceName (List.cons
                             name.token.text
-                            List.nil
-                        span := name.token.span
-                      };
+                            List.nil) (name.token.span);
                       let head : PsSyntaxBinderHead := {
                         name := fieldName
                         kind := PsSyntaxBinderKind.explicit
@@ -2287,11 +2267,7 @@ def psLeanEquationBinderName
               String.Internal.append
                 "_eq"
                 (psNatToString index);
-            {
-              segments :=
-                List.cons generated List.nil
-              span := head.name.span
-            }
+            psSyntaxGeneratedName (List.cons generated List.nil) (head.name.span)
           else
             head.name
       | _ => head.name

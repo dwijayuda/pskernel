@@ -127,7 +127,7 @@ async function observe(source, grammar, stage, target) {
     manifestSha256: hash(manifestBytes), independentAdmission: true, strictIr: true };
 }
 try {
-  const lean = capture('def answer (flag : Bool) : Bool := let selected : Bool := flag; !selected\n', 'lean');
+  const lean = capture('def answer (flag : Bool) : Bool := let selected : Prod Bool Bool := Prod.mk flag false; !selected.fst\n', 'lean');
   const plain = ownership.analyze({ snapshots: [lean], entry: 'Test.Main' });
   const conversion = converter.convert({ index: plain, snapshots: [lean], targetGrammar: 'ps' });
   const ps = converter.candidateSnapshots(conversion)[0];

@@ -72,10 +72,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
 def psSyntaxSyntheticName
     (text : String)
     (span : PsSourceSpan) : PsSyntaxName :=
-  {
-    segments := List.cons text List.nil
-    span := span
-  }
+  psSyntaxGeneratedName (List.cons text List.nil) (span)
 
 def psSyntaxSyntheticReference
     (text : String)
@@ -83,7 +80,7 @@ def psSyntaxSyntheticReference
   PsSyntaxTerm.reference (psSyntaxSyntheticName text span)
 
 def psSyntaxRootName (segments : List String) (span : PsSourceSpan) : PsSyntaxName :=
-  { segments := List.cons "_root_" segments, span := span }
+  psSyntaxGeneratedName (List.cons "_root_" segments) (span)
 
 def psSyntaxRootReference (segments : List String) (span : PsSourceSpan) : PsSyntaxTerm :=
   PsSyntaxTerm.reference (psSyntaxRootName segments span)
@@ -147,10 +144,7 @@ def psParseSyntaxNameCursorTailWithFuel
                       next.token.kind next.token.span)
         else
           Except.ok {
-            value := {
-              segments := psParseListReverse segmentsRev
-              span := { start := start, stop := stop }
-            }
+            value := psSyntaxSourceName (psParseListReverse segmentsRev) ({ start := start, stop := stop })
             cursor := cursor
           }
 
@@ -208,7 +202,7 @@ def psParseSyntaxReferenceName
             | .error error => Except.error error
             | .ok parsed =>
                 Except.ok {
-                  value := psSyntaxRootName parsed.value.segments
+                  value := psSyntaxSourceName (List.cons "_root_" parsed.value.segments)
                     { start := rootToken.token.span.start, stop := parsed.value.span.stop }
                   cursor := parsed.cursor
                 }
@@ -522,10 +516,7 @@ def psTokenCursorExpectArrow
 def psSyntaxAnonymousExplicitBinder
     (span : PsSourceSpan) : PsSyntaxBinderHead :=
   {
-    name := {
-      segments := List.cons "_" List.nil
-      span := span
-    }
+    name := psSyntaxGeneratedName (List.cons "_" List.nil) (span)
     kind := PsSyntaxBinderKind.explicit
     span := span
   }
@@ -588,10 +579,7 @@ def psParsePatternBindersWithFuel
                       cursor := cursor
                     }
                 | some read =>
-                    let binder : PsSyntaxName := {
-                      segments := List.cons token.text List.nil
-                      span := token.span
-                    };
+                    let binder : PsSyntaxName := psSyntaxSourceName (List.cons token.text List.nil) (token.span);
                     smaller
                       read.cursor
                       (List.cons binder bindersRev)
@@ -664,13 +652,10 @@ def psParseBasicPattern
             match psParseSyntaxReferenceName dot.cursor with
             | Except.error error => Except.error error
             | Except.ok constructorName =>
-                let shorthandName : PsSyntaxName := {
-                  segments := constructorName.value.segments
-                  span := {
+                let shorthandName : PsSyntaxName := PsSyntaxName.mk (constructorName.value.segments) ({
                     start := token.span.start
                     stop := constructorName.value.span.stop
-                  }
-                };
+                  }) constructorName.value.sourceSpan;
                 psParseConstructorPatternTail
                   shorthandName
                   constructorName.cursor
@@ -832,7 +817,7 @@ def psParseLambdaBindersWithFuel
           match psTokenCursorExpectKind cursor PsTokenKind.identifier with
           | Except.error error => Except.error error
           | Except.ok token =>
-              let name := PsSyntaxName.mk
+              let name := psSyntaxSourceName
                 (List.cons token.token.text List.nil) token.token.span;
               let head := PsSyntaxBinderHead.mk name
                 PsSyntaxBinderKind.explicit token.token.span;

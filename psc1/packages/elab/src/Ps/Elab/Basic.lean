@@ -214,7 +214,7 @@ def psElabLet
                 elaborate
                 context
                 name
-                (Option.some nameSyntax.span)
+                nameSyntax.sourceSpan
                 valueResult.type
                 valueResult
                 body
@@ -241,7 +241,7 @@ def psElabLet
                         elaborate
                         context
                         name
-                        (Option.some nameSyntax.span)
+                        nameSyntax.sourceSpan
                         typeResult.term
                         valueResult
                         body

@@ -37,7 +37,7 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
       span: row[4] === null ? null : decodeSpan(row[4]) };
   };
   const decodeReference = row => {
-    if (!Array.isArray(row) || row.length !== 5 || !Array.isArray(row[4]))
+    if (!Array.isArray(row) || row.length !== 6 || !Array.isArray(row[4]))
       refuse('BINDING_REFERENCE_ROW');
     const value = row[4];
     let target;
@@ -48,7 +48,7 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
     else if (value[0] === 'sort' && value.length === 1) target = { kind: 'sort' };
     else refuse('BINDING_TARGET_ROW');
     return { index: row[0], sourceName: row[1], span: decodeSpan(row[2]),
-      baseSegments: row[3], target };
+      baseSegments: row[3], target, sourceSpan: row[5] === null ? null : decodeSpan(row[5]) };
   };
   if (!Array.isArray(wire) || wire.length !== module.origins.length) refuse('BINDING_COVERAGE');
   return wire.map((batch, sourceIndex) => {
@@ -64,7 +64,7 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
       if (owners.has(owner) || !origin.members.some(member => coreName(member.name) === owner) ||
           !['definition', 'partialDefinition', 'theorem'].includes(trace.kind) ||
           trace.phase !== 'source-elaboration-before-lifts' ||
-          trace.encoding !== 'psc1-source-bindings-compact/1' || trace.enabled !== true ||
+          trace.encoding !== 'psc1-source-bindings-compact/2' || trace.enabled !== true ||
           typeof trace.complete !== 'boolean' || !Array.isArray(trace.binders) ||
           !Array.isArray(trace.references)) refuse('BINDING_TRACE');
       owners.add(owner); nat(trace.events); nat(trace.bodyStart, trace.events);
@@ -102,9 +102,15 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
       });
       const references = trace.references.map(encodedReference => {
         const reference = decodeReference(encodedReference);
-        exactKeys(reference, ['index', 'sourceName', 'span', 'baseSegments', 'target']);
+        exactKeys(reference, ['index', 'sourceName', 'span', 'baseSegments', 'target', 'sourceSpan']);
         checkEvent(reference.index);
-        sourceNameSpan(reference.span, reference.sourceName);
+        spanInSource(reference.span, row);
+        if (reference.sourceSpan !== null) {
+          sourceNameSpan(reference.sourceSpan, reference.sourceName);
+          if (reference.sourceSpan.start.byteOffset < reference.span.start.byteOffset ||
+              reference.sourceSpan.stop.byteOffset > reference.span.stop.byteOffset)
+            refuse('BINDING_REFERENCE_SOURCE_SPAN');
+        }
         const parts = words(reference.sourceName);
         nat(reference.baseSegments, parts.length);
         if (reference.baseSegments < 1) refuse('BINDING_REFERENCE_BASE');
@@ -123,7 +129,7 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
           exactKeys(target, ['kind', 'name']); coreName(target.name);
         } else if (target?.kind === 'sort') exactKeys(target, ['kind']);
         else refuse('BINDING_TARGET');
-        return { ...reference, target: { ...target,
+        return { ...reference, sourceBacked: reference.sourceSpan !== null, target: { ...target,
           ...(target.kind === 'local' && target.binder !== null
             ? { binderId: identity(target.binder) } : {}) } };
       });
@@ -159,13 +165,15 @@ export function planSourceBinderRename(module, batch, trace, binder, newName, he
   }
   for (const reference of trace.references) {
     if (reference.target.kind !== 'local' || reference.target.binder !== binder.index) continue;
+    if (!reference.sourceBacked || reference.sourceSpan === null) refuse('BINDING_GENERATED_USE');
     if (reference.baseSegments !== 1 || reference.sourceName[0]?.[0] !== 's' ||
         reference.sourceName[0]?.[1] !== oldName) refuse('BINDING_REFERENCE_BASE');
-    add(reference.span.start.byteOffset, reference.span.start.byteOffset + Buffer.byteLength(oldName));
+    add(reference.sourceSpan.start.byteOffset,
+      reference.sourceSpan.start.byteOffset + Buffer.byteLength(oldName));
   }
   const result = [...edits.values()].sort((a, b) => a.startByte - b.startByte);
   for (const reference of trace.references) {
-    const start = reference.span.start.byteOffset;
+    const start = reference.sourceSpan?.start.byteOffset ?? reference.span.start.byteOffset;
     if (result.some(edit => edit.startByte === start) &&
         !(reference.target.kind === 'local' && reference.target.binder === binder.index))
       refuse('BINDING_AMBIGUOUS_REFERENCE');
@@ -237,6 +245,7 @@ export function requireRenameBindingCorrespondence(before, after, moduleIndex, s
             ? { kind: target.kind, localId: target.localId, binder: target.binder }
             : target;
           if (x.index !== y.index || x.baseSegments !== y.baseSegments ||
+              x.sourceBacked !== y.sourceBacked || !span(x.sourceSpan, y.sourceSpan, moved) ||
               !same(expected, y.sourceName) || !span(x.span, y.span, moved) ||
               !same(targetShape(x.target), targetShape(y.target)))
             refuse('BINDING_REFERENCE_CORRESPONDENCE');

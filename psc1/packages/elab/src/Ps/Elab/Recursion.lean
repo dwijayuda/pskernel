@@ -48,7 +48,7 @@ def psElabRecursionIsSelf
 -- '$' is not a PSC source identifier character. These names exist only in the
 -- internal AST, retain the original span, and cannot capture a source binder.
 def psElabRecursionParameterName (id : Nat) (span : PsSourceSpan) : PsSyntaxName :=
-  PsSyntaxName.mk
+  psSyntaxGeneratedName
     (List.cons "$psc0SH" (List.cons (psNatToString id) List.nil))
     span
 
@@ -341,7 +341,7 @@ def psElabRecursionWalkWithFuel
                   | PsResolvedName.local id =>
                       if psElabRecursionContains plan.parameterIds id then
                         let renamed := psElabRecursionParameterName id sourceName.span;
-                        let projected := PsSyntaxName.mk
+                        let projected := psSyntaxGeneratedName
                           (psListAppend renamed.segments (Prod.snd selected)) sourceName.span;
                         Except.ok (PsElabRecursionWalkResult.mk
                           (PsSyntaxTerm.reference projected) List.nil)

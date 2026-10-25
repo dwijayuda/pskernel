@@ -350,7 +350,7 @@ def psElabProjectionReference
         match psSyntaxNameToName sourceName with
           | Option.none => context
           | Option.some name =>
-              psElabContextSourceReference context name sourceName.span
+              psElabContextSourceReference context name sourceName.span sourceName.sourceSpan
                 (Nat.sub (psElabListLength sourceName.segments) (psElabListLength selected.snd))
                 target
       else context;
@@ -551,9 +551,9 @@ def psElabTypedBindersAcc
                           name
                           typeResult.term
                           binder;
-                      let nextContext := psElabContextSourceBinder
+                      let nextContext := psElabContextSourceBinderSpan
                         (psElabContextWithLocal typeResult.context pushed.context)
-                        pushed.id head.name.span;
+                        pushed.id head.name.sourceSpan;
                       let binderEntry : PsElabTypedBinder := {
                         id := pushed.id
                         name := name
@@ -749,9 +749,9 @@ def psElabLambdaBindersAcc
                         let kind := psElabBinderKindToCore entry.fst.kind;
                         let pushed := psLocalPushBinding context.localContext
                           name view.domain kind;
-                        let localContext := psElabContextSourceBinder
+                        let localContext := psElabContextSourceBinderSpan
                           (psElabContextWithLocal context pushed.context)
-                          pushed.id entry.fst.name.span;
+                          pushed.id entry.fst.name.sourceSpan;
                         let binder := PsElabTypedBinder.mk pushed.id name view.domain kind;
                         Except.ok (PsElabTypedBindersResult.mk localContext
                           (List.cons binder List.nil))
@@ -1353,9 +1353,9 @@ def psElabMatchFieldsWorker
                         binderName
                         forallView.domain
                         forallView.binder;
-                    let nextContext := psElabContextSourceBinder
+                    let nextContext := psElabContextSourceBinderSpan
                       (psElabContextWithLocal context pushed.context)
-                      pushed.id binderSyntax.span;
+                      pushed.id binderSyntax.sourceSpan;
                     let field : PsElabMatchField := {
                       id := pushed.id
                       name := binderName
@@ -1550,10 +1550,7 @@ def psElabWildcardBinderNamesWorker
             nextRemaining;
         let segment :=
           String.Internal.append "_wild" (psNatToString index);
-        let syntaxName : PsSyntaxName := {
-          segments := List.cons segment List.nil
-          span := span
-        };
+        let syntaxName : PsSyntaxName := psSyntaxGeneratedName (List.cons segment List.nil) (span);
         List.cons
           syntaxName
           (smaller (Nat.succ index))

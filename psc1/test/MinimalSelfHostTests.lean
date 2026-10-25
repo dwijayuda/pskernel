@@ -265,11 +265,11 @@ def psTestInductiveConstructorTraversal : Bool :=
   let context := psElabContextEmpty psEnvironmentEmpty
   let inductiveName := psRootName "Traversal"
   let firstSource :=
-    PsSyntaxInductiveConstructor.mk (PsSyntaxName.mk ["first"] span) [] span
+    PsSyntaxInductiveConstructor.mk (psSyntaxGeneratedName ["first"] span) [] span
   let secondSource :=
-    PsSyntaxInductiveConstructor.mk (PsSyntaxName.mk ["second"] span) [] span
+    PsSyntaxInductiveConstructor.mk (psSyntaxGeneratedName ["second"] span) [] span
   let invalidSource :=
-    PsSyntaxInductiveConstructor.mk (PsSyntaxName.mk [] span) [] span
+    PsSyntaxInductiveConstructor.mk (psSyntaxGeneratedName [] span) [] span
   let priorA :=
     PsDeclaration.axiomDecl (psRootName "priorA") [] (PsExpr.sortE PsLevel.zero)
   let priorB :=

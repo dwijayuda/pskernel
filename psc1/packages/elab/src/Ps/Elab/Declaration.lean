@@ -1356,7 +1356,7 @@ def psElabStructureDeclaration
     (span : PsSourceSpan) :
     Except PsElabError PsElabDeclarationBatchResult :=
   let constructorName : PsSyntaxName :=
-    PsSyntaxName.mk
+    psSyntaxGeneratedName
       (List.cons "mk" List.nil)
       span;
   let constructor : PsSyntaxInductiveConstructor :=

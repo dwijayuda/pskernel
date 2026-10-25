@@ -24,6 +24,7 @@ structure PsElabSourceReference where
   index : Nat
   sourceName : PsName
   span : PsSourceSpan
+  sourceSpan : Option PsSourceSpan
   baseSegments : Nat
   target : PsElabSourceTarget
 
@@ -110,7 +111,8 @@ def psElabSourceTraceAtBinder (trace : PsElabSourceTrace)
   else trace
 
 def psElabSourceTraceReference (trace : PsElabSourceTrace)
-    (sourceName : PsName) (span : PsSourceSpan) (baseSegments : Nat)
+    (sourceName : PsName) (span : PsSourceSpan) (sourceSpan : Option PsSourceSpan)
+    (baseSegments : Nat)
     (target : PsElabSourceTarget) : PsElabSourceTrace :=
   if trace.enabled then
     let complete : Bool := match target with
@@ -119,7 +121,7 @@ def psElabSourceTraceReference (trace : PsElabSourceTrace)
           | Option.none => false
           | Option.some _ => trace.complete
       | _ => trace.complete;
-    let entry := PsElabSourceReference.mk trace.nextId sourceName span baseSegments target;
+    let entry := PsElabSourceReference.mk trace.nextId sourceName span sourceSpan baseSegments target;
     PsElabSourceTrace.mk true (Nat.succ trace.nextId) trace.bindersRev
       (List.cons entry trace.referencesRev) trace.active complete
   else trace

@@ -132,13 +132,20 @@ def psElabContextSourceBinder (context : PsElabContext)
       (psElabSourceTraceAtBinder context.sourceTrace localId span)
   else context
 
+def psElabContextSourceBinderSpan (context : PsElabContext)
+    (localId : Nat) (sourceSpan : Option PsSourceSpan) : PsElabContext :=
+  match sourceSpan with
+  | Option.none => context
+  | Option.some span => psElabContextSourceBinder context localId span
+
 def psElabContextSourceReference (context : PsElabContext)
-    (name : PsName) (span : PsSourceSpan) (baseSegments : Nat)
+    (name : PsName) (span : PsSourceSpan) (sourceSpan : Option PsSourceSpan)
+    (baseSegments : Nat)
     (target : PsElabSourceTarget) : PsElabContext :=
   if context.sourceTrace.enabled then
     PsElabContext.mk context.environment context.localContext context.instances
       context.metaContext context.structuralRecursion context.whileHelper context.currentNamespace
-      (psElabSourceTraceReference context.sourceTrace name span baseSegments target)
+      (psElabSourceTraceReference context.sourceTrace name span sourceSpan baseSegments target)
   else context
 
 def psElabContextRestoreScope (outer inner : PsElabContext) : PsElabContext :=

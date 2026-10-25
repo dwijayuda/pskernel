@@ -1,3 +1,15 @@
+## 2026-10-25 — integration CONFIRMED at qualified dbd9db47
+
+Live integration `integration/psc1-pskernel-expr-v2-lean435-20261021` now points to **`dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5`**. The non-force update required expected prior054edfce and was confirmed by a fresh Git ref read. Exact-source qualification evidence was committed first at`a4592d47213e42f9824dab46b5aef817e9bd06fd`. This containing commit updates documentation/evidence only; the exact qualified executable/proof/harness source remains dbd9db47. Primary work retains all53cb evidence and all implementation histories.
+
+The scoped production validator→decoder→ordinary-inductive ArenaModel milestone is qualified: **532 native reports/36 modules,both complete generated routes,and independent actual195/361/364-member archive audit**. See `docs/qualification/T05_VALIDATOR_ARENA_MODEL_FULL532_dbd9db47.json` and `T05_VALIDATOR_ARENA_MODEL_INTEGRATION_dbd9db47.json`. All33 added reports were freshly rechecked together with all499 retained reports at the promoted source. Production algorithms and published limits are unchanged.
+
+The automatic post-integration suites are separate,in progress at this record: correctness[40195396979](https://github.com/dwijayuda/pskernel/actions/runs/40195396979),fullArena[40195396822](https://github.com/dwijayuda/pskernel/actions/runs/40195396822),research[40195396945](https://github.com/dwijayuda/pskernel/actions/runs/40195396945),production[40195396953](https://github.com/dwijayuda/pskernel/actions/runs/40195396953). Inspect their actual terminal evidence next; do not duplicate them or transfer predecessor Arena/performance results. Last completed fullArena is054edfce/run40167644370 at173strict/193,17timeouts,one Church budget exhaustion,and two separate unsafe/partial agreements.
+
+**A remains historically scoped qualified; B OPEN,C FAIL at last measured source,D OPEN.** New broad source-specific suite outcomes and full String-cohort qualification are not claimed here. After finishing the existing runs,continue T08a's bounded real Church request3 stage probe; T06→T07→T04 remain separate functional work. No background implementation is promised by this checkpoint.
+
+---
+
 ## 2026-10-25 — complete532 validator/decoder/ArenaModel milestone QUALIFIED; integration prepared
 
 Exact source **`dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5`** passed [native/generated/canonical qualification40191895625](https://github.com/dwijayuda/pskernel/actions/runs/40191895625), attempt1. Native121164457415 checked **532 ordered unique reports across36 modules**: all499 retained reports plus33 replay/prefix/decoded-node/whole-decoder/ArenaModel reports. Generated121165214370 and canonical121165214422 passed the complete157-module/1901-declaration closure and every retained runtime matrix; canonical independently checked the reconstructed1901-declaration.ps source. All18 detached harnesses,ordinary admission controls,negative tests,resource policies and old receipt chains remain.

@@ -1538,6 +1538,55 @@
     "expectedPriorSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
     "qualifiedTargetSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
     "force": false,
-    "applied": false
+    "applied": true
+  },
+  "integrationConfirmation": {
+    "schema": "psc1-validator-arena-model-integration-v1",
+    "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+    "priorSha": "054edfce56eda28a166624ddc92dfac5af8499c0",
+    "qualifiedSourceSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+    "evidenceCommittedBeforePromotionSha": "a4592d47213e42f9824dab46b5aef817e9bd06fd",
+    "force": false,
+    "updateSucceeded": true,
+    "liveRefReadBack": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+    "sourceQualificationRun": 40191895625,
+    "artifactAuditRun": 40191990906,
+    "postIntegrationRunsObserved": [
+      {
+        "id": 40195396979,
+        "name": "PSC1 PSKernel-Core correctness",
+        "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+        "status": "in_progress",
+        "conclusion": null,
+        "sha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5"
+      },
+      {
+        "id": 40195396822,
+        "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+        "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+        "status": "in_progress",
+        "conclusion": null,
+        "sha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5"
+      },
+      {
+        "id": 40195396945,
+        "name": "PSC1 PSKernel-Core Expression V2 research",
+        "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+        "status": "in_progress",
+        "conclusion": null,
+        "sha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5"
+      },
+      {
+        "id": 40195396953,
+        "name": "PSC1 Expression V2 production integration",
+        "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+        "status": "in_progress",
+        "conclusion": null,
+        "sha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5"
+      }
+    ],
+    "newBroadResultsClaimed": false,
+    "fullKernel": false,
+    "performanceQualified": false
   }
 }

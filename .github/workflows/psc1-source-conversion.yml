@@ -50,12 +50,20 @@ jobs:
         working-directory: psc1
         run: |
           lean --version
-          lake build psc1_source_ownership psc1_lossless_source psc1_independent_checker psc1_source_census_probe psc1
+          lake build psc1_source_ownership psc1_lossless_source psc1_independent_checker psc1_source_census_probe psc1 psc1_lean_printer_scope_tests psc1_translation_tests
       - uses: actions/cache/save@v4
         if: steps.native-cache.outputs.cache-hit != 'true'
         with:
           path: psc1/.lake/build
           key: psc1-source-tools-native-v1-ubuntu2404-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Check layout scopes against actual admission and official Lean source parsing
+        working-directory: psc1
+        run: |
+          .lake/build/bin/psc1_translation_tests
+          .lake/build/bin/psc1_lean_printer_scope_tests
+          for source in dist/source-conversion/layout/*.lean; do
+            lake env lean "$source"
+          done
       - name: Check candidate conversion host syntax
         working-directory: psc1
         run: |

@@ -303,3 +303,17 @@ and still run Lake dependency validation. Documentation-only pushes do not run
 these dedicated expensive suites. The aggregate lossless/ownership/conversion
 job allows 20 minutes for additional suites; each compiler request remains 240s,
 the checker 120s and original memory/stack/fuel policies are unchanged.
+
+## Diagnosed Lean printer scope blocker
+
+Run 40202979940 at 420e647b passes focused conversion and the real 11-module
+CLI/JSON application (native compilation and actual file IO), and complete
+Lean-to-PS compiler conversion. PS-to-Lean then refuses Ps.Syntax.Token /
+psTokenKindEq with matchNonExhaustive: fixed-column nested alternatives escape
+into their enclosing match. This is a genuine printer/layout defect; no parser
+or checker refusal is relaxed. The fix threads indentation through the existing
+printer, groups low-precedence embedding positions and preserves the public fuel
+entry point. New tests compare actual independently checked admission/IR bytes
+and compile printed fixtures with official Lean 4.35 source parsing. Qualification
+of this compiler-source change and new-source G1 are pending. Frozen packaged
+compiler generations and qualified PR #184 source remain unchanged.

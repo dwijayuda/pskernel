@@ -652,3 +652,7 @@ lean_exe psc1_character_diagnostic_tests where
 lean_exe psc1_source_ownership where
   srcDir := "scripts"
   root := `SourceOwnershipMain
+
+lean_exe psc1_lean_printer_scope_tests where
+  srcDir := "test"
+  root := `LeanPrinterScopeTests

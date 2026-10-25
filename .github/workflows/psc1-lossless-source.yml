@@ -46,9 +46,13 @@ jobs:
         run: |
           lean --version
           node scripts/character-diagnostic-correspondence.mjs --reference-only
-          lake build psc1_lossless_source psc1_lossless_tests psc1_character_diagnostic_tests psc1_source_ownership psc1_independent_checker psc1_source_census_probe
+          lake build psc1_lossless_source psc1_lossless_tests psc1_character_diagnostic_tests psc1_source_ownership psc1_independent_checker psc1_source_census_probe psc1_lean_printer_scope_tests
           .lake/build/bin/psc1_lossless_tests
           .lake/build/bin/psc1_character_diagnostic_tests
+          .lake/build/bin/psc1_lean_printer_scope_tests
+          for source in dist/source-conversion/layout/*.lean; do
+            lake env lean "$source"
+          done
       - name: Exercise snapshots, trivia and staged edits
         working-directory: psc1
         run: |

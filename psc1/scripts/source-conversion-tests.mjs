@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { createLosslessSourceTool, createSourceOwnershipTool,
   createCheckedSourceConverter } from '../host-tools/source-refactoring.mjs';
 import { compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
@@ -228,8 +229,15 @@ try {
     const owned = readOwnedCompilerSources('Ps.CompilerUnified.Service');
     if (process.env.PSC1_CONVERSION_SCOPE_GUARD === 'true') {
       assert.equal(owned.length, 121);
-      assert.equal(compilerSourceClosureDigest(owned.map(row => ({ ...row, kind: 'lean' }))),
-        '60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a');
+      const baseline = spawnSync('git', ['show',
+        'b63d09c8f79f3886565c788c478cb9937057080d:psc1/packages/syntax/src/Ps/Syntax/PrintLean.lean'],
+        { encoding: 'utf8' });
+      assert.equal(baseline.status, 0);
+      const restored = owned.map(row => ({ ...row, kind: 'lean',
+        text: row.module === 'Ps.Syntax.PrintLean' ? baseline.stdout : row.text }));
+      assert.equal(compilerSourceClosureDigest(restored),
+        '60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a',
+        'only the layout printer changes inside the unified compiler closure');
     }
     const snapshots = owned.map(row => capture(row.text, row.module));
     const sourceIndex = ownership.analyze({

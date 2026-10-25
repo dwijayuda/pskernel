@@ -75,16 +75,17 @@ SHA = CONFIG["sourceSha"]
 RUN = CONFIG["runId"]
 ATTEMPT = CONFIG["runAttempt"]
 PROFILE = CONFIG.get("profile", "helpers")
-RESTORED = PROFILE == "restored"
-RETAINED = PROFILE in ("retained", "restored")
-DEFERRED = PROFILE in ("deferred", "retained", "restored")
-ADMISSION = PROFILE in ("admission", "deferred", "retained", "restored")
-FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred", "retained", "restored")
-ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred", "retained", "restored")
-LOOP = PROFILE in ("loop", "admission", "deferred", "retained", "restored")
-SOURCE_INPUT_COUNT = 92 if RETAINED else 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
-NATIVE_PROOF_TOTAL = 492 if RETAINED else 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
-NATIVE_PROOF_MODULES = len(EXPECTED_PROOFS) + (2 if FIELDS else 0) + (1 if ANALYSIS else 0) + (1 if LOOP else 0) + (3 if ADMISSION else 0) + (1 if DEFERRED else 0) + (10 if RETAINED else 0)
+LAYOUT = PROFILE == "layout"
+RESTORED = PROFILE in ("restored", "layout")
+RETAINED = PROFILE in ("retained", "restored", "layout")
+DEFERRED = PROFILE in ("deferred", "retained", "restored", "layout")
+ADMISSION = PROFILE in ("admission", "deferred", "retained", "restored", "layout")
+FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred", "retained", "restored", "layout")
+ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred", "retained", "restored", "layout")
+LOOP = PROFILE in ("loop", "admission", "deferred", "retained", "restored", "layout")
+SOURCE_INPUT_COUNT = 93 if LAYOUT else 92 if RETAINED else 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
+NATIVE_PROOF_TOTAL = 497 if LAYOUT else 492 if RETAINED else 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
+NATIVE_PROOF_MODULES = len(EXPECTED_PROOFS) + (2 if FIELDS else 0) + (1 if ANALYSIS else 0) + (1 if LOOP else 0) + (3 if ADMISSION else 0) + (1 if DEFERRED else 0) + (10 if RETAINED else 0) + (1 if LAYOUT else 0)
 FIELDS_SECTIONS = {"harness":1,"fields":147,"recursive":105,"boundaries":8,"recursorGuard":7}
 ANALYSIS_SECTIONS = {"harness":1,"matrix":84,"protocol":8}
 LOOP_SECTIONS = {"harness":1,"matrix":56,"protocol":12}
@@ -188,6 +189,28 @@ RETAINED_PROOFS = [(module,count,"retained-"+module+".log") for module,count in 
     ("PsKernelNameWorkerProofs",8),("PsKernelExprV2QuotOwnerProofs",21),
     ("PsKernelExprV2WhnfABIProofs",2),("PsKernelExprV2OwnedStateProofs",21)]]
 RETAINED_INPUTS = ["psc1/test/"+module+".lean" for module,_,_ in RETAINED_PROOFS]
+
+LAYOUT_MODULE = "PsKernelExprV2LayoutBoundaryProofs"
+LAYOUT_PROOF = "psc1/test/" + LAYOUT_MODULE + ".lean"
+LAYOUT_PROOF_BLOB = "923d74270fdc307e58922ad78c44887eaf4041a7"
+LAYOUT_PROOF_DIGEST = {"bytes":11733,
+    "sha256":"7a56146d72dcd6b6ea8515be962eaba49a1af392d868e76eff6f68ca9fa03c3b"}
+LAYOUT_NAMES = [LAYOUT_MODULE+"."+name for name in (
+    "shape_valid_establishes_layout",
+    "validate_ok_establishes_source_layout",
+    "replay_node_ok_preserves_layout",
+    "validate_fuel_ok_preserves_layout",
+    "validate_ok_establishes_canonical_layout")]
+LAYOUT_SCOPE = {
+    "shapeGuardEstablishesSourceLayout":True,
+    "successfulValidatorEstablishesSourceLayout":True,
+    "replayNodePreservesCanonicalLayout":True,
+    "validateFuelPreservesCanonicalLayout":True,
+    "canonicalOutputLayoutEstablished":True,
+    "metadataCorrespondenceEstablished":False,
+    "decoderCorrespondenceEstablished":False,
+    "replayArenaModelBridgeEstablished":False,
+}
 
 BLOBS = {}
 REPORT = {
@@ -1539,6 +1562,65 @@ def retained_native_audit(e):
         "receipt":digest(e.raw("retained-native-receipt.json"))}
 
 
+def layout_boundary_native_audit(e):
+    """Verify only the five physical-layout obligations and their retained492 parent."""
+    require(e.route=="native","Layout proof receipt belongs to native route")
+    source=git_bytes(LAYOUT_PROOF)
+    same(git_blob_sha(source),LAYOUT_PROOF_BLOB,"exact checked layout proof Git blob")
+    same(digest(source),LAYOUT_PROOF_DIGEST,"exact checked layout proof source digest")
+    same(e.raw("sources/"+LAYOUT_PROOF),source,"archived layout proof equals exact target")
+    raw=e.raw("layout-boundary-proofs.log")
+    names=proof_reports(source,raw,LAYOUT_MODULE,5)
+    same(names,LAYOUT_NAMES,"five fixed physical-layout theorem names")
+    terminal_names=[name for name,_ in re.findall(
+        r"'([^']+)' (?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])",
+        e.terminal) if name.startswith(LAYOUT_MODULE+".")]
+    same(terminal_names,LAYOUT_NAMES,"five actual ordered terminal layout reports")
+    status="PSC1_LAYOUT_BOUNDARY_PROOF_STATUS module="+LAYOUT_MODULE+" count=5 countStatus=0 leanStatus=0"
+    same(e.raw("layout-boundary-proof-status.log"),(status+"\n").encode(),
+         "exact successful layout proof command status")
+    line_marker(e.terminal,status)
+    records=[]
+    for path in ("constructor-native-receipt.json","fields-native-receipt.json",
+                 "analysis-native-receipt.json","loop-native-receipt.json",
+                 "ordinary-admission-native-receipt.json",
+                 "deferred-transform-native-receipt.json","retained-native-receipt.json"):
+        records.extend(e.json(path)["proofs"])
+    same(len(records),29,"all retained29 proof module records")
+    same(sum(record["proofs"] for record in records),492,"all retained492 proof records")
+    prior_names=[name for record in records for name in record["names"]]
+    require(len(prior_names)==492 and len(set(prior_names))==492,
+            "all retained492 theorem names are distinct")
+    modules=[record["module"] for record in records]+[LAYOUT_MODULE]
+    require(len(modules)==30 and len(set(modules))==30,"all30 proof modules are distinct")
+    require(set(prior_names).isdisjoint(names) and len(set(prior_names+names))==497,
+            "all497 theorem names are distinct")
+    r=e.json("layout-boundary-native-receipt.json"); e.identity(r)
+    expected={"schema":"psc1-t05-layout-boundary-native-receipt-v1",
+        "sourceSha":SHA,"runId":str(RUN),"runAttempt":str(ATTEMPT),
+        "job":"native-header","route":"native","status":"pass",
+        "retainedProofs":492,"newProofs":5,"totalProofs":497,"proofModules":30,
+        "proofs":[{"module":LAYOUT_MODULE,"proofs":5,"names":names,
+                   "source":digest(source),"log":digest(raw)}],
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "retainedNativeReceipt":digest(e.raw("retained-native-receipt.json")),
+        "sourceInventory":digest(e.raw("source-inventory.json")),
+        "proofStatuses":digest(e.raw("layout-boundary-proof-status.log")),
+        **LAYOUT_SCOPE,"fullOrdinaryAdmission":True,
+        "baselineTransformConstructionRestored":True,
+        "deferredTransformConstruction":False,"productionChanges":False,
+        "fullKernel":False,"performanceQualified":False}
+    same(r,expected,"exact layout497 receipt and truthful physical-layout scope")
+    logged_json(e.terminal,"PSC1_T05_LAYOUT_BOUNDARY_NATIVE: PASS ",r)
+    return {"retainedReports":492,"newReports":5,"totalReports":497,"totalModules":30,
+        "allTheoremNamesDistinct":True,"proofNames":names,"physicalLayoutOnly":True,
+        **LAYOUT_SCOPE,"source":digest(source),"sourceGitBlob":git_blob_sha(source),
+        "retainedNativeReceipt":digest(e.raw("retained-native-receipt.json")),
+        "sourceInventory":digest(e.raw("source-inventory.json")),
+        "proofStatuses":digest(e.raw("layout-boundary-proof-status.log")),
+        "receipt":digest(e.raw("layout-boundary-native-receipt.json"))}
+
+
 def wait_for_cohort():
     deadline = time.monotonic() + 75 * 60
     while True:
@@ -1562,7 +1644,7 @@ def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
-    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained","restored"),"Unknown audit profile")
+    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained","restored","layout"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
             "Exact numeric run and attempt required")
@@ -1576,6 +1658,12 @@ def main():
     require(len(path_lists) == 2 and path_lists[0] == path_lists[1],
             "Native and route source inventory definitions agree")
     expected_paths = path_lists[0]
+    if LAYOUT:
+        require(LAYOUT_PROOF in expected_paths,"explicit layout proof source inventory member")
+        same(git_blob_sha(git_bytes(LAYOUT_PROOF)),LAYOUT_PROOF_BLOB,"pinned five-report layout proof Git blob")
+        same(digest(git_bytes(LAYOUT_PROOF)),LAYOUT_PROOF_DIGEST,"pinned five-report layout proof source")
+        REPORT["layoutBoundarySource"]={"path":LAYOUT_PROOF,"gitBlobSha":LAYOUT_PROOF_BLOB,
+            **LAYOUT_PROOF_DIGEST,"proofNames":LAYOUT_NAMES,"physicalLayoutOnly":True}
     if RETAINED:
         require(set(RETAINED_INPUTS) <= set(expected_paths),"ten explicit retained native proof inputs")
     if DEFERRED:
@@ -1673,6 +1761,8 @@ def main():
                 result[label] = deferred_native_audit(evidence) if route == "native" else deferred_route_audit(evidence)
             if RETAINED and route == "native":
                 result["retainedNativeQualification"] = retained_native_audit(evidence)
+            if LAYOUT and route == "native":
+                result["layoutBoundaryQualification"] = layout_boundary_native_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -1705,6 +1795,7 @@ def main():
         "deferredTransformQualified":DEFERRED and not RESTORED,"retainedNativeProofsQualified":RETAINED,
         **({"baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
             "baselineTransformRestorationQualified":True} if RESTORED else {}),
+        **({"layoutBoundaryQualified":True,**LAYOUT_SCOPE} if LAYOUT else {}),
         **({"independentLeanControls":{"controls":18,"accepted":14,"rejected":4,
                 "safeGenerated":13,"unsafeContract":1}} if ADMISSION else {}),
     }
@@ -1738,6 +1829,10 @@ if __name__ == "__main__":
             **({"baselineTransformConstructionRestored":REPORT["status"] == "pass",
                 "baselineTransformRestorationQualified":REPORT["status"] == "pass"} if RESTORED else {}),
             **({"retainedNativeProofsQualified":REPORT["status"] == "pass"} if RETAINED else {}),
+            **({"layoutBoundaryQualified":REPORT["status"] == "pass",
+                "canonicalOutputLayoutEstablished":REPORT["status"] == "pass",
+                "metadataCorrespondenceEstablished":False,"decoderCorrespondenceEstablished":False,
+                "replayArenaModelBridgeEstablished":False} if LAYOUT else {}),
             "report":digest(payload.encode()),
             "errors":REPORT["errors"],
             **({"ordinaryAdmissionQualified":REPORT["status"] == "pass",

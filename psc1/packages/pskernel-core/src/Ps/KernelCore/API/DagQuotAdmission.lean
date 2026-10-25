@@ -70,10 +70,13 @@ def psKernelDagQuotMatchShape
         | Option.some entry =>
             match entry.node with
             | PsKernelExprV2Node.app actualFn actualArg =>
-                match psKernelDagQuotMatchShape fn arena actualFn with
+                let quotCompare0 := psKernelDagQuotMatchShape fn;
+                match quotCompare0 arena actualFn with
                 | Option.none => Option.none
                 | Option.some equal =>
-                    if equal then psKernelDagQuotMatchShape arg arena actualArg
+                    if equal then
+                      let quotCompare6 := psKernelDagQuotMatchShape arg;
+                      quotCompare6 arena actualArg
                     else Option.some false
             | _ => Option.some false
   | PsKernelExpr.lam _ domain body _ =>
@@ -83,10 +86,13 @@ def psKernelDagQuotMatchShape
         | Option.some entry =>
             match entry.node with
             | PsKernelExprV2Node.lam _ actualDomain actualBody _ =>
-                match psKernelDagQuotMatchShape domain arena actualDomain with
+                let quotCompare1 := psKernelDagQuotMatchShape domain;
+                match quotCompare1 arena actualDomain with
                 | Option.none => Option.none
                 | Option.some equal =>
-                    if equal then psKernelDagQuotMatchShape body arena actualBody
+                    if equal then
+                      let quotCompare7 := psKernelDagQuotMatchShape body;
+                      quotCompare7 arena actualBody
                     else Option.some false
             | _ => Option.some false
   | PsKernelExpr.forallE _ domain body _ =>
@@ -96,10 +102,13 @@ def psKernelDagQuotMatchShape
         | Option.some entry =>
             match entry.node with
             | PsKernelExprV2Node.forallE _ actualDomain actualBody _ =>
-                match psKernelDagQuotMatchShape domain arena actualDomain with
+                let quotCompare2 := psKernelDagQuotMatchShape domain;
+                match quotCompare2 arena actualDomain with
                 | Option.none => Option.none
                 | Option.some equal =>
-                    if equal then psKernelDagQuotMatchShape body arena actualBody
+                    if equal then
+                      let quotCompare8 := psKernelDagQuotMatchShape body;
+                      quotCompare8 arena actualBody
                     else Option.some false
             | _ => Option.some false
   | PsKernelExpr.letE _ type value body nondep =>
@@ -109,15 +118,18 @@ def psKernelDagQuotMatchShape
         | Option.some entry =>
             match entry.node with
             | PsKernelExprV2Node.letE _ actualType actualValue actualBody actualNondep =>
-                match psKernelDagQuotMatchShape type arena actualType with
+                let quotCompare3 := psKernelDagQuotMatchShape type;
+                match quotCompare3 arena actualType with
                 | Option.none => Option.none
                 | Option.some typeEqual =>
                     if typeEqual then
-                      match psKernelDagQuotMatchShape value arena actualValue with
+                      let quotCompare4 := psKernelDagQuotMatchShape value;
+                      match quotCompare4 arena actualValue with
                       | Option.none => Option.none
                       | Option.some valueEqual =>
                           if valueEqual then
-                            match psKernelDagQuotMatchShape body arena actualBody with
+                            let quotCompare5 := psKernelDagQuotMatchShape body;
+                            match quotCompare5 arena actualBody with
                             | Option.none => Option.none
                             | Option.some bodyEqual =>
                                 if bodyEqual then Option.some (psKernelBoolEq actualNondep nondep)
@@ -132,7 +144,9 @@ def psKernelDagQuotMatchShape
         | Option.some entry =>
             match entry.node with
             | PsKernelExprV2Node.mdata actualTag actualBody =>
-                if Nat.beq actualTag tag then psKernelDagQuotMatchShape body arena actualBody
+                if Nat.beq actualTag tag then
+                  let quotCompare9 := psKernelDagQuotMatchShape body;
+                  quotCompare9 arena actualBody
                 else Option.some false
             | _ => Option.some false
   | PsKernelExpr.proj name index body =>
@@ -143,7 +157,9 @@ def psKernelDagQuotMatchShape
             match entry.node with
             | PsKernelExprV2Node.proj actualName actualIndex actualBody =>
                 if psKernelNameEq actualName name then
-                  if Nat.beq actualIndex index then psKernelDagQuotMatchShape body arena actualBody
+                  if Nat.beq actualIndex index then
+                    let quotCompare10 := psKernelDagQuotMatchShape body;
+                    quotCompare10 arena actualBody
                   else Option.some false
                 else Option.some false
             | _ => Option.some false

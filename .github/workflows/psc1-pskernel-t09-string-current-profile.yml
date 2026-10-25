@@ -1,0 +1,105 @@
+name: PSC1 exact integrated String sample5 bounded profile
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t09-string-profile-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-t09-string-current-profile.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate exact integrated producer and all diagnostic inputs
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: "set -euo pipefail\npython3 - <<'PYCODE'\nimport hashlib,io,json,os,pathlib,subprocess,urllib.request,urllib.error,zipfile\n\
+        base='https://api.github.com/repos/dwijayuda/pskernel'\nsource='ecafaabf844babd76a5de57bdf12909845961fba'\n\
+        run_id=40218506599\nartifact_id=12609213747\nout=pathlib.Path(os.environ['RUNNER_TEMP'])/'psc1-string-current-profile';out.mkdir()\n\
+        class NoRedirect(urllib.request.HTTPRedirectHandler):\n    def redirect_request(self,req,fp,code,msg,headers,newurl):return\
+        \ None\ndef get(route):\n    req=urllib.request.Request(base+route,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'})\n\
+        \    try:\n        with urllib.request.build_opener(NoRedirect()).open(req,timeout=120) as response:return\
+        \ response.read()\n    except urllib.error.HTTPError as e:\n        assert e.code in (301,302,303,307,308)\n\
+        \        location=e.headers['Location'];assert location.startswith('https://')\n        return urllib.request.urlopen(urllib.request.Request(location),timeout=120).read()\n\
+        r=json.loads(get('/actions/runs/'+str(run_id)))\nassert r['head_sha']==source and r['status']=='completed'\
+        \ and r['conclusion']=='failure'\njobs=json.loads(get('/actions/runs/'+str(run_id)+'/jobs?per_page=100'))['jobs']\n\
+        producer=[j for j in jobs if j['id']==121244757273]\nassert len(producer)==1 and producer[0]['conclusion']=='success'\n\
+        info=json.loads(get('/actions/artifacts/'+str(artifact_id)))\ndigest='fe870d30c2c6cd202330b68ed01a1a70531bcdc75762e4f1b442c8e4c7585a41'\n\
+        assert info['name']=='psc1-v2-dag-generated-js' and not info['expired']\nassert info['workflow_run']['id']==run_id\
+        \ and info['workflow_run']['head_sha']==source\nassert info['size_in_bytes']==3653662 and info['digest']=='sha256:'+digest\n\
+        raw=get('/actions/artifacts/'+str(artifact_id)+'/zip')\nassert len(raw)==3653662 and hashlib.sha256(raw).hexdigest()==digest\n\
+        z=zipfile.ZipFile(io.BytesIO(raw));names=z.namelist()\nassert len(names)==69 and len(names)==len(set(names))\
+        \ and z.testzip() is None\ninputs={}\ndef put(entry,name,size,sha):\n    b=z.read(entry);assert len(b)==size\
+        \ and hashlib.sha256(b).hexdigest()==sha\n    (out/name).write_bytes(b);inputs[name]={'entry':entry,'bytes':len(b),'sha256':sha}\n\
+        put('pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js','kernel.mjs',10319059,'9d1931744355bbc54cfff3e8e2ba4065fd9d85e83eb87b326c215059a2c0ef99')\n\
+        put('_temp/psc1-t01f-generated/fixture.json','fixture.json',2791525,'563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d')\n\
+        put('_temp/psc1-t01f-generated/provenance.json','producer-provenance.json',1209,'b63188bb69c566e50bb76a067ab6cd4f8c7994bca68581da11fef52d5c87de3d')\n\
+        p='psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs'\nb=pathlib.Path(p).read_bytes();assert b==subprocess.check_output(['git','show',source+':'+p])\n\
+        assert len(b)==27140 and hashlib.sha256(b).hexdigest()=='d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2'\n\
+        (out/'runner.mjs').write_bytes(b);inputs['runner.mjs']={'gitSource':source,'path':p,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()}\n\
+        p='.github/workflows/psc1-pskernel-t09-string-current-profile.yml';b=pathlib.Path(p).read_bytes();(out/'workflow.yml').write_bytes(b)\n\
+        provenance={'schema':'psc1-exact-string-diagnostic-v1','role':'bounded diagnostic only; no qualification\
+        \ or performance acceptance','harnessSource':os.environ['GITHUB_SHA'],'programSource':source,'producerRun':run_id,'producerJob':121244757273,'producerJobConclusion':'success','aggregateConclusion':'failure','artifactId':artifact_id,'artifactBytes':len(raw),'artifactSha256':digest,'archiveMembers':len(names),'inputs':inputs,'workflowSha256':hashlib.sha256(b).hexdigest(),'sampleIndex':5,'sample':'A\xE9\
+        \u20AC\U0001F600','allSelectedSampleAssertionsUnchanged':1400,'fuel':4096,'nodeOldSpaceMiB':2048,'runtimePathEmpty':True,'diagnosticDeadlineSeconds':900,'qualificationDeadlineSecondsUnchanged':1500}\n\
+        (out/'provenance.json').write_text(json.dumps(provenance,indent=2)+'\\n')\nprint(json.dumps(provenance))\n\
+        PYCODE\n"
+    - name: Trace unchanged selected sample under bounded V8 diagnostic
+      shell: bash
+      run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/psc1-string-current-profile\"\n\
+        \"$NODE_BIN\" --check runner.mjs\n\"$NODE_BIN\" --version > node-version.txt\nset +e\n/usr/bin/time -f 'wallSeconds=%e\
+        \ maxRssKiB=%M exit=%x' -o resource.txt \\\n  timeout --signal=TERM --kill-after=5s 900s \\\n  env PATH=\"\
+        \" NODE_OPTIONS=\"\" PSC1_T01F_TRACE=1 \"$NODE_BIN\" --max-old-space-size=2048 --expose-gc \\\n  --prof\
+        \ --logfile=profile.log runner.mjs ./kernel.mjs ./fixture.json 5 2>&1 | tee trace.log\nstatus=${PIPESTATUS[0]}\n\
+        printf '%s\\n' \"$status\" > diagnostic-exit-status.txt\n# The diagnostic may be censored; this successful\
+        \ collection is not a runtime qualification.\nexit 0\n"
+    - name: Process actual V8 ticks and preserve raw diagnostic
+      if: always()
+      shell: bash
+      run: 'set -euo pipefail
+
+        cd "$RUNNER_TEMP/psc1-string-current-profile"
+
+        shopt -s nullglob
+
+        logs=(isolate-*-profile.log)
+
+        test "${#logs[@]}" -eq 1
+
+        node --prof-process "${logs[0]}" > profile.txt 2> profile-process.stderr
+
+        sed -n ''1,180p'' profile.txt
+
+        tail -n 45 trace.log
+
+        python3 - <<''PYCODE''
+
+        import hashlib,json,pathlib
+
+        out=pathlib.Path(''.'');files={p.name:{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in out.iterdir() if p.is_file()}
+
+        (out/''files.json'').write_text(json.dumps(files,indent=2)+''\n'')
+
+        PYCODE
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-exact-string-sample5-diagnostic
+        include-hidden-files: true
+        path: ${{ runner.temp }}/psc1-string-current-profile/
+        retention-days: 30

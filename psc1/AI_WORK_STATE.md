@@ -41,8 +41,16 @@ alpha equality for the selected definition value only. Candidates are copied byt
 neither the API nor developer CLI writes project sources. Headers, partial,
 normalized, ambiguous and unlocated binders refuse; structural direct self-calls
 explicitly mark incomplete coverage. R3 literal graph/IR equality is unchanged.
-Expanded malformed-wire, checker/tool/CLI and all-seven-backend/compiler-source
-integration are implemented next and remain pending actual Linux results.
+Expanded focused run40214590580/job121232875557 PASSED:14 actual checked renames
+and54 negatives, including malformed trace/target/event/span wire, tampered native
+comparison identities, actual independent checker rejection, changed tool pins,
+and candidate/read-only CLI execution from outside the repository cwd. The workflow's
+separate all-seven-backend/compiler-source integration job is still in progress.
+Changed-source Wasm G1 controller99f8c708dae6061210cf24dfbba32068387a0d73 uses
+source82322ec8f3a22f50562d81368986defafcf3a09e and portable closure
+5957bdf24a1b2b1d5799f1f743e9c35e947b174d936181ed5a818ad163ea860e;
+run40214655849 is in progress. This is G1-only, not a new generation-chain claim.
+[Binding API and exact limits](docs/PSC1_SOURCE_BINDINGS.md).
 
 This is not yet qualified R2b, complete source tracing or rename. Structured
 recursion, synthesized and normalization provenance, data declarations, exact

@@ -427,7 +427,8 @@ export function createSourceOwnershipTool({
               exactKeys(member, ['index', 'name', 'displayName', 'role']);
               const identity = coreName(member.name);
               if (member.index !== memberIndex || names.has(identity) || !roles.has(member.role) ||
-                  typeof member.displayName !== 'string' || !member.displayName.isWellFormed())
+                  typeof member.displayName !== 'string' || !member.displayName.isWellFormed() ||
+                  member.displayName !== member.name.reduce((prefix, c) => prefix ? prefix + '.' + c[1] : c[1], ''))
                 refuse('OWNERSHIP_MEMBER');
               names.add(identity); members++;
               return { ...member, ownerId: sourceOwnerId,
@@ -437,7 +438,9 @@ export function createSourceOwnershipTool({
               exactKeys(origin.normalization, ['workerName', 'span']);
               const worker = coreName(origin.normalization.workerName);
               spanInSource(origin.normalization.span, row);
-              if (!outputMembers.some(m => m.role === 'normalizedWorker' && coreName(m.name) === worker))
+              if (origin.normalization.span.start.byteOffset < origin.span.start.byteOffset ||
+                  origin.normalization.span.stop.byteOffset > origin.span.stop.byteOffset ||
+                  !outputMembers.some(m => m.role === 'normalizedWorker' && coreName(m.name) === worker))
                 refuse('OWNERSHIP_NORMALIZATION');
             }
             return { ...origin, id: sourceOwnerId, sourceId: snapshot.sourceId,

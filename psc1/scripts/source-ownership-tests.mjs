@@ -21,9 +21,13 @@ const configuration = { lexicalTool: lexical, executable, sha256, checkerExecuta
 const tool = createSourceOwnershipTool(configuration);
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-ownership-tests-'));
 const records = [];
-let negatives = 0, references = 0;
-const capture = (text, grammar = 'lean', module = 'Test.Main') =>
-  lexical.capture({ module, grammar, bytes: Buffer.from(text) });
+let negatives = 0, references = 0, captures = 0;
+function capture(text, grammar = 'lean', module = 'Test.Main') {
+  const snapshot = lexical.capture({ module, grammar, bytes: Buffer.from(text) });
+  captures++;
+  if (captures % 50 === 0) console.log('PSC1_OWNERSHIP_CAPTURE:', { captures, grammar, module });
+  return snapshot;
+}
 function rejects(work, expression = /PSC1_LOSSLESS_/) {
   assert.throws(work, expression); negatives++;
 }
@@ -49,6 +53,7 @@ function native(mode, rows, entry, assurance = 'checked', executableOverride = e
 }
 function analyze(snapshots, entry = snapshots.at(-1).module, assurance = 'checked', compare = true) {
   let index;
+  console.log('PSC1_OWNERSHIP_STARTED:', { entry, modules: snapshots.length, assurance });
   try { index = tool.analyze({ snapshots, entry, assurance }); }
   catch (error) { console.error('PSC1_OWNERSHIP_CASE:', { entry, assurance, cause: error.cause }); throw error; }
   assert.equal(index.checker.accepted, true);
@@ -62,7 +67,7 @@ function analyze(snapshots, entry = snapshots.at(-1).module, assurance = 'checke
       snapshot, module: snapshot.module, text: lexical.reconstruct(snapshot).toString('utf8'),
     }));
     const reference = native('reference', rows, entry, assurance);
-    assert.equal(reference.wire.status, 'prepared');
+    assert.equal(reference.wire.status, 'prepared', JSON.stringify(reference.wire));
     assert.equal(index.admissionsSha256, hash(reference.admissions));
     assert.equal(index.originalIrSha256, hash(reference.ir));
     references++;
@@ -187,6 +192,7 @@ try {
     w => { w.modules[0].origins[0].nameSpan.start.byteOffset++; },
     w => { w.modules[0].origins[0].members[0].role = 'invented'; },
     w => { w.modules[0].origins[0].members[0].index++; },
+    w => { w.modules[0].origins[0].members[0].displayName = 'misleading'; },
     w => { w.modules[0].origins[0].members[0].name = [['n', '01']]; },
     w => { w.modules[0].origins[0].members[0].name = []; },
     w => { w.modules[0].origins[0].members.push(w.modules[0].origins[0].members[0]); },
@@ -236,8 +242,24 @@ try {
 
   const compilerSnapshots = owned.map(row => capture(row.text, 'lean', row.module));
   const compilerIndex = analyze(compilerSnapshots, 'Ps.CompilerUnified.Service', 'ordinary-checked');
-  console.log('PSC1_OWNERSHIP_COMPILER:', { modules: compilerIndex.modules.length,
-    members: compilerIndex.sourceCoreDeclarations, ...compilerIndex.metrics });
+  console.log('PSC1_OWNERSHIP_COMPILER:', JSON.stringify({ grammar: 'lean', modules: compilerIndex.modules.length,
+    members: compilerIndex.sourceCoreDeclarations, ...compilerIndex.metrics }));
+  const translatedOutput = path.join(directory, 'ps-census.json');
+  const census = boundedRun(path.resolve('.lake/build/bin/psc1_source_census_probe'),
+    ['--grammar', 'ps', '--out', translatedOutput, '--modules',
+      ...owned.flatMap(row => [row.module, path.resolve(row.path)])],
+    { timeoutMs: 240000, timeoutPolicy: 'standard-240s' });
+  assert.equal(census.status, 0, census.stderr);
+  const translated = JSON.parse(fs.readFileSync(translatedOutput, 'utf8')).records;
+  assert.equal(translated.length, owned.length);
+  assert.ok(translated.every(row => row.parse === 'accepted' && row.elaboration === 'accepted'));
+  const psCompiler = analyze(translated.map(row => capture(row.inputSource, 'ps', row.module)),
+    'Ps.CompilerUnified.Service', 'ordinary-checked');
+  assert.equal(psCompiler.admissionsSha256, compilerIndex.admissionsSha256);
+  assert.equal(psCompiler.originalIrSha256, compilerIndex.originalIrSha256);
+  console.log('PSC1_OWNERSHIP_COMPILER:', JSON.stringify({ grammar: 'ps', modules: psCompiler.modules.length,
+    members: psCompiler.sourceCoreDeclarations, ...psCompiler.metrics }));
+
 
   fs.mkdirSync('dist/source-ownership', { recursive: true });
   const receipt = { schema: 'psc1-source-ownership-tests/1', status: 'passed',

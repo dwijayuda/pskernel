@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #183 follows qualified PR #182.
+Updated 2026-10-25 Asia/Jakarta. Active source-ownership branch follows qualified PR #183.
 Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
@@ -100,7 +100,7 @@ qualification receipts supply exact CI evidence.
 | 0 | Documentation, host readability and one compiler-module extraction | First slice qualified in the linked receipt. Preserve current entry points, invariants, correspondence and exact evidence. |
 | 0a | Lossless lexical capture (R1) | Qualified in 40191237137 and normal source run 40191245319. Exact bytes/trivia/tokens, snapshot identity, immutable capture, stale-safe candidate edits and malformed-transport refusal. No semantic or publication authority. |
 | 0b | Malformed-character location prerequisite | Qualified in focused 40195964028, new-source Wasm G1 40196021448 and ordinary 40196244138. Scoped correspondence, 664 position cases and preserved older advisory-wire compatibility; frozen package identities unchanged. |
-| 0c | Declaration ownership (R2a) | Next. Bind existing actual elaboration batch/member origins to exact module/snapshot identities. Preserve prepared declarations/admission bytes, synthesized ownership and refusals under both grammars. Read-only ownership index; finite criteria in the refactoring architecture. |
+| 0c | Declaration ownership (R2a) | Implemented, qualification in progress. Host/native adapters retain actual elaboration ownership and independently check its logical graph. [API/bounds](PSC1_SOURCE_OWNERSHIP.md). Bind existing actual elaboration batch/member origins to exact module/snapshot identities. Preserve prepared declarations/admission bytes, synthesized ownership and refusals under both grammars. Read-only ownership index; finite criteria in the refactoring architecture. |
 | 0d | Binding-aware source editing (R2b–R4) | Pending. Record local binder/reference origins at actual resolution points; context-local raw IDs are not global source identities. Then require capture-avoiding rename, affected-closure elaboration, independent admission, public API and explicit equivalence checks before publication. Do not expand the frozen language merely to shorten compiler code. |
 | 1 | Slim real applications and source-package coverage | Pending. Compile/consume CLI, JSON/file and multi-module applications through the slim APIs in both grammars. Source closure resolution must not grant host/FFI authority. Retain the previous native package. |
 | 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |

@@ -5,7 +5,8 @@ on:
     paths:
       - psc1/**/*.lean
       - psc1/host-tools/**
-      - psc1/scripts/source-binding-tests.mjs
+      - psc1/scripts/source-binding*.mjs
+      - psc1/scripts/refactor-source.mjs
       - psc1/lakefile.lean
       - psc1/lean-toolchain
       - .github/workflows/psc1-source-trace.yml
@@ -100,5 +101,91 @@ jobs:
           path: |
             psc1/dist/source-conversion/
             psc1/dist/source-bindings/
+          if-no-files-found: warn
+          retention-days: 90
+
+  integration:
+    needs: trace
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: integration-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-bindings-integration-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-bindings-integration-v1-${{ runner.os }}-
+            psc1-trace-native-v1-${{ runner.os }}-
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install locked host dependencies
+        run: npm ci --prefix psc1/host-tools --ignore-scripts
+      - name: Install qualified PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.11'
+          extensions: gmp
+          tools: none
+          coverage: none
+      - name: Install pinned Rust target tools
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.90.0 --profile minimal --component rustfmt
+          rustup default 1.90.0
+          rustc --version
+          cargo --version
+          rustfmt --version
+      - name: Install SHA-256-pinned Wasm tools and component runtime
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools" "$RUNNER_TEMP/wasmtime"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz' -o "$RUNNER_TEMP/wasmtime.tar.xz"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/wasmtime.tar.xz" | sha256sum -c -
+          tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
+          install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Install isolated pinned TypeScript consumer checker
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-ts7"
+          echo '{"name":"psc1-ts7-consumer-tests","version":"0.0.0","private":true}' > "$RUNNER_TEMP/psc1-ts7/package.json"
+          npm install --prefix "$RUNNER_TEMP/psc1-ts7" --ignore-scripts --no-save --no-audit --no-fund typescript@7.0.2
+          echo "PSC1_TSC=$RUNNER_TEMP/psc1-ts7/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build actual compiler, optional providers and source tools
+        working-directory: psc1
+        run: lake build psc1 psc1_backend_python psc1_backend_php psc1_source_ownership psc1_lossless_source psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.integration-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: psc1-bindings-integration-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-source-trace-${{ github.sha }}
+          path: psc1/dist
+      - name: Execute both grammars and seven backends, then check compiler source trace/rename
+        working-directory: psc1
+        run: node scripts/source-binding-integration-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-source-binding-integration-${{ github.sha }}
+          path: psc1/dist/source-bindings/
           if-no-files-found: warn
           retention-days: 90

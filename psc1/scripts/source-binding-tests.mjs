@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import os from 'node:os';
+import { boundedRun } from '../host-tools/generated-target-tools.mjs';
 import { createLosslessSourceTool, createSourceOwnershipTool,
   createSourceBindingTool, createCheckedSourceConverter } from '../host-tools/source-refactoring.mjs';
 
@@ -118,6 +120,109 @@ for (const grammar of ['lean', 'ps']) {
   records.push({ grammar, name: 'import-namespace-root-ordinary', ...report });
 }
 refuse(() => createSourceBindingTool({ ownershipTool: { ...ownership } }), /BINDING_OWNERSHIP_TOOL/);
+
+const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-bindings-negative-'));
+try {
+  const sourceText = 'def target (input : Nat) : Nat := let local : Nat := input; local\n';
+  const source = capture(sourceText, 'lean');
+  const index = analyze([source]), binder = selected(index, 'local');
+  const native = pin('psc1_source_ownership');
+  function fixture(label, change) {
+    const executable = path.join(work, label);
+    fs.writeFileSync(executable, '#!/usr/bin/python3\nimport sys,subprocess,json\n' +
+      'status=subprocess.run([' + JSON.stringify(native.executable) + ']+sys.argv[1:]).returncode\n' +
+      'if status: sys.exit(status)\n' +
+      'value=json.load(open(sys.argv[3]))\n' + change + '\n' +
+      'json.dump(value,open(sys.argv[3],"w"),ensure_ascii=False)\n', { mode: 0o700 });
+    const owner = createSourceOwnershipTool({
+      lexicalTool: lexical, executable, sha256: hash(fs.readFileSync(executable)),
+      checkerExecutable: checker.executable, checkerSha256: checker.sha256,
+    });
+    return createSourceBindingTool({ ownershipTool: owner });
+  }
+  const prefix = 'if sys.argv[1]=="bindings":\n  trace=value["modules"][0]["bindings"][0]["traces"][0]\n';
+  const changes = [
+    'trace["events"]+=1',
+    'trace["bodyStart"]=trace["events"]+1',
+    'trace["name"]=[["s","absent"]]',
+    'trace["phase"]="after-erasure"',
+    'trace["binders"][0]["parent"]=trace["binders"][0]["index"]',
+    'trace["binders"][0]["index"]=trace["events"]',
+    'trace["binders"][0]["span"]["start"]["column"]+=1',
+    'trace["references"][-1]["target"]["binder"]=trace["events"]',
+    'trace["references"][-1]["baseSegments"]=0',
+    'trace["references"][-1]["sourceName"]=[["s","other"]]',
+    'trace["references"][-1]["span"]["start"]["column"]+=1',
+    'trace["enabled"]=False',
+    'trace["authority"]="publish"',
+    'value["modules"][0]["bindings"]=[]',
+    'value["sourceClosureDigest"]="0"*64',
+  ];
+  for (const [i, change] of changes.entries()) {
+    const bad = fixture('trace-' + i, prefix + '  ' + change);
+    refuse(() => bad.analyze({ snapshots: [source], entry: 'Test.Main' }));
+  }
+  for (const [i, change] of [
+    'value["beforeDigest"]="0"*64',
+    'value["target"]["name"]=[["s","other"]]',
+    'value["relation"]="unrestricted"',
+    'value["sourceFilesWritten"]=True',
+    'value["publication"]=True',
+  ].entries()) {
+    const bad = fixture('comparison-' + i,
+      'if sys.argv[1]=="compare-bindings":\n  ' + change);
+    const before = bad.analyze({ snapshots: [source], entry: 'Test.Main' });
+    refuse(() => bad.rename({ index: before, snapshots: [source],
+      binder: selected(before, 'local'), newName: 'renamed' }), /BINDING_COMPARISON_IDENTITY/);
+  }
+  const badGraph = fixture('bad-admission',
+    'if sys.argv[1]=="bindings":\n  open(sys.argv[4],"w").write("{}")');
+  refuse(() => badGraph.analyze({ snapshots: [source], entry: 'Test.Main' }), /PSC1_CHECKER_/);
+  const changingPath = path.join(work, 'changed-tool');
+  fs.copyFileSync(native.executable, changingPath);
+  const changingOwner = createSourceOwnershipTool({
+    lexicalTool: lexical, executable: changingPath, sha256: native.sha256,
+    checkerExecutable: checker.executable, checkerSha256: checker.sha256,
+  });
+  const changing = createSourceBindingTool({ ownershipTool: changingOwner });
+  fs.appendFileSync(changingPath, '\nchanged');
+  refuse(() => changing.analyze({ snapshots: [source], entry: 'Test.Main' }), /TOOL_IDENTITY/);
+
+  const manifest = {
+    schema: 'psc1-source-tools/1',
+    lexical: { path: pin('psc1_lossless_source').executable, sha256: pin('psc1_lossless_source').sha256 },
+    ownership: { path: native.executable, sha256: native.sha256 },
+    checker: { path: checker.executable, sha256: checker.sha256 },
+  };
+  const manifestPath = path.join(work, 'tools.json'), sourcePath = path.join(work, 'Main.lean');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  fs.writeFileSync(sourcePath, sourceText);
+  const original = hash(fs.readFileSync(sourcePath));
+  const cli = path.resolve('scripts/refactor-source.mjs');
+  const args = ['--manifest', manifestPath, '--entry', 'Test.Main',
+    '--grammar', 'lean', '--source', 'Test.Main=' + sourcePath];
+  function runCli(extra) {
+    return boundedRun(process.execPath, [cli, ...args, ...extra], {
+      cwd: work, timeoutMs: 240000, timeoutPolicy: 'standard-240s',
+    });
+  }
+  const view = runCli(['--operation', 'bindings']);
+  assert.equal(view.status, 0, view.stderr);
+  assert.equal(JSON.parse(view.stdout).schema, 'psc1-source-bindings-view/1');
+  const rename = runCli(['--operation', 'rename', '--module', 'Test.Main',
+    '--offset', String(binder.span.start.byteOffset), '--new-name', 'renamed']);
+  assert.equal(rename.status, 0, rename.stderr);
+  const candidate = JSON.parse(rename.stdout);
+  assert.equal(candidate.schema, 'psc1-source-rename-candidate/1');
+  assert.match(candidate.modules[0].text, /let renamed/);
+  assert.equal(candidate.report.authority.publication, false);
+  const missing = runCli(['--operation', 'rename', '--module', 'Test.Main',
+    '--offset', '0', '--new-name', 'renamed']);
+  assert.notEqual(missing.status, 0); negatives++;
+  assert.equal(missing.stdout, '');
+  assert.equal(hash(fs.readFileSync(sourcePath)), original);
+} finally { fs.rmSync(work, { recursive: true, force: true }); }
+
 fs.mkdirSync('dist/source-bindings', { recursive: true });
 fs.writeFileSync('dist/source-bindings/focused.json', JSON.stringify({
   schema: 'psc1-source-bindings-focused/1', records, negatives,

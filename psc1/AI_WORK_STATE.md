@@ -1,6 +1,6 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active branch feat/psc1-binding-trace-20261025,
+Updated 2026-10-26 Asia/Jakarta. Active branch feat/psc1-binding-trace-20261025,
 stacked on qualified PR #185 HEAD583f795f91f8ee83dc59556dc886a71de7950f6d.
 R2b source-binding tracing is in implementation; new source qualification pending.
 The following R3 evidence retains its original source identity.
@@ -24,8 +24,25 @@ closure83d3497bf758fabc7bb2fcb78c658ac6687657cc199549732dd0a90aed5e565b.
 Six actual elaboration cases preserve exact declaration admission bytes and pass
 official Lean admission, including raw-ID reuse, branches, lambdas, match, Id do
 and Except do. Disabled traces stay empty and invalid typed source still refuses.
-The production module pipeline now also has the opt-in mode, carrying traces in
-actual batch origins. Its new tests and source census remain in progress.
+The production module pipeline shares the opt-in implementation through real batch
+origins. Linux40213400247/job121229268168 passes native module parity, official
+admission, exact selected-definition alpha comparison and public/other-Core refusals.
+Host implementation8fab91a6 plus grammar-fixture correctione04b9ae0 passes
+40214342888/job121232132478:14 actual checked local renames and31 negatives under
+both grammars. Inputs use the existing qualified printer for PS, then the real PS
+parser/elaborator/checker. No parallel resolver/compiler is introduced.
+
+Host indices are genuine opaque capabilities; source/member/snapshot/event identity
+distinguishes raw-local-ID reuse. Both actual endpoints receive independent official
+Lean admission and strict IR. Local rename compares all source-bound references
+under an explicit byte-offset/binder correspondence; native Core comparison keeps
+the selected public type and every other declaration exact, with existing Core
+alpha equality for the selected definition value only. Candidates are copied bytes;
+neither the API nor developer CLI writes project sources. Headers, partial,
+normalized, ambiguous and unlocated binders refuse; structural direct self-calls
+explicitly mark incomplete coverage. R3 literal graph/IR equality is unchanged.
+Expanded malformed-wire, checker/tool/CLI and all-seven-backend/compiler-source
+integration are implemented next and remain pending actual Linux results.
 
 This is not yet qualified R2b, complete source tracing or rename. Structured
 recursion, synthesized and normalization provenance, data declarations, exact

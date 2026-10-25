@@ -210,7 +210,7 @@ jobs:
                     'source inventory byte binding: '+name)
             require((out/'sources'/name).read_bytes()==raw,'archived source byte binding: '+name)
             if name in previous_lists[0] and name not in [WORKFLOW,RETAINED]:
-                if name == 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean':
+                if name in ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean','psc1/kernel-lakefile.lean']:
                     quot = json.loads((out/'quot/source.json').read_text())
                     require(quot['sourceSha']==identity['sourceSha'] and str(quot['runId'])==identity['runId']
                             and quot['baseSource']=='79031362b401f85d3c7f324cc3aa7dbf91c1bf0e'

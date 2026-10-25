@@ -43,6 +43,9 @@ def source(out):
  current=(REPO/PROD/'Ps/KernelCore/API/DagAdmission.lean').read_text()
  require(current.count(added)==1 and current.replace(added,'',1).replace('import Ps.KernelCore.API.DagQuotAdmission\n','',1)==old_dag,
   'Exact Quot routing addition; all other admission code unchanged')
+ lake=(ROOT/'kernel-lakefile.lean').read_text()
+ old_lake=git('show',BASE+':psc1/kernel-lakefile.lean').decode()
+ require(lake.replace('    `Ps.KernelCore.API.DagQuotAdmission,\\n','',1)==old_lake,'Exact additional native module root only')
  write(out/'source.json',{'schema':'psc1-quot-admission-source-v1',**identity(),'baseSource':BASE,
   'productionTree':TREE,'productionChanges':DELTA,'sourceSnapshots':rows,'fullKernel':False,'adopted':False})
  print('PSC1_QUOT_ADMISSION_SOURCE: PASS')

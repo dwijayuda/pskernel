@@ -1,0 +1,13 @@
+# Retained ownership proof repair — 2026-10-25
+
+The broader integration native job [121031648333](https://github.com/dwijayuda/pskernel/actions/runs/40147424295/jobs/121031648333) at source `10144e2f9e8d223b5dcde275bd1f48d25df113b3` found two stale batch-publication proof statements in `PsKernelExprV2RecursorProofs.lean`. They still described the former command-result pair and unconditional generated bridge, whereas the batch now uses the checked owned-command result followed by demand synchronization. The focused T05 gate omitted this retained module.
+
+The production implementation is unchanged by this repair. The two batch theorems now use the actual complete checked owner for generated-demand and tail-command failure. Two companion theorems explicitly prove fallback generated-import failure returns no owned result and any owned-command error propagates without batch publication. This preserves the generated-import failure link rather than assuming the desired batch result. The original 21 report names/order are preserved; the two companions bring this module to 23.
+
+The isolated `work/psc1-pskernel-retained-proof-20261025` branch runs the new native-only preflight. It checks all ten retained integration modules omitted by the focused gate (118 reports after the two additions), plus the existing 14 session reports: 132 total across 11 modules. All proof command statuses, exact ordered source names, logs, source bytes and allowed standard axioms are bound in the preflight receipt. This preflight does not establish complete generated or performance qualification.
+
+After it passes, extend the main complete qualification to all 492 reports across 29 modules and 92 source inputs. Retain the 17 detached runtime scripts, unchanged negative controls, both full generated routes and independent archive validation. The new proof obligations require fresh exact-source evidence; the prior D0 374-profile receipts must not be reused to qualify this repaired source.
+
+The older C5 A/B run also exposed a separate test-entry mismatch: the storage research harness was invoked on SelfHost, which does not export its flat-arena helpers. Retain that harness on the existing small research entry before full generation, bind its separate output, and use the authenticated shared bootstrap translator. No production exports or resource/fuel limits should change for that correction.
+
+Integration remains at its existing 10144 head pending a qualified forward update. The previous configured admission-profile receipts remain valid scoped evidence, while complete applicable retained-proof qualification is blocked by the issue above. A remains scoped T01F qualified; B OPEN, C FAIL, D OPEN.

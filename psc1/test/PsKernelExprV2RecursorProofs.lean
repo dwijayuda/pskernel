@@ -224,8 +224,47 @@ theorem generated_prefix_threads_complete_state
   rw [psKernelDagGeneratedInstallNewPrefix]
   simp [fresh, installed]
 
+/- Batch dispatch now returns the exact checked work owner. Demand imports
+   and continuation failures use that owner. Generated-prefix installation is
+   retained explicitly at the fallback boundary, before any owned result. -/
 theorem generated_import_error_prevents_batch_publication
     (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
+    (input built : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (result : PsKernelDagOwnedCommandResult) (error : String)
+    (admitted : psKernelDagRunOwnedCommandWithSource input execution
+      params safety arena built command = Except.ok result)
+    (failed : psKernelDagGeneratedDemandRange
+      result.execution.session.environment built.size result.owner = Except.error error) :
+    psKernelDagRunCommandsWithSource (command :: rest) input execution
+      params safety arena built = Except.error (PsKernelError.internalError error) := by
+  rw [psKernelDagRunCommandsWithSource]
+  simp only [admitted, failed]
+
+theorem generated_late_command_error_prevents_batch_publication
+    (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
+    (input built : PsKernelExprV2Decoded)
+    (execution : PsKernelDagExecutionState)
+    (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena)
+    (result : PsKernelDagOwnedCommandResult)
+    (ready : PsKernelDagGeneratedState) (error : PsKernelError)
+    (admitted : psKernelDagRunOwnedCommandWithSource input execution
+      params safety arena built command = Except.ok result)
+    (completed : psKernelDagGeneratedDemandRange
+      result.execution.session.environment built.size result.owner = Except.ok ready)
+    (failed : psKernelDagRunCommandsWithSource rest input
+      (PsKernelDagExecutionState.mk result.execution.session ready.declarations)
+      params safety ready.arena ready.built = Except.error error) :
+    psKernelDagRunCommandsWithSource (command :: rest) input execution
+      params safety arena built = Except.error error := by
+  rw [psKernelDagRunCommandsWithSource]
+  simp only [admitted, completed, failed]
+
+theorem generated_fallback_import_error_returns_no_owner
+    (command : PsKernelDagCommand)
     (input built : PsKernelExprV2Decoded)
     (execution : PsKernelDagExecutionState)
     (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
@@ -238,33 +277,22 @@ theorem generated_import_error_prevents_batch_publication
       execution.session.environment (Prod.snd result).session.environment
       (PsKernelDagGeneratedState.mk arena built (Prod.snd result).declarations) =
       Except.error error) :
-    psKernelDagRunCommandsWithSource (command :: rest) input execution
-      params safety arena built = Except.error (PsKernelError.internalError error) := by
-  simp [psKernelDagRunCommandsWithSource, admitted, failed]
+    psKernelDagRunFallbackOwnedCommandWithSource input execution
+      params safety arena built command = Except.error (PsKernelError.internalError error) := by
+  simp only [psKernelDagRunFallbackOwnedCommandWithSource, admitted, failed]
 
-theorem generated_late_command_error_prevents_batch_publication
+theorem owned_command_error_prevents_batch_publication
     (command : PsKernelDagCommand) (rest : List PsKernelDagCommand)
     (input built : PsKernelExprV2Decoded)
     (execution : PsKernelDagExecutionState)
     (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
-    (arena : PsKernelExprV2PagedArena)
-    (result : Prod PsKernelDagReply PsKernelDagExecutionState)
-    (installed ready : PsKernelDagGeneratedState) (error : PsKernelError)
-    (admitted : psKernelDagRunCommandWithSource input execution
-      params safety arena built command = Except.ok result)
-    (imported : psKernelDagGeneratedAfterCommandWithPrevious command
-      execution.session.environment (Prod.snd result).session.environment
-      (PsKernelDagGeneratedState.mk arena built (Prod.snd result).declarations) =
-      Except.ok installed)
-    (completed : psKernelDagGeneratedDemandRange
-      (Prod.snd result).session.environment built.size installed = Except.ok ready)
-    (failed : psKernelDagRunCommandsWithSource rest input
-      (PsKernelDagExecutionState.mk (Prod.snd result).session ready.declarations)
-      params safety ready.arena ready.built = Except.error error) :
+    (arena : PsKernelExprV2PagedArena) (error : PsKernelError)
+    (failed : psKernelDagRunOwnedCommandWithSource input execution
+      params safety arena built command = Except.error error) :
     psKernelDagRunCommandsWithSource (command :: rest) input execution
       params safety arena built = Except.error error := by
   rw [psKernelDagRunCommandsWithSource]
-  simp only [admitted, imported, completed, failed]
+  simp only [failed]
 
 #print axioms generated_type_reuses_current_command_ref
 #print axioms generated_prefix_empty
@@ -288,5 +316,7 @@ theorem generated_late_command_error_prevents_batch_publication
 #print axioms constructor_skips_major_callback
 #print axioms nonconstructor_callback_error_precedes_normalization
 #print axioms recursor_zero_before_syntax
+#print axioms generated_fallback_import_error_returns_no_owner
+#print axioms owned_command_error_prevents_batch_publication
 
 end PsKernelExprV2RecursorProofs

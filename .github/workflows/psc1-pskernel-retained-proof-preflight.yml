@@ -1,0 +1,150 @@
+name: PSC1 retained ownership proof preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-retained-proof-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-retained-proof-preflight.yml
+    - psc1/test/PsKernelExprV2RecursorProofs.lean
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Install and authenticate pinned Lean and exact source
+      shell: bash
+      run: |
+        set -euo pipefail
+        bash psc1/scripts/install-lean435-ci.sh
+        export PATH="$HOME/.elan/bin:$PATH"
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        test "$(cat psc1/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+        (cd psc1 && test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc")
+        mkdir -p "$RUNNER_TEMP/retained-proof-preflight"
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        specs=[{"module":"PsKernelNatFuelProofs","count":5,"log":"retained-PsKernelNatFuelProofs.log"},{"module":"PsKernelExprEqualityProofs","count":4,"log":"retained-PsKernelExprEqualityProofs.log"},{"module":"PsKernelExprV2AdmissionGuardProofs","count":18,"log":"retained-PsKernelExprV2AdmissionGuardProofs.log"},{"module":"PsKernelExprV2RecursorProofs","count":23,"log":"retained-PsKernelExprV2RecursorProofs.log"},{"module":"PsKernelExprV2RecursorMajorProofs","count":10,"log":"retained-PsKernelExprV2RecursorMajorProofs.log"},{"module":"PsKernelExprV2RecursorKProofs","count":6,"log":"retained-PsKernelExprV2RecursorKProofs.log"},{"module":"PsKernelNameWorkerProofs","count":8,"log":"retained-PsKernelNameWorkerProofs.log"},{"module":"PsKernelExprV2QuotOwnerProofs","count":21,"log":"retained-PsKernelExprV2QuotOwnerProofs.log"},{"module":"PsKernelExprV2WhnfABIProofs","count":2,"log":"retained-PsKernelExprV2WhnfABIProofs.log"},{"module":"PsKernelExprV2OwnedStateProofs","count":21,"log":"retained-PsKernelExprV2OwnedStateProofs.log"},{"module":"PsKernelExprV2SessionProofs","count":14,"log":"retained-PsKernelExprV2SessionProofs.log"}]
+        paths=['psc1/test/'+s['module']+'.lean' for s in specs]+[
+          '.github/workflows/psc1-pskernel-retained-proof-preflight.yml',
+          'psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean',
+          'psc1/kernel-lakefile.lean','psc1/lean-toolchain','psc1/scripts/install-lean435-ci.sh']
+        out=pathlib.Path(os.environ['RUNNER_TEMP'])/'retained-proof-preflight'
+        records=[]
+        for name in paths:
+            raw=pathlib.Path(name).read_bytes()
+            record={'path':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),
+                    'gitBlobSha':hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()}
+            target=out/'sources'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
+            records.append(record)
+        report={'schema':'psc1-retained-proof-source-v1','sourceSha':os.environ['GITHUB_SHA'],
+                'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                'leanGitHash':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc','files':records}
+        (out/'source-inventory.json').write_text(json.dumps(report,indent=2)+'\n')
+        print('PSC1_RETAINED_PROOF_SOURCE: PASS '+json.dumps(report,separators=(',',':')))
+        PY
+    - name: Build native production imports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean build PsKernelCore \
+          2>&1 | tee "$RUNNER_TEMP/retained-proof-preflight/native-build.log"
+    - name: Compile all 132 retained integration and session reports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        psc1_retained_failed=0
+        : > "$RUNNER_TEMP/retained-proof-preflight/proof-status.log"
+        for PSC1_RETAINED_SPEC in \
+          'PsKernelNatFuelProofs:5:retained-PsKernelNatFuelProofs.log' \
+          'PsKernelExprEqualityProofs:4:retained-PsKernelExprEqualityProofs.log' \
+          'PsKernelExprV2AdmissionGuardProofs:18:retained-PsKernelExprV2AdmissionGuardProofs.log' \
+          'PsKernelExprV2RecursorProofs:23:retained-PsKernelExprV2RecursorProofs.log' \
+          'PsKernelExprV2RecursorMajorProofs:10:retained-PsKernelExprV2RecursorMajorProofs.log' \
+          'PsKernelExprV2RecursorKProofs:6:retained-PsKernelExprV2RecursorKProofs.log' \
+          'PsKernelNameWorkerProofs:8:retained-PsKernelNameWorkerProofs.log' \
+          'PsKernelExprV2QuotOwnerProofs:21:retained-PsKernelExprV2QuotOwnerProofs.log' \
+          'PsKernelExprV2WhnfABIProofs:2:retained-PsKernelExprV2WhnfABIProofs.log' \
+          'PsKernelExprV2OwnedStateProofs:21:retained-PsKernelExprV2OwnedStateProofs.log' \
+          'PsKernelExprV2SessionProofs:14:retained-PsKernelExprV2SessionProofs.log'; do
+          IFS=: read -r PSC1_RETAINED_MODULE PSC1_RETAINED_COUNT PSC1_RETAINED_LOG <<< "$PSC1_RETAINED_SPEC"
+          psc1_retained_count_status=0
+          psc1_retained_lean_status=0
+          test "$(grep -c '^#print axioms ' "test/$PSC1_RETAINED_MODULE.lean")" -eq "$PSC1_RETAINED_COUNT" \
+            || psc1_retained_count_status=$?
+          lake -f kernel-lakefile.lean env lean "test/$PSC1_RETAINED_MODULE.lean" \
+            2>&1 | tee "$RUNNER_TEMP/retained-proof-preflight/$PSC1_RETAINED_LOG" \
+            || psc1_retained_lean_status=$?
+          printf 'PSC1_RETAINED_PROOF_STATUS module=%s count=%s countStatus=%s leanStatus=%s\n' \
+            "$PSC1_RETAINED_MODULE" "$PSC1_RETAINED_COUNT" "$psc1_retained_count_status" "$psc1_retained_lean_status" \
+            | tee -a "$RUNNER_TEMP/retained-proof-preflight/proof-status.log"
+          if [ "$psc1_retained_count_status" -ne 0 ] || [ "$psc1_retained_lean_status" -ne 0 ]; then
+            psc1_retained_failed=1
+          fi
+        done
+        test "$psc1_retained_failed" -eq 0
+        python3 - <<'PY'
+        import hashlib,json,os,pathlib,re
+        specs=[{"module":"PsKernelNatFuelProofs","count":5,"log":"retained-PsKernelNatFuelProofs.log"},{"module":"PsKernelExprEqualityProofs","count":4,"log":"retained-PsKernelExprEqualityProofs.log"},{"module":"PsKernelExprV2AdmissionGuardProofs","count":18,"log":"retained-PsKernelExprV2AdmissionGuardProofs.log"},{"module":"PsKernelExprV2RecursorProofs","count":23,"log":"retained-PsKernelExprV2RecursorProofs.log"},{"module":"PsKernelExprV2RecursorMajorProofs","count":10,"log":"retained-PsKernelExprV2RecursorMajorProofs.log"},{"module":"PsKernelExprV2RecursorKProofs","count":6,"log":"retained-PsKernelExprV2RecursorKProofs.log"},{"module":"PsKernelNameWorkerProofs","count":8,"log":"retained-PsKernelNameWorkerProofs.log"},{"module":"PsKernelExprV2QuotOwnerProofs","count":21,"log":"retained-PsKernelExprV2QuotOwnerProofs.log"},{"module":"PsKernelExprV2WhnfABIProofs","count":2,"log":"retained-PsKernelExprV2WhnfABIProofs.log"},{"module":"PsKernelExprV2OwnedStateProofs","count":21,"log":"retained-PsKernelExprV2OwnedStateProofs.log"},{"module":"PsKernelExprV2SessionProofs","count":14,"log":"retained-PsKernelExprV2SessionProofs.log"}]
+        root=pathlib.Path(os.environ['RUNNER_TEMP'])/'retained-proof-preflight'
+        def digest(path):
+            raw=path.read_bytes();return {'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        records=[];all_names=[]
+        allowed={'propext','Classical.choice','Quot.sound'}
+        statuses=[]
+        for spec in specs:
+            module,count,filename=spec['module'],spec['count'],spec['log']
+            source=pathlib.Path('test')/(module+'.lean')
+            names=re.findall(r'(?m)^#print axioms (\S+)\s*$',source.read_text())
+            names=[name if '.' in name else module+'.'+name for name in names]
+            if len(names)!=count or len(set(names))!=count:
+                raise RuntimeError('Exact unique source proof inventory required: '+module)
+            raw=(root/filename).read_text()
+            reports=re.findall(r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)",raw)
+            if [name for name,_ in reports]!=names:
+                raise RuntimeError('Actual ordered proof inventory mismatch: '+module)
+            if any(token in raw for token in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler']):
+                raise RuntimeError('Forbidden proof dependency: '+module)
+            if re.search(r'\.lean:\d+:\d+: error:',raw):
+                raise RuntimeError('Lean proof error: '+module)
+            for name,used in reports:
+                if {axiom.strip() for axiom in used.split(',') if axiom.strip()}-allowed:
+                    raise RuntimeError('Unapproved proof axiom: '+name)
+            all_names.extend(names)
+            records.append({'module':module,'proofs':count,'names':names,
+                            'source':digest(source),'log':digest(root/filename)})
+            statuses.append('PSC1_RETAINED_PROOF_STATUS module='+module+' count='+str(count)+' countStatus=0 leanStatus=0')
+        if len(all_names)!=132 or len(set(all_names))!=132:
+            raise RuntimeError('Exact132 distinct retained/session reports required')
+        if (root/'proof-status.log').read_text().splitlines()!=statuses:
+            raise RuntimeError('Exact eleven successful proof command statuses required')
+        inventory=root/'source-inventory.json'
+        source_record=json.loads(inventory.read_text())
+        repo=pathlib.Path.cwd().parent
+        for item in source_record['files']:
+            if digest(repo/item['path'])!={'bytes':item['bytes'],'sha256':item['sha256']}:
+                raise RuntimeError('Source changed after authentication: '+item['path'])
+        receipt={'schema':'psc1-retained-proof-preflight-v1','sourceSha':os.environ['GITHUB_SHA'],
+                 'runId':os.environ['GITHUB_RUN_ID'],'runAttempt':os.environ['GITHUB_RUN_ATTEMPT'],
+                 'status':'pass','proofModules':11,'totalProofs':132,'proofs':records,
+                 'sourceInventory':digest(inventory),'proofStatuses':digest(root/'proof-status.log'),
+                 'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
+                 'fullQualification':False,'performanceQualified':False}
+        (root/'native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print('PSC1_RETAINED_PROOF_PREFLIGHT: PASS '+json.dumps(receipt,separators=(',',':')))
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-retained-proof-preflight-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/retained-proof-preflight/
+        if-no-files-found: error
+        retention-days: 30

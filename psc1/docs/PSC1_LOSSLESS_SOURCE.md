@@ -99,9 +99,9 @@ these limits through source input. Capture refuses unsupported host platforms;
 only Linux development tooling is qualified here.
 
 The helper has a 1 GiB address-space cap and an 8 MiB process-stack cap. Pinned
-Lean runtime controls select the main process stack and one worker with an 8 MiB
-requested stack, avoiding the default large main-thread reservation and
-machine-sized worker pool. These settings affect only the new lexical helper.
+Lean runtime controls select the main process stack and disable the unused task
+worker pool, avoiding the default large thread-stack reservations. The lexical
+helper performs no parallel task operations. These settings affect only the new lexical helper.
 The pinned runtime documents these controls in
 [thread.cpp](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/runtime/thread.cpp)
 and [object.cpp](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/runtime/object.cpp).

@@ -21,10 +21,11 @@ function capture(text, grammar = 'lean', module = 'Tests.Main', uri) {
   try { snapshot = tool.capture({ bytes: input, module, grammar, uri }); }
   catch (error) {
     console.error('PSC1_LOSSLESS_CASE_REFUSED:', { module, grammar, bytes: input.length,
-      sha256: hash(input), captures, expectedNegative: true });
+      sha256: hash(input), completedCaptures: captures });
     throw error;
   }
   captures++;
+  if (captures % 50 === 0) console.log('PSC1_LOSSLESS_PROGRESS:', { captures, module, grammar });
   assert.deepEqual(tool.reconstruct(snapshot), Buffer.from(input));
   assert.equal(snapshot.profile, losslessProfile);
   assert.equal(snapshot.authority.publication, false);
@@ -77,6 +78,18 @@ for (const source of ['\tx', 'x\r', 'x\uFEFF']) {
   assert.equal(capture(source, 'ps').status, 'lexically-refused');
   assert.equal(capture(source, 'lean').status, 'accepted');
 }
+// Deterministic mixtures expose delimiter and trivia adjacency classes.
+let seed = 0x5eed;
+const fragments = ['x', ' ', '\\r\\n', '-- tail\\n', '/- a /- b -/ c -/',
+  '"-- /- \\\\""', "'😀'", 'α', '\\t', '\\uFEFF', '/-', '"unfinished'];
+for (let i = 0; i < 32; i++) {
+  let source = '';
+  for (let j = 0; j < 12; j++) {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    source += fragments[seed % fragments.length];
+  }
+  for (const grammar of ['lean', 'ps']) capture(source, grammar, 'Fuzz.' + i);
+}
 const original = bytes('-- keep\r\ndef α := 1 -- 😀\r\n');
 const snapshot = capture(original, 'lean', 'A.Module', '/first/location.lean');
 const again = capture(original, 'lean', 'A.Module', '/other/location.lean');
@@ -105,6 +118,7 @@ rejects(() => tool.stageTextEdits(snapshot, Buffer.concat([before, bytes(' ')]),
 rejects(() => tool.reconstruct({ ...snapshot }), 'SNAPSHOT');
 const other = createLosslessSourceTool({ executable, sha256 });
 rejects(() => other.stageTextEdits(snapshot, before, []), 'SNAPSHOT');
+rejects(() => tool.stageTextEdits(snapshot, before, Array(4097).fill({})), 'EDITS');
 const alpha = before.indexOf(bytes('α'));
 for (const edits of [
   [{ startByte: alpha + 1, endByte: alpha + 2, replacement: bytes('x') }],

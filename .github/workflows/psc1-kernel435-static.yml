@@ -1,0 +1,53 @@
+name: PSC1 kernel integration static and public types
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [.github/workflows/psc1-kernel435-static.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Parse integration code and retain exact semantic closure
+        run: |
+          for file in scripts/kernel435-*.mjs host-tools/kernel-toolchain.mjs host-tools/generated-compiler-session.mjs npm-cli/generated.mjs npm-cli/generated-entry.mjs npm-cli/kernel.mjs npm-cli/kernel-checker.mjs packages/pskernel-lean/index.mjs packages/pskernel-lean/host/*.mjs packages/pskernel-lean-wasm/index.mjs packages/pskernel-lean-wasm/host/*.mjs; do node --check "$file"; done
+          bash -n packages/pskernel-lean-wasm/scripts/build-wasm.sh
+          node scripts/kernel-provider-source.mjs . "$RUNNER_TEMP/static-kernel-overlay" "$RUNNER_TEMP/static-kernel-source.json"
+          node -e "const m=require(process.argv[1]);if(m.modules.length!==25||m.sourceClosureDigest!=='f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b')process.exit(1)" "$RUNNER_TEMP/static-kernel-source.json"
+      - name: Retrieve independently qualified native package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {readQualifiedArtifact,sha256} from './scripts/kernel435-qualified-artifact.mjs';
+          const input=JSON.parse(fs.readFileSync('scripts/kernel435-typed-input.json','utf8')).native;
+          const dir=await readQualifiedArtifact(input,'dist/kernel435-types-input');
+          if(sha256(fs.readFileSync(dir+'/'+input.tarball))!==input.tarballSha256)throw Error('tarball identity');
+          JS
+      - name: Compile a public native kernel TypeScript consumer
+        run: |
+          npm install --prefix "$RUNNER_TEMP/kernel-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          npm install --prefix "$RUNNER_TEMP/kernel-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/kernel435-types-input/proofscript-pskernel-lean-4.35.0.tgz"
+          cat > "$RUNNER_TEMP/kernel-types/consumer.mts" <<'TS'
+          import {createKernel,checkCanonicalAdmissions,type KernelResult} from '@proofscript/pskernel-lean';
+          const handle=await createKernel({timeoutMs:120000});
+          const result:KernelResult=await handle.checkCanonicalAdmissions('{}');
+          const syncResult:KernelResult=checkCanonicalAdmissions('{}');
+          const accepted:boolean=result.accepted&&syncResult.accepted;
+          // @ts-expect-error results are immutable
+          result.accepted=true;
+          console.log(accepted);
+          TS
+          node "$RUNNER_TEMP/kernel-types/node_modules/typescript/bin/tsc" --noEmit --strict --module NodeNext --moduleResolution NodeNext --target ES2022 "$RUNNER_TEMP/kernel-types/consumer.mts"

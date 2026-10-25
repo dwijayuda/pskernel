@@ -1,0 +1,901 @@
+{
+  "schema": "psc1-semantic-prefix-native-log-evidence-v1",
+  "sourceSha": "58f900330404dfc8d441b856b1c22ca29145570e",
+  "parentSha": "7b69976b0b4e5fa988160aff88daf0ca611024fc",
+  "productionBaselineSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+  "productionSourceTree": "57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff",
+  "retainedReplaySha": "0b9d2086382cedddc8b8d9b9ab798e9525bf6ba1",
+  "runId": 40164899138,
+  "runAttempt": 1,
+  "jobId": 121083833858,
+  "status": "native37 passed; actual ZIP-content audit pending",
+  "sourceInventory": {
+    "schema": "psc1-semantic-prefix-proof-source-v1",
+    "sourceSha": "58f900330404dfc8d441b856b1c22ca29145570e",
+    "runId": "40164899138",
+    "runAttempt": "1",
+    "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "baselineSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+    "retainedReplaySha": "0b9d2086382cedddc8b8d9b9ab798e9525bf6ba1",
+    "retainedLocalReplayProofUnchanged": true,
+    "productionSourceTree": "57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff",
+    "productionAndRetainedProofsUnchanged": true,
+    "files": [
+      {
+        "path": "psc1/test/PsKernelExprV2MetadataProofs.lean",
+        "bytes": 7319,
+        "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20",
+        "gitBlobSha": "c97466b70bddb9867d05ab4282990a3f3e417779"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2PagedModelProofs.lean",
+        "bytes": 16916,
+        "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8",
+        "gitBlobSha": "e9ed760c2394b908fd5632633572fb557261756a"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2ReplayMetadataProofs.lean",
+        "bytes": 12159,
+        "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46",
+        "gitBlobSha": "0df4649698e7171d422be1c5b3dfc1a5d817502e"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2SemanticPrefixProofs.lean",
+        "bytes": 24408,
+        "sha256": "358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e",
+        "gitBlobSha": "fc8fde4fa239f37c39d0766fe14d8111c2002995"
+      },
+      {
+        "path": ".github/workflows/psc1-pskernel-semantic-prefix-preflight.yml",
+        "bytes": 11644,
+        "sha256": "75f171dab45b158bfd8e09828b2b0732bd7c8c50658fbb64571e61b474f96bd5",
+        "gitBlobSha": "0456b220d869d32902cd451d59896b16eb7f1724"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean",
+        "bytes": 6143,
+        "sha256": "8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089",
+        "gitBlobSha": "b4b2855cc93ff7b886e283257203c7a4a3ef27ad"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean",
+        "bytes": 3522,
+        "sha256": "831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f",
+        "gitBlobSha": "26ba0ae6bfef59a8cedec846f1164c73e468e86c"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean",
+        "bytes": 6820,
+        "sha256": "2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5",
+        "gitBlobSha": "1e2a03c2a7cbdcca944e59957fab43166f184002"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.lean",
+        "bytes": 4842,
+        "sha256": "2257f156a0b713802ada3b0397b92db747cea44477b767224a9eec494d3e895d",
+        "gitBlobSha": "24e3809b269526a897bb6c22b8467725bb30af77"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Validation.lean",
+        "bytes": 14281,
+        "sha256": "f90f326e5c2bc4f614f327bf31838b279ab12cf4fc14cd49c1024a3ed6fcf657",
+        "gitBlobSha": "473a4c64c16079dde7a9c1bffdd24ef28cd3b9fd"
+      },
+      {
+        "path": "psc1/kernel-lakefile.lean",
+        "bytes": 17793,
+        "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170",
+        "gitBlobSha": "6b1f3747b1fc6e4d391fc31fa6196851d31a5a24"
+      },
+      {
+        "path": "psc1/lean-toolchain",
+        "bytes": 25,
+        "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+        "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915"
+      },
+      {
+        "path": "psc1/scripts/install-lean435-ci.sh",
+        "bytes": 1051,
+        "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9",
+        "gitBlobSha": "b53f59db9e2fbb45feeedea659244cae7e77b64b"
+      }
+    ]
+  },
+  "nativeReceipt": {
+    "schema": "psc1-semantic-prefix-preflight-v1",
+    "sourceSha": "58f900330404dfc8d441b856b1c22ca29145570e",
+    "runId": "40164899138",
+    "runAttempt": "1",
+    "status": "pass",
+    "proofModules": 4,
+    "totalProofs": 37,
+    "proofs": [
+      {
+        "module": "PsKernelExprV2MetadataProofs",
+        "proofs": 8,
+        "names": [
+          "PsKernelExprV2MetadataProofs.app_preserves",
+          "PsKernelExprV2MetadataProofs.lam_preserves",
+          "PsKernelExprV2MetadataProofs.forall_preserves",
+          "PsKernelExprV2MetadataProofs.let_preserves",
+          "PsKernelExprV2MetadataProofs.mdata_preserves",
+          "PsKernelExprV2MetadataProofs.proj_preserves",
+          "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+          "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth"
+        ],
+        "source": {
+          "bytes": 7319,
+          "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+        },
+        "log": {
+          "bytes": 870,
+          "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+        }
+      },
+      {
+        "module": "PsKernelExprV2PagedModelProofs",
+        "proofs": 17,
+        "names": [
+          "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+          "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+          "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+          "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+          "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+          "PsKernelExprV2PagedModelProofs.empty_layout",
+          "PsKernelExprV2PagedModelProofs.push_id_and_size",
+          "PsKernelExprV2PagedModelProofs.push_layout",
+          "PsKernelExprV2PagedModelProofs.valid_id_location",
+          "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+          "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+          "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+          "PsKernelExprV2PagedModelProofs.push_find_old",
+          "PsKernelExprV2PagedModelProofs.push_find_new",
+          "PsKernelExprV2PagedModelProofs.push_find",
+          "PsKernelExprV2PagedModelProofs.push_require_old",
+          "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+        ],
+        "source": {
+          "bytes": 16916,
+          "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+        },
+        "log": {
+          "bytes": 2900,
+          "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+        }
+      },
+      {
+        "module": "PsKernelExprV2ReplayMetadataProofs",
+        "proofs": 4,
+        "names": [
+          "PsKernelExprV2ReplayMetadataProofs.replay_node_builds_corresponding_entry",
+          "PsKernelExprV2ReplayMetadataProofs.replay_node_preserves_layout_and_metadata",
+          "PsKernelExprV2ReplayMetadataProofs.bool_eq_true_iff",
+          "PsKernelExprV2ReplayMetadataProofs.portable_same_metadata_transfers_correspondence"
+        ],
+        "source": {
+          "bytes": 12159,
+          "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46"
+        },
+        "log": {
+          "bytes": 506,
+          "sha256": "34c611bc04bdbb747b6c022b21d88ca7c6f4e05eabe61afd4cd181a1f08bbdc4"
+        }
+      },
+      {
+        "module": "PsKernelExprV2SemanticPrefixProofs",
+        "proofs": 8,
+        "names": [
+          "PsKernelExprV2SemanticPrefixProofs.interpret_congr_below",
+          "PsKernelExprV2SemanticPrefixProofs.extend_meaning_preserves_old",
+          "PsKernelExprV2SemanticPrefixProofs.empty_semantic_prefix",
+          "PsKernelExprV2SemanticPrefixProofs.replay_success_inputs",
+          "PsKernelExprV2SemanticPrefixProofs.replay_preserves_semantic_prefix",
+          "PsKernelExprV2SemanticPrefixProofs.aligned_prefix_transfers_semantics",
+          "PsKernelExprV2SemanticPrefixProofs.validate_fuel_preserves_semantic_prefix",
+          "PsKernelExprV2SemanticPrefixProofs.validate_ok_establishes_semantic_prefixes"
+        ],
+        "source": {
+          "bytes": 24408,
+          "sha256": "358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e"
+        },
+        "log": {
+          "bytes": 1173,
+          "sha256": "42c67f7eb4e22270877a5c4a6fccf69e8874a2881b9452b97799cbcf90c7abae"
+        }
+      }
+    ],
+    "sourceInventory": {
+      "bytes": 3800,
+      "sha256": "4562b43d6637d4336d08a24b7a718d273ad9f063ef12b4310c5c4193c2e6168d"
+    },
+    "proofStatuses": {
+      "bytes": 435,
+      "sha256": "a0a417d2d995166e059a1cdb0c7b0c79a2b73a22930d5c28f663d018b2216725"
+    },
+    "orderedUniqueReports": true,
+    "allowedStandardAxiomsOnly": true,
+    "localReplayMetadataCorrespondenceEstablished": true,
+    "replayNodeBranchesCovered": 12,
+    "successfulReplayPreservesLayoutAndPriorLookups": true,
+    "actualMetadataGuardTransfersCorrespondence": true,
+    "consistentSharedSemanticPrefixEstablished": true,
+    "freshMeaningPreservesPriorInterpretations": true,
+    "sourceCanonicalNodeAlignmentEstablished": true,
+    "wholeValidatorMetadataCorrespondenceEstablished": true,
+    "decoderCorrespondenceEstablished": false,
+    "replayArenaModelBridgeEstablished": false,
+    "productionChanges": false,
+    "fullQualification": false,
+    "performanceQualified": false
+  },
+  "actualOrderedReports": [
+    {
+      "name": "PsKernelExprV2MetadataProofs.app_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.lam_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.forall_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.let_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.mdata_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.proj_preserves",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.empty_layout",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.push_id_and_size",
+      "axioms": []
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.push_layout",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.valid_id_location",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.push_find_old",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.push_find_new",
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.push_find",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.push_require_old",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2ReplayMetadataProofs.replay_node_builds_corresponding_entry",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2ReplayMetadataProofs.replay_node_preserves_layout_and_metadata",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2ReplayMetadataProofs.bool_eq_true_iff",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2ReplayMetadataProofs.portable_same_metadata_transfers_correspondence",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.interpret_congr_below",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.extend_meaning_preserves_old",
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.empty_semantic_prefix",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.replay_success_inputs",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.replay_preserves_semantic_prefix",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.aligned_prefix_transfers_semantics",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.validate_fuel_preserves_semantic_prefix",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "PsKernelExprV2SemanticPrefixProofs.validate_ok_establishes_semantic_prefixes",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "actualStatuses": [
+    "PSC1_SEMANTIC_PREFIX_PROOF_STATUS module=PsKernelExprV2MetadataProofs count=8 countStatus=0 leanStatus=0",
+    "PSC1_SEMANTIC_PREFIX_PROOF_STATUS module=PsKernelExprV2PagedModelProofs count=17 countStatus=0 leanStatus=0",
+    "PSC1_SEMANTIC_PREFIX_PROOF_STATUS module=PsKernelExprV2ReplayMetadataProofs count=4 countStatus=0 leanStatus=0",
+    "PSC1_SEMANTIC_PREFIX_PROOF_STATUS module=PsKernelExprV2SemanticPrefixProofs count=8 countStatus=0 leanStatus=0"
+  ],
+  "proofSource": {
+    "path": "psc1/test/PsKernelExprV2SemanticPrefixProofs.lean",
+    "bytes": 24408,
+    "sha256": "358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e",
+    "gitBlobSha": "fc8fde4fa239f37c39d0766fe14d8111c2002995"
+  },
+  "workflow": {
+    "path": ".github/workflows/psc1-pskernel-semantic-prefix-preflight.yml",
+    "bytes": 11644,
+    "sha256": "75f171dab45b158bfd8e09828b2b0732bd7c8c50658fbb64571e61b474f96bd5",
+    "gitBlobSha": "0456b220d869d32902cd451d59896b16eb7f1724"
+  },
+  "artifact": {
+    "id": 12587896548,
+    "name": "psc1-semantic-prefix-preflight-attempt-1",
+    "members": 21,
+    "zipBytes": 37972,
+    "digest": "sha256:13f523ed10491cd4aca4c0c8a88d581fd4034423f4372487ef414760d0731544",
+    "apiAndUploadLogMatch": true
+  },
+  "soundRepair": {
+    "failedSource": "7b69976b0b4e5fa988160aff88daf0ca611024fc",
+    "failedRunId": 40164717189,
+    "failedJobId": 121083302426,
+    "failedPrivateHelpers": [
+      "with1_success_lookup",
+      "with2_success_lookups",
+      "with3_success_lookups"
+    ],
+    "change": "Exactly three successful-lookup witness terms become reflexivity after dependent case analysis has rewritten each target.",
+    "changedPropositions": 0,
+    "changedProductionFiles": 0,
+    "retainedProofReports": 29,
+    "failedSourceQualified": false
+  },
+  "scope": {
+    "consistentSharedSemanticPrefixEstablished": true,
+    "freshMeaningPreservesPriorInterpretations": true,
+    "sourceCanonicalNodeAlignmentEstablished": true,
+    "wholeValidatorMetadataCorrespondenceEstablished": true,
+    "untrustedSourceValidityAssumed": false,
+    "metadataUsedAsExpressionEquality": false,
+    "decoderCorrespondenceEstablished": false,
+    "replayArenaModelBridgeEstablished": false,
+    "productionChanges": false,
+    "fullQualification": false,
+    "performanceQualified": false,
+    "combinedGeneratedQualificationPending": true,
+    "projectB": "OPEN",
+    "projectC": "FAIL",
+    "projectD": "OPEN"
+  },
+  "independentArtifactAudit": {
+    "status": "pass",
+    "auditorSha": "6affe3f455486824cc145333ec4af29012d60fae",
+    "runId": 40166874952,
+    "runAttempt": 1,
+    "jobId": 121089636745,
+    "rootActualTerminalAndApiVerified": true,
+    "report": {
+      "bytes": 11808,
+      "sha256": "2cf49a328d188a783ce9551976363b0e551a2326b21384db20e90366dc895048"
+    },
+    "artifact": {
+      "id": 12588228998,
+      "bytes": 118376,
+      "sha256": "aafc623d29b4d90694206e293726105170e997b371a40772f568c220b57029df"
+    },
+    "result": {
+      "schema": "psc1-semantic-prefix-artifact-content-audit-v1",
+      "status": "pass",
+      "auditIdentity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "6affe3f455486824cc145333ec4af29012d60fae",
+        "runId": "40166874952",
+        "runAttempt": "1",
+        "job": "audit",
+        "workflow": ".github/workflows/psc1-pskernel-semantic-prefix-artifact-audit.yml",
+        "files": {
+          ".github/workflows/psc1-pskernel-semantic-prefix-artifact-audit.yml": {
+            "bytes": 2385,
+            "sha256": "9fb8cd2db7d1657379c4688edfd475a0ea9645dc4b7bac6f217d643b03eec763"
+          },
+          ".github/psc1-semantic-prefix-audit/audit.py": {
+            "bytes": 25113,
+            "sha256": "9657e6b294cc6559a17334f5a46175579f11d95e69c6fc225abf838467efc12c"
+          }
+        }
+      },
+      "targetSourceSha": "58f900330404dfc8d441b856b1c22ca29145570e",
+      "targetRunId": 40164899138,
+      "targetRunAttempt": 1,
+      "targetJobId": 121083833858,
+      "artifactId": 12587896548,
+      "artifactName": "psc1-semantic-prefix-preflight-attempt-1",
+      "artifactZip": {
+        "bytes": 37972,
+        "sha256": "13f523ed10491cd4aca4c0c8a88d581fd4034423f4372487ef414760d0731544"
+      },
+      "officialDownloadAction": "actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+      "rawZipSha256Verified": true,
+      "zipReader": "python-stdlib-zipfile",
+      "crcVerified": true,
+      "safeUniqueRegularPaths": true,
+      "independentZipAudit": true,
+      "officialExtractionBytesMatched": true,
+      "extractedFiles": 21,
+      "sourceFiles": 13,
+      "proofModules": 4,
+      "proofReports": 37,
+      "productionAndRetainedProofsUnchanged": true,
+      "scope": {
+        "localReplayMetadataCorrespondenceEstablished": true,
+        "replayNodeBranchesCovered": 12,
+        "successfulReplayPreservesLayoutAndPriorLookups": true,
+        "actualMetadataGuardTransfersCorrespondence": true,
+        "consistentSharedSemanticPrefixEstablished": true,
+        "freshMeaningPreservesPriorInterpretations": true,
+        "sourceCanonicalNodeAlignmentEstablished": true,
+        "wholeValidatorMetadataCorrespondenceEstablished": true,
+        "decoderCorrespondenceEstablished": false,
+        "replayArenaModelBridgeEstablished": false,
+        "productionChanges": false,
+        "fullQualification": false,
+        "performanceQualified": false
+      },
+      "producerJobEvidence": {
+        "bytes": 146642,
+        "sha256": "0bc074bd41c43a2c59b4cc52218b86b40f4aca700f7b31fa5b0619f80c9f98ee",
+        "orderedProofReports": 37,
+        "proofCommandStatuses": 4,
+        "sourceAndNativeReceiptsMatched": true,
+        "artifactUploadMatched": true
+      },
+      "proofInventory": [
+        {
+          "module": "PsKernelExprV2MetadataProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelExprV2MetadataProofs.app_preserves",
+            "PsKernelExprV2MetadataProofs.lam_preserves",
+            "PsKernelExprV2MetadataProofs.forall_preserves",
+            "PsKernelExprV2MetadataProofs.let_preserves",
+            "PsKernelExprV2MetadataProofs.mdata_preserves",
+            "PsKernelExprV2MetadataProofs.proj_preserves",
+            "PsKernelExprV2MetadataProofs.legacy_depth_le_count",
+            "PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth"
+          ],
+          "source": {
+            "bytes": 7319,
+            "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+          },
+          "log": {
+            "bytes": 870,
+            "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+          }
+        },
+        {
+          "module": "PsKernelExprV2PagedModelProofs",
+          "proofs": 17,
+          "names": [
+            "PsKernelExprV2PagedModelProofs.array_getD_push_old",
+            "PsKernelExprV2PagedModelProofs.array_getD_push_new",
+            "PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get",
+            "PsKernelExprV2PagedModelProofs.paged_get_push_old",
+            "PsKernelExprV2PagedModelProofs.paged_get_push_new",
+            "PsKernelExprV2PagedModelProofs.empty_layout",
+            "PsKernelExprV2PagedModelProofs.push_id_and_size",
+            "PsKernelExprV2PagedModelProofs.push_layout",
+            "PsKernelExprV2PagedModelProofs.valid_id_location",
+            "PsKernelExprV2PagedModelProofs.find_out_of_bounds",
+            "PsKernelExprV2PagedModelProofs.found_id_is_in_bounds",
+            "PsKernelExprV2PagedModelProofs.valid_id_is_found",
+            "PsKernelExprV2PagedModelProofs.push_find_old",
+            "PsKernelExprV2PagedModelProofs.push_find_new",
+            "PsKernelExprV2PagedModelProofs.push_find",
+            "PsKernelExprV2PagedModelProofs.push_require_old",
+            "PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata"
+          ],
+          "source": {
+            "bytes": 16916,
+            "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+          },
+          "log": {
+            "bytes": 2900,
+            "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+          }
+        },
+        {
+          "module": "PsKernelExprV2ReplayMetadataProofs",
+          "proofs": 4,
+          "names": [
+            "PsKernelExprV2ReplayMetadataProofs.replay_node_builds_corresponding_entry",
+            "PsKernelExprV2ReplayMetadataProofs.replay_node_preserves_layout_and_metadata",
+            "PsKernelExprV2ReplayMetadataProofs.bool_eq_true_iff",
+            "PsKernelExprV2ReplayMetadataProofs.portable_same_metadata_transfers_correspondence"
+          ],
+          "source": {
+            "bytes": 12159,
+            "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46"
+          },
+          "log": {
+            "bytes": 506,
+            "sha256": "34c611bc04bdbb747b6c022b21d88ca7c6f4e05eabe61afd4cd181a1f08bbdc4"
+          }
+        },
+        {
+          "module": "PsKernelExprV2SemanticPrefixProofs",
+          "proofs": 8,
+          "names": [
+            "PsKernelExprV2SemanticPrefixProofs.interpret_congr_below",
+            "PsKernelExprV2SemanticPrefixProofs.extend_meaning_preserves_old",
+            "PsKernelExprV2SemanticPrefixProofs.empty_semantic_prefix",
+            "PsKernelExprV2SemanticPrefixProofs.replay_success_inputs",
+            "PsKernelExprV2SemanticPrefixProofs.replay_preserves_semantic_prefix",
+            "PsKernelExprV2SemanticPrefixProofs.aligned_prefix_transfers_semantics",
+            "PsKernelExprV2SemanticPrefixProofs.validate_fuel_preserves_semantic_prefix",
+            "PsKernelExprV2SemanticPrefixProofs.validate_ok_establishes_semantic_prefixes"
+          ],
+          "source": {
+            "bytes": 24408,
+            "sha256": "358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e"
+          },
+          "log": {
+            "bytes": 1173,
+            "sha256": "42c67f7eb4e22270877a5c4a6fccf69e8874a2881b9452b97799cbcf90c7abae"
+          }
+        }
+      ],
+      "nativeReceipt": {
+        "bytes": 5103,
+        "sha256": "e04aa837e1d652d832ca547c653af543f6e94cfc8168c0a6f8c7286b7026c1be"
+      },
+      "sourceInventory": {
+        "bytes": 3800,
+        "sha256": "4562b43d6637d4336d08a24b7a718d273ad9f063ef12b4310c5c4193c2e6168d"
+      },
+      "manifest": [
+        {
+          "path": "native-build.log",
+          "compressedBytes": 1014,
+          "crc32": "571d86c3",
+          "bytes": 6017,
+          "sha256": "f4f352a280caaa854fc82e9334ea19749750a2b1d98b23badf454b5077358c47"
+        },
+        {
+          "path": "native-receipt.json",
+          "compressedBytes": 1465,
+          "crc32": "2e35f1f6",
+          "bytes": 5103,
+          "sha256": "e04aa837e1d652d832ca547c653af543f6e94cfc8168c0a6f8c7286b7026c1be"
+        },
+        {
+          "path": "prefix-PsKernelExprV2SemanticPrefixProofs.log",
+          "compressedBytes": 349,
+          "crc32": "dd505677",
+          "bytes": 1173,
+          "sha256": "42c67f7eb4e22270877a5c4a6fccf69e8874a2881b9452b97799cbcf90c7abae"
+        },
+        {
+          "path": "proof-status.log",
+          "compressedBytes": 145,
+          "crc32": "62fb1a7b",
+          "bytes": 435,
+          "sha256": "a0a417d2d995166e059a1cdb0c7b0c79a2b73a22930d5c28f663d018b2216725"
+        },
+        {
+          "path": "replay-PsKernelExprV2MetadataProofs.log",
+          "compressedBytes": 168,
+          "crc32": "a64ce478",
+          "bytes": 870,
+          "sha256": "2db2330528929c415dc5f5573640d26429145d27b05ab74d4dcd0e2810c3a7cf"
+        },
+        {
+          "path": "replay-PsKernelExprV2PagedModelProofs.log",
+          "compressedBytes": 543,
+          "crc32": "609f074f",
+          "bytes": 2900,
+          "sha256": "ed6e356b36fa81cb6effcbe2c0b464381788bc725dd1a40b3f22732bb4697b24"
+        },
+        {
+          "path": "replay-PsKernelExprV2ReplayMetadataProofs.log",
+          "compressedBytes": 187,
+          "crc32": "02154d3d",
+          "bytes": 506,
+          "sha256": "34c611bc04bdbb747b6c022b21d88ca7c6f4e05eabe61afd4cd181a1f08bbdc4"
+        },
+        {
+          "path": "source-inventory.json",
+          "compressedBytes": 1473,
+          "crc32": "d240df07",
+          "bytes": 3800,
+          "sha256": "4562b43d6637d4336d08a24b7a718d273ad9f063ef12b4310c5c4193c2e6168d"
+        },
+        {
+          "path": "sources/.github/workflows/psc1-pskernel-semantic-prefix-preflight.yml",
+          "compressedBytes": 3425,
+          "crc32": "3504e454",
+          "bytes": 11644,
+          "sha256": "75f171dab45b158bfd8e09828b2b0732bd7c8c50658fbb64571e61b474f96bd5"
+        },
+        {
+          "path": "sources/psc1/kernel-lakefile.lean",
+          "compressedBytes": 3279,
+          "crc32": "130cc2e1",
+          "bytes": 17793,
+          "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170"
+        },
+        {
+          "path": "sources/psc1/lean-toolchain",
+          "compressedBytes": 27,
+          "crc32": "284dedd0",
+          "bytes": 25,
+          "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean",
+          "compressedBytes": 1236,
+          "crc32": "f39aa129",
+          "bytes": 6820,
+          "sha256": "2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.lean",
+          "compressedBytes": 1048,
+          "crc32": "42c2ee2b",
+          "bytes": 4842,
+          "sha256": "2257f156a0b713802ada3b0397b92db747cea44477b767224a9eec494d3e895d"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean",
+          "compressedBytes": 1233,
+          "crc32": "3ccf6fa3",
+          "bytes": 3522,
+          "sha256": "831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean",
+          "compressedBytes": 1579,
+          "crc32": "775897d7",
+          "bytes": 6143,
+          "sha256": "8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089"
+        },
+        {
+          "path": "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2Validation.lean",
+          "compressedBytes": 3589,
+          "crc32": "a1d1b311",
+          "bytes": 14281,
+          "sha256": "f90f326e5c2bc4f614f327bf31838b279ab12cf4fc14cd49c1024a3ed6fcf657"
+        },
+        {
+          "path": "sources/psc1/scripts/install-lean435-ci.sh",
+          "compressedBytes": 579,
+          "crc32": "370712ca",
+          "bytes": 1051,
+          "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2MetadataProofs.lean",
+          "compressedBytes": 1446,
+          "crc32": "f17173e9",
+          "bytes": 7319,
+          "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2PagedModelProofs.lean",
+          "compressedBytes": 3497,
+          "crc32": "0972db0a",
+          "bytes": 16916,
+          "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2ReplayMetadataProofs.lean",
+          "compressedBytes": 2719,
+          "crc32": "6fd433e9",
+          "bytes": 12159,
+          "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46"
+        },
+        {
+          "path": "sources/psc1/test/PsKernelExprV2SemanticPrefixProofs.lean",
+          "compressedBytes": 4967,
+          "crc32": "f6cb335e",
+          "bytes": 24408,
+          "sha256": "358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e"
+        }
+      ],
+      "errors": []
+    }
+  }
+}

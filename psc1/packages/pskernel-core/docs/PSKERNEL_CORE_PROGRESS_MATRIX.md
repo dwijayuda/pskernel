@@ -1,3 +1,7 @@
+## 2026-10-26 — Scoped lazy-transform batch fully qualified; integration prepared
+
+Exact one-path candidate treebccb72769d4f20def35f2064363fbc94fcc7e54a is qualified at44d627ca: complete542/38 native/generated/canonical and independent240/413/416-member audit PASS. Frozen-f09116-observation ABBA14dad2ce and independent31/40/21/21/121-member audit PASS; no comparable10%time/15%RSS flag. All193Arena inputs/classifications and176completed semantic envelopes match baseline:174strict/193,17timeouts,2separate agreements, so C remainsFAIL. Evidence precedes any integration ref update; read latest AI_WORK_STATE.md/AI_CONTINUATION_PROMPT.md for current confirmation status. Keep BOPEN,CFAIL,DOPEN and T06/T07/T04/T09/T10 remaining obligations. The new local function equality is not a global soundness theorem.
+
 ## 2026-10-25 — T08b diagnostics completed; production remains f091
 
 Prelude ingress-stage probes40209698724/40210111896 and unchanged-kernel profile40210553785 PASS as diagnostics. The measured prefix reaches admission; body inference is costly. Both original/staged Prelude remain60s timeouts. An isolated one-path lazy-transform candidate10508e4a has no adopted/full/performance claim. Actual records are in docs/qualification/T08B_PRELUDE_*. Full Arena remains174strict/193,17timeouts,2separate agreements; A historically scoped qualified, BOPEN,CFAIL,DOPEN. Follow the newest AI_WORK_STATE.md and AI_CONTINUATION_PROMPT.md for source pins, failed proof attempt and qualification work.

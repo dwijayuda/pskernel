@@ -1,0 +1,43 @@
+{
+  "schema": "psc1-t08b-corrected-abba-checkpoint-v1",
+  "source": "14dad2ce6eaef9fa71170f28650a5c626eca4a76",
+  "run": 40213489105,
+  "sourceProductionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+  "baseline": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+  "superseded": {
+    "source": "0fd0a78bc51a663ac73ee82bd88a110dc71e67dc",
+    "run": 40212320948,
+    "reason": "Obsolete Church failure/recovery comparator inherited from older dbd benchmark; not qualified or adopted."
+  },
+  "nativeJob": {
+    "id": 121229543167,
+    "status": "PASS"
+  },
+  "compilerJob": {
+    "id": 121229917983,
+    "status": "PASS"
+  },
+  "producers": {
+    "baseline": 121230532314,
+    "candidate": 121230532496,
+    "status": "in_progress"
+  },
+  "independentAudit": {
+    "source": "05059505f5fb0302c352c59ebcc0e49a55109987",
+    "run": 40213762419,
+    "status": "in_progress"
+  },
+  "fullCohort": {
+    "source": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+    "run": 40212287088,
+    "nativeReports": 542,
+    "nativeModules": 38,
+    "nativeStatus": "PASS",
+    "generatedAndCanonicalStatus": "in_progress",
+    "independentAuditSource": "cef9725ed14646c74e21ab3ce76ab7f7773bc93c",
+    "independentAuditRun": 40212926388
+  },
+  "adopted": false,
+  "performanceQualified": false,
+  "fullQualificationComplete": false
+}

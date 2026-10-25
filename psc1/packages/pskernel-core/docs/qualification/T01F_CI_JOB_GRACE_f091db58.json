@@ -1,0 +1,163 @@
+{
+  "schema": "psc1-t01f-ci-job-grace-v1",
+  "date": "2026-10-26",
+  "baselineSource": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+  "baselineProductionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+  "cancelledJob": {
+    "run": 40208414548,
+    "id": 121222646220,
+    "status": "cancelled",
+    "started": "2026-10-25T16:36:41Z",
+    "completed": "2026-10-25T17:01:50Z",
+    "jobWallSeconds": 1509,
+    "artifact": {
+      "bytes": 5676,
+      "sha256": "642bda7b44ad3eee971db4d7816726baef6b79163ba38516169b3439f61bb97f",
+      "members": 4
+    },
+    "receipt": {
+      "schema": "psc1-t01f-shard-receipt-v1",
+      "status": "pass",
+      "identity": {
+        "repository": "dwijayuda/pskernel",
+        "sourceSha": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+        "runId": "40208414548",
+        "runAttempt": "1",
+        "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+        "route": "generated",
+        "producerJob": "generated-dag-integration",
+        "producerArtifact": "psc1-v2-dag-generated-js",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelFuel": 4096,
+        "nodeOldSpaceLimitMiB": 2048,
+        "requests": 294,
+        "metadata": 377,
+        "samples": [
+          "",
+          "a",
+          "é",
+          "€",
+          "😀",
+          "Aé€😀"
+        ],
+        "hashes": {
+          "kernel": {
+            "bytes": 10319156,
+            "sha256": "39e06dc5d7c7c7800411354b66eed46d57318e147f98499264392f67dc819ec7"
+          },
+          "fixture": {
+            "bytes": 2791525,
+            "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+          },
+          "fixtureProducer": {
+            "bytes": 39734,
+            "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+          },
+          "generatedRunner": {
+            "bytes": 27140,
+            "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+          },
+          "provenance": {
+            "bytes": 1209,
+            "sha256": "9bce3db4ff0181f361769f57bbe2c577315d88597c4afda76433e2b72083379b"
+          },
+          "orchestrator": {
+            "bytes": 15637,
+            "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+          },
+          "workflow": {
+            "bytes": 97038,
+            "sha256": "3c40f738013c7622544c0f6e205461297594289a92993469ff55ebdab7345035"
+          },
+          "providerManifest": {
+            "bytes": 2205,
+            "sha256": "2b1ef6231c5633a6b90cbd054bce9e1c00e089364c7a6deed8f11e0a536c7a9a"
+          }
+        }
+      },
+      "job": "t01f-generated-shards",
+      "node": "v22.23.3",
+      "sampleIndex": 5,
+      "sample": "Aé€😀",
+      "elapsedMs": 1478262.1265810002,
+      "measurement": "peak_rss_kib=1217044 wall_seconds=1478.25 exit_status=0",
+      "runtime": {
+        "kernelSha256": "39e06dc5d7c7c7800411354b66eed46d57318e147f98499264392f67dc819ec7",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 61.90892699999998,
+        "admissionMs": 54075.179968000004,
+        "metadataMs": 1759.221150999998,
+        "totalMs": 1478078.739464,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "Aé€😀",
+            "utf8Bytes": 10,
+            "owners": 224,
+            "ownerAndConstructionMs": 6792.577418000001,
+            "totalMs": 1421992.2906769998,
+            "arenaNodes": "288",
+            "ownedArenaNodes": "10476",
+            "memory": {
+              "rss": 1244516352,
+              "heapTotal": 554397696,
+              "heapUsed": 449738120,
+              "external": 4806409,
+              "arrayBuffers": 2809260
+            }
+          }
+        ],
+        "sampleIndex": 5,
+        "sample": "Aé€😀"
+      },
+      "log": {
+        "bytes": 14655,
+        "sha256": "c82b233dccbbe380ddbddc5898bab26b7536170124c8ddfbbe424d39595d71f9"
+      },
+      "memory": {
+        "bytes": 56,
+        "sha256": "4e1a91604d4f06bdeed1ac9a9a6783b893596281d355d8d61f9a22b56c823d07"
+      }
+    },
+    "memory": "peak_rss_kib=1217044 wall_seconds=1478.25 exit_status=0"
+  },
+  "reason": "The actual complete runtime and receipt passed at1478.262 seconds; the whole job hit its25-minute wall including setup. The aggregate remains failed because a cancelled job is not success.",
+  "change": {
+    "jobs": [
+      "t01f-generated-shards",
+      "t01f-canonical-shards"
+    ],
+    "jobTimeoutMinutes": {
+      "before": 25,
+      "after": 35
+    },
+    "newWholeHelperWallSeconds": 1500,
+    "commandPrefix": "timeout --signal=KILL 1500s",
+    "runtimeScriptsChanged": false,
+    "kernelFuel": 4096,
+    "nodeOldSpaceMiB": 2048,
+    "emptyPATH": true,
+    "fixtureHarnessInputsAndCollectorUnchanged": true,
+    "allSixRequired": true,
+    "oldCancelledJobReclassified": false
+  },
+  "validation": {
+    "yamlParsed": true,
+    "bashSyntaxChecked": true,
+    "exactWholeFileReversalMatchesOriginalWorkflows": true,
+    "actualPassingShardArtifactRead": true,
+    "newRuntimeExecutionClaimed": false,
+    "allFourMembersCRCAndArchiveHashChecked": true
+  },
+  "scope": "Job setup/upload grace only; a hard25-minute bound applies to the complete runtime helper. The kernel, fixtures, assertions, resource policy and strict all-success collector are unchanged. Future matching-source integration CI must execute the repaired workflow."
+}

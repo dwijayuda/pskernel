@@ -1,0 +1,597 @@
+{
+  "schema": "psc1-t08b-lazy-integration-decision-v1",
+  "phase": "qualified-before-integration",
+  "integrationBranch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "integrationExpectedOld": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+  "candidateQualificationSource": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+  "benchmarkSource": "14dad2ce6eaef9fa71170f28650a5c626eca4a76",
+  "candidateProductionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+  "qualifiedForScopedIntegration": true,
+  "adoptedAtRecord": false,
+  "wholeProjectComplete": false,
+  "localComparableRegressionGatePassed": true,
+  "wholeProjectPerformanceQualified": false,
+  "fullSourceQualification": {
+    "schema": "psc1-t08b-lazy-transform-full542-v1",
+    "sourceSha": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+    "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+    "qualifiedPredecessor": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+    "productionChanges": [
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"
+    ],
+    "sourceChange": "Move the exact recursive smaller binding after existing root/memo/leaf guards; explanatory comment only otherwise",
+    "fullSourceCohortStatus": "PASS",
+    "run": 40212287088,
+    "attempt": 1,
+    "nativeReports": 542,
+    "nativeModules": 38,
+    "localProof": {
+      "name": "psKernelTransformLazyPreservesAllInputs",
+      "scope": "All fuel and arbitrary well-typed state/input values; complete Except, arena and memo output equals byte-exact frozen predecessor",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "globalKernelSoundness": false,
+      "backendPreservationTheorem": false
+    },
+    "routes": [
+      {
+        "route": "native",
+        "job": 121225902887,
+        "status": "PASS",
+        "artifact": 12605483185,
+        "archive": {
+          "bytes": 3958674,
+          "sha256": "56218dbd8216e3924649ca5e47e8e56b6710e20d6c8e713251a5c9dab46c50f7",
+          "members": 240
+        }
+      },
+      {
+        "route": "generated",
+        "job": 121226779784,
+        "status": "PASS",
+        "artifact": 12606578942,
+        "archive": {
+          "bytes": 3034489,
+          "sha256": "40d561f37edd60918c0f82aed01ef01bb9277323817ca2e7277a3d4dbd101245",
+          "members": 413
+        },
+        "receipt": {
+          "schema": "psc1-transform-lazy-cohort-route-v1",
+          "sourceSha": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+          "runId": "40212287088",
+          "attempt": "1",
+          "status": "pass",
+          "route": "generated",
+          "nativeProofs": 542,
+          "proofModules": 38,
+          "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+          "retainedCompleteRoute": {
+            "bytes": 4537,
+            "sha256": "122d222faf83c90ca713ca6f40621ebe4ff0040dbb58c3266682b2fde27ed92b"
+          },
+          "nativeCohortReceipt": {
+            "bytes": 42342,
+            "sha256": "1981db3b75797680b037c1355359c94db7e88db1828eb8ba682f1fb949557d63"
+          },
+          "kernel": {
+            "bytes": 10319059,
+            "sha256": "9d1931744355bbc54cfff3e8e2ba4065fd9d85e83eb87b326c215059a2c0ef99"
+          },
+          "originalFuelAndMemoSemantics": true,
+          "transformWorkerConstructionDeferred": true,
+          "retainedLiftAndCountSourceBytesMatch": true,
+          "fullKernel": false,
+          "performanceQualified": false,
+          "adopted": false
+        }
+      },
+      {
+        "route": "canonical",
+        "job": 121226779838,
+        "status": "PASS",
+        "artifact": 12606844104,
+        "archive": {
+          "bytes": 3174610,
+          "sha256": "d0943636d7c3aff9678980322d78f718a7ba95f9a8e15f1fc247d9b945e5bed2",
+          "members": 416
+        },
+        "receipt": {
+          "schema": "psc1-transform-lazy-cohort-route-v1",
+          "sourceSha": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+          "runId": "40212287088",
+          "attempt": "1",
+          "status": "pass",
+          "route": "canonical",
+          "nativeProofs": 542,
+          "proofModules": 38,
+          "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+          "retainedCompleteRoute": {
+            "bytes": 4538,
+            "sha256": "eef911324904aace6785f98ddf122315e41b14e114d5ec8402b7cfc33834f38c"
+          },
+          "nativeCohortReceipt": {
+            "bytes": 42342,
+            "sha256": "1981db3b75797680b037c1355359c94db7e88db1828eb8ba682f1fb949557d63"
+          },
+          "kernel": {
+            "bytes": 10319066,
+            "sha256": "b8a8def43d691c5202b4773bab60f0836c08b8dd48c0a0226d0b0697dab7bf86"
+          },
+          "originalFuelAndMemoSemantics": true,
+          "transformWorkerConstructionDeferred": true,
+          "retainedLiftAndCountSourceBytesMatch": true,
+          "fullKernel": false,
+          "performanceQualified": false,
+          "adopted": false
+        }
+      }
+    ],
+    "actualAllOuterArchivesCRCAndDigestsRead": true,
+    "wholeGeneratedCanonicalRuntimeBodiesIdenticalApartFromFinalMapURL": true,
+    "fullIndependentAudit": {
+      "source": "df24381ff34105bcb852a7474c703bc2de2687b9",
+      "run": 40215378391,
+      "job": 121235270346,
+      "status": "PASS",
+      "artifact": 12606939471,
+      "archive": {
+        "bytes": 100866,
+        "sha256": "5b975890edb8e1a32beb7b3684f3ac0f1811c6584a0e4666a39305561c5b0ad0",
+        "members": 2
+      },
+      "actualDetailedReport": {
+        "bytes": 416265,
+        "sha256": "39d5bd6b4f0992fc70b15cf0a2552870d8e2658a6698a1c3067dcf15ec95fee7"
+      },
+      "summary": {
+        "schema": "psc1-t05-artifact-audit-v1",
+        "status": "pass",
+        "sourceSha": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+        "runId": 40212287088,
+        "runAttempt": 1,
+        "routes": {
+          "native": {
+            "status": "pass",
+            "artifactId": 12605483185,
+            "files": 240,
+            "error": null
+          },
+          "generated": {
+            "status": "pass",
+            "artifactId": 12606578942,
+            "files": 413,
+            "error": null
+          },
+          "canonical": {
+            "status": "pass",
+            "artifactId": 12606844104,
+            "files": 416,
+            "error": null
+          }
+        },
+        "nativeReports": 542,
+        "nativeModules": 38,
+        "lazyTransformLocalRefinementQualified": true,
+        "profile": "empty-cache",
+        "historicalThreeWorkerDelayQualified": false,
+        "retainedLiftAndCountSourceBytesMatch": true,
+        "retainedLiftAndCountSourceQualified": true,
+        "retainedNativeProofsQualified": true,
+        "layoutBoundaryQualified": true,
+        "canonicalOutputLayoutEstablished": true,
+        "metadataCorrespondenceEstablished": true,
+        "decoderCorrespondenceEstablished": true,
+        "replayArenaModelBridgeEstablished": true,
+        "emptySemanticCacheSemanticQualification": true,
+        "emptySemanticCacheHelperOnly": true,
+        "productionChanges": [
+          "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean",
+          "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean",
+          "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean",
+          "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
+        ],
+        "optimizationAdopted": false,
+        "emptySemanticCachePerformanceQualified": false,
+        "report": {
+          "bytes": 416265,
+          "sha256": "39d5bd6b4f0992fc70b15cf0a2552870d8e2658a6698a1c3067dcf15ec95fee7"
+        },
+        "errors": [],
+        "ordinaryAdmissionQualified": true,
+        "fullOrdinaryAdmission": true,
+        "fullKernel": false,
+        "performanceQualified": false
+      },
+      "priorAudit": {
+        "source": "cef9725ed14646c74e21ab3ce76ab7f7773bc93c",
+        "run": 40212926388,
+        "status": "PASS",
+        "artifact": 12607460809,
+        "actualDetailedReport": {
+          "bytes": 416258,
+          "sha256": "2ed7173ba6a7920a79e26d801f919354ab2270699210294b05289f22c82a18e6"
+        },
+        "disclosure": "All detailed checks and detailed542/38 scope passed; its short summary retained37. The corrected read-only audit reruns exact checks and reports38; no runtime gate changed."
+      }
+    },
+    "arena": {
+      "workflowSource": "afc1f42fc0459fb43a5b1501f7ebd294c617431a",
+      "kernelSource": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+      "run": 40215051429,
+      "officialJob": 121234275138,
+      "comparisonJob": 121234784393,
+      "strictStatus": "FAIL",
+      "total": 193,
+      "strictMatches": 174,
+      "counts": {
+        "agreement_with_unsafe_or_partial_contract_difference": 2,
+        "matched_acceptance": 106,
+        "matched_kernel_rejection": 60,
+        "matched_metadata_rejection": 1,
+        "matched_transport_rejection": 7,
+        "pskernel_timeout": 17
+      },
+      "timeouts": [
+        23,
+        72,
+        78,
+        80,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        90,
+        91,
+        92,
+        93,
+        94,
+        96,
+        98
+      ],
+      "separateSafetyAgreements": [
+        69,
+        70
+      ],
+      "artifact": 12607667053,
+      "archive": {
+        "bytes": 3665191,
+        "sha256": "24de1c7421e549ee62dcc2ace96f6e08e6ff062e6503bb56feb0cce3e6b31985",
+        "members": 586
+      },
+      "actualReport": {
+        "bytes": 669385,
+        "sha256": "3f7a33952a389df1214ae1d73bccbd56cc8ca98b0d2e2e72c7586ab97791be9d"
+      },
+      "actualProvenance": {
+        "schema": "psc1-lazy-transform-arena-kernel-v1",
+        "workflowSourceSha": "afc1f42fc0459fb43a5b1501f7ebd294c617431a",
+        "workflowRunId": "40215051429",
+        "kernelSourceSha": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+        "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+        "producerRun": 40212287088,
+        "producerJob": 121226779784,
+        "producerArtifact": 12606578942,
+        "producerArchive": {
+          "bytes": 3034489,
+          "sha256": "40d561f37edd60918c0f82aed01ef01bb9277323817ca2e7277a3d4dbd101245"
+        },
+        "kernel": {
+          "bytes": 10319059,
+          "sha256": "9d1931744355bbc54cfff3e8e2ba4065fd9d85e83eb87b326c215059a2c0ef99"
+        },
+        "sameProductionAndReplaySources": true,
+        "nativeReports": 542,
+        "sourceCohortAggregateStatusAtLoad": "completed",
+        "sourceCohortAggregateConclusionAtLoad": "success",
+        "generatedProducerQualified": true,
+        "fullArenaQualified": false,
+        "performanceQualified": false
+      },
+      "rootReadOnlyChecks": {
+        "all193OriginalAdaptedInputHashesAndClassificationsMatchF091": true,
+        "all176CompletedResultEnvelopesMatchRawLogs": true,
+        "all176CompleteSemanticFieldsMatchF091": true,
+        "all17ActualTimeoutsCensored": true,
+        "nested413MemberProducerCRCAndDigestChecked": true,
+        "actualCompleteKernelMatchesQualified9d193174": true
+      },
+      "postComparisonRecordFailure": "Saved report is complete and valid, but the record-printing step still asserted prior f091/39e0 provenance. The future printing pins are corrected to44d/9d; no corpus or runtime is replayed or relabelled pass."
+    },
+    "performance": {
+      "source": "14dad2ce6eaef9fa71170f28650a5c626eca4a76",
+      "run": 40213489105,
+      "status": "in_progress",
+      "actualObservationsComplete": false,
+      "independentAuditSource": "05059505f5fb0302c352c59ebcc0e49a55109987",
+      "independentAuditRun": 40213762419,
+      "statusAtRecord": "waiting for sixteen observations"
+    },
+    "adopted": false,
+    "performanceQualified": false,
+    "projectComplete": false,
+    "projectStatus": {
+      "A": "historically scoped qualified",
+      "B": "OPEN",
+      "C": "FAIL",
+      "D": "OPEN"
+    }
+  },
+  "performance": {
+    "run": 40213489105,
+    "attempt": 1,
+    "jobs": {
+      "native": 121229543167,
+      "compiler": 121229917983,
+      "baseline": 121230532314,
+      "candidate": 121230532496,
+      "abba": 121238618722
+    },
+    "allFiveJobs": "PASS",
+    "sequence": [
+      "A",
+      "B",
+      "B",
+      "A"
+    ],
+    "observations": 16,
+    "commonCompilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+    "sameActualQualifiedBaselineAndCandidateKernels": true,
+    "actualAllFiveArchivesReadAndCRCAndHashChecked": true,
+    "actualAllRawObservationManifestHashesChecked": true,
+    "rawReport": {
+      "bytes": 70919,
+      "sha256": "37ff32025cc26047f90f4f9cd091fba110616f4ad02d8a5a34e988fe96238602"
+    },
+    "independentAudit": {
+      "source": "05059505f5fb0302c352c59ebcc0e49a55109987",
+      "run": 40213762419,
+      "job": 121230363510,
+      "status": "PASS",
+      "artifact": 12608331578,
+      "archive": {
+        "bytes": 2439,
+        "sha256": "162f3ee40963cc676e84b7f73696fc0e06882eee74914adef3d62b6bcc7ae352",
+        "members": 1
+      },
+      "actualReport": {
+        "bytes": 8158,
+        "sha256": "5f9c25944450b2f63e6d1487a61538fbf4822dfb6d2adc2e04fe01e809c7662d"
+      }
+    },
+    "archives": {
+      "native-preflight": {
+        "id": 12606971036,
+        "bytes": 146013,
+        "sha256": "35be5865d1010bc1d3b71cb803233747695d1db3f0470ffd1ccc60feb636e051",
+        "members": 31
+      },
+      "compiler": {
+        "id": 12606866673,
+        "bytes": 2561674,
+        "sha256": "c28da8d4d57a5a59a1ff686b2ce671102b20073bd00bf32450fae37cf2ab8dec",
+        "members": 40
+      },
+      "baseline": {
+        "id": 12607816023,
+        "bytes": 1273499,
+        "sha256": "d4170263e8bf578c771b1b18cce3029529c09ff2c049f137c722f4e6d5d6558e",
+        "members": 21
+      },
+      "candidate": {
+        "id": 12607467412,
+        "bytes": 1273477,
+        "sha256": "de75dfb428e7efa78fb04f3b2a4b7efbfc2f709828ef14a7c783fb4e09dbe359",
+        "members": 21
+      },
+      "abba": {
+        "id": 12607553139,
+        "bytes": 3254133,
+        "sha256": "92530d4ff500fa5bd3d267ba4cefea2f4744bec32c42ee656cf4e3b344cbaebe",
+        "members": 121
+      }
+    },
+    "snapshotCoverage": {
+      "nativeArchivedSourceFiles": 24,
+      "declaredSourceFiles": 24,
+      "distinctGitInputs": 19,
+      "allDeclaredSnapshotsPresentIncludingHiddenFiles": true,
+      "supplementRequired": false
+    },
+    "summaries": [
+      {
+        "name": "perf/repeated-subproblem.ndjson",
+        "verdicts": {
+          "baseline": [
+            "accepted",
+            "accepted"
+          ],
+          "candidate": [
+            "accepted",
+            "accepted"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            1.8844294029999986,
+            1.7709283679999999
+          ],
+          "candidate": [
+            1.8165972749999924,
+            1.733788489999995
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            287240,
+            288892
+          ],
+          "candidate": [
+            289868,
+            289752
+          ]
+        },
+        "uncensoredPair": true,
+        "performanceComparable": true,
+        "retainedChurchAcceptance": false,
+        "candidateMedianTimeRatio": 0.9712826999226142,
+        "candidateMedianRssRatio": 1.006054168142023,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "perf/church-numerals.ndjson",
+        "verdicts": {
+          "baseline": [
+            "accepted",
+            "accepted"
+          ],
+          "candidate": [
+            "accepted",
+            "accepted"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            9.653302999000005,
+            9.208710800000006
+          ],
+          "candidate": [
+            9.416015611999995,
+            9.042811239999992
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            403200,
+            402324
+          ],
+          "candidate": [
+            400992,
+            410076
+          ]
+        },
+        "uncensoredPair": true,
+        "performanceComparable": true,
+        "retainedChurchAcceptance": true,
+        "candidateMedianTimeRatio": 0.9786243955021707,
+        "candidateMedianRssRatio": 1.006882476499769,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "init-prelude.ndjson",
+        "verdicts": {
+          "baseline": [
+            "timeout",
+            "timeout"
+          ],
+          "candidate": [
+            "timeout",
+            "timeout"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            60.13843301499999,
+            60.126861682000026
+          ],
+          "candidate": [
+            60.1541292,
+            60.128435904000014
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [],
+          "candidate": []
+        },
+        "uncensoredPair": false,
+        "performanceComparable": false,
+        "retainedChurchAcceptance": false,
+        "candidateMedianTimeRatio": null,
+        "candidateMedianRssRatio": null,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "verdicts": {
+          "baseline": [
+            "rejected",
+            "rejected"
+          ],
+          "candidate": [
+            "rejected",
+            "rejected"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            35.56761810399999,
+            34.28272271600002
+          ],
+          "candidate": [
+            33.09860070399998,
+            32.212287084000025
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            458816,
+            428096
+          ],
+          "candidate": [
+            428020,
+            425768
+          ]
+        },
+        "uncensoredPair": true,
+        "performanceComparable": true,
+        "retainedChurchAcceptance": false,
+        "candidateMedianTimeRatio": 0.935011726804628,
+        "candidateMedianRssRatio": 0.9626524390243902,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      }
+    ],
+    "errors": [],
+    "supersededAttempt": {
+      "source": "0fd0a78bc51a663ac73ee82bd88a110dc71e67dc",
+      "run": 40212320948,
+      "job": 121237748546,
+      "status": "FAIL",
+      "observations": 16,
+      "errors": [
+        "frozen Church baseline error changed"
+      ],
+      "usedForAdoption": false
+    },
+    "limitations": "Two cold observations per variant/case. Report observed medians and dispersion; no statistically established or whole-kernel speedup claim. Prelude remains censored with no ratio. D remains OPEN."
+  },
+  "plannedIntegrationMetadata": {
+    "ciJobGrace": "35-minute jobs with hard1500-second complete-helper command; kernel/runtime/fixture/assertions/strict collector unchanged",
+    "carryPrimaryEvidenceAndHistory": true,
+    "compilerKernelAndQualificationInputBytesMustMatch44d": true,
+    "wholeSourceIdentityDisclosure": "Qualification44d, measurement14dad and derived integration merge are distinct whole-source commits. Same production tree and actual executed bundles are verified; metadata/tooling changes are separately identified."
+  },
+  "remaining": {
+    "strictArenaMatches": 174,
+    "total": 193,
+    "timeouts": 17,
+    "separateSafetyAgreements": 2,
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN",
+    "tasks": [
+      "T06 mutual/nested/Quot ID admission",
+      "T07 four whole-operation fallback removals",
+      "T04 ingress and generated import",
+      "T09 global performance and reuse",
+      "T10 release/global proof obligations"
+    ]
+  }
+}

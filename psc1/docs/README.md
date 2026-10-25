@@ -79,3 +79,7 @@ current slim generated CLI.
 `../profile.json` retains historical native-profile fields and points to current
 contracts. It is not a current self-hosting/npm readiness authority.
 Do not delete past failures or relabel previous artifacts after a source change.
+
+## Current generated IO milestone
+
+Read [generated IO applications](PSC1_GENERATED_IO_APPLICATIONS.md) and the exact [qualification receipt](PSC1_GENERATED_IO_QUALIFICATION_2026-10-26.json). The [roadmap](PSC1_DEVELOPMENT_ROADMAP.md) owns remaining release work.

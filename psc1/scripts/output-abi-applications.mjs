@@ -34,7 +34,8 @@ export function applicationFixtures(convertToPs) {
   return fixtures;
 }
 
-export function executeApplication(fixture, moduleFile, directory) {
+export function executeApplication(fixture, moduleFile, directory,
+  runnerFile = path.resolve('scripts/practical-application-node.mjs')) {
   const compiler = fixture.application === 'compiler-like';
   const valid = '[{"text":"A","count":2},{"text":"\\uD83D\\uDE00","count":-4}]';
   const cliInputs = {
@@ -82,7 +83,7 @@ export function executeApplication(fixture, moduleFile, directory) {
     }));
     let result;
     try {
-      result = boundedRun(process.execPath, [path.resolve('scripts/practical-application-node.mjs'),
+      result = boundedRun(process.execPath, [runnerFile,
         'js', test.denied ? '/missing-guest' : moduleFile, config,
         ...(test.args || ['transform', compiler ? 'input.mini' : 'input.json', 'output.json'])],
         { logDirectory: path.join(directory, expected.id + '-process'),

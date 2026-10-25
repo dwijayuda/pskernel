@@ -96,6 +96,10 @@ refused('corrupt-default-kernel-with-native-installed',()=>{const b=Buffer.from(
 refused('missing-default-kernel-with-native-installed',()=>fs.renameSync(wasmRoot,wasmRoot+'.disabled'),()=>fs.renameSync(wasmRoot+'.disabled',wasmRoot));
 const manifest=path.join(root,'UNIVERSAL_DISTRIBUTION.json'),manifestBytes=fs.readFileSync(manifest);
 refused('manifest-policy-corruption',()=>{const d=JSON.parse(manifestBytes);d.defaultKernel='native';fs.writeFileSync(manifest,JSON.stringify(d));},()=>fs.writeFileSync(manifest,manifestBytes));
+const sourcePinFile=path.join(root,'DISTRIBUTION_PIN.mjs'),sourcePinBytes=fs.readFileSync(sourcePinFile);
+refused('compiler-source-pin-mismatch',()=>fs.writeFileSync(sourcePinFile,
+ sourcePinBytes.toString('utf8').replace(metadata.compilerSourceClosureDigest,'0'.repeat(64))),
+ ()=>fs.writeFileSync(sourcePinFile,sourcePinBytes));
 const packageFile=path.join(root,'package.json'),packageBytes=fs.readFileSync(packageFile);
 refused('missing-root-kernel-policy',()=>{const d=JSON.parse(packageBytes);delete d.proofscript.defaultKernel;fs.writeFileSync(packageFile,JSON.stringify(d));},()=>fs.writeFileSync(packageFile,packageBytes));
 for(const phase of ['before-seal','after-seal','before-commit']){const result=call(cli,['build','--project',validProject,'--out',store],{env:{...env,PSC1_TEST_SERVICE_PUBLICATION_FAIL_AT:phase}});assert.notEqual(result.status,0);assert.equal(fs.readlinkSync(path.join(store,'current')),pointer);negativeCases.push({id:phase,priorPreserved:true});}

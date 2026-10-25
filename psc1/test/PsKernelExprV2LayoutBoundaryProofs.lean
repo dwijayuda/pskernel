@@ -238,7 +238,7 @@ theorem validate_ok_establishes_canonical_layout
         (Nat.succ source.size) source
         (psKernelExprV2PagedEmptyWithLimit source.pageLimit) canonical 0
         (empty_layout source.pageLimit)
-      simpa only [psKernelExprV2PagedValidate, shape] using accepted
+      simpa only [psKernelExprV2PagedValidate, shape, ite_true] using accepted
 
 end PsKernelExprV2LayoutBoundaryProofs
 

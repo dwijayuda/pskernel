@@ -6,31 +6,56 @@ Updated 2026-10-25 Asia/Jakarta. Active checked-conversion branch
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
 
-## Checked conversion (R3; implemented, qualification in progress)
+## Checked conversion (R3; implementation and qualification in progress)
 
-The host reuses the existing grammar printers and R2a ownership pipeline. It
-independently admits the complete before/after closures and requires literal equality of privately retained
-canonical admission strings and original strict-IR bytes, partial names and exact source/member
-ownership. The ordinary logical/body pairing remains included in the comparison.
-[Conversion guide](docs/PSC1_CHECKED_SOURCE_CONVERSION.md). Candidate source bytes and declaration origin maps are returned for review;
-project files are never edited. This does not implement binding-aware rename.
+PR #185 is stacked on qualified PR #184. The host reuses the existing grammar
+printers and actual R2a ownership pipeline. Original and final candidate closures
+are independently admitted and strictly validated; literal canonical admission
+strings, original strict-IR bytes, ordinary logical/body pairing, partial names
+and exact source/member ownership must agree. [Guide](docs/PSC1_CHECKED_SOURCE_CONVERSION.md).
+The pinned developer CLI returns candidate JSON and origin maps only; it never
+writes project files or changes the frozen installed compiler.
 
-Raw comments retain their order and bytes. The default refuses comments inside
-declaration bodies; explicit owner-notes relocates them to the owning declaration's
-leading notes. Canonical conversion intentionally changes layout, spelling and
-source identities. Exact graph comparison is a finite compiler-mediated relation,
-not formal source preservation or an effect-equivalence theorem.
+Focused run 40202979940 passes ten conversions and eleven refusals, including
+a genuinely independently accepted but different body, stale/forged handles and
+outside-cwd CLI use. Its full suite compiles the converted 11-module PracticalCli
+application and executes actual JSON/file IO, but exposes a real reverse-conversion
+printer bug at Ps.Syntax.Token.psTokenKindEq: nested match branches escaped their
+scope. Run 40205234865 confirms the application again and passes the new scope
+suite under actual admission and official Lean source parsing, plus all ten
+legacy translation cases. It then refuses the whole compiler at the printer
+worker's structural-recursion arity. These failed runs remain evidence, not passes.
 
-A manifest-pinned developer CLI emits candidate JSON only. It does not select
-tools from source input, publish packages or install new compiler payloads.
-Native/shared-host build fccd4e01fa4ce6a01eeafde75032720b95493211 passes in Linux
-run 40201874043/job 121194564980. Focused run 40202304083 passes ten conversion cases and eleven refusals,
-including an independently accepted but semantically different candidate, and CLI
-operation outside the repository cwd. Full qualification stops at a test-fixture
-source-root layout error; that entry is corrected without changing the compiler.
-Real application and full compiler conversion qualification remains in progress.
+Portable source fix ef7531ed3fa43d5c7c51b9bc851544f77e087315 groups low-precedence
+terms and carries indentation through a fuel fold. Global recursive application
+uses only the decreasing fuel; the returned local worker receives indentation.
+No recursion rule, parser acceptance rule, fuel, checker or resource limit is
+weakened. Both compiler source grammars are now censused before long conversions.
+Ordinary run 40205817990 and full conversion run 40205811877 are in progress.
+A genuine Wasm G1-only request 96f8011fb52889fc9429402f668770fd43643714 runs on
+qualification/psc1-conversion-wasm-g1-v2-20261025, with identical portable source.
+The earlier request c875b52201fa1e3a84f96a3d898c2942c376b565 correctly failed its
+source census; it is not reused as qualification.
 
-## R2a declaration ownership (implemented, qualification in progress)
+The first forward-only source export (run 40204082229, source 420e647b) took
+526,720ms and host-only max RSS 1,620,508KiB. It is an old-source candidate artifact,
+not the latest compiler or a package promotion. To remove measured duplicate work,
+the conversion adapter now returns an unaccepted parsed declaration-layout preview.
+The host validates its closed schema, names, UTF-8 offsets and line/column positions
+in one scalar walk, restores retained comments, then captures/admit-checks the final
+candidate once. This removes the redundant provisional token tape and provisional
+elaboration/checker pass. The independently admitted original and final candidate
+and exact private byte comparison remain mandatory. Malformed preview negatives
+and same-grammar conversion are added; actual optimized results remain pending.
+
+Raw comments retain order and bytes. Default preserve refuses body comments;
+explicit owner-notes relocates them to declaration-leading notes. Conversion
+changes layout and source identities. This finite compiler-mediated relation is
+not formal source preservation or effect equivalence, and grants no binding-aware
+rename or publication authority. The new printer source requires its own source/G1
+evidence; frozen 120-module G2/G3/npm identities are never relabeled.
+
+## R2a declaration ownership (qualified)
 
 Native implementation 9f6291450e431931bf42a3833b3fb7718fa5ad37 compiles in Linux
 run 40199953080/job 121188821962. Host implementation
@@ -50,8 +75,9 @@ Expanded focused run 40200895349/job 121191660829 PASSED at a77ec1a8:
 121 modules and 4,676 members under both grammars, ten exact production-path
 admission/IR comparisons, 42 refusal cases and the original 359/49 lossless corpus.
 Native phase timings are 59,974ms/339,156KiB (Lean) and 62,098ms/398,296KiB (PS);
-these exclude separate checker/host overhead. Ordinary run 40200961302 remains
-in progress, so final R2a qualification is not yet claimed.
+these exclude separate checker/host overhead. Ordinary run 40200961302 PASSED:
+all selected dependencies and 37/37 finite criteria, zero blocked, releaseReady=true.
+[Exact R2a receipt](docs/PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json).
 The selected ordinary lossless job now requires those tests without removing
 existing lexical or character-proof regressions. Existing timeout, checker,
 fuel, memory and stack policies remain unchanged.
@@ -96,16 +122,15 @@ Documentation-only descendants carry this successful source baseline through the
 
 ## Immediate continuation
 
-The location prerequisite is complete. Next R2a attaches existing actual
-`PsElabBatchOrigin` / `PsElabMemberOrigin` to exact source snapshots through
-`psCompilerPreparationStepParsedWithOrigins`; do not add a second elaborator.
-Finite criteria are in the refactoring architecture and the roadmap owns the
-single dependency-ordered queue. R2a is read-only ownership, not rename.
-Then R2b must trace local binders/references at actual resolution sites; context-local
-raw IDs are not stable global source identities. Only after that implement
-capture-avoiding edits with affected-closure elaboration, independent admission
-and explicit public API/identity correspondence. R2a/R2b are still pending.
-Preserve all previous generation/package identities and existing source proof guards.
+R2a is qualified read-only ownership, not rename. Finish R3's whole-compiler
+conversion, new-source Wasm G1 and ordinary development qualification before
+claiming the latest printer source qualified. The roadmap owns the single queue.
+R2b must trace local binders/references at actual resolution sites; context-local
+raw IDs are not stable global source identities. Only then implement capture-
+avoiding edits with affected-closure elaboration, independent admission and explicit
+public API/identity correspondence. R4 equivalence, slim real applications, checked
+non-JS publication and final cross-platform release remain pending.
+Preserve previous source/generation/package identities and existing proof guards.
 
 ## Preserved qualified R1 lossless foundation
 

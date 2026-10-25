@@ -147,6 +147,21 @@ try {
     index: wrongIndex, snapshots: [constant], targetGrammar: 'ps',
   }), 'CONVERSION_RESPONSE');
 
+  // Layout is an unaccepted positioning preview; malformed previews must refuse
+  // before producing candidate capabilities, even with an otherwise genuine tool.
+  for (const [name, change, code] of [
+    ['layout-name', '  value["modules"][0]["declarations"][0]["sourceName"]=["different"]', 'CONVERSION_LAYOUT'],
+    ['layout-position', '  value["modules"][0]["declarations"][0]["span"]["start"]["column"]+=1', 'CONVERSION_LAYOUT'],
+    ['layout-schema', '  value["modules"][0]["declarations"][0]["extra"]=True', 'FIELDS'],
+  ]) {
+    const fixture = fixtureOwnership(name, change);
+    const fixtureIndex = fixture.ownership.analyze({ snapshots: [constant], entry: 'Test.Main' });
+    refuse(() => fixture.converter.convert({
+      index: fixtureIndex, snapshots: [constant], targetGrammar: 'ps',
+    }), code);
+  }
+  convert(index, before, 'lean');
+
   // Developer CLI works outside the repository cwd and emits only candidate JSON.
   const manifest = {
     schema: 'psc1-source-tools/1',

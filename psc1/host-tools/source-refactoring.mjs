@@ -532,9 +532,41 @@ export function createCheckedSourceConverter({ ownershipTool }) {
       refuse('CONVERSION_CORRESPONDENCE');
   }
 
-  function retainComments(original, target, before, after, policy) {
+  // Parsed layout previews are not admitted indexes. Validate offsets with one
+  // scalar walk; final snapshots and admission are constructed only after comments.
+  function validateLayout(module, original, before, grammar) {
+    exactKeys(module, ['module', 'text', 'declarations']);
+    if (module.module !== original.module || typeof module.text !== 'string' ||
+        !module.text.isWellFormed() || !Array.isArray(module.declarations) ||
+        module.declarations.length !== before.origins.length) refuse('CONVERSION_MODULE');
+    const bytes = bytesCopy(Buffer.from(module.text));
+    const wanted = new Set();
+    let previous = 0;
+    for (let i = 0; i < module.declarations.length; i++) {
+      const declaration = module.declarations[i];
+      exactKeys(declaration, ['sourceName', 'span']);
+      validSpan(declaration.span, bytes);
+      if (JSON.stringify(declaration.sourceName) !== JSON.stringify(before.origins[i].sourceName) ||
+          declaration.span.start.byteOffset < previous) refuse('CONVERSION_LAYOUT');
+      previous = declaration.span.stop.byteOffset;
+      wanted.add(declaration.span.start.byteOffset); wanted.add(declaration.span.stop.byteOffset);
+    }
+    let position = { byteOffset: 0, line: 1, column: 1 };
+    const positions = new Map([[0, position]]);
+    for (const char of module.text) {
+      position = advance(position, char, grammar);
+      if (wanted.has(position.byteOffset)) positions.set(position.byteOffset, position);
+    }
+    for (const declaration of module.declarations)
+      for (const p of [declaration.span.start, declaration.span.stop])
+        if (!positions.has(p.byteOffset) || !positionEqual(p, positions.get(p.byteOffset)))
+          refuse('CONVERSION_LAYOUT');
+    return { bytes, origins: module.declarations };
+  }
+
+  function retainComments(original, bytes, before, after, policy) {
     const comments = commentPieces(original);
-    if (!comments.length) return lexicalTool.reconstruct(target);
+    if (!comments.length) return bytes;
     const sourceOrigins = before.origins, targetOrigins = after.origins;
     const chunks = new Map();
     const put = (offset, comment) => chunks.set(offset, (chunks.get(offset) ?? '') + comment.raw + '\n');
@@ -554,10 +586,10 @@ export function createCheckedSourceConverter({ ownershipTool }) {
         const following = sourceOrigins.find(origin =>
           origin.span.start.byteOffset >= comment.span.stop.byteOffset);
         const next = following ? targetOrigins[following.sourceIndex] : null;
-        put(next ? next.span.start.byteOffset : target.byteLength, comment);
+        put(next ? next.span.start.byteOffset : bytes.length, comment);
       }
     }
-    const bytes = lexicalTool.reconstruct(target), output = [];
+    const output = [];
     let cursor = 0;
     for (const [offset, raw] of [...chunks].sort((a, b) => a[0] - b[0])) {
       output.push(bytes.subarray(cursor, offset));
@@ -600,28 +632,18 @@ export function createCheckedSourceConverter({ ownershipTool }) {
             wire.sourceClosureDigest !== sourceClosureDigest || wire.sourceGrammar !== index.grammar ||
             wire.targetGrammar !== targetGrammar || !Array.isArray(wire.modules) ||
             wire.modules.length !== snapshots.length) refuse('CONVERSION_RESPONSE');
-        return wire.modules.map((module, i) => {
-          exactKeys(module, ['module', 'text']);
-          if (module.module !== snapshots[i].module || typeof module.text !== 'string' ||
-              !module.text.isWellFormed()) refuse('CONVERSION_MODULE');
-          return lexicalTool.capture({ module: module.module, grammar: targetGrammar,
-            bytes: Buffer.from(module.text) });
-        });
+        return wire.modules.map((module, i) =>
+          validateLayout(module, snapshots[i], index.modules[i], targetGrammar));
       });
-      const provisional = ownershipTool.analyze({
-        snapshots: candidate, entry: index.entry, assurance: index.assurance,
-      });
-      requireCorrespondence(index, provisional);
-      const retained = candidate.map((snapshot, i) => {
-        const bytes = retainComments(snapshots[i], snapshot,
-          index.modules[i], provisional.modules[i], commentPolicy);
-        if (bytes.equals(lexicalTool.reconstruct(snapshot))) return snapshot;
-        return lexicalTool.capture({ module: snapshot.module, grammar: targetGrammar, bytes });
-      });
-      const changed = retained.some((snapshot, i) => snapshot.sourceId !== candidate[i].sourceId);
-      const checked = changed ? ownershipTool.analyze({
+      const retained = candidate.map((module, i) => lexicalTool.capture({
+        module: snapshots[i].module, grammar: targetGrammar,
+        bytes: retainComments(snapshots[i], module.bytes, index.modules[i], module, commentPolicy),
+      }));
+      // Both endpoints are independently checked. The unaccepted layout preview
+      // needs neither a second token tape nor an extra elaboration/checker run.
+      const checked = ownershipTool.analyze({
         snapshots: retained, entry: index.entry, assurance: index.assurance,
-      }) : provisional;
+      });
       requireCorrespondence(index, checked);
       for (let i = 0; i < snapshots.length; i++) {
         const original = commentPieces(snapshots[i]).map(piece => [piece.kind, piece.raw]);

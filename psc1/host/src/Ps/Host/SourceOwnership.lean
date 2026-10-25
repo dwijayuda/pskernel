@@ -118,7 +118,14 @@ def psOwnershipConvert (request : Request) (target : PsCompilerSourceKind)
       (fun _ => psOwnershipError source.moduleName "translation" "unsupported-or-invalid-source")
     if text.utf8ByteSize > 1048576 then
       throw (psOwnershipError source.moduleName "translation" "source-limit")
-    modules := modules.push (Lean.Json.mkObj [("module", .str source.moduleName), ("text", .str text)])
+    let parsed ← (psCompilerParseSource target text).mapError
+      (fun _ => psOwnershipError source.moduleName "translation" "printed-source-parse-refused")
+    let declarations := parsed.declarations.map (fun declaration =>
+      let origin := psElabOriginSource declaration
+      Lean.Json.mkObj [("sourceName", Lean.toJson origin.1.segments),
+        ("span", psOwnershipSpan origin.2)])
+    modules := modules.push (Lean.Json.mkObj [("module", .str source.moduleName),
+      ("text", .str text), ("declarations", Lean.toJson declarations)])
   return Lean.Json.mkObj [
     ("protocol", .str "psc1-source-conversion/1"), ("status", .str "candidate"),
     ("requestId", .str request.requestId), ("sourceClosureDigest", .str request.sourceClosureDigest),

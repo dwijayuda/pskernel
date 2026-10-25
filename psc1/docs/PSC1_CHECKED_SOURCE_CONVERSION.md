@@ -26,6 +26,13 @@ This is a finite compiler-mediated relation, not a formal proof of source
 preservation, behavioral equivalence or compiler correctness. Existing compiler,
 independent checker, runtime, IR, ABI and publication assurance boundaries remain.
 
+The translation helper supplies an unaccepted parsed declaration-layout preview,
+using the same frontend. The host validates its closed schema, ordered declaration
+names, scalar-boundary offsets and line/column positions before restoring comments.
+Only the final candidate receives a lexical snapshot and full ownership/admission
+pass. This avoids a redundant provisional capture and check; it never substitutes
+layout metadata for final elaboration, strict IR or independent checking.
+
 ## Comments, layout and origin maps
 
 Raw line and nested-block comments retain their bytes and order. Canonical source
@@ -85,7 +92,7 @@ The default npm kernel and frozen self-hosted executors remain unchanged.
 
 ## Validation and bounds
 
-Focused tests cover both directions, namespaces, shadowing, data declarations,
+Focused tests cover malformed layout previews, same-grammar conversion, both directions, namespaces, shadowing, data declarations,
 normalized workers, ordinary partial pairing, Unicode/string/comment boundaries,
 stale/forged handles, malicious-but-well-typed candidates and outside-cwd CLI use.
 Full qualification additionally converts a real CLI/JSON/file application and

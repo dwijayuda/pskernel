@@ -8,6 +8,8 @@ on:
       - psc1/host-tools/source-refactoring.mjs
       - psc1/scripts/lossless-source-tests.mjs
       - psc1/scripts/source-ownership-tests.mjs
+      - psc1/scripts/source-conversion-tests.mjs
+      - psc1/scripts/refactor-source.mjs
       - psc1/scripts/bounded-process.py
       - psc1/scripts/selfhost-qualification-profiles.mjs
       - psc1/lean-toolchain
@@ -20,7 +22,7 @@ concurrency:
 jobs:
   lossless:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       PSC1_LOSSLESS_SCOPE_GUARD: ${{ github.event_name == 'push' && github.ref_name == 'feat/psc1-lossless-source-20261025' }}
     steps:
@@ -52,6 +54,7 @@ jobs:
         run: |
           node scripts/lossless-source-tests.mjs
           node scripts/source-ownership-tests.mjs
+          node scripts/source-conversion-tests.mjs --focused
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -59,5 +62,6 @@ jobs:
           path: |
             psc1/dist/lossless/
             psc1/dist/source-ownership/
+            psc1/dist/source-conversion/
           if-no-files-found: error
           retention-days: 90

@@ -24,8 +24,11 @@ not formal source preservation or an effect-equivalence theorem.
 A manifest-pinned developer CLI emits candidate JSON only. It does not select
 tools from source input, publish packages or install new compiler payloads.
 Native/shared-host build fccd4e01fa4ce6a01eeafde75032720b95493211 passes in Linux
-run 40201874043/job 121194564980. Behavioral, CLI, real application and full compiler
-conversion qualification is in progress; no successful R3 qualification is claimed.
+run 40201874043/job 121194564980. Focused run 40202304083 passes ten conversion cases and eleven refusals,
+including an independently accepted but semantically different candidate, and CLI
+operation outside the repository cwd. Full qualification stops at a test-fixture
+source-root layout error; that entry is corrected without changing the compiler.
+Real application and full compiler conversion qualification remains in progress.
 
 ## R2a declaration ownership (implemented, qualification in progress)
 
@@ -289,3 +292,14 @@ Product work remains source-package/application coverage, portable publication,
 checked non-JS/provider dispatch, additional Rust platforms and final release
 qualification. New compiler-source promotion needs its own generation evidence;
 unchanged frozen packages do not require repeated long chains for documentation.
+
+## Development test scheduling for source tools
+
+Current-source ownership correspondence and negative tests remain ordinary CI
+requirements. Fixed 121-module/digest and no-production-change assertions belong
+to the dated milestone workflow, not every future compiler change. Dedicated
+conversion/native build caches use exact Lean source/toolchain/Lake identities
+and still run Lake dependency validation. Documentation-only pushes do not run
+these dedicated expensive suites. The aggregate lossless/ownership/conversion
+job allows 20 minutes for additional suites; each compiler request remains 240s,
+the checker 120s and original memory/stack/fuel policies are unchanged.

@@ -21,6 +21,8 @@ jobs:
   ownership:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    env:
+      PSC1_CONVERSION_SCOPE_GUARD: ${{ github.event_name == 'push' && github.ref_name == 'feat/psc1-checked-source-conversion-20261025' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +34,11 @@ jobs:
         with:
           path: ~/.elan
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-source-tools-native-v1-ubuntu2404-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
@@ -44,6 +51,11 @@ jobs:
         run: |
           lean --version
           lake build psc1_source_ownership psc1_lossless_source psc1_independent_checker psc1_source_census_probe psc1
+      - uses: actions/cache/save@v4
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: psc1-source-tools-native-v1-ubuntu2404-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
       - name: Check candidate conversion host syntax
         working-directory: psc1
         run: |

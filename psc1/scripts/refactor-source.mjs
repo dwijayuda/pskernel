@@ -45,38 +45,38 @@ try {
   if (args.length === 1 && args[0] === '--help') {
     process.stdout.write('usage: node refactor-source.mjs --manifest TOOLS.json --entry MODULE --grammar lean|ps --to lean|ps --source MODULE=FILE [--source MODULE=FILE ...] [--assurance checked|ordinary-checked] [--comments preserve|owner-notes]\n');
   } else {
-  const options = argumentsOf(args);
-  const manifest = JSON.parse(file(path.resolve(options.manifest), 16384).toString('utf8'));
-  keys(manifest, ['schema', 'lexical', 'ownership', 'checker']);
-  if (manifest.schema !== 'psc1-source-tools/1') fail('MANIFEST');
-  for (const tool of [manifest.lexical, manifest.ownership, manifest.checker]) {
-    keys(tool, ['path', 'sha256']);
-    if (!path.isAbsolute(tool.path) || !/^[0-9a-f]{64}$/.test(tool.sha256)) fail('MANIFEST');
-  }
-  const lexical = createLosslessSourceTool({
-    executable: manifest.lexical.path, sha256: manifest.lexical.sha256,
-  });
-  const ownership = createSourceOwnershipTool({
-    lexicalTool: lexical, executable: manifest.ownership.path, sha256: manifest.ownership.sha256,
-    checkerExecutable: manifest.checker.path, checkerSha256: manifest.checker.sha256,
-  });
-  const converter = createCheckedSourceConverter({ ownershipTool: ownership });
-  const snapshots = options.sources.map(source => lexical.capture({
-    module: source.module, grammar: options.grammar, uri: source.path, bytes: file(source.path, 1048576),
-  }));
-  const index = ownership.analyze({ snapshots, entry: options.entry, assurance: options.assurance });
-  const report = converter.convert({
-    index, snapshots, targetGrammar: options.to, commentPolicy: options.comments,
-  });
-  const output = JSON.stringify({
-    schema: 'psc1-source-conversion-candidate/1', report,
-    modules: snapshots.map(source => ({
-      module: source.module, grammar: options.to,
-      text: converter.readCandidate(report, source.module).toString('utf8'),
-    })),
-  });
-  if (Buffer.byteLength(output) > 33554432) fail('RESPONSE_LIMIT');
-  process.stdout.write(output + '\n');
+    const options = argumentsOf(args);
+    const manifest = JSON.parse(file(path.resolve(options.manifest), 16384).toString('utf8'));
+    keys(manifest, ['schema', 'lexical', 'ownership', 'checker']);
+    if (manifest.schema !== 'psc1-source-tools/1') fail('MANIFEST');
+    for (const tool of [manifest.lexical, manifest.ownership, manifest.checker]) {
+      keys(tool, ['path', 'sha256']);
+      if (!path.isAbsolute(tool.path) || !/^[0-9a-f]{64}$/.test(tool.sha256)) fail('MANIFEST');
+    }
+    const lexical = createLosslessSourceTool({
+      executable: manifest.lexical.path, sha256: manifest.lexical.sha256,
+    });
+    const ownership = createSourceOwnershipTool({
+      lexicalTool: lexical, executable: manifest.ownership.path, sha256: manifest.ownership.sha256,
+      checkerExecutable: manifest.checker.path, checkerSha256: manifest.checker.sha256,
+    });
+    const converter = createCheckedSourceConverter({ ownershipTool: ownership });
+    const snapshots = options.sources.map(source => lexical.capture({
+      module: source.module, grammar: options.grammar, uri: source.path, bytes: file(source.path, 1048576),
+    }));
+    const index = ownership.analyze({ snapshots, entry: options.entry, assurance: options.assurance });
+    const report = converter.convert({
+      index, snapshots, targetGrammar: options.to, commentPolicy: options.comments,
+    });
+    const output = JSON.stringify({
+      schema: 'psc1-source-conversion-candidate/1', report,
+      modules: snapshots.map(source => ({
+        module: source.module, grammar: options.to,
+        text: converter.readCandidate(report, source.module).toString('utf8'),
+      })),
+    });
+    if (Buffer.byteLength(output) > 33554432) fail('RESPONSE_LIMIT');
+    process.stdout.write(output + '\n');
   }
 } catch (error) {
   process.stderr.write(JSON.stringify({

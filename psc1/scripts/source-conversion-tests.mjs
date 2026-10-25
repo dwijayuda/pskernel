@@ -5,6 +5,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import { createLosslessSourceTool, createSourceOwnershipTool,
   createCheckedSourceConverter } from '../host-tools/source-refactoring.mjs';
+import { compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
 import { readOwnedCompilerSources } from '../host-tools/compiler-source-inputs.mjs';
 import { boundedRun } from '../host-tools/generated-target-tools.mjs';
 
@@ -201,8 +202,10 @@ try {
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, converter.readCandidate(converted.report, source.module));
     }
+    const entryFile = path.join(sourceRoot, 'Run.ps');
+    fs.writeFileSync(entryFile, converter.readCandidate(converted.report, 'PracticalCli.Run'));
     const output = path.join(folder, 'application.js');
-    run(toolPath('psc1'), ['build', path.join(sourceRoot, 'PracticalCli/Run.ps'), '--target', 'js',
+    run(toolPath('psc1'), ['build', entryFile, '--target', 'js',
       '--assurance', 'ordinary', '--abi', 'io-dispatcher', '--out', output],
       { env: { ...process.env, PSC1_HOST_TOOLS: path.join(root, 'host-tools/artifacts.mjs') } });
     const config = path.join(folder, 'io.json');
@@ -223,6 +226,11 @@ try {
     }));
 
     const owned = readOwnedCompilerSources('Ps.CompilerUnified.Service');
+    if (process.env.PSC1_CONVERSION_SCOPE_GUARD === 'true') {
+      assert.equal(owned.length, 121);
+      assert.equal(compilerSourceClosureDigest(owned.map(row => ({ ...row, kind: 'lean' }))),
+        '60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a');
+    }
     const snapshots = owned.map(row => capture(row.text, row.module));
     const sourceIndex = ownership.analyze({
       snapshots, entry: 'Ps.CompilerUnified.Service', assurance: 'ordinary-checked',

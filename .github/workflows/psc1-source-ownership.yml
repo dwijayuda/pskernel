@@ -20,6 +20,8 @@ jobs:
   ownership:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    env:
+      PSC1_OWNERSHIP_SCOPE_GUARD: ${{ github.event_name == 'push' && github.ref_name == 'feat/psc1-source-ownership-20261025' }}
     steps:
       - uses: actions/checkout@v4
         with:

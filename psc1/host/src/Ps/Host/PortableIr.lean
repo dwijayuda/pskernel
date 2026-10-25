@@ -192,8 +192,13 @@ def inductiveRow (value : Lean.Json) : Except String PsVerifiedIrInductive := do
 def declaration (value : Lean.Json) : Except String PsVerifiedIrDeclaration := do
   match ← rows value with
   | [name, parameters, arguments, result, body] =>
-    return { name := ← string name, typeParameters := ← typeParameters parameters,
-      parameters := ← (← rows arguments).mapM parameter, resultType := ← type 4096 result, body := ← expr 4096 body }
+    return {
+      name := ← string name
+      typeParameters := ← typeParameters parameters
+      parameters := ← (← rows arguments).mapM parameter
+      resultType := ← type 4096 result
+      body := ← expr 4096 body
+    }
   | _ => throw "PSC1_PORTABLE_IR_DECLARATION"
 
 def imported (value : Lean.Json) : Except String PsVerifiedIrExternalImport := do
@@ -205,10 +210,12 @@ def imported (value : Lean.Json) : Except String PsVerifiedIrExternalImport := d
 def decode (value : Lean.Json) : Except String PsVerifiedIrModule := do
   let result ← match ← rows value with
     | [.str "psc1-ir/1", imports, structures, inductives, declarations] =>
-      pure { imports := ← (← rows imports).mapM imported,
-        structures := ← (← rows structures).mapM structureRow,
-        inductives := ← (← rows inductives).mapM inductiveRow,
-        declarations := ← (← rows declarations).mapM declaration : PsVerifiedIrModule }
+      pure ({
+        imports := ← (← rows imports).mapM imported
+        structures := ← (← rows structures).mapM structureRow
+        inductives := ← (← rows inductives).mapM inductiveRow
+        declarations := ← (← rows declarations).mapM declaration
+      } : PsVerifiedIrModule)
     | _ => throw "PSC1_PORTABLE_IR_MODULE"
   let encoded ← match psIrEncodeModule result with
     | .ok encoded => pure encoded

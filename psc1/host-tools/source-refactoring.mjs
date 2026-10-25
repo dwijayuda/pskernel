@@ -318,6 +318,21 @@ function runSourceHelper({ executable, sha256 }, mode, encoded, consume) {
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 }
 
+// Token spans are half-open. In particular, the zero-width EOF token at
+// stopByte belongs to no name, even when a source file has no final newline.
+function tokensInSpan(span, row) {
+  const first = row.tokenStarts.get(span.start.byteOffset);
+  if (first === undefined) return [];
+  const tokens = [];
+  for (let i = first; i < row.tokens.length; i++) {
+    const piece = row.tokens[i];
+    if (piece.span.start.byteOffset >= span.stop.byteOffset ||
+        piece.span.stop.byteOffset > span.stop.byteOffset) break;
+    tokens.push(piece);
+  }
+  return tokens;
+}
+
 /** Read-only semantic provenance over genuine lexical capabilities. The host
  * pins both tools; source bytes cannot choose executables, policies or checkers.
  * Independent admission covers exact logical graph bytes, not refactoring equivalence.
@@ -426,12 +441,7 @@ export function createSourceOwnershipTool({
                   origin.span.stop.byteOffset < origin.nameSpan.stop.byteOffset ||
                   origin.nameSpan.start.byteOffset === origin.nameSpan.stop.byteOffset)
                 refuse('OWNERSHIP_NAME_SPAN');
-              const tokens = [];
-              const startToken = row.tokenStarts.get(origin.nameSpan.start.byteOffset);
-              if (startToken === undefined) refuse('OWNERSHIP_TOKEN_ALIGNMENT');
-              for (let i = startToken; i < row.tokens.length &&
-                  row.tokens[i].span.stop.byteOffset <= origin.nameSpan.stop.byteOffset; i++)
-                tokens.push(row.tokens[i]);
+              const tokens = tokensInSpan(origin.nameSpan, row);
               if (!tokens.length || tokens[0].span.start.byteOffset !== origin.nameSpan.start.byteOffset ||
                   tokens.at(-1).span.stop.byteOffset !== origin.nameSpan.stop.byteOffset ||
                   tokens.some(p => !['identifier', 'symbol'].includes(p.token.kind)))
@@ -463,7 +473,7 @@ export function createSourceOwnershipTool({
             const result = { ...module, sourceId: snapshot.sourceId, sourceSha256: snapshot.sourceSha256,
               profile: snapshot.profile, grammar: snapshot.grammar, origins };
             if (mode === 'bindings') result.bindings = validateSourceBindingModule(module.bindings,
-              result, row, { exactKeys, spanInSource, coreName, hash, refuse });
+              result, row, { exactKeys, spanInSource, coreName, hash, refuse, tokensInSpan });
             return result;
           });
           if (members !== wire.sourceCoreDeclarations) refuse('OWNERSHIP_COVERAGE');

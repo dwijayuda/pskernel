@@ -60,8 +60,23 @@ and manual test constructors are updated using the Linux source inventory
 40217518231. Actual allocation/resolution tracing transports both anchor and optional
 source span. Generated references remain attributed read-only; a selected binder
 with a generated/unlocated use refuses edits. Full token/span checks, actual target
-correspondence, endpoint admission and Core comparison remain mandatory. New
-list/projection/grouped-reference/grouped-call tests are pending Linux qualification.
+correspondence, endpoint admission and Core comparison remain mandatory. Focused40217982759/job121243651239 PASSED:20 actual checked renames and61
+refusals, including lists, projection bases, nested grouping and adjacent grouped
+calls. Both whole122-module grammar censuses pass source closure
+1714b8cf1d3d50096ac85fc4838237f82205a2459645c01c3811bbad257756f8.
+
+The full integration executes all28 before/after artifacts with projection use,
+then still refuses a compiler reference span. Read-only Linux diagnostic
+40218871489/job121245870721 captures the actual1714b8cf source:108032 references
+(98437 source/9595 generated), zero spelling mismatches,17033418 response bytes,
+63867ms and496596KiB maxRSS. It explicitly produces no accepted index, independent
+admission or candidate. The remaining host range bug included the zero-width EOF
+token when a reference ended at EOF. Ownership/reference validation now shares
+one half-open token-range utility; no-final-newline positives and an empty-EOF
+span refusal are added. Strict span/target/admission/Core checks remain unchanged.
+New focused/whole-compiler/ordinary results for this host fix remain pending.
+Current-source Wasm G1 is independently running40218467242 from request
+47b0db70b000f7f631883c828182c6511d7316c2, source d51873c5 and1714b8cf closure.
 
 Preserved development-source Wasm G1 PASSED40214655849/job121233194023:
 source82322ec8f3a22f50562d81368986defafcf3a09e, closure

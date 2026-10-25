@@ -64,6 +64,7 @@ for (const grammar of ['lean', 'ps']) {
     ['reuse', 'def choose : Nat := Nat.add (let x : Nat := 1; x) (let x : Nat := 2; x)\n', 'x', 1],
     ['lambda', 'def choose : Nat := (fun (x : Nat) => Nat.add x 1) 2\n', 'x', 0],
     ['branch', 'def choose : Nat := if true then (let x : Nat := 1; x) else (let x : Nat := 2; x)\n', 'x', 1],
+    ['no-final-newline', 'def choose : Nat := let value : Nat := 7; value', 'value', 0],
     ['list-generated', 'def choose : Nat := let x : Nat := 7; ' +
       'let values : List Nat := [x, x]; match values with | List.nil => 0 | List.cons head tail => head\n', 'x', 0],
     ['projection', 'def choose : Nat := let pair : Prod Nat Bool := Prod.mk 7 true; pair.fst\n', 'pair', 0],
@@ -127,6 +128,7 @@ for (const grammar of ['lean', 'ps']) {
   // Group spans remain available for adjacency while source-name spans stay
   // exactly on identifiers. This tests actual authored PS, not printer output.
   for (const [name, text, binderName] of [
+    ['no-final-newline', 'def choose : Nat := let value : Nat := 7\n value', 'value'],
     ['grouped-reference', 'def choose : Nat := let value : Nat := 7\n ((value))\n', 'value'],
     ['adjacent-grouped-call', 'def choose : Nat := let fn : Nat -> Nat := fun(value : Nat) => value\n (fn)(7)\n', 'fn'],
   ]) {
@@ -179,6 +181,7 @@ try {
     'trace["references"][-1][2].append(0)',
     'trace["references"][-1][5].append(0)',
     'trace["references"][-1][5][2]+=1',
+    'trace["references"][-1][5]=[value["modules"][0]["byteLength"],2,1,value["modules"][0]["byteLength"],2,1]',
     'trace["enabled"]=False',
     'trace["authority"]="publish"',
     'value["modules"][0]["bindings"]=[]',

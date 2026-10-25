@@ -85,10 +85,19 @@ theorem match_shape_correspondence
 
 theorem expected_eq_supported (universeName : PsKernelName) :
     BootstrapShape (psKernelExpectedEqType universeName) := by
+  change BootstrapShape
+    (.forallE (.str .anonymous "α") (.sort (.param universeName))
+      (.forallE .anonymous (.bvar 0)
+        (.forallE .anonymous (.bvar 1) (.sort .zero) .default) .default) .implicit)
   repeat constructor
 
 theorem expected_refl_supported (universeName : PsKernelName) :
     BootstrapShape (psKernelExpectedEqReflType universeName) := by
+  change BootstrapShape
+    (.forallE (.str .anonymous "α") (.sort (.param universeName))
+      (.forallE (.str .anonymous "a") (.bvar 0)
+        (.app (.app (.app (.const psKernelEqName [.param universeName])
+          (.bvar 1)) (.bvar 0)) (.bvar 0)) .default) .implicit)
   repeat constructor
 
 theorem eq_shape_correspondence

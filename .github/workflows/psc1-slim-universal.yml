@@ -1,7 +1,7 @@
 name: PSC1 slim universal npm and optional execution qualification
 on:
   push:
-    branches: [feat/psc1-slim-universal-npm-20261025]
+    branches: [feat/psc1-slim-universal-npm-20261025, refactor/psc1-readability-20261025]
     paths:
       - .github/workflows/psc1-slim-universal.yml
       - psc1/scripts/slim-universal-*

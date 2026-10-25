@@ -61,23 +61,23 @@ const entries=[
     "name": "psWasmTypingInstructions"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
     "name": "psWasmListFoldlWorker"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
     "name": "psWasmCollectFunctionTypesFromTypeWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
     "name": "psWasmCollectFunctionTypesFromExprWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
     "name": "psWasmCollectArrayTypesFromTypeWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
     "name": "psWasmCollectArrayTypesFromExprWithFuel"
   },
   {

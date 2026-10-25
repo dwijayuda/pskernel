@@ -1,5 +1,10 @@
 # pskernel
 
+This repository contains several independently scoped compiler and kernel projects.
+For the current PSC1 compiler and npm toolchain, start at [psc1/README.md](psc1/README.md).
+The sections below describe the root TypeScript kernel research project; its Lean
+4.34 compatibility oracle is distinct from PSC1's official Lean 4.35 admission provider.
+
 An independent TypeScript reimplementation of the **Lean 4.34.0 trusted kernel**, developed for ProofScript kernel research.
 
 This repository is intentionally version-pinned. Lean 4.34.0 is the compatibility oracle; Lean4Lean is a secondary implementation/verification guide. The project does **not** claim full Lean compatibility or formal equivalence until the remaining gates in `PROGRESS.json` are closed.

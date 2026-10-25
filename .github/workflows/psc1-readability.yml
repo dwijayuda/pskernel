@@ -1,0 +1,41 @@
+name: PSC1 readability correspondence
+on:
+  push:
+    branches: [refactor/psc1-readability-20261025]
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-readability.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-readability-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  correspondence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+          cache: npm
+          cache-dependency-path: psc1/host-tools/package-lock.json
+      - name: Install existing pinned host tooling
+        run: npm ci --prefix psc1/host-tools --ignore-scripts --no-audit --no-fund
+      - name: Check scoped formatting and executable AST correspondence
+        run: node psc1/scripts/readability-host-check.mjs
+      - name: Check verbatim Wasm type-inventory extraction
+        run: node psc1/scripts/readability-module-check.mjs
+      - name: Preserve all moved recursive-prefix guards
+        working-directory: psc1
+        run: node scripts/check-wasm-applied-prefixes.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-readability-${{ github.sha }}
+          path: psc1/dist/readability/
+          if-no-files-found: error
+          retention-days: 90

@@ -1,121 +1,110 @@
-# PSC1 native compiler architecture
+# PSC1 architecture
 
-Updated 2026-10-20. Active scope: **PSC1 Practical Core — v7.2 subset**.
-The implementation is handwritten Lean, pinned to Lean 4.35.0 commit
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The previous bootstrap architecture is
-preserved verbatim in [the historical document](docs/history/ARCHITECTURE_BEFORE_SEVEN_BACKENDS_2026-10-20.md).
+This document describes responsibilities. Exact source identities and passing
+runs belong to the qualification receipts linked from [the documentation index](docs/README.md).
+The previous architecture snapshot is [preserved](docs/history/ARCHITECTURE_BEFORE_READABILITY_2026-10-25.md).
 
-## Actual execution pipeline
+## Follow one compilation
 
-1. `Ps.Host.SourceSnapshot` captures the entry and dependency source bytes and syntax once.
-2. `Ps.Host.ProjectCompiler`, syntax, environment, meta and elaborator packages construct
-   the dependency-ordered canonical Core closure.
-3. `Ps.Compiler.Api` prepares the exact immutable admission graph.
-   `Ps.Host.LeanChecked` submits that graph to the independent official Lean kernel.
-4. In ordinary mode, `Ps.Compiler.Ordinary` pairs the opaque logical declaration with
-   its separately admitted executable body; graph identity is recomputed before erasure.
-5. `Ps.Erasure` removes proofs and type-only declarations and selects referenced runtime
-   prelude declarations. `Ps.CompilerIr` checks the resulting typed executable IR.
-6. `Ps.BackendCommon.Plan` shares target identities, public capability checks and the
-   closed specialization/revalidation plan. JS, TS, Python, PHP and both Wasm paths use
-   that closed plan; Rust retains its checked generic IR.
-7. Direct backend packages lower and print target code. Host tools perform target syntax
-   checking, formatting, final source-map observation and filesystem publication.
-8. Complete checksummed bundles are staged privately and exposed by one atomic generation
-   pointer. Failed builds preserve an already published generation.
+1. Capture dependency-ordered exact source bytes and module identities.
+   The native path uses `Ps.Host.SourceSnapshot`; the installed API receives a
+   captured source list, and its CLI accepts a single file or a closed project JSON.
+2. Parse either grammar into shared syntax, resolve names and elaborate canonical Core.
+3. Prepare the exact canonical admission graph. Ordinary-checked mode pairs opaque
+   logical declarations with separately typed executable bodies and checks their identity.
+4. Erase proofs/types and construct executable IR. Strict validation applies to the
+   original IR and again after target transformations.
+5. Apply the existing target plan and emitter to produce a **candidate**.
+6. The host requires actual independent official Lean 4.35.0 acceptance of the exact
+   admission graph, validates response/source/tool identities and runs target/API checks.
+7. For publication, seal a complete immutable generation and commit its current pointer
+   through the existing transaction. Failures preserve the previous published generation.
 
-The constructor of `PsHostDirectPrepared` is private. Public executable commands require
-this admitted session; an arbitrary IR wrapper or npm manifest cannot authorize output.
-`PsValidatedIrModule` is data with public construction, so every target entry must validate
-it again. IR typing is not a proof of semantic preservation.
+This is a dependency description. Generated execution can produce the candidate
+before the external checker runs; candidate production never grants publication authority.
 
-## Package direction
+## Responsibility and dependency map
 
-| Responsibility | Source |
-| --- | --- |
-| Source positions, names, diagnostics | `packages/foundation` |
-| Both supported input grammars and shared AST | `packages/syntax` |
-| Canonical logical terms/declarations | `packages/core` |
-| Resolution, prelude and elaboration | `packages/environment`, `packages/meta`, `packages/elab` |
-| Canonical admission transport | `packages/bridge` |
-| Logical/executable pairing and orchestration | `packages/compiler` |
-| Proof erasure and typed executable IR | `packages/erasure`, `packages/compiler-ir` |
-| Shared target identity and closed planning | `packages/backend-common` |
-| Independent direct printers and runtime catalogues | `packages/backend-*` |
-| Independent official Lean admission | `packages/pskernel-lean/provider` |
-| Captured projects, target tools and publication | `host`, `host-tools` |
-| One CLI model; npm process launcher | `packages/cli/src/Main.lean`, `npm-cli` |
+| Layer | Implementation | May depend on |
+| --- | --- | --- |
+| Positions, names, collections and diagnostics | `packages/foundation` | Portable foundation |
+| Shared AST, lexer, both parsers/printers | `packages/syntax` | Foundation |
+| Logical terms and declarations | `packages/core` | Foundation/model dependencies |
+| Environment, inference and elaboration | `packages/environment`, `meta`, `elab` | Syntax/Core; no target printers |
+| Admission encoding and compiler orchestration | `packages/bridge`, `compiler` | Semantic layers and erasure/IR |
+| Erasure, executable IR and strict validation | `packages/erasure`, `compiler-ir` | Semantic models; no target publication |
+| Closed target planning | `packages/backend-common` | Checked IR |
+| Target representations, runtime helpers and emission | `packages/backend-*` | IR and shared plan |
+| Four-engine composition root | `packages/compiler-unified` | JS/TS/Rust/Wasm compiler services |
+| Native project/CLI composition | `host/src`, `packages/cli` | Semantic compiler, selected backends and host facilities |
+| Installed sessions, resources and publication | `host-tools`, `npm-cli` | Explicit pinned tools and packages |
+| Official independent checking | `packages/pskernel-lean/provider`, `pskernel-lean-wasm` | Official pinned Lean kernel |
 
-Semantic compiler packages do not import target printers. Host code composes the built-in
-backends into one executable. Python/PHP support does not require installing either
-interpreter to parse, elaborate, admit, or erase source. Selecting a target requires its
-actual validation tools before publication. Compiler installation and target execution
-environments are separate.
+The import graph and the build are authoritative for exact dependencies. This
+table is a guide, not permission to introduce cycles or bypass the semantic compiler.
+Existing semantic-boundary guards remain in force.
 
-## Current boundaries
+## Three independent selections
 
-The qualified parent checkpoint is `ea03ce125ad4d4902070d6fef92d92b51cb2e857`,
-[Linux run 39349606554](https://github.com/dwijayuda/pskernel/actions/runs/39349606554).
-It qualifies bounded JS, TS, Rust, core Wasm and Bool-only component Wasm behavior.
-New backend qualification is recorded separately in `docs/PSC1_BACKEND_CONFORMANCE.md`;
-a source file or target enum is not execution evidence.
+- **Execution engine:** the generated compiler runs as JS, TS, Rust or compiler-Wasm.
+- **Output target:** JS, TS, Rust, core Wasm, component Wasm, Python or PHP.
+- **Independent checker:** official Lean 4.35.0 via linear-memory Wasm by default,
+  optionally native or explicit comparison of both.
 
-The independent official Lean kernel is the direct admission provider. The owned
-PSKernel-Core is separately integrated and natively regression-tested. There is no
-automatic fallback, new axiom policy, or behavioral certificate.
+One source/compiler pipeline supplies the engines. They are not four handwritten compilers.
+The current slim checked API publishes JS; its other target API is explicitly candidate-only.
+The retained native distribution exposes the existing seven mappings with optional Python/PHP.
+Never infer installed capability from a backend enum or an available source file.
 
-The executable IR remains expression-oriented: typed calls, lets, lambdas,
-conditionals, records, constructors and matches. The control/data continuation
-uses those same operations. Lexical mutable binding identities track successive
-immutable Core values. Branch and finite-loop continuations carry the visible
-state; early return bypasses the continuation. List/Nat iteration uses two total
-checked helper definitions, and Array iteration uses the existing fold.
+## Authority and trust
 
-Selected ordinary while loops first elaborate through a temporary internal marker.
-A checked Core lifting pass captures lexical values, specializes the state/step
-continuation into a private partial helper, requires fully saturated direct tail
-recurrence, and rechecks the helper and rewritten source. Every marker is removed
-before admission. Temporary self/type headers are elaborator context only; they
-are not admitted source axioms. The unchanged ordinary preparation independently
-admits each opaque witness and exact body, then rechecks immutable graph pairing.
+`PsVerifiedIrModule` and `PsValidatedIrModule` are constructible data wrappers.
+Their names are not proof certificates. Backend entries must revalidate input.
+Generated response fields, package metadata and copied receipts cannot select a
+checker, tool path, plugin, output directory or publication policy.
 
-Tuples and array literals use existing datatype constructors. Optional lookup binds
-receiver/index once and scans through the checked Array fold to construct Option.
-No procedural IR, unchecked loop opcode, host mutable cell or execution fuel is added.
+The generated host's private session state ties together captured sources,
+actual compiler execution, strict response validation, actual independent checker
+acceptance, staged target bytes and the publication transaction. See
+[`host-tools/generated-compiler-session.mjs`](host-tools/generated-compiler-session.mjs)
+and [host guide](host-tools/README.md).
 
-See [control/data architecture and scope](docs/PSC1_PRACTICAL_CORE_CONTROL_DATA.md)
-for supported effects, closure restrictions, finite-loop space use, optional-lookup
-cost, native admission/execution distinctions and exact qualification.
+Independent admission establishes logical acceptance under the pinned Lean rules.
+Typed IR is not a proof of source-to-target preservation. Cross-backend tests and
+self-host fixed points do not replace such a proof. The current receipts explicitly
+retain these assurance boundaries.
 
-## Runtime ownership
+## Runtime, control and resource invariants
 
-A logical prelude declaration is checked source and may enter the shared erasure closure.
-A target runtime helper implements a target representation and belongs to its backend.
-The old `npm-runtime` directory contains historical generated-compiler packaging support;
-it is not an implicit dependency of newly generated Python/PHP programs.
+A logical prelude declaration is checked source. A target runtime helper implements
+a target representation and belongs to its backend. Selected helpers are bundled
+with target output; there is no implicit general-purpose npm runtime authority.
 
-Runtime-free programs should use native target values and operators. Helpers must be
-selected by required operations and their dependencies; emitted bundles record the
-runtime contract/version and checksums. A shared external runtime mode is not implemented; generated bundles include their
-selected readable helpers.
+The executable IR remains expression-oriented. Checked continuations carry lexical
+state. Selected ordinary loops use checked private helpers; temporary elaborator
+markers are removed before admission. No unchecked loop opcode, host mutable cell
+or source-selected foreign authority is introduced.
 
-## Direct TS and JS
+Explicit workers, accumulator order, source fuel and refusal priority are intentional
+parts of the self-hostable implementation. A readability refactor must preserve
+these before considering a different algorithm.
 
-DirectTS prints TypeScript. DirectJS prints JavaScript without invoking a TypeScript
-compiler. Combined output captures and admits source once, shares the closed public
-plan, prints both independently and validates both before publication. A TypeScript checker
-used in CI is an independent consumer test, not a hidden DirectJS code generator.
+Compiler-Wasm retains PSC1's existing GC architecture. The independent Wasm kernel
+is the official C++ kernel compiled with Emscripten to linear memory; it is not Wasm GC.
+Kernel research under PSKernel-Core remains an independent workstream.
 
-## npm and future self-hosting
+## Distribution and reproducibility
 
-The native npm package must carry the compiler, exact pin, host tool dependencies and
-portable source library resolver. Installed source libraries are resolved as source and
-re-enter captured independent admission. Package metadata is not proof evidence.
+The slim root packages frozen qualified G3 JS/TS executors, the mandatory Wasm
+checker and readable host code. Optional compiler executors and native checking
+require exact package/version/manifest/resource identities. Missing or corrupt
+resources refuse without download or fallback.
 
-The minimal future self-host import closure remains semantic compiler plus one selected
-backend. New host-only providers, npm tooling and additional backends do not automatically
-enter that closure. No compiler/kernel fixed-point or full self-host qualification is
-part of this milestone.
+Linux publication retains locks, before/after identity checks, immutable generations,
+file/directory fsync and an atomic current-pointer commit. Other OS publication
+is refused pending equivalent implementation and release tests.
 
-See [backend decisions](docs/PSC1_BACKEND_ARCHITECTURE.md), the runtime contract,
-npm ecosystem document and machine-readable qualification records for precise limits.
+Frozen compiler qualification remains attached to its original source closure.
+A native-source refactor does not retroactively requalify generated frozen payloads;
+changed compiler sources need their own source/closure/release evidence.
+See [current roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md), [contracts and receipts](docs/README.md).

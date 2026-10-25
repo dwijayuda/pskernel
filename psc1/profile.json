@@ -67,5 +67,11 @@
   "doValueUniverse": "Type 0 only for the newly selected Id/Except/CompilerM surface",
   "practicalCoreQualification": "docs/PSC1_PRACTICAL_CORE_SLICE_1_QUALIFICATION.json",
   "practicalCoreQualifiedCommit": "4be91b111c1773f02a009fb2f643b18912cee920",
-  "practicalCoreQualifiedRun": 39348537989
+  "practicalCoreQualifiedRun": 39348537989,
+  "historicalSnapshot": true,
+  "currentAuthorities": {
+    "language": "docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json",
+    "npm": "NPM_DISTRIBUTION_CONTRACT.json",
+    "evidence": "docs/PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json"
+  }
 }

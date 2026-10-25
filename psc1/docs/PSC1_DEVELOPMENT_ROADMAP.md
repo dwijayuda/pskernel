@@ -1,113 +1,127 @@
 # PSC1 development roadmap
 
-Updated2026-10-25 Asia/Jakarta. Draft PR #180 follows qualified PR #179. Practical
-Core v1 remains frozen at14 feature families/37 finite criteria. One existing
-compiler source/frontend/elaborator/checked IR/verification pipeline serves all
-seven backend mappings and both source grammars. No merge or npm publication.
+Updated 2026-10-25 Asia/Jakarta. Active draft PR #181 follows qualified PR #180.
+Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
+One semantic compiler serves both grammars and all seven native backend mappings.
+No merge or npm publication is authorized.
 
-## Current package result
+## Current maintenance result
 
-Slim universal-format `proofscript@0.1.0-psc1.4` passes actual Linux package
-run40166882825 at0a717520110c673006d3f5f5d7627e59d5853f62:
-3,703,113-byte root, down94.04% from62,181,083. Root includes qualified JS/TS
-executors and the mandatory official4.35 linear-memory Wasm checker only.
-Rust/compiler-Wasm executors and native checking are explicit optional packages.
-Exact package/version/index/manifest/resource/source/executable pins prohibit
-arbitrary plugin selection, downloads and silent fallback.
+Implementation `446a0f21c6288a7c20b843bbeadcd18ba1460fa2` is qualified by
+correspondence run 40184892095, actual host-package run 40184641007 and normal
+source run 40184897417. The latter passes all 37 criteria with zero blocked.
+New-source Wasm G1 additionally passes in 40184951724; no new G2/G3 is claimed.
 
-Tests:20 real compiler cases/four engines/both grammars,12 local/global CLI cases,
-48 candidate mappings,14 genuine checker comparisons,31 negative/rollback cases
-and actual packed public types. Empty-cache offline installation begins without
-optional/native payloads or SDK execution. Optional bundles are then installed
-and actually executed through the same existing checked session.
+The first slice establishes current README, architecture, contributor, documentation
+index and host guides. It formats/documents the installed host with executable-AST
+correspondence and extracts one Wasm type-discovery module with unchanged declaration
+bodies. Earlier documents and qualifications remain preserved.
+[Contributor guide](../CONTRIBUTING.md), [documentation index](README.md),
+[exact receipt](PSC1_READABILITY_QUALIFICATION_2026-10-25.json).
 
-[Install guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md),
-[qualification receipt](PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json),
-[continuation](PSC1_SLIM_UNIVERSAL_CONTINUATION.md).
-The finite [npm distribution contract](../NPM_DISTRIBUTION_CONTRACT.json)
-owns acceptance; exact CI evidence belongs in the receipt, not a volatile
-self-reported contract status.
+The refactored source contains 121 modules, closure
+`7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000`.
+It has actual Wasm G1 evidence in run 40184951724: both grammar censuses, 40
+cross-target cases and nine envelope refusals. This is not new G2/G3 or fixed-point
+qualification. Packaged G3 executors retain the separately qualified frozen source.
 
-## Current qualification boundary
+## Current package and source result
 
-The root format and checked compile API/stdout are portable Node-only code; this
-slice is tested on Linux only. JS checked publication preserves the existing
-Linux fsync/lock/immutable-generation/atomic-current-pointer guarantee, and
-explicitly refuses other OS publication. Kernel-Wasm stays official C++ linear
-memory; optional compiler-Wasm stays PSC1's existing GC architecture.
+The handwritten host at `dfb44062bbc1fb490fa5696483938f07e0f63e0c` passes
+[package run 40184641007](https://github.com/dwijayuda/pskernel/actions/runs/40184641007).
+The unpublished root is 3,704,169 bytes, compared with the previous 62,181,083-byte
+integrated root. JS/TS executors and the mandatory official Lean 4.35 linear-memory
+Wasm checker are included. Rust/compiler-Wasm execution and native checking are
+explicit, exactly pinned optional packages.
 
-Checked generated output is JS. Candidate-only JS/TS/Rust/Wasm-core output grants
-no proof or publication authority. It is distinct from complete checked generated
-publication. The previous native distribution and its all-seven-output CLI,
-matching optional Python/PHP providers and real application evidence remain
-preserved in [the prior guide](PSC1_KERNEL_PACKAGES.md) and Git history.
+Actual tests cover 20 compiler cases, 12 local/global CLI cases, 48 candidate
+mappings, 14 genuine checker comparisons, 36 negative/publication-failure cases
+and packed public types. Installation starts offline without optional payloads,
+native compiler SDKs or install scripts. Later explicit optional installs execute
+the same existing checked session.
 
-Normal source run40166884643 PASSED at code
-`0a717520110c673006d3f5f5d7627e59d5853f62`: full job121091590002 and final
-gate121096509883,37/37 Practical Core criteria,0 blocked,all seven backends/both
-grammars,minimum Python and installed native npm/source libraries.
-Tested merge`559ea387ad22999b7b6aedd073fd61c8a0c1bc28` and code HEAD share
-tree`0a232bbdf67f6f8de60950142af3be17f1231e4d`.
-Full artifact12589082030 ZIP SHA256
-`1c0d30be97a68c7ca3fb25667dd8412dbb477d8df447960d12fd5b88764700a2`.
-This is separate from slim package40166882825 and does not imply complete
-cross-platform or checked non-JS generated publication qualification.
+[Normal source run 40184897417](https://github.com/dwijayuda/pskernel/actions/runs/40184897417)
+passes 37/37 criteria with zero blocked: full job 121146243734, gate 121152107403,
+all seven native backends, both grammars, minimum Python and installed native
+npm/source libraries. Tested merge `1b9eca5fd94ca4271369238ed34dd094f66d9134`
+and implementation 446a0f21 share tree
+`cf56c28b8e67e6f8d643465fc74086cf7c95e409`.
+The exact receipt owns artifact hashes and per-job results. This finite-contract
+qualification does not imply complete universal-platform/non-JS publication.
 
+The package format and checked compile/stdout API use portable Node APIs, with
+actual Linux qualification in this slice. Checked generated output is JS.
+Candidate-only JS/TS/Rust/Wasm-core output grants no admission/publication authority.
+Linux publication preserves existing locks, complete immutable generations, fsync
+and an atomic current pointer. Other OS publication refuses until qualified.
 
-## One dependency-ordered queue
+The previous native distribution, all seven output mappings and optional Python/PHP
+providers remain preserved. Kernel-Wasm stays official C++/Emscripten linear memory;
+compiler-Wasm retains PSC1's existing GC architecture.
+[Current install guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md),
+[prior native guide](PSC1_KERNEL_PACKAGES.md).
+The [distribution contract](../NPM_DISTRIBUTION_CONTRACT.json) defines acceptance;
+qualification receipts supply exact CI evidence.
+
+## One dependency-ordered remaining queue
 
 | Order | Work | Status and finite acceptance |
 | --- | --- | --- |
-| 0 | Slim root and optional executor integration | PACKAGE QUALIFIED40166882825. Source gate40166884643 PASSED37/37,0 blocked. Default JS/TS without native/optional payloads, explicit pinned Rust/Wasm local/global execution, independent checking and refusal/rollback are verified. |
-| 1 | Slim real application/source-package coverage | PENDING. Compile/consume representative CLI/JSON/file/multi-module applications through the new root and both grammars; automatic source closure capture must not grant host/FFI authority. Keep previous native package functional. |
-| 2 | Portable transactional publication | PENDING. Preserve Linux semantics and previous outputs. Implement actual equivalent macOS/Windows publication plus offline installed platform release gates; source-admission binaries or universal npm metadata alone do not qualify this. |
-| 3 | Checked generated TS publication | PENDING. Reuse checked emitter/runtime/admission/publication, independent pinned TS consumers, all four executors/both grammars, negative/ABI/tamper/prior-output checks. |
-| 4 | Checked Rust/Wasm/core/component/provider dispatch | PENDING. Reuse existing emitters and runtime adapters, complete all relevant target mappings/consumer gates. Python/PHP remain optional. Additional Rust execution platforms need genuine binaries and bounded supervisors. |
-| 5 | Final clean reproduction and universal release | PENDING. Exact final source/package/platform qualification, full required reproduction and user authorization before merge/publication. |
-| 6 | Original240-second performance target | UNQUALIFIED. Optimize measured real compiler workloads without changing semantic fuel, G1/checker or memory/stack policies. Isolated proved lexer31e10263 is unpromoted. |
-| 7 | Broader language/extensions/readability | DEFERRED beyond frozen v1. Preserve all working features; optional source/API packages grant no kernel/host/FFI/runtime authority. |
+| 0 | Documentation, host readability and one compiler-module extraction | First slice qualified in the linked receipt. Preserve current entry points, invariants, correspondence and exact evidence. |
+| 0a | Further maintenance and safe source editing | Not implemented. Prefer coherent modules and explanatory contracts. Before broad automatic rename/conversion, qualify lossless token/trivia reconstruction, exact source digests, resolved identities and stale/capture refusal. Do not expand the frozen language merely to shorten compiler code. |
+| 1 | Slim real applications and source-package coverage | Pending. Compile/consume CLI, JSON/file and multi-module applications through the slim APIs in both grammars. Source closure resolution must not grant host/FFI authority. Retain the previous native package. |
+| 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |
+| 3 | Checked generated TS publication | Pending. Reuse existing emitter, IR/admission/runtime and publication machinery; require independent pinned TS consumers, four executors, both grammars and negative/ABI/tamper/prior-output checks. |
+| 4 | Checked Rust/Wasm/component/provider dispatch | Pending. Reuse existing emitters/adapters, complete relevant target/consumer gates and keep Python/PHP optional. Additional Rust execution platforms need genuine binaries and bounded supervisors. |
+| 5 | Clean reproduction and final universal release | Pending. Qualify final source/package/platform identities and required compiler generations. Preserve frozen qualifications; promote changed compiler source only with its own evidence. User authorization remains required before merge/publication. |
+| 6 | Original 240-second self-compilation performance target | Unqualified. Optimize measured real compiler workloads without changing fuel, G1/checker or memory/stack policies. Isolated proved lexer experiment 31e10263 remains unpromoted. |
+| 7 | Broader language features and generalized extensions | Deferred beyond frozen v1. Preserve working features. Optional packages cannot acquire kernel, host, FFI or runtime authority through metadata. |
 
 ## Preserved qualifications
 
-Four genuine G1/G2/G3 chains and exact source/admission/both-IR/executable/four-output
-fixed points share120-module closure
-07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af,
-implementationdaa735017e34ee94da79d747c363237b4adbc4ef.
-Each chain has120 cross-target cases and27 refusals with successful immutable
-readbacks. [Exact receipt](PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json).
+The frozen packaged compiler has 120 modules, implementation
+`daa735017e34ee94da79d747c363237b4adbc4ef`, closure
+`07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af`.
+Four genuine G1/G2/G3 chains retain exact source, admission, both IR, executable
+and four-output fixed points. Each chain has 120 cross-target cases, 27 envelope
+refusals and immutable readback evidence.
+[Four-engine receipt](PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json).
 
-| Executor | G2/G3 request ms | Service maxRSS KiB | Correctness profile |
+| Executor | G2 / G3 request milliseconds | Service max RSS KiB | Correctness profile |
 | --- | --- | --- | --- |
-| JS | 1621212 /1656073 | 3568508 /3496952 | 1800s |
-| TS | 1453401 /1411839 | 3437396 /3466012 | 1800s |
-| Rust | 2139961 /2160767 | 1197260 /1197296 | 3600s |
-| Wasm | 1090090 /1091869 | 2904948 /2719740 | 1800s |
+| JS | 1621212 / 1656073 | 3568508 / 3496952 | 1800 seconds |
+| TS | 1453401 / 1411839 | 3437396 / 3466012 | 1800 seconds |
+| Rust | 2139961 / 2160767 | 1197260 / 1197296 | 3600 seconds |
+| Wasm | 1090090 / 1091869 | 2904948 / 2719740 | 1800 seconds |
 
-Prior PR #179 default-Wasm integration40161362270 and source40161364575 passed
-37/37/seven backends/both grammars; final docs40163908331 pass.
-Native4.35 kernels40155475188 and official linear-Wasm40158859386 are installed
-qualified on Linux x64/arm64, macOS x64/arm64 and Windows x64. Native raw kernels
-are2.77–4.62MB each; whole native tgz6446239 bytes. Wasm tgz582533 bytes/module2212007.
-Compiled bundle40158598464 qualifies Wasm candidate execution on five platforms
-and Rust on Linux x64. These are distinct from full root-platform release.
-[Exact prior receipt](PSC1_KERNEL435_QUALIFICATION_2026-10-25.json).
+Prior PR #179 package run 40161362270 and source run 40161364575 passed their exact
+37 criteria/seven-backend/both-grammar scope; final docs run 40163908331 passed.
+The original PR #180 slim package/source evidence remains in
+[its receipt](PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json).
 
-## Fixed policies and throughput
+Official native kernels (40155475188) and linear-memory Wasm kernels (40158859386)
+retain qualification on Linux x64/arm64, macOS x64/arm64 and Windows x64.
+Native raw kernels are 2.77–4.62 MB each; the native tarball is 6,446,239 bytes.
+The Wasm tarball is 582,533 bytes and its module is 2,212,007 bytes.
+Compiled-bundle run 40158598464 qualifies compiler-Wasm candidate execution on five
+platforms and Rust execution on Linux x64. These do not qualify full root-platform
+publication. [Kernel/package receipt](PSC1_KERNEL435_QUALIFICATION_2026-10-25.json).
 
-Official Lean4.35.0 at eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
-trustlevel0, finite2000000-heartbeat/20000-recursion, independent admission,
-strict original/transformed IR, source/logical pairing, semantic fuel,
-memory/stack/lifetime, negatives and unsupported ABI refusals remain required.
-G1/tools/corpus240s/checker120s unchanged; original1800s correctness and240s
-performance remain separate; Rust-only3600s is G2/G3 requests only.
+## Fixed policies and efficient validation
 
-Use successful exact-source artifacts and dependency-selected CI. Package tests
-qualify default local/global installation and optional bundles in one run. Keep
-npm-managed metadata separate from the immutable runtime dependency-lock snapshot.
-Do not rerun successful long frozen chains for package/docs-only changes.
-PSKernel-Core research remains independent and does not replace official checking
-or block Practical Core work.
+Official Lean 4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`,
+trust level zero, finite 2,000,000-heartbeat/20,000-recursion bounds, independent
+admission, source/logical pairing, strict original/transformed IR, semantic fuel,
+memory/stack/lifetime policies, negatives and unsupported ABI refusals remain required.
 
-[AI state](../AI_WORK_STATE.md) owns the current checkpoint; this roadmap owns
-the single remaining queue. Earlier complete states remain available through Git
-and the immutable qualification receipts.
+G1/tools/corpus remain 240 seconds and the checker remains 120 seconds.
+The 1800-second correctness and original 240-second performance profiles remain
+separate; Rust-only 3600 seconds applies only to G2/G3 requests.
+
+Use dependency-selected CI and successful exact-source artifacts. Do not rerun
+long frozen chains for unchanged package/docs payloads. Keep npm-managed metadata
+separate from immutable runtime dependency-lock identities. PSKernel-Core research
+remains independent and does not replace official checking or block compiler work.
+
+[AI work state](../AI_WORK_STATE.md) records the checkpoint; this document owns
+the remaining queue. Git history and dated receipts retain earlier evidence.

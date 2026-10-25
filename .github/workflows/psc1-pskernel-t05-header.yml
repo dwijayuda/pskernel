@@ -133,7 +133,7 @@ jobs:
         baseline_tree=git('rev-parse',BASE+':'+ROOT).decode().strip()
         target_tree=git('rev-parse','HEAD:'+ROOT).decode().strip()
         require(baseline_tree=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff','complete qualified baseline production tree')
-        require(target_tree=='2b0f061ef9e211df46b6dda8266b4b975823fab7','complete pinned candidate production tree')
+        require(target_tree=='3acf8530793b6ed01d310bb06fc7fd5fea2285e1','complete pinned candidate production tree')
         changed=git('diff','--name-only',BASE,'HEAD','--',ROOT).decode().splitlines()
         require(changed==["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact authenticated cache, unary-spine and lazy-transform changes')
         baseline=git('show',BASE+':'+PROD)
@@ -272,7 +272,7 @@ jobs:
         assert cache_audit["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
         assert cache_audit["job"] == os.environ["GITHUB_JOB"] and cache_audit["route"] == os.environ["PSC1_T05_ROUTE"]
         assert cache_audit["baselineSha"] == "20224a295359abb201f56c72395690bf0bfac9fa"
-        assert cache_audit["targetProductionTree"] == "2b0f061ef9e211df46b6dda8266b4b975823fab7"
+        assert cache_audit["targetProductionTree"] == "3acf8530793b6ed01d310bb06fc7fd5fea2285e1"
         assert cache_audit["exactCacheLookupGuardAndCommentOnly"] is True
         assert changed == cache_audit["productionChanges"] == ["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"], "only the independently authenticated cache, unary-spine and lazy-transform deltas are allowed: " + repr(changed)
         proof_path = pathlib.Path("psc1/test/PsKernelDeferredTransformProofs.lean")
@@ -1390,7 +1390,7 @@ jobs:
                 and all(source[k]==v for k,v in identity.items()),'authenticated helper source identity')
         require(source['baselineSha']=='20224a295359abb201f56c72395690bf0bfac9fa'
                 and source['baselineProductionTree']=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff'
-                and source['targetProductionTree']=='2b0f061ef9e211df46b6dda8266b4b975823fab7'
+                and source['targetProductionTree']=='3acf8530793b6ed01d310bb06fc7fd5fea2285e1'
                 and source['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact complete production trees and delta')
         require(all(source[k] is True for k in ['exactCacheLookupGuardAndCommentOnly','frozenLookupByteExact',
                 'retainedProofStatementAndOtherBodiesUnchanged','otherRetainedInputsExceptAuthenticatedTransformAndQuotUnchanged']),
@@ -1715,6 +1715,7 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
+        lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean
         lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean \
           2>&1 | tee "$PSC1_T05_DIR/structural-occurrence-check.log"
         lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean \

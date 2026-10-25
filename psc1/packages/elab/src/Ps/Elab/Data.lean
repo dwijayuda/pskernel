@@ -152,7 +152,7 @@ def Ps.Internal.ElabData.psElabPatternWithLocal
       let term := PsExpr.letE name (psMetaInstantiate metas type)
         (psMetaInstantiate metas value.term)
         (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term));
-      psElabResolvedTerm (psElabContextWithMeta outer metas) term expected
+      psElabResolvedTerm (psElabContextRestoreScope outer body.context) term expected
 
 def psDataProdFields (context : PsElabContext) (type : PsExpr) :
     Except PsElabError (Prod PsExpr PsExpr) :=

@@ -1,11 +1,36 @@
 # PSC1 development roadmap
 
-Updated 2026-10-25 Asia/Jakarta. Active checked-conversion PR #185 follows qualified PR #184.
+Updated 2026-10-26 Asia/Jakarta. Active bounded source-binding PR #186 follows qualified PR #185.
 Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
-## Latest checked conversion
+## Latest bounded source rename
+
+PR #186 implementation 9d07ae36 qualifies the bounded R2b relation in
+40219590598:23 checked renames/62 refusals;28 before/after runtime artifacts
+across both grammars and all seven targets; actual full compiler indexing and
+a checked local rename under both grammars. Source 122 modules/4735 members,
+closure 1714b8cf1d3d50096ac85fc4838237f82205a2459645c01c3811bbad257756f8.
+Actual elaborator allocation/resolution events supply identity; no second
+resolver is added. Exact unaffected bytes/public API/other Core declarations,
+selected-value alpha equality, strict IR and independent admission remain required.
+Coverage is explicitly recorded term bases before lifts, with unsupported paths
+refusing edits. R4 effectful/partial/foreign transformations remain deferred.
+Current-source WasmG1 40218467242 passes 40 cross-target cases and 9 envelope refusals.
+Ordinary source run 40219590598 and final gate 121257714088 pass every selected
+dependency, full job 121250940323 and all 37 finite Practical Core criteria with
+zero blocked (releaseReady=true). This qualifies the finite source contract,
+not final universal-platform publication or new G2/G3 generations.
+[API](PSC1_SOURCE_BINDINGS.md),
+[receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json).
+
+Item1 now has a native-reference IO request probe at 6e27116a/source 073e5156:
+40221444236 passes 4 grammar/assurance cases and 30 negatives. Four generated G1
+IO engines are running40222325020; this is separate unpromoted source, not npm
+or G2/G3 qualification. Preserve frozen distributions until new generations pass.
+
+## Preserved checked conversion
 
 PR #185 implementation fa265940 qualifies finite conversion/API/CLI gates in
 40206625342: eleven focused conversions, fourteen refusals, actual 11-module
@@ -18,7 +43,7 @@ has 4,677 members. Genuine Wasm G1 40206504499 passes both grammar censuses,
 payloads. [Guide](PSC1_CHECKED_SOURCE_CONVERSION.md),
 [receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json),
 [continuation](PSC1_SOURCE_REFACTOR_CONTINUATION.md).
-Ordinary source run40206628424 passes every selected dependency, full job121212292606
+Ordinary source run 40206628424 passes every selected dependency, full job 121212292606
 and gate121218977024: 37/37 qualified, zero blocked, releaseReady=true within the
 finite contract. Frozen package identities remain distinct. The printer fixes preserve source scopes without weakening
 structural recursion or any checker/resource policy.
@@ -119,9 +144,10 @@ qualification receipts supply exact CI evidence.
 | 0a | Lossless lexical capture (R1) | Qualified in 40191237137 and normal source run 40191245319. Exact bytes/trivia/tokens, snapshot identity, immutable capture, stale-safe candidate edits and malformed-transport refusal. No semantic or publication authority. |
 | 0b | Malformed-character location prerequisite | Qualified in focused 40195964028, new-source Wasm G1 40196021448 and ordinary 40196244138. Scoped correspondence, 664 position cases and preserved older advisory-wire compatibility; frozen package identities unchanged. |
 | 0c | Declaration ownership (R2a) | Qualified: focused 40200895349 (121 modules/both grammars, 10 production-path comparisons, 42 refusals) and ordinary 40200961302 (37/37). [Receipt](PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json). Host/native adapters retain actual elaboration ownership and independently check its logical graph. [API/bounds](PSC1_SOURCE_OWNERSHIP.md). Bind existing actual elaboration batch/member origins to exact module/snapshot identities. Preserve prepared declarations/admission bytes, synthesized ownership and refusals under both grammars. Read-only ownership index; finite criteria in the refactoring architecture. |
-| 0d | Checked grammar conversion (R3) | Finite gates passed at fa265940: 40206625342 passes 11 conversions/14 refusals, real CLI JSON/file IO and complete compiler forward/reverse exact bytes/ownership/comments. New-source Wasm G1 40206504499 passes. Redundant provisional checks removed; observed full export 360,068ms/1,197,708KiB host RSS versus earlier 526,720ms/1,620,508KiB (different runs/source; not a controlled benchmark). Ordinary source40206628424 passes all selected dependencies and37/37, zero blocked. [Receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json). |
-| 0e | Binding-aware source editing and equivalence (R2b/R4) | Pending. Record local binder/reference origins at actual resolution points; context-local raw IDs are not global source identities. Then require capture-avoiding rename, affected-closure elaboration, independent admission, public API and explicit equivalence checks before publication. Do not expand the frozen language merely to shorten compiler code. |
-| 1 | Slim real applications and source-package coverage | Pending. Compile/consume CLI, JSON/file and multi-module applications through the slim APIs in both grammars. Source closure resolution must not grant host/FFI authority. Retain the previous native package. |
+| 0d | Checked grammar conversion (R3) | Finite gates passed at fa265940: 40206625342 passes 11 conversions/14 refusals, real CLI JSON/file IO and complete compiler forward/reverse exact bytes/ownership/comments. New-source Wasm G1 40206504499 passes. Redundant provisional checks removed; observed full export 360,068ms/1,197,708KiB host RSS versus earlier 526,720ms/1,620,508KiB (different runs/source; not a controlled benchmark). Ordinary source 40206628424 passes all selected dependencies and 37/37, zero blocked. [Receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json). |
+| 0e | Bounded binding-aware rename (R2b) | Qualified finite relation in 40219590598:23/62 focused;28 seven-target artifacts;full122-module compiler indexed/renamed under both grammars;new-source WasmG1 passes 40218467242. [Receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json). Complete tracing and broader edits remain outside this boundary. |
+| 0f | R4 behavioral/definitional obligations | Deferred. Require explicit effect/evaluation/divergence/foreign obligations before broader simplification; never infer equivalence from parsing or runtime tests alone. |
+| 1 | Slim real applications and source-package coverage | In progress. Native explicit IO request probe 4/30 passes 40221444236;generated G1 IO running40222325020. No package qualification yet. Compile/consume CLI, JSON/file and multi-module applications through the slim APIs in both grammars. Source closure resolution must not grant host/FFI authority. Retain the previous native package. |
 | 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |
 | 3 | Checked generated TS publication | Pending. Reuse existing emitter, IR/admission/runtime and publication machinery; require independent pinned TS consumers, four executors, both grammars and negative/ABI/tamper/prior-output checks. |
 | 4 | Checked Rust/Wasm/component/provider dispatch | Pending. Reuse existing emitters/adapters, complete relevant target/consumer gates and keep Python/PHP optional. Additional Rust execution platforms need genuine binaries and bounded supervisors. |

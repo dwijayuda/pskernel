@@ -1,4 +1,4 @@
-import Ps.Host.SourceOwnership
+import Ps.Host.SourceBindings
 
 open Ps.Internal.CompilerService
 
@@ -8,10 +8,19 @@ private def demand (condition : Bool) (code : String) : IO Unit :=
 def main (args : List String) : IO Unit := do
   let [mode, input, output, admissionsPath, irPath] := args
     | throw (IO.userError "PSC1_OWNERSHIP_USAGE")
-  demand (["index", "reference", "to-lean", "to-ps"].contains mode) "MODE"
+  demand (["index", "bindings", "reference", "to-lean", "to-ps", "compare-bindings"].contains mode) "MODE"
   let bytes ← IO.FS.readBinFile input
   demand (bytes.size ≤ 33554432) "REQUEST_LIMIT"
   let some text := String.fromUTF8? bytes | throw (IO.userError "PSC1_OWNERSHIP_UTF8")
+  if mode == "compare-bindings" then
+    let response := match Ps.Internal.SourceBindingComparison.compare text with
+      | .ok value => value
+      | .error message => Lean.Json.mkObj [
+          ("protocol", .str "psc1-source-binding-comparison/1"),
+          ("status", .str "refused"), ("code", .str message)]
+    demand (response.compress.utf8ByteSize ≤ 33554432) "RESPONSE_LIMIT"
+    IO.FS.writeFile output response.compress
+    return
   let request ← match decode text with
     | .ok value => pure value
     | .error error => throw (IO.userError ("PSC1_OWNERSHIP_WIRE:" ++ error.phase ++ ":" ++ error.code))
@@ -37,7 +46,7 @@ def main (args : List String) : IO Unit := do
         (fun e => psOwnershipError e.moduleName e.phase e.code)
       if c.entry.isNone then throw (psOwnershipError request.entry "capture" "entry-missing")
       pure (c, #[])
-    else psOwnershipCapture request
+    else psOwnershipCaptureWithSourceTrace request (mode == "bindings")
   let result := do
     let (captured, rows) ← outcome
     let semantic ← psOwnershipPrepare request captured
@@ -61,7 +70,7 @@ def main (args : List String) : IO Unit := do
         ("sourceCoreDeclarations", Lean.toJson semantic.source.length),
         ("logicalCoreDeclarations", Lean.toJson semantic.logicalCount),
         ("partialNames", Lean.toJson (semantic.partialNames.map (fun n => psNameToString n)))]).compress
-      demand (response.utf8ByteSize ≤ 33554432) "RESPONSE_LIMIT"
+      demand (response.utf8ByteSize ≤ 33554432) ("RESPONSE_LIMIT:" ++ toString response.utf8ByteSize)
       IO.FS.writeFile admissionsPath semantic.admissions
       IO.FS.writeFile irPath ir
       IO.FS.writeFile output response

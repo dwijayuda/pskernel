@@ -24,7 +24,7 @@ def psElabDoForLambda
       let term := PsExpr.lam name (psMetaInstantiate metas domain)
         (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
         PsBinderInfo.explicit;
-      psElabResolvedTerm (psElabContextWithMeta context metas) term Option.none
+      psElabResolvedTerm (psElabContextRestoreScope context body.context) term Option.none
 
 def psElabDoForApply
     (ops : PsElabDoOps) (result : PsExpr) (fn : PsExpr)
@@ -88,7 +88,7 @@ def psElabDoForList
       context name element with
   | Except.error error => Except.error error
   | Except.ok minor =>
-      let current := psElabContextWithMeta context minor.context.metaContext;
+      let current := psElabContextRestoreScope context minor.context;
       let folded := psExprApplyMany (PsExpr.constE psControlLazyListFoldName [])
         [element, continuationType, PsExpr.fvar continuationId, minor.term, collection];
       match psElabResolvedTerm current folded (Option.some continuationType) with
@@ -210,7 +210,7 @@ def psElabDoForRangeLoop
       context (psElabDoInternalName "_psc1RangeIndex" context) natType with
   | Except.error error => Except.error error
   | Except.ok minor =>
-      let current := psElabContextWithMeta context minor.context.metaContext;
+      let current := psElabContextRestoreScope context minor.context;
       let count := psExprApplyMany (PsExpr.constE psNatSubName []) [upper, lower];
       let folded := psExprApplyMany (PsExpr.constE psControlLazyNatFoldName [])
         [continuationType, PsExpr.fvar continuationId, minor.term, count];

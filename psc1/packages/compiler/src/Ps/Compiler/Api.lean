@@ -144,11 +144,12 @@ def psCompilerPreparationStart
 
 -- One actual elaboration supplies both the next state and source-local origins.
 -- The surrounding source-owned caller attaches module identity to these records.
-def psCompilerPreparationStepParsedWithOrigins
+def psCompilerPreparationStepParsedWithOriginsUsingTrace
+    (tracing : Bool)
     (state : PsCompilerPreparationState)
     (sourceModule : PsSyntaxModule) :
     Except PsElabOriginError PsCompilerPreparationStepWithOriginsResult :=
-  match psElabModuleWithOrigins state.environment sourceModule with
+  match psElabModuleWithSourceTrace tracing state.environment sourceModule with
   | Except.error error => Except.error error
   | Except.ok elaborated =>
       let nextState : PsCompilerPreparationState :=
@@ -158,6 +159,11 @@ def psCompilerPreparationStepParsedWithOrigins
             (psListReverse elaborated.result.declarations) state.declarationsRev);
       Except.ok
         (PsCompilerPreparationStepWithOriginsResult.mk nextState elaborated.origins)
+
+def psCompilerPreparationStepParsedWithOrigins
+    (state : PsCompilerPreparationState) (sourceModule : PsSyntaxModule) :
+    Except PsElabOriginError PsCompilerPreparationStepWithOriginsResult :=
+  psCompilerPreparationStepParsedWithOriginsUsingTrace false state sourceModule
 
 def psCompilerPreparationStepParsed
     (state : PsCompilerPreparationState)

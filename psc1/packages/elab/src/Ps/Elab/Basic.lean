@@ -131,7 +131,7 @@ def psElabResolvedTerm
         result
         expected
 
-def psElabLetAfterValue
+def psElabLetAfterValueWithSource
     (elaborate :
       PsElabContext ->
       PsSyntaxTerm ->
@@ -139,6 +139,7 @@ def psElabLetAfterValue
       Except PsElabError PsElabTermResult)
     (outerContext : PsElabContext)
     (name : PsName)
+    (source : Option PsSourceSpan)
     (bindingType : PsExpr)
     (valueResult : PsElabTermResult)
     (body : PsSyntaxTerm)
@@ -150,10 +151,10 @@ def psElabLetAfterValue
       name
       bindingType
       valueResult.term;
-  let bodyContext :=
-    psElabContextWithLocal
-      valueResult.context
-      pushed.context;
+  let localContext := psElabContextWithLocal valueResult.context pushed.context;
+  let bodyContext : PsElabContext := match source with
+    | Option.none => localContext
+    | Option.some span => psElabContextSourceBinder localContext pushed.id span;
   match elaborate bodyContext body expected with
   | Except.error error => Except.error error
   | Except.ok bodyResult =>
@@ -173,11 +174,20 @@ def psElabLetAfterValue
           closedValue
           closedBody;
       let restoredContext :=
-        psElabContextWithMeta outerContext metaContext;
+        psElabContextRestoreScope outerContext bodyResult.context;
       psElabResolvedTerm
         restoredContext
         term
         expected
+
+def psElabLetAfterValue
+    (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (outerContext : PsElabContext) (name : PsName) (bindingType : PsExpr)
+    (valueResult : PsElabTermResult) (body : PsSyntaxTerm) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  psElabLetAfterValueWithSource elaborate outerContext name Option.none
+    bindingType valueResult body expected
 
 def psElabLet
     (elaborate :
@@ -200,10 +210,11 @@ def psElabLet
           match elaborate context value Option.none with
           | Except.error error => Except.error error
           | Except.ok valueResult =>
-              psElabLetAfterValue
+              psElabLetAfterValueWithSource
                 elaborate
                 context
                 name
+                nameSyntax.sourceSpan
                 valueResult.type
                 valueResult
                 body
@@ -226,10 +237,11 @@ def psElabLet
                       (Option.some typeResult.term) with
                   | Except.error error => Except.error error
                   | Except.ok valueResult =>
-                      psElabLetAfterValue
+                      psElabLetAfterValueWithSource
                         elaborate
                         context
                         name
+                        nameSyntax.sourceSpan
                         typeResult.term
                         valueResult
                         body

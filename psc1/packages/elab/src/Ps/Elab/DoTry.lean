@@ -56,7 +56,7 @@ def psElabDoCatch
           context (psElabDoInternalName "_psc1CatchOk" context) type with
       | Except.error error => Except.error error
       | Except.ok okBranch =>
-          let current := psElabContextWithMeta context okBranch.context.metaContext;
+          let current := psElabContextRestoreScope context okBranch.context;
           psElabDoExceptCases current error type (psElabDoType ops type)
             action handler okBranch.term
   | PsElabDoOps.compiler reader state error =>
@@ -80,7 +80,7 @@ def psElabDoLiftTerminal
           (psMetaInstantiate action.context.metaContext returnType) with
       | Except.error error => Except.error error
       | Except.ok continuation =>
-          let current := psElabContextWithMeta context continuation.context.metaContext;
+          let current := psElabContextRestoreScope context continuation.context;
           psElabDoBind ops current
             (psMetaInstantiate current.metaContext returnType)
             (psMetaInstantiate current.metaContext result)
@@ -117,14 +117,14 @@ def psElabDoTryPacket
   | Except.error error => Except.error error
   | Except.ok action =>
       -- Recovery starts from the pre-try lexical values.
-      let current := psElabContextWithMeta context action.context.metaContext;
+      let current := psElabContextRestoreScope context action.context;
       match psElabDoForLambda
           (fun (recoveryContext : PsElabContext) (id : Nat) =>
             inside packetType returnPacket recoveryContext state handler finishPacket)
           current name (psMetaInstantiate current.metaContext errorType) with
       | Except.error error => Except.error error
       | Except.ok recovery =>
-          let current := psElabContextWithMeta context recovery.context.metaContext;
+          let current := psElabContextRestoreScope context recovery.context;
           match psElabDoCatch ops current
               (psMetaInstantiate current.metaContext packetType)
               (psMetaInstantiate current.metaContext action.term) recovery.term with
@@ -139,7 +139,7 @@ def psElabDoTryPacket
                         (psMetaInstantiate packetContext.metaContext returnType) with
                     | Except.error error => Except.error error
                     | Except.ok returnBranch =>
-                        let current := psElabContextWithMeta packetContext returnBranch.context.metaContext;
+                        let current := psElabContextRestoreScope packetContext returnBranch.context;
                         match psElabDoForLambda
                             (fun (stateContext : PsElabContext) (stateId : Nat) =>
                               psElabDoWhileOpenState
@@ -150,7 +150,7 @@ def psElabDoTryPacket
                             (psMetaInstantiate current.metaContext stateType) with
                         | Except.error error => Except.error error
                         | Except.ok stateBranch =>
-                            let current := psElabContextWithMeta packetContext stateBranch.context.metaContext;
+                            let current := psElabContextRestoreScope packetContext stateBranch.context;
                             psElabDoExceptCases current
                               (psMetaInstantiate current.metaContext returnType)
                               (psMetaInstantiate current.metaContext stateType)
@@ -160,7 +160,7 @@ def psElabDoTryPacket
                   (psMetaInstantiate caught.context.metaContext packetType) with
               | Except.error error => Except.error error
               | Except.ok continuation =>
-                  let current := psElabContextWithMeta context continuation.context.metaContext;
+                  let current := psElabContextRestoreScope context continuation.context;
                   psElabDoBind ops current
                     (psMetaInstantiate current.metaContext packetType)
                     (psMetaInstantiate current.metaContext result)
@@ -190,14 +190,14 @@ def psElabDoTry
               match inside result onReturn context state body finish with
               | Except.error error => Except.error error
               | Except.ok action =>
-                  let current := psElabContextWithMeta context action.context.metaContext;
+                  let current := psElabContextRestoreScope context action.context;
                   match psElabDoForLambda
                       (fun (recoveryContext : PsElabContext) (id : Nat) =>
                         inside result onReturn recoveryContext state handler finish)
                       current name (psMetaInstantiate current.metaContext errorType) with
                   | Except.error error => Except.error error
                   | Except.ok recovery =>
-                      let current := psElabContextWithMeta context recovery.context.metaContext;
+                      let current := psElabContextRestoreScope context recovery.context;
                       psElabDoCatch ops current
                         (psMetaInstantiate current.metaContext result)
                         (psMetaInstantiate current.metaContext action.term) recovery.term

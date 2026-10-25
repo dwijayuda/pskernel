@@ -1,10 +1,18 @@
 # PSC1 checked source-refactoring architecture
 
-Status: R1 lexical capture and staged byte edits qualified in Linux runs 40191237137 and 40191245319. No semantics-preserving automatic refactoring qualification is claimed. The original architectural inspection used `da880d864ca5f9e35729255fd7e4f8a17953cd39`; the additive R1 implementation follows PR #181 HEAD `d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
+Status: finite R1 lexical capture, R2a declaration ownership, R3 checked conversion
+and bounded R2b local rename are qualified by their dated receipts. General
+semantics-preserving automatic refactoring and R4 behavioral transformations remain
+unqualified. The original inspection below used da880d864ca5f9e35729255fd7e4f8a17953cd39;
+current implementation and exact evidence are linked separately.
 
-[Lossless capture contract and API](PSC1_LOSSLESS_SOURCE.md). R1 reused the original lexer. The subsequent [character-diagnostic correction](PSC1_CHARACTER_DIAGNOSTICS.md) changes one malformed-literal span expression with scoped formal correspondence and its own source qualification. The semantic AST remains unchanged. Actual declaration ownership and independent admission are implemented by [R2a](PSC1_SOURCE_OWNERSHIP.md); complete local binder/reference identities remain R2b work. [R3 conversion](PSC1_CHECKED_SOURCE_CONVERSION.md) requires literal admitted-graph/strict-IR bytes and member ownership before returning candidates.
+[Lossless capture contract and API](PSC1_LOSSLESS_SOURCE.md). R1 reused the original lexer. The subsequent [character-diagnostic correction](PSC1_CHARACTER_DIAGNOSTICS.md) changes one malformed-literal span expression with scoped formal correspondence and its own source qualification. The semantic term structure remains shared. R2b adds optional lexical source-name
+provenance alongside existing spans; grouping/adjacency and diagnostic anchors
+retain their original meaning. Actual declaration ownership and independent admission are implemented by [R2a](PSC1_SOURCE_OWNERSHIP.md); bounded local allocation/reference tracing and checked candidate rename are
+implemented by [R2b](PSC1_SOURCE_BINDINGS.md); complete source tracing remains outside
+that scope. [R3 conversion](PSC1_CHECKED_SOURCE_CONVERSION.md) requires literal admitted-graph/strict-IR bytes and member ownership before returning candidates.
 
-## Current source evidence
+## Original inspection and retained architecture
 
 `packages/foundation/src/Ps/Foundation/Source.lean` stores `PsSourcePos {byteOffset,line,column}` and spans with start/stop positions; consumers must retain the established position convention rather than infer UTF-16 from a byte count. `packages/syntax/src/Ps/Syntax/Token.lean` retains token kind, text and span, but has no comment/trivia or stable-node field. `packages/syntax/src/Ps/Syntax/Lexer.lean` skips line/block comments and whitespace. Therefore the AST/printer path is currently a canonicalizer, not a lossless source editor.
 
@@ -64,17 +72,25 @@ R2a acceptance is finite:
   collisions and malformed/stale ownership input. The output is a read-only
   ownership index, with no rename or publication authority.
 
-A later R2b must record local binder/reference origins at actual elaboration
+The R2b design requires local binder/reference origins at actual elaboration
 resolution points before any rename. `PsLocalContext.nextId` allocates local IDs
 within contexts; a raw local ID is not a globally stable source binder identity.
 Declaration ownership alone does not identify all references or establish
-capture avoidance. R2a is qualified separately by focused run 40200895349 and ordinary run 40200961302 (37/37 finite criteria); the [receipt](PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json) owns exact identities and boundaries. R2b remains pending. The diagnostic fix itself implements neither.
+capture avoidance. R2a is qualified separately by focused run 40200895349 and ordinary run 40200961302 (37/37 finite criteria); the [receipt](PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json) owns exact identities and boundaries. Bounded R2b is now qualified in 40219590598, with actual source allocation/resolution
+events, factory-scoped capabilities, capture checks, strict IR and independent
+admission at both endpoints. Its [receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json)
+owns the finite scope. The diagnostic correction alone implements neither.
 
 ## Milestones
 
 R1 (qualified; see the lossless capture receipt): capture source IDs/digests and lossless token/trivia tape. Tests reconstruct exact bytes including nested comments, Unicode, CRLF, escaped literals and EOF trivia; reject stale edits. No semantic graph change.
 
-R2: resolved binder/declaration side tables and one binding-aware rename. Test shadowing, namespaces, qualified/root names, imported private ownership, multiple modules and capture refusal. Independent admission and public API correspondence mandatory.
+R2a/R2b (qualified finite scope): actual declaration ownership plus recorded local
+binder/reference side tables and one body-binder rename. Shadowing, namespace/root
+and imported ownership, multiple modules, generated anchors, projections, grouping,
+EOF and capture refusal are tested. Independent admission, strict IR, exact public
+API/other Core declarations and selected-value alpha equality are mandatory.
+Unsupported/incomplete trace paths refuse edits. This is not complete IDE tracing.
 
 R3 (qualified finite conversion; see the [receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json)): checked cross-grammar conversion command with source-origin map and exact private graph-byte comparison. Reuse shared printers and their fail-closed unsupported-source errors. Include all selected Practical Core forms and ordinary partial helpers; preserve exact checked logical/runtime pairing.
 

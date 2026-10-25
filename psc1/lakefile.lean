@@ -208,6 +208,7 @@ lean_lib PsHost where
     `Ps.Host.ProjectCompiler,
     `Ps.Host.SourceSnapshot,
     `Ps.Host.SourceOwnership,
+    `Ps.Host.SourceBindings,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,
     `Ps.Host.LeanChecked,
@@ -239,6 +240,7 @@ lean_lib PsMeta where
 lean_lib PsElab where
   srcDir := "packages/elab/src"
   roots := #[
+    `Ps.Elab.SourceTrace,
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
@@ -656,3 +658,7 @@ lean_exe psc1_source_ownership where
 lean_exe psc1_lean_printer_scope_tests where
   srcDir := "test"
   root := `LeanPrinterScopeTests
+
+lean_exe psc1_source_trace_tests where
+  root := `test.SourceTraceTests
+  srcDir := "."

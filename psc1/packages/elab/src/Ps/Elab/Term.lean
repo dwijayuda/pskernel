@@ -342,17 +342,29 @@ def psElabProjectionReference
           Except.error
             (PsElabError.unknownName (psNameAppendStr PsName.anonymous first))
   | Option.some selected =>
+      let sourceContext : PsElabContext := if context.sourceTrace.enabled then
+        let target : PsElabSourceTarget := match selected.fst with
+          | PsResolvedName.local id =>
+              PsElabSourceTarget.local id (psElabSourceTraceFind context.sourceTrace.active id)
+          | PsResolvedName.global name => PsElabSourceTarget.global name;
+        match psSyntaxNameToName sourceName with
+          | Option.none => context
+          | Option.some name =>
+              psElabContextSourceReference context name sourceName.span sourceName.sourceSpan
+                (Nat.sub (psElabListLength sourceName.segments) (psElabListLength selected.snd))
+                target
+      else context;
       let baseTerm : PsExpr :=
         match Prod.fst selected with
         | PsResolvedName.local id => PsExpr.fvar id
         | PsResolvedName.global name => PsExpr.constE name List.nil;
       match Prod.snd selected with
-      | List.nil => psElabResolvedTerm context baseTerm expected
+      | List.nil => psElabResolvedTerm sourceContext baseTerm expected
       | List.cons _ _ =>
-          match psElabResolvedTerm context baseTerm Option.none with
+          match psElabResolvedTerm sourceContext baseTerm Option.none with
           | Except.error error => Except.error error
           | Except.ok baseResult =>
-              match psElabProjectionChain context baseResult (Prod.snd selected) with
+              match psElabProjectionChain sourceContext baseResult (Prod.snd selected) with
               | Except.error error => Except.error error
               | Except.ok projected => psElabFinalizeExpected projected expected
 
@@ -539,10 +551,9 @@ def psElabTypedBindersAcc
                           name
                           typeResult.term
                           binder;
-                      let nextContext :=
-                        psElabContextWithLocal
-                          typeResult.context
-                          pushed.context;
+                      let nextContext := psElabContextSourceBinderSpan
+                        (psElabContextWithLocal typeResult.context pushed.context)
+                        pushed.id head.name.sourceSpan;
                       let binderEntry : PsElabTypedBinder := {
                         id := pushed.id
                         name := name
@@ -738,7 +749,9 @@ def psElabLambdaBindersAcc
                         let kind := psElabBinderKindToCore entry.fst.kind;
                         let pushed := psLocalPushBinding context.localContext
                           name view.domain kind;
-                        let localContext := psElabContextWithLocal context pushed.context;
+                        let localContext := psElabContextSourceBinderSpan
+                          (psElabContextWithLocal context pushed.context)
+                          pushed.id entry.fst.name.sourceSpan;
                         let binder := PsElabTypedBinder.mk pushed.id name view.domain kind;
                         Except.ok (PsElabTypedBindersResult.mk localContext
                           (List.cons binder List.nil))
@@ -792,7 +805,7 @@ def psElabLambda
                   openTerm
                   openType;
               let outerContext :=
-                psElabContextWithMeta context metaContext;
+                psElabContextRestoreScope context bodyResult.context;
               let finalResult :=
                 PsElabTermResult.mk
                   outerContext
@@ -859,7 +872,7 @@ def psElabForall
                   binderResult.bindersRev
                   openBody;
               let outerContext :=
-                psElabContextWithMeta context metaContext;
+                psElabContextRestoreScope context bodyResult.context;
               psElabResolvedTerm
                 outerContext
                 closed
@@ -928,7 +941,7 @@ def psElabIf
                             psMetaInstantiate metaContext elseResult.term
                           ];
                       let restoredContext :=
-                        psElabContextWithMeta context metaContext;
+                        psElabContextRestoreScope context elseResult.context;
                       let shared := psElabConditionClose metaContext conditionResult.bindings term;
                       psElabResolvedTerm
                         restoredContext
@@ -1340,8 +1353,9 @@ def psElabMatchFieldsWorker
                         binderName
                         forallView.domain
                         forallView.binder;
-                    let nextContext :=
-                      psElabContextWithLocal context pushed.context;
+                    let nextContext := psElabContextSourceBinderSpan
+                      (psElabContextWithLocal context pushed.context)
+                      pushed.id binderSyntax.sourceSpan;
                     let field : PsElabMatchField := {
                       id := pushed.id
                       name := binderName
@@ -1536,10 +1550,7 @@ def psElabWildcardBinderNamesWorker
             nextRemaining;
         let segment :=
           String.Internal.append "_wild" (psNatToString index);
-        let syntaxName : PsSyntaxName := {
-          segments := List.cons segment List.nil
-          span := span
-        };
+        let syntaxName : PsSyntaxName := psSyntaxGeneratedName (List.cons segment List.nil) (span);
         List.cons
           syntaxName
           (smaller (Nat.succ index))
@@ -1668,9 +1679,7 @@ def psElabMatchConstructorMinor
                             withHypotheses;
                         Except.ok {
                           context :=
-                            psElabContextWithMeta
-                              context
-                              metaContext
+                            psElabContextRestoreScope context bodyResult.context
                           term := closed
                         }
 
@@ -2944,7 +2953,7 @@ def psTryElabStructuralSelfCall
                     | Except.ok _ =>
                         match
                             psElabResolvedTerm
-                              context
+                              (psElabContextSourceIncomplete context)
                               (PsExpr.fvar hypothesisId)
                               expected with
                         | Except.error error => Except.error error

@@ -7,7 +7,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { compilerSourceClosureDigest, runIndependentChecker } from '../host-tools/compiler-host-protocol.mjs';
-import { createLosslessSourceTool, createSourceOwnershipTool } from '../host-tools/source-refactoring.mjs';
+import { createLosslessSourceTool, createSourceOwnershipTool, createCheckedSourceConverter } from '../host-tools/source-refactoring.mjs';
 import { applicationFixtures, executeApplication } from './output-abi-applications.mjs';
 import { boundedRun } from '../host-tools/generated-target-tools.mjs';
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -110,7 +110,19 @@ try {
     'Entry', [['Entry', 'def bad : Nat := true\n']], 'io-dispatcher'];
   assert.equal(native('js', invalid).status, 'refused'); negatives++;
   const applications = [];
-  for (const fixture of applicationFixtures()) {
+  const converter = createCheckedSourceConverter({ ownershipTool: ownership });
+  const toPs = (sources, entry) => {
+    const snapshots = sources.map(source => lexical.capture({
+      module: source.module, grammar: 'lean', bytes: Buffer.from(source.text),
+    }));
+    const index = ownership.analyze({ snapshots, entry, assurance: 'ordinary-checked' });
+    const report = converter.convert({ index, snapshots, targetGrammar: 'ps', commentPolicy: 'owner-notes' });
+    assert.equal(report.admissionsSha256, index.admissionsSha256);
+    assert.equal(report.originalIrSha256, index.originalIrSha256);
+    return sources.map(source => ({ module: source.module, kind: 'ps',
+      text: new TextDecoder('utf-8', { fatal: true }).decode(converter.readCandidate(report, source.module)) }));
+  };
+  for (const fixture of applicationFixtures(toPs)) {
     const snapshots = fixture.sources.map(source => lexical.capture({
       module: source.module, grammar: fixture.grammar, bytes: Buffer.from(source.text),
     }));
@@ -128,7 +140,7 @@ try {
     const modulePath = path.join(work, fixture.id + '.mjs');
     fs.writeFileSync(modulePath, candidate.source);
     const cases = executeApplication(fixture, modulePath, path.join(work, fixture.id));
-    applications.push({ id: fixture.id, modules: fixture.sources.length,
+    applications.push({ id: fixture.id, application: fixture.application, grammar: fixture.grammar, modules: fixture.sources.length,
       sourceClosureDigest: digest, admissionsSha256: index.admissionsSha256,
       originalIrSha256: index.originalIrSha256, sourceSha256: hash(candidate.source),
       contractSha256: fixture.contractSha256, cases });

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { boundedRun, sha } from '../host-tools/generated-target-tools.mjs';
 
-export function applicationFixtures() {
+export function applicationFixtures(convertToPs) {
   const fixtures = [];
   for (const grammar of ['lean', 'ps']) for (const application of ['cli-json', 'compiler-like']) {
     const entry = application === 'cli-json' ? 'PracticalCli.Run' : 'MiniCompiler.Run';
@@ -14,14 +14,14 @@ export function applicationFixtures() {
       if (seen.has(module)) return;
       assert.equal(active.has(module), false, 'authored fixture import cycle');
       active.add(module);
-      const relative = module.replaceAll('.', '/') + '.' + grammar;
+      const relative = module.replaceAll('.', '/') + '.lean';
       const file = ['test/applications', 'stdlib'].map(base => path.join(base, relative))
         .find(candidate => fs.existsSync(candidate));
       assert.ok(file, 'authored application module ' + module);
       const text = fs.readFileSync(file, 'utf8');
       for (const match of text.matchAll(/^import\s+(.+)$/gm))
         for (const dependency of match[1].trim().split(/\s+/)) visit(dependency);
-      active.delete(module); seen.add(module); sources.push({ module, kind: grammar, text });
+      active.delete(module); seen.add(module); sources.push({ module, kind: 'lean', text });
     }
     visit(entry);
     const contractPath = application === 'cli-json'
@@ -29,7 +29,7 @@ export function applicationFixtures() {
       : 'docs/PSC1_COMPILER_APPLICATION_CONTRACT.json';
     const bytes = fs.readFileSync(contractPath), contract = JSON.parse(bytes);
     fixtures.push({ id: grammar + '-' + application, grammar, application, entry,
-      sources, contract, contractSha256: sha(bytes) });
+      sources: grammar === 'ps' ? convertToPs(sources, entry) : sources, contract, contractSha256: sha(bytes) });
   }
   return fixtures;
 }

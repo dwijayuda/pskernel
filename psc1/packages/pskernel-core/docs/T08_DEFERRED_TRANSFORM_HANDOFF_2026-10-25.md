@@ -1,3 +1,9 @@
+## A/B workflow wired — execution pending
+
+The new `.github/workflows/psc1-pskernel-transform-delay-abba.yml` triggers only on its own path and the A/B driver on this isolated draft branch. It reruns source authentication and the three native proofs for the experiment SHA, builds one shared compiler, and uses clean explicit baseline/candidate kernel checkouts. Each producer checks the new 23 controls on a small generated leaf before checking and building the complete canonical kernel, then retains the DAG, paged, and 138 Arena replay controls.
+
+Native, compiler, producer, and measurement receipts distinguish experiment, compiler, and kernel source identities and bind every intermediate file by digest. The producer jobs retain the existing 75-minute generation ceiling; the final same-runner diagnostic retains the existing 60-second per-case bound, fuel4096, empty PATH, and 2,048MiB old-space setting. All full-qualification and performance-qualification flags remain false. No A/B result exists yet.
+
 ## Bounded A/B driver prepared
 
 `psc1/scripts/pskernel-transform-delay-abba.py` is prepared for four authentic Arena cases in fresh-process A-B-B-A order: repeated subproblem, Church numerals, Init.Prelude, and the rejected projection-of-stuck-Prop control. It pins the existing archive and case-body digests, uses the existing replay driver with fuel4096, empty PATH, 2,048MiB old-space and a 60-second per-case host bound, and compares complete semantic result fields whenever both variants finish.

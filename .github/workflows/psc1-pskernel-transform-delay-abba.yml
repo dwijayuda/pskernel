@@ -1,0 +1,537 @@
+name: PSC1 deferred transform bounded A-B-B-A diagnostic
+
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t08-deferred-transform-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-transform-delay-abba.yml
+    - psc1/scripts/pskernel-transform-delay-abba.py
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  BASELINE_SHA: '10144e2f9e8d223b5dcde275bd1f48d25df113b3'
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and authenticate pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash psc1/scripts/install-lean435-ci.sh
+          export PATH="$HOME/.elan/bin:$PATH"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(cat psc1/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          (cd psc1 && test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc")
+          mkdir -p "$RUNNER_TEMP/transform-delay-preflight"
+      - name: Authenticate exact frozen bodies and focused production delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess
+          base, source = os.environ["BASELINE_SHA"], os.environ["GITHUB_SHA"]
+          assert re.fullmatch(r"[0-9a-f]{40}", base)
+          assert re.fullmatch(r"[0-9a-f]{40}", source)
+          prefix = "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/"
+          pinned = {
+              "Transform.lean": ("8f50a74edf1d00288efee9c559a05a75b755acbf", "psKernelExprV2TransformWithFuel"),
+              "TransformSupport.lean": ("7957a3aaf87f440b6fb09c2ee98eb574aeab6c72", "psKernelExprV2TransformCountWithFuel"),
+              "Lift.lean": ("50a63d2729088039a3b01f75eda5c6e83f91e036", "psKernelExprV2PagedLiftWithFuel"),
+          }
+          moves = {
+              "Transform.lean": (
+                  "      let smaller := psKernelExprV2TransformWithFuel remaining;\n",
+                  "        (state : PsKernelExprV2TransformState) (source offset : Nat) =>\n",
+                  "        let smaller := psKernelExprV2TransformWithFuel remaining;\n"),
+              "TransformSupport.lean": (
+                  "      let smaller := psKernelExprV2TransformCountWithFuel remaining;\n",
+                  "          (memo : List PsKernelExprV2TransformCountMemo) (root : Nat) =>\n",
+                  "        let smaller := psKernelExprV2TransformCountWithFuel remaining;\n"),
+              "Lift.lean": (
+                  "      let smaller :\n          PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n          Except String (PsKernelExprV2PagedLiftState × Nat) :=\n        psKernelExprV2PagedLiftWithFuel remaining;\n",
+                  "            fun (amount : Nat) =>\n",
+                  "              let smaller :\n                  PsKernelExprV2PagedLiftState -> Nat -> Nat -> Nat ->\n                  Except String (PsKernelExprV2PagedLiftState × Nat) :=\n                psKernelExprV2PagedLiftWithFuel remaining;\n"),
+          }
+          changed = subprocess.check_output([
+              "git", "diff", "--name-only", base, source, "--",
+              "psc1/packages/pskernel-core/src"], text=True).splitlines()
+          assert set(changed) == {prefix + path for path in pinned}, changed
+          proof_path = pathlib.Path("psc1/test/PsKernelDeferredTransformProofs.lean")
+          proof = proof_path.read_text()
+          assert proof.count("namespace Frozen\n") == 1
+          assert proof.count("\nend Frozen") == 1
+          frozen = proof.split("namespace Frozen\n", 1)[1].split("\nend Frozen", 1)[0]
+          def body(text, name):
+              found = re.search(r"(?ms)^def " + re.escape(name) + r"\n.*?(?=^def |\Z)", text)
+              assert found, name
+              return found.group(0).rstrip()
+          baseline_blobs = {}
+          for short, (expected_blob, name) in pinned.items():
+              path = prefix + short
+              blob = subprocess.check_output(["git", "rev-parse", base + ":" + path], text=True).strip()
+              assert blob == expected_blob, (path, blob)
+              before = subprocess.check_output(["git", "show", base + ":" + path], text=True)
+              assert body(before, name) == body(frozen, name), "frozen body mismatch: " + name
+              remove, anchor, insert = moves[short]
+              assert before.count(remove) == before.count(anchor) == 1, short
+              expected = before.replace(remove, "").replace(anchor, anchor + insert)
+              assert pathlib.Path(path).read_text() == expected, "extra production change: " + short
+              baseline_blobs[path] = blob
+          paths = [prefix + short for short in pinned] + [
+              str(proof_path),
+              "psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs",
+              ".github/workflows/psc1-pskernel-transform-delay-abba.yml",
+              "psc1/scripts/pskernel-transform-delay-abba.py",
+          ]
+          audit = {
+              "schema": "psc1-transform-delay-source-v1", "sourceSha": source,
+              "baselineSha": base, "runId": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "baselineBlobs": baseline_blobs, "frozenBodiesMatch": True,
+              "exactBindingMovesOnly": True, "productionChanges": changed,
+              "sourceFiles": {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths},
+              "fullQualification": False, "performanceQualified": False,
+          }
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-preflight"
+          (out / "source-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
+          print("PSC1_TRANSFORM_DELAY_SOURCE: PASS " + json.dumps(audit, separators=(",", ":")))
+          PY
+          node --check psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs
+          python3 -m py_compile psc1/scripts/pskernel-transform-delay-abba.py
+          (cd psc1 && node check-psc1-source.mjs --all-portable)
+      - name: Build native production closure and check exact worker equalities
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean build PsKernelCore \
+            2>&1 | tee "$RUNNER_TEMP/transform-delay-preflight/native-build.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelDeferredTransformProofs.lean \
+            2>&1 | tee "$RUNNER_TEMP/transform-delay-preflight/proofs.log"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-preflight"
+          proof = pathlib.Path("test/PsKernelDeferredTransformProofs.lean").read_text()
+          expected = re.findall(r"(?m)^#print axioms (\S+)\s*$", proof)
+          assert len(expected) == len(set(expected)) == 3, expected
+          log = (out / "proofs.log").read_text()
+          reports = re.findall(
+              r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)", log)
+          assert [name for name, _ in reports] == expected, reports
+          allowed = {"propext", "Classical.choice", "Quot.sound"}
+          for name, raw in reports:
+              axioms = {a.strip() for a in raw.split(",") if a.strip()}
+              assert axioms <= allowed, (name, axioms)
+          assert not any(x in log for x in ("sorryAx", "Lean.ofReduceBool", "Lean.trustCompiler"))
+          receipt = {
+              "schema": "psc1-transform-delay-native-v1",
+              "sourceSha": os.environ["GITHUB_SHA"], "baselineSha": os.environ["BASELINE_SHA"],
+              "runId": os.environ["GITHUB_RUN_ID"], "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "proofs": 3, "names": expected,
+              "proofLogSha256": hashlib.sha256((out / "proofs.log").read_bytes()).hexdigest(),
+              "sourceAuditSha256": hashlib.sha256((out / "source-audit.json").read_bytes()).hexdigest(),
+              "fullQualification": False, "performanceQualified": False,
+          }
+          (out / "native-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_TRANSFORM_DELAY_NATIVE: PASS " + json.dumps(receipt, separators=(",", ":")))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-transform-delay-native-preflight-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-preflight/
+          if-no-files-found: error
+          retention-days: 30
+
+  compiler:
+    needs: native
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_OPTIONS: ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-transform-delay-native-preflight-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-shared
+      - name: Install pinned Lean
+        shell: bash
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Build one exact compiler and check portable transformation closure
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          PSC1_DELAY_SHARED="$RUNNER_TEMP/transform-delay-shared"
+          lake build psc1 2>&1 | tee "$PSC1_DELAY_SHARED/compiler-build.log"
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean \
+            2>&1 | tee "$PSC1_DELAY_SHARED/portable-leaf.log"
+          cp .lake/build/bin/psc1 "$PSC1_DELAY_SHARED/psc1"
+          mkdir -p "$PSC1_DELAY_SHARED/runtime"
+          for PSC1_DELAY_SCRIPT in \
+            pskernel-expr-v2-transform-delay-smoke.mjs \
+            pskernel-expr-v2-dag-smoke.mjs pskernel-expr-v2-generated-smoke.mjs \
+            pskernel-arena-replay-controls.mjs pskernel-arena-replay.mjs; do
+            cp "scripts/$PSC1_DELAY_SCRIPT" "$PSC1_DELAY_SHARED/runtime/$PSC1_DELAY_SCRIPT"
+          done
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-shared"
+          def digest(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          native = json.loads((out / "native-receipt.json").read_text())
+          audit = json.loads((out / "source-audit.json").read_text())
+          assert native["sourceSha"] == audit["sourceSha"] == os.environ["GITHUB_SHA"]
+          assert native["baselineSha"] == audit["baselineSha"] == os.environ["BASELINE_SHA"]
+          assert native["runId"] == os.environ["GITHUB_RUN_ID"]
+          assert native["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
+          assert native["proofs"] == 3
+          assert native["proofLogSha256"] == digest(out / "proofs.log")
+          assert native["sourceAuditSha256"] == digest(out / "source-audit.json")
+          scripts = [
+              "pskernel-expr-v2-transform-delay-smoke.mjs", "pskernel-expr-v2-dag-smoke.mjs",
+              "pskernel-expr-v2-generated-smoke.mjs", "pskernel-arena-replay-controls.mjs",
+              "pskernel-arena-replay.mjs",
+          ]
+          assert audit["sourceFiles"]["psc1/scripts/" + scripts[0]] == digest(out / "runtime" / scripts[0])
+          stable = ["psc1/scripts/" + name for name in scripts[1:]] + [
+              "psc1/scripts/pskernel-arena435-compare.py", "psc1/scripts/pskernel-arena435-oracle.py"]
+          subprocess.check_call(["git", "-C", "..", "diff", "--exit-code", os.environ["BASELINE_SHA"],
+              os.environ["GITHUB_SHA"], "--", *stable])
+          names = ["psc1", "native-receipt.json", "source-audit.json", "proofs.log",
+              "native-build.log", "compiler-build.log", "portable-leaf.log"] + ["runtime/" + name for name in scripts]
+          receipt = {
+              "schema": "psc1-transform-delay-compiler-v1",
+              "sourceSha": os.environ["GITHUB_SHA"], "baselineSha": os.environ["BASELINE_SHA"],
+              "runId": os.environ["GITHUB_RUN_ID"], "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "compilerSha256": digest(out / "psc1"),
+              "nativeReceiptSha256": digest(out / "native-receipt.json"),
+              "portableLeafChecked": True, "retainedArenaHarnessUnchanged": True,
+              "files": {name: digest(out / name) for name in names},
+              "fullQualification": False, "performanceQualified": False,
+          }
+          (out / "compiler-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_TRANSFORM_DELAY_COMPILER: PASS " + json.dumps(receipt, separators=(",", ":")))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-transform-delay-compiler-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-shared/
+          if-no-files-found: error
+          retention-days: 30
+
+
+  generated:
+    needs: compiler
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [baseline, candidate]
+    env:
+      NODE_OPTIONS: ''
+      PSC1_DELAY_VARIANT: ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.variant == 'baseline' && env.BASELINE_SHA || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-transform-delay-compiler-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-shared
+      - name: Install pinned Lean
+        shell: bash
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Authenticate clean kernel checkout and shared compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$PSC1_DELAY_VARIANT" = baseline ]; then
+            PSC1_DELAY_KERNEL_SHA="$BASELINE_SHA"
+          else
+            PSC1_DELAY_KERNEL_SHA="$GITHUB_SHA"
+          fi
+          test "$(git rev-parse HEAD)" = "$PSC1_DELAY_KERNEL_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
+          echo "PSC1_DELAY_KERNEL_SHA=$PSC1_DELAY_KERNEL_SHA" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/transform-delay-producer"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          shared = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-shared"
+          def digest(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          c = json.loads((shared / "compiler-receipt.json").read_text())
+          assert c["schema"] == "psc1-transform-delay-compiler-v1"
+          assert c["sourceSha"] == os.environ["GITHUB_SHA"]
+          assert c["baselineSha"] == os.environ["BASELINE_SHA"]
+          assert c["runId"] == os.environ["GITHUB_RUN_ID"]
+          assert c["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
+          assert c["leanGitHash"] == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          assert c["portableLeafChecked"] is True and c["retainedArenaHarnessUnchanged"] is True
+          names = ["psc1", "native-receipt.json", "source-audit.json", "proofs.log",
+              "native-build.log", "compiler-build.log", "portable-leaf.log"] + [
+              "runtime/" + n for n in (
+                  "pskernel-expr-v2-transform-delay-smoke.mjs",
+                  "pskernel-expr-v2-dag-smoke.mjs", "pskernel-expr-v2-generated-smoke.mjs",
+                  "pskernel-arena-replay-controls.mjs", "pskernel-arena-replay.mjs")]
+          assert set(c["files"]) == set(names)
+          for name in names: assert digest(shared / name) == c["files"][name], name
+          assert c["compilerSha256"] == digest(shared / "psc1")
+          assert c["nativeReceiptSha256"] == digest(shared / "native-receipt.json")
+          PY
+          chmod +x "$RUNNER_TEMP/transform-delay-shared/psc1"
+          (cd psc1 && test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc")
+      - name: Install pinned TypeScript outside workspaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/transform-delay-ts"
+          printf '%s\n' '{"name":"psc1-transform-delay-ts","private":true,"version":"0.0.0"}' \
+            > "$RUNNER_TEMP/transform-delay-ts/package.json"
+          npm install --prefix "$RUNNER_TEMP/transform-delay-ts" --no-save \
+            --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/transform-delay-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Check raw staged controls on a small generated leaf before full builds
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_DELAY_NODE="$(command -v node)"
+          PSC1_DELAY_COMPILER="$RUNNER_TEMP/transform-delay-shared/psc1"
+          "$PSC1_DELAY_COMPILER" build \
+            packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean \
+            --out dist/transform-delay-leaf/kernel.js
+          node --check dist/transform-delay-leaf/kernel.js
+          cp dist/transform-delay-leaf/kernel.js "$RUNNER_TEMP/transform-delay-leaf.mjs"
+          env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
+            "$RUNNER_TEMP/transform-delay-shared/runtime/pskernel-expr-v2-transform-delay-smoke.mjs" \
+            "$RUNNER_TEMP/transform-delay-leaf.mjs"
+      - name: Check complete authentic source and canonical reconstruction
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_DELAY_COMPILER="$RUNNER_TEMP/transform-delay-shared/psc1"
+          PSC1_DELAY_OUT="$RUNNER_TEMP/transform-delay-producer"
+          "$PSC1_DELAY_COMPILER" check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            2>&1 | tee "$PSC1_DELAY_OUT/authentic-source.log"
+          node scripts/bootstrap-project.mjs \
+            packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            dist/transform-delay/workspace
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+          const workspace='dist/transform-delay/workspace';
+          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+          if(manifest.entry!=='packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps')
+            throw Error('wrong kernel closure entry');
+          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+          console.log('PSC1_TRANSFORM_DELAY_CANONICAL_CLOSURE modules='+manifest.sourceCount);
+          NODE
+          "$PSC1_DELAY_COMPILER" check \
+            dist/transform-delay/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            2>&1 | tee "$PSC1_DELAY_OUT/canonical-source.log"
+          "$PSC1_DELAY_COMPILER" build \
+            dist/transform-delay/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            --out dist/transform-delay/kernel.js \
+            2>&1 | tee "$PSC1_DELAY_OUT/generated-build.log"
+          for PSC1_DELAY_SUFFIX in js ts d.ts js.map; do
+            test -s "dist/transform-delay/kernel.$PSC1_DELAY_SUFFIX"
+            cp "dist/transform-delay/kernel.$PSC1_DELAY_SUFFIX" "$PSC1_DELAY_OUT/"
+          done
+          node --check "$PSC1_DELAY_OUT/kernel.js"
+          cp dist/transform-delay/workspace/.proofscript-bootstrap.json \
+            "$PSC1_DELAY_OUT/bootstrap-manifest.json"
+
+
+      - name: Run retained transformation controls and new raw staged controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_DELAY_NODE="$(command -v node)"
+          PSC1_DELAY_OUT="$RUNNER_TEMP/transform-delay-producer"
+          PSC1_DELAY_RUNTIME="$RUNNER_TEMP/transform-delay-runtime"
+          mkdir -p "$PSC1_DELAY_RUNTIME"
+          cp "$PSC1_DELAY_OUT/kernel.js" "$PSC1_DELAY_RUNTIME/kernel.mjs"
+          cp "$RUNNER_TEMP/transform-delay-shared/runtime/"*.mjs "$PSC1_DELAY_RUNTIME/"
+          cd "$PSC1_DELAY_RUNTIME"
+          env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
+            pskernel-expr-v2-transform-delay-smoke.mjs kernel.mjs \
+            2>&1 | tee "$PSC1_DELAY_OUT/raw-abi.log"
+          env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
+            pskernel-expr-v2-dag-smoke.mjs kernel.mjs \
+            2>&1 | tee "$PSC1_DELAY_OUT/dag-smoke.log"
+          env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
+            pskernel-expr-v2-generated-smoke.mjs kernel.mjs \
+            2>&1 | tee "$PSC1_DELAY_OUT/paged-smoke.log"
+          env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
+            pskernel-arena-replay-controls.mjs kernel.mjs \
+            2>&1 | tee "$PSC1_DELAY_OUT/arena-controls.log"
+      - name: Seal producer receipt with actual kernel and compiler identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PSC1_DELAY_KERNEL_SHA"
+          git diff --exit-code -- psc1/packages/pskernel-core/src
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil, subprocess
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-producer"
+          shared = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-shared"
+          def digest(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          for old, new in (
+              ("native-receipt.json", "native-receipt.json"),
+              ("source-audit.json", "native-source-audit.json"),
+              ("proofs.log", "native-proofs.log"),
+              ("compiler-receipt.json", "compiler-receipt.json")):
+              shutil.copyfile(shared / old, out / new)
+          compiler = json.loads((out / "compiler-receipt.json").read_text())
+          audit = json.loads((out / "native-source-audit.json").read_text())
+          tools = {
+              "nodeVersion": subprocess.check_output(["node", "--version"], text=True).strip(),
+              "typescriptVersion": subprocess.check_output(
+                  ["node", os.environ["PSC0_TSC"], "--version"], text=True).strip(),
+              "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "kernelSourceSha": os.environ["PSC1_DELAY_KERNEL_SHA"],
+              "kernelSourceTree": subprocess.check_output(["git", "rev-parse",
+                  "HEAD:psc1/packages/pskernel-core/src"], text=True).strip(),
+              "compilerSourceSha": os.environ["GITHUB_SHA"],
+              "experimentSourceSha": os.environ["GITHUB_SHA"],
+              "workflowPath": ".github/workflows/psc1-pskernel-transform-delay-abba.yml",
+              "workflowSha256": audit["sourceFiles"][".github/workflows/psc1-pskernel-transform-delay-abba.yml"],
+              "driverSha256": audit["sourceFiles"]["psc1/scripts/pskernel-transform-delay-abba.py"],
+              "nativeSourceAuditSha256": digest(out / "native-source-audit.json"),
+          }
+          assert tools["nodeVersion"].startswith("v22.")
+          assert tools["typescriptVersion"] == "Version 7.0.2"
+          (out / "producer-tools.json").write_text(json.dumps(tools, indent=2) + "\n")
+          names = (
+              "kernel.js", "kernel.ts", "kernel.d.ts", "kernel.js.map",
+              "bootstrap-manifest.json", "raw-abi.log", "dag-smoke.log",
+              "paged-smoke.log", "arena-controls.log", "native-receipt.json",
+              "native-source-audit.json", "native-proofs.log", "compiler-receipt.json",
+              "authentic-source.log", "canonical-source.log", "generated-build.log", "producer-tools.json")
+          markers = {
+              "raw-abi.log": "PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11",
+              "dag-smoke.log": "PSC1_V2_TRANSFORM_JS: PASS",
+              "paged-smoke.log": "PSC1_EXPR_V2_JS_SMOKE: PASS",
+              "arena-controls.log": "PSC1_ARENA_REPLAY_CONTROLS: PASS count=138",
+          }
+          for name, marker in markers.items():
+              assert (out / name).read_text().splitlines().count(marker) == 1, name
+          receipt = {
+              "schema": "psc1-transform-delay-producer-v1", "variant": os.environ["PSC1_DELAY_VARIANT"],
+              "sourceSha": os.environ["GITHUB_SHA"], "baselineSha": os.environ["BASELINE_SHA"],
+              "kernelSourceSha": os.environ["PSC1_DELAY_KERNEL_SHA"],
+              "compilerSourceSha": os.environ["GITHUB_SHA"], "compilerSha256": compiler["compilerSha256"],
+              "runId": os.environ["GITHUB_RUN_ID"], "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "leanGitHash": tools["leanGitHash"], "tools": tools,
+              "files": {name: digest(out / name) for name in names},
+              "fullQualification": False, "performanceQualified": False,
+          }
+          (out / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("PSC1_TRANSFORM_DELAY_PRODUCER: PASS " + json.dumps(receipt, separators=(",", ":")))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-transform-delay-${{ matrix.variant }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-producer/
+          if-no-files-found: error
+          retention-days: 30
+
+  abba:
+    needs: generated
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_OPTIONS: ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-transform-delay-baseline-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-pair/baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-transform-delay-candidate-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-pair/candidate
+      - name: Install pinned Lean for independent official reference
+        shell: bash
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Run bounded authentic A-B-B-A cases in fresh detached processes
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          python3 -m py_compile scripts/pskernel-transform-delay-abba.py
+          curl -fL --retry 3 --retry-delay 2 \
+            -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+          python3 scripts/pskernel-transform-delay-abba.py \
+            --baseline-root "$RUNNER_TEMP/transform-delay-pair/baseline" \
+            --candidate-root "$RUNNER_TEMP/transform-delay-pair/candidate" \
+            --baseline-sha "$BASELINE_SHA" \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --official-project . --out "$RUNNER_TEMP/transform-delay-pair/results" \
+            2>&1 | tee "$RUNNER_TEMP/transform-delay-pair/abba.log"
+      - name: Print exact experiment report
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "transform-delay-pair/results/report.json"
+          if path.is_file():
+              print("PSC1_TRANSFORM_DELAY_ABBA_REPORT " + json.dumps(json.loads(path.read_text()), separators=(",", ":")))
+          else:
+              raise SystemExit("missing experiment report; diagnostic did not complete")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-transform-delay-abba-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/transform-delay-pair/
+          if-no-files-found: error
+          retention-days: 30
+

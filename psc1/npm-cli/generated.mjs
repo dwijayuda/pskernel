@@ -13,15 +13,22 @@ export async function generatedMain(args,root){
  const options={};let file;
  for(let i=1;i<args.length;i++){
   const key=args[i];
-  if(key.startsWith('--')){if(!['--engine','--out','--project','--assurance','--target'].includes(key)||options[key]!==undefined||!args[i+1]||args[i+1].startsWith('--'))fail('ARGUMENT');options[key]=args[++i];}
+  if(key.startsWith('--')){if(!['--engine','--out','--project','--assurance','--target','--kernel'].includes(key)||options[key]!==undefined||!args[i+1]||args[i+1].startsWith('--'))fail('ARGUMENT');options[key]=args[++i];}
   else if(file)fail('ARGUMENT');else file=key;
  }
  if(!engines.includes(options['--engine'])||!options['--out']||((!!file)===(!!options['--project'])))fail('ARGUMENT');
  if(options['--target']&&options['--target']!=='js')fail('TARGET: generated package integration currently qualifies JS publication; use psc build for other native targets');
+ const kernel=options['--kernel']||'native';if(!['native','both'].includes(kernel))fail('KERNEL');
  const engine=meta.engines[options['--engine']];
  const inside=relative=>{if(typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).some(x=>!x||x==='..'||x==='.' ))fail('PATH');return path.join(root,relative);};
  const pin=row=>{const p=inside(row.path),stat=fs.lstatSync(p);if(!stat.isFile()||stat.isSymbolicLink()||sha(fs.readFileSync(p))!==row.sha256)fail('IDENTITY_CHANGED');return {path:p,sha256:row.sha256};};
  const service=pin(engine.adapter),checker=pin(meta.checker),deps=[...engine.dependencies,...meta.nativeLibraries,...(meta.hostDependencies||[])].map(pin);
+ const additionalCheckers=[];
+ if(kernel==='both'){
+  const descriptor=meta.additionalCheckers?.wasm;if(!descriptor)fail('WASM_KERNEL_UNAVAILABLE');
+  const script=pin(descriptor.script);deps.push(...descriptor.dependencies.map(pin));
+  additionalCheckers.push({name:'wasm',scriptFile:script.path,scriptSha256:script.sha256});
+ }
  const runner=pin(meta.runner);const sessionCode=pin(meta.session);
  // The session is loaded from this immutable installed package; verify its pin.
  if(sessionCode.path!==path.join(root,'host-tools/generated-compiler-session.mjs'))fail('SESSION');
@@ -38,10 +45,11 @@ export async function generatedMain(args,root){
   sources:project.sources,entryModule:project.entryModule,assurance,
   serviceFile:service.path,serviceSha256:service.sha256,runnerFile:runner.path,runnerSha256:runner.sha256,
   checkerExecutable:checker.path,checkerSha256:checker.sha256,publicationRoot:path.resolve(options['--out']),
-  serviceDependencies:[...deps,sessionCode]});
+  serviceDependencies:[...deps,sessionCode],additionalCheckers});
  const result=session.execute(),published=session.publish();
  console.log(JSON.stringify({status:'accepted',engine:options['--engine'],engineSourceClosureDigest:engine.sourceClosureDigest,
   engineQualification:engine.qualification,compilerExecutionMs:session.events.find(e=>e.role==='generated-compiler').elapsedMs,target:'js',artifact:published.target,manifestSha256:published.manifestSha256,
   sourceClosureDigest:result.sourceClosureDigest,logicalAdmission:result.logicalAdmission,checkerCommit:meta.checkerCommit,
+  kernelProviders:kernel==='both'?['native','wasm']:['native'],...(result.additionalAdmissions?{additionalAdmissions:result.additionalAdmissions}:{}),
   performanceQualification:engine.performanceQualification,behaviorallyVerified:false,formalPreservation:'not-provided'}));
 }

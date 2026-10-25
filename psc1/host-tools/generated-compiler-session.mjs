@@ -56,7 +56,7 @@ function checkFiles(stage, expected) {
  */
 export function createGeneratedJsCompilerSession({ requestId, sources, entryModule, assurance,
     serviceFile, serviceSha256, runnerFile, runnerSha256,
-    checkerExecutable, checkerSha256, publicationRoot, serviceDependencies = [] }) {
+    checkerExecutable, checkerSha256, publicationRoot, serviceDependencies = [], additionalCheckers = [] }) {
   if (process.version !== 'v22.23.3') fail('PSC1_SERVICE_NODE_PIN');
   if (typeof requestId !== 'string' || !requestId || typeof entryModule !== 'string' ||
       !['checked', 'ordinary-checked'].includes(assurance) ||
@@ -78,12 +78,22 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
     if (!tool || typeof tool !== 'object') fail('PSC1_SERVICE_DEPENDENCIES_INVALID');
     tools['dependency' + index] = identity(tool.path, tool.sha256);
   });
+  if (!Array.isArray(additionalCheckers) || additionalCheckers.length > 2) fail('PSC1_SERVICE_ADDITIONAL_CHECKERS_INVALID');
+  const extraChecks = additionalCheckers.map((checker, index) => {
+    if (!checker || !/^[a-z][a-z0-9-]{0,31}$/.test(checker.name || '') ||
+        additionalCheckers.slice(0,index).some(prior => prior.name === checker.name)) fail('PSC1_SERVICE_ADDITIONAL_CHECKERS_INVALID');
+    const script=identity(checker.scriptFile,checker.scriptSha256);
+    tools['additional-checker-'+index]=script;
+    return {name:checker.name,script};
+  });
+  const additionalAdmissions=[];
   const verifyTools = () => Object.values(tools).forEach(tool => identity(tool.path, tool.sha256));
   const requestText = JSON.stringify(['psc1-compiler-service/1', requestId, sourceClosureDigest,
     grammar, assurance, entryModule, captured.map(row => [row.module, row.text])]);
   const request = Object.freeze({ requestId, sourceClosureDigest, grammar, assurance,
     entryModule, target: 'js', requestSha256: sha(requestText), serviceSha256,
-    runnerSha256, checkerSha256, nodeVersion: process.version, nodeSha256: tools.node.sha256 });
+    runnerSha256, checkerSha256, nodeVersion: process.version, nodeSha256: tools.node.sha256,
+    ...(extraChecks.length?{additionalCheckers:extraChecks.map(c=>({name:c.name,scriptSha256:c.script.sha256}))}:{}) });
   const root = path.resolve(publicationRoot);
   for (const directory of [root, path.join(root, 'generations')]) {
     const stat = inspect(directory);
@@ -202,6 +212,23 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         verifyTools();
         events.push({ role: 'independent-checker', state: 'accepted',
           checkerCommit: receipt.checkerCommit, admissionsSha256: receipt.admissionsDigest });
+        // Mandatory native admission above is preserved. Extra host-selected providers
+        // check the identical captured canonical bytes before any publication can occur.
+        for(const checker of extraChecks){
+          verifyTools();const started=Date.now();
+          const checked=spawnSync(process.execPath,[checker.script.path],{input:admissions,encoding:'utf8',
+            timeout:120000,maxBuffer:32*1024*1024,killSignal:'SIGKILL',windowsHide:true});
+          events.push({role:'additional-independent-checker',name:checker.name,executable:process.execPath,
+            scriptSha256:checker.script.sha256,status:checked.status,signal:checked.signal,
+            elapsedMs:Date.now()-started,admissionsSha256:sha(admissions),error:checked.error?.message||null});
+          verifyTools();if(checked.error||checked.status!==0)fail('PSC1_SERVICE_ADDITIONAL_CHECKER_PROCESS');
+          let result;try{result=JSON.parse(checked.stdout);}catch{fail('PSC1_SERVICE_ADDITIONAL_CHECKER_JSON');}
+          if(result.protocol!=='pskernel-lean/1'||result.provider!=='lean4-cpp'||result.leanVersion!=='4.35.0'||
+            result.leanCommit!==receipt.checkerCommit||result.profile!=='lean4.35-core'||result.accepted!==true)
+            fail('PSC1_SERVICE_ADDITIONAL_CHECKER_REFUSED');
+          additionalAdmissions.push({name:checker.name,scriptSha256:checker.script.sha256,
+            admissionsSha256:sha(admissions),checkerCommit:result.leanCommit,accepted:true,responseSha256:sha(checked.stdout)});
+        }
         fs.writeFileSync(path.join(stage, 'target.mjs'), candidate.source);
         run('target-syntax', ['--check', path.join(stage, 'target.mjs')]);
         const apiCode = "import {pathToFileURL} from 'node:url';" +
@@ -216,7 +243,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         fs.writeFileSync(path.join(stage, 'specialized-ir.json'), JSON.stringify(candidate.specializedIr));
         fs.writeFileSync(path.join(stage, 'sources.json'), json(captured));
         fs.writeFileSync(path.join(stage, 'session.json'), json({ request, tools, receipt, execution,
-          events, candidateSha256: sha(raw), sourceSha256: sha(candidate.source),
+          events, ...(extraChecks.length?{additionalAdmissions}:{}), candidateSha256: sha(raw), sourceSha256: sha(candidate.source),
           publicNames: candidate.publicNames, runtimeRequirements: candidate.runtimeRequirements,
           irValidation: 'original-and-transformed-validated-by-pinned-compiler-service',
           behaviorallyVerified: false, formalPreservation: 'not-provided' }));
@@ -233,6 +260,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
           specializedIrSha256: sha(JSON.stringify(candidate.specializedIr)),
           publicNames: [...candidate.publicNames], execution: clone(execution),
           logicalAdmission: 'accepted', productionPublication: 'pending',
+          ...(extraChecks.length?{additionalAdmissions:clone(additionalAdmissions)}:{}),
           behaviorallyVerified: false });
       } catch (error) { state = 'rejected'; retainFailure(error); throw error; }
     },
@@ -249,6 +277,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         publicationFault('before-seal');
         const manifest = { schema: 'psc1-generated-service-bundle/1', request,
           checkerCommit: receipt.checkerCommit, files: sealedFiles,
+          ...(extraChecks.length?{additionalAdmissions:clone(additionalAdmissions)}:{}),
           logicalAdmission: 'accepted', targetSyntaxAndApi: 'accepted',
           irValidation: 'by-pinned-compiler-service', behaviorallyVerified: false,
           claim: 'exact logical admission and bounded compiler checks; not a preservation proof' };

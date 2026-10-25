@@ -222,7 +222,7 @@ LAYOUT_SCOPE = {
 }
 
 EMPTY_BASELINE = "20224a295359abb201f56c72395690bf0bfac9fa"
-EMPTY_PRODUCTION_TREE = "bccb72769d4f20def35f2064363fbc94fcc7e54a"
+EMPTY_PRODUCTION_TREE = "2b0f061ef9e211df46b6dda8266b4b975823fab7"
 EMPTY_PRODUCTION = RESTORED_PRODUCTION_ROOT + "/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
 EMPTY_RETAINED = "psc1/test/PsKernelClosedCacheAnalysisRegression.lean"
 EMPTY_MODULE = "PsKernelEmptySemanticCacheProofs"
@@ -1782,7 +1782,11 @@ def empty_cache_sources(expected_paths):
         if path not in (WORKFLOW,EMPTY_RETAINED):
             old_raw=git("show",EMPTY_BASELINE+":"+path)
             actual=git_bytes(path)
-            if path==LAZY_PATH:
+            if path in [QUOT_DAG,'psc1/kernel-lakefile.lean']:
+                same(digest(actual),QUOT_PINS[path],"separately pinned quotient source "+path)
+                unchanged.append({"path":path,"baselineGitBlob":git_blob_sha(old_raw),
+                    "actual":digest(actual),"separateQuotientAdmissionQualification":True})
+            elif path==LAZY_PATH:
                 same(lazy_normalize(actual),old_raw,"exact normalized Transform predecessor in retained inventory")
                 unchanged.append({"path":path,"baselineGitBlob":git_blob_sha(old_raw),
                     "actual":digest(actual),"normalizedPredecessor":digest(old_raw),"exactTransformLetMotion":True})
@@ -1794,7 +1798,7 @@ def empty_cache_sources(expected_paths):
         "exactCacheLookupGuardAndCommentOnly":True,"baselineProduction":EMPTY_OLD_PRODUCTION,
         "predecessorLookup":EMPTY_OLD_LOOKUP,"candidateLookup":EMPTY_NEW_LOOKUP,
         "frozenLookupByteExact":True,"retainedProofStatementAndOtherBodiesUnchanged":True,
-        "retainedProofBaseline":EMPTY_OLD_RETAINED,"otherRetainedInputsExceptAuthenticatedTransformUnchanged":True,
+        "retainedProofBaseline":EMPTY_OLD_RETAINED,"otherRetainedInputsExceptAuthenticatedTransformAndQuotUnchanged":True,
         "sourceInputs":96,"proofNames":EMPTY_NAMES,"files":records,
         "otherRetainedInputs":unchanged,"baselineWorkflow":digest(baseline_workflow),
         "baselineObjectsFetched":not baseline_available}
@@ -1810,14 +1814,14 @@ def empty_cache_source_receipt(e):
             "baselineSha","baselineProductionTree","targetProductionTree","productionChanges",
             "exactCacheLookupGuardAndCommentOnly","baselineProduction","predecessorLookup","candidateLookup",
             "frozenLookupByteExact","retainedProofStatementAndOtherBodiesUnchanged",
-            "retainedProofBaseline","otherRetainedInputsExceptAuthenticatedTransformUnchanged","sourceInputs","proofNames","files")},
+            "retainedProofBaseline","otherRetainedInputsExceptAuthenticatedTransformAndQuotUnchanged","sourceInputs","proofNames","files")},
         "sourceInventory":digest(e.raw("source-inventory.json")),
         "retainedLiftAndCountSourceBytesMatch":True,"liftAndCountWorkersDeferred":False,
         "fullQualification":False,"performanceQualified":False}
     source=e.json("empty-semantic-cache-source-audit.json");e.identity(source)
     same(source,expected,"whole empty-cache source audit matches independent Git authentication")
     logged_json(e.terminal,"PSC1_T09_EMPTY_SEMANTIC_CACHE_SOURCE: PASS ",source)
-    return {"exactFourProductionPaths":True,"otherRetainedInputsExceptAuthenticatedTransformUnchanged":True,
+    return {"exactSevenProductionPaths":True,"otherRetainedInputsExceptAuthenticatedTransformAndQuotUnchanged":True,
         "frozenLookupByteExact":True,"sourceInputs":96,
         "receipt":digest(e.raw("empty-semantic-cache-source-audit.json"))}
 
@@ -1987,7 +1991,7 @@ def validator_audit(e):
         "arenaModelProofSource": "150123e5fb8e17d8fab4d737a043705727ee1bcc",
         "productionBaselineSource": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
         "qualifiedPredecessorSource": "f091db586dcbe4a31905d6edf1c8c7957082527d",
-        "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a", "files": rows}
+        "productionTree": "2b0f061ef9e211df46b6dda8266b4b975823fab7", "files": rows}
     same(source_inventory, expected_inventory, "entire independent validator source inventory")
     statuses = [{"module": module, "count": count, "exitCode": 0}
                 for module, count in VALIDATOR_MODULES]
@@ -2019,7 +2023,7 @@ def validator_audit(e):
             "proofs": retained + added, "retainedLayers": layers,
             "sourceInventory": digest(e.raw("validator/source-inventory.json")),
             "proofStatuses": digest(e.raw("validator/proof-status.json")),
-            "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a", "productionChanges": UNARY_DELTA,
+            "productionTree": "2b0f061ef9e211df46b6dda8266b4b975823fab7", "productionChanges": UNARY_DELTA,
             "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
             "untrustedSourceValidityAssumed": False, "replayArenaModelBridgeEstablished": True,
             "fullKernel": False, "performanceQualified": False}
@@ -2053,8 +2057,8 @@ def validator_audit(e):
 
 
 
-UNARY_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"]
-UNARY_FULL_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
+UNARY_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"]
+UNARY_FULL_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
 UNARY_PINS = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean":{"bytes":20939,"sha256":"bd66aa2e8cc039406b76d8e24459d3d9107e579c7e17ed5432cf192b38e3e2d2"},"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean":{"bytes":3754,"sha256":"0a5eb430466bff2fa3f3f00384b5ac7f22dc62bbc0505429ca52494259a8e26e"},"psc1/test/PsKernelUnarySpineProofs.lean":{"bytes":11532,"sha256":"4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"},"psc1/test/PsKernelChurchSource.lean":{"bytes":21080,"sha256":"5f723e4b184c9134128552fe8186064dd0b291a42e54ecc575d210d339dd0a30"},"psc1/test/PsKernelChurchStageProbe.lean":{"bytes":6043,"sha256":"3601231d19268d33474697a2058a7ada58918ce5a8d11b56da263b4377e41a32"},"psc1/scripts/pskernel-unary-spine-smoke.mjs":{"bytes":5583,"sha256":"9053a5bfc66687c7d1529c6f18179bfb97ced1e41ac0dd3d24ae039d60612d2b"},"psc1/scripts/pskernel-church-fixture.py":{"bytes":5437,"sha256":"9053ae13a6df9fd542ab9f76177f4daea4835fa68c661b1d1c1b446c06608ddf"},"psc1/scripts/pskernel-church-stages.mjs":{"bytes":4798,"sha256":"d008052b8bb6ecab9c0b0fc5c7c43a2de66304da03e34016c0396cfee947f11d"}}
 UNARY_NATIVE_COPY = None
 UNARY_PROOF_NAMES = ["psKernelUnaryPlanZero","psKernelUnaryPlanStops","psKernelUnaryPlanPreserves","psKernelUnaryPlanSkippedBound","psKernelUnaryViewHasSharedHead","psKernelUnaryPlanExpressionCongruence","psKernelUnaryContextZero","psKernelUnaryPlanTerminates","psKernelUnaryCallbackOwner"]
@@ -2079,7 +2083,7 @@ def unary_source_authentication():
         UNARY_DELTA,'complete independently authenticated unary production delta')
     for path,pin in UNARY_PINS.items():
         same(digest(git_bytes(path)),pin,'independent reviewed unary source pin '+path)
-    path=UNARY_DELTA[0]
+    path='psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean'
     current=git_bytes(path).decode()
     start=current.index('/- A positive congruence shortcut.')
     end=current.index('def psKernelExprV2DefEqFullShapeEtaOwnedWith\n',start)
@@ -2250,7 +2254,7 @@ def lazy_source_authentication():
     same(git("rev-parse",LAZY_BASE+":"+RESTORED_PRODUCTION_ROOT).decode().strip(),
         "62d48691ff7d9680878cf668862017d1061f2ebd","qualified f091 baseline production tree")
     same(git("diff","--name-only",LAZY_BASE,SHA,"--",RESTORED_PRODUCTION_ROOT).decode().splitlines(),
-        [LAZY_PATH],"exact one-path production delta from f091")
+        QUOT_LAZY_DELTA,"exact retained transform plus separately authenticated quotient delta from f091")
     for path,pin in LAZY_PINS.items():same(digest(git_bytes(path)),pin,"independent exact lazy source pin "+path)
     before=git("show",LAZY_BASE+":"+LAZY_PATH)
     same(lazy_normalize(git_bytes(LAZY_PATH)),before,"entire candidate restores exact qualified f091 Transform bytes")
@@ -2262,7 +2266,7 @@ def lazy_source_authentication():
     same(re.findall(r"(?m)^#print axioms (\S+)\s*$",proof),[LAZY_NAME],"one exact new universal statement")
     require(not re.search(r"(?m)^\s*(?:axiom|unsafe|partial|opaque)\b",proof) and "sorry" not in proof,"no new proof escape")
     return {"baselineSha":LAZY_BASE,"baselineProductionTree":"62d48691ff7d9680878cf668862017d1061f2ebd",
-        "productionTree":EMPTY_PRODUCTION_TREE,"productionChanges":[LAZY_PATH],"exactLetMotionOnly":True,
+        "productionTree":EMPTY_PRODUCTION_TREE,"productionChanges":QUOT_LAZY_DELTA,"exactLetMotionOnly":True,
         "predecessor":digest(before),"reviewedSourcePins":LAZY_PINS}
 def lazy_audit(e):
     global LAZY_NATIVE_COPY
@@ -2271,7 +2275,8 @@ def lazy_audit(e):
         "psc1/lean-toolchain",WORKFLOW]
     rows=[{"path":p,**digest(git_bytes(p))} for p in paths]
     expected_source={"schema":"psc1-transform-lazy-source-v1","sourceSha":SHA,"runId":str(RUN),"attempt":str(ATTEMPT),
-        "baselineSha":LAZY_BASE,"productionTree":EMPTY_PRODUCTION_TREE,"productionChanges":[LAZY_PATH],
+        "baselineSha":LAZY_BASE,"productionTree":EMPTY_PRODUCTION_TREE,"productionChanges":QUOT_LAZY_DELTA,"exactLetMotionScope":LAZY_PATH,
+        "additionalQuotAdmissionChangesSeparatelyQualified":True,
         "exactLetMotionOnly":True,"originalFuelAndMemoSemantics":True,"sourceSnapshots":rows,
         "predecessor":digest(lazy_normalize(git_bytes(LAZY_PATH))),"qualificationComplete":False,
         "performanceQualified":False,"adopted":False}
@@ -2318,7 +2323,119 @@ def lazy_audit(e):
         line_marker(e.terminal,"PSC1_TRANSFORM_LAZY_COHORT_ROUTE542: PASS route="+e.route)
     same({p for p in e.files if p.startswith("lazy/")},members,"exact complete lazy evidence member set")
     return {"status":"pass","nativeReports":542,"nativeModules":38,"additionalLocalReports":1,
-        "exactOnePathFromF091":True,"allFuelAndInputsExactEquality":True,"fullKernel":False,"performanceQualified":False}
+        "exactTransformPathPlusSeparatelyQualifiedQuotFromF091":True,"allFuelAndInputsExactEquality":True,"fullKernel":False,"performanceQualified":False}
+
+
+
+QUOT_BASE="79031362b401f85d3c7f324cc3aa7dbf91c1bf0e"
+QUOT_DAG="psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean"
+QUOT_DELTA=["psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean"]
+QUOT_LAZY_DELTA=sorted(QUOT_DELTA+[LAZY_PATH])
+QUOT_PINS={"psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean":{"bytes":3326,"sha256":"528860b30e49a78930ab497b72900dba1afc047d2989964e6d88316b8cbebd68"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean":{"bytes":11106,"sha256":"f92312807e5eebf143682fb1b0adb25042f6f64fb9ba9ab856df925e6f416594"},"psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean":{"bytes":23775,"sha256":"be61803c61760b15d3f6674b0174d93692858a788f182676282e4b0a0a13980a"},"psc1/kernel-lakefile.lean":{"bytes":17834,"sha256":"2d8397ccfbd42bffa0a1cd64af2d3863494b7011f144800b8bbfb41cd59ba461"},"psc1/test/PsKernelQuotAdmissionProofs.lean":{"bytes":15698,"sha256":"9ed76158b819bfccf856c7e46f199a796dd7e5c015e364ffb5bfcc629483a3cd"},"psc1/test/PsKernelQuotAdmissionRegression.lean":{"bytes":5011,"sha256":"3ebdac6dde2d600f4c370a6d9e558a5d9477f6adfc5acb15f01c1cac110963c6"},"psc1/test/PsKernelExprV2QuotOwnerRegression.lean":{"bytes":37053,"sha256":"b967ec021389288500a2a5db9ea6c71cb4675971bec6815b8011984bcccc4cf1"},"psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs":{"bytes":28062,"sha256":"0117beadc375cb1d93734334bf7d1aa956af8f3862da210c9acec8117c2ffc89"}}
+QUOT_EXTRA_PATHS=["psc1/scripts/pskernel-quot-admission-qualification.py",
+    "psc1/scripts/pskernel-transform-lazy-qualification.py",
+    "psc1/scripts/pskernel-unary-spine-qualification.py",
+    "psc1/scripts/pskernel-validator-qualification.py",WORKFLOW,"psc1/lean-toolchain"]
+QUOT_NATIVE_COPY=None
+def quot_source_authentication():
+    def git(*args):return subprocess.check_output(["git","-C",str(SOURCE_ROOT),*args])
+    if subprocess.run(["git","-C",str(SOURCE_ROOT),"cat-file","-e",QUOT_BASE+"^{commit}"],
+        stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
+        subprocess.run(["git","-C",str(SOURCE_ROOT),"fetch","--no-tags","--depth=1","origin",QUOT_BASE],check=True)
+    same(git("diff","--name-only",QUOT_BASE,SHA,"--",RESTORED_PRODUCTION_ROOT).decode().splitlines(),
+        QUOT_DELTA,"exact three-path quotient production change from7903")
+    same(git("rev-parse",QUOT_BASE+":"+RESTORED_PRODUCTION_ROOT).decode().strip(),
+        "bccb72769d4f20def35f2064363fbc94fcc7e54a","qualified lazy-transform predecessor tree")
+    same(git("rev-parse",SHA+":"+RESTORED_PRODUCTION_ROOT).decode().strip(),
+        EMPTY_PRODUCTION_TREE,"exact reviewed whole production tree")
+    for path,pin in QUOT_PINS.items():same(digest(git_bytes(path)),pin,"exact independent quotient pin "+path)
+    old=git("show",QUOT_BASE+":"+RESTORED_PRODUCTION_ROOT+"/Ps/KernelCore/Admission/Quot/Admission.lean").decode()
+    frozen=old[old.index("def psKernelAddQuot"):].replace("def psKernelAddQuot","private def frozenAddQuot",1)
+    proof=git_bytes("psc1/test/PsKernelQuotAdmissionProofs.lean").decode()
+    require(frozen in proof,"literal entire frozen admission reference")
+    require("sorry" not in proof and not re.search(r"(?m)^\s*(axiom|unsafe|partial|opaque)\b",proof),"no proof escape")
+    current=git_bytes(QUOT_DAG).decode()
+    added="      | PsKernelDagDeclarationRequest.quot =>\n          match declaration with\n          | PsKernelDeclarationRequest.quot =>\n              psKernelDagTryAdmitQuot environment arena declarations\n          | _ => Option.none\n"
+    require(current.count(added)==1,"one direct Quot route")
+    same(current.replace(added,"",1).replace("import Ps.KernelCore.API.DagQuotAdmission\n","",1),
+        git("show",QUOT_BASE+":"+QUOT_DAG).decode(),"all other public admission bytes unchanged")
+    lake=git_bytes("psc1/kernel-lakefile.lean").decode()
+    same(lake.replace("    "+chr(96)+"Ps.KernelCore.API.DagQuotAdmission,\n","",1),
+        git("show",QUOT_BASE+":psc1/kernel-lakefile.lean").decode(),"one native root addition only")
+    return {"baseSource":QUOT_BASE,"productionTree":EMPTY_PRODUCTION_TREE,
+        "productionChanges":QUOT_DELTA,"reviewedPins":QUOT_PINS,
+        "allOtherProductionBytesUnchanged":True,"frozenWholeAdmissionReferenceExact":True}
+
+def quot_audit(e):
+    global QUOT_NATIVE_COPY
+    paths=list(QUOT_PINS)+QUOT_EXTRA_PATHS
+    rows=[{"path":path,**digest(git_bytes(path))} for path in paths]
+    expected_source={"schema":"psc1-quot-admission-source-v1","sourceSha":SHA,"runId":str(RUN),
+        "attempt":str(ATTEMPT),"baseSource":QUOT_BASE,"productionTree":EMPTY_PRODUCTION_TREE,
+        "productionChanges":QUOT_DELTA,"sourceSnapshots":rows,"fullKernel":False,"adopted":False}
+    same(e.json("quot/source.json"),expected_source,"entire independent quotient source inventory")
+    members={"quot/source.json"}|{"quot/sources/"+path for path in paths}
+    for path in paths:same(e.raw("quot/sources/"+path),git_bytes(path),"exact archived quotient input "+path)
+    same(e.terminal.splitlines().count("PSC1_QUOT_ADMISSION_SOURCE: PASS"),2,"source authenticated before and after qualification")
+    if e.route=="native":
+        members|={"quot/proofs.log","quot/regression.log","quot/retained-quot-owner.log","quot/native-receipt.json"}
+        names=proof_reports(git_bytes("psc1/test/PsKernelQuotAdmissionProofs.lean"),
+            e.raw("quot/proofs.log"),"PsKernelQuotAdmissionProofs",9)
+        labels=[line[len("PSC1_QUOT_ADMISSION_ASSERT "):] for line in e.text("quot/regression.log").splitlines()
+            if line.startswith("PSC1_QUOT_ADMISSION_ASSERT ")]
+        same(labels,["valid-Eq-owner-shape","valid-refl-owner-shape","direct-complete-admission",
+            "absent-owner-declines","wrong-kind-declines","wrong-level-owner-declines",
+            "out-of-owner-root-declines","missing-Eq-exact-error",
+            "initialized-bypass-preserves-environment","public-same-batch-complete-and-idempotent"]+
+            ["mutated-shape-exact-structural-result"]*8+
+            ["reserved-name-exact-error-and-no-publication","reserved-failure-original-uninitialized"]*4,
+            "actual26 direct/public/negative quotient controls")
+        same(e.text("quot/regression.log").splitlines()[-1],"PSC1_QUOT_ADMISSION_PASS","native controls complete")
+        same(e.text("quot/retained-quot-owner.log").splitlines()[-1],
+            "PSC1_V2_QUOT_OWNER_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 officialPositive=10 officialNegative=7",
+            "complete retained official native quotient suite")
+        retained=e.json("lazy/cohort-native-receipt.json")
+        all_names=retained["names"]+names
+        same(len(all_names),551,"actual551reports");same(len(set(all_names)),551,"unique551reports")
+        expected={"schema":"psc1-quot-admission-native-v1","sourceSha":SHA,"runId":str(RUN),"attempt":str(ATTEMPT),
+            "status":"pass","productionTree":EMPTY_PRODUCTION_TREE,"productionChanges":QUOT_DELTA,
+            "retainedProofs":542,"newProofs":9,"totalProofs":551,"proofModules":39,"names":all_names,
+            "sourceInventory":digest(e.raw("quot/source.json")),
+            "logs":{name:digest(e.raw("quot/"+name)) for name in ["proofs.log","regression.log","retained-quot-owner.log"]},
+            "retainedReceipt":digest(e.raw("lazy/cohort-native-receipt.json")),
+            "fullKernel":False,"globalSoundnessProved":False,"performanceQualified":False,"adopted":False}
+        same(e.json("quot/native-receipt.json"),expected,"entire independently reconstructed native551receipt")
+        line_marker(e.terminal,"PSC1_QUOT_ADMISSION_NATIVE551: PASS")
+        QUOT_NATIVE_COPY={"receipt":e.raw("quot/native-receipt.json"),"names":all_names}
+    else:
+        require(QUOT_NATIVE_COPY is not None,"native quotient audit precedes runtime")
+        members|={"quot/runtime.log","quot/runtime.memory","quot/route-receipt.json"}
+        same(e.raw("detached/pskernel-expr-v2-quot-owner-smoke.mjs"),
+            git_bytes("psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs"),"actual detached retained+direct quotient runtime helper")
+        summaries=[line for line in e.text("quot/runtime.log").splitlines()
+            if line.startswith("PSC1_V2_QUOT_OWNER_JS_PASS ")]
+        same(len(summaries),1,"one actual complete quotient runtime summary")
+        summary=summaries[0]
+        require(re.fullmatch(r"PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions=\d+",summary) is not None,
+            "all retained quotient differential controls and direct admission reached completion")
+        memory=e.text("quot/runtime.memory")
+        require(re.fullmatch(r"peak_rss_kib=\d+ wall_seconds=\d+(?:\.\d+)? exit_status=0\s*",memory) is not None,
+            "actual successful bounded time/RSS")
+        expected={"schema":"psc1-quot-admission-route-v1","sourceSha":SHA,"runId":str(RUN),"attempt":str(ATTEMPT),
+            "status":"pass","route":e.route,"productionTree":EMPTY_PRODUCTION_TREE,
+            "productionChanges":QUOT_DELTA,"nativeProofs":551,"proofModules":39,
+            "kernel":digest(e.raw("detached/kernel.mjs")),
+            "retainedCompleteRoute":digest(e.raw("lazy/cohort-route-receipt.json")),
+            "nativeCohortReceipt":digest(QUOT_NATIVE_COPY["receipt"]),
+            "runtimeLog":digest(e.raw("quot/runtime.log")),"runtimeMemory":digest(e.raw("quot/runtime.memory")),
+            "summary":summary,"fuel":4096,"oldSpaceMiB":2048,"emptyPATH":True,
+            "fullKernel":False,"performanceQualified":False,"adopted":False}
+        same(e.json("quot/route-receipt.json"),expected,"entire independently reconstructed route551receipt")
+        line_marker(e.terminal,"PSC1_QUOT_ADMISSION_ROUTE551: PASS route="+e.route)
+    same({name for name in e.files if name.startswith("quot/")},members,"exact quotient evidence member set")
+    return {"status":"pass","nativeReports":551,"nativeModules":39,"newReports":9,
+        "structuralMatcherCorrespondence":True,"sharedFrozenInstallerRefinement":True,
+        "retainedOfficialAndRuntimeControls":True,"fullKernel":False,"performanceQualified":False}
 
 
 def main():
@@ -2340,6 +2457,7 @@ def main():
     require(len(path_lists) == 2 and path_lists[0] == path_lists[1],
             "Native and route source inventory definitions agree")
     expected_paths = path_lists[0]
+    REPORT["quotientAdmissionSources"] = quot_source_authentication()
     REPORT["lazyTransformSources"] = lazy_source_authentication()
     if EMPTY_CACHE:
         REPORT["emptySemanticCacheSources"] = empty_cache_sources(expected_paths)
@@ -2418,7 +2536,7 @@ def main():
             same("sha256:" + digest(raw)["sha256"],artifact.get("digest"),"API archive SHA256")
             files = unzip(raw)
             if EMPTY_CACHE:
-                same(len(files),{"native":240,"generated":413,"canonical":416}[route],"exact complete unary qualification archive member count")
+                same(len(files),{"native":259,"generated":433,"canonical":436}[route],"exact complete unary qualification archive member count")
             job = job_map[route]
             same(job.get("run_id"),RUN,"job source run")
             same(job.get("head_sha"),SHA,"job source SHA")
@@ -2459,6 +2577,7 @@ def main():
                 result["validatorQualification"] = validator_audit(evidence)
             result["unarySpineQualification"] = unary_audit(evidence)
             result["lazyTransformQualification"] = lazy_audit(evidence)
+            result["quotientAdmissionQualification"] = quot_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -2481,7 +2600,7 @@ def main():
         "constructorHelpersQualified":True,"fullT05AdmissionQualified":ADMISSION,
         "ordinaryAdmissionQualified":ADMISSION,"publicRoutingQualified":ADMISSION,"fullKernelQualified":False,
         "projectB":"OPEN","projectC":"FAIL","projectD":"OPEN",
-        "nativeProofReports":542,"nativeProofModules":38,
+        "nativeProofReports":551,"nativeProofModules":39,
         "nativeAssertions":{"params":284,"result":432,
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
             **({"loop":69} if LOOP else {}),
@@ -2527,8 +2646,8 @@ if __name__ == "__main__":
             "routes":{r:{"status":v["status"],"artifactId":v.get("artifactId"),
                         "files":v.get("fileCount"),"error":v.get("error")}
                       for r,v in REPORT["routes"].items()},
-            "nativeReports":542 if REPORT["status"] == "pass" else None,
-            "nativeModules":38 if REPORT["status"] == "pass" else None,
+            "nativeReports":551 if REPORT["status"] == "pass" else None,
+            "nativeModules":39 if REPORT["status"] == "pass" else None,
             "lazyTransformLocalRefinementQualified":REPORT["status"] == "pass",
             "profile":PROFILE,
             **({"historicalThreeWorkerDelayQualified":REPORT["status"] == "pass" and not RESTORED} if DEFERRED else {}),

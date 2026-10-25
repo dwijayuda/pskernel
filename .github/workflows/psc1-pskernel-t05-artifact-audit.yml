@@ -1,9 +1,9 @@
-name: PSC1 lazy-transform artifact-only complete542 cohort audit
+name: PSC1 quotient ID admission artifact-only complete551 cohort audit
 'on':
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-transform-lazy-audit-20261025
+    - work/psc1-pskernel-t06-quot-audit-20261026
     paths:
     - .github/workflows/psc1-pskernel-t05-artifact-audit.yml
     - .github/psc1-t05-audit/**

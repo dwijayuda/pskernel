@@ -1,3 +1,15 @@
+## 2026-10-25 — Retained atomicity repair passed focused native preflight
+
+Repair source `9bb3a6f56f71680e8142bb893fad9dd7360c984c` passed [40149179070](https://github.com/dwijayuda/pskernel/actions/runs/40149179070), attempt 1, native job `121036878291`. Actual logs contain all **132 ordered unique reports across 11 modules**, all command/count statuses zero, and only standard allowed axioms. The four current atomicity equations passed, including explicit generated-import failure at the fallback boundary and complete-owner demand/tail failure. The original 21 recursor report names/order remain; two companion reports are added. The production implementation is unchanged by this proof repair.
+
+The native artifact `12581687340` contains 30 files (43,472 bytes), ZIP SHA256 `334747fa55c8ab667bf1db9228bee849db5aef50066b55f3673b14e67bcbf518`. API and terminal digests match; this focused preflight does not claim independent ZIP or full source qualification. Exact evidence is recorded in `docs/qualification/T05_RETAINED_PROOF_PREFLIGHT_9bb3a6f.json`.
+
+This candidate now extends the complete workflow to **492 reports / 29 modules / 92 source inputs / 17 detached scripts**. The ten added integration proof modules run before the rest of the native inventory, and the final receipt retains the entire 374-report chain. Both complete generated routes and the independent `retained`-profile archive audit must run on this new exact source. The older D0 374-profile cohort remains scoped diagnostic evidence and cannot qualify the repaired source.
+
+The corrected A/B workflow preserves every control. The storage research harness runs before full builds on its intended, pinned `Research/ExprV2ResearchAll.lean` entry; that distinct module and log are authenticated in a 20-file producer inventory. Full-kernel raw23, complete DAG, and Arena138 controls remain required. Canonical translation/check/build uses the authenticated shared compiler through the reviewed bootstrap adapter. No unused production export or resource/fuel change is introduced.
+
+The C5 diagnostic is terminal failure with no A/B measurements. Use this new candidate's exact SHA for both main complete qualification and the single corrected A/B run on the isolated transform branch. Keep integration at `10144e2f` until full new-source qualification succeeds and inspect bounded A/B evidence before adopting the transform change. A is scoped qualified; B OPEN, C FAIL, D OPEN.
+
 # Retained ownership proof repair — 2026-10-25
 
 The broader integration native job [121031648333](https://github.com/dwijayuda/pskernel/actions/runs/40147424295/jobs/121031648333) at source `10144e2f9e8d223b5dcde275bd1f48d25df113b3` found two stale batch-publication proof statements in `PsKernelExprV2RecursorProofs.lean`. They still described the former command-result pair and unconditional generated bridge, whereas the batch now uses the checked owned-command result followed by demand synchronization. The focused T05 gate omitted this retained module.

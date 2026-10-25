@@ -222,7 +222,8 @@ jobs:
           stable = ["psc1/scripts/" + name for name in scripts[1:]] + [
               "psc1/scripts/pskernel-arena435-compare.py", "psc1/scripts/pskernel-arena435-oracle.py",
               "psc1/scripts/bootstrap-project.mjs", "psc1/scripts/bootstrap-manifest.mjs",
-              "psc1/scripts/workspace-layout.mjs"]
+              "psc1/scripts/workspace-layout.mjs",
+              "psc1/packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean"]
           subprocess.check_call(["git", "-C", "..", "diff", "--exit-code", os.environ["BASELINE_SHA"],
               os.environ["GITHUB_SHA"], "--", *stable])
           names = ["psc1", "native-receipt.json", "source-audit.json", "proofs.log",
@@ -340,6 +341,30 @@ jobs:
           env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
             "$RUNNER_TEMP/transform-delay-shared/runtime/pskernel-expr-v2-transform-delay-smoke.mjs" \
             "$RUNNER_TEMP/transform-delay-leaf.mjs"
+      - name: Run retained storage research controls on their intended small entry before full builds
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_DELAY_NODE="$(command -v node)"
+          PSC1_DELAY_COMPILER="$RUNNER_TEMP/transform-delay-shared/psc1"
+          PSC1_DELAY_OUT="$RUNNER_TEMP/transform-delay-producer"
+          PSC1_DELAY_RESEARCH_ENTRY=packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean
+          python3 - <<'PY'
+          import hashlib, pathlib
+          raw = pathlib.Path("packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean").read_bytes()
+          assert hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest() == \
+              "3349d6d3b453297123095354bf25dcdcc4efa625"
+          PY
+          "$PSC1_DELAY_COMPILER" build "$PSC1_DELAY_RESEARCH_ENTRY" \
+            --out dist/transform-delay-research/kernel.js \
+            2>&1 | tee "$PSC1_DELAY_OUT/research-build.log"
+          node --check dist/transform-delay-research/kernel.js
+          cp dist/transform-delay-research/kernel.js "$PSC1_DELAY_OUT/research-kernel.mjs"
+          env PATH="" "$PSC1_DELAY_NODE" --expose-gc --max-old-space-size=2048 \
+            "$RUNNER_TEMP/transform-delay-shared/runtime/pskernel-expr-v2-generated-smoke.mjs" \
+            "$PSC1_DELAY_OUT/research-kernel.mjs" \
+            2>&1 | tee "$PSC1_DELAY_OUT/paged-smoke.log"
       - name: Check complete authentic source and canonical reconstruction
         working-directory: psc1
         shell: bash
@@ -432,9 +457,6 @@ jobs:
             pskernel-expr-v2-dag-smoke.mjs kernel.mjs \
             2>&1 | tee "$PSC1_DELAY_OUT/dag-smoke.log"
           env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
-            pskernel-expr-v2-generated-smoke.mjs kernel.mjs \
-            2>&1 | tee "$PSC1_DELAY_OUT/paged-smoke.log"
-          env PATH="" "$PSC1_DELAY_NODE" --max-old-space-size=2048 \
             pskernel-arena-replay-controls.mjs kernel.mjs \
             2>&1 | tee "$PSC1_DELAY_OUT/arena-controls.log"
       - name: Seal producer receipt with actual kernel and compiler identities
@@ -471,6 +493,20 @@ jobs:
               "driverSha256": audit["sourceFiles"]["psc1/scripts/pskernel-transform-delay-abba.py"],
               "nativeSourceAuditSha256": digest(out / "native-source-audit.json"),
               "bootstrap": json.loads((out / "bootstrap-tools.json").read_text()),
+              "research": {
+                  "entry": "packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean",
+                  "entryGitBlob": "3349d6d3b453297123095354bf25dcdcc4efa625",
+                  "entrySha256": digest(pathlib.Path("psc1/packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean")),
+                  "sourceSha": os.environ["PSC1_DELAY_KERNEL_SHA"],
+                  "compilerSourceSha": os.environ["GITHUB_SHA"],
+                  "compilerSha256": compiler["compilerSha256"],
+                  "kernelFile": "research-kernel.mjs",
+                  "kernelSha256": digest(out / "research-kernel.mjs"),
+                  "buildLogSha256": digest(out / "research-build.log"),
+                  "smokeLogSha256": digest(out / "paged-smoke.log"),
+                  "harnessSha256": compiler["files"]["runtime/pskernel-expr-v2-generated-smoke.mjs"],
+                  "validatesSelfHost": False,
+              },
           }
           assert tools["nodeVersion"].startswith("v22.")
           assert tools["typescriptVersion"] == "Version 7.0.2"
@@ -482,7 +518,7 @@ jobs:
               "paged-smoke.log", "arena-controls.log", "native-receipt.json",
               "native-source-audit.json", "native-proofs.log", "compiler-receipt.json",
               "authentic-source.log", "canonical-source.log", "generated-build.log", "producer-tools.json",
-              "bootstrap-shared.mjs")
+              "bootstrap-shared.mjs", "research-kernel.mjs", "research-build.log")
           markers = {
               "raw-abi.log": "PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11",
               "dag-smoke.log": "PSC1_V2_TRANSFORM_JS: PASS",
@@ -491,6 +527,7 @@ jobs:
           }
           for name, marker in markers.items():
               assert (out / name).read_text().splitlines().count(marker) == 1, name
+          assert (out / "dag-smoke.log").read_text().splitlines().count("PSC1_V2_DAG_JS: PASS") == 1
           receipt = {
               "schema": "psc1-transform-delay-producer-v1", "variant": os.environ["PSC1_DELAY_VARIANT"],
               "sourceSha": os.environ["GITHUB_SHA"], "baselineSha": os.environ["BASELINE_SHA"],

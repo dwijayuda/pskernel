@@ -43,7 +43,7 @@ REQUIRED_FILES = {
     "paged-smoke.log", "arena-controls.log", "native-receipt.json",
     "native-source-audit.json", "native-proofs.log", "compiler-receipt.json",
     "authentic-source.log", "canonical-source.log", "generated-build.log", "producer-tools.json",
-    "bootstrap-shared.mjs",
+    "bootstrap-shared.mjs", "research-kernel.mjs", "research-build.log",
 }
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -94,6 +94,26 @@ def authenticate(root, variant, source, baseline):
         or bootstrap.get("translatorSha256") != compiler.get("compilerSha256")
         or bootstrap.get("translatorSourceSha") != source):
         raise ValueError("shared bootstrap translator receipt mismatch")
+    research = producer_tools.get("research", {})
+    research_entry = "packages/pskernel-core/src/Ps/KernelCore/Research/ExprV2ResearchAll.lean"
+    raw_entry = (HERE.parent / research_entry).read_bytes()
+    entry_blob = hashlib.sha1(b"blob " + str(len(raw_entry)).encode() + b"\0" + raw_entry).hexdigest()
+    if (research.get("entry") != research_entry
+        or entry_blob != "3349d6d3b453297123095354bf25dcdcc4efa625"
+        or research.get("entryGitBlob") != entry_blob
+        or research.get("entrySha256") != hashlib.sha256(raw_entry).hexdigest()
+        or research.get("sourceSha") != receipt.get("kernelSourceSha")
+        or research.get("compilerSourceSha") != source
+        or research.get("compilerSha256") != compiler.get("compilerSha256")
+        or research.get("kernelFile") != "research-kernel.mjs"
+        or research.get("kernelSha256") != digest(root / "research-kernel.mjs")
+        or research.get("buildLogSha256") != digest(root / "research-build.log")
+        or research.get("smokeLogSha256") != digest(root / "paged-smoke.log")
+        or research.get("harnessSha256") != compiler["files"]["runtime/pskernel-expr-v2-generated-smoke.mjs"]
+        or research.get("validatesSelfHost") is not False):
+        raise ValueError("storage research entry/kernel/control receipt mismatch")
+    if (root / "dag-smoke.log").read_text().splitlines().count("PSC1_V2_DAG_JS: PASS") != 1:
+        raise ValueError("complete SelfHost DAG smoke did not finish")
     markers = {
         "raw-abi.log": "PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11",
         "dag-smoke.log": "PSC1_V2_TRANSFORM_JS: PASS",

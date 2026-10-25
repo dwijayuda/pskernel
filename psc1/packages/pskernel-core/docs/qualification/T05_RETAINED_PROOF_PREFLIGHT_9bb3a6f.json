@@ -1,0 +1,481 @@
+{
+  "schema": "psc1-retained-proof-repair-checkpoint-v1",
+  "sourceSha": "9bb3a6f56f71680e8142bb893fad9dd7360c984c",
+  "runId": 40149179070,
+  "runAttempt": 1,
+  "jobId": 121036878291,
+  "status": "pass",
+  "proofModules": 11,
+  "proofReports": 132,
+  "sourceInventory": {
+    "schema": "psc1-retained-proof-source-v1",
+    "sourceSha": "9bb3a6f56f71680e8142bb893fad9dd7360c984c",
+    "runId": "40149179070",
+    "runAttempt": "1",
+    "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "files": [
+      {
+        "path": "psc1/test/PsKernelNatFuelProofs.lean",
+        "bytes": 7545,
+        "sha256": "890171f8907b872ec79286cc06cadc611525d7ee685aedf3d1f73730a28b0bcc",
+        "gitBlobSha": "42353e67cbcc5ce5ebafc7e73162cfcb3029c5ef"
+      },
+      {
+        "path": "psc1/test/PsKernelExprEqualityProofs.lean",
+        "bytes": 13698,
+        "sha256": "6e15d29e67b0125182e449eca9f22e6adaa1cf99892198c1a9a4b6af5c828664",
+        "gitBlobSha": "a2a81dc10c93c4cdefabaed9be7ce5b07818d0c7"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2AdmissionGuardProofs.lean",
+        "bytes": 10427,
+        "sha256": "c61033f08eb98c70a05a81261e276740d113c012a0104ece7882072fe625c3ba",
+        "gitBlobSha": "de597c70416cc91b3606d72edfbf01e24529588a"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2RecursorProofs.lean",
+        "bytes": 17392,
+        "sha256": "7269e054a0a7fe2731de7fa0720ec9eefbe5be0eafa0efee34ec0e0254a118e4",
+        "gitBlobSha": "f56535ff7344b5d71b626e720a0584522512943d"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2RecursorMajorProofs.lean",
+        "bytes": 6659,
+        "sha256": "a387dba1a82dbc13897a59373625754e1edb42ec75b99392c0ecba71c48de5e7",
+        "gitBlobSha": "de27dbe6ed55f180947a7e0dc423082a7f2cb2cb"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2RecursorKProofs.lean",
+        "bytes": 4804,
+        "sha256": "de842c5700f96c1b472d6ca2a3f572ae7b0a2f954cdd79b3ee3ad2f20c85913d",
+        "gitBlobSha": "25022eb665c4ec4a26b2d0b63706e2c3b2f23b51"
+      },
+      {
+        "path": "psc1/test/PsKernelNameWorkerProofs.lean",
+        "bytes": 5799,
+        "sha256": "a70448dc4a1572ea8d772399d95fd815b155acf68bd66554c6e9544b9b7fbe41",
+        "gitBlobSha": "43d280f3d4da3b21f4c67e53da08dbb036b5a30f"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2QuotOwnerProofs.lean",
+        "bytes": 9332,
+        "sha256": "c3f91b5a10bb38d9e5a06bbf0a8d86d485a3a0725fd0429e06a2743ee913bb99",
+        "gitBlobSha": "47f7c6d019e798d54797bcc6a87036d9fd485d79"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2WhnfABIProofs.lean",
+        "bytes": 2300,
+        "sha256": "69f3b43a2a3e7dc6c8105df907fadfac33d7cfa57bb79e16bf9d65857070109c",
+        "gitBlobSha": "8363d4794a6c56a46bd790294cc8b8d8709fe139"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2OwnedStateProofs.lean",
+        "bytes": 14451,
+        "sha256": "81771cc44028e58b161fb8745c64d6eebfaf83c66113d3cb87112ee119652716",
+        "gitBlobSha": "084b4a646af750d56d9259ad8eafbfc0a2c83658"
+      },
+      {
+        "path": "psc1/test/PsKernelExprV2SessionProofs.lean",
+        "bytes": 9567,
+        "sha256": "33b73b9333eea849e44a096a886fdee549504e820072305f9438361ecabb0dd3",
+        "gitBlobSha": "48541d207b6853088c88a61ad0f50ec4b5422232"
+      },
+      {
+        "path": ".github/workflows/psc1-pskernel-retained-proof-preflight.yml",
+        "bytes": 10843,
+        "sha256": "d3fec10df3a5177d4adf73e6a58910eeaf0c0a030458631b08daa3433dc4436f",
+        "gitBlobSha": "ead0d3f870b50416697c3f1ccd991c559dc207a4"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean",
+        "bytes": 22751,
+        "sha256": "48ff1c3f3eab626fb11c8afe34b8b8359b69dba76acde768987ee997b494aea6",
+        "gitBlobSha": "585e4d12f1682c5478da382ee3f6b2d20a3e25d8"
+      },
+      {
+        "path": "psc1/kernel-lakefile.lean",
+        "bytes": 17793,
+        "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170",
+        "gitBlobSha": "6b1f3747b1fc6e4d391fc31fa6196851d31a5a24"
+      },
+      {
+        "path": "psc1/lean-toolchain",
+        "bytes": 25,
+        "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c",
+        "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915"
+      },
+      {
+        "path": "psc1/scripts/install-lean435-ci.sh",
+        "bytes": 1051,
+        "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9",
+        "gitBlobSha": "b53f59db9e2fbb45feeedea659244cae7e77b64b"
+      }
+    ]
+  },
+  "nativeReceipt": {
+    "schema": "psc1-retained-proof-preflight-v1",
+    "sourceSha": "9bb3a6f56f71680e8142bb893fad9dd7360c984c",
+    "runId": "40149179070",
+    "runAttempt": "1",
+    "status": "pass",
+    "proofModules": 11,
+    "totalProofs": 132,
+    "proofs": [
+      {
+        "module": "PsKernelNatFuelProofs",
+        "proofs": 5,
+        "names": [
+          "PsKernelNatFuelProofs.NatGcdWithFuel_delayed_recursion_preserves",
+          "PsKernelNatFuelProofs.NatHeapWordCountWithFuel_delayed_recursion_preserves",
+          "PsKernelNatFuelProofs.NatPowWithFuel_delayed_recursion_preserves",
+          "PsKernelNatFuelProofs.NatBitwiseWithFuel_delayed_recursion_preserves",
+          "PsKernelNatFuelProofs.NatShiftRightWithFuel_delayed_recursion_preserves"
+        ],
+        "source": {
+          "bytes": 7545,
+          "sha256": "890171f8907b872ec79286cc06cadc611525d7ee685aedf3d1f73730a28b0bcc"
+        },
+        "log": {
+          "bytes": 593,
+          "sha256": "d802991be34a34714004f1c49c67ce59ff350dbb5b98f5545c0ccf1cb69edb4f"
+        }
+      },
+      {
+        "module": "PsKernelExprEqualityProofs",
+        "proofs": 4,
+        "names": [
+          "PsKernelExprEqualityProofs.exprEq_delayed_recursion_preserves",
+          "PsKernelExprEqualityProofs.exprEqual_delayed_recursion_preserves",
+          "PsKernelExprEqualityProofs.exprEq_pointwise_preserves",
+          "PsKernelExprEqualityProofs.exprEqual_pointwise_preserves"
+        ],
+        "source": {
+          "bytes": 13698,
+          "sha256": "6e15d29e67b0125182e449eca9f22e6adaa1cf99892198c1a9a4b6af5c828664"
+        },
+        "log": {
+          "bytes": 564,
+          "sha256": "5f89bbacb64bb25b0ea67037e25e7417121c781ac4944398e4d82be9ce720447"
+        }
+      },
+      {
+        "module": "PsKernelExprV2AdmissionGuardProofs",
+        "proofs": 18,
+        "names": [
+          "PsKernelExprV2AdmissionGuardProofs.id_member_exact",
+          "PsKernelExprV2AdmissionGuardProofs.bucket_set_same",
+          "PsKernelExprV2AdmissionGuardProofs.inserted_id_is_found",
+          "PsKernelExprV2AdmissionGuardProofs.hit_requires_exact_id",
+          "PsKernelExprV2AdmissionGuardProofs.empty_owner_has_no_hits",
+          "PsKernelExprV2AdmissionGuardProofs.first_undef_kept",
+          "PsKernelExprV2AdmissionGuardProofs.first_undef_from_next",
+          "PsKernelExprV2AdmissionGuardProofs.expression_mvar_implies_full_mvar",
+          "PsKernelExprV2AdmissionGuardProofs.sort_universe_mvar_precedes_param",
+          "PsKernelExprV2AdmissionGuardProofs.constant_universe_mvar_precedes_param",
+          "PsKernelExprV2AdmissionGuardProofs.free_variable_precedes_undefined_param",
+          "PsKernelExprV2AdmissionGuardProofs.finish_matches_reference",
+          "PsKernelExprV2AdmissionGuardProofs.scan_zero_precedes_memo",
+          "PsKernelExprV2AdmissionGuardProofs.validated_root_expression_mvar",
+          "PsKernelExprV2AdmissionGuardProofs.canonical_guard_matches_reference_conditionally",
+          "PsKernelExprV2AdmissionGuardProofs.checked_boundary_preserves_validation_error",
+          "PsKernelExprV2AdmissionGuardProofs.header_existing_name_precedes_arena",
+          "PsKernelExprV2AdmissionGuardProofs.header_duplicate_params_precedes_arena"
+        ],
+        "source": {
+          "bytes": 10427,
+          "sha256": "c61033f08eb98c70a05a81261e276740d113c012a0104ece7882072fe625c3ba"
+        },
+        "log": {
+          "bytes": 2005,
+          "sha256": "1c5ac9ba0ccd1dbe9c76cc54f994f58fce2dbb0b4165740f244f07ed48267cd1"
+        }
+      },
+      {
+        "module": "PsKernelExprV2RecursorProofs",
+        "proofs": 23,
+        "names": [
+          "PsKernelExprV2RecursorProofs.generated_type_reuses_current_command_ref",
+          "PsKernelExprV2RecursorProofs.generated_prefix_empty",
+          "PsKernelExprV2RecursorProofs.generated_prefix_stops_at_old_name",
+          "PsKernelExprV2RecursorProofs.generated_prefix_first_import_error",
+          "PsKernelExprV2RecursorProofs.generated_prefix_threads_complete_state",
+          "PsKernelExprV2RecursorProofs.generated_import_error_prevents_batch_publication",
+          "PsKernelExprV2RecursorProofs.generated_late_command_error_prevents_batch_publication",
+          "PsKernelExprV2RecursorProofs.check_uses_input_namespace",
+          "PsKernelExprV2RecursorProofs.whnf_uses_input_namespace",
+          "PsKernelExprV2RecursorProofs.defeq_left_uses_input_namespace_first",
+          "PsKernelExprV2RecursorProofs.admission_uses_input_namespace",
+          "PsKernelExprV2RecursorProofs.generated_finish_synchronizes_append",
+          "PsKernelExprV2RecursorProofs.generated_finish_refuses_wrong_root",
+          "PsKernelExprV2RecursorProofs.no_owner_from_empty_batch",
+          "PsKernelExprV2RecursorProofs.insufficient_fields_precede_owner",
+          "PsKernelExprV2RecursorProofs.wrong_universe_arity_precedes_owner",
+          "PsKernelExprV2RecursorProofs.missing_owner_never_claims_reduction",
+          "PsKernelExprV2RecursorProofs.K_refuses_before_callbacks",
+          "PsKernelExprV2RecursorProofs.constructor_skips_major_callback",
+          "PsKernelExprV2RecursorProofs.nonconstructor_callback_error_precedes_normalization",
+          "PsKernelExprV2RecursorProofs.recursor_zero_before_syntax",
+          "PsKernelExprV2RecursorProofs.generated_fallback_import_error_returns_no_owner",
+          "PsKernelExprV2RecursorProofs.owned_command_error_prevents_batch_publication"
+        ],
+        "source": {
+          "bytes": 17392,
+          "sha256": "7269e054a0a7fe2731de7fa0720ec9eefbe5be0eafa0efee34ec0e0254a118e4"
+        },
+        "log": {
+          "bytes": 3346,
+          "sha256": "0ffed70e5ca824534f8d2b4edcfbfa02df4ae7e30a4135fdb7f91b508e990129"
+        }
+      },
+      {
+        "module": "PsKernelExprV2RecursorMajorProofs",
+        "proofs": 10,
+        "names": [
+          "PsKernelExprV2RecursorMajorProofs.major_family_zero_precedes_root",
+          "PsKernelExprV2RecursorMajorProofs.structure_fields_zero_preserves_arena",
+          "PsKernelExprV2RecursorMajorProofs.no_type_owner_in_empty_index",
+          "PsKernelExprV2RecursorMajorProofs.constructor_shortcut_precedes_owner_and_callbacks",
+          "PsKernelExprV2RecursorMajorProofs.missing_family_owner_declines",
+          "PsKernelExprV2RecursorMajorProofs.non_structure_major_is_supported_unchanged",
+          "PsKernelExprV2RecursorMajorProofs.structure_inference_decline_preserved",
+          "PsKernelExprV2RecursorMajorProofs.structure_inference_error_precedes_type_whnf",
+          "PsKernelExprV2RecursorMajorProofs.string_uses_public_callback_after_exact_construction",
+          "PsKernelExprV2RecursorMajorProofs.is_prop_retains_complete_last_callback_state"
+        ],
+        "source": {
+          "bytes": 6659,
+          "sha256": "a387dba1a82dbc13897a59373625754e1edb42ec75b99392c0ecba71c48de5e7"
+        },
+        "log": {
+          "bytes": 1309,
+          "sha256": "c8ac84786350f495ab0af3949b493467db9ad1a0151028742e963ba74ff2fd25"
+        }
+      },
+      {
+        "module": "PsKernelExprV2RecursorKProofs",
+        "proofs": 6,
+        "names": [
+          "PsKernelExprV2RecursorKProofs.inferNone",
+          "PsKernelExprV2RecursorKProofs.inferError",
+          "PsKernelExprV2RecursorKProofs.whnfNone",
+          "PsKernelExprV2RecursorKProofs.whnfError",
+          "PsKernelExprV2RecursorKProofs.candidateDecisionRetainsFullState",
+          "PsKernelExprV2RecursorKProofs.candidateFalseRetainsFullState"
+        ],
+        "source": {
+          "bytes": 4804,
+          "sha256": "de842c5700f96c1b472d6ca2a3f572ae7b0a2f954cdd79b3ee3ad2f20c85913d"
+        },
+        "log": {
+          "bytes": 655,
+          "sha256": "b4614290d24d35bb97286d4e07ec144f4696b55dfd85ab45e123c6bf124a0ee8"
+        }
+      },
+      {
+        "module": "PsKernelNameWorkerProofs",
+        "proofs": 8,
+        "names": [
+          "PsKernelNameWorkerProofs.raw_worker_exact",
+          "PsKernelNameWorkerProofs.raw_public_exact",
+          "PsKernelNameWorkerProofs.string_public_exact",
+          "PsKernelNameWorkerProofs.name_worker_exact",
+          "PsKernelNameWorkerProofs.name_public_exact",
+          "PsKernelNameWorkerProofs.raw_partial_application_exact",
+          "PsKernelNameWorkerProofs.name_partial_application_exact",
+          "PsKernelNameWorkerProofs.raw_zero_fuel_exact"
+        ],
+        "source": {
+          "bytes": 5799,
+          "sha256": "a70448dc4a1572ea8d772399d95fd815b155acf68bd66554c6e9544b9b7fbe41"
+        },
+        "log": {
+          "bytes": 859,
+          "sha256": "999a5006eecdde13b397c9569a9c2b41895b01f70025a2ae771b98a55fc8e927"
+        }
+      },
+      {
+        "module": "PsKernelExprV2QuotOwnerProofs",
+        "proofs": 21,
+        "names": [
+          "PsKernelExprV2QuotOwnerProofs.kind_reflexive",
+          "PsKernelExprV2QuotOwnerProofs.quotient_kind_matches_exact",
+          "PsKernelExprV2QuotOwnerProofs.quotient_kind_refuses_axiom",
+          "PsKernelExprV2QuotOwnerProofs.find_missing",
+          "PsKernelExprV2QuotOwnerProofs.find_wrong_kind",
+          "PsKernelExprV2QuotOwnerProofs.plan_uninitialized",
+          "PsKernelExprV2QuotOwnerProofs.plan_missing_first",
+          "PsKernelExprV2QuotOwnerProofs.plan_incomplete_last",
+          "PsKernelExprV2QuotOwnerProofs.plan_complete",
+          "PsKernelExprV2QuotOwnerProofs.owner_missing",
+          "PsKernelExprV2QuotOwnerProofs.owner_delta_refused",
+          "PsKernelExprV2QuotOwnerProofs.owner_type_error_refused",
+          "PsKernelExprV2QuotOwnerProofs.owner_type_exact_comparison",
+          "PsKernelExprV2QuotOwnerProofs.install_missing_plan",
+          "PsKernelExprV2QuotOwnerProofs.install_existing_plan",
+          "PsKernelExprV2QuotOwnerProofs.install_incomplete_owners",
+          "PsKernelExprV2QuotOwnerProofs.quotient_info_imports_only_header",
+          "PsKernelExprV2QuotOwnerProofs.quotient_command_uses_checked_plan",
+          "PsKernelExprV2QuotOwnerProofs.quotient_previous_command_uses_checked_plan",
+          "PsKernelExprV2QuotOwnerProofs.private_check_reference_stays_invalid",
+          "PsKernelExprV2QuotOwnerProofs.private_whnf_reference_stays_invalid"
+        ],
+        "source": {
+          "bytes": 9332,
+          "sha256": "c3f91b5a10bb38d9e5a06bbf0a8d86d485a3a0725fd0429e06a2743ee913bb99"
+        },
+        "log": {
+          "bytes": 2348,
+          "sha256": "ed03aee82672c602bf9490d543bd8d5477e3c2bf91c4df165abac1324a6410e8"
+        }
+      },
+      {
+        "module": "PsKernelExprV2WhnfABIProofs",
+        "proofs": 2,
+        "names": [
+          "PsKernelExprV2WhnfABIProofs.core_wrapper_keeps_exact_operation",
+          "PsKernelExprV2WhnfABIProofs.public_wrapper_keeps_exact_operation"
+        ],
+        "source": {
+          "bytes": 2300,
+          "sha256": "69f3b43a2a3e7dc6c8105df907fadfac33d7cfa57bb79e16bf9d65857070109c"
+        },
+        "log": {
+          "bytes": 254,
+          "sha256": "b81f7d506112ca3ae56ce733500f7bfab355dc53b2c0308a690e148cc32f9950"
+        }
+      },
+      {
+        "module": "PsKernelExprV2OwnedStateProofs",
+        "proofs": 21,
+        "names": [
+          "PsKernelExprV2OwnedStateProofs.lift_success_preserves_six_outer_fields",
+          "PsKernelExprV2OwnedStateProofs.optional_lift_success_preserves_six_outer_fields",
+          "PsKernelExprV2OwnedStateProofs.lower_lift_identity",
+          "PsKernelExprV2OwnedStateProofs.optional_lower_lift_identity",
+          "PsKernelExprV2OwnedStateProofs.lift_decline_and_error_preserved",
+          "PsKernelExprV2OwnedStateProofs.owned_core_zero_precedes_callbacks_and_syntax",
+          "PsKernelExprV2OwnedStateProofs.owned_public_zero_precedes_callbacks_and_syntax",
+          "PsKernelExprV2OwnedStateProofs.owned_recursor_zero_precedes_callbacks_and_syntax",
+          "PsKernelExprV2OwnedStateProofs.owned_inference_zero_precedes_callbacks_and_cache",
+          "PsKernelExprV2OwnedStateProofs.owned_defeq_zero_precedes_syntax_and_cache",
+          "PsKernelExprV2OwnedStateProofs.admission_sort_keeps_complete_returned_owner",
+          "PsKernelExprV2OwnedStateProofs.admission_sort_decline_precedes_lookup",
+          "PsKernelExprV2OwnedStateProofs.admission_sort_error_precedes_lookup",
+          "PsKernelExprV2OwnedStateProofs.admission_prop_keeps_both_callback_owners",
+          "PsKernelExprV2OwnedStateProofs.admission_prop_inference_decline_precedes_whnf",
+          "PsKernelExprV2OwnedStateProofs.admission_prop_inference_error_precedes_whnf",
+          "PsKernelExprV2OwnedStateProofs.admission_prop_whnf_decline_keeps_order",
+          "PsKernelExprV2OwnedStateProofs.admission_prop_whnf_error_keeps_order",
+          "PsKernelExprV2OwnedStateProofs.full_state_whnf_zero_precedes_syntax_and_cache",
+          "PsKernelExprV2OwnedStateProofs.admission_sort_zero_precedes_syntactic_sort",
+          "PsKernelExprV2OwnedStateProofs.admission_prop_zero_preserves_inference_failure"
+        ],
+        "source": {
+          "bytes": 14451,
+          "sha256": "81771cc44028e58b161fb8745c64d6eebfaf83c66113d3cb87112ee119652716"
+        },
+        "log": {
+          "bytes": 2443,
+          "sha256": "6060a02faa1b8d6d6aac97ba3d1ae8eeabce4d08d240022e4f0c7a579966e775"
+        }
+      },
+      {
+        "module": "PsKernelExprV2SessionProofs",
+        "proofs": 14,
+        "names": [
+          "PsKernelExprV2SessionProofs.collect_zero_preserves_pending",
+          "PsKernelExprV2SessionProofs.collect_invalid_node_stops",
+          "PsKernelExprV2SessionProofs.next_demand_skips_owned_name",
+          "PsKernelExprV2SessionProofs.next_demand_skips_missing_name",
+          "PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info",
+          "PsKernelExprV2SessionProofs.complete_no_demand_preserves_state",
+          "PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import",
+          "PsKernelExprV2SessionProofs.complete_import_error_returns_no_state",
+          "PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons",
+          "PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners",
+          "PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication",
+          "PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace",
+          "PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication",
+          "PsKernelExprV2SessionProofs.append_demands_preserves_order"
+        ],
+        "source": {
+          "bytes": 9567,
+          "sha256": "33b73b9333eea849e44a096a886fdee549504e820072305f9438361ecabb0dd3"
+        },
+        "log": {
+          "bytes": 1774,
+          "sha256": "6252fcd741c45297f1a7e0fb9e2699d3fe7783add8a224076453a801a73a101a"
+        }
+      }
+    ],
+    "sourceInventory": {
+      "bytes": 4090,
+      "sha256": "2e196ffe17789b618d27a271036f0ea90d116d6934addf6248626c754e3c4976"
+    },
+    "proofStatuses": {
+      "bytes": 1084,
+      "sha256": "990b495ec6e21496b14672f3df638e786bdb64d25b3b3203cad4982db2fa5de8"
+    },
+    "orderedUniqueReports": true,
+    "allowedStandardAxiomsOnly": true,
+    "fullQualification": false,
+    "performanceQualified": false
+  },
+  "artifact": {
+    "id": 12581687340,
+    "name": "psc1-retained-proof-preflight-attempt-1",
+    "size_in_bytes": 43472,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581687340",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12581687340/zip",
+    "expired": false,
+    "created_at": "2026-10-25T01:05:58Z",
+    "expires_at": "2026-11-24T01:05:57Z",
+    "updated_at": "2026-10-25T01:05:58Z",
+    "digest": "sha256:334747fa55c8ab667bf1db9228bee849db5aef50066b55f3673b14e67bcbf518",
+    "workflow_run": {
+      "id": 40149179070,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-retained-proof-20261025",
+      "head_sha": "9bb3a6f56f71680e8142bb893fad9dd7360c984c"
+    }
+  },
+  "archiveEvidence": {
+    "fileCount": 30,
+    "apiAndUploadDigestsMatch": true,
+    "independentZipAuditPassed": false
+  },
+  "scope": {
+    "focusedNativePreflightPassed": true,
+    "fullQualification": false,
+    "performanceQualified": false
+  },
+  "priorFailure": {
+    "sourceSha": "10144e2f9e8d223b5dcde275bd1f48d25df113b3",
+    "runId": 40147424295,
+    "jobId": 121031648333,
+    "module": "PsKernelExprV2RecursorProofs",
+    "lines": [
+      242,
+      265
+    ]
+  },
+  "repair": {
+    "productionChanged": false,
+    "oldReportNamesRetained": 21,
+    "newCompanionReports": 2,
+    "stages": [
+      "actual owned-command failure",
+      "actual generated-demand failure with complete owner",
+      "actual tail-command failure with synchronized owner",
+      "explicit fallback generated-import error"
+    ]
+  },
+  "nextFullGate": {
+    "reports": 492,
+    "modules": 29,
+    "sourceInputs": 92,
+    "detachedScripts": 17,
+    "newRawAssertionsPerGeneratedRoute": 23
+  }
+}

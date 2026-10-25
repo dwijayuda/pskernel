@@ -36,3 +36,20 @@ jobs:
         run: |
           lean --version
           lake build psc1_source_ownership psc1_lossless_source psc1_independent_checker psc1_source_census_probe
+      - name: Validate exact ownership, independent admission and refusal boundaries
+        working-directory: psc1
+        run: |
+          node --check host-tools/source-refactoring.mjs
+          node scripts/source-ownership-tests.mjs
+      - name: Preserve lexical regressions
+        working-directory: psc1
+        run: node scripts/lossless-source-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-source-ownership-${{ github.sha }}
+          path: |
+            psc1/dist/source-ownership/
+            psc1/dist/lossless/
+          if-no-files-found: warn
+          retention-days: 90

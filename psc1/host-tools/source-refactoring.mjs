@@ -20,6 +20,7 @@ const supervisor = fileURLToPath(new URL('../scripts/bounded-process.py', import
 
 function exactKeys(value, keys) {
   if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      Object.keys(value).length !== keys.length ||
       Object.keys(value).sort().join(',') !== [...keys].sort().join(',')) refuse('FIELDS');
 }
 function bytesCopy(value, limit = losslessLimits.sourceBytes) {

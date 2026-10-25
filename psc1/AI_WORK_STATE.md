@@ -1,8 +1,8 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #181, branch
-`refactor/psc1-readability-20261025`, based on qualified PR #180 HEAD
-`3089cbc369bc8a11f540c13140c7003c9dadf4a8`.
+Updated 2026-10-25 Asia/Jakarta. Active R1 branch
+`feat/psc1-lossless-source-20261025`, based on qualified PR #181 HEAD
+`d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
 
@@ -15,9 +15,29 @@ The original lexer/parser/compiler and packaged artifacts remain unchanged.
 Opaque host snapshots retain exact bytes, logical identity, grammar/profile and
 per-snapshot piece IDs. Candidate edits require the exact current bytes and are
 never published or labeled semantically equivalent. Host, negative, corpus and
-resource tests are being added; this is not yet a qualified R1 result.
+resource qualification run 40190913539/job 121161536693 passes at
+1602e707dae836111ca3a88ee09e4f4137531a6a: 357 captures, 40 negative cases,
+121 modules under both lexers, exact unchanged closure, maximum helper wall time
+350ms and max RSS 159,716 KiB. Artifact 12598615273 ZIP SHA256
+21e8e9f2f3ff782641210a9f492b575fb9ca7aadd669075c41c28acc5dfd8e38.
+Final stricter schema/diagnostic negatives and broader frozen-input guards follow;
+normal source qualification is pending. Do not label those pending tests passed.
+The fixed new helper envelope is 1 MiB input, 262,144 pieces, 32 MiB response,
+240s, 4 GiB virtual address space and an 8 MiB process stack, with no task workers.
+Run 40190581290 diagnoses mandatory official runtime libuv thread initialization:
+1/2 GiB address-space probes fail, while 4 GiB starts successfully. Existing
+compiler/checker limits and sources remain unchanged.
 
-## Readability slice
+Tracked diagnostic defect: the existing psLexReadCharacterBody malformed-literal
+branch advances the close character without advancing the first body character.
+For apostrophe/emoji/alpha, its original error offset 3 falls inside the emoji.
+Run 40190697846 exposed this through deterministic delimiter mixtures. R1 retains
+the exact unlexed bytes and original diagnostic as advisory metadata, explicitly
+marks unverified coordinates, and never treats them as edit ranges. Fixing that
+production lexer branch requires a separate source qualification; it is not
+silently changed here.
+
+## Preserved PR #181 readability slice
 
 Implementation: `446a0f21c6288a7c20b843bbeadcd18ba1460fa2`.
 Documentation commit 40bd3bb3 establishes current README/architecture/contributor,
@@ -39,8 +59,9 @@ Commit 446a0f21 relocates five prefix-guard paths without dropping assertions.
 
 [Contributor guide](CONTRIBUTING.md), [docs index](docs/README.md),
 [exact readability receipt](docs/PSC1_READABILITY_QUALIFICATION_2026-10-25.json).
-This is the first maintenance slice; lossless source editing, binding-aware rename,
-broad language extensions and a generalized plugin framework are not implemented.
+That checkpoint was the first maintenance slice. The additive R1 lexical
+foundation is described above; binding-aware rename, semantic source editing,
+broad language extensions and a generalized plugin framework remain unimplemented.
 
 ## Actual validation
 

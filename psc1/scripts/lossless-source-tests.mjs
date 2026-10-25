@@ -155,14 +155,15 @@ rejects(() => createLosslessSourceTool({ executable, sha256: '0'.repeat(64) }), 
 // Trusted, host-selected test executables exercise every wire boundary. They
 // are never chosen by source text; the real helper supplies the baseline tape.
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-lossless-negative-'));
+const wireOf = snapshot => ({
+  protocol: snapshot.protocol, grammar: snapshot.grammar, status: snapshot.status,
+  byteLength: snapshot.byteLength,
+  pieces: snapshot.pieces.map(({ id, ...piece }) => piece),
+  tokens: snapshot.pieces.filter(p => p.token).map(p => p.token), diagnostic: snapshot.diagnostic,
+});
 try {
   const base = capture('def x := 1\n');
-  const wire = {
-    protocol: base.protocol, grammar: base.grammar, status: base.status,
-    byteLength: base.byteLength,
-    pieces: base.pieces.map(({ id, ...piece }) => piece),
-    tokens: base.pieces.filter(p => p.token).map(p => p.token), diagnostic: base.diagnostic,
-  };
+  const wire = wireOf(base);
   const malformed = [
     w => { w.extra = true; }, w => { w.protocol = 'untrusted'; },
     w => { w.byteLength++; }, w => { w.pieces[0].raw = 'bad'; },
@@ -173,14 +174,30 @@ try {
     w => { w.status = 'lexically-refused'; }, w => { w.diagnostic = { code: 'approved' }; },
     w => { w.pieces[1].kind = 'lineComment'; },
   ];
+  const refusedWire = wireOf(capture("'😀α"));
+  const refusedMutations = [
+    w => { w.diagnostic.span.stop.byteOffset = 999; },
+    w => { w.diagnostic.span.start.column = 0; },
+    w => { w.diagnostic.span.stop.byteOffset = -1; },
+    w => { w.diagnostic.span.stop.line = 1.5; },
+    w => { w.diagnostic.span.extra = true; },
+    w => { w.diagnostic.code = 'admitted'; },
+    w => { w.pieces[0].span.stop.byteOffset = 3; },
+    w => { w.status = 'accepted'; },
+    w => { w.tokens = [wire.tokens[0]]; },
+  ];
+  const cases = [
+    ...malformed.map(mutate => ({ original: wire, mutate, input: 'def x := 1\n' })),
+    ...refusedMutations.map(mutate => ({ original: refusedWire, mutate, input: "'😀α" })),
+  ];
   let i = 0;
-  for (const mutate of malformed) {
-    const bad = structuredClone(wire); mutate(bad);
+  for (const { original, mutate, input } of cases) {
+    const bad = structuredClone(original); mutate(bad);
     const file = path.join(directory, 'helper-' + i++);
     fs.writeFileSync(file, '#!/usr/bin/python3\nimport json,sys\nwire=json.loads(' +
       JSON.stringify(JSON.stringify(bad)) + ')\nopen(sys.argv[3],"w").write(json.dumps(wire))\n', { mode: 0o700 });
     const fake = createLosslessSourceTool({ executable: file, sha256: hash(fs.readFileSync(file)) });
-    rejects(() => fake.capture({ module: 'Bad', grammar: 'lean', bytes: bytes('def x := 1\n') }));
+    rejects(() => fake.capture({ module: 'Bad', grammar: 'lean', bytes: bytes(input) }));
   }
   const tamper = path.join(directory, 'tamper');
   fs.writeFileSync(tamper, '#!/usr/bin/python3\nimport sys\nopen(sys.argv[0],"a").write("# changed")\n',
@@ -199,11 +216,13 @@ if (process.env.PSC1_LOSSLESS_SCOPE_GUARD === 'true') {
 assert.equal(sources.length, 121);
 assert.equal(closure, '7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000');
 const baseline = 'd7e845b35e6c5cc80ffafe2f6f41fc475bf3842c';
-const diff = spawnSync('git', ['diff', '--name-only', baseline, 'HEAD', '--', 'packages', 'host', 'lean-toolchain'],
+const diff = spawnSync('git', ['diff', '--name-only', baseline, 'HEAD', '--', 'packages', 'host', 'host-tools', 'npm-cli', 'lean-toolchain',
+  'scripts/slim-universal-package.mjs', 'scripts/slim-universal-input.json',
+  'scripts/bounded-process.py', 'scripts/selfhost-qualification-profiles.mjs'],
   { encoding: 'utf8' });
 assert.equal(diff.status, 0);
 assert.deepEqual(diff.stdout.trim().split('\n').filter(Boolean),
-  ['psc1/packages/syntax/src/Ps/Syntax/Lossless.lean']);
+  ['psc1/host-tools/source-refactoring.mjs', 'psc1/packages/syntax/src/Ps/Syntax/Lossless.lean']);
 }
 for (const row of sources) {
   for (const grammar of ['lean', 'ps']) assert.equal(capture(row.text, grammar, row.module).status, 'accepted');

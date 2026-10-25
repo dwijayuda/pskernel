@@ -1,0 +1,164 @@
+name: PSC1 checked component and optional-provider dispatch
+on:
+  push:
+    branches: [feat/psc1-checked-component-providers-20261026]
+    paths: ['psc1/host-tools/**','psc1/npm-cli/**','psc1/scripts/checked-*','psc1/scripts/optional-*','psc1/scripts/prepare-checked-dispatch-tools.mjs','psc1/scripts/slim-universal-package.mjs','psc1/host/src/Ps/Host/*Provider*.lean','psc1/host/src/Ps/Host/PortableIr.lean','.github/workflows/psc1-checked-dispatch.yml']
+concurrency:
+  group: psc1-checked-dispatch-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+jobs:
+  transactions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - run: node scripts/transactional-publication-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-transactional-publication-${{ github.sha }}
+          path: psc1/dist/transactional-publication/
+          retention-days: 90
+  installed:
+    needs: transactions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-dispatch-native-v1-${{ hashFiles('psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-portable-provider-v1-
+            psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install pinned official Lean for optional emitter builds
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.8'
+      - name: Record exact Python runtime
+        run: echo "PSC1_PYTHON_314=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5.11'
+          extensions: gmp
+          coverage: none
+      - name: Prepare SHA256-pinned component validation and execution tools
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools" "$RUNNER_TEMP/wasmtime"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz' -o "$RUNNER_TEMP/wasmtime.tar.xz"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/wasmtime.tar.xz" | sha256sum -c -
+          tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
+          install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
+          echo "PSC1_WASM_TOOLS=$RUNNER_TEMP/psc1-bin/wasm-tools" >> "$GITHUB_ENV"
+          echo "PSC1_WASMTIME=$RUNNER_TEMP/psc1-bin/wasmtime" >> "$GITHUB_ENV"
+          echo "PSC1_PHP=$(command -v php)" >> "$GITHUB_ENV"
+      - name: Check new host and qualification script syntax
+        run: |
+          node --check host-tools/generated-compiler-session.mjs
+          node --check host-tools/checked-targets.mjs
+          node --check host-tools/installed-engine-resolver.mjs
+          node --check scripts/checked-publication-installed.mjs
+          node --check scripts/checked-publication-types.mjs
+      - name: Preserve historical cleanup and explicit feature AST correspondence
+        run: |
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+          node scripts/readability-host-check.mjs --propose
+      - name: Install locked target consumer for assembly only
+        run: npm ci --prefix .. --ignore-scripts --include=optional
+      - name: Prepare locked optional Rust target consumer
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          node scripts/prepare-rust-target-consumer.mjs
+      - name: Build isolated optional emitters and compare retained native payloads
+        run: |
+          lake build psc1_backend_python psc1_backend_php psc1_backend_provider_tests
+          .lake/build/bin/psc1_backend_provider_tests dist/portable-provider/fixtures
+          node scripts/prepare-checked-dispatch-tools.mjs
+      - name: Assemble unchanged qualified G3s and actual kernels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --check host-tools/generated-compiler-session.mjs
+          node --check host-tools/checked-targets.mjs
+          node scripts/slim-universal-package.mjs
+      - name: Preserve every existing installed regression
+        run: |
+          node scripts/slim-universal-installed.mjs
+          node scripts/slim-universal-io-preflight.mjs
+      - name: Execute checked target publication and transaction boundaries
+        run: node scripts/checked-publication-installed.mjs
+      - name: Qualify all new checked dispatch paths with actual runtimes and refusals
+        run: node scripts/checked-dispatch-installed.mjs
+      - name: Preserve actual installed application and target mapping regressions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rustup default 1.90.0
+          node scripts/generated-io-installed-applications.mjs
+          node scripts/generated-io-installed-candidates.mjs
+      - name: Check the packed public declarations with the pinned SDK
+        run: node scripts/checked-publication-types.mjs
+      - name: Archive immutable stores and actual application evidence
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
+          const out=path.resolve('dist/slim-universal');fs.mkdirSync(out,{recursive:true});
+          const roots=fs.readdirSync(os.tmpdir()).filter(name=>name.startsWith('psc1-checked-publication-')).sort();
+          for(const [index,name]of roots.entries()){
+           const root=path.join(os.tmpdir(),name),stat=fs.lstatSync(root);assert.ok(stat.isDirectory()&&!stat.isSymbolicLink());
+           const names=fs.readdirSync(root).filter(name=>['stores','io-stores','sdk-negative','rust-sdk-negative','consumer.mjs'].includes(name)||/^rust-(io-)?consumer-.*\\.rs$/.test(name));
+           if(names.length){const r=spawnSync('tar',['czf',path.join(out,'checked-publication-evidence-'+index+'.tar.gz'),'-C',root,...names],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(r.status,0,r.stderr);}
+          }
+          const applications=path.join(out,'installed-applications');
+          if(fs.existsSync(applications)){const r=spawnSync('tar',['czf',path.join(out,'installed-applications-evidence.tar.gz'),'-C',out,'installed-applications'],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(r.status,0,r.stderr);}
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-checked-dispatch-${{ github.sha }}
+          path: |
+            psc1/dist/slim-universal/tarballs/
+            psc1/dist/slim-universal/package-receipt.json
+            psc1/dist/slim-universal/installed-qualification.json
+            psc1/dist/slim-universal/io-adapter-preflight.json
+            psc1/dist/slim-universal/compiler-kernel-admission.json
+            psc1/dist/slim-universal/checked-publication.json
+            psc1/dist/slim-universal/checked-dispatch.json
+            psc1/dist/portable-provider/
+            psc1/dist/readability/host.json
+            psc1/dist/slim-universal/application-qualification.json
+            psc1/dist/slim-universal/io-candidate-qualification.json
+            psc1/dist/slim-universal/checked-publication-types.json
+            psc1/dist/slim-universal/*evidence*.tar.gz
+          retention-days: 90

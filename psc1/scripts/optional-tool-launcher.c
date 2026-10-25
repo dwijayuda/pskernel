@@ -28,16 +28,20 @@ int main(int argc,char **argv){
     if((!strcmp(argv[1],"emit-portable")&&argc!=3)||(!strcmp(argv[1],"--identity")&&argc!=2))return 125;
     snprintf(binary,sizeof(binary),"%s/worker",root);args[n++]=binary;
     for(int i=1;i<argc;i++)args[n++]=argv[i];
-  }else if(!strcmp(argv[1],"python-check")&&argc==4){
+  }else if((!strcmp(argv[1],"python-check")&&argc==4)||(!strcmp(argv[1],"python-run")&&argc>=3)){
     snprintf(binary,sizeof(binary),"%s/runtime/bin/python3",root);
     snprintf(script,sizeof(script),"%s/validate.py",root);
-    args[n++]=binary;args[n++]="-I";args[n++]="-S";args[n++]="-B";args[n++]=script;args[n++]=argv[2];args[n++]=argv[3];
-  }else if(!strcmp(argv[1],"php-check")&&argc==4){
+    args[n++]=binary;args[n++]="-I";args[n++]="-S";args[n++]="-B";
+    if(!strcmp(argv[1],"python-check")){args[n++]=script;args[n++]=argv[2];args[n++]=argv[3];}
+    else for(int i=2;i<argc;i++)args[n++]=argv[i];
+  }else if((!strcmp(argv[1],"php-check")&&argc==4)||(!strcmp(argv[1],"php-run")&&argc>=3)){
     snprintf(binary,sizeof(binary),"%s/runtime/bin/php",root);
     snprintf(script,sizeof(script),"%s/validate.php",root);
     snprintf(extension,sizeof(extension),"extension=%s/runtime/gmp.so",root);
     args[n++]=binary;args[n++]="-n";args[n++]="-d";args[n++]=extension;
-    args[n++]="-d";args[n++]="ffi.enable=0";args[n++]=script;args[n++]=argv[2];args[n++]=argv[3];
+    args[n++]="-d";args[n++]="ffi.enable=0";
+    if(!strcmp(argv[1],"php-check")){args[n++]=script;args[n++]=argv[2];args[n++]=argv[3];}
+    else for(int i=2;i<argc;i++)args[n++]=argv[i];
   }else if(!strcmp(argv[1],"validate")||(!strcmp(argv[1],"component")&&argc==4&&!strcmp(argv[2],"wit"))){
     snprintf(binary,sizeof(binary),"%s/wasm-tools",root);args[n++]=binary;
     for(int i=1;i<argc;i++)args[n++]=argv[i];

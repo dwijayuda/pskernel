@@ -15,9 +15,9 @@ const cleanupCommit = '446a0f21c6288a7c20b843bbeadcd18ba1460fa2';
 // Intentional checked-target/publication features have separate behavior qualification.
 // Preserve the original cleanup proof; do not call these features formatting.
 const featureBaselines = {
-  'host-tools/installed-engine-resolver.mjs': '9c9e8ef4c337d51caa4d7075829f56ebfd75e153',
-  'npm-cli/universal.mjs': '0c2c70b910f864cd87a19185843bb38e3d2ca653',
-  'npm-cli/universal-cli.mjs': '0c2c70b910f864cd87a19185843bb38e3d2ca653',
+  'host-tools/installed-engine-resolver.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
+  'npm-cli/universal.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
+  'npm-cli/universal-cli.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
 };
 const featureQualification = 'docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json';
 const files = [

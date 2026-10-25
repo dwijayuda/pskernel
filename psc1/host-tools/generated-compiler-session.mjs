@@ -274,7 +274,7 @@ export function createGeneratedJsCompilerSession({
         fail('PSC1_SERVICE_PROVIDER_ENV');
       env.PSC1_BACKEND_REQUEST_SHA256 = digestEnv.PSC1_BACKEND_REQUEST_SHA256;
     } else delete env.PSC1_BACKEND_REQUEST_SHA256;
-    verifyTools();
+    if (componentTools || optionalProvider) verifyTools();
     const result = spawnSync(executable, args, {
       encoding: 'utf8',
       env,
@@ -283,7 +283,7 @@ export function createGeneratedJsCompilerSession({
       killSignal: 'SIGKILL',
       windowsHide: true,
     });
-    verifyTools();
+    if (componentTools || optionalProvider) verifyTools();
     events.push({
       role,
       executable,

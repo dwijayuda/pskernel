@@ -317,3 +317,10 @@ entry point. New tests compare actual independently checked admission/IR bytes
 and compile printed fixtures with official Lean 4.35 source parsing. Qualification
 of this compiler-source change and new-source G1 are pending. Frozen packaged
 compiler generations and qualified PR #184 source remain unchanged.
+
+The new scope/official-Lean source tests pass in ordinary run 40204771123.
+Dedicated run 40204767954 stops first on an archived do test that expected parse
+refusal from the pre-Practical-Core grammar. The same Nat-result/non-effect case
+is now required to refuse with doUnsupportedEffect during elaboration. Typed Id
+do and ordinary explicit higher-order calls keep separate roundtrip tests.
+No unsupported effect is admitted and no production parser/elaborator changes.

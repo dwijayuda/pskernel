@@ -59,11 +59,11 @@ jobs:
       - name: Check layout scopes against actual admission and official Lean source parsing
         working-directory: psc1
         run: |
-          .lake/build/bin/psc1_translation_tests
           .lake/build/bin/psc1_lean_printer_scope_tests
           for source in dist/source-conversion/layout/*.lean; do
             lake env lean "$source"
           done
+          .lake/build/bin/psc1_translation_tests
       - name: Check candidate conversion host syntax
         working-directory: psc1
         run: |

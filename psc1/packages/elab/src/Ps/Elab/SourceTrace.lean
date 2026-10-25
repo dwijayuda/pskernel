@@ -58,7 +58,7 @@ def psElabSourceTraceAddLocal (trace : PsElabSourceTrace) (entry : PsLocalDecl) 
   match psElabSourceTraceFind trace.active (psLocalDeclId entry) with
   | Option.some _ => trace
   | Option.none =>
-      let parent := match trace.active with
+      let parent : Option Nat := match trace.active with
         | [] => Option.none
         | first :: _ => Option.some first.snd;
       let binder := PsElabSourceBinder.mk trace.nextId (psLocalDeclId entry)
@@ -113,7 +113,7 @@ def psElabSourceTraceReference (trace : PsElabSourceTrace)
     (sourceName : PsName) (span : PsSourceSpan) (baseSegments : Nat)
     (target : PsElabSourceTarget) : PsElabSourceTrace :=
   if trace.enabled then
-    let complete := match target with
+    let complete : Bool := match target with
       | PsElabSourceTarget.local _ binder =>
           match binder with
           | Option.none => false

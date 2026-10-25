@@ -342,8 +342,8 @@ def psElabProjectionReference
           Except.error
             (PsElabError.unknownName (psNameAppendStr PsName.anonymous first))
   | Option.some selected =>
-      let sourceContext := if context.sourceTrace.enabled then
-        let target := match selected.fst with
+      let sourceContext : PsElabContext := if context.sourceTrace.enabled then
+        let target : PsElabSourceTarget := match selected.fst with
           | PsResolvedName.local id =>
               PsElabSourceTarget.local id (psElabSourceTraceFind context.sourceTrace.active id)
           | PsResolvedName.global name => PsElabSourceTarget.global name;

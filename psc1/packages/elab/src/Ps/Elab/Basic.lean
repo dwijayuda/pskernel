@@ -152,7 +152,7 @@ def psElabLetAfterValueWithSource
       bindingType
       valueResult.term;
   let localContext := psElabContextWithLocal valueResult.context pushed.context;
-  let bodyContext := match source with
+  let bodyContext : PsElabContext := match source with
     | Option.none => localContext
     | Option.some span => psElabContextSourceBinder localContext pushed.id span;
   match elaborate bodyContext body expected with

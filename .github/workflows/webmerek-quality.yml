@@ -1,0 +1,87 @@
+name: WebMerek quality
+on:
+  push:
+    branches: ['webmerek/**']
+    paths: ['webmerek/**', '.github/workflows/webmerek-quality.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: webmerek-quality-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  qualify:
+    if: startsWith(github.ref, 'refs/heads/webmerek/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated QA dependencies
+        working-directory: webmerek/qa
+        run: |
+          if test -f package-lock.json; then npm ci --ignore-scripts; else npm install --ignore-scripts; fi
+          python3 -m pip install -r requirements.txt
+          npx playwright install --with-deps chromium firefox webkit
+      - name: Render static HTML and original social artwork
+        run: |
+          python3 webmerek/scripts/render.py
+          cd webmerek/qa && node og.mjs
+      - name: Commit deterministic generated files with a branch lease
+        id: source
+        env:
+          BRANCH: ${{ github.ref_name }}
+          EXPECTED: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BRANCH" == webmerek/* ]]
+          git add -- webmerek
+          python3 - <<'PY'
+          import subprocess
+          changed = subprocess.check_output(['git','diff','--cached','--name-only'], text=True).splitlines()
+          allowed = {'webmerek/assets/config.js','webmerek/assets/og.png','webmerek/generated-manifest.json','webmerek/robots.txt','webmerek/sitemap.xml','webmerek/qa/package-lock.json'}
+          assert all(p in allowed or (p.startswith('webmerek/') and p.count('/') == 1 and p.endswith('.html')) for p in changed), changed
+          PY
+          if ! git diff --cached --quiet; then
+            live="$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)"
+            test "$live" = "$EXPECTED" || { echo 'Concurrent branch update: refusing to overwrite'; exit 1; }
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'build(webmerek): materialize static HTML, artwork and QA lockfile'
+            git push origin "HEAD:refs/heads/$BRANCH"
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Verify exact committed source and model arithmetic
+        run: |
+          python3 webmerek/scripts/render.py --check
+          python3 webmerek/scripts/check.py
+          node --check webmerek/assets/site.js
+          mkdir -p webmerek/.artifacts
+          python3 webmerek/scripts/finance.py | tee webmerek/.artifacts/financial-model.json
+      - name: Browser, accessibility and interaction verification
+        working-directory: webmerek/qa
+        run: npm test
+      - name: Package qualified website and research
+        run: python3 webmerek/scripts/package.py
+      - name: Record tested revision
+        if: always()
+        env:
+          TESTED_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          printf '## WebMerek qualification\n\nTrigger: `%s`\n\nTested committed source: `%s`\n\nNo public deployment. No compiler or kernel changes.\n' "$GITHUB_SHA" "$TESTED_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: webmerek-evidence-${{ github.run_id }}
+          path: |
+            webmerek/.artifacts/
+            webmerek/qa/playwright-report/
+            webmerek/qa/test-results/
+            webmerek/qa/results.json
+          include-hidden-files: true
+          retention-days: 14

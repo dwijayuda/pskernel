@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+qa/node_modules/
+qa/playwright-report/
+qa/test-results/
+qa/results.json
+.artifacts/

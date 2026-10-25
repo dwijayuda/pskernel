@@ -1,0 +1,51 @@
+{
+  "name": "WebMerek",
+  "tagline": "Biar kualitasnya terlihat.",
+  "mode": "preview",
+  "publicBaseUrl": "",
+  "whatsapp": "",
+  "email": "",
+  "operatorName": "",
+  "contactVerified": false,
+  "legalReviewed": false,
+  "offersApproved": false,
+  "launchApproved": false,
+  "allowIndexing": false,
+  "packages": [
+    {
+      "id": "fondasi",
+      "name": "Fondasi Merek",
+      "price": 4900000,
+      "duration": "10–15 hari kerja",
+      "fit": "Untuk bisnis yang perlu memperjelas pesan dan identitasnya.",
+      "features": ["Sesi strategi 90 menit + ringkasan positioning", "1 arah kreatif, logo utama & variasi", "Warna, tipografi & panduan merek ringkas", "3 template sosial + 2 putaran revisi"],
+      "exclusions": "Tidak termasuk website, riset survei, penamaan, atau pendaftaran merek.",
+      "hours": 20,
+      "otherCost": 200000
+    },
+    {
+      "id": "website",
+      "name": "Website Meyakinkan",
+      "price": 7900000,
+      "duration": "10–15 hari kerja",
+      "fit": "Untuk bisnis yang sudah punya identitas dan perlu rumah digital yang jelas.",
+      "features": ["Website statis hingga 5 halaman", "Penyuntingan naskah hingga 1.500 kata", "Tampilan mobile + jalur konsultasi WhatsApp", "SEO teknis dasar, 2 putaran revisi & panduan"],
+      "exclusions": "Identitas harus siap. Tidak termasuk CMS, toko online, aplikasi, domain, hosting, atau iklan.",
+      "hours": 32,
+      "otherCost": 320000
+    },
+    {
+      "id": "lengkap",
+      "name": "Merek + Website",
+      "price": 11900000,
+      "duration": "20–25 hari kerja",
+      "fit": "Satu alur untuk menyelaraskan strategi, identitas, dan website bisnis Anda.",
+      "features": ["Seluruh lingkup Fondasi Merek", "Seluruh lingkup Website Meyakinkan", "Satu sesi strategi bersama, bukan dua proyek", "Serah terima file + dukungan bug 30 hari"],
+      "exclusions": "Batas halaman, kata, dan revisi mengikuti dua paket di atas; bukan layanan tanpa batas.",
+      "hours": 48,
+      "otherCost": 480000
+    }
+  ],
+  "care": {"price": 650000, "hours": 2, "otherCost": 70000},
+  "laborRate": 90000
+}

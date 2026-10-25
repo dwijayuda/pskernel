@@ -1,0 +1,67 @@
+name: PSC1 Quot external curried ABI runtime diagnostic
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t06-quot-owner-full-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-t06-quot-runtime.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate exact compiled program and diagnose only revised external ABI calls
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: "set -euo pipefail\npython3 - <<'PYCODE'\nimport hashlib,io,json,os,pathlib,subprocess,urllib.request,urllib.error,zipfile,stat\n\
+        source='cb0bbaeb332a9fa3655f0c852496d96b2f722416';base='https://api.github.com/repos/dwijayuda/pskernel'\n\
+        out=pathlib.Path(os.environ['RUNNER_TEMP'])/'quot-runtime-repair';out.mkdir()\nclass NoRedirect(urllib.request.HTTPRedirectHandler):\n\
+        \    def redirect_request(self,req,fp,code,msg,headers,newurl):return None\ndef get(route):\n    req=urllib.request.Request(base+route,headers={'Authorization':'Bearer\
+        \ '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})\n    try:return urllib.request.build_opener(NoRedirect()).open(req,timeout=120).read()\n\
+        \    except urllib.error.HTTPError as error:\n        assert error.code in (301,302,303,307,308)\n     \
+        \   url=error.headers['Location'];assert url.startswith('https://')\n        return urllib.request.urlopen(urllib.request.Request(url),timeout=120).read()\n\
+        assert subprocess.check_output(['git','rev-parse','HEAD:psc1/packages/pskernel-core/src']).decode().strip()=='65d5b9c3d0431a8b86961b6d1aec398f7169d223'\n\
+        subprocess.run(['git','diff','--exit-code',source,'HEAD','--','psc1/packages/pskernel-core/src','psc1/test','psc1/lean-toolchain','psc1/kernel-lakefile.lean'],check=True)\n\
+        run=json.loads(get('/actions/runs/40225115416'));assert run['head_sha']==source and run['run_attempt']==1\n\
+        jobs=json.loads(get('/actions/runs/40225115416/jobs?per_page=100'))['jobs'];job,=[j for j in jobs if j['id']==121265677693]\n\
+        assert job['status']=='completed' and job['conclusion']=='failure'\ninfo=json.loads(get('/actions/artifacts/12612050579'));sha='60f13a3d4123b49b7cdc5242f47f857acb245c781ac00443b1eed5b8c25ca545'\n\
+        assert info['workflow_run']['id']==40225115416 and info['workflow_run']['head_sha']==source and not info['expired']\n\
+        assert info['size_in_bytes']==3224756 and info['digest']=='sha256:'+sha\nraw=get('/actions/artifacts/12612050579/zip');assert\
+        \ len(raw)==3224756 and hashlib.sha256(raw).hexdigest()==sha\n(out/'authenticated-producer.zip').write_bytes(raw)\n\
+        z=zipfile.ZipFile(io.BytesIO(raw));assert len(z.namelist())==len(set(z.namelist()))==443 and z.testzip()\
+        \ is None\nkernel=z.read('detached/kernel.mjs');assert kernel==z.read('production/kernel.js')\nassert len(kernel)==10393520\
+        \ and hashlib.sha256(kernel).hexdigest()=='7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4'\n\
+        assert 'Error: PSC1_QUOT_OWNER_FAIL Quot-valid-bounded-pattern' in z.read('quot/runtime.log').decode()\n\
+        (out/'kernel.mjs').write_bytes(kernel)\ninputs={}\nfor path in ['psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs','psc1/scripts/pskernel-quot-session-owner-smoke.mjs']:\n\
+        \    old=subprocess.check_output(['git','show',source+':'+path]).decode();expected=old.replace('(pattern.term)(generated.arena,pattern.id)','(pattern.term)(generated.arena)(pattern.id)').replace('(pattern.term)(generated.arena,generated.arena.size+1)','(pattern.term)(generated.arena)(generated.arena.size+1)').replace('(pattern.term)(generated.arena,s1.id)','(pattern.term)(generated.arena)(s1.id)')\n\
+        \    actual=pathlib.Path(path).read_text();assert expected!=old and actual==expected\n    name=pathlib.Path(path).name;(out/name).write_text(actual);inputs[path]={'bytes':len(actual.encode()),'sha256':hashlib.sha256(actual.encode()).hexdigest()}\n\
+        record={'schema':'psc1-quot-runtime-ABI-diagnostic-v1','harnessSource':os.environ['GITHUB_SHA'],'programSource':source,'programProducerRun':40225115416,'programProducerJob':121265677693,'producerJobConclusion':'failure','failurePreserved':'new\
+        \ external ABI test call applied both curried arguments in one JS call','programBytes':len(kernel),'programSha256':hashlib.sha256(kernel).hexdigest(),'producerArchiveSha256':sha,'inputs':inputs,'onlyThreeExternalCallsPerHelperChanged':True,'productionAndNativeProofInputsUnchanged':True,'fullQualification':False,'fuel':4096,'oldSpaceMiB':2048,'emptyPATH':True,'eachDeadlineSeconds':1500}\n\
+        (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
+    - name: Run both complete retained Quot helpers through actual compiled program
+      shell: bash
+      run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/quot-runtime-repair\"\nfor helper\
+        \ in pskernel-expr-v2-quot-owner-smoke.mjs pskernel-quot-session-owner-smoke.mjs; do\n  \"$NODE_BIN\" --check\
+        \ \"$helper\"\n  /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o \"$helper.memory\"\
+        \ \\\n    timeout --signal=KILL 1500s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n    \"$helper\"\
+        \ ./kernel.mjs > \"$helper.log\" 2>&1\n  cat \"$helper.log\"\ndone\n"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-quot-external-ABI-runtime-diagnostic
+        include-hidden-files: true
+        path: ${{ runner.temp }}/quot-runtime-repair/
+        retention-days: 90

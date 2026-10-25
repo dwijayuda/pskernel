@@ -349,11 +349,11 @@ must(same(directQuotWorker(withEq.environment,generated.arena,nil),none),"Quot-m
 must(same(directQuotWorker(session.environment,get("psKernelExprV2PagedEmpty"),nil),
  Option.some(get("Except").ok(session.environment))),"Quot-initialized-exact-environment");
 for(const pattern of [eqType,eqReflType]){
- must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena,pattern.id),
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(pattern.id),
   Option.some(true)),"Quot-valid-bounded-pattern");
- must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena,generated.arena.size+1),none),
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(generated.arena.size+1),none),
   "Quot-missing-shape-root-declines");
- must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena,s1.id),
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(s1.id),
   Option.some(exprEq(s1.term,pattern.term))),"Quot-wrong-sort-exact-shape-result");
 }
 

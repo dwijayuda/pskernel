@@ -90,7 +90,7 @@ jobs:
         \    assert subprocess.check_output(['git','rev-parse','HEAD:'+path]).decode().strip()==wanted,(path,'audited249binding')\n\
         snapshots=[]\npaths=['psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',\n    'psc1/scripts/pskernel-mutual-complete-smoke.mjs','psc1/scripts/pskernel-mutual-public-smoke.mjs',\n\
         \    'psc1/scripts/pskernel-mutual-retained-runtime-audit.py','psc1/test/retained-21-generated-helper-manifest.json','psc1/test/retained-249-audited-input-manifest.json',\n\
-        \    '.github/workflows/psc1-pskernel-t06-mutual-public-full.yml',\n    'psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs']\n\
+        \    '.github/workflows/psc1-pskernel-t06-mutual-public-full.yml',\n    'psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs','psc1/scripts/pskernel-authenticated-translate-lake.sh']\n\
         paths+=['psc1/packages/pskernel-core/src/Ps/KernelCore/'+p+'.lean' for p in ['API/Dag','API/DagMutualHeader','API/DagMutualConstructorResult','Core/ExprV2/ExpandedSize','API/DagMutualRecursiveArgument','API/DagMutualConstructorFields','API/DagMutualConstructorAnalysis','API/DagMutualConstructorLoop','API/DagMutualGenerated','API/DagMutualRecursorValidation','API/DagMutualAdmission']]\n\
         legacy=json.loads(pathlib.Path('psc1/test/retained-21-generated-helper-manifest.json').read_text());assert\
         \ len(legacy['helpers'])==21\nfor spec in legacy['helpers']:\n    path=spec['path'];data=pathlib.Path(path).read_bytes()\n\
@@ -138,10 +138,13 @@ jobs:
         });\nwriteFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json',JSON.stringify({source:process.env.GITHUB_SHA,entry,files},null,2)+'\\\
         n');\nconsole.log('PSC1_MUTUAL_FULL_LEAN_CLOSURE: PASS modules='+files.length);\nNODE\ntar -czf \"$OUT/lean-source.tar.gz\"\
         \ -C \"$OUT/lean-source\" .\ntimeout --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean\
-        \ 2>&1 | tee \"$OUT/complete-lean-check.log\"\nif [ \"$PSC1_MUTUAL_ROUTE\" = canonical ]; then\n  node scripts/bootstrap-project.mjs\
-        \ packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/mutual-public/workspace\n  node --input-type=module\
-        \ <<'NODE'\nimport {readFileSync} from 'node:fs';\nimport {assertBootstrapWorkspaceManifest} from './scripts/bootstrap-manifest.mjs';\n\
-        const workspace='dist/mutual-public/workspace';\nconst manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));\n\
+        \ 2>&1 | tee \"$OUT/complete-lean-check.log\"\nif [ \"$PSC1_MUTUAL_ROUTE\" = canonical ]; then\n  mkdir\
+        \ -p \"$RUNNER_TEMP/mutual-translate-bin\"\n  cp scripts/pskernel-authenticated-translate-lake.sh \"$RUNNER_TEMP/mutual-translate-bin/lake\"\
+        \n  chmod 700 \"$RUNNER_TEMP/mutual-translate-bin/lake\"\n  cp scripts/pskernel-authenticated-translate-lake.sh\
+        \ \"$OUT/lake-translate-adapter.sh\"\n  PSC1_MUTUAL_COMPILER=\"$RUNNER_TEMP/mutual-psc1\" PATH=\"$RUNNER_TEMP/mutual-translate-bin:$PATH\"\
+        \ node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/mutual-public/workspace\n\
+        \  node --input-type=module <<'NODE'\nimport {readFileSync} from 'node:fs';\nimport {assertBootstrapWorkspaceManifest}\
+        \ from './scripts/bootstrap-manifest.mjs';\nconst workspace='dist/mutual-public/workspace';\nconst manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));\n\
         const lean=JSON.parse(readFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json','utf8'));\nconst\
         \ expected=new Set(lean.files.map(x=>x.path.replace(/\\.lean$/u,'.ps')));\nif(manifest.entry!==lean.entry.replace(/\\\
         .lean$/u,'.ps')||manifest.sourceCount!==expected.size||manifest.generated.length!==expected.size||new Set(manifest.generated).size!==expected.size||!manifest.generated.every(x=>expected.has(x)))throw\

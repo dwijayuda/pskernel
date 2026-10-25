@@ -1,147 +1,132 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active readability work branch
-`refactor/psc1-readability-20261025`, from qualified PR #180 HEAD
-`3089cbc369bc8a11f540c13140c7003c9dadf4a8`. Use connected GitHub and Linux Actions
-only. Fetch live HEAD before writes; single-parent expected-HEAD non-force updates.
-No merge or npm publication is authorized.
+Updated 2026-10-25 Asia/Jakarta. Active draft PR #181, branch
+`refactor/psc1-readability-20261025`, based on qualified PR #180 HEAD
+`3089cbc369bc8a11f540c13140c7003c9dadf4a8`.
+Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
+single-parent expected-HEAD non-force updates. No merge or npm publication.
 
-## Active readability implementation
+## Readability slice
 
-User-authorized scope: current documentation and handwritten installed host code,
-then one coherent compiler-module extraction. Documentation now separates current
-contracts/guides from immutable receipts/history. Host cleanup will use pinned
-Prettier and baseline Babel AST comparison. The compiler pilot extracts bounded
-Wasm type discovery without rewriting algorithms, declaration names, fuel or limits.
-No new source/package/refactor qualification is claimed until actual Linux CI passes.
-Frozen generated compiler/kernel artifacts and their qualifications remain unchanged.
+Implementation: `446a0f21c6288a7c20b843bbeadcd18ba1460fa2`.
+Documentation commit 40bd3bb3 establishes current README/architecture/contributor,
+docs-index and host guides. Previous README/architecture snapshots are preserved
+under docs/history. Root research and PSC1 pins are explicitly distinguished.
+Historical profile fields are retained and point to current finite contracts.
 
-## Current verified package milestone
+Host commit `dfb44062bbc1fb490fa5696483938f07e0f63e0c` formats/documents the
+installed engine resolver, API and CLI with existing pinned Prettier 3.6.2.
+Babel 7.28.0 compares all three executable ASTs with immutable baseline 3089cbc3,
+ignoring comments/positions/literal spelling metadata only. No host behavior changes.
 
-Slim `proofscript@0.1.0-psc1.4` is genuinely install-qualified on Linux at
-`0a717520110c673006d3f5f5d7627e59d5853f62`.
-Run40166882825/job121089658777 passed assembly, offline fresh local/global
-installation, real compilation/checking, optional executor integration and packed
-public TypeScript APIs.
+Module commit fef84d24 extracts 27 public definitions and 935 lines verbatim into
+`packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean`.
+Lower.lean decreases from 6472 to 5538 lines. The new module imports only Wasm
+Type and Foundation.List, retains traversal/de-duplication/fuel behavior and has
+an explicit Lake root. All moved and remaining declaration bytes are checked.
+Commit 446a0f21 relocates five prefix-guard paths without dropping assertions.
 
-The root tarball is **3,703,113 bytes**, versus62,181,083 previously, a94.04%
-reduction. SHA256
-`f198538c5396d25cc9944c50c698a00bea1685ce997b55e766dd4582fddf794e`.
-Qualified five-tarball artifact12588024057 ZIP SHA256
-`163ca39fa564e407b1008e25cdfd358f0516e6af669963ceef585bd4c628e708`.
-[Install guide](docs/PSC1_SLIM_UNIVERSAL_PACKAGE.md) and
-[exact receipt](docs/PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json).
+[Contributor guide](CONTRIBUTING.md), [docs index](docs/README.md),
+[exact readability receipt](docs/PSC1_READABILITY_QUALIFICATION_2026-10-25.json).
+This is the first maintenance slice; lossless source editing, binding-aware rename,
+broad language extensions and a generalized plugin framework are not implemented.
 
-Default root includes the unchanged genuine G3 JS/TS engines and mandatory
-official Lean4.35 C++/Emscripten linear-memory Wasm kernel. No native compiler,
-native kernel, Rust executor, compiler-Wasm executor, platform formatter, SDK,
-Python or PHP payload is in that root. Npm optional peer metadata does not
-auto-install those packages; empty-cache offline tests verify actual absence.
+## Actual validation
 
-Explicit optional `@proofscript/compiler-rust-linux-x64@0.1.0-psc1.3` and
-`@proofscript/compiler-wasm@0.1.0-psc1.3` reuse existing qualified G3 artifacts.
-A closed engine inventory resolves ordinary local/global npm packages, verifies
-exact versions/index/manifest/resource/source/executable identities and passes
-them into the existing checked session. Missing, unsupported, corrupt or
-wrong-version executors fail; there is no arbitrary plugin or source-selected
-tool, network fetch or silent fallback. Native checking is an explicit optional
-`@proofscript/pskernel-lean@4.35.0`; default Wasm never falls back.
+- Correspondence run 40184892095/job 121143498849 PASSED: three formatted,
+  baseline-equivalent executable ASTs; exact 27-definition extraction; all 52
+  recursive-prefix worker guards; 467 owned Wasm definitions scanned, no violations.
+- Package run 40184641007/job 121142731401 PASSED at host commit dfb44062:
+  20 compiler cases, 12 local/global CLI cases, 48 candidate mappings,
+  14 genuine native/Wasm acceptance/rejection comparisons, 36 negative or
+  publication-failure cases and actual packed public TypeScript APIs.
+- The packaged host and frozen inputs are unchanged between dfb44062 and
+  implementation 446a0f21; GitHub comparison contains only compiler extraction,
+  its tests/docs, Lake registration and the correspondence workflow.
+- New-source Wasm G1 run 40184951724/job 121143765230 PASSED. Both grammar
+  censuses accept all 121 modules. Genuine generated Wasm runs 40 cross-target
+  cases (including semantic refusals) and nine envelope refusals, with native
+  compiler executables removed after the one seed. Existing 240s request/tool/
+  corpus and 120s checker limits remain. This is G1-only, with no new G2/G3,
+  fixed point or 240s self-compilation performance qualification.
 
-Actual package qualification passes20 compiler cases (four engines/both grammars),
-12 local/global CLI cases,48 candidate target/grammar mappings,14 real native/Wasm
-checker comparisons,36 source/integrity/version/policy/publication-fault refusals,
-a real checked dual-provider compile and installed public TypeScript APIs.
-Sixteen candidate cases run before optional executors are installed. Project JSON
-rejects host-option fields; UTF-8 is fatal and BOM bytes remain captured before
-frontend rejection. These follow-up guards are qualified at0a717520.
-Linux execution PATH excludes compiler SDKs and native compilers. Root files are
-audited for absent native executables and absent optional payloads.
+New source closure:
+`7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000`.
+G1 qualification branch `qualification/psc1-readable-wasm-g1-20261025`,
+control 1114d60b, request `b0cf4895a8ad3ec97be45e7382d5dbf690acb340`.
+GitHub comparison against 446a0f21 changes only the workflow branch guard and
+explicit request JSON; no PSC1 source changes.
+Artifact 12595587700 ZIP SHA256
+`3e1114b99c8944618c756ad1aa490644291ea53bcc4baef6b349dc98eba3779a`.
 
-## Scope and evidence boundary
+Normal source run [40184897417](https://github.com/dwijayuda/pskernel/actions/runs/40184897417)
+PASSED: full job 121146243734, final gate 121152107403; 37/37 Practical Core criteria,
+zero blocked, releaseReady=true within the finite contract. All seven native
+backends, both grammars, minimum Python, runtime/IO/negative checks and installed
+native npm/source libraries pass.
+Tested merge `1b9eca5fd94ca4271369238ed34dd094f66d9134` and implementation
+446a0f21 share Git tree `cf56c28b8e67e6f8d643465fc74086cf7c95e409`.
+Full artifact 12597345757, ZIP SHA256
+`c27b05c898cc1ca1be1525172b927847a27649efdbc0cc169e89b433049d7316`.
+This source qualification is distinct from slim host package 40184641007 and
+new-source Wasm G1 40184951724; it does not qualify new-source G2/G3 or a complete
+cross-platform/generated-non-JS release.
 
-New universal-format root has no OS/CPU/libc npm restriction. The checked compile
-API and JSON stdout path use portable Node APIs and return admitted JS without
-publishing files. Existing generated-compiler-session.mjs is reused unchanged:
-source capture, strict original/transformed IR, independent official admission,
-target syntax/API checking and sealed publication state remain mandatory.
+## Qualified installable host package
 
-Linux JS publication retains existing lock, before/after identities, complete
-immutable generations, file/directory fsync and atomic current-pointer commit.
-Non-Linux publication is explicitly refused pending real release qualification.
-This slice uses Linux CI only; no macOS/Windows root qualification is claimed.
+Unpublished `proofscript@0.1.0-psc1.4`: 3,704,169 bytes, SHA256
+`8eb0c18270fd4224671a8da3babc0cd428139abd8bec2dc8ded7d572745809d8`.
+Five-tarball qualified artifact 12595861227 from run 40184641007, ZIP SHA256
+`2cbb2fa57328a60f0372eaa30f9eed2b2ad9e7c79ce26d2961f50ffacd75e1e7`.
+Use [the current install guide](docs/PSC1_SLIM_UNIVERSAL_PACKAGE.md).
 
-The separate bounded `compileCandidate` API exposes existing JS/TS/Rust/Wasm-core
-emission but returns candidate-only data with no proof/publication authority.
-Checked generated compilation/publication remains JS. Component/provider dispatch,
-checked non-JS publication and complete application/package integration remain
-unfinished. The previous native/all-seven-output distribution with matching
-optional Python/PHP packages is preserved in PR #179's source/history/artifact.
-Nothing is relabeled as equivalent final release functionality.
+The root retains frozen G3 JS/TS and the mandatory official C++/Emscripten
+linear-memory Wasm checker. Rust/compiler-Wasm and native checking are explicit
+pinned optional packages. Actual empty-cache offline installs disable scripts
+and start without optional/native payloads or compiler SDKs.
+Checked generated output remains JS; other exposed mappings are candidate-only.
+Linux publication retains locks, immutable generations, fsync and atomic pointer
+commit; other OS publication still refuses. No fallback or arbitrary plugin/tool
+selection is introduced.
 
-Initial run40165875329 failed because npm's installed tree did not retain
-npm-shrinkwrap.json at the runtime-pinned path. Fix039888f8 pins an explicitly
-packaged immutable DEPENDENCY_LOCK.json snapshot, while exact installed kernel
-package/version/resource checks remain mandatory. Retry40166882825 passed.
-Preserve the failure evidence; do not weaken integrity to tolerate missing pins.
+## Preserved frozen compiler and kernel evidence
 
-## Normal source regression qualification
-
-Normal source run40166884643 PASSED at code
-`0a717520110c673006d3f5f5d7627e59d5853f62`: full job121091590002 and final
-gate121096509883,37/37 Practical Core criteria,0 blocked,all seven backends/both
-grammars,minimum Python and installed native npm/source libraries.
-Tested merge`559ea387ad22999b7b6aedd073fd61c8a0c1bc28` and code HEAD share
-tree`0a232bbdf67f6f8de60950142af3be17f1231e4d`.
-Full artifact12589082030 ZIP SHA256
-`1c0d30be97a68c7ca3fb25667dd8412dbb477d8df447960d12fd5b88764700a2`.
-This is separate from slim package40166882825 and does not imply complete
-cross-platform or checked non-JS generated publication qualification.
-
-
-## Frozen compiler and prior evidence
-
-All four genuine G1/G2/G3 and exact source/admission/original+specialized IR/
-executable/four-output fixed points remain unchanged:
-120 modules, source closure
-`07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af`.
-Implementation`daa735017e34ee94da79d747c363237b4adbc4ef`.
-Rust40141718481/request2d27f142; JS/TS/Wasm40147825207/request0cabb7ed;
-120 cross-target cases and27 envelope refusals per chain; immutable readbacks pass.
+Frozen packaged compiler: 120 modules, implementation daa735017e34ee94da79d747c363237b4adbc4ef,
+closure `07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af`.
+All four prior G1/G2/G3 and exact source/admission/original+specialized IR/
+executable/four-target fixed points retain their original identities:
+Rust 40141718481; JS/TS/Wasm 40147825207.
 [Four-engine receipt](docs/PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json).
+Do not present these as G2/G3 evidence for the refactored 121-module source.
 
-PR #179 integrated default-Wasm package40161362270/codecd6a16ba and complete
-source40161364575/full121075449014/final121080510772 passed37/37,0 blocked,
-seven backends/both grammars. Tested merge460a2f70 and codecd6a16ba share tree
-55cf04f9c8d50738f77cef82dded1e97478c6d3d. Its final docsba3bfb04 pass40163908331.
-Both official4.35 kernel packages remain qualified on five platforms, Native
-40155475188 and linear-Wasm40158859386. Separate compiled execution payloads pass
-40158598464 (compiler-Wasm five platforms; Rust Linux x64).
-[Prior complete kernel/package receipt](docs/PSC1_KERNEL435_QUALIFICATION_2026-10-25.json)
-retains exact hashes/platform results. Do not rerun successful long chains merely
-for package/host/doc changes.
+Both official Lean 4.35 kernel packages retain five-platform qualification:
+native 40155475188, linear-memory Wasm 40158859386.
+Compiled bundles 40158598464 retain Wasm execution on five platforms and Rust on
+Linux x64. The previous native distribution and optional Python/PHP providers
+remain preserved with their seven-output/source-library/application evidence.
+[Kernel/package receipt](docs/PSC1_KERNEL435_QUALIFICATION_2026-10-25.json),
+[prior slim receipt](docs/PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json).
 
-## Dependency-ordered next work
+Official Lean 4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+trustlevel0, finite 2,000,000-heartbeat/20,000-recursion bounds, exact source/logical
+pairing, independent admission, strict both IR, fuel, memory/stack/lifetime,
+negative tests and unsupported ABI refusals remain unchanged.
+Original 240s performance and 1800s correctness profiles remain separate;
+Rust-only 3600s applies only to G2/G3 requests. The isolated lexer 31e10263 remains
+unpromoted. Formal compiler semantic preservation and final clean release
+reproduction are not claimed.
 
-1. VERIFIED: slim-root package and current normal source gates pass. Seal the documentation-only milestone; preserve exact immutable evidence.
-2. Extend real application/source-package resolution coverage through the slim
-   APIs, keeping the old full native distribution available.
-3. Implement portable transactional publication, then actual platform release
-   tests; no weakening Linux guarantees or previous-output preservation.
-4. Complete checked generated TS, then Rust/Wasm core/component and optional
-   provider dispatch using existing emitters/runtime adapters and all seven mappings.
-5. Additional Rust executor platform payloads/bounded supervisors; final exact
-   source/package/platform qualification and clean reproduction.
-6. Optimize the separate240s performance target from measured compiler workloads.
-   Broader language/extensions remain deferred beyond frozen v1. The current
-   user-authorized readability slice proceeds without expanding language semantics.
+## Continue from this checkpoint
 
-Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trustlevel0,
-finite2000000-heartbeat/20000-recursion kernel bounds, source/logical pairing,
-strict both IR, negative/ABI refusals, semantic fuel and memory/stack/lifetime
-policies remain unchanged. G1/tools/corpus240s, checker120s; original1800s
-correctness and240s performance remain separate. Rust-only3600s applies only to
-G2/G3 compiler requests. The isolated lexer31e10263 remains unpromoted.
+The [single development roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining
+queue. Preserve the completed readability slice and its exact evidence.
+For further maintenance, prefer independent helper/module boundaries and recorded
+invariants; build lossless token/trivia and resolved identities before broad
+automatic source conversion or rename. Do not replace workers with shorter forms
+without correspondence/resource evidence. Existing source-shape guards remain
+required until equivalent protection is explicitly qualified.
 
-[Authoritative remaining roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md),
-[finite npm contract](NPM_DISTRIBUTION_CONTRACT.json) and
-[executable continuation](docs/PSC1_SLIM_UNIVERSAL_CONTINUATION.md).
+Product work remains source-package/application coverage, portable publication,
+checked non-JS/provider dispatch, additional Rust platforms and final release
+qualification. New compiler-source promotion needs its own generation evidence;
+unchanged frozen packages do not require repeated long chains for documentation.

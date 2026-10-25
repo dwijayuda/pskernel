@@ -1,6 +1,6 @@
 # Slim universal ProofScript package milestone
 
-The new unpublished `proofscript@0.1.0-psc1.4` root is **3,703,113 bytes**,
+The new unpublished `proofscript@0.1.0-psc1.4` root is **3,704,169 bytes**,
 compared with 62,181,083 bytes for the preceding integrated root: a **94.04%**
 reduction. It embeds the unchanged qualified G3 JS and TS compilers and the genuine
 official Lean4.35 C++ linear-memory Wasm kernel. Rust and compiler-Wasm execution
@@ -10,13 +10,13 @@ root. There is no install-time build, SDK download or executor fallback.
 
 ## Qualified download and installation
 
-[Download the five-tarball artifact](https://github.com/dwijayuda/pskernel/actions/runs/40166882825/artifacts/12588024057).
+[Download the five-tarball artifact](https://github.com/dwijayuda/pskernel/actions/runs/40184641007/artifacts/12595861227).
 Artifact ZIP SHA256:
-`163ca39fa564e407b1008e25cdfd358f0516e6af669963ceef585bd4c628e708`.
+`2cbb2fa57328a60f0372eaa30f9eed2b2ad9e7c79ce26d2961f50ffacd75e1e7`.
 
 Extract and enter `tarballs/`. The root tarball is
 `proofscript-0.1.0-psc1.4.tgz`, SHA256:
-`f198538c5396d25cc9944c50c698a00bea1685ce997b55e766dd4582fddf794e`.
+`8eb0c18270fd4224671a8da3babc0cd428139abd8bec2dc8ded7d572745809d8`.
 Use Node **22.23.3**, matching the qualified transports.
 
 ```sh
@@ -76,7 +76,7 @@ A missing/corrupt/refusing Wasm checker never falls back to the native checker.
 
 The optional compiler-Wasm uses PSC1's existing GC architecture. It is distinct
 from the **linear-memory official C++ Lean kernel** included in the root.
-All executors use the same existing 120-module compiler source, frontend,
+All packaged executors use the same frozen 120-module compiler source, frontend,
 elaborator, checked IR and strict original/transformed IR verification pipeline.
 No compiler implementation has been rewritten.
 
@@ -113,8 +113,8 @@ the new slim flavor does not overwrite or relabel it.
 
 ## Actual qualification
 
-[Linux package run40166882825](https://github.com/dwijayuda/pskernel/actions/runs/40166882825)
-at `0a717520110c673006d3f5f5d7627e59d5853f62` passed:
+[Linux package run40184641007](https://github.com/dwijayuda/pskernel/actions/runs/40184641007)
+at `dfb44062bbc1fb490fa5696483938f07e0f63e0c` passed:
 
 - 20 real compiler cases: all four executors and both source grammars.
 - 12 local/global CLI cases, with SDKs absent and optional packages absent initially.
@@ -123,19 +123,13 @@ at `0a717520110c673006d3f5f5d7627e59d5853f62` passed:
 - 36 source, integrity, version, project-authority, policy and publication-fault refusals, preserving prior output.
 - Packed public TypeScript API/type-refusal checks.
 
-Normal source run40166884643 PASSED at code
-`0a717520110c673006d3f5f5d7627e59d5853f62`: full job121091590002 and final
-gate121096509883,37/37 Practical Core criteria,0 blocked,all seven backends/both
-grammars,minimum Python and installed native npm/source libraries.
-Tested merge`559ea387ad22999b7b6aedd073fd61c8a0c1bc28` and code HEAD share
-tree`0a232bbdf67f6f8de60950142af3be17f1231e4d`.
-Full artifact12589082030 ZIP SHA256
-`1c0d30be97a68c7ca3fb25667dd8412dbb477d8df447960d12fd5b88764700a2`.
-This is separate from slim package40166882825 and does not imply complete
-cross-platform or checked non-JS generated publication qualification.
+The [readability qualification receipt](PSC1_READABILITY_QUALIFICATION_2026-10-25.json)
+records the current host package evidence, retained declaration correspondence,
+normal source qualification and a genuine G1 of the refactored 121-module
+compiler. The refactored source is distinct from these packaged frozen G3 payloads.
+Prior package/source evidence remains preserved in
+[the original slim receipt](PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json).
 
-[The exact receipt](PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json) retains both
-package and source evidence.
 No new G1/G2/G3 runs are needed for unchanged frozen payloads; the original
 self-host/fixed-point identities are preserved. Kernel/checker120s,
 normal compiler/tool240s, strict IR, semantic fuel and memory/stack/lifetime

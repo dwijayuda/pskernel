@@ -1,0 +1,1314 @@
+{
+  "schema": "psc1-readability-qualification/1",
+  "date": "2026-10-25",
+  "status": "qualified-first-readability-slice; final-universal-release-incomplete",
+  "base": {
+    "pr": 180,
+    "commit": "3089cbc369bc8a11f540c13140c7003c9dadf4a8"
+  },
+  "implementation": {
+    "pr": 181,
+    "branch": "refactor/psc1-readability-20261025",
+    "commit": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2",
+    "tree": "cf56c28b8e67e6f8d643465fc74086cf7c95e409",
+    "commits": {
+      "documentation": "40bd3bb39e052421acb6777c71c7c59f2cf82665",
+      "host": "dfb44062bbc1fb490fa5696483938f07e0f63e0c",
+      "module": "fef84d244768597ed44d6b973da81c226031745f",
+      "guardRelocation": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2"
+    }
+  },
+  "changes": {
+    "documentation": [
+      "psc1/README.md",
+      "psc1/ARCHITECTURE.md",
+      "psc1/CONTRIBUTING.md",
+      "psc1/docs/README.md",
+      "psc1/host-tools/README.md"
+    ],
+    "history": "Previous README and architecture retained verbatim under docs/history; Git history preserved",
+    "historicalProfile": "Existing profile fields retained; historicalSnapshot/currentAuthorities explicitly identify current contracts",
+    "hostFiles": [
+      "psc1/host-tools/installed-engine-resolver.mjs",
+      "psc1/npm-cli/universal.mjs",
+      "psc1/npm-cli/universal-cli.mjs"
+    ],
+    "compilerModule": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean"
+  },
+  "correspondence": {
+    "run": 40184892095,
+    "job": 121143498849,
+    "status": "passed",
+    "baseline": "3089cbc369bc8a11f540c13140c7003c9dadf4a8",
+    "host": {
+      "formatter": "prettier@3.6.2",
+      "parser": "@babel/parser@7.28.0",
+      "allThreeExecutableAstsEqualToBaseline": true
+    },
+    "module": {
+      "schema": "psc1-readability-module-extraction/1",
+      "commit": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2",
+      "baseline": "3089cbc369bc8a11f540c13140c7003c9dadf4a8",
+      "originalPath": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+      "extractedPath": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
+      "movedDeclarations": [
+        "psWasmListFoldlWorker",
+        "psWasmListFoldl",
+        "psWasmFunctionTypeListContains",
+        "psWasmInsertFunctionType",
+        "psWasmCollectFunctionTypesFromTypeWithFuel",
+        "psWasmCollectFunctionTypesFromType",
+        "psWasmCollectFunctionTypesFromParameters",
+        "psWasmParameterTypes",
+        "psWasmCollectFunctionTypesFromExprWithFuel",
+        "psWasmCollectFunctionTypesFromExpr",
+        "psWasmCollectFunctionTypesFromStructureFields",
+        "psWasmCollectFunctionTypesFromConstructorFields",
+        "psWasmCollectFunctionTypesFromConstructors",
+        "psWasmCollectModuleFunctionTypes",
+        "psWasmArrayTypeListContains",
+        "psWasmInsertArrayType",
+        "psWasmCollectArrayTypesFromTypeWithFuel",
+        "psWasmCollectArrayTypesFromType",
+        "psWasmCollectArrayTypesFromParameters",
+        "psWasmAddSingleArrayTypeArgument",
+        "psWasmAddArrayTypesForIntrinsic",
+        "psWasmCollectArrayTypesFromExprWithFuel",
+        "psWasmCollectArrayTypesFromExpr",
+        "psWasmCollectArrayTypesFromStructureFields",
+        "psWasmCollectArrayTypesFromConstructorFields",
+        "psWasmCollectArrayTypesFromConstructors",
+        "psWasmCollectModuleArrayTypes"
+      ],
+      "movedLines": 935,
+      "declarationBodies": "byte-identical-to-baseline",
+      "remainingDeclarations": "byte-identical-to-baseline",
+      "formalCompilerPreservation": "not-claimed",
+      "frozenGeneratedPayloadQualification": "unchanged-original-identities"
+    },
+    "prefixGuards": {
+      "retainedWorkerAssertions": 52,
+      "ownedDefinitionsScanned": 467,
+      "problems": []
+    },
+    "artifacts": [
+      {
+        "id": 12596290407,
+        "node_id": "MDg6QXJ0aWZhY3QxMjU5NjI5MDQwNw==",
+        "name": "psc1-readability-446a0f21c6288a7c20b843bbeadcd18ba1460fa2",
+        "size_in_bytes": 1087,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12596290407",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12596290407/zip",
+        "expired": false,
+        "digest": "sha256:0609b1b06a38d5e4f9ff3289321a30423639e38153469b46fd0e71c55323bc50",
+        "created_at": "2026-10-25T10:28:41Z",
+        "updated_at": "2026-10-25T10:28:41Z",
+        "expires_at": "2027-01-23T10:28:08Z",
+        "workflow_run": {
+          "id": 40184892095,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "refactor/psc1-readability-20261025",
+          "head_sha": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2"
+        }
+      }
+    ]
+  },
+  "installedPackage": {
+    "run": 40184641007,
+    "job": 121142731401,
+    "status": "passed",
+    "commit": "dfb44062bbc1fb490fa5696483938f07e0f63e0c",
+    "assembly": {
+      "schema": "psc1-slim-universal-package/1",
+      "sourceCommit": "dfb44062bbc1fb490fa5696483938f07e0f63e0c",
+      "status": "assembled-not-yet-qualified",
+      "package": "proofscript",
+      "version": "0.1.0-psc1.4",
+      "tarball": "proofscript-0.1.0-psc1.4.tgz",
+      "bytes": 3704169,
+      "sha256": "8eb0c18270fd4224671a8da3babc0cd428139abd8bec2dc8ded7d572745809d8",
+      "previousRootBytes": 62181083,
+      "sizeRatio": 0.05957067360824191,
+      "removedBytes": 58476914,
+      "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "embeddedEngines": [
+        "js",
+        "ts"
+      ],
+      "optionalExecutionPackages": [
+        {
+          "package": "@proofscript/compiler-rust-linux-x64",
+          "version": "0.1.0-psc1.3",
+          "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz",
+          "sha256": "551f150d09d98fe48312c40cdaa793522534c84fff250097199ff75b467530f7"
+        },
+        {
+          "package": "@proofscript/compiler-wasm",
+          "version": "0.1.0-psc1.3",
+          "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
+          "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83"
+        }
+      ],
+      "defaultKernel": "wasm",
+      "nativePayloadsIncluded": false,
+      "compilerSdkRequired": false,
+      "osCpuLibcRestrictions": false,
+      "publicationPlatforms": [
+        "linux"
+      ],
+      "fullCrossPlatformRelease": false,
+      "input": {
+        "schema": "psc1-slim-universal-package-inputs/1",
+        "qualifiedIntegration": {
+          "run": 40161362270,
+          "job": 121073432577,
+          "artifact": 12586394254,
+          "zipSha256": "426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52",
+          "commit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+          "tarball": "kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz",
+          "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a"
+        },
+        "packages": {
+          "wasmKernel": {
+            "package": "@proofscript/pskernel-lean-wasm",
+            "version": "4.35.0",
+            "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+            "sha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511"
+          },
+          "nativeKernel": {
+            "package": "@proofscript/pskernel-lean",
+            "version": "4.35.0",
+            "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+            "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+          },
+          "rust": {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "version": "0.1.0-psc1.3",
+            "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz",
+            "sha256": "551f150d09d98fe48312c40cdaa793522534c84fff250097199ff75b467530f7"
+          },
+          "wasm-core": {
+            "package": "@proofscript/compiler-wasm",
+            "version": "0.1.0-psc1.3",
+            "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
+            "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83"
+          }
+        }
+      }
+    },
+    "installed": {
+      "schema": "psc1-slim-universal-installed/1",
+      "sourceCommit": "dfb44062bbc1fb490fa5696483938f07e0f63e0c",
+      "status": "passed",
+      "tarballSha256": "8eb0c18270fd4224671a8da3babc0cd428139abd8bec2dc8ded7d572745809d8",
+      "tarballBytes": 3704169,
+      "sizeRatio": 0.05957067360824191,
+      "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "defaultKernel": "wasm",
+      "defaultEngine": "js",
+      "cases": [
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "465405900e41d6ada59891ea34e6ef76eec1e4d8c67b7060ec9967815b8e38e6",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "069104ec00bd9f45e26ea8537c66af6fb79f5b7ee5510c7453a54bb5549b177b",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "a45823bcc473e572ef9ca262b37832f43dcd1e632a64045ab3d7ed046a7001b2",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "58c3ae4bc415a59bb0f5072afbc24a774799148e5b815a9c4aa4c0ef9c77722c",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "d3cb2e3d3980a943e0d395e5474be1c146995bec8e5fe2ae4ba54c5bcb8e8a1c",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "95ceab7c188edd99a6b5beebf02ad2bedbec825cadf5173ab4bdb52b30cc8a73",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "b785e3fbe3d744045d33929350237dfd6b7ec2d7a6a302f01a82bf4005456530",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "2d91ed5e6f1565bc9d504680117c5ee314b07d0d328eabf60bd073ddfd78e67b",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "6d355e00b4092624067e999fc24ce91634c80b44841c625d2c1b07609b523643",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "6b23c8b2547c0be429ac0f19288dea7b8f38fb7b574d2f604242689e89bb84ea",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "d1108f3633aa45db16b2e894731b8f1b87b5fbf7adfcc40441cb10a5eb61e177",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "d4f90feef09ecfd02a569f5d9f11ad82d8535b287ffdeb54da659a17cd363959",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "88731ab92d859437bd72b860fa76cbdb9d03c0603f6a025f7e90d96f247913fa",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "b141a4f14b47c7bd2c979e29ce7b3f3849e22bd446f69c4b3784288c13aa393b",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "ca6ccbf56fb2b8d5b88b16bc83d7661fc6108d66204ecd7ab715b91f161046f0",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "a021534cb81bfdbe8c60ff768ee06d0c56a089961d80fa21c779cc6f190cab87",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "f690a924a464981b14258e925e09803a5df5846c4d322e64cd6a6e0e194fb835",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "388c3a5de954a477541f380aec76b3f366a9cc4f25ee6afd20417460d38d1aa2",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "c2d932767f975eabe7739b7ac2af4626f78a50ee5bbd1c3503b7e9255ee8fa80",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "b89653c6550ec5cfc286467e78f920aaaef1efd591d909dcd833b2fb92eb4544",
+          "passed": true
+        }
+      ],
+      "globalCases": [
+        {
+          "scope": "local",
+          "grammar": "lean",
+          "checkedStdout": true
+        },
+        {
+          "scope": "local",
+          "grammar": "ps",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "grammar": "lean",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "grammar": "ps",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "engine": "js",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "js",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "ts",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "ts",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "rust",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "rust",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "wasm-core",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "wasm-core",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        }
+      ],
+      "candidateCases": [
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        }
+      ],
+      "kernelCases": [
+        {
+          "id": "nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "large-nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "kernel-type-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "duplicate-declaration-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-constant-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unsafe-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "metavariable-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "height-overflow-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "malformed-json",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-format",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "string-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-admission",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "truncated-structured-name",
+          "accepted": false,
+          "agreement": true
+        }
+      ],
+      "negativeCases": [
+        {
+          "engine": "js",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "id": "invalid-utf8-refused"
+        },
+        {
+          "id": "project-cannot-select-out",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-serviceFile",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-checkerExecutable",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-engine",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "id": "corrupt-default-kernel-with-native-installed",
+          "priorPreserved": true
+        },
+        {
+          "id": "missing-default-kernel-with-native-installed",
+          "priorPreserved": true
+        },
+        {
+          "id": "manifest-policy-corruption",
+          "priorPreserved": true
+        },
+        {
+          "id": "missing-root-kernel-policy",
+          "priorPreserved": true
+        },
+        {
+          "id": "before-seal",
+          "priorPreserved": true
+        },
+        {
+          "id": "after-seal",
+          "priorPreserved": true
+        },
+        {
+          "id": "before-commit",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "optional-executor-corruption",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "optional-executor-version-refusal"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "optional-executor-corruption",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "optional-executor-version-refusal"
+        }
+      ],
+      "byteCaptureCases": [
+        {
+          "id": "utf8-bom-preserved-in-captured-source",
+          "compilerAccepted": false,
+          "sourceClosureDigest": "ae2fc62575a4900f2a381a9ea474898e368d888a827d33dfa31ea3c6c32edf2c"
+        }
+      ],
+      "rootOnlyWithoutOptionalPayloads": true,
+      "noCompilerSdkOnExecutionPath": true,
+      "offlineEmptyCache": true,
+      "installScriptsDisabled": true,
+      "optionalBundlesInstalledExplicitly": true,
+      "allFourQualifiedPayloadsPreserved": true,
+      "linuxPublicationQualified": true,
+      "otherPlatformPublicationPolicy": "explicit-runtime-guard; other OS execution not qualified",
+      "actualPlatform": "linux-x64",
+      "fullCrossPlatformRelease": false,
+      "scope": "universal package format and checked compile API, real Linux local/global JS publication; no macOS/Windows release execution claim"
+    },
+    "packedPublicTypes": "passed actual packed TypeScript API check",
+    "qualifiedArtifact": {
+      "id": 12595861227,
+      "node_id": "MDg6QXJ0aWZhY3QxMjU5NTg2MTIyNw==",
+      "name": "psc1-slim-universal-qualified-dfb44062bbc1fb490fa5696483938f07e0f63e0c",
+      "size_in_bytes": 24796599,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12595861227",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12595861227/zip",
+      "expired": false,
+      "digest": "sha256:2cbb2fa57328a60f0372eaa30f9eed2b2ad9e7c79ce26d2961f50ffacd75e1e7",
+      "created_at": "2026-10-25T10:28:36Z",
+      "updated_at": "2026-10-25T10:28:36Z",
+      "expires_at": "2027-01-23T10:24:26Z",
+      "workflow_run": {
+        "id": 40184641007,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "refactor/psc1-readability-20261025",
+        "head_sha": "dfb44062bbc1fb490fa5696483938f07e0f63e0c"
+      }
+    },
+    "implementationComparison": {
+      "files": [
+        ".github/workflows/psc1-readability.yml",
+        "psc1/lakefile.lean",
+        "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+        "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower/README.md",
+        "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
+        "psc1/scripts/check-wasm-applied-prefixes.mjs",
+        "psc1/scripts/readability-module-check.mjs"
+      ],
+      "packagedHostAndFrozenInputsUnchanged": true
+    }
+  },
+  "newSourceG1": {
+    "run": 40184951724,
+    "job": 121143765230,
+    "status": "passed",
+    "branch": "qualification/psc1-readable-wasm-g1-20261025",
+    "control": {
+      "head": "1114d60bbb4266c82d5ee771a32ee46802cfa98a",
+      "tree": "6c0c0cdfe8bc269164c439954c354e1f571f879d"
+    },
+    "requestCommit": "b0cf4895a8ad3ec97be45e7382d5dbf690acb340",
+    "request": {
+      "schema": "psc1-unified-selfhost-request/1",
+      "branch": "qualification/psc1-readable-wasm-g1-20261025",
+      "parentCommit": "1114d60bbb4266c82d5ee771a32ee46802cfa98a",
+      "action": "validate-independent-G1",
+      "mode": "--g1-only",
+      "profile": "performance-240s",
+      "g1TimeoutMs": 240000,
+      "g2g3TimeoutMs": 240000,
+      "targets": [
+        "wasm-core"
+      ]
+    },
+    "sourceComparison": {
+      "implementation": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2",
+      "onlyDifferences": [
+        ".github/qualification-requests/psc1-unified-selfhost.json",
+        ".github/workflows/psc1-unified-selfhost.yml"
+      ]
+    },
+    "result": {
+      "target": "wasm-core",
+      "profile": {
+        "name": "performance-240s",
+        "g1TimeoutMs": 240000,
+        "corpusTimeoutMs": 240000,
+        "toolTimeoutMs": 240000,
+        "selfCompileTimeoutMs": 240000,
+        "correctnessAndPerformanceSeparate": true
+      },
+      "correctnessQualification": "G1-only",
+      "performanceQualification": "not-run-in-this-profile",
+      "status": "passed",
+      "sourceModules": 121,
+      "sourceClosureDigest": "7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000",
+      "generations": [
+        1
+      ],
+      "fixedPoint": "not-requested",
+      "attempts": []
+    },
+    "generatedRequests": 49,
+    "crossTargetCasesIncludingSemanticRefusals": 40,
+    "envelopeRefusals": 9,
+    "totalGeneratedRequestMs": 12193,
+    "maxGeneratedServiceRssKiB": 122516,
+    "artifacts": [
+      {
+        "id": 12595587700,
+        "node_id": "MDg6QXJ0aWZhY3QxMjU5NTU4NzcwMA==",
+        "name": "psc1-unified-selfhost-performance-240s-wasm-core-b0cf4895a8ad3ec97be45e7382d5dbf690acb340",
+        "size_in_bytes": 10983875,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12595587700",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12595587700/zip",
+        "expired": false,
+        "digest": "sha256:3e1114b99c8944618c756ad1aa490644291ea53bcc4baef6b349dc98eba3779a",
+        "created_at": "2026-10-25T10:34:46Z",
+        "updated_at": "2026-10-25T10:34:46Z",
+        "expires_at": "2027-01-23T10:29:01Z",
+        "workflow_run": {
+          "id": 40184951724,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "qualification/psc1-readable-wasm-g1-20261025",
+          "head_sha": "b0cf4895a8ad3ec97be45e7382d5dbf690acb340"
+        }
+      }
+    ],
+    "scope": "New 121-module source G1 only; no new G2/G3/fixed-point or 240-second self-compilation qualification",
+    "generatedServiceArtifactSha256": "0040401a48b143f20dfcda245d070b91c24a0e34dd5ed0900538eeecdd2727a6"
+  },
+  "normalSource": {
+    "run": 40184897417,
+    "status": "passed",
+    "implementation": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2",
+    "testedMerge": "1b9eca5fd94ca4271369238ed34dd094f66d9134",
+    "identicalTree": "cf56c28b8e67e6f8d643465fc74086cf7c95e409",
+    "fullJob": 121146243734,
+    "gateJob": 121152107403,
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "jobs": [
+      {
+        "id": 121143678225,
+        "name": "static",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121143831237,
+        "name": "focused / focused (core)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121143831250,
+        "name": "native / native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121143831290,
+        "name": "focused / focused (applications)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121143831300,
+        "name": "focused / php-application",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121143832338,
+        "name": "benchmark",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 121145426597,
+        "name": "g1 / generated-js",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121145426638,
+        "name": "g1 / host-session-boundary",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121145426668,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121145426669,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121145426699,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121146243734,
+        "name": "full / linux-scoped",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121152107403,
+        "name": "gate",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "qualifiedArtifact": {
+      "id": 12597345757,
+      "node_id": "MDg6QXJ0aWZhY3QxMjU5NzM0NTc1Nw==",
+      "name": "psc1-scoped-correctness-1b9eca5fd94ca4271369238ed34dd094f66d9134",
+      "size_in_bytes": 121300544,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12597345757",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12597345757/zip",
+      "expired": false,
+      "digest": "sha256:c27b05c898cc1ca1be1525172b927847a27649efdbc0cc169e89b433049d7316",
+      "created_at": "2026-10-25T11:10:42Z",
+      "updated_at": "2026-10-25T11:10:42Z",
+      "expires_at": "2026-11-08T11:10:34Z",
+      "workflow_run": {
+        "id": 40184897417,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "refactor/psc1-readability-20261025",
+        "head_sha": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2"
+      }
+    },
+    "allSevenNativeBackendsAndBothGrammars": true,
+    "minimumPythonAndInstalledNativeSourceLibraries": true,
+    "summary": {
+      "qualification": "passed-scoped-execution",
+      "logicalChecker": {
+        "version": "4.35.0",
+        "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      "runtimeContract": "psc1-runtime-semantics/1",
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      },
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "exclusions": [
+        "full Practical Core feature families",
+        "unrestricted Lean",
+        "Int division/modulo",
+        "fixed-width/floating runtime scalars",
+        "Python/PHP public compound ABI",
+        "component public ABI outside explicit Bool/String dispatcher profiles",
+        "formal backend preservation",
+        "full self-host/fixed-point qualification",
+        "npm registry publication",
+        "non-Linux native package qualification"
+      ]
+    }
+  },
+  "preserved": {
+    "frozenSourceModules": 120,
+    "frozenSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "priorFourEngineReceipt": "PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json",
+    "officialLeanVersion": "4.35.0",
+    "officialLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "wasmKernel": "official C++ Emscripten linear memory; unchanged",
+    "compilerWasm": "existing GC architecture; unchanged",
+    "independentAdmission": true,
+    "strictOriginalAndTransformedIr": true,
+    "sourceLogicalPairing": true,
+    "negativeTests": true,
+    "semanticFuelUnchanged": true,
+    "memoryStackLimitsUnchanged": true,
+    "requestLimitsUnchanged": true
+  },
+  "limitations": [
+    "No formal compiler semantic-preservation claim",
+    "Frozen four-engine G2/G3 qualifications remain attached to their original source; refactored source has G1-only evidence",
+    "No macOS/Windows compiler publication qualification",
+    "No language feature expansion, arbitrary extension authority or lossless source-editor implementation",
+    "No merge or npm publication"
+  ],
+  "preliminaryRuns": [
+    {
+      "run": 40184475139,
+      "commit": "40bd3bb39e052421acb6777c71c7c59f2cf82665",
+      "scope": "Linux formatter proposal only; not final qualification",
+      "status": "passed"
+    },
+    {
+      "run": 40184640976,
+      "commit": "dfb44062bbc1fb490fa5696483938f07e0f63e0c",
+      "scope": "host AST and formatting before module extraction",
+      "status": "passed"
+    },
+    {
+      "run": 40184704679,
+      "commit": "fef84d244768597ed44d6b973da81c226031745f",
+      "scope": "superseded normal source run before guard-path relocation",
+      "status": "cancelled"
+    }
+  ]
+}

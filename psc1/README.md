@@ -58,13 +58,16 @@ The frozen 120-module compiler closure
 has genuine JS/TS/Rust/compiler-Wasm G1/G2/G3 and fixed-point evidence.
 [Four-engine receipt](docs/PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json).
 
-At implementation `0a717520110c673006d3f5f5d7627e59d5853f62`,
-[package CI 40166882825](https://github.com/dwijayuda/pskernel/actions/runs/40166882825)
-qualifies offline local/global installation, all four executors, real checking,
-candidate target mappings and refusal/publication-failure cases.
-[Source CI 40166884643](https://github.com/dwijayuda/pskernel/actions/runs/40166884643)
+The readability implementation is `446a0f21c6288a7c20b843bbeadcd18ba1460fa2`.
+[Package CI 40184641007](https://github.com/dwijayuda/pskernel/actions/runs/40184641007)
+qualifies the readable host at dfb44062, with the same frozen compiler payloads.
+[Source CI 40184897417](https://github.com/dwijayuda/pskernel/actions/runs/40184897417)
 passes 37/37 Practical Core criteria, both grammars and all seven native target mappings.
-[Exact package/source receipt](docs/PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json).
+The refactored 121-module unified source separately passes a genuine
+[Wasm G1](https://github.com/dwijayuda/pskernel/actions/runs/40184951724), including
+both grammar censuses and 40 cross-target cases plus nine envelope refusals.
+It has no new G2/G3/fixed-point qualification.
+[Exact readability receipt](docs/PSC1_READABILITY_QUALIFICATION_2026-10-25.json).
 
 These results belong to their exact commits and artifacts. Subsequent source
 changes need their own evidence. The current slim checked-output path supports JS;

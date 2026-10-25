@@ -23,7 +23,11 @@ those authorities; they do not create qualification.
 
 ## Exact existing qualification
 
-- [Slim package and normal source](PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json):
+- [Current readability slice](PSC1_READABILITY_QUALIFICATION_2026-10-25.json):
+  implementation 446a0f21, host package 40184641007, new-source Wasm G1
+  40184951724 and normal source 40184897417. Frozen packaged source and
+  refactored compiler source are explicitly distinguished.
+- [Preserved PR #180 slim package and normal source](PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json):
   implementation 0a717520, package 40166882825, source 40166884643.
 - [Frozen four-engine self-hosting](PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json):
   exact source/admission/IR/executable/target fixed points for the frozen closure.
@@ -38,6 +42,8 @@ similar filename does not qualify current HEAD.
 `history/` contains superseded snapshots. Dated audits, failure records and
 qualification JSON elsewhere in this directory also describe their stated commits.
 Use their exact scope/date before applying an old conclusion to current code.
+The two BEFORE_READABILITY snapshots reproduce commit 3089cbc3 verbatim; consult
+that commit's original paths when following their original relative links.
 Older guides can remain useful for retained native packages without describing the
 current slim generated CLI.
 

@@ -109,7 +109,26 @@ theorem characterDiagnostic_preserves_observation
     by_cases newline : psLexCharEq first '\n' = true
     · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline]
     · by_cases slash : psLexCharEq first '\\' = true
-      · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash]
+      · cases rest with
+        | nil =>
+          simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash]
+        | cons escaped tail =>
+          by_cases hexX : psLexCharEq escaped 'x' = true
+          · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash, hexX]
+          · by_cases hexU : psLexCharEq escaped 'u' = true
+            · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash, hexX, hexU]
+            · cases tail with
+              | nil =>
+                simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash, hexX, hexU]
+              | cons close afterClose =>
+                by_cases quote : psLexCharEq close '\'' = true
+                · by_cases allowed : psLexCharacterEscapeAllowed escaped = true
+                  · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash,
+                      hexX, hexU, quote, allowed]
+                  · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash,
+                      hexX, hexU, quote, allowed]
+                · simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash,
+                    hexX, hexU, quote]
       · cases rest with
         | nil =>
           simp [psLexReadCharacterBody, legacyPsLexReadCharacterBody, newline, slash]
@@ -160,7 +179,7 @@ def characterCheck (grammar : PsLosslessGrammar) (source : String) : IO Unit := 
 def main : IO Unit := do
   let bodies : List Char := ['a', 'α', '中', '😀', '\r', '\t', '﻿']
   let closes : List Char := ['x', 'β', '界', '🚀', '\n', '\r', '\t', '/', '-']
-  let prefixes := ["", "-- before\r\n", "/- before 😀 -/\n", "def value := "]
+  let prefixes := ["", "﻿", "-- before\r\n", "/- before 😀 -/\n", "def value := "]
   let mut checked := 0
   for grammar in [PsLosslessGrammar.lean, PsLosslessGrammar.proofScript] do
     for leading in prefixes do

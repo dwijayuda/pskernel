@@ -25,8 +25,8 @@ jobs:
           cache-dependency-path: psc1/host-tools/package-lock.json
       - name: Install existing pinned host tooling
         run: npm ci --prefix psc1/host-tools --ignore-scripts --no-audit --no-fund
-      - name: Prepare scoped host formatting on Linux
-        run: node psc1/scripts/readability-host-check.mjs --propose
+      - name: Check scoped formatting and executable AST correspondence
+        run: node psc1/scripts/readability-host-check.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

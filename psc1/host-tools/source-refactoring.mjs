@@ -197,7 +197,15 @@ export function createLosslessSourceTool({ executable, sha256 }) {
         if (result.error || result.status !== 0) refuse('SUPERVISOR');
         let metrics;
         try { metrics = JSON.parse(result.stdout); } catch { refuse('SUPERVISOR_RESPONSE'); }
-        if (metrics.error || metrics.status !== 0 || metrics.signal) refuse('PROCESS');
+        if (metrics.error || metrics.status !== 0 || metrics.signal) {
+          // Bounded helper diagnostics accompany refusal; no output becomes a snapshot.
+          const diagnostic = name => regularFile(
+            path.join(request.directory, 'tool.' + name + '.txt'), losslessLimits.responseBytes,
+          ).subarray(0, 4096).toString('utf8');
+          throw new Error('PSC1_LOSSLESS_PROCESS', {
+            cause: { metrics, stdout: diagnostic('stdout'), stderr: diagnostic('stderr') },
+          });
+        }
         if (!regularFile(input, losslessLimits.sourceBytes).equals(source)) refuse('INPUT_CHANGED');
         let wire;
         try { wire = JSON.parse(decoder.decode(regularFile(output, losslessLimits.responseBytes))); }

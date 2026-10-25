@@ -1,9 +1,15 @@
 name: PSC1 lossless source capture
 on:
+  workflow_call:
   push:
     branches: [feat/psc1-lossless-source-20261025]
     paths:
-      - psc1/**
+      - psc1/**/*.lean
+      - psc1/host-tools/source-refactoring.mjs
+      - psc1/scripts/lossless-source-tests.mjs
+      - psc1/scripts/bounded-process.py
+      - psc1/scripts/selfhost-qualification-profiles.mjs
+      - psc1/lean-toolchain
       - .github/workflows/psc1-lossless-source.yml
 permissions:
   contents: read
@@ -14,6 +20,8 @@ jobs:
   lossless:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      PSC1_LOSSLESS_SCOPE_GUARD: ${{ github.event_name == 'push' && github.ref_name == 'feat/psc1-lossless-source-20261025' }}
     steps:
       - uses: actions/checkout@v4
         with:

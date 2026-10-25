@@ -1,5 +1,28 @@
 # PSC1 AI work state
 
+## Frozen Rust qualification completed; other engines next
+
+Rust request2d27f142/run40141718481/job121014751809 PASSED genuine G1/G2/G3
+and exact source/admission/original+transformed IR/raw-executable/four-output
+fixed points on120-module closure
+07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af.
+G2=2139961ms,service maxRSS1197260KiB;G3=2160767ms,1197296KiB.
+Both exceed the former1800s cap; correctness-3600s was required. Performance240s
+remains unqualified. G1/corpus/build240s,checker120s and all other policies stay.
+Artifact12580184355,ZIPc294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0.
+Both qualified attempts and every historical failure remain preserved.
+
+The next explicit request qualifies JS/TS/Wasm on this exact same source closure
+using their unchanged correctness-1800s profile. It does not repeat Rust or inherit
+older TS/Wasm/JS evidence. Current primary14cb3e30 changes package installation
+metadata/global regressions, not the portable compiler source or qualification
+tools. Do not modify this frozen source while those runs are active.
+A separate proved lexer candidate remains unpromoted. Primary package/CLI work
+and full correctness results are recorded in the primary AI_WORK_STATE.md.
+
+
+## Earlier control snapshot
+
 ## Active measured-runtime candidate and longer Rust qualification
 
 Updated2026-10-25 Asia/Jakarta. Current control8966261900c7d019553fcef5b04bc9e90593c901

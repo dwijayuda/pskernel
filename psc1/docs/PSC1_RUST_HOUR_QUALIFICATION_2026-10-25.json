@@ -1,0 +1,85 @@
+{
+  "schema": "psc1-rust-hour-qualified/1",
+  "request": "2d27f1428e6a53a6de5006f950fc94f2d471b214",
+  "run": 40141718481,
+  "job": 121014751809,
+  "artifact": 12580184355,
+  "zipSha256": "c294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0",
+  "summary": {
+    "target": "rust",
+    "profile": {
+      "name": "correctness-3600s",
+      "g1TimeoutMs": 240000,
+      "corpusTimeoutMs": 240000,
+      "toolTimeoutMs": 240000,
+      "selfCompileTimeoutMs": 3600000,
+      "correctnessAndPerformanceSeparate": true
+    },
+    "correctnessQualification": "qualified",
+    "performanceQualification": "not-run-in-this-profile",
+    "status": "passed",
+    "sourceModules": 120,
+    "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "generations": [
+      1,
+      2,
+      3
+    ],
+    "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+    "attempts": [
+      {
+        "generation": 2,
+        "producer": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+        "startedAt": "2026-10-24T23:19:42.412Z",
+        "status": "passed",
+        "completedAt": "2026-10-24T23:58:41.332Z"
+      },
+      {
+        "generation": 3,
+        "producer": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+        "startedAt": "2026-10-24T23:58:41.374Z",
+        "status": "passed",
+        "completedAt": "2026-10-25T00:38:00.970Z"
+      }
+    ]
+  },
+  "metrics": [
+    {
+      "role": "generated-compiler",
+      "target": "rust",
+      "id": "G2-self",
+      "serviceSha256": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+      "requestSha256": "9b52f7d7cad553d96abb4432e6d3906ac92d8e2e2639f229364d168abcbfb3ae",
+      "timeoutMs": 3600000,
+      "timeoutPolicy": "g2g3-correctness-3600s",
+      "maxRssKiB": 1197260,
+      "peakTreeRssKiB": 1225916,
+      "sampledCpuSeconds": 2254.48,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "elapsedMs": 2139961,
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "serviceMaxRssKiB": 1197260
+    },
+    {
+      "role": "generated-compiler",
+      "target": "rust",
+      "id": "G3-self",
+      "serviceSha256": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+      "requestSha256": "ef8c56a368042b61c549ffbb5775056e923f3729d30d4acf4b76087af20f6283",
+      "timeoutMs": 3600000,
+      "timeoutPolicy": "g2g3-correctness-3600s",
+      "maxRssKiB": 1197296,
+      "peakTreeRssKiB": 1182824,
+      "sampledCpuSeconds": 2277.3,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "elapsedMs": 2160767,
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "serviceMaxRssKiB": 1197296
+    }
+  ],
+  "otherEngineQualification": "pending new frozen-root request"
+}

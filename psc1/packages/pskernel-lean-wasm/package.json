@@ -18,7 +18,10 @@
     "access": "public"
   },
   "exports": {
-    ".": "./index.mjs",
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs"
+    },
     "./metadata/lean": "./LEAN_SOURCE_PIN.json",
     "./metadata/emscripten": "./EMSCRIPTEN_PIN.json",
     "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
@@ -40,7 +43,8 @@
     "README.md",
     "BUILDING.md",
     "prebuilt/",
-    "PREBUILT_MANIFEST.json"
+    "PREBUILT_MANIFEST.json",
+    "index.d.ts"
   ],
   "proofscript": {
     "npmArchitecture": "psc1-independent-kernel-provider/1",
@@ -57,5 +61,6 @@
   "scripts": {
     "build:kernel": "bash scripts/build-wasm.sh && node scripts/write-prebuilt-manifest.mjs",
     "verify:prebuilt": "node host/verify-prebuilt.mjs"
-  }
+  },
+  "types": "./index.d.ts"
 }

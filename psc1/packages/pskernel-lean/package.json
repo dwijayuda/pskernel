@@ -18,7 +18,10 @@
     "access": "public"
   },
   "exports": {
-    ".": "./index.mjs",
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs"
+    },
     "./node": "./host/node-provider.mjs",
     "./metadata": "./LEAN_SOURCE_PIN.json",
     "./package.json": "./package.json"
@@ -37,7 +40,8 @@
     "README.md",
     "BUILDING.md",
     "prebuilt/",
-    "PREBUILT_MANIFEST.json"
+    "PREBUILT_MANIFEST.json",
+    "index.d.ts"
   ],
   "proofscript": {
     "npmArchitecture": "psc1-independent-kernel-provider/1",
@@ -53,5 +57,6 @@
   },
   "scripts": {
     "build:kernel": "node scripts/build-native-slim.mjs"
-  }
+  },
+  "types": "./index.d.ts"
 }

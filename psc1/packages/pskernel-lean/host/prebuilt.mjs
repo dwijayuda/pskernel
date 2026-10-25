@@ -2,6 +2,7 @@ import {createHash} from 'node:crypto';
 import {
   existsSync,
   readFileSync,
+  lstatSync,
 } from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -86,13 +87,13 @@ export function loadLeanKernelPrebuiltManifest({
   }
   const actualTargets=Object.keys(manifest.targets).sort();
   const expectedTargets=[...supportedLeanKernelProviderTargets].sort();
-  if(JSON.stringify(actualTargets)!==JSON.stringify(expectedTargets)){
+  if(actualTargets.length===0||actualTargets.some(target=>!expectedTargets.includes(target))){
     throw new Error(
       `Lean kernel prebuilt manifest target set mismatch: ${actualTargets.join(', ')}`,
     );
   }
 
-  for(const target of supportedLeanKernelProviderTargets){
+  for(const target of actualTargets){
     const entry=manifest.targets[target];
     if(!entry||typeof entry!=='object'){
       throw new Error(`Lean kernel prebuilt manifest missing target ${target}`);
@@ -131,6 +132,8 @@ export function verifyLeanKernelPrebuiltBinary({
   if(path.resolve(binaryPath)!==expectedPath){
     throw new Error(`Lean kernel prebuilt path mismatch for ${target}`);
   }
+  const stat=lstatSync(binaryPath);
+  if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==(entry.size??entry.bytes))throw Error('Lean kernel prebuilt size or file kind mismatch');
   const actual=createHash('sha256')
     .update(readFileSync(binaryPath))
     .digest('hex');
@@ -166,6 +169,7 @@ export function resolveLeanKernelProviderBinary({
   }
 
   if(manifest){
+    if(!Object.hasOwn(manifest.targets,target))throw new Error('No qualified Lean4.35.0 provider is bundled for '+target);
     const bundledPath=assertInsidePackageRoot(
       packageRoot,
       manifest.targets[target].path,

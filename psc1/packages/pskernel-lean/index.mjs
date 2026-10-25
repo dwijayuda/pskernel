@@ -1,8 +1,1 @@
-export {
-  checkCanonicalAdmissions,
-  defaultLeanKernelProviderBinary,
-  leanKernelProviderCommit,
-  leanKernelProviderName,
-  leanKernelProviderProtocol,
-  leanKernelProviderVersion,
-} from './host/node-provider.mjs';
+export {checkCanonicalAdmissions,createKernel,defaultLeanKernelProviderBinary,leanKernelProviderCommit,leanKernelProviderName,leanKernelProviderProtocol,leanKernelProviderVersion,leanKernelProviderProfile} from './host/node-provider.mjs';

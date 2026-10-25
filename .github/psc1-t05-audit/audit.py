@@ -222,7 +222,7 @@ LAYOUT_SCOPE = {
 }
 
 EMPTY_BASELINE = "20224a295359abb201f56c72395690bf0bfac9fa"
-EMPTY_PRODUCTION_TREE = "7e92ffc478e060d282844c00f4d91e767a9894ef"
+EMPTY_PRODUCTION_TREE = "62d48691ff7d9680878cf668862017d1061f2ebd"
 EMPTY_PRODUCTION = RESTORED_PRODUCTION_ROOT + "/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
 EMPTY_RETAINED = "psc1/test/PsKernelClosedCacheAnalysisRegression.lean"
 EMPTY_MODULE = "PsKernelEmptySemanticCacheProofs"
@@ -1979,7 +1979,7 @@ def validator_audit(e):
         "isolatedProofSource": "e652d02a69ebcaaeb5b4fe0b391e368efebf18e7",
         "arenaModelProofSource": "150123e5fb8e17d8fab4d737a043705727ee1bcc",
         "productionSource": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
-        "productionTree": "7e92ffc478e060d282844c00f4d91e767a9894ef", "files": rows}
+        "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd", "files": rows}
     same(source_inventory, expected_inventory, "entire independent validator source inventory")
     statuses = [{"module": module, "count": count, "exitCode": 0}
                 for module, count in VALIDATOR_MODULES]
@@ -2011,7 +2011,7 @@ def validator_audit(e):
             "proofs": retained + added, "retainedLayers": layers,
             "sourceInventory": digest(e.raw("validator/source-inventory.json")),
             "proofStatuses": digest(e.raw("validator/proof-status.json")),
-            "productionTree": "7e92ffc478e060d282844c00f4d91e767a9894ef", "productionChanges": UNARY_DELTA,
+            "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd", "productionChanges": UNARY_DELTA,
             "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
             "untrustedSourceValidityAssumed": False, "replayArenaModelBridgeEstablished": True,
             "fullKernel": False, "performanceQualified": False}
@@ -2047,7 +2047,7 @@ def validator_audit(e):
 
 UNARY_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean"]
 UNARY_FULL_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
-UNARY_PINS = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean":{"bytes":20758,"sha256":"9eb91b6dae31c55836af18c6dca19d33fcd162dd89205f6312ceda326e57ac5c"},"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean":{"bytes":3754,"sha256":"0a5eb430466bff2fa3f3f00384b5ac7f22dc62bbc0505429ca52494259a8e26e"},"psc1/test/PsKernelUnarySpineProofs.lean":{"bytes":11532,"sha256":"4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"},"psc1/test/PsKernelChurchSource.lean":{"bytes":21080,"sha256":"5f723e4b184c9134128552fe8186064dd0b291a42e54ecc575d210d339dd0a30"},"psc1/test/PsKernelChurchStageProbe.lean":{"bytes":6043,"sha256":"3601231d19268d33474697a2058a7ada58918ce5a8d11b56da263b4377e41a32"},"psc1/scripts/pskernel-unary-spine-smoke.mjs":{"bytes":5522,"sha256":"595355b03cec6bbea7df67fb2452551bfac8feb8658a677a2ef998dc53291210"},"psc1/scripts/pskernel-church-fixture.py":{"bytes":5437,"sha256":"9053ae13a6df9fd542ab9f76177f4daea4835fa68c661b1d1c1b446c06608ddf"},"psc1/scripts/pskernel-church-stages.mjs":{"bytes":4798,"sha256":"d008052b8bb6ecab9c0b0fc5c7c43a2de66304da03e34016c0396cfee947f11d"}}
+UNARY_PINS = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean":{"bytes":20939,"sha256":"bd66aa2e8cc039406b76d8e24459d3d9107e579c7e17ed5432cf192b38e3e2d2"},"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean":{"bytes":3754,"sha256":"0a5eb430466bff2fa3f3f00384b5ac7f22dc62bbc0505429ca52494259a8e26e"},"psc1/test/PsKernelUnarySpineProofs.lean":{"bytes":11532,"sha256":"4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"},"psc1/test/PsKernelChurchSource.lean":{"bytes":21080,"sha256":"5f723e4b184c9134128552fe8186064dd0b291a42e54ecc575d210d339dd0a30"},"psc1/test/PsKernelChurchStageProbe.lean":{"bytes":6043,"sha256":"3601231d19268d33474697a2058a7ada58918ce5a8d11b56da263b4377e41a32"},"psc1/scripts/pskernel-unary-spine-smoke.mjs":{"bytes":5583,"sha256":"9053a5bfc66687c7d1529c6f18179bfb97ced1e41ac0dd3d24ae039d60612d2b"},"psc1/scripts/pskernel-church-fixture.py":{"bytes":5437,"sha256":"9053ae13a6df9fd542ab9f76177f4daea4835fa68c661b1d1c1b446c06608ddf"},"psc1/scripts/pskernel-church-stages.mjs":{"bytes":4798,"sha256":"d008052b8bb6ecab9c0b0fc5c7c43a2de66304da03e34016c0396cfee947f11d"}}
 UNARY_NATIVE_COPY = None
 UNARY_PROOF_NAMES = ["psKernelUnaryPlanZero","psKernelUnaryPlanStops","psKernelUnaryPlanPreserves","psKernelUnaryPlanSkippedBound","psKernelUnaryViewHasSharedHead","psKernelUnaryPlanExpressionCongruence","psKernelUnaryContextZero","psKernelUnaryPlanTerminates","psKernelUnaryCallbackOwner"]
 UNARY_LABELS = ['harness/rejection','arena/canonical','view/shared-head','view/different-head',

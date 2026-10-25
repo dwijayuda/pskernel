@@ -1,30 +1,27 @@
 {
-  "schema": "psc1-selfhost-event-request/1",
+  "schema": "psc1-qualified-generation-evidence-request/1",
   "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
-  "jobs": [
-    {
-      "target": "js",
+  "engines": {
+    "js": {
       "run": 40223062370,
       "job": 121258729566,
+      "artifact": 12611622480,
+      "zipSha256": "1c18b578e110f96545a91ba6f520eed436826206f556243695261b72e68ede45",
       "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98"
     },
-    {
-      "target": "ts",
+    "ts": {
       "run": 40223062370,
       "job": 121258729656,
+      "artifact": 12612640406,
+      "zipSha256": "60e453cfbfd42d63533adb1014b3e255b69c522ce63eeebed55753ae2817607d",
       "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98"
     },
-    {
-      "target": "wasm-core",
+    "wasm-core": {
       "run": 40223062370,
       "job": 121258729664,
+      "artifact": 12611662030,
+      "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
       "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98"
-    },
-    {
-      "target": "rust",
-      "run": 40223086966,
-      "job": 121258808523,
-      "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be"
     }
-  ]
+  }
 }

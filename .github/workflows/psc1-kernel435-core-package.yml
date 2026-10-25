@@ -2,7 +2,7 @@ name: PSC1 integrated independent kernel compiler packages
 on:
   push:
     branches: [integration/psc1-lean435-kernel-packages-20261025]
-    paths: [psc1/scripts/kernel435-integrated-inputs.json]
+    paths: [psc1/scripts/kernel435-integrated-inputs.json, .github/workflows/psc1-kernel435-core-package.yml]
 permissions:
   contents: read
   actions: read

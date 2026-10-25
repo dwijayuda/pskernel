@@ -17,6 +17,36 @@ for(const kind of ['lean','ps']){
  const result=JSON.parse(command(['kernel','check-source',file,'--provider','both']));assert.equal(result.accepted,true);assert.equal(result.agreement,true);assert.equal(result.provider,'both');sourceCases.push({kind,admissionsSha256:result.admissionsSha256});
  fs.writeFileSync(file,'def wrong : Nat := true\n');const bad=spawnSync(process.execPath,[cli,'kernel','check-source',file,'--provider','both'],{cwd:consumer,encoding:'utf8',timeout:240000});assert.notEqual(bad.status,0);
 }
+const applicationCases=[],sourceRoot=process.cwd();const write=(p,b)=>{fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,b);};
+const canonicalPs=new Map();
+{
+ // Standard library .ps is derived by the existing owned translator, exactly as
+ // normal native package resolution and compiler source census already do.
+ const ordered=[],seen=new Set();
+ function visit(module){
+  if(seen.has(module))return;
+  const file=path.join(sourceRoot,'stdlib',...module.split('.'))+'.lean',text=fs.readFileSync(file,'utf8');
+  for(const m of text.matchAll(/^import\s+(.+)$/gm))for(const dep of m[1].trim().split(/\s+/))visit(dep);
+  seen.add(module);ordered.push({module,file});
+ }
+ visit('ProofScript.System.IO');
+ for(const item of ordered){const translated=command(['translate',item.file,'--to','ps']);assert.equal(typeof translated,'string');assert.ok(translated.length);canonicalPs.set(item.module,translated);}
+
+}
+
+function applicationSources(grammar,entryModule,entryText){
+ const ordered=[],seen=new Set(),active=new Set();
+ function visit(module,text){
+  if(seen.has(module))return;assert.ok(!active.has(module),'application import cycle');active.add(module);
+  const file=module.startsWith('ProofScript.')?path.join(sourceRoot,'stdlib',...module.split('.'))+'.'+grammar
+   :path.join(sourceRoot,'test/applications',...module.split('.'))+'.'+grammar;
+  const source=text===undefined?(grammar==='ps'&&module.startsWith('ProofScript.')?canonicalPs.get(module):fs.readFileSync(file,'utf8')):text;assert.equal(typeof source,'string');
+  for(const m of source.matchAll(/^import\s+(.+)$/gm))for(const name of m[1].trim().split(/\s+/))visit(name);
+  active.delete(module);seen.add(module);ordered.push({module,kind:grammar,text:source});
+ }
+ visit(entryModule,entryText);return ordered;
+}
+
 // Use the real qualified G3 engines with the native compiler unavailable.
 const native=path.join(root,'native/bin/psc1'),nativeKernel=path.join(root,distribution.checker.path);fs.renameSync(native,native+'.disabled');fs.renameSync(nativeKernel,nativeKernel+'.disabled');const cases=[],negatives=[];
 try{
@@ -33,6 +63,40 @@ try{
   const wasm=path.join(root,'node_modules/@proofscript/pskernel-lean-wasm/wasm/pskernel-lean.wasm'),b=fs.readFileSync(wasm),changed=Buffer.from(b);changed[changed.length-1]^=1;fs.writeFileSync(wasm,changed);
   try{const r=spawnSync(process.execPath,[cli,'generated','build','--project',path.join(consumer,engine+'-'+corpus[0].id+'.json'),'--engine',engine,'--out',prior],{cwd:consumer,encoding:'utf8',timeout:240000});assert.notEqual(r.status,0);assert.equal(fs.readlinkSync(path.join(prior,'current')),pointer);negatives.push({engine,id:'Wasm-kernel-tamper',priorPreserved:true});}finally{fs.writeFileSync(wasm,b);}
  }
+for(const grammar of ['lean','ps']){
+ const jsonEntry=grammar==='lean'
+  ? 'import JsonRecords.Transform\ndef observe (source : String) : Nat := recordObservation [source]\n'
+  : 'import JsonRecords.Transform\ndef observe(source : String) : Nat := recordObservation([source])\n';
+ const cliEntry=grammar==='lean'
+  ? 'import PracticalCli.Args\ndef observe (source : String) : Nat :=\n  match cliArguments source with\n  | Option.none => 2\n  | Option.some command =>\n      match command with\n      | CliCommand.help => 0\n      | CliCommand.transform _ _ => 1\n'
+  : 'import PracticalCli.Args\ndef observe(source : String) : Nat :=\n match (cliArguments(source)) with { | Option.none => 2 | Option.some command => match (command) with { | CliCommand.help => 0 | CliCommand.transform input output => 1 } }\n';
+ for(const [app,text,observations]of [
+  ['json-records',jsonEntry,[['{"text":"A"}','65'],['{"text":"\\uD83D\\uDE00"}','128512'],['{"text":"\\uD800"}','1'],['{"text":false}','2'],['{"text":"A","text":"B"}','2']]],
+  ['cli-arguments',cliEntry,[['["--help"]','0'],['["transform","in λ😀.json","out.json"]','1'],['["transform","input.json"]','2'],['["--help","extra"]','2'],['{','2']]]
+ ]){
+  const sources=applicationSources(grammar,'Entry',text),project=path.join(consumer,app+'-'+grammar+'.json');
+  write(project,JSON.stringify({entryModule:'Entry',assurance:'ordinary-checked',sources}));
+  const expected=observations.map(x=>x[1]);
+  for(const engine of Object.keys(distribution.engines)){
+   const store=path.join(consumer,engine+'-'+app+'-'+grammar);
+   const result=JSON.parse(command(['generated','build','--project',project,'--engine',engine,'--out',store]));
+   const observe=path.join(consumer,'application-observe.mjs');
+   write(observe,"import * as m from "+JSON.stringify(pathToFileURL(result.artifact).href)+";\n"+
+    'console.log(JSON.stringify('+JSON.stringify(observations.map(x=>x[0]))+'.map(x=>String(m.observe(x)))));\n');
+   assert.deepEqual(JSON.parse(run(process.execPath,[observe])),expected);
+   applicationCases.push({engine,grammar,app,modules:sources.length,observations:observations.length,
+    sourceClosureDigest:result.sourceClosureDigest,compilerExecutionMs:result.compilerExecutionMs,manifestSha256:result.manifestSha256,passed:true});
+  }
+ }
+ // Qualify the direct single-file user command as well as captured projects.
+ const filename=path.join(consumer,'Single.'+grammar);write(filename,'def answer : Nat := 42\n');
+ for(const engine of Object.keys(distribution.engines)){
+  const result=JSON.parse(command(['generated','build',filename,'--engine',engine,'--out',path.join(consumer,engine+'-single-'+grammar)]));
+  const observe=path.join(consumer,'single-observe.mjs');write(observe,"import * as m from "+JSON.stringify(pathToFileURL(result.artifact).href)+";\nif(m.answer!==42n)throw Error('single file');\n");
+  run(process.execPath,[observe]);applicationCases.push({engine,grammar,app:'single-file',observations:1,compilerExecutionMs:result.compilerExecutionMs,passed:true});
+ }
+}
+
 }finally{fs.renameSync(native+'.disabled',native);fs.renameSync(nativeKernel+'.disabled',nativeKernel);}
 const crossChecks=[];
 for(const engine of Object.keys(distribution.engines)){
@@ -55,5 +119,5 @@ for(const kind of ['lean','ps']){
 const policy=path.join(root,'KERNEL_DISTRIBUTION.json'),policyBytes=fs.readFileSync(policy);fs.renameSync(policy,policy+'.disabled');
 try{const missing=spawnSync(process.execPath,[cli,'check',path.join(consumer,'Native.lean')],{cwd:consumer,encoding:'utf8',timeout:240000});assert.notEqual(missing.status,0,'missing Wasm policy must not fall back to native');}finally{fs.renameSync(policy+'.disabled',policy);}
 
-const report={schema:'psc1-integrated-kernel-installed/1',sourceCommit:process.env.GITHUB_SHA,status:'passed',tarballSha256:sha256(fs.readFileSync(tar)),platform:process.platform+'-'+process.arch,kernelCases,sourceCases,cases,negatives,crossChecks,nativePublication,missingPolicyRefused:true,nativeCompilerUnavailableDuringGeneratedCases:true,defaultIndependentWasm:true,nativeCheckerUnavailableDuringDefaultGeneratedCases:true,wasmMemoryModel:'linear',compilerSourceClosureDigest:distribution.sharedSourceClosureDigest,finalCrossPlatformRelease:false,scope:'installed Linux integration; kernel packages carry their separate five-platform qualification'};
+const report={schema:'psc1-integrated-kernel-installed/1',sourceCommit:process.env.GITHUB_SHA,status:'passed',tarballSha256:sha256(fs.readFileSync(tar)),platform:process.platform+'-'+process.arch,kernelCases,sourceCases,cases,applicationCases,negatives,crossChecks,nativePublication,missingPolicyRefused:true,nativeCompilerUnavailableDuringGeneratedCases:true,defaultIndependentWasm:true,nativeCheckerUnavailableDuringDefaultGeneratedCases:true,wasmMemoryModel:'linear',compilerSourceClosureDigest:distribution.sharedSourceClosureDigest,finalCrossPlatformRelease:false,scope:'installed Linux integration; kernel packages carry their separate five-platform qualification'};
 fs.mkdirSync('dist/kernel435-core-installed',{recursive:true});fs.writeFileSync('dist/kernel435-core-installed/qualification.json',JSON.stringify(report,null,2)+'\n');console.log('PSC1_KERNEL435_CORE_INSTALLED: '+JSON.stringify(report));

@@ -61,12 +61,13 @@ jobs:
       working-directory: psc1
       shell: bash
       run: "set -euo pipefail\nlake -f kernel-lakefile.lean build PsKernelCore PsKernelOrdinaryHeaderProofs 2>&1\
-        \ | tee \"$RUNNER_TEMP/t09-cache-scan4/build.log\"\n\nlake -f kernel-lakefile.lean env lean test/PsKernelCacheScan4Proofs.lean\
-        \ 2>&1 | tee \"$RUNNER_TEMP/t09-cache-scan4/cache4-proofs.log\"\npython3 - <<'PYCODE'\nimport pathlib,os,re\n\
-        text=(pathlib.Path(os.environ['RUNNER_TEMP'])/'t09-cache-scan4/cache4-proofs.log').read_text()\nrows=re.findall(r\"\
-        '(PsKernelCacheScan4Proofs\\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not depend on any axioms)\"\
-        ,text)\nassert len(rows)==len({name for name,_ in rows})==4,rows\nassert not any(x in text for x in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\n\
-        for name,axioms in rows:assert set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'},(name,axioms)\n\
+        \ | tee \"$RUNNER_TEMP/t09-cache-scan4/build.log\"\n\nlake -f kernel-lakefile.lean env lean -o .lake/build/lib/lean/PsKernelCacheScan4Proofs.olean\
+        \ test/PsKernelCacheScan4Proofs.lean 2>&1 | tee \"$RUNNER_TEMP/t09-cache-scan4/cache4-proofs.log\"\npython3\
+        \ - <<'PYCODE'\nimport pathlib,os,re\ntext=(pathlib.Path(os.environ['RUNNER_TEMP'])/'t09-cache-scan4/cache4-proofs.log').read_text()\n\
+        rows=re.findall(r\"'(PsKernelCacheScan4Proofs\\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not depend\
+        \ on any axioms)\",text)\nassert len(rows)==len({name for name,_ in rows})==4,rows\nassert not any(x in\
+        \ text for x in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\nfor name,axioms in rows:assert set(x.strip()\
+        \ for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'},(name,axioms)\n\
         print('PSC1_CACHE_SCAN4_ALL_INPUT_REFINEMENT_PASS reports=4')\nPYCODE\n\nlake -f kernel-lakefile.lean env\
         \ lean -o .lake/build/lib/lean/PsKernelExpandedSizeProofs.olean test/PsKernelExpandedSizeProofs.lean 2>&1\
         \ | tee \"$RUNNER_TEMP/t09-cache-scan4/retained-count-proofs.log\"\nlake -f kernel-lakefile.lean env lean\

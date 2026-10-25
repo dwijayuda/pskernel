@@ -1,3 +1,4 @@
+import PsKernelCacheScan4Proofs
 import Ps.KernelCore.Checker.Inference.Constant
 import Ps.KernelCore.Checker.ExprV2.Check
 import Init.Data.Nat.MinMax
@@ -558,8 +559,9 @@ theorem psKernelExprV2WhnfCacheFindIn_eq_before
   cases entries with
   | nil => rfl
   | cons first rest =>
-      exact psKernelExprV2WhnfCacheFindWorker_eq_before
-        (List.cons first rest) arena source hash
+      exact (PsKernelCacheScan4Proofs.whnf_curried_wrapper_preserves_all_inputs_and_exact_errors
+        (List.cons first rest) arena source hash).trans
+          (psKernelExprV2WhnfCacheFindWorker_eq_before (List.cons first rest) arena source hash)
 
 end PsKernelCacheScopeProofs
 

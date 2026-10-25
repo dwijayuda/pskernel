@@ -2,8 +2,22 @@
 
 Updated 2026-10-25 Asia/Jakarta. Continue from draft PR #178 and the latest
 non-force branch HEAD. Implementation `daa735017e34ee94da79d747c363237b4adbc4ef`
-is the current frozen compiler; later documentation commits do not change it.
+is the current frozen compiler; packaging and documentation commits do not change its source.
 GitHub tools/Linux Actions only. No merge or registry publication authorized.
+
+## Package installation fix in progress
+
+The clean runner40145246949 exposed npm's global automatic-peer registry lookup
+for optional providers. Diagnostic40145577407/job121026066810 passes after adding
+standard optional-peer metadata, preserving the peer version and every native/
+resource/descriptor byte. It executes8 generated builds across local/global
+installs, both grammars and TS/Wasm, with no checkout or lake build tree and the
+native compiler disabled. Patched add-on receipt/artifact12580715967 has ZIP
+eee8bbfc8c4aa80d063411b998c4663db4fccc56b006c5e39b654796a297fa7d.
+The production builder now declares this metadata and adds actual global Python/
+PHP compilation/execution in both grammars with a separate empty npm cache.
+Full production CI is PENDING for this packaging change. The compiler source,
+frozen Rust request and host provider identity/refusal policy are unchanged.
 
 ## Current verified state
 

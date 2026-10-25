@@ -133,7 +133,7 @@ jobs:
       - name: Install pinned Lean
         shell: bash
         run: bash psc1/scripts/install-lean435-ci.sh
-      - name: Build one exact compiler and check portable transformation closure
+      - name: Build one exact compiler and check portable unary helper closure
         working-directory: psc1
         shell: bash
         run: |

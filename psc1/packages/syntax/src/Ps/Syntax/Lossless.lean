@@ -204,8 +204,11 @@ def psCaptureLosslessWithLimit (pieceLimit : Nat) (grammar : PsLosslessGrammar)
       match psLosslessCaptureWorker (Nat.add bound 1) bound pieceLimit source tokens initial with
       | Except.error error => Except.error error
       | Except.ok pieces =>
-          Except.ok { pieces := pieces, tokens := tokens,
-            lexicalError := Option.none, byteLength := bytes }
+          Except.ok {
+            pieces := pieces
+            tokens := tokens
+            lexicalError := Option.none
+            byteLength := bytes }
   | Except.error error =>
       if Nat.beq pieceLimit 0 then Except.error PsLosslessError.budgetExhausted
       else
@@ -215,8 +218,11 @@ def psCaptureLosslessWithLimit (pieceLimit : Nat) (grammar : PsLosslessGrammar)
             let start : PsSourcePos := { byteOffset := 0, line := 1, column := 1 };
             let piece := psLosslessPiece source 0 PsSourcePieceKind.unlexed
               start final.position Option.none;
-            Except.ok { pieces := List.cons piece List.nil, tokens := List.nil,
-              lexicalError := Option.some error, byteLength := bytes }
+            Except.ok {
+              pieces := List.cons piece List.nil
+              tokens := List.nil
+              lexicalError := Option.some error
+              byteLength := bytes }
 
 def psCaptureLossless (grammar : PsLosslessGrammar) (source : String) :
     Except PsLosslessError PsLosslessTape :=

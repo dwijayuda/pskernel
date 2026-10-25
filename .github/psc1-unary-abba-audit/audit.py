@@ -178,8 +178,24 @@ def main():
   ref=r['reference'];same(ref['verdict'],'accepted' if label=='good' else 'rejected','independent official verdict')
   raw_ref=pair['results/'+ref['log']];same(sha(raw_ref),ref['output_sha256'],'actual official reference log')
   require(('Lean default kernel accepts the solution' if label=='good' else 'Lean default kernel rejects the solution') in raw_ref.decode(),'official kernel marker')
-  observed=r['observed'];same(observed.get('coreInvoked'),True,'real kernel entered')
+  observed=r['observed']
   prefix='results/round-'+str(round_index)+'/case-'+str(index)+'/'
+  if observed['verdict']=='timeout':
+   same(observed['timeout_seconds'],60,'unchanged actual timeout')
+   same(observed['stage'],'host-wall-time','actual censored host outcome')
+   same(observed['returncode'],-9,'actual timed-out process killed')
+   stderr=pair[prefix+observed['stderr']].decode()
+   progress=[json.loads(line.split(' ',1)[1]) for line in stderr.splitlines() if line.startswith('PSC1_ARENA_PROGRESS ')]
+   same(len(progress),observed['progress_snapshots'],'actual censored progress count')
+   same(observed['invalid_progress_snapshots'],0,'all censored progress snapshots valid')
+   require(progress and all(p.get('format')=='psc1-arena-progress-v2' for p in progress),'actual current progress envelopes')
+   normalized={k:v for k,v in progress[-1].items() if k!='format'}
+   same(normalized,observed['last_progress'],'actual last censored progress record')
+   same(normalized.get('coreInvoked'),True,'actual kernel entry before host timeout')
+   same(normalized.get('fuel'),'4096','unchanged censored fuel')
+   same(normalized.get('sourceSha256'),sha(inp),'actual censored input identity')
+  else:
+   same(observed.get('coreInvoked'),True,'real kernel entered')
   if observed['verdict']!='timeout':
    envelope=A.one_json_line(pair[prefix+observed['stdout']].decode(),'PSC1_ARENA_REPLAY ')
    for key,value in envelope.items():same(observed.get(key),value,'actual process result envelope')

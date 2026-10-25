@@ -4,7 +4,7 @@
   "pullRequest": "https://github.com/dwijayuda/pskernel/pull/187",
   "implementationCommit": "4174fefe50fccc0bd68e3882c069c784bc5f3a7e",
   "testedMerge": "31057ebc60d41ac3cb168a93f8ed5d2108b965f5",
-  "status": "source-G1-applications-mappings-and-all-four-G1-G2-G3-fixed-points-qualified; final-new-source-npm-pending",
+  "status": "qualified-current-source-G1-G2-G3-fixed-points-installed-IO-npm-and-finite-source-release",
   "source": {
     "modules": 122,
     "members": 4742,
@@ -352,6 +352,16 @@
         "zipSha256": "7f03d01c700f86747c52ca01c1af15c5dd5594810a33190cad0b49c3e2869052"
       },
       "finalQualification": false
+    },
+    {
+      "run": 40229518201,
+      "head": "11f598d2992a9f04a7fd8d43b8396f6d81b87c11",
+      "status": "superseded/cancelled",
+      "cancelledFullJob": 121280753167,
+      "gateJob": 121281708005,
+      "gateConclusion": "failure because required full job was cancelled",
+      "reason": "qualified generation inputs and actual census-harness correction promoted at ce38afd8; fresh required source gate 40230721977",
+      "terminalQualification": false
     }
   ],
   "limits": {
@@ -383,12 +393,12 @@
     "completeCrossPlatformReleaseClaimed": false
   },
   "ordinarySource": {
-    "run": 40224098349,
-    "head": "4174fefe50fccc0bd68e3882c069c784bc5f3a7e",
-    "testedMerge": "31057ebc60d41ac3cb168a93f8ed5d2108b965f5",
-    "testedTree": "e77cb74cae2f99905256846d02b242615a6016b3",
-    "fullJob": 121264542703,
-    "gateJob": 121271442126,
+    "run": 40230721977,
+    "head": "ce38afd8a3bed86178ea52edeeecca15cdccb842",
+    "testedMerge": "25f64ed9ebe39d64fce9cebb7bf27a8954aac011",
+    "testedTree": "bca2c95d7936813a49e8dfcc8bc00ed84a2257e0",
+    "fullJob": 121283667496,
+    "gateJob": 121288390096,
     "status": "passed",
     "counts": {
       "qualified": 37,
@@ -397,9 +407,122 @@
     "releaseReady": true,
     "finiteContractOnly": true,
     "artifact": {
-      "id": 12612090541,
-      "zipSha256": "b003ef06bff21a4ad6e7c6e3ed63c1cae47a16ca90e9e685619c51b7cab89a1e"
-    }
+      "id": 12613532720,
+      "name": "psc1-scoped-correctness-25f64ed9ebe39d64fce9cebb7bf27a8954aac011",
+      "size_in_bytes": 121334784,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613532720",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613532720/zip",
+      "expired": false,
+      "created_at": "2026-10-25T20:54:18Z",
+      "expires_at": "2026-11-08T20:54:12Z",
+      "updated_at": "2026-10-25T20:54:18Z",
+      "digest": "sha256:5e40c9e35d47644f5821e600f7f5c9e73ec2aa5f826c5ad35d91ef2584e67a9f",
+      "workflow_run": {
+        "id": 40230721977,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-generated-io-applications-20261026",
+        "head_sha": "ce38afd8a3bed86178ea52edeeecca15cdccb842"
+      }
+    },
+    "jobs": [
+      {
+        "id": 121281735750,
+        "name": "static",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121281896915,
+        "name": "lossless / lossless",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121281896949,
+        "name": "focused / php-application",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121281896953,
+        "name": "focused / focused (applications)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121281896956,
+        "name": "source-bindings / trace",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121281896958,
+        "name": "native / native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121281896984,
+        "name": "focused / focused (core)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121281898180,
+        "name": "benchmark",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 121282523405,
+        "name": "source-bindings / integration",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121283081395,
+        "name": "g1 / generated-js",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121283081440,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121283081453,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121283081467,
+        "name": "g1 / host-session-boundary",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121283081470,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121283667496,
+        "name": "full / linux-scoped",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 121288390096,
+        "name": "gate",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
   },
   "compilerKernelCrosscheck": {
     "run": 40227942797,
@@ -1118,19 +1241,236 @@
     "run": 40230101814,
     "job": 121279783037,
     "commit": "46cea8b91448db9845641a048e4c5d01afd991c0",
-    "status": "running; not-qualified",
-    "control": "a37b49a23d756d006cb650f234aab044f78aff04"
+    "control": "a37b49a23d756d006cb650f234aab044f78aff04",
+    "status": "passed",
+    "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "package": {
+      "name": "proofscript",
+      "version": "0.1.0-psc1.5",
+      "tarball": "proofscript-0.1.0-psc1.5.tgz",
+      "bytes": 3723061,
+      "sha256": "af00e2f279062565fbbb9a6de819602c7d793fd654a53084e87fd4541c5e91ae"
+    },
+    "optionalExecutionPackages": [
+      {
+        "package": "@proofscript/compiler-rust-linux-x64",
+        "version": "0.1.0-psc1.5",
+        "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.5.tgz",
+        "sha256": "c197975d00f1a1fa00dc6d16c9dabcb7d94765c7327b347eb4491bb4baa31066"
+      },
+      {
+        "package": "@proofscript/compiler-wasm",
+        "version": "0.1.0-psc1.5",
+        "tarball": "proofscript-compiler-wasm-0.1.0-psc1.5.tgz",
+        "sha256": "5098ccc5ef9f130a2c3f4c8ba344c0049be73c5fdc17d0133a414f4452ce626c"
+      }
+    ],
+    "kernelPackages": [
+      {
+        "package": "@proofscript/pskernel-lean-wasm",
+        "version": "4.35.0",
+        "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+        "sha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511"
+      },
+      {
+        "package": "@proofscript/pskernel-lean",
+        "version": "4.35.0",
+        "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+        "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+      }
+    ],
+    "installedCounts": {
+      "cases": 20,
+      "globalCases": 12,
+      "candidateCases": 48,
+      "kernelCases": 14,
+      "negativeCases": 37,
+      "byteCaptureCases": 1
+    },
+    "applications": {
+      "closures": 16,
+      "cases": 264,
+      "globalCases": 8,
+      "sourceMetadataAuthorityNegatives": 8,
+      "sourcePackageJavaScriptExecuted": false,
+      "automaticSourcePackageResolution": false
+    },
+    "ioCandidates": {
+      "executed": 24,
+      "refused": 8,
+      "consumers": {
+        "node": "22.23.3",
+        "typescript": "7.0.2",
+        "rust": "1.90.0"
+      },
+      "bothKernelProviders": true
+    },
+    "publicPackedTypes": "passed TypeScript 7.0.2 with readonly/ABI/capability negative assertions",
+    "compilerAdmissionCrosscheck": {
+      "admissionsSha256": "a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213",
+      "bytes": 29887093,
+      "admissionRecords": 3465,
+      "providers": {
+        "wasm": {
+          "accepted": true,
+          "elapsedMs": 8175,
+          "invalidTypeRejected": true,
+          "acceptedResponseSha256": "4a859c5f3b68f7852fc22fb94f9d27f0ada9ecfe82ca69e031a7dbb46058db88",
+          "rejectionResponseSha256": "ff1bf426336e373aeb23c7ac9bd237f60df9dd5f7d29eca15ca942bcefc33430"
+        },
+        "native": {
+          "accepted": true,
+          "elapsedMs": 2484,
+          "invalidTypeRejected": true,
+          "acceptedResponseSha256": "4a859c5f3b68f7852fc22fb94f9d27f0ada9ecfe82ca69e031a7dbb46058db88",
+          "rejectionResponseSha256": "ff1bf426336e373aeb23c7ac9bd237f60df9dd5f7d29eca15ca942bcefc33430"
+        }
+      },
+      "agreement": true
+    },
+    "artifact": {
+      "id": 12613625554,
+      "name": "psc1-generated-io-toolchain-46cea8b91448db9845641a048e4c5d01afd991c0",
+      "size_in_bytes": 28535576,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613625554",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613625554/zip",
+      "expired": false,
+      "created_at": "2026-10-25T20:33:41Z",
+      "expires_at": "2027-01-23T20:17:57Z",
+      "updated_at": "2026-10-25T20:33:41Z",
+      "digest": "sha256:49e01d2b53c29410ac18c855b00bcc620fedb5ddf00cff784dc9c1b57689e576",
+      "workflow_run": {
+        "id": 40230101814,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "qualification/psc1-io-package-20261026",
+        "head_sha": "46cea8b91448db9845641a048e4c5d01afd991c0"
+      }
+    },
+    "npmPublished": false,
+    "fullCrossPlatformRelease": false
   },
   "updatedHostGate": {
-    "run": 40229514151,
-    "job": 121278013272,
-    "commit": "11f598d2992a9f04a7fd8d43b8396f6d81b87c11",
+    "run": 40230718891,
+    "job": 121281644870,
+    "commit": "ce38afd8a3bed86178ea52edeeecca15cdccb842",
     "status": "passed",
     "applications": 16,
     "cases": 264,
     "artifact": {
-      "id": 12612925080,
-      "zipSha256": "86b3aa4385c11e6a2a75529c71b122a0852ced38f24991ff9be1a47245bab441"
+      "id": 12613097291,
+      "name": "psc1-generated-io-applications-ce38afd8a3bed86178ea52edeeecca15cdccb842",
+      "size_in_bytes": 3021170,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613097291",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613097291/zip",
+      "expired": false,
+      "created_at": "2026-10-25T20:35:57Z",
+      "expires_at": "2027-01-23T20:25:45Z",
+      "updated_at": "2026-10-25T20:35:57Z",
+      "digest": "sha256:fd41520405155a9298b44fd49b512dc8aebfe1d95b9eac99939fb2780d522f36",
+      "workflow_run": {
+        "id": 40230718891,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-generated-io-applications-20261026",
+        "head_sha": "ce38afd8a3bed86178ea52edeeecca15cdccb842"
+      }
     }
+  },
+  "testedRuntimeSourceEquivalence": {
+    "testedCommit": "46cea8b91448db9845641a048e4c5d01afd991c0",
+    "currentCommit": "ce38afd8a3bed86178ea52edeeecca15cdccb842",
+    "identicalProductCodeAndWorkflowBlobs": true,
+    "onlyProductDataDifference": "psc1/scripts/slim-universal-input.json",
+    "currentInputEqualsTestedCiExplicitInput": true,
+    "wholeTreeIdentityClaimed": false
+  },
+  "linuxPackageMilestoneComplete": true,
+  "currentSourceSnapshot": {
+    "head": "ce38afd8a3bed86178ea52edeeecca15cdccb842",
+    "testedMerge": "25f64ed9ebe39d64fce9cebb7bf27a8954aac011",
+    "testedTree": "bca2c95d7936813a49e8dfcc8bc00ed84a2257e0"
+  },
+  "previousOrdinarySource": {
+    "run": 40224098349,
+    "head": "4174fefe50fccc0bd68e3882c069c784bc5f3a7e",
+    "testedMerge": "31057ebc60d41ac3cb168a93f8ed5d2108b965f5",
+    "testedTree": "e77cb74cae2f99905256846d02b242615a6016b3",
+    "fullJob": 121264542703,
+    "gateJob": 121271442126,
+    "status": "passed",
+    "counts": {
+      "qualified": 37,
+      "blocked": 0
+    },
+    "releaseReady": true,
+    "finiteContractOnly": true,
+    "artifact": {
+      "id": 12612090541,
+      "zipSha256": "b003ef06bff21a4ad6e7c6e3ed63c1cae47a16ca90e9e685619c51b7cab89a1e"
+    }
+  },
+  "finalBindingRegression": {
+    "run": 40230721977,
+    "job": 121282523405,
+    "head": "ce38afd8a3bed86178ea52edeeecca15cdccb842",
+    "testedMerge": "25f64ed9ebe39d64fce9cebb7bf27a8954aac011",
+    "status": "passed",
+    "executedArtifacts": 28,
+    "records": [
+      {
+        "grammar": "lean",
+        "modules": 122,
+        "members": 4742,
+        "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+        "traces": 2935,
+        "complete": 2170,
+        "binders": 42321,
+        "references": 108198,
+        "elapsedMs": 63390,
+        "renameElapsedMs": 80088
+      },
+      {
+        "grammar": "ps",
+        "modules": 122,
+        "members": 4742,
+        "sourceClosureDigest": "e9131ed0e67d229184babca0ade81174bfed98ce9e2a149769ce9a459aaaea53",
+        "traces": 2935,
+        "complete": 2170,
+        "binders": 42321,
+        "references": 108198,
+        "elapsedMs": 64892,
+        "renameElapsedMs": 85028
+      }
+    ],
+    "artifact": {
+      "id": 12613301828,
+      "name": "psc1-source-binding-integration-25f64ed9ebe39d64fce9cebb7bf27a8954aac011",
+      "size_in_bytes": 25505,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613301828",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12613301828/zip",
+      "expired": false,
+      "created_at": "2026-10-25T20:42:39Z",
+      "expires_at": "2027-01-23T20:25:47Z",
+      "updated_at": "2026-10-25T20:42:39Z",
+      "digest": "sha256:530f22186709bedcd78869d6791199fcc969365e51304f213826166e7dae6950",
+      "workflow_run": {
+        "id": 40230721977,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-generated-io-applications-20261026",
+        "head_sha": "ce38afd8a3bed86178ea52edeeecca15cdccb842"
+      }
+    }
+  },
+  "milestone": {
+    "scope": "current-source self-hosted IO/npm Linux development milestone",
+    "completed": true,
+    "sourceReleaseCriteria": 37,
+    "installedApplicationCases": 264,
+    "finalCrossPlatformRelease": false,
+    "formalCompilerPreservation": false,
+    "original240SecondSelfCompileTarget": "unqualified",
+    "nextRoadmapItem": "2 portable transactional publication"
   }
 }

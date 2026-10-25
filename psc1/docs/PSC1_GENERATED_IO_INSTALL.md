@@ -2,7 +2,7 @@
 
 Use the exact qualified artifact and SHA256 identities in the dated generated IO
 receipt. The root is proofscript 0.1.0-psc1.5. Nothing here publishes to npm.
-Use Node 22.23.3. Extract the complete artifact ZIP, preserving its directories.
+Use Node 22.23.3. Extract the complete artifact ZIP, preserving its directories. Tarballs are under `slim-universal/tarballs/`.
 
 From the directory containing the tarballs:
 
@@ -49,3 +49,7 @@ The [roadmap](PSC1_DEVELOPMENT_ROADMAP.md) tracks portable publication, checked
 non-JS publication, final platform replay and the original 240-second selfcompile
 performance target. Independent admission, strict IR and all resource limits
 remain required. No merge or registry publication is authorized.
+
+Qualified artifact: [40230101814 /12613625554](https://github.com/dwijayuda/pskernel/actions/runs/40230101814/artifacts/12613625554).
+ZIP SHA256: `49e01d2b53c29410ac18c855b00bcc620fedb5ddf00cff784dc9c1b57689e576`.
+Root tarball SHA256: `af00e2f279062565fbbb9a6de819602c7d793fd654a53084e87fd4541c5e91ae`.

@@ -1,8 +1,9 @@
 # Generated compiler IO applications
 
 Status: new-source G1, checked host-session applications and supported IO target
-mappings pass. All four new-source G2/G3 and exact fixed points pass. Final installed package
-qualification remains a required separate gate. Read the dated receipt and
+mappings pass. All four new-source G2/G3 and exact fixed points pass.
+Installed npm qualification also passes 40230101814. This is a Linux-qualified development milestone; final
+universal platform/publication qualification remains separate. Read the dated receipt and
 [work state](../AI_WORK_STATE.md) for exact source and CI identities.
 
 ## Select the output ABI explicitly
@@ -131,8 +132,11 @@ providers retain their regressions.
   preserved G3 payloads use the old source and refuse the new compiler request.
 - New compiler promotion: genuine G1/G2/G3 and exact fixed points for each engine
   are mandatory. G1 evidence is explicitly rejected as insufficient for G3.
-- Final installed new-source applications, mappings and platform release checks
-  must carry their own terminal evidence. A configured workflow is not a pass.
+- Installed new-source npm qualification passes 40230101814: 264 application cases,
+  eight global cases, eight metadata authority refusals, 24 target consumers/eight
+  explicit ABI refusals and packed public types. It checks both official kernels
+  on the complete compiler graph. [Installation](PSC1_GENERATED_IO_INSTALL.md).
+- Final platform release checks remain separate; npm metadata alone is not a pass.
 
 Compiler/tools/G1/corpus remain 240 seconds; checker requests remain 120 seconds.
 Long correctness profiles apply only to existing manual G2/G3 requests. Original

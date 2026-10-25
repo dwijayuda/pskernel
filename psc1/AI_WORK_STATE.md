@@ -21,12 +21,13 @@ The PS candidate closure from actual compiler census is
 `e9131ed0e67d229184babca0ade81174bfed98ce9e2a149769ce9a459aaaea53`.
 Both grammars use the same frontend, elaborator, checked IR and backend mappings.
 
-Implementation `4174fefe50fccc0bd68e3882c069c784bc5f3a7e` and tested merge
-`31057ebc60d41ac3cb168a93f8ed5d2108b965f5` share tree
-`e77cb74cae2f99905256846d02b242615a6016b3`.
-Source run **40224098349** passes every selected dependency, full job
-**121264542703** and gate **121271442126**: **37/37** finite Practical Core criteria,
-zero blocked. This is the finite source contract, not a final universal release.
+Current implementation `ce38afd8a3bed86178ea52edeeecca15cdccb842` and tested merge
+`25f64ed9ebe39d64fce9cebb7bf27a8954aac011` share tree
+`bca2c95d7936813a49e8dfcc8bc00ed84a2257e0`.
+Source run **40230721977** passes every selected dependency, full job
+**121283667496** and gate **121288390096**: **37/37** finite Practical Core criteria,
+zero blocked. The separate benchmark is skipped, not qualified. This is the finite
+source contract and Linux IO/npm milestone, not a final universal release.
 
 Completed new-source IO evidence:
 
@@ -54,7 +55,7 @@ Completed new-source IO evidence:
   Canonical hash `a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213`.
   Observed checks: Wasm 8,208 ms; native 2,477 ms. Logical admission only.
 
-## New generations and remaining package gate
+## Qualified generations and installed packages
 
 **All four engines have terminal passing G1/G2/G3 and exact fixed points** in
 **40223062370**, source request `4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98`.
@@ -91,16 +92,30 @@ snapshot; intentional IO/pin behavior has explicit feature baselines and tests.
 
 All four artifact identities are audited in **40229443268 / 121277802691**.
 The repository package input now selects those exact current-source G3s by default.
-The unpublished npm qualification retry **40230101814 / 121279783037** is running. It must execute offline installed
-CLI/API/source-data applications through four engines, public IO runtime/types,
-real JS/TS/Rust consumers, mandatory linear-memory Wasm checking, optional native
-cross-checking and all preserved regressions. The final source/package gates remain required. Updated host run
-**40229514151 / 121278013272** passes all 264 G1 application cases and boundaries.
+The unpublished npm qualification **40230101814 / 121279783037** has passed.
+It passes offline local/global installs, 20 compiler cases, 12 CLI cases, 48 scalar
+candidate cases, 14 kernel comparisons, 37 negative cases and exact-byte capture.
+Actual installed IO: **16 applications / 264 cases**, eight global cases and eight
+metadata authority refusals; **24 executing JS/TS/Rust outputs / eight Wasm ABI
+refusals**; public API/IO types under TypeScript 7.0.2. Both official kernels accept
+and reject the complete compiler graph as required. The latest source gate **40230721977** has also passed. Updated host run
+**40230718891 / 121281644870** passes all 264 G1 application cases and boundaries.
 The preceding package attempt **40229553987** passed G3 promotion, both complete
 compiler kernel checks and all installed regressions, then exposed a test-harness
 mistake: Lean census rows carry measured facts, not PS translation source text.
 The correction hashes actual owned source bytes and compares the archived ordered
-module/byte/import/stage facts; no compiler, kernel or runtime gate was weakened. [Guide](docs/PSC1_GENERATED_IO_APPLICATIONS.md).
+module/byte/import/stage facts; no compiler, kernel or runtime gate was weakened.
+[Guide](docs/PSC1_GENERATED_IO_APPLICATIONS.md).
+
+Qualified root: **proofscript 0.1.0-psc1.5**, **3,723,061 bytes**, SHA256
+`af00e2f279062565fbbb9a6de819602c7d793fd654a53084e87fd4541c5e91ae`.
+Artifact **12613625554**, ZIP SHA256
+`49e01d2b53c29410ac18c855b00bcc620fedb5ddf00cff784dc9c1b57689e576`.
+It contains all five unpublished tarballs and their actual qualification receipts.
+[Install instructions](docs/PSC1_GENERATED_IO_INSTALL.md).
+The package qualification request `46cea8b9` and development `ce38afd8` have
+identical product/workflow Git blobs; the only product-data change commits the
+same effective compiler inputs used by CI. Whole-tree identity is not claimed.
 
 ## Protocol and authority
 
@@ -149,7 +164,8 @@ ordinary logical/body pairing, strict original/transformed IR and negative tests
 remain mandatory. Longer profiles affect only manual G2/G3 requests.
 No formal whole-compiler preservation or final cross-platform release is claimed.
 
-Remaining release work follows the roadmap: portable transactional publication
+This implementation/qualification milestone is complete. Remaining release work
+follows the roadmap: portable transactional publication
 with actual platform evidence; checked non-JS publication; final clean source/
 package/platform replay; original selfcompile performance. Merge and registry
 publication still require authorization.

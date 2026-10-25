@@ -9,13 +9,13 @@ No merge or npm publication is authorized.
 
 The 122-module / 4,742-member compiler source closure is
 `073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
-Source run 40224098349 passes every selected dependency and all 37 finite criteria,
+Source run 40230721977 passes every selected dependency and all 37 finite criteria,
 zero blocked. Actual G1 host-session application run 40224092530 passes 264 cases
 across four engines/both grammars; mapping run 40225024349 executes 24 JS/TS/Rust
 candidates and eight Wasm callback refusals. Both genuine official kernel packages
 accept the complete compiler graph and reject an invalid-type variant in
 40227942797. JS/TS/Wasm G1/G2/G3 and exact fixed points pass 40223062370;
-Rust also passes 40223086966. Final new-source npm qualification remains required.
+Rust also passes 40223086966. New-source npm qualification passes 40230101814: offline local/global, 264 actual application cases, 24 target consumers/eight ABI refusals and packed types. Latest source replay 40230721977 also passes. This completes the current Linux generated-IO/npm milestone; the next release item is portable transactional publication.
 
 The new ABI is an explicit host-selected request through existing compiler
 semantics. Scalar protocol/defaults, source/project authority limits, independent
@@ -165,7 +165,7 @@ qualification receipts supply exact CI evidence.
 | 0d | Checked grammar conversion (R3) | Finite gates passed at fa265940: 40206625342 passes 11 conversions/14 refusals, real CLI JSON/file IO and complete compiler forward/reverse exact bytes/ownership/comments. New-source Wasm G1 40206504499 passes. Redundant provisional checks removed; observed full export 360,068ms/1,197,708KiB host RSS versus earlier 526,720ms/1,620,508KiB (different runs/source; not a controlled benchmark). Ordinary source 40206628424 passes all selected dependencies and 37/37, zero blocked. [Receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json). |
 | 0e | Bounded binding-aware rename (R2b) | Qualified finite relation in 40219590598:23/62 focused;28 seven-target artifacts;full122-module compiler indexed/renamed under both grammars;new-source WasmG1 passes 40218467242. [Receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json). Complete tracing and broader edits remain outside this boundary. |
 | 0f | R4 behavioral/definitional obligations | Deferred. Require explicit effect/evaluation/divergence/foreign obligations before broader simplification; never infer equivalence from parsing or runtime tests alone. |
-| 1 | Slim real applications and source-package coverage | G1 checked host sessions qualified: 264 cases through four engines/both grammars; native reference 66 and target mappings 24/8 pass. Public IO adapter/types and dynamic source pins pass offline frozen-G3 preflight. All four new fixed points pass; actual new-source installed package/application/consumer qualification remains required. Source-only package JS must never execute or grant authority. |
+| 1 | Slim real applications and source-package coverage | G1 checked host sessions qualified: 264 cases through four engines/both grammars; native reference 66 and target mappings 24/8 pass. Public IO adapter/types and dynamic source pins pass offline frozen-G3 preflight. All four new fixed points and new-source installed package/application/consumer qualification pass 40230101814. Root proofscript 0.1.0-psc1.5 is 3,723,061 bytes. Source-only package data is captured explicitly; automatic npm source resolution remains unimplemented. Source-only package JS must never execute or grant authority. |
 | 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |
 | 3 | Checked generated TS publication | Pending. Reuse existing emitter, IR/admission/runtime and publication machinery; require independent pinned TS consumers, four executors, both grammars and negative/ABI/tamper/prior-output checks. |
 | 4 | Checked Rust/Wasm/component/provider dispatch | Pending. Reuse existing emitters/adapters, complete relevant target/consumer gates and keep Python/PHP optional. Additional Rust execution platforms need genuine binaries and bounded supervisors. |

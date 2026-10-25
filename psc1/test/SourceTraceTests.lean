@@ -74,6 +74,37 @@ private def check (label source : String) (reuse : Bool := false) : IO Unit := d
   IO.println ("PSC1_TRACE_CASE: " ++ label ++ " binders=" ++ toString after.trace.bindersRev.length ++
     " references=" ++ toString after.trace.referencesRev.length)
 
+private def checkModule (grammar : PsCompilerSourceKind) (text : String) : IO Unit := do
+  let parsed ← match psCompilerParseSource grammar text with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "PSC1_TRACE_MODULE_PARSE")
+  let before ← match psElabModuleWithOrigins psSelfHostProdPreludeEnvironment parsed with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (psHostElabErrorText error.error))
+  let after ← match psElabModuleWithSourceTrace true psSelfHostProdPreludeEnvironment parsed with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (psHostElabErrorText error.error))
+  let a ← match psEncodeCheckedAdmissionsCanonical before.result.declarations with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "PSC1_TRACE_MODULE_BEFORE")
+  let b ← match psEncodeCheckedAdmissionsCanonical after.result.declarations with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "PSC1_TRACE_MODULE_AFTER")
+  demand (a == b) "opt-in module path changed actual prepared declarations"
+  demand (before.origins.all (fun origin => origin.sourceTraces.isEmpty))
+    "ordinary preparation accumulated traces"
+  demand (after.origins.any (fun origin => !origin.sourceTraces.isEmpty))
+    "opt-in module path lost traces"
+  for origin in after.origins do
+    for member in origin.sourceTraces do
+      demand (member.trace.enabled && member.trace.complete) "module trace incomplete"
+      demand (origin.members.any (fun actual => psNameEq actual.name member.name))
+        "trace owner is not an actual batch member"
+  match ← psHostLeanCheckPrepared (PsCompilerAdmissionReadyModule.mk after.result.declarations) with
+  | .error message => throw (IO.userError message)
+  | .ok _ => pure ()
+  IO.println "PSC1_TRACE_MODULE: PASS one actual elaboration, origin ownership and exact admission bytes"
+
 def main : IO Unit := do
   check "shadow-and-reuse"
     "def trace (value : Nat) : Nat :=\n  let left : Nat := (let value : Nat := Nat.succ value; value);\n  let right : Nat := (let value : Nat := Nat.succ value; value);\n  Nat.add left right\n" true
@@ -92,4 +123,10 @@ def main : IO Unit := do
     match traceDeclaration enabled bad with
     | .error .typeMismatch => pure ()
     | _ => throw (IO.userError "PSC1_TRACE_CHANGED_REFUSAL")
+  let moduleSource := "namespace TraceLibrary\ninductive Flag where\n  | off\n  | on\ndef choose (flag : Flag) (value : Nat) : Nat :=\n  let next : Nat := Nat.succ value;\n  match flag with\n  | Flag.off => next\n  | Flag.on => Nat.succ next\nend TraceLibrary\n"
+  checkModule .lean moduleSource
+  let ps ← match psTranslateLeanToProofScript moduleSource with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "PSC1_TRACE_MODULE_TRANSLATION")
+  checkModule .proofScript ps
   IO.println "PSC1_SOURCE_TRACE: PASS actual allocation/resolution, scope reuse, byte parity, official admission, disabled mode and refusal"

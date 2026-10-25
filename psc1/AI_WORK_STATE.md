@@ -18,8 +18,14 @@ raw local IDs. Successful scope restoration retains event history and restores t
 outer active-binding map; failed branches yield no context/log. The existing
 declaration routines share one implementation with a tracing flag; normal compiler
 entry points remain disabled and do not accumulate events. No second resolver or
-elaborator is added. Initial scope/byte-parity/official admission tests and both
-whole-compiler source censuses are running in Linux Actions.
+elaborator is added. Foundation commit35633131849fab031e5a459f2c0d876204231182 passes Linux
+run40212099555/job121225316762:122 modules under both grammar censuses,
+closure83d3497bf758fabc7bb2fcb78c658ac6687657cc199549732dd0a90aed5e565b.
+Six actual elaboration cases preserve exact declaration admission bytes and pass
+official Lean admission, including raw-ID reuse, branches, lambdas, match, Id do
+and Except do. Disabled traces stay empty and invalid typed source still refuses.
+The production module pipeline now also has the opt-in mode, carrying traces in
+actual batch origins. Its new tests and source census remain in progress.
 
 This is not yet qualified R2b, complete source tracing or rename. Structured
 recursion, synthesized and normalization provenance, data declarations, exact

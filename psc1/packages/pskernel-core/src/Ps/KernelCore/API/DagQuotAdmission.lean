@@ -48,7 +48,12 @@ def psKernelDagQuotMatchShape
         | Option.none => Option.none
         | Option.some entry =>
             match entry.node with
-            | PsKernelExprV2Node.const actual actualLevels => Option.some (if psKernelNameEq actual name then psKernelLevelListEq actualLevels levels else false)
+            | PsKernelExprV2Node.const actual actualLevels =>
+                let equal :=
+                  if psKernelNameEq actual name then
+                    psKernelLevelListEq actualLevels levels
+                  else false;
+                Option.some equal
             | _ => Option.some false
   | PsKernelExpr.lit value =>
       fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>

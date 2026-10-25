@@ -139,10 +139,22 @@ for(const target of ['python','php']){
   assert.equal(r.error,undefined);assert.notEqual(r.status,0);assert.equal(r.stdout,'');refusals.push({target,label});
  }
 }
+
+const lifetimeProbe=path.join(work,'lifetime.py'),lifetimeInfo=path.join(work,'lifetime.json'),owner=path.join(work,'owner.mjs');
+fs.writeFileSync(lifetimeProbe,'import json,os,resource,time\nprint(json.dumps({"pid":os.getpid(),"addressSpace":resource.getrlimit(resource.RLIMIT_AS)[0],"stack":resource.getrlimit(resource.RLIMIT_STACK)[0]}),flush=True)\ntime.sleep(120)\n');
+fs.writeFileSync(owner,"import fs from 'node:fs';import {spawn} from 'node:child_process';const child=spawn("+JSON.stringify(tool('python'))+",['python-run',"+JSON.stringify(lifetimeProbe)+"],{env:{...process.env,PSC1_OPTIONAL_PARENT_PID:String(process.pid)}});let text='';child.stdout.on('data',b=>{text+=b;if(text.includes('\\n')){fs.writeFileSync("+JSON.stringify(lifetimeInfo)+",text);process.exit(0);}});child.stderr.on('data',b=>process.stderr.write(b));setTimeout(()=>process.exit(2),10000);");
+run(process.execPath,[owner]);
+const limits=JSON.parse(fs.readFileSync(lifetimeInfo));assert.equal(limits.addressSpace,4294967296);assert.equal(limits.stack,8388608);
+function live(pid){try{const rest=fs.readFileSync('/proc/'+pid+'/stat','utf8').split(') ').at(-1).split(' ');return !['Z','X','x'].includes(rest[0]);}catch{return false;}}
+for(let i=0;i<30&&live(limits.pid);i++)await new Promise(resolve=>setTimeout(resolve,20));
+assert.equal(live(limits.pid),false,'owner exit must reap the optional runtime');
+const wrongParent=spawnSync(tool('python'),['python-run',pythonDriver,actual.rows.find(r=>r.target==='python').artifact,'{}'],{env:{...env,PSC1_OPTIONAL_PARENT_PID:'0'},encoding:'utf8',timeout:240000});
+assert.notEqual(wrongParent.status,0);assert.equal(wrongParent.stdout,'');
+
 assert.equal(actual.rows.length,40);assert.equal(actual.io.length,16);assert.equal(actual.components.length,8);
 const receipt={schema:'psc1-checked-dispatch-qualification/1',testedCommit:process.env.GITHUB_SHA,status:'passed',compilerSourceClosureDigest:assembly.compilerSourceClosureDigest,rootSha256:assembly.sha256,
  unchangedG3:true,independentAdmission:true,strictOriginalAndTransformedIr:true,optionalEmitterNativeRevalidation:true,
  offline:true,installScripts:false,executorPath:'Node-only',platform:'Linux x64 only',formalPreservation:'not-provided',
- ...actual,cliRecords,refusals:[...actual.negatives,...refusals]};
+ ...actual,cliRecords,resourceAndLifetime:{addressSpaceBytes:limits.addressSpace,stackBytes:limits.stack,ownerExitKills:true,wrongParentRefused:true},refusals:[...actual.negatives,...refusals]};
 fs.writeFileSync(path.join(out,'checked-dispatch.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_CHECKED_DISPATCH: '+JSON.stringify({source:receipt.compilerSourceClosureDigest,providers:40,io:16,components:8,refusals:receipt.refusals.length}));

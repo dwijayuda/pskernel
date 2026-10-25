@@ -13,9 +13,9 @@ async function auditSymbols(binary,target){
  const forbidden=/initialize_Ps_Compiler_Api|initialize_Ps_Elab_Term|initialize_PsKernelLean_|initialize_Ps_Host_DirectBackend/;
  const other=target==='python'?/initialize_Ps_BackendPhp/:/initialize_Ps_BackendPython/;
  await new Promise((resolve,reject)=>{
-   const child=spawn('nm',['--defined-only','--extern-only','-j',binary],{stdio:['ignore','pipe','pipe']});
+   const child=spawn('nm',['--defined-only','-j',binary],{stdio:['ignore','pipe','pipe']});
    let pending='',stderr='',failure=null,owned=0,count=0;
-   const inspect=line=>{count++;if(line.includes('initialize_Ps_Backend'))owned++;if(forbidden.test(line)||other.test(line))failure='PSC1_PROVIDER_FORBIDDEN_SYMBOL';};
+   const inspect=line=>{count++;if((target==='python'?/psPythonEmit|PsPython_/:/psPhpEmit|PsPhp_/).test(line))owned++;if(forbidden.test(line)||other.test(line))failure='PSC1_PROVIDER_FORBIDDEN_SYMBOL';};
    const timer=setTimeout(()=>{failure='PSC1_PROVIDER_SYMBOL_AUDIT_DEADLINE';child.kill('SIGKILL');},240000);
    child.stdout.on('data',bytes=>{pending+=bytes.toString('utf8');let index;while((index=pending.indexOf('\n'))!==-1){inspect(pending.slice(0,index));pending=pending.slice(index+1);}if(pending.length>1048576){failure='PSC1_PROVIDER_SYMBOL_LINE_LIMIT';child.kill('SIGKILL');}});
    child.stderr.on('data',bytes=>{stderr=(stderr+bytes.toString('utf8')).slice(-8192);});
@@ -23,6 +23,29 @@ async function auditSymbols(binary,target){
    child.once('close',status=>{clearTimeout(timer);if(pending)inspect(pending);if(status!==0||failure||!owned)reject(Error(failure||stderr||'PSC1_PROVIDER_SYMBOL_AUDIT_EMPTY'));else{console.log('PSC1_PROVIDER_SYMBOL_AUDIT '+JSON.stringify({target,count,owned,streamed:true,frontendCheckerPublisherAbsent:true}));resolve();}});
  });
 }
+function auditSourceClosure(target){
+ const lake=fs.readFileSync('lakefile.lean','utf8'),index=new Map();
+ for(const library of lake.matchAll(/lean_lib\s+(\w+)\s+where\n([\s\S]*?)(?=\n(?:lean_|@)|$)/g)){
+  const directory=library[2].match(/srcDir\s*:=\s*"([^"]+)"/)?.[1];if(!directory)continue;
+  for(const item of library[2].matchAll(/\x60([\w.]+)/g))index.set(item[1],path.join(directory,...item[1].split('.'))+'.lean');
+ }
+ const seen=new Set(),rows=[];
+ function visit(module){
+  if(module==='Lean')return;
+  if(seen.has(module))return;seen.add(module);
+  assert.doesNotMatch(module,/^Ps\.(Compiler\.|CompilerUnified\.|Elab\.|Host\.(DirectBackend|LeanChecked|ArtifactBundle|CompilerDriver))/);
+  assert.doesNotMatch(module,/^PsKernelLean\./);
+  assert.doesNotMatch(module,target==='python'?/^Ps\.BackendPhp\./:/^Ps\.BackendPython\./);
+  const file=index.get(module);assert.ok(file,'unregistered provider source '+module);
+  const text=fs.readFileSync(file,'utf8');rows.push({module,path:file,sha256:sha(text)});
+  for(const imported of text.matchAll(/^import\s+(.+)$/gm))for(const dependency of imported[1].trim().split(/\s+/))visit(dependency);
+ }
+ // Executable roots are registered separately from lean_lib module roots.
+ const entry='Ps.Backend'+(target==='python'?'Python':'Php')+'.ProviderMain';
+ index.set(entry,'packages/backend-'+target+'/src/'+entry.split('.').join('/')+'.lean');visit(entry);
+ return rows.sort((a,b)=>a.module.localeCompare(b.module));
+}
+
 const descriptors={};
 for(const target of ['python','php','wasm-component']){
  const packageName=target==='wasm-component'?'@proofscript/wasm-component-tools-linux-x64':'@proofscript/backend-'+target;
@@ -34,8 +57,10 @@ for(const target of ['python','php','wasm-component']){
    libraries(process.env.PSC1_WASM_TOOLS,path.join(stage,'lib'));
  }else{
    const worker=path.resolve('.lake/build/bin/psc1_backend_'+target);copy(worker,path.join(stage,'worker'));libraries(worker,path.join(stage,'lib'));
+   const workerSources=auditSourceClosure(target);
+   fs.writeFileSync(path.join(stage,'worker-source.json'),JSON.stringify(workerSources,null,2)+'\n');
    await auditSymbols(worker,target);
-   run('strip',['--strip-debug',path.join(stage,'worker')]);
+   run('strip',['--strip-unneeded',path.join(stage,'worker')]);
    const resources=target==='python'?['typed_io.py','generated-python-transport.py']:['typed-io.php','generated-php-transport.php'];
    for(const resource of resources)copy('host-tools/'+resource,path.join(stage,'resources',resource));
    if(target==='python'){
@@ -43,6 +68,8 @@ for(const target of ['python','php','wasm-component']){
      const info=JSON.parse(run(exe,['-I','-S','-c','import json,sysconfig;print(json.dumps({k:sysconfig.get_config_var(k) for k in ["LIBDIR","LDLIBRARY"]}|{"stdlib":sysconfig.get_path("stdlib")}))']));
      copy(exe,path.join(stage,'runtime/bin/python3'));libraries(exe,path.join(stage,'runtime/lib'));
      copy(info.stdlib,path.join(stage,'runtime/lib/python3.14'));
+     const dynamic=path.join(stage,'runtime/lib/python3.14/lib-dynload');
+     for(const file of fs.readdirSync(dynamic))if(file.endsWith('.so'))libraries(path.join(dynamic,file),path.join(stage,'runtime/lib'));
      copy(path.join(info.LIBDIR,info.LDLIBRARY),path.join(stage,'runtime/lib',info.LDLIBRARY));
      copy('scripts/optional-provider-validate.py',path.join(stage,'validate.py'));
    }else{

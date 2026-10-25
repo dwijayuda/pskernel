@@ -5,7 +5,19 @@ Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
-## Current checked-publication milestone
+## Current checked-dispatch milestone
+
+PR #189 follows PR #188 at9c13f2f2. Checked component/provider implementation is
+in progress; consult [its guide](PSC1_CHECKED_DISPATCH.md) and
+[exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json).
+No new qualification is claimed until actual jobs complete. The qualified G3
+source and executable bytes remain unchanged. Component output packages the exact
+GC core with a bounded Bool ABI; Python/PHP receive only admitted portable IR and
+perform native strict IR/target ABI checks. Optional workers contain no PSC1
+frontend, independent admission or publication host.
+New native tools/runtimes require Linux x64 evidence and other platforms refuse.
+
+## Preserved checked-publication milestone
 
 PR #188 implementation1b0e695e and package run**40238538092 /121305298430** pass:
 four G3 executors/both grammars/four checked targets;32 scalar groups,24 callback
@@ -189,7 +201,7 @@ qualification receipts supply exact CI evidence.
 | 1 | Slim real applications and source-package coverage | G1 checked host sessions qualified: 264 cases through four engines/both grammars; native reference 66 and target mappings 24/8 pass. Public IO adapter/types and dynamic source pins pass offline frozen-G3 preflight. All four new fixed points and new-source installed package/application/consumer qualification pass 40230101814. Root proofscript 0.1.0-psc1.5 is 3,723,061 bytes. Source-only package data is captured explicitly; automatic npm source resolution remains unimplemented. Source-only package JS must never execute or grant authority. |
 | 2 | Portable transactional publication | File-pointer and legacy layouts qualified in40238538092,including actual fault/SIGKILL/readback tests. Immutable returned paths, sealed inventory, stale-writer refusal and explicit committed-but-durability-uncertain outcomes are required. Actual macOS/Windows publication remains blocked on platform release evidence; Linux-only tests cannot qualify it. |
 | 3 | Checked generated TS publication | Qualified for Linux x64 in40238538092,including four executors/both grammars and actual strict consumers. Optional TypeScript 7.0.2 requires its separately pinned Linux x64 native dependency for offline execution. Same private admission and strict IR boundary; no SDK in default root. |
-| 4 | Checked Rust/Wasm/component/provider dispatch | Rust and Wasm-core qualified in40238538092 within the stated ABI/platform boundaries. Optional Rust 1.90.0 consumer uses locked BigInt dependencies and a pinned syntax/API inspector; actual rlib linking/execution is required. Wasm uses existing import-free GC transport and closed primitive ABI. Component/provider dispatch remains pending; Python/PHP stay optional. Additional Rust/SDK platforms require actual evidence. |
+| 4 | Checked Rust/Wasm/component/provider dispatch | Rust and Wasm-core qualified in40238538092 within the stated ABI/platform boundaries. Optional Rust 1.90.0 consumer uses locked BigInt dependencies and a pinned syntax/API inspector; actual rlib linking/execution is required. Wasm uses existing import-free GC transport and closed primitive ABI. Component/provider dispatch is implemented in PR #189 and awaiting exact installed qualification; Python/PHP stay optional. Additional Rust/SDK platforms require actual evidence. |
 | 5 | Clean reproduction and final universal release | Pending. Qualify final source/package/platform identities and required compiler generations. Preserve frozen qualifications; promote changed compiler source only with its own evidence. User authorization remains required before merge/publication. |
 | 6 | Original 240-second self-compilation performance target | Unqualified. Optimize measured real compiler workloads without changing fuel, G1/checker or memory/stack policies. Isolated proved lexer experiment 31e10263 remains unpromoted. |
 | 7 | Broader language features and generalized extensions | Deferred beyond frozen v1. Preserve working features. Optional packages cannot acquire kernel, host, FFI or runtime authority through metadata. |

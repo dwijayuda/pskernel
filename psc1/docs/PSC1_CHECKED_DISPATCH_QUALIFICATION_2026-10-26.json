@@ -37,6 +37,13 @@
       "job": 121325281157,
       "status": "failed",
       "reason": "nm symbol audit exhausted the 32MiB capture buffer; replaced full-buffer collection with bounded line streaming, preserving all forbidden-symbol checks and runtime limits"
+    },
+    {
+      "head": "6b4c9a906439765a895573a8538a432bc4840154",
+      "run": 40245482617,
+      "job": 121326148590,
+      "status": "failed",
+      "reason": "public-initializer positive symbol check is invalid for optimized workers; full symbol streaming and explicit source-import closure now enforce the provider boundary"
     }
   ],
   "scope": {

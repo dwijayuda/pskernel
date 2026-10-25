@@ -10,6 +10,26 @@ permissions:
   contents: read
   actions: read
 jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Reject syntax and launcher diagnostics before expensive preparation
+        run: |
+          node --check host-tools/checked-component.mjs
+          node --check host-tools/checked-optional-provider.mjs
+          node --check host-tools/generated-compiler-session.mjs
+          node --check host-tools/installed-engine-resolver.mjs
+          node --check scripts/prepare-checked-dispatch-tools.mjs
+          node --check scripts/checked-dispatch-installed.mjs
+          cc -O2 -Wall -Wextra -Werror scripts/optional-tool-launcher.c -o "$RUNNER_TEMP/psc1-optional-tool"
   transactions:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -29,7 +49,7 @@ jobs:
           path: psc1/dist/transactional-publication/
           retention-days: 90
   installed:
-    needs: transactions
+    needs: [preflight, transactions]
     runs-on: ubuntu-24.04
     timeout-minutes: 65
     defaults:

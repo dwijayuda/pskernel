@@ -41,5 +41,35 @@
     "strictOriginalAndTransformedIr": true,
     "publication": "core-host"
   },
-  "qualification": "Installed offline core plus explicit add-ons; retained emitter payloads; both grammars; all-seven existing regressions; does not confer new self-host G2/G3 qualification"
+  "qualification": "Installed offline core plus explicit add-ons; retained emitter payloads; both grammars; all-seven existing regressions; does not confer new self-host G2/G3 qualification",
+  "generatedHostDispatch": {
+    "schema": "psc1-checked-optional-provider/1",
+    "wire": "psc1-portable-backend-provider/1",
+    "command": "emit-portable",
+    "requestShape": [
+      "protocol",
+      "target",
+      "psc1-ir/1 module",
+      "public names",
+      "ioDispatcherAbi Bool"
+    ],
+    "limits": {
+      "requestBytes": 33554432,
+      "responseBytes": 33554432,
+      "executionTimeoutMs": 240000,
+      "addressSpaceBytes": 4294967296,
+      "stackBytes": 8388608,
+      "parentLifetime": "Linux parent-death signal and host parent PID binding"
+    },
+    "compilerTarget": "js",
+    "logicalAdmission": "mandatory in core host before emitter invocation",
+    "canonicalRoundTrip": "exact equality with existing psIrEncodeModule",
+    "strictOriginalAndTransformedIr": true,
+    "nativeStrictIrAndTargetAbiRecheck": true,
+    "providerAuthority": "candidate-only",
+    "publicationAuthority": "single-use checked core host",
+    "defaultPackageAbsence": true,
+    "platformQualification": "pending exact Linux x64 evidence",
+    "arbitraryProviderRegistration": false
+  }
 }

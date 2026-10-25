@@ -5,6 +5,7 @@ on:
     paths: [psc1/scripts/prepare-rust-target-consumer.mjs, 'psc1/scripts/rust-api-inspector/**', .github/workflows/psc1-rust-target-consumer.yml]
 permissions:
   contents: read
+  actions: read
 jobs:
   consumer:
     runs-on: ubuntu-24.04
@@ -49,3 +50,27 @@ jobs:
             if(r.status!==0)throw Error('consumer diagnostic');
           });
           JS
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 40236689438
+          name: psc1-checked-publication-5cd2303055cc6bdff9a7972fcaf43c5d829032ba
+          path: diagnostic-artifact
+      - name: Diagnose actual emitted TS from the failed package attempt
+        run: |
+          mkdir -p "$RUNNER_TEMP/ts-actual"
+          npm install --prefix "$RUNNER_TEMP/ts-actual" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/diagnostic-artifact/tarballs/proofscript-0.1.0-psc1.6.tgz" "$GITHUB_WORKSPACE/diagnostic-artifact/tarballs/typescript-7.0.2.tgz"
+          cat > "$RUNNER_TEMP/ts-actual/diagnostic.mjs" <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import {spawnSync} from 'node:child_process';
+          import {compileCandidate} from 'proofscript';
+          const c=compileCandidate({entryModule:'Entry',sources:[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}],target:'ts'}).candidate;
+          const stage=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-ts-real-'));
+          const {prepareCheckedTarget}=await import(process.env.GITHUB_WORKSPACE+'/psc1/host-tools/checked-targets.mjs');
+          console.log('ACTUAL_GENERATED_SOURCE='+c.source);
+          prepareCheckedTarget(stage,c,{target:'ts',typescript:{entry:path.resolve(path.dirname(new URL(import.meta.url).pathname),'node_modules/typescript/bin/tsc')}},(role,args)=>{
+           const r=spawnSync(process.execPath,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});
+           console.log(JSON.stringify({role,status:r.status,stdout:r.stdout,stderr:r.stderr}));
+           if(r.status!==0)throw Error('actual target consumer failure');
+          });
+          JS
+          node "$RUNNER_TEMP/ts-actual/diagnostic.mjs"

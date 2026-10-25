@@ -1,16 +1,15 @@
 {
   "schema": "psc1-unified-selfhost-request/1",
-  "branch": "qualification/psc1-output-abi-g1-20261026",
-  "parentCommit": "e22782decf4250faefc8304679db123e7fdc43cf",
-  "action": "validate-independent-G1",
-  "mode": "--g1-only",
-  "profile": "performance-240s",
+  "branch": "qualification/psc1-output-abi-fixed-js-ts-wasm-20261026",
+  "parentCommit": "a047e92d2e0a95543e863b3f3cddc909b268cbeb",
+  "action": "qualify-independent-G1-G2-G3",
+  "mode": "--self-host",
+  "profile": "correctness-1800s",
   "g1TimeoutMs": 240000,
-  "g2g3TimeoutMs": 240000,
+  "g2g3TimeoutMs": 1800000,
   "targets": [
     "js",
     "ts",
-    "rust",
     "wasm-core"
   ]
 }

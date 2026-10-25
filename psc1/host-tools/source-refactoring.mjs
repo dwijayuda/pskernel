@@ -15,6 +15,7 @@ export const losslessLimits = Object.freeze({
 });
 const protocol = 'psc1-lossless-capture/1';
 const losslessTools = new WeakMap();
+const ownershipTools = new WeakMap();
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 const refuse = code => { throw new Error('PSC1_LOSSLESS_' + code); };
 const decoder = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
@@ -276,6 +277,45 @@ export function createLosslessSourceTool({ executable, sha256 }) {
 }
 
 
+function runSourceHelper({ executable, sha256 }, mode, encoded, consume) {
+  pinnedTool(executable, sha256);
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-ownership-'));
+  try {
+    const input = path.join(directory, 'request.json'), output = path.join(directory, 'index.json');
+    const admissionsFile = path.join(directory, 'admissions.json'), irFile = path.join(directory, 'ir.json');
+    fs.writeFileSync(input, encoded, { flag: 'wx', mode: 0o600 });
+    const limit = supervisorLimit(240000, 'standard-240s');
+    const control = {
+      command: ['prlimit', '--as=' + losslessLimits.addressSpaceBytes,
+        '--stack=' + losslessLimits.stackBytes, '--', executable,
+        mode, input, output, admissionsFile, irFile],
+      directory: path.join(directory, 'supervisor'), timeoutMs: limit.timeoutMs,
+      timeoutPolicy: limit.timeoutPolicy, maxBuffer: losslessLimits.responseBytes,
+    };
+    const result = spawnSync('python3', [supervisor, JSON.stringify(control)], {
+      encoding: 'utf8', timeout: limit.supervisorGuardMs, maxBuffer: losslessLimits.responseBytes,
+      env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0',
+        LEAN_STACK_SIZE_KB: '8192' },
+    });
+    pinnedTool(executable, sha256);
+    if (result.error || result.status !== 0) refuse('OWNERSHIP_SUPERVISOR');
+    let metrics;
+    try { metrics = JSON.parse(result.stdout); } catch { refuse('OWNERSHIP_SUPERVISOR_RESPONSE'); }
+    if (metrics.error || metrics.status !== 0 || metrics.signal) {
+      throw new Error('PSC1_LOSSLESS_OWNERSHIP_PROCESS', { cause: {
+        metrics, stderr: regularFile(path.join(control.directory, 'tool.stderr.txt'),
+          losslessLimits.responseBytes).subarray(0, 4096).toString('utf8'),
+      } });
+    }
+    if (regularFile(input, losslessLimits.responseBytes).toString('utf8') !== encoded)
+      refuse('OWNERSHIP_INPUT_CHANGED');
+    let wire;
+    try { wire = JSON.parse(decoder.decode(regularFile(output, losslessLimits.responseBytes))); }
+    catch { refuse('OWNERSHIP_RESPONSE_JSON'); }
+    return consume({ wire, admissionsFile, irFile, metrics });
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+}
+
 /** Read-only semantic provenance over genuine lexical capabilities. The host
  * pins both tools; source bytes cannot choose executables, policies or checkers.
  * Independent admission covers exact logical graph bytes, not refactoring equivalence.
@@ -332,7 +372,7 @@ export function createSourceOwnershipTool({
         refuse('OWNERSHIP_POSITION');
     }
   }
-  return Object.freeze({
+  const tool = Object.freeze({
     analyze({ snapshots, entry, assurance = 'checked' }) {
       const rows = select(snapshots);
       if (!['checked', 'ordinary-checked'].includes(assurance) ||
@@ -345,137 +385,314 @@ export function createSourceOwnershipTool({
         sourceClosureDigest, grammar, assurance, entry, rows.map(row => [row.module, row.text])]);
       if (Buffer.byteLength(encoded) > losslessLimits.responseBytes) refuse('OWNERSHIP_REQUEST_LIMIT');
       pinnedTool(executable, sha256); pinnedTool(checkerExecutable, checkerSha256);
-      const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-ownership-'));
-      try {
-        const input = path.join(directory, 'request.json'), output = path.join(directory, 'index.json');
-        const admissionsFile = path.join(directory, 'admissions.json'), irFile = path.join(directory, 'ir.json');
-        fs.writeFileSync(input, encoded, { flag: 'wx', mode: 0o600 });
-        const limit = supervisorLimit(240000, 'standard-240s');
-        const control = { command: ['prlimit', '--as=' + losslessLimits.addressSpaceBytes,
-          '--stack=' + losslessLimits.stackBytes, '--', executable,
-          'index', input, output, admissionsFile, irFile],
-          directory: path.join(directory, 'supervisor'), timeoutMs: limit.timeoutMs,
-          timeoutPolicy: limit.timeoutPolicy, maxBuffer: losslessLimits.responseBytes };
-        const result = spawnSync('python3', [supervisor, JSON.stringify(control)], {
-          encoding: 'utf8', timeout: limit.supervisorGuardMs, maxBuffer: losslessLimits.responseBytes,
-          env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0',
-            LEAN_STACK_SIZE_KB: '8192' },
-        });
-        pinnedTool(executable, sha256);
-        if (result.error || result.status !== 0) refuse('OWNERSHIP_SUPERVISOR');
-        let metrics;
-        try { metrics = JSON.parse(result.stdout); } catch { refuse('OWNERSHIP_SUPERVISOR_RESPONSE'); }
-        if (metrics.error || metrics.status !== 0 || metrics.signal) {
-          throw new Error('PSC1_LOSSLESS_OWNERSHIP_PROCESS', { cause: {
-            metrics, stderr: regularFile(path.join(control.directory, 'tool.stderr.txt'),
-              losslessLimits.responseBytes).subarray(0, 4096).toString('utf8'),
-          } });
-        }
-        if (regularFile(input, losslessLimits.responseBytes).toString('utf8') !== encoded)
-          refuse('OWNERSHIP_INPUT_CHANGED');
-        let wire;
-        try { wire = JSON.parse(decoder.decode(regularFile(output, losslessLimits.responseBytes))); }
-        catch { refuse('OWNERSHIP_RESPONSE_JSON'); }
+      return runSourceHelper({ executable, sha256 }, 'index', encoded,
+        ({ wire, admissionsFile, irFile, metrics }) => {
+          if (wire?.status === 'refused') {
+            exactKeys(wire, ['protocol', 'status', 'requestId', 'sourceClosureDigest', 'error']);
+            if (wire.protocol !== protocol || wire.requestId !== requestId ||
+                wire.sourceClosureDigest !== sourceClosureDigest) refuse('OWNERSHIP_REFUSAL_IDENTITY');
+            throw new Error('PSC1_LOSSLESS_OWNERSHIP_REFUSED', { cause: wire.error });
+          }
+          exactKeys(wire, ['protocol', 'status', 'requestId', 'sourceClosureDigest',
+            'grammar', 'assurance', 'entry', 'modules', 'sourceCoreDeclarations',
+            'logicalCoreDeclarations', 'partialNames']);
+          if (wire.protocol !== protocol || wire.status !== 'prepared' || wire.requestId !== requestId ||
+              wire.sourceClosureDigest !== sourceClosureDigest || wire.grammar !== grammar ||
+              wire.assurance !== assurance || wire.entry !== entry ||
+              !Array.isArray(wire.modules) || wire.modules.length !== rows.length ||
+              !Array.isArray(wire.partialNames) || wire.partialNames.some(n => typeof n !== 'string') ||
+              !Number.isSafeInteger(wire.sourceCoreDeclarations) || wire.sourceCoreDeclarations < 0 ||
+              !Number.isSafeInteger(wire.logicalCoreDeclarations) || wire.logicalCoreDeclarations < 0)
+            refuse('OWNERSHIP_RESPONSE');
+          const names = new Set();
+          let members = 0;
+          const modules = wire.modules.map((module, moduleIndex) => {
+            const row = rows[moduleIndex], snapshot = row.snapshot;
+            exactKeys(module, ['module', 'byteLength', 'imports', 'sourceDeclarations', 'origins']);
+            if (module.module !== row.module || module.byteLength !== row.bytes.length ||
+                !Array.isArray(module.imports) || module.imports.some(n => typeof n !== 'string') ||
+                !Array.isArray(module.origins) || module.origins.length !== module.sourceDeclarations)
+              refuse('OWNERSHIP_MODULE');
+            const origins = module.origins.map((origin, sourceIndex) => {
+              exactKeys(origin, ['sourceIndex', 'sourceName', 'nameSpan', 'span', 'members', 'normalization']);
+              if (origin.sourceIndex !== sourceIndex || !Array.isArray(origin.sourceName) ||
+                  !origin.sourceName.length || origin.sourceName.some(n => typeof n !== 'string' || !n) ||
+                  !Array.isArray(origin.members) || !origin.members.length) refuse('OWNERSHIP_ORIGIN');
+              spanInSource(origin.span, row); spanInSource(origin.nameSpan, row);
+              if (origin.span.start.byteOffset > origin.nameSpan.start.byteOffset ||
+                  origin.span.stop.byteOffset < origin.nameSpan.stop.byteOffset ||
+                  origin.nameSpan.start.byteOffset === origin.nameSpan.stop.byteOffset)
+                refuse('OWNERSHIP_NAME_SPAN');
+              const tokens = [];
+              const startToken = row.tokenStarts.get(origin.nameSpan.start.byteOffset);
+              if (startToken === undefined) refuse('OWNERSHIP_TOKEN_ALIGNMENT');
+              for (let i = startToken; i < row.tokens.length &&
+                  row.tokens[i].span.stop.byteOffset <= origin.nameSpan.stop.byteOffset; i++)
+                tokens.push(row.tokens[i]);
+              if (!tokens.length || tokens[0].span.start.byteOffset !== origin.nameSpan.start.byteOffset ||
+                  tokens.at(-1).span.stop.byteOffset !== origin.nameSpan.stop.byteOffset ||
+                  tokens.some(p => !['identifier', 'symbol'].includes(p.token.kind)))
+                refuse('OWNERSHIP_TOKEN_ALIGNMENT');
+              const sourceOwnerId = hash(JSON.stringify([protocol, snapshot.sourceId, sourceIndex]));
+              const outputMembers = origin.members.map((member, memberIndex) => {
+                exactKeys(member, ['index', 'name', 'displayName', 'role']);
+                const identity = coreName(member.name);
+                if (member.index !== memberIndex || names.has(identity) || !roles.has(member.role) ||
+                    typeof member.displayName !== 'string' || !member.displayName.isWellFormed() ||
+                    member.displayName !== member.name.reduce((prefix, c) => prefix ? prefix + '.' + c[1] : c[1], ''))
+                  refuse('OWNERSHIP_MEMBER');
+                names.add(identity); members++;
+                return { ...member, ownerId: sourceOwnerId,
+                  id: hash(JSON.stringify([sourceOwnerId, memberIndex, member.role, member.name])) };
+              });
+              if (origin.normalization !== null) {
+                exactKeys(origin.normalization, ['workerName', 'span']);
+                const worker = coreName(origin.normalization.workerName);
+                spanInSource(origin.normalization.span, row);
+                if (origin.normalization.span.start.byteOffset < origin.span.start.byteOffset ||
+                    origin.normalization.span.stop.byteOffset > origin.span.stop.byteOffset ||
+                    !outputMembers.some(m => m.role === 'normalizedWorker' && coreName(m.name) === worker))
+                  refuse('OWNERSHIP_NORMALIZATION');
+              }
+              return { ...origin, id: sourceOwnerId, sourceId: snapshot.sourceId,
+                namePieceIds: tokens.map(p => p.id), members: outputMembers };
+            });
+            return { ...module, sourceId: snapshot.sourceId, sourceSha256: snapshot.sourceSha256,
+              profile: snapshot.profile, grammar: snapshot.grammar, origins };
+          });
+          if (members !== wire.sourceCoreDeclarations) refuse('OWNERSHIP_COVERAGE');
+          const admissions = decoder.decode(regularFile(admissionsFile, losslessLimits.responseBytes));
+          const ir = regularFile(irFile, losslessLimits.responseBytes);
+          pinnedTool(checkerExecutable, checkerSha256);
+          const checker = runIndependentChecker(checkerExecutable, admissions);
+          pinnedTool(checkerExecutable, checkerSha256);
+          const admissionsSha256 = hash(admissions), originalIrSha256 = hash(ir);
+          const id = hash(JSON.stringify([protocol, sha256, sourceClosureDigest,
+            admissionsSha256, originalIrSha256, rows.map(r => r.snapshot.sourceId)]));
+          const index = deepFreeze({ protocol, id, sourceClosureDigest, entry, grammar, assurance,
+            modules, sourceCoreDeclarations: members, logicalCoreDeclarations: wire.logicalCoreDeclarations,
+            partialNames: wire.partialNames, admissionsSha256, originalIrSha256,
+            checker: { ...checker, executableSha256: checkerSha256, accepted: true },
+            metrics: { elapsedMs: metrics.elapsedMs, maxRssKiB: metrics.maxRssKiB,
+              peakTreeRssKiB: metrics.peakTreeRssKiB, timeoutMs: metrics.timeoutMs },
+            authority: { readOnlyOwnership: true, referenceResolution: false,
+              semanticEquivalence: 'not-claimed', publication: false } });
+          indexes.set(index, { sourceIds: rows.map(r => r.snapshot.sourceId), admissions, ir });
+          return index;
+
+      });
+    },
+    assertCurrent(index, snapshots) {
+      const record = indexes.get(index);
+      if (!record) refuse('OWNERSHIP_INDEX');
+      const current = select(snapshots).map(r => r.snapshot.sourceId);
+      if (JSON.stringify(current) !== JSON.stringify(record.sourceIds)) refuse('OWNERSHIP_STALE');
+      return true;
+    },
+  });
+  ownershipTools.set(tool, {
+    lexicalTool, executable, sha256,
+    sameGraphs(left, right) {
+      const before = indexes.get(left), after = indexes.get(right);
+      return !!before && !!after && before.admissions === after.admissions && before.ir.equals(after.ir);
+    },
+  });
+  return tool;
+}
+
+
+/** Checked candidate conversion, with exact before/after graph correspondence.
+ * It never writes source files. Read candidate bytes explicitly for review.
+ */
+export function createCheckedSourceConverter({ ownershipTool }) {
+  const configuration = ownershipTools.get(ownershipTool);
+  if (!configuration) refuse('CONVERSION_OWNERSHIP_TOOL');
+  const { lexicalTool, executable, sha256 } = configuration;
+  const conversions = new WeakMap();
+  const protocol = 'psc1-source-conversion/1';
+  const commentPieces = snapshot => snapshot.pieces.filter(p =>
+    p.kind === 'lineComment' || p.kind === 'blockComment');
+  const semanticOwners = index => index.modules.map(module => ({
+    module: module.module, imports: module.imports,
+    origins: module.origins.map(origin => ({
+      sourceIndex: origin.sourceIndex, sourceName: origin.sourceName,
+      members: origin.members.map(member => ({
+        index: member.index, name: member.name, role: member.role,
+      })),
+      normalization: origin.normalization?.workerName ?? null,
+    })),
+  }));
+
+  function requireCorrespondence(before, after) {
+    if (!configuration.sameGraphs(before, after) ||
+        after.admissionsSha256 !== before.admissionsSha256 ||
+        after.originalIrSha256 !== before.originalIrSha256 ||
+        JSON.stringify(after.partialNames) !== JSON.stringify(before.partialNames) ||
+        JSON.stringify(semanticOwners(after)) !== JSON.stringify(semanticOwners(before)))
+      refuse('CONVERSION_CORRESPONDENCE');
+  }
+
+  // Parsed layout previews are not admitted indexes. Validate offsets with one
+  // scalar walk; final snapshots and admission are constructed only after comments.
+  function validateLayout(module, original, before, grammar) {
+    exactKeys(module, ['module', 'text', 'declarations']);
+    if (module.module !== original.module || typeof module.text !== 'string' ||
+        !module.text.isWellFormed() || !Array.isArray(module.declarations) ||
+        module.declarations.length !== before.origins.length) refuse('CONVERSION_MODULE');
+    const bytes = bytesCopy(Buffer.from(module.text));
+    const wanted = new Set();
+    let previous = 0;
+    for (let i = 0; i < module.declarations.length; i++) {
+      const declaration = module.declarations[i];
+      exactKeys(declaration, ['sourceName', 'span']);
+      validSpan(declaration.span, bytes);
+      if (JSON.stringify(declaration.sourceName) !== JSON.stringify(before.origins[i].sourceName) ||
+          declaration.span.start.byteOffset < previous) refuse('CONVERSION_LAYOUT');
+      previous = declaration.span.stop.byteOffset;
+      wanted.add(declaration.span.start.byteOffset); wanted.add(declaration.span.stop.byteOffset);
+    }
+    let position = { byteOffset: 0, line: 1, column: 1 };
+    const positions = new Map([[0, position]]);
+    for (const char of module.text) {
+      position = advance(position, char, grammar);
+      if (wanted.has(position.byteOffset)) positions.set(position.byteOffset, position);
+    }
+    for (const declaration of module.declarations)
+      for (const p of [declaration.span.start, declaration.span.stop])
+        if (!positions.has(p.byteOffset) || !positionEqual(p, positions.get(p.byteOffset)))
+          refuse('CONVERSION_LAYOUT');
+    return { bytes, origins: module.declarations };
+  }
+
+  function retainComments(original, bytes, before, after, policy) {
+    const comments = commentPieces(original);
+    if (!comments.length) return bytes;
+    const sourceOrigins = before.origins, targetOrigins = after.origins;
+    const chunks = new Map();
+    const put = (offset, comment) => chunks.set(offset, (chunks.get(offset) ?? '') + comment.raw + '\n');
+    for (const comment of comments) {
+      const inside = sourceOrigins.find(origin =>
+        origin.span.start.byteOffset <= comment.span.start.byteOffset &&
+        comment.span.stop.byteOffset <= origin.span.stop.byteOffset);
+      if (inside) {
+        if (policy !== 'owner-notes') refuse('CONVERSION_INNER_COMMENT');
+        const next = targetOrigins[inside.sourceIndex];
+        if (!next) refuse('CONVERSION_COMMENT_OWNER');
+        put(next.span.start.byteOffset, comment);
+      } else if (!sourceOrigins.length || comment.span.stop.byteOffset <=
+          original.pieces.find(p => p.kind === 'token').span.start.byteOffset) {
+        put(0, comment);
+      } else {
+        const following = sourceOrigins.find(origin =>
+          origin.span.start.byteOffset >= comment.span.stop.byteOffset);
+        const next = following ? targetOrigins[following.sourceIndex] : null;
+        put(next ? next.span.start.byteOffset : bytes.length, comment);
+      }
+    }
+    const output = [];
+    let cursor = 0;
+    for (const [offset, raw] of [...chunks].sort((a, b) => a[0] - b[0])) {
+      output.push(bytes.subarray(cursor, offset));
+      // Newlines around comments prevent token concatenation or line swallowing.
+      if (offset > 0 && bytes[offset - 1] !== 10) output.push(Buffer.from('\n'));
+      output.push(Buffer.from(raw));
+      cursor = offset;
+    }
+    output.push(bytes.subarray(cursor));
+    return Buffer.concat(output);
+  }
+
+  return Object.freeze({
+    convert({ index, snapshots, targetGrammar, commentPolicy = 'preserve' }) {
+      const started = Date.now();
+      ownershipTool.assertCurrent(index, snapshots);
+      if (!['lean', 'ps'].includes(targetGrammar) || !['preserve', 'owner-notes'].includes(commentPolicy))
+        refuse('CONVERSION_REQUEST');
+      const sources = snapshots.map(snapshot => ({
+        module: snapshot.module, kind: snapshot.grammar,
+        text: decoder.decode(lexicalTool.reconstruct(snapshot)),
+      }));
+      const sourceClosureDigest = compilerSourceClosureDigest(sources);
+      const requestId = hash(JSON.stringify([protocol, sourceClosureDigest,
+        index.entry, index.assurance, targetGrammar, commentPolicy]));
+      const encoded = JSON.stringify(['psc1-compiler-service/1', requestId,
+        sourceClosureDigest, index.grammar, index.assurance, index.entry,
+        sources.map(row => [row.module, row.text])]);
+      if (Buffer.byteLength(encoded) > losslessLimits.responseBytes) refuse('CONVERSION_REQUEST_LIMIT');
+      const candidate = runSourceHelper({ executable, sha256 }, 'to-' + targetGrammar, encoded, ({ wire }) => {
         if (wire?.status === 'refused') {
           exactKeys(wire, ['protocol', 'status', 'requestId', 'sourceClosureDigest', 'error']);
           if (wire.protocol !== protocol || wire.requestId !== requestId ||
-              wire.sourceClosureDigest !== sourceClosureDigest) refuse('OWNERSHIP_REFUSAL_IDENTITY');
-          throw new Error('PSC1_LOSSLESS_OWNERSHIP_REFUSED', { cause: wire.error });
+              wire.sourceClosureDigest !== sourceClosureDigest) refuse('CONVERSION_IDENTITY');
+          throw new Error('PSC1_LOSSLESS_CONVERSION_REFUSED', { cause: wire.error });
         }
         exactKeys(wire, ['protocol', 'status', 'requestId', 'sourceClosureDigest',
-          'grammar', 'assurance', 'entry', 'modules', 'sourceCoreDeclarations',
-          'logicalCoreDeclarations', 'partialNames']);
-        if (wire.protocol !== protocol || wire.status !== 'prepared' || wire.requestId !== requestId ||
-            wire.sourceClosureDigest !== sourceClosureDigest || wire.grammar !== grammar ||
-            wire.assurance !== assurance || wire.entry !== entry ||
-            !Array.isArray(wire.modules) || wire.modules.length !== rows.length ||
-            !Array.isArray(wire.partialNames) || wire.partialNames.some(n => typeof n !== 'string') ||
-            !Number.isSafeInteger(wire.sourceCoreDeclarations) || wire.sourceCoreDeclarations < 0 ||
-            !Number.isSafeInteger(wire.logicalCoreDeclarations) || wire.logicalCoreDeclarations < 0)
-          refuse('OWNERSHIP_RESPONSE');
-        const names = new Set();
-        let members = 0;
-        const modules = wire.modules.map((module, moduleIndex) => {
-          const row = rows[moduleIndex], snapshot = row.snapshot;
-          exactKeys(module, ['module', 'byteLength', 'imports', 'sourceDeclarations', 'origins']);
-          if (module.module !== row.module || module.byteLength !== row.bytes.length ||
-              !Array.isArray(module.imports) || module.imports.some(n => typeof n !== 'string') ||
-              !Array.isArray(module.origins) || module.origins.length !== module.sourceDeclarations)
-            refuse('OWNERSHIP_MODULE');
-          const origins = module.origins.map((origin, sourceIndex) => {
-            exactKeys(origin, ['sourceIndex', 'sourceName', 'nameSpan', 'span', 'members', 'normalization']);
-            if (origin.sourceIndex !== sourceIndex || !Array.isArray(origin.sourceName) ||
-                !origin.sourceName.length || origin.sourceName.some(n => typeof n !== 'string' || !n) ||
-                !Array.isArray(origin.members) || !origin.members.length) refuse('OWNERSHIP_ORIGIN');
-            spanInSource(origin.span, row); spanInSource(origin.nameSpan, row);
-            if (origin.span.start.byteOffset > origin.nameSpan.start.byteOffset ||
-                origin.span.stop.byteOffset < origin.nameSpan.stop.byteOffset ||
-                origin.nameSpan.start.byteOffset === origin.nameSpan.stop.byteOffset)
-              refuse('OWNERSHIP_NAME_SPAN');
-            const tokens = [];
-            const startToken = row.tokenStarts.get(origin.nameSpan.start.byteOffset);
-            if (startToken === undefined) refuse('OWNERSHIP_TOKEN_ALIGNMENT');
-            for (let i = startToken; i < row.tokens.length &&
-                row.tokens[i].span.stop.byteOffset <= origin.nameSpan.stop.byteOffset; i++)
-              tokens.push(row.tokens[i]);
-            if (!tokens.length || tokens[0].span.start.byteOffset !== origin.nameSpan.start.byteOffset ||
-                tokens.at(-1).span.stop.byteOffset !== origin.nameSpan.stop.byteOffset ||
-                tokens.some(p => !['identifier', 'symbol'].includes(p.token.kind)))
-              refuse('OWNERSHIP_TOKEN_ALIGNMENT');
-            const sourceOwnerId = hash(JSON.stringify([protocol, snapshot.sourceId, sourceIndex]));
-            const outputMembers = origin.members.map((member, memberIndex) => {
-              exactKeys(member, ['index', 'name', 'displayName', 'role']);
-              const identity = coreName(member.name);
-              if (member.index !== memberIndex || names.has(identity) || !roles.has(member.role) ||
-                  typeof member.displayName !== 'string' || !member.displayName.isWellFormed() ||
-                  member.displayName !== member.name.reduce((prefix, c) => prefix ? prefix + '.' + c[1] : c[1], ''))
-                refuse('OWNERSHIP_MEMBER');
-              names.add(identity); members++;
-              return { ...member, ownerId: sourceOwnerId,
-                id: hash(JSON.stringify([sourceOwnerId, memberIndex, member.role, member.name])) };
-            });
-            if (origin.normalization !== null) {
-              exactKeys(origin.normalization, ['workerName', 'span']);
-              const worker = coreName(origin.normalization.workerName);
-              spanInSource(origin.normalization.span, row);
-              if (origin.normalization.span.start.byteOffset < origin.span.start.byteOffset ||
-                  origin.normalization.span.stop.byteOffset > origin.span.stop.byteOffset ||
-                  !outputMembers.some(m => m.role === 'normalizedWorker' && coreName(m.name) === worker))
-                refuse('OWNERSHIP_NORMALIZATION');
-            }
-            return { ...origin, id: sourceOwnerId, sourceId: snapshot.sourceId,
-              namePieceIds: tokens.map(p => p.id), members: outputMembers };
-          });
-          return { ...module, sourceId: snapshot.sourceId, sourceSha256: snapshot.sourceSha256,
-            profile: snapshot.profile, grammar: snapshot.grammar, origins };
-        });
-        if (members !== wire.sourceCoreDeclarations) refuse('OWNERSHIP_COVERAGE');
-        const admissions = decoder.decode(regularFile(admissionsFile, losslessLimits.responseBytes));
-        const ir = regularFile(irFile, losslessLimits.responseBytes);
-        pinnedTool(checkerExecutable, checkerSha256);
-        const checker = runIndependentChecker(checkerExecutable, admissions);
-        pinnedTool(checkerExecutable, checkerSha256);
-        const admissionsSha256 = hash(admissions), originalIrSha256 = hash(ir);
-        const id = hash(JSON.stringify([protocol, sha256, sourceClosureDigest,
-          admissionsSha256, originalIrSha256, rows.map(r => r.snapshot.sourceId)]));
-        const index = deepFreeze({ protocol, id, sourceClosureDigest, entry, grammar, assurance,
-          modules, sourceCoreDeclarations: members, logicalCoreDeclarations: wire.logicalCoreDeclarations,
-          partialNames: wire.partialNames, admissionsSha256, originalIrSha256,
-          checker: { ...checker, executableSha256: checkerSha256, accepted: true },
-          metrics: { elapsedMs: metrics.elapsedMs, maxRssKiB: metrics.maxRssKiB,
-            peakTreeRssKiB: metrics.peakTreeRssKiB, timeoutMs: metrics.timeoutMs },
-          authority: { readOnlyOwnership: true, referenceResolution: false,
-            semanticEquivalence: 'not-claimed', publication: false } });
-        indexes.set(index, rows.map(r => r.snapshot.sourceId));
-        return index;
-      } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+          'sourceGrammar', 'targetGrammar', 'modules']);
+        if (wire.protocol !== protocol || wire.status !== 'candidate' || wire.requestId !== requestId ||
+            wire.sourceClosureDigest !== sourceClosureDigest || wire.sourceGrammar !== index.grammar ||
+            wire.targetGrammar !== targetGrammar || !Array.isArray(wire.modules) ||
+            wire.modules.length !== snapshots.length) refuse('CONVERSION_RESPONSE');
+        return wire.modules.map((module, i) =>
+          validateLayout(module, snapshots[i], index.modules[i], targetGrammar));
+      });
+      const retained = candidate.map((module, i) => lexicalTool.capture({
+        module: snapshots[i].module, grammar: targetGrammar,
+        bytes: retainComments(snapshots[i], module.bytes, index.modules[i], module, commentPolicy),
+      }));
+      // Both endpoints are independently checked. The unaccepted layout preview
+      // needs neither a second token tape nor an extra elaboration/checker run.
+      const checked = ownershipTool.analyze({
+        snapshots: retained, entry: index.entry, assurance: index.assurance,
+      });
+      requireCorrespondence(index, checked);
+      for (let i = 0; i < snapshots.length; i++) {
+        const original = commentPieces(snapshots[i]).map(piece => [piece.kind, piece.raw]);
+        const converted = commentPieces(retained[i]).map(piece => [piece.kind, piece.raw]);
+        if (JSON.stringify(original) !== JSON.stringify(converted)) refuse('CONVERSION_COMMENTS');
+      }
+      const report = deepFreeze({
+        protocol, id: hash(JSON.stringify([protocol, index.id, checked.id, commentPolicy])),
+        sourceIndexId: index.id, candidateIndexId: checked.id, sourceGrammar: index.grammar,
+        targetGrammar, entry: index.entry, assurance: index.assurance, commentPolicy,
+        admissionsSha256: checked.admissionsSha256, originalIrSha256: checked.originalIrSha256,
+        elapsedMs: Date.now() - started,
+        originMap: index.modules.map((module, i) => ({
+          module: module.module, from: module.sourceId, to: checked.modules[i].sourceId,
+          declarations: module.origins.map((origin, j) => ({
+            sourceIndex: origin.sourceIndex, before: origin.span,
+            after: checked.modules[i].origins[j].span,
+            nameBefore: origin.nameSpan, nameAfter: checked.modules[i].origins[j].nameSpan,
+            members: origin.members.map(m => ({ name: m.name, role: m.role })),
+          })),
+        })),
+        authority: { candidateOnly: true, sourceFilesWritten: false, publication: false,
+          relation: 'byte-equal canonical admission and original strict IR; identical member ownership',
+          formalSourcePreservation: false, rename: false },
+      });
+      conversions.set(report, { original: index, snapshots: retained, checked });
+      return report;
     },
-    assertCurrent(index, snapshots) {
-      const identities = indexes.get(index);
-      if (!identities) refuse('OWNERSHIP_INDEX');
-      const current = select(snapshots).map(r => r.snapshot.sourceId);
-      if (JSON.stringify(current) !== JSON.stringify(identities)) refuse('OWNERSHIP_STALE');
-      return true;
+    readCandidate(report, module) {
+      const record = conversions.get(report);
+      if (!record) refuse('CONVERSION_REPORT');
+      const source = record.snapshots.find(snapshot => snapshot.module === module);
+      if (!source) refuse('CONVERSION_MODULE');
+      return lexicalTool.reconstruct(source);
+    },
+    candidateIndex(report) {
+      const record = conversions.get(report);
+      if (!record) refuse('CONVERSION_REPORT');
+      return record.checked;
+    },
+    candidateSnapshots(report) {
+      const record = conversions.get(report);
+      if (!record) refuse('CONVERSION_REPORT');
+      return Object.freeze([...record.snapshots]);
+    },
+    assertCurrent(report, snapshots) {
+      const record = conversions.get(report);
+      if (!record) refuse('CONVERSION_REPORT');
+      return ownershipTool.assertCurrent(record.original, snapshots);
     },
   });
 }

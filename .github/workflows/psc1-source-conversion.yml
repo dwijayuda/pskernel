@@ -1,0 +1,116 @@
+name: PSC1 checked source conversion qualification
+on:
+  workflow_call:
+  push:
+    branches: [feat/psc1-checked-source-conversion-20261025]
+    paths:
+      - psc1/**/*.lean
+      - psc1/host-tools/**/*.mjs
+      - psc1/host-tools/package-lock.json
+      - psc1/scripts/**/*.mjs
+      - psc1/scripts/bounded-process.py
+      - psc1/lakefile.lean
+      - psc1/lean-toolchain
+      - .github/workflows/psc1-source-conversion.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-source-conversion-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ownership:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PSC1_CONVERSION_SCOPE_GUARD: ${{ github.event_name == 'push' && github.ref_name == 'feat/psc1-checked-source-conversion-20261025' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-source-tools-native-v1-ubuntu2404-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install locked native publication dependencies
+        run: npm ci --prefix psc1/host-tools --ignore-scripts
+      - name: Compile production provenance and independent checker
+        working-directory: psc1
+        run: |
+          lean --version
+          lake build psc1_source_ownership psc1_lossless_source psc1_independent_checker psc1_source_census_probe psc1 psc1_lean_printer_scope_tests psc1_translation_tests
+      - uses: actions/cache/save@v4
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: psc1-source-tools-native-v1-ubuntu2404-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Check layout scopes against actual admission and official Lean source parsing
+        working-directory: psc1
+        run: |
+          .lake/build/bin/psc1_lean_printer_scope_tests
+          for source in dist/source-conversion/layout/*.lean; do
+            lake env lean "$source"
+          done
+          .lake/build/bin/psc1_translation_tests
+      - name: Census both real compiler source grammars before long workloads
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { readOwnedCompilerSources } from './host-tools/compiler-source-inputs.mjs';
+          import { compilerSourceClosureDigest } from './host-tools/compiler-host-protocol.mjs';
+          import { boundedRun } from './host-tools/generated-target-tools.mjs';
+          const rows = readOwnedCompilerSources('Ps.CompilerUnified.Service');
+          fs.mkdirSync('dist/source-conversion', { recursive: true });
+          for (const grammar of ['lean', 'ps']) {
+            const output = path.resolve('dist/source-conversion/census-' + grammar + '.json');
+            const result = boundedRun('prlimit', ['--as=4294967296', '--stack=8388608', '--',
+              path.resolve('.lake/build/bin/psc1_source_census_probe'), '--grammar', grammar,
+              '--out', output, '--modules', ...rows.flatMap(row => [row.module, path.resolve(row.path)])], {
+              timeoutMs: 240000, timeoutPolicy: 'standard-240s',
+              env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0', LEAN_STACK_SIZE_KB: '8192' },
+            });
+            assert.equal(result.status, 0, result.stderr);
+            const records = JSON.parse(fs.readFileSync(output, 'utf8')).records;
+            const failures = records.filter(row => row.parse !== 'accepted' || row.elaboration !== 'accepted');
+            assert.deepEqual(failures, [], 'actual source census: ' + JSON.stringify(failures));
+          }
+          console.log('PSC1_CONVERSION_SOURCE_CENSUS:', JSON.stringify({
+            modules: rows.length,
+            sourceClosureDigest: compilerSourceClosureDigest(rows.map(row => ({ ...row, kind: 'lean' }))),
+            grammars: ['lean', 'ps'], status: 'passed',
+          }));
+          
+          JS
+      - name: Check candidate conversion host syntax
+        working-directory: psc1
+        run: |
+          node --check host-tools/source-refactoring.mjs
+          node --check scripts/refactor-source.mjs
+      - name: Check conversion candidates, comments, exact correspondence and CLI refusals
+        working-directory: psc1
+        run: node scripts/source-conversion-tests.mjs --focused
+      - name: Convert real applications and complete compiler source in both directions
+        working-directory: psc1
+        run: node scripts/source-conversion-tests.mjs --full-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-source-conversion-${{ github.sha }}
+          path: psc1/dist/source-conversion/
+          if-no-files-found: warn
+          retention-days: 90

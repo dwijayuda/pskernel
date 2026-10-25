@@ -1,0 +1,280 @@
+{
+  "schema": "psc1-source-ownership-qualification/1",
+  "date": "2026-10-25",
+  "milestone": "R2a read-only declaration ownership over opaque exact-byte source snapshots",
+  "implementationCommit": "a77ec1a8153d94ff8586a3dfa37df521e75df501",
+  "baselineCommit": "b63d09c8f79f3886565c788c478cb9937057080d",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/184",
+  "testedMerge": "2bccf63721b76b39b510a9697b038928eb9d2b1d",
+  "testedTree": "e537829b0fea44640f70e0d057791f2ef31d6dac",
+  "source": {
+    "portableModules": 121,
+    "portableClosureSha256": "60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a",
+    "portableCompilerChanged": false,
+    "nativeAdapter": "psc1/host/src/Ps/Host/SourceOwnership.lean",
+    "hostApi": "createSourceOwnershipTool"
+  },
+  "scope": {
+    "singleActualElaborationPerModule": true,
+    "existingProductionPreparation": true,
+    "strictOriginalIr": true,
+    "independentOfficialAdmission": true,
+    "taggedCoreNames": true,
+    "completeActualBatchCoverage": true,
+    "sourceAndNameSpans": true,
+    "nameTokenPieceIds": true,
+    "normalizationOwnership": true,
+    "readOnly": true,
+    "referenceResolution": false,
+    "rename": false,
+    "publication": false
+  },
+  "limits": {
+    "sourceBytes": 1048576,
+    "modules": 256,
+    "requestAndEachOutputBytes": 33554432,
+    "compilerRequestMs": 240000,
+    "checkerMs": 120000,
+    "helperAddressSpaceBytes": 4294967296,
+    "helperStackBytes": 8388608,
+    "leanTaskWorkers": 0,
+    "leanMainUseThread": false
+  },
+  "focused": {
+    "runId": 40200895349,
+    "jobId": 121191660829,
+    "status": "passed",
+    "productionPathDigestComparisons": 10,
+    "negativeCases": 42,
+    "records": 12,
+    "compiler": [
+      {
+        "grammar": "lean",
+        "modules": 121,
+        "sourceCoreMembers": 4676,
+        "helperWallMs": 59974,
+        "maxRssKiB": 339156,
+        "peakTreeRssKiB": 331308
+      },
+      {
+        "grammar": "ps",
+        "modules": 121,
+        "sourceCoreMembers": 4676,
+        "helperWallMs": 62098,
+        "maxRssKiB": 398296,
+        "peakTreeRssKiB": 398168
+      }
+    ],
+    "timingScope": "native helper only; excludes host validation, source capture and separate checker",
+    "canonicalAdmissionAndOriginalIrDigestParityAcrossGrammars": true,
+    "actualIndependentRejection": true,
+    "originalLossless": {
+      "captures": 359,
+      "negativeCases": 49,
+      "helperMaximumWallMs": 358,
+      "helperMaximumRssKiB": 159808
+    },
+    "artifact": {
+      "id": 12602650184,
+      "zipBytes": 31627,
+      "zipSha256": "ab74030394a8f98fabb618deadafede5940f68b86698964095946ab3ce6e14ec",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40200895349/artifacts/12602650184",
+      "receipt": "source-ownership/qualification.json",
+      "helperIdentityFields": [
+        "nativeHelperSha256",
+        "checkerSha256"
+      ],
+      "note": "uploaded ownership and lexical receipts retain exact tool identities and per-source measurements"
+    }
+  },
+  "ordinaryDevelopment": {
+    "runId": 40200961302,
+    "status": "passed",
+    "qualified": 37,
+    "blocked": 0,
+    "releaseReady": true,
+    "jobs": [
+      {
+        "id": 121191850264,
+        "name": "static",
+        "result": "success"
+      },
+      {
+        "id": 121192031733,
+        "name": "native / native",
+        "result": "success"
+      },
+      {
+        "id": 121192031754,
+        "name": "focused / php-application",
+        "result": "success"
+      },
+      {
+        "id": 121192031761,
+        "name": "lossless / lossless",
+        "result": "success"
+      },
+      {
+        "id": 121192031762,
+        "name": "focused / focused (applications)",
+        "result": "success"
+      },
+      {
+        "id": 121192031803,
+        "name": "focused / focused (core)",
+        "result": "success"
+      },
+      {
+        "id": 121192032863,
+        "name": "benchmark",
+        "result": "skipped"
+      },
+      {
+        "id": 121194079516,
+        "name": "g1 / host-session-boundary",
+        "result": "success"
+      },
+      {
+        "id": 121194079558,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121194079562,
+        "name": "g1 / generated-js",
+        "result": "success"
+      },
+      {
+        "id": 121194079564,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "result": "success"
+      },
+      {
+        "id": 121194079568,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121195044117,
+        "name": "full / linux-scoped",
+        "result": "success"
+      },
+      {
+        "id": 121199904342,
+        "name": "gate",
+        "result": "success"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 12603001345,
+        "name": "psc1-scoped-correctness-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 121306481,
+        "zipSha256": "cd06d0142ae9ba37173110621fbd48b8d110307e67e132eeeac64dd46101610f"
+      },
+      {
+        "id": 12602350589,
+        "name": "psc1-practical-compiler-m-applications-2bccf63721b76b39b510a9697b038928eb9d2b1d-attempt-1",
+        "zipBytes": 1750257,
+        "zipSha256": "a224589f861a42eab9d30993365bbda9ee5153e3bfd45a84b8c8d239494dbc91"
+      },
+      {
+        "id": 12602341066,
+        "name": "psc1-generated-session-boundary-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 237654,
+        "zipSha256": "3475633130c6a51862ec413c5353ae21e38ba101afdb58fcb287e9d5ae11f889"
+      },
+      {
+        "id": 12602241330,
+        "name": "psc1-generated-compiler-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 5589908,
+        "zipSha256": "b87c48959203559abc7c56330666f43af799ad3e08f2ab5b46767c195274dbb5"
+      },
+      {
+        "id": 12602231110,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 2473000,
+        "zipSha256": "98deb3ee7e7736266e6e6372ac1b7116944993c0c3aa0f00a663794595a1d71b"
+      },
+      {
+        "id": 12602181261,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 2757178,
+        "zipSha256": "1f267e3ea25c9bfadb44922c4f57b788de84b026c5a77704ec18d218b95dd78d"
+      },
+      {
+        "id": 12602055704,
+        "name": "psc1-architecture-native-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 319166,
+        "zipSha256": "9b6bdfe5c733559999e3ec23cf217c6fbf3fe0c557c7df24458f2783015e38a4"
+      },
+      {
+        "id": 12602048482,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 1986934,
+        "zipSha256": "6e3f70bd860736dcfc82fd20b3f8fab2ad322c3729d42edbfeb60ae0a5a5efec"
+      },
+      {
+        "id": 12601943437,
+        "name": "psc1-lossless-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 31630,
+        "zipSha256": "288e366807886262ea37a2c9df172282f6fad5c5e5a195a241391c9fea944c5d"
+      },
+      {
+        "id": 12601807482,
+        "name": "psc1-development-2bccf63721b76b39b510a9697b038928eb9d2b1d",
+        "zipBytes": 2516,
+        "zipSha256": "284693443c58907165ea5e53f08256e918315c0ed4630d0da7b5abaaeda224be"
+      },
+      {
+        "id": 12601499765,
+        "name": "psc1-php-applications-2bccf63721b76b39b510a9697b038928eb9d2b1d-attempt-1",
+        "zipBytes": 360288,
+        "zipSha256": "6af6390627adaacfa35f8809af7f545ae1bde542112801bed5824311701b2450"
+      },
+      {
+        "id": 12601453616,
+        "name": "psc1-practical-compiler-m-core-2bccf63721b76b39b510a9697b038928eb9d2b1d-attempt-1",
+        "zipBytes": 3019703,
+        "zipSha256": "e2e194d17bc6cb1522fd2e45ed13ffaf7b615c51512b9689db98ef187e3db996"
+      }
+    ]
+  },
+  "preserved": {
+    "unifiedSourceG1": {
+      "runId": 40196021448,
+      "sourceIdentity": "same 121-module closure; qualification not relabeled"
+    },
+    "frozenPackagedCompiler": {
+      "modules": 120,
+      "commit": "daa735017e34ee94da79d747c363237b4adbc4ef",
+      "closureSha256": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "changed": false,
+      "newGenerationQualificationClaimed": false
+    },
+    "officialLean": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "trustLevel": 0,
+      "heartbeats": 2000000,
+      "recursion": 20000,
+      "checkerMs": 120000
+    },
+    "slimInstalledInputs": "unchanged; developer source tools are not included",
+    "backendEmitters": "all seven unchanged"
+  },
+  "remaining": [
+    "source-bound binder/reference tracing at actual elaboration sites",
+    "capture-avoiding rename with explicit Core/API correspondence",
+    "installed/refactoring-editor transactions",
+    "mixed-grammar ownership tooling"
+  ],
+  "notClaimed": [
+    "formal source preservation",
+    "behavioral equivalence",
+    "new G2/G3 or fixed points",
+    "new npm source-tool package",
+    "merge",
+    "publication"
+  ]
+}

@@ -2,7 +2,7 @@
 
 Status: R1 lexical capture and staged byte edits qualified in Linux runs 40191237137 and 40191245319. No semantics-preserving automatic refactoring qualification is claimed. The original architectural inspection used `da880d864ca5f9e35729255fd7e4f8a17953cd39`; the additive R1 implementation follows PR #181 HEAD `d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
 
-[Lossless capture contract and API](PSC1_LOSSLESS_SOURCE.md). R1 reused the original lexer. The subsequent [character-diagnostic correction](PSC1_CHARACTER_DIAGNOSTICS.md) changes one malformed-literal span expression with scoped formal correspondence and its own source qualification. The semantic AST remains unchanged. Resolved identities and independent before/after admission remain R2 work.
+[Lossless capture contract and API](PSC1_LOSSLESS_SOURCE.md). R1 reused the original lexer. The subsequent [character-diagnostic correction](PSC1_CHARACTER_DIAGNOSTICS.md) changes one malformed-literal span expression with scoped formal correspondence and its own source qualification. The semantic AST remains unchanged. Actual declaration ownership and independent admission are implemented by [R2a](PSC1_SOURCE_OWNERSHIP.md); complete local binder/reference identities remain R2b work. [R3 conversion](PSC1_CHECKED_SOURCE_CONVERSION.md) requires literal admitted-graph/strict-IR bytes and member ownership before returning candidates.
 
 ## Current source evidence
 
@@ -42,7 +42,7 @@ Use different acceptance relations for different edits:
 
 Exact raw graph-byte equality is a useful strong gate when expected, but may reject harmless generated-name changes. Do not weaken equality silently; specify and test a canonical identity correspondence. Definitional equality does not establish foreign effect equivalence, and successful reparse does not establish either.
 
-## Next bounded step: R2a declaration ownership
+## Qualified R2a declaration ownership
 
 Reuse `psCompilerPreparationStepParsedWithOrigins` and
 `psElabModuleWithOrigins`. They already return `PsElabBatchOrigin` and its
@@ -68,7 +68,7 @@ A later R2b must record local binder/reference origins at actual elaboration
 resolution points before any rename. `PsLocalContext.nextId` allocates local IDs
 within contexts; a raw local ID is not a globally stable source binder identity.
 Declaration ownership alone does not identify all references or establish
-capture avoidance. R2a/R2b are pending, not implemented by the diagnostic fix.
+capture avoidance. R2a is qualified separately by focused run 40200895349 and ordinary run 40200961302 (37/37 finite criteria); the [receipt](PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json) owns exact identities and boundaries. R2b remains pending. The diagnostic fix itself implements neither.
 
 ## Milestones
 
@@ -76,6 +76,6 @@ R1 (qualified; see the lossless capture receipt): capture source IDs/digests and
 
 R2: resolved binder/declaration side tables and one binding-aware rename. Test shadowing, namespaces, qualified/root names, imported private ownership, multiple modules and capture refusal. Independent admission and public API correspondence mandatory.
 
-R3: checked cross-grammar conversion command with source-origin map and graph comparison. Reuse shared printers and their fail-closed unsupported-source errors. Include all selected Practical Core forms and ordinary partial helpers; preserve exact checked logical/runtime pairing.
+R3 (qualified finite conversion; see the [receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json)): checked cross-grammar conversion command with source-origin map and exact private graph-byte comparison. Reuse shared printers and their fail-closed unsupported-source errors. Include all selected Practical Core forms and ordinary partial helpers; preserve exact checked logical/runtime pairing.
 
 R4: explicitly justified simplification passes with obligations. Keep unsupported effectful, partial or foreign transformations as proposed edits until behavioral evidence exists. Do not market this as verified automatic code improvement based only on parser or runtime tests.

@@ -1,4 +1,5 @@
 import Ps.Syntax.Translate
+import Ps.Compiler.Api
 
 def psTranslationLeanFixture : String :=
   "import Demo.Core\n\n" ++
@@ -96,15 +97,14 @@ def psTestPartialDefinitionTranslationRoundTrip : Bool :=
 
 def psTestComplexApplicationTranslationRoundTrip : Bool :=
   let leanSource :=
-    "def effectDo (state : Nat) : Nat := do\n" ++
-    "  let next : Nat <- compilerPure state;\n" ++
+    "def effectDo (state : Nat) : Id Nat := do\n" ++
+    "  let next : Nat <- pure state;\n" ++
     "  return next"
   match
       psTranslateLeanToProofScript leanSource,
       psCanonicalizeLeanSource leanSource with
   | Except.ok proofScript, Except.ok canonicalLean =>
-      proofScript.contains "compilerBind("
-        && proofScript.contains "fun "
+      proofScript.contains "do {"
         && match psTranslateProofScriptToLean proofScript with
            | Except.error _ => false
            | Except.ok leanAgain =>
@@ -140,17 +140,20 @@ def psTestProofScriptNestedBinderTypes : Bool :=
         | .error _ => false
         | .ok again => again == canonical
 
+-- The selected grammar now parses do. Preserve the same non-effect negative
+-- at its actual semantic boundary, rather than requiring obsolete parse refusal.
 def psTestProofScriptDoUnsupported : Bool :=
-  match psParseProofScriptSource
-      "def unsupported(state : Nat) : Nat := do { return state }\n" with
-  | Except.error _ => true
-  | Except.ok _ => false
+  match psCompilerElaborateSource .proofScript
+      "def unsupported(state: Nat) : Nat := do { return state }\n" with
+  | .error (.elaboration .doUnsupportedEffect) => true
+  | _ => false
 
+-- Explicit higher-order calls remain ordinary calls; do is no longer a
+-- parser rewrite into these unbound historical demonstration names.
 def psTestExplicitCompilerEffectCallsTranslation : Bool :=
   let leanSource :=
-    "def effectDo (state : Nat) : Nat := do\n" ++
-    "  let next : Nat <- compilerPure state;\n" ++
-    "  return next"
+    "def effectDo (state : Nat) : Nat := " ++
+    "compilerBind (compilerPure state) (fun (next : Nat) => compilerPure next)"
   let proofScriptSource :=
     "def effectDo(state : Nat) : Nat := " ++
     "compilerBind(compilerPure(state), (fun (next : Nat) => compilerPure(next)))\n"

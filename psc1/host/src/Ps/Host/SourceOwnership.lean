@@ -106,3 +106,28 @@ def psOwnershipPrepare (request : Request) (captured : Captured) :
   let _ ← (psStrictValidateModule semantic.raw).mapError
     (fun _ => psOwnershipError "" "strict-ir" "refused")
   return semantic
+
+
+/-- Conversion reuses the existing frontend/printer. Admission is a separate
+before/after host obligation; this function grants no editing authority. -/
+def psOwnershipConvert (request : Request) (target : PsCompilerSourceKind)
+    (grammar : String) : Except Lean.Json Lean.Json := do
+  let mut modules : Array Lean.Json := #[]
+  for source in request.sources do
+    let text ← (psCompilerTranslateSource request.kind target source.text).mapError
+      (fun _ => psOwnershipError source.moduleName "translation" "unsupported-or-invalid-source")
+    if text.utf8ByteSize > 1048576 then
+      throw (psOwnershipError source.moduleName "translation" "source-limit")
+    let parsed ← (psCompilerParseSource target text).mapError
+      (fun _ => psOwnershipError source.moduleName "translation" "printed-source-parse-refused")
+    let declarations := parsed.declarations.map (fun declaration =>
+      let origin := psElabOriginSource declaration
+      Lean.Json.mkObj [("sourceName", Lean.toJson origin.1.segments),
+        ("span", psOwnershipSpan origin.2)])
+    modules := modules.push (Lean.Json.mkObj [("module", .str source.moduleName),
+      ("text", .str text), ("declarations", Lean.toJson declarations)])
+  return Lean.Json.mkObj [
+    ("protocol", .str "psc1-source-conversion/1"), ("status", .str "candidate"),
+    ("requestId", .str request.requestId), ("sourceClosureDigest", .str request.sourceClosureDigest),
+    ("sourceGrammar", .str request.grammar), ("targetGrammar", .str grammar),
+    ("modules", .arr modules)]

@@ -200,18 +200,24 @@ def psPrintLeanMapDeclarations
           | Except.ok printedTail =>
               Except.ok (List.cons printedHead printedTail)
 
-def psPrintLeanTermWithFuel
+-- Layout belongs to the enclosing alternative, even through lambdas/lets/ifs.
+-- Keep explicit grouping at low-precedence embedding boundaries.
+def psPrintLeanTermAtWithFuel
     (fuel : Nat) :
-    PsSyntaxTerm -> Except PsSourcePrintError String :=
+    String -> PsSyntaxTerm -> Except PsSourcePrintError String :=
   match fuel with
   | 0 =>
-      fun (_term : PsSyntaxTerm) =>
+      fun (_indent : String) (_term : PsSyntaxTerm) =>
         Except.error PsSourcePrintError.fuelExhausted
   | remaining + 1 =>
-      fun (term : PsSyntaxTerm) =>
+      -- Apply the recursive fold only to its decreasing fuel argument.
+      -- Indentation is state of the returned worker, not an extra recursive call.
+      let step : String -> PsSyntaxTerm -> Except PsSourcePrintError String :=
+        psPrintLeanTermAtWithFuel remaining;
+      fun (indent : String) (term : PsSyntaxTerm) =>
       let smaller :
           PsSyntaxTerm -> Except PsSourcePrintError String :=
-        psPrintLeanTermWithFuel remaining;
+        step indent;
       match term with
       | PsSyntaxTerm.reference name =>
           psPrintSyntaxName name
@@ -425,7 +431,7 @@ def psPrintLeanTermWithFuel
                               printedName
                               printedType
                               " := "
-                              printedValue
+                              (psPrintOperatorOperand value printedValue)
                               (psPrintLeanConcat2 "; " printedBody))
       | PsSyntaxTerm.ifE condition thenBranch elseBranch _ =>
           match smaller condition with
@@ -440,11 +446,11 @@ def psPrintLeanTermWithFuel
                       Except.ok
                         (psPrintLeanConcat6
                           "if "
-                          printedCondition
+                          (psPrintOperatorOperand condition printedCondition)
                           " then "
-                          printedThen
+                          (psPrintOperatorOperand thenBranch printedThen)
                           " else "
-                          printedElse)
+                          (psPrintOperatorOperand elseBranch printedElse))
       | PsSyntaxTerm.matchE scrutinee alternatives _ =>
           match smaller scrutinee with
           | Except.error error => Except.error error
@@ -461,15 +467,15 @@ def psPrintLeanTermWithFuel
                           | Except.error error => Except.error error
                           | Except.ok printedPattern =>
                               match
-                                  smaller body with
+                                  step (psPrintLeanConcat2 indent "  ") body with
                               | Except.error error => Except.error error
                               | Except.ok printedBody =>
                                   Except.ok
                                     (psPrintLeanConcat4
-                                      "  | "
+                                      (psPrintLeanConcat2 indent "  | ")
                                       printedPattern
                                       " => "
-                                      printedBody);
+                                      (psPrintOperatorOperand body printedBody));
               let printedAlternativesResult :
                   Except PsSourcePrintError (List String) :=
                 psPrintLeanMapAlternatives
@@ -480,14 +486,21 @@ def psPrintLeanTermWithFuel
               | Except.ok printedAlternatives =>
                   match printedAlternatives with
                   | List.nil =>
-                      Except.ok (psPrintLeanConcat2 "nomatch " printedScrutinee)
+                      Except.ok (psPrintLeanConcat2 "nomatch "
+                        (psPrintOperatorOperand scrutinee printedScrutinee))
                   | List.cons _ _ =>
                       Except.ok
                         (psPrintLeanConcat4
                           "match "
-                          printedScrutinee
+                          (psPrintOperatorOperand scrutinee printedScrutinee)
                           " with\n"
                           (psPrintJoin "\n" printedAlternatives))
+
+-- Preserve the public entry point and its established semantic fuel.
+def psPrintLeanTermWithFuel
+    (fuel : Nat) (term : PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  psPrintLeanTermAtWithFuel fuel "" term
 
 def psPrintLeanTerm
     (term : PsSyntaxTerm) :

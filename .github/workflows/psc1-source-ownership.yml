@@ -4,7 +4,12 @@ on:
   push:
     branches: [feat/psc1-source-ownership-20261025]
     paths:
-      - psc1/**
+      - psc1/**/*.lean
+      - psc1/host-tools/**/*.mjs
+      - psc1/scripts/**/*.mjs
+      - psc1/scripts/bounded-process.py
+      - psc1/lakefile.lean
+      - psc1/lean-toolchain
       - .github/workflows/psc1-source-ownership.yml
 permissions:
   contents: read
@@ -15,6 +20,8 @@ jobs:
   ownership:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    env:
+      PSC1_OWNERSHIP_SCOPE_GUARD: ${{ github.event_name == 'push' && github.ref_name == 'feat/psc1-source-ownership-20261025' }}
     steps:
       - uses: actions/checkout@v4
         with:

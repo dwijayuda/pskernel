@@ -1,3 +1,13 @@
+## 2026-10-25 — Deferred-transform complete native gate passed; full routes and audit pending
+
+Exact candidate **`d0ee3dd0450278251cbe3c24a2c5b3e465ce524a`** passed native job `121032998114` in [40147870357](https://github.com/dwijayuda/pskernel/actions/runs/40147870357), attempt 1. The actual log contains **374 ordered unique reports across 19 modules**, all required retained native controls, and **82 authenticated source inputs**. The new three universal equality reports use only the standard allowed axioms. Whole-file and frozen-body authentication confirms exactly the three intended binding moves against qualified baseline `10144e2f`.
+
+Generated job `121033624771` and canonical job `121033624753` are in progress. Independent archive auditor [40148074626](https://github.com/dwijayuda/pskernel/actions/runs/40148074626), attempt 1, source `bcf80e37175c8528be152def20b0f71b24eb08e8`, job `121033600496`, targets this exact cohort with profile `deferred`. It has not reported a final audit result. Do not launch duplicate matching-source runs or integrate this candidate before both routes and the archive audit pass.
+
+The native artifact is `12581269385` (139 files, 424,475 bytes; ZIP SHA256 `9fe5300e249b717c9e37f1dab16acdaed455758770c303b1d8cc72998516d0b8`). Its API and actual upload digests match; independent ZIP qualification remains pending. Exact source/receipt details are recorded in `docs/qualification/T08_DEFERRED_TRANSFORM_NATIVE_d0ee3dd0.json`.
+
+Integration remains at qualified T05 source `10144e2f9e8d223b5dcde275bd1f48d25df113b3`. The older A/B diagnostic `40146310517` at `c5f00507` still has producers running; preserve its bootstrap-translator limitation. When it finishes, advance only the isolated transform branch to **this same exact candidate `d0ee3dd0450278251cbe3c24a2c5b3e465ce524a`** for the reviewed shared-translator experiment. Keep the full qualification run bound to `d0ee3dd0450278251cbe3c24a2c5b3e465ce524a` even if documentation-only descendants move the work branch. No performance or broader Arena qualification is claimed.
+
 ## 2026-10-25 — Deferred-transform candidate prepared for complete qualification
 
 The integration branch remains at the fully qualified T05 source `10144e2f9e8d223b5dcde275bd1f48d25df113b3`. This next candidate carries only the three previously prepared predecessor-binding moves in Transform, TransformSupport and Lift, their universal equality proofs, the 23 raw staged-call controls, and qualification/evidence infrastructure. No new fuel policy, public admission behavior, theorem statement, or unsafe construct is introduced.

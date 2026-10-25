@@ -1,10 +1,33 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active stacked draft PR #183, branch
-`fix/psc1-character-diagnostics-20261025`, based on qualified PR #182 HEAD
-`4c977654b8ca39b5fb3568ca9ebea03eee9d4339`.
+Updated 2026-10-25 Asia/Jakarta. Active source-ownership branch
+`feat/psc1-source-ownership-20261025`, based on qualified PR #183 HEAD
+`b63d09c8f79f3886565c788c478cb9937057080d`.
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
+
+## R2a declaration ownership (implemented, qualification in progress)
+
+Native implementation 9f6291450e431931bf42a3833b3fb7718fa5ad37 compiles in Linux
+run 40199953080/job 121188821962. Host implementation
+6c31f8fe5daea009c5a9af98f8abf873470f2aca adds an opaque read-only ownership index
+over genuine R1 lexical capabilities, exact closure/source identities and actual
+elaboration batches. It retains numeric/string Core-name components, batch roles,
+source spans, name token-piece IDs and normalization ownership. The production
+frontend, elaborator, seven backend emitters and frozen packages are unchanged.
+
+The native adapter calls the existing origin-aware preparation and ordinary/
+checked preparation, then strict IR validation. The host pins both helper and
+independent official Lean checker; it admits exact candidate graph bytes before
+returning an index. Tooling does not grant rename, reference-resolution,
+semantic-equivalence or publication authority. This is not R2b.
+
+Current validation is in progress. The first build passes; actual origin,
+admission/IR byte correspondence, full compiler closure in both grammars, stale/
+forged capabilities and refusal tests must finish before R2a is qualified.
+The selected ordinary lossless job now requires those tests without removing
+existing lexical or character-proof regressions. Existing timeout, checker,
+fuel, memory and stack policies remain unchanged.
 
 ## Qualified character-diagnostic prerequisite
 

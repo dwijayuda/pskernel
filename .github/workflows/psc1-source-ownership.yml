@@ -1,0 +1,55 @@
+name: PSC1 source ownership qualification
+on:
+  workflow_call:
+  push:
+    branches: [feat/psc1-source-ownership-20261025]
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-source-ownership.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-source-ownership-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ownership:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile production provenance and independent checker
+        working-directory: psc1
+        run: |
+          lean --version
+          lake build psc1_source_ownership psc1_lossless_source psc1_independent_checker psc1_source_census_probe
+      - name: Validate exact ownership, independent admission and refusal boundaries
+        working-directory: psc1
+        run: |
+          node --check host-tools/source-refactoring.mjs
+          node scripts/source-ownership-tests.mjs
+      - name: Preserve lexical regressions
+        working-directory: psc1
+        run: node scripts/lossless-source-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-source-ownership-${{ github.sha }}
+          path: |
+            psc1/dist/source-ownership/
+            psc1/dist/lossless/
+          if-no-files-found: warn
+          retention-days: 90

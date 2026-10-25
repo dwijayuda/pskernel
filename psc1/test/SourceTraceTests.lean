@@ -1,4 +1,5 @@
 import Ps.Host.LeanChecked
+import Ps.Host.SourceBindings
 import Ps.Host.ProjectCompiler
 
 private def demand (ok : Bool) (message : String) : IO Unit :=
@@ -105,6 +106,39 @@ private def checkModule (grammar : PsCompilerSourceKind) (text : String) : IO Un
   | .ok _ => pure ()
   IO.println "PSC1_TRACE_MODULE: PASS one actual elaboration, origin ownership and exact admission bytes"
 
+private def comparisonEnvelope (before after : String) (name : String := "target") : Lean.Json :=
+  let request (id text : String) := Lean.Json.arr #[
+    .str "psc1-compiler-service/1", .str id, .str id, .str "lean", .str "checked",
+    .str "Main", .arr #[.arr #[.str "Main", .str text]]]
+  Lean.Json.mkObj [
+    ("protocol", .str "psc1-source-binding-comparison/1"),
+    ("before", request "before" before), ("after", request "after" after),
+    ("target", Lean.Json.mkObj [("module", .str "Main"),
+      ("name", .arr #[.arr #[.str "s", .str name]])])]
+
+private def checkComparison : IO Unit := do
+  let original := "def target (input : Nat) : Nat := let local : Nat := Nat.succ input; local\n"
+  let renamed := "def target (input : Nat) : Nat := let renamed : Nat := Nat.succ input; renamed\n"
+  match Ps.Internal.SourceBindingComparison.compare (comparisonEnvelope original renamed).compress with
+  | .error message => throw (IO.userError ("PSC1_TRACE_COMPARISON_POSITIVE:" ++ message))
+  | .ok _ => pure ()
+  let changedBody := "def target (input : Nat) : Nat := let local : Nat := Nat.succ (Nat.succ input); local\n"
+  let changedType := "def target (renamedInput : Nat) : Nat := let local : Nat := Nat.succ renamedInput; local\n"
+  let capture := "def target (input : Nat) : Nat := let local : Nat := Nat.succ input; input\n"
+  for candidate in [changedBody, changedType, capture] do
+    match Ps.Internal.SourceBindingComparison.compare (comparisonEnvelope original candidate).compress with
+    | .error _ => pure ()
+    | .ok _ => throw (IO.userError "PSC1_TRACE_COMPARISON_FALSE_POSITIVE")
+  let otherBefore := original ++ "def other : Nat := 41\n"
+  let otherAfter := renamed ++ "def other : Nat := 42\n"
+  match Ps.Internal.SourceBindingComparison.compare (comparisonEnvelope otherBefore otherAfter).compress with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "PSC1_TRACE_OTHER_DECLARATION_CHANGED")
+  match Ps.Internal.SourceBindingComparison.compare (comparisonEnvelope original renamed "missing").compress with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "PSC1_TRACE_MISSING_TARGET")
+  IO.println "PSC1_BINDING_COMPARISON: PASS alpha-only body, exact API/other declarations, capture/body/type/owner refusals"
+
 def main : IO Unit := do
   check "shadow-and-reuse"
     "def trace (value : Nat) : Nat :=\n  let left : Nat := (let value : Nat := Nat.succ value; value);\n  let right : Nat := (let value : Nat := Nat.succ value; value);\n  Nat.add left right\n" true
@@ -129,4 +163,5 @@ def main : IO Unit := do
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_TRACE_MODULE_TRANSLATION")
   checkModule .proofScript ps
+  checkComparison
   IO.println "PSC1_SOURCE_TRACE: PASS actual allocation/resolution, scope reuse, byte parity, official admission, disabled mode and refusal"

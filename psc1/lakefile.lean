@@ -208,6 +208,7 @@ lean_lib PsHost where
     `Ps.Host.ProjectCompiler,
     `Ps.Host.SourceSnapshot,
     `Ps.Host.SourceOwnership,
+    `Ps.Host.SourceBindings,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,
     `Ps.Host.LeanChecked,

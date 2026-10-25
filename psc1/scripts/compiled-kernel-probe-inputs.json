@@ -1,0 +1,17 @@
+{
+  "schema": "psc1-compiler-kernel-probe-inputs/1",
+  "compiler": {
+    "run": 40222325020,
+    "job": 121256498745,
+    "artifact": 12610241874,
+    "zipSha256": "2e86233e840f7224960b9834a1a68617d5762f4b6ca0cdb483def6027ccf2905",
+    "commit": "67fd1dcae5554aea06b089be228c7eeb46fa82c1"
+  },
+  "kernels": {
+    "run": 40224378823,
+    "job": 121262524477,
+    "artifact": 12610527721,
+    "zipSha256": "6119e716e30016b75ce173716aa6d2eaa7e67f7447f1f91f048344d6a58e9ba5",
+    "commit": "ccb5ee9eabb144d013bf061868b0f41df0cfd053"
+  }
+}

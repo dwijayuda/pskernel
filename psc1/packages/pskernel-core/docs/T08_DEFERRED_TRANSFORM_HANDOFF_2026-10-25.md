@@ -4,6 +4,12 @@
 
 This is an unqualified implementation draft based on `10144e2f9e8d223b5dcde275bd1f48d25df113b3`. The baseline's complete T05 generated qualification and archive audit were still running when this draft was prepared. No performance improvement, Arena compatibility result, or new qualified source is claimed.
 
+## Native preflight correction
+
+Initial run [40144960417](https://github.com/dwijayuda/pskernel/actions/runs/40144960417), attempt 1, at `705ec57230ae631aa6779072d0522c9d3815645e` passed the frozen-body authentication, exact three-binding-change guard, portable source/syntax checks, and native production build (186 jobs). The three successor proof cases simplified to matching expressions but lacked the final definitional-equality closure used by the retained `PsKernelKnotFuelProofs` pattern.
+
+The repair appends `<;> rfl` to each of the three existing simplification steps. The universal theorem statements, frozen definitions, and production files are unchanged. The failed run supplies no proof qualification; a fresh exact-source native preflight is required.
+
 ## Focused production change
 
 Move only the existing predecessor-function binding under every existing result lambda in:

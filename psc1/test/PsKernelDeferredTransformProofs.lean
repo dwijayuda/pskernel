@@ -182,7 +182,7 @@ theorem transform_with_fuel_eq (fuel : Nat) :
   | succ remaining ih =>
       funext operation state source offset
       simp only [psKernelExprV2TransformWithFuel,
-        Frozen.psKernelExprV2TransformWithFuel, ih]
+        Frozen.psKernelExprV2TransformWithFuel, ih] <;> rfl
 
 theorem count_with_fuel_eq (fuel : Nat) :
     psKernelExprV2TransformCountWithFuel fuel =
@@ -192,7 +192,7 @@ theorem count_with_fuel_eq (fuel : Nat) :
   | succ remaining ih =>
       funext arena memo root
       simp only [psKernelExprV2TransformCountWithFuel,
-        Frozen.psKernelExprV2TransformCountWithFuel, ih]
+        Frozen.psKernelExprV2TransformCountWithFuel, ih] <;> rfl
 
 theorem lift_with_fuel_eq (fuel : Nat) :
     psKernelExprV2PagedLiftWithFuel fuel =
@@ -202,7 +202,7 @@ theorem lift_with_fuel_eq (fuel : Nat) :
   | succ remaining ih =>
       funext state source cutoff amount
       simp only [psKernelExprV2PagedLiftWithFuel,
-        Frozen.psKernelExprV2PagedLiftWithFuel, ih]
+        Frozen.psKernelExprV2PagedLiftWithFuel, ih] <;> rfl
 
 end PsKernelDeferredTransformProofs
 

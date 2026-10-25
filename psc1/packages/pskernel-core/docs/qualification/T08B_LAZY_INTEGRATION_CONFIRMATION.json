@@ -1,0 +1,152 @@
+{
+  "schema": "psc1-t08b-lazy-integration-confirmation-v1",
+  "phase": "integrated-ref-read-back",
+  "integrationBranch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "oldIntegrationSha": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+  "integrationSha": "ecafaabf844babd76a5de57bdf12909845961fba",
+  "evidenceCommittedBeforeRefUpdate": "829a0764c1e5aa63cf7ae929f6930d9c821628b0",
+  "nonForceExpectedShaUpdate": true,
+  "readBackSha": "ecafaabf844babd76a5de57bdf12909845961fba",
+  "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+  "exactProductionChanges": [
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"
+  ],
+  "qualificationSource": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+  "benchmarkSource": "14dad2ce6eaef9fa71170f28650a5c626eca4a76",
+  "staticVerification": {
+    "candidate": "ecafaabf844babd76a5de57bdf12909845961fba",
+    "evidence": "829a0764c1e5aa63cf7ae929f6930d9c821628b0",
+    "integrationOld": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+    "productionTree": "bccb72769d4f20def35f2064363fbc94fcc7e54a",
+    "productionDelta": [
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"
+    ],
+    "qualificationSource": "44d627cac02fdf70e884dfc60bacc3ea4f252a6c",
+    "auditedInputPaths": 239,
+    "auditedInputsChanged": [],
+    "otherChangedPathsFromQualifiedSource": [
+      ".github/psc1-t05-audit/audit.py",
+      ".github/psc1-t05-audit/target.json",
+      ".github/psc1-unary-abba-audit/audit.py",
+      ".github/psc1-unary-abba-audit/target.json",
+      ".github/workflows/psc1-pskernel-core-correctness.yml",
+      ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+      ".github/workflows/psc1-pskernel-lazy-arena435.yml",
+      ".github/workflows/psc1-pskernel-t05-artifact-audit.yml",
+      ".github/workflows/psc1-pskernel-transform-delay-abba.yml",
+      ".github/workflows/psc1-pskernel-unary-abba-audit.yml",
+      "psc1/packages/pskernel-core/AI_WORK_STATE.md",
+      "psc1/packages/pskernel-core/docs/AI_CONTINUATION_PROMPT.md",
+      "psc1/packages/pskernel-core/docs/PSKERNEL_CORE_COMPLETION_PLAN.md",
+      "psc1/packages/pskernel-core/docs/PSKERNEL_CORE_PROGRESS_MATRIX.md",
+      "psc1/packages/pskernel-core/docs/T01F_CI_JOB_GRACE_2026-10-26.md",
+      "psc1/packages/pskernel-core/docs/T08B_LAZY_TRANSFORM_CANDIDATE_2026-10-25.md",
+      "psc1/packages/pskernel-core/docs/qualification/T01F_CI_JOB_GRACE_f091db58.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_CORRECTED_ABBA_CHECKPOINT.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_LAZY_ABBA_14dad2ce.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_LAZY_ABBA_AUDIT_05059505.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_LAZY_ARENA193_44d627ca.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_LAZY_COHORT_AUDIT_df24381f.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_LAZY_FULL542_44d627ca.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_LAZY_INTEGRATION_DECISION.json",
+      "psc1/packages/pskernel-core/docs/qualification/T08B_LAZY_TRANSFORM_NATIVE_CHECKPOINT.json",
+      "psc1/scripts/pskernel-lazy-arena-artifact.py",
+      "psc1/scripts/pskernel-transform-delay-abba.py"
+    ],
+    "mergeBaseFromF091": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+    "statusFromF091": "ahead"
+  },
+  "qualifiedScopedWorkerAdopted": true,
+  "wholeSourceIdentity": "Derived integration commit differs from the full qualification and benchmark sources. All 239 independently audited inputs are unchanged; documentation, CI scheduling and separately audited measurement/audit tooling differ as listed.",
+  "qualification": {
+    "nativeReports": 542,
+    "nativeModules": 38,
+    "completeSourceRun": 40212287088,
+    "cohortAuditRun": 40215378391,
+    "status": "PASS",
+    "localTheorem": "psKernelTransformLazyPreservesAllInputs",
+    "globalSoundnessTheorem": false
+  },
+  "performance": {
+    "run": 40213489105,
+    "auditRun": 40213762419,
+    "status": "PASS",
+    "coldObservations": 16,
+    "comparableRegressionFlags": 0,
+    "statisticalOrWholeKernelSpeedupEstablished": false
+  },
+  "arena": {
+    "run": 40215051429,
+    "strictStatus": "FAIL",
+    "matches": 174,
+    "total": 193,
+    "timeouts": 17,
+    "separateSafetyAgreements": 2,
+    "completedSemanticEnvelopesUnchanged": 176
+  },
+  "ciGrace": {
+    "jobMinutes": 35,
+    "wholeHelperHardSeconds": 1500,
+    "runtimeAssertionsAndKernelLimitsUnchanged": true,
+    "newAutomaticRuns": [
+      {
+        "id": 40218506692,
+        "name": "PSC1 authentic Arena timeout diagnostics",
+        "statusAtRecord": "in_progress",
+        "conclusionAtRecord": null,
+        "headSha": "ecafaabf844babd76a5de57bdf12909845961fba",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40218506692"
+      },
+      {
+        "id": 40218506576,
+        "name": "PSC1 PSKernel-Core correctness",
+        "statusAtRecord": "in_progress",
+        "conclusionAtRecord": null,
+        "headSha": "ecafaabf844babd76a5de57bdf12909845961fba",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40218506576"
+      },
+      {
+        "id": 40218506579,
+        "name": "PSC1 Lean Arena 4.35 full corpus qualification",
+        "statusAtRecord": "in_progress",
+        "conclusionAtRecord": null,
+        "headSha": "ecafaabf844babd76a5de57bdf12909845961fba",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40218506579"
+      },
+      {
+        "id": 40218506616,
+        "name": "PSC1 PSKernel-Core Expression V2 research",
+        "statusAtRecord": "in_progress",
+        "conclusionAtRecord": null,
+        "headSha": "ecafaabf844babd76a5de57bdf12909845961fba",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40218506616"
+      },
+      {
+        "id": 40218506599,
+        "name": "PSC1 Expression V2 production integration",
+        "statusAtRecord": "in_progress",
+        "conclusionAtRecord": null,
+        "headSha": "ecafaabf844babd76a5de57bdf12909845961fba",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40218506599"
+      }
+    ],
+    "newAutomaticCINotYetQualified": true
+  },
+  "project": {
+    "A": "historically scoped qualified",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN",
+    "complete": false,
+    "remaining": [
+      "T06 mutual/nested/Quot ID-native admission",
+      "T07 four public whole-operation restarts",
+      "T04 eager decode and metadata import",
+      "17 timeouts and two safety-contract differences",
+      "T09 global performance and CI reuse",
+      "T10 release and global proof obligations"
+    ]
+  },
+  "mainMerged": false,
+  "npmPublished": false
+}

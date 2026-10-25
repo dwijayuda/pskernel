@@ -1,0 +1,77 @@
+{
+  "source": "aed07022222c8330b17636c3f894874058bfe571",
+  "run": 40233313952,
+  "job": 121295244940,
+  "artifact": 12615754053,
+  "bytes": 3499,
+  "members": 3,
+  "sha256": "910c83a7950c165a5baa95339e947b10b7ccebf31d801f20fe60f4c52c85a512",
+  "all3ActualMembersRead": true,
+  "inputs": {
+    "repository": "dwijayuda/pskernel",
+    "sourceSha": "aed07022222c8330b17636c3f894874058bfe571",
+    "runId": "40233313952",
+    "runAttempt": "1",
+    "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+    "route": "generated",
+    "producerJob": "generated-dag-integration",
+    "producerArtifact": "psc1-v2-dag-generated-js",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "\u00e9",
+      "\u20ac",
+      "\ud83d\ude00",
+      "A\u00e9\u20ac\ud83d\ude00"
+    ],
+    "hashes": {
+      "kernel": {
+        "bytes": 10393520,
+        "sha256": "7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4"
+      },
+      "fixture": {
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      "fixtureProducer": {
+        "bytes": 39734,
+        "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+      },
+      "generatedRunner": {
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      "provenance": {
+        "bytes": 1209,
+        "sha256": "4f15dd304b4d6b9984d94ab76cef2a75456dd3f8ecde69ab80b92916b8576240"
+      },
+      "orchestrator": {
+        "bytes": 15637,
+        "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+      },
+      "workflow": {
+        "bytes": 97168,
+        "sha256": "9d1d84c14764b6f6dc87fa4a9eca38eb9fdc4af0816ff398d53d60a26cb02065"
+      },
+      "providerManifest": {
+        "bytes": 2205,
+        "sha256": "db40e15095d38e94d54feb5558214dab60e62a1495f7a85464902613b7f5c264"
+      }
+    }
+  },
+  "logTail": "code\nPSC1_T01F_JS_ADMIT_BEGIN 263 ByteArray.IsValidUTF8\nPSC1_T01F_JS_ADMIT_BEGIN 264 String\nPSC1_T01F_JS_ADMIT_BEGIN 265 String.ofList._proof_1\nPSC1_T01F_JS_ADMIT_BEGIN 266 String.ofList\nPSC1_T01F_JS_ADMIT_BEGIN 267 Bool.or\nPSC1_T01F_JS_ADMIT_BEGIN 268 instDecidableOr.match_3\nPSC1_T01F_JS_ADMIT_BEGIN 269 instDecidableOr.match_1\nPSC1_T01F_JS_ADMIT_BEGIN 270 instDecidableOr._proof_1\nPSC1_T01F_JS_ADMIT_BEGIN 271 instDecidableOr\nPSC1_T01F_JS_ADMIT_BEGIN 272 Bool.and\nPSC1_T01F_JS_ADMIT_BEGIN 273 instDecidableAnd.match_1\nPSC1_T01F_JS_ADMIT_BEGIN 274 And.right\nPSC1_T01F_JS_ADMIT_BEGIN 275 And.left\nPSC1_T01F_JS_ADMIT_BEGIN 276 instDecidableAnd._proof_1\nPSC1_T01F_JS_ADMIT_BEGIN 277 instDecidableAnd\nPSC1_T01F_JS_ADMIT_BEGIN 278 BitVec.ofNatLT\nPSC1_T01F_JS_ADMIT_BEGIN 279 UInt32.size\nPSC1_T01F_JS_ADMIT_BEGIN 280 _private.Init.Prelude.0.isValidChar_UInt32.match_1_1\nPSC1_T01F_JS_ADMIT_BEGIN 281 Nat.lt_trans\nPSC1_T01F_JS_ADMIT_BEGIN 282 _private.Init.Prelude.0.of_decide_eq_true.match_1_1\nPSC1_T01F_JS_ADMIT_BEGIN 283 _private.Init.Prelude.0.Bool.ne_true_of_eq_false.match_1_1\nPSC1_T01F_JS_ADMIT_BEGIN 284 Bool.ne_true_of_eq_false\nPSC1_T01F_JS_ADMIT_BEGIN 285 _private.Init.Prelude.0.decide_eq_false.match_1_1\nPSC1_T01F_JS_ADMIT_BEGIN 286 decide_eq_false\nPSC1_T01F_JS_ADMIT_BEGIN 287 of_decide_eq_true\nPSC1_T01F_JS_ADMIT_BEGIN 288 _private.Init.Prelude.0.isValidChar_UInt32\nPSC1_T01F_JS_ADMIT_BEGIN 289 Char.ofNatAux._private_1\nPSC1_T01F_JS_ADMIT_BEGIN 290 Char.ofNatAux\nPSC1_T01F_JS_ADMIT_BEGIN 291 Char.ofNat._proof_1\nPSC1_T01F_JS_ADMIT_BEGIN 292 Char.ofNat._proof_2\nPSC1_T01F_JS_ADMIT_BEGIN 293 Char.ofNat\nPSC1_T01F_ADMISSION_COMPLETE {\"requests\":294,\"admissionMs\":54073.924863}\nPSC1_T01F_METADATA_COMPLETE {\"declarations\":377,\"milliseconds\":1759.5462499999994}\nPSC1_T01F_JS_SINGLETON_PASS \"A\u00e9\u20ac\ud83d\ude00\"\n",
+  "executionStatus": "HARD1500sKILL137",
+  "executionStartedAt": "2026-10-25T21:42:58Z",
+  "killedAt": "2026-10-25T22:07:58Z",
+  "full1400AssertionReceiptPresent": false,
+  "memoryReceiptEmpty": true,
+  "completeCollectorJob": 121305800311,
+  "completeCollectorResult": "failure",
+  "allOtherProductionJobsPassed": true,
+  "globalPerformanceQualified": false
+}

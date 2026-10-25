@@ -1,5 +1,19 @@
 # PSC1 AI work state
 
+## Package qualification and project-boundary hardening
+
+Package039888f8 passed40166009809:3,703,048 bytes,20 real compiler cases,
+12 local/global CLI cases,32 candidate mappings,14 real checker comparisons,
+31 refusal/rollback cases and packed public types. It fixes the npm-managed
+shrinkwrap runtime-pin failure by preserving an immutable DEPENDENCY_LOCK.json.
+
+The current follow-up closes project JSON to entryModule/sources/assurance only.
+Source data cannot set output paths, service files, checkers or executor choices;
+those require explicit host options. Added tests reject those fields and preserve
+prior output. Additional root-only tests exercise all four candidate output
+mappings using embedded JS/TS without optional executors. This latest hardening
+must pass its actual package/source gates before being called qualified.
+
 ## Active slice: slim universal root and optional executors
 
 Continue from PR #179 HEAD ba3bfb045619ceb2948820f874357b2058f79868 on

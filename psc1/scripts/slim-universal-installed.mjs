@@ -49,6 +49,19 @@ for(const bin of [cli,globalCli])for(const grammar of ['lean','ps']){
  const checked=JSON.parse(run(bin,['check',source]));assert.equal(checked.engine,'js');assert.equal(checked.logicalAdmission,'accepted');assert.equal(checked.source,undefined);
  const compiled=JSON.parse(run(bin,['compile',source,'--engine','ts']));assert.equal(compiled.engine,'ts');assert.equal(compiled.logicalAdmission,'accepted');assert.equal(compiled.publication,'not-requested');assert.ok(compiled.source.includes('42'));globalCases.push({scope:bin===cli?'local':'global',grammar,checkedStdout:true});
 }
+
+const rootOnlyApi=path.join(consumer,'root-only-api.mjs');
+fs.writeFileSync(rootOnlyApi,"import {compileCandidate,getCompilerMetadata} from 'proofscript';\n"+
+ "const records=[];for(const engine of ['js','ts'])for(const target of ['js','ts','rust','wasm-core'])for(const kind of ['lean','ps']){const r=compileCandidate({engine,target,entryModule:'Entry',sources:[{module:'Entry',kind,text:'def answer : Nat := 42\\n'}]});if(r.publicationAuthority!==false||r.logicalAdmission!=='not-run'||r.candidate.status!=='candidate'||r.candidate.target!==target)throw Error('root candidate mapping');records.push({engine,target,grammar:kind,optionalPackagesAbsent:true,candidateOnly:true});}const m=getCompilerMetadata();if(m.engines.rust.installed||m.engines['wasm-core'].installed)throw Error('unexpected optional package');console.log(JSON.stringify(records));\n");
+candidateCases.push(...JSON.parse(run(process.execPath,[rootOnlyApi])));
+const safeStore=path.join(consumer,'local-js-'+corpus[0].id),safePointer=fs.readlinkSync(path.join(safeStore,'current'));
+for(const field of ['out','serviceFile','checkerExecutable','engine']){
+ const injected=path.join(consumer,'host-options.json'),selected=path.join(consumer,'source-selected-output-'+field);
+ fs.writeFileSync(injected,JSON.stringify({entryModule:'Entry',sources:[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}],[field]:selected}));
+ const denied=call(cli,['build','--project',injected,'--out',safeStore]);assert.notEqual(denied.status,0);assert.match(denied.stderr,/PROJECT_FIELDS/);assert.equal(fs.readlinkSync(path.join(safeStore,'current')),safePointer);assert.equal(fs.existsSync(selected),false);
+ negativeCases.push({id:'project-cannot-select-'+field,priorPreserved:true});
+}
+
 const optional=assembly.input.packages,packagePaths=['rust','wasm-core','nativeKernel'].map(k=>path.join(tarballs,optional[k].tarball));
 install(['--prefix',consumer,...packagePaths],path.join(temp,'optional-local-cache'));install(['--global','--prefix',prefix,...packagePaths],path.join(temp,'optional-global-cache'));
 const installed=command(['--identity']);assert.equal(installed.engines.rust.installed,true);assert.equal(installed.engines['wasm-core'].installed,true);

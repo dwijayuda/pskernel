@@ -211,7 +211,7 @@
   },
   "activeMilestone": {
     "name": "slim-universal-root-and-optional-execution-integration",
-    "status": "implemented-awaiting-Linux-CI",
+    "status": "implementation; qualification evidence is maintained separately",
     "version": "0.1.0-psc1.4",
     "base": "ba3bfb045619ceb2948820f874357b2058f79868",
     "embeddedEngines": [
@@ -250,7 +250,11 @@
       "negative-policy-tamper-version-and-publication-fault-preservation",
       "genuine-optional-native-wasm-cross-checks",
       "actual-packed-public-types",
-      "normal-dependency-selected-source-gate"
-    ]
+      "normal-dependency-selected-source-gate",
+      "project-data-cannot-select-host-tools-or-output-paths",
+      "root-only-js-ts-can-emit-all-four-candidate-targets-without-optional-executors"
+    ],
+    "qualificationReceipt": "docs/PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json",
+    "projectAuthority": "Project JSON is restricted to entryModule/sources/assurance; output paths/executors/checkers come only from explicit host options."
   }
 }

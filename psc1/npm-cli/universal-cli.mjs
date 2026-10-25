@@ -9,9 +9,12 @@ function project(args){
  for(let i=0;i<args.length;i++){const a=args[i];if(a.startsWith('--')){if(!['--engine','--kernel','--provider','--out','--assurance','--target','--project'].includes(a)||Object.hasOwn(options,a)||!args[i+1]||args[i+1].startsWith('--'))fail('ARGUMENT');options[a]=args[++i];}else if(file)fail('ARGUMENT');else file=a;}
  if(Boolean(file)===Boolean(options['--project']))fail('SOURCE_OR_PROJECT_REQUIRED');
  let source;
- if(options['--project'])source=JSON.parse(text(path.resolve(options['--project'])));
+ if(options['--project']){
+  source=JSON.parse(text(path.resolve(options['--project'])));
+  if(!source||typeof source!=='object'||Array.isArray(source)||Object.keys(source).some(k=>!['entryModule','sources','assurance'].includes(k)))fail('PROJECT_FIELDS');
+ }
  else{const kind=path.extname(file).slice(1),entryModule=path.basename(file,path.extname(file));if(!['lean','ps'].includes(kind)||!/^[A-Za-z_][A-Za-z_0-9]*$/.test(entryModule))fail('SOURCE');source={entryModule,sources:[{module:entryModule,kind,text:text(path.resolve(file))}]};}
- return {...source,engine:options['--engine']||'js',kernel:options['--kernel']||options['--provider']||'wasm',assurance:options['--assurance']||source.assurance||'checked',...(options['--target']?{target:options['--target']}:{}),...(options['--out']?{out:options['--out']}:{})};
+ return {entryModule:source.entryModule,sources:source.sources,engine:options['--engine']||'js',kernel:options['--kernel']||options['--provider']||'wasm',assurance:options['--assurance']||source.assurance||'checked',...(options['--target']?{target:options['--target']}:{}),...(options['--out']?{out:options['--out']}:{})};
 }
 try{
  let args=process.argv.slice(2);if(args[0]==='generated')args=args.slice(1);

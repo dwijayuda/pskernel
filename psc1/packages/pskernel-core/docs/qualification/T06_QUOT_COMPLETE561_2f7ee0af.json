@@ -89,14 +89,105 @@
   "unchanged193Replay": {
     "source": "146e3d4e2a5247b984b97c37dae6bc8ee9e9405b",
     "run": 40228699303,
-    "status": "running",
+    "job": 121275597369,
+    "artifact": 12613009563,
+    "archiveBytes": 3953405,
+    "archiveSha256": "41f39a2ded556bb05e44a0da552879fce9e464d428c6a7cf6f122344326ff845",
+    "members": 587,
+    "crc": "pass",
+    "qualifiedKernelSource": "2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89",
+    "kernelBytes": 10393520,
+    "kernelSha256": "7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4",
+    "all193InputsAndClassificationsExactlyMatchPriorQualifiedReplay": true,
+    "all176CompletedRawSemanticEnvelopesExactlyMatchPriorQualifiedReplay": true,
+    "completeProducerAndOfficialZipBytesExactlyMatchRootReadArchives": true,
+    "strictMatches": 174,
+    "timeouts": [
+      {
+        "index": 23,
+        "name": "perf/refute-cheap-last.ndjson"
+      },
+      {
+        "index": 72,
+        "name": "init-prelude.ndjson"
+      },
+      {
+        "index": 78,
+        "name": "perf/app-lam.ndjson"
+      },
+      {
+        "index": 80,
+        "name": "perf/beta-ladder.ndjson"
+      },
+      {
+        "index": 82,
+        "name": "perf/discarded-argument-match.ndjson"
+      },
+      {
+        "index": 83,
+        "name": "perf/discarded-argument.ndjson"
+      },
+      {
+        "index": 84,
+        "name": "perf/folded-constant-first.ndjson"
+      },
+      {
+        "index": 85,
+        "name": "perf/folded-constant-last.ndjson"
+      },
+      {
+        "index": 86,
+        "name": "perf/fueled-chain.ndjson"
+      },
+      {
+        "index": 87,
+        "name": "perf/grind-ring-5.ndjson"
+      },
+      {
+        "index": 90,
+        "name": "perf/let-ladder.ndjson"
+      },
+      {
+        "index": 91,
+        "name": "perf/magma-list-deep-n21.ndjson"
+      },
+      {
+        "index": 92,
+        "name": "perf/magma-list-deep-n36.ndjson"
+      },
+      {
+        "index": 93,
+        "name": "perf/magma-list-pair-n21.ndjson"
+      },
+      {
+        "index": 94,
+        "name": "perf/magma-list-pair-n7.ndjson"
+      },
+      {
+        "index": 96,
+        "name": "perf/shared-subterm.ndjson"
+      },
+      {
+        "index": 98,
+        "name": "perf/unroll-versus-evaluate.ndjson"
+      }
+    ],
+    "separateSafetyAgreements": 2,
+    "strictStatus": "FAIL",
+    "actualReportCollection": "PASS",
     "allCases": 193,
     "excluded": [],
     "fuel": 4096,
-    "timeoutPerCaseSeconds": 60,
+    "timeoutSecondsPerCase": 60,
     "oldSpaceMiB": 2048,
+    "workers": 2,
     "emptyPATH": true,
-    "workers": 2
+    "fullKernel": false,
+    "performanceQualified": false,
+    "actualReport": {
+      "bytes": 669400,
+      "sha256": "4ba207c9cda9cfbeaf01d876d9884e6ea95ae5c0cbfb60116cffb2ed4e0e7370"
+    }
   },
   "scope": "same-batch and preexisting-session Quot owning-ID admission; local refinements/protocols only",
   "globalCheckerSoundnessEstablished": false,
@@ -104,5 +195,6 @@
   "fullKernel": false,
   "performanceQualified": false,
   "adopted": false,
-  "integrationStill": "ecafaabf844babd76a5de57bdf12909845961fba"
+  "integrationStill": "ecafaabf844babd76a5de57bdf12909845961fba",
+  "readyForScopedIntegration": true
 }

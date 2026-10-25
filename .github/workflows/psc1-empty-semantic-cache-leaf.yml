@@ -1,0 +1,105 @@
+name: PSC1 empty semantic cache paired leaf preflight
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-empty-semantic-cache-leaf-20261025
+    paths:
+    - .github/workflows/psc1-empty-semantic-cache-leaf.yml
+    - .github/psc1-empty-semantic-cache/leaf.py
+    - psc1/scripts/pskernel-empty-semantic-cache-smoke.mjs
+permissions:
+  contents: read
+  actions: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      NODE_OPTIONS: ''
+    steps:
+    - name: Check out exact experiment code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: experiment-source
+        persist-credentials: false
+    - name: Check out fixed baseline kernel
+      uses: actions/checkout@v4
+      with:
+        ref: 20224a295359abb201f56c72395690bf0bfac9fa
+        path: baseline-source
+        persist-credentials: false
+    - name: Check out fixed native-qualified candidate kernel
+      uses: actions/checkout@v4
+      with:
+        ref: e503972553ae2d41d5ba7a26d7739fb32ee86b96
+        path: candidate-source
+        persist-credentials: false
+    - name: Bind producer API identities and independently verify both raw ZIP digests
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        python3 experiment-source/.github/psc1-empty-semantic-cache/leaf.py prepare \
+          baseline-source candidate-source experiment-source "$RUNNER_TEMP/empty-semantic-cache-leaf"
+    - name: Extract exact authenticated compiler artifact
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        artifact-ids: '12581708293'
+        run-id: '40149637831'
+        repository: dwijayuda/pskernel
+        github-token: ${{ github.token }}
+        merge-multiple: true
+        path: ${{ runner.temp }}/empty-semantic-cache-leaf/inputs/compiler/extracted
+    - name: Extract exact candidate native69 evidence
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        artifact-ids: '12585087010'
+        run-id: '40157229337'
+        repository: dwijayuda/pskernel
+        github-token: ${{ github.token }}
+        merge-multiple: true
+        path: ${{ runner.temp }}/empty-semantic-cache-leaf/inputs/native/extracted
+    - name: Verify all input artifact contents and exact native reports before code generation
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 experiment-source/.github/psc1-empty-semantic-cache/leaf.py verify-inputs \
+          baseline-source candidate-source experiment-source "$RUNNER_TEMP/empty-semantic-cache-leaf"
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean runtime
+      shell: bash
+      run: |
+        set -euo pipefail
+        bash candidate-source/psc1/scripts/install-lean435-ci.sh
+    - name: Install exact TypeScript in a separate temporary tool directory
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir "$RUNNER_TEMP/empty-semantic-cache-ts"
+        printf '%s\n' '{"name":"psc1-empty-cache-leaf-tools","version":"0.0.0","private":true}' \
+          > "$RUNNER_TEMP/empty-semantic-cache-ts/package.json"
+        npm install --prefix "$RUNNER_TEMP/empty-semantic-cache-ts" --save-exact \
+          --ignore-scripts --no-audit --no-fund typescript@7.0.2
+        echo "PSC0_TSC=$RUNNER_TEMP/empty-semantic-cache-ts/node_modules/typescript/bin/tsc" \
+          >> "$GITHUB_ENV"
+    - name: Check both exact eight-source canonical leaves and run separate1884 plus21 controls
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 experiment-source/.github/psc1-empty-semantic-cache/leaf.py build \
+          baseline-source candidate-source experiment-source "$RUNNER_TEMP/empty-semantic-cache-leaf"
+    - name: Retain source manifests, inputs, canonical leaves, logs and exact receipts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: psc1-empty-semantic-cache-paired-leaf-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/empty-semantic-cache-leaf/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

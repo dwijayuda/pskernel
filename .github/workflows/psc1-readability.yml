@@ -29,6 +29,9 @@ jobs:
         run: node psc1/scripts/readability-host-check.mjs
       - name: Check verbatim Wasm type-inventory extraction
         run: node psc1/scripts/readability-module-check.mjs
+      - name: Preserve all moved recursive-prefix guards
+        working-directory: psc1
+        run: node scripts/check-wasm-applied-prefixes.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

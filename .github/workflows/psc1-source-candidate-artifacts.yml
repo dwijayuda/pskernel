@@ -1,0 +1,148 @@
+name: PSC1 reviewable compiler source candidates
+on:
+  push:
+    branches: [qualification/psc1-source-candidates-v2-20261025]
+    paths: [.github/workflows/psc1-source-candidate-artifacts.yml]
+permissions:
+  contents: read
+concurrency:
+  group: psc1-source-candidates-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  candidates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_IMPLEMENTATION: fa265940ebf78797845ddae41ccaa5499577144d
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Verify source implementation is unchanged by artifact controls
+        run: |
+          git diff --exit-code "$SOURCE_IMPLEMENTATION" HEAD -- psc1
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile exact native source tools
+        working-directory: psc1
+        run: lake build psc1_lossless_source psc1_source_ownership psc1_independent_checker
+      - name: Export complete independently checked source candidates and origin maps
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          import { spawnSync } from 'node:child_process';
+          import { createLosslessSourceTool, createSourceOwnershipTool,
+            createCheckedSourceConverter } from './host-tools/source-refactoring.mjs';
+          import { readOwnedCompilerSources } from './host-tools/compiler-source-inputs.mjs';
+          import { compilerSourceClosureDigest } from './host-tools/compiler-host-protocol.mjs';
+          const sha = b => crypto.createHash('sha256').update(b).digest('hex');
+          const bin = name => path.resolve('.lake/build/bin/' + name);
+          const helper = bin('psc1_source_ownership'), checker = bin('psc1_independent_checker');
+          const lexicalHelper = bin('psc1_lossless_source');
+          const lexical = createLosslessSourceTool({
+            executable: lexicalHelper, sha256: sha(fs.readFileSync(lexicalHelper)),
+          });
+          const ownership = createSourceOwnershipTool({
+            lexicalTool: lexical, executable: helper, sha256: sha(fs.readFileSync(helper)),
+            checkerExecutable: checker, checkerSha256: sha(fs.readFileSync(checker)),
+          });
+          const converter = createCheckedSourceConverter({ ownershipTool: ownership });
+          const rows = readOwnedCompilerSources('Ps.CompilerUnified.Service');
+          assert.equal(rows.length, 121);
+          const baseline = spawnSync('git', ['show',
+            'b63d09c8f79f3886565c788c478cb9937057080d:psc1/packages/syntax/src/Ps/Syntax/PrintLean.lean'],
+            { encoding: 'utf8' });
+          assert.equal(baseline.status, 0);
+          const restored = rows.map(row => ({ ...row, kind: 'lean',
+            text: row.module === 'Ps.Syntax.PrintLean' ? baseline.stdout : row.text }));
+          assert.equal(compilerSourceClosureDigest(restored),
+            '60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a');
+          console.log('PSC1_CANDIDATE_INPUT:', JSON.stringify({
+            sourceClosureDigest: compilerSourceClosureDigest(rows.map(row => ({ ...row, kind: 'lean' }))),
+            modules: rows.length, implementation: process.env.SOURCE_IMPLEMENTATION,
+          }));
+          const started = Date.now();
+          const snapshots = rows.map(row => lexical.capture({
+            module: row.module, grammar: 'lean', bytes: Buffer.from(row.text),
+          }));
+          const before = ownership.analyze({
+            snapshots, entry: 'Ps.CompilerUnified.Service', assurance: 'ordinary-checked',
+          });
+          const report = converter.convert({
+            index: before, snapshots, targetGrammar: 'ps', commentPolicy: 'owner-notes',
+          });
+          const after = converter.candidateIndex(report);
+          const targets = converter.candidateSnapshots(report);
+          const root = path.resolve('dist/source-candidates');
+          const modules = [];
+          for (let i = 0; i < rows.length; i++) {
+            const module = rows[i].module;
+            assert.match(module, /^[A-Za-z_]\w*(\.[A-Za-z_]\w*)*$/);
+            const relative = path.join('ps', ...module.split('.')) + '.ps';
+            const destination = path.resolve(root, relative);
+            assert.ok(destination.startsWith(root + path.sep));
+            fs.mkdirSync(path.dirname(destination), { recursive: true });
+            const bytes = converter.readCandidate(report, module);
+            fs.writeFileSync(destination, bytes);
+            modules.push({
+              module, file: relative, fromSourceId: snapshots[i].sourceId,
+              fromSha256: snapshots[i].sourceSha256, toSourceId: targets[i].sourceId,
+              toSha256: sha(bytes), bytes: bytes.length,
+            });
+          }
+          const manifest = {
+            schema: 'psc1-readable-compiler-candidate/1', status: 'prepared-and-checked',
+            implementationCommit: process.env.SOURCE_IMPLEMENTATION,
+            controlCommit: process.env.GITHUB_SHA, modules,
+            before: { sourceClosureDigest: before.sourceClosureDigest, indexId: before.id,
+              helperMetrics: before.metrics },
+            after: { sourceClosureDigest: after.sourceClosureDigest, indexId: after.id,
+              helperMetrics: after.metrics },
+            sourceCoreDeclarations: after.sourceCoreDeclarations,
+            admissionsSha256: report.admissionsSha256, originalIrSha256: report.originalIrSha256,
+            checker: after.checker, report, elapsedMs: Date.now() - started,
+            hostMaxRssKiB: process.resourceUsage().maxRSS,
+            memoryScope: 'host-only maxRSS; native helper trees reported separately',
+            tools: { lexicalSha256: sha(fs.readFileSync(lexicalHelper)),
+              ownershipSha256: sha(fs.readFileSync(helper)), checkerSha256: sha(fs.readFileSync(checker)) },
+            frozenSourcePromoted: false, newG2G3Qualification: false, publication: false,
+          };
+          fs.writeFileSync(path.join(root, 'SOURCE_MANIFEST.json'), JSON.stringify(manifest, null, 2) + '\n');
+          fs.writeFileSync(path.join(root, 'README.md'),
+            '# Reviewable compiler source candidates\n\n' +
+            '121 complete ProofScript source modules are canonical views of implementation ' +
+            process.env.SOURCE_IMPLEMENTATION + '. Raw comments retain bytes/order and body comments are ' +
+            'deliberately relocated to declaration-leading owner notes. No original layout is promised.\n\n' +
+            'Both complete source closures are independently admitted; canonical logical/body graph and original ' +
+            'strict IR bytes, partial names and member ownership match exactly in the checked API. ' +
+            'SOURCE_MANIFEST.json records exact source IDs, hashes, origin maps, tools and measurements.\n\n' +
+            'These are reviewable source candidates, not promoted compiler sources, npm packages, ' +
+            'new G2/G3/fixed points, a formal compiler proof or authorized project edits.\n');
+          console.log('PSC1_SOURCE_CANDIDATE_ARTIFACT:', JSON.stringify({
+            modules: modules.length, sourceCoreDeclarations: after.sourceCoreDeclarations,
+            sourceClosureDigest: after.sourceClosureDigest, admissionsSha256: report.admissionsSha256,
+            originalIrSha256: report.originalIrSha256, elapsedMs: manifest.elapsedMs,
+            hostMaxRssKiB: manifest.hostMaxRssKiB, manifestSha256: sha(fs.readFileSync(path.join(root, 'SOURCE_MANIFEST.json'))),
+          }));
+          
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-readable-compiler-source-${{ github.sha }}
+          path: psc1/dist/source-candidates/
+          if-no-files-found: error
+          retention-days: 90

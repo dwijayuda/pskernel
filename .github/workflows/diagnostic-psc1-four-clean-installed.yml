@@ -1,0 +1,79 @@
+name: PSC1 four frozen engines clean installed execution without SDKs
+on:
+  push:
+    branches: [diagnostic/psc1-unified-v2-profile-20261025]
+    paths: [.github/workflows/diagnostic-psc1-four-clean-installed.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  installed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Verify distributed archive without checkout or build tools
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import crypto from 'node:crypto';import {spawnSync} from 'node:child_process';
+          assert.equal(fs.existsSync('psc1'),false);assert.equal(fs.existsSync('.lake'),false);
+          const root=path.resolve('package-input');fs.mkdirSync(root);
+          const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+          const route='https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12583067653';
+          const m=await fetch(route,{headers});assert.equal(m.status,200);const a=await m.json();
+          assert.equal(a.expired,false);assert.equal(a.workflow_run.id,40152198370);assert.equal(a.digest,'sha256:d6f2d578b0451b92f3d20778b0fe9983e310b656454d1a9daf7de3377f8d2f5a');assert.ok(a.size_in_bytes<256*1024*1024);
+          const redirect=await fetch(route+'/zip',{headers,redirect:'manual'});assert.ok([301,302,303,307].includes(redirect.status));
+          const url=new URL(redirect.headers.get('location'));assert.equal(url.protocol,'https:');assert.ok(url.hostname.endsWith('.blob.core.windows.net')||url.hostname.endsWith('.actions.githubusercontent.com'));
+          const response=await fetch(url,{redirect:'error'});assert.equal(response.status,200);
+          const bytes=Buffer.from(await response.arrayBuffer());assert.equal('sha256:'+crypto.createHash('sha256').update(bytes).digest('hex'),a.digest);fs.writeFileSync('input.zip',bytes);
+          const py="import pathlib,zipfile,stat\nroot=pathlib.Path('package-input').resolve()\nwith zipfile.ZipFile('input.zip') as z:\n rows=z.infolist();assert len(rows)<50000;assert sum(i.file_size for i in rows)<2*1024*1024*1024\n for i in rows:\n  p=pathlib.PurePosixPath(i.filename);assert not p.is_absolute() and '..' not in p.parts and '\\\\' not in i.filename;assert stat.S_IFMT(i.external_attr>>16)!=stat.S_IFLNK;assert (root/pathlib.Path(*p.parts)).resolve().is_relative_to(root)\n z.extractall(root)\n";
+          const r=spawnSync('python3',['-c',py],{encoding:'utf8',timeout:120000});assert.equal(r.status,0,r.stderr);fs.unlinkSync('input.zip');
+          const files=[];function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else files.push(p);}}walk(root);
+          const expected={'proofscript-0.1.0-psc1.3.tgz':'4e4881d77c6a77cbad44faeb70798e71b76572fcedaee8cff01fcbe83f3ba711','proofscript-backend-python-0.1.0-psc1.3.tgz':'a9e26065a916ba53405897a29bdcb6b0cb4b750fef516e2948ad0c30a1a3e1bd','proofscript-backend-php-0.1.0-psc1.3.tgz':'7eaaa1f667e9783803e2402ce5d1adb6bd0d867faf665dbb8c5e406a260afaec'};
+          const tarballs={};for(const [name,digest]of Object.entries(expected)){const matches=files.filter(p=>path.basename(p)===name);assert.equal(matches.length,1);assert.equal(crypto.createHash('sha256').update(fs.readFileSync(matches[0])).digest('hex'),digest);tarballs[name]=matches[0];}
+          fs.writeFileSync('tarballs.json',JSON.stringify(tarballs));
+          JS
+      - name: Exercise offline local and global CLI with native compiler unavailable
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {pathToFileURL} from 'node:url';
+          const tarballs=JSON.parse(fs.readFileSync('tarballs.json')),core=tarballs['proofscript-0.1.0-psc1.3.tgz'];
+          const run=(exe,args,options={})=>{const r=spawnSync(exe,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024,...options});assert.equal(r.error,undefined,String(r.error));assert.equal(r.status,0,(r.stdout||'')+(r.stderr||''));return r.stdout;};
+          const minimalEnv={...process.env,PATH:path.dirname(process.execPath)};
+          for(const tool of ['python3','php','lean','rustc','cargo'])assert.equal(spawnSync(tool,['--version'],{env:minimalEnv,encoding:'utf8'}).error?.code,'ENOENT',tool+' must be unavailable during generated compilation');
+          const cases=[];
+          for(const mode of ['local','global']){
+           const prefix=path.resolve(mode),cache=path.resolve('cache-'+mode);fs.mkdirSync(prefix);
+           if(mode==='local')fs.writeFileSync(path.join(prefix,'package.json'),JSON.stringify({name:'psc1-clean-installed',private:true,type:'module'}));
+           const install=items=>run('npm',['install',...(mode==='global'?['--global']:[]),'--prefix',prefix,'--cache',cache,'--offline','--ignore-scripts','--no-audit','--no-fund',...items]);
+           install([core]);
+           const modules=path.join(prefix,mode==='global'?'lib/node_modules':'node_modules'),installed=path.join(modules,'proofscript'),cli=path.join(prefix,mode==='global'?'bin/psc':'node_modules/.bin/psc');
+           for(const target of ['python','php'])assert.equal(fs.existsSync(path.join(modules,'@proofscript/backend-'+target)),false);
+           install([tarballs['proofscript-backend-python-0.1.0-psc1.3.tgz'],tarballs['proofscript-backend-php-0.1.0-psc1.3.tgz']]);
+           for(const target of ['python','php'])assert.equal(fs.existsSync(path.join(modules,'@proofscript/backend-'+target)),true);
+           const identity=JSON.parse(run(cli,['--identity'],{cwd:prefix}));assert.equal(identity.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+           const meta=JSON.parse(run(cli,['generated','--identity'],{cwd:prefix}));assert.equal(meta.nativeCoreSourceCommit,'348746f32e7fe04b3402eb22030054375eb9ebcd');assert.deepEqual(Object.keys(meta.engines),['js','ts','rust','wasm-core']);assert.equal(meta.allFourEngineSelfHostQualified,true);assert.equal(meta.sharedSourceClosureDigest,'07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af');
+           fs.renameSync(path.join(installed,'native/bin/psc1'),path.join(installed,'native/bin/psc1.disabled'));
+           for(const grammar of ['lean','ps'])for(const engine of ['js','ts','rust','wasm-core']){
+            const input=path.join(prefix,'Main.'+grammar),out=path.join(prefix,engine+'-'+grammar);fs.writeFileSync(input,'def answer : Nat := 42\n');
+            const q=JSON.parse(run(cli,['generated','build',input,'--engine',engine,'--out',out],{cwd:prefix,env:minimalEnv}));assert.equal(q.logicalAdmission,'accepted');assert.equal(q.checkerCommit,identity.leanCommit);
+            const observe=path.join(prefix,'observe.mjs');fs.writeFileSync(observe,"import * as m from "+JSON.stringify(pathToFileURL(q.artifact).href)+";\nif(m.answer!==42n)throw Error('result');\n");
+            run(process.execPath,[observe],{cwd:prefix});cases.push({mode,grammar,engine,passed:true,manifest:q.manifestSha256});
+           }
+           fs.renameSync(path.join(installed,'native/bin/psc1.disabled'),path.join(installed,'native/bin/psc1'));run(cli,['--identity'],{cwd:prefix});
+          }
+          assert.equal(fs.existsSync('.lake'),false);assert.equal(fs.existsSync('psc1'),false);
+          assert.equal(cases.length,16);
+          const q={schema:'psc1-clean-installed-generated/1',controlCommit:process.env.GITHUB_SHA,status:'passed',inputArtifact:12583067653,coreSha256:'4e4881d77c6a77cbad44faeb70798e71b76572fcedaee8cff01fcbe83f3ba711',noRepositoryCheckout:true,noCompilerSdkOrPythonOnExecutionPath:true,noLakeBuildTree:true,offlineLocalAndGlobal:true,matchingOptionalPackagesInstalled:true,optionalEmitterExecution:'covered by exact native full40145805549, not repeated here',nativeCompilerUnavailableDuringGeneratedCases:true,checkerCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',cases};
+          fs.writeFileSync('clean-installed.json',JSON.stringify(q,null,2)+'\n');console.log('PSC1_CLEAN_INSTALLED_GENERATED: '+JSON.stringify(q));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-clean-installed-generated-${{ github.sha }}
+          path: clean-installed.json
+          retention-days: 90

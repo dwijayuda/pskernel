@@ -46,6 +46,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Checker.ExprV2.RecursorMajor,
     `Ps.KernelCore.Checker.ExprV2.RecursorK,
     `Ps.KernelCore.Checker.ExprV2.Recursor,
+    `Ps.KernelCore.API.DagQuotAdmission,
     `Ps.KernelCore.API.DagAdmission,
     `Ps.KernelCore.API.Dag,
     `Ps.KernelCore.Checker.ExprV2.DefEqPair,

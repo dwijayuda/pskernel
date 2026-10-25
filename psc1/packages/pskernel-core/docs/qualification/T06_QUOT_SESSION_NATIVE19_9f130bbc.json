@@ -1,0 +1,36 @@
+{
+  "source": "9f130bbc7ccaf0aa2288c592ab4fbc668ecefd80",
+  "run": 40223744958,
+  "job": 121260665188,
+  "artifact": 12610516718,
+  "archive": {
+    "bytes": 801231,
+    "sha256": "fe3a43653d40da3925492df15fe3a5a37f25982d87d5fdf706fd578ebe8b309c",
+    "members": 309
+  },
+  "sourceSnapshotsChecked": 301,
+  "proofNames": [
+    "PsKernelQuotAdmissionProofs.match_shape_correspondence",
+    "PsKernelQuotAdmissionProofs.eq_shape_correspondence",
+    "PsKernelQuotAdmissionProofs.refl_shape_correspondence",
+    "PsKernelQuotAdmissionProofs.initialized_returns_exact_environment",
+    "PsKernelQuotAdmissionProofs.declined_check_does_not_install",
+    "PsKernelQuotAdmissionProofs.failed_check_does_not_install",
+    "PsKernelQuotAdmissionProofs.shared_install_preserves_frozen_admission",
+    "PsKernelQuotAdmissionProofs.missing_owner_declines",
+    "PsKernelQuotAdmissionProofs.wrong_owner_declines",
+    "PsKernelQuotSessionOwnerProofs.preflight_error_precedes_prepare",
+    "PsKernelQuotSessionOwnerProofs.prepare_error_publishes_no_owner",
+    "PsKernelQuotSessionOwnerProofs.decline_discards_prepared_owner_and_restarts_original",
+    "PsKernelQuotSessionOwnerProofs.hard_rejection_never_invokes_original_admission",
+    "PsKernelQuotSessionOwnerProofs.success_keeps_exact_prepared_owner_for_atomic_publication",
+    "PsKernelQuotSessionOwnerProofs.declaration_limit_precedes_generated_header_import",
+    "PsKernelQuotSessionOwnerProofs.initialized_preparation_is_exact_identity",
+    "PsKernelQuotSessionOwnerProofs.missing_eq_preparation_is_exact_identity",
+    "PsKernelQuotSessionOwnerProofs.wrong_eq_kind_does_not_import",
+    "PsKernelQuotSessionOwnerProofs.explicit_public_quot_routes_to_owned_worker"
+  ],
+  "bootstrapAssertions": 26,
+  "sessionAssertions": 17,
+  "retainedQuotSummary": "PSC1_V2_QUOT_OWNER_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 officialPositive=10 officialNegative=7"
+}

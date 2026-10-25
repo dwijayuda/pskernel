@@ -485,10 +485,13 @@ private def admissionRegression (prepared : Prepared) (input : Inputs)
     require (label ++ "-no-publication") (psKernelEnvironmentFind prepared.session.environment (nm label)).isNone
     admissions := admissions + 1
   require "seventeen-actual-direct-admissions" (admissions == 17)
-  require "Quot-admission-itself-remains-validated-V1"
-    (psKernelDagTryAdmitSimpleWithFuel prepared.session.resources.fuel prepared.withEq.environment
+  require "Quot-admission-itself-uses-owned-IDs"
+    (match psKernelDagTryAdmitSimpleWithFuel prepared.session.resources.fuel prepared.withEq.environment
       prepared.session.resources.maxRecDepth prepared.session.resources.maxNatSize
-      generated.arena generated.declarations .quot .quot).isNone
+      generated.arena generated.declarations .quot .quot with
+     | some (.ok environment) => environment.quotInitialized &&
+         psKernelEnvironmentSize environment == psKernelEnvironmentSize prepared.session.environment
+     | _ => false)
 
 private def publicRegression (prepared : Prepared) (input : Inputs) : IO Unit := do
   let mut queries := []

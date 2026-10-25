@@ -323,6 +323,57 @@ def psKernelDagRunOrdinaryOwnedWith
           | Except.ok checked =>
               psKernelDagFinishOwnedOrdinaryAdmission execution.session declaration checked
 
+/- Publish the four checked live Quot headers only after direct bootstrap
+   validation and the unchanged public declaration limit succeed. Metadata
+   import remains private and atomic; evaluator authority is cleared as in V1. -/
+def psKernelDagFinishOwnedQuotAdmission
+    (session : PsKernelKernelSession) (environment : PsKernelEnvironment)
+    (prepared : PsKernelDagGeneratedState) :
+    Except PsKernelError PsKernelDagOwnedCommandResult :=
+  if psKernelResourceAllowsSize session.resources (psKernelEnvironmentSize environment) then
+    let checked := psKernelEnvironmentWithNativeEvaluator environment Option.none;
+    match psKernelDagGeneratedInstallQuotPlan (psKernelDagGeneratedPlanQuot checked) prepared with
+    | Except.error error => Except.error (PsKernelError.internalError error)
+    | Except.ok owner =>
+        let next := PsKernelKernelSession.mk checked session.resources session.provider;
+        Except.ok
+          (PsKernelDagOwnedCommandResult.mk
+            (PsKernelDagReply.admitted (psKernelV1Receipt session checked))
+            (PsKernelDagExecutionState.mk next owner.declarations) owner)
+  else
+    Except.error
+      (PsKernelError.resourceExhausted PsKernelResourceError.declarationLimit
+        "declaration limit exceeded")
+
+/- Internal injected callbacks expose owner/error/decline sequencing for native
+   proofs. None restarts the exact original command and owner, discarding every
+   prepared suffix. A hard rejection never invokes original admission. -/
+def psKernelDagRunQuotOwnedWith
+    (prepare : PsKernelEnvironment -> PsKernelDagGeneratedState ->
+      Except String PsKernelDagGeneratedState)
+    (admit : PsKernelEnvironment -> PsKernelExprV2PagedArena ->
+      List PsKernelExprV2DeclarationRef -> Option (Except String PsKernelEnvironment))
+    (input : PsKernelExprV2Decoded) (execution : PsKernelDagExecutionState)
+    (levelParams : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (arena : PsKernelExprV2PagedArena) (built : PsKernelExprV2Decoded) :
+    Except PsKernelError PsKernelDagOwnedCommandResult :=
+  match psKernelKernelSessionPreflight execution.session with
+  | Except.error error => Except.error error
+  | Except.ok _ =>
+      let environment := psKernelKernelSessionEnvironment execution.session;
+      match prepare environment (PsKernelDagGeneratedState.mk arena built execution.declarations) with
+      | Except.error error => Except.error (PsKernelError.internalError error)
+      | Except.ok prepared =>
+          match admit environment prepared.arena prepared.declarations with
+          | Option.none =>
+              psKernelDagRunFallbackOwnedCommandWithSource input execution levelParams safety
+                arena built (PsKernelDagCommand.admit PsKernelDagDeclarationRequest.quot)
+          | Option.some attempted =>
+              match attempted with
+              | Except.error error => Except.error (psKernelErrorFromMessage error)
+              | Except.ok checked =>
+                  psKernelDagFinishOwnedQuotAdmission execution.session checked prepared
+
 def psKernelDagRunOwnedCommandWithSource
     (input : PsKernelExprV2Decoded)
     (execution : PsKernelDagExecutionState)
@@ -345,6 +396,9 @@ def psKernelDagRunOwnedCommandWithSource
                     input owner levels numParams value isUnsafe;
               psKernelDagRunOrdinaryOwnedWith admit input execution
                 levelParams safety arena built request declaration
+      | PsKernelDagDeclarationRequest.quot =>
+          psKernelDagRunQuotOwnedWith psKernelDagGeneratedPrepareQuot psKernelDagTryAdmitQuot
+            input execution levelParams safety arena built
       | _ =>
           psKernelDagRunFallbackOwnedCommandWithSource input execution
             levelParams safety arena built command

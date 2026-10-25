@@ -601,3 +601,34 @@ def psKernelDagGeneratedFromSession
     (built : PsKernelExprV2Decoded) : Except String PsKernelDagGeneratedState :=
   psKernelDagGeneratedDemandRange session.environment 0
     (PsKernelDagGeneratedState.mk arena built List.nil)
+
+/- Explicit Quot commands may not mention Eq in the input graph. Adapt only
+   their two checked bootstrap declarations before direct admission. The live
+   immutable environment remains authoritative; no caller-supplied table can
+   admit a declaration. Repeated initialized commands do not rebuild Eq owners.
+   This is a bounded transitional session import, not DAG-native type creation. -/
+def psKernelDagGeneratedPrepareQuot
+    (environment : PsKernelEnvironment) (state : PsKernelDagGeneratedState) :
+    Except String PsKernelDagGeneratedState :=
+  if environment.quotInitialized then Except.ok state
+  else
+    match psKernelEnvironmentFind environment psKernelEqName with
+    | Option.none => Except.ok state
+    | Option.some info =>
+        match info with
+        | PsKernelConstantInfo.inductInfo value =>
+            match value.base.levelParams with
+            | List.cons _ quotSingletonTail1 =>
+                match quotSingletonTail1 with
+                | List.cons _ _ => Except.ok state
+                | List.nil =>
+                    match value.ctors with
+                    | List.cons reflName quotSingletonTail0 =>
+                        match quotSingletonTail0 with
+                        | List.cons _ _ => Except.ok state
+                        | List.nil =>
+                            psKernelDagGeneratedCompleteDemands environment.constants environment
+                              (List.cons psKernelEqName (List.cons reflName List.nil)) state
+                    | _ => Except.ok state
+            | _ => Except.ok state
+        | _ => Except.ok state

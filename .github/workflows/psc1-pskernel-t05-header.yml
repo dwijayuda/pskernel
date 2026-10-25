@@ -1,9 +1,9 @@
-name: PSC1 complete lazy-transform refinement qualification
+name: PSC1 complete quotient cross-session ownership qualification
 'on':
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-transform-lazy-full-20261025
+    - work/psc1-pskernel-t06-quot-owner-full-20261026
     paths:
     - psc1/kernel-lakefile.lean
     - psc1/lean-toolchain
@@ -93,6 +93,8 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
+        python3 scripts/pskernel-quot-session-owner-qualification.py source "$PSC1_T05_DIR/quot-owner"
+        python3 scripts/pskernel-quot-admission-qualification.py source "$PSC1_T05_DIR/quot"
         python3 scripts/pskernel-transform-lazy-qualification.py source "$PSC1_T05_DIR/lazy"
         python3 scripts/pskernel-unary-spine-qualification.py source --out "$PSC1_T05_DIR/unary"
     - name: Authenticate the exact empty-cache helper delta and all retained source obligations
@@ -132,9 +134,9 @@ jobs:
         baseline_tree=git('rev-parse',BASE+':'+ROOT).decode().strip()
         target_tree=git('rev-parse','HEAD:'+ROOT).decode().strip()
         require(baseline_tree=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff','complete qualified baseline production tree')
-        require(target_tree=='bccb72769d4f20def35f2064363fbc94fcc7e54a','complete pinned candidate production tree')
+        require(target_tree=='65d5b9c3d0431a8b86961b6d1aec398f7169d223','complete pinned candidate production tree')
         changed=git('diff','--name-only',BASE,'HEAD','--',ROOT).decode().splitlines()
-        require(changed==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact authenticated cache, unary-spine and lazy-transform changes')
+        require(changed==["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact authenticated cache, unary-spine and lazy-transform changes')
         baseline=git('show',BASE+':'+PROD)
         require(blob(baseline)=='4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b','pinned complete predecessor')
         before=baseline.decode()
@@ -209,10 +211,28 @@ jobs:
                     'source inventory byte binding: '+name)
             require((out/'sources'/name).read_bytes()==raw,'archived source byte binding: '+name)
             if name in previous_lists[0] and name not in [WORKFLOW,RETAINED]:
-                if name == 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean':
+                if name in ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean']:
+                    owners = json.loads((out/'quot-owner/source.json').read_text())
+                    require(owners['sourceSha']==identity['sourceSha'] and str(owners['runId'])==identity['runId']
+                            and owners['baseSource']=='79031362b401f85d3c7f324cc3aa7dbf91c1bf0e'
+                            and owners['allOtherPublicDagAndMetadataCodeUnchanged'] is True,
+                            'same-source exact checked session-owner migration')
+                    pin, = [item for item in owners['sourceSnapshots'] if item['path']==name]
+                    require(digest(raw)=={'bytes':pin['bytes'],'sha256':pin['sha256']},
+                            'actual owning-session source snapshot')
+                elif name in ['psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean','psc1/kernel-lakefile.lean']:
+                    quot = json.loads((out/'quot/source.json').read_text())
+                    require(quot['sourceSha']==identity['sourceSha'] and str(quot['runId'])==identity['runId']
+                            and quot['baseSource']=='79031362b401f85d3c7f324cc3aa7dbf91c1bf0e'
+                            and quot['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean"],
+                            'same-source exact separately authenticated quotient migration')
+                    pin, = [item for item in quot['sourceSnapshots'] if item['path']==name]
+                    require(digest(raw)=={'bytes':pin['bytes'],'sha256':pin['sha256']},
+                            'actual quotient admission routing source snapshot')
+                elif name == 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean':
                     lazy = json.loads((out/'lazy/source.json').read_text())
                     require(lazy['sourceSha']==identity['sourceSha'] and str(lazy['runId'])==identity['runId']
-                            and lazy['productionChanges']==[name] and lazy['exactLetMotionOnly'] is True,
+                            and lazy['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"] and lazy['exactLetMotionOnly'] is True,
                             'same-source exact one-path lazy-transform authentication')
                     pin, = [item for item in lazy['sourceSnapshots'] if item['path']==name]
                     require(digest(raw)=={'bytes':pin['bytes'],'sha256':pin['sha256']},
@@ -228,7 +248,7 @@ jobs:
                 'predecessorLookup':digest(old.encode()),'candidateLookup':digest(updated.encode()),
                 'frozenLookupByteExact':True,'retainedProofStatementAndOtherBodiesUnchanged':True,
                 'retainedProofBaseline':{'path':RETAINED,**digest(prior),'gitBlobSha':blob(prior)},
-                'otherRetainedInputsExceptAuthenticatedTransformUnchanged':True,'sourceInputs':96,'proofNames':names,
+                'otherRetainedInputsExceptAuthenticatedTransformAndQuotUnchanged':True,'sourceInputs':96,'proofNames':names,
                 'files':records,'sourceInventory':digest(inventory.read_bytes()),
                 'retainedLiftAndCountSourceBytesMatch':True,'liftAndCountWorkersDeferred':False,
                 'fullQualification':False,'performanceQualified':False}
@@ -262,9 +282,9 @@ jobs:
         assert cache_audit["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
         assert cache_audit["job"] == os.environ["GITHUB_JOB"] and cache_audit["route"] == os.environ["PSC1_T05_ROUTE"]
         assert cache_audit["baselineSha"] == "20224a295359abb201f56c72395690bf0bfac9fa"
-        assert cache_audit["targetProductionTree"] == "bccb72769d4f20def35f2064363fbc94fcc7e54a"
+        assert cache_audit["targetProductionTree"] == "65d5b9c3d0431a8b86961b6d1aec398f7169d223"
         assert cache_audit["exactCacheLookupGuardAndCommentOnly"] is True
-        assert changed == cache_audit["productionChanges"] == ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"], "only the independently authenticated cache, unary-spine and lazy-transform deltas are allowed: " + repr(changed)
+        assert changed == cache_audit["productionChanges"] == ["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"], "only the independently authenticated cache, unary-spine and lazy-transform deltas are allowed: " + repr(changed)
         proof_path = pathlib.Path("psc1/test/PsKernelDeferredTransformProofs.lean")
         proof = proof_path.read_bytes().decode("utf-8")
         assert proof.count("namespace Frozen\n") == 1
@@ -1130,7 +1150,7 @@ jobs:
         if source['baselineSha']!='10144e2f9e8d223b5dcde275bd1f48d25df113b3':
             raise RuntimeError('Deferred transform qualified baseline changed')
         if (source['normalizedTransformAndRetainedBodiesMatch'] is not True or source['exactBindingMovesOnly'] is not False
-            or source['productionChanges'] != ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
+            or source['productionChanges'] != ["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
             or source['productionChangePolicy'] != 'empty-semantic-cache-plus-unary-spines-plus-lazy-transform'
             or source['emptySemanticCacheSourceAudit'] != digest(root/'empty-semantic-cache-source-audit.json')
             or source['retainedLiftAndCountSourceBytesMatch'] is not True
@@ -1336,7 +1356,7 @@ jobs:
                  'replayArenaModelBridgeEstablished':False,
                  'fullOrdinaryAdmission':True,'retainedLiftAndCountSourceBytesMatch':True,
                  'liftAndCountWorkersDeferred':False,
-                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],
+                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],
                  'layoutProofProductionChanges':False,
                  'emptySemanticCacheSourceAudit':digest(root/'empty-semantic-cache-source-audit.json'),
                  'fullKernel':False,'performanceQualified':False}
@@ -1374,16 +1394,16 @@ jobs:
                      'replayArenaModelBridgeEstablished']
         require(all(retained[k] is True for k in true_flags),'retained layout guarantees')
         require(all(retained[k] is False for k in false_flags),'retained scope limits')
-        require(retained['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'truthful complete four-path production delta')
+        require(retained['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'truthful complete four-path production delta')
         source_path=root/'empty-semantic-cache-source-audit.json';source=json.loads(source_path.read_text())
         require(source['schema']=='psc1-t09-empty-semantic-cache-source-v1'
                 and all(source[k]==v for k,v in identity.items()),'authenticated helper source identity')
         require(source['baselineSha']=='20224a295359abb201f56c72395690bf0bfac9fa'
                 and source['baselineProductionTree']=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff'
-                and source['targetProductionTree']=='bccb72769d4f20def35f2064363fbc94fcc7e54a'
-                and source['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact complete production trees and delta')
+                and source['targetProductionTree']=='65d5b9c3d0431a8b86961b6d1aec398f7169d223'
+                and source['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact complete production trees and delta')
         require(all(source[k] is True for k in ['exactCacheLookupGuardAndCommentOnly','frozenLookupByteExact',
-                'retainedProofStatementAndOtherBodiesUnchanged','otherRetainedInputsExceptAuthenticatedTransformUnchanged']),
+                'retainedProofStatementAndOtherBodiesUnchanged','otherRetainedInputsExceptAuthenticatedTransformAndQuotUnchanged']),
                 'exact helper and retained source authentication')
         require(retained['emptySemanticCacheSourceAudit']==digest(source_path),'retained source-authentication digest')
         inventory=root/'source-inventory.json';inv=json.loads(inventory.read_text())
@@ -1431,7 +1451,7 @@ jobs:
                  'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
                  'retainedLayoutReceipt':digest(parent),'sourceAudit':digest(source_path),
                  'sourceInventory':digest(inventory),'proofStatuses':digest(status),
-                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'emptySemanticCacheSemanticEquality':True,
+                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'emptySemanticCacheSemanticEquality':True,
                  'frozenLookupByteExact':True,'retainedProofStatementAndOtherBodiesUnchanged':True,
                  'emptySemanticCacheHelperOnly':True,'fullOrdinaryAdmission':True,
                  'retainedLiftAndCountSourceBytesMatch':True,'liftAndCountWorkersDeferred':False,
@@ -1457,6 +1477,28 @@ jobs:
           2>&1 | tee "$PSC1_T05_DIR/lazy/proofs.log"
         python3 scripts/pskernel-transform-lazy-qualification.py proofs "$PSC1_T05_DIR/lazy"
         python3 scripts/pskernel-transform-lazy-qualification.py cohort "$PSC1_T05_DIR/lazy"
+    - name: Qualify nine quotient ID proofs and retained official Quot controls
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean test/PsKernelQuotAdmissionProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/quot/proofs.log"
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelQuotAdmissionRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/quot/regression.log"
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelExprV2QuotOwnerRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/quot/retained-quot-owner.log"
+        python3 scripts/pskernel-quot-admission-qualification.py native "$PSC1_T05_DIR/quot"
+    - name: Qualify ten explicit-session owner proofs and17 complete controls
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        lake -f kernel-lakefile.lean env lean test/PsKernelQuotSessionOwnerProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/quot-owner/proofs.log"
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelQuotSessionOwnerRegression.lean \
+          2>&1 | tee "$PSC1_T05_DIR/quot-owner/regression.log"
+        python3 scripts/pskernel-quot-session-owner-qualification.py native "$PSC1_T05_DIR/quot-owner"
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -1551,6 +1593,8 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
+        python3 scripts/pskernel-quot-session-owner-qualification.py source "$PSC1_T05_DIR/quot-owner"
+        python3 scripts/pskernel-quot-admission-qualification.py source "$PSC1_T05_DIR/quot"
         python3 scripts/pskernel-transform-lazy-qualification.py source "$PSC1_T05_DIR/lazy"
         python3 scripts/pskernel-unary-spine-qualification.py source --out "$PSC1_T05_DIR/unary"
     - name: Build authentic PSC1 for the bounded generation gate
@@ -2562,6 +2606,20 @@ jobs:
         python3 scripts/pskernel-unary-spine-qualification.py route --out "$PSC1_T05_DIR/unary" \
           --native-root "$RUNNER_TEMP/validator-native" --node "$PSC1_T05_NODE"
         python3 scripts/pskernel-transform-lazy-qualification.py route "$PSC1_T05_DIR/lazy" "$RUNNER_TEMP/validator-native"
+    - name: Qualify direct quotient IDs in the complete generated program
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-quot-admission-qualification.py route "$PSC1_T05_DIR/quot" \
+          "$RUNNER_TEMP/validator-native" "$PSC1_T05_NODE"
+    - name: Qualify explicit cross-session Quot in the complete generated program
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-quot-session-owner-qualification.py route "$PSC1_T05_DIR/quot-owner" \
+          "$RUNNER_TEMP/validator-native" "$PSC1_T05_NODE"
     - name: Retain bounded gate artifacts on success or failure
       working-directory: psc1
       shell: bash

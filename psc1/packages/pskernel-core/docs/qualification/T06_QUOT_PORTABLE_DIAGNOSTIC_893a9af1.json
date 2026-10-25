@@ -1,0 +1,45 @@
+{
+  "source": "893a9af1d1ef83be3b986848fbf57a916b1f5467",
+  "run": 40223657627,
+  "job": 121260395550,
+  "artifact": 12611140437,
+  "archive": {
+    "bytes": 14837,
+    "sha256": "f85d90aaa6a3aea6ec93b3757d397b0031633e8ea33a1acde4700786f7a5c5f3",
+    "members": 8
+  },
+  "compiler": {
+    "schema": "psc1-quot-parser-diagnostic-v1",
+    "sourceSha": "893a9af1d1ef83be3b986848fbf57a916b1f5467",
+    "runId": "40223657627",
+    "compilerSource": "14dad2ce6eaef9fa71170f28650a5c626eca4a76",
+    "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+    "actualCompilerArtifact": 12606866673,
+    "actualArchiveSha256": "c28da8d4d57a5a59a1ff686b2ce671102b20073bd00bf32450fae37cf2ab8dec",
+    "snapshots": [
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean",
+        "bytes": 12993,
+        "sha256": "624697322e578ef620a9a5bbf68f67a46e27c45e240ef29de76296892794c16b"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean",
+        "bytes": 31020,
+        "sha256": "47defc0dba315bb98e862fb28d74b209e58610fe2e8be459777e7cc6f7de67d3"
+      },
+      {
+        "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean",
+        "bytes": 26014,
+        "sha256": "80a8d48df35f9b9b8a045cb6cab932262bf38afea9b065fa04b3231a1e3412f5"
+      }
+    ],
+    "diagnosticOnly": true,
+    "fullQualification": false
+  },
+  "actualDeclarationCounts": {
+    "DagQuotAdmission": 1147,
+    "DagGenerated": 1206,
+    "Dag": 1918
+  },
+  "diagnosticOnly": true
+}

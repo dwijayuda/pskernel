@@ -64,14 +64,17 @@ def psOwnershipError (moduleName phase detail : String)
           ("span", psOwnershipSpan value.span),
           ("phase", .str (psOwnershipPhase value.phase))])]
 
+-- Lossless compact rows avoid repeating JSON field names/position labels in
+-- whole-compiler traces. All six coordinates and tagged names are retained.
+def psOwnershipBindingSpan (span : PsSourceSpan) : Lean.Json :=
+  Lean.toJson ([span.start.byteOffset, span.start.line, span.start.column,
+    span.stop.byteOffset, span.stop.line, span.stop.column] : List Nat)
+
 def psOwnershipBindingTarget (target : PsElabSourceTarget) : Lean.Json :=
   match target with
-  | .local localId binder => Lean.Json.mkObj [
-      ("kind", .str "local"), ("localId", Lean.toJson localId),
-      ("binder", Lean.toJson binder)]
-  | .global name => Lean.Json.mkObj [
-      ("kind", .str "global"), ("name", Lean.toJson (psOwnershipName name))]
-  | .sort => Lean.Json.mkObj [("kind", .str "sort")]
+  | .local localId binder => .arr #[.str "local", Lean.toJson localId, Lean.toJson binder]
+  | .global name => .arr #[.str "global", Lean.toJson (psOwnershipName name)]
+  | .sort => .arr #[.str "sort"]
 
 def psOwnershipBindingTrace (member : PsElabSourceMemberTrace) : Lean.Json :=
   let trace := member.trace
@@ -82,22 +85,20 @@ def psOwnershipBindingTrace (member : PsElabSourceMemberTrace) : Lean.Json :=
       | .partialDefinition => "partialDefinition"
       | .theoremDeclaration => "theorem")),
     ("phase", .str "source-elaboration-before-lifts"),
+    ("encoding", .str "psc1-source-bindings-compact/1"),
     ("bodyStart", Lean.toJson member.bodyStart),
     ("enabled", Lean.toJson trace.enabled), ("complete", Lean.toJson trace.complete),
     ("events", Lean.toJson trace.nextId),
-    ("binders", Lean.toJson (trace.bindersRev.reverse.map fun binder => Lean.Json.mkObj [
-      ("index", Lean.toJson binder.index), ("localId", Lean.toJson binder.localId),
-      ("name", Lean.toJson (psOwnershipName binder.name)),
-      ("parent", Lean.toJson binder.parent),
-      ("span", match binder.source with
+    ("binders", Lean.toJson (trace.bindersRev.reverse.map fun binder => Lean.Json.arr #[
+      Lean.toJson binder.index, Lean.toJson binder.localId,
+      Lean.toJson (psOwnershipName binder.name), Lean.toJson binder.parent,
+      match binder.source with
         | .none => .null
-        | .some span => psOwnershipSpan span)])),
-    ("references", Lean.toJson (trace.referencesRev.reverse.map fun reference => Lean.Json.mkObj [
-      ("index", Lean.toJson reference.index),
-      ("sourceName", Lean.toJson (psOwnershipName reference.sourceName)),
-      ("span", psOwnershipSpan reference.span),
-      ("baseSegments", Lean.toJson reference.baseSegments),
-      ("target", psOwnershipBindingTarget reference.target)]))]
+        | .some span => psOwnershipBindingSpan span])),
+    ("references", Lean.toJson (trace.referencesRev.reverse.map fun reference => Lean.Json.arr #[
+      Lean.toJson reference.index, Lean.toJson (psOwnershipName reference.sourceName),
+      psOwnershipBindingSpan reference.span, Lean.toJson reference.baseSegments,
+      psOwnershipBindingTarget reference.target]))]
 
 /-- One actual elaboration per module. No second resolver, parser or compiler. -/
 def psOwnershipCaptureWithSourceTrace (request : Request) (tracing : Bool) :

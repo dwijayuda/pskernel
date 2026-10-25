@@ -24,6 +24,32 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
         tokens.map(piece => piece.token.text).join('') !== words(tagged).join('.'))
       refuse('BINDING_REFERENCE_SPAN');
   };
+  const decodeSpan = value => {
+    if (!Array.isArray(value) || value.length !== 6) refuse('BINDING_SPAN_ROW');
+    for (const coordinate of value)
+      if (!Number.isSafeInteger(coordinate) || coordinate < 0) refuse('BINDING_SPAN_ROW');
+    return { start: { byteOffset: value[0], line: value[1], column: value[2] },
+      stop: { byteOffset: value[3], line: value[4], column: value[5] } };
+  };
+  const decodeBinder = row => {
+    if (!Array.isArray(row) || row.length !== 5) refuse('BINDING_BINDER_ROW');
+    return { index: row[0], localId: row[1], name: row[2], parent: row[3],
+      span: row[4] === null ? null : decodeSpan(row[4]) };
+  };
+  const decodeReference = row => {
+    if (!Array.isArray(row) || row.length !== 5 || !Array.isArray(row[4]))
+      refuse('BINDING_REFERENCE_ROW');
+    const value = row[4];
+    let target;
+    if (value[0] === 'local' && value.length === 3)
+      target = { kind: 'local', localId: value[1], binder: value[2] };
+    else if (value[0] === 'global' && value.length === 2)
+      target = { kind: 'global', name: value[1] };
+    else if (value[0] === 'sort' && value.length === 1) target = { kind: 'sort' };
+    else refuse('BINDING_TARGET_ROW');
+    return { index: row[0], sourceName: row[1], span: decodeSpan(row[2]),
+      baseSegments: row[3], target };
+  };
   if (!Array.isArray(wire) || wire.length !== module.origins.length) refuse('BINDING_COVERAGE');
   return wire.map((batch, sourceIndex) => {
     exactKeys(batch, ['sourceIndex', 'traces']);
@@ -32,12 +58,13 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
         batch.traces.length > origin.members.length) refuse('BINDING_BATCH');
     const owners = new Set();
     const traces = batch.traces.map(trace => {
-      exactKeys(trace, ['name', 'kind', 'phase', 'bodyStart', 'enabled', 'complete',
+      exactKeys(trace, ['name', 'kind', 'phase', 'encoding', 'bodyStart', 'enabled', 'complete',
         'events', 'binders', 'references']);
       const owner = coreName(trace.name);
       if (owners.has(owner) || !origin.members.some(member => coreName(member.name) === owner) ||
           !['definition', 'partialDefinition', 'theorem'].includes(trace.kind) ||
-          trace.phase !== 'source-elaboration-before-lifts' || trace.enabled !== true ||
+          trace.phase !== 'source-elaboration-before-lifts' ||
+          trace.encoding !== 'psc1-source-bindings-compact/1' || trace.enabled !== true ||
           typeof trace.complete !== 'boolean' || !Array.isArray(trace.binders) ||
           !Array.isArray(trace.references)) refuse('BINDING_TRACE');
       owners.add(owner); nat(trace.events); nat(trace.bodyStart, trace.events);
@@ -49,7 +76,8 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
         if (index >= trace.events || events.has(index)) refuse('BINDING_EVENT');
         events.add(index);
       };
-      const outputBinders = trace.binders.map(binder => {
+      const outputBinders = trace.binders.map(row => {
+        const binder = decodeBinder(row);
         exactKeys(binder, ['index', 'localId', 'name', 'parent', 'span']);
         checkEvent(binder.index); nat(binder.localId); name(binder.name);
         if (binder.parent !== null) {
@@ -72,7 +100,8 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
         binders.set(binder.index, result);
         return result;
       });
-      const references = trace.references.map(reference => {
+      const references = trace.references.map(row => {
+        const reference = decodeReference(row);
         exactKeys(reference, ['index', 'sourceName', 'span', 'baseSegments', 'target']);
         checkEvent(reference.index);
         sourceNameSpan(reference.span, reference.sourceName);

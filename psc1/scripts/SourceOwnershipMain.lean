@@ -70,7 +70,7 @@ def main (args : List String) : IO Unit := do
         ("sourceCoreDeclarations", Lean.toJson semantic.source.length),
         ("logicalCoreDeclarations", Lean.toJson semantic.logicalCount),
         ("partialNames", Lean.toJson (semantic.partialNames.map (fun n => psNameToString n)))]).compress
-      demand (response.utf8ByteSize ≤ 33554432) "RESPONSE_LIMIT"
+      demand (response.utf8ByteSize ≤ 33554432) ("RESPONSE_LIMIT:" ++ toString response.utf8ByteSize)
       IO.FS.writeFile admissionsPath semantic.admissions
       IO.FS.writeFile irPath ir
       IO.FS.writeFile output response

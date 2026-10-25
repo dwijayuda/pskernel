@@ -26,6 +26,12 @@ const bindings = createSourceBindingTool({ ownershipTool: ownership });
 const converter = createCheckedSourceConverter({ ownershipTool: ownership });
 const env = { ...process.env, PSC1_HOST_TOOLS: path.resolve('host-tools/artifacts.mjs') };
 const records = [], compiler = [];
+function retain(status) {
+  fs.writeFileSync(path.join(output, 'progress.json'), JSON.stringify({
+    schema: 'psc1-source-binding-progress/1', testedCommit: process.env.GITHUB_SHA,
+    status, records, compiler, sourceFilesWritten: false, publication: false,
+  }, null, 2) + '\n');
+}
 const output = path.resolve('dist/source-bindings');
 fs.mkdirSync(output, { recursive: true });
 fs.writeFileSync(path.join(work, 'package.json'), '{"type":"module"}\n');
@@ -135,6 +141,7 @@ try {
       const after = await observe(bindings.readCandidate(report, 'Test.Main'), grammar, 'after', target);
       assert.deepEqual(after.values, before.values);
       records.push(before, after);
+      retain('in-progress');
       console.log('PSC1_RENAME_BACKEND:', grammar, target, 'before/after passed');
     }
   }
@@ -167,6 +174,7 @@ try {
       references: traces.reduce((sum, trace) => sum + trace.references.length, 0),
       candidateSha256: hash(candidate), report };
     compiler.push(record);
+    retain('in-progress');
     console.log('PSC1_BINDING_COMPILER:', JSON.stringify({
       grammar, modules: record.modules, members: record.members,
       sourceClosureDigest: record.sourceClosureDigest, traces: record.traces,
@@ -181,6 +189,7 @@ try {
     checker: 'lean4:4.35.0', checkerCommit: 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
     records, compiler, sourceFilesWritten: false, publication: false,
   }, null, 2) + '\n');
+  retain('passed');
   console.log('PSC1_BINDING_INTEGRATION: PASS', JSON.stringify({
     executedArtifacts: records.length, compilerGrammars: compiler.length,
   }));

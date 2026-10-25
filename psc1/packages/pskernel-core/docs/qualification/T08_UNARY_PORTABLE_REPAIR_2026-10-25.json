@@ -1,0 +1,20 @@
+{
+  "schema": "psc1-unary-source-repair-handoff-v1",
+  "candidate": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+  "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+  "fullRun": 40201690903,
+  "auditSource": "f33d91760b11eb36e2ba6d3afcb868226317122a",
+  "auditRun": 40201797756,
+  "abbaSource": "a6a1e1fd4a1558df36a51e5be43a33a15047da22",
+  "abbaRun": 40202200567,
+  "failedSource": "9de6a17cba7224a3a98ae7dbc00e147246acef9f",
+  "failedRun": 40200450224,
+  "failure": "portable parser rejects nested constructor pattern before kernel generation",
+  "nativeReports": 541,
+  "originalFullShapeBodyByteIdentical": true,
+  "integration": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+  "productionAdopted": false,
+  "B": "OPEN",
+  "C": "FAIL",
+  "D": "OPEN"
+}

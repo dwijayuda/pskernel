@@ -1,0 +1,38 @@
+{
+  "schema": "psc1-slim-universal-package-inputs/1",
+  "qualifiedIntegration": {
+    "run": 40161362270,
+    "job": 121073432577,
+    "artifact": 12586394254,
+    "zipSha256": "426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52",
+    "commit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+    "tarball": "kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz",
+    "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a"
+  },
+  "packages": {
+    "wasmKernel": {
+      "package": "@proofscript/pskernel-lean-wasm",
+      "version": "4.35.0",
+      "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+      "sha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511"
+    },
+    "nativeKernel": {
+      "package": "@proofscript/pskernel-lean",
+      "version": "4.35.0",
+      "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+      "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+    },
+    "rust": {
+      "package": "@proofscript/compiler-rust-linux-x64",
+      "version": "0.1.0-psc1.3",
+      "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz",
+      "sha256": "551f150d09d98fe48312c40cdaa793522534c84fff250097199ff75b467530f7"
+    },
+    "wasm-core": {
+      "package": "@proofscript/compiler-wasm",
+      "version": "0.1.0-psc1.3",
+      "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
+      "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83"
+    }
+  }
+}

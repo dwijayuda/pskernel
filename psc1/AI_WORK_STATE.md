@@ -1,5 +1,39 @@
 # PSC1 AI work state
 
+## Active slice: slim universal root and optional executors
+
+Continue from PR #179 HEAD ba3bfb045619ceb2948820f874357b2058f79868 on
+`feat/psc1-slim-universal-npm-20261025`. The prior PR and qualified artifacts are
+preserved. This slice uses GitHub and Linux Actions only; no merge or npm publish.
+
+Implementation is now prepared, **not yet qualified**: a fresh universal-format
+proofscript@0.1.0-psc1.4 root containing only existing G3 JS/TS engines and the
+mandatory official Lean4.35 linear-memory Wasm kernel. No native compiler/checker,
+Rust executor, compiler-Wasm executor, formatter binary, SDK or Python/PHP payload
+is included by default. Rust/Wasm execution and native comparison are explicit
+optional installed packages, selected only through exact closed package/version/
+manifest/index/resource pins from the already qualified artifacts. No discovery
+from source text, arbitrary plugin names, downloads or silent fallback.
+
+The root reuses generated-compiler-session.mjs unchanged for independent admission,
+strict original/transformed IR and Linux transactional JS publication. Universal
+checked compile API/stdout returns admitted JS without publication. Non-Linux
+file publication is explicitly refused pending actual platform qualification.
+A separate bounded candidate-only API retains JS/TS/Rust/Wasm-core emission from
+the same compiler; it grants no admission/publication authority. The prior native
+distribution still owns its qualified all-seven-output CLI and stays preserved.
+
+Acceptance: packed root <50% of previous62181083 bytes; no OS/CPU/libc restriction
+or native executable payload; offline fresh local/global installation; default
+JS/TS without SDK/optional executors; explicit Rust/Wasm discovery/all four real
+engines/both grammars; optional native/Wasm genuine checker agreement; rejection,
+corruption/version/absence/policy/fault cases preserve previous output; actual
+public API TypeScript consumer. Linux package qualification and normal selected
+source CI must pass before recording success. Full macOS/Windows publication,
+generated non-JS publication, component/provider dispatch and final release remain
+separate incomplete requirements. No frozen compiler source or qualified G3 byte
+is changed; do not rerun successful long self-host chains for this packaging slice.
+
 Updated2026-10-25 Asia/Jakarta. Draft PR #179, branch
 `integration/psc1-lean435-kernel-packages-20261025`, stacked on #178/
 qualified55f9327e. Connected GitHub and cloud Actions only; routine development

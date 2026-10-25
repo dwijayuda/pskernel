@@ -208,5 +208,49 @@
       "php-optional"
     ],
     "fullCrossPlatformRelease": false
+  },
+  "activeMilestone": {
+    "name": "slim-universal-root-and-optional-execution-integration",
+    "status": "implemented-awaiting-Linux-CI",
+    "version": "0.1.0-psc1.4",
+    "base": "ba3bfb045619ceb2948820f874357b2058f79868",
+    "embeddedEngines": [
+      "js",
+      "ts"
+    ],
+    "mandatoryKernel": "@proofscript/pskernel-lean-wasm@4.35.0",
+    "optionalExecutionPackages": [
+      "@proofscript/compiler-rust-linux-x64@0.1.0-psc1.3",
+      "@proofscript/compiler-wasm@0.1.0-psc1.3"
+    ],
+    "nativeKernel": "optional explicit @proofscript/pskernel-lean@4.35.0",
+    "checkedTargets": [
+      "js"
+    ],
+    "candidateOnlyTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "publicationPlatforms": [
+      "linux"
+    ],
+    "otherPlatformPublication": "explicitly refused; actual release tests pending",
+    "priorNativeDistributionPreserved": true,
+    "compilerSourceUnchanged": true,
+    "acceptance": [
+      "root-less-than-half-previous-size",
+      "no-platform-native-default-payload",
+      "offline-local-and-global-install",
+      "default-js-ts-without-sdk-or-optional-payloads",
+      "explicit-hash-pinned-rust-wasm-discovery",
+      "same-frozen-compiler-source-and-IR-admission-boundary",
+      "both-grammars-and-all-four-installed-engines",
+      "negative-policy-tamper-version-and-publication-fault-preservation",
+      "genuine-optional-native-wasm-cross-checks",
+      "actual-packed-public-types",
+      "normal-dependency-selected-source-gate"
+    ]
   }
 }

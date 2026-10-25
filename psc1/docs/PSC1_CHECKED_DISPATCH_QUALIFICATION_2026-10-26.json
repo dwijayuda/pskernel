@@ -1,0 +1,46 @@
+{
+  "schema": "psc1-checked-dispatch-qualification/1",
+  "status": "in-progress",
+  "baseCommit": "9c13f2f2f11bda05a9274e27453d1e275bef1222",
+  "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+  "compilerGenerations": "unchanged qualified four-engine G3 inputs",
+  "nativeTransport": {
+    "commit": "dfb26a02401acb33bbaef77bb651b1c632e1c38b",
+    "run": 40244821125,
+    "job": 121324054005,
+    "status": "passed",
+    "retainedPayloadEquality": [
+      "python",
+      "php"
+    ],
+    "legacyNegativeCases": 16
+  },
+  "attempts": [
+    {
+      "head": "30fdd28e810c2f78b790d84b7b6cce3507c57a1c",
+      "run": 40244572685,
+      "job": 121323314299,
+      "status": "failed",
+      "reason": "native record-field layout",
+      "fixedAt": "dfb26a02401acb33bbaef77bb651b1c632e1c38b"
+    },
+    {
+      "head": "b3dfa700d1bf63abb889b3522da1a7d56dcf3f9f",
+      "run": 40244990464,
+      "job": 121324671513,
+      "status": "failed",
+      "reason": "C launcher signed comparison diagnosed by -Werror"
+    }
+  ],
+  "scope": {
+    "targets": [
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "platform": "Linux x64 only",
+    "formalPreservation": false,
+    "releaseQualified": false,
+    "npmPublication": false
+  }
+}

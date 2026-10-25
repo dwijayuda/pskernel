@@ -92,7 +92,7 @@ jobs:
       - name: Preserve historical cleanup and explicit feature AST correspondence
         run: |
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
-          node scripts/readability-host-check.mjs --propose
+          node scripts/readability-host-check.mjs
       - name: Install locked target consumer for assembly only
         run: npm ci --prefix .. --ignore-scripts --include=optional
       - name: Prepare locked optional Rust target consumer

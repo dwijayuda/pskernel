@@ -23,6 +23,8 @@ for(const target of ['python','php','wasm-component']){
    const symbols=run('nm',['--defined-only',worker]);
    assert.doesNotMatch(symbols,/initialize_Ps_Compiler_Api|initialize_Ps_Elab_Term|initialize_PsKernelLean_|initialize_Ps_Host_DirectBackend/);
    assert.doesNotMatch(symbols,target==='python'?/initialize_Ps_BackendPhp/:/initialize_Ps_BackendPython/);
+   const resources=target==='python'?['typed_io.py','generated-python-transport.py']:['typed-io.php','generated-php-transport.php'];
+   for(const resource of resources)copy('host-tools/'+resource,path.join(stage,'resources',resource));
    if(target==='python'){
      const exe=process.env.PSC1_PYTHON_314;assert.ok(exe);assert.equal(run(exe,['--version']),'Python 3.14.8');
      const info=JSON.parse(run(exe,['-I','-S','-c','import json,sysconfig;print(json.dumps({k:sysconfig.get_config_var(k) for k in ["LIBDIR","LDLIBRARY"]}|{"stdlib":sysconfig.get_path("stdlib")}))']));

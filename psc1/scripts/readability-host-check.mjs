@@ -19,7 +19,7 @@ const featureBaselines = {
   'npm-cli/universal.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
   'npm-cli/universal-cli.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
 };
-const featureQualification = 'docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json';
+const featureQualification = 'docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json';
 const files = [
   'host-tools/installed-engine-resolver.mjs',
   'npm-cli/universal.mjs',

@@ -268,6 +268,9 @@ export function createGeneratedJsCompilerSession({
         key.startsWith('DYLD_')
       )
         delete env[key];
+    if ([componentTools?.executable, optionalProvider?.executable].includes(executable))
+      env.PSC1_OPTIONAL_PARENT_PID = String(process.pid);
+    else delete env.PSC1_OPTIONAL_PARENT_PID;
     if (digestEnv !== undefined) {
       if (role !== 'optional-provider' || Object.keys(digestEnv).join(',') !== 'PSC1_BACKEND_REQUEST_SHA256' ||
           !/^[a-f0-9]{64}$/.test(digestEnv.PSC1_BACKEND_REQUEST_SHA256))

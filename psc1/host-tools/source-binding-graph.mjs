@@ -76,8 +76,8 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
         if (index >= trace.events || events.has(index)) refuse('BINDING_EVENT');
         events.add(index);
       };
-      const outputBinders = trace.binders.map(row => {
-        const binder = decodeBinder(row);
+      const outputBinders = trace.binders.map(encodedBinder => {
+        const binder = decodeBinder(encodedBinder);
         exactKeys(binder, ['index', 'localId', 'name', 'parent', 'span']);
         checkEvent(binder.index); nat(binder.localId); name(binder.name);
         if (binder.parent !== null) {
@@ -100,8 +100,8 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
         binders.set(binder.index, result);
         return result;
       });
-      const references = trace.references.map(row => {
-        const reference = decodeReference(row);
+      const references = trace.references.map(encodedReference => {
+        const reference = decodeReference(encodedReference);
         exactKeys(reference, ['index', 'sourceName', 'span', 'baseSegments', 'target']);
         checkEvent(reference.index);
         sourceNameSpan(reference.span, reference.sourceName);

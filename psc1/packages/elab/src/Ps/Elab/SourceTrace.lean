@@ -114,7 +114,10 @@ def psElabSourceTraceReference (trace : PsElabSourceTrace)
     (target : PsElabSourceTarget) : PsElabSourceTrace :=
   if trace.enabled then
     let complete := match target with
-      | PsElabSourceTarget.local _ Option.none => false
+      | PsElabSourceTarget.local _ binder =>
+          match binder with
+          | Option.none => false
+          | Option.some _ => trace.complete
       | _ => trace.complete;
     let entry := PsElabSourceReference.mk trace.nextId sourceName span baseSegments target;
     PsElabSourceTrace.mk true (Nat.succ trace.nextId) trace.bindersRev

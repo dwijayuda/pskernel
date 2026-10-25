@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
@@ -73,7 +73,8 @@ jobs:
             assert.equal(result.status, 0, result.stderr);
             const records = JSON.parse(fs.readFileSync(output, 'utf8')).records;
             const failures = records.filter(row => row.parse !== 'accepted' || row.elaboration !== 'accepted');
-            assert.deepEqual(failures, [], 'actual source census: ' + JSON.stringify(failures));
+            assert.equal(failures.length, 0, 'actual source census roots: ' +
+            JSON.stringify(failures.filter(row => !row.blockedImports)) + '; affected modules=' + failures.length);
           }
           console.log('PSC1_CONVERSION_SOURCE_CENSUS:', JSON.stringify({
             modules: rows.length,

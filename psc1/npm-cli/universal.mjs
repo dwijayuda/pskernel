@@ -164,15 +164,15 @@ export function compileCandidate(options) {
   )
     fail('SOURCE_CAPTURE');
   const inner = [
-      outputAbi === 'scalar' ? 'psc1-compiler-service/1' : 'psc1-compiler-service/2',
-      'candidate-' + crypto.randomUUID(),
-      digest,
-      sources[0].kind,
-      assurance,
-      options.entryModule,
-      sources.map((s) => [s.module, s.text]),
-      ...(outputAbi === 'scalar' ? [] : ['io-dispatcher']),
-    ];
+    outputAbi === 'scalar' ? 'psc1-compiler-service/1' : 'psc1-compiler-service/2',
+    'candidate-' + crypto.randomUUID(),
+    digest,
+    sources[0].kind,
+    assurance,
+    options.entryModule,
+    sources.map((s) => [s.module, s.text]),
+    ...(outputAbi === 'scalar' ? [] : ['io-dispatcher']),
+  ];
   const request = JSON.stringify(['psc1-unified-compiler-service/2', options.target, inner]);
   if (Buffer.byteLength(request) > 128 * 1024 * 1024) fail('REQUEST_LIMIT');
   const verify = () =>

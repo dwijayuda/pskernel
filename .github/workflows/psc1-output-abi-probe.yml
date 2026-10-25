@@ -112,11 +112,21 @@ jobs:
           node scripts/generated-session-boundary-tests.mjs
           node scripts/output-abi-host-tests.mjs
           node scripts/typed-io-policy-tests.mjs
+      - name: Check bounded artifact retries and unchanged identity and extraction refusals
+        working-directory: psc1
+        run: node scripts/kernel435-qualified-artifact-tests.mjs
       - name: Execute actual generated G1 CLI JSON and compiler applications with independent checking
         working-directory: psc1
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/generated-io-application-tests.mjs
+      - name: Archive complete application evidence with arbitrary valid fixture filenames
+        if: always()
+        working-directory: psc1
+        run: |
+          if [ -d dist/generated-io-applications ]; then
+            tar --exclude='*/input' -czf dist/generated-io-applications-evidence.tar.gz -C dist generated-io-applications
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -125,7 +135,7 @@ jobs:
             psc1/dist/output-abi/
             psc1/dist/source-conversion/
             psc1/dist/generated-session-boundary/
-            psc1/dist/generated-io-applications/
-            '!psc1/dist/generated-io-applications/**/input/**'
+            psc1/dist/generated-io-applications-evidence.tar.gz
+            psc1/dist/artifact-transport-*/qualification.json
           if-no-files-found: warn
           retention-days: 90

@@ -43,9 +43,15 @@ reuses typed-io.mjs with host-owned Linux ABI/capabilities/root/byte/fd limits a
 packed public types. It does not load or admit programs. These host/package
 changes are in qualification; frozen installed payloads do not gain the new
 request semantics until separately qualified changed-source promotion.
-Current integration reuses exact G1 artifacts, removes native compiler tools and
-executes the checked host session, actual independent admission, Linux publication
-and all 264 application cases across four generated engines. Results pending.
+Current integration reuses exact G1 artifacts and removes native compiler tools.
+Initial run 40223401958/job 121259626403 passes all scalar boundaries, 10 new IO
+protocol/publication refusals and the unchanged 20 typed IO policy groups. Actual
+JS G1 passes all 66 application cases through independent admission and Linux
+publication. Downloading the next engine then fails with transient GitHub EPIPE;
+upload also rejects the intentionally quoted Unicode input filename. Both failures
+remain preserved. A bounded metadata/body retry helper retains exact job/commit/ZIP
+checks, with no retry on identity/extraction/authentication failures. Evidence is
+now tar-archived without altering fixture filenames. Full 264-case retry pending.
 
 Genuine new-source G1/G2/G3 fixed-point runs are independently active:
 40223062370 (JS/TS/Wasm, existing 1800s G2/G3 correctness profile), request

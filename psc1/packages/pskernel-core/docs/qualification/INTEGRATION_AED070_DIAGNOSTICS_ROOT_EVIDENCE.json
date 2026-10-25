@@ -1,0 +1,1104 @@
+{
+  "source": "aed07022222c8330b17636c3f894874058bfe571",
+  "run": 40233313965,
+  "job": 121289498757,
+  "artifact": 12614737670,
+  "archiveBytes": 12121279,
+  "members": 58,
+  "archiveSha256": "c4eab54d5fc934f63e453d1fa5933de52421b2807fda12ec9192d6d43bb10703",
+  "allMembersActuallyRead": true,
+  "allProfileManifestDigestsVerified": 49,
+  "kernelBytes": 10393520,
+  "kernelSha256": "7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4",
+  "cases": [
+    {
+      "name": "perf/repeated-subproblem.ndjson",
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "97ec5a16351fb60e171f67ff3ff292e4a166a59bc7af3772cc782f77ec26dfc8",
+        "adapted_sha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "original_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "adapted_body_sha256": "16ad35530b3f5590d5160ad6ee5fb421b8f9629e49e340fc73016ef965785533",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.3636082450000231,
+        "log": "official.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "unprofiled": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+        "verdict": "accepted",
+        "stage": "complete",
+        "coreInvoked": true,
+        "records": 214,
+        "metadataCounts": {
+          "ctorInfo": 5,
+          "recInfo": 3,
+          "inductInfo": 3,
+          "defnInfo": 1,
+          "thmInfo": 1
+        },
+        "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+        "sourceMutualBlockMetadata": [
+          {
+            "kind": "defnInfo",
+            "name": {
+              "tableId": "32",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "perfect"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "thmInfo",
+            "name": {
+              "tableId": "43",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "kernel_repeated_subproblem"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+        "exportedDeclarations": 13,
+        "admissionCommands": 5,
+        "arenaNodes": "162",
+        "fuel": "4096",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": true,
+        "officialReplaySkipsUnsafeOrPartial": false,
+        "elapsed_seconds": 1.3557335129999046,
+        "returncode": 0,
+        "stdout": "case-000-stdout.txt",
+        "stderr": "case-000-stderr.txt",
+        "time_log": "case-000-time.txt",
+        "progress_snapshots": 7,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "metadata-compare",
+          "coreInvoked": true,
+          "records": 214,
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "elapsedMilliseconds": 1229.835782
+        },
+        "peak_rss_kib": 290880
+      },
+      "profiled": {
+        "observation": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 214,
+          "metadataCounts": {
+            "ctorInfo": 5,
+            "recInfo": 3,
+            "inductInfo": 3,
+            "defnInfo": 1,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "32",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "perfect"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "32",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "perfect"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "43",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_repeated_subproblem"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "43",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_repeated_subproblem"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 13,
+          "admissionCommands": 5,
+          "arenaNodes": "162",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false,
+          "returncode": 0,
+          "timed_out": false,
+          "elapsed_seconds": 1.7140113189998374,
+          "observed_vm_hwm_kib_lower_bound": 280304,
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 214,
+            "exportedDeclarations": 13,
+            "admissionCommands": 5,
+            "arenaNodes": "162",
+            "fuel": "4096",
+            "sourceSha256": "cb80e698d838355e31296645442f8f11dcf06b0888b0f268aab7d9ae9e38f29a",
+            "elapsedMilliseconds": 1589.715046
+          }
+        },
+        "streaming_profiles": [
+          {
+            "raw_log": "isolate-0x3f86a000-5852-ticks.v8.log",
+            "raw_log_sha256": "a082561875967f2a51649128a4c833427278a5e9a7d44ded46219cf598d2d1cc",
+            "bytes": 15823905,
+            "tick_records": 1414,
+            "processed": "ticks-0.processed.txt",
+            "processed_sha256": "36be71c0bf37c5fe3d6df81004cac6f7c5d06d8e68dff7aa74946144c1561a1b",
+            "processing": {
+              "returncode": 0,
+              "timed_out": false,
+              "elapsed_seconds": 5.288468600999977,
+              "observed_vm_hwm_kib_lower_bound": 419028
+            },
+            "hottest_javascript_and_callers": [
+              " [JavaScript]:",
+              "   ticks  total  nonlib   name",
+              "     24    1.7%    6.0%  Builtin: GeneratorPrototypeNext",
+              "     23    1.6%    5.8%  Builtin: LoadIC",
+              "     17    1.2%    4.3%  Builtin: WeakCollectionSet",
+              "     15    1.1%    3.8%  Builtin: ResumeGeneratorBaseline",
+              "     12    0.8%    3.0%  Builtin: SuspendGeneratorBaseline",
+              "     12    0.8%    3.0%  Builtin: ResumeGeneratorTrampoline",
+              "     11    0.8%    2.8%  Builtin: CreateIterResultObject",
+              "     10    0.7%    2.5%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:29:22",
+              "     10    0.7%    2.5%  Builtin: CompileLazy",
+              "      9    0.6%    2.3%  Builtin: LoadIC_Megamorphic",
+              "      7    0.5%    1.8%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "      6    0.4%    1.5%  Builtin: RecordWriteSaveFP",
+              "      5    0.4%    1.3%  Builtin: CreateGeneratorObject",
+              "      5    0.4%    1.3%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+              "      4    0.3%    1.0%  Builtin: LoadICTrampoline_Megamorphic",
+              "      4    0.3%    1.0%  Builtin: FastNewClosure",
+              "      4    0.3%    1.0%  Builtin: CallFunction_ReceiverIsAny",
+              "      4    0.3%    1.0%  Builtin: BaselineOutOfLinePrologue",
+              "      4    0.3%    1.0%  Builtin: BaselineLeaveFrame",
+              "      3    0.2%    0.8%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:453:366",
+              "      3    0.2%    0.8%  Builtin: WeakMapLookupHashIndex",
+              "      3    0.2%    0.8%  Builtin: LoadIC_NoFeedback",
+              "      3    0.2%    0.8%  Builtin: LoadICBaseline",
+              "      3    0.2%    0.8%  Builtin: InterpreterEntryTrampoline",
+              " [Bottom up (heavy) profile]:",
+              "  Note: percentage shows a share of a particular caller in the total",
+              "  amount of its parent calls.",
+              "  Callers occupying less than 1.0% are not shown.",
+              "",
+              "   ticks parent  name",
+              "    980   69.3%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "    806   82.2%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "    208   25.8%      JS: ~moduleStrategy node:internal/modules/esm/translators:102:50",
+              "    208  100.0%        JS: ~#translate node:internal/modules/esm/loader:550:13",
+              "    208  100.0%          JS: ~afterLoad node:internal/modules/esm/loader:610:23",
+              "    208  100.0%            JS: ~loadAndTranslate node:internal/modules/esm/loader:608:19",
+              "    152   18.9%      JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "    148   97.4%        JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:137841:33",
+              "    148  100.0%          JS: ^replayText file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:105:27",
+              "    148  100.0%            JS: ~replayFile file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:490:33",
+              "      3    2.0%        JS: ^fn file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:25:16",
+              "      3  100.0%          JS: ^exprEq file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:117:16",
+              "      3  100.0%            JS: ^replayText file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:105:27",
+              "     39    4.8%      Builtin: WeakMapPrototypeSet",
+              "     25   64.1%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:24:19",
+              "      6   24.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72313:153",
+              "      6  100.0%            Builtin: GeneratorPrototypeNext",
+              "      5   20.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74593:32",
+              "      5  100.0%            Builtin: GeneratorPrototypeNext",
+              "      5   20.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:135170:780",
+              "      5  100.0%            Builtin: GeneratorPrototypeNext",
+              "      5   20.0%          JS: *__ps$impl$psKernelExprV2OrdinaryAnalyzeRecursiveArgumentWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:134875:73",
+              "      5  100.0%            Builtin: GeneratorPrototypeNext",
+              "      2    8.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:133709:435",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "      1    4.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74856:32",
+              "      1  100.0%            Builtin: GeneratorPrototypeNext",
+              "      1    4.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:134573:456",
+              "      1  100.0%            Builtin: GeneratorPrototypeNext",
+              "      7   17.9%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78705:116",
+              "      7  100.0%          Builtin: GeneratorPrototypeNext",
+              "      7  100.0%            JS: *__ps$impl$psKernelExprV2TransformMapChildren_$psc0SH_0 file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78705:65",
+              "      7   17.9%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:135170:780",
+              "      7  100.0%          Builtin: GeneratorPrototypeNext",
+              "      7  100.0%            JS: *__ps$impl$psKernelExprV2OrdinaryOpenConstructorFieldsWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:135170:70",
+              "     15    1.9%      JS: *__ps$impl$psKernelExprV2OrdinaryOpenConstructorParamsWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:133709:70",
+              "     15  100.0%        Builtin: GeneratorPrototypeNext",
+              "     15  100.0%          JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "     15  100.0%            JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:137841:33",
+              "     10    1.2%      JS: *__ps$impl$psKernelExprV2OrdinaryOpenConstructorFieldsWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:135170:70",
+              "     10  100.0%        Builtin: GeneratorPrototypeNext",
+              "     10  100.0%          JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "     10  100.0%            JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:137841:33",
+              "     10    1.2%      JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:156",
+              "      8   80.0%        JS: *__ps$impl$psKernelExprV2PagedFind file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:44",
+              "      8  100.0%          Builtin: GeneratorPrototypeNext",
+              "      8  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "      2   20.0%        Builtin: GeneratorPrototypeNext",
+              "      2  100.0%          JS: *__ps$impl$psKernelExprV2PagedFind file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:44",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "      9    1.1%      JS: *__ps$impl$psKernelExprV2PagedFind file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:44",
+              "      9  100.0%        Builtin: GeneratorPrototypeNext",
+              "      9  100.0%          JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "      9  100.0%            JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:137841:33",
+              "     19    1.9%    JS: ^compileForInternalLoader node:internal/bootstrap/realm:385:27",
+              "     18   94.7%      JS: ^requireBuiltin node:internal/bootstrap/realm:422:24",
+              "      3   16.7%        JS: ~<anonymous> node:internal/fs/promises:1:1",
+              "      3  100.0%          JS: ^compileForInternalLoader node:internal/bootstrap/realm:385:27",
+              "      3  100.0%            JS: ^requireBuiltin node:internal/bootstrap/realm:422:24"
+            ]
+          }
+        ],
+        "trailing_samples_may_be_lost_on_kill": false,
+        "instrumented_timing_is_not_a_performance_comparison": true,
+        "profile_collection_complete": true
+      }
+    },
+    {
+      "name": "perf/church-numerals.ndjson",
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "1234703fc7082cdf99eaf7ecd18fe09f1e11191c9c5b4ffcc5c159c50595927a",
+        "adapted_sha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "original_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "adapted_body_sha256": "85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.39923923700007435,
+        "log": "official.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "unprofiled": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+        "verdict": "accepted",
+        "stage": "complete",
+        "coreInvoked": true,
+        "records": 227,
+        "metadataCounts": {
+          "ctorInfo": 1,
+          "recInfo": 1,
+          "inductInfo": 1,
+          "defnInfo": 2,
+          "thmInfo": 1
+        },
+        "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+        "sourceMutualBlockMetadata": [
+          {
+            "kind": "defnInfo",
+            "name": {
+              "tableId": "15",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "CNat"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "15",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "CNat"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "defnInfo",
+            "name": {
+              "tableId": "17",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "cmul"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "17",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "cmul"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "thmInfo",
+            "name": {
+              "tableId": "20",
+              "segments": [
+                {
+                  "kind": "str",
+                  "value": "kernel_church_numerals"
+                }
+              ]
+            },
+            "all": [
+              {
+                "tableId": "20",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_church_numerals"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+        "exportedDeclarations": 6,
+        "admissionCommands": 4,
+        "arenaNodes": "197",
+        "fuel": "4096",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": true,
+        "officialReplaySkipsUnsafeOrPartial": false,
+        "elapsed_seconds": 7.293338710999933,
+        "returncode": 0,
+        "stdout": "case-001-stdout.txt",
+        "stderr": "case-001-stderr.txt",
+        "time_log": "case-001-time.txt",
+        "progress_snapshots": 7,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "metadata-compare",
+          "coreInvoked": true,
+          "records": 227,
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "elapsedMilliseconds": 7186.89106
+        },
+        "peak_rss_kib": 597608
+      },
+      "profiled": {
+        "observation": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 227,
+          "metadataCounts": {
+            "ctorInfo": 1,
+            "recInfo": 1,
+            "inductInfo": 1,
+            "defnInfo": 2,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "15",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "CNat"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "15",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "CNat"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "17",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "cmul"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "17",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "cmul"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "20",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_church_numerals"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "20",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_church_numerals"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false,
+          "returncode": 0,
+          "timed_out": false,
+          "elapsed_seconds": 7.615316635999989,
+          "observed_vm_hwm_kib_lower_bound": 413232,
+          "progress_snapshots": 7,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "metadata-compare",
+            "coreInvoked": true,
+            "records": 227,
+            "exportedDeclarations": 6,
+            "admissionCommands": 4,
+            "arenaNodes": "197",
+            "fuel": "4096",
+            "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+            "elapsedMilliseconds": 7466.103854
+          }
+        },
+        "streaming_profiles": [
+          {
+            "raw_log": "isolate-0x32ba6000-5914-ticks.v8.log",
+            "raw_log_sha256": "2b7e8919d89c72924a7bf56311066c9aa213e3bd7a46c4f8d4a7ed14659f60f9",
+            "bytes": 16959868,
+            "tick_records": 6412,
+            "processed": "ticks-0.processed.txt",
+            "processed_sha256": "36cbc3a3347ff28da0f92cfa22dbabf606498726041062c54df55094168fdf3a",
+            "processing": {
+              "returncode": 0,
+              "timed_out": false,
+              "elapsed_seconds": 4.4789050449999195,
+              "observed_vm_hwm_kib_lower_bound": 462448
+            },
+            "hottest_javascript_and_callers": [
+              " [JavaScript]:",
+              "   ticks  total  nonlib   name",
+              "    121    1.9%    6.3%  Builtin: LoadIC_Megamorphic",
+              "    109    1.7%    5.7%  Builtin: ResumeGeneratorTrampoline",
+              "    102    1.6%    5.3%  Builtin: GeneratorPrototypeNext",
+              "     98    1.5%    5.1%  Builtin: CompileLazy",
+              "     97    1.5%    5.1%  Builtin: WeakCollectionSet",
+              "     74    1.2%    3.9%  Builtin: LoadIC",
+              "     57    0.9%    3.0%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:29:22",
+              "     53    0.8%    2.8%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "     44    0.7%    2.3%  Builtin: RecordWriteSaveFP",
+              "     30    0.5%    1.6%  Builtin: ResumeGeneratorBaseline",
+              "     26    0.4%    1.4%  Builtin: SuspendGeneratorBaseline",
+              "     24    0.4%    1.3%  Builtin: CreateGeneratorObject",
+              "     22    0.3%    1.1%  Builtin: CreateIterResultObject",
+              "     22    0.3%    1.1%  Builtin: CallFunction_ReceiverIsAny",
+              "     21    0.3%    1.1%  JS: *__ps$impl$psKernelExprV2PagedFind file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:44",
+              "     21    0.3%    1.1%  Builtin: BaselineLeaveFrame",
+              "     20    0.3%    1.0%  Builtin: WeakMapLookupHashIndex",
+              "     18    0.3%    0.9%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78744:185",
+              "     17    0.3%    0.9%  Builtin: Call_ReceiverIsNotNullOrUndefined",
+              "     16    0.2%    0.8%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:156",
+              "     16    0.2%    0.8%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+              "     16    0.2%    0.8%  Builtin: BaselineOutOfLinePrologue",
+              "     15    0.2%    0.8%  Builtin: EphemeronKeyBarrierSaveFP",
+              "     14    0.2%    0.7%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78744:148",
+              " [Bottom up (heavy) profile]:",
+              "  Note: percentage shows a share of a particular caller in the total",
+              "  amount of its parent calls.",
+              "  Callers occupying less than 1.0% are not shown.",
+              "",
+              "   ticks parent  name",
+              "   4337   67.6%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "   3374   77.8%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "    461   13.7%      JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "    460   99.8%        JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:137841:33",
+              "    460  100.0%          JS: ^replayText file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:105:27",
+              "    460  100.0%            JS: ~replayFile file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:490:33",
+              "    262    7.8%      Builtin: WeakMapPrototypeSet",
+              "    112   42.7%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:24:19",
+              "     34   30.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:577:70",
+              "     34  100.0%            Builtin: GeneratorPrototypeNext",
+              "     12   10.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74591:94",
+              "     12  100.0%            Builtin: GeneratorPrototypeNext",
+              "      6    5.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:88836:111",
+              "      6  100.0%            Builtin: GeneratorPrototypeNext",
+              "      6    5.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78075:101",
+              "      6  100.0%            Builtin: GeneratorPrototypeNext",
+              "      5    4.5%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78964:45",
+              "      5  100.0%            Builtin: GeneratorPrototypeNext",
+              "      4    3.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:82834:68",
+              "      4  100.0%            Builtin: GeneratorPrototypeNext",
+              "      4    3.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:82832:443",
+              "      4  100.0%            Builtin: GeneratorPrototypeNext",
+              "      4    3.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:76950:332",
+              "      4  100.0%            Builtin: GeneratorPrototypeNext",
+              "      4    3.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:133709:435",
+              "      4  100.0%            Builtin: GeneratorPrototypeNext",
+              "      3    2.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:88877:84",
+              "      3  100.0%            Builtin: GeneratorPrototypeNext",
+              "      3    2.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:88807:60",
+              "      3  100.0%            Builtin: GeneratorPrototypeNext",
+              "      3    2.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:82834:144",
+              "      3  100.0%            Builtin: GeneratorPrototypeNext",
+              "      3    2.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78742:102",
+              "      3  100.0%            Builtin: GeneratorPrototypeNext",
+              "      3    2.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:132568:58",
+              "      3  100.0%            Builtin: GeneratorPrototypeNext",
+              "      2    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:92535:199",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "      2    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:89088:128",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "      2    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:89077:121",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "      2    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:82834:105",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "      2    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:79133:35",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "      2    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74613:32",
+              "      2  100.0%            Builtin: GeneratorPrototypeNext",
+              "     38   14.5%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72313:153",
+              "     38  100.0%          Builtin: GeneratorPrototypeNext",
+              "     38  100.0%            JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "     25    9.5%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78742:102",
+              "     25  100.0%          Builtin: GeneratorPrototypeNext",
+              "     25  100.0%            JS: *__ps$impl$psKernelExprV2TransformWithFuel file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78736:52",
+              "     25    9.5%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78705:116",
+              "     25  100.0%          Builtin: GeneratorPrototypeNext",
+              "     25  100.0%            JS: *__ps$impl$psKernelExprV2TransformMapChildren_$psc0SH_0 file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78705:65",
+              "     17    6.5%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:92514:253",
+              "     17  100.0%          Builtin: GeneratorPrototypeNext"
+            ]
+          }
+        ],
+        "trailing_samples_may_be_lost_on_kill": false,
+        "instrumented_timing_is_not_a_performance_comparison": true,
+        "profile_collection_complete": true
+      }
+    },
+    {
+      "name": "init-prelude.ndjson",
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "fc440bd35aa4ecb244836eef0c2e31c578ac4460f42665f4e8305cbc2cd2104d",
+        "adapted_sha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+        "original_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "adapted_body_sha256": "db35e7676c622a5da904e9cff32c761a05e389672dc5a8a5a344e1f31d378d08",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "accepted",
+        "reason": "official_kernel_verdict",
+        "returncode": 0,
+        "elapsed_seconds": 0.6006584780000139,
+        "log": "official.txt",
+        "output_sha256": "da88ef3a12e04954821297a1e280f9f31e88659d088ed0f1a0b439046e87daf8"
+      },
+      "unprofiled": {
+        "elapsed_seconds": 60.1270157580002,
+        "returncode": -9,
+        "stdout": "case-002-stdout.txt",
+        "stderr": "case-002-stderr.txt",
+        "time_log": "case-002-time.txt",
+        "progress_snapshots": 67,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 63723,
+          "exportedDeclarations": 2059,
+          "admissionCommands": 1774,
+          "arenaNodes": "54535",
+          "fuel": "4096",
+          "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+          "elapsedMilliseconds": 1744.012509
+        },
+        "verdict": "timeout",
+        "stage": "host-wall-time",
+        "timeout_seconds": 60
+      },
+      "profiled": {
+        "observation": {
+          "returncode": -9,
+          "timed_out": true,
+          "elapsed_seconds": 60.10549385299987,
+          "observed_vm_hwm_kib_lower_bound": 1082044,
+          "progress_snapshots": 67,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 63723,
+            "exportedDeclarations": 2059,
+            "admissionCommands": 1774,
+            "arenaNodes": "54535",
+            "fuel": "4096",
+            "sourceSha256": "3e1ab3b27e814aa73d4f91a4555c91b94ac7c8d02d92445f1d487d26f4fce86c",
+            "elapsedMilliseconds": 2025.652039
+          },
+          "verdict": "timeout",
+          "stage": "host-wall-time",
+          "timeout_seconds": 60
+        },
+        "streaming_profiles": [
+          {
+            "raw_log": "isolate-0xa210000-5985-ticks.v8.log",
+            "raw_log_sha256": "42cf9e8e8f17913b337377f37558d5306a34d8efabd9b0654abcbfcda81b2899",
+            "bytes": 24849661,
+            "tick_records": 51874,
+            "processed": "ticks-0.processed.txt",
+            "processed_sha256": "938577fd46e18f97d7ac0a466d228b93a40f0d19ecd4a35291e8a8e0cbb8f5cd",
+            "processing": {
+              "returncode": 0,
+              "timed_out": false,
+              "elapsed_seconds": 5.135272763000103,
+              "observed_vm_hwm_kib_lower_bound": 394036
+            },
+            "hottest_javascript_and_callers": [
+              " [JavaScript]:",
+              "   ticks  total  nonlib   name",
+              "   1006    1.9%    6.7%  Builtin: WeakCollectionSet",
+              "    971    1.9%    6.4%  Builtin: LoadIC_Megamorphic",
+              "    968    1.9%    6.4%  Builtin: GeneratorPrototypeNext",
+              "    890    1.7%    5.9%  Builtin: CompileLazy",
+              "    653    1.3%    4.3%  Builtin: ResumeGeneratorTrampoline",
+              "    577    1.1%    3.8%  Builtin: RecordWriteSaveFP",
+              "    497    1.0%    3.3%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "    373    0.7%    2.5%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:29:22",
+              "    372    0.7%    2.5%  Builtin: LoadIC",
+              "    259    0.5%    1.7%  Builtin: WeakMapLookupHashIndex",
+              "    258    0.5%    1.7%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72664:108",
+              "    227    0.4%    1.5%  Builtin: CallFunction_ReceiverIsAny",
+              "    217    0.4%    1.4%  Builtin: CreateIterResultObject",
+              "    164    0.3%    1.1%  Builtin: LoadICTrampoline_Megamorphic",
+              "    137    0.3%    0.9%  Builtin: CreateGeneratorObject",
+              "    132    0.3%    0.9%  Builtin: EphemeronKeyBarrierSaveFP",
+              "    132    0.3%    0.9%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+              "    127    0.2%    0.8%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+              "    126    0.2%    0.8%  Builtin: SuspendGeneratorBaseline",
+              "    118    0.2%    0.8%  JS: *__ps$utf8 file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:35:19",
+              "    104    0.2%    0.7%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:156",
+              "    101    0.2%    0.7%  JS: *__ps$impl$psKernelExprV2PagedFind file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:44",
+              "     99    0.2%    0.7%  Builtin: Call_ReceiverIsNotNullOrUndefined",
+              "     98    0.2%    0.6%  Builtin: ResumeGeneratorBaseline",
+              " [Bottom up (heavy) profile]:",
+              "  Note: percentage shows a share of a particular caller in the total",
+              "  amount of its parent calls.",
+              "  Callers occupying less than 1.0% are not shown.",
+              "",
+              "   ticks parent  name",
+              "  34976   67.4%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "  23401   66.9%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "   3589   15.3%      Builtin: WeakMapPrototypeSet",
+              "    682   19.0%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:24:19",
+              "     71   10.4%          JS: *__ps$impl$psKernelEnvironmentIndexFindWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:6091:55",
+              "     71  100.0%            Builtin: GeneratorPrototypeNext",
+              "     54    7.9%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78075:101",
+              "     54  100.0%            Builtin: GeneratorPrototypeNext",
+              "     49    7.2%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72674:96",
+              "     49  100.0%            Builtin: GeneratorPrototypeNext",
+              "     41    6.0%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:577:70",
+              "     41  100.0%            Builtin: GeneratorPrototypeNext",
+              "     40    5.9%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74832:117",
+              "     40  100.0%            Builtin: GeneratorPrototypeNext",
+              "     32    4.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78961:288",
+              "     32  100.0%            Builtin: GeneratorPrototypeNext",
+              "     30    4.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74350:258",
+              "     30  100.0%            Builtin: GeneratorPrototypeNext",
+              "     30    4.4%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:523:91",
+              "     30  100.0%            Builtin: GeneratorPrototypeNext",
+              "     28    4.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78142:100",
+              "     28  100.0%            Builtin: GeneratorPrototypeNext",
+              "     23    3.4%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:77976:106",
+              "     23  100.0%            Builtin: GeneratorPrototypeNext",
+              "     22    3.2%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74611:272",
+              "     22  100.0%            Builtin: GeneratorPrototypeNext",
+              "     21    3.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78107:106",
+              "     21  100.0%            Builtin: GeneratorPrototypeNext",
+              "     21    3.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72319:180",
+              "     21  100.0%            Builtin: GeneratorPrototypeNext",
+              "     21    3.1%          JS: *__ps$impl$psKernelExprV2PagedLiftWithFuel file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:77766:52",
+              "     21  100.0%            Builtin: GeneratorPrototypeNext",
+              "     19    2.8%          JS: *__ps$impl$psKernelEnvironmentHashStringWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:6050:56",
+              "     19  100.0%            Builtin: GeneratorPrototypeNext",
+              "     18    2.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:82359:180",
+              "     18  100.0%            Builtin: GeneratorPrototypeNext",
+              "     18    2.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74854:376",
+              "     18  100.0%            Builtin: GeneratorPrototypeNext",
+              "     17    2.5%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:6134:36",
+              "     17  100.0%            Builtin: GeneratorPrototypeNext",
+              "     16    2.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72558:88",
+              "     16  100.0%            Builtin: GeneratorPrototypeNext",
+              "     15    2.2%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:132568:58",
+              "     15  100.0%            Builtin: GeneratorPrototypeNext",
+              "     11    1.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78219:118",
+              "     11  100.0%            Builtin: GeneratorPrototypeNext",
+              "     10    1.5%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74856:32",
+              "     10  100.0%            Builtin: GeneratorPrototypeNext",
+              "      8    1.2%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78351:113",
+              "      8  100.0%            Builtin: GeneratorPrototypeNext",
+              "      7    1.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78968:73",
+              "      7  100.0%            Builtin: GeneratorPrototypeNext",
+              "    350    9.8%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:577:70",
+              "    350  100.0%          Builtin: GeneratorPrototypeNext",
+              "    350  100.0%            JS: *__ps$impl$psKernelNameEq file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:577:35",
+              "    344    9.6%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74591:94",
+              "    344  100.0%          Builtin: GeneratorPrototypeNext",
+              "    344  100.0%            JS: *__ps$impl$psKernelExprV2AdmissionSeenBucket file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74580:54",
+              "    242    6.7%        JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78705:116"
+            ]
+          }
+        ],
+        "trailing_samples_may_be_lost_on_kill": true,
+        "instrumented_timing_is_not_a_performance_comparison": true,
+        "profile_collection_complete": true
+      }
+    },
+    {
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "adaptation": {
+        "method": "header_only_compatibility_NOT_native_435_reexport",
+        "original_lean": {
+          "githash": "f72c35b3f637c8c6571d353742168ab66cc22c00",
+          "version": "4.29.1"
+        },
+        "target_lean": {
+          "version": "4.35.0",
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+        },
+        "original_sha256": "a2fc30b56ba4b26e7e5fccc53c6b63a73e083761b3b7f4caa4d462fde84ee711",
+        "adapted_sha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "original_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "adapted_body_sha256": "9930c5f92d12cca0ed0d4e132a2b3c7520fb2b1520de66c3bc24fdeb5895402f",
+        "body_bytes_identical": true
+      },
+      "official": {
+        "verdict": "rejected",
+        "reason": "official_kernel_verdict",
+        "returncode": 1,
+        "elapsed_seconds": 0.3829144250000809,
+        "log": "official.txt",
+        "output_sha256": "4e778133c3af3c56c0e343a29f25718d3436b4161d9c6524896da3191643b864"
+      },
+      "unprofiled": {
+        "format": "psc1-arena-replay-v1",
+        "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+        "verdict": "rejected",
+        "stage": "kernel-admission",
+        "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+        "fuel": "4096",
+        "coreInvoked": true,
+        "records": 5272,
+        "exportedDeclarations": 161,
+        "admissionCommands": 117,
+        "arenaNodes": "4392",
+        "containsUnsafeOrPartial": false,
+        "metadataValidated": false,
+        "elapsed_seconds": 26.935149395000053,
+        "returncode": 0,
+        "stdout": "case-003-stdout.txt",
+        "stderr": "case-003-stderr.txt",
+        "time_log": "case-003-time.txt",
+        "progress_snapshots": 10,
+        "invalid_progress_snapshots": 0,
+        "last_progress": {
+          "stage": "kernel-admission",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "fuel": "4096",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "elapsedMilliseconds": 268.133009
+        },
+        "peak_rss_kib": 601068
+      },
+      "profiled": {
+        "observation": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+          "verdict": "rejected",
+          "stage": "kernel-admission",
+          "reason": "{\"message\":\"simple inductive result must be a sort\"}",
+          "fuel": "4096",
+          "coreInvoked": true,
+          "records": 5272,
+          "exportedDeclarations": 161,
+          "admissionCommands": 117,
+          "arenaNodes": "4392",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "elapsed_seconds": 28.31566349500008,
+          "observed_vm_hwm_kib_lower_bound": 438336,
+          "progress_snapshots": 10,
+          "invalid_progress_snapshots": 0,
+          "last_progress": {
+            "stage": "kernel-admission",
+            "coreInvoked": true,
+            "records": 5272,
+            "exportedDeclarations": 161,
+            "admissionCommands": 117,
+            "arenaNodes": "4392",
+            "fuel": "4096",
+            "sourceSha256": "08dd7180adb1abc50a0fefaeefa3e0c73c7812730e3fe9c5018ef3cf4886e8ee",
+            "elapsedMilliseconds": 515.62626
+          }
+        },
+        "streaming_profiles": [
+          {
+            "raw_log": "isolate-0xebf5000-6054-ticks.v8.log",
+            "raw_log_sha256": "88c487b6b6f9d3b7c4c3ccb75fe93b7e9b2caa1110d2a43b4ab8954d22aa1ed9",
+            "bytes": 21519541,
+            "tick_records": 24243,
+            "processed": "ticks-0.processed.txt",
+            "processed_sha256": "4388bf098a77092456020f573a6db47b08cac183529ad01d622becefd3110027",
+            "processing": {
+              "returncode": 0,
+              "timed_out": false,
+              "elapsed_seconds": 4.82990979799979,
+              "observed_vm_hwm_kib_lower_bound": 401056
+            },
+            "hottest_javascript_and_callers": [
+              " [JavaScript]:",
+              "   ticks  total  nonlib   name",
+              "    482    2.0%    6.4%  Builtin: LoadIC_Megamorphic",
+              "    421    1.7%    5.6%  Builtin: CompileLazy",
+              "    416    1.7%    5.5%  Builtin: GeneratorPrototypeNext",
+              "    389    1.6%    5.1%  Builtin: WeakCollectionSet",
+              "    356    1.5%    4.7%  Builtin: ResumeGeneratorTrampoline",
+              "    278    1.1%    3.7%  Builtin: LoadIC",
+              "    246    1.0%    3.3%  JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "    228    0.9%    3.0%  Builtin: RecordWriteSaveFP",
+              "    178    0.7%    2.4%  JS: *__ps$invoke file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:29:22",
+              "    117    0.5%    1.5%  Builtin: WeakMapLookupHashIndex",
+              "    110    0.5%    1.5%  Builtin: CallFunction_ReceiverIsAny",
+              "    109    0.4%    1.4%  Builtin: CreateIterResultObject",
+              "    107    0.4%    1.4%  Builtin: ResumeGeneratorBaseline",
+              "    102    0.4%    1.3%  Builtin: SuspendGeneratorBaseline",
+              "     97    0.4%    1.3%  Builtin: CreateGeneratorObject",
+              "     76    0.3%    1.0%  Builtin: BaselineOutOfLinePrologue",
+              "     74    0.3%    1.0%  Builtin: BaselineLeaveFrame",
+              "     72    0.3%    1.0%  Builtin: LoadICTrampoline_Megamorphic",
+              "     67    0.3%    0.9%  Builtin: CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+              "     62    0.3%    0.8%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined",
+              "     57    0.2%    0.8%  Builtin: KeyedLoadIC_PolymorphicName",
+              "     51    0.2%    0.7%  Builtin: EphemeronKeyBarrierSaveFP",
+              "     51    0.2%    0.7%  Builtin: Call_ReceiverIsNotNullOrUndefined_Baseline_Compact",
+              "     48    0.2%    0.6%  JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72205:156",
+              " [Bottom up (heavy) profile]:",
+              "  Note: percentage shows a share of a particular caller in the total",
+              "  amount of its parent calls.",
+              "  Callers occupying less than 1.0% are not shown.",
+              "",
+              "   ticks parent  name",
+              "  15902   65.6%  /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "  11641   73.2%    /opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+              "   1607   13.8%      JS: *__ps$run file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:2:18",
+              "   1601   99.6%        JS: ~psKernelV1RunDag file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:137841:33",
+              "   1601  100.0%          JS: ^replayText file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:105:27",
+              "   1601  100.0%            JS: ~replayFile file:///tmp/psc1-arena-profile-detached-q8u8ga9f/replay.mjs:490:33",
+              "   1522   13.1%      Builtin: WeakMapPrototypeSet",
+              "    449   29.5%        JS: *__ps$wrap file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:24:19",
+              "     36    8.0%          JS: *__ps$impl$psKernelEnvironmentHashStringWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:6050:56",
+              "     36  100.0%            Builtin: GeneratorPrototypeNext",
+              "     31    6.9%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:77067:36",
+              "     31  100.0%            Builtin: GeneratorPrototypeNext",
+              "     23    5.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:76950:332",
+              "     23  100.0%            Builtin: GeneratorPrototypeNext",
+              "     21    4.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78142:100",
+              "     21  100.0%            Builtin: GeneratorPrototypeNext",
+              "     18    4.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:82835:88",
+              "     18  100.0%            Builtin: GeneratorPrototypeNext",
+              "     18    4.0%          JS: *__ps$impl$psKernelEnvironmentIndexFindWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:6091:55",
+              "     18  100.0%            Builtin: GeneratorPrototypeNext",
+              "     15    3.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74611:272",
+              "     15  100.0%            Builtin: GeneratorPrototypeNext",
+              "     15    3.3%          JS: *<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:523:91",
+              "     15  100.0%            Builtin: GeneratorPrototypeNext",
+              "     14    3.1%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:132579:75",
+              "     14  100.0%            Builtin: GeneratorPrototypeNext",
+              "     14    3.1%          JS: *__ps$impl$psKernelExprV2PagedLiftWithFuel file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:77766:52",
+              "     14  100.0%            Builtin: GeneratorPrototypeNext",
+              "     12    2.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:920:71",
+              "     12  100.0%            Builtin: GeneratorPrototypeNext",
+              "     12    2.7%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:577:70",
+              "     12  100.0%            Builtin: GeneratorPrototypeNext",
+              "     11    2.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:88807:60",
+              "     11  100.0%            Builtin: GeneratorPrototypeNext",
+              "     11    2.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78377:102",
+              "     11  100.0%            Builtin: GeneratorPrototypeNext",
+              "     11    2.4%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:74854:376",
+              "     11  100.0%            Builtin: GeneratorPrototypeNext",
+              "     10    2.2%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:72316:177",
+              "     10  100.0%            Builtin: GeneratorPrototypeNext",
+              "      9    2.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:91170:50",
+              "      9  100.0%            Builtin: GeneratorPrototypeNext",
+              "      9    2.0%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78742:102",
+              "      9  100.0%            Builtin: GeneratorPrototypeNext",
+              "      9    2.0%          JS: *__ps$impl$psKernelExprV2OrdinaryOpenConstructorParamsWorker file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:133709:70",
+              "      9  100.0%            Builtin: GeneratorPrototypeNext",
+              "      8    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:79053:44",
+              "      8  100.0%            Builtin: GeneratorPrototypeNext",
+              "      8    1.8%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:132575:67",
+              "      8  100.0%            Builtin: GeneratorPrototypeNext",
+              "      7    1.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:83329:129",
+              "      7  100.0%            Builtin: GeneratorPrototypeNext",
+              "      7    1.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:78254:36",
+              "      7  100.0%            Builtin: GeneratorPrototypeNext",
+              "      7    1.6%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:77770:36",
+              "      7  100.0%            Builtin: GeneratorPrototypeNext",
+              "      6    1.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:77976:106",
+              "      6  100.0%            Builtin: GeneratorPrototypeNext",
+              "      6    1.3%          JS: ^<anonymous> file:///tmp/psc1-arena-profile-detached-q8u8ga9f/kernel.mjs:76953:45"
+            ]
+          }
+        ],
+        "trailing_samples_may_be_lost_on_kill": false,
+        "instrumented_timing_is_not_a_performance_comparison": true,
+        "profile_collection_complete": true
+      }
+    }
+  ],
+  "scope": "fixed diagnostic subset; full 193-case qualification is separate",
+  "kernelQualified": false,
+  "limitations": [
+    "Instrumented timing includes V8 profiler overhead.",
+    "SIGKILL can truncate the final buffered tick-log tail.",
+    "Observed /proc VmHWM is a sampled lower bound on peak RSS.",
+    "Neither profiling nor diagnostic completion establishes kernel conformance."
+  ]
+}

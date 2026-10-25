@@ -1,3 +1,31 @@
+## Current continuation checkpoint — private mutual stages, integrated Quot replay preserved
+
+This checkpoint was written after actual results on 2026-10-25 UTC; existing project filenames use the 2026-10-26 convention. It supersedes older status passages below without changing their historical evidence.
+
+The scoped integration is **aed07022222c8330b17636c3f894874058bfe571**, with exact qualified production tree **65d5b9c3d0431a8b86961b6d1aec398f7169d223**. This primary branch retains that production tree. Quot complete561/40, all249 audited Git bindings and adoption readback remain established. Private mutual/count modules below have **not** been adopted into integration or the public route.
+
+| Private work | Actual qualification | Root-read evidence |
+|---|---|---|
+| Exact expanded count + shared headers/family recognition | Fresh complete program 1c4b0d6a /run40233827678 PASS all173 labels | Actual20-member5620513-byte ZIP d4f2651f37f3ddfeb64b5fd271b8e40f59e30fcf8c3aaae13a4b21d8d3e6aec2; complete10455285-byte program79d5ef8f; all19 digests/6 source Git blobs/3 nested archives checked |
+| Recursive-argument worker | 5ee8dfe2 /run40235169535 PASS195 production build jobs,15new+11retained reports,88native controls | Actual320-member846513-byte ZIP41bd21d1; all319 digests and313 archived source Git blobs checked |
+| Constructor fields | f1cfd69e /run40235491470 PASS196 production jobs,44reports/171controls | Actual325-member856003-byte ZIP87f00934; all324digests and316 source Git blobs checked |
+| Headers/family/count/recursive arguments/fields together | Fresh complete program13f2f666 /run40235791443 PASS344direct controls | Actual23-member6445903-byte ZIP2acacb90; all22digests/8Git sources/4nested archives checked; every344 label exactly matches actual native logs; complete10500038-byte program6875f7b9; runtime2.72s/399424KiB |
+| Complete closed constructor analysis | d45db713 /run40236067280 PASS197 production jobs,66reports/360controls | Actual330-member866229-byte ZIPa6874b78; all329digests and319 source Git blobs checked |
+| Complete closed constructor generated stage | 25eaaae7 /run40236754905 ACTIVE; requires fresh533direct controls | Not a pass or a final public cohort until actual archive/program/labels are read |
+| Private constructor/type list installation | 87ba62d5 follows rejected4d227bd2;16new+66retained reports and52new+360retained controls required | Latest run must be checked. First run40236906942 built198production jobs but rejected one provisional sorryAx; proof-only result-case repair preserves production and all statements |
+
+The original mutual recursive worker selects a structural family application **before WHNF**, even at checker fuel zero. It keeps checker fuel fixed while opening argument binders, checks syntactic negative domains before annotations/local allocation, and uses exactly **succ(original expanded NodeCount)** for its separate structural budget. The ID count is proved exact under the existing noncircular ArenaModel/private MemoSound. A universal theorem proves the retained original worker ignores its `applied` accumulator. The private worker uses that exact count; it is not a public-route admission yet.
+
+The constructor field stage preserves syntactic telescope order, Check → mandatory public EnsureSort → universe guard → annotations → field allocation → recursive analysis. Temporary argument scopes/caches are restored before the next field, while owning arena and monotone freshness survive. Complete constructor analysis first checks the closed type in a fresh owner, discards that owner's caches/freshness when resuming shared parameters, and distinguishes invalid return type from a valid family application returning the wrong owner.
+
+**Critical next-loop rule:** unlike the ordinary loop, the retained mutual constructor/type loops recurse structurally on lists, keep checker fuel unchanged, and succeed on empty lists at zero fuel. Never copy the ordinary predecessor-fuel loop into mutual admission. Existing validated boundary expressions may supply metadata after direct checking; no new eager input expansion or V1 checker call is authorized as a replacement. The current eager boundary carrier and recursive metadata importer remain T04 open work.
+
+Post-adoption integration run40233314029 has now been root-read: all193 input adaptations/classifications and all176 completed raw envelopes exactly match ecafaab. The actual586-member1141557-byte ZIP a26eaa5428d9ba93c9e6d37e36c5910c51dfdeb7d40f4109dff490e0f647e2ed contains the exact qualified10393520-byte7087dca9 program. Result remains **174strict/193,17timeouts,2separate matching safety agreements; strict FAIL**. The fresh199-member official artifact12613649899 has122accepted/71rejected and pinned controls. Four-case authentic diagnostic40233313965 is collection PASS only: repeated-subproblem1.356s accepted, Church7.293s accepted, init-prelude60.127s timeout, stuck-prop projection26.935s rejected; no whole-kernel speed claim.
+
+Integration native correctness/native DAG/generated DAG/paired-owner and all6research jobs have passed. Correctness portability and production String samples must be read live: at this checkpoint production0–3passed,4–5active. The earlier ecafaab String5 hard1500s kill remains a real unresolved qualification failure until the unchanged complete sample proves otherwise. Preserve1500s/4096fuel/2048MiB/emptyPATH/all6samples/all1400assertions and strict collection.
+
+Continue autonomous GitHub/Linux Actions execution: finish fresh533 and private list-loop qualification, then all mutual generated recursor types/rules and atomic bundle publication, nested admission, four public whole-operation restart removal, eager decode/worklist metadata import, authentic17timeouts/String scaling, and global semantics/backend/release evidence. Use source-bound raw artifacts and expected-SHA non-force refs; no local compiler/kernel execution, main merge, force push, npm publication, or subagents. **A scoped qualified; B OPEN/C FAIL/D OPEN. The project is not finished.**
+
 # PSKernel-Core remaining execution plan — 2026-10-26
 
 This is an implementation plan for the authorized open-source repository
@@ -7,11 +35,12 @@ results, source-bound evidence and a non-force integration confirmation.
 
 ## Current verified boundary
 
-Integration is ecafaabf844babd76a5de57bdf12909845961fba, production tree
-bccb72769d4f20def35f2064363fbc94fcc7e54a. Its local lazy-transform qualification
-has542 native reports/38modules, complete generated/canonical routes, independent
-archive audits and a frozen same-compiler16-observation A-B-B-A. None establishes
-global checker soundness or statistically established whole-kernel performance.
+Integration is aed07022222c8330b17636c3f894874058bfe571, production tree
+65d5b9c3d0431a8b86961b6d1aec398f7169d223. The adopted Quot slice has561native
+reports/40modules, complete generated/canonical routes, independent249input audit,
+actual193 replay and non-force integration confirmation. Earlier lazy-transform
+qualification and A-B-B-A observations remain scoped evidence, not global
+checker soundness or statistically established whole-kernel performance.
 
 The full Arena denominator remains193:174 strict matches,17 timeouts and two
 separate safety-contract agreements. Cases69/70 both reject unsafe/partial proof
@@ -25,7 +54,7 @@ the fixed resource policy.
 | Scoped String and local worker batches | Qualified within recorded sources | Actual receipts and independent archives |
 | Quot ID admission | Adopted exact2f7 tree after complete561/40, audit and unchanged193 evidence | Confirmed integrationaed07022; broader global scope remains open |
 | Cross-session Quot owners | Adopted with complete source561/audit and17actual session controls on both routes | Exact input namespace, atomic publication and error order retained |
-| Mutual/nested ID admission | Private header+family native22/147 and reused complete-program147 PASS; exact ID size native11/26 PASS | Recursive fields, constructors, all recursors and atomic publication open |
+| Mutual/nested ID admission | Private fresh complete program344controls; native complete closed constructor66reports/360controls PASS; fresh533 and private list-loop qualification active | Public route, all recursors, atomic bundle and nested admission open |
 | Whole-operation restart removal | Open | Four public routes without supported original-operation restart |
 | Eager decode/metadata import removal | Open | Demand-based output decode and bounded owning worklist import |
 | Arena performance |17timeouts; two separately classified agreements | All193 preserved original bodies and pinned official controls |
@@ -49,7 +78,7 @@ Current final cohort **2f7ee0af /40228598527 PASS all3routes**, exact production
 
 Private c673885b /40230310206 now passes native22reports/147controls and all307Git-bound archived sources. edb92439 /40231776046 passes exactly the same147labels through the authenticated complete f55program from2f7d65df, correcting only2injected callback Option wrappers. This is a reused-program private preflight, not fresh full-source qualification or complete mutual admission. The all-family selector and occurrence workers preserve exact first target/index, parameter fvars, target-specific index arity, recursive occurrence short circuiting and original index IDs.
 
-Private exact-size30aeb034 /40231705901 passes11local reports/26controls; all310source blobs and actual316-member archive checked. Use its conditional count correspondence to preserve the original mutual structural budget. It is native-only and not consumed by admission yet. Preserve all earlier failed proof/parser/mock-callback attempts and rejected provisional sorryAx.2f7 production/proof statements were unchanged by the passing external JS ABI fixes.
+Private exact-size30aeb034 /40231705901 passes11local reports/26controls; all310source blobs and actual316-member archive checked. Use its conditional count correspondence to preserve the original mutual structural budget. Its fresh complete generated173 and344control programs now pass, and the private recursive-argument worker consumes the exact count. It is not consumed by the public admission route yet. Preserve all earlier failed proof/parser/mock-callback attempts and rejected provisional sorryAx.2f7 production/proof statements were unchanged by the passing external JS ABI fixes.
 
 ## 2. Implement shared mutual headers
 

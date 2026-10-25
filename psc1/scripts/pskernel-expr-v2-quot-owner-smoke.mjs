@@ -339,10 +339,23 @@ for(const [label,type,value] of negatives){
  admissions++;independentNegative++;
 }
 must(admissions===17&&independentPositive===10&&independentNegative===7,"seventeen-actual-direct-admissions");
-must(same(get("psKernelDagTryAdmitSimpleWithFuel")(
+const directQuot=accepted(accepted(get("psKernelDagTryAdmitSimpleWithFuel")(
  session.resources.fuel,withEq.environment,session.resources.maxRecDepth,session.resources.maxNatSize,
- generated.arena,generated.declarations,unit(D.quot),unit(Request.quot)),none),
- "Quot-admission-itself-remains-validated-V1");
+ generated.arena,generated.declarations,unit(D.quot),unit(Request.quot)),"direct-Quot-option"),"direct-Quot");
+must(directQuot.quotInitialized && get("psKernelEnvironmentSize")(directQuot)===
+ get("psKernelEnvironmentSize")(session.environment),"Quot-admission-itself-uses-owned-IDs");
+const directQuotWorker=get("psKernelDagTryAdmitQuot");
+must(same(directQuotWorker(withEq.environment,generated.arena,nil),none),"Quot-missing-owner-declines");
+must(same(directQuotWorker(session.environment,get("psKernelExprV2PagedEmpty"),nil),
+ Option.some(get("Except").ok(session.environment))),"Quot-initialized-exact-environment");
+for(const pattern of [eqType,eqReflType]){
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(pattern.id),
+  Option.some(true)),"Quot-valid-bounded-pattern");
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(generated.arena.size+1n),none),
+  "Quot-missing-shape-root-declines");
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(s1.id),
+  Option.some(exprEq(s1.term,pattern.term))),"Quot-wrong-sort-exact-shape-result");
+}
 
 const queries=fixtures.flatMap(({term,expected})=>[C.check(term.id),C.whnf(term.id),C.isDefEq(term.id,expected.id)]);
 const result=accepted(run(queries),"complete-Quot-owner-batch");

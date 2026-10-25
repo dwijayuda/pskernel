@@ -20,7 +20,7 @@ SPECS = [
     ("PsKernelExprV2ArenaModelBridgeProofs", 7, "arena-model-bridge.lean"),
 ]
 PINS = {'psc1/test/PsKernelExprV2ReplayMetadataProofs.lean': 'bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46', 'psc1/test/PsKernelExprV2SemanticPrefixProofs.lean': '358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e', 'psc1/test/PsKernelExprV2DecodedNodeProofs.lean': '0720db5abc1922656c47d1f2b251efa9f4b23fafc8d12932dbaec0a822a25d27', 'psc1/test/PsKernelExprV2DecodedBridgeProofs.lean': 'c97baa13eea76cd5ef5076a4277f517a1748014ee3a49d06f4b5ef68765085b3', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean': '2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Decode.lean': 'efa439588f6b4b80eb6ab25c8311fa221d74971f7e8ad572abd4a6aa57b77d5e', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.lean': '2257f156a0b713802ada3b0397b92db747cea44477b767224a9eec494d3e895d', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean': '831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f', 'psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean': '8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089', 'psc1/test/PsKernelExprV2MetadataProofs.lean': '5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20', 'psc1/test/PsKernelExprV2PagedModelProofs.lean': 'a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8', 'psc1/test/PsKernelExprV2ArenaModelBridgeProofs.lean': '2699f6a6bd9d8d0d793a8eb2d398293f43255d79bd8f5c84d1033be393d72af3', 'psc1/test/PsKernelOrdinaryOccurrenceProofs.lean': 'd5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351'}
-PRODUCTION_TREE = "bccb72769d4f20def35f2064363fbc94fcc7e54a"
+PRODUCTION_TREE = "65d5b9c3d0431a8b86961b6d1aec398f7169d223"
 RETAINED_LAYERS = [
     "constructor-native-receipt.json", "fields-native-receipt.json",
     "analysis-native-receipt.json", "loop-native-receipt.json",
@@ -167,7 +167,7 @@ def native(repo, root):
                "proofModules": 36, "proofs": all_records, "retainedLayers": layers,
                "sourceInventory": digest(out / "source-inventory.json"),
                "proofStatuses": digest(out / "proof-status.json"),
-               "productionTree": PRODUCTION_TREE, "productionChanges": ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"],
+               "productionTree": PRODUCTION_TREE, "productionChanges": ["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"],
                "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
                "untrustedSourceValidityAssumed": False, "replayArenaModelBridgeEstablished": True,
                "fullKernel": False, "performanceQualified": False}
@@ -210,7 +210,7 @@ def route(repo, root, native_root):
                "route": provenance["route"], "nativeProofs": 532,
                "nativeReceipt": digest(out / "native-receipt.json"),
                "retainedRouteReceipt": digest(root / "empty-semantic-cache-receipt.json"),
-               "kernel": provenance["kernel"], "productionChanges": ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"],
+               "kernel": provenance["kernel"], "productionChanges": ["psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean"],
                "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
                "replayArenaModelBridgeEstablished": True, "fullKernel": False,
                "performanceQualified": False}

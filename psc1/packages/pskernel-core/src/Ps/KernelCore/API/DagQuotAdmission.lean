@@ -1,0 +1,246 @@
+import Ps.KernelCore.API.DagDeclaration
+import Ps.KernelCore.Admission.Quot.Admission
+
+/- Structural comparison against a fixed bootstrap pattern. Recursion follows
+   expected syntax; the input is read only by IDs in its owning canonical arena.
+   All constructor fields follow psKernelExprEq, including binder erasure and
+   metadata sensitivity. No hashes or input expansion decide equality. Quot uses
+   only the two bounded ExpectedEq patterns. Missing children decline. -/
+def psKernelDagQuotMatchShape
+    (expected : PsKernelExpr) :
+    PsKernelExprV2PagedArena -> Nat -> Option Bool :=
+  match expected with
+  | PsKernelExpr.bvar index =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.bvar actual => Option.some (Nat.beq actual index)
+            | _ => Option.some false
+  | PsKernelExpr.fvar name =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.fvar actual => Option.some (psKernelNameEq actual name)
+            | _ => Option.some false
+  | PsKernelExpr.mvar name =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.mvar actual => Option.some (psKernelNameEq actual name)
+            | _ => Option.some false
+  | PsKernelExpr.sort level =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.sort actual => Option.some (psKernelLevelEq actual level)
+            | _ => Option.some false
+  | PsKernelExpr.const name levels =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.const actual actualLevels =>
+                let equal :=
+                  if psKernelNameEq actual name then
+                    psKernelLevelListEq actualLevels levels
+                  else false;
+                Option.some equal
+            | _ => Option.some false
+  | PsKernelExpr.lit value =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.lit actual => Option.some (psKernelLiteralEq actual value)
+            | _ => Option.some false
+  | PsKernelExpr.app fn arg =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.app actualFn actualArg =>
+                let quotCompare0 := psKernelDagQuotMatchShape fn;
+                match quotCompare0 arena actualFn with
+                | Option.none => Option.none
+                | Option.some equal =>
+                    if equal then
+                      let quotCompare6 := psKernelDagQuotMatchShape arg;
+                      quotCompare6 arena actualArg
+                    else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.lam _ domain body _ =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.lam _ actualDomain actualBody _ =>
+                let quotCompare1 := psKernelDagQuotMatchShape domain;
+                match quotCompare1 arena actualDomain with
+                | Option.none => Option.none
+                | Option.some equal =>
+                    if equal then
+                      let quotCompare7 := psKernelDagQuotMatchShape body;
+                      quotCompare7 arena actualBody
+                    else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.forallE _ domain body _ =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.forallE _ actualDomain actualBody _ =>
+                let quotCompare2 := psKernelDagQuotMatchShape domain;
+                match quotCompare2 arena actualDomain with
+                | Option.none => Option.none
+                | Option.some equal =>
+                    if equal then
+                      let quotCompare8 := psKernelDagQuotMatchShape body;
+                      quotCompare8 arena actualBody
+                    else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.letE _ type value body nondep =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.letE _ actualType actualValue actualBody actualNondep =>
+                let quotCompare3 := psKernelDagQuotMatchShape type;
+                match quotCompare3 arena actualType with
+                | Option.none => Option.none
+                | Option.some typeEqual =>
+                    if typeEqual then
+                      let quotCompare4 := psKernelDagQuotMatchShape value;
+                      match quotCompare4 arena actualValue with
+                      | Option.none => Option.none
+                      | Option.some valueEqual =>
+                          if valueEqual then
+                            let quotCompare5 := psKernelDagQuotMatchShape body;
+                            match quotCompare5 arena actualBody with
+                            | Option.none => Option.none
+                            | Option.some bodyEqual =>
+                                if bodyEqual then Option.some (psKernelBoolEq actualNondep nondep)
+                                else Option.some false
+                          else Option.some false
+                    else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.mdata tag body =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.mdata actualTag actualBody =>
+                if Nat.beq actualTag tag then
+                  let quotCompare9 := psKernelDagQuotMatchShape body;
+                  quotCompare9 arena actualBody
+                else Option.some false
+            | _ => Option.some false
+  | PsKernelExpr.proj name index body =>
+      fun (arena : PsKernelExprV2PagedArena) (root : Nat) =>
+        match psKernelExprV2PagedFind arena root with
+        | Option.none => Option.none
+        | Option.some entry =>
+            match entry.node with
+            | PsKernelExprV2Node.proj actualName actualIndex actualBody =>
+                if psKernelNameEq actualName name then
+                  if Nat.beq actualIndex index then
+                    let quotCompare10 := psKernelDagQuotMatchShape body;
+                    quotCompare10 arena actualBody
+                  else Option.some false
+                else Option.some false
+            | _ => Option.some false
+
+/- Only private references derived in this immutable batch/session are used.
+   Live environment kind and universe arity remain authoritative. -/
+def psKernelDagQuotMatchInfo
+    (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef)
+    (info : PsKernelConstantInfo) (expected : PsKernelExpr) : Option Bool :=
+  match psKernelExprV2DeclarationRefFind declarations (psKernelConstantInfoName info) with
+  | Option.none => Option.none
+  | Option.some owner =>
+      if psKernelExprV2DeclarationRefMatches owner info then
+        psKernelDagQuotMatchShape expected arena owner.type
+      else Option.none
+
+def psKernelDagCheckEqForQuot
+    (environment : PsKernelEnvironment) (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    Option (Except String Unit) :=
+  match psKernelEnvironmentFind environment psKernelEqName with
+  | Option.none => Option.some (Except.error
+      "failed to initialize quot module, environment does not have Eq type")
+  | Option.some eqValue =>
+      match eqValue with
+      | PsKernelConstantInfo.inductInfo eqInfo =>
+          match eqInfo.base.levelParams with
+          | List.cons universeName quotSingletonTail2 =>
+              match quotSingletonTail2 with
+              | List.cons _ _ => Option.some (Except.error
+                  "failed to initialize quot module, unexpected number of universe params at Eq type")
+              | List.nil =>
+                  match eqInfo.ctors with
+                  | List.cons reflName quotSingletonTail1 =>
+                      match quotSingletonTail1 with
+                      | List.cons _ _ => Option.some (Except.error
+                          "failed to initialize quot module, unexpected number of constructors for Eq type")
+                      | List.nil =>
+                          match psKernelDagQuotMatchInfo arena declarations eqValue
+                              (psKernelExpectedEqType universeName) with
+                          | Option.none => Option.none
+                          | Option.some equal =>
+                              if equal then
+                                match psKernelEnvironmentFind environment reflName with
+                                | Option.none => Option.some (Except.error
+                                    "failed to initialize quot module, missing Eq constructor")
+                                | Option.some reflInfo =>
+                                    match psKernelConstantInfoLevelParams reflInfo with
+                                    | List.cons reflUniverse quotSingletonTail0 =>
+                                        match quotSingletonTail0 with
+                                        | List.cons _ _ => Option.some (Except.error
+                                            "failed to initialize quot module, unexpected universe params at Eq constructor")
+                                        | List.nil =>
+                                            match psKernelDagQuotMatchInfo arena declarations reflInfo
+                                                (psKernelExpectedEqReflType reflUniverse) with
+                                            | Option.none => Option.none
+                                            | Option.some reflEqual =>
+                                                if reflEqual then Option.some (Except.ok Unit.unit)
+                                                else Option.some (Except.error
+                                                  "failed to initialize quot module, unexpected type for Eq constructor")
+                                    | _ => Option.some (Except.error
+                                        "failed to initialize quot module, unexpected universe params at Eq constructor")
+                              else Option.some (Except.error
+                                "failed to initialize quot module, Eq has an unexpected type")
+                  | _ => Option.some (Except.error
+                      "failed to initialize quot module, unexpected number of constructors for Eq type")
+          | _ => Option.some (Except.error
+              "failed to initialize quot module, unexpected number of universe params at Eq type")
+      | _ => Option.some (Except.error
+          "failed to initialize quot module, environment does not have Eq type")
+
+def psKernelDagTryAdmitQuot
+    (environment : PsKernelEnvironment) (arena : PsKernelExprV2PagedArena)
+    (declarations : List PsKernelExprV2DeclarationRef) :
+    Option (Except String PsKernelEnvironment) :=
+  if environment.quotInitialized then Option.some (Except.ok environment)
+  else
+    match psKernelDagCheckEqForQuot environment arena declarations with
+    | Option.none => Option.none
+    | Option.some attempted =>
+        match attempted with
+        | Except.error error => Option.some (Except.error error)
+        | Except.ok _ => Option.some (psKernelInstallCheckedQuot environment)

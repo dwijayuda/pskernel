@@ -23,8 +23,8 @@ the fixed resource policy.
 | Work | Current state | Completion evidence |
 |---|---|---|
 | Scoped String and local worker batches | Qualified within recorded sources | Actual receipts and independent archives |
-| Quot ID admission | Final2f7 complete561/40 and both complete routes PASS; independent417578e4 audit PASS | Read actual unchanged193 replay, evidence-before-integration, confirmation |
-| Cross-session Quot owners | Final complete source561/audit PASS with17actual session controls on both routes | Preserve exact ownership/input namespace/publication; no adoption yet |
+| Quot ID admission | Adopted exact2f7 tree after complete561/40, audit and unchanged193 evidence | Confirmed integrationaed07022; broader global scope remains open |
+| Cross-session Quot owners | Adopted with complete source561/audit and17actual session controls on both routes | Exact input namespace, atomic publication and error order retained |
 | Mutual/nested ID admission | Private header+family native22/147 and reused complete-program147 PASS; exact ID size native11/26 PASS | Recursive fields, constructors, all recursors and atomic publication open |
 | Whole-operation restart removal | Open | Four public routes without supported original-operation restart |
 | Eager decode/metadata import removal | Open | Demand-based output decode and bounded owning worklist import |
@@ -45,7 +45,7 @@ psKernelExprEq's binder erasure, metadata and other fields. Shared installation
 has a complete frozen-function refinement theorem. It reads no expanded input
 type and imports no input expression.
 
-Current final cohort **2f7ee0af /40228598527 PASS all3routes**, exact production65d5b9c3d0431a8b86961b6d1aec398f7169d223. Independent417578e4 /40228636222 PASS actual273/448/451archives/all561reports40modules and complete programs. Root read those archives and all249 audited Git bindings (248physical source bindings; workspace-layout is an explicitly separate immutable Git-only layout input). Generated7087dca9 and canonical6715de57 bodies match except final map URL. The actual unchanged193 replay146e3d4e /40228699303 remains running with fixed original inputs/resources and the authentic already passed official reference. No adoption before actual replay inspection and evidence commit.
+Current final cohort **2f7ee0af /40228598527 PASS all3routes**, exact production65d5b9c3d0431a8b86961b6d1aec398f7169d223. Independent417578e4 /40228636222 PASS actual273/448/451archives/all561reports40modules and complete programs. Root read those archives and all249 audited Git bindings (248physical source bindings; workspace-layout is an explicitly separate immutable Git-only layout input). Generated7087dca9 and canonical6715de57 bodies match except final map URL. The actual unchanged193 replay146e3d4e /40228699303 preserves all193 inputs/classifications and all176 completed raw envelopes:174strict,17timeouts,2separate matching safety agreements. Its actual587-member archive was read and evidence committed inaf45abff before this integration. The exact qualified tree is adopted in the scoped integration with all249audited inputs unchanged; the non-force expected-SHA update to aed07022222c8330b17636c3f894874058bfe571 is confirmed by live ref readback. Strict C remains FAIL; no performance/global proof claim.
 
 Private c673885b /40230310206 now passes native22reports/147controls and all307Git-bound archived sources. edb92439 /40231776046 passes exactly the same147labels through the authenticated complete f55program from2f7d65df, correcting only2injected callback Option wrappers. This is a reused-program private preflight, not fresh full-source qualification or complete mutual admission. The all-family selector and occurrence workers preserve exact first target/index, parameter fvars, target-specific index arity, recursive occurrence short circuiting and original index IDs.
 

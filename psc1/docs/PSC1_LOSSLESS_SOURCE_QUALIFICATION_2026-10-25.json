@@ -1,0 +1,393 @@
+{
+  "schema": "psc1-lossless-source-qualification/1",
+  "date": "2026-10-25",
+  "milestone": "R1 lexical capture, opaque exact-byte snapshots and stale-safe staged edits",
+  "implementationCommit": "c577d49888493857199fa3dc26f7ff78ed157def",
+  "baselineCommit": "d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/182",
+  "testedMerge": "e0b14e376f0231877b4c03321842f4eeaad97f5a",
+  "testedTree": "424e725cde95312d2b5cac9e87aa36df1fc3a676",
+  "scope": {
+    "lexer": "original psLex/psLexProofScript token stream and trivia helpers",
+    "snapshots": "module, grammar, fixed profile, exact byte SHA256; URI is provenance only",
+    "edits": "opaque snapshot, exact current bytes, UTF8 boundaries, sorted non-overlapping old-coordinate ranges",
+    "authority": {
+      "lexicalOnly": true,
+      "admission": "not-run",
+      "semanticEquivalence": "not-claimed",
+      "publication": false
+    },
+    "distribution": "developer tool only; not added to the slim npm root"
+  },
+  "limits": {
+    "sourceBytes": 1048576,
+    "pieces": 262144,
+    "responseBytes": 33554432,
+    "edits": 4096,
+    "timeoutMs": 240000,
+    "virtualAddressSpaceBytes": 4294967296,
+    "mainProcessStackBytes": 8388608,
+    "leanTaskWorkers": 0,
+    "leanMainUseThread": false
+  },
+  "currentCompiler": {
+    "modules": 121,
+    "closureSha256": "7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000",
+    "changed": false,
+    "semanticSourceFilesChanged": [],
+    "newSidecarOutsideImportClosure": "Ps.Syntax.Lossless"
+  },
+  "focused": {
+    "runId": 40191237137,
+    "jobId": 121162499744,
+    "status": "passed",
+    "captures": 358,
+    "negativeCases": 49,
+    "authoredCompilerModules": 121,
+    "lexers": [
+      "lean",
+      "ps"
+    ],
+    "maximumHelperWallMs": 355,
+    "maximumHelperRssKiB": 160280,
+    "artifact": {
+      "id": 12598640604,
+      "zipBytes": 29490,
+      "zipSha256": "ecd89e8f997ae1b78dd30f453f2099ba1c3800b6867786e781aba59b18192517",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40191237137/artifacts/12598640604",
+      "receipt": "qualification.json",
+      "helperIdentityField": "helperSha256",
+      "sourceIdentityFields": "measurements[].sourceId/sourceSha256"
+    },
+    "coverage": [
+      "exact reconstruction",
+      "original token projection",
+      "nested/line/doc comments",
+      "raw escaped literals",
+      "Unicode scalar columns and UTF8 spans",
+      "CRLF/LF/EOF",
+      "grammar-specific BOM",
+      "lexical refusals retained unlexed",
+      "advisory diagnostic coordinates",
+      "strict UTF8 rejection",
+      "opaque/deeply frozen snapshot metadata",
+      "copied input/output bytes",
+      "source/piece identity determinism",
+      "URI-independent identity",
+      "stale and forged/cross-tool snapshots",
+      "overlap/order/boundary/replacement/edit-count refusal",
+      "helper identity/tamper/symlink refusal",
+      "closed wire schemas and malformed diagnostics",
+      "piece exhaustion",
+      "real compiler corpus",
+      "deterministic delimiter mixtures",
+      "bounded large comments/trivia",
+      "unchanged frozen input guard"
+    ]
+  },
+  "ordinaryDevelopment": {
+    "runId": 40191245319,
+    "status": "passed",
+    "jobs": {
+      "static": {
+        "id": 121162523948,
+        "status": "passed"
+      },
+      "native": {
+        "id": 121162707631,
+        "status": "passed",
+        "artifact": {
+          "id": 12598635674,
+          "zipBytes": 319168,
+          "zipSha256": "0606b903e102e6cdb85d1185ea5c282f5a92e895b6085c1dbd46047333a0d4f3"
+        }
+      },
+      "lossless": {
+        "id": 121162707713,
+        "status": "passed",
+        "captures": 358,
+        "negativeCases": 49,
+        "maximumHelperWallMs": 359,
+        "maximumHelperRssKiB": 159444,
+        "artifact": {
+          "id": 12597797977,
+          "zipBytes": 29589,
+          "zipSha256": "2117db3869b5c4b07ce63ab917cfa975f980b937bd473bd9cfa0cf6f8a821cd2"
+        }
+      },
+      "phpApplication": {
+        "id": 121162707550,
+        "status": "passed",
+        "scope": "both grammars; 12 compiler CLI/file and 21 JSON/file cases per grammar, independent official Lean admission",
+        "artifact": {
+          "id": 12597887985,
+          "zipBytes": 360283,
+          "zipSha256": "ba3028121f7ebfe07c398be310a04d62d1225afd6e8a2f30df568e1c265ccace"
+        }
+      },
+      "core": {
+        "id": 121162707520,
+        "status": "passed",
+        "scope": "original core, typed IO and JS/TS/Rust consumers under both grammars",
+        "artifact": {
+          "id": 12598131728,
+          "zipBytes": 3019672,
+          "zipSha256": "fa9925041cd6594d9b4ff169e442b7cf442c57dbe093693d3e51613c09ad1b95"
+        }
+      },
+      "applications": {
+        "id": 121162707569,
+        "status": "passed",
+        "scope": "original focused five-target compiler and CLI applications under both grammars",
+        "artifact": {
+          "id": 12598641190,
+          "zipBytes": 1750256,
+          "zipSha256": "68870270574ffd51da5512985226088f8c33fd2842c14ba22cd7f44dd80cc413"
+        }
+      },
+      "hostSession": {
+        "id": 121164567665,
+        "status": "passed",
+        "scope": "real host state and publication boundary regressions",
+        "artifact": {
+          "id": 12597754089,
+          "zipBytes": 237649,
+          "zipSha256": "d0b2b42ccb8c32e80931d30403d496631d6e7f093fffe1200fb0a77e337c2429"
+        }
+      },
+      "closures": [
+        {
+          "id": 121164567681,
+          "closure": "directjs-compiler",
+          "mode": "ordinary-checked",
+          "status": "passed",
+          "artifact": {
+            "id": 12598352706,
+            "zipBytes": 2757185,
+            "zipSha256": "b23c4fbaed35ddae9110f5f3d6a214c577c7e3105c7eb92675f873146fd28d59"
+          }
+        },
+        {
+          "id": 121164567695,
+          "closure": "rust-compiler",
+          "mode": "ordinary-checked",
+          "status": "passed",
+          "artifact": {
+            "id": 12598626375,
+            "zipBytes": 2472986,
+            "zipSha256": "a1ec5df9246e9ade4936859a6e9c1f35639c1fa03a90461111835f2296f8d3ea"
+          }
+        },
+        {
+          "id": 121164567781,
+          "closure": "semantic-compiler",
+          "mode": "checked",
+          "status": "passed",
+          "artifact": {
+            "id": 12598526558,
+            "zipBytes": 1986917,
+            "zipSha256": "f316d4c8f3b559b71c0b8ba954ab38839b7ac77e96c6ccb1453b72efb078b951"
+          }
+        }
+      ],
+      "generatedJs": {
+        "id": 121164567680,
+        "status": "passed",
+        "scope": "existing G1 facade/source/corpus regressions, not a new G2/G3 chain",
+        "artifact": {
+          "id": 12597899045,
+          "zipBytes": 5589937,
+          "zipSha256": "1e27a4a0beae81285c508523f7d6077a4b986543fba87ba6f83be1d675c2a479"
+        }
+      },
+      "full": {
+        "id": 121165434305,
+        "status": "passed",
+        "qualified": 37,
+        "blocked": 0,
+        "releaseReady": true,
+        "artifact": {
+          "id": 12598369446,
+          "zipBytes": 121305482,
+          "zipSha256": "30f94cf356f25e3d3a25f6df3708bb7d8509ea474a3b5e14b72b461c97203437",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/40191245319/artifacts/12598369446"
+        }
+      }
+    },
+    "qualified": 37,
+    "blocked": 0,
+    "releaseReady": true,
+    "gate": {
+      "id": 121171444990,
+      "status": "passed"
+    },
+    "selectedJobResults": [
+      {
+        "id": 121162523948,
+        "name": "static",
+        "result": "success"
+      },
+      {
+        "id": 121162707520,
+        "name": "focused / focused (core)",
+        "result": "success"
+      },
+      {
+        "id": 121162707550,
+        "name": "focused / php-application",
+        "result": "success"
+      },
+      {
+        "id": 121162707569,
+        "name": "focused / focused (applications)",
+        "result": "success"
+      },
+      {
+        "id": 121162707631,
+        "name": "native / native",
+        "result": "success"
+      },
+      {
+        "id": 121162707713,
+        "name": "lossless / lossless",
+        "result": "success"
+      },
+      {
+        "id": 121162707918,
+        "name": "benchmark",
+        "result": "skipped"
+      },
+      {
+        "id": 121164567665,
+        "name": "g1 / host-session-boundary",
+        "result": "success"
+      },
+      {
+        "id": 121164567680,
+        "name": "g1 / generated-js",
+        "result": "success"
+      },
+      {
+        "id": 121164567681,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121164567695,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121164567781,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "result": "success"
+      },
+      {
+        "id": 121165434305,
+        "name": "full / linux-scoped",
+        "result": "success"
+      },
+      {
+        "id": 121171444990,
+        "name": "gate",
+        "result": "success"
+      }
+    ],
+    "sevenBackendScope": {
+      "qualification": "passed-scoped-execution",
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "targets": 14,
+      "scriptingRegressionGroups": 28,
+      "versions": {
+        "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+        "node": "v22.23.3",
+        "npm": "10.9.9",
+        "typescriptConsumer": "Version 7.0.2",
+        "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+        "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+        "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+        "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+        "python": "Python 3.15.0",
+        "pythonMinimum": "Python 3.14.8",
+        "php": "PHP 8.5.12 (cli) (built: Oct 24 2026 12:34:32) (NTS)"
+      },
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      }
+    }
+  },
+  "diagnosed": {
+    "runtimeInitialization": {
+      "runId": 40190581290,
+      "oneGiB": "startup-refused",
+      "twoGiB": "startup-refused",
+      "fourGiB": "startup-passed",
+      "cause": "official runtime mandatory libuv thread starts before main-thread environment controls",
+      "existingCompilerAndCheckerPoliciesChanged": false
+    },
+    "legacyCharacterDiagnostic": {
+      "observedRunId": 40190697846,
+      "regression": "apostrophe U+1F600 U+03B1; original unterminatedCharacter diagnostic stop offset 3 is inside the emoji",
+      "status": "tracked; production lexer unchanged",
+      "handling": "preserve exact diagnostic as advisory, mark diagnosticCoordinatesVerified=false, never use as edit span"
+    }
+  },
+  "preserved": {
+    "nativeSourceQualification": {
+      "runId": 40184897417,
+      "criteria": 37,
+      "qualified": 37
+    },
+    "newSourceWasmG1": {
+      "runId": 40184951724,
+      "scope": "G1 only; same 121-module closure"
+    },
+    "frozenFourEngineSource": {
+      "modules": 120,
+      "commit": "daa735017e34ee94da79d747c363237b4adbc4ef",
+      "closureSha256": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "runs": [
+        40141718481,
+        40147825207
+      ],
+      "newQualificationClaimed": false
+    },
+    "packagedHost": {
+      "runId": 40184641007,
+      "changed": false,
+      "newTarballClaimed": false
+    },
+    "officialLean": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "trustLevel": 0,
+      "heartbeatLimit": 2000000,
+      "recursionLimit": 20000,
+      "checkerTimeoutMs": 120000
+    },
+    "previousGuardsAndTests": "preserved; required lossless dependency added"
+  },
+  "remaining": [
+    "qualified production-lexer diagnostic correction",
+    "resolved declaration/binder identities",
+    "capture-avoiding semantic rename with affected-closure elaboration and independent admission",
+    "checked cross-grammar conversion and explicit equivalence obligations",
+    "editor integration and race-safe publication"
+  ],
+  "notClaimed": [
+    "semantic refactoring equivalence",
+    "parser acceptance from lexical capture",
+    "new compiler G2/G3 or fixed-point qualification",
+    "formal compiler preservation",
+    "installed refactoring CLI",
+    "non-Linux developer-tool qualification",
+    "merge",
+    "npm publication"
+  ]
+}

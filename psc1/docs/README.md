@@ -24,6 +24,10 @@ those authorities; they do not create qualification.
 
 ## Exact existing qualification
 
+- [Lossless R1 capture](PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json):
+  implementation c577d498, focused 40191237137 (358 captures, 49 refusals),
+  normal 40191245319 (37/37 finite criteria), unchanged unified/frozen source identities.
+
 - [Current readability slice](PSC1_READABILITY_QUALIFICATION_2026-10-25.json):
   implementation 446a0f21, host package 40184641007, new-source Wasm G1
   40184951724 and normal source 40184897417. Frozen packaged source and

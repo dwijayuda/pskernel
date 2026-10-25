@@ -57,6 +57,8 @@ It reconstructs the tape and compares it with the original bytes before retentio
 After building the native helper in Linux CI, a trusted host can use:
 
 ~~~js
+import { createLosslessSourceTool } from '../host-tools/source-refactoring.mjs';
+
 const tool = createLosslessSourceTool({
   executable: absoluteHelperPath,
   sha256: expectedHelperSha256,
@@ -124,9 +126,11 @@ unsafe implementation, unchecked proof or semantic fuel increase is introduced.
 
 ## Verification and next boundary
 
-The qualification receipt records exact source/helper identities, Linux runs,
+[The R1 qualification receipt](PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json) records exact source/helper identities, Linux runs,
 measurements and preserved baseline closure. Corpus coverage is lexical capture
 under both lexers; it is not .ps parser translation or a new self-hosting chain.
+Focused run 40191237137 passes 358 captures and 49 negative cases; normal run
+40191245319 passes all selected dependencies and 37/37 finite release criteria.
 The previously qualified compiler generations and npm artifacts remain unchanged.
 
 R2 still requires resolved declarations/binders, capture-avoiding rename,

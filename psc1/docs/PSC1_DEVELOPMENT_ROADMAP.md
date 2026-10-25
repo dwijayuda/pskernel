@@ -1,16 +1,19 @@
 # PSC1 development roadmap
 
-Updated 2026-10-25 Asia/Jakarta. Active R1 lossless capture branch follows qualified PR #181.
+Updated 2026-10-25 Asia/Jakarta. Active draft PR #182 follows qualified PR #181.
 Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
-## Active R1 lossless capture
+## Qualified R1 lossless capture
 
 The additive token/trivia tape, opaque exact-byte source snapshots and stale-safe
 candidate edits are implemented outside the unified compiler import closure.
-The original lexer is reused without modification. Linux qualification is in
-progress; no semantic rename, automatic file edit or publication is claimed.
+The original lexer is reused without modification. Linux focused run 40191237137 passes 358 captures and 49 refusal cases. Ordinary
+run 40191245319 passes every selected dependency and 37/37 finite release criteria.
+The 121-module compiler closure and frozen npm payload inputs remain unchanged.
+No semantic rename, automatic file edit or publication is claimed.
+[Exact R1 receipt](PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json).
 [Capture contract](PSC1_LOSSLESS_SOURCE.md),
 [refactoring boundaries](PSC1_SOURCE_REFACTOR_ARCHITECTURE.md).
 
@@ -77,8 +80,8 @@ qualification receipts supply exact CI evidence.
 | Order | Work | Status and finite acceptance |
 | --- | --- | --- |
 | 0 | Documentation, host readability and one compiler-module extraction | First slice qualified in the linked receipt. Preserve current entry points, invariants, correspondence and exact evidence. |
-| 0a | Lossless lexical capture (R1) | Implemented; Linux qualification in progress. Exact bytes/trivia/tokens, snapshot identity, immutable capture, stale-safe candidate edits and malformed-transport refusal. No semantic or publication authority. |
-| 0b | Binding-aware source editing (R2–R4) | Pending. Resolve declaration/binder identities before capture-avoiding rename. Require affected-closure elaboration, independent admission, public API and explicit equivalence checks before publication. Do not expand the frozen language merely to shorten compiler code. |
+| 0a | Lossless lexical capture (R1) | Qualified in 40191237137 and normal source run 40191245319. Exact bytes/trivia/tokens, snapshot identity, immutable capture, stale-safe candidate edits and malformed-transport refusal. No semantic or publication authority. |
+| 0b | Binding-aware source editing (R2–R4) | Pending. Preserve the tracked advisory malformed-character diagnostic boundary; a production lexer correction needs separate source evidence. Resolve declaration/binder identities before capture-avoiding rename. Require affected-closure elaboration, independent admission, public API and explicit equivalence checks before publication. Do not expand the frozen language merely to shorten compiler code. |
 | 1 | Slim real applications and source-package coverage | Pending. Compile/consume CLI, JSON/file and multi-module applications through the slim APIs in both grammars. Source closure resolution must not grant host/FFI authority. Retain the previous native package. |
 | 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |
 | 3 | Checked generated TS publication | Pending. Reuse existing emitter, IR/admission/runtime and publication machinery; require independent pinned TS consumers, four executors, both grammars and negative/ABI/tamper/prior-output checks. |

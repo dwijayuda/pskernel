@@ -4,6 +4,37 @@ Updated 2026-10-25 Asia/Jakarta. Draft PR #178; branch
 `feat/psc1-unified-selfhost-20261024`. GitHub tools/cloud Actions only; routine development stays Linux.
 Use fresh expected-HEAD, single-parent non-force updates. No merge/npm publication.
 
+## Latest user requirement: default Wasm kernel and separate execution bundles
+
+The final/default independent checker is now required to be
+@proofscript/pskernel-lean-wasm4.35.0 (official C++/Emscripten linear memory).
+Native Lean is explicit --kernel native|both; no silent native fallback is allowed.
+The reference proofscript-psc0-ps-npm-packages.zip was read only as nested package
+metadata/layout, with no scripts executed. Its old4.34/candidate-JS trust metadata,
+mismatched .js/.mjs exports and Linux-only bundled TypeScript tool are not release
+patterns to inherit. [Authoritative distribution contract](NPM_DISTRIBUTION_CONTRACT.json).
+
+Root proofscript will provide qualified generated JS/TS execution, default Wasm
+checking and JS/TS/Rust/Wasm output capabilities. Separate optional compiler-rust,
+compiler-wasm and platform-native execution bundles reuse the existing compiler;
+Python/PHP remain optional output providers. Compiler execution, output backend
+and independent kernel are distinct. Modular source/API packages must ship real
+working exports/types, not pretend independently compiled facades. The package
+split is a final-release queue item; current integration bundles retain old assets.
+
+Default selection implementation now uses a pinned Node/Wasm primary checker,
+with explicit native/both comparison. Preserved native publication adds default
+Wasm checking of the exact captured staged admissions before commit; its original
+native internal checking is retained. The updated host-boundary/native-publisher
+and installed-package tests must pass before this implementation is qualified.
+The long real Wasm build remains40154206987; do not substitute4.34 bytes.
+
+Native compiler source-admission release run40157017833 has PASSED all four new
+platforms (Linux arm64, macOS x64/arm64, Windows x64), with SDK absent from execution
+PATH. These are source/check/admission binary gates, not complete backend
+publication or whole-toolchain npm qualification. The existing Linux publication
+boundary remains a final cross-platform blocker.
+
 ## Active kernel and platform integration mission
 
 Latest development continues on `integration/psc1-lean435-kernel-packages-20261025`,

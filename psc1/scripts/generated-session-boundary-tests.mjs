@@ -35,7 +35,7 @@ const runnerHash = sha(fs.readFileSync(runner));
 const publicationRoot = path.join(directory, 'publication');
 let serial = 0;
 const records = [];
-function fixtureSession(mutate = '', capture = source, serviceDependencies = [], additionalCheckers = []) {
+function fixtureSession(mutate = '', capture = source, serviceDependencies = [], additionalCheckers = [], primaryChecker) {
   const id = 'host-fixture-' + serial++;
   const file = path.join(directory, id + '.mjs');
   fs.writeFileSync(file, 'const template=' + JSON.stringify(base) + ';\n' +
@@ -49,7 +49,8 @@ function fixtureSession(mutate = '', capture = source, serviceDependencies = [],
   const session = createGeneratedJsCompilerSession({ requestId: id, sources: capture,
     entryModule: 'Entry', assurance: 'checked', serviceFile: file,
     serviceSha256: sha(fs.readFileSync(file)), runnerFile: runner, runnerSha256: runnerHash,
-    checkerExecutable: checker, checkerSha256: checkerHash, publicationRoot, serviceDependencies, additionalCheckers });
+    checkerExecutable: primaryChecker?process.execPath:checker, checkerSha256: primaryChecker?sha(fs.readFileSync(process.execPath)):checkerHash,
+    ...(primaryChecker?{checkerScriptFile:primaryChecker.path,checkerScriptSha256:primaryChecker.sha256}:{}), publicationRoot, serviceDependencies, additionalCheckers });
   return { session, file };
 }
 function pointer() {
@@ -201,6 +202,18 @@ for(const [name,program,error] of [
 fs.writeFileSync(extraScript,realExtra);
 failClosed('additional checker changed after admission',()=>{const {session}=fixtureSession('',source,[],extraDescriptor());session.execute();fs.appendFileSync(extraScript,' ');assert.throws(()=>session.publish(),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);fs.writeFileSync(extraScript,realExtra);});
 assert.throws(()=>fixtureSession('',source,[],{}),/PSC1_SERVICE_ADDITIONAL_CHECKERS_INVALID/);
+
+// A script-based primary still executes a genuine official native reference here.
+fs.writeFileSync(extraScript,realExtra);
+const primaryPin=()=>({path:extraScript,sha256:sha(fs.readFileSync(extraScript))});
+const primaryGood=fixtureSession('',source,[],[],primaryPin()),primaryPrepared=primaryGood.session.execute();
+assert.equal(primaryPrepared.logicalAdmission,'accepted');assert.equal(primaryPrepared.checkerScriptSha256,primaryPin().sha256);primaryGood.session.publish();
+records.push({name:'pinned script primary checks actual canonical admissions with official native reference',status:'passed',wasmAcceptanceClaim:false});
+failClosed('primary checker script changed before execution',()=>{const {session}=fixtureSession('',source,[],[],primaryPin());fs.appendFileSync(extraScript,' ');assert.throws(()=>session.execute(),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);fs.writeFileSync(extraScript,realExtra);});
+failClosed('primary checker script changed after admission',()=>{const {session}=fixtureSession('',source,[],[],primaryPin());session.execute();fs.appendFileSync(extraScript,' ');assert.throws(()=>session.publish(),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);fs.writeFileSync(extraScript,realExtra);});
+fs.writeFileSync(extraScript,"console.log(JSON.stringify({accepted:true,leanCommit:'wrong'}));");
+failClosed('primary checker script wrong identity cannot admit',()=>{const {session}=fixtureSession('',source,[],[],primaryPin());assert.throws(()=>session.execute(),/PSC1_CHECKER_IDENTITY_MISMATCH/);assert.throws(()=>session.publish(),/PSC1_SERVICE_NOT_ADMITTED/);});
+fs.writeFileSync(extraScript,realExtra);
 
 fs.unlinkSync(checker); // retain the exact binary hash, not a duplicate checker executable
 fs.writeFileSync(path.join(directory, 'results.json'), JSON.stringify({

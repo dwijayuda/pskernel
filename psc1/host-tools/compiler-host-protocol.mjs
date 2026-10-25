@@ -1,5 +1,6 @@
 // Host-owned protocol boundary. Never imported by generated portable code.
 import crypto from 'node:crypto';
+import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const fail = code => { throw new Error(code); };
@@ -7,8 +8,9 @@ const checkerIdentity = Object.freeze({ protocol: 'pskernel-lean/1', provider: '
   leanVersion: '4.35.0', leanCommit: 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',
   profile: 'lean4.35-core' });
 
-export function runIndependentChecker(executable, canonicalAdmissions) {
-  const result = spawnSync(executable, ['--check'], { input: canonicalAdmissions,
+export function runIndependentChecker(executable, canonicalAdmissions, checkerScript) {
+  if(checkerScript!==undefined&&(typeof checkerScript!=='string'||!path.isAbsolute(checkerScript)))fail('PSC1_CHECKER_SCRIPT_INVALID');
+  const result = spawnSync(executable, checkerScript?[checkerScript,'--check']:['--check'], { input: canonicalAdmissions,
     encoding: 'utf8', timeout: 120000, maxBuffer: 32 * 1024 * 1024 });
   if (result.error || result.status !== 0) fail('PSC1_CHECKER_PROCESS_FAILED');
   let response;
@@ -37,7 +39,7 @@ export function compilerSourceClosureDigest(sources) {
  * Generated wire data cannot select checker tools. The receipt claims logical
  * admission of exact graph bytes only, never source-to-Core/backend preservation.
  */
-export function createCompilerHostSession({ requestId, target, sources, canonicalAdmissions, checkerExecutable }) {
+export function createCompilerHostSession({ requestId, target, sources, canonicalAdmissions, checkerExecutable, checkerScript }) {
   if (typeof requestId !== 'string' || !requestId || !['js', 'ts', 'rust', 'wasm-core', 'python', 'php'].includes(target) ||
       typeof canonicalAdmissions !== 'string' || !canonicalAdmissions ||
       typeof checkerExecutable !== 'string' || !checkerExecutable) fail('PSC1_HOST_REQUEST_INVALID');
@@ -59,7 +61,7 @@ export function createCompilerHostSession({ requestId, target, sources, canonica
           wire.target !== target || wire.admissions !== admissions) fail('PSC1_HOST_REQUEST_MISMATCH');
       state = 'checking';
       try {
-        const checker = runIndependentChecker(checkerExecutable, admissions);
+        const checker = runIndependentChecker(checkerExecutable, admissions, checkerScript);
         state = 'admitted';
         return Object.freeze({ protocol: 'psc1-compiler-host/1', requestId, target,
           sourceClosureDigest, admissionsDigest, checkerCommit: checker.leanCommit,

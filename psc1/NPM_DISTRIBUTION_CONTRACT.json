@@ -1,0 +1,150 @@
+{
+  "schema": "psc1-npm-distribution-contract/1",
+  "status": "implementation-and-qualification-in-progress",
+  "defaultKernel": {
+    "package": "@proofscript/pskernel-lean-wasm",
+    "version": "4.35.0",
+    "implementation": "official Lean C++ via Emscripten6.0.9",
+    "memoryModel": "linear",
+    "protocol": "pskernel-lean/1",
+    "canonicalAdmissionsVersion": 2,
+    "silentFallback": false,
+    "nativeComparisonPackage": "@proofscript/pskernel-lean",
+    "nativeComparisonSelection": "explicit --kernel native|both"
+  },
+  "defaultInstallation": {
+    "package": "proofscript",
+    "compilerExecution": "qualified generated JS/TS, from the existing unified compiler source",
+    "defaultCompilerPackage": "@proofscript/compiler",
+    "cliPackage": "@proofscript/cli",
+    "noNativeCompilerSdkRequired": true,
+    "noInstallTimeCompilation": true,
+    "outputBackends": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component"
+    ],
+    "optionalOutputProviders": [
+      "@proofscript/backend-python",
+      "@proofscript/backend-php"
+    ]
+  },
+  "optionalExecutionBundles": {
+    "rust": {
+      "package": "@proofscript/compiler-rust",
+      "payload": "platform-selected precompiled genuine G3 Rust compiler",
+      "platformPayloads": [
+        "linux-x64",
+        "linux-arm64",
+        "darwin-x64",
+        "darwin-arm64",
+        "win32-x64"
+      ],
+      "noHandwrittenCompiler": true
+    },
+    "wasm": {
+      "package": "@proofscript/compiler-wasm",
+      "payload": "genuine qualified G3 PSC1 compiler Wasm artifact and bounded transport",
+      "memoryArchitecture": "preserve existing PSC1 backend architecture; distinct from linear-memory Lean kernel",
+      "noHandwrittenCompiler": true
+    },
+    "native": {
+      "package": "@proofscript/compiler-native",
+      "payload": "optional platform-selected existing Lean-built compiler and explicit native kernel comparison"
+    }
+  },
+  "sourceModules": {
+    "format": "source plus actual built runtime/API/types where supplied",
+    "candidates": [
+      "foundation",
+      "core",
+      "syntax",
+      "environment",
+      "elab",
+      "compiler-ir",
+      "erasure",
+      "compiler",
+      "bridge",
+      "meta",
+      "cli"
+    ],
+    "partialSourceConversionsNotParityClaims": true,
+    "noWorkingFeatureRemoved": true
+  },
+  "platformPolicy": {
+    "development": "Linux",
+    "release": [
+      "linux-x64-glibc",
+      "linux-arm64-glibc",
+      "darwin-x64",
+      "darwin-arm64",
+      "win32-x64"
+    ],
+    "universalTarballMustNotContainWrongPlatformToolAsDefault": true,
+    "unsupportedPlatformFailsExplicitly": true
+  },
+  "authority": {
+    "independentOfficialLean435Required": true,
+    "strictOriginalAndTransformedIr": true,
+    "sourceLogicalPairing": true,
+    "sourcePackagesGrantNoKernelOrHostAuthority": true,
+    "resourcePolicies": "preserved",
+    "pskernelCoreResearchDoesNotReplaceOfficialKernel": true
+  },
+  "acceptance": [
+    {
+      "id": "default-wasm-real",
+      "required": "Unconfigured installed CLI/API uses genuine4.35 Wasm checking; missing/corrupt/refusing Wasm never falls back to native."
+    },
+    {
+      "id": "native-explicit",
+      "required": "Explicit native/both comparison performs actual pinned native checks of identical canonical bytes."
+    },
+    {
+      "id": "no-native-default",
+      "required": "Default generated compilation succeeds with native compiler/checker payloads unavailable."
+    },
+    {
+      "id": "native-publisher-wasm",
+      "required": "Preserved native compiler publication adds default Wasm checking of its exact captured/staged admissions before commit."
+    },
+    {
+      "id": "engine-output-separation",
+      "required": "Removing optional Rust/Wasm execution bundles does not remove core JS/TS/Rust/Wasm emission capabilities."
+    },
+    {
+      "id": "real-runtime-exports",
+      "required": "Every packaged main/exports/types/bin target exists and is imported/typechecked/executed from the packed tarball."
+    },
+    {
+      "id": "all-platform-installs",
+      "required": "Offline local/global final toolchain installs and actual compilation/consumption on every release platform."
+    },
+    {
+      "id": "portable-publication",
+      "required": "Platform publication preserves complete immutable generations, integrity and prior outputs on every failure; existing Linux guarantees retained."
+    },
+    {
+      "id": "reproducible-artifacts",
+      "required": "Exact source/IR/admission/compiler/toolchain/platform/package hashes and genuine existing G1/G2/G3/fixed-point evidence."
+    },
+    {
+      "id": "seven-backends-both-grammars",
+      "required": "Frozen Practical Core v1 and seven-backend regression/final release qualification remain passing."
+    }
+  ],
+  "referenceArchive": {
+    "name": "proofscript-psc0-ps-npm-packages.zip",
+    "inspection": "read-only nested tarball/package metadata, no code executed",
+    "sourceCommit": "8b68413a94e14c36edb713bea96feac439b5deb6",
+    "reuse": "scoped distribution/source metadata layout only",
+    "differences": [
+      "reference uses older4.34 and candidate generated-JS checker metadata",
+      "some reference package exports name index.js where packed payload is index.mjs",
+      "reference root bundles a Linux x64 TypeScript tool; final universal package must use portable or correctly selected tools"
+    ]
+  },
+  "publication": "requires exact release qualification and user authorization"
+}

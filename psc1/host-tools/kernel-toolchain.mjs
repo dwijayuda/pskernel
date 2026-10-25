@@ -16,10 +16,11 @@ function pinned(root,record){
  if(sha(fs.readFileSync(file))!==record.sha256)fail('pinned file checksum '+record.path);
  return file;
 }
-export async function createIndependentKernelToolchain({root,provider='both'}){
+export async function createIndependentKernelToolchain({root,provider='wasm'}){
  root=path.resolve(root);if(!['native','wasm','both'].includes(provider))fail('unknown provider');
  const distribution=loadKernelDistribution(root),selected=provider==='both'?['native','wasm']:[provider],verify=()=>{
   const current=loadKernelDistribution(root);if(JSON.stringify(current)!==JSON.stringify(distribution))fail('distribution changed');
+  for(const record of distribution.hostFiles||[])pinned(root,record);
   for(const key of selected){const p=distribution.providers[key];if(!p||p.version!=='4.35.0'||!Array.isArray(p.files)||p.files.length===0)fail('provider descriptor');for(const r of p.files)pinned(root,r);}
  };
  verify();const handles={};

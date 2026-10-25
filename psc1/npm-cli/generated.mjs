@@ -18,16 +18,23 @@ export async function generatedMain(args,root){
  }
  if(!engines.includes(options['--engine'])||!options['--out']||((!!file)===(!!options['--project'])))fail('ARGUMENT');
  if(options['--target']&&options['--target']!=='js')fail('TARGET: generated package integration currently qualifies JS publication; use psc build for other native targets');
- const kernel=options['--kernel']||'native';if(!['native','both'].includes(kernel))fail('KERNEL');
+ const kernel=options['--kernel']||meta.defaultKernel||'native';if(!['wasm','native','both'].includes(kernel))fail('KERNEL');
  const engine=meta.engines[options['--engine']];
  const inside=relative=>{if(typeof relative!=='string'||path.isAbsolute(relative)||relative.split(/[\\/]/).some(x=>!x||x==='..'||x==='.' ))fail('PATH');return path.join(root,relative);};
  const pin=row=>{const p=inside(row.path),stat=fs.lstatSync(p);if(!stat.isFile()||stat.isSymbolicLink()||sha(fs.readFileSync(p))!==row.sha256)fail('IDENTITY_CHANGED');return {path:p,sha256:row.sha256};};
- const service=pin(engine.adapter),checker=pin(meta.checker),deps=[...engine.dependencies,...meta.nativeLibraries,...(meta.hostDependencies||[])].map(pin);
+ const service=pin(engine.adapter),deps=[...engine.dependencies,...meta.nativeLibraries,...(meta.hostDependencies||[])].map(pin);
+ let checker,checkerScript;
  const additionalCheckers=[];
+ if(kernel==='native'){
+  checker=pin(meta.checker);deps.push(...(meta.kernelCheckers?.native?.dependencies||[]).map(pin));
+ }else{
+  const descriptor=meta.kernelCheckers?.wasm;if(!descriptor)fail('WASM_KERNEL_UNAVAILABLE');
+  checkerScript=pin(descriptor.script);checker={path:process.execPath,sha256:sha(fs.readFileSync(process.execPath))};deps.push(...descriptor.dependencies.map(pin));
+ }
  if(kernel==='both'){
-  const descriptor=meta.additionalCheckers?.wasm;if(!descriptor)fail('WASM_KERNEL_UNAVAILABLE');
+  const descriptor=meta.additionalCheckers?.native;if(!descriptor)fail('NATIVE_KERNEL_UNAVAILABLE');
   const script=pin(descriptor.script);deps.push(...descriptor.dependencies.map(pin));
-  additionalCheckers.push({name:'wasm',scriptFile:script.path,scriptSha256:script.sha256});
+  additionalCheckers.push({name:'native',scriptFile:script.path,scriptSha256:script.sha256});
  }
  const runner=pin(meta.runner);const sessionCode=pin(meta.session);
  // The session is loaded from this immutable installed package; verify its pin.
@@ -44,12 +51,12 @@ export async function generatedMain(args,root){
  const session=createGeneratedJsCompilerSession({requestId:'package-'+crypto.randomUUID(),
   sources:project.sources,entryModule:project.entryModule,assurance,
   serviceFile:service.path,serviceSha256:service.sha256,runnerFile:runner.path,runnerSha256:runner.sha256,
-  checkerExecutable:checker.path,checkerSha256:checker.sha256,publicationRoot:path.resolve(options['--out']),
+  checkerExecutable:checker.path,checkerSha256:checker.sha256,...(checkerScript?{checkerScriptFile:checkerScript.path,checkerScriptSha256:checkerScript.sha256}:{}),publicationRoot:path.resolve(options['--out']),
   serviceDependencies:[...deps,sessionCode],additionalCheckers});
  const result=session.execute(),published=session.publish();
  console.log(JSON.stringify({status:'accepted',engine:options['--engine'],engineSourceClosureDigest:engine.sourceClosureDigest,
   engineQualification:engine.qualification,compilerExecutionMs:session.events.find(e=>e.role==='generated-compiler').elapsedMs,target:'js',artifact:published.target,manifestSha256:published.manifestSha256,
   sourceClosureDigest:result.sourceClosureDigest,logicalAdmission:result.logicalAdmission,checkerCommit:meta.checkerCommit,
-  kernelProviders:kernel==='both'?['native','wasm']:['native'],...(result.additionalAdmissions?{additionalAdmissions:result.additionalAdmissions}:{}),
+  kernelProviders:kernel==='both'?['wasm','native']:[kernel],...(result.additionalAdmissions?{additionalAdmissions:result.additionalAdmissions}:{}),
   performanceQualification:engine.performanceQualification,behaviorallyVerified:false,formalPreservation:'not-provided'}));
 }

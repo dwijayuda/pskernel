@@ -56,7 +56,7 @@ function checkFiles(stage, expected) {
  */
 export function createGeneratedJsCompilerSession({ requestId, sources, entryModule, assurance,
     serviceFile, serviceSha256, runnerFile, runnerSha256,
-    checkerExecutable, checkerSha256, publicationRoot, serviceDependencies = [], additionalCheckers = [] }) {
+    checkerExecutable, checkerSha256, checkerScriptFile, checkerScriptSha256, publicationRoot, serviceDependencies = [], additionalCheckers = [] }) {
   if (process.version !== 'v22.23.3') fail('PSC1_SERVICE_NODE_PIN');
   if (typeof requestId !== 'string' || !requestId || typeof entryModule !== 'string' ||
       !['checked', 'ordinary-checked'].includes(assurance) ||
@@ -71,6 +71,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
     checker: identity(checkerExecutable, checkerSha256),
     node: identity(process.execPath, sha(fs.readFileSync(process.execPath)))
   };
+  if(checkerScriptFile!==undefined)tools.checkerScript=identity(checkerScriptFile,checkerScriptSha256);
   // Trusted host-selected dependencies bind imported generated engine bytes too.
   // Generated wire fields cannot add paths or choose a checker.
   if (!Array.isArray(serviceDependencies)) fail('PSC1_SERVICE_DEPENDENCIES_INVALID');
@@ -93,6 +94,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
   const request = Object.freeze({ requestId, sourceClosureDigest, grammar, assurance,
     entryModule, target: 'js', requestSha256: sha(requestText), serviceSha256,
     runnerSha256, checkerSha256, nodeVersion: process.version, nodeSha256: tools.node.sha256,
+    ...(checkerScriptFile?{checkerScriptSha256}:{}),
     ...(extraChecks.length?{additionalCheckers:extraChecks.map(c=>({name:c.name,scriptSha256:c.script.sha256}))}:{}) });
   const root = path.resolve(publicationRoot);
   for (const directory of [root, path.join(root, 'generations')]) {
@@ -205,14 +207,14 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         }
         const admissions = candidate.admissionRequest?.admissions;
         const checkerSession = createCompilerHostSession({ requestId, target: 'js',
-          sources: captured, canonicalAdmissions: admissions, checkerExecutable });
+          sources: captured, canonicalAdmissions: admissions, checkerExecutable, checkerScript:checkerScriptFile });
         events.push({ role: 'independent-checker', executable: checkerExecutable,
           checkerSha256, admissionsSha256: sha(admissions), state: 'before' });
         receipt = checkerSession.admit(JSON.stringify(candidate.admissionRequest));
         verifyTools();
         events.push({ role: 'independent-checker', state: 'accepted',
           checkerCommit: receipt.checkerCommit, admissionsSha256: receipt.admissionsDigest });
-        // Mandatory native admission above is preserved. Extra host-selected providers
+        // Mandatory independent official Lean admission above is preserved. Extra host-selected providers
         // check the identical captured canonical bytes before any publication can occur.
         for(const checker of extraChecks){
           verifyTools();const started=Date.now();

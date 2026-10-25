@@ -484,6 +484,33 @@ function publicationFault(phase) {
   if (process.env.PSC1_TEST_PUBLICATION_FAIL_AT === phase) fail('PSC1_INJECTED_PUBLICATION_FAILURE', phase);
 }
 
+
+function checkInstalledKernelBeforePublication(admissions){
+  const installation=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+  const meta=readJson(path.join(installation,'package.json'));
+  if(meta.proofscript?.defaultKernel!=='wasm')return undefined; // Preserved legacy/development profile.
+  const distribution=readJson(path.join(installation,'KERNEL_DISTRIBUTION.json'));
+  if(distribution.defaultProvider!=='wasm'||distribution.leanCommit!==nativePin.commit)fail('PSC1_BUNDLE_KERNEL_POLICY');
+  const provider=process.env.PSC1_KERNEL_PROVIDER||'wasm';
+  if(!['wasm','native','both'].includes(provider))fail('PSC1_BUNDLE_KERNEL_PROVIDER');
+  const verify=()=>{
+    if(json(readJson(path.join(installation,'KERNEL_DISTRIBUTION.json')))!==json(distribution))fail('PSC1_BUNDLE_KERNEL_DISTRIBUTION_CHANGED');
+    if(!Array.isArray(distribution.hostFiles)||distribution.hostFiles.length===0)fail('PSC1_BUNDLE_KERNEL_HOST_PINS');
+    for(const record of distribution.hostFiles){
+      const file=path.resolve(installation,record.path),relative=path.relative(installation,file);
+      if(!relative||relative.startsWith('..')||path.isAbsolute(relative))fail('PSC1_BUNDLE_KERNEL_HOST_PATH');
+      const stat=fs.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==record.bytes||sha256(fs.readFileSync(file))!==record.sha256)fail('PSC1_BUNDLE_KERNEL_HOST_IDENTITY');
+    }
+  };
+  const script=path.join(installation,'npm-cli/kernel-checker.mjs');
+  if(!distribution.hostFiles.some(r=>r.path==='npm-cli/kernel-checker.mjs'))fail('PSC1_BUNDLE_KERNEL_SCRIPT_NOT_PINNED');
+  verify();const checked=spawnSync(process.execPath,[script,'--provider',provider],{input:admissions,encoding:'utf8',timeout:120000,maxBuffer:32*1024*1024,killSignal:'SIGKILL',windowsHide:true});verify();
+  if(checked.error||checked.status!==0)fail('PSC1_BUNDLE_KERNEL_PROCESS',checked.stderr||checked.error?.message||'');
+  let result;try{result=JSON.parse(checked.stdout);}catch{fail('PSC1_BUNDLE_KERNEL_RESPONSE');}
+  if(result.protocol!=='pskernel-lean/1'||result.provider!=='lean4-cpp'||result.leanVersion!==nativePin.version||result.leanCommit!==nativePin.commit||result.profile!=='lean4.35-core'||result.accepted!==true)fail('PSC1_BUNDLE_KERNEL_REFUSED');
+  return {provider,accepted:true,leanCommit:result.leanCommit,admissionsSha256:sha256(admissions),responseSha256:sha256(checked.stdout)};
+}
+
 export function publish(stage, output, kind) {
   const layout = outputLayout(output);
   const generations = path.join(layout.store, 'generations');
@@ -516,6 +543,7 @@ export function publish(stage, output, kind) {
 
   const admissions = fs.readFileSync(path.join(stage, 'admissions.json'));
   if (!admissions.length) fail('PSC1_BUNDLE_ADMISSIONS_MISSING');
+  const independentKernel=checkInstalledKernelBeforePublication(admissions);
   const root = path.dirname(info.entryPath);
   const sourceRecords = info.sources.map(source => ({
     path: slash(path.relative(root, source.path)), sha256: sha256(source.text),
@@ -558,6 +586,7 @@ export function publish(stage, output, kind) {
     logicalCheckerCommit: info.leanCommit,
     assurance, behaviorallyVerified: false, partialDeclarations, publicAbi,
     kernelAdmissionSha256: sha256(admissions),
+    ...(independentKernel?{independentKernel}:{}),
     sourceClosureSha256: sha256(json(sourceRecords.map(({ path, sha256, bytes }) => ({ path, sha256, bytes })))),
     compiler: info.compiler ?? 'PSC1 native', publicNames: info.publicNames,
     ...(info.backendProvider ? {backendProvider: validateBackendProviderReceipt(info.backendProvider, kind)} : {}),

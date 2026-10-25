@@ -22,6 +22,14 @@
       "artifact": 12611662030,
       "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
       "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98"
+    },
+    "rust": {
+      "run": 40223086966,
+      "job": 121258808523,
+      "artifact": 12612555500,
+      "zipSha256": "d33f5329203ed41fb3503e1d3cdccf6bc4f833023a456c91976494a1db005ca0",
+      "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be"
     }
-  }
+  },
+  "parentCommit": "eeecb63bcac55161e82ad293c38053ba48078b10"
 }

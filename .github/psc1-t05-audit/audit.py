@@ -222,7 +222,7 @@ LAYOUT_SCOPE = {
 }
 
 EMPTY_BASELINE = "20224a295359abb201f56c72395690bf0bfac9fa"
-EMPTY_PRODUCTION_TREE = "e567685e5c441a5b0a78d8241f7bae151b48b5ca"
+EMPTY_PRODUCTION_TREE = "7e92ffc478e060d282844c00f4d91e767a9894ef"
 EMPTY_PRODUCTION = RESTORED_PRODUCTION_ROOT + "/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
 EMPTY_RETAINED = "psc1/test/PsKernelClosedCacheAnalysisRegression.lean"
 EMPTY_MODULE = "PsKernelEmptySemanticCacheProofs"
@@ -1456,8 +1456,8 @@ def restored_production_sources():
         "productionRoot":RESTORED_PRODUCTION_ROOT,"baselineProductionTree":RESTORED_PRODUCTION_TREE,
         "targetProductionTree":actual_tree,"wholeFilesMatch":True,
         "baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
-        "productionChanges":[EMPTY_PRODUCTION] if EMPTY_CACHE else [],
-        **({"productionChangePolicy":"empty-semantic-cache-only"} if EMPTY_CACHE else {}),
+        "productionChanges":UNARY_FULL_DELTA if EMPTY_CACHE else [],
+        **({"productionChangePolicy":"empty-semantic-cache-plus-unary-spines"} if EMPTY_CACHE else {}),
         "exactBindingMovesOnly":False,"frozenBodiesMatch":True,
         "workers":records,"proof":digest(git_bytes(DEFERRED_PROOF))}
 
@@ -1508,8 +1508,8 @@ def deferred_native_audit(e):
     if RESTORED:
         restored_receipt_flags(source,"restored source audit")
         if EMPTY_CACHE:
-            same(source["productionChanges"],[EMPTY_PRODUCTION],"only authenticated cache production delta")
-            same(source.get("productionChangePolicy"),"empty-semantic-cache-only","explicit cache change policy")
+            same(source["productionChanges"],UNARY_FULL_DELTA,"only authenticated cache production delta")
+            same(source.get("productionChangePolicy"),"empty-semantic-cache-plus-unary-spines","explicit cache change policy")
             e.check_digest("empty-semantic-cache-source-audit.json",source["emptySemanticCacheSourceAudit"])
         else:
             same(source["productionChanges"],[],"no production delta paths after restoration")
@@ -1524,7 +1524,7 @@ def deferred_native_audit(e):
     for key,value in {"schema":"psc1-t08-deferred-transform-native-receipt-v1",
         "status":"pass","retainedProofs":371,"newProofs":3,"totalProofs":374,
         "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
-        "productionSemanticEquality":True,"deferredTransformConstruction":not RESTORED,
+        "restoredTransformSemanticEquality":True,"deferredTransformConstruction":not RESTORED,
         "fullOrdinaryAdmission":True,"fullKernel":False,"performanceQualified":False}.items():
         same(r.get(key),value,"deferred native receipt "+key)
     restored_receipt_flags(r,"restored native374 receipt")
@@ -1663,7 +1663,7 @@ def layout_boundary_native_audit(e):
         **LAYOUT_SCOPE,"fullOrdinaryAdmission":True,
         "baselineTransformConstructionRestored":True,
         "deferredTransformConstruction":False,
-        "productionChanges":[EMPTY_PRODUCTION] if EMPTY_CACHE else False,
+        "productionChanges":UNARY_FULL_DELTA if EMPTY_CACHE else False,
         **({"layoutProofProductionChanges":False,
             "emptySemanticCacheSourceAudit":digest(e.raw("empty-semantic-cache-source-audit.json"))}
            if EMPTY_CACHE else {}),
@@ -1699,7 +1699,7 @@ def empty_cache_sources(expected_paths):
     same(baseline_tree,RESTORED_PRODUCTION_TREE,"complete qualified20224 production tree")
     same(target_tree,EMPTY_PRODUCTION_TREE,"complete reviewed empty-cache production tree")
     changed=git("diff","--name-only",EMPTY_BASELINE,SHA,"--",RESTORED_PRODUCTION_ROOT).decode().splitlines()
-    same(changed,[EMPTY_PRODUCTION],"exact one-path production difference")
+    same(changed,UNARY_FULL_DELTA,"exact one-path production difference")
     baseline=git("show",EMPTY_BASELINE+":"+EMPTY_PRODUCTION)
     prior=git("show",EMPTY_BASELINE+":"+EMPTY_RETAINED)
     same({"path":EMPTY_PRODUCTION,**digest(baseline),"gitBlobSha":git_blob_sha(baseline)},
@@ -1784,7 +1784,7 @@ def empty_cache_sources(expected_paths):
             unchanged.append({"path":path,"gitBlobSha":git_blob_sha(old_raw),**digest(old_raw)})
     return {"baselineSha":EMPTY_BASELINE,"baselineProductionTree":baseline_tree,
         "targetProductionTree":target_tree,"productionChanges":changed,
-        "exactLookupGuardAndCommentOnly":True,"baselineProduction":EMPTY_OLD_PRODUCTION,
+        "exactCacheLookupGuardAndCommentOnly":True,"baselineProduction":EMPTY_OLD_PRODUCTION,
         "predecessorLookup":EMPTY_OLD_LOOKUP,"candidateLookup":EMPTY_NEW_LOOKUP,
         "frozenLookupByteExact":True,"retainedProofStatementAndOtherBodiesUnchanged":True,
         "retainedProofBaseline":EMPTY_OLD_RETAINED,"allOtherRetainedInputsUnchanged":True,
@@ -1801,7 +1801,7 @@ def empty_cache_source_receipt(e):
         "job":"native-header","route":"native",
         **{key:checked[key] for key in (
             "baselineSha","baselineProductionTree","targetProductionTree","productionChanges",
-            "exactLookupGuardAndCommentOnly","baselineProduction","predecessorLookup","candidateLookup",
+            "exactCacheLookupGuardAndCommentOnly","baselineProduction","predecessorLookup","candidateLookup",
             "frozenLookupByteExact","retainedProofStatementAndOtherBodiesUnchanged",
             "retainedProofBaseline","allOtherRetainedInputsUnchanged","sourceInputs","proofNames","files")},
         "sourceInventory":digest(e.raw("source-inventory.json")),
@@ -1810,7 +1810,7 @@ def empty_cache_source_receipt(e):
     source=e.json("empty-semantic-cache-source-audit.json");e.identity(source)
     same(source,expected,"whole empty-cache source audit matches independent Git authentication")
     logged_json(e.terminal,"PSC1_T09_EMPTY_SEMANTIC_CACHE_SOURCE: PASS ",source)
-    return {"exactOneProductionPath":True,"allOtherRetainedInputsUnchanged":True,
+    return {"exactThreeProductionPaths":True,"allOtherRetainedInputsUnchanged":True,
         "frozenLookupByteExact":True,"sourceInputs":96,
         "receipt":digest(e.raw("empty-semantic-cache-source-audit.json"))}
 
@@ -1850,7 +1850,7 @@ def empty_cache_native_audit(e):
         "sourceAudit":digest(e.raw("empty-semantic-cache-source-audit.json")),
         "sourceInventory":digest(e.raw("source-inventory.json")),
         "proofStatuses":digest(e.raw("empty-semantic-cache-proof-status.log")),
-        "productionChanges":[EMPTY_PRODUCTION],"emptySemanticCacheSemanticEquality":True,
+        "productionChanges":UNARY_FULL_DELTA,"emptySemanticCacheSemanticEquality":True,
         "frozenLookupByteExact":True,"retainedProofStatementAndOtherBodiesUnchanged":True,
         "emptySemanticCacheHelperOnly":True,"fullOrdinaryAdmission":True,
         "baselineTransformConstructionRestored":True,"deferredTransformConstruction":False,
@@ -1978,8 +1978,8 @@ def validator_audit(e):
         "runId": str(RUN), "runAttempt": str(ATTEMPT),
         "isolatedProofSource": "e652d02a69ebcaaeb5b4fe0b391e368efebf18e7",
         "arenaModelProofSource": "150123e5fb8e17d8fab4d737a043705727ee1bcc",
-        "productionSource": "054edfce56eda28a166624ddc92dfac5af8499c0",
-        "productionTree": "e567685e5c441a5b0a78d8241f7bae151b48b5ca", "files": rows}
+        "productionSource": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+        "productionTree": "7e92ffc478e060d282844c00f4d91e767a9894ef", "files": rows}
     same(source_inventory, expected_inventory, "entire independent validator source inventory")
     statuses = [{"module": module, "count": count, "exitCode": 0}
                 for module, count in VALIDATOR_MODULES]
@@ -2011,7 +2011,7 @@ def validator_audit(e):
             "proofs": retained + added, "retainedLayers": layers,
             "sourceInventory": digest(e.raw("validator/source-inventory.json")),
             "proofStatuses": digest(e.raw("validator/proof-status.json")),
-            "productionTree": "e567685e5c441a5b0a78d8241f7bae151b48b5ca", "productionChanges": False,
+            "productionTree": "7e92ffc478e060d282844c00f4d91e767a9894ef", "productionChanges": UNARY_DELTA,
             "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
             "untrustedSourceValidityAssumed": False, "replayArenaModelBridgeEstablished": True,
             "fullKernel": False, "performanceQualified": False}
@@ -2032,7 +2032,7 @@ def validator_audit(e):
             "route": e.route, "nativeProofs": 532,
             "nativeReceipt": digest(e.raw("validator/native-receipt.json")),
             "retainedRouteReceipt": digest(e.raw("empty-semantic-cache-receipt.json")),
-            "kernel": e.json("provenance.json")["kernel"], "productionChanges": False,
+            "kernel": e.json("provenance.json")["kernel"], "productionChanges": UNARY_DELTA,
             "metadataCorrespondenceEstablished": True, "decoderCorrespondenceEstablished": True,
             "replayArenaModelBridgeEstablished": True, "fullKernel": False, "performanceQualified": False}
         same(e.json("validator/route-receipt.json"), expected_route, "entire source-bound validator route receipt")
@@ -2044,10 +2044,181 @@ def validator_audit(e):
             "replayArenaModelBridgeEstablished": True, "fullKernel": False, "performanceQualified": False}
 
 
+
+UNARY_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean"]
+UNARY_FULL_DELTA = ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
+UNARY_PINS = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean":{"bytes":20758,"sha256":"9eb91b6dae31c55836af18c6dca19d33fcd162dd89205f6312ceda326e57ac5c"},"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean":{"bytes":3754,"sha256":"0a5eb430466bff2fa3f3f00384b5ac7f22dc62bbc0505429ca52494259a8e26e"},"psc1/test/PsKernelUnarySpineProofs.lean":{"bytes":11532,"sha256":"4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"},"psc1/test/PsKernelChurchSource.lean":{"bytes":21080,"sha256":"5f723e4b184c9134128552fe8186064dd0b291a42e54ecc575d210d339dd0a30"},"psc1/test/PsKernelChurchStageProbe.lean":{"bytes":6043,"sha256":"3601231d19268d33474697a2058a7ada58918ce5a8d11b56da263b4377e41a32"},"psc1/scripts/pskernel-unary-spine-smoke.mjs":{"bytes":5522,"sha256":"595355b03cec6bbea7df67fb2452551bfac8feb8658a677a2ef998dc53291210"},"psc1/scripts/pskernel-church-fixture.py":{"bytes":5437,"sha256":"9053ae13a6df9fd542ab9f76177f4daea4835fa68c661b1d1c1b446c06608ddf"},"psc1/scripts/pskernel-church-stages.mjs":{"bytes":4798,"sha256":"d008052b8bb6ecab9c0b0fc5c7c43a2de66304da03e34016c0396cfee947f11d"}}
+UNARY_NATIVE_COPY = None
+UNARY_PROOF_NAMES = ["psKernelUnaryPlanZero","psKernelUnaryPlanStops","psKernelUnaryPlanPreserves","psKernelUnaryPlanSkippedBound","psKernelUnaryViewHasSharedHead","psKernelUnaryPlanExpressionCongruence","psKernelUnaryContextZero","psKernelUnaryPlanTerminates","psKernelUnaryCallbackOwner"]
+UNARY_LABELS = ['harness/rejection','arena/canonical','view/shared-head','view/different-head',
+    'view/distinct-id-conservative','view/non-fvar','plan/zero','plan/structural-exhaustion',
+    'plan/exact-residual','plan/canonical-depth-bound','callback/exact-owner-once',
+    'shortcut/positive-only','fallback/false','fallback/decline','fallback/error',
+    'shortcut/one-layer-declines','resource/depth-guard','resource/three-scopes',
+    'boundary/invalid-id','ownership/inputs-unchanged']
+
+def unary_source_authentication():
+    baseline='dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5'
+    def git(*args):
+        return subprocess.check_output(['git','-C',str(SOURCE_ROOT),*args])
+    if subprocess.run(['git','-C',str(SOURCE_ROOT),'cat-file','-e',baseline+'^{commit}'],
+            stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
+        subprocess.run(['git','-C',str(SOURCE_ROOT),'fetch','--no-tags','--depth=1','origin',baseline],check=True)
+    same(git('status','--porcelain'),b'','clean independent source checkout')
+    same(git('rev-parse',baseline+':psc1/packages/pskernel-core/src').decode().strip(),
+        'e567685e5c441a5b0a78d8241f7bae151b48b5ca','qualified unary baseline production tree')
+    same(git('diff','--name-only',baseline,SHA,'--','psc1/packages/pskernel-core/src').decode().splitlines(),
+        UNARY_DELTA,'complete independently authenticated unary production delta')
+    for path,pin in UNARY_PINS.items():
+        same(digest(git_bytes(path)),pin,'independent reviewed unary source pin '+path)
+    path=UNARY_DELTA[0]
+    current=git_bytes(path).decode()
+    start=current.index('/- A positive congruence shortcut.')
+    end=current.index('def psKernelExprV2DefEqFullShapeEtaOwnedWith\n',start)
+    restored=current[:start]+current[end:]
+    restored=restored.replace('import Ps.KernelCore.Checker.ExprV2.DefEq.UnarySpines\n','',1)
+    restored=restored.replace('def psKernelExprV2DefEqFullShapeAppOriginalWith\n',
+        'def psKernelExprV2DefEqFullShapeAppWith\n',1)
+    same(restored.encode(),git('show',baseline+':'+path),'entire retained full-shape rule unchanged beneath positive wrapper')
+    return {'baseline':baseline,'productionTree':EMPTY_PRODUCTION_TREE,
+        'productionChanges':UNARY_DELTA,'retainedFullShapeBodyByteIdentical':True,
+        'reviewedSourcePins':UNARY_PINS}
+
+def unary_church(e,label,runtime,mode):
+    base='unary/'+label
+    status=e.json(base+'.status.json')
+    same(status.get('timedOut'),False,'Church actual host limit')
+    same(status.get('exitCode'),0,'Church actual exit0')
+    require(type(status.get('seconds')) in (int,float) and 0<=status['seconds']<60,'bounded original process duration')
+    measurement=e.text(base+'.time').strip()
+    require(re.fullmatch(r'peak_rss_kib=\d+ wall_seconds=\d+(?:\.\d+)? exit_status=0',measurement) is not None,
+        'actual Church process measurement')
+    text=e.text(base+'.stdout')
+    marker='PSC1_ARENA_REPLAY ' if runtime!='native' and mode=='baseline' else 'PSC1_CHURCH_RESULT '
+    result=one_json_line(text,marker)
+    same(result.get('verdict'),'accepted','actual original Church acceptance')
+    same(str(result.get('fuel')),'4096','unchanged authentic Church fuel')
+    if mode=='stages':
+        stages=[json.loads(line.split(' ',1)[1]) for line in text.splitlines() if line.startswith('PSC1_CHURCH_STAGE ')]
+        same([(x['stage'],x['status']) for x in stages],
+            [(s,'ok') for s in ['header','is-prop','body-static','body-check','final-defeq']],
+            'all five actual owner-threaded stages accepted')
+        prefix=one_json_line(text,'PSC1_CHURCH_PREFIX ')
+        same({k:str(v) for k,v in prefix.items()},
+            {'requests':'3','sourceNodes':'197','ownedNodes':'249','declarations':'5'},'actual independently admitted prefix')
+    return result
+
+def unary_audit(e):
+    global UNARY_NATIVE_COPY
+    paths=list(UNARY_PINS)+[
+        'psc1/scripts/pskernel-unary-spine-qualification.py',WORKFLOW,
+        'psc1/scripts/pskernel-validator-qualification.py',
+        'psc1/scripts/pskernel-arena-replay.mjs','psc1/scripts/pskernel-arena435-oracle.py',
+        'psc1/kernel-lakefile.lean','psc1/lean-toolchain']
+    rows=[{'path':p,**digest(git_bytes(p))} for p in paths]
+    expected_source={'schema':'psc1-unary-source-v1','sourceSha':SHA,'runId':str(RUN),
+        'runAttempt':str(ATTEMPT),'productionTree':EMPTY_PRODUCTION_TREE,
+        'baselineSource':'dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5',
+        'baselineProductionTree':'e567685e5c441a5b0a78d8241f7bae151b48b5ca',
+        'productionChanges':UNARY_DELTA,'files':rows,'fuel':4096}
+    same(e.json('unary/source-inventory.json'),expected_source,'entire actual unary source inventory')
+    for p in paths:
+        same(e.raw('unary/sources/'+p),git_bytes(p),'unary archived Git source '+p)
+    members={'unary/sources/'+p for p in paths}|{'unary/source-inventory.json'}
+    if e.route=='native':
+        members|={'unary/'+n for n in ['proof.log','arena.tar.gz','input.ndjson',
+            'input-provenance.json','native-lakefile.lean','native-build.log','native-receipt.json']}
+        for mode in ['baseline','stages']:
+            members|={'unary/church-native-'+mode+s for s in ['.stdout','.stderr','.time','.status.json']}
+        require('Build completed successfully' in e.text('unary/native-build.log'),'actual complete native probe build')
+        expected_config=git_bytes('psc1/kernel-lakefile.lean').decode()+'''
+lean_lib PsKernelChurchLiteralSource where
+  srcDir := "test"
+  roots := #[`PsKernelChurchSource]
+
+lean_exe psc1_kernel_church_stages where
+  srcDir := "test"
+  root := `PsKernelChurchStageProbe
+'''
+        same(e.text('unary/native-lakefile.lean'),expected_config,'exact append-only native build configuration')
+        corpus=e.raw('unary/arena.tar.gz')
+        same(digest(corpus),{'bytes':3497743,'sha256':'98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d'},
+            'actual original pinned corpus archive')
+        data=e.raw('unary/input.ndjson')
+        same(digest(data)['sha256'],'443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1','actual original adapted Church input')
+        same(digest(data.partition(b'\n')[2])['sha256'],'85526c244d94e9710a6be432164c054c742d8f7c1d3ca0d8580d0874f7815a47','actual unchanged Church declaration body')
+        source=git_bytes('psc1/test/PsKernelUnarySpineProofs.lean').decode()
+        same(re.findall(r'(?m)^#print axioms (\S+)\s*$',source),UNARY_PROOF_NAMES,'exact nine universal source statements')
+        log=e.text('unary/proof.log')
+        reports=re.findall(r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)",log)
+        same([n for n,_ in reports],UNARY_PROOF_NAMES,'nine actual ordered reports')
+        require(not any(x in log for x in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler']), 'no trusted computation or unfinished proof dependency')
+        require(not re.search(r'\.lean:\d+:\d+: error',log),'no actual new proof diagnostic')
+        for _,used in reports:
+            require({a.strip() for a in used.split(',') if a.strip()}<={'propext','Classical.choice','Quot.sound'},'standard axioms only')
+        retained=e.json('validator/native-receipt.json')
+        old_names=[n for row in retained['proofs'] for n in row['names']]
+        same(len(set(old_names+UNARY_PROOF_NAMES)),541,'541 distinct actual reports')
+        results={mode:unary_church(e,'church-native-'+mode,'native',mode) for mode in ['baseline','stages']}
+        receipt={'schema':'psc1-unary-native-v1','sourceSha':SHA,'runId':str(RUN),'runAttempt':str(ATTEMPT),
+            'status':'pass','productionTree':EMPTY_PRODUCTION_TREE,'retainedProofs':532,'newProofs':9,
+            'totalProofs':541,'proofModules':37,'names':UNARY_PROOF_NAMES,
+            'newProofSource':digest(git_bytes('psc1/test/PsKernelUnarySpineProofs.lean')),
+            'newProofLog':digest(e.raw('unary/proof.log')),
+            'retainedReceipt':digest(e.raw('validator/native-receipt.json')),
+            'sourceInventory':digest(e.raw('unary/source-inventory.json')),
+            'church':results,'fuel':4096,'fullKernel':False,'performanceQualified':False}
+        same(e.json('unary/native-receipt.json'),receipt,'entire independent native541 receipt')
+        logged_json(e.terminal,'PSC1_UNARY_NATIVE541: PASS ',receipt)
+        UNARY_NATIVE_COPY={n:e.raw('unary/'+n) for n in ['native-receipt.json','proof.log','input.ndjson','input-provenance.json']}
+    else:
+        require(UNARY_NATIVE_COPY is not None,'native evidence precedes route auditing')
+        for n,raw in UNARY_NATIVE_COPY.items():
+            members.add('unary/native-'+n)
+            same(e.raw('unary/native-'+n),raw,'exact native/runtime evidence bytes '+n)
+        for label in ['unary-controls','church-baseline','church-stages']:
+            members|={'unary/'+label+s for s in ['.stdout','.stderr','.time','.status.json']}
+        members.add('unary/route-receipt.json')
+        labels=[line.split(' ',1)[1] for line in e.text('unary/unary-controls.stdout').splitlines() if line.startswith('PSC1_UNARY_SPINE_ASSERT ')]
+        same(labels,UNARY_LABELS,'exact20 real executed helper controls')
+        summary=one_json_line(e.text('unary/unary-controls.stdout'),'PSC1_UNARY_SPINE_JS: PASS ')
+        same(summary,{'schema':'psc1-unary-spine-v1','assertions':20,'labels':UNARY_LABELS,
+            'actualGeneratedConstructors':True,'helperOnly':True,'fullKernel':False,'performanceQualified':False},
+            'complete independent20-control result')
+        status=e.json('unary/unary-controls.status.json')
+        require(status['timedOut'] is False and status['exitCode']==0 and status['seconds']<60,'bounded actual helper process')
+        for n in ['pskernel-unary-spine-smoke.mjs','pskernel-arena-replay.mjs','pskernel-church-stages.mjs']:
+            same(e.raw('detached/'+n),git_bytes('psc1/scripts/'+n),'exact executed generated harness '+n)
+        driver=git_bytes('psc1/scripts/pskernel-arena-replay.mjs').decode()
+        anchor="    const result=accepted(get('psKernelV1RunDag')(session,nil,S.safe,arena,list(commands)),'kernel-admission');"
+        same(driver.count(anchor),1,'one original production admission boundary')
+        transport="import {runChurchStages} from './pskernel-church-stages.mjs';\n"+driver.replace(anchor,
+            "    return runChurchStages(kernel,{arena,commands,session,nil,safety:S.safe,list,array,request:order[3].request});")
+        same(e.text('detached/church-diagnostic-transport.mjs'),transport,'exact diagnostic transport insertion')
+        runner="import {readFileSync} from 'node:fs';\nimport * as kernel from './kernel.mjs';\nimport {replayText} from './church-diagnostic-transport.mjs';\nreplayText(kernel,readFileSync('church-input.ndjson','utf8'));\n"
+        same(e.text('detached/church-staged-runner.mjs'),runner,'exact same-kernel staged entry')
+        same(e.raw('detached/church-input.ndjson'),UNARY_NATIVE_COPY['input.ndjson'],'exact generated Church body')
+        results={mode:unary_church(e,'church-'+mode,e.route,mode) for mode in ['baseline','stages']}
+        receipt={'schema':'psc1-unary-route-v1','sourceSha':SHA,'runId':str(RUN),'runAttempt':str(ATTEMPT),
+            'status':'pass','route':e.route,'productionTree':EMPTY_PRODUCTION_TREE,'nativeProofs':541,
+            'newRuntimeControls':summary,'church':results,'kernel':digest(e.raw('detached/kernel.mjs')),
+            'retainedReceipt':digest(e.raw('validator/route-receipt.json')),
+            'nativeReceipt':digest(UNARY_NATIVE_COPY['native-receipt.json']),
+            'sourceInventory':digest(e.raw('unary/source-inventory.json')),
+            'fuel':4096,'processLimitSeconds':60,'oldSpaceMiB':2048,'emptyPATH':True,
+            'fullKernel':False,'performanceQualified':False}
+        same(e.json('unary/route-receipt.json'),receipt,'entire independently checked generated541 receipt')
+        logged_json(e.terminal,'PSC1_UNARY_ROUTE541: PASS ',receipt)
+    same({p for p in e.files if p.startswith('unary/')},members,'exact complete unary artifact member set')
+    return {'status':'pass','nativeReports':541,'nativeModules':37,'originalChurchAccepted':True,
+        'runtimeControls':0 if e.route=='native' else 20,'fuel':4096,'fullKernel':False,'performanceQualified':False}
+
+
 def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
+    require(CONFIG.get("unary") is True and VALIDATOR and EMPTY_CACHE,"Complete unary extension required")
     require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained","restored","layout","empty-cache"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
@@ -2104,6 +2275,7 @@ def main():
             require(path in expected_paths,"Frozen oracle missing from source inventory")
             same(git_blob_sha(git_bytes(path)),oid,"frozen ordinary oracle "+path)
         REPORT["frozenOracleGitBlobs"]=frozen_blobs
+    REPORT["unarySpineSources"] = unary_source_authentication()
     closure = lean_closure()
     REPORT["actualLeanClosureCount"] = len(closure)
     REPORT["targetWorkflowSource"] = digest(git_bytes(WORKFLOW))
@@ -2138,7 +2310,7 @@ def main():
             same("sha256:" + digest(raw)["sha256"],artifact.get("digest"),"API archive SHA256")
             files = unzip(raw)
             if EMPTY_CACHE:
-                same(len(files),EMPTY_FILE_COUNTS[route] + ((23 if route == "native" else 24) if VALIDATOR else 0),"exact extended profile archive member count")
+                same(len(files),{"native":226,"generated":401,"canonical":404}[route],"exact complete unary qualification archive member count")
             job = job_map[route]
             same(job.get("run_id"),RUN,"job source run")
             same(job.get("head_sha"),SHA,"job source SHA")
@@ -2177,6 +2349,7 @@ def main():
                 result["emptySemanticCacheQualification"] = empty_cache_native_audit(evidence) if route == "native" else empty_cache_route_audit(evidence)
             if VALIDATOR:
                 result["validatorQualification"] = validator_audit(evidence)
+            result["unarySpineQualification"] = unary_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -2190,11 +2363,15 @@ def main():
     same(final_run.get("run_attempt"),ATTEMPT,"final attempt did not change")
     same(final_run.get("conclusion"),"success","final cohort conclusion")
     REPORT["status"] = "pass"
+    REPORT["metadataCorrespondenceEstablished"] = True
+    REPORT["decoderCorrespondenceEstablished"] = True
+    REPORT["replayArenaModelBridgeEstablished"] = True
+    REPORT["unarySpineLocalRefinementQualified"] = True
     REPORT["scope"] = {
         "constructorHelpersQualified":True,"fullT05AdmissionQualified":ADMISSION,
         "ordinaryAdmissionQualified":ADMISSION,"publicRoutingQualified":ADMISSION,"fullKernelQualified":False,
         "projectB":"OPEN","projectC":"FAIL","projectD":"OPEN",
-        "nativeProofReports":NATIVE_PROOF_TOTAL,"nativeProofModules":NATIVE_PROOF_MODULES,
+        "nativeProofReports":541,"nativeProofModules":37,
         "nativeAssertions":{"params":284,"result":432,
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
             **({"loop":69} if LOOP else {}),
@@ -2212,7 +2389,7 @@ def main():
             "baselineTransformRestorationQualified":True} if RESTORED else {}),
         **({"layoutBoundaryQualified":True,**LAYOUT_SCOPE} if LAYOUT else {}),
         **({"emptySemanticCacheSemanticQualification":True,"emptySemanticCacheHelperOnly":True,
-            "productionChanges":[EMPTY_PRODUCTION],"optimizationAdopted":False,
+            "productionChanges":UNARY_FULL_DELTA,"optimizationAdopted":False,
             "emptySemanticCachePerformanceQualified":False} if EMPTY_CACHE else {}),
         **({"independentLeanControls":{"controls":18,"accepted":14,"rejected":4,
                 "safeGenerated":13,"unsafeContract":1}} if ADMISSION else {}),
@@ -2240,8 +2417,8 @@ if __name__ == "__main__":
             "routes":{r:{"status":v["status"],"artifactId":v.get("artifactId"),
                         "files":v.get("fileCount"),"error":v.get("error")}
                       for r,v in REPORT["routes"].items()},
-            "nativeReports":NATIVE_PROOF_TOTAL if REPORT["status"] == "pass" else None,
-            "nativeModules":NATIVE_PROOF_MODULES if REPORT["status"] == "pass" else None,
+            "nativeReports":541 if REPORT["status"] == "pass" else None,
+            "nativeModules":37 if REPORT["status"] == "pass" else None,
             "profile":PROFILE,
             **({"deferredTransformQualified":REPORT["status"] == "pass" and not RESTORED} if DEFERRED else {}),
             **({"baselineTransformConstructionRestored":REPORT["status"] == "pass",
@@ -2249,10 +2426,10 @@ if __name__ == "__main__":
             **({"retainedNativeProofsQualified":REPORT["status"] == "pass"} if RETAINED else {}),
             **({"layoutBoundaryQualified":REPORT["status"] == "pass",
                 "canonicalOutputLayoutEstablished":REPORT["status"] == "pass",
-                "metadataCorrespondenceEstablished":False,"decoderCorrespondenceEstablished":False,
-                "replayArenaModelBridgeEstablished":False} if LAYOUT else {}),
+                "metadataCorrespondenceEstablished":REPORT["status"] == "pass","decoderCorrespondenceEstablished":REPORT["status"] == "pass",
+                "replayArenaModelBridgeEstablished":REPORT["status"] == "pass"} if LAYOUT else {}),
             **({"emptySemanticCacheSemanticQualification":REPORT["status"] == "pass",
-                "emptySemanticCacheHelperOnly":True,"productionChanges":[EMPTY_PRODUCTION],
+                "emptySemanticCacheHelperOnly":True,"productionChanges":UNARY_FULL_DELTA,
                 "optimizationAdopted":False,"emptySemanticCachePerformanceQualified":False}
                if EMPTY_CACHE else {}),
             "report":digest(payload.encode()),

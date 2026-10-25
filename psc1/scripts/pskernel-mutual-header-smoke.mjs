@@ -148,3 +148,68 @@ if(labels.length!==33||new Set(labels).size!==33)throw Error('matrix incomplete'
 console.log('PSC1_MUTUAL_HEADER_JS: PASS '+JSON.stringify({assertions:33,positive:11,negative:16,budgets:5,
  injected:1,labels,completeV1PrefixComparison:true,owningIDs:true,privateHeaderOnly:true,fullAdmission:false,
  fullKernel:false,performanceQualified:false,kernel:{bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')}}));
+
+// Cross-family recognition uses actual checked shared headers with 0/1/2 indices.
+const familyValue={levelParams:nil,numParams:1n,isUnsafe:false,types:list([
+ type(a,all('P',s1,s1)),type(b,all('P',s1,all('i',s1,s1))),
+ type(c,all('P',s1,all('i',s1,all('j',s1,s1))))])};
+const familyBuilt=build(familyValue),familyOld=frozen(256n,familyValue);
+const familyActual=direct(get('psKernelExprV2MutualAnalyzeHeaderWithFuel')(
+ 256n,environment,depth,maxNat,familyBuilt.arena,nil,familyBuilt.value));
+const familyLabels=[];
+const familyRequire=(label,condition)=>{if(condition!==true)throw Error('PSC1_MUTUAL_RESULT_FAIL '+label);familyLabels.push(label);};
+familyRequire('checked-shared-header-parameter-names',same(
+ array(familyOld.parameters.binders).map(p=>p.internalName),
+ array(familyActual.parameters.binders).map(p=>p.internalName)));
+let familySource={arena:familyActual.arena,built:force(get('psKernelExprV2DecodeChecked')(familyActual.arena)),declarations:nil};
+const familyInput=term=>{const next=force(get('psKernelDagGeneratedImport')(term,familySource));familySource=next.fst;return next.snd;};
+const ca=E.const(a,nil),cb=E.const(b,nil),cc=E.const(c,nil),co=E.const(nm('Other'),nil),free=E.fvar(nm('free'));
+const Lit=get('PsKernelLiteral');
+const familyTerms=[ca,cb,cc,co,s1,free,E.app(co,ca),E.lam(nm('x'),ca,free,bi),
+ E.forallE(nm('x'),free,cb,unit(get('PsKernelBinderInfo').implicit)),
+ E.letE(nm('x'),free,ca,cb,false),E.mdata(5n,ca),E.proj(a,0n,s1),E.proj(nm('Other'),0n,cb),
+ E.bvar(0n),E.mvar(a),E.lit(Lit.nat(3n)),E.lit(Lit.str('Aé€😀')),
+ E.app(E.lam(nm('x'),co,E.mdata(3n,cc),bi),cb)];
+const targetSets=[[],[a],[b,c],[a,b,c],[a,a]];
+familyTerms.forEach((term,i)=>{
+ const root=familyInput(term);
+ targetSets.forEach((names,j)=>familyRequire('all-family-occurrence-'+i+'-'+j,
+  force(get('psKernelExprV2MutualContainsConstOnCanonical')(familySource.arena,list(names),root))===
+   get('psKernelSimpleMutualContainsConst')(list(names),term)));
+});
+familyRequire('zero-structural-budget-precedes-lookup',same(
+ get('psKernelExprV2MutualContainsConstWithFuel')(0n)(familySource.arena)(list([a,b,c]))(familySource.arena.size+1n),
+ get('Except').error('PSKERNEL_V2_MUTUAL_CONTAINS_CONST_FUEL')));
+familyRequire('missing-occurrence-root-is-error',Object.hasOwn(
+ get('psKernelExprV2MutualContainsConstOnCanonical')(familySource.arena,list([a,b,c]),familySource.arena.size),'error'));
+const parameter=E.fvar(array(familyOld.parameters.binders)[0].internalName),wrong=E.fvar(nm('wrong'));
+const apps=(head,args)=>args.reduce((fn,arg)=>E.app(fn,arg),head);
+const applicationTerms=[apps(ca,[parameter]),apps(cb,[parameter,s1]),apps(cc,[parameter,s1,s2]),
+ apps(cb,[parameter,wrong]),apps(co,[parameter]),ca,apps(cb,[parameter]),apps(ca,[parameter,s1]),
+ apps(E.const(a,list([zero])),[parameter]),apps(ca,[wrong]),apps(ca,[E.mdata(0n,parameter)]),
+ apps(E.mdata(0n,ca),[parameter]),apps(cb,[parameter,ca]),apps(cb,[parameter,E.proj(a,0n,s1)]),
+ apps(cb,[parameter,E.app(co,cc)]),apps(cb,[parameter,E.letE(nm('x'),s1,cb,s1,false)]),
+ apps(wrong,[parameter]),apps(cc,[parameter,s1]),apps(cc,[parameter,s1,s2,s1]),
+ apps(cb,[parameter,E.mdata(0n,E.proj(nm('Other'),0n,cc))])];
+const oldShapes=list(familyOld.types.map(t=>({decl:t.declaration,indices:t.indices.binders})));
+applicationTerms.forEach((term,i)=>{
+ const root=familyInput(term);
+ const old=get('psKernelSimpleMutualAppInfo')(list([a,b,c]),oldShapes,nil,familyOld.parameters.binders,term);
+ const actual=force(get('psKernelExprV2MutualAppInfoOnCanonical')(familySource.arena,list([a,b,c]),
+  familyActual.types,nil,familyActual.parameters.binders,root));
+ let equal=same(old,none)&&same(actual,none);
+ if(!same(old,none)&&!same(actual,none)){
+  const left=old.value,right=actual.value,li=array(left.indices),ri=array(right.indices);
+  const spine=force(get('psKernelExprV2TransformAppSpineOnCanonical')(familySource.arena,root));
+  equal=left.target===right.target&&li.length===ri.length&&
+   li.every((expr,j)=>eq(expr,decode(familySource.arena,ri[j])))&&same(ri,array(spine.snd).slice(1));
+ }
+ familyRequire('cross-family-application-'+i,equal);
+});
+familyRequire('missing-application-root-is-error',Object.hasOwn(get('psKernelExprV2MutualAppInfoOnCanonical')(
+ familySource.arena,list([a,b,c]),familyActual.types,nil,familyActual.parameters.binders,familySource.arena.size),'error'));
+if(familyLabels.length!==114||new Set(familyLabels).size!==114)throw Error('family matrix incomplete');
+console.log('PSC1_MUTUAL_RESULT_JS: PASS '+JSON.stringify({assertions:114,occurrence:90,application:20,
+ boundary:3,headers:1,labels:familyLabels,completeV1StructuralComparison:true,originalIndexIDs:true,
+ allFamilyNames:true,privateStageOnly:true,fullAdmission:false,fullKernel:false,performanceQualified:false,
+ kernel:{bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')}}));

@@ -1,4 +1,4 @@
-name: PSC1 private mutual header complete-program generated preflight
+name: PSC1 combined private mutual stages complete-program generated preflight
 'on':
   workflow_dispatch: null
   push:
@@ -42,7 +42,7 @@ jobs:
         \ and not a['expired']\n    assert a['size_in_bytes']==size and a['digest']=='sha256:'+sha\n    raw=get('/actions/artifacts/'+str(artifact)+'/zip');assert\
         \ len(raw)==size and hashlib.sha256(raw).hexdigest()==sha\n    z=zipfile.ZipFile(io.BytesIO(raw));assert\
         \ len(z.namelist())==len(set(z.namelist()))==members and z.testzip() is None\n    (out/name).write_bytes(raw);return\
-        \ z\nnative_source='ed45802269907009be8872e1188d93567b1c87df'\nn=archive(native_source,40227506926,12612130826,825317,'af74d134b6aaca01494c0f0b98612d703c783a289443cda4d383a441f31a8179',310,'authenticated-native.zip')\n\
+        \ z\nnative_source='c673885bd8da7443a266fae06051a5bdd51a02f3'\nn=archive(native_source,40230310206,12611989142,833402,'7836c63b58be36d690e6fd4b8ed7c12581e391bdc4c5f934ee091ffaa6ad862e',315,'authenticated-native.zip')\n\
         manifest=json.loads(n.read('files.json'));assert manifest['source']==native_source\nfor path,pin in manifest['files'].items():\n\
         \    data=n.read(path);assert len(data)==pin['bytes'] and hashlib.sha256(data).hexdigest()==pin['sha256']\n\
         \    if path.startswith('source/'):\n        p=path.removeprefix('source/');assert data==subprocess.check_output(['git','show','HEAD:'+p]),p\n\
@@ -54,9 +54,9 @@ jobs:
         packages=[str(p) for p in pathlib.Path('psc1/packages').iterdir() if p.is_dir() and p.name!='pskernel-core']\n\
         stable=packages+['psc1/lakefile.lean','psc1/lake-manifest.json','psc1/lean-toolchain','psc1/host','psc1/stdlib','psc1/psconfig.json']\n\
         subprocess.run(['git','diff','--exit-code',compiler_source,'HEAD','--',*stable],check=True)\nexe=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-psc1';exe.write_bytes(binary);exe.chmod(0o700)\n\
-        snapshots=[]\nfor p in ['psc1/test/PsKernelMutualHeaderSelfHost.lean','psc1/scripts/pskernel-mutual-header-smoke.mjs','.github/workflows/psc1-pskernel-t06-mutual-generated.yml','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualHeader.lean']:\n\
+        snapshots=[]\nfor p in ['psc1/test/PsKernelMutualHeaderSelfHost.lean','psc1/scripts/pskernel-mutual-header-smoke.mjs','.github/workflows/psc1-pskernel-t06-mutual-generated.yml','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualHeader.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorResult.lean']:\n\
         \    data=pathlib.Path(p).read_bytes();assert data==subprocess.check_output(['git','show','HEAD:'+p]);dest=out/'sources'/p;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);snapshots.append({'path':p,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})\n\
-        record={'schema':'psc1-mutual-header-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40227506926,'nativeReports':12,'nativeAssertions':33,'all304NativeSourceSnapshotsMatchActualGit':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelMutualHeaderSelfHost.lean','snapshots':snapshots,'scope':'complete-program\
+        record={'schema':'psc1-mutual-header-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40230310206,'nativeReports':22,'nativeAssertions':147,'all307NativeSourceSnapshotsMatchActualGit':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelMutualHeaderSelfHost.lean','snapshots':snapshots,'scope':'complete-program\
         \ private-header preflight only; not full mutual admission or final public-route qualification','runtimeFuel':256,'runtimeDeadlineSeconds':600,'oldSpaceMiB':2048,'emptyPATH':True}\n\
         (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
     - name: Install exact retained TypeScript7.0.2
@@ -85,7 +85,7 @@ jobs:
         \ -s dist/t06-mutual/kernel.js.map\nmkdir -p \"$RUNNER_TEMP/mutual-generated/production\"\ncp dist/t06-mutual/kernel.{js,ts,d.ts,js.map}\
         \ \"$RUNNER_TEMP/mutual-generated/production/\"\ncp dist/t06-mutual/kernel.js \"$RUNNER_TEMP/mutual-generated/kernel.mjs\"\
         \ncp scripts/pskernel-mutual-header-smoke.mjs \"$RUNNER_TEMP/mutual-generated/\"\n"
-    - name: Compare all33 private header controls with retained complete V1 prefix
+    - name: Compare all147 private header and family controls with complete retained V1 prefix
       shell: bash
       run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\"\
         \ --check kernel.mjs\n\"$NODE_BIN\" --check pskernel-mutual-header-smoke.mjs\nset +e\n/usr/bin/time -f 'peak_rss_kib=%M\
@@ -95,6 +95,10 @@ jobs:
         \ PASS '\nr,=[json.loads(line[len(marker):]) for line in text.splitlines() if line.startswith(marker)]\n\
         assert r['assertions']==len(r['labels'])==len(set(r['labels']))==33\nassert [r[k] for k in ['positive','negative','budgets','injected']]==[11,16,5,1]\n\
         assert r['completeV1PrefixComparison'] and r['owningIDs'] and r['privateHeaderOnly'] and not r['fullAdmission']\
+        \ and not r['fullKernel']\nmarker='PSC1_MUTUAL_RESULT_JS: PASS '\nr,=[json.loads(line[len(marker):]) for\
+        \ line in text.splitlines() if line.startswith(marker)]\nassert r['assertions']==len(r['labels'])==len(set(r['labels']))==114\n\
+        assert [r[k] for k in ['occurrence','application','boundary','headers']]==[90,20,3,1]\nassert r['completeV1StructuralComparison']\
+        \ and r['originalIndexIDs'] and r['allFamilyNames'] and r['privateStageOnly'] and not r['fullAdmission']\
         \ and not r['fullKernel']\nPYCODE\n"
     - name: Preserve exact actual generated evidence
       if: always()

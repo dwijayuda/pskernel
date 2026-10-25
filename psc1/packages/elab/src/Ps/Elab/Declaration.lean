@@ -8,6 +8,10 @@ structure PsElabDeclarationResult where
   declaration : PsDeclaration
   metaContext : PsMetaContext
 
+structure PsElabDeclarationTraceResult where
+  result : PsElabDeclarationResult
+  trace : PsElabSourceTrace
+
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
 
@@ -243,20 +247,21 @@ def psElabDeclarationTermCallback
     Except PsElabError PsElabTermResult :=
   psElabTerm context term expected
 
-def psElabDeclarationParts
+def psElabDeclarationPartsWithSourceTrace
+    (tracing : Bool)
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
     (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (typeSyntax : PsSyntaxTerm)
     (valueSyntax : PsSyntaxTerm)
     (isTheorem : Bool) :
-    Except PsElabError PsElabDeclarationResult :=
+    Except PsElabError PsElabDeclarationTraceResult :=
   match psSyntaxNameToName nameSyntax with
   | none =>
       Except.error PsElabError.emptyName
   | some name =>
       let initial : PsElabContext :=
-        psElabContextForDeclaration environment name;
+        psElabContextWithSourceTrace (psElabContextForDeclaration environment name) tracing;
       match
           psElabTypedBinders
             psElabDeclarationTermCallback
@@ -330,22 +335,36 @@ def psElabDeclarationParts
                           PsElabError.unresolvedMetavariable
                       else if isTheorem then
                         Except.ok
-                          (PsElabDeclarationResult.mk
-                            (PsDeclaration.theoremDecl
-                              name
-                              List.nil
-                              (Prod.snd closed)
-                              (Prod.fst closed))
-                            metaContext)
+                          (PsElabDeclarationTraceResult.mk
+                            (PsElabDeclarationResult.mk
+                              (PsDeclaration.theoremDecl
+                                name
+                                List.nil
+                                (Prod.snd closed)
+                                (Prod.fst closed))
+                              metaContext)
+                            valueResult.context.sourceTrace)
                       else
                         Except.ok
-                          (PsElabDeclarationResult.mk
-                            (PsDeclaration.definitionDecl
-                              name
-                              List.nil
-                              (Prod.snd closed)
-                              (Prod.fst closed))
-                            metaContext)
+                          (PsElabDeclarationTraceResult.mk
+                            (PsElabDeclarationResult.mk
+                              (PsDeclaration.definitionDecl
+                                name
+                                List.nil
+                                (Prod.snd closed)
+                                (Prod.fst closed))
+                              metaContext)
+                            valueResult.context.sourceTrace)
+
+def psElabDeclarationParts
+    (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (typeSyntax valueSyntax : PsSyntaxTerm) (isTheorem : Bool) :
+    Except PsElabError PsElabDeclarationResult :=
+  match psElabDeclarationPartsWithSourceTrace false environment nameSyntax binders
+      typeSyntax valueSyntax isTheorem with
+  | Except.error error => Except.error error
+  | Except.ok value => Except.ok value.result
 
 def psSyntaxConstructorCoreName
     (inductiveName : PsName)
@@ -388,6 +407,7 @@ def psElabContextWithEnvironment
     structuralRecursion := context.structuralRecursion
     whileHelper := context.whileHelper
     currentNamespace := context.currentNamespace
+    sourceTrace := context.sourceTrace
   }
 
 def psElabBinderArgument
@@ -1324,17 +1344,18 @@ def psElabStructureDeclaration
     (List.cons constructor List.nil)
     true
 
-def psElabPartialDeclaration
+def psElabPartialDeclarationWithSourceTrace
+    (tracing : Bool)
     (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
     (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (typeSyntax : PsSyntaxTerm)
     (valueSyntax : PsSyntaxTerm) :
-    Except PsElabError PsElabDeclarationResult :=
+    Except PsElabError PsElabDeclarationTraceResult :=
   match psSyntaxNameToName nameSyntax with
   | Option.none => Except.error PsElabError.emptyName
   | Option.some name =>
-      let initial := psElabContextForDeclaration environment name;
+      let initial := psElabContextWithSourceTrace (psElabContextForDeclaration environment name) tracing;
       match
           psElabTypedBinders
             psElabDeclarationTermCallback
@@ -1428,13 +1449,25 @@ def psElabPartialDeclaration
                                 PsElabError.unresolvedMetavariable
                             else
                               Except.ok
-                                (PsElabDeclarationResult.mk
-                                  (PsDeclaration.partialDecl
-                                    name
-                                    List.nil
-                                    (Prod.snd closed)
-                                    (Prod.fst closed))
-                                  metaContext)
+                                (PsElabDeclarationTraceResult.mk
+                                  (PsElabDeclarationResult.mk
+                                    (PsDeclaration.partialDecl
+                                      name
+                                      List.nil
+                                      (Prod.snd closed)
+                                      (Prod.fst closed))
+                                    metaContext)
+                                  valueResult.context.sourceTrace)
+
+def psElabPartialDeclaration
+    (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
+    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (typeSyntax valueSyntax : PsSyntaxTerm) :
+    Except PsElabError PsElabDeclarationResult :=
+  match psElabPartialDeclarationWithSourceTrace false environment nameSyntax binders
+      typeSyntax valueSyntax with
+  | Except.error error => Except.error error
+  | Except.ok value => Except.ok value.result
 
 def psElabDeclaration
     (environment : PsEnvironment)

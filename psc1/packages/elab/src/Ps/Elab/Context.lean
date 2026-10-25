@@ -2,6 +2,7 @@ import Ps.Environment.Basic
 import Ps.Environment.Instances
 import Ps.Environment.LocalContext
 import Ps.Meta.Context
+import Ps.Elab.SourceTrace
 
 structure PsElabStructuralRecursion where
   functionName : PsName
@@ -32,6 +33,7 @@ structure PsElabContext where
   structuralRecursion : Option PsElabStructuralRecursion
   whileHelper : Option PsName
   currentNamespace : PsName
+  sourceTrace : PsElabSourceTrace
 
 def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {
@@ -42,6 +44,7 @@ def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
     structuralRecursion := Option.none
     whileHelper := Option.none
     currentNamespace := PsName.anonymous
+    sourceTrace := psElabSourceTraceEmpty false
   }
 
 def psElabContextWithLocal
@@ -55,6 +58,7 @@ def psElabContextWithLocal
     structuralRecursion := context.structuralRecursion
     whileHelper := context.whileHelper
     currentNamespace := context.currentNamespace
+    sourceTrace := psElabSourceTraceWithLocals context.sourceTrace localContext
   }
 
 def psElabContextWithMeta
@@ -68,6 +72,7 @@ def psElabContextWithMeta
     structuralRecursion := context.structuralRecursion
     whileHelper := context.whileHelper
     currentNamespace := context.currentNamespace
+    sourceTrace := context.sourceTrace
   }
 
 def psElabContextWithStructuralRecursion
@@ -82,6 +87,7 @@ def psElabContextWithStructuralRecursion
     structuralRecursion := structuralRecursion
     whileHelper := context.whileHelper
     currentNamespace := context.currentNamespace
+    sourceTrace := context.sourceTrace
   }
 
 -- Root fields keep their established call map in every nested body. Only the
@@ -99,7 +105,7 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
 def psElabContextWithWhileHelper
     (context : PsElabContext) (helper : PsName) : PsElabContext :=
   PsElabContext.mk context.environment context.localContext context.instances
-    context.metaContext context.structuralRecursion (Option.some helper) context.currentNamespace
+    context.metaContext context.structuralRecursion (Option.some helper) context.currentNamespace context.sourceTrace
 
 def psElabContextForDeclaration
     (environment : PsEnvironment) (name : PsName) : PsElabContext :=
@@ -110,4 +116,32 @@ def psElabContextForDeclaration
     | PsName.num parent _ => parent;
   let context : PsElabContext := psElabContextEmpty environment;
   PsElabContext.mk context.environment context.localContext context.instances
-    context.metaContext context.structuralRecursion context.whileHelper currentNamespace
+    context.metaContext context.structuralRecursion context.whileHelper currentNamespace context.sourceTrace
+
+-- Tracing is explicitly host/developer selected, never source selected.
+def psElabContextWithSourceTrace (context : PsElabContext) (enabled : Bool) : PsElabContext :=
+  PsElabContext.mk context.environment context.localContext context.instances
+    context.metaContext context.structuralRecursion context.whileHelper context.currentNamespace
+    (psElabSourceTraceWithLocals (psElabSourceTraceEmpty enabled) context.localContext)
+
+def psElabContextSourceBinder (context : PsElabContext)
+    (localId : Nat) (span : PsSourceSpan) : PsElabContext :=
+  if context.sourceTrace.enabled then
+    PsElabContext.mk context.environment context.localContext context.instances
+      context.metaContext context.structuralRecursion context.whileHelper context.currentNamespace
+      (psElabSourceTraceAtBinder context.sourceTrace localId span)
+  else context
+
+def psElabContextSourceReference (context : PsElabContext)
+    (name : PsName) (span : PsSourceSpan) (baseSegments : Nat)
+    (target : PsElabSourceTarget) : PsElabContext :=
+  if context.sourceTrace.enabled then
+    PsElabContext.mk context.environment context.localContext context.instances
+      context.metaContext context.structuralRecursion context.whileHelper context.currentNamespace
+      (psElabSourceTraceReference context.sourceTrace name span baseSegments target)
+  else context
+
+def psElabContextRestoreScope (outer inner : PsElabContext) : PsElabContext :=
+  PsElabContext.mk outer.environment outer.localContext outer.instances
+    inner.metaContext outer.structuralRecursion outer.whileHelper outer.currentNamespace
+    (psElabSourceTraceRestore outer.sourceTrace inner.sourceTrace)

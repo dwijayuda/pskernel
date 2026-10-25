@@ -1,0 +1,93 @@
+name: PSC1 source binding trace qualification
+on:
+  push:
+    branches: [feat/psc1-binding-trace-20261025]
+    paths:
+      - psc1/**/*.lean
+      - psc1/lakefile.lean
+      - psc1/lean-toolchain
+      - .github/workflows/psc1-source-trace.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-source-trace-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-trace-native-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-source-tools-native-v1-ubuntu2404-
+      - name: Install repository-pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build production elaborator and actual source tracing tests
+        working-directory: psc1
+        run: |
+          lean --version
+          lake build psc1_source_trace_tests psc1_source_census_probe
+      - uses: actions/cache/save@v4
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: psc1-trace-native-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Compare actual traced/untraced declarations and official admission
+        working-directory: psc1
+        run: .lake/build/bin/psc1_source_trace_tests
+      - name: Census both whole compiler grammars
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { readOwnedCompilerSources } from './host-tools/compiler-source-inputs.mjs';
+          import { compilerSourceClosureDigest } from './host-tools/compiler-host-protocol.mjs';
+          import { boundedRun } from './host-tools/generated-target-tools.mjs';
+          const rows = readOwnedCompilerSources('Ps.CompilerUnified.Service');
+          fs.mkdirSync('dist/source-conversion', { recursive: true });
+          for (const grammar of ['lean', 'ps']) {
+            const output = path.resolve('dist/source-conversion/census-' + grammar + '.json');
+            const result = boundedRun('prlimit', ['--as=4294967296', '--stack=8388608', '--',
+              path.resolve('.lake/build/bin/psc1_source_census_probe'), '--grammar', grammar,
+              '--out', output, '--modules', ...rows.flatMap(row => [row.module, path.resolve(row.path)])], {
+              timeoutMs: 240000, timeoutPolicy: 'standard-240s',
+              env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0', LEAN_STACK_SIZE_KB: '8192' },
+            });
+            assert.equal(result.status, 0, result.stderr);
+            const records = JSON.parse(fs.readFileSync(output, 'utf8')).records;
+            const failures = records.filter(row => row.parse !== 'accepted' || row.elaboration !== 'accepted');
+            assert.deepEqual(failures, [], 'actual source census: ' + JSON.stringify(failures));
+          }
+          console.log('PSC1_CONVERSION_SOURCE_CENSUS:', JSON.stringify({
+            modules: rows.length,
+            sourceClosureDigest: compilerSourceClosureDigest(rows.map(row => ({ ...row, kind: 'lean' }))),
+            grammars: ['lean', 'ps'], status: 'passed',
+          }));
+          
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-source-trace-${{ github.sha }}
+          path: psc1/dist/source-conversion/
+          if-no-files-found: warn
+          retention-days: 90

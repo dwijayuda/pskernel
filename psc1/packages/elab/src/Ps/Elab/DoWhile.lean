@@ -106,7 +106,7 @@ def psElabDoWhileStep
                       (Option.some (psElabDoType ops result))) with
           | Except.error error => Except.error error
           | Except.ok yes =>
-              let noContext := psElabContextWithMeta conditionContext yes.context.metaContext;
+              let noContext := psElabContextRestoreScope conditionContext yes.context;
               match psElabDoJoinCall ops result restId carried noContext state with
               | Except.error error => Except.error error
               | Except.ok no =>
@@ -172,7 +172,7 @@ def psElabDoWhile
                         loopContext (psElabDoInternalName "_psc1WhileFallback" loopContext) unitType with
                     | Except.error error => Except.error error
                     | Except.ok fallback =>
-                        let current := psElabContextWithMeta loopContext fallback.context.metaContext;
+                        let current := psElabContextRestoreScope loopContext fallback.context;
                         match psElabDoForLambda
                             (fun (recursiveContext : PsElabContext) (recursiveId : Nat) =>
                               psElabDoForLambda
@@ -189,7 +189,7 @@ def psElabDoWhile
                             current (psElabDoInternalName "_psc1WhileNext" current) recursiveType with
                         | Except.error error => Except.error error
                         | Except.ok step =>
-                            let current := psElabContextWithMeta current step.context.metaContext;
+                            let current := psElabContextRestoreScope current step.context;
                             match psElabDoWhileStateValue current state carried with
                             | Except.error error => Except.error error
                             | Except.ok initial =>

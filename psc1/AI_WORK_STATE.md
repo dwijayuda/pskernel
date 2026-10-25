@@ -1,15 +1,32 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active draft PR #185,
-branch feat/psc1-checked-source-conversion-20261025, stacked on qualified PR #184.
-Implementation fa265940ebf78797845ddae41ccaa5499577144d.
+Updated 2026-10-25 Asia/Jakarta. Active branch feat/psc1-binding-trace-20261025,
+stacked on qualified PR #185 HEAD583f795f91f8ee83dc59556dc886a71de7950f6d.
+R2b source-binding tracing is in implementation; new source qualification pending.
+The following R3 evidence retains its original source identity.
 Use connected GitHub and Linux Actions only. Fetch HEAD before every write and
 use single-parent expected-HEAD non-force updates. No merge or npm publication.
 The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining-work queue;
 dated receipts own evidence. [Prior work-state snapshot](docs/history/AI_WORK_STATE_BEFORE_R3_QUALIFICATION_2026-10-25.md)
 preserves previous progress/failures without treating historical claims as current.
 
-## Current source and assurance
+## R2b implementation in progress
+
+The production elaborator now has an opt-in source trace at actual local allocation
+and term-name resolution sites. Declaration-local event ordinals distinguish reused
+raw local IDs. Successful scope restoration retains event history and restores the
+outer active-binding map; failed branches yield no context/log. The existing
+declaration routines share one implementation with a tracing flag; normal compiler
+entry points remain disabled and do not accumulate events. No second resolver or
+elaborator is added. Initial scope/byte-parity/official admission tests and both
+whole-compiler source censuses are running in Linux Actions.
+
+This is not yet qualified R2b, complete source tracing or rename. Structured
+recursion, synthesized and normalization provenance, data declarations, exact
+source transport and binding-aware editing remain to finish. Preserve the R3
+and frozen package identities below; never reuse them for the changed compiler.
+
+## Preserved qualified R3 source and assurance
 
 The active portable compiler has 121 modules and 4,677 source Core members:
 77e2173db1ffd86e7f7400c25986e9c23ec8975c4ff773e9489d89d5632dcacb.

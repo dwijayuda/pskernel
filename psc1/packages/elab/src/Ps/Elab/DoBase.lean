@@ -330,7 +330,7 @@ def psElabDoContinue
           (psExprAbstractFVar pushed.id (psMetaInstantiate metaContext bodyResult.term))
           PsBinderInfo.explicit;
       psElabDoBind ops
-        (psElabContextWithMeta outerContext metaContext)
+        (psElabContextRestoreScope outerContext bodyResult.context)
         (psMetaInstantiate metaContext alpha)
         (psMetaInstantiate metaContext beta)
         (psMetaInstantiate metaContext action.term)
@@ -412,7 +412,7 @@ def psElabDoWithLocal
         PsExpr.letE name (psMetaInstantiate metas type)
           (psMetaInstantiate metas value.term)
           (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term));
-      psElabResolvedTerm (psElabContextWithMeta outerContext metas) term expected
+      psElabResolvedTerm (psElabContextRestoreScope outerContext body.context) term expected
 
 -- A continuation is elaborated once in its original lexical scope. Only the
 -- visible mutable values are parameters. Branch-local declarations therefore
@@ -437,7 +437,7 @@ def psElabDoJoinWorker
             let term : PsExpr := PsExpr.lam name unitType
               (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
               PsBinderInfo.explicit;
-            psElabResolvedTerm (psElabContextWithMeta context metas) term Option.none
+            psElabResolvedTerm (psElabContextRestoreScope context body.context) term Option.none
   | List.cons entry rest =>
       fun (context : PsElabContext) (state : List PsElabDoMutable) =>
         let smaller : PsElabContext -> List PsElabDoMutable ->
@@ -452,7 +452,7 @@ def psElabDoJoinWorker
             let term : PsExpr := PsExpr.lam entry.userName (psMetaInstantiate metas type)
               (psExprAbstractFVar pushed.id (psMetaInstantiate metas body.term))
               PsBinderInfo.explicit;
-            psElabResolvedTerm (psElabContextWithMeta context metas) term Option.none
+            psElabResolvedTerm (psElabContextRestoreScope context body.context) term Option.none
 
 def psElabDoJoin
     (finish :
@@ -524,10 +524,10 @@ def psElabDoBranches
   match next context thenBranch with
   | Except.error error => Except.error error
   | Except.ok thenResult =>
-      match next (psElabContextWithMeta context thenResult.context.metaContext) elseBranch with
+      match next (psElabContextRestoreScope context thenResult.context) elseBranch with
       | Except.error error => Except.error error
       | Except.ok elseResult =>
           psElabDoCoreIf ops result
-            (psElabContextWithMeta context elseResult.context.metaContext)
+            (psElabContextRestoreScope context elseResult.context)
             condition thenResult.term elseResult.term
 

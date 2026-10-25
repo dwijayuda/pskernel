@@ -1,6 +1,7 @@
 import Ps.KernelCore.API.Kernel
 import Ps.KernelCore.API.DagDeclaration
 import Ps.KernelCore.API.DagAdmissionGuards
+import Ps.KernelCore.API.DagQuotAdmission
 import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.AdmissionHelpers
 import Ps.KernelCore.Checker.ExprV2.DefEq
@@ -379,6 +380,11 @@ def psKernelDagTryAdmitSimpleWithFuel
           | PsKernelDeclarationRequest.mutualDefinitions values =>
               psKernelDagTryAdmitMutualDefinitionsWithFuel fuel environment
                 maxRecDepth maxNatSize arena declarations inputs values
+          | _ => Option.none
+      | PsKernelDagDeclarationRequest.quot =>
+          match declaration with
+          | PsKernelDeclarationRequest.quot =>
+              psKernelDagTryAdmitQuot environment arena declarations
           | _ => Option.none
       | _ => Option.none
   | Option.some plan =>

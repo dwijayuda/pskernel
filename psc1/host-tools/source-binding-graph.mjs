@@ -22,7 +22,11 @@ export function validateSourceBindingModule(wire, module, row, helpers) {
         tokens.some(piece => !['identifier', 'natural'].includes(piece.token.kind) &&
           !(piece.token.kind === 'symbol' && piece.token.text === '.')) ||
         tokens.map(piece => piece.token.text).join('') !== words(tagged).join('.'))
-      refuse('BINDING_REFERENCE_SPAN');
+      throw new Error('PSC1_LOSSLESS_BINDING_REFERENCE_SPAN', { cause: {
+        module: module.module, name: tagged, span,
+        raw: row.bytes.subarray(span.start.byteOffset, span.stop.byteOffset).toString('utf8').slice(0,512),
+        tokenSpelling: tokens.map(piece => piece.token.text).join('').slice(0,512),
+      } });
   };
   const decodeSpan = value => {
     if (!Array.isArray(value) || value.length !== 6) refuse('BINDING_SPAN_ROW');

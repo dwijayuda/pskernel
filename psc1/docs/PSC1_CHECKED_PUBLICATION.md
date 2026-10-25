@@ -21,6 +21,8 @@ Candidate-only APIs retain no admission or publication authority.
 Native distribution seven-target support and optional Python/PHP are preserved.
 Wasm-component/optional-provider checked dispatch in this slim API is unfinished.
 
+[Install exact qualified artifacts](PSC1_CHECKED_PUBLICATION_INSTALL.md).
+
 ## Installation and output consumers
 
 Use the exact unpublished artifacts linked by the qualification receipt and
@@ -37,7 +39,7 @@ emitted ESM and the fixed consumer configuration.
 
 For Rust output, install the included
 `@proofscript/rust-target-consumer-linux-x64@0.1.0-psc1.6` tarball and provision the
-official Rust1.90.0 Linux x64 toolchain explicitly. Default SDK location is
+matching official Rust1.90.0 Linux x64 toolchain explicitly; CI uses a minimal profile. Default SDK location is
 `~/.rustup/toolchains/1.90.0-x86_64-unknown-linux-gnu`; an explicit host
 `rustToolchainRoot` / CLI `--rust-toolchain-root` may locate the same exact SDK.
 Every selected SDK resource must match the trusted inventory. Version text alone

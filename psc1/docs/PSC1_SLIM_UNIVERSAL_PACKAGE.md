@@ -3,7 +3,8 @@
 The current host/package work is `proofscript@0.1.0-psc1.6`:
 [checked output and transactional publication](PSC1_CHECKED_PUBLICATION.md),
 [exact current receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json).
-Qualification is in progress; consult the receipt before promoting an artifact.
+Linux qualification passes40238538092 and source37/37 passes40238649527.
+[Install the eight exact tarballs](PSC1_CHECKED_PUBLICATION_INSTALL.md).
 The preceding qualified generated-IO package remains available in
 [its exact installation guide](PSC1_GENERATED_IO_INSTALL.md).
 
@@ -41,3 +42,6 @@ source-package resolution and final clean-release work.
 [Preserved PR #181 slim guide](history/PSC1_SLIM_UNIVERSAL_BEFORE_CHECKED_PUBLICATION_2026-10-26.md)
 retains its frozen120-module payload identities and .4 artifacts.
 They remain separate from current122-module .5/.6 payloads and qualifications.
+
+The preserved guide is verbatim; resolve its original relative links at commit
+`563ee855407581d0d34adcbc450ad77863f39f94` and its original docs path.

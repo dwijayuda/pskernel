@@ -48,6 +48,8 @@ All four genuine G1/G2/G3 chains and exact fixed points passed for this source:
 JS/TS/Wasm40223062370; Rust40223086966.
 [Current generated-IO receipt](docs/PSC1_GENERATED_IO_QUALIFICATION_2026-10-26.json)
 retains the source, generation and preceding installed-application evidence.
+Current source CI40238649527 passes all37 finite criteria,zero blocked.
+
 [Checked-publication receipt](docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json)
 owns the new host/package qualification. Older frozen120-module and refactored121-module
 results remain distinct in dated receipts; they are not relabeled current.

@@ -1,69 +1,475 @@
 {
   "schema": "psc1-checked-publication-qualification/1",
-  "status": "in-progress",
   "date": "2026-10-26",
+  "status": "qualified-linux-transactional-and-checked-targets",
   "pr": 188,
+  "branch": "feat/psc1-portable-checked-publication-20261026",
   "baseCommit": "563ee855407581d0d34adcbc450ad77863f39f94",
   "implementation": {
-    "head": "1b0e695e67fd76bfd8bb43901eebc35058a0fc1a",
-    "tree": "e963601d74978807dfabcbf8774c33c7d4599571"
+    "packageAndRuntimeCommit": "1b0e695e67fd76bfd8bb43901eebc35058a0fc1a",
+    "directTypescriptConsumerCommit": "9c9e8ef4c337d51caa4d7075829f56ebfd75e153",
+    "sourceHead": "52d693e06f6cc1a3afcee9e5e00fa207d61ebcd1",
+    "testedMerge": "b3376bd5e39c58b4af425696497fe725e887f9ae",
+    "sourceHeadAndMergeTree": "fcf10f9da517fcf5c0a76ab081ac8b88d9b3aa25",
+    "runtimePayloadUnchangedBetweenPackageAndSourceHead": true,
+    "metadataOnlyPaths": [
+      "psc1/AI_WORK_STATE.md",
+      "psc1/NPM_DISTRIBUTION_CONTRACT.json",
+      "psc1/README.md",
+      "psc1/docs/PSC1_CHECKED_PUBLICATION.md",
+      "psc1/docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json",
+      "psc1/docs/PSC1_SLIM_UNIVERSAL_PACKAGE.md",
+      "psc1/docs/README.md",
+      "psc1/docs/history/PSC1_SLIM_UNIVERSAL_BEFORE_CHECKED_PUBLICATION_2026-10-26.md",
+      "psc1/host-tools/README.md"
+    ]
   },
-  "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
-  "compilerSourceUnchanged": true,
-  "priorSourceGate": {
-    "run": 40230721977,
-    "criteria": 37,
-    "blocked": 0
-  },
-  "qualifiedGenerations": {
-    "js-ts-wasm": 40223062370,
-    "rust": 40223086966
-  },
-  "tests": {
-    "firstTransaction": {
-      "run": 40236426372,
-      "job": 121298892084,
-      "status": "passed"
+  "compiler": {
+    "modules": 122,
+    "sourceCoreMembers": 4742,
+    "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "psClosureDigest": "e9131ed0e67d229184babca0ade81174bfed98ce9e2a149769ce9a459aaaea53",
+    "portableCompilerSourceChanged": false,
+    "qualifiedGenerations": {
+      "schema": "psc1-qualified-compiler-generation-inputs/1",
+      "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "engines": {
+        "js": {
+          "run": 40223062370,
+          "job": 121258729566,
+          "artifact": 12611622480,
+          "zipSha256": "1c18b578e110f96545a91ba6f520eed436826206f556243695261b72e68ede45",
+          "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+          "manifestSha256": "6f55b61fcaf69e9eb1ac790bd85f31d900a4baced97dbb73fb5ccd2a3359e2af",
+          "executableSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa"
+        },
+        "ts": {
+          "run": 40223062370,
+          "job": 121258729656,
+          "artifact": 12612640406,
+          "zipSha256": "60e453cfbfd42d63533adb1014b3e255b69c522ce63eeebed55753ae2817607d",
+          "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+          "manifestSha256": "b8eb2279226222cb79f8b90234d4b5c6d8b9a2920352703c3827c78ec762ea44",
+          "executableSha256": "9a7c60fc9d02a596d2a3a2aa725dfce653e3babea2585e116ef809d8144ecdc2"
+        },
+        "wasm-core": {
+          "run": 40223062370,
+          "job": 121258729664,
+          "artifact": 12611662030,
+          "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
+          "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+          "manifestSha256": "c02be90d27cca4861ca2b9f98b9b5193c38fcd7f9e15a9e496e207a1ebd7fb78",
+          "executableSha256": "53e30eac21add83fd1b7eb8635530d16a4d0af54f8dbe7bb995d24590f3bc137"
+        },
+        "rust": {
+          "run": 40223086966,
+          "job": 121258808523,
+          "artifact": 12612555500,
+          "zipSha256": "d33f5329203ed41fb3503e1d3cdccf6bc4f833023a456c91976494a1db005ca0",
+          "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be",
+          "manifestSha256": "5ac54e9006aab1de9eea9fd46d4d5a8637938d3d1a24809af37ef1e0a67a783e",
+          "executableSha256": "29078960566487cbd33b2504af6a71b777e72c92f68f7bf4733e7eb45e966bab"
+        }
+      }
     },
-    "firstInstalledFourTargets": {
-      "run": 40237499042,
-      "job": 121302072701,
-      "targetSuite": "passed",
-      "fullJob": "in-progress-at-checkpoint"
+    "g2g3RerunForHostChanges": false
+  },
+  "qualification": {
+    "transaction": {
+      "run": 40238538092,
+      "job": 121305173680,
+      "status": "passed",
+      "platform": "ubuntu-24.04/linux-x64",
+      "protocols": [
+        "legacy-symlink",
+        "portable-file"
+      ],
+      "actualFileOperations": true,
+      "preCommitFaultsPerProtocol": 3,
+      "sealedFileTamper": true,
+      "immutableReaderBytes": true,
+      "staleWriterRefusal": true,
+      "mixedProtocolRefusal": true,
+      "symlinkedGenerationRootRefusal": true,
+      "postCommitDurabilityUncertainty": true,
+      "actualPostCommitLockCleanupFailure": true,
+      "sigkillAfterSeal": true,
+      "unsafeStaleLockTakeoverRefused": true,
+      "actualPowerLossTest": false,
+      "otherPlatformTests": false,
+      "artifact": {
+        "id": 12615940802,
+        "zipSha256": "618c1cc4f8be87f8fd97786570ca1356684e7469181fa2560a5667accc7bd856"
+      }
+    },
+    "installed": {
+      "run": 40238538092,
+      "job": 121305298430,
+      "status": "passed",
+      "commit": "1b0e695e67fd76bfd8bb43901eebc35058a0fc1a",
+      "node": "22.23.3",
+      "platform": "ubuntu-24.04/linux-x64",
+      "engines": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core"
+      ],
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "checkedTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core"
+      ],
+      "scalarPublicationGroups": 32,
+      "scalarTypes": [
+        "nat",
+        "int",
+        "bool",
+        "unicode-string"
+      ],
+      "checkedCallbackIoGroups": 24,
+      "refusals": 143,
+      "actualRustLibraryLinksAndExecutions": 16,
+      "immutablePriorGenerationObserved": true,
+      "defaultKernel": "wasm",
+      "packedPublicTypes": "typescript7.0.2 strict positive and negative consumer",
+      "preservedRegressions": {
+        "compilerCases": 20,
+        "cliCases": 12,
+        "candidateMappings": 48,
+        "kernelComparisons": 14,
+        "negativeCases": 37,
+        "bomCaptures": 1,
+        "installedApplications": 16,
+        "applicationCases": 264,
+        "globalApplicationCases": 8,
+        "sourceMetadataAuthorityRefusals": 8,
+        "ioTargetConsumers": 24,
+        "wasmCallbackAbiRefusals": 8
+      },
+      "offlineEmptyCache": true,
+      "installScriptsDisabled": true,
+      "noCompilerSdkOnOrdinaryExecutionPath": true,
+      "immutableStoreAndApplicationEvidenceArchived": true,
+      "rootOnlyCandidateEmissionPreserved": true
+    },
+    "compilerKernelCrosscheck": {
+      "admissionsSha256": "a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213",
+      "bytes": 29887093,
+      "admissionRecords": 3465,
+      "providers": {
+        "wasm": {
+          "accepted": true,
+          "elapsedMs": 8015,
+          "invalidTypeRejected": true,
+          "acceptedResponseSha256": "4a859c5f3b68f7852fc22fb94f9d27f0ada9ecfe82ca69e031a7dbb46058db88",
+          "rejectionResponseSha256": "ff1bf426336e373aeb23c7ac9bd237f60df9dd5f7d29eca15ca942bcefc33430"
+        },
+        "native": {
+          "accepted": true,
+          "elapsedMs": 2419,
+          "invalidTypeRejected": true,
+          "acceptedResponseSha256": "4a859c5f3b68f7852fc22fb94f9d27f0ada9ecfe82ca69e031a7dbb46058db88",
+          "rejectionResponseSha256": "ff1bf426336e373aeb23c7ac9bd237f60df9dd5f7d29eca15ca942bcefc33430"
+        }
+      },
+      "agreement": true
+    },
+    "source": {
+      "run": 40238649527,
+      "head": "52d693e06f6cc1a3afcee9e5e00fa207d61ebcd1",
+      "testedMerge": "b3376bd5e39c58b4af425696497fe725e887f9ae",
+      "fullJob": 121308481950,
+      "status": "passed",
+      "gateJob": 121315141117,
+      "readiness": {
+        "counts": {
+          "implemented": 0,
+          "tested": 0,
+          "qualified": 37,
+          "blocked": 0
+        },
+        "releaseReady": true
+      },
+      "readinessScope": "37 finite Practical Core criteria; not a final universal npm/platform release",
+      "jobs": [
+        {
+          "id": 121305554831,
+          "name": "static",
+          "conclusion": "success"
+        },
+        {
+          "id": 121305762709,
+          "name": "lossless / lossless",
+          "conclusion": "success"
+        },
+        {
+          "id": 121305762724,
+          "name": "focused / php-application",
+          "conclusion": "success"
+        },
+        {
+          "id": 121305762733,
+          "name": "source-bindings / trace",
+          "conclusion": "success"
+        },
+        {
+          "id": 121305762742,
+          "name": "focused / focused (applications)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121305762768,
+          "name": "focused / focused (core)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121305762898,
+          "name": "native / native",
+          "conclusion": "success"
+        },
+        {
+          "id": 121305763158,
+          "name": "benchmark",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 121306536439,
+          "name": "source-bindings / integration",
+          "conclusion": "success"
+        },
+        {
+          "id": 121307527811,
+          "name": "g1 / generated-js",
+          "conclusion": "success"
+        },
+        {
+          "id": 121307527814,
+          "name": "g1 / host-session-boundary",
+          "conclusion": "success"
+        },
+        {
+          "id": 121307527835,
+          "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121307527845,
+          "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121307527851,
+          "name": "closures / selected-closure (semantic-compiler, checked)",
+          "conclusion": "success"
+        },
+        {
+          "id": 121308481950,
+          "name": "full / linux-scoped",
+          "conclusion": "success"
+        },
+        {
+          "id": 121315141117,
+          "name": "gate",
+          "conclusion": "success"
+        }
+      ],
+      "artifact": {
+        "id": 12617450138,
+        "bytes": 121340892,
+        "zipSha256": "114c0bff188e735d42e8d73169738b777079cb69d758d85be5dbeafaa7397bb8"
+      }
+    },
+    "historicalCleanupCorrespondence": {
+      "job": 121305298430,
+      "original": "3089cbc369bc8a11f540c13140c7003c9dadf4a8",
+      "cleanup": "446a0f21c6288a7c20b843bbeadcd18ba1460fa2",
+      "featureBaselines": {
+        "resolver": "9c9e8ef4c337d51caa4d7075829f56ebfd75e153",
+        "apiAndCli": "0c2c70b910f864cd87a19185843bb38e3d2ca653"
+      },
+      "claim": "bounded executable AST correspondence; intentional feature behavior separately qualified"
     }
+  },
+  "package": {
+    "name": "proofscript",
+    "version": "0.1.0-psc1.6",
+    "rootBytes": 3761565,
+    "rootSha256": "4657ecbf3d4afaf3438d115ec24e60d9c4af80e3602c8ee19ed93e45104810dd",
+    "artifact": {
+      "run": 40238538092,
+      "id": 12616533098,
+      "bytes": 43884788,
+      "zipSha256": "fc204d5e043b3c45776307522a24cfca846a50794b11cf7dddbcf321105c2d35",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40238538092/artifacts/12616533098"
+    },
+    "tarballs": [
+      {
+        "package": "proofscript",
+        "version": "0.1.0-psc1.6",
+        "tarball": "proofscript-0.1.0-psc1.6.tgz",
+        "sha256": "4657ecbf3d4afaf3438d115ec24e60d9c4af80e3602c8ee19ed93e45104810dd",
+        "bytes": 3761565
+      },
+      {
+        "package": "@proofscript/pskernel-lean-wasm",
+        "version": "4.35.0",
+        "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+        "sha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511"
+      },
+      {
+        "package": "@proofscript/pskernel-lean",
+        "version": "4.35.0",
+        "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+        "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+      },
+      {
+        "package": "@proofscript/compiler-rust-linux-x64",
+        "version": "0.1.0-psc1.6",
+        "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.6.tgz",
+        "sha256": "0b727e2388e557cf4a3118557e032aef032e440f982ac58023274f6b68c069b3"
+      },
+      {
+        "package": "@proofscript/compiler-wasm",
+        "version": "0.1.0-psc1.6",
+        "tarball": "proofscript-compiler-wasm-0.1.0-psc1.6.tgz",
+        "sha256": "47adf8144365056f52dfc1df1b17e4eba5b616a3d7a734be1c01342620ef9778"
+      },
+      {
+        "package": "typescript",
+        "version": "7.0.2",
+        "tarball": "typescript-7.0.2.tgz",
+        "sha256": "da2513f4b95176d6dde8b51aab7afe8a927656c9d277369793f77f7e59371c08"
+      },
+      {
+        "package": "@typescript/typescript-linux-x64",
+        "version": "7.0.2",
+        "tarball": "typescript-typescript-linux-x64-7.0.2.tgz",
+        "sha256": "7ecad6f67377e831856367ab062ef394f21506a611405bf8ac0ff039348637d3"
+      },
+      {
+        "package": "@proofscript/rust-target-consumer-linux-x64",
+        "version": "0.1.0-psc1.6",
+        "tarball": "proofscript-rust-target-consumer-linux-x64-0.1.0-psc1.6.tgz",
+        "sha256": "0b57758a5bb074593f699f93d2267d8a80d2fcdeba19f4c61222cbb517e04309"
+      }
+    ],
+    "embeddedExecutors": [
+      "js",
+      "ts"
+    ],
+    "optionalExecutors": [
+      "rust",
+      "wasm-core"
+    ],
+    "mandatoryKernel": "@proofscript/pskernel-lean-wasm@4.35.0",
+    "nativeChecking": "optional explicit",
+    "defaultSdkRequirement": false,
+    "targetSdkResources": "complete exact package-receipt.json inventory; no install-time downloads/builds",
+    "typescript": {
+      "version": "7.0.2",
+      "nativePackage": "@typescript/typescript-linux-x64@7.0.2",
+      "directPinnedExecutable": "lib/tsc",
+      "strict": true,
+      "noEmitOnError": true,
+      "skipLibCheck": false
+    },
+    "rust": {
+      "version": "1.90.0",
+      "platform": "linux-x64",
+      "consumerPackage": "@proofscript/rust-target-consumer-linux-x64@0.1.0-psc1.6",
+      "syn": "2.0.106",
+      "lockedDependencies": true,
+      "externalSdkResourceFiles": 61,
+      "externalSdkBytes": 525135078,
+      "largestSdkFileBytes": 186472960,
+      "sourceSuppliedCargoOrBuildScripts": false,
+      "crateType": "rlib"
+    }
+  },
+  "assurance": {
+    "officialLeanVersion": "4.35.0",
+    "officialLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "kernelImplementation": "genuine official C++",
+    "kernelWasmMemory": "linear Emscripten",
+    "compilerWasmMemory": "existing GC",
+    "trustLevel": 0,
+    "strictOriginalAndTransformedIr": true,
+    "ordinaryLogicalBodyPairing": true,
+    "sourceIdentitiesPreserved": true,
+    "semanticFuelAndMemoryStackLifetimePoliciesPreserved": true,
+    "compilerToolG1CorpusSeconds": 240,
+    "independentCheckerSeconds": 120,
+    "g2g3ProfilesUnchanged": true,
+    "original240SecondSelfCompilationPerformance": "unqualified",
+    "formalPreservation": "not-provided"
   },
   "diagnostics": [
     {
       "run": 40236689438,
-      "result": "old installed regressions pass; TS native SDK missing from offline package set"
-    },
-    {
-      "run": 40237315097,
-      "job": 121301530073,
-      "result": "actual SDK launcher diagnoses @typescript/typescript-linux-x64 requirement"
+      "job": 121299673733,
+      "status": "failed",
+      "observation": "all old installed regressions and full compiler kernel checks passed; TS launcher lacked its separate native SDK in the offline install",
+      "focusedDiagnosis": {
+        "run": 40237315097,
+        "job": 121301530073
+      },
+      "resolution": "pin and package typescript-linux-x64 separately; invoke its pinned binary directly"
     },
     {
       "run": 40237646865,
-      "result": "reader helper shadowing, fixed e3266f82"
+      "job": 121302535644,
+      "status": "failed",
+      "observation": "reader helper shadowing after directory durability extension",
+      "resolution": "requireDirectory naming at e3266f820439cf4475d8d331a1f62dd04fd241e6"
     },
     {
       "run": 40237884483,
-      "result": "multiple Rust exports require actual newline delimiter, fixed 1b0e695e"
+      "job": 121303258716,
+      "status": "failed",
+      "observation": "multi-export Rust inspector output split on literal backslash-n instead of newline",
+      "resolution": "actual newline splitting at1b0e695e without weakening exact API equality"
+    },
+    {
+      "run": 40237499042,
+      "job": 121302072701,
+      "status": "passed",
+      "scope": "preceding Nat-only32 target groups/141 refusals and preserved full application/type gates; final broader qualification is separate"
     }
   ],
-  "qualificationBoundary": {
-    "platform": "linux-x64",
-    "otherPlatformCommits": "refused-unqualified",
-    "fullCrossPlatformRelease": false,
-    "formalPreservation": "not-provided",
-    "npmPublication": false
+  "limits": {
+    "qualifiedPublicationPlatforms": [
+      "linux"
+    ],
+    "qualifiedOutputSdkPlatforms": [
+      "linux-x64"
+    ],
+    "wasmStandalonePublicTypes": [
+      "nat",
+      "int",
+      "bool",
+      "string",
+      "unit"
+    ],
+    "wasmCallbackIo": "explicit refusal",
+    "automaticStaleLockRecovery": false,
+    "candidateApiAdmissionAuthority": false,
+    "readerManifestAdmissionAuthority": false,
+    "finalCrossPlatformRelease": false,
+    "npmPublication": false,
+    "merged": false
   },
   "remaining": [
-    "terminal final installed consumer/application/type and ordinary selected source CI",
-    "actual macOS/Windows publication evidence",
-    "additional SDK/Rust platforms",
-    "component/optional-provider checked dispatch",
-    "automatic source-package resolution",
-    "final clean release reproduction and authorization"
+    "actual macOS/Windows transactional commit qualification; current development permits Linux Actions only",
+    "additional Rust execution and TS/Rust SDK platforms",
+    "checked Wasm-component and optional provider dispatch in the slim generated API",
+    "automatic source-package dependency resolution as captured data only",
+    "final clean platform/source/package reproduction and authorized release",
+    "original240-second self-compilation performance target"
   ]
 }

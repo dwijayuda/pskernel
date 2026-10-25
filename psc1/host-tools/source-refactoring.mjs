@@ -192,6 +192,10 @@ export function createLosslessSourceTool({ executable, sha256 }) {
         };
         const result = spawnSync('python3', [supervisor, JSON.stringify(request)], {
           encoding: 'utf8', timeout: limit.supervisorGuardMs, maxBuffer: losslessLimits.responseBytes,
+          // Pinned Lean starts a separate main thread by default. Keep lexical
+          // work on the bounded process stack and avoid machine-sized pools.
+          env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '1',
+            LEAN_STACK_SIZE_KB: '8192' },
         });
         pinnedTool(executable, sha256);
         if (result.error || result.status !== 0) refuse('SUPERVISOR');

@@ -16,14 +16,26 @@ from immutable evidence; dated records remain preserved.
 | Where does installed host authority live? | [Host tools](../host-tools/README.md) |
 | How are exact bytes, tokens and comments retained? | [Lossless capture contract](PSC1_LOSSLESS_SOURCE.md) |
 | How was the malformed-character location defect repaired? | [Correction and scoped proof](PSC1_CHARACTER_DIAGNOSTICS.md) |
+| How are actual declaration/member origins tied to source? | [Read-only ownership](PSC1_SOURCE_OWNERSHIP.md) |
+| How do I convert supported source grammars safely? | [Checked candidate conversion API/CLI](PSC1_CHECKED_SOURCE_CONVERSION.md) |
 | Which refactor operations can be justified? | [Checked source-refactoring design](PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) |
-| How can an engineering session continue? | [AI work state](../AI_WORK_STATE.md), [package continuation](PSC1_SLIM_UNIVERSAL_CONTINUATION.md) |
+| How can an engineering session continue? | [AI work state](../AI_WORK_STATE.md), [current continuation](PSC1_SOURCE_REFACTOR_CONTINUATION.md) |
 
 Acceptance contracts define requirements. Qualification receipts attach actual
 results to exact source/artifact identities. Work state and this index point to
 those authorities; they do not create qualification.
 
 ## Exact existing qualification
+
+- [Checked grammar conversion (R3)](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json):
+  implementation fa265940, source closure 77e2173d; conversion40206625342,
+  genuine WasmG1 40206504499 and readable source artifact40206663537.
+  Ordinary source40206628424 passes37/37, zero blocked. Exact source/publication boundaries and artifacts are in the receipt.
+
+- [Read-only declaration ownership (R2a)](PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json):
+  implementation a77ec1a8, focused 40200895349 (121 modules in both grammars,
+  ten production-path graph comparisons and 42 refusals), ordinary 40200961302
+  (37/37 finite criteria). Reference resolution and rename remain pending.
 
 - [Character diagnostic correction](PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json):
   implementation d70221c9, focused 40195964028 (664 position cases, 359 captures,

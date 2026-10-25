@@ -5,6 +5,24 @@ Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
+## Latest checked conversion
+
+PR #185 implementation fa265940 qualifies finite conversion/API/CLI gates in
+40206625342: eleven focused conversions, fourteen refusals, actual 11-module
+CLI/JSON/file IO and all 121 compiler modules round-tripped with exact admitted
+graph/IR bytes, ownership and raw comments. Source closure
+77e2173db1ffd86e7f7400c25986e9c23ec8975c4ff773e9489d89d5632dcacb
+has 4,677 members. Genuine Wasm G1 40206504499 passes both grammar censuses,
+40 cross-target cases and nine envelope refusals. Source candidate artifact
+40206663537/12604625486 is reviewable PS source only, not promoted compiler/npm
+payloads. [Guide](PSC1_CHECKED_SOURCE_CONVERSION.md),
+[receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json),
+[continuation](PSC1_SOURCE_REFACTOR_CONTINUATION.md).
+Ordinary source run40206628424 passes every selected dependency, full job121212292606
+and gate121218977024: 37/37 qualified, zero blocked, releaseReady=true within the
+finite contract. Frozen package identities remain distinct. The printer fixes preserve source scopes without weakening
+structural recursion or any checker/resource policy.
+
 ## Qualified malformed-character diagnostic correction
 
 PR #183 changes one production lexer expression to advance body then following
@@ -101,7 +119,7 @@ qualification receipts supply exact CI evidence.
 | 0a | Lossless lexical capture (R1) | Qualified in 40191237137 and normal source run 40191245319. Exact bytes/trivia/tokens, snapshot identity, immutable capture, stale-safe candidate edits and malformed-transport refusal. No semantic or publication authority. |
 | 0b | Malformed-character location prerequisite | Qualified in focused 40195964028, new-source Wasm G1 40196021448 and ordinary 40196244138. Scoped correspondence, 664 position cases and preserved older advisory-wire compatibility; frozen package identities unchanged. |
 | 0c | Declaration ownership (R2a) | Qualified: focused 40200895349 (121 modules/both grammars, 10 production-path comparisons, 42 refusals) and ordinary 40200961302 (37/37). [Receipt](PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json). Host/native adapters retain actual elaboration ownership and independently check its logical graph. [API/bounds](PSC1_SOURCE_OWNERSHIP.md). Bind existing actual elaboration batch/member origins to exact module/snapshot identities. Preserve prepared declarations/admission bytes, synthesized ownership and refusals under both grammars. Read-only ownership index; finite criteria in the refactoring architecture. |
-| 0d | Checked grammar conversion (R3) | Implemented; qualification in progress. [API/CLI](PSC1_CHECKED_SOURCE_CONVERSION.md). Exact admitted graph/strict-IR bytes and ownership, retained comments, no project writes. Real converted 11-module CLI/JSON/file IO passes. Whole compiler exposed nested-match printer scope and recursive application-shape bugs; ef7531ed fixes them without policy weakening. Whole-source forward/reverse conversion, new-source Wasm G1 and ordinary source gates remain required. Remove measured redundant provisional capture/checking, then measure actual improvement. |
+| 0d | Checked grammar conversion (R3) | Finite gates passed at fa265940: 40206625342 passes 11 conversions/14 refusals, real CLI JSON/file IO and complete compiler forward/reverse exact bytes/ownership/comments. New-source Wasm G1 40206504499 passes. Redundant provisional checks removed; observed full export 360,068ms/1,197,708KiB host RSS versus earlier 526,720ms/1,620,508KiB (different runs/source; not a controlled benchmark). Ordinary source40206628424 passes all selected dependencies and37/37, zero blocked. [Receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json). |
 | 0e | Binding-aware source editing and equivalence (R2b/R4) | Pending. Record local binder/reference origins at actual resolution points; context-local raw IDs are not global source identities. Then require capture-avoiding rename, affected-closure elaboration, independent admission, public API and explicit equivalence checks before publication. Do not expand the frozen language merely to shorten compiler code. |
 | 1 | Slim real applications and source-package coverage | Pending. Compile/consume CLI, JSON/file and multi-module applications through the slim APIs in both grammars. Source closure resolution must not grant host/FFI authority. Retain the previous native package. |
 | 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |

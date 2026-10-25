@@ -98,8 +98,32 @@ stale/forged handles, malicious-but-well-typed candidates and outside-cwd CLI us
 Full qualification additionally converts a real CLI/JSON/file application and
 the entire compiler closure in both directions.
 
-Qualification is in progress. Passing source/ownership checks do not alone
-qualify runtime application behavior, final distribution or all remaining work.
+At implementation fa265940ebf78797845ddae41ccaa5499577144d, Linux conversion run
+40206625342 passes eleven focused conversions, fourteen refusal cases, actual
+11-module CLI/JSON/file execution, and all 121 compiler modules forward/reverse.
+The compiler has 4,677 actual source Core members; forward/reverse conversion
+takes 110,726ms / 152,009ms in that run. These are complete conversion-call
+measurements, excluding initial source capture and original index construction.
+
+The portable source is 121 modules with closure SHA-256
+77e2173db1ffd86e7f7400c25986e9c23ec8975c4ff773e9489d89d5632dcacb.
+The shared Lean printer now preserves nested-match scopes by explicit grouping
+and indentation state through a decreasing-fuel fold. Tests check actual admitted
+graphs and parse generated nested cases with official Lean. Both whole-source
+grammars pass. Genuine new-source Wasm G1 run 40206504499 passes 40 cross-target
+cases and nine envelope refusals at unchanged limits. It is G1-only.
+
+[Reviewable ProofScript source artifact](https://github.com/dwijayuda/pskernel/actions/runs/40206663537/artifacts/12604625486)
+contains all 121 .ps modules, exact source/tool hashes and declaration origin maps.
+Its manifest explicitly retains candidate-only status. ZIP SHA-256:
+6bffb02c4122ac34f4299509905513569ab9ed2a3cea956296e0f8d0e9d43f73.
+These files are not promoted compiler sources or npm executors. Frozen 120-module
+G2/G3/npm identities remain separate. Ordinary source run40206628424 passes all selected dependencies and37/37 finite
+Practical Core criteria, zero blocked. [Exact receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json)
+records full job121212292606, gate121218977024, tested tree and artifact identities.
+
+Passing this finite conversion relation does not qualify binding-aware rename,
+R4 transformations, complete distribution or all remaining work.
 
 Compiler/helper requests remain 240 seconds, the independent checker 120 seconds,
 with the same fuel and helper memory/stack envelopes. The aggregate test job grows

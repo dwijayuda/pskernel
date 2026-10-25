@@ -1,5 +1,10 @@
 # Continue the slim universal ProofScript milestone
 
+Historical PR #180 checkpoint. For the latest active source/refactoring state,
+use [the current continuation](PSC1_SOURCE_REFACTOR_CONTINUATION.md) and
+[authoritative roadmap](PSC1_DEVELOPMENT_ROADMAP.md). Exact older receipts and
+commands below retain their original scope; do not treat them as latest HEAD.
+
 Continue draft PR #180, branch `feat/psc1-slim-universal-npm-20261025`, from
 PR #179 HEAD ba3bfb045619ceb2948820f874357b2058f79868.
 Fetch live HEAD, work state, roadmap and current CI before writes.

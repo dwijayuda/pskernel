@@ -2,7 +2,7 @@
 
 Status: R1 lexical capture and staged byte edits qualified in Linux runs 40191237137 and 40191245319. No semantics-preserving automatic refactoring qualification is claimed. The original architectural inspection used `da880d864ca5f9e35729255fd7e4f8a17953cd39`; the additive R1 implementation follows PR #181 HEAD `d7e845b35e6c5cc80ffafe2f6f41fc475bf3842c`.
 
-[Lossless capture contract and API](PSC1_LOSSLESS_SOURCE.md). The original lexer and semantic AST remain unchanged. Resolved identities and independent before/after admission remain R2 work.
+[Lossless capture contract and API](PSC1_LOSSLESS_SOURCE.md). R1 reused the original lexer. The subsequent [character-diagnostic correction](PSC1_CHARACTER_DIAGNOSTICS.md) changes one malformed-literal span expression with scoped formal correspondence and its own source qualification. The semantic AST remains unchanged. Resolved identities and independent before/after admission remain R2 work.
 
 ## Current source evidence
 
@@ -14,7 +14,7 @@ Status: R1 lexical capture and staged byte edits qualified in Linux runs 4019123
 
 ## Decision
 
-Retain the existing shared semantic AST and elaborator. Add a separate token/trivia tape and resolved-source side tables only when a first source-editing feature is implemented. Do not add a second elaborator or retrofit executable IR into a lossless syntax tree. Broad refactoring is outside the first JS/Rust self-host critical path.
+Retain the existing shared semantic AST and elaborator and the qualified R1 token/trivia tape. Add resolved-source side tables through the bounded R2 ownership and reference-tracing steps below. Do not add a second elaborator or retrofit executable IR into a lossless syntax tree. Broad refactoring is outside the first JS/Rust self-host critical path.
 
 Record the following at source capture/elaboration boundaries:
 
@@ -42,11 +42,39 @@ Use different acceptance relations for different edits:
 
 Exact raw graph-byte equality is a useful strong gate when expected, but may reject harmless generated-name changes. Do not weaken equality silently; specify and test a canonical identity correspondence. Definitional equality does not establish foreign effect equivalence, and successful reparse does not establish either.
 
+## Next bounded step: R2a declaration ownership
+
+Reuse `psCompilerPreparationStepParsedWithOrigins` and
+`psElabModuleWithOrigins`. They already return `PsElabBatchOrigin` and its
+source index/name/span, actual output members, roles and normalization ownership
+from the same elaboration that produces declarations. Do not re-elaborate a
+parallel interpretation merely to reconstruct provenance.
+
+R2a acceptance is finite:
+
+- Attach logical module, grammar/profile and exact snapshot identity to each
+  actual source batch. Use source-local ordinal and member role/index with exact
+  declaration identity; never treat display spelling as globally unique.
+- Retain every actual batch member and synthesized ownership, including namespace
+  qualification, inductive/structure constructors and recursors, and normalized
+  workers/public wrappers. Refuse ambiguous or stale span-to-snapshot pairing.
+- Compare original prepared declarations/admission bytes with the origin-aware
+  path on successful inputs; preserve actual error attribution on refusal.
+- Exercise both grammars, multiple modules, namespace/root names, generated-name
+  collisions and malformed/stale ownership input. The output is a read-only
+  ownership index, with no rename or publication authority.
+
+A later R2b must record local binder/reference origins at actual elaboration
+resolution points before any rename. `PsLocalContext.nextId` allocates local IDs
+within contexts; a raw local ID is not a globally stable source binder identity.
+Declaration ownership alone does not identify all references or establish
+capture avoidance. R2a/R2b are pending, not implemented by the diagnostic fix.
+
 ## Milestones
 
 R1 (qualified; see the lossless capture receipt): capture source IDs/digests and lossless token/trivia tape. Tests reconstruct exact bytes including nested comments, Unicode, CRLF, escaped literals and EOF trivia; reject stale edits. No semantic graph change.
 
-R2: resolved binder/declaration side tables and one lexical rename. Test shadowing, namespaces, qualified/root names, imported private ownership, multiple modules and capture refusal. Independent admission and public API correspondence mandatory.
+R2: resolved binder/declaration side tables and one binding-aware rename. Test shadowing, namespaces, qualified/root names, imported private ownership, multiple modules and capture refusal. Independent admission and public API correspondence mandatory.
 
 R3: checked cross-grammar conversion command with source-origin map and graph comparison. Reuse shared printers and their fail-closed unsupported-source errors. Include all selected Practical Core forms and ordinary partial helpers; preserve exact checked logical/runtime pairing.
 

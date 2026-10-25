@@ -1,0 +1,427 @@
+{
+  "schema": "psc1-character-diagnostic-qualification/1",
+  "date": "2026-10-25",
+  "milestone": "Correct malformed unescaped-character spans with scoped formal correspondence and new-source qualification",
+  "implementationCommit": "d70221c9b26827fba48ff5e85224f6a170fc0904",
+  "baselineCommit": "4c977654b8ca39b5fb3568ca9ebea03eee9d4339",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/183",
+  "testedMerge": "cffaa232709d3b49061bd04a06eea7761fb364d4",
+  "testedTree": "4362ebb25ae7070e64ef4402cc7be9d0a7234f17",
+  "source": {
+    "modules": 121,
+    "closureSha256": "60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a",
+    "productionChange": "psc1/packages/syntax/src/Ps/Syntax/Lexer.lean",
+    "before": "psLexAdvanceChar position close",
+    "after": "psLexAdvanceTwo position first close",
+    "allOtherUnifiedModuleBytes": "unchanged; reverting only Lexer recovers qualified R1 closure",
+    "baselineClosureSha256": "7a49ccbd8b11d029e54fa0d78da9e8fe66943193cc73d00c29b4ed392126a000"
+  },
+  "formal": {
+    "status": "passed",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "referenceCommit": "4c977654b8ca39b5fb3568ca9ebea03eee9d4339",
+    "referenceLeafSha256": "0dae0f5c3fa5aa4ad4ce9817dcc0d15b23073c331d8471cf78e965afc6a6c5f7",
+    "theorems": [
+      {
+        "name": "characterDiagnostic_preserves_observation",
+        "scope": "all leaf input/cursor/accumulator states; exact accepted results and error constructor/reason after erasing diagnostic spans"
+      },
+      {
+        "name": "characterDiagnostic_uses_actual_prefix",
+        "scope": "malformed unescaped leaf branch reports existing cursor advancement over body then following scalar"
+      }
+    ],
+    "mechanism": "ordinary kernel checked theorem; immutable Git reference byte guard; no proof/checking-budget exemptions",
+    "wholeCompilerFormalPreservation": false,
+    "formalGeneralUtf8Bounds": false
+  },
+  "focused": {
+    "runId": 40195964028,
+    "jobId": 121176735555,
+    "status": "passed",
+    "positionCases": 664,
+    "captures": 359,
+    "negativeCases": 49,
+    "olderAdvisoryWireCompatibility": "passed",
+    "authoredCompilerModules": 121,
+    "lexers": [
+      "lean",
+      "ps"
+    ],
+    "maximumHelperWallMs": 360,
+    "maximumHelperRssKiB": 159684,
+    "artifact": {
+      "id": 12599607744,
+      "zipBytes": 30274,
+      "zipSha256": "c83f7341f45b427146bc67cd07348607be9878187449911ee33d4e53033fe085",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40195964028/artifacts/12599607744"
+    }
+  },
+  "ordinaryDevelopment": {
+    "runId": 40196244138,
+    "status": "passed",
+    "lossless": {
+      "id": 121177746711,
+      "status": "passed",
+      "positionCases": 664,
+      "captures": 359,
+      "negativeCases": 49,
+      "maximumHelperWallMs": 359,
+      "maximumHelperRssKiB": 160036
+    },
+    "selectedJobResults": [
+      {
+        "id": 121177578086,
+        "name": "static",
+        "result": "success"
+      },
+      {
+        "id": 121177746571,
+        "name": "native / native",
+        "result": "success"
+      },
+      {
+        "id": 121177746586,
+        "name": "focused / php-application",
+        "result": "success"
+      },
+      {
+        "id": 121177746620,
+        "name": "focused / focused (core)",
+        "result": "success"
+      },
+      {
+        "id": 121177746704,
+        "name": "focused / focused (applications)",
+        "result": "success"
+      },
+      {
+        "id": 121177746711,
+        "name": "lossless / lossless",
+        "result": "success"
+      },
+      {
+        "id": 121177747821,
+        "name": "benchmark",
+        "result": "skipped"
+      },
+      {
+        "id": 121179239901,
+        "name": "g1 / generated-js",
+        "result": "success"
+      },
+      {
+        "id": 121179239928,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "result": "success"
+      },
+      {
+        "id": 121179239933,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121179239942,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121179239943,
+        "name": "g1 / host-session-boundary",
+        "result": "success"
+      },
+      {
+        "id": 121180082849,
+        "name": "full / linux-scoped",
+        "result": "success"
+      },
+      {
+        "id": 121186807387,
+        "name": "gate",
+        "result": "success"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 12601661019,
+        "name": "psc1-scoped-correctness-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 121303682,
+        "zipSha256": "92d314287c988769f5fcb11a946424ad58524a3e400602bf111466bb5502d808",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12601661019"
+      },
+      {
+        "id": 12600720725,
+        "name": "psc1-lossless-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 29633,
+        "zipSha256": "5379347f49048ac8980b8c5dc7647c0db55bd75261f5dfdfdc35ffb5bf2ab562",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12600720725"
+      },
+      {
+        "id": 12600541551,
+        "name": "psc1-practical-compiler-m-core-cffaa232709d3b49061bd04a06eea7761fb364d4-attempt-1",
+        "zipBytes": 3019682,
+        "zipSha256": "ad00dc8bb97b9ce03927a6d8576c75f7a903cb7742763aad884cc377c4a5a105",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12600541551"
+      },
+      {
+        "id": 12600397166,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 1986931,
+        "zipSha256": "892c7fa95b9c254a4c3c257ac34a828b87484f8e1c4954cdad5fbdfb67d4173b",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12600397166"
+      },
+      {
+        "id": 12600312363,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 2757173,
+        "zipSha256": "3939cd37cd9fad36d2a838bb78d9249bc3ba50d747d354084b698414288af33b",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12600312363"
+      },
+      {
+        "id": 12600307467,
+        "name": "psc1-generated-compiler-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 5589895,
+        "zipSha256": "cfd25b3f632d77669b3d984c8e262e7d8e6fed88b17d1d5e970827ddbe358129",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12600307467"
+      },
+      {
+        "id": 12600247555,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 2472998,
+        "zipSha256": "f4138100f12a34961e6b1025b5229d787793797879bc6b4b55cc0941d8fb8e26",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12600247555"
+      },
+      {
+        "id": 12600127522,
+        "name": "psc1-practical-compiler-m-applications-cffaa232709d3b49061bd04a06eea7761fb364d4-attempt-1",
+        "zipBytes": 1750248,
+        "zipSha256": "cc6f320f5fd53df657b442da50bbad5bde7901f0c0695f6dae987adaa629a18a",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12600127522"
+      },
+      {
+        "id": 12599956832,
+        "name": "psc1-architecture-native-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 319165,
+        "zipSha256": "19fbdb313d381b0cc939dba871f55c360475bca8cbc09bbe098f0e88c28a86b1",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12599956832"
+      },
+      {
+        "id": 12599872123,
+        "name": "psc1-php-applications-cffaa232709d3b49061bd04a06eea7761fb364d4-attempt-1",
+        "zipBytes": 360293,
+        "zipSha256": "4f21d69cb5c4ebc4378fdc4089dfd90fd9e647f1edf2da57c84680aeef8ff96b",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12599872123"
+      },
+      {
+        "id": 12599837724,
+        "name": "psc1-generated-session-boundary-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 237672,
+        "zipSha256": "8e1452de687ebef350b1f9676fc01763a3faebeda6aadd895276ae0335a3d150",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12599837724"
+      },
+      {
+        "id": 12599682292,
+        "name": "psc1-development-cffaa232709d3b49061bd04a06eea7761fb364d4",
+        "zipBytes": 2512,
+        "zipSha256": "a0aa6dafc7c268184ebf6215032648954477e9e578bd06fa4685beb805e18a03",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196244138/artifacts/12599682292"
+      }
+    ],
+    "closures": [
+      {
+        "phase": "semantic-compiler",
+        "modules": 70,
+        "passed": true,
+        "canonicalAdmissionBytesParity": "accepted",
+        "canonicalIrBytesParity": "accepted",
+        "lanes": {
+          "lean": {
+            "coreDeclarations": 2642,
+            "admissionsSha256": "d486ff65e13a0e46087ae8eeded2215ab9709f218ecc6ae11ef2dcd2fa5d9e33",
+            "irSha256": "438284e1dcc828a5a35bd79749059df56bba169470e21ecd24b8722e52718e3a"
+          },
+          "ps": {
+            "coreDeclarations": 2642,
+            "admissionsSha256": "d486ff65e13a0e46087ae8eeded2215ab9709f218ecc6ae11ef2dcd2fa5d9e33",
+            "irSha256": "438284e1dcc828a5a35bd79749059df56bba169470e21ecd24b8722e52718e3a"
+          }
+        }
+      },
+      {
+        "phase": "directjs-compiler",
+        "modules": 87,
+        "passed": true,
+        "canonicalAdmissionBytesParity": "accepted",
+        "canonicalIrBytesParity": "accepted",
+        "lanes": {
+          "lean": {
+            "coreDeclarations": 3583,
+            "admissionsSha256": "e2ca4b496f38c6d1f0dac2d379557bc30a0ed9a38ce502276fcfe8849b78afbe",
+            "irSha256": "acc7113b91251fd7551b3e3c22dab4cb934b2cddbe6f1e48b9849b9c313495da"
+          },
+          "ps": {
+            "coreDeclarations": 3583,
+            "admissionsSha256": "e2ca4b496f38c6d1f0dac2d379557bc30a0ed9a38ce502276fcfe8849b78afbe",
+            "irSha256": "acc7113b91251fd7551b3e3c22dab4cb934b2cddbe6f1e48b9849b9c313495da"
+          }
+        }
+      },
+      {
+        "phase": "rust-compiler",
+        "modules": 89,
+        "passed": true,
+        "canonicalAdmissionBytesParity": "accepted",
+        "canonicalIrBytesParity": "accepted",
+        "lanes": {
+          "lean": {
+            "coreDeclarations": 3360,
+            "admissionsSha256": "8cf5f2d9c61d161fb4685f011092277ec99aff9b17e428a805e0b2564110e6aa",
+            "irSha256": "a2d6ba95d299f012ed0c89430743239c600539a59029064cadc4cf604290fd61"
+          },
+          "ps": {
+            "coreDeclarations": 3360,
+            "admissionsSha256": "8cf5f2d9c61d161fb4685f011092277ec99aff9b17e428a805e0b2564110e6aa",
+            "irSha256": "a2d6ba95d299f012ed0c89430743239c600539a59029064cadc4cf604290fd61"
+          }
+        }
+      }
+    ],
+    "generatedJs": {
+      "status": "passed-diagnostic",
+      "generatedCompilerExecution": "passed-G1-selected-corpus",
+      "selfCompilation": "deferred-manual-qualification",
+      "fixedPoint": "deferred-feature-freeze",
+      "service": {
+        "generation": 1,
+        "sha256": "6c2f1bb9197b154f5aa7fd54d18f5ef9e00462fdc12f15fe8b58945dde3c5243",
+        "export": "psCompilerJsServiceCandidate",
+        "sourceClosureDigest": "110228356a3feaa3142d2e2e35bcdacf46b95d3071acef01d70536c8b0089dcf",
+        "sourceModules": 87,
+        "candidateAdmission": "e2ca4b496f38c6d1f0dac2d379557bc30a0ed9a38ce502276fcfe8849b78afbe",
+        "canonicalOriginalIr": "acc7113b91251fd7551b3e3c22dab4cb934b2cddbe6f1e48b9849b9c313495da",
+        "canonicalSpecializedIr": "60ed9fc82bcd5b2e7db66db33d08acd26782c20b35e6ff00300563bd38f7c613"
+      },
+      "cases": 10,
+      "completedCorpusGenerations": [
+        1
+      ],
+      "scope": "existing 87-module DirectJS service regression, separate from unified 121-module new-source Wasm G1"
+    },
+    "hostSessionBoundary": {
+      "checks": 36,
+      "status": "passed",
+      "actualGeneratedCompilerSemantics": "separate-diagnostic"
+    },
+    "qualified": 37,
+    "blocked": 0,
+    "releaseReady": true,
+    "fullJobId": 121180082849,
+    "gateJobId": 121186807387,
+    "fullEvidence": {
+      "qualified": 37,
+      "blocked": 0,
+      "releaseReady": true,
+      "qualification": "passed-scoped-execution",
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "nativeBackendMappings": 7,
+      "targetExecutionBundles": 14,
+      "scriptingRegressionGroups": 28,
+      "minimumPython": {
+        "targetExecutionBundles": 2,
+        "scriptingRegressionGroups": 14,
+        "artifactBundles": 12,
+        "runtimeEvidence": "runtime-conformance-python314/results.json",
+        "scriptingEvidence": "script-backends-python314/results.json"
+      },
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      },
+      "versions": {
+        "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+        "node": "v22.23.3",
+        "npm": "10.9.9",
+        "typescriptConsumer": "Version 7.0.2",
+        "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+        "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+        "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+        "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+        "python": "Python 3.15.0",
+        "pythonMinimum": "Python 3.14.8",
+        "php": "PHP 8.5.12 (cli) (built: Oct 24 2026 12:34:32) (NTS)"
+      }
+    }
+  },
+  "genuineNewSourceWasmG1": {
+    "runId": 40196021448,
+    "status": "passed",
+    "implementationCommit": "d70221c9b26827fba48ff5e85224f6a170fc0904",
+    "controlCommit": "462fb149b32d5d7c5afa87207da6308445bbda3c",
+    "requestCommit": "029b66ba18badad54172e22825f8e299bcc6b050",
+    "sourceDifferencesFromImplementation": [],
+    "controlDifferences": [
+      ".github/workflows/psc1-unified-selfhost.yml",
+      ".github/qualification-requests/psc1-unified-selfhost.json"
+    ],
+    "mode": "--g1-only",
+    "g1TimeoutMs": 240000,
+    "requestJobId": 121176901083,
+    "jobId": 121177024041,
+    "sourceModules": 121,
+    "sourceClosureSha256": "60dd756e29cf6fbd44386e342318c53b22f41f2f3beb21b05aa39505a366271a",
+    "generations": [
+      1
+    ],
+    "fixedPoint": "not-requested",
+    "performanceQualification": "not-run",
+    "crossTargetCases": 40,
+    "envelopeRefusals": 9,
+    "workloadMaximumWallMs": 468,
+    "workloadMaximumServiceRssKiB": 122768,
+    "workloadMaximumSupervisorRssKiB": 143752,
+    "serviceSha256": "043e72d6fade1b209c6bcc4231a07175bb3ca48ac2eb6c50858f62e5b4b3f16f",
+    "artifact": {
+      "id": 12600127008,
+      "zipBytes": 10983943,
+      "zipSha256": "c41f78c2091f3859d8f8ad0d05fb1d6b95c46e8a966b1d5e037f6bfe71885a75",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40196021448/artifacts/12600127008"
+    }
+  },
+  "preserved": {
+    "frozenFourEngineSource": {
+      "modules": 120,
+      "commit": "daa735017e34ee94da79d747c363237b4adbc4ef",
+      "closureSha256": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "runs": [
+        40141718481,
+        40147825207
+      ],
+      "changed": false
+    },
+    "packagedHostAndPayloads": "unchanged; no new npm artifact or generation promotion",
+    "officialAdmission": "Lean 4.35.0, trust zero, 2000000 heartbeats, recursion 20000, checker 120 seconds",
+    "resourcePolicies": "existing memory/stack/semantic fuel and G1 240-second limits unchanged",
+    "priorR1Receipt": "PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json"
+  },
+  "remaining": [
+    "R2 resolved declaration/binder identities from existing elaboration origins",
+    "capture-avoiding rename with affected-closure elaboration, independent admission and explicit API/identity correspondence",
+    "checked cross-grammar conversion and behavioral obligations",
+    "installed editor/CLI integration and race-safe publication"
+  ],
+  "notClaimed": [
+    "whole-compiler formal preservation",
+    "new G2/G3 or fixed-point qualification",
+    "new frozen compiler or npm promotion",
+    "semantic rename",
+    "cross-platform source-tool qualification",
+    "merge",
+    "npm publication"
+  ]
+}

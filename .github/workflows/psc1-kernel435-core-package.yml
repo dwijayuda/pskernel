@@ -28,6 +28,10 @@ jobs:
           node scripts/kernel435-core-package.mjs
       - name: Real installed native and four generated compiler engines with dual admission
         run: node scripts/kernel435-core-installed.mjs dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz
+      - name: Independently recheck the exact frozen compiler graph with both kernels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/kernel435-frozen-compiler.mjs dist/kernel435-core/work/package
       - uses: actions/upload-artifact@v4
         with:
           name: psc1-kernel435-integrated-toolchain-qualified-${{ github.sha }}

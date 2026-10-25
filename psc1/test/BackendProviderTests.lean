@@ -48,6 +48,18 @@ def main (args : List String) : IO Unit := do
     let (_, validated) ← match psBackendProviderDecode (encode req) target with
       | .ok value => pure value
       | .error reason => throw (IO.userError reason)
+    let portable ← match psIrEncodeModule fixture with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "PSC1_PROVIDER_PORTABLE_ENCODE")
+    let decoded ← match Ps.Host.PortableIr.decode (← match Lean.Json.parse portable with
+        | .ok value => pure value
+        | .error reason => throw (IO.userError reason)) with
+      | .ok value => pure value
+      | .error reason => throw (IO.userError reason)
+    ensure ((Lean.toJson decoded) == Lean.toJson fixture) "PSC1_PROVIDER_PORTABLE_ROUND_TRIP"
+    IO.FS.writeFile (out / (name ++ ".portable.json"))
+      ("[\"psc1-portable-backend-provider/1\",\"" ++ name ++ "\"," ++ portable ++ "," ++
+        (Lean.toJson req.publicNames).compress ++ ",false]")
     let source ← match psIrEncodeModule validated.raw, psIrEncodeModule fixture with
       | .ok actual, .ok expected => pure (actual == expected)
       | _, _ => pure false

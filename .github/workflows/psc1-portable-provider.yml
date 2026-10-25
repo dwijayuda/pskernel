@@ -1,0 +1,59 @@
+name: PSC1 portable provider transport
+on:
+  push:
+    branches: [feat/psc1-checked-component-providers-20261026]
+    paths: ['psc1/host/src/Ps/Host/PortableIr.lean','psc1/host/src/Ps/Host/BackendProvider*.lean','psc1/test/BackendProviderTests.lean','.github/workflows/psc1-portable-provider.yml']
+permissions:
+  contents: read
+concurrency:
+  group: psc1-portable-provider-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  workers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-portable-provider-v1-${{ hashFiles('psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install pinned official Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build emit-only workers and retained comparisons
+        run: lake build psc1_backend_python psc1_backend_php psc1_backend_provider_tests
+      - name: Compare portable transport with retained emitter payloads
+        run: |
+          .lake/build/bin/psc1_backend_provider_tests dist/portable-provider/fixtures
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {createHash} from 'node:crypto';
+          for(const target of ['python','php']){
+            const file='dist/portable-provider/fixtures/'+target+'.portable.json',bytes=fs.readFileSync(file);
+            const digest=createHash('sha256').update(bytes).digest('hex');
+            const r=spawnSync('.lake/build/bin/psc1_backend_'+target,['emit-portable',file],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024,env:{...process.env,PSC1_BACKEND_REQUEST_SHA256:digest}});
+            assert.equal(r.status,0,r.stderr);const result=JSON.parse(r.stdout),expected=JSON.parse(fs.readFileSync('dist/portable-provider/fixtures/'+target+'.expected.json'));
+            expected.requestSha256=digest;assert.deepEqual(result,expected);
+            console.log('PSC1_PORTABLE_PROVIDER_PASS '+target+' '+digest);
+            console.log(spawnSync('ldd',['.lake/build/bin/psc1_backend_'+target],{encoding:'utf8'}).stdout);
+          }
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-portable-providers-${{ github.sha }}
+          path: psc1/dist/portable-provider
+          retention-days: 90

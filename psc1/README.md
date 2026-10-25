@@ -1,99 +1,81 @@
 # PSC1 compiler and ProofScript toolchain
 
-PSC1 compiles the frozen **Practical Core v1** subset from both supported
-`.lean` and `.ps` grammars. One semantic compiler serves seven output targets:
-JavaScript, TypeScript, Rust, core Wasm, component Wasm, Python and PHP.
+PSC1 compiles frozen Practical Core v1 from supported `.lean` and `.ps` grammars.
+One semantic compiler supplies seven native backend mappings. The slim npm flavor
+uses genuine self-hosted JS/TS executors with optional Rust/compiler-Wasm executors
+and the official Lean4.35.0 independent C++ kernel compiled to linear-memory Wasm.
+Compiler execution, output target and checking are separate choices.
 
-The current unpublished slim npm distribution includes qualified self-hosted
-JS/TS compiler executors and the official Lean 4.35.0 C++ kernel compiled by
-Emscripten to **linear-memory Wasm**. Rust and compiler-Wasm executors are
-explicit optional packages. Python/PHP output providers belong to the preserved
-native distribution; the slim generated path does not yet expose every output.
-Compiler execution engine, output target and independent checker are separate choices.
+Start with the [installation guide](docs/PSC1_SLIM_UNIVERSAL_PACKAGE.md),
+[architecture](ARCHITECTURE.md) and [contributor guide](CONTRIBUTING.md).
+The [documentation index](docs/README.md) links current contracts and exact receipts.
+The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work;
+[AI_WORK_STATE.md](AI_WORK_STATE.md) records the engineering checkpoint.
 
-## Start here
-
-| Reader's task | Authoritative entry |
-| --- | --- |
-| Install and use the current slim package | [Slim package guide](docs/PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
-| Understand compilation and authority | [Architecture](ARCHITECTURE.md) |
-| Modify the implementation | [Contributor guide](CONTRIBUTING.md) |
-| Find current documents and evidence | [Documentation index](docs/README.md) |
-| Determine unfinished product work | [Development roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) |
-| Continue an engineering session | [AI work state](AI_WORK_STATE.md) |
-| Verify language acceptance criteria | [Practical Core contract](docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json) |
-| Verify npm acceptance criteria | [Distribution contract](NPM_DISTRIBUTION_CONTRACT.json) |
-
-## A small program
+## Programs and installed use
 
 ```lean
 def invert (flag : Bool) : Bool := if flag then false else true
 ```
 
-The supported ProofScript equivalent is:
+The supported ProofScript spelling is:
 
 ```text
 def invert(flag : Bool) : Bool := if (flag) { false } else { true }
 ```
 
-For a matching qualified unpublished tarball and Node 22.23.3:
+With Node22.23.3 and the qualified local unpublished tarball:
 
 ```sh
-npm install ./proofscript-0.1.0-psc1.4.tgz
-npx psc check Main.lean
-npx psc compile Main.ps --engine ts
-npx psc build Main.ps --out dist/app
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.6.tgz
+npx --no-install psc check Main.lean
+npx --no-install psc compile Main.ps --engine ts
+npx --no-install psc build Main.ps --target wasm-core --publication-protocol portable-file --out dist/app
 ```
 
-These commands use the independently checked generated compiler workflow.
-`compile` returns JSON containing checked JS and its receipt. `build` publishes
-checked JS with the existing Linux transaction guarantees. Missing or corrupt
-optional executors fail explicitly; there is no automatic tool download or fallback.
-Use the install guide for exact optional tarballs and API examples.
+The default root requires no compiler SDK or install-time build. Optional output
+consumers are explicit: TypeScript7.0.2 plus its pinned platform binary for TS;
+the pinned Rust1.90.0 SDK and separate consumer package for Rust. JS/Wasm output
+requires neither. [Checked targets and publication](docs/PSC1_CHECKED_PUBLICATION.md)
+documents immutable artifacts, runtime loaders, source encoding, ABI bounds and
+failure handling. Python/PHP remain optional in the preserved native distribution.
 
-## What is qualified, and what remains open
+## Qualification and evidence boundaries
 
-The frozen 120-module compiler closure
-`07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af`
-has genuine JS/TS/Rust/compiler-Wasm G1/G2/G3 and fixed-point evidence.
-[Four-engine receipt](docs/PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json).
+Current compiler source:122 modules/4742 Core members, closure
+`073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
+All four genuine G1/G2/G3 chains and exact fixed points passed for this source:
+JS/TS/Wasm40223062370; Rust40223086966.
+[Current generated-IO receipt](docs/PSC1_GENERATED_IO_QUALIFICATION_2026-10-26.json)
+retains the source, generation and preceding installed-application evidence.
+Current source CI40238649527 passes all37 finite criteria,zero blocked.
 
-The readability implementation is `446a0f21c6288a7c20b843bbeadcd18ba1460fa2`.
-[Package CI 40184641007](https://github.com/dwijayuda/pskernel/actions/runs/40184641007)
-qualifies the readable host at dfb44062, with the same frozen compiler payloads.
-[Source CI 40184897417](https://github.com/dwijayuda/pskernel/actions/runs/40184897417)
-passes 37/37 Practical Core criteria, both grammars and all seven native target mappings.
-The refactored 121-module unified source separately passes a genuine
-[Wasm G1](https://github.com/dwijayuda/pskernel/actions/runs/40184951724), including
-both grammar censuses and 40 cross-target cases plus nine envelope refusals.
-It has no new G2/G3/fixed-point qualification.
-[Exact readability receipt](docs/PSC1_READABILITY_QUALIFICATION_2026-10-25.json).
+[Checked-publication receipt](docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json)
+owns the new host/package qualification. Older frozen120-module and refactored121-module
+results remain distinct in dated receipts; they are not relabeled current.
 
-These results belong to their exact commits and artifacts. Subsequent source
-changes need their own evidence. The current slim checked-output path supports JS;
-checked generated non-JS publication, complete source-package/application integration,
-portable transactional publication and final clean release qualification remain open.
-Linux-only compiler/package testing does not qualify every release platform.
+The [Practical Core contract](docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json) defines
+37 finite language criteria. The [npm distribution contract](NPM_DISTRIBUTION_CONTRACT.json)
+also requires final platform/package qualification. Linux-only compiler/package
+tests do not qualify a final macOS/Windows release. Those publication commits
+remain disabled until actual platform evidence exists.
 
-Independent Lean admission checks the canonical logical graph. IR validation
-checks executable typing and structure. Runtime regressions and self-host fixed
-points are additional evidence. None alone proves compiler semantic preservation.
-No merge or npm publication is authorized by these documents.
+Independent Lean admission checks the canonical logical graph. Strict IR
+validation checks typing/structure. Runtime tests and self-host fixed points add
+evidence; none alone proves compiler semantic preservation. Official checking,
+resource limits, negative tests and explicit unsupported-ABI refusals are preserved.
+No merge or npm publication is authorized.
 
 ## Source ownership
 
-- `packages/*/src`: authored semantic compiler and backend source.
-- `host/src`, `host-tools`: project capture, independent checker/tool invocation,
-  installed resources and publication authority.
-- `npm-cli`: installed API and CLI entry points.
-- `test`: regressions, reference algorithms and practical applications.
-- `scripts`: CI, qualification, packaging and historical source-shape checks.
-- `docs`: current guides, finite contracts, immutable receipts and dated history.
-- `legacy`, `npm-runtime`, `release-js`: older paths; inspect import/packaging
-  ownership before modifying them. Their presence does not make them current products.
-- `dist` and packed `selfhost` payloads: generated artifacts, never handwritten compiler sources.
+- `packages/*/src`: authored semantic compiler/backend source.
+- `host/src`, `host-tools`: capture, pinned resources, independent tools and publication.
+- `npm-cli`: installed API/CLI.
+- `test`: authored regressions, reference algorithms and applications.
+- `scripts`: CI, bounded consumers, packaging and qualification.
+- `docs`: current guides, contracts, dated receipts and preserved history.
+- `dist` and packed `selfhost`: generated artifacts, never handwritten compilers.
+- `legacy`, `npm-runtime`, `release-js`: older paths; establish import/packaging ownership before changes.
 
-`profile.json` is explicitly marked as a historical native snapshot.
-Current language and npm scope comes from the contracts linked above.
-The [previous README](docs/history/README_BEFORE_READABILITY_2026-10-25.md)
-and Git history preserve earlier instructions and qualifications.
+Historical profile fields and older instructions remain in Git and
+`docs/history/`. They do not replace the current contracts or exact evidence.

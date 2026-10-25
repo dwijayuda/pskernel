@@ -9,6 +9,7 @@ from immutable evidence; dated records remain preserved.
 | Question | Read |
 | --- | --- |
 | How do I install/use the current slim toolchain? | [Slim package guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
+| How do checked targets and transactions work? | [Guide](PSC1_CHECKED_PUBLICATION.md), [receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_PUBLICATION_INSTALL.md) |
 | What remains unfinished? | [One development roadmap](PSC1_DEVELOPMENT_ROADMAP.md) |
 | What must Practical Core v1 support? | [Finite language contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json) |
 | What must npm distribution qualify? | [Finite distribution contract](../NPM_DISTRIBUTION_CONTRACT.json) |
@@ -87,3 +88,11 @@ Read [generated IO applications](PSC1_GENERATED_IO_APPLICATIONS.md) and the exac
 Qualified new-G3 packages: [installation and exact artifact](PSC1_GENERATED_IO_INSTALL.md).
 [Executable continuation](PSC1_SOURCE_REFACTOR_CONTINUATION.md) starts with the next
 release item; the current generated IO/npm milestone is qualified.
+
+## Qualified checked publication
+
+PR #188:Linux transaction and four-target installed qualification40238538092,
+source37/37 and all selected dependencies40238649527. See the current receipt
+and installation guide above. Other-platform publication remains disabled.
+The new BEFORE_CHECKED_PUBLICATION snapshots reproduce563ee855 verbatim;
+resolve their original relative links at that commit and original paths.

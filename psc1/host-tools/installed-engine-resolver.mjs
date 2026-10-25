@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import os from 'node:os';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
@@ -20,7 +21,7 @@ const require = createRequire(path.join(installationRoot, 'package.json'));
 const closedEngines = ['js', 'rust', 'ts', 'wasm-core'];
 // Resolve only a pinned regular file under its declared package root.
 // Walking every path component keeps parent-directory symlinks out of the boundary.
-export function verifyFile(root, record) {
+export function verifyFile(root, record, maxBytes = 128 * 1024 * 1024) {
   if (
     !record ||
     typeof record.path !== 'string' ||
@@ -28,7 +29,7 @@ export function verifyFile(root, record) {
     !/^[0-9a-f]{64}$/.test(record.sha256 || '') ||
     !Number.isSafeInteger(record.bytes) ||
     record.bytes < 1 ||
-    record.bytes > 128 * 1024 * 1024
+    record.bytes > maxBytes
   )
     fail('INVALID_PIN');
   const file = path.resolve(root, record.path),
@@ -101,7 +102,9 @@ export function commonPins(distribution = loadDistribution()) {
 function packagePins(descriptor) {
   if (
     !descriptor ||
-    !/^@proofscript\/[a-z0-9-]+$/.test(descriptor.package || '') ||
+    (descriptor.package !== 'typescript' &&
+      descriptor.package !== '@typescript/typescript-linux-x64' &&
+      !/^@proofscript\/[a-z0-9-]+$/.test(descriptor.package || '')) ||
     !Array.isArray(descriptor.files) ||
     !descriptor.files.length
   )
@@ -177,6 +180,75 @@ export function resolveEngine(engine = 'js', distribution = loadDistribution()) 
     candidate: resolved.entry,
     candidateKind: 'bundle',
     pins: [...common, ...resolved.pins, verifyFile(installationRoot, descriptor.adapter)],
+  };
+}
+export function resolveCheckedTarget(
+  target,
+  distribution = loadDistribution(),
+  { rustToolchainRoot } = {},
+) {
+  if (target === 'rust') {
+    const descriptor = distribution.targetConsumers?.rust;
+    if (
+      process.platform !== 'linux' ||
+      process.arch !== 'x64' ||
+      !descriptor ||
+      descriptor.toolchain?.version !== '1.90.0'
+    )
+      fail('RUST_CONSUMER_PLATFORM');
+    const resolved = packagePins(descriptor),
+      sdk = path.resolve(
+        rustToolchainRoot ||
+          path.join(os.homedir(), '.rustup/toolchains', descriptor.toolchain.directoryName),
+      );
+    if (!fs.lstatSync(sdk).isDirectory() || fs.lstatSync(sdk).isSymbolicLink())
+      fail('RUST_SDK_ROOT');
+    const sdkPins = descriptor.toolchain.files.map((pin) =>
+      verifyFile(sdk, pin, 512 * 1024 * 1024),
+    );
+    const externs = ['num_bigint', 'num_traits'].map((name) => {
+      const rows = descriptor.files.filter(
+        (pin) => pin.path.startsWith('deps/lib' + name + '-') && pin.path.endsWith('.rlib'),
+      );
+      if (rows.length !== 1) fail('RUST_DEPENDENCY');
+      return { name, file: verifyFile(resolved.root, rows[0]).path };
+    });
+    return {
+      rust: {
+        sysroot: sdk,
+        rustc: path.join(sdk, 'bin/rustc'),
+        inspector: path.join(resolved.root, descriptor.inspector),
+        dependencyDirectory: path.join(resolved.root, 'deps'),
+        externs,
+        pins: [...resolved.pins, ...sdkPins],
+      },
+    };
+  }
+  if (target === 'js' || target === 'wasm-core') return {};
+  if (
+    target !== 'ts' ||
+    distribution.targetConsumers?.ts?.package !== 'typescript' ||
+    distribution.targetConsumers.ts.version !== '7.0.2'
+  )
+    fail('CHECKED_TARGET_CONSUMER');
+  const resolved = packagePins(distribution.targetConsumers.ts);
+  if (
+    process.platform !== 'linux' ||
+    process.arch !== 'x64' ||
+    distribution.targetConsumers.ts.platform !== 'linux-x64' ||
+    distribution.targetConsumers.ts.dependencies?.length !== 1 ||
+    distribution.targetConsumers.ts.dependencies[0].package !==
+      '@typescript/typescript-linux-x64' ||
+    distribution.targetConsumers.ts.dependencies[0].version !== '7.0.2'
+  )
+    fail('TYPESCRIPT_CONSUMER_PLATFORM');
+  const native = packagePins(distribution.targetConsumers.ts.dependencies[0]);
+  return {
+    typescript: {
+      entry: resolved.entry.path,
+      executable: native.entry.path,
+      pins: [...resolved.pins, ...native.pins],
+    },
   };
 }
 export function resolveKernel(provider = 'wasm', distribution = loadDistribution()) {
@@ -265,7 +337,8 @@ export function describeInstallation() {
     leanVersion: '4.35.0',
     leanCommit,
     engines,
-    checkedTargets: ['js'],
+    checkedTargets: ['js', 'ts', 'rust', 'wasm-core'],
+    publicationProtocols: ['legacy-symlink', 'portable-file'],
     candidateTargets: ['js', 'ts', 'rust', 'wasm-core'],
     publicationPlatforms: ['linux'],
     finalCrossPlatformRelease: false,

@@ -9,3 +9,4 @@ if(typeof fn!=='function')throw Error('PSC1_CANDIDATE_SERVICE_EXPORT');
 const result=fn(data.toString('utf8'));if(typeof result!=='string'||Buffer.byteLength(result)>128*1024*1024)throw Error('PSC1_CANDIDATE_OUTPUT_LIMIT');
 if(sha(fs.readFileSync(file))!==expected||sha(fs.readFileSync(input))!==sha(data))throw Error('PSC1_CANDIDATE_INPUT_CHANGED');
 fs.writeFileSync(output,result,{flag:'wx'});
+console.log(JSON.stringify({protocol:'psc1-generated-service-run/1',serviceSha256:expected,requestSha256:sha(data),responseSha256:sha(result),responseUtf8Bytes:Buffer.byteLength(result)}));

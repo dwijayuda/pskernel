@@ -1,0 +1,54 @@
+name: PSC1 pinned target consumer and host correspondence
+on:
+  push:
+    branches: [feat/psc1-portable-checked-publication-20261026]
+    paths: [psc1/scripts/prepare-rust-target-consumer.mjs, 'psc1/scripts/rust-api-inspector/**', .github/workflows/psc1-rust-target-consumer.yml]
+permissions:
+  contents: read
+jobs:
+  consumer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - run: rustup toolchain install 1.90.0 --profile minimal
+      - run: node scripts/prepare-rust-target-consumer.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-rust-target-consumer-${{ github.sha }}
+          path: psc1/dist/rust-target-consumer/
+          retention-days: 90
+  format-proposal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Produce pinned formatter proposals with executable AST equality
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
+          const require=createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier'),{parse}=require('@babel/parser');
+          assert.equal(require('prettier/package.json').version,'3.6.2');assert.equal(require('@babel/parser/package.json').version,'7.28.0');
+          const ignored=new Set(['start','end','loc','extra','comments','leadingComments','trailingComments','innerComments']);
+          const ast=s=>JSON.parse(JSON.stringify(parse(s,{sourceType:'module'}),(key,value)=>ignored.has(key)?undefined:value));
+          const proposals={};
+          for(const file of ['host-tools/transactional-publication.mjs','host-tools/checked-targets.mjs','host-tools/generated-compiler-session.mjs','host-tools/installed-engine-resolver.mjs','npm-cli/universal.mjs','npm-cli/universal-cli.mjs']){
+           const source=fs.readFileSync(file,'utf8'),formatted=await prettier.format(source,{parser:'babel',singleQuote:true,printWidth:100});
+           assert.deepEqual(ast(formatted),ast(source));proposals[file]=formatted;
+          }
+          console.log('PSC1_HOST_FORMAT_PROPOSAL='+JSON.stringify(proposals));
+          JS

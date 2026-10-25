@@ -12,14 +12,14 @@ const prettier = require('prettier');
 const {parse} = require('@babel/parser');
 const baseline = '3089cbc369bc8a11f540c13140c7003c9dadf4a8';
 const cleanupCommit = '446a0f21c6288a7c20b843bbeadcd18ba1460fa2';
-// Intentional IO/qualified-source features have separate behavior qualification.
+// Intentional checked-target/publication features have separate behavior qualification.
 // Preserve the original cleanup proof; do not call these features formatting.
 const featureBaselines = {
-  'host-tools/installed-engine-resolver.mjs': '2a6626246a4d2be8953c017f5b5d6d19375aee0b',
-  'npm-cli/universal.mjs': '4174fefe50fccc0bd68e3882c069c784bc5f3a7e',
-  'npm-cli/universal-cli.mjs': '4174fefe50fccc0bd68e3882c069c784bc5f3a7e',
+  'host-tools/installed-engine-resolver.mjs': '9c9e8ef4c337d51caa4d7075829f56ebfd75e153',
+  'npm-cli/universal.mjs': '0c2c70b910f864cd87a19185843bb38e3d2ca653',
+  'npm-cli/universal-cli.mjs': '0c2c70b910f864cd87a19185843bb38e3d2ca653',
 };
-const featureQualification = 'docs/PSC1_GENERATED_IO_QUALIFICATION_2026-10-26.json';
+const featureQualification = 'docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json';
 const files = [
   'host-tools/installed-engine-resolver.mjs',
   'npm-cli/universal.mjs',

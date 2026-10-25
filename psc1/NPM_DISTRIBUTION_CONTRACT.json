@@ -117,7 +117,7 @@
     {
       "id": "engine-output-separation",
       "required": "Removing optional Rust/Wasm execution bundles does not remove core JS/TS/Rust/Wasm emission capabilities.",
-      "status": "pending-final-root-split-and-generated-output-publication"
+      "status": "implemented-current-slim-root; exact installed qualification in current receipt"
     },
     {
       "id": "real-runtime-exports",
@@ -131,8 +131,8 @@
     },
     {
       "id": "portable-publication",
-      "required": "Platform publication preserves complete immutable generations, integrity and prior outputs on every failure; existing Linux guarantees retained.",
-      "status": "pending"
+      "required": "Platform publication preserves complete immutable generations and integrity. Pre-commit failures preserve the prior pointer; after a commit, durability/cleanup uncertainty must be explicitly distinguished from rollback. Actual platform release evidence is mandatory and existing Linux flush/atomicity guarantees remain required.",
+      "status": "implementation-Linux-file-format; exact platform qualification in current receipt"
     },
     {
       "id": "reproducible-artifacts",
@@ -142,7 +142,7 @@
     {
       "id": "seven-backends-both-grammars",
       "required": "Frozen Practical Core v1 and seven-backend regression/final release qualification remain passing.",
-      "status": "qualified-parent55; latest-source-regression-CI-must-be-recorded"
+      "status": "prior-current-source-40230721977-qualified; latest HEAD must have its own successful selected gate"
     }
   ],
   "referenceArchive": {
@@ -210,6 +210,102 @@
     "fullCrossPlatformRelease": false
   },
   "activeMilestone": {
+    "name": "checked-targets-and-transactional-file-publication",
+    "status": "implementation; exact qualification states and results are maintained in the linked receipt",
+    "version": "0.1.0-psc1.6",
+    "base": "563ee855407581d0d34adcbc450ad77863f39f94",
+    "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "embeddedEngines": [
+      "js",
+      "ts"
+    ],
+    "mandatoryKernel": "@proofscript/pskernel-lean-wasm@4.35.0",
+    "optionalExecutionPackages": [
+      "@proofscript/compiler-rust-linux-x64@0.1.0-psc1.6",
+      "@proofscript/compiler-wasm@0.1.0-psc1.6"
+    ],
+    "checkedTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "candidateTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "candidateApiAuthority": false,
+    "publicationProtocols": [
+      "legacy-symlink",
+      "portable-file"
+    ],
+    "publicationPlatforms": [
+      "linux"
+    ],
+    "otherPlatformPublication": "explicitly refused; actual platform durability qualification remains required",
+    "defaultCompilerSdkRequired": false,
+    "outputConsumers": {
+      "ts": {
+        "optional": true,
+        "typescript": "7.0.2",
+        "platformDependency": "@typescript/typescript-linux-x64@7.0.2",
+        "qualifiedPlatformBoundary": "Linux x64 only; consult receipt"
+      },
+      "rust": {
+        "optional": true,
+        "package": "@proofscript/rust-target-consumer-linux-x64@0.1.0-psc1.6",
+        "externalToolchain": "official Rust1.90.0 Linux x64, exact full selected resource inventory",
+        "noSourceSuppliedCargo": true
+      },
+      "wasm-core": {
+        "additionalSdk": false,
+        "memoryArchitecture": "existing PSC1 Wasm GC",
+        "standaloneAbi": [
+          "nat",
+          "int",
+          "bool",
+          "string",
+          "unit"
+        ],
+        "unsupportedAbi": "explicit refusal"
+      }
+    },
+    "priorNativeDistributionPreserved": true,
+    "compilerSourceUnchanged": true,
+    "fullCrossPlatformRelease": false,
+    "qualificationReceipt": "docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json",
+    "projectAuthority": "Project JSON remains entryModule/sources/assurance only; target/protocol/toolchain/output/checker selections are explicit host capabilities.",
+    "acceptance": [
+      "root-less-than-half-previous-size",
+      "no-platform-native-default-payload",
+      "offline-local-and-global-install",
+      "default-js-ts-without-sdk-or-optional-payloads",
+      "explicit-hash-pinned-rust-wasm-discovery",
+      "same-frozen-compiler-source-and-IR-admission-boundary",
+      "both-grammars-and-all-four-installed-engines",
+      "negative-policy-tamper-version-and-publication-fault-preservation",
+      "genuine-optional-native-wasm-cross-checks",
+      "actual-packed-public-types",
+      "normal-dependency-selected-source-gate",
+      "project-data-cannot-select-host-tools-or-output-paths",
+      "root-only-js-ts-can-emit-all-four-candidate-targets-without-optional-executors",
+      "both-pointer-layout-real-filesystem-fault-and-SIGKILL-tests",
+      "immutable-returned-reader-paths",
+      "stale-writer-and-sealed-tamper-refusal",
+      "precommit-prior-output-preservation",
+      "explicit-postcommit-durability-and-cleanup-uncertainty",
+      "all-four-executors-both-grammars-four-checked-targets",
+      "actual-scalar-unicode-and-callback-IO-consumers",
+      "Rust-rlib-actual-link-and-execution",
+      "SDK-absence-and-corruption-fail-closed",
+      "actual-native-and-linear-Wasm-kernel-acceptance-and-rejection",
+      "preserved-264-installed-application-cases-and-target-regressions",
+      "packed-public-types-and-exact-source-qualification"
+    ]
+  },
+  "previousActiveMilestone": {
     "name": "slim-universal-root-and-optional-execution-integration",
     "status": "implementation; qualification evidence is maintained separately",
     "version": "0.1.0-psc1.4",

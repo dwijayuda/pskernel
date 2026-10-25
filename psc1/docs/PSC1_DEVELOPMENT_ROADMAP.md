@@ -1,11 +1,34 @@
 # PSC1 development roadmap
 
-Updated 2026-10-26 Asia/Jakarta. Practical generated-IO development follows qualified PR #186.
+Updated 2026-10-26 Asia/Jakarta. Checked-target publication follows qualified PR #187.
 Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
-## Current generated IO qualification
+## Current checked-publication milestone
+
+PR #188 implementation1b0e695e and package run**40238538092 /121305298430** pass:
+four G3 executors/both grammars/four checked targets;32 scalar groups,24 callback
+IO groups,143 refusals and16 actual Rust rlib consumers. All existing264
+application cases, local/global/kernel/mapping/type regressions remain passing.
+Both official kernels accept the complete compiler graph and reject an invalid
+variant. Root proofscript0.1.0-psc1.6 is3,761,565 bytes; artifact12616533098.
+Transaction job121305173680 passes both layouts, real faults/SIGKILL, stale
+writers, tamper, immutable paths and explicit committed uncertainty.
+
+Source head52d693e0 /tested mergeb3376bd5 passes**40238649527**:
+full121308481950 and gate121315141117,all37 finite criteria,zero blocked.
+The benchmark is skipped,not qualified. Compiler closure073e5156 and all four
+existing G3 fixed points remain unchanged. No compiler source was altered.
+
+[Checked-output guide](PSC1_CHECKED_PUBLICATION.md),
+[exact receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json),
+[install exact artifacts](PSC1_CHECKED_PUBLICATION_INSTALL.md).
+This qualifies Linux transactions and the stated target/ABI scope. Actual
+macOS/Windows publication remains a release blocker and disabled under the
+current Linux-only development constraint. Final universal release is not claimed.
+
+## Preserved PR #187 generated IO qualification
 
 The 122-module / 4,742-member compiler source closure is
 `073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
@@ -15,7 +38,7 @@ across four engines/both grammars; mapping run 40225024349 executes 24 JS/TS/Rus
 candidates and eight Wasm callback refusals. Both genuine official kernel packages
 accept the complete compiler graph and reject an invalid-type variant in
 40227942797. JS/TS/Wasm G1/G2/G3 and exact fixed points pass 40223062370;
-Rust also passes 40223086966. New-source npm qualification passes 40230101814: offline local/global, 264 actual application cases, 24 target consumers/eight ABI refusals and packed types. Latest source replay 40230721977 also passes. This completes the current Linux generated-IO/npm milestone; the next release item is portable transactional publication.
+Rust also passes 40223086966. New-source npm qualification passes 40230101814: offline local/global, 264 actual application cases, 24 target consumers/eight ABI refusals and packed types. Latest source replay 40230721977 also passes. This completes the current Linux generated-IO/npm milestone; the next host implementation is qualified separately above.
 
 The new ABI is an explicit host-selected request through existing compiler
 semantics. Scalar protocol/defaults, source/project authority limits, independent
@@ -43,10 +66,8 @@ not final universal-platform publication or new G2/G3 generations.
 [API](PSC1_SOURCE_BINDINGS.md),
 [receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json).
 
-Item1 now has a native-reference IO request probe at 6e27116a/source 073e5156:
-40221444236 passes 4 grammar/assurance cases and 30 negatives. All four generated G1 IO engines pass 40222325020; native real-application run
-40222933046 passes 66 cases. New host-session integration and genuine fixed-point
-runs 40223062370/40223086966 are active; npm promotion remains unqualified. Preserve frozen distributions until new generations pass.
+The earlier Item1 diagnostic at 6e27116a is superseded by the current-source
+G3 and installed IO qualifications above; its failures and exact source remain in history.
 
 ## Preserved checked conversion
 
@@ -116,7 +137,7 @@ It has actual Wasm G1 evidence in run 40184951724: both grammar censuses, 40
 cross-target cases and nine envelope refusals. This is not new G2/G3 or fixed-point
 qualification. Packaged G3 executors retain the separately qualified frozen source.
 
-## Current package and source result
+## Historical PR #181 package and source result
 
 The handwritten host at `dfb44062bbc1fb490fa5696483938f07e0f63e0c` passes
 [package run 40184641007](https://github.com/dwijayuda/pskernel/actions/runs/40184641007).
@@ -166,9 +187,9 @@ qualification receipts supply exact CI evidence.
 | 0e | Bounded binding-aware rename (R2b) | Qualified finite relation in 40219590598:23/62 focused;28 seven-target artifacts;full122-module compiler indexed/renamed under both grammars;new-source WasmG1 passes 40218467242. [Receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json). Complete tracing and broader edits remain outside this boundary. |
 | 0f | R4 behavioral/definitional obligations | Deferred. Require explicit effect/evaluation/divergence/foreign obligations before broader simplification; never infer equivalence from parsing or runtime tests alone. |
 | 1 | Slim real applications and source-package coverage | G1 checked host sessions qualified: 264 cases through four engines/both grammars; native reference 66 and target mappings 24/8 pass. Public IO adapter/types and dynamic source pins pass offline frozen-G3 preflight. All four new fixed points and new-source installed package/application/consumer qualification pass 40230101814. Root proofscript 0.1.0-psc1.5 is 3,723,061 bytes. Source-only package data is captured explicitly; automatic npm source resolution remains unimplemented. Source-only package JS must never execute or grant authority. |
-| 2 | Portable transactional publication | Pending. Implement equivalent macOS/Windows publication semantics and actual permitted platform release tests. Preserve Linux durability, rollback and previous outputs. Universal npm metadata alone does not qualify publication. |
-| 3 | Checked generated TS publication | Pending. Reuse existing emitter, IR/admission/runtime and publication machinery; require independent pinned TS consumers, four executors, both grammars and negative/ABI/tamper/prior-output checks. |
-| 4 | Checked Rust/Wasm/component/provider dispatch | Pending. Reuse existing emitters/adapters, complete relevant target/consumer gates and keep Python/PHP optional. Additional Rust execution platforms need genuine binaries and bounded supervisors. |
+| 2 | Portable transactional publication | File-pointer and legacy layouts qualified in40238538092,including actual fault/SIGKILL/readback tests. Immutable returned paths, sealed inventory, stale-writer refusal and explicit committed-but-durability-uncertain outcomes are required. Actual macOS/Windows publication remains blocked on platform release evidence; Linux-only tests cannot qualify it. |
+| 3 | Checked generated TS publication | Qualified for Linux x64 in40238538092,including four executors/both grammars and actual strict consumers. Optional TypeScript 7.0.2 requires its separately pinned Linux x64 native dependency for offline execution. Same private admission and strict IR boundary; no SDK in default root. |
+| 4 | Checked Rust/Wasm/component/provider dispatch | Rust and Wasm-core qualified in40238538092 within the stated ABI/platform boundaries. Optional Rust 1.90.0 consumer uses locked BigInt dependencies and a pinned syntax/API inspector; actual rlib linking/execution is required. Wasm uses existing import-free GC transport and closed primitive ABI. Component/provider dispatch remains pending; Python/PHP stay optional. Additional Rust/SDK platforms require actual evidence. |
 | 5 | Clean reproduction and final universal release | Pending. Qualify final source/package/platform identities and required compiler generations. Preserve frozen qualifications; promote changed compiler source only with its own evidence. User authorization remains required before merge/publication. |
 | 6 | Original 240-second self-compilation performance target | Unqualified. Optimize measured real compiler workloads without changing fuel, G1/checker or memory/stack policies. Isolated proved lexer experiment 31e10263 remains unpromoted. |
 | 7 | Broader language features and generalized extensions | Deferred beyond frozen v1. Preserve working features. Optional packages cannot acquire kernel, host, FFI or runtime authority through metadata. |

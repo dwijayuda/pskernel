@@ -477,20 +477,26 @@ export function createSourceOwnershipTool({
               peakTreeRssKiB: metrics.peakTreeRssKiB, timeoutMs: metrics.timeoutMs },
             authority: { readOnlyOwnership: true, referenceResolution: false,
               semanticEquivalence: 'not-claimed', publication: false } });
-          indexes.set(index, rows.map(r => r.snapshot.sourceId));
+          indexes.set(index, { sourceIds: rows.map(r => r.snapshot.sourceId), admissions, ir });
           return index;
 
       });
     },
     assertCurrent(index, snapshots) {
-      const identities = indexes.get(index);
-      if (!identities) refuse('OWNERSHIP_INDEX');
+      const record = indexes.get(index);
+      if (!record) refuse('OWNERSHIP_INDEX');
       const current = select(snapshots).map(r => r.snapshot.sourceId);
-      if (JSON.stringify(current) !== JSON.stringify(identities)) refuse('OWNERSHIP_STALE');
+      if (JSON.stringify(current) !== JSON.stringify(record.sourceIds)) refuse('OWNERSHIP_STALE');
       return true;
     },
   });
-  ownershipTools.set(tool, { lexicalTool, executable, sha256 });
+  ownershipTools.set(tool, {
+    lexicalTool, executable, sha256,
+    sameGraphs(left, right) {
+      const before = indexes.get(left), after = indexes.get(right);
+      return !!before && !!after && before.admissions === after.admissions && before.ir.equals(after.ir);
+    },
+  });
   return tool;
 }
 
@@ -518,7 +524,8 @@ export function createCheckedSourceConverter({ ownershipTool }) {
   }));
 
   function requireCorrespondence(before, after) {
-    if (after.admissionsSha256 !== before.admissionsSha256 ||
+    if (!configuration.sameGraphs(before, after) ||
+        after.admissionsSha256 !== before.admissionsSha256 ||
         after.originalIrSha256 !== before.originalIrSha256 ||
         JSON.stringify(after.partialNames) !== JSON.stringify(before.partialNames) ||
         JSON.stringify(semanticOwners(after)) !== JSON.stringify(semanticOwners(before)))
@@ -637,7 +644,7 @@ export function createCheckedSourceConverter({ ownershipTool }) {
           })),
         })),
         authority: { candidateOnly: true, sourceFilesWritten: false, publication: false,
-          relation: 'equal canonical admission and original strict IR; identical member ownership',
+          relation: 'byte-equal canonical admission and original strict IR; identical member ownership',
           formalSourcePreservation: false, rename: false },
       });
       conversions.set(report, { original: index, snapshots: retained, checked });

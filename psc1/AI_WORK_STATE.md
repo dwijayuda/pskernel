@@ -9,10 +9,10 @@ single-parent expected-HEAD non-force updates. No merge or npm publication.
 ## Checked conversion (R3; implemented, qualification in progress)
 
 The host reuses the existing grammar printers and R2a ownership pipeline. It
-independently admits the complete before/after closures and requires equal
-canonical admission, original strict IR, partial names and exact source/member
+independently admits the complete before/after closures and requires literal equality of privately retained
+canonical admission strings and original strict-IR bytes, partial names and exact source/member
 ownership. The ordinary logical/body pairing remains included in the comparison.
-Candidate source bytes and declaration origin maps are returned for review;
+[Conversion guide](docs/PSC1_CHECKED_SOURCE_CONVERSION.md). Candidate source bytes and declaration origin maps are returned for review;
 project files are never edited. This does not implement binding-aware rename.
 
 Raw comments retain their order and bytes. The default refuses comments inside

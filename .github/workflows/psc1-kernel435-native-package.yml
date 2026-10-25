@@ -1,0 +1,71 @@
+name: PSC1 Lean435 packed native kernel platform gates
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [.github/workflows/psc1-kernel435-native-package.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  assemble:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Pin audit snapshot to official unmodified Lean source
+        run: |
+          git clone --depth 1 --branch v4.35.0 --filter=blob:none https://github.com/leanprover/lean4.git "$RUNNER_TEMP/lean435-audit"
+          test "$(git -C "$RUNNER_TEMP/lean435-audit" rev-parse HEAD)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+      - name: Assemble only exact successful kernel artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PSC1_OFFICIAL_LEAN_SOURCE: ${{ runner.temp }}/lean435-audit
+        run: |
+          node --check scripts/kernel435-native-package.mjs
+          node --check scripts/kernel435-fixtures.mjs
+          node --check scripts/kernel435-native-installed.mjs
+          node scripts/kernel435-native-package.mjs
+          mkdir -p dist/kernel435-packed
+          cp dist/kernel435-native-package/*.tgz dist/kernel435-native-package/package-receipt.json dist/kernel435-packed/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-lean435-native-packed-${{ github.sha }}
+          path: psc1/dist/kernel435-packed/
+          if-no-files-found: error
+          retention-days: 90
+  installed:
+    needs: assemble
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-lean435-native-packed-${{ github.sha }}
+          path: ${{ runner.temp }}/kernel435-package
+      - name: Offline local global installed API and corruption refusal
+        run: node scripts/kernel435-native-installed.mjs "$RUNNER_TEMP/kernel435-package/proofscript-pskernel-lean-4.35.0.tgz"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-lean435-native-installed-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+          path: psc1/dist/kernel435-installed/
+          retention-days: 90

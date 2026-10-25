@@ -32,6 +32,14 @@
       "artifact": 12584237016,
       "zipSha256": "50d1a9105c7c1e04f62ca9851a4bdbdd2415c5e7c88eb7011c1384e01a1111a7",
       "commit": "fdee7795c0736cf0acca9dddca4ebbc1c86bd0d4"
+    },
+    {
+      "target": "win32-x64",
+      "run": 40155170697,
+      "job": 121054915634,
+      "artifact": 12583923425,
+      "zipSha256": "fd08b0114b4bd5f4f2d1344e2d9178b6eb81896cb1462c9e0c9fa91878996d19",
+      "commit": "546bb0f84e86e4d09876f24b036711368fe01635"
     }
   ]
 }

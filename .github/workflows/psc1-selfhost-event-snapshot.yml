@@ -19,9 +19,11 @@ jobs:
         working-directory: psc1
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/collect-selfhost-events.mjs
+        run: node scripts/collect-generation-qualification.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: psc1-selfhost-event-snapshot-${{ github.sha }}
-          path: psc1/dist/selfhost-events/
+          path: |
+            psc1/dist/selfhost-events/qualified-inputs.json
+            psc1/dist/selfhost-events/qualification.json
           retention-days: 90

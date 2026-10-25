@@ -1,3 +1,15 @@
+## 2026-10-25 — T05 native and generated route passed; canonical/archive pending
+
+The production candidate is **10144e2f9e8d223b5dcde275bd1f48d25df113b3**. Full cohort [40144186958](https://github.com/dwijayuda/pskernel/actions/runs/40144186958), attempt 1, has passed native job `121021932365` and generated job `121022487261`. Canonical job `121022487308` is still checking/compiling its complete route. Do not launch duplicate runs or qualify/integrate this candidate until canonical and the archive audit pass.
+
+The actual native log contains all **371** ordered reports across **18** modules, with standard allowed axioms only and **77** exact source inputs. Retained DAG/prefix controls and new elimination116, private143, official18, and public12 controls passed. The generated route checked **157** modules and **1,901** declarations, passed every retained suite and all new116/143/12 assertions, and bound its detached kernel (10,297,874 bytes, SHA256 `51e0b4397a105a6198f6f5554b416e98d34d71230ed50630626f106fdc5f1375`) to the exact source/run/attempt.
+
+Artifact-only audit [40144403625](https://github.com/dwijayuda/pskernel/actions/runs/40144403625), auditor `9e56533b719c849f8bdc728979ba3ba4ba75a3b9`, targets exactly that cohort and is waiting for canonical. It must verify actual ZIPs and complete receipt chains. Integration remains **a49d64ae494d51fdc80b688dab0922dd96403e5e**.
+
+Separately, `work/psc1-pskernel-t08-deferred-transform-20261025` contains three binding-only allocation changes. Source `d7d7b8905d6f7bb6e0044a2fcae4a33fe1424ed5` passed three universal frozen-worker equations in run40145171697. Experimental source `c5f0050747a2c34cabbc711305bc975c77fc6d2d` is running bounded A/B workflow [40146310517](https://github.com/dwijayuda/pskernel/actions/runs/40146310517). Its fresh native proof gate and shared compiler build passed; producer leaf steps report success, with actual complete producer logs still pending. The experiment's stock bootstrap helper separately invokes Lake's translator; this extra invocation requires an explicit provenance limitation or focused adapter repair before claiming every translation used the shared binary. No deferred change is integrated or fully qualified.
+
+A remains scoped-qualified. B remains OPEN; C remains FAIL (historical173/193 strict,17timeouts,1budget exhaustion,2separateunsafe/partialcontracts); D remains OPEN. Replay/ArenaModel and external decoder/layout proof bridges remain open. Resume by inspecting these exact live runs, then record and integrate only a completely qualified source.
+
 ## 2026-10-25 — preserve the internal owner-mismatch diagnostic
 
 Run [40143863644](https://github.com/dwijayuda/pskernel/actions/runs/40143863644), attempt 1, at `6531c344f1c3f0a0e400528616ba6de4f837fcc0` passed the repaired session equation and retained 310-report receipt, but failed the retained prefix negative `internal-import-error-does-not-publish-batch`. The new ordinary worker correctly rejected the forged arena/decoded-size mismatch earlier; its newly named internal diagnostic differed from the established `PSKERNEL_V2_GENERATED_OWNER_MISMATCH` contract.

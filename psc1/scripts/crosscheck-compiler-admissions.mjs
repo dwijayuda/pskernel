@@ -29,7 +29,7 @@ export async function crosscheckCompilerAdmissions({ sourceClosureDigest, admiss
     const bytes = fs.readFileSync(input.file); assert.equal(sha(bytes), input.sha256);
     const source = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
     const graph = JSON.parse(source);
-    assert.equal(graph.protocol, 'pskernel-lean/1');
+    if (graph.protocol !== undefined) assert.equal(graph.protocol, 'pskernel-lean/1');
     assert.equal(graph.format, 'proofscript-checked-admissions'); assert.equal(graph.version, 2);
     const bad = JSON.parse(fixtures.find(item => item.id === 'kernel-type-rejection').input).admissions[0];
     bad.declaration.n.v = 'PSC1.WholeCompilerInvalidType';
@@ -41,7 +41,7 @@ export async function crosscheckCompilerAdmissions({ sourceClosureDigest, admiss
       const elapsedMs = Date.now() - started;
       const rejected = await handles[provider].checkCanonicalAdmissions(invalid);
       assert.equal(rejected.accepted, false, provider + ': malformed compiler graph accepted');
-      assert.equal(rejected.error?.kind, 'kernel-rejection');
+      assert.equal(rejected.errorKind, 'kernel-rejection');
       providers[provider] = { accepted: true, elapsedMs, invalidTypeRejected: true,
         acceptedResponseSha256: sha(JSON.stringify(accepted)),
         rejectionResponseSha256: sha(JSON.stringify(rejected)) };

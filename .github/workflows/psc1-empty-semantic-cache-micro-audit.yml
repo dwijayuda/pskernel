@@ -1,0 +1,83 @@
+name: PSC1 empty semantic cache partial microbenchmark artifact audit
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-empty-semantic-cache-micro-audit-20261025
+    paths:
+    - .github/workflows/psc1-empty-semantic-cache-micro-audit.yml
+    - .github/psc1-empty-semantic-cache/micro-audit.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - name: Check out exact independent audit implementation
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: audit-source
+        persist-credentials: false
+    - name: Check out exact measured implementation
+      uses: actions/checkout@v4
+      with:
+        ref: d3c50dcb182960d8a78b3da53a7d04fde0ec809d
+        path: measured-source
+        persist-credentials: false
+    - name: Check out exact paired producer implementation
+      uses: actions/checkout@v4
+      with:
+        ref: 80182d1b95894fc3daa5c7fbcfe8b1a7adb687d9
+        path: producer-source
+        persist-credentials: false
+    - name: Check out fixed baseline kernel source
+      uses: actions/checkout@v4
+      with:
+        ref: 20224a295359abb201f56c72395690bf0bfac9fa
+        path: baseline-source
+        persist-credentials: false
+    - name: Check out fixed candidate kernel source
+      uses: actions/checkout@v4
+      with:
+        ref: e503972553ae2d41d5ba7a26d7739fb32ee86b96
+        path: candidate-source
+        persist-credentials: false
+    - name: Authenticate failed run and exact333-member raw ZIP
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        python3 audit-source/.github/psc1-empty-semantic-cache/micro-audit.py prepare \
+          audit-source measured-source producer-source baseline-source candidate-source \
+          "$RUNNER_TEMP/empty-semantic-cache-micro-audit"
+    - name: Official extraction of the fixed partial artifact
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        artifact-ids: '12585854601'
+        run-id: '40161243172'
+        repository: dwijayuda/pskernel
+        github-token: ${{ github.token }}
+        merge-multiple: true
+        path: ${{ runner.temp }}/empty-semantic-cache-micro-audit/input
+    - name: Verify all333 members,32 completed observations and failed ordinal32
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 audit-source/.github/psc1-empty-semantic-cache/micro-audit.py audit \
+          audit-source measured-source producer-source baseline-source candidate-source \
+          "$RUNNER_TEMP/empty-semantic-cache-micro-audit"
+    - name: Retain original partial evidence and independent audit report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: psc1-empty-semantic-cache-micro-partial-audit-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/empty-semantic-cache-micro-audit/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

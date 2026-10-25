@@ -1,0 +1,383 @@
+{
+  "schema": "psc1-church-stage-and-unary-native-handoff-v1",
+  "date": "2026-10-25",
+  "integrationSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+  "unchangedDiagnosis": {
+    "sourceSha": "6553607f02a9dd1768cfc5c86922c75975d87af9",
+    "runId": 40197021041,
+    "artifactId": 12600726837,
+    "zipBytes": 3138376,
+    "zipSha256": "559693ab32bf9d4fb8b46ba14e33b0fbe403d9f7b0e338d8ab8a5093bd56ada1",
+    "members": 41,
+    "sourceSnapshotsVerified": 10,
+    "actualZipRead": true,
+    "firstFailingStage": "final-defeq",
+    "allFourOutcomes": "resource_exhausted: kernel reduction budget exhausted"
+  },
+  "nativeTrace": {
+    "sourceSha": "2a0f0f553d4fc92d43254abb32eeb3ba4364b2da",
+    "runId": 40197721809,
+    "artifactId": 12600008561,
+    "zipBytes": 3157646,
+    "zipSha256": "9da14cdfe7b0236ccb532d43693a8ba1d1700cc261afa7820b9b3f020f3e3eda",
+    "members": 53,
+    "actualZipRead": true,
+    "productionFilesChanged": 0,
+    "trace": "Repeated same-fvar-headed unary application comparison decreases DefEq fuel; core WHNF ultimately exhausts at the fvar head."
+  },
+  "localPrototype": {
+    "sourceSha": "5f162a0302ff2ce16bfb3c197e3044b8acb97e59",
+    "runId": 40199575400,
+    "artifactId": 12601946365,
+    "zipBytes": 3176745,
+    "zipSha256": "857106b3dd85723348ab2ddea76badd04fd5d55d1b97ba696a0412180bef7ffe",
+    "members": 70,
+    "actualZipRead": true,
+    "axiomReports": 9,
+    "unfinishedOrTrustedComputationDependencies": false,
+    "churchOriginalAndStaged": "accepted at4096",
+    "productionAdopted": false
+  },
+  "productionCandidate": {
+    "branch": "work/psc1-pskernel-unary-spines-20261025",
+    "sourceSha": "9de6a17cba7224a3a98ae7dbc00e147246acef9f",
+    "productionTree": "7e92ffc478e060d282844c00f4d91e767a9894ef",
+    "changedProductionPaths": [
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean"
+    ],
+    "nativeReceipt": {
+      "schema": "psc1-unary-native-v1",
+      "sourceSha": "9de6a17cba7224a3a98ae7dbc00e147246acef9f",
+      "runId": "40200450224",
+      "runAttempt": "1",
+      "status": "pass",
+      "productionTree": "7e92ffc478e060d282844c00f4d91e767a9894ef",
+      "retainedProofs": 532,
+      "newProofs": 9,
+      "totalProofs": 541,
+      "proofModules": 37,
+      "names": [
+        "psKernelUnaryPlanZero",
+        "psKernelUnaryPlanStops",
+        "psKernelUnaryPlanPreserves",
+        "psKernelUnaryPlanSkippedBound",
+        "psKernelUnaryViewHasSharedHead",
+        "psKernelUnaryPlanExpressionCongruence",
+        "psKernelUnaryContextZero",
+        "psKernelUnaryPlanTerminates",
+        "psKernelUnaryCallbackOwner"
+      ],
+      "newProofSource": {
+        "bytes": 11532,
+        "sha256": "4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"
+      },
+      "newProofLog": {
+        "bytes": 1025,
+        "sha256": "2f32b41200bae456672ca543c1519816d156cb20a3ef5394e2609dff731800eb"
+      },
+      "retainedReceipt": {
+        "bytes": 59422,
+        "sha256": "3f95c4602105cb112983a05875e13788f759714c26b5faa8fbaebccf2ec75e5e"
+      },
+      "sourceInventory": {
+        "bytes": 3284,
+        "sha256": "20005d16883793d68e15c472957f32215af872821c39fd2e07fa6bffa7c3ec3f"
+      },
+      "church": {
+        "baseline": {
+          "fuel": 4096,
+          "milliseconds": 20,
+          "mode": "baseline",
+          "reason": "",
+          "runtime": "native",
+          "schema": "psc1-church-stages-v1",
+          "sourceNodes": 197,
+          "verdict": "accepted"
+        },
+        "stages": {
+          "fuel": 4096,
+          "milliseconds": 21,
+          "mode": "stages",
+          "reason": "",
+          "runtime": "native",
+          "schema": "psc1-church-stages-v1",
+          "sourceNodes": 197,
+          "verdict": "accepted"
+        }
+      },
+      "fuel": 4096,
+      "fullKernel": false,
+      "performanceQualified": false
+    },
+    "nativeArtifact": {
+      "id": 12600909415,
+      "node_id": "MDg6QXJ0aWZhY3QxMjYwMDkwOTQxNQ==",
+      "name": "psc1-t05-header-native-attempt-1",
+      "size_in_bytes": 3892169,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12600909415",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12600909415/zip",
+      "expired": false,
+      "digest": "sha256:7f478a8f772cb81d82afa802f3f45c4239cc44a345e71dd0f53841c3a10d364c",
+      "created_at": "2026-10-25T14:06:36Z",
+      "updated_at": "2026-10-25T14:06:36Z",
+      "expires_at": "2027-01-23T14:03:28Z",
+      "workflow_run": {
+        "id": 40200450224,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "work/psc1-pskernel-unary-spines-20261025",
+        "head_sha": "9de6a17cba7224a3a98ae7dbc00e147246acef9f"
+      }
+    },
+    "completeRun": 40200450224,
+    "completeStatus": "native PASS; generated and canonical active"
+  },
+  "independentAudit": {
+    "branch": "work/psc1-pskernel-unary-spines-audit-20261025",
+    "sourceSha": "db05141fcb8f8578b301e78ce265aee8b7cfe899",
+    "runId": 40200577291,
+    "status": "waiting for exact cohort"
+  },
+  "abba": {
+    "branch": "work/psc1-pskernel-unary-spines-abba-20261025",
+    "sourceSha": "4eef319da63d133484b4715d18dddcd2dcd172d2",
+    "productionTree": "7e92ffc478e060d282844c00f4d91e767a9894ef",
+    "runId": 40200839664,
+    "baselineSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+    "status": "active; no measurements claimed",
+    "sequence": [
+      "A",
+      "B",
+      "B",
+      "A"
+    ],
+    "cases": 4,
+    "expectedObservations": 16,
+    "changedOutcome": "Only Church must recover official acceptance; its timings are not reported as a same-outcome speed ratio."
+  },
+  "failedAttemptsPreserved": [
+    {
+      "run": 40196657444,
+      "source": "bd333ad81b3b58efdd89615cf63beefb31e1aa1e",
+      "reason": "same-shell Lean PATH setup"
+    },
+    {
+      "run": 40196777159,
+      "source": "63deaca0c75782492a52e33ca87359cd7f45511b",
+      "reason": "reserved native fixture identifier"
+    },
+    {
+      "source": "5188bfd1dc33c7570ac6038afcae6131dba04841",
+      "run": 40198439183,
+      "reason": "unknown tactic in local witness proof"
+    },
+    {
+      "source": "86374ba113d778a209f7d9be71fb09573a72310a",
+      "reason": "qualification-script replacement escaping; repaired before further work"
+    },
+    {
+      "source": "a42816ec228e6b21e6e6ddd7aec35243bcbc4e82",
+      "run": 40198738396,
+      "reason": "unfinished witness and callback proof"
+    },
+    {
+      "source": "ebe8a80d5274410ec5954e4055d114323f134e89",
+      "run": 40198976311,
+      "reason": "unfinished witness and unknown simp lemma"
+    },
+    {
+      "source": "23ac2e9dc6858f2407950c7e09ea7db25b7f97f5",
+      "run": 40199288202,
+      "reason": "wildcard constructor proof did not eliminate impossible cases"
+    },
+    {
+      "source": "9b7c62b9ea7d5ba75a4d34fd38ec42fe3abc11f2",
+      "run": 40200020837,
+      "reason": "native541 passed; both generated jobs stopped at source authentication because shallow checkout omitted exact baseline commit"
+    }
+  ],
+  "arena": {
+    "source": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+    "runId": 40195396822,
+    "cases": 193,
+    "counts": {
+      "matched_kernel_rejection": 60,
+      "matched_metadata_rejection": 1,
+      "pskernel_timeout": 17,
+      "matched_transport_rejection": 7,
+      "agreement_with_unsafe_or_partial_contract_difference": 2,
+      "matched_acceptance": 105,
+      "pskernel_resource_exhausted": 1
+    },
+    "open": [
+      {
+        "index": 23,
+        "name": "perf/refute-cheap-last.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "rejected",
+        "actual": "timeout"
+      },
+      {
+        "index": 69,
+        "name": "tutorial/140_falseFromUnsafe.ndjson",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference",
+        "official": "rejected",
+        "actual": "rejected"
+      },
+      {
+        "index": 70,
+        "name": "tutorial/141_falseFromPartial.ndjson",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference",
+        "official": "rejected",
+        "actual": "rejected"
+      },
+      {
+        "index": 72,
+        "name": "init-prelude.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 78,
+        "name": "perf/app-lam.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 80,
+        "name": "perf/beta-ladder.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 81,
+        "name": "perf/church-numerals.ndjson",
+        "classification": "pskernel_resource_exhausted",
+        "official": "accepted",
+        "actual": "resource_exhausted"
+      },
+      {
+        "index": 82,
+        "name": "perf/discarded-argument-match.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 83,
+        "name": "perf/discarded-argument.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 84,
+        "name": "perf/folded-constant-first.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 85,
+        "name": "perf/folded-constant-last.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 86,
+        "name": "perf/fueled-chain.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 87,
+        "name": "perf/grind-ring-5.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 90,
+        "name": "perf/let-ladder.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 91,
+        "name": "perf/magma-list-deep-n21.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 92,
+        "name": "perf/magma-list-deep-n36.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 93,
+        "name": "perf/magma-list-pair-n21.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 94,
+        "name": "perf/magma-list-pair-n7.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 96,
+        "name": "perf/shared-subterm.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      },
+      {
+        "index": 98,
+        "name": "perf/unroll-versus-evaluate.ndjson",
+        "classification": "pskernel_timeout",
+        "official": "accepted",
+        "actual": "timeout"
+      }
+    ]
+  },
+  "limits": {
+    "lean": "4.35.0",
+    "leanGitHash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "fuel": 4096,
+    "churchProcessSeconds": 60,
+    "nodeOldSpaceMiB": 2048,
+    "emptyPATH": true
+  },
+  "scope": {
+    "A": "historically scoped qualified",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN",
+    "productionAdopted": false,
+    "fullKernel": false,
+    "globalSoundnessProof": false,
+    "backendPreservationProof": false,
+    "remaining": [
+      "complete candidate native/generated/canonical qualification and independent ZIP audit",
+      "same-source authentic ABBA, archive review, and adoption decision",
+      "remaining authentic Arena timeouts and safety-contract cases",
+      "T06 mutual/nested ID admission",
+      "T07 four whole-operation fallback removals",
+      "T04 ingress and metadata import work",
+      "T09 performance and T10 release obligations"
+    ]
+  }
+}

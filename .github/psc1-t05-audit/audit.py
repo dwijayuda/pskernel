@@ -75,13 +75,15 @@ SHA = CONFIG["sourceSha"]
 RUN = CONFIG["runId"]
 ATTEMPT = CONFIG["runAttempt"]
 PROFILE = CONFIG.get("profile", "helpers")
-DEFERRED = PROFILE == "deferred"
-ADMISSION = PROFILE in ("admission", "deferred")
-FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred")
-ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred")
-LOOP = PROFILE in ("loop", "admission", "deferred")
-SOURCE_INPUT_COUNT = 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
-NATIVE_PROOF_TOTAL = 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
+RETAINED = PROFILE == "retained"
+DEFERRED = PROFILE in ("deferred", "retained")
+ADMISSION = PROFILE in ("admission", "deferred", "retained")
+FIELDS = PROFILE in ("fields", "analysis", "loop", "admission", "deferred", "retained")
+ANALYSIS = PROFILE in ("analysis", "loop", "admission", "deferred", "retained")
+LOOP = PROFILE in ("loop", "admission", "deferred", "retained")
+SOURCE_INPUT_COUNT = 92 if RETAINED else 82 if DEFERRED else 77 if ADMISSION else 59 if LOOP else 55 if ANALYSIS else 50 if FIELDS else 43
+NATIVE_PROOF_TOTAL = 492 if RETAINED else 374 if DEFERRED else 371 if ADMISSION else 310 if LOOP else 296 if ANALYSIS else 277 if FIELDS else 230
+NATIVE_PROOF_MODULES = len(EXPECTED_PROOFS) + (2 if FIELDS else 0) + (1 if ANALYSIS else 0) + (1 if LOOP else 0) + (3 if ADMISSION else 0) + (1 if DEFERRED else 0) + (10 if RETAINED else 0)
 FIELDS_SECTIONS = {"harness":1,"fields":147,"recursive":105,"boundaries":8,"recursorGuard":7}
 ANALYSIS_SECTIONS = {"harness":1,"matrix":84,"protocol":8}
 LOOP_SECTIONS = {"harness":1,"matrix":56,"protocol":12}
@@ -175,6 +177,14 @@ DEFERRED_LABELS = [
     "raw-lift-one-child-exhaustion",
     "raw-lift-two-threads-shared-child-memo-and-ids"
 ]
+
+RETAINED_PROOFS = [(module,count,"retained-"+module+".log") for module,count in [
+    ("PsKernelNatFuelProofs",5),("PsKernelExprEqualityProofs",4),
+    ("PsKernelExprV2AdmissionGuardProofs",18),("PsKernelExprV2RecursorProofs",23),
+    ("PsKernelExprV2RecursorMajorProofs",10),("PsKernelExprV2RecursorKProofs",6),
+    ("PsKernelNameWorkerProofs",8),("PsKernelExprV2QuotOwnerProofs",21),
+    ("PsKernelExprV2WhnfABIProofs",2),("PsKernelExprV2OwnedStateProofs",21)]]
+RETAINED_INPUTS = ["psc1/test/"+module+".lean" for module,_,_ in RETAINED_PROOFS]
 
 BLOBS = {}
 REPORT = {
@@ -1442,6 +1452,45 @@ def deferred_route_audit(e):
         "allReceiptLogDigestsMatched":True}
 
 
+def retained_native_audit(e):
+    r=e.json("retained-native-receipt.json"); e.identity(r)
+    for key,value in {"schema":"psc1-retained-native-receipt-v1","status":"pass",
+        "retainedProofs":374,"addedReports":118,"historicalReports":116,
+        "newCompanionReports":2,"totalProofs":492,
+        "orderedUniqueReports":True,"allowedStandardAxiomsOnly":True,
+        "fullOrdinaryAdmission":True,"deferredTransformConstruction":True,
+        "fullKernel":False,"performanceQualified":False}.items():
+        same(r.get(key),value,"retained native receipt "+key)
+    records=[]
+    for module,count,filename in RETAINED_PROOFS:
+        source=git_bytes("psc1/test/"+module+".lean"); raw=e.raw(filename)
+        names=proof_reports(source,raw,module,count)
+        records.append({"module":module,"proofs":count,"names":names,
+                        "source":digest(source),"log":digest(raw)})
+    same(len(records),10,"ten retained proof modules")
+    same(sum(x["proofs"] for x in records),118,"118 additional retained reports")
+    same(len({name for x in records for name in x["names"]}),118,
+         "118 globally unique retained proof names")
+    same(r["proofs"],records,"ten source-named retained native proof records")
+    same(records[3]["names"][-2:],[
+        "PsKernelExprV2RecursorProofs.generated_fallback_import_error_returns_no_owner",
+        "PsKernelExprV2RecursorProofs.owned_command_error_prevents_batch_publication"],
+        "two companion fallback and owned-command error obligations")
+    same(e.text("retained-proof-status.log").splitlines(),[
+        "PSC1_RETAINED_PROOF_STATUS module="+module+" count="+str(count)+
+        " countStatus=0 leanStatus=0" for module,count,_ in RETAINED_PROOFS],
+        "ten successful native proof commands in frozen order")
+    e.check_digest("deferred-transform-native-receipt.json",r["retainedDeferredReceipt"])
+    e.check_digest("source-inventory.json",r["sourceInventory"])
+    e.check_digest("retained-proof-status.log",r["proofStatuses"])
+    logged_json(e.terminal,"PSC1_RETAINED_NATIVE_PROOFS: PASS ",r)
+    return {"retainedReports":374,"addedReports":118,"historicalReports":116,
+        "newCompanionReports":2,"totalReports":492,"totalModules":29,
+        "modules":[{"module":x["module"],"reports":x["proofs"]} for x in records],
+        "proofStatuses":digest(e.raw("retained-proof-status.log")),
+        "receipt":digest(e.raw("retained-native-receipt.json"))}
+
+
 def wait_for_cohort():
     deadline = time.monotonic() + 75 * 60
     while True:
@@ -1465,7 +1514,7 @@ def main():
     require(os.environ.get("RUNNER_OS") == "Linux","This audit runs on GitHub Linux only")
     require(os.environ.get("GITHUB_ACTIONS") == "true","GitHub Actions required")
     require(TOKEN,"Missing read-only GitHub token")
-    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred"),"Unknown audit profile")
+    require(PROFILE in ("helpers","fields","analysis","loop","admission","deferred","retained"),"Unknown audit profile")
     require(re.fullmatch(r"[0-9a-f]{40}",SHA) is not None,"Exact target source SHA required")
     require(type(RUN) is int and RUN > 0 and type(ATTEMPT) is int and ATTEMPT > 0,
             "Exact numeric run and attempt required")
@@ -1479,6 +1528,8 @@ def main():
     require(len(path_lists) == 2 and path_lists[0] == path_lists[1],
             "Native and route source inventory definitions agree")
     expected_paths = path_lists[0]
+    if RETAINED:
+        require(set(RETAINED_INPUTS) <= set(expected_paths),"ten explicit retained native proof inputs")
     if DEFERRED:
         require(set(DEFERRED_INPUTS) <= set(expected_paths),"five explicit deferred production/proof/harness inputs")
         REPORT["deferredTransformSources"] = deferred_production_sources()
@@ -1568,6 +1619,8 @@ def main():
                 result["ordinaryAdmissionQualification"] = admission_native_audit(evidence) if route == "native" else admission_route_audit(evidence)
             if DEFERRED:
                 result["deferredTransformQualification"] = deferred_native_audit(evidence) if route == "native" else deferred_route_audit(evidence)
+            if RETAINED and route == "native":
+                result["retainedNativeQualification"] = retained_native_audit(evidence)
             result["status"] = "pass"
             print("PSC1_T05_ARTIFACT_ROUTE: PASS route=" + route +
                   " artifact=" + str(artifact["id"]) + " files=" + str(len(files)),flush=True)
@@ -1585,7 +1638,7 @@ def main():
         "constructorHelpersQualified":True,"fullT05AdmissionQualified":ADMISSION,
         "ordinaryAdmissionQualified":ADMISSION,"publicRoutingQualified":ADMISSION,"fullKernelQualified":False,
         "projectB":"OPEN","projectC":"FAIL","projectD":"OPEN",
-        "nativeProofReports":NATIVE_PROOF_TOTAL,
+        "nativeProofReports":NATIVE_PROOF_TOTAL,"nativeProofModules":NATIVE_PROOF_MODULES,
         "nativeAssertions":{"params":284,"result":432,
             **({"fields":268} if FIELDS else {}),**({"analysis":93} if ANALYSIS else {}),
             **({"loop":69} if LOOP else {}),
@@ -1597,7 +1650,7 @@ def main():
             **({"deferredTransform":23} if DEFERRED else {})},
         "constructorFieldsQualified":FIELDS,"singleConstructorAnalysisQualified":ANALYSIS,
         "constructorLoopQualified":LOOP,"profile":PROFILE,
-        "deferredTransformQualified":DEFERRED,
+        "deferredTransformQualified":DEFERRED,"retainedNativeProofsQualified":RETAINED,
         **({"independentLeanControls":{"controls":18,"accepted":14,"rejected":4,
                 "safeGenerated":13,"unsafeContract":1}} if ADMISSION else {}),
     }
@@ -1625,8 +1678,10 @@ if __name__ == "__main__":
                         "files":v.get("fileCount"),"error":v.get("error")}
                       for r,v in REPORT["routes"].items()},
             "nativeReports":NATIVE_PROOF_TOTAL if REPORT["status"] == "pass" else None,
+            "nativeModules":NATIVE_PROOF_MODULES if REPORT["status"] == "pass" else None,
             "profile":PROFILE,
             **({"deferredTransformQualified":REPORT["status"] == "pass"} if DEFERRED else {}),
+            **({"retainedNativeProofsQualified":REPORT["status"] == "pass"} if RETAINED else {}),
             "report":digest(payload.encode()),
             "errors":REPORT["errors"],
             **({"ordinaryAdmissionQualified":REPORT["status"] == "pass",

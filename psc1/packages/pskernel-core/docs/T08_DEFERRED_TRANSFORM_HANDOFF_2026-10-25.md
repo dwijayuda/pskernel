@@ -1,3 +1,13 @@
+## Latest checkpoint — shared bootstrap adapter prepared
+
+Current diagnostic source `c5f0050747a2c34cabbc711305bc975c77fc6d2d` has a running A/B cohort [40146310517](https://github.com/dwijayuda/pskernel/actions/runs/40146310517), attempt 1. Fresh native job `121028288826` passed all three universal equality reports. Compiler job `121028584772` passed its 254-declaration portable check and produced shared binary SHA256 `13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c`. Both clean producer checkouts passed the early generated-leaf step by job status and are still building their complete closures; actual producer logs and measurements have not yet been inspected.
+
+That running diagnostic uses the stock bootstrap helper, whose translation command invokes `lake exe psc1 translate` in each checkout. Its final source check/build uses the authenticated shared binary, but it does not establish that every canonical translation used that same binary. Do not report that stronger property for this cohort.
+
+This revision prepares a temporary bootstrap adapter outside the tracked checkout. It authenticates the original bootstrap Git blob `734db05bccdd777f3cb1fa95aa9904e36caa9926`, makes exactly four checked text substitutions (two absolute helper imports, explicit checkout root, and the verified shared translator command), syntax-checks the adapter, and preserves all other collection, ordering, translation arguments, and manifest logic. The adapter and its source/binary digests are retained in the exact 18-file producer inventory and rechecked by the measurement driver. The retained bootstrap helper sources must also match the fixed baseline.
+
+No new production or proof bodies change in this revision. It has not executed yet. Do not launch a duplicate replacement cohort while the current diagnostic is running. The current A/B result, complete source qualification, independent archive verification, and performance qualification remain pending. The notes below preserve earlier checkpoints and must not be read as newer execution evidence.
+
 ## A/B workflow wired — execution pending
 
 The new `.github/workflows/psc1-pskernel-transform-delay-abba.yml` triggers only on its own path and the A/B driver on this isolated draft branch. It reruns source authentication and the three native proofs for the experiment SHA, builds one shared compiler, and uses clean explicit baseline/candidate kernel checkouts. Each producer checks the new 23 controls on a small generated leaf before checking and building the complete canonical kernel, then retains the DAG, paged, and 138 Arena replay controls.

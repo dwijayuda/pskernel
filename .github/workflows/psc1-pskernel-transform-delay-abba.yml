@@ -220,7 +220,9 @@ jobs:
           ]
           assert audit["sourceFiles"]["psc1/scripts/" + scripts[0]] == digest(out / "runtime" / scripts[0])
           stable = ["psc1/scripts/" + name for name in scripts[1:]] + [
-              "psc1/scripts/pskernel-arena435-compare.py", "psc1/scripts/pskernel-arena435-oracle.py"]
+              "psc1/scripts/pskernel-arena435-compare.py", "psc1/scripts/pskernel-arena435-oracle.py",
+              "psc1/scripts/bootstrap-project.mjs", "psc1/scripts/bootstrap-manifest.mjs",
+              "psc1/scripts/workspace-layout.mjs"]
           subprocess.check_call(["git", "-C", "..", "diff", "--exit-code", os.environ["BASELINE_SHA"],
               os.environ["GITHUB_SHA"], "--", *stable])
           names = ["psc1", "native-receipt.json", "source-audit.json", "proofs.log",
@@ -345,9 +347,45 @@ jobs:
           set -euo pipefail
           PSC1_DELAY_COMPILER="$RUNNER_TEMP/transform-delay-shared/psc1"
           PSC1_DELAY_OUT="$RUNNER_TEMP/transform-delay-producer"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          workspace = pathlib.Path.cwd().resolve()
+          shared = pathlib.Path(os.environ['RUNNER_TEMP']) / 'transform-delay-shared'
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'transform-delay-producer'
+          source_path = workspace / 'scripts/bootstrap-project.mjs'
+          raw = source_path.read_bytes()
+          blob = hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest()
+          assert blob == '734db05bccdd777f3cb1fa95aa9904e36caa9926'
+          compiler = (shared / 'psc1').resolve(strict=True)
+          c = json.loads((shared / 'compiler-receipt.json').read_text())
+          compiler_hash = hashlib.sha256(compiler.read_bytes()).hexdigest()
+          assert compiler_hash == c['compilerSha256']
+          text = raw.decode('utf-8')
+          replacements = [
+              ('from "./workspace-layout.mjs";', 'from ' + json.dumps((workspace / 'scripts/workspace-layout.mjs').as_uri()) + ';'),
+              ('from "./bootstrap-manifest.mjs";', 'from ' + json.dumps((workspace / 'scripts/bootstrap-manifest.mjs').as_uri()) + ';'),
+              ('const selfhostRoot = path.resolve(scriptDir, "..");', 'const selfhostRoot = ' + json.dumps(str(workspace)) + ';'),
+              ('    "lake",\n    [\n      "exe",\n      "psc1",\n', '    ' + json.dumps(str(compiler)) + ',\n    [\n'),
+          ]
+          for before, after in replacements:
+              assert text.count(before) == 1, before
+              text = text.replace(before, after, 1)
+          adapter = out / 'bootstrap-shared.mjs'
+          adapter.write_text(text, encoding='utf-8')
+          record = {
+              'sourceGitBlob': blob,
+              'sourceSha256': hashlib.sha256(raw).hexdigest(),
+              'adapterSha256': hashlib.sha256(adapter.read_bytes()).hexdigest(),
+              'translatorSha256': compiler_hash,
+              'translatorSourceSha': c['sourceSha'],
+              'replacementCount': len(replacements),
+          }
+          (out / 'bootstrap-tools.json').write_text(json.dumps(record, indent=2) + '\n')
+          PY
+          node --check "$PSC1_DELAY_OUT/bootstrap-shared.mjs"
           "$PSC1_DELAY_COMPILER" check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
             2>&1 | tee "$PSC1_DELAY_OUT/authentic-source.log"
-          node scripts/bootstrap-project.mjs \
+          node "$PSC1_DELAY_OUT/bootstrap-shared.mjs" \
             packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
             dist/transform-delay/workspace
           node --input-type=module <<'NODE'
@@ -432,16 +470,19 @@ jobs:
               "workflowSha256": audit["sourceFiles"][".github/workflows/psc1-pskernel-transform-delay-abba.yml"],
               "driverSha256": audit["sourceFiles"]["psc1/scripts/pskernel-transform-delay-abba.py"],
               "nativeSourceAuditSha256": digest(out / "native-source-audit.json"),
+              "bootstrap": json.loads((out / "bootstrap-tools.json").read_text()),
           }
           assert tools["nodeVersion"].startswith("v22.")
           assert tools["typescriptVersion"] == "Version 7.0.2"
           (out / "producer-tools.json").write_text(json.dumps(tools, indent=2) + "\n")
+          (out / "bootstrap-tools.json").unlink()
           names = (
               "kernel.js", "kernel.ts", "kernel.d.ts", "kernel.js.map",
               "bootstrap-manifest.json", "raw-abi.log", "dag-smoke.log",
               "paged-smoke.log", "arena-controls.log", "native-receipt.json",
               "native-source-audit.json", "native-proofs.log", "compiler-receipt.json",
-              "authentic-source.log", "canonical-source.log", "generated-build.log", "producer-tools.json")
+              "authentic-source.log", "canonical-source.log", "generated-build.log", "producer-tools.json",
+              "bootstrap-shared.mjs")
           markers = {
               "raw-abi.log": "PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11",
               "dag-smoke.log": "PSC1_V2_TRANSFORM_JS: PASS",

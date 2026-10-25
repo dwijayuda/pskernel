@@ -43,6 +43,7 @@ REQUIRED_FILES = {
     "paged-smoke.log", "arena-controls.log", "native-receipt.json",
     "native-source-audit.json", "native-proofs.log", "compiler-receipt.json",
     "authentic-source.log", "canonical-source.log", "generated-build.log", "producer-tools.json",
+    "bootstrap-shared.mjs",
 }
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -84,6 +85,15 @@ def authenticate(root, variant, source, baseline):
         or compiler.get("nativeReceiptSha256") != digest(root / "native-receipt.json")
         or compiler.get("compilerSha256") != receipt.get("compilerSha256")):
         raise ValueError("shared compiler receipt mismatch")
+    producer_tools = json.loads((root / "producer-tools.json").read_text())
+    bootstrap = producer_tools.get("bootstrap", {})
+    if (bootstrap.get("sourceGitBlob") != "734db05bccdd777f3cb1fa95aa9904e36caa9926"
+        or bootstrap.get("sourceSha256") != digest(HERE / "bootstrap-project.mjs")
+        or bootstrap.get("replacementCount") != 4
+        or bootstrap.get("adapterSha256") != digest(root / "bootstrap-shared.mjs")
+        or bootstrap.get("translatorSha256") != compiler.get("compilerSha256")
+        or bootstrap.get("translatorSourceSha") != source):
+        raise ValueError("shared bootstrap translator receipt mismatch")
     markers = {
         "raw-abi.log": "PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11",
         "dag-smoke.log": "PSC1_V2_TRANSFORM_JS: PASS",

@@ -52,7 +52,7 @@ Packages are absent by default and require explicit installation.
 
 New optional packages contain Linux x64 tools and are qualified only on the
 actual Linux runner environment. Python includes isolated Python3.14.8; PHP
-includes PHP8.5.11 with GMP and explicitly disables FFI during target checking.
+includes PHP8.5.12 with GMP and explicitly disables FFI during target checking.
 Those versions retain the established minimum target profiles. No runtime is
 downloaded or compiled during npm installation or a compiler request.
 macOS/Windows/other architectures refuse this new native dispatch path until

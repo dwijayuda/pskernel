@@ -290,7 +290,7 @@
       "php": {
         "optional": true,
         "package": "@proofscript/backend-php@0.1.0-psc1.7",
-        "targetRuntime": "PHP8.5.11 with GMP bundled; FFI disabled during checking",
+        "targetRuntime": "PHP8.5.12 with GMP bundled; FFI disabled during checking",
         "input": "already admitted portable specialized IR only"
       }
     },
@@ -332,7 +332,7 @@
       "optional-providers-absent-by-default-offline-explicit-install",
       "emit-only-workers-exclude-PSC1-frontend-checker-publisher",
       "canonical-portable-IR-roundtrip-and-native-strict-target-ABI-recheck",
-      "actual-Python3148-and-PHP8511-GMP-consumers",
+      "actual-Python3148-and-PHP8512-GMP-consumers",
       "four-G3-executors-real-provider-corpus-and-callback-IO",
       "local-both-grammar-and-global-new-target-CLI",
       "malformed-and-noncanonical-provider-requests-refuse",

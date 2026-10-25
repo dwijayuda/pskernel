@@ -68,6 +68,32 @@ for (const file of files) {
     featureQualification, executableAstMatchesBaseline: true,
     formatted: source === formatted, lines: source.split('\n').length});
 }
+
+const newModules = [
+  'host-tools/checked-component.mjs',
+  'host-tools/checked-optional-provider.mjs',
+  'host-tools/checked-targets.mjs',
+  'host-tools/generated-compiler-session.mjs',
+];
+for (const file of newModules) {
+  const featureBaseline = '7062f6823b434657e433caae21a03238f6bbb685';
+  const feature = spawnSync('git', ['show', featureBaseline + ':psc1/' + file], {
+    cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
+  });
+  assert.equal(feature.status, 0, file + '\n' + feature.stderr);
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  assert.deepEqual(executableAst(source), executableAst(feature.stdout),
+    file + ': new dispatch module changed from its explicit feature baseline');
+  const formatted = await prettier.format(source, formatOptions);
+  assert.deepEqual(executableAst(formatted), executableAst(source),
+    file + ': formatter changed executable AST');
+  if (propose) proposal[file] = formatted;
+  else assert.equal(source, formatted, file + ': run pinned scoped formatter');
+  results.push({file, originalCleanupAstCorrespondence: 'not-claimed-new-module',
+    featureBaseline, featureQualification, executableAstMatchesBaseline: true,
+    formatted: source === formatted, lines: source.split('\n').length});
+}
+
 const out = path.join(root, 'dist/readability');
 fs.mkdirSync(out, {recursive: true});
 fs.writeFileSync(path.join(out, 'host.json'), JSON.stringify({

@@ -73,7 +73,7 @@ for(const target of ['python','php','wasm-component']){
      copy(path.join(info.LIBDIR,info.LDLIBRARY),path.join(stage,'runtime/lib',info.LDLIBRARY));
      copy('scripts/optional-provider-validate.py',path.join(stage,'validate.py'));
    }else{
-     const exe=process.env.PSC1_PHP;assert.ok(exe);assert.equal(run(exe,['-r','echo PHP_VERSION;']),'8.5.11');
+     const exe=process.env.PSC1_PHP;assert.ok(exe);assert.equal(run(exe,['-r','echo PHP_VERSION;']),'8.5.12');
      copy(exe,path.join(stage,'runtime/bin/php'));libraries(exe,path.join(stage,'runtime/lib'));
      const gmp=run(exe,['-r','echo ini_get("extension_dir")."/gmp.so";']);copy(gmp,path.join(stage,'runtime/gmp.so'));libraries(gmp,path.join(stage,'runtime/lib'));
      copy('scripts/optional-provider-validate.php',path.join(stage,'validate.php'));

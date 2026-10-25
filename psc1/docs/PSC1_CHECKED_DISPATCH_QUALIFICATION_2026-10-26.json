@@ -44,6 +44,24 @@
       "job": 121326148590,
       "status": "failed",
       "reason": "public-initializer positive symbol check is invalid for optimized workers; full symbol streaming and explicit source-import closure now enforce the provider boundary"
+    },
+    {
+      "head": "a579d358e2e361338e8a48bab1abbfb623cb6bbf",
+      "run": 40245843536,
+      "job": 121327218798,
+      "status": "failed",
+      "reason": "setup-php installed actual8.5.12 despite requested8.5.11; require and bundle exact8.5.12, matching retained generated-runtime profile",
+      "symbolAudits": {
+        "python": {
+          "symbols": 298952,
+          "owned": 421
+        },
+        "php": {
+          "symbols": 299011,
+          "owned": 472
+        },
+        "sourceImportClosure": "passed"
+      }
     }
   ],
   "scope": {

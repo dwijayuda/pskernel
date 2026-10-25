@@ -42,9 +42,9 @@ for(const engine of ['js','ts','rust','wasm-core']) {
   }
  }
  for(const kind of ['lean','ps']){
-  const options={engine,target:'wasm-component',publicationProtocol:'portable-file',out:path.resolve('components',engine,kind),entryModule:'Entry',sources:[{module:'Entry',kind,text:kind==='lean'?'def truth : Bool := true\\ndef negate (value : Bool) : Bool := Bool.not value\\n':'def truth : Bool := true\\ndef negate(value : Bool) : Bool := Bool.not(value)\\n'}]};
+  const options={engine,target:'wasm-component',publicationProtocol:'portable-file',out:path.resolve('components',engine,kind),entryModule:'Entry',sources:[{module:'Entry',kind,text:kind==='lean'?'def truth : Bool := true\\ndef negate (value : Bool) : Bool := Bool.not value\\ndef big : Bool := Nat.beq (Nat.add 9007199254740993 1) 9007199254740994\\n':'def truth : Bool := true\\ndef negate(value : Bool) : Bool := Bool.not(value)\\ndef big : Bool := Nat.beq(Nat.add(9007199254740993, 1), 9007199254740994)\\n'}]};
   const result=build(options);assert.equal(result.receipt.compilerTarget,'wasm-core');
-  assert.equal(result.artifact,result.runtimeArtifact);assert.equal(result.receipt.targetArtifact.schema.length,2);
+  assert.equal(result.artifact,result.runtimeArtifact);assert.equal(result.receipt.targetArtifact.schema.length,3);
   const first=fs.readFileSync(result.artifact);assert.deepEqual([...first.subarray(0,8)],[0,97,115,109,13,0,1,0]);
   const next=build(options);assert.deepEqual(fs.readFileSync(next.artifact),first);assert.notEqual(result.generation,next.generation);
   for(const text of ['def value : Nat := 42\\n','def _invalid : Bool := true\\n','def truth : Bool := 42\\n']){
@@ -85,6 +85,7 @@ for(const row of actual.io){
 for(const row of actual.components){
  const wasmTime=process.env.PSC1_WASMTIME;assert.ok(wasmTime);
  assert.match(run(wasmTime,['run','--invoke','truth()',row.artifact]),/true/);
+ assert.match(run(wasmTime,['run','--invoke','big()',row.artifact]),/true/);
  assert.match(run(wasmTime,['run','--invoke','negate(false)',row.artifact]),/true/);
  assert.match(run(wasmTime,['run','--invoke','negate(true)',row.artifact]),/false/);
  row.runtime='executed';

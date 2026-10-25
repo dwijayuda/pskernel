@@ -84,7 +84,7 @@ jobs:
         run: echo "PSC1_PYTHON_314=$(python -c 'import sys; print(sys.executable)')" >> "$GITHUB_ENV"
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
-          php-version: '8.5.11'
+          php-version: '8.5.12'
           extensions: gmp
           coverage: none
       - name: Prepare SHA256-pinned component validation and execution tools

@@ -1,3 +1,11 @@
+## 2026-10-25 — semantic-prefix lookup witness repair (qualification pending)
+
+The first isolated37 preflight, source `7b69976b0b4e5fa988160aff88daf0ca611024fc`, [run40164717189](https://github.com/dwijayuda/pskernel/actions/runs/40164717189), job121083302426, passed all29 retained metadata/storage/local-replay reports. The new module failed only in the private With1/With2/With3 successful-lookup helpers at lines148/164/188: dependent case analysis had already rewritten the target lookups to reflexive equalities. This commit replaces those three branch witness terms with the corresponding `rfl` witnesses. Every definition, private/public proposition, eight printed theorem names, retained proof body, workflow gate and production file is unchanged.
+
+The failed source is not qualified: its error-dependent reports include Lean's error-placeholder dependency and it emitted no passing37 receipt. The new source must pass its own unique37 preflight and actual artifact-content audit before any semantic-prefix guarantee is recorded. No weaker premise, axiom, sorry/admit, unsafe declaration, fuel/resource change or fallback change is introduced.
+
+Integration remains `20224a295359abb201f56c72395690bf0bfac9fa`. The separate cache candidate `054edfce56eda28a166624ddc92dfac5af8499c0` is unchanged. Continue with actual compiler diagnostics, then the production paged decoder bridge only after this prefix obligation is sound. B remains OPEN, C FAIL, D OPEN.
+
 # T05 semantic-prefix witness — native37 preflight
 
 ## 2026-10-25 — isolated semantic-prefix proof preflight (unqualified)

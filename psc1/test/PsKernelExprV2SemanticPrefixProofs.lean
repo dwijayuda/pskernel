@@ -145,7 +145,7 @@ private theorem with1_success_lookup
   cases found : psKernelExprV2PagedFind arena child with
   | none =>
       simp [psKernelExprV2PagedWith1, psKernelExprV2PagedRequire, found] at accepted
-  | some entry => exact ⟨entry, found⟩
+  | some entry => exact ⟨entry, rfl⟩
 
 private theorem with2_success_lookups
     (arena : PsKernelExprV2PagedArena) (left right : Nat)
@@ -161,7 +161,7 @@ private theorem with2_success_lookups
       cases second : psKernelExprV2PagedFind arena right with
       | none =>
           simp [psKernelExprV2PagedWith2, psKernelExprV2PagedRequire, first, second] at accepted
-      | some b => exact ⟨a, b, first, second⟩
+      | some b => exact ⟨a, b, rfl, rfl⟩
 
 private theorem with3_success_lookups
     (arena : PsKernelExprV2PagedArena) (first second third : Nat)
@@ -185,7 +185,7 @@ private theorem with3_success_lookups
           | none =>
               simp [psKernelExprV2PagedWith3, psKernelExprV2PagedRequire,
                 firstFound, secondFound, thirdFound] at accepted
-          | some c => exact ⟨a, b, c, firstFound, secondFound, thirdFound⟩
+          | some c => exact ⟨a, b, c, rfl, rfl, rfl⟩
 
 /- Success obtains child witnesses from actual production lookups. The caller
    does not supply a new node's metadata or an arbitrary expression witness. -/

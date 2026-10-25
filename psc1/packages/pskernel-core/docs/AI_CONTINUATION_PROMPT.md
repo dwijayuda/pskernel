@@ -1,3 +1,19 @@
+## 2026-10-25 — combined production validator/decoder qualification pending
+
+This checkpoint combines integrated production `054edfce56eda28a166624ddc92dfac5af8499c0` with the four byte-identical proof modules from `e652d02a69ebcaaeb5b4fe0b391e368efebf18e7`. Production tree remains `e567685e5c441a5b0a78d8241f7bae151b48b5ca`. Work is isolated on `work/psc1-pskernel-validator-qualification-20261025`; integration remains 054edfce until this exact combined source passes all gates and archive verification. Historical statements below about integration remaining 20224 are superseded.
+
+The isolated proof prerequisite passed native51 run [40167568667](https://github.com/dwijayuda/pskernel/actions/runs/40167568667), job121091633723. Independent [audit40167924515](https://github.com/dwijayuda/pskernel/actions/runs/40167924515), auditor37ac35e0, verified all26 ZIP members,16 exact source inputs,51 actual reports and six successful commands. The native archive is artifact12589175265,47381 bytes,SHA256 e074920980142a1dcd2d3e6a0c66cf9dbe4322c49087c3c8a7e3236a8b2cb948. These are prerequisite evidence, not qualification inherited by this combined source.
+
+The complete native-first workflow retains all499 existing reports and all96 original authenticated inputs without changing their schemas or receipt chains. It adds26 replay/prefix/decoded-node/whole-decoder reports, for **525 unique reports across35 modules**. A separate13-input source inventory pins the four exact audited proof files, five actual production storage/validation/decoder modules, retained metadata/paged proof dependencies, and the current workflow/helper. Native525 reopens every retained proof log and checks global uniqueness and permitted axioms. Both unchanged complete generated routes must consume the same-run native525 artifact and bind it to their actual detached kernel and complete existing runtime/log receipt chain. Fuel4096,60-second Arena limits,2048MiB and all negative controls are unchanged.
+
+The established isolated theorems cover all12 node constructors, one consistent semantic prefix, canonical/source syntax and metadata alignment, full production ValidateFuel preservation, decoder physical storage, actual Require lookup preservation, DecodeCanonicalFuel success with actual size-plus-one fuel, and public DecodeChecked correspondence. No validity premise is assumed for untrusted source input. A checker-wide ArenaModel bridge and global kernel soundness remain open.
+
+Latest integrated Arena [40167644370](https://github.com/dwijayuda/pskernel/actions/runs/40167644370) completed193 cases on exact054edfce:173 strict matches (105 acceptance,60 kernel rejection,1 metadata rejection,7 transport rejection),17 host timeouts,1 reduction-budget exhaustion,2 separate unsafe/partial agreements. Source/body provenance is retained; this is header-only adaptation, not native4.35 re-export. B OPEN,C FAIL,D OPEN; no performance gain is claimed here.
+
+Next: inspect the single matching-source complete qualification run, repair demonstrated harness/proof errors, then independently audit all three actual archives, including the extra validator evidence, before a non-force expected-SHA integration. Do not launch duplicate matching-source CI or rerun the incomplete56-process microbenchmark. Continue toward ArenaModel/remaining functional and measured performance obligations after qualification.
+
+---
+
 ## 2026-10-25 — integrated T05; conditional empty-cache full499 candidate
 
 **Integration remains `20224a295359abb201f56c72395690bf0bfac9fa`.** The containing work commit introduces the previously isolated empty-cache candidate and its fresh qualification/measurement workflows. It is **not yet qualified or adopted into integration**. Do not inherit source-specific qualification from `e503972553ae2d41d5ba7a26d7739fb32ee86b96`, its leaf experiment, or the integrated baseline.

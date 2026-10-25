@@ -1,9 +1,9 @@
-name: PSC1 ordinary admission, paged layout and empty-cache qualification
+name: PSC1 complete validator and decoder qualification
 'on':
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-t01f-string-20261022
+    - work/psc1-pskernel-validator-qualification-20261025
     paths:
     - psc1/kernel-lakefile.lean
     - psc1/lean-toolchain
@@ -1416,6 +1416,12 @@ jobs:
         (root/'empty-semantic-cache-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T09_EMPTY_SEMANTIC_CACHE_NATIVE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
+    - name: Qualify all 525 native reports including the production validator and decoder
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-validator-qualification.py native .. "$PSC1_T05_DIR"
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -2494,6 +2500,17 @@ jobs:
         (root/'empty-semantic-cache-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T09_EMPTY_SEMANTIC_CACHE_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
+    - name: Download the exact same-run native proof inventory
+      uses: actions/download-artifact@v4
+      with:
+        name: psc1-t05-header-native-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/validator-native
+    - name: Bind the complete generated route to all 525 native reports
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-validator-qualification.py route .. "$PSC1_T05_DIR" "$RUNNER_TEMP/validator-native"
     - name: Retain bounded gate artifacts on success or failure
       working-directory: psc1
       shell: bash

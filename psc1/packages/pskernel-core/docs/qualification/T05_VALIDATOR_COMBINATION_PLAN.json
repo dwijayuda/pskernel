@@ -1,0 +1,15 @@
+{
+  "schema": "psc1-validator-combination-plan-v1",
+  "productionSource": "054edfce56eda28a166624ddc92dfac5af8499c0",
+  "proofSource": "e652d02a69ebcaaeb5b4fe0b391e368efebf18e7",
+  "nativeRun": 40167568667,
+  "artifactAuditRun": 40167924515,
+  "retainedProofs": 499,
+  "addedProofs": 26,
+  "expectedTotal": 525,
+  "expectedModules": 35,
+  "productionChanges": false,
+  "qualified": false,
+  "fullKernel": false,
+  "performanceQualified": false
+}

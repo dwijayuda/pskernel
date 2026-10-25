@@ -81,6 +81,21 @@ jobs:
           node scripts/generated-io-installed-candidates.mjs
       - name: Check the packed public declarations with the pinned SDK
         run: node scripts/checked-publication-types.mjs
+      - name: Archive immutable stores and actual application evidence
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
+          const out=path.resolve('dist/slim-universal');fs.mkdirSync(out,{recursive:true});
+          const roots=fs.readdirSync(os.tmpdir()).filter(name=>name.startsWith('psc1-checked-publication-')).sort();
+          for(const [index,name]of roots.entries()){
+           const root=path.join(os.tmpdir(),name),stat=fs.lstatSync(root);assert.ok(stat.isDirectory()&&!stat.isSymbolicLink());
+           const names=fs.readdirSync(root).filter(name=>['stores','io-stores','sdk-negative','rust-sdk-negative','consumer.mjs'].includes(name)||/^rust-(io-)?consumer-.*\\.rs$/.test(name));
+           if(names.length){const r=spawnSync('tar',['czf',path.join(out,'checked-publication-evidence-'+index+'.tar.gz'),'-C',root,...names],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(r.status,0,r.stderr);}
+          }
+          const applications=path.join(out,'installed-applications');
+          if(fs.existsSync(applications)){const r=spawnSync('tar',['czf',path.join(out,'installed-applications-evidence.tar.gz'),'-C',out,'installed-applications'],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(r.status,0,r.stderr);}
+          JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -95,4 +110,5 @@ jobs:
             psc1/dist/slim-universal/application-qualification.json
             psc1/dist/slim-universal/io-candidate-qualification.json
             psc1/dist/slim-universal/checked-publication-types.json
+            psc1/dist/slim-universal/*evidence*.tar.gz
           retention-days: 90

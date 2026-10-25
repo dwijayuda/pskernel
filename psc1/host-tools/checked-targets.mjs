@@ -64,7 +64,7 @@ export function prepareCheckedTarget(stage, candidate, { target, typescript, rus
     fs.writeFileSync(file, candidate.source);
     const names = run('target-rust-api', [file], rust.inspector)
       .trim()
-      .split('\\n')
+      .split('\n')
       .filter(Boolean)
       .sort();
     if (JSON.stringify(names) !== JSON.stringify([...candidate.publicNames].sort()))

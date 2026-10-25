@@ -84,11 +84,10 @@ for(const engine of ['js','ts','rust','wasm-core'])for(const kind of ['lean','ps
  assert.equal(readPublication({out,publicationProtocol:'portable-file'}).generation,prior);negatives.push({id:'wasm-io-abi-refusal',engine,kind,priorPreserved:true});
 }
 assert.equal(records.length,32);assert.equal(negatives.length,143);
-fs.writeFileSync(${JSON.stringify(output)},JSON.stringify({schema:'psc1-installed-checked-publication/1',testedCommit:process.env.GITHUB_SHA,status:'passed',platform:process.platform,compilerSourceClosureDigest:getCompilerMetadata().compilerSourceClosureDigest,records,ioRecords,rustConsumers,negatives,nonLinuxQualification:'not-run',rustOutput:'typechecked-awaiting-external-link-observations'},null,2)+'\\n');
+fs.writeFileSync(${JSON.stringify(output)},JSON.stringify({schema:'psc1-installed-checked-publication/1',testedCommit:process.env.GITHUB_SHA,status:'target-consumers-passed-awaiting-link',platform:process.platform,compilerSourceClosureDigest:getCompilerMetadata().compilerSourceClosureDigest,records,ioRecords,rustConsumers,negatives,nonLinuxQualification:'not-run',rustOutput:'typechecked-awaiting-external-link-observations'},null,2)+'\\n');
 console.log('PSC1_INSTALLED_CHECKED_PUBLICATION: PASS '+JSON.stringify({cases:records.length,negatives:negatives.length}));
 `);
-const result=spawnSync(process.execPath,[consumer],{cwd:work,env,encoding:'utf8',timeout:1500000,maxBuffer:32*1024*1024});
-console.log(result.stdout);
+const result=spawnSync(process.execPath,[consumer],{cwd:work,env,encoding:'utf8',stdio:['ignore','inherit','inherit'],timeout:1500000,maxBuffer:32*1024*1024});
 if(result.status!==0)for(const file of fs.readdirSync(work,{recursive:true})){
  if(typeof file==='string'&&/\.(stderr|stdout)\.txt$/.test(file)){console.log('TARGET_DIAGNOSTIC: '+file+'\n'+fs.readFileSync(path.join(work,file),'utf8').slice(0,8192));}
 }
@@ -102,4 +101,4 @@ for(const row of receipt.rustConsumers){
  assert.equal(built.status,0,built.stderr);const observed=spawnSync(exe,[],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(observed.status,0,observed.stderr);
  row.linkedAndExecuted=true;
 }
-receipt.rustOutput='typechecked-linked-and-executed';fs.writeFileSync(output,JSON.stringify(receipt,null,2)+'\n');
+receipt.status='passed';receipt.rustOutput='typechecked-linked-and-executed';fs.writeFileSync(output,JSON.stringify(receipt,null,2)+'\n');

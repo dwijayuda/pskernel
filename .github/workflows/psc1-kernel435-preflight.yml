@@ -1,0 +1,57 @@
+name: PSC1 Lean435 kernel compatibility preflight
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [.github/workflows/psc1-kernel435-preflight.yml]
+permissions:
+  contents: read
+jobs:
+  compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Inspect live package consumers and current semantic closure
+        run: |
+          rg -n 'pskernel-lean-wasm|pskernel-lean/index|pskernel-lean.*node-provider|checkCanonicalAdmissions' psc1/host-tools psc1/scripts psc1/npm-cli .github/workflows/psc1-* || true
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          const roots=['foundation/src','core/src','environment/src','bridge/src','pskernel-lean/provider'].map(p=>path.join('psc1/packages',p)),seen=new Set(),active=new Set(),rows=[];
+          function visit(module){if(seen.has(module))return;assert.ok(!active.has(module),'cycle '+module);const files=roots.map(r=>path.join(r,...module.split('.'))+'.lean').filter(fs.existsSync);assert.equal(files.length,1,module);active.add(module);const text=fs.readFileSync(files[0],'utf8');for(const m of text.matchAll(/^import\s+(.+)$/gm))for(const dep of m[1].trim().split(/\s+/))if(dep.startsWith('Ps.')||dep.startsWith('PsKernelLean.'))visit(dep);active.delete(module);seen.add(module);rows.push({module,path:files[0],sha256:crypto.createHash('sha256').update(text).digest('hex')});}
+          visit('PsKernelLean.Main');console.log('PSC1_KERNEL435_SOURCE_CLOSURE: '+JSON.stringify(rows));
+          JS
+      - name: Fetch exact official Lean4.35 source
+        run: |
+          git init -q "$RUNNER_TEMP/lean435"
+          git -C "$RUNNER_TEMP/lean435" remote add origin https://github.com/leanprover/lean4.git
+          git -C "$RUNNER_TEMP/lean435" fetch --depth 1 origin eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git -C "$RUNNER_TEMP/lean435" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/lean435" rev-parse HEAD)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+      - name: Check retained Cpp Emscripten compatibility transformations against435
+        run: |
+          status=0
+          if ! git -C "$RUNNER_TEMP/lean435" apply --check "$GITHUB_WORKSPACE/psc1/packages/pskernel-lean-wasm/patches/lean435-compat-preflight.patch"; then
+            status=1
+          fi
+          if ! node psc1/packages/pskernel-lean-wasm/scripts/apply-wasm-abi.mjs "$RUNNER_TEMP/lean435"; then
+            status=1
+          fi
+          if ! node psc1/packages/pskernel-lean-wasm/scripts/apply-shell-exit-code.mjs "$RUNNER_TEMP/lean435"; then
+            status=1
+          fi
+          exit "$status"
+      - name: Retain compatibility logs and exact upstream delta
+        if: always()
+        run: |
+          mkdir -p preflight
+          git -C "$RUNNER_TEMP/lean435" diff > preflight/abi-delta.patch
+          git -C "$RUNNER_TEMP/lean435" rev-parse HEAD > preflight/upstream.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-kernel435-preflight-${{ github.sha }}
+          path: preflight/
+          retention-days: 90

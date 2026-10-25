@@ -1,0 +1,30 @@
+{
+  "schema": "psc1-selfhost-event-request/1",
+  "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+  "jobs": [
+    {
+      "target": "js",
+      "run": 40223062370,
+      "job": 121258729566,
+      "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98"
+    },
+    {
+      "target": "ts",
+      "run": 40223062370,
+      "job": 121258729656,
+      "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98"
+    },
+    {
+      "target": "wasm-core",
+      "run": 40223062370,
+      "job": 121258729664,
+      "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98"
+    },
+    {
+      "target": "rust",
+      "run": 40223086966,
+      "job": 121258808523,
+      "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be"
+    }
+  ]
+}

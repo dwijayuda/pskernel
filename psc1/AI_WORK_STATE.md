@@ -2,7 +2,7 @@
 
 Updated 2026-10-26 Asia/Jakarta. Active branch feat/psc1-binding-trace-20261025,
 stacked on qualified PR #185 HEAD583f795f91f8ee83dc59556dc886a71de7950f6d.
-R2b source-binding tracing is in implementation; new source qualification pending.
+Bounded R2b source-binding/rename evidence is recorded below; retain its finite scope.
 The following R3 evidence retains its original source identity.
 Use connected GitHub and Linux Actions only. Fetch HEAD before every write and
 use single-parent expected-HEAD non-force updates. No merge or npm publication.
@@ -10,93 +10,96 @@ The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns the remaining-work queue;
 dated receipts own evidence. [Prior work-state snapshot](docs/history/AI_WORK_STATE_BEFORE_R3_QUALIFICATION_2026-10-25.md)
 preserves previous progress/failures without treating historical claims as current.
 
-## R2b implementation in progress
+## Qualified bounded source binding and rename (R2b)
 
-The production elaborator now has an opt-in source trace at actual local allocation
-and term-name resolution sites. Declaration-local event ordinals distinguish reused
-raw local IDs. Successful scope restoration retains event history and restores the
-outer active-binding map; failed branches yield no context/log. The existing
-declaration routines share one implementation with a tracing flag; normal compiler
-entry points remain disabled and do not accumulate events. No second resolver or
-elaborator is added. Foundation commit35633131849fab031e5a459f2c0d876204231182 passes Linux
-run40212099555/job121225316762:122 modules under both grammar censuses,
-closure83d3497bf758fabc7bb2fcb78c658ac6687657cc199549732dd0a90aed5e565b.
-Six actual elaboration cases preserve exact declaration admission bytes and pass
-official Lean admission, including raw-ID reuse, branches, lambdas, match, Id do
-and Except do. Disabled traces stay empty and invalid typed source still refuses.
-The production module pipeline shares the opt-in implementation through real batch
-origins. Linux40213400247/job121229268168 passes native module parity, official
-admission, exact selected-definition alpha comparison and public/other-Core refusals.
-Host implementation8fab91a6 plus grammar-fixture correctione04b9ae0 passes
-40214342888/job121232132478:14 actual checked local renames and31 negatives under
-both grammars. Inputs use the existing qualified printer for PS, then the real PS
-parser/elaborator/checker. No parallel resolver/compiler is introduced.
-
-Host indices are genuine opaque capabilities; source/member/snapshot/event identity
-distinguishes raw-local-ID reuse. Both actual endpoints receive independent official
-Lean admission and strict IR. Local rename compares all source-bound references
-under an explicit byte-offset/binder correspondence; native Core comparison keeps
-the selected public type and every other declaration exact, with existing Core
-alpha equality for the selected definition value only. Candidates are copied bytes;
-neither the API nor developer CLI writes project sources. Headers, partial,
-normalized, ambiguous and unlocated binders refuse; structural direct self-calls
-explicitly mark incomplete coverage. R3 literal graph/IR equality is unchanged.
-Expanded focused run40214590580/job121232875557 PASSED:14 actual checked renames
-and54 negatives, including malformed trace/target/event/span wire, tampered native
-comparison identities, actual independent checker rejection, changed tool pins,
-and candidate/read-only CLI execution from outside the repository cwd. The full PR run40215046405 executes28 before/after artifacts across both grammars
-and all seven backends, then refuses the compiler trace at the existing32MiB wire
-bound. Compact transport99bf6047/b14ec90a preserves every coordinate, event and
-tagged name without increasing limits; focused40215894458/job121237125649 passes
-14 renames/58 negatives. Its full job121237825151 confirms all28 runtime artifacts,
-then exposes generated-reference/source-span ambiguity in actual compiler input.
-No whole-compiler binding or rename qualification is yet claimed.
-
-The systematic fix adds optional sourceSpan to PsSyntaxName: actual source-name
-factories retain exact lexical spans, generated-name factories explicitly retain
-only diagnostic anchors, and grouping preserves the original source-name span
-while keeping legacy term spans/adjacency. All production construction/copy sites
-and manual test constructors are updated using the Linux source inventory
-40217518231. Actual allocation/resolution tracing transports both anchor and optional
-source span. Generated references remain attributed read-only; a selected binder
-with a generated/unlocated use refuses edits. Full token/span checks, actual target
-correspondence, endpoint admission and Core comparison remain mandatory. Focused40217982759/job121243651239 PASSED:20 actual checked renames and61
-refusals, including lists, projection bases, nested grouping and adjacent grouped
-calls. Both whole122-module grammar censuses pass source closure
+Implementation 9d07ae36e077aec381fea01d2db585984dff38ba and tested merge
+45397570c5c0e9eeaf8e036a8589a13d097e1189 share tree
+f43e37d4c845d91c821aab989ec61c888f0b9104.
+The current portable compiler has122 modules/4735 source Core members, closure
 1714b8cf1d3d50096ac85fc4838237f82205a2459645c01c3811bbad257756f8.
+The [R2b receipt](docs/PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json)
+owns exact jobs/artifacts, finite relations, refusals and preserved failures.
 
-The full integration executes all28 before/after artifacts with projection use,
-then still refuses a compiler reference span. Read-only Linux diagnostic
-40218871489/job121245870721 captures the actual1714b8cf source:108032 references
-(98437 source/9595 generated), zero spelling mismatches,17033418 response bytes,
-63867ms and496596KiB maxRSS. It explicitly produces no accepted index, independent
-admission or candidate. The remaining host range bug included the zero-width EOF
-token when a reference ended at EOF. Ownership/reference validation now shares
-one half-open token-range utility; no-final-newline positives and an empty-EOF
-span refusal are added. Strict span/target/admission/Core checks remain unchanged.
-New focused/whole-compiler/ordinary results for this host fix remain pending.
-Current-source Wasm G1 is independently running40218467242 from request
-47b0db70b000f7f631883c828182c6511d7316c2, source d51873c5 and1714b8cf closure.
+Production tracing records actual allocation and resolved term-base events.
+Monotonic declaration-local ordinals distinguish reused raw local IDs; successful
+scope restoration preserves event history and restores the active map. Failed
+branches return no context/log. The same compiler implementation takes an opt-in
+host tracing flag; ordinary compilation remains disabled. There is no second
+resolver or compiler. PsSyntaxName now retains an optional exact lexical source
+span separately from its existing grouping/diagnostic anchor. Generated names
+retain attribution without fabricated source edit authority.
 
-Preserved development-source Wasm G1 PASSED40214655849/job121233194023:
-source82322ec8f3a22f50562d81368986defafcf3a09e, closure
-5957bdf24a1b2b1d5799f1f743e9c35e947b174d936181ed5a818ad163ea860e,
-122 modules under both grammar audits,40 cross-target cases and9 envelope negatives.
-Controller99f8c708dae6061210cf24dfbba32068387a0d73; G1 service SHA
-40d08715f93aab248a73926417a6046c488a8ec1692d81e9fa2b5e4c51616c31.
-Artifact12607570362 ZIPccd69fec152ea6d95601a4bc46ef23ef9e55b00e03741c9948df00e2dbc72548.
-This evidence predates the new syntax-name provenance field; that changed source
-needs its own census/G1/ordinary gates. Frozen package generations remain unchanged.
-[Binding API and exact limits](docs/PSC1_SOURCE_BINDINGS.md).
+The private host factory binds actual source/member/snapshot/event identity to
+immutable capabilities. Rename patches one supported body binder and its actual
+source references only, preserves unaffected bytes, and independently admits and
+strictly validates both actual endpoints. Full source/binder/reference target
+correspondence detects capture. Native Core comparison requires the exact public
+name/levels/type and every other raw declaration, including ordinary bodies; only
+the selected definition value may differ by existing Core alpha equality.
+R3 retains literal private canonical admission/original-IR equality.
+The developer CLI returns read-only indices or candidate JSON and never writes
+project sources. [API and deliberate limits](docs/PSC1_SOURCE_BINDINGS.md).
 
-This is not yet qualified R2b, complete source tracing or rename. Structured
-recursion, synthesized and normalization provenance, data declarations, exact
-source transport and binding-aware editing remain to finish. Preserve the R3
-and frozen package identities below; never reuse them for the changed compiler.
+Focused 40219590598/job 121248430355 passes 23 renames/62 refusals, both grammars,
+official checking, forged/stale/cross-index refusal, changed tools/checker refusal,
+projection/list/grouped-call syntax and exact EOF ranges. Full binding integration
+job 121249317325 passes 28 actual before/after artifacts across all seven backends.
+It checks the entire compiler in both grammars:2928 traces, 2163 complete recorded
+traces, 42269 binder events and 108032 references per grammar. It independently
+checks a candidate rename of body binder pruned to retainedTrace in
+Ps.Elab.SourceTrace.psElabSourceTraceWithLocals for both whole compiler closures.
+The candidates are not applied to compiler source. PS candidate closure:
+2ad431f2264360ca8c1cf89df6e22cf4fd9177157101910f2a5e150d50af3ca1.
+Lean indexing/rename60337/76662ms; PS60262/81353ms.
+
+Current-source genuine Wasm G1 PASSED 40218467242/job 121244777955:
+both 122-module grammar audits,40 cross-target cases and 9 envelope refusals,
+service manifest1df35ec0f8d68295d5ac886120bbe65b6567a5a9615ed90fee07fee56eb85ace.
+The G1 source is d51873c5;9d07 changes host token-range handling only and has the
+same portable source digest. This is G1-only, not new G2/G3 or fixed points.
+Ordinary source run 40219590598 and final gate 121257714088 pass every selected
+dependency, full job 121250940323 and all 37 finite Practical Core criteria with
+zero blocked (releaseReady=true). This qualifies the finite source contract,
+not final universal-platform publication or new G2/G3 generations.
+
+Diagnosed failures remain preserved in Git and the receipt. Verbose whole-source
+tracing exceeded the existing32MiB response cap after all 28 artifacts passed.
+Compact transport preserves every coordinate/event/tagged name within the cap.
+Generated/list/grouping references then exposed source-span ambiguity; explicit
+optional lexical provenance fixes the class while retaining legacy parse spans.
+A subsequent read-only diagnostic found zero spelling mismatches among108032
+references in 17033418 response bytes (63867ms/496596KiB native RSS). It granted
+no admission/index/candidate authority. The final bug was inclusion of zero-width
+EOF in a reference's token range; one shared half-open utility fixes ownership
+and reference checks without weakening span validation.
+
+Coverage is bounded recorded term bases before lifts. Data/normalization batches,
+structural direct self-call paths, generated/unlocated uses, mutable SSA/join
+aliases, public headers, partial/theorem definitions and ambiguous/multi-member
+selections refuse edits. This is not complete IDE tracing, a formal whole-source
+preservation theorem, R4 effect equivalence or publication authority.
+
+## Next practical distribution work
+
+The opt-in IO request reuses existing source/frontend/elaboration/strict IR,
+public IO signature validation and backend mappings. Native probe 6e27116a
+on qualification/psc1-output-abi-probe-20261026 passes 40221444236/job 121253688524:
+122-module grammar audits,4 actual grammar/assurance cases and 30 negatives,
+real independent admission and actual Unicode/dispatcher/trap execution.
+Its distinct portable source closure is
+073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
+Generated G1 IO execution is running40222325020 on separate preserved qualification
+branch qualification/psc1-output-abi-g1-20261026, request67fd1dcae5554aea06b089be228c7eeb46fa82c1.
+It is not yet package/new G2/G3/fixed-point qualification and is not promoted into
+PR #186. Finish the exact terminal results, then follow roadmap item1 without
+relabeling old frozen payloads. Further native real-application probing is running from 92db3e344189adebe9b1fa8ae085f1df75da6a25
+on the same experimental branch; it has no terminal qualification yet.
+Host API/CLI/types/explicit IO packaging and real
+multi-module application execution remain to qualify.
 
 ## Preserved qualified R3 source and assurance
 
-The active portable compiler has 121 modules and 4,677 source Core members:
+The preserved R3 portable compiler has 121 modules and 4,677 source Core members:
 77e2173db1ffd86e7f7400c25986e9c23ec8975c4ff773e9489d89d5632dcacb.
 Only Ps.Syntax.PrintLean changes inside the previously qualified closure.
 The printer groups low-precedence/nested-match forms and threads indentation
@@ -143,7 +146,7 @@ ef7531ed; subsequent host optimization preserves portable closure 77e2173d.
 This is G1-only, not new G2/G3, fixed-point or self-compilation performance evidence.
 
 Ordinary source run 40206628424 PASSED every selected dependency, full Linux-scoped
-job121212292606 and final gate121218977024: 37/37 finite Practical Core criteria
+job 121212292606 and final gate121218977024: 37/37 finite Practical Core criteria
 qualified, zero blocked, releaseReady=true within that contract. It covers all
 seven backend mappings/both grammars, runtime/negative/minimum-Python checks and
 actual installed native npm/source-library tests. Full artifact12605114230 ZIP
@@ -180,9 +183,9 @@ failure/source identities; none is relabeled as a pass.
 
 | Scope | Exact existing evidence |
 | --- | --- |
-| R1 lexical capture and stale-safe byte edits | c577d498, focused40191237137/source40191245319; [receipt](docs/PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json). Lexical only. |
-| Character diagnostics | d70221c9, focused40195964028 (664 positions), WasmG1 40196021448/source40196244138; [receipt](docs/PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json). Two scoped ordinary Lean leaf theorems, not whole-compiler proof. |
-| Documentation, host formatting, 27-definition Wasm extraction | 446a0f21, correspondence40184892095/package40184641007/WasmG1 40184951724/source40184897417; [receipt](docs/PSC1_READABILITY_QUALIFICATION_2026-10-25.json). |
+| R1 lexical capture and stale-safe byte edits | c577d498, focused 40191237137/source 40191245319; [receipt](docs/PSC1_LOSSLESS_SOURCE_QUALIFICATION_2026-10-25.json). Lexical only. |
+| Character diagnostics | d70221c9, focused 40195964028 (664 positions), WasmG1 40196021448/source 40196244138; [receipt](docs/PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json). Two scoped ordinary Lean leaf theorems, not whole-compiler proof. |
+| Documentation, host formatting, 27-definition Wasm extraction | 446a0f21, correspondence40184892095/package40184641007/WasmG1 40184951724/source 40184897417; [receipt](docs/PSC1_READABILITY_QUALIFICATION_2026-10-25.json). |
 | Frozen four-engine self-hosting | 120 modules, daa735017e34ee94da79d747c363237b4adbc4ef; [receipt](docs/PSC1_UNIFIED_FOUR_ENGINE_QUALIFICATION_2026-10-25.json). Genuine G1/G2/G3 and exact fixed points; unchanged payloads. |
 | Current installable host package | proofscript@0.1.0-psc1.4, 3,704,169 bytes, package40184641007/artifact12595861227; [install guide](docs/PSC1_SLIM_UNIVERSAL_PACKAGE.md). |
 | Official kernels | Native40155475188/Wasm40158859386, five-platform kernel tests; [receipt](docs/PSC1_KERNEL435_QUALIFICATION_2026-10-25.json). Full root-platform publication remains separate. |
@@ -211,7 +214,7 @@ elaborator, textual global rename or blanket equivalence claim.
 R4, slim real application/source-package coverage, checked generated non-JS output,
 portable transactions and final clean changed-source/platform release remain pending.
 
-Keep official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust0,
+Keep official Lean 4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust0,
 2M heartbeats/20k recursion, strict original/transformed IR, exact logical/runtime
 pairing, semantic fuel, negative/resource/ABI refusal policies. Compiler/tool/G1/
 corpus240s and checker120s remain. Manual Rust3600s and other1800s correctness

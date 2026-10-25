@@ -1,0 +1,332 @@
+{
+  "schema": "psc1-source-bindings-qualification/1",
+  "date": "2026-10-26",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/186",
+  "implementationCommit": "9d07ae36e077aec381fea01d2db585984dff38ba",
+  "testedMerge": "45397570c5c0e9eeaf8e036a8589a13d097e1189",
+  "testedTree": "f43e37d4c845d91c821aab989ec61c888f0b9104",
+  "status": "qualified-bounded-source-rename-milestone",
+  "source": {
+    "portableModules": 122,
+    "sourceCoreMembers": 4735,
+    "portableClosureSha256": "1714b8cf1d3d50096ac85fc4838237f82205a2459645c01c3811bbad257756f8",
+    "psCandidateClosureSha256": "2ad431f2264360ca8c1cf89df6e22cf4fd9177157101910f2a5e150d50af3ca1"
+  },
+  "scope": {
+    "phase": "source-elaboration-before-lifts",
+    "coverage": "recorded-term-bases",
+    "edit": "one source-backed body binder in one stable definition",
+    "actualElaboratorEvents": true,
+    "secondResolver": false,
+    "defaultCompilerTracing": false,
+    "opaqueFactoryCapabilities": true,
+    "exactUnaffectedBytes": true,
+    "completeTracingClaimed": false,
+    "formalWholeCompilerPreservation": false,
+    "sourceWrites": false,
+    "publication": false
+  },
+  "comparison": {
+    "independentlyAdmitActualBeforeAndAfterGraphs": true,
+    "strictIrBothEndpoints": true,
+    "ordinaryLogicalBodyPairing": true,
+    "fullSourceBinderReferenceCorrespondence": true,
+    "exactPublicNameLevelsAndType": true,
+    "exactOtherCoreDeclarations": true,
+    "selectedDefinitionValue": "existing Core alpha equality only",
+    "r3LiteralPrivateAdmissionAndOriginalIrEqualityUnchanged": true
+  },
+  "focused": {
+    "runId": 40219590598,
+    "jobId": 121248430355,
+    "status": "passed",
+    "checkedRenames": 23,
+    "refusals": 62,
+    "sourceGrammars": [
+      "lean",
+      "ps"
+    ],
+    "artifact": {
+      "id": 12609062532,
+      "zipSha256": "a9a206d763948966a523d176bea8792bda2615a773f42347f8005bd8921e4d56"
+    }
+  },
+  "fullCompilerIntegration": {
+    "runId": 40219590598,
+    "jobId": 121249317325,
+    "status": "passed",
+    "executedBeforeAfterArtifacts": 28,
+    "backends": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "perGrammar": {
+      "traces": 2928,
+      "completeRecordedTraces": 2163,
+      "binders": 42269,
+      "references": 108032
+    },
+    "selectedCompilerDefinition": "Ps.Elab.SourceTrace.psElabSourceTraceWithLocals",
+    "candidateRename": {
+      "from": "pruned",
+      "to": "retainedTrace",
+      "appliedToCompilerSource": false
+    },
+    "lean": {
+      "indexMs": 60337,
+      "renameMs": 76662
+    },
+    "ps": {
+      "indexMs": 60262,
+      "renameMs": 81353
+    },
+    "artifact": {
+      "id": 12608609961,
+      "zipSha256": "c90aad21ef45c7208113af1befd9885b516fab194e1f2364b6c45cc46af3a3b4",
+      "perEndpointIdentities": "integration.json inside the SHA-pinned artifact"
+    }
+  },
+  "genuineNewSourceWasmG1": {
+    "runId": 40218467242,
+    "jobId": 121244777955,
+    "status": "passed",
+    "sourceCommit": "d51873c5f38c35704272aee7e679b6af875fe612",
+    "branch": "qualification/psc1-name-origin-wasm-g1-20261026",
+    "control": "408f5ace6ebc34a145a41f5c82e6f1d58ff7c6f3",
+    "request": "47b0db70b000f7f631883c828182c6511d7316c2",
+    "source": "d51873c5f38c35704272aee7e679b6af875fe612",
+    "sourceDigest": "1714b8cf1d3d50096ac85fc4838237f82205a2459645c01c3811bbad257756f8",
+    "sourceModules": 122,
+    "sourceClosureDigest": "1714b8cf1d3d50096ac85fc4838237f82205a2459645c01c3811bbad257756f8",
+    "sourceGrammars": [
+      "lean",
+      "ps"
+    ],
+    "crossTargetCases": 40,
+    "envelopeRefusals": 9,
+    "serviceSha256": "1df35ec0f8d68295d5ac886120bbe65b6567a5a9615ed90fee07fee56eb85ace",
+    "artifact": {
+      "id": 12609325580,
+      "zipSha256": "5a6f20804da769607938af33323dce2a6156e6f8381371fc12bdc5082fc37f1a"
+    },
+    "generations": [
+      1
+    ],
+    "fixedPoint": "not-requested"
+  },
+  "limits": {
+    "compilerRequestMs": 240000,
+    "checkerMs": 120000,
+    "addressSpaceBytes": 4294967296,
+    "helperStackBytes": 8388608,
+    "sourceBytes": 1048576,
+    "modules": 256,
+    "requestAndEachOutputBytes": 33554432,
+    "maxEventsPerDeclaration": 262144,
+    "maxEdits": 4096,
+    "semanticFuelChanged": false,
+    "policiesWeakened": false
+  },
+  "transport": {
+    "encoding": "psc1-source-bindings-compact/2",
+    "coordinatesEventsTaggedNamesRetained": true,
+    "explicitSourceNameSpanSeparateFromDiagnosticAnchor": true,
+    "legacyGroupingAndAdjacencySpansPreserved": true,
+    "halfOpenTokenRangesExcludeZeroWidthEof": true
+  },
+  "preservedFailures": [
+    {
+      "runId": 40215046405,
+      "jobId": 121235199211,
+      "reason": "28 artifacts pass; whole compiler trace exceeds unchanged 32MiB response bound",
+      "fix": "compact positional transport preserves every event/name/span"
+    },
+    {
+      "runId": 40215894458,
+      "jobId": 121237825151,
+      "reason": "generated-reference source span ambiguity",
+      "fix": "optional lexical sourceSpan with separate generated diagnostic anchors"
+    },
+    {
+      "runId": 40217982759,
+      "reason": "whole compiler reference ending at EOF included zero-width EOF token",
+      "fix": "shared half-open token range helper; no-final-newline positives and empty-EOF refusal"
+    }
+  ],
+  "readOnlyDiagnostic": {
+    "runId": 40218871489,
+    "jobId": 121245870721,
+    "responseBytes": 17033418,
+    "sourceReferences": 98437,
+    "generatedReferences": 9595,
+    "spellingMismatches": 0,
+    "nativeMs": 63867,
+    "nativeMaxRssKiB": 496596,
+    "responseSha256": "f243cb642c041cf477ebd41b63f95e6bd5e7b2255dca071cae869b3add59dc86",
+    "independentAdmission": "not-run",
+    "acceptedIndex": false,
+    "candidate": false,
+    "publication": false
+  },
+  "deliberateRefusals": [
+    "public headers and declaration/field renames",
+    "partial/theorem/normalized or multiple-member definitions",
+    "generated-only or unlocated/ambiguous binders or uses",
+    "structural direct self-call paths with incomplete trace coverage",
+    "SSA/join aliases without source-family attribution",
+    "data/normalization paths without recorded traces",
+    "stale/forged/cross-index handles",
+    "capture, changed targets or unrelated Core",
+    "checker/tool/limit failures"
+  ],
+  "preserved": {
+    "officialLeanVersion": "4.35.0",
+    "officialLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "trustLevel": 0,
+    "heartbeats": 2000000,
+    "checkerRecursion": 20000,
+    "frozenCompilerCommit": "daa735017e34ee94da79d747c363237b4adbc4ef",
+    "frozenCompilerClosureSha256": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "frozenPackagesChanged": false,
+    "oldGenerationQualificationsRelabeled": false,
+    "newG2G3Claimed": false,
+    "backendEmitterCount": 7,
+    "kernelWasmMemoryModel": "official C++/Emscripten linear memory",
+    "compilerWasmArchitecture": "existing GC"
+  },
+  "remaining": [
+    "R4 obligations for effectful/partial/foreign transformations",
+    "broader tracing beyond bounded recorded-term scope",
+    "slim real applications through generated/compiler npm engines",
+    "portable publication and actual platform qualification",
+    "checked TS/Rust/Wasm publication",
+    "final changed-source generation and distribution qualification",
+    "original 240-second selfcompile performance target"
+  ],
+  "ordinaryDevelopment": {
+    "runId": 40219590598,
+    "fullJobId": 121250940323,
+    "gateJobId": 121257714088,
+    "status": "passed",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "finiteContractOnly": true,
+    "jobs": [
+      {
+        "id": 121248277203,
+        "name": "static",
+        "result": "success"
+      },
+      {
+        "id": 121248430284,
+        "name": "focused / php-application",
+        "result": "success"
+      },
+      {
+        "id": 121248430329,
+        "name": "lossless / lossless",
+        "result": "success"
+      },
+      {
+        "id": 121248430332,
+        "name": "native / native",
+        "result": "success"
+      },
+      {
+        "id": 121248430355,
+        "name": "source-bindings / trace",
+        "result": "success"
+      },
+      {
+        "id": 121248430358,
+        "name": "focused / focused (applications)",
+        "result": "success"
+      },
+      {
+        "id": 121248430371,
+        "name": "focused / focused (core)",
+        "result": "success"
+      },
+      {
+        "id": 121248431534,
+        "name": "benchmark",
+        "result": "skipped"
+      },
+      {
+        "id": 121249317325,
+        "name": "source-bindings / integration",
+        "result": "success"
+      },
+      {
+        "id": 121250155492,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "result": "success"
+      },
+      {
+        "id": 121250155511,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121250155546,
+        "name": "g1 / host-session-boundary",
+        "result": "success"
+      },
+      {
+        "id": 121250155615,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "result": "success"
+      },
+      {
+        "id": 121250155668,
+        "name": "g1 / generated-js",
+        "result": "success"
+      },
+      {
+        "id": 121250940323,
+        "name": "full / linux-scoped",
+        "result": "success"
+      },
+      {
+        "id": 121257714088,
+        "name": "gate",
+        "result": "success"
+      }
+    ],
+    "artifact": {
+      "id": 12610271441,
+      "name": "psc1-scoped-correctness-45397570c5c0e9eeaf8e036a8589a13d097e1189",
+      "size_in_bytes": 121333982,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12610271441",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12610271441/zip",
+      "expired": false,
+      "created_at": "2026-10-25T18:45:27Z",
+      "expires_at": "2026-11-08T18:45:18Z",
+      "updated_at": "2026-10-25T18:45:27Z",
+      "digest": "sha256:e6ba113801b87cd1e92a800b92f21ba051a1e6dd12a755916de8de1c07aa4be8",
+      "workflow_run": {
+        "id": 40219590598,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-binding-trace-20261025",
+        "head_sha": "9d07ae36e077aec381fea01d2db585984dff38ba"
+      }
+    }
+  }
+}

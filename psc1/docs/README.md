@@ -18,6 +18,7 @@ from immutable evidence; dated records remain preserved.
 | How was the malformed-character location defect repaired? | [Correction and scoped proof](PSC1_CHARACTER_DIAGNOSTICS.md) |
 | How are actual declaration/member origins tied to source? | [Read-only ownership](PSC1_SOURCE_OWNERSHIP.md) |
 | How do I convert supported source grammars safely? | [Checked candidate conversion API/CLI](PSC1_CHECKED_SOURCE_CONVERSION.md) |
+| How do I produce a checked local rename candidate? | [Binding trace/rename API and deliberate bounds](PSC1_SOURCE_BINDINGS.md) |
 | Which refactor operations can be justified? | [Checked source-refactoring design](PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) |
 | How can an engineering session continue? | [AI work state](../AI_WORK_STATE.md), [current continuation](PSC1_SOURCE_REFACTOR_CONTINUATION.md) |
 
@@ -27,15 +28,20 @@ those authorities; they do not create qualification.
 
 ## Exact existing qualification
 
+- [Bounded source binding and local rename (R2b)](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json):
+  implementation 9d07ae36/source 1714b8cf;40219590598 passes 23 renames/62 refusals,
+  28 seven-target artifacts and whole122-module compiler indexing/rename under both
+  grammars;current-source WasmG1 40218467242. Complete tracing remains unsupported.
+
 - [Checked grammar conversion (R3)](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json):
   implementation fa265940, source closure 77e2173d; conversion40206625342,
   genuine WasmG1 40206504499 and readable source artifact40206663537.
-  Ordinary source40206628424 passes37/37, zero blocked. Exact source/publication boundaries and artifacts are in the receipt.
+  Ordinary source 40206628424 passes 37/37, zero blocked. Exact source/publication boundaries and artifacts are in the receipt.
 
 - [Read-only declaration ownership (R2a)](PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json):
   implementation a77ec1a8, focused 40200895349 (121 modules in both grammars,
   ten production-path graph comparisons and 42 refusals), ordinary 40200961302
-  (37/37 finite criteria). Reference resolution and rename remain pending.
+  (37/37 finite criteria). That receipt grants no reference/rename authority; bounded R2b has separate evidence.
 
 - [Character diagnostic correction](PSC1_CHARACTER_DIAGNOSTIC_QUALIFICATION_2026-10-25.json):
   implementation d70221c9, focused 40195964028 (664 position cases, 359 captures,

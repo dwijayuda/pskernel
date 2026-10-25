@@ -41,6 +41,13 @@ with the original error. No partial token acceptance is invented. The status
 "accepted" means only lexical acceptance; neither status runs a parser or checker.
 Capture failures (including piece exhaustion) produce no snapshot.
 
+Diagnostics are advisory data copied from the original lexer, never edit ranges.
+The existing malformed-character branch can compute a location inside a UTF-8
+scalar (for example, the refused input apostrophe–emoji–alpha). Such a location
+is retained verbatim and marked diagnosticCoordinatesVerified false. Verified
+locations still grant no editing authority. Token/trivia/edit spans always require
+exact UTF-8 boundaries; this diagnostic distinction never grants lexical acceptance.
+
 The host checks the closed response shape, piece order, complete byte coverage,
 raw slices, UTF-8 boundaries, position progression, EOF and exact token projection.
 It reconstructs the tape and compares it with the original bytes before retention.

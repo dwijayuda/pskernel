@@ -90,6 +90,13 @@ for (let i = 0; i < 32; i++) {
   }
   for (const grammar of ['lean', 'ps']) capture(source, grammar, 'Fuzz.' + i);
 }
+for (const grammar of ['lean', 'ps']) {
+  const malformedCharacter = capture("'😀α", grammar);
+  assert.equal(malformedCharacter.status, 'lexically-refused');
+  assert.equal(malformedCharacter.diagnostic.code, 'unterminatedCharacter');
+  assert.equal(malformedCharacter.diagnostic.span.stop.byteOffset, 3);
+  assert.equal(malformedCharacter.diagnosticCoordinatesVerified, false);
+}
 const original = bytes('-- keep\r\ndef α := 1 -- 😀\r\n');
 const snapshot = capture(original, 'lean', 'A.Module', '/first/location.lean');
 const again = capture(original, 'lean', 'A.Module', '/other/location.lean');

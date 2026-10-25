@@ -25,7 +25,7 @@ def checkSource (grammar : PsLosslessGrammar) (source : String) : IO Unit := do
 def main : IO Unit := do
   let cases := ["", " \r\n", "-- eof", "/- outer /- nested -/ end -/",
     "def x := \"/- literal -- \\\" raw\" -- tail\r\n",
-    "def α := '😀'\n", "﻿def x := 2\r\n", "\tdef x := 0",
+    "def α := '😀'\n", "'😀α", "﻿def x := 2\r\n", "\tdef x := 0",
     "/- unfinished", "\"unfinished", "\"line\n", "'x", "x\r", "x﻿"]
   for source in cases do
     checkSource .lean source

@@ -132,6 +132,7 @@ function validateResponse(wire, bytes, grammar) {
   }
   if (cursor.byteOffset !== bytes.length || tokenIndex !== wire.tokens.length ||
       !Buffer.concat(chunks).equals(bytes)) refuse('COVERAGE');
+  let diagnosticCoordinatesVerified = null;
   if (wire.status === 'accepted') {
     if (wire.diagnostic !== null || !wire.tokens.length ||
         wire.tokens.at(-1).kind !== 'endOfInput') refuse('ACCEPTANCE');
@@ -145,16 +146,25 @@ function validateResponse(wire, bytes, grammar) {
     if (diagnostic.code === 'fuelExhausted') {
       if (diagnostic.span !== null) refuse('DIAGNOSTIC');
     } else {
-      validSpan(diagnostic.span, bytes);
-      for (const p of [diagnostic.span.start, diagnostic.span.stop]) {
-        if (!positionEqual(p, atOffset(bytes, p.byteOffset, grammar))) refuse('DIAGNOSTIC_POSITION');
+      // Existing lexer diagnostics are preserved as advisory data. Malformed
+      // character errors can point inside a UTF-8 scalar; they are never edit ranges.
+      exactKeys(diagnostic.span, ['start', 'stop']);
+      const positions = [diagnostic.span.start, diagnostic.span.stop];
+      for (const p of positions) {
+        exactKeys(p, ['byteOffset', 'line', 'column']);
+        if (!Number.isSafeInteger(p.byteOffset) || p.byteOffset < 0 || p.byteOffset > bytes.length ||
+            !Number.isSafeInteger(p.line) || p.line < 1 ||
+            !Number.isSafeInteger(p.column) || p.column < 1) refuse('DIAGNOSTIC_POSITION');
       }
+      if (positions[0].byteOffset > positions[1].byteOffset) refuse('DIAGNOSTIC_POSITION');
+      diagnosticCoordinatesVerified = positions.every(p => boundary(bytes, p.byteOffset) &&
+        positionEqual(p, atOffset(bytes, p.byteOffset, grammar)));
     }
     if (diagnostic.code === 'invalidSource' &&
         (typeof diagnostic.reason !== 'string' || !diagnostic.reason.isWellFormed() ||
          diagnostic.reason.length > 1024)) refuse('DIAGNOSTIC');
   }
-  return wire;
+  return { diagnosticCoordinatesVerified };
 }
 
 /** The caller pins a trusted native helper. Source data can never select tools.
@@ -214,12 +224,13 @@ export function createLosslessSourceTool({ executable, sha256 }) {
         let wire;
         try { wire = JSON.parse(decoder.decode(regularFile(output, losslessLimits.responseBytes))); }
         catch { refuse('RESPONSE_JSON'); }
-        validateResponse(wire, source, grammar);
+        const { diagnosticCoordinatesVerified } = validateResponse(wire, source, grammar);
         const sourceSha256 = hash(source);
         const sourceId = hash(JSON.stringify([protocol, module, grammar, losslessProfile, sourceSha256]));
         const snapshot = deepFreeze({
           protocol, sourceId, sourceSha256, module, grammar, profile: losslessProfile, uri,
           byteLength: source.length, status: wire.status, diagnostic: wire.diagnostic,
+          diagnosticCoordinatesVerified,
           pieces: wire.pieces.map(p => ({ ...p, id: sourceId + ':' + p.ordinal })),
           authority: { lexicalOnly: true, admission: 'not-run', publication: false },
           metrics: { elapsedMs: metrics.elapsedMs, maxRssKiB: metrics.maxRssKiB,

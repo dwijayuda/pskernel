@@ -44,7 +44,8 @@ function ensureDirectory(file) {
   const parent = path.dirname(file);
   ensureDirectory(parent);
   fs.mkdirSync(file, { mode: 0o700 });
-  syncDirectory(parent);
+  // Compile-only temporary staging remains portable; durability is qualified on Linux.
+  if (process.platform === 'linux') syncDirectory(parent);
 }
 function committedFailure(cause, result) {
   const error = Error('PSC1_SERVICE_PUBLICATION_COMMITTED_DURABILITY_UNCERTAIN', { cause });
@@ -110,7 +111,7 @@ function verifyGeneration(directory, generation, expectedFiles) {
   return manifest;
 }
 export function readPublication(root, protocol = 'legacy-symlink') {
-  requirePublicationPlatform(protocol);
+  if (!publicationProtocols.includes(protocol)) fail('PUBLICATION_PROTOCOL');
   root = path.resolve(root);
   if (!inspect(root)) return null;
   requireDirectory(root);
@@ -150,6 +151,7 @@ export function openPublicationStore(root, protocol = 'legacy-symlink') {
     root,
     protocol,
     publish({ stage, manifest, verify, fault = () => {} }) {
+      requirePublicationPlatform(protocol);
       if (consumed) fail('PUBLICATION_CONSUMED');
       consumed = true;
       if (

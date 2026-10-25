@@ -1,5 +1,10 @@
 # Continue the Wasm-default ProofScript release integration
 
+This is the preserved PR #179 checkpoint. Continue current work from
+[the slim universal continuation](PSC1_SLIM_UNIVERSAL_CONTINUATION.md),
+which records the qualified PR #180 milestone and remaining release boundaries.
+
+
 Continue draft PR #179 on
 `integration/psc1-lean435-kernel-packages-20261025`, stacked on #178/
 `feat/psc1-unified-selfhost-20261024`. Fetch live branch HEAD and CI before writes.

@@ -1,5 +1,10 @@
 # ProofScript and independent Lean 4.35 kernel packages
 
+A separate **3.70 MB slim universal-format root** is now qualified on Linux.
+See [the new install guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md). This document preserves
+the preceding native/all-seven-output distribution and its qualification.
+
+
 The integrated, unpublished Linux x64/glibc package uses
 `@proofscript/pskernel-lean-wasm@4.35.0` as the default independent checker.
 It is the official Lean C++ kernel compiled with Emscripten 6.0.9 and linear

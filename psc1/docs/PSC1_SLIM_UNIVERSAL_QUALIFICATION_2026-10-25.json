@@ -1,0 +1,1056 @@
+{
+  "schema": "psc1-slim-universal-qualification/1",
+  "date": "2026-10-25",
+  "status": "verified-Linux-package-and-source-milestone; complete-universal-release-incomplete",
+  "base": {
+    "pr": 179,
+    "head": "ba3bfb045619ceb2948820f874357b2058f79868",
+    "sourceRun": 40161364575,
+    "sourceQualifiedCommit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+    "criteria": 37,
+    "blocked": 0
+  },
+  "implementation": {
+    "pr": 180,
+    "branch": "feat/psc1-slim-universal-npm-20261025",
+    "commit": "0a717520110c673006d3f5f5d7627e59d5853f62",
+    "compilerSourceChanged": false,
+    "hostSessionChanged": false
+  },
+  "packageQualification": {
+    "run": 40166882825,
+    "job": 121089658777,
+    "status": "passed",
+    "artifact": 12588024057,
+    "zipSha256": "163ca39fa564e407b1008e25cdfd358f0516e6af669963ceef585bd4c628e708",
+    "assembly": {
+      "schema": "psc1-slim-universal-package/1",
+      "sourceCommit": "0a717520110c673006d3f5f5d7627e59d5853f62",
+      "status": "assembled-not-yet-qualified",
+      "package": "proofscript",
+      "version": "0.1.0-psc1.4",
+      "tarball": "proofscript-0.1.0-psc1.4.tgz",
+      "bytes": 3703113,
+      "sha256": "f198538c5396d25cc9944c50c698a00bea1685ce997b55e766dd4582fddf794e",
+      "previousRootBytes": 62181083,
+      "sizeRatio": 0.05955369095131392,
+      "removedBytes": 58477970,
+      "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "embeddedEngines": [
+        "js",
+        "ts"
+      ],
+      "optionalExecutionPackages": [
+        {
+          "package": "@proofscript/compiler-rust-linux-x64",
+          "version": "0.1.0-psc1.3",
+          "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz",
+          "sha256": "551f150d09d98fe48312c40cdaa793522534c84fff250097199ff75b467530f7"
+        },
+        {
+          "package": "@proofscript/compiler-wasm",
+          "version": "0.1.0-psc1.3",
+          "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
+          "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83"
+        }
+      ],
+      "defaultKernel": "wasm",
+      "nativePayloadsIncluded": false,
+      "compilerSdkRequired": false,
+      "osCpuLibcRestrictions": false,
+      "publicationPlatforms": [
+        "linux"
+      ],
+      "fullCrossPlatformRelease": false,
+      "input": {
+        "schema": "psc1-slim-universal-package-inputs/1",
+        "qualifiedIntegration": {
+          "run": 40161362270,
+          "job": 121073432577,
+          "artifact": 12586394254,
+          "zipSha256": "426c62ce4ca8fb87570d1ba169c681004d7da5e5faea80e2b3fbe07c9ef04b52",
+          "commit": "cd6a16ba1c9efc5668507ee6b9eb125f2d3b2fad",
+          "tarball": "kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz",
+          "tarballSha256": "02c5db1989adf3ada1ad39318c3efc05498a3f3132b2f21fa6a564aceea3f60a"
+        },
+        "packages": {
+          "wasmKernel": {
+            "package": "@proofscript/pskernel-lean-wasm",
+            "version": "4.35.0",
+            "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+            "sha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511"
+          },
+          "nativeKernel": {
+            "package": "@proofscript/pskernel-lean",
+            "version": "4.35.0",
+            "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+            "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+          },
+          "rust": {
+            "package": "@proofscript/compiler-rust-linux-x64",
+            "version": "0.1.0-psc1.3",
+            "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.3.tgz",
+            "sha256": "551f150d09d98fe48312c40cdaa793522534c84fff250097199ff75b467530f7"
+          },
+          "wasm-core": {
+            "package": "@proofscript/compiler-wasm",
+            "version": "0.1.0-psc1.3",
+            "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
+            "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83"
+          }
+        }
+      }
+    },
+    "installed": {
+      "schema": "psc1-slim-universal-installed/1",
+      "sourceCommit": "0a717520110c673006d3f5f5d7627e59d5853f62",
+      "status": "passed",
+      "tarballSha256": "f198538c5396d25cc9944c50c698a00bea1685ce997b55e766dd4582fddf794e",
+      "tarballBytes": 3703113,
+      "sizeRatio": 0.05955369095131392,
+      "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+      "defaultKernel": "wasm",
+      "defaultEngine": "js",
+      "cases": [
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "2a6afa9dd6eba5fd81d703d7e156ec8cb3264924d748377860ba6ba1a7a16ff8",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "bd931f77b328ebf405a86ee6346cac01a5a738fbc9c91ae5c2bfe773d5744d1e",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "82dc09c37b9a76c820c00a19d22614d0800bda5dabde67b0e5c774185f22a553",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "d7e6a6c291c974a0ea30814db3e065203dfb7a905ad88aba56e639256dd39649",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "8a54f18adc1e6fee565681f23e22bfe503a317a7057d2f0630b5c7692d2baa7f",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "d692cf536b8c96f217e66e4b46380354debdba250a321accfcb6032a8a83a962",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "6b11f84dcd9883d1c6b7962d8a5da42518ad31fa6e5fc6f8489c24008675bf57",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "fde582af42ebd6ae9df8b5c6d07da1338c67443b01991bf0cc101ac2eb07e243",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "f658612887633cb1fe8c25b7e97a82e89c4e19d3d0ada060c76d09eeb8fb45f2",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "12027a0383a566b9e9095f21f32d6e7842b214e6d32f6050cfe6b1f6112d00d6",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "6fd670b0aa509e6b960a29781f84b9e91816cbbf8a5981e737aa979b7cd1e3d8",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "58f1be19d91147e0312b2ae9f10d2391da52b67d532ed7b60be04c2cfdfde9fe",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "18c0e937512ac807772d2e8cfb09f75cf208b28eb9cbc6574e05487bd3733e18",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "18a74c426b85d41133bd4203f611976f3b1306d5eaa074670a6d60053545bf49",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "c6a2e3dddc1ed02920180df5181439faca81363e3a9044ff70b8ff8873d9ad09",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "dd3ad40e7ba476c65abe264d6d7eebda16d4106404f82863118e32856c30df41",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "e5d45427a64a390551d9b895b9da11f1291dce30e60b0d0385cd4ef2a43f5694",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "170320906c29bf133ceb3026d91bc4447b9c140582163e1ee46fcc39f5a20a1b",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "67e7337cb052b00d1fdcdba181b83fbb9e60dec2b0984b603f14fedb692631ef",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "5120d7c5a6b5b731e3aec5389cd8a2d9409d05973c014245c5c28b2ab67405d1",
+          "passed": true
+        }
+      ],
+      "globalCases": [
+        {
+          "scope": "local",
+          "grammar": "lean",
+          "checkedStdout": true
+        },
+        {
+          "scope": "local",
+          "grammar": "ps",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "grammar": "lean",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "grammar": "ps",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "engine": "js",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "js",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "ts",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "ts",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "rust",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "rust",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "wasm-core",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "wasm-core",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        }
+      ],
+      "candidateCases": [
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        }
+      ],
+      "kernelCases": [
+        {
+          "id": "nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "large-nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "kernel-type-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "duplicate-declaration-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-constant-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unsafe-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "metavariable-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "height-overflow-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "malformed-json",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-format",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "string-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-admission",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "truncated-structured-name",
+          "accepted": false,
+          "agreement": true
+        }
+      ],
+      "negativeCases": [
+        {
+          "engine": "js",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "id": "invalid-utf8-refused"
+        },
+        {
+          "id": "project-cannot-select-out",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-serviceFile",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-checkerExecutable",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-engine",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "id": "corrupt-default-kernel-with-native-installed",
+          "priorPreserved": true
+        },
+        {
+          "id": "missing-default-kernel-with-native-installed",
+          "priorPreserved": true
+        },
+        {
+          "id": "manifest-policy-corruption",
+          "priorPreserved": true
+        },
+        {
+          "id": "missing-root-kernel-policy",
+          "priorPreserved": true
+        },
+        {
+          "id": "before-seal",
+          "priorPreserved": true
+        },
+        {
+          "id": "after-seal",
+          "priorPreserved": true
+        },
+        {
+          "id": "before-commit",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "optional-executor-corruption",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "optional-executor-version-refusal"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "optional-executor-corruption",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "optional-executor-version-refusal"
+        }
+      ],
+      "byteCaptureCases": [
+        {
+          "id": "utf8-bom-preserved-in-captured-source",
+          "compilerAccepted": false,
+          "sourceClosureDigest": "ae2fc62575a4900f2a381a9ea474898e368d888a827d33dfa31ea3c6c32edf2c"
+        }
+      ],
+      "rootOnlyWithoutOptionalPayloads": true,
+      "noCompilerSdkOnExecutionPath": true,
+      "offlineEmptyCache": true,
+      "installScriptsDisabled": true,
+      "optionalBundlesInstalledExplicitly": true,
+      "allFourQualifiedPayloadsPreserved": true,
+      "linuxPublicationQualified": true,
+      "otherPlatformPublicationPolicy": "explicit-runtime-guard; other OS execution not qualified",
+      "actualPlatform": "linux-x64",
+      "fullCrossPlatformRelease": false,
+      "scope": "universal package format and checked compile API, real Linux local/global JS publication; no macOS/Windows release execution claim"
+    },
+    "installedPublicTypes": "passed"
+  },
+  "sourceRegression": {
+    "status": "passed",
+    "run": 40166884643,
+    "fullJob": 121091590002,
+    "finalGate": 121096509883,
+    "headCommit": "0a717520110c673006d3f5f5d7627e59d5853f62",
+    "testedCommit": "559ea387ad22999b7b6aedd073fd61c8a0c1bc28",
+    "treeSha": "0a232bbdf67f6f8de60950142af3be17f1231e4d",
+    "headAndTestedTreesEqual": true,
+    "artifact": 12589082030,
+    "artifactZipSha256": "1c0d30be97a68c7ca3fb25667dd8412dbb477d8df447960d12fd5b88764700a2",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "sevenBackends": {
+      "qualification": "passed-scoped-execution",
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "targetExecutionBundles": 14,
+      "scriptingRegressionGroups": 28,
+      "architectureRegressionGroups": 11,
+      "minimumPython": {
+        "targetExecutionBundles": 2,
+        "scriptingRegressionGroups": 14,
+        "artifactBundles": 12,
+        "runtimeEvidence": "runtime-conformance-python314/results.json",
+        "scriptingEvidence": "script-backends-python314/results.json"
+      },
+      "versions": {
+        "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+        "node": "v22.23.3",
+        "npm": "10.9.9",
+        "typescriptConsumer": "Version 7.0.2",
+        "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+        "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+        "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+        "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+        "python": "Python 3.15.0",
+        "pythonMinimum": "Python 3.14.8",
+        "php": "PHP 8.5.12 (cli) (built: Oct 24 2026 12:34:32) (NTS)"
+      },
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      }
+    },
+    "scope": "exact current source regression and native all-seven-output qualification; slim installed root has its own separate actual package qualification and narrower checked-target/platform scope"
+  },
+  "semanticsAndTrust": {
+    "compilerSourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "kernelMemoryModel": "official C++ Emscripten linear memory",
+    "compilerWasmArchitecture": "existing GC architecture unchanged",
+    "defaultKernel": "wasm",
+    "defaultExecutor": "js",
+    "embeddedExecutors": [
+      "js",
+      "ts"
+    ],
+    "optionalExecutors": [
+      "rust",
+      "wasm-core"
+    ],
+    "kernelRequestLimitMs": 120000,
+    "compilerRequestLimitMs": 240000,
+    "strictOriginalAndTransformedIr": true,
+    "sourceLogicalPairing": true,
+    "semanticFuelAndMemoryStackPolicies": "unchanged",
+    "frozenG1G2G3FixedPoints": "preserved verbatim; not replayed for host/package-only slice",
+    "formalCompilerPreservation": "not claimed"
+  },
+  "resolvedFailures": [
+    {
+      "run": 40165875329,
+      "job": 121086684315,
+      "commit": "7360cf33ae18f72250ecc3af448d0cb49c27d673",
+      "failure": "Npm-managed shrinkwrap absent in installed package; integrity manifest expected its path",
+      "fix": "039888f8491fa21ffbe07a3479d4f5047d7de5da",
+      "resolution": "Pin explicit immutable DEPENDENCY_LOCK.json snapshot; actual kernel package/version/resource pins still mandatory",
+      "verifiedRun": 40166009809
+    }
+  ],
+  "remaining": [
+    "actual macOS/Windows root installation/checked compile qualification and portable transactional publication",
+    "additional Rust executor platforms and supervisors",
+    "checked generated TS/Rust/Wasm core/component publication and optional Python/PHP provider dispatch",
+    "root-only SDK-free real application coverage and final exact source/package/platform qualification",
+    "required authorization before merge or npm publication"
+  ],
+  "publication": "unpublished",
+  "merge": "not merged",
+  "completeUniversalRelease": false,
+  "previousPackageQualification": {
+    "run": 40166009809,
+    "commit": "039888f8491fa21ffbe07a3479d4f5047d7de5da",
+    "artifact": 12587793310,
+    "sha256": "7188fc0c948c6faebcd081fbfaee0f9ff1d0aecd0ade28492952834f6d765bfb",
+    "bytes": 3703048,
+    "status": "passed-before-project-authority-and-byte-capture-hardening"
+  },
+  "projectDataAuthority": {
+    "allowedFields": [
+      "entryModule",
+      "sources",
+      "assurance"
+    ],
+    "hostOptionsFromSource": false,
+    "closedProjectRefusals": 4,
+    "outputPathsExecutorsCheckersRequireExplicitHostOptions": true
+  },
+  "byteCapture": {
+    "utf8": "fatal decoding, BOM preserved before frontend",
+    "cases": [
+      {
+        "id": "utf8-bom-preserved-in-captured-source",
+        "compilerAccepted": false,
+        "sourceClosureDigest": "ae2fc62575a4900f2a381a9ea474898e368d888a827d33dfa31ea3c6c32edf2c"
+      }
+    ],
+    "invalidUtf8Refused": true
+  },
+  "reviewFixes": [
+    {
+      "class": "project-data-cannot-select-host-tools-or-output-paths",
+      "fix": "c4922814fd6d4db7ce90ef116eb3d926cbfcf272",
+      "verifiedRun": 40166882825
+    },
+    {
+      "class": "exact-utf8-byte-capture-before-frontend",
+      "fix": "0a717520110c673006d3f5f5d7627e59d5853f62",
+      "verifiedRun": 40166882825
+    }
+  ]
+}

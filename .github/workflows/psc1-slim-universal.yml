@@ -1,0 +1,85 @@
+name: PSC1 slim universal npm and optional execution qualification
+on:
+  push:
+    branches: [feat/psc1-slim-universal-npm-20261025]
+    paths:
+      - .github/workflows/psc1-slim-universal.yml
+      - psc1/scripts/slim-universal-*
+      - psc1/scripts/universal-candidate-runner.mjs
+      - psc1/host-tools/installed-engine-resolver.mjs
+      - psc1/npm-cli/universal*
+permissions:
+  contents: read
+  actions: read
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Assemble a fresh slim root from exact qualified compiler and kernel payloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --check scripts/slim-universal-package.mjs
+          node --check scripts/slim-universal-installed.mjs
+          node scripts/slim-universal-package.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-slim-universal-candidate-${{ github.sha }}
+          path: |
+            psc1/dist/slim-universal/tarballs/
+            psc1/dist/slim-universal/package-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Execute offline local/global root and optional compiler bundles without SDKs
+        run: node scripts/slim-universal-installed.mjs
+      - name: Typecheck the actual packed public API
+        run: |
+          npm install --prefix "$RUNNER_TEMP/slim-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          npm install --prefix "$RUNNER_TEMP/slim-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.4.tgz"
+          cat > "$RUNNER_TEMP/slim-types/consumer.mts" <<'TS'
+          import {compile,build,compileCandidate,getCompilerMetadata,createIndependentKernelToolchain,checkCanonicalAdmissions,type Source,type CompilerEngine} from 'proofscript';
+          const sources:readonly Source[]=[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}];
+          const checked=compile({sources,entryModule:'Entry'});
+          const text:string=checked.source; const admission:'accepted'=checked.logicalAdmission;
+          const built=build({sources,entryModule:'Entry',out:'out',engine:'wasm-core'});
+          const candidate=compileCandidate({sources,entryModule:'Entry',target:'rust',engine:'ts'});
+          const authority:false=candidate.publicationAuthority;
+          const kernel=await createIndependentKernelToolchain(); const result=await kernel.checkCanonicalAdmissions('{}');
+          const accepted:boolean=result.accepted&&(await checkCanonicalAdmissions('{}')).accepted;
+          // @ts-expect-error a checked compilation is readonly
+          checked.logicalAdmission='not-run';
+          // @ts-expect-error arbitrary plugin names cannot select compiler authority
+          const unknown:CompilerEngine='untrusted-package';
+          console.log(text,admission,built.artifact,authority,accepted,getCompilerMetadata());
+          TS
+          cat > "$RUNNER_TEMP/slim-types/tsconfig.json" <<'JSON'
+          {"compilerOptions":{"noEmit":true,"strict":true,"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022"},"files":["consumer.mts"]}
+          JSON
+          node "$RUNNER_TEMP/slim-types/node_modules/typescript/bin/tsc" --project "$RUNNER_TEMP/slim-types/tsconfig.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-slim-universal-qualified-${{ github.sha }}
+          path: |
+            psc1/dist/slim-universal/tarballs/
+            psc1/dist/slim-universal/package-receipt.json
+            psc1/dist/slim-universal/installed-qualification.json
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: psc1-slim-universal-diagnostics-${{ github.sha }}
+          path: |
+            psc1/dist/slim-universal/package-receipt.json
+            psc1/dist/slim-universal/installed-qualification.json
+            psc1/dist/slim-universal/tarballs/
+          retention-days: 90

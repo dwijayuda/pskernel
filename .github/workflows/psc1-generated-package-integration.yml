@@ -57,12 +57,7 @@ jobs:
           const repo='dwijayuda/pskernel',root=path.resolve('dist/generated-package-input');fs.mkdirSync(root,{recursive:true});
           const headers={Authorization:'Bearer '+process.env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
           async function api(route){const r=await fetch('https://api.github.com/repos/'+repo+route,{headers});assert.equal(r.status,200,route);return r.json();}
-          const known=[
-           {id:12581184979,digest:'sha256:2bf7d0fadd0bacd45c1b645ad9f15ba400a67236d9720c55f21391470e12fda3',run:40145805549},
-           {id:12580184355,digest:'sha256:c294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0',run:40141718481},
-           {id:12573999378,digest:'sha256:330a41af351664b86d41791664a3a7a659813963c35b1e24af633ba99d1a9ce3',run:40126488125},
-           {id:12575002462,digest:'sha256:77c0e130074807cf538dc9759c656a0ef6fa5ec9c3939cecb0c37922d8205d77',run:40126488125}
-          ];
+          const known=[{"id":12581184979,"digest":"sha256:2bf7d0fadd0bacd45c1b645ad9f15ba400a67236d9720c55f21391470e12fda3","run":40145805549},{"id":12580184355,"digest":"sha256:c294caabf1d814c9302d3d6f95177b7af03533b9d6ed3d947d856e39ad6ee0c0","run":40141718481},{"id":12583485014,"digest":"sha256:dc724fb2d1c9b7c3667aff5d007e98504b40c00cc34f724952f3988449528f24","run":40147825207},{"id":12583170640,"digest":"sha256:58e8002673b37118e8e354be2f7f15f9955df4a312a68f85fe2e7890e1c4b479","run":40147825207},{"id":12582620129,"digest":"sha256:bde5a56799c5975789aea63b3cd9b13902fe9f12e63367eb4aae2015ae9245b3","run":40147825207}];
           const metadata=[];
           for(const item of known){
            const a=await api('/actions/artifacts/'+item.id);assert.equal(a.id,item.id);assert.equal(a.workflow_run.id,item.run);assert.equal(a.expired,false);
@@ -101,7 +96,7 @@ jobs:
           const base=path.resolve('dist/generated-package-input'),files=[];
           function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name);if(e.isDirectory())walk(p);else files.push(p);}}walk(base);
           const qs=files.filter(p=>path.basename(p)==='qualification.json').map(p=>{try{return {path:p,value:JSON.parse(fs.readFileSync(p))};}catch{return null;}}).filter(Boolean);
-          const qfiles=['ts','wasm-core','rust'].map(target=>{const a=qs.filter(x=>x.value.schema==='psc1-generated-target-qualification/1'&&x.value.mode==='--self-host'&&x.value.target===target&&x.value.testedCommit===(target==='rust'?'2d27f1428e6a53a6de5006f950fc94f2d471b214':'812094c1f5e1e0c0dca516dab1e30ef66f3076f7'));assert.equal(a.length,1);return a[0].path;});
+          const qfiles=['js','ts','rust','wasm-core'].map(target=>{const a=qs.filter(x=>x.value.schema==='psc1-generated-target-qualification/1'&&x.value.mode==='--self-host'&&x.value.target===target&&x.value.testedCommit===(target==='rust'?'2d27f1428e6a53a6de5006f950fc94f2d471b214':'0cabb7edef8fbce76d966487fcf37ac030dc2e3b'));assert.equal(a.length,1);return a[0].path;});
           const native=qs.filter(x=>x.value.qualification==='passed'&&x.value.tarballSha256&&x.value.nativeNpmIdentityAgreement===true);assert.equal(native.length,1);assert.equal(native[0].value.sourceCommit,'348746f32e7fe04b3402eb22030054375eb9ebcd');assert.equal(native[0].value.branchHeadCommit,'14cb3e30503d0c5e6b1e007598b0bde7ad77befb');
           const tarballs=files.filter(p=>path.basename(p)===path.basename(native[0].value.tarball));assert.equal(tarballs.length,1);
           assert.equal(sha(fs.readFileSync(tarballs[0])),native[0].value.tarballSha256);

@@ -6,7 +6,7 @@ import {sha,verifyArtifact} from '../host-tools/generated-target-tools.mjs';
 import {compilerSourceClosureDigest} from '../host-tools/compiler-host-protocol.mjs';
 import {corpus,observedExpressions,expectedObservations,refusals} from './generated-target-corpus.mjs';
 const [nativeTarball,...qfiles]=process.argv.slice(2);
-assert.equal(qfiles.length,3);
+assert.equal(qfiles.length,4);
 const root=process.cwd(),out=path.resolve('dist/npm-generated');fs.mkdirSync(out,{recursive:true});
 const work=fs.mkdtempSync(path.join(out,'run-')),stage=path.join(work,'package');
 const run=(exe,args,options={})=>{const r=spawnSync(exe,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024,...options});if(r.error||r.status!==0)throw Error('PSC1_GENERATED_PACKAGE_PROCESS: '+exe+' '+args.join(' ')+'\n'+(r.error||'')+r.stdout+r.stderr);return r.stdout;};
@@ -21,9 +21,30 @@ assert.equal(nativeDistribution.nativeSha256,sha(fs.readFileSync(path.join(stage
 const checkerCommit='eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
 assert.equal(nativeDistribution.compilerIdentity.leanCommit,checkerCommit);
 const pins={
- ts:{commit:'812094c1f5e1e0c0dca516dab1e30ef66f3076f7',closure:'92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2',manifest:'dacdd66e5ed9a92ea3b47069755f17c645df022909d2f84f0dd5b1acb8a0c85b',executable:'8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75'},
- 'wasm-core':{commit:'812094c1f5e1e0c0dca516dab1e30ef66f3076f7',closure:'92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2',manifest:'1f33a6a8b2b731d50f997f1ac4008ec06a0d4d3a4b5c04ca0b1d5ab06d0c6996',executable:'73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df'},
- rust:{commit:'2d27f1428e6a53a6de5006f950fc94f2d471b214',closure:'07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af',manifest:'33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a',executable:'07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6'}
+  "js": {
+    "commit": "0cabb7edef8fbce76d966487fcf37ac030dc2e3b",
+    "closure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "manifest": "e5f958b82f9d7b3ed9bf3c7d81abf568b8cad7772a2f0666b9834200e3426141",
+    "executable": "b1325b31ddabb01a46db04f0790b6fcf248e3643d6a7d6ad8fbdb809f7723635"
+  },
+  "ts": {
+    "commit": "0cabb7edef8fbce76d966487fcf37ac030dc2e3b",
+    "closure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "manifest": "2484bb3543a52645fc1fc56e9c754b6f54547337c6fedfe2df19ac739a97c269",
+    "executable": "136445a23a4968abee73f6c898b4bfc8607c20544627320af98acfe73310504a"
+  },
+  "rust": {
+    "commit": "2d27f1428e6a53a6de5006f950fc94f2d471b214",
+    "closure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "manifest": "33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a",
+    "executable": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6"
+  },
+  "wasm-core": {
+    "commit": "0cabb7edef8fbce76d966487fcf37ac030dc2e3b",
+    "closure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "manifest": "332be1a1d4324241264ba996842b6d4d1b8e6cce524562441a4f63fdd16be3c9",
+    "executable": "6c0af1dc0023fc0e97b1ad50f2fe6028e0506ca69661e3def1bcb03796e7ab9d"
+  }
 };
 const filePin=relative=>({path:relative,sha256:sha(fs.readFileSync(path.join(stage,relative)))});
 const engines={};
@@ -56,7 +77,7 @@ for(const qfile of qfiles){
  const manifest=path.join(dir,'G3-service/artifact.json'),m=verifyArtifact(manifest,pins[engine].manifest);
  const prefix='selfhost/'+engine;copy(manifest,path.join(stage,prefix,'artifact.json'));
  for(const row of m.files)copy(path.join(m.directory,row.path),path.join(stage,prefix,row.path));
- const adapter=engine==='ts'
+ const adapter=(engine==='ts'||engine==='js')
   ? "import {psCompilerServiceCandidate} from './module.js';\n"
   : engine==='wasm-core'
   ? "import {loadWasmArtifact} from '../../host-tools/generated-wasm-transport.mjs';\nimport {fileURLToPath} from 'node:url';\nconst {psCompilerServiceCandidate}=loadWasmArtifact(fileURLToPath(new URL('./artifact.json',import.meta.url)));\n"
@@ -87,21 +108,21 @@ const distribution={schema:'psc1-installed-generated-engines/1',packageBuildComm
  hostDependencies:['host-tools/generated-rust-transport.mjs','host-tools/generated-rust-guard.mjs','host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs','host-tools/generated-wasm-transport.mjs'].map(filePin),
  nativeLibraries:nativeDistribution.bundledNativeLibraries.map(r=>filePin('native/lib/'+r.name)),
  generatedPublicationTargets:['js'],nativeOutputTargets:nativeDistribution.builtInTargets,
- unavailableGeneratedEngines:{js:'latest shared-root fixed point pending'},
+ unavailableGeneratedEngines:{},sharedSourceClosureDigest:"07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",allFourEngineSelfHostQualified:true,
  allFourEngineReleaseQualified:false,publication:'unpublished'};
 write(path.join(stage,'SELFHOST_DISTRIBUTION.json'),JSON.stringify(distribution,null,2)+'\n');
 meta.bin={psc:'./npm-cli/generated-entry.mjs',psc1:'./npm-cli/generated-entry.mjs'};
 fs.chmodSync(path.join(stage,'npm-cli/generated-entry.mjs'),0o755);
 meta.files.push('selfhost/','scripts/','SELFHOST_DISTRIBUTION.json');
 meta.proofscript.generatedEngines=Object.keys(engines);meta.proofscript.generatedPublicationTargets=['js'];
-meta.proofscript.allFourEngineReleaseQualified=false;
+meta.proofscript.allFourEngineReleaseQualified=false;meta.proofscript.allFourEngineSelfHostQualified=true;meta.proofscript.sharedSourceClosureDigest="07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af";
 write(path.join(stage,'package.json'),JSON.stringify(meta,null,2)+'\n');
-fs.appendFileSync(path.join(stage,'README.md'),'\nQualified generated Rust/TS/Wasm engines: psc generated --identity.\n'+
+fs.appendFileSync(path.join(stage,'README.md'),'\nQualified generated JS/TS/Rust/Wasm engines: psc generated --identity.\n'+
  'Compile one source file: psc generated build Main.ps --engine ts --out dist/generated.\n'+
  'For modules use --project project.json with entryModule and ordered sources [{module,kind,text}].\n'+
  'The result lives at dist/generated/current/target.mjs after official independent Lean4.35 admission and JS syntax/API checks.\n'+
  'This explicit generated path currently publishes JS; psc build retains all five native core targets and matching optional Python/PHP providers.\n'+
- 'Generated execution requires Node22.23.3. Engine qualifications retain their recorded source identities. Rust uses the frozen current root; TS/Wasm retain earlier qualified roots.\n');
+ 'Generated execution requires Node22.23.3. Engine qualifications retain their recorded source identities. All four engines use the frozen shared source root.\n');
 const tarballs=path.join(work,'tarballs');fs.mkdirSync(tarballs);
 const packed=JSON.parse(run('npm',['pack',stage,'--pack-destination',tarballs,'--ignore-scripts','--json']));
 const tarball=path.join(tarballs,packed[0].filename),consumer=path.join(work,'consumer'),cache=path.join(work,'cache');
@@ -221,7 +242,7 @@ const receipt={schema:'psc1-generated-package-qualification/1',status:'passed',t
  nativeInputTarballSha256:sha(fs.readFileSync(nativeTarball)),distribution,cases,applicationCases,negativeCases:Object.keys(engines).length*(refusals.length+1)+2,
  nativeCompilerUnavailableDuringGeneratedCases:true,offlineInstall:true,tarball:path.relative(root,tarball),
  tarballSha256:sha(fs.readFileSync(tarball)),bytes:fs.statSync(tarball).size,
- scope:'Qualified Rust/TS/Wasm engines integrated for independently admitted JS publication. Rust uses current frozen root; TS/Wasm retain historical qualifications. Not all-four-engine/shared-root qualification.'};
+ scope:'All four JS/TS/Rust/Wasm engines qualified on the same frozen source and integrated for independently admitted JS publication. Other generated publication targets, clean full-generation replay and final release remain separate.'};
 write(path.join(out,'qualification.json'),JSON.stringify(receipt,null,2)+'\n');
 for(const p of [stage,consumer,cache])fs.rmSync(p,{recursive:true,force:true});
 console.log('PSC1_GENERATED_PACKAGE_QUALIFICATION: '+JSON.stringify(receipt));

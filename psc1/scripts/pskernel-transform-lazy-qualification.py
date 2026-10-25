@@ -32,7 +32,7 @@ def source(out):
  require(reference in proof,'Byte-exact predecessor worker reference')
  require(not re.search(r'(?m)^\s*(?:axiom|unsafe|partial|opaque)\b',proof) and 'sorry' not in proof,'No new trust or partial proof')
  for path,pin in PINS.items():require(digest((ROOT.parent/path).read_bytes())==pin,'Exact candidate/proof pin: '+path)
- paths=list(PINS)+['psc1/scripts/pskernel-transform-lazy-qualification.py','.github/workflows/psc1-pskernel-transform-lazy-native.yml','psc1/kernel-lakefile.lean','psc1/lean-toolchain']
+ paths=list(PINS)+['psc1/scripts/pskernel-transform-lazy-qualification.py','.github/workflows/psc1-pskernel-transform-lazy-native.yml','psc1/kernel-lakefile.lean','psc1/lean-toolchain','.github/workflows/psc1-pskernel-t05-header.yml']
  snapshots=[]
  for path in paths:
   raw=(ROOT.parent/path).read_bytes();target=out/'sources'/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
@@ -53,9 +53,46 @@ def proofs(out):
   'runId':os.environ['GITHUB_RUN_ID'],'attempt':os.environ['GITHUB_RUN_ATTEMPT'],'proofs':1,'allFuelAndInputsExactEquality':True,
   'proofLog':digest((out/'proofs.log').read_bytes()),'fullQualification':False,'performanceQualified':False,'adopted':False})
  print('PSC1_TRANSFORM_LAZY_NATIVE: PASS allFuelAndInputsExactEquality=true proofs=1')
+
+def cohort(out):
+ one=json.loads((out/'native-receipt.json').read_text())
+ retained=json.loads((out.parent/'unary/native-receipt.json').read_text())
+ validator=json.loads((out.parent/'validator/native-receipt.json').read_text())
+ for row in [one,retained,validator]:
+  require(row['sourceSha']==os.environ['GITHUB_SHA'] and str(row['runId'])==os.environ['GITHUB_RUN_ID'],'Exact same-source native cohort')
+ require(one['proofs']==1 and one['allFuelAndInputsExactEquality'] and retained['totalProofs']==541
+  and validator['totalProofs']==532 and retained['productionTree']==git('rev-parse','HEAD:'+PROD).decode().strip(),'Actual542 cohort')
+ names=[n for row in validator['proofs'] for n in row['names']]+retained['names']+['psKernelTransformLazyPreservesAllInputs']
+ require(len(names)==len(set(names))==542,'542 unique actual native reports')
+ write(out/'cohort-native-receipt.json',{'schema':'psc1-transform-lazy-cohort-native-v1','sourceSha':os.environ['GITHUB_SHA'],
+  'runId':os.environ['GITHUB_RUN_ID'],'attempt':os.environ['GITHUB_RUN_ATTEMPT'],'totalProofs':542,'proofModules':38,
+  'retainedProofs':541,'additionalProofs':1,'productionTree':retained['productionTree'],'names':names,
+  'retainedReceipt':digest((out.parent/'unary/native-receipt.json').read_bytes()),'localReceipt':digest((out/'native-receipt.json').read_bytes()),
+  'fullKernel':False,'performanceQualified':False,'adopted':False})
+ print('PSC1_TRANSFORM_LAZY_COHORT_NATIVE542: PASS actualUniqueReports=542')
+def route(out,native_root):
+ native=native_root/'lazy';receipt=json.loads((native/'cohort-native-receipt.json').read_text())
+ retained=json.loads((out.parent/'unary/route-receipt.json').read_text())
+ require(receipt['sourceSha']==retained['sourceSha']==os.environ['GITHUB_SHA']
+  and str(receipt['runId'])==str(retained['runId'])==os.environ['GITHUB_RUN_ID'],'Same-source native and complete route')
+ require(receipt['totalProofs']==542 and receipt['proofModules']==38 and retained['nativeProofs']==541
+  and retained['status']=='pass' and receipt['productionTree']==retained['productionTree'],'Complete retained route plus actual local refinement')
+ require(receipt['retainedReceipt']==digest((native_root/'unary/native-receipt.json').read_bytes())
+  and receipt['localReceipt']==digest((native/'native-receipt.json').read_bytes()),'Actual retained/local receipt bytes')
+ write(out/'cohort-route-receipt.json',{'schema':'psc1-transform-lazy-cohort-route-v1','sourceSha':os.environ['GITHUB_SHA'],
+  'runId':os.environ['GITHUB_RUN_ID'],'attempt':os.environ['GITHUB_RUN_ATTEMPT'],'status':'pass','route':retained['route'],
+  'nativeProofs':542,'proofModules':38,'productionTree':retained['productionTree'],
+  'retainedCompleteRoute':digest((out.parent/'unary/route-receipt.json').read_bytes()),
+  'nativeCohortReceipt':digest((native/'cohort-native-receipt.json').read_bytes()),'kernel':retained['kernel'],
+  'originalFuelAndMemoSemantics':True,'transformWorkerConstructionDeferred':True,
+  'retainedLiftAndCountSourceBytesMatch':True,'fullKernel':False,'performanceQualified':False,'adopted':False})
+ print('PSC1_TRANSFORM_LAZY_COHORT_ROUTE542: PASS route='+retained['route'])
+
 if __name__=='__main__':
  require(os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('RUNNER_OS')=='Linux','GitHub Linux only')
- command=sys.argv[1];out=pathlib.Path(os.environ['RUNNER_TEMP'])/'transform-lazy'
+ command=sys.argv[1];out=pathlib.Path(sys.argv[2]) if len(sys.argv)>2 else pathlib.Path(os.environ['RUNNER_TEMP'])/'transform-lazy'
  if command=='source':source(out)
  elif command=='proofs':proofs(out)
+ elif command=='cohort':cohort(out)
+ elif command=='route':route(out,pathlib.Path(sys.argv[3]))
  else:raise RuntimeError('Unknown command')

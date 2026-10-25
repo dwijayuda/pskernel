@@ -15,10 +15,11 @@ import time
 import zipfile
 
 BASE = 'dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5'
-TREE = '62d48691ff7d9680878cf668862017d1061f2ebd'
+TREE = 'bccb72769d4f20def35f2064363fbc94fcc7e54a'
 PROD = 'psc1/packages/pskernel-core/src'
 DELTA = [PROD+'/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean',
-         PROD+'/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean']
+         PROD+'/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean',
+         PROD+'/Ps/KernelCore/Core/ExprV2/Transform.lean']
 PINS = {"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean":{"bytes":20939,"sha256":"bd66aa2e8cc039406b76d8e24459d3d9107e579c7e17ed5432cf192b38e3e2d2"},"psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean":{"bytes":3754,"sha256":"0a5eb430466bff2fa3f3f00384b5ac7f22dc62bbc0505429ca52494259a8e26e"},"psc1/test/PsKernelUnarySpineProofs.lean":{"bytes":11532,"sha256":"4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"},"psc1/test/PsKernelChurchSource.lean":{"bytes":21080,"sha256":"5f723e4b184c9134128552fe8186064dd0b291a42e54ecc575d210d339dd0a30"},"psc1/test/PsKernelChurchStageProbe.lean":{"bytes":6043,"sha256":"3601231d19268d33474697a2058a7ada58918ce5a8d11b56da263b4377e41a32"},"psc1/scripts/pskernel-unary-spine-smoke.mjs":{"bytes":5583,"sha256":"9053a5bfc66687c7d1529c6f18179bfb97ced1e41ac0dd3d24ae039d60612d2b"},"psc1/scripts/pskernel-church-fixture.py":{"bytes":5437,"sha256":"9053ae13a6df9fd542ab9f76177f4daea4835fa68c661b1d1c1b446c06608ddf"},"psc1/scripts/pskernel-church-stages.mjs":{"bytes":4798,"sha256":"d008052b8bb6ecab9c0b0fc5c7c43a2de66304da03e34016c0396cfee947f11d"}}
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
@@ -46,9 +47,10 @@ def authenticate(out):
     out.mkdir(parents=True,exist_ok=True)
     require(git('rev-parse','HEAD').decode().strip()==identity()['sourceSha'],'Exact checkout')
     require(git('rev-parse','HEAD:'+PROD).decode().strip()==TREE,'Exact production tree')
-    require(git('diff','--name-only',BASE,'HEAD','--',PROD).decode().splitlines()==DELTA,'Exact two-path production delta')
+    require(git('diff','--name-only',BASE,'HEAD','--',PROD).decode().splitlines()==DELTA,'Exact retained unary and additional lazy-transform production delta')
     require(git('rev-parse',BASE+':'+PROD).decode().strip()=='e567685e5c441a5b0a78d8241f7bae151b48b5ca','Qualified baseline tree')
     paths=list(PINS)+[
+        'psc1/scripts/pskernel-transform-lazy-qualification.py','psc1/test/PsKernelTransformLazyProofs.lean',
         'psc1/scripts/pskernel-unary-spine-qualification.py',
         '.github/workflows/psc1-pskernel-t05-header.yml',
         'psc1/scripts/pskernel-validator-qualification.py',

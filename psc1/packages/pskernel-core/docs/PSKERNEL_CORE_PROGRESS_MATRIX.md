@@ -1,3 +1,7 @@
+## 2026-10-25 — T08b diagnostics completed; production remains f091
+
+Prelude ingress-stage probes40209698724/40210111896 and unchanged-kernel profile40210553785 PASS as diagnostics. The measured prefix reaches admission; body inference is costly. Both original/staged Prelude remain60s timeouts. An isolated one-path lazy-transform candidate10508e4a has no adopted/full/performance claim. Actual records are in docs/qualification/T08B_PRELUDE_*. Full Arena remains174strict/193,17timeouts,2separate agreements; A historically scoped qualified, BOPEN,CFAIL,DOPEN. Follow the newest AI_WORK_STATE.md and AI_CONTINUATION_PROMPT.md for source pins, failed proof attempt and qualification work.
+
 ## 2026-10-25 — T08a qualified and integrated atf091db58
 
 The non-force integration advance **dbd9db47→f091db586dcbe4a31905d6edf1c8c7957082527d** is confirmed by a fresh ref read. Evidence commit**39d58e72530247fa201a05467cfb5492936ae7c5** preceded the update. Production tree**62d48691ff7d9680878cf668862017d1061f2ebd** has complete native541/37 and both full generated routes PASS in40201690903; independent226/401/404-member audit40201797756 PASS. Same-compiler16-observation ABBA40202200567 and independent audit40206818462 PASS with no comparable10%time/15%RSS flag. Authentic Church accepts at4096 in native, generated and canonical original/staged paths; no fuel or published limit was increased.

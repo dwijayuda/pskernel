@@ -1,9 +1,9 @@
-name: PSC1 complete unary congruence qualification
+name: PSC1 complete lazy-transform refinement qualification
 'on':
   workflow_dispatch: null
   push:
     branches:
-    - work/psc1-pskernel-unary-spines-20261025
+    - work/psc1-pskernel-transform-lazy-full-20261025
     paths:
     - psc1/kernel-lakefile.lean
     - psc1/lean-toolchain
@@ -93,6 +93,7 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
+        python3 scripts/pskernel-transform-lazy-qualification.py source "$PSC1_T05_DIR/lazy"
         python3 scripts/pskernel-unary-spine-qualification.py source --out "$PSC1_T05_DIR/unary"
     - name: Authenticate the exact empty-cache helper delta and all retained source obligations
       shell: bash
@@ -131,9 +132,9 @@ jobs:
         baseline_tree=git('rev-parse',BASE+':'+ROOT).decode().strip()
         target_tree=git('rev-parse','HEAD:'+ROOT).decode().strip()
         require(baseline_tree=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff','complete qualified baseline production tree')
-        require(target_tree=='62d48691ff7d9680878cf668862017d1061f2ebd','complete pinned candidate production tree')
+        require(target_tree=='bccb72769d4f20def35f2064363fbc94fcc7e54a','complete pinned candidate production tree')
         changed=git('diff','--name-only',BASE,'HEAD','--',ROOT).decode().splitlines()
-        require(changed==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact authenticated cache and unary-spine changes')
+        require(changed==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact authenticated cache, unary-spine and lazy-transform changes')
         baseline=git('show',BASE+':'+PROD)
         require(blob(baseline)=='4d5ca3d8e2a6136d5fcb35dec131e5c28e6b743b','pinned complete predecessor')
         before=baseline.decode()
@@ -218,7 +219,7 @@ jobs:
                 'retainedProofBaseline':{'path':RETAINED,**digest(prior),'gitBlobSha':blob(prior)},
                 'allOtherRetainedInputsUnchanged':True,'sourceInputs':96,'proofNames':names,
                 'files':records,'sourceInventory':digest(inventory.read_bytes()),
-                'baselineTransformConstructionRestored':True,'deferredTransformConstruction':False,
+                'retainedLiftAndCountSourceBytesMatch':True,'liftAndCountWorkersDeferred':False,
                 'fullQualification':False,'performanceQualified':False}
         (out/'empty-semantic-cache-source-audit.json').write_text(json.dumps(report,indent=2)+'\n')
         print('PSC1_T09_EMPTY_SEMANTIC_CACHE_SOURCE: PASS '+json.dumps(report,separators=(',',':')))
@@ -250,9 +251,9 @@ jobs:
         assert cache_audit["runAttempt"] == os.environ["GITHUB_RUN_ATTEMPT"]
         assert cache_audit["job"] == os.environ["GITHUB_JOB"] and cache_audit["route"] == os.environ["PSC1_T05_ROUTE"]
         assert cache_audit["baselineSha"] == "20224a295359abb201f56c72395690bf0bfac9fa"
-        assert cache_audit["targetProductionTree"] == "62d48691ff7d9680878cf668862017d1061f2ebd"
+        assert cache_audit["targetProductionTree"] == "bccb72769d4f20def35f2064363fbc94fcc7e54a"
         assert cache_audit["exactCacheLookupGuardAndCommentOnly"] is True
-        assert changed == cache_audit["productionChanges"] == ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"], "only the independently authenticated cache and unary-spine deltas are allowed: " + repr(changed)
+        assert changed == cache_audit["productionChanges"] == ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"], "only the independently authenticated cache, unary-spine and lazy-transform deltas are allowed: " + repr(changed)
         proof_path = pathlib.Path("psc1/test/PsKernelDeferredTransformProofs.lean")
         proof = proof_path.read_bytes().decode("utf-8")
         assert proof.count("namespace Frozen\n") == 1
@@ -269,10 +270,20 @@ jobs:
             assert blob == expected_blob, (path, blob)
             before = subprocess.check_output(["git", "show", base + ":" + path])
             current = pathlib.Path(path).read_bytes()
-            actual_blob = hashlib.sha1(b"blob " + str(len(current)).encode() + b"\0" + current).hexdigest()
-            assert actual_blob == expected_blob, "restored production blob mismatch: " + short
-            assert current == before, "complete baseline production bytes required: " + short
-            assert body(current.decode("utf-8"), name) == body(frozen, name), "frozen body mismatch: " + name
+            normalized = current
+            if short == "Transform.lean":
+                text = current.decode("utf-8")
+                late = "                    | Option.none =>\n                        let smaller := psKernelExprV2TransformWithFuel remaining;\n                        let children := psKernelExprV2TransformChildren entry.node depth;"
+                early = "  | Nat.succ remaining =>\n      fun (operation : PsKernelExprV2Transform)"
+                assert text.count(late) == text.count(early) == 1
+                text = text.replace(late, "                    | Option.none =>\n                        let children := psKernelExprV2TransformChildren entry.node depth;")
+                text = text.replace(early, "  | Nat.succ remaining =>\n      let smaller := psKernelExprV2TransformWithFuel remaining;\n      fun (operation : PsKernelExprV2Transform)")
+                text = text.replace("The recursive worker is formed only after root, memo and leaf guards require\nchild traversal. This changes closure allocation only: the original fuel,\nresult, arena and memo behavior are preserved for every input.\n", "")
+                normalized = text.encode("utf-8")
+            actual_blob = hashlib.sha1(b"blob " + str(len(normalized)).encode() + b"\0" + normalized).hexdigest()
+            assert actual_blob == expected_blob, "normalized exact predecessor blob mismatch: " + short
+            assert normalized == before, "unchanged retained bytes or reversible Transform let motion only: " + short
+            assert body(normalized.decode("utf-8"), name) == body(frozen, name), "frozen reference body mismatch: " + name
             baseline_blobs[path] = blob
         paths = [prefix + short for short in pinned] + [
             str(proof_path),
@@ -284,12 +295,12 @@ jobs:
             "baselineSha": base, "runId": os.environ["GITHUB_RUN_ID"],
             "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
             "job": os.environ["GITHUB_JOB"], "route": os.environ["PSC1_T05_ROUTE"],
-            "baselineBlobs": baseline_blobs, "frozenBodiesMatch": True,
+            "baselineBlobs": baseline_blobs, "normalizedTransformAndRetainedBodiesMatch": True,
             "exactBindingMovesOnly": False, "productionChanges": changed,
-            "productionChangePolicy": "empty-semantic-cache-plus-unary-spines",
+            "productionChangePolicy": "empty-semantic-cache-plus-unary-spines-plus-lazy-transform",
             "emptySemanticCacheSourceAudit": {"bytes": len(cache_audit_raw),
                 "sha256": hashlib.sha256(cache_audit_raw).hexdigest()},
-            "baselineTransformConstructionRestored": True, "deferredTransformConstruction": False,
+            "retainedLiftAndCountSourceBytesMatch": True, "liftAndCountWorkersDeferred": False,
             "sourceFiles": {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths},
             "fullQualification": False, "performanceQualified": False,
         }
@@ -1107,12 +1118,12 @@ jobs:
             raise RuntimeError('Deferred transform source authentication identity mismatch')
         if source['baselineSha']!='10144e2f9e8d223b5dcde275bd1f48d25df113b3':
             raise RuntimeError('Deferred transform qualified baseline changed')
-        if (source['frozenBodiesMatch'] is not True or source['exactBindingMovesOnly'] is not False
-            or source['productionChanges'] != ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
-            or source['productionChangePolicy'] != 'empty-semantic-cache-plus-unary-spines'
+        if (source['normalizedTransformAndRetainedBodiesMatch'] is not True or source['exactBindingMovesOnly'] is not False
+            or source['productionChanges'] != ["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"]
+            or source['productionChangePolicy'] != 'empty-semantic-cache-plus-unary-spines-plus-lazy-transform'
             or source['emptySemanticCacheSourceAudit'] != digest(root/'empty-semantic-cache-source-audit.json')
-            or source['baselineTransformConstructionRestored'] is not True
-            or source['deferredTransformConstruction'] is not False):
+            or source['retainedLiftAndCountSourceBytesMatch'] is not True
+            or source['liftAndCountWorkersDeferred'] is not False):
             raise RuntimeError('Complete baseline restoration and frozen-body authentication required')
         inventory=root/'source-inventory.json'
         if retained['sourceInventory']!=digest(inventory):
@@ -1148,8 +1159,8 @@ jobs:
                  'proofs':[{'module':module,'proofs':3,'names':expected,'source':digest(proof),'log':digest(log)}],
                  'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
                  'retainedAdmissionReceipt':digest(parent),'sourceAudit':digest(source_audit),
-                 'sourceInventory':digest(inventory),'restoredTransformSemanticEquality':True,
-                 'deferredTransformConstruction':False,'baselineTransformConstructionRestored':True,'fullOrdinaryAdmission':True,
+                 'sourceInventory':digest(inventory),'retainedTransformsAndLazyWorkerSemanticEquality':True,
+                 'liftAndCountWorkersDeferred':False,'retainedLiftAndCountSourceBytesMatch':True,'fullOrdinaryAdmission':True,
                  'fullKernel':False,'performanceQualified':False}
         (root/'deferred-transform-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T08_DEFERRED_TRANSFORM_NATIVE: PASS '+json.dumps(receipt,separators=(',',':')))
@@ -1177,9 +1188,9 @@ jobs:
             raise RuntimeError('Retained374 native inventory changed')
         if retained['orderedUniqueReports'] is not True or retained['allowedStandardAxiomsOnly'] is not True:
             raise RuntimeError('Retained374 report verification required')
-        if (retained['restoredTransformSemanticEquality'] is not True
-            or retained['baselineTransformConstructionRestored'] is not True
-            or retained['deferredTransformConstruction'] is not False):
+        if (retained['retainedTransformsAndLazyWorkerSemanticEquality'] is not True
+            or retained['retainedLiftAndCountSourceBytesMatch'] is not True
+            or retained['liftAndCountWorkersDeferred'] is not False):
             raise RuntimeError('Retained374 baseline restoration verification required')
         specs=[{"module":"PsKernelNatFuelProofs","count":5,"log":"retained-PsKernelNatFuelProofs.log"},{"module":"PsKernelExprEqualityProofs","count":4,"log":"retained-PsKernelExprEqualityProofs.log"},{"module":"PsKernelExprV2AdmissionGuardProofs","count":18,"log":"retained-PsKernelExprV2AdmissionGuardProofs.log"},{"module":"PsKernelExprV2RecursorProofs","count":23,"log":"retained-PsKernelExprV2RecursorProofs.log"},{"module":"PsKernelExprV2RecursorMajorProofs","count":10,"log":"retained-PsKernelExprV2RecursorMajorProofs.log"},{"module":"PsKernelExprV2RecursorKProofs","count":6,"log":"retained-PsKernelExprV2RecursorKProofs.log"},{"module":"PsKernelNameWorkerProofs","count":8,"log":"retained-PsKernelNameWorkerProofs.log"},{"module":"PsKernelExprV2QuotOwnerProofs","count":21,"log":"retained-PsKernelExprV2QuotOwnerProofs.log"},{"module":"PsKernelExprV2WhnfABIProofs","count":2,"log":"retained-PsKernelExprV2WhnfABIProofs.log"},{"module":"PsKernelExprV2OwnedStateProofs","count":21,"log":"retained-PsKernelExprV2OwnedStateProofs.log"}]
         records=[];names_all=[];statuses=[]
@@ -1226,7 +1237,7 @@ jobs:
                  'totalProofs':492,'proofs':records,'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
                  'retainedDeferredReceipt':digest(parent),'sourceInventory':digest(inventory),
                  'proofStatuses':digest(status_file),'fullOrdinaryAdmission':True,
-                 'deferredTransformConstruction':False,'baselineTransformConstructionRestored':True,'fullKernel':False,'performanceQualified':False}
+                 'liftAndCountWorkersDeferred':False,'retainedLiftAndCountSourceBytesMatch':True,'fullKernel':False,'performanceQualified':False}
         (root/'retained-native-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_RETAINED_NATIVE_PROOFS: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
@@ -1252,10 +1263,10 @@ jobs:
         if retained['retainedProofs']!=374 or retained['addedReports']!=118 or retained['totalProofs']!=492:
             raise RuntimeError('Retained492 native inventory changed')
         for key in ['orderedUniqueReports','allowedStandardAxiomsOnly','fullOrdinaryAdmission',
-                    'baselineTransformConstructionRestored']:
+                    'retainedLiftAndCountSourceBytesMatch']:
             if retained[key] is not True:
                 raise RuntimeError('Retained492 guarantee required: '+key)
-        if retained['deferredTransformConstruction'] is not False:
+        if retained['liftAndCountWorkersDeferred'] is not False:
             raise RuntimeError('Held transform optimization must remain absent')
         inventory=root/'source-inventory.json'
         if retained['sourceInventory']!=digest(inventory):
@@ -1312,9 +1323,9 @@ jobs:
                  'metadataCorrespondenceEstablished':False,
                  'decoderCorrespondenceEstablished':False,
                  'replayArenaModelBridgeEstablished':False,
-                 'fullOrdinaryAdmission':True,'baselineTransformConstructionRestored':True,
-                 'deferredTransformConstruction':False,
-                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],
+                 'fullOrdinaryAdmission':True,'retainedLiftAndCountSourceBytesMatch':True,
+                 'liftAndCountWorkersDeferred':False,
+                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],
                  'layoutProofProductionChanges':False,
                  'emptySemanticCacheSourceAudit':digest(root/'empty-semantic-cache-source-audit.json'),
                  'fullKernel':False,'performanceQualified':False}
@@ -1344,22 +1355,22 @@ jobs:
         require((retained['retainedProofs'],retained['newProofs'],retained['totalProofs'],retained['proofModules'])
                 ==(492,5,497,30),'retained497 proof inventory')
         true_flags=['orderedUniqueReports','allowedStandardAxiomsOnly','fullOrdinaryAdmission',
-                    'baselineTransformConstructionRestored','shapeGuardEstablishesSourceLayout',
+                    'retainedLiftAndCountSourceBytesMatch','shapeGuardEstablishesSourceLayout',
                     'successfulValidatorEstablishesSourceLayout','replayNodePreservesCanonicalLayout',
                     'validateFuelPreservesCanonicalLayout','canonicalOutputLayoutEstablished']
-        false_flags=['deferredTransformConstruction','layoutProofProductionChanges','fullKernel',
+        false_flags=['liftAndCountWorkersDeferred','layoutProofProductionChanges','fullKernel',
                      'performanceQualified','metadataCorrespondenceEstablished','decoderCorrespondenceEstablished',
                      'replayArenaModelBridgeEstablished']
         require(all(retained[k] is True for k in true_flags),'retained layout guarantees')
         require(all(retained[k] is False for k in false_flags),'retained scope limits')
-        require(retained['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'truthful complete three-path production delta')
+        require(retained['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'truthful complete four-path production delta')
         source_path=root/'empty-semantic-cache-source-audit.json';source=json.loads(source_path.read_text())
         require(source['schema']=='psc1-t09-empty-semantic-cache-source-v1'
                 and all(source[k]==v for k,v in identity.items()),'authenticated helper source identity')
         require(source['baselineSha']=='20224a295359abb201f56c72395690bf0bfac9fa'
                 and source['baselineProductionTree']=='57b209c4b29f7a9dd67bdae37e728cde4a0ac1ff'
-                and source['targetProductionTree']=='62d48691ff7d9680878cf668862017d1061f2ebd'
-                and source['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact complete production trees and delta')
+                and source['targetProductionTree']=='bccb72769d4f20def35f2064363fbc94fcc7e54a'
+                and source['productionChanges']==["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'exact complete production trees and delta')
         require(all(source[k] is True for k in ['exactCacheLookupGuardAndCommentOnly','frozenLookupByteExact',
                 'retainedProofStatementAndOtherBodiesUnchanged','allOtherRetainedInputsUnchanged']),
                 'exact helper and retained source authentication')
@@ -1409,10 +1420,10 @@ jobs:
                  'orderedUniqueReports':True,'allowedStandardAxiomsOnly':True,
                  'retainedLayoutReceipt':digest(parent),'sourceAudit':digest(source_path),
                  'sourceInventory':digest(inventory),'proofStatuses':digest(status),
-                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'emptySemanticCacheSemanticEquality':True,
+                 'productionChanges':["psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean","psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"],'emptySemanticCacheSemanticEquality':True,
                  'frozenLookupByteExact':True,'retainedProofStatementAndOtherBodiesUnchanged':True,
                  'emptySemanticCacheHelperOnly':True,'fullOrdinaryAdmission':True,
-                 'baselineTransformConstructionRestored':True,'deferredTransformConstruction':False,
+                 'retainedLiftAndCountSourceBytesMatch':True,'liftAndCountWorkersDeferred':False,
                  'canonicalOutputLayoutEstablished':True,'metadataCorrespondenceEstablished':False,
                  'decoderCorrespondenceEstablished':False,'replayArenaModelBridgeEstablished':False,
                  'fullKernel':False,'performanceQualified':False}
@@ -1431,6 +1442,10 @@ jobs:
       run: |
         set -euo pipefail
         python3 scripts/pskernel-unary-spine-qualification.py native --out "$PSC1_T05_DIR/unary"
+        lake -f kernel-lakefile.lean env lean test/PsKernelTransformLazyProofs.lean \
+          2>&1 | tee "$PSC1_T05_DIR/lazy/proofs.log"
+        python3 scripts/pskernel-transform-lazy-qualification.py proofs "$PSC1_T05_DIR/lazy"
+        python3 scripts/pskernel-transform-lazy-qualification.py cohort "$PSC1_T05_DIR/lazy"
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -1525,6 +1540,7 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
+        python3 scripts/pskernel-transform-lazy-qualification.py source "$PSC1_T05_DIR/lazy"
         python3 scripts/pskernel-unary-spine-qualification.py source --out "$PSC1_T05_DIR/unary"
     - name: Build authentic PSC1 for the bounded generation gate
       working-directory: psc1
@@ -2405,7 +2421,7 @@ jobs:
                  'result':result,'log':digest(log),'harness':digest(harness),
                  'measurement':measurement,'peakRssKiB':int(timed[1]),'wallSeconds':float(timed[2]),
                  'logs':{p.name:digest(p) for p in sorted(root.glob('*.log'))},
-                 'deferredTransformConstruction':False,'baselineTransformConstructionRestored':True,'fullKernel':False,'performanceQualified':False}
+                 'liftAndCountWorkersDeferred':False,'retainedLiftAndCountSourceBytesMatch':True,'fullKernel':False,'performanceQualified':False}
         (root/'deferred-transform-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T08_DEFERRED_TRANSFORM_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
@@ -2485,8 +2501,8 @@ jobs:
             previous=name
         require(retained['result']['assertions']==23 and retained['result']['exports']==3
                 and retained['result']['stagedArrows']==11,'all retained raw transform controls')
-        require(retained['baselineTransformConstructionRestored'] is True
-                and retained['deferredTransformConstruction'] is False,'held transform optimization remains absent')
+        require(retained['retainedLiftAndCountSourceBytesMatch'] is True
+                and retained['liftAndCountWorkersDeferred'] is False,'retained Lift and Count worker construction remains unchanged')
         expected_labels=['harness/rejection']+['empty/'+str(i).zfill(2) for i in range(20)]
         log=root/'empty-semantic-cache.log';lines=log.read_text().splitlines()
         prefix='PSC1_EMPTY_SEMANTIC_CACHE_ASSERT ';marker='PSC1_EMPTY_SEMANTIC_CACHE_JS: PASS '
@@ -2511,8 +2527,8 @@ jobs:
                  'result':result,'assertionLabels':labels,'log':digest(log),'harness':digest(harness),
                  'measurement':measurement,'peakRssKiB':int(timed[1]),'wallSeconds':float(timed[2]),
                  'logs':{p.name:digest(p) for p in sorted(root.glob('*.log'))},
-                 'emptySemanticCacheHelperOnly':True,'baselineTransformConstructionRestored':True,
-                 'deferredTransformConstruction':False,'fullKernel':False,'performanceQualified':False}
+                 'emptySemanticCacheHelperOnly':True,'retainedLiftAndCountSourceBytesMatch':True,
+                 'liftAndCountWorkersDeferred':False,'fullKernel':False,'performanceQualified':False}
         (root/'empty-semantic-cache-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print('PSC1_T09_EMPTY_SEMANTIC_CACHE_ROUTE: PASS '+json.dumps(receipt,separators=(',',':')))
         PY
@@ -2534,6 +2550,7 @@ jobs:
         set -euo pipefail
         python3 scripts/pskernel-unary-spine-qualification.py route --out "$PSC1_T05_DIR/unary" \
           --native-root "$RUNNER_TEMP/validator-native" --node "$PSC1_T05_NODE"
+        python3 scripts/pskernel-transform-lazy-qualification.py route "$PSC1_T05_DIR/lazy" "$RUNNER_TEMP/validator-native"
     - name: Retain bounded gate artifacts on success or failure
       working-directory: psc1
       shell: bash

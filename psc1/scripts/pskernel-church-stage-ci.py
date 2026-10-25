@@ -115,7 +115,7 @@ def prepare(out, archive):
     (detached / 'staged-runner.mjs').write_text("import {readFileSync} from 'node:fs';\nimport * as kernel from './kernel.mjs';\nimport {replayText} from './diagnostic-transport.mjs';\nreplayText(kernel,readFileSync('input.ndjson','utf8'));\n")
     paths = ['psc1/test/PsKernelChurchSource.lean', 'psc1/test/PsKernelChurchStageProbe.lean',
              'psc1/scripts/pskernel-church-fixture.py', 'psc1/scripts/pskernel-church-stage-ci.py',
-             'psc1/scripts/pskernel-church-stages.mjs', 'psc1/scripts/pskernel-arena-replay.mjs',
+             'psc1/scripts/pskernel-church-stages.mjs', 'psc1/scripts/pskernel-church-trace-ci.py', 'psc1/scripts/pskernel-arena-replay.mjs',
              '.github/workflows/psc1-pskernel-church-stages.yml', 'psc1/kernel-lakefile.lean',
              'psc1/lean-toolchain', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean']
     sources = []
@@ -127,7 +127,7 @@ def prepare(out, archive):
         'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'], 'productionSource': BASE,
         'input': digest(adapted), 'bodySha256': BODY_SHA, 'adaptation': provenance,
         'files': sources, 'generatedKernel': digest(kernel), 'producerZip': digest((out / 'producer.zip').read_bytes())})
-    print('PSC1_CHURCH_PREPARE: PASS originalBody=true producerAuthenticated=true sources=10')
+    print('PSC1_CHURCH_PREPARE: PASS originalBody=true producerAuthenticated=true sources=11')
 
 
 def bounded(out, label, command, cwd, env):

@@ -75,6 +75,16 @@ jobs:
         python3 scripts/pskernel-church-stage-ci.py execute --out "$RUNNER_TEMP/church-stages" \
           --node "$PSC1_CHURCH_NODE" --native "$PWD/.lake/build/bin/psc1_kernel_church_stages" \
           2>&1 | tee "$RUNNER_TEMP/church-stages/diagnosis.log"
+    - name: Trace the actual native failure with ephemeral diagnostic source
+      working-directory: psc1
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 scripts/pskernel-church-trace-ci.py instrument --out "$RUNNER_TEMP/church-stages/trace"
+        lake -f .church-stage-lakefile.lean build psc1_kernel_church_stages \
+          2>&1 | tee "$RUNNER_TEMP/church-stages/trace/native-build.log"
+        python3 scripts/pskernel-church-trace-ci.py execute --out "$RUNNER_TEMP/church-stages/trace" \
+          --native "$PWD/.lake/build/bin/psc1_kernel_church_stages"
     - uses: actions/upload-artifact@v4
       if: always()
       with:

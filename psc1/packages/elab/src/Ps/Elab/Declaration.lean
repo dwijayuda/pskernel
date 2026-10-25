@@ -11,6 +11,7 @@ structure PsElabDeclarationResult where
 structure PsElabDeclarationTraceResult where
   result : PsElabDeclarationResult
   trace : PsElabSourceTrace
+  bodyStart : Nat
 
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
@@ -24,6 +25,7 @@ structure PsElabSourceMemberTrace where
   name : PsName
   kind : PsElabSourceMemberKind
   trace : PsElabSourceTrace
+  bodyStart : Nat
 
 structure PsElabDeclarationTraceBatch where
   result : PsElabDeclarationBatchResult
@@ -369,7 +371,7 @@ def psElabDeclarationPartsWithSourceTrace
                                 (Prod.snd closed)
                                 (Prod.fst closed))
                               metaContext)
-                            valueResult.context.sourceTrace)
+                            valueResult.context.sourceTrace typeResult.context.sourceTrace.nextId)
                       else
                         Except.ok
                           (PsElabDeclarationTraceResult.mk
@@ -380,7 +382,7 @@ def psElabDeclarationPartsWithSourceTrace
                                 (Prod.snd closed)
                                 (Prod.fst closed))
                               metaContext)
-                            valueResult.context.sourceTrace)
+                            valueResult.context.sourceTrace typeResult.context.sourceTrace.nextId)
 
 def psElabDeclarationParts
     (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
@@ -1483,7 +1485,7 @@ def psElabPartialDeclarationWithSourceTrace
                                       (Prod.snd closed)
                                       (Prod.fst closed))
                                     metaContext)
-                                  valueResult.context.sourceTrace)
+                                  valueResult.context.sourceTrace typeResult.context.sourceTrace.nextId)
 
 def psElabPartialDeclaration
     (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
@@ -1639,7 +1641,7 @@ def psElabDeclarationBatchStableWithSourceTrace
           let declaration := captured.result.declaration;
           let traces : List PsElabSourceMemberTrace :=
             if tracing then [PsElabSourceMemberTrace.mk (psDeclarationName declaration)
-              (psElabSourceMemberKind source) captured.trace] else List.nil;
+              (psElabSourceMemberKind source) captured.trace captured.bodyStart] else List.nil;
           let lowered : Except PsElabError PsElabDeclarationBatchResult :=
             match declaration with
             | PsDeclaration.partialDecl name levels type value =>

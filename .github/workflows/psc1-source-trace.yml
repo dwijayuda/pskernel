@@ -44,7 +44,7 @@ jobs:
         working-directory: psc1
         run: |
           lean --version
-          lake build psc1_source_census_probe
+          lake build psc1_source_census_probe psc1_source_ownership psc1_lossless_source psc1_independent_checker
       - uses: actions/cache/save@v4
         if: steps.native-cache.outputs.cache-hit != 'true'
         with:

@@ -64,8 +64,43 @@ def psOwnershipError (moduleName phase detail : String)
           ("span", psOwnershipSpan value.span),
           ("phase", .str (psOwnershipPhase value.phase))])]
 
+def psOwnershipBindingTarget (target : PsElabSourceTarget) : Lean.Json :=
+  match target with
+  | .local localId binder => Lean.Json.mkObj [
+      ("kind", .str "local"), ("localId", Lean.toJson localId),
+      ("binder", Lean.toJson binder)]
+  | .global name => Lean.Json.mkObj [
+      ("kind", .str "global"), ("name", Lean.toJson (psOwnershipName name))]
+  | .sort => Lean.Json.mkObj [("kind", .str "sort")]
+
+def psOwnershipBindingTrace (member : PsElabSourceMemberTrace) : Lean.Json :=
+  let trace := member.trace
+  Lean.Json.mkObj [
+    ("name", Lean.toJson (psOwnershipName member.name)),
+    ("kind", .str (match member.kind with
+      | .definition => "definition"
+      | .partialDefinition => "partialDefinition"
+      | .theoremDeclaration => "theorem")),
+    ("phase", .str "source-elaboration-before-lifts"),
+    ("bodyStart", Lean.toJson member.bodyStart),
+    ("enabled", Lean.toJson trace.enabled), ("complete", Lean.toJson trace.complete),
+    ("events", Lean.toJson trace.nextId),
+    ("binders", Lean.toJson (trace.bindersRev.reverse.map fun binder => Lean.Json.mkObj [
+      ("index", Lean.toJson binder.index), ("localId", Lean.toJson binder.localId),
+      ("name", Lean.toJson (psOwnershipName binder.name)),
+      ("parent", Lean.toJson binder.parent),
+      ("span", match binder.source with
+        | .none => .null
+        | .some span => psOwnershipSpan span)])),
+    ("references", Lean.toJson (trace.referencesRev.reverse.map fun reference => Lean.Json.mkObj [
+      ("index", Lean.toJson reference.index),
+      ("sourceName", Lean.toJson (psOwnershipName reference.sourceName)),
+      ("span", psOwnershipSpan reference.span),
+      ("baseSegments", Lean.toJson reference.baseSegments),
+      ("target", psOwnershipBindingTarget reference.target)]))]
+
 /-- One actual elaboration per module. No second resolver, parser or compiler. -/
-def psOwnershipCapture (request : Request) :
+def psOwnershipCaptureWithSourceTrace (request : Request) (tracing : Bool) :
     Except Lean.Json (Captured × Array Lean.Json) := do
   let mut captured := Captured.mk (psCompilerPreparationStart request.kind) [] [] [] none
   let mut rows : Array Lean.Json := #[]
@@ -77,7 +112,7 @@ def psOwnershipCapture (request : Request) :
     let imports := parsed.imports.map (fun i => String.intercalate "." i.moduleName.segments)
     if imports.any (fun name => !captured.seen.contains name) then
       throw (psOwnershipError source.moduleName "capture" "import-order-or-missing")
-    let next ← (psCompilerPreparationStepParsedWithOrigins captured.state parsed).mapError
+    let next ← (psCompilerPreparationStepParsedWithOriginsUsingTrace tracing captured.state parsed).mapError
       (fun error => psOwnershipError source.moduleName "elaboration"
         (psHostElabErrorText error.error) (some error))
     -- Check coverage against the declarations returned by that same execution.
@@ -87,10 +122,16 @@ def psOwnershipCapture (request : Request) :
     if names.length != actual.length || !(names.zip actual).all (fun pair => psNameEq pair.1 pair.2) ||
         next.origins.length != parsed.declarations.length then
       throw (psOwnershipError source.moduleName "ownership" "actual-batch-mismatch")
-    rows := rows.push (Lean.Json.mkObj [
+    let fields : List (String × Lean.Json) := [
       ("module", .str source.moduleName), ("byteLength", Lean.toJson source.text.utf8ByteSize),
       ("imports", Lean.toJson imports), ("sourceDeclarations", Lean.toJson parsed.declarations.length),
-      ("origins", Lean.toJson (next.origins.map psOwnershipOrigin))])
+      ("origins", Lean.toJson (next.origins.map psOwnershipOrigin))]
+    let fields := if tracing then fields ++ [
+      ("bindings", Lean.toJson (next.origins.map fun origin => Lean.Json.mkObj [
+        ("sourceIndex", Lean.toJson origin.sourceIndex),
+        ("traces", Lean.toJson (origin.sourceTraces.map psOwnershipBindingTrace))]))]
+      else fields
+    rows := rows.push (Lean.Json.mkObj fields)
     captured := Captured.mk next.state (source.moduleName :: captured.seen)
       ((source.moduleName, imports) :: captured.graphRev) []
       (if source.moduleName == request.entry then some parsed else captured.entry)
@@ -98,6 +139,10 @@ def psOwnershipCapture (request : Request) :
   let _ ← (exactClosureWorker captured.graphRev [request.entry]).mapError
     (fun error => psOwnershipError error.moduleName error.phase error.code)
   return (captured, rows)
+
+def psOwnershipCapture (request : Request) :
+    Except Lean.Json (Captured × Array Lean.Json) :=
+  psOwnershipCaptureWithSourceTrace request false
 
 def psOwnershipPrepare (request : Request) (captured : Captured) :
     Except Lean.Json Semantic := do

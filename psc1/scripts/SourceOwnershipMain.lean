@@ -8,7 +8,7 @@ private def demand (condition : Bool) (code : String) : IO Unit :=
 def main (args : List String) : IO Unit := do
   let [mode, input, output, admissionsPath, irPath] := args
     | throw (IO.userError "PSC1_OWNERSHIP_USAGE")
-  demand (["index", "reference", "to-lean", "to-ps"].contains mode) "MODE"
+  demand (["index", "bindings", "reference", "to-lean", "to-ps"].contains mode) "MODE"
   let bytes ← IO.FS.readBinFile input
   demand (bytes.size ≤ 33554432) "REQUEST_LIMIT"
   let some text := String.fromUTF8? bytes | throw (IO.userError "PSC1_OWNERSHIP_UTF8")
@@ -37,7 +37,7 @@ def main (args : List String) : IO Unit := do
         (fun e => psOwnershipError e.moduleName e.phase e.code)
       if c.entry.isNone then throw (psOwnershipError request.entry "capture" "entry-missing")
       pure (c, #[])
-    else psOwnershipCapture request
+    else psOwnershipCaptureWithSourceTrace request (mode == "bindings")
   let result := do
     let (captured, rows) ← outcome
     let semantic ← psOwnershipPrepare request captured

@@ -1,7 +1,7 @@
 name: PSC1 unified generated compiler qualification
 on:
   push:
-    branches: [feat/psc1-unified-selfhost-20261024]
+    branches: [qualification/psc1-output-abi-g1-20261026]
     paths: [.github/qualification-requests/psc1-unified-selfhost.json]
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
           import {validateUnifiedSelfhostRequest} from './scripts/unified-selfhost-request.mjs';
           const file='.github/qualification-requests/psc1-unified-selfhost.json';
           const r=JSON.parse(fs.readFileSync('../'+file)),e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
-          validateUnifiedSelfhostRequest(r,'feat/psc1-unified-selfhost-20261024');
+          validateUnifiedSelfhostRequest(r,'qualification/psc1-output-abi-g1-20261026');
           assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
           assert.equal(r.parentCommit,e.before);assert.equal(e.after,process.env.GITHUB_SHA);
           const p=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(p.status,0);assert.equal(p.stdout.trim(),r.parentCommit);
@@ -112,7 +112,7 @@ jobs:
           node scripts/unified-selfhost-request-tests.mjs
           node scripts/generated-target-contract-tests.mjs
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_rust_nat_literal_tests psc1_codec_static_schema_tests psc1_rust_string_ownership_tests psc1_wasm_nat_divmod_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
+          lake build psc1_output_abi_probe psc1_source_ownership psc1_lossless_source psc1_rust_nat_literal_tests psc1_codec_static_schema_tests psc1_rust_string_ownership_tests psc1_wasm_nat_divmod_tests psc1_unified_service_seed psc1_unified_service_tests psc1_independent_checker psc1_source_census_probe psc1_js_service_tests psc1_direct_selfhost_preflight_tests psc1_js_statement_tests
       - uses: actions/cache/save@v4
         if: steps.native_build.outcome == 'success'
         with:
@@ -140,14 +140,19 @@ jobs:
           node scripts/wasm-nat-divmod-tests.mjs
       - name: Census complete owned backend source in both grammars
         run: node scripts/generated-target-source-audit.mjs ${{ matrix.target }} unified
+      - name: Capture actual native IO reference and refusal candidates before the sole seed
+        run: node scripts/output-abi-native-tests.mjs
       - name: Execute genuine generated compiler generations and exact fixed point
         timeout-minutes: ${{ needs.request.outputs.profile == 'correctness-3600s' && 170 || 110 }}
         run: node scripts/generated-target-qualification.mjs ${{ matrix.target }} ${{ needs.request.outputs.mode }} ${{ needs.request.outputs.profile }} unified
+      - name: Execute IO requests using only the genuine generated G1 compiler
+        run: node scripts/output-abi-generated-tests.mjs ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-unified-selfhost-${{ needs.request.outputs.profile }}-${{ matrix.target }}-${{ github.sha }}
           path: |
+            psc1/dist/output-abi/
             psc1/dist/rust-nat-literal/
             psc1/dist/codec-spine/
             psc1/dist/rust-string-ownership/

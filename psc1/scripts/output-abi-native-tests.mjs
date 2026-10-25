@@ -21,6 +21,7 @@ const ownership = createSourceOwnershipTool({
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-output-abi-'));
 fs.writeFileSync(path.join(work, 'package.json'), '{"type":"module"}\n');
 const records = [];
+const requestInventory = [];
 let negatives = 0;
 function native(target, request) {
   const input = path.join(work, 'request.json'), output = path.join(work, 'response.json');
@@ -30,7 +31,10 @@ function native(target, request) {
     env: { ...process.env, LEAN_MAIN_USE_THREAD: '0', LEAN_NUM_THREADS: '0', LEAN_STACK_SIZE_KB: '8192' } });
   assert.equal(result.error, null, result.stderr);
   assert.equal(result.status, 0, result.stderr);
-  return JSON.parse(fs.readFileSync(output, 'utf8'));
+  const candidate = JSON.parse(fs.readFileSync(output, 'utf8'));
+  requestInventory.push({ target, request, candidateSha256: hash(JSON.stringify(candidate)),
+    status: candidate.status, protocol: candidate.protocol, outputAbi: candidate.outputAbi ?? null });
+  return candidate;
 }
 try {
   for (const grammar of ['lean', 'ps']) for (const assurance of ['checked', 'ordinary-checked']) {
@@ -107,7 +111,7 @@ try {
   fs.mkdirSync('dist/output-abi', { recursive: true });
   fs.writeFileSync('dist/output-abi/native-reference.json', JSON.stringify({
     schema: 'psc1-output-abi-native-reference/1', testedCommit: process.env.GITHUB_SHA,
-    records, negatives, generatedSelfHosting: 'not-run', publication: false,
+    records, requestInventory, negatives, generatedSelfHosting: 'not-run', publication: false,
   }, null, 2) + '\n');
   console.log('PSC1_OUTPUT_ABI_NATIVE: PASS', JSON.stringify({ cases: records.length, negatives }));
 } finally { fs.rmSync(work, { recursive: true, force: true }); }

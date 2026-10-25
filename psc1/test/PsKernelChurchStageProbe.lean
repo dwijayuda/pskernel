@@ -90,14 +90,14 @@ def main (args : List String) : IO Unit := do
       pure ((psKernelV1RunDag session [] .safe arena (requests.map PsKernelDagCommand.admit)).map (fun _ => ()))
     else do
       let canonical ← stringIO (psKernelExprV2PagedValidate arena)
-      let prefix ← kernelIO (psKernelV1RunDag session [] .safe canonical
+      let admittedPrefix ← kernelIO (psKernelV1RunDag session [] .safe canonical
         ([first, second, third].map PsKernelDagCommand.admit))
       let decoded ← stringIO (psKernelExprV2DecodeChecked canonical)
-      let installed ← stringIO (psKernelDagGeneratedFromSession prefix.session canonical decoded)
+      let installed ← stringIO (psKernelDagGeneratedFromSession admittedPrefix.session canonical decoded)
       emit "PSC1_CHURCH_PREFIX" [("requests", toJson (3 : Nat)),
         ("sourceNodes", toJson arena.size), ("ownedNodes", toJson installed.arena.size),
-        ("declarations", toJson (psKernelEnvironmentSize prefix.session.environment))]
-      let attempted ← (staged prefix.session installed request).run
+        ("declarations", toJson (psKernelEnvironmentSize admittedPrefix.session.environment))]
+      let attempted ← (staged admittedPrefix.session installed request).run
       pure (attempted.mapError psKernelErrorFromMessage)
   let elapsed := (← IO.monoMsNow) - start
   let (verdict, reason) := match result with

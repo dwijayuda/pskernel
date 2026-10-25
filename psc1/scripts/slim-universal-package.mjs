@@ -68,7 +68,7 @@ const distribution={schema:'psc1-universal-npm-distribution/1',packageBuildCommi
  defaultEngine:'js',defaultKernel:'wasm',leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',engines,kernels:{wasm:descriptor('wasmKernel'),native:descriptor('nativeKernel')},
  hostFiles:[...hostFiles,'package.json','DEPENDENCY_LOCK.json','SOURCE_IDENTITIES.json','README.md'].map(pins),runner:pins('scripts/generated-compiler-runner.mjs'),fullCrossPlatformRelease:false,qualifiedInput};
 const manifest=JSON.stringify(distribution,null,2)+'\n';fs.writeFileSync(path.join(stage,'UNIVERSAL_DISTRIBUTION.json'),manifest);
-fs.writeFileSync(path.join(stage,'DISTRIBUTION_PIN.mjs'),"export const expectedDistributionSha256='"+sha256(manifest)+"';\n");
+fs.writeFileSync(path.join(stage,'DISTRIBUTION_PIN.mjs'),"export const expectedDistributionSha256='"+sha256(manifest)+"';\nexport const expectedCompilerSourceClosureDigest='"+compiler.sharedSourceClosureDigest+"';\n");
 const packed=JSON.parse(run('npm',['pack',stage,'--ignore-scripts','--json','--pack-destination',tarballs]));assert.equal(packed.length,1);
 const file=path.join(tarballs,packed[0].filename),bytes=fs.readFileSync(file);
 const inventoryRows=inventory(stage);assert.ok(!inventoryRows.some(r=>r.path.startsWith('native/')||r.path.startsWith('selfhost/rust/')||r.path.startsWith('selfhost/wasm-core/')));assert.ok(!meta.os&&!meta.cpu&&!meta.libc);

@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { readQualifiedArtifact, sha256 as sha } from './kernel435-qualified-artifact.mjs';
 import { verifyArtifact } from '../host-tools/generated-target-tools.mjs';
 import { compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
+import { readOwnedCompilerSources } from '../host-tools/compiler-source-inputs.mjs';
 
 const engines = ['js', 'ts', 'rust', 'wasm-core'];
 const checkerCommit = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
@@ -177,6 +178,10 @@ function optionalBundle(engine, compiler, assetsRoot, directory, tarballs, versi
 export async function readQualifiedCompilerAssets(input, destination, version) {
   assert.equal(input.schema, 'psc1-qualified-compiler-generation-inputs/1');
   assert.match(input.sourceClosureDigest, /^[a-f0-9]{64}$/);
+  const localSources = readOwnedCompilerSources('Ps.CompilerUnified.Service')
+    .map(source => ({ module: source.module, kind: 'lean', text: source.text }));
+  assert.equal(compilerSourceClosureDigest(localSources), input.sourceClosureDigest,
+    'qualification must match the current owned compiler source');
   assert.equal(Object.keys(input.engines).sort().join(','), [...engines].sort().join(','));
   assert.ok(destination.startsWith(path.resolve('dist') + path.sep));
   assert.equal(fs.existsSync(destination), false, 'fresh compiler promotion directory');
@@ -212,11 +217,18 @@ export async function readQualifiedCompilerAssets(input, destination, version) {
       sourceClosureDigest: q.sourceClosureDigest, qualifiedCommit: q.testedCommit,
       qualification: q.correctnessQualification, fixedPoint: q.fixedPoint,
       performanceQualification: q.performanceQualification, executableSha256: selected.executableSha256,
+      selfCompileEvents: q.events.filter(event => event.role === 'generated-compiler' &&
+        ['G2-self', 'G3-self'].includes(event.id)),
       adapter: pin(assetsRoot, prefix + '/adapter.mjs'),
       dependencies: ['artifact.json', ...artifact.files.map(file => file.path), 'qualification.json']
         .map(file => pin(assetsRoot, prefix + '/' + file)),
     };
     result.engines[engine] = compiler;
+    console.log('PSC1_COMPILER_GENERATION_RECEIPT: ' + JSON.stringify({ engine,
+      sourceClosureDigest: q.sourceClosureDigest, sourceModules: q.sourceModules,
+      qualifiedCommit: q.testedCommit, manifestSha256: selected.manifestSha256,
+      executableSha256: selected.executableSha256, profile: q.profile,
+      fixedPoint: q.fixedPoint, selfCompileEvents: compiler.selfCompileEvents }));
     if (engine === 'rust' || engine === 'wasm-core')
       result.optionalPackages[engine] = optionalBundle(engine, compiler, assetsRoot,
         path.join(destination, engine, 'package'), tarballs, version);

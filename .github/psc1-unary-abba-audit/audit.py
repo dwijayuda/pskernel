@@ -80,22 +80,47 @@ def main():
  require(not any(x in native['proofs.log'].decode() for x in ['sorryAx','Lean.ofReduceBool','Lean.trustCompiler']),'no unfinished or trusted-computation dependency')
  for _,used in reports:require({x.strip() for x in used.split(',') if x.strip()}<={'propext','Classical.choice','Quot.sound'},'standard axioms only')
  inventory=obj(native,'unary/source-inventory.json')
+ missing_snapshot='unary/sources/.github/workflows/psc1-pskernel-t05-header.yml'
+ # The comparison's original upload policy omitted this hidden tooling snapshot.
+ # Recover its actual archived bytes from the already-qualified full cohort;
+ # never substitute an unverified declaration or pretend it was in this ZIP.
+ cohort_run=A.api('actions/runs/40201690903')
+ same(cohort_run['head_sha'],'f091db586dcbe4a31905d6edf1c8c7957082527d','supplement cohort source')
+ same(cohort_run['conclusion'],'success','supplement complete cohort qualification')
+ meta=A.api('actions/artifacts/12602374819')
+ same(meta['workflow_run']['id'],40201690903,'supplement producer run')
+ same(meta['workflow_run']['head_sha'],'f091db586dcbe4a31905d6edf1c8c7957082527d','supplement artifact source')
+ same(meta['digest'],'sha256:059cf9759096ffb445fccdfe845f7ccc99271e9c4b2cde19d3477088dfa6f64f','supplement expected API digest')
+ raw=A.request('actions/artifacts/12602374819/zip')
+ same(A.digest(raw),{'bytes':2974740,'sha256':'059cf9759096ffb445fccdfe845f7ccc99271e9c4b2cde19d3477088dfa6f64f'},'actual source supplement archive')
+ supplement=A.unzip(raw)
+ same(len(supplement),401,'complete CRC-valid supplement archive')
+ workflow_bytes=supplement[missing_snapshot]
+ same(workflow_bytes,A.git_bytes('.github/workflows/psc1-pskernel-t05-header.yml'),'byte-identical qualified/performance workflow source')
+ require(missing_snapshot not in native and missing_snapshot not in files['compiler'],'exact documented hidden-file omission')
+ (OUT/'qualified-workflow-source.yml').write_bytes(workflow_bytes)
+ REPORT['sourceSnapshotCoverage']={'nativeArchivedSourceFiles':14,'declaredSourceFiles':15,
+  'exactOmittedPath':missing_snapshot,'supplementArtifact':12602374819,
+  'supplementArchive':A.digest(raw),'supplementSnapshot':A.digest(workflow_bytes),
+  'allProductionAndProofSourcesPresentInOriginalArchive':True,
+  'qualifiedAndPerformanceWorkflowBytesIdentical':True}
  same([row['path'] for row in inventory['files']],list(A.UNARY_PINS)+[
   'psc1/scripts/pskernel-unary-spine-qualification.py',A.WORKFLOW,'psc1/scripts/pskernel-validator-qualification.py',
   'psc1/scripts/pskernel-arena-replay.mjs','psc1/scripts/pskernel-arena435-oracle.py','psc1/kernel-lakefile.lean','psc1/lean-toolchain'],'complete native source inventory')
  for row in inventory['files']:
-  raw=native['unary/sources/'+row['path']]
+  source_path='unary/sources/'+row['path']
+  raw=workflow_bytes if source_path==missing_snapshot else native[source_path]
   same(raw,A.git_bytes(row['path']),'actual Git/native source equality')
   same(A.digest(raw),{'bytes':row['bytes'],'sha256':row['sha256']},'actual source digest')
  expected_native={'source-audit.json','native-build.log','proofs.log','native-receipt.json','unary/source-inventory.json'}|{'unary/sources/'+row['path'] for row in inventory['files']}
- same(set(native),expected_native,'complete exact native artifact membership')
+ same(set(native),expected_native-{missing_snapshot},'exact native archive membership with the documented tooling snapshot omission')
  compiler=files['compiler'];c=obj(compiler,'compiler-receipt.json')
  same(c['sourceSha'],SOURCE,'common compiler source')
  same(c['baselineSha'],BASE,'frozen baseline')
  same(sha(compiler['psc1']),c['compilerSha256'],'actual single compiler binary')
  same(sha(compiler['native-receipt.json']),c['nativeReceiptSha256'],'compiler/native provenance')
  for name,expected in c['files'].items():same(sha(compiler[name]),expected,'common compiler actual input '+name)
- same(set(compiler),set(c['files'])|{'compiler-receipt.json'}|{p for p in expected_native if p.startswith('unary/')},'complete exact shared-compiler artifact membership')
+ same(set(compiler),(set(c['files'])|{'compiler-receipt.json'}|{p for p in expected_native if p.startswith('unary/')})-{missing_snapshot},'exact compiler archive membership with the same documented omission')
  for name,raw in native.items():same(compiler[name],raw,'native/compiler evidence copy '+name)
  producer={}
  for variant in ['baseline','candidate']:
